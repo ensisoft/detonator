@@ -26,22 +26,52 @@
 
 namespace invaders
 {
-    class game
+    class Game
     {
     public:
-
-        void set_dimensions(unsigned x, unsigned y);
+        Game(unsigned width, unsigned height);
+       ~Game();
 
         void tick();
+
+        void fire(unsigned value);
+
+        unsigned moveUp()
+        {
+            if (cursor_ >= 1)
+                cursor_--;
+            return cursor_;
+        }
+
+        unsigned moveDown()
+        {
+            if (cursor_ < height_-1)
+                cursor_++;
+            return cursor_;
+        }
+
+        unsigned width() const 
+        { return width_; }
+
+        unsigned height() const
+        { return height_; }
+
     private:
         struct invader {
             unsigned character;
+            unsigned row;
+            unsigned cell;
         };
         struct missile {
             unsigned character;
+            unsigned row; 
+            unsigned cell;
         };
         std::deque<missile> missiles_;
         std::deque<invader> invaders_;
+        unsigned width_;
+        unsigned height_;
+        unsigned cursor_;
     };
 
 } // invaders

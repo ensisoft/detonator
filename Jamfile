@@ -6,6 +6,7 @@ project invaders :
   ;
 
 exe invaders : 
+  game.cpp
   main.cpp
   mainwindow.h
   mainwindow.cpp

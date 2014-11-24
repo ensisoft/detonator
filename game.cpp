@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2014 Sami Väisänen, Ensisoft 
 //
 // http://www.ensisoft.com
 //
@@ -18,56 +18,23 @@
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-
-#pragma once
+//  THE SOFTWARE.            
 
 #include "config.h"
-#include "warnpush.h"
-#  include <QtGui/QWidget>
-#  include <QObject>
-#  include <QTimer>
-#  include <QElapsedTimer>
-#include "warnpop.h"
-
-#include <list>
-#include <map>
-#include <memory>
-#include <chrono>
+#include "game.h"
 
 namespace invaders
 {
-    class Game;
 
-    class GameWidget : public QWidget
-    {
-        Q_OBJECT
+Game::Game(unsigned width, unsigned height) : width_(width), height_(height), cursor_(0)
+{}
 
-    public:
-        GameWidget(QWidget* parent);
-       ~GameWidget();
+Game::~Game()
+{}
 
-        void startGame();
+void Game::tick()
+{
 
-    private:
-        virtual void timerEvent(QTimerEvent* timer) override;
-        virtual void paintEvent(QPaintEvent* paint) override;
-        virtual void keyPressEvent(QKeyEvent* press) override;
-    private:
-        class Entity;
-        class Background;
-        class Display;
-        class Starfield;
-        class Player;
-        class Debug;
-
-    private:
-        std::unique_ptr<Background> background_;
-        std::unique_ptr<Display> display_;
-        std::unique_ptr<Debug> debug_;
-        std::unique_ptr<Player> player_;
-        std::list<std::unique_ptr<Entity>> entities_;
-        std::unique_ptr<Game> game_;
-    };
+}
 
 } // invaders
