@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
+    <file>icons/ico_exit.png</file>
+    <file>icons/ico_invaders.png</file>
+    <file>icons/ico_play.png</file>
+  </qresource>
+</RCC>        

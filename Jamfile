@@ -1,0 +1,19 @@
+
+project invaders :
+  requirements
+  # for the promoted widget
+  <include>. 
+  ;
+
+exe invaders : 
+  main.cpp
+  mainwindow.h
+  mainwindow.cpp
+  mainwindow.ui
+  gamewidget.h
+  gamewidget.cpp
+  resource.qrc
+  /qt//QtCore
+  /qt//QtGui
+;
+
