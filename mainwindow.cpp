@@ -48,6 +48,8 @@ MainWindow::~MainWindow()
     QSettings settings("Ensisoft", "Invaders");
     settings.setValue("window/width", width());
     settings.setValue("window/height", height());
+    settings.setValue("window/xpos", x());
+    settings.setValue("window/ypos", y());
 }
 
 void MainWindow::on_actionExit_triggered()

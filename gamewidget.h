@@ -51,6 +51,8 @@ namespace invaders
         class Entity;
         class Background;
         class Display;
+        class Starfield;
+        class Player;
 
     private:
         std::unique_ptr<Background> background_;

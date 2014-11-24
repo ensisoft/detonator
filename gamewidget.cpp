@@ -28,9 +28,27 @@
 #  include <QtGui/QBrush>
 #  include <QtGui/QColor>
 #  include <QtGui/QPainter>
+#  include <QtGui/QFontDatabase>
+#  include <QResource>
 #include "../warnpop.h"
 
 #include "gamewidget.h"
+
+namespace {
+
+QFont loadFont(const QString& file, const QString& family)
+{
+    const auto ret = QFontDatabase::addApplicationFont(file);
+    if (ret == -1)
+        throw std::runtime_error("failed to load font");
+
+    QFont font(family);
+    //if (!font.isValid())
+    //    throw std::runtime_error("no such font");
+    return font;
+}
+
+}  // namespace
 
 namespace invaders
 {
@@ -64,13 +82,40 @@ private:
 class GameWidget::Display : public Entity
 {
 public:
-    Display()
+    Display() : arcade_(loadFont(":/fonts/ARCADE.TTF", "Arcade"))
     {
-        // load resources here
+        arcade_.setPointSize(40);
     }
 
     virtual void paint(QPainter& painter, PaintState& state) override
+    {
+        QPen pen;
+        pen.setColor(Qt::red);
+        pen.setWidth(1);
+
+        painter.setFont(arcade_);
+        painter.setPen(pen);
+        painter.drawText(100, 100, "foobar");
+    }
+private:
+    QFont arcade_;
+};
+
+class GameWidget::Starfield
+{
+public:
+    Starfield()
     {}
+   ~Starfield()
+    {}
+
+
+};
+
+class GameWidget::Player 
+{
+public:
+
 };
 
 

@@ -4,5 +4,7 @@
     <file>icons/ico_exit.png</file>
     <file>icons/ico_invaders.png</file>
     <file>icons/ico_play.png</file>
+
+    <file>fonts/ARCADE.TTF</file>
   </qresource>
 </RCC>        

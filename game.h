@@ -30,6 +30,8 @@ namespace invaders
     {
     public:
 
+        void set_dimensions(unsigned x, unsigned y);
+
         void tick();
     private:
         struct invader {
