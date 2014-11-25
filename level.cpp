@@ -20,32 +20,25 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#pragma once
-
 #include "config.h"
-#include "warnpush.h"
-#  include <QtGui/QMainWindow>
-#  include <QObject>
-#  include "ui_mainwindow.h"
-#include "warnpop.h"
+
+#include <cstdlib>
+
+#include "level.h"
 
 namespace invaders
 {
-    class MainWindow : public QMainWindow
-    {
-        Q_OBJECT
 
-    public:
-        MainWindow();
-       ~MainWindow();
-
-    private slots:
-        void on_actionExit_triggered();
-        void on_actionPlay_triggered();
-
-    private:
-
-        Ui::MainWindow ui_;
+Level::invader Level::spawn()
+{
+    unsigned data [] = {
+        0x6211, 0x8981, 0x53BB, 0x6C92, 0x4E86
     };
+
+    invader next;
+    next.character = data[std::rand() % 5];
+    next.value     = 'w' << 8 | 'o';
+    return next;
+}
 
 } // invaders

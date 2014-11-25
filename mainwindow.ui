@@ -71,6 +71,9 @@
    <property name="toolTip">
     <string>Play a new game</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
   </action>
  </widget>
  <customwidgets>

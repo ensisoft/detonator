@@ -57,4 +57,9 @@ void MainWindow::on_actionExit_triggered()
     close();
 }
 
+void MainWindow::on_actionPlay_triggered()
+{
+    ui_.game->startGame();
+}
+
 } // invaders
