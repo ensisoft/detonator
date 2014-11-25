@@ -41,6 +41,7 @@ namespace invaders
             unsigned row;
             unsigned cell;
             unsigned identity;
+            unsigned score;
         };
         struct missile {
             unsigned value;
@@ -49,7 +50,8 @@ namespace invaders
             unsigned identity;
         };
 
-        std::function<void (const invader&)> on_invader_hit;
+        std::function<void (const invader&, const missile& m)> on_invader_kill;
+        std::function<void (const invader&, const missile& m)> on_missile_fail;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
         std::function<void (const missile&)> on_missile_fire;

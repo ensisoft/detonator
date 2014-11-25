@@ -44,10 +44,36 @@ void Game::tick()
     // prune missiles
     pruneMissiles();
 
-    // update live missiles
-    for (auto& m : missiles_)
+    // update live missiles and check for collision
+    for (auto misit = std::begin(missiles_); misit != std::end(missiles_); )
     {
-        m.cell += 1;
+        auto& mis = *misit;
+
+        mis.cell += 1;
+        auto invit = std::find_if(std::begin(invaders_), std::end(invaders_),
+            [&](const invader& i) {
+                return i.row == mis.row && i.cell == mis.cell;
+            });
+        if (invit == std::end(invaders_))
+        {
+            ++misit;
+            continue;
+        }
+
+        auto& inv = *invit;
+        if (inv.value == mis.value)
+        {
+            on_invader_kill(inv, mis);
+            invaders_.erase(invit);
+            misit = missiles_.erase(misit);
+            score_ += inv.score;
+            highscore_ = std::max(score_, highscore_);
+        }
+        else
+        {
+           on_missile_fail(inv, mis);
+           misit = missiles_.erase(misit);
+       }
     }
 
     pruneInvaders();
@@ -71,8 +97,9 @@ void Game::tick()
             invader inv;
             inv.value     = next.value;
             inv.character = next.character;
+            inv.score     = next.score;            
             inv.row       = std::rand() % height_;
-            inv.cell      = width_ - 1;
+            inv.cell      = width_;
             inv.identity  = identity_++;
             invaders_.push_back(inv);
             on_invader_spawn(inv);
@@ -126,7 +153,10 @@ void Game::pruneInvaders()
 
 
     for (auto it = end; it != std::end(invaders_); ++it)
+    {
         on_invader_victory(*it);
+
+    }
 
     invaders_.erase(end, std::end(invaders_));
 }

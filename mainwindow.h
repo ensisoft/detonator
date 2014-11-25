@@ -39,10 +39,6 @@ namespace invaders
         MainWindow();
        ~MainWindow();
 
-    private slots:
-        void on_actionExit_triggered();
-        void on_actionPlay_triggered();
-
     private:
 
         Ui::MainWindow ui_;

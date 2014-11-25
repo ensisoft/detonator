@@ -40,6 +40,9 @@ MainWindow::MainWindow()
     const auto ypos = settings.value("window/ypos", y()).toInt();
     resize(wwidth, wheight);
     move(xpos, ypos);
+
+    QObject::connect(ui_.game, SIGNAL(quitGame()), 
+        this, SLOT(close()));
 }
 
 
@@ -50,16 +53,6 @@ MainWindow::~MainWindow()
     settings.setValue("window/height", height());
     settings.setValue("window/xpos", x());
     settings.setValue("window/ypos", y());
-}
-
-void MainWindow::on_actionExit_triggered()
-{
-    close();
-}
-
-void MainWindow::on_actionPlay_triggered()
-{
-    ui_.game->startGame();
 }
 
 } // invaders

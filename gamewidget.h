@@ -50,6 +50,9 @@ namespace invaders
 
         void startGame();
 
+    signals:
+        void quitGame();
+
     private:
         virtual void timerEvent(QTimerEvent* timer) override;
         virtual void paintEvent(QPaintEvent* paint) override;
@@ -59,10 +62,10 @@ namespace invaders
         class Missile;
         class Background;
         class Display;
-        class Starfield;
         class Player;
         class Debug;
         class Welcome;
+        class GameOver;
 
     private:
         std::unique_ptr<Background> background_;

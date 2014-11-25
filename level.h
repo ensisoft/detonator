@@ -34,6 +34,7 @@ namespace invaders
         struct invader {
             unsigned character;
             unsigned value;
+            unsigned score;
         };
 
         //Level();
@@ -48,7 +49,7 @@ namespace invaders
         { return 0; }
 
         std::size_t spawnInterval() const 
-        { return 3; }
+        { return 10; }
 
         unsigned seed() const
         { return 0xbabe; }

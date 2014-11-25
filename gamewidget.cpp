@@ -31,6 +31,7 @@
 #  include <QtGui/QFontDatabase>
 #  include <QtGui/QCursor>
 #  include <QtGui/QVector2D>
+#  include <QtGui/QPixmap>
 #  include <QResource>
 #  include <QtDebug>
 #include "../warnpop.h"
@@ -65,7 +66,7 @@ public:
     PaintState(QRect rect) : rect_(rect)
     {}
 
-    QRect rect() const 
+    QRect viewRect() const 
     { return rect_; }
 
     int viewWidth() const 
@@ -134,12 +135,18 @@ public:
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
         const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(QPointF(xpos_ - offset_, ypos_ + 1));
+        const auto beg = state.toViewSpace(QPointF(xpos_ - offset_ - 1, ypos_));
+        const auto end = state.toViewSpace(QPointF(xpos_ - offset_, ypos_ + 1));
+
+        font_.setPixelSize(dim.y());
+
         QPen pen;
+        QRectF rect(beg, end);
         pen.setWidth(2);
         pen.setColor(Qt::darkCyan);
+        painter.setFont(font_);
         painter.setPen(pen);
-        painter.drawText(pos, text_);
+        painter.drawText(rect, Qt::AlignCenter, text_);
     }
 private:
     double xpos_;
@@ -161,6 +168,7 @@ public:
                 text_.push_back(c);
         }
         offset_ = 0;
+        font_   = loadFont(":/fonts/ARCADE.TTF", "Arcade");
     }
 
     void setPosition(unsigned x, unsigned y)
@@ -177,19 +185,26 @@ public:
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
         const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(QPointF(xpos_ + offset_, ypos_ + 1));
+        const auto beg = state.toViewSpace(QPointF(xpos_ + offset_, ypos_));
+        const auto end = state.toViewSpace(QPointF(xpos_ + offset_ + 1, ypos_ + 1));
+
+        font_.setPixelSize(dim.y() / 2);
 
         QPen pen;
+        QRectF rect(beg, end);
         pen.setWidth(2);
         pen.setColor(Qt::darkGray);
+        painter.setFont(font_);
         painter.setPen(pen);
-        painter.drawText(pos, text_);
+        painter.drawText(rect, Qt::AlignCenter, text_);
+
     }
 private:
     double xpos_;
     double ypos_;
     double offset_;    
     QString  text_;
+    QFont    font_;
 
 };
 
@@ -224,7 +239,7 @@ public:
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
         QBrush space(Qt::black);
-        painter.fillRect(state.rect(), space);
+        painter.fillRect(state.viewRect(), space);
 
         QBrush star(Qt::white);
 
@@ -259,46 +274,36 @@ private:
 class GameWidget::Display
 {
 public:
-    Display() : arcade_(loadFont(":/fonts/ARCADE.TTF", "Arcade"))
+    Display() : font_(loadFont(":/fonts/ARCADE.TTF", "Arcade")), life_(":/resource/icons/ico_life.png")
     {}
 
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
         const auto dim = state.getScale();
-        const auto beg = state.toViewSpace(QPoint(0, 1));
-        const auto end = state.toViewSpace(QPoint(0, 1));
+        const auto beg = state.toViewSpace(QPoint(0, 0));
+        const auto end = state.toViewSpace(QPoint(game.width(), 1));
+        const QRect rect(beg, end);
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
         pen.setWidth(1);
-        arcade_.setPixelSize(dim.y());
+        font_.setPixelSize(dim.y() / 2);
 
-        painter.setFont(arcade_);
+        const auto score = game.score();
+        const auto hiscore = game.highScore();
+        QRect out;
+        painter.setFont(font_);
         painter.setPen(pen);
-        painter.drawText(end, 
+        painter.drawText(rect, 
+            Qt::AlignLeft | Qt::AlignVCenter,
             QString("Level %1 Score %2 High Score %3")
             .arg(0)
-            .arg(1)
-            .arg(2));
-
-        pen.setColor(Qt::darkGray);
-        pen.setWidth(1);
-        painter.setPen(pen);
-        painter.drawLine(beg, end);
+            .arg(score)
+            .arg(hiscore), &out);
     }
 private:
-    QFont arcade_;
-};
-
-class GameWidget::Starfield
-{
-public:
-    Starfield()
-    {}
-   ~Starfield()
-    {}
-
-
+    QFont font_;
+    QPixmap life_;
 };
 
 // player representation on the screen (the vertical caret)
@@ -306,7 +311,9 @@ class GameWidget::Player
 {
 public:
     Player() : ypos_(0), blink_(0), value_(0)
-    {}
+    {
+        font_ = loadFont(":/fonts/ARCADE.TTF", "Arcade");
+    }
 
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
@@ -316,16 +323,18 @@ public:
         painter.setPen(pen);
 
         const auto beg = state.toViewSpace(QPoint(0, ypos_));
-        const auto end = state.toViewSpace(QPoint(0, ypos_+1));
+        const auto end = state.toViewSpace(QPoint(1, ypos_+1));
         const auto dim = state.getScale();
-        if (!isBlank())
-            painter.drawLine(beg, end);
 
-        QFont font;
-        font.setPixelSize(dim.y());
+        painter.drawLine(beg.x(), beg.y(), beg.x(), beg.y() + dim.y());
+
+        QRect rect(beg, end);
+
+        font_.setPixelSize(dim.y() / 2);
         pen.setWidth(2);
         painter.setPen(pen);
-        painter.drawText(end, input_);
+        painter.setFont(font_);
+        painter.drawText(rect, Qt::AlignCenter, input_);
     }
 
     void keyPress(QKeyEvent* press, Game& game)
@@ -373,6 +382,7 @@ private:
     unsigned blink_;    
     unsigned value_;
     QString  input_;
+    QFont    font_;
 };
 
 
@@ -416,20 +426,32 @@ public:
     Welcome() : font_(loadFont(":/fonts/ARCADE.TTF", "Arcade"))
     {}
 
+    void update(quint64 time)
+    {}
+
     void paint(QPainter& painter, PaintState& state, Game& game)
     {
+        const auto dim  = state.getScale();
+        const auto rect = state.viewRect();
+
+        font_.setPixelSize(dim.y() / 2);
+
         QPen pen;
         pen.setWidth(1);
         pen.setColor(Qt::darkGray);
         painter.setPen(pen);
         painter.setFont(font_);
 
-        // Evil chinese characters are attacking.
-        // Your job is to stop them by typing
-        // the right pinyin! 
-        //  Ctrl+N - move down
-        //  Ctrl+P - move up
-
+        painter.drawText(rect,
+            Qt::AlignCenter,
+            "Evil chinese characters are attacking!\n"
+            "You can only stop them by typing the right pinyin.\n"
+            "Ctrl + Q - Exit     \n"
+            "Ctrl + N - Move down\n"
+            "Ctrl + P - Move up  \n"
+            "Space - Fire        \n"
+            "Esc - Back to menu  \n\n"
+            "Press Space to play!\n");
     }
 private:
     QFont font_;
@@ -439,9 +461,23 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 {
     game_.reset(new Game(20, 10));
 
-    game_->on_invader_hit = [&](const Game::invader& inv) {
-        // todo: a little particle explosion
+    game_->on_invader_kill = [&](const Game::invader& i, const Game::missile& m) 
+    {
+
+        missiles_.erase(m.identity);
+        invaders_.erase(i.identity);
+
+        qDebug() << "Invader kill";
     };
+
+    game_->on_missile_fail = [&](const Game::invader& i, const Game::missile& m) 
+    {
+        missiles_.erase(m.identity);
+
+        qDebug() << "Missile fail";
+    };
+
+
     game_->on_invader_spawn = [&](const Game::invader& inv) {
         std::unique_ptr<Invader> invader(new Invader(inv.cell, inv.row, inv.character));
         invaders_[inv.identity] = std::move(invader);
@@ -461,7 +497,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     };
 
     background_.reset(new Background);
-    //welcome_.reset(new Welcome);
+    welcome_.reset(new Welcome);
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
@@ -481,6 +517,7 @@ void GameWidget::startGame()
     player_.reset(new Player);
     level_.reset(new Level);
     display_.reset(new Display);
+    welcome_.reset();
 
     game_->play(*level_);
 
@@ -550,14 +587,18 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     background_->update(delta);
     background_->paint(painter, state, *game_);
+    if (welcome_)
+    {
+        welcome_->update(delta);
+        welcome_->paint(painter, state, *game_);
+        return;
+    }
 
-    if (display_)
-        display_->paint(painter, state, *game_);
+    display_->paint(painter, state, *game_);
 
     state.setUnitOffset(QPoint(0, 1));
 
-    if (player_)
-        player_->paint(painter, state, *game_);
+    player_->paint(painter, state, *game_);
 
     const auto tick = 1000 / speed_;
 
@@ -578,9 +619,29 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
 {
-    if (player_)
-        player_->keyPress(press, *game_);
+    const auto key = press->key();
+    const auto mod = press->modifiers();
 
+    if (key == Qt::Key_Q && mod == Qt::ControlModifier)
+    {
+        emit quitGame();
+        return;
+    }
+
+    if (welcome_)
+    {
+        if (key == Qt::Key_Space)
+            startGame();
+        return;
+    }
+
+    if (key == Qt::Key_Escape)
+    {
+        welcome_.reset(new Welcome());
+        return;
+    }
+
+    player_->keyPress(press, *game_);
     update();
 }
 
