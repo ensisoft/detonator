@@ -1,7 +1,7 @@
 # level 1
 
 spawnCount=1
-spawnInterval=10
+spawnInterval=5
 enemyCount=100
 
 # p.85 numbers from 1 to 10
@@ -16,7 +16,7 @@ enemyCount=100
 九 jiu 10
 十 shi 10
 
-# p.113 some common characters such as wo, whi, yao
+# p.113 some common characters such as wo, ni, shi, yao
 我 wo 20
 你 ni 20
 是 shi 20

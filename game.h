@@ -38,27 +38,18 @@ namespace invaders
         struct invader {
             unsigned character;
             unsigned value;
-            unsigned row;
-            unsigned cell;
+            unsigned ypos;
+            unsigned xpos;
             unsigned identity;
             unsigned score;
         };
-        struct missile {
-            unsigned value;
-            unsigned row; 
-            unsigned cell;
-            unsigned identity;
-        };
 
-        std::function<void (const invader&, const missile& m)> on_invader_kill;
-        std::function<void (const invader&, const missile& m)> on_missile_fail;
+        std::function<void (const invader&)> on_invader_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
-        std::function<void (const missile&)> on_missile_fire;
-        std::function<void (const missile&)> on_missile_prune;
 
 
-        Game(unsigned width, unsigned height);
+        Game(unsigned width, unsigned heigth);
        ~Game();
 
         // advance game simulation by one increment
@@ -69,22 +60,6 @@ namespace invaders
 
         // start playing a level
         void play(Level& level);
-
-        // move player up
-        unsigned moveUp()
-        {
-            if (cursor_ >= 1)
-                cursor_--;
-            return cursor_;
-        }
-
-        // move player down
-        unsigned moveDown()
-        {
-            if (cursor_ < height_-1)
-                cursor_++;
-            return cursor_;
-        }
 
         // get game space width
         unsigned width() const 
@@ -100,10 +75,6 @@ namespace invaders
         unsigned score() const 
         { return score_; }
 
-        const 
-        std::deque<missile>& missiles() const 
-        { return missiles_; }
-
         const
         std::deque<invader>& invaders() const 
         { return invaders_; }
@@ -112,16 +83,10 @@ namespace invaders
         { return level_ != nullptr; }
 
     private:
-        void pruneMissiles();
-        void pruneInvaders();
-
-    private:
-        std::deque<missile> missiles_;
         std::deque<invader> invaders_;
         std::size_t tick_;
         unsigned width_;
         unsigned height_;
-        unsigned cursor_;
         unsigned score_;
         unsigned identity_;
         unsigned highscore_;

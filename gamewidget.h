@@ -62,6 +62,9 @@ namespace invaders
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
+        class Animation;
+        class Explosion;
+        class MissileLaunch;
         class Invader;
         class Missile;
         class Background;
@@ -74,13 +77,12 @@ namespace invaders
     private:
         std::unique_ptr<Background> background_;
         std::unique_ptr<Display> display_;
-        std::unique_ptr<Debug> debug_;
         std::unique_ptr<Player> player_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;
-        std::map<unsigned, std::unique_ptr<Missile>> missiles_;
         std::unique_ptr<Game> game_;
         std::unique_ptr<Welcome> welcome_;
         std::vector<std::unique_ptr<Level>> levels_;
+        std::list<std::unique_ptr<Animation>> animations_;
     private:
         QElapsedTimer timer_;
         quint64 time_delta_;

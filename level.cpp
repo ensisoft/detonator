@@ -69,8 +69,9 @@ unsigned ascvalue(const QString& str)
     unsigned ret = 0;
     for (int i=0; i<str.size(); ++i)
     {
+        const auto ch = str[i];
         ret <<= 8;
-        ret |= str[0].unicode() & 0xff;
+        ret |= ch.toAscii();
     }
     return ret;
 }
@@ -109,14 +110,16 @@ void Level::load(const QString& file)
             throw std::runtime_error("level data format error");
 
         const auto character = toks[0];
-        const auto value = toks[1];
-        const auto score = toks[2];
+        const auto pinyin    = toks[1];
+        const auto score     = toks[2];
 
         Level::enemy enemy;
         enemy.character = character[0].unicode();
-        enemy.value     = ascvalue(value);
+        enemy.value     = ascvalue(pinyin);
         enemy.score     = score.toInt();
         enemies_.push_back(enemy);
+
+        //qDebug() << "Enemy " << pinyin << " value: " << enemy.value;
     }
 
     qDebug() << "Level spawn count: " << spawncount_;
