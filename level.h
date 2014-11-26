@@ -35,9 +35,9 @@ namespace invaders
     {
     public:
         struct enemy {
-            unsigned character;
-            unsigned value;
             unsigned score;
+            QString  string;
+            QString  killstring;
         };
 
         Level();

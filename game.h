@@ -23,6 +23,10 @@
 #pragma once
 
 #include "config.h"
+#include "warnpush.h"
+#  include <QtGui/QVector2D>
+#  include <QString>
+#include "warnpop.h"
 
 #include <memory>
 #include <deque>
@@ -36,18 +40,22 @@ namespace invaders
     {
     public:
         struct invader {
-            unsigned character;
-            unsigned value;
             unsigned ypos;
             unsigned xpos;
             unsigned identity;
             unsigned score;
+            QString  string;
+            QString  killstring;
         };
 
-        std::function<void (const invader&)> on_invader_kill;
+        struct missile {
+            QVector2D position;
+            QString string;
+        };
+
+        std::function<void (const invader&, const missile& m)> on_invader_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
-
 
         Game(unsigned width, unsigned heigth);
        ~Game();
@@ -56,7 +64,7 @@ namespace invaders
         void tick();
 
         // launch a missile at the current player position
-        void fire(unsigned value);
+        void fire(const missile& m);
 
         // start playing a level
         void play(Level& level);

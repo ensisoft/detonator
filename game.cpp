@@ -67,15 +67,15 @@ void Game::tick()
         for (auto i=0; i<spawn_count; ++i)
         {
             const auto enemy = level_->spawn();
-            if (enemy.character == 0)
-                break;
+            //if (enemy.character == 0)
+                //break;
             invader inv;
-            inv.value     = enemy.value;
-            inv.character = enemy.character;
-            inv.score     = enemy.score;            
-            inv.ypos      = std::rand() % height_;
-            inv.xpos      = width_ + i;
-            inv.identity  = identity_++;
+            inv.killstring = enemy.killstring;
+            inv.string     = enemy.string;
+            inv.score      = enemy.score;            
+            inv.ypos       = std::rand() % height_;
+            inv.xpos       = width_ + i;
+            inv.identity   = identity_++;
             invaders_.push_back(inv);
             on_invader_spawn(inv);
         }
@@ -84,11 +84,11 @@ void Game::tick()
     ++tick_;
 }
 
-void Game::fire(unsigned value)
+void Game::fire(const Game::missile& missile)
 {
     auto it = std::find_if(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.value == value;
+            return i.killstring == missile.string;
         });
     if (it == std::end(invaders_))
         return;
@@ -97,7 +97,7 @@ void Game::fire(unsigned value)
 
     score_ += inv.score;
 
-    on_invader_kill(*it);
+    on_invader_kill(*it, missile);
 
     invaders_.erase(it);
 }

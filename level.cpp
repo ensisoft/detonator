@@ -64,19 +64,6 @@ unsigned readInt(QTextStream& stream, const QString& key)
     return ret;
 }
 
-unsigned ascvalue(const QString& str)
-{
-    unsigned ret = 0;
-    for (int i=0; i<str.size(); ++i)
-    {
-        const auto ch = str[i];
-        ret <<= 8;
-        ret |= ch.toAscii();
-    }
-    return ret;
-}
-
-
 } // namespace
 
 namespace invaders
@@ -109,17 +96,11 @@ void Level::load(const QString& file)
         if (toks.size() != 3)
             throw std::runtime_error("level data format error");
 
-        const auto character = toks[0];
-        const auto pinyin    = toks[1];
-        const auto score     = toks[2];
-
         Level::enemy enemy;
-        enemy.character = character[0].unicode();
-        enemy.value     = ascvalue(pinyin);
-        enemy.score     = score.toInt();
+        enemy.string     = toks[0];
+        enemy.killstring = toks[1];
+        enemy.score      = toks[2].toInt();
         enemies_.push_back(enemy);
-
-        //qDebug() << "Enemy " << pinyin << " value: " << enemy.value;
     }
 
     qDebug() << "Level spawn count: " << spawncount_;
