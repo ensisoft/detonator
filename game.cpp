@@ -91,13 +91,13 @@ void Game::tick()
     {
         for (auto i=0; i<spawn_count; ++i)
         {
-            const auto next = level_->spawn();
-            if (next.character == 0)
+            const auto enemy = level_->spawn();
+            if (enemy.character == 0)
                 break;
             invader inv;
-            inv.value     = next.value;
-            inv.character = next.character;
-            inv.score     = next.score;            
+            inv.value     = enemy.value;
+            inv.character = enemy.character;
+            inv.score     = enemy.score;            
             inv.row       = std::rand() % height_;
             inv.cell      = width_;
             inv.identity  = identity_++;

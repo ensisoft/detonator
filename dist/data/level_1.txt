@@ -1,0 +1,27 @@
+# level 1
+
+spawnCount=1
+spawnInterval=10
+enemyCount=100
+
+# p.85 numbers from 1 to 10
+一 yi 10
+二 er 10
+三 san 10
+四 si 10
+五 wu 10
+六 liu 10
+七 qi 10
+八 ba 10
+九 jiu 10
+十 shi 10
+
+# p.113 some common characters such as wo, whi, yao
+我 wo 20
+你 ni 20
+是 shi 20
+要 yao 20
+有 you 20
+不 bu 15
+很 hen 25
+嗎 ma 30

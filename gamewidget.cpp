@@ -20,8 +20,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#include "../config.h"
-#include "../warnpush.h"
+#include "config.h"
+#include "warnpush.h"
 #  include <QtGui/QPaintEvent>
 #  include <QtGui/QKeyEvent>
 #  include <QtGui/QPen>
@@ -34,8 +34,7 @@
 #  include <QtGui/QPixmap>
 #  include <QResource>
 #  include <QtDebug>
-#include "../warnpop.h"
-#include <cassert>
+#include "warnpop.h"
 
 #include "gamewidget.h"
 #include "game.h"
@@ -225,13 +224,14 @@ public:
 
         direction_ = QVector2D(4, 3);
         direction_.normalize();
-        direction_ *= 0.2; // 20% of screen per second
+
         for (std::size_t i=0; i<200; ++i)
         {
             particle p;
             p.x = (float)std::rand() / RAND_MAX;
             p.y = (float)std::rand() / RAND_MAX;
             p.a = 1.0;
+            p.v = 0.08 + (0.05 * (float)std::rand() / RAND_MAX);
             particles_.push_back(p);
         }
     }
@@ -256,14 +256,15 @@ public:
         const auto d = direction_ * (time / 1000.0);
         for (auto& p : particles_)
         {
-            p.x = wrap(1.0, p.x + d.x(), 0.0);
-            p.y = wrap(1.0, p.y + d.y(), 0.0);
+            p.x = wrap(1.0, p.x + d.x() * p.v, 0.0);
+            p.y = wrap(1.0, p.y + d.y() * p.v, 0.0);
         }
     }
 private:
     struct particle {
         float x, y;
         float a; 
+        float v;
     };
     std::vector<particle> particles_; 
 private:
@@ -445,12 +446,11 @@ public:
         painter.drawText(rect,
             Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
-            "You can only stop them by typing the right pinyin.\n"
-            "Ctrl + Q - Exit     \n"
+            "Only you can stop them by typing the right pinyin.\n"
             "Ctrl + N - Move down\n"
             "Ctrl + P - Move up  \n"
             "Space - Fire        \n"
-            "Esc - Back to menu  \n\n"
+            "Esc - Exit          \n\n"
             "Press Space to play!\n");
     }
 private:
@@ -515,16 +515,27 @@ GameWidget::~GameWidget()
 void GameWidget::startGame()
 {
     player_.reset(new Player);
-    level_.reset(new Level);
     display_.reset(new Display);
     welcome_.reset();
 
-    game_->play(*level_);
+    level_ = 0; // start at level 0 (doh)
+    speed_ = 2; // initial speed at 2 units per tick
+
+    game_->play(*levels_[0]);
 
     invaders_.clear();
     missiles_.clear();
 
     qDebug() << "New game";
+}
+
+void GameWidget::loadLevel(const QString& file)
+{
+    qDebug() << "Loading level: " << file;
+
+    std::unique_ptr<Level> level(new Level);
+    level->load(file);
+    levels_.push_back(std::move(level));
 }
 
 void GameWidget::timerEvent(QTimerEvent* timer)
@@ -622,15 +633,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     const auto key = press->key();
     const auto mod = press->modifiers();
 
-    if (key == Qt::Key_Q && mod == Qt::ControlModifier)
-    {
-        emit quitGame();
-        return;
-    }
-
     if (welcome_)
     {
-        if (key == Qt::Key_Space)
+        if (key == Qt::Key_Escape)
+            emit quitGame();
+        else if (key == Qt::Key_Space)
             startGame();
         return;
     }

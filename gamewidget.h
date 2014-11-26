@@ -48,7 +48,11 @@ namespace invaders
         GameWidget(QWidget* parent);
        ~GameWidget();
 
+        // start a new game
         void startGame();
+
+        // load level data from the specified file
+        void loadLevel(const QString& file);
 
     signals:
         void quitGame();
@@ -75,14 +79,15 @@ namespace invaders
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;
         std::map<unsigned, std::unique_ptr<Missile>> missiles_;
         std::unique_ptr<Game> game_;
-        std::unique_ptr<Level> level_;
         std::unique_ptr<Welcome> welcome_;
+        std::vector<std::unique_ptr<Level>> levels_;
     private:
         QElapsedTimer timer_;
         quint64 time_delta_;
         quint64 time_total_;
         quint64 time_stamp_;
         unsigned speed_;
+        unsigned level_;
     };
 
 } // invaders

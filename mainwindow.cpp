@@ -23,6 +23,8 @@
 #include "config.h"
 #include "warnpush.h"
 #  include <QSettings>
+#  include <QDir>
+#  include <QStringList>
 #include "warnpop.h"
 
 #include "mainwindow.h"
@@ -43,6 +45,18 @@ MainWindow::MainWindow()
 
     QObject::connect(ui_.game, SIGNAL(quitGame()), 
         this, SLOT(close()));
+
+    const auto& inst = QApplication::applicationDirPath();
+    const auto& data = inst + "/data/";
+
+    QDir dir(data);
+    QStringList filters("level_*.txt");
+    QStringList entries = dir.entryList(filters);
+    for ( const auto& entry : entries)
+    {
+        const auto& file = data + entry;
+        ui_.game->loadLevel(file); 
+    }
 }
 
 

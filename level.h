@@ -23,6 +23,9 @@
 #pragma once
 
 #include "config.h"
+#include "warnpush.h"
+#  include <QString>
+#include "warnpop.h"
 
 #include <cstddef>
 
@@ -31,30 +34,43 @@ namespace invaders
     class Level 
     {
     public:
-        struct invader {
+        struct enemy {
             unsigned character;
             unsigned value;
             unsigned score;
         };
 
-        //Level();
-        //~Level();
+        Level();
+       ~Level();
 
-        invader spawn();
+        void load(const QString& file);
 
-        std::size_t spawnCount() const
-        { return 1; }
+        // spawn a new enemy
+        enemy spawn();
 
-        std::size_t enemyCount() const 
-        { return 0; }
+        // return the number of enemies to spawn per one spawn
+        unsigned spawnCount() const
+        { return spawncount_; }
 
-        std::size_t spawnInterval() const 
-        { return 10; }
+        // return the total number of enemies this level has
+        unsigned enemyCount() const 
+        { return enemycount_; }
+
+        // return the interval between spawning new enemies
+        // the interval is expressed in game ticks
+        unsigned spawnInterval() const 
+        { return spawninterval_; }
 
         unsigned seed() const
-        { return 0xbabe; }
+        { return seedvalue_; }
 
     private:
+        unsigned spawncount_;
+        unsigned spawninterval_;
+        unsigned enemycount_;
+        unsigned seedvalue_;
+    private:
+        std::vector<enemy> enemies_;
 
     };
 } // invaders

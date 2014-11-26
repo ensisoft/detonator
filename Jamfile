@@ -19,3 +19,4 @@ exe invaders :
   /qt//QtGui
 ;
 
+install dist : invaders ;
