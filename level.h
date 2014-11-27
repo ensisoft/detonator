@@ -64,6 +64,9 @@ namespace invaders
         unsigned seed() const
         { return seedvalue_; }
 
+        const std::vector<enemy>& getEnemies() const
+        { return enemies_; }
+
     private:
         unsigned spawncount_;
         unsigned spawninterval_;

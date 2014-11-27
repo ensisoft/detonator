@@ -45,61 +45,17 @@
 namespace invaders
 {
 
-// game space is discrete space from 0 to game::width-1 on X axis
-// and from 0 to game::height-1 on Y axis
-struct GameSpace {
-    unsigned x, y;
-
-    QPoint toPoint() const 
-    { return {(int)x, (int)y}; }
-};
-
-struct GameSpaceF {
-    float x, y;
-
-    QPointF toPoint() const 
-    { return {x, y}; }
-};
+// game space is discrete space from 0 to game::width() - 1 on X axis
+// and from 0 to game::height() - 1 on Y axis
+// we use QPoint to represent this.
 
 // normalized widget/view space is expressed with floats from 0 to 1.0 on Y and X
 // 0.0, 0.0 being the window top left and 1.0,1.0 being the window bottom right
-struct NormalizedViewSpace {
-    float x, y;
+// we use QVector2D to represent this
 
-    QPointF toPoint() const 
-    { return {x, y}; }
-
-    NormalizedViewSpace& operator += (const NormalizedViewSpace& rhs) 
-    {
-        x += rhs.x;
-        y += rhs.y;
-        return *this;
-    }
-    NormalizedViewSpace& operator -= (const NormalizedViewSpace& rhs)
-    {
-        x -= rhs.x;
-        y -= rhs.y;
-        return  *this;
-    }
-};
-
-NormalizedViewSpace operator - (const NormalizedViewSpace& lhs, const NormalizedViewSpace& rhs)
-{
-    return { lhs.x - rhs.x, lhs.y - rhs.y };
-}
-
-NormalizedViewSpace operator + (const NormalizedViewSpace& lhs, const NormalizedViewSpace& rhs)
-{
-    return { lhs.x + rhs.x, lhs.y + rhs.y };
-}
-
-// eventually QPainter paint operations require coordinates in pixel space.
-struct ViewSpace {
-    int x, y;
-
-    QPoint toPoint() const 
-    { return {x, y }; }
-};
+// eventually QPainter paint operations require coordinates in pixel space
+// which runs from 0 to widget::width() on X axis and from 0 to widget::height()
+// on the Y axis. this is also represented by QPoint
 
 class TransformState 
 {
@@ -120,18 +76,16 @@ public:
         scale_  = QPoint(widget_width / game_width, widget_height / game_height);
     }
 
-    ViewSpace toViewSpace(GameSpace game) const 
+    TransformState(const QRect& window, int numCols, int numRows)
     {
-        const int xpos = game.x * scale_.x();
-        const int ypos = game.y * scale_.y();
-        return {xpos, ypos};
+        
     }
 
-    ViewSpace toViewSpace(NormalizedViewSpace norm) const 
+    QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const 
     {
-        const int xpos = widget_.x() * norm.x;
-        const int ypos = widget_.y() * norm.y;
-        return { xpos, ypos };
+        const QPoint top = toViewSpace(gameTopLeft);
+        const QPoint bot = toViewSpace(gameTopBottom);
+        return {top, bot};
     }
 
     QPoint toViewSpace(const QPoint& game) const
@@ -153,32 +107,6 @@ public:
         const float xpos = (float)p.x() / widget_.x();
         const float ypos = (float)p.y() / widget_.y();
         return {xpos, ypos};
-    }
-
-    NormalizedViewSpace toNormalizedViewSpace(GameSpace game) const 
-    {
-        const float xpos = (float)game.x * scale_.x();
-        const float ypos = (float)game.y * scale_.y();
-
-        return { xpos / widget_.x(), 
-                 ypos / widget_.y() };
-    }
-
-    NormalizedViewSpace toNormalizedViewSpace(GameSpaceF game) const 
-    {
-        const float xpos = game.x * scale_.x();
-        const float ypos = game.y * scale_.y();
-
-        return { xpos / widget_.x(), 
-                 ypos / widget_.y() };        
-    }
-
-
-    NormalizedViewSpace toNormalizedViewSpace(ViewSpace view) const
-    {
-        const auto xpos = (float)view.x / widget_.x();
-        const auto ypos = (float)view.y / widget_.y();
-        return { xpos, ypos };
     }
 
     QPoint getScale() const 
@@ -227,7 +155,7 @@ public:
 
     // returns true if animation is still valid
     // otherwise false and the animation is expired.
-    virtual bool update(quint64 dt) = 0;
+    virtual bool update(quint64 dt, float tick, TransformState& state) = 0;
 
     // 
     virtual void paint(QPainter& painter, TransformState& state) = 0;
@@ -241,37 +169,31 @@ private:
 class GameWidget::Invader
 {
 public:
-    Invader(unsigned x, unsigned y, const QString& str) : text_(str)
+    Invader(QVector2D position, QString str) : position_(position), text_(str)
     {}
 
-    // set position from game space coordinates
-    void setPosition(unsigned x, unsigned y, TransformState& state)
+    void setPosition(QVector2D position)
     {
-        position_ = state.toNormalizedViewSpace(GameSpace{x, y + 1});
+        position_ = position;
     }
 
-    // set position in normalized view space
-    void setPosition(float x, float y)
+    void update(float tick, TransformState& state)
     {
-        position_ = NormalizedViewSpace{x, y};
-    }
-
-    void update(quint64 time_delta, quint64 time_tick, TransformState& state)
-    {
-        const auto frac = (float)time_delta / (float)time_tick;
-        offset_ = state.toNormalizedViewSpace(GameSpaceF{frac, 0.0});
+        const auto unit = state.toViewSpace(QPoint(-1, 0));
+        const auto off  = state.toNormalizedViewSpace(unit);
+        offset_ = off * tick;
     }
 
     void paint(QPainter& painter, TransformState& state)
     {
         const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(position_ - offset_);
+        const auto pos = state.toViewSpace(position_ + offset_);
 
         QFont font;
         font.setFamily("Monospace");
         font.setPixelSize(dim.y());
         QRect rect = QFontMetrics(font).boundingRect(text_);
-        rect.moveTo(pos.toPoint());
+        rect.moveTo(pos);
 
         QPen pen;
         pen.setWidth(2);
@@ -280,14 +202,14 @@ public:
         painter.setPen(pen);
         painter.drawText(rect, Qt::AlignCenter, text_);
     }
-    QPointF getPosition() const 
+    QVector2D getPosition() const 
     {
-        return (position_ + offset_).toPoint();
+        return position_ + offset_;
     }
 
 private:
-    NormalizedViewSpace position_;
-    NormalizedViewSpace offset_;
+    QVector2D position_;
+    QVector2D offset_;
     QString text_;
 };
 
@@ -339,19 +261,21 @@ public:
     MissileLaunch(std::unique_ptr<Invader> i,std::unique_ptr<Missile> m,
         quint64 lifetime) : invader_(std::move(i)), missile_(std::move(m)), lifetime_(lifetime), time_(0)
     {
-        QVector2D to(invader_->getPosition());
-        QVector2D from(missile_->getPosition());
-        direction_ = to - from;
+        const auto a = missile_->getPosition();
+        const auto b = invader_->getPosition();
+        direction_ = b - a;
     }
-    virtual bool update(quint64 dt) override
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
     {
         time_ += dt;
         if (time_ >= lifetime_)
             return false;
 
-        const auto d = (double)time_ / (double)lifetime_;
+        const auto d = (double)dt / (double)lifetime_;
         const auto p = direction_ * d;
-        missile_->setPosition(p);
+        const auto n = missile_->getPosition();
+        missile_->setPosition(n + p);
+        invader_->update(tick, state);
         return true;
     }
 
@@ -367,7 +291,6 @@ private:
 private:
     quint64 lifetime_;
     quint64 time_;
-private:
     QVector2D direction_;
 };
 
@@ -400,7 +323,7 @@ public:
         }
     }
 
-    void paint(QPainter& painter, const QRect& rect, Game& game)
+    void paint(QPainter& painter, const QRect& rect, const QPoint&)
     {
         QBrush space(Qt::black);
         painter.fillRect(rect, space);
@@ -439,11 +362,11 @@ private:
 class GameWidget::Display
 {
 public:
-    Display()
+    Display(const Game& game) : game_(game)
     {}
-    void paint(QPainter& painter, const QRect& area, const Game& game)
+    void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
-        const auto score = game.score();
+        const auto score = game_.score();
         const auto text  = QString("Level %1 Score %2 ").arg(1).arg(score);
 
         QPen pen;
@@ -453,13 +376,13 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(area.height() / 2);
+        font.setPixelSize(scale.y() / 2);
         painter.setFont(font);
 
         painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text);
     }
 private:
-
+    const Game& game_;
 };
 
 // player representation on the screen
@@ -469,7 +392,7 @@ public:
     Player() : text_(initString())
     {}
 
-    void paint(QPainter& painter, const QRect& area, const Game& game, const TransformState& transform)
+    void paint(QPainter& painter, const QRect& area, const TransformState& transform)
     {
         QFont font;
         font.setFamily("Arcade");
@@ -477,24 +400,32 @@ public:
         painter.setFont(font);        
 
         QFontMetrics fm(font);
-        QRect bounds = fm.boundingRect(text_);
+        const auto width  = fm.width(text_);
+        const auto height = fm.height();
 
-        const auto x = (area.width() - bounds.width()) / 2;
-        const auto y = (area.height() - bounds.height()) / 2;
+        // calculate text X, Y (top left)
+        const auto x = area.x() + ((area.width() - width) / 2.0);
+        const auto y = area.y() + ((area.height() - height) / 2.0);
 
-        QPoint top(area.left() + x, area.y() + y);
-        QPoint bot(area.right() - x, area.y() - y);
-        QRect rect(top, bot);
+        if (false)
+        {
+            QPen pen;
+            pen.setWidth(2);        
+            pen.setColor(Qt::darkRed);
+            painter.setPen(pen);
+            painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text_);                
+        }
 
         QPen pen;
+        pen.setWidth(2);        
         pen.setColor(Qt::darkGray);
-        pen.setWidth(2);
         painter.setPen(pen);
 
+        QRect rect(QPoint(x, y), QPoint(x + width, y + height));
         painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, text_);
 
         // save the missile launch position
-        missile_ = transform.toNormalizedViewSpace(top);
+        missile_ = transform.toNormalizedViewSpace(QPoint(x, y));
     }
 
     void keyPress(QKeyEvent* press, Game& game)
@@ -546,7 +477,7 @@ public:
     void update(quint64 time)
     {}
 
-    void paint(QPainter& painter, const QRect& area, const QPoint& unit, Game& game)
+    void paint(QPainter& painter, const QRect& area, const QPoint& unit)
     {
         QPen pen;
         pen.setWidth(1);
@@ -557,9 +488,8 @@ public:
         font.setFamily("Arcade");
         font.setPixelSize(unit.y() / 2);        
         painter.setFont(font);
-
-        painter.drawText(area,
-            Qt::AlignCenter,
+        
+        painter.drawText(area, Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
@@ -570,6 +500,54 @@ public:
     }
 private:
 };
+
+class GameWidget::GameOver
+{
+
+};
+
+class GameWidget::Help
+{
+public:
+    Help(const Level& level) : level_(level)
+    {}
+
+    void update(quint64 dt)
+    {}
+
+    void paint(QPainter& painter, const QRect& area, const TransformState& state) const
+    {
+        const auto unit = state.getScale();
+
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkGray);
+        painter.setPen(pen);
+
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(unit.y() / 2);
+        painter.setFont(font);
+
+
+        QString text;
+        text.append("Kill the following enemies!\n");
+
+        const auto& enemies = level_.getEnemies();
+        for (const auto& e : enemies)
+        {
+            const auto s = QString("%1 - %2\n").arg(e.string).arg(e.killstring);
+            text.append(s);
+        }
+
+        text.append("\nPress any key to continue");
+        painter.drawText(area, Qt::AlignCenter, text);
+    }
+
+private:
+    const Level& level_;
+};
+
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 {
@@ -583,7 +561,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
         std::unique_ptr<Invader> inv(std::move(it->second));
         std::unique_ptr<Missile> mis(new Missile(m.position, m.string.toUpper()));
-        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 2000));
+        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 250));
 
         animations_.push_back(std::move(anim));
         invaders_.erase(it);
@@ -591,7 +569,11 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     game_->on_invader_spawn = [&](const Game::invader& inv) 
     {
-        std::unique_ptr<Invader> invader(new Invader(inv.xpos, inv.ypos, inv.string));
+        TransformState state(this, game_.get());
+
+        const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
+        const auto posi = state.toNormalizedViewSpace(view);        
+        std::unique_ptr<Invader> invader(new Invader(posi, inv.string));
         invaders_[inv.identity] = std::move(invader);
     };
 
@@ -602,13 +584,14 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     background_.reset(new Background);
     welcome_.reset(new Welcome);
+    display_.reset(new Display(*game_));    
+    player_.reset(new Player);    
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
     startTimer(0);
 
-    time_delta_ = 0;
-    time_total_ = 0;
+    tick_delta_ = 0;
     speed_  = 2;
     timer_.start();
 }
@@ -618,9 +601,8 @@ GameWidget::~GameWidget()
 
 void GameWidget::startGame()
 {
-    player_.reset(new Player);
-    display_.reset(new Display);
-    welcome_.reset();
+    help_.reset(new Help(*levels_[0]));
+    welcome_.reset();        
 
     level_ = 0; // start at level 0 (doh)
     speed_ = 2; // initial speed at 2 units per tick
@@ -628,8 +610,6 @@ void GameWidget::startGame()
     game_->play(*levels_[0]);
 
     invaders_.clear();
-
-    qDebug() << "New game";
 }
 
 void GameWidget::loadLevel(const QString& file)
@@ -648,25 +628,28 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     const auto tick = 1000 / speed_;
     const auto elap = time - time_stamp_;
 
-    time_delta_ += elap;
-    time_total_ += elap;
-    if (time_delta_ >= tick && game_)
+    if (!isPaused())
     {
-        TransformState state(this, game_.get());
-
-        // advance game by one tick
-        game_->tick();
-
-        // synchronize invader position with the actual game position
-        const auto& invaders = game_->invaders();
-
-        for (const auto& i : invaders)
+        tick_delta_ += elap;
+        if (tick_delta_ >= tick && game_)
         {
-            auto it   = invaders_.find(i.identity);
-            auto& inv = it->second;
-            inv->setPosition(i.xpos, i.ypos, state);
+            TransformState state(this, game_.get());
+
+            // advance game by one tick
+            game_->tick();
+
+            // synchronize invader position with the actual game position
+            const auto& invaders = game_->invaders();
+            for (const auto& i : invaders)
+            {
+                auto it   = invaders_.find(i.identity);
+                auto& inv = it->second;
+                const auto view = state.toViewSpace(QPoint(i.xpos, i.ypos + 1));
+                const auto pos  = state.toNormalizedViewSpace(view);
+                inv->setPosition(pos);
+            }
+            tick_delta_ = 0;
         }
-        time_delta_ = 0;
     }
 
     update();
@@ -683,14 +666,20 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     const auto time  = timer_.elapsed();
     const auto delta = time - time_stamp_;
-    const auto tick  = 1000 / speed_;    
+    const auto tick  = 1000.0 / speed_;    
 
     background_->update(delta);
-    background_->paint(painter, rect(), *game_);
+    background_->paint(painter, rect(), state.getScale());
     if (welcome_)
     {
         welcome_->update(delta);
-        welcome_->paint(painter, rect(), state.getScale(), *game_);
+        welcome_->paint(painter, rect(), state.getScale());
+        return;
+    } 
+    else if (help_)
+    {
+        help_->update(delta);
+        help_->paint(painter, rect(), state);
         return;
     }
 
@@ -700,19 +689,21 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // layout the HUD at the first "game row"
     auto top = state.toViewSpace(QPoint(0, 0));
     auto bot = state.toViewSpace(QPoint(cols, 1));
-    display_->paint(painter, QRect(top, bot), *game_);
+    display_->paint(painter, QRect(top, bot), state.getScale());
 
+    // paint the invaders
     for (auto& pair : invaders_)
     {
         auto& invader = pair.second;
-        invader->update(time_delta_, tick, state);
+        invader->update(tick_delta_ / tick, state);
         invader->paint(painter, state);
     }
 
+    // paint animations
     for (auto it = std::begin(animations_); it != std::end(animations_);)
     {
         auto& anim = *it;
-        if (!anim->update(delta))
+        if (!anim->update(delta, tick_delta_ / tick, state))
         {
             it = animations_.erase(it);
             continue;
@@ -724,30 +715,58 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // layout the player at the last "game row"
     top = state.toViewSpace(QPoint(0, rows-1));
     bot = state.toViewSpace(QPoint(cols, rows));
-    player_->paint(painter, QRect(top, bot), *game_, state);
+    player_->paint(painter, QRect(top, bot), state);
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
 {
     const auto key = press->key();
 
-    if (welcome_)
-    {
-        if (key == Qt::Key_Escape)
-            emit quitGame();
-        else if (key == Qt::Key_Space)
-            startGame();
-        return;
-    }
-
     if (key == Qt::Key_Escape)
     {
-        welcome_.reset(new Welcome());
-        return;
+        if (game_->isRunning())
+        {
+            if (help_)
+            {
+                help_.reset();
+            }
+            else
+            {
+                game_->quit();
+                welcome_.reset(new Welcome());
+            }
+        }
+        else
+        {
+            emit quitGame();
+        }
+    }
+    else if (key == Qt::Key_Space)
+    {
+        if (welcome_)
+            startGame();
+    }
+    else if (key == Qt::Key_F1)
+    {
+        if (game_->isRunning())
+        {
+            if (!help_)
+            {
+                help_.reset(new Help(*levels_[level_]));                
+            }
+        }
+    }
+    else if (player_)
+    {
+        player_->keyPress(press, *game_);
     }
 
-    player_->keyPress(press, *game_);
     update();
+}
+
+bool GameWidget::isPaused() const 
+{
+    return !!help_;
 }
 
 } // invaders

@@ -87,8 +87,11 @@ namespace invaders
         std::deque<invader>& invaders() const 
         { return invaders_; }
 
-        bool is_running() const 
+        bool isRunning() const 
         { return level_ != nullptr; }
+
+        void quit()
+        { level_ = nullptr; }
 
     private:
         std::deque<invader> invaders_;
@@ -100,6 +103,7 @@ namespace invaders
         unsigned highscore_;
     private:
         Level* level_;
+    private:
     };
 
 } // invaders
