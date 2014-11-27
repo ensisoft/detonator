@@ -25,10 +25,21 @@
 #  include <QtGui/QApplication>
 #include "warnpop.h"
 
+#if defined(LINUX_OS)
+#  include <fenv.h>
+#endif
 #include "mainwindow.h"
 
 int main(int argc, char* argv[])
 {
+#if defined(LINUX_OS)
+    // SIGFPE on floating point exception
+    feenableexcept(FE_INVALID   | 
+                   FE_DIVBYZERO | 
+                   FE_OVERFLOW  | 
+                   FE_UNDERFLOW);
+#endif
+
     QApplication app(argc, argv);
 
     invaders::MainWindow window;

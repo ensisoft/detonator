@@ -60,27 +60,10 @@ namespace invaders
 class TransformState 
 {
 public:
-    TransformState(const QRect& widget, const Game& game)
-    {
-        // we divide the widget's client area into a equal sized cells
-        // according to the game's size. We also add one extra row 
-        // for HUD display at the top of the screen and for the player
-        // at the bottom of the screen
-        const auto game_width  = game.width();
-        const auto game_height = game.height() + 2;
-        const auto widget_width  = widget.width();
-        const auto widget_height = widget.height();
-
-        widget_ = QPoint(widget_width, widget_height);
-        game_   = QPoint(game_width, game_height);
-        scale_  = QPoint(widget_width / game_width, widget_height / game_height);
-    }
-
     TransformState(const QRect& window, int numCols, int numRows)
     {
         // divide the widget's client area int equal sized cells
         widget_ = QPoint(window.width(), window.height());
-        game_   = QPoint(numCols, numRows);
         scale_  = QPoint(window.width() / numCols, window.height() / numRows);
     }
 
@@ -134,20 +117,8 @@ public:
     { 
         return widget_.y(); 
     }
-
-    int numRows() const 
-    { 
-        return game_.y(); 
-    }
-
-    int numCols() const 
-    { 
-        return game_.x();
-    }
-
 private:
     QPoint widget_;
-    QPoint game_;
     QPoint scale_;
 };
 
@@ -167,6 +138,56 @@ protected:
 private:
 };
 
+class GameWidget::Explosion : public GameWidget::Animation
+{
+public:
+    Explosion(QVector2D position, quint64 lifetime) : position_(position), lifetime_(lifetime), time_(0)
+    {}    
+
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    {
+        time_ += dt;
+        if (time_ > lifetime_)
+            return false;
+
+        return true;
+    }
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        const auto pos = state.toViewSpace(position_);
+        const auto dim = state.getScale();
+
+        // explosion texture has 80 phases for the explosion
+        const auto phase  = lifetime_ / 80.0;
+        const int  index  = time_ / phase;
+
+        const auto row = index / 10;
+        const auto col = index % 10;
+
+        // each explosion phase is 100x100px
+        const auto w = 100;
+        const auto h = 100;
+        const auto x = col * w;
+        const auto y = row * h;
+        const QRect src(x, y, w, h);
+            
+        QRect dst(0, 0, 100, 100);
+        dst.moveTo(pos);
+
+        QPixmap tex = Explosion::texture();
+        painter.drawPixmap(pos, tex, src);
+    }
+private:
+    static QPixmap texture()
+    {
+        static QPixmap px(":/textures/ExplosionMap.png");
+        return px;
+    }
+private:
+    QVector2D position_;    
+    quint64 lifetime_;
+    quint64 time_;
+};
 
 
 class GameWidget::Invader
@@ -304,6 +325,8 @@ public:
         invader_->paint(painter, state);
         missile_->paint(painter, state);
     }
+    QVector2D getPosition() const 
+    { return invader_->getPosition(); }
 
 private:
     std::unique_ptr<Invader> invader_;
@@ -325,7 +348,7 @@ float wrap(float max, float val, float wrap)
 class GameWidget::Background
 {
 public:
-    Background()
+    Background() : texture_(":textures/SpaceBackground.png")
     {
         std::srand(std::time(nullptr));
 
@@ -347,6 +370,7 @@ public:
     {
         QBrush space(Qt::black);
         painter.fillRect(rect, space);
+        painter.drawPixmap(rect, texture_, texture_.rect());
 
         QBrush star(Qt::white);
 
@@ -356,7 +380,6 @@ public:
             const auto y = p.y * rect.height();
             painter.fillRect(x, y, 1, 1, star);
         }
-
     }
     void update(quint64 time)
     {
@@ -376,6 +399,7 @@ private:
     std::vector<particle> particles_; 
 private:
     QVector2D direction_;
+    QPixmap texture_;
 };
 
 // Heads Up Display, display scoreboards etc.
@@ -443,6 +467,7 @@ public:
         painter.setPen(pen);
 
         QRect rect(QPoint(x, y), QPoint(x + width, y + height));
+        painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, text_);
 
         // save the missile launch position
@@ -473,6 +498,10 @@ public:
         {
             text_.append(key);
         }
+    }
+    void reset()
+    {
+        text_ = initString();
     }
 private:
     static 
@@ -573,9 +602,8 @@ public:
     void update(quint64 dt)
     {}
 
-    void paint(QPainter& painter, const QRect& area, const TransformState& foo) const
+    void paint(QPainter& painter, const QRect& area, const QPoint& scale) const
     {
-        const auto unit = foo.getScale();
 
         QPen pen;
         pen.setWidth(1);
@@ -584,7 +612,7 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(unit.y() / 2);
+        font.setPixelSize(scale.y() / 2);
         painter.setFont(font);
 
         const auto& enemies = level_.getEnemies();
@@ -639,7 +667,9 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     game_->on_invader_spawn = [&](const Game::invader& inv) 
     {
-        TransformState state(rect(), *game_);
+        const auto cols = game_->width();
+        const auto rows = game_->height() + 2;
+        TransformState state(rect(), cols, rows);
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
@@ -700,15 +730,16 @@ void GameWidget::loadLevels(const QString& file)
 
 void GameWidget::timerEvent(QTimerEvent* timer)
 {
-    update();
-}
+    // we divide the widget's client area into a equal sized cells
+    // according to the game's size. We also add one extra row 
+    // for HUD display at the top of the screen and for the player
+    // at the bottom of the screen. This provides the basic layout
+    // for the game in a way that doesnt depend on any actual
+    // viewport size.
+    const auto cols = game_->width();
+    const auto rows = game_->height() + 2;
 
-void GameWidget::paintEvent(QPaintEvent* paint)
-{
-    QPainter painter(this);
-    painter.setRenderHints(QPainter::HighQualityAntialiasing);
-
-    TransformState state(rect(), *game_);
+    TransformState state(rect(), cols, rows);
 
     // milliseconds
     const auto time  = timer_.elapsed();
@@ -720,8 +751,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         tick_delta_ += delta;
         if (tick_delta_ >= tick)
         {
-            TransformState state(rect(), *game_);
-
             // advance game by one tick
             game_->tick();
 
@@ -739,25 +768,74 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         }
     }
 
-    background_->update(delta);
+    if (background_) 
+        background_->update(delta);
+
+    if (menu_) 
+        menu_->update(delta);    
+
+    if (help_) 
+        help_->update(delta);
+
+    // update invaders
+    for (auto& pair : invaders_)
+    {
+        auto& invader = pair.second;
+        invader->update(tick_delta_ / tick, state);
+    }
+
+    // update animations
+    for (auto it = std::begin(animations_); it != std::end(animations_);)
+    {
+        auto& anim = *it;
+        if (!anim->update(delta, tick_delta_ / tick, state))
+        {
+            if (auto* p = dynamic_cast<MissileLaunch*>(anim.get()))
+            {
+                const auto pos = p->getPosition();
+                std::unique_ptr<Animation> expl(new Explosion(pos, 1000));
+                animations_.push_back(std::move(expl));
+            }
+            it = animations_.erase(it);
+            continue;
+        }
+        ++it;
+    }    
+
+    // trigger redraw
+    update();
+
+    time_stamp_ = time;    
+}
+
+void GameWidget::paintEvent(QPaintEvent* paint)
+{
+    QPainter painter(this);
+    painter.setRenderHints(QPainter::HighQualityAntialiasing);
+
+    // we divide the widget's client area into a equal sized cells
+    // according to the game's size. We also add one extra row 
+    // for HUD display at the top of the screen and for the player
+    // at the bottom of the screen. This provides the basic layout
+    // for the game in a way that doesnt depend on any actual
+    // viewport size.
+    const auto cols = game_->width();
+    const auto rows = game_->height() + 2;
+
+    TransformState state(rect(), cols, rows);
+
     background_->paint(painter, rect(), state.getScale());
+
     if (menu_)
     {
-        menu_->update(delta);
         menu_->paint(painter, rect(), state.getScale());
-        time_stamp_ = time;
         return;
     } 
     else if (help_)
     {
-        help_->update(delta);
-        help_->paint(painter, rect(), state);
-        time_stamp_ = time;        
+        help_->paint(painter, rect(), state.getScale());
         return;
     }
-
-    const auto cols = state.numCols();
-    const auto rows = state.numRows();
 
     // layout the HUD at the first "game row"
     auto top = state.toViewSpace(QPoint(0, 0));
@@ -768,29 +846,19 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     for (auto& pair : invaders_)
     {
         auto& invader = pair.second;
-        invader->update(tick_delta_ / tick, state);
         invader->paint(painter, state);
     }
 
     // paint animations
-    for (auto it = std::begin(animations_); it != std::end(animations_);)
+    for (auto& anim : animations_)
     {
-        auto& anim = *it;
-        if (!anim->update(delta, tick_delta_ / tick, state))
-        {
-            it = animations_.erase(it);
-            continue;
-        }
         anim->paint(painter, state);
-        ++it;
     }
 
     // layout the player at the last "game row"
     top = state.toViewSpace(QPoint(0, rows-1));
     bot = state.toViewSpace(QPoint(cols, rows));
     player_->paint(painter, QRect(top, bot), state);
-
-    time_stamp_ = time;    
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)

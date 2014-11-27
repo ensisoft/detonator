@@ -9,5 +9,7 @@
     <file>fonts/ARCADE.TTF</file>
 
     <file>textures/SpaceShipNormal.png</file>
+    <file>textures/SpaceBackground.png</file>
+    <file>textures/ExplosionMap.png</file>
   </qresource>
 </RCC>        
