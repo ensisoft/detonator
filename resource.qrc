@@ -7,5 +7,7 @@
     <file>icons/ico_life.png</file>
 
     <file>fonts/ARCADE.TTF</file>
+
+    <file>textures/SpaceShipNormal.png</file>
   </qresource>
 </RCC>        

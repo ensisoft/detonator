@@ -60,16 +60,16 @@ namespace invaders
 class TransformState 
 {
 public:
-    TransformState(const QWidget* widget, const Game* game)
+    TransformState(const QRect& widget, const Game& game)
     {
         // we divide the widget's client area into a equal sized cells
         // according to the game's size. We also add one extra row 
         // for HUD display at the top of the screen and for the player
         // at the bottom of the screen
-        const auto game_width  = game->width();
-        const auto game_height = game->height() + 2;
-        const auto widget_width  = widget->width();
-        const auto widget_height = widget->height();
+        const auto game_width  = game.width();
+        const auto game_height = game.height() + 2;
+        const auto widget_width  = widget.width();
+        const auto widget_height = widget.height();
 
         widget_ = QPoint(widget_width, widget_height);
         game_   = QPoint(game_width, game_height);
@@ -78,7 +78,10 @@ public:
 
     TransformState(const QRect& window, int numCols, int numRows)
     {
-        
+        // divide the widget's client area int equal sized cells
+        widget_ = QPoint(window.width(), window.height());
+        game_   = QPoint(numCols, numRows);
+        scale_  = QPoint(window.width() / numCols, window.height() / numRows);
     }
 
     QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const 
@@ -189,15 +192,26 @@ public:
         const auto dim = state.getScale();
         const auto pos = state.toViewSpace(position_ + offset_);
 
+        QPixmap tex = Invader::texture();
+        const float w = tex.width();
+        const float h = tex.height();
+        const float a = h / w;
+        QRect r(0, 0, dim.x(), dim.x() * a);
+        r.moveTo(pos);
+        //painter.fillRect(r, Qt::white);
+        painter.drawPixmap(r, tex, tex.rect());
+
         QFont font;
         font.setFamily("Monospace");
-        font.setPixelSize(dim.y());
+        font.setPixelSize(dim.y() / 2);
         QRect rect = QFontMetrics(font).boundingRect(text_);
-        rect.moveTo(pos);
+        //rect.moveTo(pos);
+        rect.moveTo(pos + QPoint(r.width(), (r.height() - rect.height()) / 2));
+
 
         QPen pen;
         pen.setWidth(2);
-        pen.setColor(Qt::darkCyan);
+        pen.setColor(Qt::darkYellow);
         painter.setFont(font);
         painter.setPen(pen);
         painter.drawText(rect, Qt::AlignCenter, text_);
@@ -205,6 +219,12 @@ public:
     QVector2D getPosition() const 
     {
         return position_ + offset_;
+    }
+private:
+    static const QPixmap& texture() 
+    {
+        static QPixmap px(":/textures/SpaceShipNormal.png");
+        return px;
     }
 
 private:
@@ -367,7 +387,7 @@ public:
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
         const auto score = game_.score();
-        const auto text  = QString("Level %1 Score %2 ").arg(1).arg(score);
+        const auto text  = QString("Level %1 Score %2 (Press F1 for help)").arg(1).arg(score);
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -515,9 +535,9 @@ public:
     void update(quint64 dt)
     {}
 
-    void paint(QPainter& painter, const QRect& area, const TransformState& state) const
+    void paint(QPainter& painter, const QRect& area, const TransformState& foo) const
     {
-        const auto unit = state.getScale();
+        const auto unit = foo.getScale();
 
         QPen pen;
         pen.setWidth(1);
@@ -529,19 +549,31 @@ public:
         font.setPixelSize(unit.y() / 2);
         painter.setFont(font);
 
-
-        QString text;
-        text.append("Kill the following enemies!\n");
-
         const auto& enemies = level_.getEnemies();
-        for (const auto& e : enemies)
+        const auto cols = 3;
+        const auto rows = (enemies.size() / cols) + 2;
+
+        TransformState state(area, cols, rows);
+        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 1));
+        const auto footer = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+
+        painter.drawText(header, Qt::AlignCenter, 
+            "Kill the following enemies\n");
+
+        for (auto i=0; i<enemies.size(); ++i)
         {
-            const auto s = QString("%1 - %2\n").arg(e.string).arg(e.killstring);
-            text.append(s);
+            const auto& e   = enemies[i];
+            const auto col  = i % cols;
+            const auto row  = i / cols;
+            const auto rect = state.toViewSpaceRect(QPoint(col, row + 1), QPoint(col+1, row+2));
+            painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
+                QString("%1 (%2) \n %3")
+                .arg(e.string)
+                .arg(e.killstring)
+                .arg(e.help));
         }
 
-        text.append("\nPress any key to continue");
-        painter.drawText(area, Qt::AlignCenter, text);
+        painter.drawText(footer, Qt::AlignCenter, "Press Space to continue");
     }
 
 private:
@@ -569,7 +601,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     game_->on_invader_spawn = [&](const Game::invader& inv) 
     {
-        TransformState state(this, game_.get());
+        TransformState state(rect(), *game_);
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
@@ -633,7 +665,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         tick_delta_ += elap;
         if (tick_delta_ >= tick && game_)
         {
-            TransformState state(this, game_.get());
+            TransformState state(rect(), *game_);
 
             // advance game by one tick
             game_->tick();
@@ -662,7 +694,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     QPainter painter(this);
     painter.setRenderHints(QPainter::HighQualityAntialiasing);
 
-    TransformState state(this, game_.get());
+    TransformState state(rect(), *game_);
 
     const auto time  = timer_.elapsed();
     const auto delta = time - time_stamp_;
@@ -726,15 +758,8 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (game_->isRunning())
         {
-            if (help_)
-            {
-                help_.reset();
-            }
-            else
-            {
-                game_->quit();
-                welcome_.reset(new Welcome());
-            }
+            game_->quit();
+            showWelcome();
         }
         else
         {
@@ -745,16 +770,13 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (welcome_)
             startGame();
+        else if (help_)
+            quitHelp();
     }
     else if (key == Qt::Key_F1)
     {
         if (game_->isRunning())
-        {
-            if (!help_)
-            {
-                help_.reset(new Help(*levels_[level_]));                
-            }
-        }
+            showHelp();
     }
     else if (player_)
     {
@@ -767,6 +789,21 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 bool GameWidget::isPaused() const 
 {
     return !!help_;
+}
+
+void GameWidget::showWelcome()
+{
+    welcome_.reset(new Welcome());
+}
+
+void GameWidget::showHelp()
+{
+    const auto& level = *levels_[level_];
+    help_.reset(new Help(level));
+}
+void GameWidget::quitHelp()
+{
+    help_.reset();
 }
 
 } // invaders

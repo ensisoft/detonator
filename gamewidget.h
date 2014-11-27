@@ -63,6 +63,9 @@ namespace invaders
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
         bool isPaused() const;
+        void showWelcome();
+        void showHelp();
+        void quitHelp();
 
     private:
         class Animation;
@@ -82,10 +85,10 @@ namespace invaders
         std::unique_ptr<Background> background_;
         std::unique_ptr<Display> display_;
         std::unique_ptr<Player> player_;
-        std::map<unsigned, std::unique_ptr<Invader>> invaders_;
-        std::unique_ptr<Game> game_;
         std::unique_ptr<Welcome> welcome_;
         std::unique_ptr<Help> help_;
+        std::unique_ptr<Game> game_;
+        std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
         std::vector<std::unique_ptr<Level>> levels_;
         std::list<std::unique_ptr<Animation>> animations_;
     private:

@@ -4,24 +4,27 @@ spawnCount=1
 spawnInterval=5
 enemyCount=100
 
+# level format 
+# [chinese character string] [pinyin kill string] [score] [description]
+
 # p.85 numbers from 1 to 10
-一 yi 10
-二 er 10
-三 san 10
-四 si 10
-五 wu 10
-六 liu 10
-七 qi 10
-八 ba 10
-九 jiu 10
-十 shi 10
+一 yi  10 one / 1 / single
+二 er  10 two / 2
+三 san 10 three / 3
+四 si  10 four / 4
+五 wu  10 five / 5
+六 liu 10 six / 6
+七 qi  10 seven / 7
+八 ba  10 eight / 8
+九 jiu 10 nine / 9
+十 shi 10 ten / 10
 
 # p.113 some common characters such as wo, ni, shi, yao
-我 wo 20
-你 ni 20
-是 shi 20
-要 yao 20
-有 you 20
-不 bu 15
-很 hen 25
-嗎 ma 30
+我 wo  20 I / me / my
+你 ni  20 you
+是 shi 20 is / are / am 
+要 yao 20 to want / to ask
+有 you 20 to have / there is 
+不 bu  15 no / not 
+很 hen 25 quite / very 
+嗎 ma  30 question particle

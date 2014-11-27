@@ -38,6 +38,7 @@ namespace invaders
             unsigned score;
             QString  string;
             QString  killstring;
+            QString  help;
         };
 
         Level();

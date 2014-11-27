@@ -64,6 +64,17 @@ unsigned readInt(QTextStream& stream, const QString& key)
     return ret;
 }
 
+QString joinTokens(const QStringList& toks, int from)
+{
+    QString ret;
+    for (int i=from; i < toks.size(); ++i)
+    {
+        ret.append(toks[i]);
+        ret.append(" ");
+    }
+    return ret;
+}
+
 } // namespace
 
 namespace invaders
@@ -92,14 +103,15 @@ void Level::load(const QString& file)
     while (!stream.atEnd())
     {
         const auto line = readLine(stream);
-        const auto toks = line.split(" ");
-        if (toks.size() != 3)
+        const auto toks = line.split(" ", QString::SkipEmptyParts);
+        if (toks.size() < 3)
             throw std::runtime_error("level data format error");
 
         Level::enemy enemy;
         enemy.string     = toks[0];
         enemy.killstring = toks[1];
         enemy.score      = toks[2].toInt();
+        enemy.help       = joinTokens(toks, 3);
         enemies_.push_back(enemy);
     }
 
