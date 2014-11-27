@@ -355,13 +355,14 @@ public:
         direction_ = QVector2D(4, 3);
         direction_.normalize();
 
-        for (std::size_t i=0; i<200; ++i)
+        for (std::size_t i=0; i<300; ++i)
         {
             particle p;
             p.x = (float)std::rand() / RAND_MAX;
             p.y = (float)std::rand() / RAND_MAX;
-            p.a = 1.0;
-            p.v = 0.08 + (0.05 * (float)std::rand() / RAND_MAX);
+            p.a = 0.5 + (0.5 * (float)std::rand() / RAND_MAX);
+            p.v = 0.05 + (0.05 * (float)std::rand() / RAND_MAX);
+            p.b = !(i % 7);
             particles_.push_back(p);
         }
     }
@@ -373,12 +374,15 @@ public:
         painter.drawPixmap(rect, texture_, texture_.rect());
 
         QBrush star(Qt::white);
+        QColor col(Qt::white);
 
         for (const auto& p : particles_)
         {
+            col.setAlpha(p.a * 0xff);
+            star.setColor(col);
             const auto x = p.x * rect.width();
             const auto y = p.y * rect.height();
-            painter.fillRect(x, y, 1, 1, star);
+            painter.fillRect(x, y, 1 + p.b, 1 + p.b, star);
         }
     }
     void update(quint64 time)
@@ -395,6 +399,7 @@ private:
         float x, y;
         float a; 
         float v;
+        int   b;
     };
     std::vector<particle> particles_; 
 private:
@@ -539,12 +544,12 @@ public:
         font.setPixelSize(unit.y() / 2);        
         painter.setFont(font);
         
-        const auto cols = levels_.size() + 2 + levels_.size() - 1;
+        const auto cols = 7;
         const auto rows = 5;
         TransformState state(area, cols, rows);
 
-        const auto rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 4));
-        painter.drawText(rect, Qt::AlignCenter,
+        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 4));
+        painter.drawText(header, Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
@@ -558,20 +563,34 @@ public:
         selected.setWidth(2);
         selected.setColor(Qt::darkGreen);
 
-        auto col = 1;
-        auto row = 3;
-        for (auto i=0; i<levels_.size(); ++i)
-        {
-            const auto& level = levels_[i];
-            const auto rect = state.toViewSpaceRect(QPoint(col, row), QPoint(col + 1, row + 1));
-            if (i == level_)
-                painter.setPen(selected);
-            painter.drawRect(rect);
-            painter.setPen(pen);
-            painter.drawText(rect, Qt::AlignCenter, 
-                QString("Level %1\n%2").arg(i+1).arg(level->description()));
-            col += 2;
-        }
+        QPen locked;
+        locked.setWidth(2);
+        locked.setColor(Qt::darkRed);
+
+        font.setPixelSize(unit.y() / 2);
+        painter.setFont(font);
+
+        const auto prev = level_ > 0 ? level_ - 1 : levels_.size() - 1;
+        const auto next = (level_ + 1) % levels_.size();
+        const auto& left  = levels_[prev];
+        const auto& mid   = levels_[level_];
+        const auto& right = levels_[next];
+
+        QRect rect;
+        rect = state.toViewSpaceRect(QPoint(1, 3), QPoint(2, 4));
+        drawLevel(painter, rect, *left, prev);
+
+        if (mid->isLocked())
+            painter.setPen(locked);
+        else painter.setPen(selected);
+
+        rect = state.toViewSpaceRect(QPoint(3, 3), QPoint(4, 4));
+        drawLevel(painter, rect, *mid, level_);
+
+        painter.setPen(pen);
+        rect = state.toViewSpaceRect(QPoint(5, 3), QPoint(6, 4));
+        painter.drawRect(rect);
+        drawLevel(painter, rect, *right, next);
     }
     void keyPress(QKeyEvent* press)
     {
@@ -588,6 +607,19 @@ public:
 
     std::size_t selectedLevel() const 
     { return level_; }
+
+private:
+    void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
+    {
+        QString locked;
+        if (level.isLocked())
+            locked = "Locked";
+
+        painter.drawRect(rect);
+        painter.drawText(rect, Qt::AlignCenter,
+            QString("Level %1\n%2\n%3").arg(index+1).arg(level.description()).arg(locked));
+    }
+
 private:
     const std::vector<std::unique_ptr<Level>>& levels_;
     std::size_t level_;
@@ -604,7 +636,6 @@ public:
 
     void paint(QPainter& painter, const QRect& area, const QPoint& scale) const
     {
-
         QPen pen;
         pen.setWidth(1);
         pen.setColor(Qt::darkGray);
@@ -724,8 +755,18 @@ void GameWidget::startGame(unsigned index)
 void GameWidget::loadLevels(const QString& file)
 {
     levels_ = Level::loadLevels(file);
+    levels_[0]->unlock();
+}
 
-    qDebug() << "Loaded " << levels_.size() << " levels";
+void GameWidget::unlockLevel(const QString& name)
+{
+    for (auto& l : levels_)
+    {
+        if (l->description() != name)
+            continue;
+        l->unlock();
+        return;
+    }
 }
 
 void GameWidget::timerEvent(QTimerEvent* timer)
@@ -882,7 +923,8 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         if (menu_)
         {
             const auto level = menu_->selectedLevel();
-            startGame(level);
+            if (!levels_[level]->isLocked())
+                startGame(level);
         }
         else if (help_)
             quitHelp();

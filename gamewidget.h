@@ -54,6 +54,8 @@ namespace invaders
         // load level data from the specified file
         void loadLevels(const QString& file);
 
+        void unlockLevel(const QString& name);
+
     signals:
         void quitGame();
 

@@ -64,6 +64,9 @@ namespace invaders
         // spawn a new enemy
         enemy spawn();
 
+        void unlock() 
+        { locked_ = false; }
+
         // return the number of enemies to spawn per one spawn
         unsigned spawnCount() const
         { return spawncount_; }
@@ -84,6 +87,10 @@ namespace invaders
         const std::vector<enemy>& getEnemies() const
         { return enemies_; }
 
+        bool isLocked() const 
+        { return locked_; }
+
+
         // load a list of levels from a level file.
         static std::vector<std::unique_ptr<Level>> loadLevels(const QString& file);
 
@@ -92,6 +99,7 @@ namespace invaders
         unsigned spawninterval_;
         unsigned enemycount_;
         QString  description_;
+        bool locked_;
     private:
         std::vector<enemy> enemies_;
         std::size_t max_;

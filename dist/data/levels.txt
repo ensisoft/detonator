@@ -15,13 +15,11 @@
 #
 # END
 
-# p.85 numbers from 1 to 10
-
 BEGIN
 description   = Numerals
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+spawnCount    = 2
+spawnInterval = 4
+enemyCount    = 40
 一 yi  10 one / 1 / single
 二 er  10 two / 2
 三 san 10 three / 3
@@ -33,8 +31,6 @@ enemyCount    = 20
 九 jiu 10 nine / 9
 十 shi 10 ten / 10
 END
-
-# p.113 some common characters such as wo, ni, shi, yao
 
 BEGIN
 description   = You and I
@@ -52,7 +48,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description   = Qing Wen
+description   = QingWen...
 spawnCount    = 1
 spawnInterval = 5
 enemyCount    = 20
@@ -83,14 +79,14 @@ END
 
 
 BEGIN
-description = "O le!"
+description = "O'le!"
 spawnCount    = 1
 spawnInterval = 5
 enemyCount    = 20
 了 le   5  modal particle
 回 hui  5  to go back
 來 lai  5  to come / arrive
-他 ta   5  he / him
+他 ta   5  she / he / him / her
 就 jiu  30 at once / right away
 還 hai  30 still
 也 ye   20 also / too
@@ -98,7 +94,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description = What & How
+description   = What & How
 spawnCount    = 1
 spawnInterval = 5
 enemyCount    = 20
@@ -112,3 +108,20 @@ enemyCount    = 20
 怎麼 zenme  40 how? / why?
 什麼 shenme 40 what? / who?
 END
+
+BEGIN
+description   = Shuo Hua
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+大 da   10 big / huge
+買 mai  20 to buy / to purchase
+得 dei  20 to have to / to must
+小 xiao 10 small / tiny
+書 shu  20 book / letter
+再 zai  20 again / once more
+都 dou  20 all / both
+說 shuo 20 to speak / say
+END
+
+

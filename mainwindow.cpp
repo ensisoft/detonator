@@ -36,8 +36,8 @@ MainWindow::MainWindow()
 {
     ui_.setupUi(this);
     QSettings settings("Ensisoft", "Invaders");
-    const auto wwidth  = settings.value("window/width", width()).toInt();
-    const auto wheight = settings.value("window/height", height()).toInt();
+    const auto wwidth  = settings.value("window/width", 1200).toInt();
+    const auto wheight = settings.value("window/height", 700).toInt();
     const auto xpos = settings.value("window/xpos", x()).toInt();
     const auto ypos = settings.value("window/ypos", y()).toInt();
     resize(wwidth, wheight);
