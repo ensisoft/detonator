@@ -1,0 +1,114 @@
+# this is a comment line
+#
+# this file should be stored in UTF-8
+#
+# level format is as follows:
+# BEGIN
+#
+# spawnCount      the number of enemies to spawn on a single game tick
+# spawnInterval   the number of game ticks between spawning enemies
+# enemyCount      the number of enemies 
+# 
+# list of enemies:
+# [chinese Character String] [pinyin kill string] [score] [description]
+#      ....
+#
+# END
+
+# p.85 numbers from 1 to 10
+
+BEGIN
+description   = Numerals
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+一 yi  10 one / 1 / single
+二 er  10 two / 2
+三 san 10 three / 3
+四 si  10 four / 4
+五 wu  10 five / 5
+六 liu 10 six / 6
+七 qi  10 seven / 7
+八 ba  10 eight / 8
+九 jiu 10 nine / 9
+十 shi 10 ten / 10
+END
+
+# p.113 some common characters such as wo, ni, shi, yao
+
+BEGIN
+description   = You and I
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+我 wo  20 I / me / my
+你 ni  20 you
+是 shi 20 is / are / am 
+要 yao 20 to want / to ask
+有 you 20 to have / there is 
+不 bu  15 no / not 
+很 hen 25 quite / very 
+嗎 ma  30 question particle
+END
+
+BEGIN
+description   = Qing Wen
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+的 de    20 possessive particle
+在 zai   10 at / in / exist
+上 shang 10 on top / above / upper
+這 zhe   10 this / these
+那 na    10 that / those / then
+裡 li    10 away / from
+請 qing  30 to invite / please
+問 wen   10 to ask
+END
+
+BEGIN
+description   = Keyi!
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+好 hao   5 good / well
+沒 mei   5 have not / not
+天 tian  5 day
+能 neng  5 to be able to to
+下 xia   5 down / downwards
+中 zhong 5 middle / center
+可 ke    5 can / may 
+以 yi    5 to use 
+END
+
+
+BEGIN
+description = "O le!"
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+了 le   5  modal particle
+回 hui  5  to go back
+來 lai  5  to come / arrive
+他 ta   5  he / him
+就 jiu  30 at once / right away
+還 hai  30 still
+也 ye   20 also / too
+看 kan  20 to see / to look
+END
+
+BEGIN
+description = What & How
+spawnCount    = 1
+spawnInterval = 5
+enemyCount    = 20
+公   gong   5  public
+車   che    5  car / vehicle
+哪   na     5  how / which
+去   qu     5  to go 
+太   tai    5  very / too much
+百   bai    5  hundred / numerous
+人   ren    5  person
+怎麼 zenme  40 how? / why?
+什麼 shenme 40 what? / who?
+END

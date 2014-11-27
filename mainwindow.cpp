@@ -47,16 +47,9 @@ MainWindow::MainWindow()
         this, SLOT(close()));
 
     const auto& inst = QApplication::applicationDirPath();
-    const auto& data = inst + "/data/";
+    const auto& file = inst + "/data/levels.txt";
 
-    QDir dir(data);
-    QStringList filters("level_*.txt");
-    QStringList entries = dir.entryList(filters);
-    for ( const auto& entry : entries)
-    {
-        const auto& file = data + entry;
-        ui_.game->loadLevel(file); 
-    }
+    ui_.game->loadLevels(file); 
 }
 
 

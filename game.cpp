@@ -38,8 +38,7 @@ Game::~Game()
 
 void Game::tick()
 {
-    if (!level_)
-       return;
+    if (!level_) return;
 
     // prune invaders
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
@@ -48,7 +47,11 @@ void Game::tick()
         });
     for (auto it = end; it != std::end(invaders_); ++it)
     {
-        on_invader_victory(*it);
+        const auto& inv = *it;
+        on_invader_victory(inv);
+        score_.points -= std::min(inv.score, score_.points);
+        score_.victor++;
+        score_.pending--;
     }
 
     invaders_.erase(end, std::end(invaders_));
@@ -59,28 +62,38 @@ void Game::tick()
         i.xpos -= 1;
     }
 
-    // spawn invaders
-    const auto spawn_count = level_->spawnCount();
-    const auto spawn_inter = level_->spawnInterval();
-    if (!(tick_ % spawn_inter))
+    const auto spawnCount = level_->spawnCount();
+    const auto spawnInterval = level_->spawnInterval();    
+    const auto enemyCount = level_->enemyCount();
+
+    if (spawned_ == enemyCount)
     {
-        for (auto i=0; i<spawn_count; ++i)
+        // todo: spawn THE BOSS
+
+        if (invaders_.empty())
+            on_level_complete(score_);
+    }
+    else if (spawned_ < enemyCount)
+    {
+        if ((tick_ % spawnInterval) == 0)
         {
-            const auto enemy = level_->spawn();
-            //if (enemy.character == 0)
-                //break;
-            invader inv;
-            inv.killstring = enemy.killstring;
-            inv.string     = enemy.string;
-            inv.score      = enemy.score;            
-            inv.ypos       = std::rand() % height_;
-            inv.xpos       = width_ + i;
-            inv.identity   = identity_++;
-            invaders_.push_back(inv);
-            on_invader_spawn(inv);
+            for (auto i=0; i<spawnCount; ++i)
+            {
+                if (++spawned_ == enemyCount)
+                    break;
+                const auto enemy = level_->spawn();
+                invader inv;
+                inv.killstring = enemy.killstring;
+                inv.string     = enemy.string;
+                inv.score      = enemy.score;            
+                inv.ypos       = std::rand() % height_;
+                inv.xpos       = width_ + i;
+                inv.identity   = identity_++;
+                invaders_.push_back(inv);
+                on_invader_spawn(inv);
+            }
         }
     }
-
     ++tick_;
 }
 
@@ -95,7 +108,9 @@ void Game::fire(const Game::missile& missile)
 
     auto inv = *it;
 
-    score_ += inv.score;
+    score_.points += inv.score;
+    score_.killed++;
+    score_.pending--;
 
     on_invader_kill(*it, missile);
 
@@ -105,9 +120,11 @@ void Game::fire(const Game::missile& missile)
 void Game::play(Level& level)
 {
     invaders_.clear();
-    level_  = &level;
-    tick_   = 0;
-    score_  = 0;
+    level_   = &level;
+    tick_    = 0;
+    spawned_ = 0;
+    score_   = score{0, 0, 0, 0};
+    score_.pending = level.enemyCount();
 }
 
 } // invaders

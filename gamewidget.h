@@ -48,11 +48,11 @@ namespace invaders
         GameWidget(QWidget* parent);
        ~GameWidget();
 
-        // start a new game
-        void startGame();
+        // start a new game. index is the number of the level to play
+        void startGame(unsigned index);
 
         // load level data from the specified file
-        void loadLevel(const QString& file);
+        void loadLevels(const QString& file);
 
     signals:
         void quitGame();
@@ -63,7 +63,7 @@ namespace invaders
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
         bool isPaused() const;
-        void showWelcome();
+        void showMenu();
         void showHelp();
         void quitHelp();
 
@@ -76,16 +76,14 @@ namespace invaders
         class Background;
         class Display;
         class Player;
-        class Debug;
-        class Welcome;
-        class GameOver;
+        class Menu;
         class Help;
 
     private:
         std::unique_ptr<Background> background_;
         std::unique_ptr<Display> display_;
         std::unique_ptr<Player> player_;
-        std::unique_ptr<Welcome> welcome_;
+        std::unique_ptr<Menu> menu_;
         std::unique_ptr<Help> help_;
         std::unique_ptr<Game> game_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        

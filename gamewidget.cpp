@@ -386,8 +386,9 @@ public:
     {}
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
-        const auto score = game_.score();
-        const auto text  = QString("Level %1 Score %2 (Press F1 for help)").arg(1).arg(score);
+        const auto& score = game_.getScore();
+        const auto& text  = QString("Level %1 Score %2 Enemies %3 (Press F1 for help)")
+            .arg(1).arg(score.points).arg(score.pending);
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -399,7 +400,7 @@ public:
         font.setPixelSize(scale.y() / 2);
         painter.setFont(font);
 
-        painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text);
+        painter.drawText(area, Qt::AlignLeft | Qt::AlignVCenter, text);
     }
 private:
     const Game& game_;
@@ -488,10 +489,10 @@ private:
 
 
 // initial greeting and instructions
-class GameWidget::Welcome 
+class GameWidget::Menu
 {
 public:
-    Welcome()
+    Menu(const std::vector<std::unique_ptr<Level>>& levels) : levels_(levels), level_(0)
     {}
 
     void update(quint64 time)
@@ -509,7 +510,12 @@ public:
         font.setPixelSize(unit.y() / 2);        
         painter.setFont(font);
         
-        painter.drawText(area, Qt::AlignCenter,
+        const auto cols = levels_.size() + 2 + levels_.size() - 1;
+        const auto rows = 5;
+        TransformState state(area, cols, rows);
+
+        const auto rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 4));
+        painter.drawText(rect, Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
@@ -517,13 +523,45 @@ public:
             "Esc - Exit          \n"
             "F1 - Help         \n\n"
             "Press Space to play!\n");
+
+
+        QPen selected;
+        selected.setWidth(2);
+        selected.setColor(Qt::darkGreen);
+
+        auto col = 1;
+        auto row = 3;
+        for (auto i=0; i<levels_.size(); ++i)
+        {
+            const auto& level = levels_[i];
+            const auto rect = state.toViewSpaceRect(QPoint(col, row), QPoint(col + 1, row + 1));
+            if (i == level_)
+                painter.setPen(selected);
+            painter.drawRect(rect);
+            painter.setPen(pen);
+            painter.drawText(rect, Qt::AlignCenter, 
+                QString("Level %1\n%2").arg(i+1).arg(level->description()));
+            col += 2;
+        }
     }
+    void keyPress(QKeyEvent* press)
+    {
+        const auto key = press->key();
+        if (key == Qt::Key_Left)
+        {
+            level_ = level_ > 0 ? level_ - 1 : levels_.size() - 1;
+        }
+        else if (key == Qt::Key_Right)
+        {
+            level_ = (level_ + 1) % levels_.size();
+        }
+    }
+
+    std::size_t selectedLevel() const 
+    { return level_; }
 private:
-};
-
-class GameWidget::GameOver
-{
-
+    const std::vector<std::unique_ptr<Level>>& levels_;
+    std::size_t level_;
 };
 
 class GameWidget::Help
@@ -573,7 +611,7 @@ public:
                 .arg(e.help));
         }
 
-        painter.drawText(footer, Qt::AlignCenter, "Press Space to continue");
+        painter.drawText(footer, Qt::AlignCenter, "Press Space to play!");
     }
 
 private:
@@ -593,7 +631,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
         std::unique_ptr<Invader> inv(std::move(it->second));
         std::unique_ptr<Missile> mis(new Missile(m.position, m.string.toUpper()));
-        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 250));
+        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 500));
 
         animations_.push_back(std::move(anim));
         invaders_.erase(it);
@@ -614,8 +652,13 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
         invaders_.erase(inv.identity);
     };
 
+    game_->on_level_complete = [&](const Game::score& score)
+    {
+
+    };
+
     background_.reset(new Background);
-    welcome_.reset(new Welcome);
+    menu_.reset(new Menu(levels_));
     display_.reset(new Display(*game_));    
     player_.reset(new Player);    
 
@@ -623,47 +666,59 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
     startTimer(0);
 
-    tick_delta_ = 0;
-    speed_  = 2;
     timer_.start();
+
+    tick_delta_ = 0;
+    time_stamp_ = 0;
+    speed_ = 2;
 }
 
 GameWidget::~GameWidget()
 {}
 
-void GameWidget::startGame()
+void GameWidget::startGame(unsigned index)
 {
-    help_.reset(new Help(*levels_[0]));
-    welcome_.reset();        
+    // todo: use a deterministic seed or not?
+    std::srand(std::time(nullptr));
 
-    level_ = 0; // start at level 0 (doh)
-    speed_ = 2; // initial speed at 2 units per tick
+    auto& level = levels_[index];
+    level->reset();
 
-    game_->play(*levels_[0]);
-
+    menu_.reset();
+    help_.reset(new Help(*level));
+    game_->play(*level);
+    speed_ = 2; // initial speed at 2 units per tick    
     invaders_.clear();
 }
 
-void GameWidget::loadLevel(const QString& file)
+void GameWidget::loadLevels(const QString& file)
 {
-    qDebug() << "Loading level: " << file;
+    levels_ = Level::loadLevels(file);
 
-    std::unique_ptr<Level> level(new Level);
-    level->load(file);
-    levels_.push_back(std::move(level));
+    qDebug() << "Loaded " << levels_.size() << " levels";
 }
 
 void GameWidget::timerEvent(QTimerEvent* timer)
 {
+    update();
+}
+
+void GameWidget::paintEvent(QPaintEvent* paint)
+{
+    QPainter painter(this);
+    painter.setRenderHints(QPainter::HighQualityAntialiasing);
+
+    TransformState state(rect(), *game_);
+
     // milliseconds
-    const auto time = timer_.elapsed();
-    const auto tick = 1000 / speed_;
-    const auto elap = time - time_stamp_;
+    const auto time  = timer_.elapsed();
+    const auto delta = time - time_stamp_;
+    const auto tick  = 1000.0 / speed_;
 
     if (!isPaused())
     {
-        tick_delta_ += elap;
-        if (tick_delta_ >= tick && game_)
+        tick_delta_ += delta;
+        if (tick_delta_ >= tick)
         {
             TransformState state(rect(), *game_);
 
@@ -684,34 +739,20 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         }
     }
 
-    update();
-
-    time_stamp_ = time;
-}
-
-void GameWidget::paintEvent(QPaintEvent* paint)
-{
-    QPainter painter(this);
-    painter.setRenderHints(QPainter::HighQualityAntialiasing);
-
-    TransformState state(rect(), *game_);
-
-    const auto time  = timer_.elapsed();
-    const auto delta = time - time_stamp_;
-    const auto tick  = 1000.0 / speed_;    
-
     background_->update(delta);
     background_->paint(painter, rect(), state.getScale());
-    if (welcome_)
+    if (menu_)
     {
-        welcome_->update(delta);
-        welcome_->paint(painter, rect(), state.getScale());
+        menu_->update(delta);
+        menu_->paint(painter, rect(), state.getScale());
+        time_stamp_ = time;
         return;
     } 
     else if (help_)
     {
         help_->update(delta);
         help_->paint(painter, rect(), state);
+        time_stamp_ = time;        
         return;
     }
 
@@ -748,6 +789,8 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     top = state.toViewSpace(QPoint(0, rows-1));
     bot = state.toViewSpace(QPoint(cols, rows));
     player_->paint(painter, QRect(top, bot), state);
+
+    time_stamp_ = time;    
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
@@ -759,7 +802,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         if (game_->isRunning())
         {
             game_->quit();
-            showWelcome();
+            showMenu();
         }
         else
         {
@@ -768,8 +811,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     }
     else if (key == Qt::Key_Space)
     {
-        if (welcome_)
-            startGame();
+        if (menu_)
+        {
+            const auto level = menu_->selectedLevel();
+            startGame(level);
+        }
         else if (help_)
             quitHelp();
     }
@@ -778,6 +824,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         if (game_->isRunning())
             showHelp();
     }
+    else if (menu_)
+    {
+        menu_->keyPress(press);
+    }    
     else if (player_)
     {
         player_->keyPress(press, *game_);
@@ -791,9 +841,9 @@ bool GameWidget::isPaused() const
     return !!help_;
 }
 
-void GameWidget::showWelcome()
+void GameWidget::showMenu()
 {
-    welcome_.reset(new Welcome());
+    menu_.reset(new Menu(levels_));
 }
 
 void GameWidget::showHelp()

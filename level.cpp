@@ -30,6 +30,7 @@
 
 #include <stdexcept>
 #include <cstdlib>
+#include <cassert>
 
 #include "level.h"
 
@@ -53,15 +54,31 @@ QString readLine(QTextStream& stream)
 unsigned readInt(QTextStream& stream, const QString& key)
 {
     const auto line = readLine(stream);
-    const auto toks = line.split("=");
+    const auto toks = line.split("=", QString::SkipEmptyParts);
     if (toks.size() != 2)
         throw std::runtime_error("unexpected data");
 
-    if (toks[0] != key)
+    const auto tok = toks[0].trimmed();
+
+    if (tok != key)
         throw std::runtime_error("invalid key");
 
     const auto ret = toks[1].toUInt();
     return ret;
+}
+
+QString readStr(QTextStream& stream, const QString& key)
+{
+    const auto line = readLine(stream);
+    const auto toks = line.split("=", QString::SkipEmptyParts);
+    if (toks.size() != 2)
+        throw std::runtime_error("unexpected data");
+
+    const auto tok = toks[0].trimmed();
+    if (tok != key)
+        throw std::runtime_error("invalid key");
+
+    return toks[1].trimmed();
 }
 
 QString joinTokens(const QStringList& toks, int from)
@@ -80,8 +97,10 @@ QString joinTokens(const QStringList& toks, int from)
 namespace invaders
 {
 
-Level::Level() : spawncount_(0), spawninterval_(0), enemycount_(0), seedvalue_(0)
-{}
+Level::Level() : spawncount_(0), spawninterval_(0), enemycount_(0)
+{
+    reset();
+}
 
 Level::~Level()
 {}
@@ -95,6 +114,7 @@ void Level::load(const QString& file)
     QTextStream stream(&io);
     stream.setCodec("UTF-8");    
 
+    description_   = readStr(stream, "description");
     spawncount_    = readInt(stream, "spawnCount");
     spawninterval_ = readInt(stream, "spawnInterval");
     enemycount_    = readInt(stream, "enemyCount");
@@ -120,9 +140,74 @@ void Level::load(const QString& file)
     qDebug() << "Level enemy count: " << enemycount_;    
 }
 
-Level::enemy Level::spawn()
+void Level::reset()
 {
-    return enemies_[std::rand() % enemies_.size()];
+    max_ = enemies_.size();
+}
+
+Level::enemy Level::spawn() 
+{
+    const auto n = std::rand() % max_;
+    const auto r = enemies_[n];
+    std::swap(enemies_[n], enemies_[max_-1]);
+
+    if (max_ > 1)
+        max_--;
+    else max_ = enemies_.size();
+
+    return r;
+}
+
+std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
+{
+    QFile io(file);
+    if (!io.open(QIODevice::ReadOnly))
+        throw std::runtime_error("failed to load levels");
+
+    QTextStream stream(&io);
+    stream.setCodec("UTF-8");
+
+    std::vector<std::unique_ptr<Level>> ret;
+
+    while (!stream.atEnd())
+    {
+        const auto line = readLine(stream);
+        if (line != "BEGIN")
+            continue;
+
+        std::unique_ptr<Level> next(new Level);
+        next->description_   = readStr(stream, "description");
+        next->spawncount_    = readInt(stream, "spawnCount");
+        next->spawninterval_ = readInt(stream, "spawnInterval");
+        next->enemycount_    = readInt(stream, "enemyCount");
+
+        // read the enemy data
+        bool end = false;
+        while (!stream.atEnd())
+        {
+            const auto line = readLine(stream);
+            if (line == "END")
+            {
+                end = true;
+                break;
+            }
+            const auto toks = line.split(" ", QString::SkipEmptyParts);
+            if (toks.size() < 3)
+                throw std::runtime_error("level data format error");
+
+            Level::enemy enemy;
+            enemy.string     = toks[0];
+            enemy.killstring = toks[1];
+            enemy.score      = toks[2].toInt();
+            enemy.help       = joinTokens(toks, 3);
+            next->enemies_.push_back(enemy);                
+        }
+        if (!end)
+            throw std::runtime_error("no end in sight...");
+
+        ret.push_back(std::move(next));
+    }
+    return ret;
 }
 
 } // invaders

@@ -53,9 +53,17 @@ namespace invaders
             QString string;
         };
 
+        struct score {
+            unsigned points;
+            unsigned killed;
+            unsigned victor;
+            unsigned pending;
+        };
+
         std::function<void (const invader&, const missile& m)> on_invader_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
+        std::function<void (const score&)> on_level_complete;
 
         Game(unsigned width, unsigned heigth);
        ~Game();
@@ -77,10 +85,8 @@ namespace invaders
         unsigned height() const
         { return height_; }
 
-        unsigned highScore() const
-        { return highscore_; }
-
-        unsigned score() const 
+        const 
+        score& getScore() const 
         { return score_; }
 
         const
@@ -96,11 +102,11 @@ namespace invaders
     private:
         std::deque<invader> invaders_;
         std::size_t tick_;
+        std::size_t spawned_;
         unsigned width_;
         unsigned height_;
-        unsigned score_;
         unsigned identity_;
-        unsigned highscore_;
+        score score_;
     private:
         Level* level_;
     private:

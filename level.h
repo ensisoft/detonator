@@ -28,23 +28,38 @@
 #include "warnpop.h"
 
 #include <cstddef>
+#include <vector>
+#include <memory>
 
 namespace invaders
 {
+    // Level is a factory for spawning enemies and configuring the game 
     class Level 
     {
     public:
         struct enemy {
+
+            // the points you get for killing this bastard
             unsigned score;
+
+            // enemy representation string.
             QString  string;
+
+            // the correct killstring to kill the enemy
             QString  killstring;
+
+            // help/description of the enemy 
+            // (word definition)
             QString  help;
         };
 
         Level();
        ~Level();
 
+        // load data from the a single file
         void load(const QString& file);
+
+        void reset();
 
         // spawn a new enemy
         enemy spawn();
@@ -62,19 +77,23 @@ namespace invaders
         unsigned spawnInterval() const 
         { return spawninterval_; }
 
-        unsigned seed() const
-        { return seedvalue_; }
+        QString description() const 
+        { return description_; }
 
+        // get a list of available enemies in this level.
         const std::vector<enemy>& getEnemies() const
         { return enemies_; }
+
+        // load a list of levels from a level file.
+        static std::vector<std::unique_ptr<Level>> loadLevels(const QString& file);
 
     private:
         unsigned spawncount_;
         unsigned spawninterval_;
         unsigned enemycount_;
-        unsigned seedvalue_;
+        QString  description_;
     private:
         std::vector<enemy> enemies_;
-
+        std::size_t max_;
     };
 } // invaders
