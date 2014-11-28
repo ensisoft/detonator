@@ -77,6 +77,8 @@ namespace invaders
         // start playing a level
         void play(Level& level);
 
+        void quitLevel();
+
         // get game space width
         unsigned width() const 
         { return width_; }
@@ -96,8 +98,9 @@ namespace invaders
         bool isRunning() const 
         { return level_ != nullptr; }
 
-        void quit()
-        { level_ = nullptr; }
+
+    private:
+        unsigned killScore(unsigned points) const;
 
     private:
         std::deque<invader> invaders_;

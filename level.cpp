@@ -97,7 +97,7 @@ QString joinTokens(const QStringList& toks, int from)
 namespace invaders
 {
 
-Level::Level() : spawncount_(0), spawninterval_(0), enemycount_(0), locked_(true)
+Level::Level() : spawncount_(0), spawninterval_(0), enemycount_(0)
 {
     reset();
 }

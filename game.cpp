@@ -108,7 +108,7 @@ void Game::fire(const Game::missile& missile)
 
     auto inv = *it;
 
-    score_.points += inv.score;
+    score_.points += killScore(inv.score);
     score_.killed++;
     score_.pending--;
 
@@ -125,6 +125,18 @@ void Game::play(Level& level)
     spawned_ = 0;
     score_   = score{0, 0, 0, 0};
     score_.pending = level.enemyCount();
+}
+
+void Game::quitLevel()
+{
+    invaders_.clear();
+    level_ = nullptr;
+    score_ = score{0, 0, 0, 0};
+}
+
+unsigned Game::killScore(unsigned points) const 
+{
+    return points;
 }
 
 } // invaders

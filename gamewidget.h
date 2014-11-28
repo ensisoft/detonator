@@ -28,6 +28,7 @@
 #  include <QObject>
 #  include <QTimer>
 #  include <QElapsedTimer>
+#  include <QString>
 #include "warnpop.h"
 
 #include <list>
@@ -45,16 +46,27 @@ namespace invaders
         Q_OBJECT
 
     public:
+        struct LevelInfo {
+            QString name;
+            unsigned highScore;
+            bool locked;
+        };
+
         GameWidget(QWidget* parent);
        ~GameWidget();
 
         // start a new game. index is the number of the level to play
         void startGame(unsigned index);
 
-        // load level data from the specified file
+        // load level data from the specified data file
         void loadLevels(const QString& file);
 
+        // unlock the level identified by it's name
         void unlockLevel(const QString& name);
+
+        void setLevelInfo(const LevelInfo& info);
+
+        bool getLevelInfo(LevelInfo& info, unsigned index) const;
 
     signals:
         void quitGame();
@@ -68,6 +80,7 @@ namespace invaders
         void showMenu();
         void showHelp();
         void quitHelp();
+        void quitScore();
 
     private:
         class Animation;
@@ -76,6 +89,7 @@ namespace invaders
         class Invader;
         class Missile;
         class Background;
+        class Scoreboard;        
         class Display;
         class Player;
         class Menu;
@@ -83,6 +97,7 @@ namespace invaders
 
     private:
         std::unique_ptr<Background> background_;
+        std::unique_ptr<Scoreboard> score_;
         std::unique_ptr<Display> display_;
         std::unique_ptr<Player> player_;
         std::unique_ptr<Menu> menu_;
@@ -90,6 +105,7 @@ namespace invaders
         std::unique_ptr<Game> game_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
         std::vector<std::unique_ptr<Level>> levels_;
+        std::vector<LevelInfo> info_;
         std::list<std::unique_ptr<Animation>> animations_;
     private:
         QElapsedTimer timer_;

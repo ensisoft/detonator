@@ -407,6 +407,22 @@ private:
     QPixmap texture_;
 };
 
+class GameWidget::Scoreboard 
+{
+public:
+    Scoreboard(const Game::score& score) : score_(score)
+    {}
+
+    void paint(QPainter& painter, const QRect& area, const QPoint& scale)
+    {
+
+    }
+
+
+private:
+    Game::score score_;
+};
+
 // Heads Up Display, display scoreboards etc.
 class GameWidget::Display
 {
@@ -526,7 +542,9 @@ private:
 class GameWidget::Menu
 {
 public:
-    Menu(const std::vector<std::unique_ptr<Level>>& levels) : levels_(levels), level_(0)
+    Menu(const std::vector<std::unique_ptr<Level>>& levels,
+         const std::vector<GameWidget::LevelInfo>& infos)
+    : levels_(levels), infos_(infos), level_(0)
     {}
 
     void update(quint64 time)
@@ -548,7 +566,7 @@ public:
         const auto rows = 5;
         TransformState state(area, cols, rows);
 
-        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 4));
+        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
         painter.drawText(header, Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
@@ -567,7 +585,7 @@ public:
         locked.setWidth(2);
         locked.setColor(Qt::darkRed);
 
-        font.setPixelSize(unit.y() / 2);
+        font.setPixelSize(unit.y() / 2.5);
         painter.setFont(font);
 
         const auto prev = level_ > 0 ? level_ - 1 : levels_.size() - 1;
@@ -580,7 +598,7 @@ public:
         rect = state.toViewSpaceRect(QPoint(1, 3), QPoint(2, 4));
         drawLevel(painter, rect, *left, prev);
 
-        if (mid->isLocked())
+        if (infos_[level_].locked)
             painter.setPen(locked);
         else painter.setPen(selected);
 
@@ -611,9 +629,14 @@ public:
 private:
     void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
     {
+        const auto& info = infos_[index];
+
         QString locked;
-        if (level.isLocked())
+        if (info.locked)
             locked = "Locked";
+        else if (info.highScore)
+            locked = QString("%1 points").arg(info.highScore);
+        else locked = "Play!";
 
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter,
@@ -622,6 +645,7 @@ private:
 
 private:
     const std::vector<std::unique_ptr<Level>>& levels_;
+    const std::vector<LevelInfo>& infos_;
     std::size_t level_;
 };
 
@@ -715,11 +739,14 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     game_->on_level_complete = [&](const Game::score& score)
     {
+        qDebug() << "Level complete!";
 
+        game_->quitLevel();
+        score_.reset(new Scoreboard(score));
     };
 
     background_.reset(new Background);
-    menu_.reset(new Menu(levels_));
+    menu_.reset(new Menu(levels_, info_));
     display_.reset(new Display(*game_));    
     player_.reset(new Player);    
 
@@ -755,18 +782,48 @@ void GameWidget::startGame(unsigned index)
 void GameWidget::loadLevels(const QString& file)
 {
     levels_ = Level::loadLevels(file);
-    levels_[0]->unlock();
+
+    for (const auto& level : levels_)
+    {
+        LevelInfo info;
+        info.highScore = 0;
+        info.name      = level->description();
+        info.locked    = true;
+        info_.push_back(info);
+    }
+    info_[0].locked = false;
 }
 
 void GameWidget::unlockLevel(const QString& name)
 {
-    for (auto& l : levels_)
+    for (auto& info : info_)
     {
-        if (l->description() != name)
+        if (info.name != name)
             continue;
-        l->unlock();
+
+        info.locked = false;
         return;
     }
+}
+
+void GameWidget::setLevelInfo(const LevelInfo& info)
+{
+    for (auto& i : info_)
+    {
+        if (i.name != info.name)
+            continue;
+
+        i = info;
+        return;
+    }
+}
+
+bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const 
+{
+    if (index >= levels_.size())
+        return false;
+    info = info_[index];
+    return true;
 }
 
 void GameWidget::timerEvent(QTimerEvent* timer)
@@ -862,19 +919,25 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // viewport size.
     const auto cols = game_->width();
     const auto rows = game_->height() + 2;
+    const auto rect = this->rect();
 
-    TransformState state(rect(), cols, rows);
+    TransformState state(rect, cols, rows);
 
-    background_->paint(painter, rect(), state.getScale());
+    background_->paint(painter, rect, state.getScale());
 
     if (menu_)
     {
-        menu_->paint(painter, rect(), state.getScale());
+        menu_->paint(painter, rect, state.getScale());
         return;
     } 
     else if (help_)
     {
-        help_->paint(painter, rect(), state.getScale());
+        help_->paint(painter, rect, state.getScale());
+        return;
+    }
+    else if (score_)
+    {
+        score_->paint(painter, rect, state.getScale());
         return;
     }
 
@@ -910,10 +973,14 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (game_->isRunning())
         {
-            game_->quit();
+            game_->quitLevel();
             showMenu();
         }
-        else
+        else if (score_)
+        {
+            showMenu();
+        }
+        else if (menu_)
         {
             emit quitGame();
         }
@@ -923,11 +990,18 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         if (menu_)
         {
             const auto level = menu_->selectedLevel();
-            if (!levels_[level]->isLocked())
+            if (!info_[level].locked)
                 startGame(level);
         }
+        else if (score_)
+        {
+            quitScore();
+            showMenu();
+        }
         else if (help_)
+        {
             quitHelp();
+        }
     }
     else if (key == Qt::Key_F1)
     {
@@ -953,7 +1027,7 @@ bool GameWidget::isPaused() const
 
 void GameWidget::showMenu()
 {
-    menu_.reset(new Menu(levels_));
+    menu_.reset(new Menu(levels_, info_));
 }
 
 void GameWidget::showHelp()
@@ -964,6 +1038,11 @@ void GameWidget::showHelp()
 void GameWidget::quitHelp()
 {
     help_.reset();
+}
+
+void GameWidget::quitScore()
+{
+    score_.reset();
 }
 
 } // invaders

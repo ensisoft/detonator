@@ -50,6 +50,17 @@ MainWindow::MainWindow()
     const auto& file = inst + "/data/levels.txt";
 
     ui_.game->loadLevels(file); 
+
+    QStringList levels = settings.value("game/levels").toStringList();
+    for (int i=0; i<levels.size(); ++i)
+    {
+        const auto name = levels[i];
+        GameWidget::LevelInfo info;
+        info.name = name;
+        info.highScore = settings.value(name + "/highscore").toUInt();
+        info.locked = settings.value(name + "/locked").toBool();
+        ui_.game->setLevelInfo(info);
+    }
 }
 
 
@@ -60,6 +71,20 @@ MainWindow::~MainWindow()
     settings.setValue("window/height", height());
     settings.setValue("window/xpos", x());
     settings.setValue("window/ypos", y());
+
+    QStringList levels;
+    for (unsigned i=0; ; ++i)
+    {
+        GameWidget::LevelInfo info;
+        if (!ui_.game->getLevelInfo(info, i))
+            break;
+
+        levels << info.name;
+        settings.setValue(info.name + "/highscore", info.highScore);
+        settings.setValue(info.name + "/locked", info.locked);
+    }
+    settings.setValue("game/levels", levels);
+
 }
 
 } // invaders
