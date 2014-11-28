@@ -73,7 +73,10 @@ void Game::tick()
         // todo: spawn THE BOSS
 
         if (invaders_.empty())
+        {
             on_level_complete(score_);
+            quitLevel();
+        }
     }
     else if (spawned_ < enemyCount)
     {
@@ -125,7 +128,9 @@ void Game::play(Level* level, Game::setup setup)
     level_   = level;
     tick_    = 0;
     spawned_ = 0;
-    score_   = score{0, 0, 0, 0};
+    score_.killed  = 0;
+    score_.points  = 0;
+    score_.victor  = 0;
     score_.pending = setup.numEnemies;
     setup_ = setup;
 }

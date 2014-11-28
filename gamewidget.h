@@ -93,7 +93,9 @@ namespace invaders
         void showMenu();
         void showHelp();
         void quitHelp();
+        void quitMenu();
         void quitScore();
+        void quitLevel();
 
     private:
         class Animation;

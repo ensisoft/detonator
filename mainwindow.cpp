@@ -111,6 +111,7 @@ void MainWindow::loadProfile(GameWidget::Profile profile)
     qDebug() << "Speed:" << profile.speed;
     qDebug() << "spawnCount:" << profile.spawnCount;
     qDebug() << "spawnInterval:" << profile.spawnInterval;
+    qDebug() << "enemyCount: " << profile.numEnemies;
 }
 
 } // invaders

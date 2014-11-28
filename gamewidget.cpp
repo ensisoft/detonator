@@ -410,17 +410,36 @@ private:
 class GameWidget::Scoreboard 
 {
 public:
-    Scoreboard(const Game::score& score) : score_(score)
-    {}
+    Scoreboard(unsigned finalScore, bool isHighScore, int unlockedLevel) 
+    {
+        text_.append("Level complete!\n");
+        if (isHighScore)
+            text_.append("New high score!\n");
+
+        text_.append(QString("You scored %1 points\n\n").arg(finalScore));
+
+        if (unlockedLevel)
+            text_.append(QString("Level %1 unlocked!").arg(unlockedLevel));
+
+        text_.append("Press Space to continue");
+    }
 
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkGray);
 
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(scale.y());
+
+        painter.setPen(pen);
+        painter.setFont(font);
+        painter.drawText(area, Qt::AlignCenter, text_);
     }
-
-
 private:
-    Game::score score_;
+    QString text_;
 };
 
 // Heads Up Display, display scoreboards etc.
@@ -756,10 +775,15 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
     game_->on_level_complete = [&](const Game::score& score)
     {
-        qDebug() << "Level complete!";
+        auto& level   = info_[level_];
+        auto& profile = profiles_[profile_];
+        
+        const auto bonus   = profile.speed;
+        const auto final   = bonus * 10 * score.points;
+        const bool hiscore = final > level.highScore;
+        level.highScore = std::max(level.highScore, (unsigned)final);
 
-        game_->quitLevel();
-        score_.reset(new Scoreboard(score));
+        score_.reset(new Scoreboard(final, hiscore, 0));
     };
 
     background_.reset(new Background);
@@ -792,21 +816,19 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     level->reset();
     player_->reset();
     display_->setLevel(levelIndex + 1);
-
-    menu_.reset();
-    help_.reset(new Help(*level));
+    invaders_.clear();    
 
     Game::setup setup;
     setup.numEnemies    = profile.numEnemies;
     setup.spawnCount    = profile.spawnCount;
     setup.spawnInterval = profile.spawnInterval;
-
     game_->play(levels_[levelIndex].get(), setup);
-
-    invaders_.clear();
 
     level_   = levelIndex;
     profile_ = profileIndex;
+
+    quitMenu();
+    showHelp();
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -1007,27 +1029,18 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
     if (key == Qt::Key_Escape)
     {
-        if (game_->isRunning())
-        {
-            if (help_)
-            {
-                quitHelp();
-            }
-            else
-            {
-                game_->quitLevel();
-                showMenu();
-            }
-        }
-        else if (score_)
-        {
-            quitScore();
-            showMenu();
-        }
-        else if (menu_)
+        if (menu_)
         {
             emit quitGame();
+            return;
         }
+        if (score_)
+            quitScore();
+        if (help_)
+            quitHelp();
+
+        quitLevel();
+        showMenu();        
     }
     else if (key == Qt::Key_Space)
     {
@@ -1085,9 +1098,24 @@ void GameWidget::quitHelp()
     help_.reset();
 }
 
+void GameWidget::quitMenu()
+{
+    menu_.reset();
+}
+
 void GameWidget::quitScore()
 {
     score_.reset();
+}
+
+void GameWidget::quitLevel()
+{
+    if (game_->isRunning())
+    {
+        game_->quitLevel();
+        invaders_.clear();
+        animations_.clear();
+    }
 }
 
 } // invaders
