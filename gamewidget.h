@@ -46,17 +46,28 @@ namespace invaders
         Q_OBJECT
 
     public:
+        // Level info for persisting level data
         struct LevelInfo {
             QString name;
             unsigned highScore;
             bool locked;
         };
 
+        // game profile settings, for example "easy", "medium" etc.
+        struct Profile {
+            QString  name;
+            float speed;
+            unsigned spawnCount;
+            unsigned spawnInterval;
+            unsigned numEnemies;
+        };
+
         GameWidget(QWidget* parent);
        ~GameWidget();
 
         // start a new game. index is the number of the level to play
-        void startGame(unsigned index);
+        // and profile is the index of the difficulty profile to play
+        void startGame(unsigned level, unsigned profile);
 
         // load level data from the specified data file
         void loadLevels(const QString& file);
@@ -67,6 +78,8 @@ namespace invaders
         void setLevelInfo(const LevelInfo& info);
 
         bool getLevelInfo(LevelInfo& info, unsigned index) const;
+
+        void setProfile(const Profile& profile);
 
     signals:
         void quitGame();
@@ -106,13 +119,14 @@ namespace invaders
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
         std::vector<std::unique_ptr<Level>> levels_;
         std::vector<LevelInfo> info_;
+        std::vector<Profile> profiles_;
         std::list<std::unique_ptr<Animation>> animations_;
+        unsigned level_;
+        unsigned profile_;
     private:
         QElapsedTimer timer_;
         quint64 tick_delta_;
         quint64 time_stamp_;
-        unsigned speed_;
-        unsigned level_;
     };
 
 } // invaders

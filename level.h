@@ -64,21 +64,8 @@ namespace invaders
         // spawn a new enemy
         enemy spawn();
 
-        // return the number of enemies to spawn per one spawn
-        unsigned spawnCount() const
-        { return spawncount_; }
-
-        // return the total number of enemies this level has
-        unsigned enemyCount() const 
-        { return enemycount_; }
-
-        // return the interval between spawning new enemies
-        // the interval is expressed in game ticks
-        unsigned spawnInterval() const 
-        { return spawninterval_; }
-
-        QString description() const 
-        { return description_; }
+        QString name() const 
+        { return name_; }
 
         // get a list of available enemies in this level.
         const std::vector<enemy>& getEnemies() const
@@ -88,11 +75,7 @@ namespace invaders
         static std::vector<std::unique_ptr<Level>> loadLevels(const QString& file);
 
     private:
-        unsigned spawncount_;
-        unsigned spawninterval_;
-        unsigned enemycount_;
-        QString  description_;
-    private:
+        QString  name_;
         std::vector<enemy> enemies_;
         std::size_t max_;
     };

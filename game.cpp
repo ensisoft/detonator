@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include "game.h"
 #include "level.h"
 
@@ -38,7 +39,8 @@ Game::~Game()
 
 void Game::tick()
 {
-    if (!level_) return;
+    if (!level_)
+        return;
 
     // prune invaders
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
@@ -62,9 +64,9 @@ void Game::tick()
         i.xpos -= 1;
     }
 
-    const auto spawnCount = level_->spawnCount();
-    const auto spawnInterval = level_->spawnInterval();    
-    const auto enemyCount = level_->enemyCount();
+    const auto spawnCount    = setup_.spawnCount;
+    const auto spawnInterval = setup_.spawnInterval;    
+    const auto enemyCount    = setup_.numEnemies;
 
     if (spawned_ == enemyCount)
     {
@@ -117,21 +119,23 @@ void Game::fire(const Game::missile& missile)
     invaders_.erase(it);
 }
 
-void Game::play(Level& level)
+void Game::play(Level* level, Game::setup setup)
 {
     invaders_.clear();
-    level_   = &level;
+    level_   = level;
     tick_    = 0;
     spawned_ = 0;
     score_   = score{0, 0, 0, 0};
-    score_.pending = level.enemyCount();
+    score_.pending = setup.numEnemies;
+    setup_ = setup;
 }
 
 void Game::quitLevel()
 {
     invaders_.clear();
     level_ = nullptr;
-    score_ = score{0, 0, 0, 0};
+    std::memset(&score_, 0, sizeof(score_));
+    std::memset(&setup_, 0, sizeof(setup_));
 }
 
 unsigned Game::killScore(unsigned points) const 

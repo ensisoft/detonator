@@ -25,6 +25,7 @@
 #  include <QSettings>
 #  include <QDir>
 #  include <QStringList>
+#  include <QtDebug>
 #include "warnpop.h"
 
 #include "mainwindow.h"
@@ -61,6 +62,14 @@ MainWindow::MainWindow()
         info.locked = settings.value(name + "/locked").toBool();
         ui_.game->setLevelInfo(info);
     }
+
+    const GameWidget::Profile EASY {"Easy", 2.0f, 1, 5, 20};
+    const GameWidget::Profile MEDIUM {"Medium", 2.5f, 2, 4, 30};
+    const GameWidget::Profile CHINESE {"Chinese", 3.5f, 2, 3, 30};
+
+    loadProfile(EASY);
+    loadProfile(MEDIUM);
+    loadProfile(CHINESE);
 }
 
 
@@ -85,6 +94,23 @@ MainWindow::~MainWindow()
     }
     settings.setValue("game/levels", levels);
 
+}
+
+void MainWindow::loadProfile(GameWidget::Profile profile)
+{
+    QSettings settings("Ensisoft", "Invaders");
+    QString name = profile.name;
+    profile.speed = settings.value(name + "/speed", profile.speed).toFloat();
+    profile.spawnCount = settings.value(name + "/spawnCount", profile.spawnCount).toUInt();
+    profile.spawnInterval = settings.value(name + "/spawnInterval", profile.spawnInterval).toUInt();
+    profile.numEnemies = settings.value(name + "/enemyCount", profile.numEnemies).toUInt();
+
+    ui_.game->setProfile(profile);
+
+    qDebug() << "Game Profile:" << profile.name;
+    qDebug() << "Speed:" << profile.speed;
+    qDebug() << "spawnCount:" << profile.spawnCount;
+    qDebug() << "spawnInterval:" << profile.spawnInterval;
 }
 
 } // invaders

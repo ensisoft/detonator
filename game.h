@@ -60,6 +60,12 @@ namespace invaders
             unsigned pending;
         };
 
+        struct setup {
+            unsigned numEnemies;
+            unsigned spawnCount;
+            unsigned spawnInterval;
+        };
+
         std::function<void (const invader&, const missile& m)> on_invader_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
@@ -75,7 +81,7 @@ namespace invaders
         void fire(const missile& m);
 
         // start playing a level
-        void play(Level& level);
+        void play(Level* level, Game::setup setup);
 
         void quitLevel();
 
@@ -104,15 +110,14 @@ namespace invaders
 
     private:
         std::deque<invader> invaders_;
-        std::size_t tick_;
-        std::size_t spawned_;
+        unsigned tick_;
+        unsigned spawned_;
         unsigned width_;
         unsigned height_;
         unsigned identity_;
         score score_;
-    private:
+        setup setup_;
         Level* level_;
-    private:
     };
 
 } // invaders

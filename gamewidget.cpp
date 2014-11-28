@@ -427,13 +427,13 @@ private:
 class GameWidget::Display
 {
 public:
-    Display(const Game& game) : game_(game)
+    Display(const Game& game) : game_(game), level_(0)
     {}
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
         const auto& score = game_.getScore();
         const auto& text  = QString("Level %1 Score %2 Enemies %3 (Press F1 for help)")
-            .arg(1).arg(score.points).arg(score.pending);
+            .arg(level_).arg(score.points).arg(score.pending);
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -447,8 +447,12 @@ public:
 
         painter.drawText(area, Qt::AlignLeft | Qt::AlignVCenter, text);
     }
+    void setLevel(unsigned number)
+    { level_ = number; }
+
 private:
     const Game& game_;
+    unsigned level_;
 };
 
 // player representation on the screen
@@ -543,8 +547,9 @@ class GameWidget::Menu
 {
 public:
     Menu(const std::vector<std::unique_ptr<Level>>& levels,
-         const std::vector<GameWidget::LevelInfo>& infos)
-    : levels_(levels), infos_(infos), level_(0)
+         const std::vector<GameWidget::LevelInfo>& infos,
+         const std::vector<GameWidget::Profile>& profiles)
+    : levels_(levels), infos_(infos), profiles_(profiles), level_(0), profile_(0)
     {}
 
     void update(quint64 time)
@@ -566,20 +571,28 @@ public:
         const auto rows = 5;
         TransformState state(area, cols, rows);
 
-        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
-        painter.drawText(header, Qt::AlignCenter,
+        QRect rect;
+
+        rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
+        painter.drawText(rect, Qt::AlignCenter,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
-            "Enter - Fire        \n"
-            "Esc - Exit          \n"
-            "F1 - Help         \n\n"
-            "Press Space to play!\n");
+            "Enter - Fire\n"
+            "Esc - Exit\n"
+            "F1 - Help\n\n"
+            "Difficulty\n\n"
+            "Easy  Medium  Chinese");
 
+        rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+        painter.drawText(rect, Qt::AlignCenter,
+            "Press Space to play!\n");
 
         QPen selected;
         selected.setWidth(2);
         selected.setColor(Qt::darkGreen);
+
+        //rect = state.toViewSpace(QPoint(2, 3), QPoint(3, 3));
 
         QPen locked;
         locked.setWidth(2);
@@ -594,7 +607,6 @@ public:
         const auto& mid   = levels_[level_];
         const auto& right = levels_[next];
 
-        QRect rect;
         rect = state.toViewSpaceRect(QPoint(1, 3), QPoint(2, 4));
         drawLevel(painter, rect, *left, prev);
 
@@ -623,8 +635,11 @@ public:
         }
     }
 
-    std::size_t selectedLevel() const 
+    unsigned selectedLevel() const 
     { return level_; }
+
+    unsigned selectedProfile() const 
+    { return profile_; }
 
 private:
     void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
@@ -640,13 +655,15 @@ private:
 
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter,
-            QString("Level %1\n%2\n%3").arg(index+1).arg(level.description()).arg(locked));
+            QString("Level %1\n%2\n%3").arg(index+1).arg(level.name()).arg(locked));
     }
 
 private:
     const std::vector<std::unique_ptr<Level>>& levels_;
     const std::vector<LevelInfo>& infos_;
-    std::size_t level_;
+    const std::vector<Profile>& profiles_;
+    unsigned level_;
+    unsigned profile_;
 };
 
 class GameWidget::Help
@@ -702,7 +719,7 @@ private:
 };
 
 
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
+GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0), tick_delta_(0), time_stamp_(0)
 {
     QFontDatabase::addApplicationFont(":/fonts/ARCADE.TTF");
 
@@ -746,7 +763,6 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     };
 
     background_.reset(new Background);
-    menu_.reset(new Menu(levels_, info_));
     display_.reset(new Display(*game_));    
     player_.reset(new Player);    
 
@@ -755,28 +771,42 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     startTimer(0);
 
     timer_.start();
-
-    tick_delta_ = 0;
-    time_stamp_ = 0;
-    speed_ = 2;
+    showMenu();
 }
 
 GameWidget::~GameWidget()
 {}
 
-void GameWidget::startGame(unsigned index)
+void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
 {
+    Q_ASSERT(levelIndex < levels_.size());
+    Q_ASSERT(profileIndex < profiles_.size());
+
+    const auto& level   = levels_[levelIndex];
+    const auto& profile = profiles_[profileIndex];
+    qDebug() << "Start game: " << level->name() << profile.name;
+
     // todo: use a deterministic seed or not?
     std::srand(std::time(nullptr));
 
-    auto& level = levels_[index];
     level->reset();
+    player_->reset();
+    display_->setLevel(levelIndex + 1);
 
     menu_.reset();
     help_.reset(new Help(*level));
-    game_->play(*level);
-    speed_ = 2; // initial speed at 2 units per tick    
+
+    Game::setup setup;
+    setup.numEnemies    = profile.numEnemies;
+    setup.spawnCount    = profile.spawnCount;
+    setup.spawnInterval = profile.spawnInterval;
+
+    game_->play(levels_[levelIndex].get(), setup);
+
     invaders_.clear();
+
+    level_   = levelIndex;
+    profile_ = profileIndex;
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -787,7 +817,7 @@ void GameWidget::loadLevels(const QString& file)
     {
         LevelInfo info;
         info.highScore = 0;
-        info.name      = level->description();
+        info.name      = level->name();
         info.locked    = true;
         info_.push_back(info);
     }
@@ -826,6 +856,12 @@ bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const
     return true;
 }
 
+void GameWidget::setProfile(const Profile& profile)
+{
+    profiles_.push_back(profile);
+}
+
+
 void GameWidget::timerEvent(QTimerEvent* timer)
 {
     // we divide the widget's client area into a equal sized cells
@@ -842,7 +878,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     // milliseconds
     const auto time  = timer_.elapsed();
     const auto delta = time - time_stamp_;
-    const auto tick  = 1000.0 / speed_;
+    const auto tick  = 1000.0 / profiles_[profile_].speed;
 
     if (!isPaused())
     {
@@ -973,11 +1009,19 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (game_->isRunning())
         {
-            game_->quitLevel();
-            showMenu();
+            if (help_)
+            {
+                quitHelp();
+            }
+            else
+            {
+                game_->quitLevel();
+                showMenu();
+            }
         }
         else if (score_)
         {
+            quitScore();
             showMenu();
         }
         else if (menu_)
@@ -989,9 +1033,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (menu_)
         {
-            const auto level = menu_->selectedLevel();
+            const auto level   = menu_->selectedLevel();
+            const auto profile = menu_->selectedProfile();
             if (!info_[level].locked)
-                startGame(level);
+                startGame(level, profile);
         }
         else if (score_)
         {
@@ -1027,7 +1072,7 @@ bool GameWidget::isPaused() const
 
 void GameWidget::showMenu()
 {
-    menu_.reset(new Menu(levels_, info_));
+    menu_.reset(new Menu(levels_, info_, profiles_));
 }
 
 void GameWidget::showHelp()

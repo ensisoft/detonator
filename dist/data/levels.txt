@@ -4,22 +4,15 @@
 #
 # level format is as follows:
 # BEGIN
-#
-# spawnCount      the number of enemies to spawn on a single game tick
-# spawnInterval   the number of game ticks between spawning enemies
-# enemyCount      the number of enemies 
-# 
+# name of the level
 # list of enemies:
-# [chinese Character String] [pinyin kill string] [score] [description]
-#      ....
+# [chinese Character String] [pinyin kill string] [score] [help] 
+#     ....
 #
 # END
 
 BEGIN
-description   = Numerals
-spawnCount    = 2
-spawnInterval = 4
-enemyCount    = 40
+Numerals
 一 yi  10 one / 1 / single
 二 er  10 two / 2
 三 san 10 three / 3
@@ -33,10 +26,7 @@ enemyCount    = 40
 END
 
 BEGIN
-description   = You and I
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+You and I
 我 wo  20 I / me / my
 你 ni  20 you
 是 shi 20 is / are / am 
@@ -48,10 +38,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description   = QingWen...
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+QingWen...
 的 de    20 possessive particle
 在 zai   10 at / in / exist
 上 shang 10 on top / above / upper
@@ -63,10 +50,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description   = Keyi!
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+Keyi!
 好 hao   5 good / well
 沒 mei   5 have not / not
 天 tian  5 day
@@ -79,10 +63,7 @@ END
 
 
 BEGIN
-description = "O'le!"
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+O'le!
 了 le   5  modal particle
 回 hui  5  to go back
 來 lai  5  to come / arrive
@@ -94,10 +75,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description   = What & How
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+What & How
 公   gong   5  public
 車   che    5  car / vehicle
 哪   na     5  how / which
@@ -110,10 +88,7 @@ enemyCount    = 20
 END
 
 BEGIN
-description   = Shuo Hua
-spawnCount    = 1
-spawnInterval = 5
-enemyCount    = 20
+Shuo Hua
 大 da   10 big / huge
 買 mai  20 to buy / to purchase
 得 dei  20 to have to / to must
@@ -123,5 +98,4 @@ enemyCount    = 20
 都 dou  20 all / both
 說 shuo 20 to speak / say
 END
-
 

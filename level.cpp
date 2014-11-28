@@ -97,7 +97,7 @@ QString joinTokens(const QStringList& toks, int from)
 namespace invaders
 {
 
-Level::Level() : spawncount_(0), spawninterval_(0), enemycount_(0)
+Level::Level()
 {
     reset();
 }
@@ -114,15 +114,18 @@ void Level::load(const QString& file)
     QTextStream stream(&io);
     stream.setCodec("UTF-8");    
 
-    description_   = readStr(stream, "description");
-    spawncount_    = readInt(stream, "spawnCount");
-    spawninterval_ = readInt(stream, "spawnInterval");
-    enemycount_    = readInt(stream, "enemyCount");
+    const auto beg = readLine(stream);
+    if (beg != "BEGIN")
+        throw std::runtime_error("no level begin was found");
+
+    name_ = readLine(stream);
 
     // read the enemy data
     while (!stream.atEnd())
     {
         const auto line = readLine(stream);
+        if (line == "END")
+            break;
         const auto toks = line.split(" ", QString::SkipEmptyParts);
         if (toks.size() < 3)
             throw std::runtime_error("level data format error");
@@ -134,10 +137,6 @@ void Level::load(const QString& file)
         enemy.help       = joinTokens(toks, 3);
         enemies_.push_back(enemy);
     }
-
-    qDebug() << "Level spawn count: " << spawncount_;
-    qDebug() << "Level spawn interval: " << spawninterval_;
-    qDebug() << "Level enemy count: " << enemycount_;    
 }
 
 void Level::reset()
@@ -176,10 +175,7 @@ std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
             continue;
 
         std::unique_ptr<Level> next(new Level);
-        next->description_   = readStr(stream, "description");
-        next->spawncount_    = readInt(stream, "spawnCount");
-        next->spawninterval_ = readInt(stream, "spawnInterval");
-        next->enemycount_    = readInt(stream, "enemyCount");
+        next->name_ = readLine(stream);
 
         // read the enemy data
         bool end = false;

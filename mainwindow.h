@@ -29,6 +29,8 @@
 #  include "ui_mainwindow.h"
 #include "warnpop.h"
 
+#include "gamewidget.h"
+
 namespace invaders
 {
     class MainWindow : public QMainWindow
@@ -39,6 +41,8 @@ namespace invaders
         MainWindow();
        ~MainWindow();
 
+    private:
+        void loadProfile(GameWidget::Profile profile);
     private:
 
         Ui::MainWindow ui_;
