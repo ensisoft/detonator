@@ -75,11 +75,20 @@ namespace invaders
         // unlock the level identified by it's name
         void unlockLevel(const QString& name);
 
+        // restore previously stored level info 
         void setLevelInfo(const LevelInfo& info);
 
+        // retrieve the lavel info for the level at index.
+        // returns true when index is a valid index, otherwise false.
         bool getLevelInfo(LevelInfo& info, unsigned index) const;
 
+        // set the gaming profile
         void setProfile(const Profile& profile);
+
+        // if set to true unlocks all profiles regardless
+        // of current level status.
+        // if set to false restores normal level based behaviour.
+        void setMasterUnlock(bool onOff);
 
     signals:
         void quitGame();
@@ -129,6 +138,8 @@ namespace invaders
         QElapsedTimer timer_;
         quint64 tick_delta_;
         quint64 time_stamp_;
+    private:
+        bool master_unlock_;
     };
 
 } // invaders

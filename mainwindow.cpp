@@ -96,6 +96,11 @@ MainWindow::~MainWindow()
 
 }
 
+void MainWindow::setMasterUnlock(bool onOff)
+{
+    ui_.game->setMasterUnlock(onOff);
+}
+
 void MainWindow::loadProfile(GameWidget::Profile profile)
 {
     QSettings settings("Ensisoft", "Invaders");

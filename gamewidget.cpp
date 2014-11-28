@@ -738,7 +738,7 @@ private:
 };
 
 
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0), tick_delta_(0), time_stamp_(0)
+GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0), tick_delta_(0), time_stamp_(0), master_unlock_(false)
 {
     QFontDatabase::addApplicationFont(":/fonts/ARCADE.TTF");
 
@@ -881,6 +881,11 @@ bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const
 void GameWidget::setProfile(const Profile& profile)
 {
     profiles_.push_back(profile);
+}
+
+void GameWidget::setMasterUnlock(bool onOff)
+{
+    master_unlock_ = onOff;
 }
 
 
@@ -1048,7 +1053,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         {
             const auto level   = menu_->selectedLevel();
             const auto profile = menu_->selectedProfile();
-            if (!info_[level].locked)
+            if (!info_[level].locked || master_unlock_)
                 startGame(level, profile);
         }
         else if (score_)

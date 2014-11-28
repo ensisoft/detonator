@@ -41,6 +41,7 @@ namespace invaders
         MainWindow();
        ~MainWindow();
 
+        void setMasterUnlock(bool onOff);
     private:
         void loadProfile(GameWidget::Profile profile);
     private:

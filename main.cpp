@@ -23,6 +23,7 @@
 #include "config.h"
 #include "warnpush.h"
 #  include <QtGui/QApplication>
+#  include <QStringList>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -42,8 +43,18 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
 
+    bool masterUnlock = false;
+
+    const auto& args = app.arguments();
+    for (const auto& a : args)
+    {
+        if (a == "--unlock-all")
+            masterUnlock = true;
+    }
+
     invaders::MainWindow window;
 
+    window.setMasterUnlock(masterUnlock);
     window.show();
 
     return app.exec();
