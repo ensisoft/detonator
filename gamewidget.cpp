@@ -205,13 +205,13 @@ public:
     {
         const auto unit = state.toViewSpace(QPoint(-1, 0));
         const auto off  = state.toNormalizedViewSpace(unit);
-        offset_ = off * tick;
+        position_ += (off * tick);
     }
 
     void paint(QPainter& painter, TransformState& state)
     {
         const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(position_ + offset_);
+        const auto pos = state.toViewSpace(position_);
 
         QPixmap tex = Invader::texture();
         const float w = tex.width();
@@ -239,7 +239,7 @@ public:
     }
     QVector2D getPosition() const 
     {
-        return position_ + offset_;
+        return position_;
     }
 private:
     static const QPixmap& texture() 
@@ -250,7 +250,6 @@ private:
 
 private:
     QVector2D position_;
-    QVector2D offset_;
     QString text_;
 };
 
@@ -451,7 +450,7 @@ public:
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
         const auto& score = game_.getScore();
-        const auto& text  = QString("Level %1 Score %2 Enemies %3 (Press F1 for help)")
+        const auto& text  = QString("Level %1 Score %2 Enemies %3")
             .arg(level_).arg(score.points).arg(score.pending);
 
         QPen pen;
@@ -824,8 +823,9 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.spawnInterval = profile.spawnInterval;
     game_->play(levels_[levelIndex].get(), setup);
 
-    level_   = levelIndex;
-    profile_ = profileIndex;
+    level_      = levelIndex;
+    profile_    = profileIndex;
+    tick_delta_ = 0;
 
     quitMenu();
     showHelp();
@@ -903,13 +903,24 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     TransformState state(rect(), cols, rows);
 
     // milliseconds
-    const auto time  = timer_.elapsed();
-    const auto delta = time - time_stamp_;
-    const auto tick  = 1000.0 / profiles_[profile_].speed;
+    const auto now  = timer_.elapsed();
+    const auto time = now - time_stamp_;
+    const auto tick  = 1000.0 / profiles_[profile_].speed;    
+    if (!time) 
+        return;
+
+    background_->update(time);
+    if (menu_) 
+        menu_->update(time);    
+    if (help_) 
+        help_->update(time);
+
+    // fragment of time expressed in ticks
+    const auto ticks = time / tick;
 
     if (!isPaused())
     {
-        tick_delta_ += delta;
+        tick_delta_ += time;
         if (tick_delta_ >= tick)
         {
             // advance game by one tick
@@ -927,29 +938,21 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             }
             tick_delta_ = 0;
         }
-    }
-
-    if (background_) 
-        background_->update(delta);
-
-    if (menu_) 
-        menu_->update(delta);    
-
-    if (help_) 
-        help_->update(delta);
-
-    // update invaders
-    for (auto& pair : invaders_)
-    {
-        auto& invader = pair.second;
-        invader->update(tick_delta_ / tick, state);
+        else
+        {
+            for (auto& pair : invaders_)
+            {
+                auto& invader = pair.second;
+                invader->update(ticks, state);
+            }
+        }
     }
 
     // update animations
     for (auto it = std::begin(animations_); it != std::end(animations_);)
     {
         auto& anim = *it;
-        if (!anim->update(delta, tick_delta_ / tick, state))
+        if (!anim->update(time, ticks, state))
         {
             if (auto* p = dynamic_cast<MissileLaunch*>(anim.get()))
             {
@@ -966,7 +969,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     // trigger redraw
     update();
 
-    time_stamp_ = time;    
+    time_stamp_ = now;
 }
 
 void GameWidget::paintEvent(QPaintEvent* paint)
@@ -1066,11 +1069,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             quitHelp();
         }
     }
-    else if (key == Qt::Key_F1)
-    {
-        if (game_->isRunning())
-            showHelp();
-    }
+    // else if (key == Qt::Key_F1)
+    // {
+    //     if (game_->isRunning())
+    //         showHelp();
+    // }
     else if (menu_)
     {
         menu_->keyPress(press);

@@ -84,7 +84,7 @@ void Game::tick()
         {
             for (auto i=0; i<spawnCount; ++i)
             {
-                if (++spawned_ == enemyCount)
+                if (spawned_ == enemyCount)
                     break;
                 const auto enemy = level_->spawn();
                 invader inv;
@@ -96,6 +96,7 @@ void Game::tick()
                 inv.identity   = identity_++;
                 invaders_.push_back(inv);
                 on_invader_spawn(inv);
+                ++spawned_;
             }
         }
     }
@@ -104,9 +105,12 @@ void Game::tick()
 
 void Game::fire(const Game::missile& missile)
 {
+    auto pos = width_;
+
     auto it = std::find_if(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.killstring == missile.string;
+            return (i.killstring == missile.string) && 
+                   (i.xpos < pos);
         });
     if (it == std::end(invaders_))
         return;
