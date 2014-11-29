@@ -77,6 +77,6 @@ namespace invaders
     private:
         QString  name_;
         std::vector<enemy> enemies_;
-        std::size_t max_;
+        std::size_t randMax_;
     };
 } // invaders

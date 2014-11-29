@@ -23,10 +23,13 @@
 #include "config.h"
 
 #include <algorithm>
+#include <map>
 #include <cstdlib>
 #include <cstring>
 #include "game.h"
 #include "level.h"
+
+const unsigned DangerZone = 3;
 
 namespace invaders
 {
@@ -62,43 +65,26 @@ void Game::tick()
     for (auto& i : invaders_)
     {
         i.xpos -= 1;
+        if (i.xpos < DangerZone)
+        {
+            on_invader_warning(i);
+        }
     }
 
-    const auto spawnCount    = setup_.spawnCount;
-    const auto spawnInterval = setup_.spawnInterval;    
-    const auto enemyCount    = setup_.numEnemies;
-
-    if (spawned_ == enemyCount)
+    if (spawned_ == setup_.numEnemies)
     {
         // todo: spawn THE BOSS
+        //spawnBoss();
 
         if (invaders_.empty())
         {
             on_level_complete(score_);
-            quitLevel();
+            level_ = nullptr;
         }
     }
-    else if (spawned_ < enemyCount)
+    else if (isSpawnTick())
     {
-        if ((tick_ % spawnInterval) == 0)
-        {
-            for (auto i=0; i<spawnCount; ++i)
-            {
-                if (spawned_ == enemyCount)
-                    break;
-                const auto enemy = level_->spawn();
-                invader inv;
-                inv.killstring = enemy.killstring;
-                inv.string     = enemy.string;
-                inv.score      = enemy.score;            
-                inv.ypos       = std::rand() % height_;
-                inv.xpos       = width_ + i;
-                inv.identity   = identity_++;
-                invaders_.push_back(inv);
-                on_invader_spawn(inv);
-                ++spawned_;
-            }
-        }
+        spawn();
     }
     ++tick_;
 }
@@ -115,9 +101,10 @@ void Game::fire(const Game::missile& missile)
     if (it == std::end(invaders_))
         return;
 
-    auto inv = *it;
+    auto& inv = *it;
+    inv.score = killScore(inv);
 
-    score_.points += killScore(inv.score);
+    score_.points += inv.score;
     score_.killed++;
     score_.pending--;
 
@@ -129,13 +116,14 @@ void Game::fire(const Game::missile& missile)
 void Game::play(Level* level, Game::setup setup)
 {
     invaders_.clear();
-    level_   = level;
-    tick_    = 0;
-    spawned_ = 0;
-    score_.killed  = 0;
-    score_.points  = 0;
-    score_.victor  = 0;
-    score_.pending = setup.numEnemies;
+    level_           = level;
+    tick_            = 0;
+    spawned_         = 0;
+    score_.killed    = 0;
+    score_.points    = 0;
+    score_.victor    = 0;
+    score_.maxpoints = 0;    
+    score_.pending   = setup.numEnemies;
     setup_ = setup;
 }
 
@@ -147,9 +135,58 @@ void Game::quitLevel()
     std::memset(&setup_, 0, sizeof(setup_));
 }
 
-unsigned Game::killScore(unsigned points) const 
+unsigned Game::killScore(const invader& inv) const
 {
-    return points;
+    // scoring goes as follows.
+    // there's a time factor that decreases as the invader approaches an escape.
+    // if the enemy is in the warning zone (we're showing the kill string)
+    // then there's no points to be given (but no penalty either)
+    // otherwise award the player the invader base points  + bonus
+    if (inv.xpos < DangerZone)
+        return 0;
+
+    const auto xpos  = (float)inv.xpos - DangerZone;
+    const auto width = (float)width_ - DangerZone - 1; // width_'th column is not even visible
+    const auto bonus = xpos / width;
+
+    return inv.score +  (inv.score * bonus);
+}
+
+void Game::spawn()
+{
+    const auto spawnCount = setup_.spawnCount;
+    const auto enemyCount = setup_.numEnemies;
+    std::map<unsigned, unsigned> batch;
+
+    for (unsigned i=0; i<spawnCount; ++i)
+    {
+        if (spawned_ == enemyCount)
+            break;
+
+        const auto enemy = level_->spawn();
+        invader inv;
+        inv.killstring = enemy.killstring;
+        inv.string     = enemy.string;
+        inv.score      = enemy.score;            
+        inv.ypos       = std::rand() % height_;
+        inv.xpos       = width_ + batch[inv.ypos] + i;
+        inv.identity   = identity_++;
+        invaders_.push_back(inv);
+        on_invader_spawn(inv);
+        spawned_++;
+        score_.maxpoints += (enemy.score * 2);
+        batch[inv.ypos]++;
+    }
+}
+
+void Game::spawnBoss()
+{
+    // todo:
+}
+
+bool Game::isSpawnTick() const
+{
+    return !(tick_ % setup_.spawnInterval);
 }
 
 } // invaders

@@ -58,6 +58,7 @@ namespace invaders
             unsigned killed;
             unsigned victor;
             unsigned pending;
+            unsigned maxpoints;
         };
 
         struct setup {
@@ -69,6 +70,7 @@ namespace invaders
         std::function<void (const invader&, const missile& m)> on_invader_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
+        std::function<void (const invader&)> on_invader_warning;
         std::function<void (const score&)> on_level_complete;
 
         Game(unsigned width, unsigned heigth);
@@ -106,7 +108,10 @@ namespace invaders
 
 
     private:
-        unsigned killScore(unsigned points) const;
+        unsigned killScore(const invader& inv) const;
+        void spawn();
+        void spawnBoss();
+        bool isSpawnTick() const;
 
     private:
         std::deque<invader> invaders_;

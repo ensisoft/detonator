@@ -100,8 +100,10 @@ namespace invaders
     private:
         bool isPaused() const;
         void showMenu();
+        void showFleet();
         void showHelp();
         void quitHelp();
+        void quitFleet();
         void quitMenu();
         void quitScore();
         void quitLevel();
@@ -118,6 +120,7 @@ namespace invaders
         class Player;
         class Menu;
         class Help;
+        class Fleet;
 
     private:
         std::unique_ptr<Background> background_;
@@ -126,6 +129,7 @@ namespace invaders
         std::unique_ptr<Player> player_;
         std::unique_ptr<Menu> menu_;
         std::unique_ptr<Help> help_;
+        std::unique_ptr<Fleet> fleet_;
         std::unique_ptr<Game> game_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
         std::vector<std::unique_ptr<Level>> levels_;

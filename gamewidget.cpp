@@ -45,6 +45,8 @@
 namespace invaders
 {
 
+const auto LevelUnlockCriteria = 0.85;
+
 // game space is discrete space from 0 to game::width() - 1 on X axis
 // and from 0 to game::height() - 1 on Y axis
 // we use QPoint to represent this.
@@ -241,6 +243,9 @@ public:
     {
         return position_;
     }
+
+    void showHelp(const QString& help)
+    { text_ = help; }
 private:
     static const QPixmap& texture() 
     {
@@ -409,18 +414,20 @@ private:
 class GameWidget::Scoreboard 
 {
 public:
-    Scoreboard(unsigned finalScore, bool isHighScore, int unlockedLevel) 
+    Scoreboard(unsigned score, unsigned bonus, bool isHighScore, int unlockedLevel) 
     {
-        text_.append("Level complete!\n");
+        text_.append("Level complete!\n\n");
+        text_.append(QString("You scored %1 points\n").arg(score));
+        text_.append(QString("Difficulty bonus %1 points\n").arg(bonus));
+        text_.append(QString("Total %1 points\n\n").arg(score + bonus));
+
         if (isHighScore)
             text_.append("New high score!\n");
 
-        text_.append(QString("You scored %1 points\n\n").arg(finalScore));
-
         if (unlockedLevel)
-            text_.append(QString("Level %1 unlocked!").arg(unlockedLevel));
+            text_.append(QString("Level %1 unlocked!\n").arg(unlockedLevel + 1));
 
-        text_.append("Press Space to continue");
+        text_.append("\nPress Space to continue");
     }
 
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
@@ -431,7 +438,7 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(scale.y());
+        font.setPixelSize(scale.y() / 2);
 
         painter.setPen(pen);
         painter.setFont(font);
@@ -449,9 +456,12 @@ public:
     {}
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
-        const auto& score = game_.getScore();
-        const auto& text  = QString("Level %1 Score %2 Enemies %3")
-            .arg(level_).arg(score.points).arg(score.pending);
+        const auto& score  = game_.getScore();
+        const auto& result = score.maxpoints ? 
+            (float)score.points / (float)score.maxpoints * 100 : 0.0;
+        const auto& format = QString("%1").arg(result, 0, 'f', 0);            
+        const auto& text   = QString("Level %1 Score %2 (%3%) Enemies %4 (F1 for help)")
+            .arg(level_).arg(score.points).arg(format).arg(score.pending);
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -659,6 +669,8 @@ public:
     unsigned selectedProfile() const 
     { return profile_; }
 
+    void selectLevel(unsigned level)
+    { level_ = level; }
 private:
     void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
     {
@@ -687,7 +699,36 @@ private:
 class GameWidget::Help
 {
 public:
-    Help(const Level& level) : level_(level)
+    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
+    {
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkGray);
+
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(scale.y() / 2);
+
+        auto str = QString("%1").arg(LevelUnlockCriteria * 100, 0, 'f', 0);
+
+        painter.setPen(pen);
+        painter.setFont(font);
+        painter.drawText(rect, Qt::AlignCenter, 
+            QString("Kill the invaders by typing the correct pinyin.\n"
+            "You get scored based on how fast you kill and\n"
+            "how complicated the characters are.\n\n"
+            "Invaders that approach the left edge will show the\n"
+            "the pinyin string and score no points.\n"
+            "You will lose points for invaders that you faill to kill.\n"
+            "Score %1% or higher to unlock the next level.\n\n"
+            "Press Esc to exit\n").arg(str));
+    }
+};
+
+class GameWidget::Fleet
+{
+public:
+    Fleet(const Level& level) : level_(level)
     {}
 
     void update(quint64 dt)
@@ -772,17 +813,43 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         invaders_.erase(inv.identity);
     };
 
+    // invader is almost escaping unharmed. we help the player to learn
+    // by changing the text from chinese to the pinyin kill string
+    game_->on_invader_warning = [&](const Game::invader& inv)
+    {
+        auto it = invaders_.find(inv.identity);
+        it->second->showHelp(inv.killstring);
+    };
+
     game_->on_level_complete = [&](const Game::score& score)
     {
-        auto& level   = info_[level_];
+        qDebug() << "Level complete: points" << score.points << "maxpoints" << score.maxpoints;
+
+        auto& level   = levels_[level_];
+        auto& info    = info_[level_];
         auto& profile = profiles_[profile_];
         
-        const auto bonus   = profile.speed;
-        const auto final   = bonus * 10 * score.points;
-        const bool hiscore = final > level.highScore;
-        level.highScore = std::max(level.highScore, (unsigned)final);
+        const auto base    = score.points;
+        const auto bonus   = profile.speed * score.points;
+        const auto final   = score.points + bonus;
+        const bool hiscore = final > info.highScore;
+        info.highScore = std::max(info.highScore, (unsigned)final);
 
-        score_.reset(new Scoreboard(final, hiscore, 0));
+        unsigned unlockLevel = 0;
+        if ((base / (float)score.maxpoints) > LevelUnlockCriteria)
+        {
+            if (level_ < levels_.size())
+            {
+                if (info_[level_+1].locked)
+                {
+                    unlockLevel = level_ + 1;
+                    info_[unlockLevel].locked = false;
+                }
+            }
+        }
+
+        score_.reset(new Scoreboard(base, bonus, hiscore, unlockLevel));
+
     };
 
     background_.reset(new Background);
@@ -815,7 +882,6 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     level->reset();
     player_->reset();
     display_->setLevel(levelIndex + 1);
-    invaders_.clear();    
 
     Game::setup setup;
     setup.numEnemies    = profile.numEnemies;
@@ -826,9 +892,6 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     level_      = levelIndex;
     profile_    = profileIndex;
     tick_delta_ = 0;
-
-    quitMenu();
-    showHelp();
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -912,8 +975,8 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     background_->update(time);
     if (menu_) 
         menu_->update(time);    
-    if (help_) 
-        help_->update(time);
+    if (fleet_) 
+        fleet_->update(time);
 
     // fragment of time expressed in ticks
     const auto ticks = time / tick;
@@ -991,25 +1054,34 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     background_->paint(painter, rect, state.getScale());
 
-    if (menu_)
-    {
-        menu_->paint(painter, rect, state.getScale());
-        return;
-    } 
-    else if (help_)
+    if (help_)
     {
         help_->paint(painter, rect, state.getScale());
         return;
     }
-    else if (score_)
+    else if (menu_)
     {
-        score_->paint(painter, rect, state.getScale());
+        menu_->paint(painter, rect, state.getScale());
+        return;
+    } 
+    else if (fleet_)
+    {
+        fleet_->paint(painter, rect, state.getScale());
         return;
     }
 
+
+    if (score_ && animations_.empty())
+    {
+        score_->paint(painter, rect, state.getScale());
+        return;
+    }        
+
+    QPoint top;
+    QPoint bot;
     // layout the HUD at the first "game row"
-    auto top = state.toViewSpace(QPoint(0, 0));
-    auto bot = state.toViewSpace(QPoint(cols, 1));
+    top = state.toViewSpace(QPoint(0, 0));
+    bot = state.toViewSpace(QPoint(cols, 1));
     display_->paint(painter, QRect(top, bot), state.getScale());
 
     // paint the invaders
@@ -1037,43 +1109,55 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
     if (key == Qt::Key_Escape)
     {
-        if (menu_)
+        if (help_)
+        {
+            quitHelp();
+            return;
+        }
+        else if (menu_)
         {
             emit quitGame();
             return;
         }
         if (score_)
             quitScore();
-        if (help_)
-            quitHelp();
+        else if (fleet_)
+            quitFleet();
 
         quitLevel();
         showMenu();        
     }
     else if (key == Qt::Key_Space)
     {
-        if (menu_)
+        if (help_)
+        {
+            return;
+        }
+        else if (menu_)
         {
             const auto level   = menu_->selectedLevel();
             const auto profile = menu_->selectedProfile();
             if (!info_[level].locked || master_unlock_)
+            {
                 startGame(level, profile);
+                quitMenu();
+                showFleet();
+            }
         }
         else if (score_)
         {
             quitScore();
             showMenu();
         }
-        else if (help_)
+        else if (fleet_)
         {
-            quitHelp();
+            quitFleet();
         }
     }
-    // else if (key == Qt::Key_F1)
-    // {
-    //     if (game_->isRunning())
-    //         showHelp();
-    // }
+    else if (key == Qt::Key_F1)
+    {
+        showHelp();
+    }
     else if (menu_)
     {
         menu_->keyPress(press);
@@ -1088,22 +1172,33 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
 bool GameWidget::isPaused() const 
 {
-    return !!help_;
+    return !!fleet_;
 }
 
 void GameWidget::showMenu()
 {
     menu_.reset(new Menu(levels_, info_, profiles_));
+    menu_->selectLevel(level_);
 }
 
 void GameWidget::showHelp()
 {
+    help_.reset(new Help);
+}
+
+void GameWidget::showFleet()
+{
     const auto& level = *levels_[level_];
-    help_.reset(new Help(level));
+    fleet_.reset(new Fleet(level));
 }
 void GameWidget::quitHelp()
 {
     help_.reset();
+}
+
+void GameWidget::quitFleet()
+{
+    fleet_.reset();
 }
 
 void GameWidget::quitMenu()

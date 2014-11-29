@@ -141,18 +141,18 @@ void Level::load(const QString& file)
 
 void Level::reset()
 {
-    max_ = enemies_.size();
+    randMax_ = enemies_.size();
 }
 
 Level::enemy Level::spawn() 
 {
-    const auto n = std::rand() % max_;
+    const auto n = std::rand() % randMax_;
     const auto r = enemies_[n];
-    std::swap(enemies_[n], enemies_[max_-1]);
+    std::swap(enemies_[n], enemies_[randMax_-1]);
 
-    if (max_ > 1)
-        max_--;
-    else max_ = enemies_.size();
+    if (randMax_ > 1)
+        randMax_--;
+    else randMax_ = enemies_.size();
 
     return r;
 }
