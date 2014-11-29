@@ -44,6 +44,7 @@ namespace invaders
             unsigned xpos;
             unsigned identity;
             unsigned score;
+            unsigned velocity;
             QString  string;
             QString  killstring;
         };

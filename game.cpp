@@ -48,7 +48,7 @@ void Game::tick()
     // prune invaders
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.xpos != 0;
+            return i.xpos > i.velocity;
         });
     for (auto it = end; it != std::end(invaders_); ++it)
     {
@@ -64,7 +64,7 @@ void Game::tick()
     // update live invaders
     for (auto& i : invaders_)
     {
-        i.xpos -= 1;
+        i.xpos -= i.velocity;
         if (i.xpos < DangerZone)
         {
             on_invader_warning(i);
@@ -171,6 +171,7 @@ void Game::spawn()
         inv.ypos       = std::rand() % height_;
         inv.xpos       = width_ + batch[inv.ypos] + i;
         inv.identity   = identity_++;
+        inv.velocity   = 1 + (std::rand() % 2);
         invaders_.push_back(inv);
         on_invader_spawn(inv);
         spawned_++;

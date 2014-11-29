@@ -253,7 +253,7 @@ private:
 class GameWidget::Invader
 {
 public:
-    Invader(QVector2D position, QString str) : position_(position), text_(str)
+    Invader(QVector2D position, QString str, unsigned velocity) : position_(position), text_(str), velocity_(velocity)
     {}
 
     void setPosition(QVector2D position)
@@ -263,7 +263,7 @@ public:
 
     void update(float tick, TransformState& state)
     {
-        const auto unit = state.toViewSpace(QPoint(-1, 0));
+        const auto unit = state.toViewSpace(QPoint(-velocity_, 0));
         const auto off  = state.toNormalizedViewSpace(unit);
         position_ += (off * tick);
     }
@@ -314,6 +314,8 @@ private:
 private:
     QVector2D position_;
     QString text_;
+private:
+    unsigned velocity_;
 };
 
 class GameWidget::Missile
@@ -857,7 +859,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
-        std::unique_ptr<Invader> invader(new Invader(posi, inv.string));
+        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.velocity));
         invaders_[inv.identity] = std::move(invader);
     };
 
@@ -930,7 +932,8 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     qDebug() << "Start game: " << level->name() << profile.name;
 
     // todo: use a deterministic seed or not?
-    std::srand(std::time(nullptr));
+    //std::srand(std::time(nullptr));
+    std::srand(0x7f6a4b + levelIndex ^ profileIndex);
 
     level->reset();
     player_->reset();
