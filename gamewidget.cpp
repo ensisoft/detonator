@@ -37,6 +37,7 @@
 #  include <QResource>
 #  include <QtDebug>
 #include "warnpop.h"
+#include <cmath>
 
 #include "gamewidget.h"
 #include "game.h"
@@ -124,6 +125,22 @@ private:
     QPoint scale_;
 };
 
+float wrap(float max, float val, float wrap)
+{
+    if (val > max)
+        return wrap;
+    return val;
+}
+
+float clamp(float min, float val, float max)
+{
+    if (val < min)
+        return min;
+    if (val > max)
+        return max;
+    return val;
+}
+
 class GameWidget::Animation
 {
 public:
@@ -144,7 +161,24 @@ class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
     Explosion(QVector2D position, quint64 lifetime) : position_(position), lifetime_(lifetime), time_(0)
-    {}    
+    {
+        const auto particles = 100;
+        const auto angle = (M_PI * 2) / particles;
+
+        for (int i=0; i<particles; ++i)
+        {
+            particle p;
+            const auto r = (float)std::rand() / RAND_MAX;
+            const auto v = (float)std::rand() / RAND_MAX;
+            const auto a = i * angle + angle * r;
+            p.dir.setX(std::cos(a));
+            p.dir.setY(std::sin(a));
+            p.dir *= v;
+            p.pos  = position;
+            p.a    = 0.8;
+            particles_.push_back(p);
+        }
+    }    
 
     virtual bool update(quint64 dt, float tick, TransformState& state) override
     {
@@ -152,12 +186,28 @@ public:
         if (time_ > lifetime_)
             return false;
 
+        for (auto& p : particles_)
+        {
+            p.pos += p.dir * (dt / 2500.0);
+            p.a = clamp(0.0, p.a - (dt / 2000.0), 1.0);
+        }
+
         return true;
     }
     virtual void paint(QPainter& painter, TransformState& state) override
     {
         const auto pos = state.toViewSpace(position_);
         const auto dim = state.getScale();
+
+        QColor color(102, 102, 102);
+        QBrush brush(color);
+        for (const auto& particle : particles_)
+        {
+            color.setAlpha(0xff * particle.a);            
+            brush.setColor(color);
+            const auto pos = state.toViewSpace(particle.pos) + QPoint(50, 50);
+            painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
+        }
 
         // explosion texture has 80 phases for the explosion
         const auto phase  = lifetime_ / 80.0;
@@ -178,6 +228,8 @@ public:
 
         QPixmap tex = Explosion::texture();
         painter.drawPixmap(pos, tex, src);
+
+
     }
 private:
     static QPixmap texture()
@@ -185,6 +237,12 @@ private:
         static QPixmap px(":/textures/ExplosionMap.png");
         return px;
     }
+    struct particle {
+        QVector2D dir;
+        QVector2D pos;
+        float a;
+    };
+    std::vector<particle> particles_;
 private:
     QVector2D position_;    
     quint64 lifetime_;
@@ -341,12 +399,7 @@ private:
     QVector2D direction_;
 };
 
-float wrap(float max, float val, float wrap)
-{
-    if (val > max)
-        return wrap;
-    return val;
-}
+
 
 // game space background rendering
 class GameWidget::Background
