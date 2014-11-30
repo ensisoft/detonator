@@ -9,7 +9,6 @@ lib pulseaudio : : <name>pulse ;
 lib soundfile  : : <name>sndfile ;
 
 exe invaders : 
-  audio.cpp
   level.cpp
   game.cpp
   main.cpp

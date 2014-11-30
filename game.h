@@ -54,6 +54,15 @@ namespace invaders
             QString string;
         };
 
+        struct bomb {
+
+        };
+
+        struct timewarp {
+            float durationTicks;
+            float slowFactor;
+        };
+
         struct score {
             unsigned points;
             unsigned killed;
@@ -68,7 +77,8 @@ namespace invaders
             unsigned spawnInterval;
         };
 
-        std::function<void (const invader&, const missile& m)> on_invader_kill;
+        std::function<void (const invader&, const missile& m)> on_missile_kill;
+        std::function<void (const invader&, const bomb& b)> on_bomb_kill;
         std::function<void (const invader&)> on_invader_spawn;        
         std::function<void (const invader&)> on_invader_victory;
         std::function<void (const invader&)> on_invader_warning;
@@ -82,6 +92,10 @@ namespace invaders
 
         // launch a missile at the current player position
         void fire(const missile& m);
+
+        void ignite(const bomb& b);
+
+        void enter(const timewarp& w);
 
         // start playing a level
         void play(Level* level, Game::setup setup);

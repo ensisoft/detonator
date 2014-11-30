@@ -108,9 +108,35 @@ void Game::fire(const Game::missile& missile)
     score_.killed++;
     score_.pending--;
 
-    on_invader_kill(*it, missile);
+    on_missile_kill(*it, missile);
 
     invaders_.erase(it);
+}
+
+void Game::ignite(const bomb& b)
+{
+    auto end = std::partition(std::begin(invaders_), std::end(invaders_),
+        [&](const invader& i) {
+            return i.xpos < width_;
+        });
+    if (end == std::end(invaders_))
+        return;
+
+    for (auto it = std::begin(invaders_); it != end; ++it)
+    {
+        auto& inv = *it;
+        inv.score = killScore(inv);
+        score_.points += inv.score;
+        score_.killed++;
+        score_.pending--;
+        on_bomb_kill(inv, b);
+    }
+    invaders_.erase(std::begin(invaders_), end);
+}
+
+void Game::enter(const timewarp& w)
+{
+    
 }
 
 void Game::play(Level* level, Game::setup setup)
