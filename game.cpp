@@ -171,7 +171,7 @@ void Game::spawn()
         inv.ypos       = std::rand() % height_;
         inv.xpos       = width_ + batch[inv.ypos] + i;
         inv.identity   = identity_++;
-        inv.velocity   = 1 + (std::rand() % 2);
+        inv.velocity   = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
         on_invader_spawn(inv);
         spawned_++;
