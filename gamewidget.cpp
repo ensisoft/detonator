@@ -588,11 +588,24 @@ public:
         const auto key = press->key();
         if (key == Qt::Key_Space || key == Qt::Key_Return)
         {
-            Game::missile m;
-            m.position = missile_;
-            m.string = text_.toLower();
-
-            game.fire(m);
+            if (text_ == "BOMB")
+            {
+                Game::bomb b;
+                game.ignite(b);
+                qDebug() << "Bomb launched";
+            }
+            else if (text_ == "WARP")
+            {
+                Game::timewarp w;
+                game.enter(w);
+            }
+            else
+            {
+                Game::missile m;
+                m.position = missile_;
+                m.string = text_.toLower();
+                game.fire(m);                
+            }
             text_.clear();
         }
         else if (key == Qt::Key_Backspace)
@@ -837,7 +850,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
     game_.reset(new Game(20, 10));
 
-    game_->on_invader_kill = [&](const Game::invader& i, const Game::missile& m)
+    game_->on_missile_kill = [&](const Game::invader& i, const Game::missile& m)
     {
         auto it = invaders_.find(i.identity);
 
@@ -846,6 +859,16 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 500));
 
         animations_.push_back(std::move(anim));
+        invaders_.erase(it);
+    };
+
+    game_->on_bomb_kill = [&](const Game::invader& i, const Game::bomb& b)
+    {
+        auto it = invaders_.find(i.identity);
+        auto& inv = it->second;
+
+        std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 1000));
+        animations_.push_back(std::move(explosion));
         invaders_.erase(it);
     };
 
