@@ -101,6 +101,16 @@ void MainWindow::setMasterUnlock(bool onOff)
     ui_.game->setMasterUnlock(onOff);
 }
 
+void MainWindow::setUnlimitedWarps(bool onOff)
+{
+    ui_.game->setUnlimitedWarps(onOff);
+}
+
+void MainWindow::setUnlimitedBombs(bool onOff)
+{
+    ui_.game->setUnlimitedBombs(onOff);
+}
+
 void MainWindow::loadProfile(GameWidget::Profile profile)
 {
     QSettings settings("Ensisoft", "Invaders");

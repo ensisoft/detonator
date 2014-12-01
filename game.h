@@ -59,8 +59,8 @@ namespace invaders
         };
 
         struct timewarp {
-            float durationTicks;
-            float slowFactor;
+            float duration;
+            float factor;
         };
 
         struct score {
@@ -81,7 +81,8 @@ namespace invaders
 
         std::function<void (const invader&, const missile& m)> onMissileKill;
         std::function<void (const invader&, const bomb& b)> onBombKill;
-        std::function<void ()> onBomb;
+        std::function<void (const bomb& b)> onBomb;
+        std::function<void (const timewarp& w)> onWarp;
         std::function<void (const invader&)> onInvaderSpawn;        
         std::function<void (const invader&)> onInvaderVictory;
         std::function<void (const invader&)> onInvaderWarning;

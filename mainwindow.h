@@ -42,6 +42,10 @@ namespace invaders
        ~MainWindow();
 
         void setMasterUnlock(bool onOff);
+
+        void setUnlimitedWarps(bool onOff);
+        void setUnlimitedBombs(bool onOff);
+
     private:
         void loadProfile(GameWidget::Profile profile);
     private:

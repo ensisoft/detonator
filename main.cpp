@@ -44,17 +44,25 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     bool masterUnlock = false;
+    bool unlimitedWarps = false;
+    bool unlimitedBombs = false;
 
     const auto& args = app.arguments();
     for (const auto& a : args)
     {
         if (a == "--unlock-all")
             masterUnlock = true;
+        else if (a == "--unlimited-warps")
+            unlimitedWarps = true;
+        else if (a == "--unlimited-bombs")
+            unlimitedBombs = true;
     }
 
     invaders::MainWindow window;
 
     window.setMasterUnlock(masterUnlock);
+    window.setUnlimitedWarps(unlimitedWarps);
+    window.setUnlimitedBombs(unlimitedBombs);
     window.show();
 
     return app.exec();

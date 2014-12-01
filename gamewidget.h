@@ -90,6 +90,10 @@ namespace invaders
         // if set to false restores normal level based behaviour.
         void setMasterUnlock(bool onOff);
 
+        void setUnlimitedWarps(bool onOff);
+
+        void setUnlimitedBombs(bool onOff);
+
     signals:
         void quitGame();
 
@@ -142,10 +146,14 @@ namespace invaders
         unsigned profile_;
     private:
         QElapsedTimer timer_;
-        quint64 tick_delta_;
-        quint64 time_stamp_;
+        quint64 tickDelta_;
+        quint64 timeStamp_;
+        float warpFactor_;
+        unsigned warpDuration_;
     private:
-        bool master_unlock_;
+        bool masterUnlock_;
+        bool unlimitedBombs_;
+        bool unlimitedWarps_;
     };
 
 } // invaders

@@ -85,6 +85,7 @@ void Game::tick()
     {
         spawn();
     }
+
     ++tick_;
 }
 
@@ -133,14 +134,19 @@ void Game::ignite(const bomb& b)
     }
     invaders_.erase(std::begin(invaders_), end);
 
-    onBomb();    
+    onBomb(b);    
 
     setup_.numBombs--;
 }
 
 void Game::enter(const timewarp& w)
 {
-    
+    if (!setup_.numWarps)
+        return;
+
+    onWarp(w);
+
+    setup_.numWarps--;
 }
 
 void Game::play(Level* level, Game::setup setup)
@@ -180,7 +186,7 @@ unsigned Game::killScore(const invader& inv) const
     const auto points = inv.score * inv.speed;
     const auto bonus  = xpos / width;
 
-    return inv.score +  (inv.score * bonus);
+    return points +  (points * bonus);
 }
 
 void Game::spawn()
@@ -205,9 +211,12 @@ void Game::spawn()
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
         onInvaderSpawn(inv);
+
         spawned_++;
-        score_.maxpoints += (enemy.score * 2);
-        batch[inv.ypos]++;
+        batch[inv.ypos]++;        
+
+        inv.xpos = width_ - 1;
+        score_.maxpoints += killScore(inv);
     }
 }
 

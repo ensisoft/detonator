@@ -183,7 +183,8 @@ float wrap(float max, float val, float wrap)
     return val;
 }
 
-float clamp(float min, float val, float max)
+template<typename T>
+T clamp(T min, T val, T max)
 {
     if (val < min)
         return min;
@@ -212,7 +213,7 @@ class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
     Explosion(QVector2D position, quint64 start, quint64 lifetime) : 
-        position_(position), start_(start), life_(lifetime), time_(0)
+        position_(position), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {
         const auto particles = 100;
         const auto angle = (M_PI * 2) / particles;
@@ -254,7 +255,8 @@ public:
         if (time_ < start_)
             return;
 
-        const auto pos = state.toViewSpace(position_);
+        const auto unitScale = state.getScale();
+        const auto position  = state.toViewSpace(position_);
 
         QColor color(102, 102, 102);
         QBrush brush(color);
@@ -262,7 +264,7 @@ public:
         {
             color.setAlpha(0xff * particle.a);            
             brush.setColor(color);
-            const auto pos = state.toViewSpace(particle.pos) + QPoint(50, 50);
+            const auto pos = state.toViewSpace(particle.pos);
             painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
         }
 
@@ -273,19 +275,26 @@ public:
         const auto row = index / 10;
         const auto col = index % 10;
 
-        // each explosion phase is 100x100px
+        // each explosion texture is 100x100px
         const auto w = 100;
         const auto h = 100;
         const auto x = col * w;
         const auto y = row * h;
         const QRect src(x, y, w, h);
             
-        QRect dst(0, 0, 100, 100);
-        dst.moveTo(pos);
+        const auto scaledWidth  = unitScale.x() * scale_;
+        const auto scaledHeight = unitScale.y() * scale_;
+
+        QRect dst(0, 0, scaledWidth, scaledHeight);
+        dst.moveTo(position -
+            QPoint(scaledWidth / 2.0, scaledHeight / 2.0));
 
         QPixmap tex = Explosion::texture();
-        painter.drawPixmap(pos, tex, src);
+        painter.drawPixmap(dst, tex, src);
     }
+
+    void setScale(float scale)
+    { scale_ = scale; }
 
     QVector2D getPosition() const
     { return position_; }
@@ -307,14 +316,20 @@ private:
     quint64 start_;
     quint64 life_;
     quint64 time_;
+private:
+    float scale_;
 };
 
 
 class GameWidget::Invader : public GameWidget::Animation
 {
 public:
-    Invader(QVector2D position, QString str, unsigned speed) : 
-        position_(position), text_(str), time_(0), expire_(0), speed_(speed)
+    enum class ShipType {
+        cruiser, destroyer, mother
+    };
+
+    Invader(QVector2D position, QString str, unsigned speed, ShipType type) : 
+        position_(position), text_(str), time_(0), expire_(0), speed_(speed), type_(type)
     {}
 
     void setPosition(QVector2D position)
@@ -336,34 +351,53 @@ public:
         return true;
     }
 
+    float getScale() const 
+    { 
+        switch (type_)
+        {
+            case ShipType::cruiser:   return 2.0;
+            case ShipType::destroyer: return 1.8;
+            case ShipType::mother:    return 4.0;
+        }
+        return 1.0;
+    }
+
     void paint(QPainter& painter, TransformState& state)
     {
-        const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(position_);
+        // offset the texture to be centered around the position
+        const auto unitScale   = state.getScale();
+        const auto spriteScale = state.getScale() * getScale();
+        const auto position    = state.toViewSpace(position_);
 
-        QPixmap tex = Invader::texture();
-        const float w = tex.width();
-        const float h = tex.height();
-        const float a = h / w;
-        QRect r(0, 0, dim.x(), dim.x() * a);
-        r.moveTo(pos);
-        //painter.fillRect(r, Qt::white);
-        painter.drawPixmap(r, tex, tex.rect());
+        QPixmap tex = Invader::texture(type_);
+        const float width  = tex.width();
+        const float height = tex.height();
+        const float aspect = height / width;
+        const float scaledWidth  = spriteScale.x();
+        const float scaledHeight = scaledWidth * aspect;
+
+        // set the target rectangle with the dimensions of the 
+        // sprite we want to draw.
+        QRect target(0, 0, scaledWidth, scaledHeight);
+
+        // offset it so that the center is aligned with the unit position
+        target.moveTo(position -
+            QPoint(scaledWidth / 2.0, scaledHeight / 2.0));
+
+        painter.drawPixmap(target, tex, tex.rect());
+
+        target.translate(scaledWidth, 0);
 
         QFont font;
         font.setFamily("Monospace");
-        font.setPixelSize(dim.y() / 2);
-        QRect rect = QFontMetrics(font).boundingRect(text_);
-        //rect.moveTo(pos);
-        rect.moveTo(pos + QPoint(r.width(), (r.height() - rect.height()) / 2));
-
+        font.setPixelSize(unitScale.y() / 2);
 
         QPen pen;
         pen.setWidth(2);
         pen.setColor(Qt::darkYellow);
         painter.setFont(font);
         painter.setPen(pen);
-        painter.drawText(rect, Qt::AlignCenter, text_);
+        painter.drawText(target, Qt::AlignVCenter, text_);
     }
 
     // get current position
@@ -390,10 +424,14 @@ public:
     { text_ = help; }
 
 private:
-    static const QPixmap& texture() 
+    static const QPixmap& texture(ShipType type) 
     {
-        static QPixmap px(R("textures/SpaceShipNormal.png"));
-        return px;
+        static QPixmap destroyer(R("textures/Destroyer.png"));
+        static QPixmap cruiser(R("textures/Cruiser.png"));
+        if (type == ShipType::destroyer)
+            return destroyer;
+
+        return cruiser;
     }
 
 private:
@@ -403,6 +441,8 @@ private:
     quint64 expire_;
 private:
     unsigned speed_;
+private:
+    ShipType type_;
 };
 
 class GameWidget::Missile : public GameWidget::Animation
@@ -566,7 +606,7 @@ public:
         font.setPixelSize(dim.y() / 2.0);
         painter.setPen(pen);
         painter.setFont(font);
-        painter.drawText(QRect(top, end), Qt::AlignCenter, QString("%1").arg(score_));
+        painter.drawText(QRect(top, end), QString("%1").arg(score_));
     }
 private:
     QVector2D position_;
@@ -780,6 +820,8 @@ public:
             else if (text_ == "WARP")
             {
                 Game::timewarp w;
+                w.duration = 2000;
+                w.factor   = 0.2;
                 game.enter(w);
             }
             else
@@ -1029,7 +1071,8 @@ private:
 };
 
 
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0), tick_delta_(0), time_stamp_(0), master_unlock_(false)
+GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
+    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
 {
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
@@ -1053,16 +1096,17 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         const auto missileFlyTime   = 500;
         const auto explosionTime    = 1000;
         const auto missileFlyTicks  = missileFlyTime / tick;
-        const auto futurePosition   = invader->getPosition(missileFlyTicks, state);
-        const auto missileEnd       = futurePosition + (unit / 2.0); // aim in the middle of the unit
+        const auto missileEnd       = invader->getPosition(missileFlyTicks, state);
         const auto missileBeg       = m.position;
         const auto missileDir       = missileEnd - missileBeg;
 
-        std::unique_ptr<Missile> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
-        std::unique_ptr<Explosion> explosion(new Explosion(futurePosition, missileFlyTime, explosionTime));
-        std::unique_ptr<Score> score(new Score(missileEnd, explosionTime, 2000, i.score));        
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
+        std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
+        std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, i.score));        
 
         invader->expireIn(missileFlyTime);
+        explosion->setScale(invader->getScale() * 1.5);
+
         animations_.push_back(std::move(invader));
         animations_.push_back(std::move(missile));
         animations_.push_back(std::move(explosion));
@@ -1077,14 +1121,26 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         auto& inv = it->second;
 
         std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000));
+        std::unique_ptr<Animation> score(new Score(inv->getPosition(), 1000, 2000, i.score));
         animations_.push_back(std::move(explosion));
+        animations_.push_back(std::move(score));
+
         invaders_.erase(it);
     };
 
-    game_->onBomb = [&]() 
+    game_->onBomb = [&](const Game::bomb& b) 
     {
         std::unique_ptr<Animation> explosion(new BigExplosion(1500));
+
+
         animations_.push_back(std::move(explosion));
+    };
+
+    game_->onWarp = [&](const Game::timewarp& w)
+    {
+        qDebug() << "begin time warp";
+        warpFactor_   = w.factor;
+        warpDuration_ = w.duration;
     };
 
     game_->onInvaderSpawn = [&](const Game::invader& inv) 
@@ -1093,7 +1149,10 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
-        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.speed));
+        const auto type = inv.speed == 1 ? Invader::ShipType::cruiser :
+            Invader::ShipType::destroyer ;
+
+        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.speed, type));
         invaders_[inv.identity] = std::move(invader);
     };
 
@@ -1177,13 +1236,14 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.numEnemies    = profile.numEnemies;
     setup.spawnCount    = profile.spawnCount;
     setup.spawnInterval = profile.spawnInterval;
-    setup.numBombs      = 2;
-    setup.numWarps      = 2;
+    setup.numBombs      = unlimitedBombs_ ? std::numeric_limits<unsigned>::max() : 2;
+    setup.numWarps      = unlimitedWarps_ ? std::numeric_limits<unsigned>::max() : 2;
     game_->play(levels_[levelIndex].get(), setup);
 
-    level_      = levelIndex;
-    profile_    = profileIndex;
-    tick_delta_ = 0;
+    level_       = levelIndex;
+    profile_     = profileIndex;
+    tickDelta_   = 0;
+    warpFactor_  = 1.0;
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -1240,7 +1300,17 @@ void GameWidget::setProfile(const Profile& profile)
 
 void GameWidget::setMasterUnlock(bool onOff)
 {
-    master_unlock_ = onOff;
+    masterUnlock_ = onOff;
+}
+
+void GameWidget::setUnlimitedWarps(bool onOff)
+{
+    unlimitedWarps_ = onOff;
+}
+
+void GameWidget::setUnlimitedBombs(bool onOff)
+{
+    unlimitedBombs_ = onOff;
 }
 
 
@@ -1250,24 +1320,17 @@ void GameWidget::timerEvent(QTimerEvent* timer)
 
     // milliseconds
     const auto now  = timer_.elapsed();
-    const auto time = now - time_stamp_;
+    const auto time = (now - timeStamp_);
     const auto tick  = 1000.0 / profiles_[profile_].speed;    
     if (!time) 
         return;
 
-    background_->update(time);
-    if (menu_) 
-        menu_->update(time);    
-    if (fleet_) 
-        fleet_->update(time);
-
-    // fragment of time expressed in ticks
-    const auto ticks = time / tick;
+    background_->update(time * warpFactor_);
 
     if (gameIsRunning())
     {
-        tick_delta_ += time;
-        if (tick_delta_ >= tick)
+        tickDelta_ += (time * warpFactor_);
+        if (tickDelta_ >= tick)
         {
             // advance game by one tick
             game_->tick();
@@ -1282,17 +1345,21 @@ void GameWidget::timerEvent(QTimerEvent* timer)
                 const auto pos  = state.toNormalizedViewSpace(view);
                 inv->setPosition(pos);
             }
-            tick_delta_ = 0;
+            tickDelta_ = 0;
         }
         else
         {
+            // fragment of time expressed in ticks
+            const auto ticks = (time * warpFactor_) / tick;
             for (auto& pair : invaders_)
             {
                 auto& invader = pair.second;
-                invader->update(time, ticks, state);
+                invader->update(time * warpFactor_, ticks, state);
             }
         }
     }
+
+    const auto ticks = time / tick;
 
     // update animations
     for (auto it = std::begin(animations_); it != std::end(animations_);)
@@ -1309,7 +1376,18 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     // trigger redraw
     update();
 
-    time_stamp_ = now;
+    timeStamp_ = now;
+
+    if (warpDuration_) 
+    {
+        warpDuration_ = clamp(0, (int)warpDuration_ - (int)time, (int)warpDuration_);
+        if (!warpDuration_)
+        {
+            warpFactor_ = 1.0;
+            qDebug() << "warp ended";
+        }
+    }
+
 }
 
 void GameWidget::paintEvent(QPaintEvent* paint)
@@ -1408,7 +1486,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         {
             const auto level   = menu_->selectedLevel();
             const auto profile = menu_->selectedProfile();
-            if (!info_[level].locked || master_unlock_)
+            if (!info_[level].locked || masterUnlock_)
             {
                 startGame(level, profile);
                 quitMenu();
@@ -1490,6 +1568,7 @@ void GameWidget::quitLevel()
         invaders_.clear();
         animations_.clear();
     }
+    warpFactor_ = 1.0;
 }
 
 } // invaders
