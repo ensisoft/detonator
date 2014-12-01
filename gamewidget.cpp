@@ -58,13 +58,7 @@ QString R(const QString& s)
         return resname;
 
     static const auto& inst = QApplication::applicationDirPath();
-    QString filename = inst + "/" + s;
-    if (!QFileInfo(filename).exists())
-    {
-        qDebug() << "Missing resource" << filename;
-    }
-
-    return filename;
+    return inst + "/" + s;
 }
 
 QString F(const QString& s) 
@@ -217,7 +211,8 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(QVector2D position, quint64 lifetime) : position_(position), lifetime_(lifetime), time_(0)
+    Explosion(QVector2D position, quint64 start, quint64 lifetime) : 
+        position_(position), start_(start), life_(lifetime), time_(0)
     {
         const auto particles = 100;
         const auto angle = (M_PI * 2) / particles;
@@ -240,7 +235,10 @@ public:
     virtual bool update(quint64 dt, float tick, TransformState& state) override
     {
         time_ += dt;
-        if (time_ > lifetime_)
+        if (time_ < start_)
+            return true;
+
+        if (time_ - start_ > life_)
             return false;
 
         for (auto& p : particles_)
@@ -253,8 +251,10 @@ public:
     }
     virtual void paint(QPainter& painter, TransformState& state) override
     {
+        if (time_ < start_)
+            return;
+
         const auto pos = state.toViewSpace(position_);
-        const auto dim = state.getScale();
 
         QColor color(102, 102, 102);
         QBrush brush(color);
@@ -267,8 +267,8 @@ public:
         }
 
         // explosion texture has 80 phases for the explosion
-        const auto phase  = lifetime_ / 80.0;
-        const int  index  = time_ / phase;
+        const auto phase  = life_ / 80.0;
+        const int  index  = (time_ - start_) / phase;
 
         const auto row = index / 10;
         const auto col = index % 10;
@@ -285,9 +285,11 @@ public:
 
         QPixmap tex = Explosion::texture();
         painter.drawPixmap(pos, tex, src);
-
-
     }
+
+    QVector2D getPosition() const
+    { return position_; }
+
 private:
     static QPixmap texture()
     {
@@ -302,15 +304,17 @@ private:
     std::vector<particle> particles_;
 private:
     QVector2D position_;    
-    quint64 lifetime_;
+    quint64 start_;
+    quint64 life_;
     quint64 time_;
 };
 
 
-class GameWidget::Invader
+class GameWidget::Invader : public GameWidget::Animation
 {
 public:
-    Invader(QVector2D position, QString str, unsigned speed) : position_(position), text_(str), speed_(speed)
+    Invader(QVector2D position, QString str, unsigned speed) : 
+        position_(position), text_(str), time_(0), expire_(0), speed_(speed)
     {}
 
     void setPosition(QVector2D position)
@@ -318,11 +322,18 @@ public:
         position_ = position;
     }
 
-    void update(float tick, TransformState& state)
+    bool update(quint64 dt, float tick, TransformState& state)
     {
         const auto unit = state.toViewSpace(QPoint(-speed_, 0));
         const auto norm = state.toNormalizedViewSpace(unit);
         position_ += (norm * tick);
+        if (expire_)
+        {
+            time_ += dt;
+            if (time_ > expire_)
+                return false;
+        }
+        return true;
     }
 
     void paint(QPainter& painter, TransformState& state)
@@ -369,6 +380,9 @@ public:
         return position_ + norm * ticksLater;
     }
 
+    void expireIn(quint64 ms)
+    { expire_ = ms; }
+
     unsigned getSpeed() const 
     { return speed_; }
 
@@ -385,20 +399,35 @@ private:
 private:
     QVector2D position_;
     QString text_;
+    quint64 time_;
+    quint64 expire_;
 private:
     unsigned speed_;
 };
 
-class GameWidget::Missile
+class GameWidget::Missile : public GameWidget::Animation
 {
 public:
-    Missile(QVector2D pos, QString str) : position_(pos), text_(str)
+    Missile(QVector2D pos, QVector2D dir, quint64 lifetime, QString str) : 
+        position_(pos), direction_(dir), life_(lifetime), time_(0), text_(str)
     {}
 
     // set position in normalized widget space
     void setPosition(QVector2D pos)
     {
         position_ = pos;
+    }
+
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    {
+        time_ += dt;
+        if (time_ > life_)
+            return false;
+
+        const auto d = (float)dt / (float)life_;
+        const auto p = direction_ * d;
+        position_ += p;
+        return true;
     }
 
     void paint(QPainter& painter, TransformState& state)
@@ -427,52 +456,10 @@ public:
 
 private:
     QVector2D position_;
-    QString text_;
-};
-
-//
-class GameWidget::MissileLaunch : public GameWidget::Animation
-{
-public:
-    MissileLaunch(std::unique_ptr<Invader> i,std::unique_ptr<Missile> m, quint64 lifetime, quint64 tick, const TransformState& state)
-        : invader_(std::move(i)), missile_(std::move(m)), lifetime_(lifetime), time_(0)
-    {
-
-        const auto unit  = state.getNormalizedScale();
-        const auto ticks = (float)lifetime / (float)tick;
-        const auto a = missile_->getPosition();
-        const auto b = invader_->getPosition(ticks, state) + (unit / 2.0);
-        direction_ = b - a;
-    }
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
-    {
-        time_ += dt;
-        if (time_ >= lifetime_)
-            return false;
-
-        const auto d = (double)dt / (double)lifetime_;
-        const auto p = direction_ * d;
-        const auto n = missile_->getPosition();
-        missile_->setPosition(n + p);
-        invader_->update(tick, state);
-        return true;
-    }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {
-        invader_->paint(painter, state);
-        missile_->paint(painter, state);
-    }
-    QVector2D getPosition() const 
-    { return invader_->getPosition(); }
-
-private:
-    std::unique_ptr<Invader> invader_;
-    std::unique_ptr<Missile> missile_;
-private:
-    quint64 lifetime_;
-    quint64 time_;
     QVector2D direction_;
+    quint64 life_;
+    quint64 time_;
+    QString text_;
 };
 
 
@@ -528,7 +515,7 @@ private:
         std::vector<QPixmap> v;
         for (int i=1; i<=90; ++i)
         {
-            v.push_back(R(QString("textures/bomb/explosion1_00%1.png").arg(i)));
+            v.push_back(R("textures/bomb/explosion1_00%1.png").arg(i));
         }
         return v;
     }
@@ -543,6 +530,52 @@ private:
     quint64 lifetime_;
     quint64 time_;
 };
+
+class GameWidget::Score : public GameWidget::Animation
+{
+public:
+    Score(QVector2D position, quint64 start, quint64 lifetime, unsigned score) : 
+        position_(position), start_(start), life_(lifetime), time_(0), score_(score)
+    {}
+
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    {
+        time_ += dt;
+        if (time_ < start_)
+            return true;
+        return time_ - start_ < life_;
+    }
+
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        if (time_ < start_)
+            return;
+
+        const auto alpha = 1.0 - (float)(time_ - start_ )/ (float)life_;
+        const auto dim = state.getScale();        
+        const auto top = state.toViewSpace(position_);
+        const auto end = top + dim;
+
+        QColor color(Qt::darkYellow);
+        color.setAlpha(0xff * alpha);
+
+        QPen pen;
+        pen.setWidth(2);
+        pen.setColor(color);
+        QFont font("Arcade");
+        font.setPixelSize(dim.y() / 2.0);
+        painter.setPen(pen);
+        painter.setFont(font);
+        painter.drawText(QRect(top, end), Qt::AlignCenter, QString("%1").arg(score_));
+    }
+private:
+    QVector2D position_;
+    quint64 start_;
+    quint64 life_;
+    quint64 time_;
+    unsigned score_;
+};
+
 
 
 // game space background rendering
@@ -975,7 +1008,7 @@ public:
         painter.drawText(header, Qt::AlignCenter, 
             "Kill the following enemies\n");
 
-        for (auto i=0; i<enemies.size(); ++i)
+        for (size_t i=0; i<enemies.size(); ++i)
         {
             const auto& e   = enemies[i];
             const auto col  = i % cols;
@@ -1010,13 +1043,31 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
         TransformState state(rect(), *game_);
 
-        const auto tick = 1000 / profiles_[profile_].speed;
+        std::unique_ptr<Invader> invader(it->second.release());
 
-        std::unique_ptr<Invader> inv(std::move(it->second));
-        std::unique_ptr<Missile> mis(new Missile(m.position, m.string.toUpper()));
-        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 500, tick, state));
+        // calculate position for the invader to be in at now + missile fly time
+        // and then aim the missile to that position.
+        const auto unit  = state.getNormalizedScale();        
+        const auto tick  = 1000.0 / profiles_[profile_].speed;
 
-        animations_.push_back(std::move(anim));
+        const auto missileFlyTime   = 500;
+        const auto explosionTime    = 1000;
+        const auto missileFlyTicks  = missileFlyTime / tick;
+        const auto futurePosition   = invader->getPosition(missileFlyTicks, state);
+        const auto missileEnd       = futurePosition + (unit / 2.0); // aim in the middle of the unit
+        const auto missileBeg       = m.position;
+        const auto missileDir       = missileEnd - missileBeg;
+
+        std::unique_ptr<Missile> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
+        std::unique_ptr<Explosion> explosion(new Explosion(futurePosition, missileFlyTime, explosionTime));
+        std::unique_ptr<Score> score(new Score(missileEnd, explosionTime, 2000, i.score));        
+
+        invader->expireIn(missileFlyTime);
+        animations_.push_back(std::move(invader));
+        animations_.push_back(std::move(missile));
+        animations_.push_back(std::move(explosion));
+        animations_.push_back(std::move(score));
+
         invaders_.erase(it);
     };
 
@@ -1025,7 +1076,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         auto it = invaders_.find(i.identity);
         auto& inv = it->second;
 
-        std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 1000));
+        std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000));
         animations_.push_back(std::move(explosion));
         invaders_.erase(it);
     };
@@ -1116,7 +1167,7 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
 
     // todo: use a deterministic seed or not?
     //std::srand(std::time(nullptr));
-    std::srand(0x7f6a4b + levelIndex ^ profileIndex);
+    std::srand(0x7f6a4b + (levelIndex ^ profileIndex));
 
     level->reset();
     player_->reset();
@@ -1238,7 +1289,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             for (auto& pair : invaders_)
             {
                 auto& invader = pair.second;
-                invader->update(ticks, state);
+                invader->update(time, ticks, state);
             }
         }
     }
@@ -1249,12 +1300,6 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         auto& anim = *it;
         if (!anim->update(time, ticks, state))
         {
-            if (auto* p = dynamic_cast<MissileLaunch*>(anim.get()))
-            {
-                const auto pos = p->getPosition();
-                std::unique_ptr<Animation> expl(new Explosion(pos, 1000));
-                animations_.push_back(std::move(expl));
-            }
             it = animations_.erase(it);
             continue;
         }

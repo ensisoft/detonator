@@ -175,9 +175,10 @@ unsigned Game::killScore(const invader& inv) const
     if (inv.xpos < DangerZone)
         return 0;
 
-    const auto xpos  = (float)inv.xpos - DangerZone;
-    const auto width = (float)width_ - DangerZone - 1; // width_'th column is not even visible
-    const auto bonus = xpos / width;
+    const auto xpos   = (float)inv.xpos - DangerZone;
+    const auto width  = (float)width_ - DangerZone - 1; // width_'th column is not even visible
+    const auto points = inv.score * inv.speed;
+    const auto bonus  = xpos / width;
 
     return inv.score +  (inv.score * bonus);
 }

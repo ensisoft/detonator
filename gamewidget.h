@@ -112,7 +112,7 @@ namespace invaders
         class Animation;
         class Explosion;
         class BigExplosion;
-        class MissileLaunch;
+        class Score;
         class Invader;
         class Missile;
         class Background;
@@ -122,6 +122,7 @@ namespace invaders
         class Menu;
         class Help;
         class Fleet;
+
 
     private:
         std::unique_ptr<Background> background_;
