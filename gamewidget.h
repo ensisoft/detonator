@@ -111,6 +111,7 @@ namespace invaders
     private:
         class Animation;
         class Explosion;
+        class BigExplosion;
         class MissileLaunch;
         class Invader;
         class Missile;

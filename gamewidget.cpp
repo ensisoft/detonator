@@ -34,7 +34,9 @@
 #  include <QtGui/QPixmap>
 #  include <QtGui/QFont>
 #  include <QtGui/QFontMetrics>
+#  include <QtGui/QApplication>
 #  include <QResource>
+#  include <QFileInfo>
 #  include <QtDebug>
 #include "warnpop.h"
 #include <cmath>
@@ -47,6 +49,29 @@ namespace invaders
 {
 
 const auto LevelUnlockCriteria = 0.85;
+
+QString R(const QString& s) 
+{ 
+    QString resname = ":/dist/" + s;
+    QResource resource(resname);
+    if (resource.isValid())
+        return resname;
+
+    static const auto& inst = QApplication::applicationDirPath();
+    QString filename = inst + "/" + s;
+    if (!QFileInfo(filename).exists())
+    {
+        qDebug() << "Missing resource" << filename;
+    }
+
+    return filename;
+}
+
+QString F(const QString& s) 
+{ 
+    const auto inst = QApplication::applicationDirPath();
+    return inst + s;
+}
 
 // game space is discrete space from 0 to game::width() - 1 on X axis
 // and from 0 to game::height() - 1 on Y axis
@@ -266,7 +291,7 @@ public:
 private:
     static QPixmap texture()
     {
-        static QPixmap px(":/textures/ExplosionMap.png");
+        static QPixmap px(R("textures/ExplosionMap.png"));
         return px;
     }
     struct particle {
@@ -353,7 +378,7 @@ public:
 private:
     static const QPixmap& texture() 
     {
-        static QPixmap px(":/textures/SpaceShipNormal.png");
+        static QPixmap px(R("textures/SpaceShipNormal.png"));
         return px;
     }
 
@@ -451,12 +476,80 @@ private:
 };
 
 
+class GameWidget::BigExplosion : public GameWidget::Animation
+{
+public:
+    BigExplosion(quint64 lifetime) : lifetime_(lifetime), time_(0)
+    {}
+
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    {
+        time_ += dt;
+        if (time_ > lifetime_)
+            return false;
+        return true;
+    }
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        const auto phase  = lifetime_ / 90.0;
+        const auto index  = time_ / phase;
+        if (index >= 90)
+            return;
+        const auto pixmap = loadTexture(index);
+
+        const auto pxw = pixmap.width();
+        const auto pxh = pixmap.height();
+        const auto aspect = (float)pxh / (float)pxw;
+
+        const auto numExplosions = 3;
+
+        const auto explosionWidth  = state.viewWidth();
+        const auto explosionHeight = explosionWidth * aspect;
+        const auto xpos = state.viewWidth() / (numExplosions + 1);
+        const auto ypos = (state.viewHeight() - explosionHeight) / 2;
+
+        auto yoffset = 50.0;
+        auto xoffset = -explosionWidth / 2.0;        
+        for (auto i=0; i<numExplosions; ++i)
+        {
+            painter.drawPixmap((i+1) * xpos + xoffset, ypos + yoffset, explosionWidth, explosionHeight, pixmap);
+            yoffset *= -1;
+        }
+    }
+
+    static void prepare()
+    {
+        loadTexture(0);
+    }
+
+private:
+    static std::vector<QPixmap> loadTextures()
+    {
+        std::vector<QPixmap> v;
+        for (int i=1; i<=90; ++i)
+        {
+            v.push_back(R(QString("textures/bomb/explosion1_00%1.png").arg(i)));
+        }
+        return v;
+    }
+    static QPixmap loadTexture(int index)
+    {
+        static auto textures = loadTextures();
+        Q_ASSERT(index > 0);
+        Q_ASSERT(index < textures.size());        
+        return textures[index];
+    }
+private:
+    quint64 lifetime_;
+    quint64 time_;
+};
+
 
 // game space background rendering
 class GameWidget::Background
 {
 public:
-    Background() : texture_(":textures/SpaceBackground.png")
+    Background() : texture_(R("textures/SpaceBackground.png"))
     {
         std::srand(std::time(nullptr));
 
@@ -564,8 +657,8 @@ public:
         const auto& result = score.maxpoints ? 
             (float)score.points / (float)score.maxpoints * 100 : 0.0;
         const auto& format = QString("%1").arg(result, 0, 'f', 0);            
-        const auto& text   = QString("Level %1 Score %2 (%3%) Enemies %4 (F1 for help)")
-            .arg(level_).arg(score.points).arg(format).arg(score.pending);
+        const auto bombs   = game_.numBombs();
+        const auto warps   = game_.numWarps();
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -577,7 +670,14 @@ public:
         font.setPixelSize(scale.y() / 2);
         painter.setFont(font);
 
-        painter.drawText(area, Qt::AlignLeft | Qt::AlignVCenter, text);
+        painter.drawText(area, Qt::AlignCenter,
+            QString("Level %1 Score %2 (%3%) | Enemies x %4 | Bombs x %5 | Warps x %6 | (F1 for help)")
+                .arg(level_)
+                .arg(score.points)
+                .arg(format)
+                .arg(score.pending)
+                .arg(bombs)
+                .arg(warps));
     }
     void setLevel(unsigned number)
     { level_ = number; }
@@ -837,6 +937,8 @@ public:
             "the pinyin string and score no points.\n"
             "You will lose points for invaders that you faill to kill.\n"
             "Score %1% or higher to unlock the next level.\n\n"
+            "Type BOMB to ignite a bomb\n"
+            "Type WARP to enter a timewarp\n\n"
             "Press Esc to exit\n").arg(str));
     }
 };
@@ -896,11 +998,13 @@ private:
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0), tick_delta_(0), time_stamp_(0), master_unlock_(false)
 {
-    QFontDatabase::addApplicationFont(":/fonts/ARCADE.TTF");
+    QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
+
+    BigExplosion::prepare();
 
     game_.reset(new Game(20, 10));
 
-    game_->on_missile_kill = [&](const Game::invader& i, const Game::missile& m)
+    game_->onMissileKill = [&](const Game::invader& i, const Game::missile& m)
     {
         auto it = invaders_.find(i.identity);
 
@@ -916,7 +1020,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         invaders_.erase(it);
     };
 
-    game_->on_bomb_kill = [&](const Game::invader& i, const Game::bomb& b)
+    game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b)
     {
         auto it = invaders_.find(i.identity);
         auto& inv = it->second;
@@ -926,7 +1030,13 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         invaders_.erase(it);
     };
 
-    game_->on_invader_spawn = [&](const Game::invader& inv) 
+    game_->onBomb = [&]() 
+    {
+        std::unique_ptr<Animation> explosion(new BigExplosion(1500));
+        animations_.push_back(std::move(explosion));
+    };
+
+    game_->onInvaderSpawn = [&](const Game::invader& inv) 
     {
         TransformState state(rect(), *game_);
 
@@ -936,20 +1046,20 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
         invaders_[inv.identity] = std::move(invader);
     };
 
-    game_->on_invader_victory = [&](const Game::invader& inv) 
+    game_->onInvaderVictory = [&](const Game::invader& inv) 
     {
         invaders_.erase(inv.identity);
     };
 
     // invader is almost escaping unharmed. we help the player to learn
     // by changing the text from chinese to the pinyin kill string
-    game_->on_invader_warning = [&](const Game::invader& inv)
+    game_->onInvaderWarning = [&](const Game::invader& inv)
     {
         auto it = invaders_.find(inv.identity);
         it->second->showHelp(inv.killstring);
     };
 
-    game_->on_level_complete = [&](const Game::score& score)
+    game_->onLevelComplete = [&](const Game::score& score)
     {
         qDebug() << "Level complete: points" << score.points << "maxpoints" << score.maxpoints;
 
@@ -1016,6 +1126,8 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.numEnemies    = profile.numEnemies;
     setup.spawnCount    = profile.spawnCount;
     setup.spawnInterval = profile.spawnInterval;
+    setup.numBombs      = 2;
+    setup.numWarps      = 2;
     game_->play(levels_[levelIndex].get(), setup);
 
     level_      = levelIndex;

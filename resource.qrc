@@ -6,10 +6,10 @@
     <file>icons/ico_play.png</file>
     <file>icons/ico_life.png</file>
 
-    <file>fonts/ARCADE.TTF</file>
+    <file>dist/fonts/ARCADE.TTF</file>
 
-    <file>textures/SpaceShipNormal.png</file>
-    <file>textures/SpaceBackground.png</file>
-    <file>textures/ExplosionMap.png</file>
+    <file>dist/textures/SpaceShipNormal.png</file>
+    <file>dist/textures/SpaceBackground.png</file>
+    <file>dist/textures/ExplosionMap.png</file>
   </qresource>
 </RCC>        

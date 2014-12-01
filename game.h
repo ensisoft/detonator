@@ -75,14 +75,17 @@ namespace invaders
             unsigned numEnemies;
             unsigned spawnCount;
             unsigned spawnInterval;
+            unsigned numBombs;
+            unsigned numWarps;
         };
 
-        std::function<void (const invader&, const missile& m)> on_missile_kill;
-        std::function<void (const invader&, const bomb& b)> on_bomb_kill;
-        std::function<void (const invader&)> on_invader_spawn;        
-        std::function<void (const invader&)> on_invader_victory;
-        std::function<void (const invader&)> on_invader_warning;
-        std::function<void (const score&)> on_level_complete;
+        std::function<void (const invader&, const missile& m)> onMissileKill;
+        std::function<void (const invader&, const bomb& b)> onBombKill;
+        std::function<void ()> onBomb;
+        std::function<void (const invader&)> onInvaderSpawn;        
+        std::function<void (const invader&)> onInvaderVictory;
+        std::function<void (const invader&)> onInvaderWarning;
+        std::function<void (const score&)> onLevelComplete;
 
         Game(unsigned width, unsigned heigth);
        ~Game();
@@ -109,6 +112,12 @@ namespace invaders
         // get game space height
         unsigned height() const
         { return height_; }
+
+        unsigned numBombs() const 
+        { return setup_.numBombs; }
+
+        unsigned numWarps() const
+        { return setup_.numWarps; }
 
         const 
         score& getScore() const 

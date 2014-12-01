@@ -52,7 +52,7 @@ void Game::tick()
     for (auto it = end; it != std::end(invaders_); ++it)
     {
         const auto& inv = *it;
-        on_invader_victory(inv);
+        onInvaderVictory(inv);
         score_.points -= std::min(inv.score, score_.points);
         score_.victor++;
         score_.pending--;
@@ -66,7 +66,7 @@ void Game::tick()
         i.xpos -= i.speed;
         if (i.xpos < DangerZone)
         {
-            on_invader_warning(i);
+            onInvaderWarning(i);
         }
     }
 
@@ -77,7 +77,7 @@ void Game::tick()
 
         if (invaders_.empty())
         {
-            on_level_complete(score_);
+            onLevelComplete(score_);
             level_ = nullptr;
         }
     }
@@ -107,13 +107,16 @@ void Game::fire(const Game::missile& missile)
     score_.killed++;
     score_.pending--;
 
-    on_missile_kill(*it, missile);
+    onMissileKill(*it, missile);
 
     invaders_.erase(it);
 }
 
 void Game::ignite(const bomb& b)
 {
+    if (!setup_.numBombs)
+        return;
+
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
             return i.xpos < width_;
@@ -126,9 +129,13 @@ void Game::ignite(const bomb& b)
         score_.points += inv.score;
         score_.killed++;
         score_.pending--;
-        on_bomb_kill(inv, b);
+        onBombKill(inv, b);
     }
     invaders_.erase(std::begin(invaders_), end);
+
+    onBomb();    
+
+    setup_.numBombs--;
 }
 
 void Game::enter(const timewarp& w)
@@ -196,7 +203,7 @@ void Game::spawn()
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
-        on_invader_spawn(inv);
+        onInvaderSpawn(inv);
         spawned_++;
         score_.maxpoints += (enemy.score * 2);
         batch[inv.ypos]++;
