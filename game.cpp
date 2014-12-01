@@ -21,7 +21,6 @@
 //  THE SOFTWARE.            
 
 #include "config.h"
-
 #include <algorithm>
 #include <map>
 #include <cstdlib>
@@ -48,7 +47,7 @@ void Game::tick()
     // prune invaders
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.xpos > i.velocity;
+            return i.xpos > i.speed;
         });
     for (auto it = end; it != std::end(invaders_); ++it)
     {
@@ -64,7 +63,7 @@ void Game::tick()
     // update live invaders
     for (auto& i : invaders_)
     {
-        i.xpos -= i.velocity;
+        i.xpos -= i.speed;
         if (i.xpos < DangerZone)
         {
             on_invader_warning(i);
@@ -119,8 +118,6 @@ void Game::ignite(const bomb& b)
         [&](const invader& i) {
             return i.xpos < width_;
         });
-    if (end == std::end(invaders_))
-        return;
 
     for (auto it = std::begin(invaders_); it != end; ++it)
     {
@@ -197,7 +194,7 @@ void Game::spawn()
         inv.ypos       = std::rand() % height_;
         inv.xpos       = width_ + batch[inv.ypos] + i;
         inv.identity   = identity_++;
-        inv.velocity   = 1 + (!(std::rand() % 5));
+        inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
         on_invader_spawn(inv);
         spawned_++;

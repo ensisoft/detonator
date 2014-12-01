@@ -63,11 +63,28 @@ const auto LevelUnlockCriteria = 0.85;
 class TransformState 
 {
 public:
+    TransformState(const QRect& window, const Game& game)
+    {
+        // we divide the widget's client area into a equal sized cells
+        // according to the game's size. We also add one extra row 
+        // for HUD display at the top of the screen and for the player
+        // at the bottom of the screen. This provides the basic layout
+        // for the game in a way that doesnt depend on any actual
+        // viewport size.        
+        const auto numCols = game.width();
+        const auto numRows = game.height() + 2;
+        // divide the widget's client area int equal sized cells
+        widget_ = QPoint(window.width(), window.height());
+        scale_  = QPoint(window.width() / numCols, window.height() / numRows);        
+        size_   = QPoint(numCols, numRows);
+    }
+
     TransformState(const QRect& window, int numCols, int numRows)
     {
         // divide the widget's client area int equal sized cells
         widget_ = QPoint(window.width(), window.height());
         scale_  = QPoint(window.width() / numCols, window.height() / numRows);
+        size_   = QPoint(numCols, numRows);        
     }
 
     QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const 
@@ -103,6 +120,14 @@ public:
         return scale_; 
     }
 
+    QVector2D getNormalizedScale() const 
+    {
+        const auto scale  = getScale();
+        const auto width  = (float)viewWidth();
+        const auto height = (float)viewHeight();
+        return {scale.x() / width, scale.y() / height};
+    }
+
     // get whole widget rect in widget coordinates
     QRect viewRect() const 
     { 
@@ -120,9 +145,16 @@ public:
     { 
         return widget_.y(); 
     }
+
+    int numCols() const
+    { return size_.x(); }
+
+    int numRows() const 
+    { return size_.y(); }
 private:
     QPoint widget_;
     QPoint scale_;
+    QPoint size_;
 };
 
 float wrap(float max, float val, float wrap)
@@ -253,7 +285,7 @@ private:
 class GameWidget::Invader
 {
 public:
-    Invader(QVector2D position, QString str, unsigned velocity) : position_(position), text_(str), velocity_(velocity)
+    Invader(QVector2D position, QString str, unsigned speed) : position_(position), text_(str), speed_(speed)
     {}
 
     void setPosition(QVector2D position)
@@ -263,9 +295,9 @@ public:
 
     void update(float tick, TransformState& state)
     {
-        const auto unit = state.toViewSpace(QPoint(-velocity_, 0));
-        const auto off  = state.toNormalizedViewSpace(unit);
-        position_ += (off * tick);
+        const auto unit = state.toViewSpace(QPoint(-speed_, 0));
+        const auto norm = state.toNormalizedViewSpace(unit);
+        position_ += (norm * tick);
     }
 
     void paint(QPainter& painter, TransformState& state)
@@ -297,13 +329,27 @@ public:
         painter.setPen(pen);
         painter.drawText(rect, Qt::AlignCenter, text_);
     }
+
+    // get current position
     QVector2D getPosition() const 
     {
         return position_;
     }
 
+    // get the position at ticksLater ticks time
+    QVector2D getPosition(float ticksLater, const TransformState& state) const 
+    {
+        const auto unit = state.toViewSpace(QPoint(-speed_, 0));
+        const auto norm = state.toNormalizedViewSpace(unit);
+        return position_ + norm * ticksLater;
+    }
+
+    unsigned getSpeed() const 
+    { return speed_; }
+
     void showHelp(const QString& help)
     { text_ = help; }
+
 private:
     static const QPixmap& texture() 
     {
@@ -315,7 +361,7 @@ private:
     QVector2D position_;
     QString text_;
 private:
-    unsigned velocity_;
+    unsigned speed_;
 };
 
 class GameWidget::Missile
@@ -363,11 +409,14 @@ private:
 class GameWidget::MissileLaunch : public GameWidget::Animation
 {
 public:
-    MissileLaunch(std::unique_ptr<Invader> i,std::unique_ptr<Missile> m,
-        quint64 lifetime) : invader_(std::move(i)), missile_(std::move(m)), lifetime_(lifetime), time_(0)
+    MissileLaunch(std::unique_ptr<Invader> i,std::unique_ptr<Missile> m, quint64 lifetime, quint64 tick, const TransformState& state)
+        : invader_(std::move(i)), missile_(std::move(m)), lifetime_(lifetime), time_(0)
     {
+
+        const auto unit  = state.getNormalizedScale();
+        const auto ticks = (float)lifetime / (float)tick;
         const auto a = missile_->getPosition();
-        const auto b = invader_->getPosition();
+        const auto b = invader_->getPosition(ticks, state) + (unit / 2.0);
         direction_ = b - a;
     }
     virtual bool update(quint64 dt, float tick, TransformState& state) override
@@ -594,7 +643,6 @@ public:
             {
                 Game::bomb b;
                 game.ignite(b);
-                qDebug() << "Bomb launched";
             }
             else if (text_ == "WARP")
             {
@@ -856,9 +904,13 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
     {
         auto it = invaders_.find(i.identity);
 
+        TransformState state(rect(), *game_);
+
+        const auto tick = 1000 / profiles_[profile_].speed;
+
         std::unique_ptr<Invader> inv(std::move(it->second));
         std::unique_ptr<Missile> mis(new Missile(m.position, m.string.toUpper()));
-        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 500));
+        std::unique_ptr<Animation> anim(new MissileLaunch(std::move(inv), std::move(mis), 500, tick, state));
 
         animations_.push_back(std::move(anim));
         invaders_.erase(it);
@@ -876,13 +928,11 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent), level_(0), profile_(0
 
     game_->on_invader_spawn = [&](const Game::invader& inv) 
     {
-        const auto cols = game_->width();
-        const auto rows = game_->height() + 2;
-        TransformState state(rect(), cols, rows);
+        TransformState state(rect(), *game_);
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
-        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.velocity));
+        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.speed));
         invaders_[inv.identity] = std::move(invader);
     };
 
@@ -1033,16 +1083,7 @@ void GameWidget::setMasterUnlock(bool onOff)
 
 void GameWidget::timerEvent(QTimerEvent* timer)
 {
-    // we divide the widget's client area into a equal sized cells
-    // according to the game's size. We also add one extra row 
-    // for HUD display at the top of the screen and for the player
-    // at the bottom of the screen. This provides the basic layout
-    // for the game in a way that doesnt depend on any actual
-    // viewport size.
-    const auto cols = game_->width();
-    const auto rows = game_->height() + 2;
-
-    TransformState state(rect(), cols, rows);
+    TransformState state(rect(), *game_);
 
     // milliseconds
     const auto now  = timer_.elapsed();
@@ -1060,7 +1101,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     // fragment of time expressed in ticks
     const auto ticks = time / tick;
 
-    if (!isPaused())
+    if (gameIsRunning())
     {
         tick_delta_ += time;
         if (tick_delta_ >= tick)
@@ -1119,17 +1160,11 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     QPainter painter(this);
     painter.setRenderHints(QPainter::HighQualityAntialiasing);
 
-    // we divide the widget's client area into a equal sized cells
-    // according to the game's size. We also add one extra row 
-    // for HUD display at the top of the screen and for the player
-    // at the bottom of the screen. This provides the basic layout
-    // for the game in a way that doesnt depend on any actual
-    // viewport size.
-    const auto cols = game_->width();
-    const auto rows = game_->height() + 2;
-    const auto rect = this->rect();
+    TransformState state(rect(), *game_);
 
-    TransformState state(rect, cols, rows);
+    const auto cols = state.numCols();
+    const auto rows = state.numRows();
+    const auto rect = this->rect();    
 
     background_->paint(painter, rect, state.getScale());
 
@@ -1249,9 +1284,9 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     update();
 }
 
-bool GameWidget::isPaused() const 
+bool GameWidget::gameIsRunning() const
 {
-    return !!fleet_;
+    return !menu_ && !fleet_ && !help_;
 }
 
 void GameWidget::showMenu()

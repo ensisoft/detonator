@@ -98,7 +98,7 @@ namespace invaders
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
-        bool isPaused() const;
+        bool gameIsRunning() const;
         void showMenu();
         void showFleet();
         void showHelp();
