@@ -91,15 +91,17 @@ void Game::tick()
 
 void Game::fire(const Game::missile& missile)
 {
-    auto pos = width_;
-
-    auto it = std::find_if(std::begin(invaders_), std::end(invaders_),
+    auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return (i.killstring == missile.string) && 
-                   (i.xpos < pos);
+            return i.killstring == missile.string;
         });
-    if (it == std::end(invaders_))
+    if (end == std::begin(invaders_))
         return;
+
+    auto it = std::min_element(std::begin(invaders_), end, 
+        [&](const invader& a, const invader& b) {
+            return a.xpos < b.xpos;
+        });
 
     auto& inv = *it;
     inv.score = killScore(inv);
@@ -206,7 +208,7 @@ void Game::spawn()
         inv.string     = enemy.string;
         inv.score      = enemy.score;            
         inv.ypos       = std::rand() % height_;
-        inv.xpos       = width_ + batch[inv.ypos] + i;
+        inv.xpos       = width_ + batch[inv.ypos] + i + 1;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
