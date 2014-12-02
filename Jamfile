@@ -29,4 +29,4 @@ exe invaders :
   : <user-interface>gui
 ;
 
-install dist : invaders ;
+install dist : invaders  README.md ;
