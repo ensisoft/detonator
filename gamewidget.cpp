@@ -93,6 +93,7 @@ public:
         const auto numCols = game.width();
         const auto numRows = game.height() + 2;
         // divide the widget's client area int equal sized cells
+        origin_ = QPoint(window.x(), window.y());
         widget_ = QPoint(window.width(), window.height());
         scale_  = QPoint(window.width() / numCols, window.height() / numRows);        
         size_   = QPoint(numCols, numRows);
@@ -101,6 +102,7 @@ public:
     TransformState(const QRect& window, int numCols, int numRows)
     {
         // divide the widget's client area int equal sized cells
+        origin_ = QPoint(window.x(), window.y());
         widget_ = QPoint(window.width(), window.height());
         scale_  = QPoint(window.width() / numCols, window.height() / numRows);
         size_   = QPoint(numCols, numRows);        
@@ -115,15 +117,15 @@ public:
 
     QPoint toViewSpace(const QPoint& game) const
     {
-        const int xpos = game.x() * scale_.x();
-        const int ypos = game.y() * scale_.y();
+        const int xpos = game.x() * scale_.x() + origin_.x();
+        const int ypos = game.y() * scale_.y() + origin_.y();
         return { xpos, ypos };
     }
 
     QPoint toViewSpace(const QVector2D& norm) const 
     {
-        const int xpos = widget_.x() * norm.x();
-        const int ypos = widget_.y() * norm.y();
+        const int xpos = widget_.x() * norm.x() + origin_.x();
+        const int ypos = widget_.y() * norm.y() + origin_.y();
         return { xpos, ypos };
     }
 
@@ -150,7 +152,7 @@ public:
     // get whole widget rect in widget coordinates
     QRect viewRect() const 
     { 
-        return {0, 0, widget_.x(), widget_.y()}; 
+        return {origin_.x(), origin_.y(), widget_.x(), widget_.y()}; 
     }
 
     // get widget width
@@ -171,15 +173,19 @@ public:
     int numRows() const 
     { return size_.y(); }
 private:
+    QPoint origin_;
     QPoint widget_;
     QPoint scale_;
     QPoint size_;
 };
 
-float wrap(float max, float val, float wrap)
+template<typename T>
+T wrap(T max, T min, T val)
 {
     if (val > max)
-        return wrap;
+        return min;
+    if (val < min)
+        return max;
     return val;
 }
 
@@ -192,6 +198,9 @@ T clamp(T min, T val, T max)
         return max;
     return val;
 }
+
+
+
 
 class GameWidget::Animation
 {
@@ -258,7 +267,7 @@ public:
         const auto unitScale = state.getScale();
         const auto position  = state.toViewSpace(position_);
 
-        QColor color(102, 102, 102);
+        QColor color(255, 255, 68);
         QBrush brush(color);
         for (const auto& particle : particles_)
         {
@@ -356,7 +365,7 @@ public:
         switch (type_)
         {
             case ShipType::cruiser:   return 2.0;
-            case ShipType::destroyer: return 1.8;
+            case ShipType::destroyer: return 2.5;
             case ShipType::mother:    return 4.0;
         }
         return 1.0;
@@ -664,8 +673,8 @@ public:
         const auto d = direction_ * (time / 1000.0);
         for (auto& p : particles_)
         {
-            p.x = wrap(1.0, p.x + d.x() * p.v, 0.0);
-            p.y = wrap(1.0, p.y + d.y() * p.v, 0.0);
+            p.x = wrap(1.0, 0.0, p.x + d.x() * p.v);
+            p.y = wrap(1.0, 0.0, p.y + d.y() * p.v);
         }
     }
 private:
@@ -820,7 +829,7 @@ public:
             else if (text_ == "WARP")
             {
                 Game::timewarp w;
-                w.duration = 2000;
+                w.duration = 3000;
                 w.factor   = 0.2;
                 game.enter(w);
             }
@@ -868,7 +877,7 @@ public:
     Menu(const std::vector<std::unique_ptr<Level>>& levels,
          const std::vector<GameWidget::LevelInfo>& infos,
          const std::vector<GameWidget::Profile>& profiles)
-    : levels_(levels), infos_(infos), profiles_(profiles), level_(0), profile_(0)
+    : levels_(levels), infos_(infos), profiles_(profiles), level_(0), profile_(0), selrow_(1)
     {}
 
     void update(quint64 time)
@@ -876,18 +885,31 @@ public:
 
     void paint(QPainter& painter, const QRect& area, const QPoint& unit)
     {
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkGray);
-        painter.setPen(pen);
+        QPen regular;
+        regular.setWidth(1);
+        regular.setColor(Qt::darkGray);
+        painter.setPen(regular);
 
         QFont font;
         font.setFamily("Arcade");
         font.setPixelSize(unit.y() / 2);        
         painter.setFont(font);
+
+        QFont underline;
+        underline.setFamily("Arcade");
+        underline.setUnderline(true);
+        underline.setPixelSize(unit.y() / 2);
+
+        QPen selected;
+        selected.setWidth(2);
+        selected.setColor(Qt::darkGreen);
+
+        QPen locked;
+        locked.setWidth(2);
+        locked.setColor(Qt::darkRed);
         
         const auto cols = 7;
-        const auto rows = 5;
+        const auto rows = 6;
         TransformState state(area, cols, rows);
 
         QRect rect;
@@ -900,25 +922,53 @@ public:
             "Enter - Fire\n"
             "Esc - Exit\n"
             "F1 - Help\n\n"
-            "Difficulty\n\n"
-            "Easy  Medium  Chinese");
+            "Difficulty\n");
 
-        rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
-        painter.drawText(rect, Qt::AlignCenter,
-            "Press Space to play!\n");
+        rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
 
-        QPen selected;
-        selected.setWidth(2);
-        selected.setColor(Qt::darkGreen);
 
-        //rect = state.toViewSpace(QPoint(2, 3), QPoint(3, 3));
 
-        QPen locked;
-        locked.setWidth(2);
-        locked.setColor(Qt::darkRed);
+        TransformState sub(rect, 3, 1);
+        rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));        
+        if (profile_ == 0)
+        {
+            painter.setFont(underline);            
+            if (selrow_ == 0)
+                painter.setPen(selected);        
+        }
 
-        font.setPixelSize(unit.y() / 2.5);
+        painter.drawText(rect, Qt::AlignTop | Qt::AlignRight, "Easy");
+        painter.setPen(regular);
         painter.setFont(font);
+
+        rect = sub.toViewSpaceRect(QPoint(1, 0), QPoint(2, 1));
+        if (profile_ == 1)
+        {
+            painter.setFont(underline);                        
+            if (selrow_ == 0)        
+                painter.setPen(selected);
+        }
+
+        painter.drawText(rect, Qt::AlignTop | Qt::AlignHCenter, "Normal");
+        painter.setPen(regular);
+        painter.setFont(font);        
+
+        rect = sub.toViewSpaceRect(QPoint(2, 0), QPoint(3, 1));
+        if (profile_ == 2)
+        {
+            painter.setFont(underline);            
+            if (selrow_ == 0)
+                painter.setPen(selected);
+        }
+
+        painter.drawText(rect, Qt::AlignTop | Qt::AlignLeft, "Chinese");
+        painter.setPen(regular);
+        painter.setFont(font);        
+
+        QFont small;
+        small.setFamily("Arcade");
+        small.setPixelSize(unit.y() / 2.5);
+        painter.setFont(small);
 
         const auto prev = level_ > 0 ? level_ - 1 : levels_.size() - 1;
         const auto next = (level_ + 1) % levels_.size();
@@ -926,31 +976,72 @@ public:
         const auto& mid   = levels_[level_];
         const auto& right = levels_[next];
 
-        rect = state.toViewSpaceRect(QPoint(1, 3), QPoint(2, 4));
+        rect = state.toViewSpaceRect(QPoint(1, 4), QPoint(2, 5));
         drawLevel(painter, rect, *left, prev);
 
-        if (infos_[level_].locked)
-            painter.setPen(locked);
-        else painter.setPen(selected);
+        if (selrow_ == 1)
+        {
+            if (infos_[level_].locked)
+                 painter.setPen(locked);
+            else painter.setPen(selected);
+        }
+        else
+        {
+            painter.setPen(regular);
+        }
 
-        rect = state.toViewSpaceRect(QPoint(3, 3), QPoint(4, 4));
+        rect = state.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
         drawLevel(painter, rect, *mid, level_);
 
-        painter.setPen(pen);
-        rect = state.toViewSpaceRect(QPoint(5, 3), QPoint(6, 4));
+        painter.setPen(regular);
+        rect = state.toViewSpaceRect(QPoint(5, 4), QPoint(6, 5));
         painter.drawRect(rect);
         drawLevel(painter, rect, *right, next);
+
+
+        rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+        painter.setPen(regular);
+        painter.setFont(font);
+        painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
     }
     void keyPress(QKeyEvent* press)
     {
+        const int numLevelsMin = 0;
+        const int numLevelsMax = levels_.size() - 1;
+        const int numProfilesMin = 0;
+        const int numProfilesMax = 2;
+
         const auto key = press->key();
         if (key == Qt::Key_Left)
         {
-            level_ = level_ > 0 ? level_ - 1 : levels_.size() - 1;
+            if (selrow_ == 0)
+            {
+                profile_ = wrap(numProfilesMax, numProfilesMin, (int)profile_ - 1);
+            }
+            else
+            {
+                level_ = wrap(numLevelsMax, numLevelsMin, (int)level_ -1);
+            }
+
         }
         else if (key == Qt::Key_Right)
         {
-            level_ = (level_ + 1) % levels_.size();
+            if (selrow_ == 0)
+            {
+                profile_ = wrap(numProfilesMax, numProfilesMin, (int)profile_ + 1);
+            }
+            else
+            {
+                level_ = wrap(numLevelsMax, numLevelsMin, (int)level_ + 1);
+            }
+        }
+        else if (key == Qt::Key_Up)
+        {
+            selrow_ = wrap(1, 0, (int)selrow_  - 1);
+        }
+        else if (key == Qt::Key_Down)
+        {
+            selrow_ = wrap(1, 0, (int)selrow_ + 1);
         }
     }
 
@@ -962,6 +1053,9 @@ public:
 
     void selectLevel(unsigned level)
     { level_ = level; }
+
+    void selectProfile(unsigned profile)
+    { profile_ = profile; }
 private:
     void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
     {
@@ -985,6 +1079,7 @@ private:
     const std::vector<Profile>& profiles_;
     unsigned level_;
     unsigned profile_;
+    unsigned selrow_;
 };
 
 class GameWidget::Help
@@ -1072,7 +1167,7 @@ private:
 
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
-    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
+    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
 {
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
@@ -1090,7 +1185,6 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         // calculate position for the invader to be in at now + missile fly time
         // and then aim the missile to that position.
-        const auto unit  = state.getNormalizedScale();        
         const auto tick  = 1000.0 / profiles_[profile_].speed;
 
         const auto missileFlyTime   = 500;
@@ -1240,10 +1334,11 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.numWarps      = unlimitedWarps_ ? std::numeric_limits<unsigned>::max() : 2;
     game_->play(levels_[levelIndex].get(), setup);
 
-    level_       = levelIndex;
-    profile_     = profileIndex;
-    tickDelta_   = 0;
-    warpFactor_  = 1.0;
+    level_        = levelIndex;
+    profile_      = profileIndex;
+    tickDelta_    = 0;
+    warpFactor_   = 1.0;
+    warpDuration_ = 0;
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -1528,6 +1623,7 @@ void GameWidget::showMenu()
 {
     menu_.reset(new Menu(levels_, info_, profiles_));
     menu_->selectLevel(level_);
+    menu_->selectProfile(profile_);
 }
 
 void GameWidget::showHelp()
