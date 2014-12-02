@@ -40,6 +40,7 @@
 #  include <QtDebug>
 #include "warnpop.h"
 #include <cmath>
+#include <ctime>
 
 #include "gamewidget.h"
 #include "game.h"
@@ -228,7 +229,7 @@ public:
             p.dir.setY(std::sin(a));
             p.dir *= v;
             p.pos  = position;
-            p.a    = 0.8;
+            p.a    = 0.8f;
             particles_.push_back(p);
         }
     }    
@@ -339,7 +340,7 @@ public:
 
     bool update(quint64 dt, float tick, TransformState& state)
     {
-        const auto unit = state.toViewSpace(QPoint(-speed_, 0));
+        const auto unit = state.toViewSpace(QPoint(-(int)speed_, 0));
         const auto norm = state.toNormalizedViewSpace(unit);
         position_ += (norm * tick);
         if (expire_)
@@ -355,11 +356,11 @@ public:
     { 
         switch (type_)
         {
-            case ShipType::cruiser:   return 2.0;
-            case ShipType::destroyer: return 1.8;
-            case ShipType::mother:    return 4.0;
+            case ShipType::cruiser:   return 2.0f;
+            case ShipType::destroyer: return 1.8f;
+            case ShipType::mother:    return 4.0f;
         }
-        return 1.0;
+        return 1.0f;
     }
 
     void paint(QPainter& painter, TransformState& state)
@@ -409,7 +410,7 @@ public:
     // get the position at ticksLater ticks time
     QVector2D getPosition(float ticksLater, const TransformState& state) const 
     {
-        const auto unit = state.toViewSpace(QPoint(-speed_, 0));
+        const auto unit = state.toViewSpace(QPoint(-(int)speed_, 0));
         const auto norm = state.toNormalizedViewSpace(unit);
         return position_ + norm * ticksLater;
     }
@@ -559,10 +560,9 @@ private:
         }
         return v;
     }
-    static QPixmap loadTexture(int index)
+    static QPixmap loadTexture(unsigned index)
     {
         static auto textures = loadTextures();
-        Q_ASSERT(index > 0);
         Q_ASSERT(index < textures.size());        
         return textures[index];
     }
@@ -821,7 +821,7 @@ public:
             {
                 Game::timewarp w;
                 w.duration = 2000;
-                w.factor   = 0.2;
+                w.factor   = 0.2f;
                 game.enter(w);
             }
             else

@@ -5,8 +5,8 @@ project invaders :
   <include>. 
   ;
 
-lib pulseaudio : : <name>pulse ;
-lib soundfile  : : <name>sndfile ;
+#lib pulseaudio : : <name>pulse ;
+#lib soundfile  : : <name>sndfile ;
 
 exe invaders : 
   level.cpp
@@ -20,8 +20,13 @@ exe invaders :
   resource.qrc
   /qt//QtCore
   /qt//QtGui
-  pulseaudio
-  soundfile
+ 
+  #pulseaudio
+  #soundfile
+
+  ../qtmain_win.cpp
+
+  : <user-interface>gui
 ;
 
 install dist : invaders ;
