@@ -26,6 +26,7 @@
 #include "warnpush.h"
 #  include <QtGui/QVector2D>
 #  include <QString>
+#  include <QStringList>
 #include "warnpop.h"
 
 #include <memory>
@@ -45,10 +46,8 @@ namespace invaders
             unsigned identity;
             unsigned score;
             unsigned speed;
-            QString  viewstring;
-            QString  killstring;
-            QList<QString> killList;
-            QList<QString> viewList;
+            QStringList killList;
+            QStringList viewList;
         };
 
         struct missile {

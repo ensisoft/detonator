@@ -110,13 +110,9 @@ void Game::fire(const Game::missile& missile)
 
     auto& inv = *it;
 
-    QString kill = inv.killList.first();
-    QString view = inv.viewList.first();
     inv.viewList.pop_front();
     inv.killList.pop_front();
-    inv.killstring.remove(0, kill.size());
-    inv.viewstring.remove(0, view.size());
-    if (inv.killstring.isEmpty())
+    if (inv.killList.isEmpty())
     {
         inv.score = killScore(inv);
         score_.points += inv.score;
@@ -221,8 +217,6 @@ void Game::spawn()
 
         const auto enemy = level_->spawn();
         invader inv;
-        inv.killstring = enemy.killstring;
-        inv.viewstring = enemy.string;        
         inv.killList.append(enemy.killstring);
         inv.viewList.append(enemy.string);
         inv.score      = enemy.score;            
@@ -252,8 +246,6 @@ void Game::spawnBoss()
     for (int i=0; i<5; ++i)
     {
         const auto enemy = level_->spawn();
-        theBoss.killstring.append(enemy.killstring);
-        theBoss.viewstring.append(enemy.string);
         theBoss.viewList.append(enemy.string);        
         theBoss.killList.append(enemy.killstring);
         theBoss.score += enemy.score;
