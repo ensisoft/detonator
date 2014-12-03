@@ -45,8 +45,10 @@ namespace invaders
             unsigned identity;
             unsigned score;
             unsigned speed;
-            QString  string;
+            QString  viewstring;
             QString  killstring;
+            QList<QString> killList;
+            QList<QString> viewList;
         };
 
         struct missile {
@@ -80,10 +82,11 @@ namespace invaders
         };
 
         std::function<void (const invader&, const missile& m)> onMissileKill;
+        std::function<void (const invader&, const missile& m)> onMissileDamage;
         std::function<void (const invader&, const bomb& b)> onBombKill;
         std::function<void (const bomb& b)> onBomb;
         std::function<void (const timewarp& w)> onWarp;
-        std::function<void (const invader&)> onInvaderSpawn;        
+        std::function<void (const invader&, bool boss)> onInvaderSpawn;        
         std::function<void (const invader&)> onInvaderVictory;
         std::function<void (const invader&)> onInvaderWarning;
         std::function<void (const score&)> onLevelComplete;
@@ -148,6 +151,7 @@ namespace invaders
         score score_;
         setup setup_;
         Level* level_;
+        bool haveBoss_;
     };
 
 } // invaders

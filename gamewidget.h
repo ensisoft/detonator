@@ -115,6 +115,7 @@ namespace invaders
     private:
         class Animation;
         class Explosion;
+        class Debris;        
         class BigExplosion;
         class Score;
         class Invader;

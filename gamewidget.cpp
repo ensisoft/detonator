@@ -222,9 +222,12 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(QVector2D position, quint64 start, quint64 lifetime) : 
+    Explosion(QVector2D position, quint64 start, quint64 lifetime, bool emitParticles) : 
         position_(position), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {
+        if (!emitParticles)
+            return;
+        
         const auto particles = 100;
         const auto angle = (M_PI * 2) / particles;
 
@@ -293,7 +296,7 @@ public:
         const QRect src(x, y, w, h);
             
         const auto scaledWidth  = unitScale.x() * scale_;
-        const auto scaledHeight = unitScale.y() * scale_;
+        const auto scaledHeight = unitScale.x() * scale_; // * ascpect;
 
         QRect dst(0, 0, scaledWidth, scaledHeight);
         dst.moveTo(position -
@@ -331,11 +334,80 @@ private:
 };
 
 
+class GameWidget::Debris : public GameWidget::Animation
+{
+public:
+    Debris(QVector2D position, quint64 start, quint64 lifetime)
+        : position_(position), start_(start), life_(lifetime), time_(0)
+    {
+        const auto particles = 100;
+        const auto angle = (M_PI * 2) / particles;
+
+        for (int i=0; i<particles; ++i)
+        {
+            particle p;
+            const auto r = (float)std::rand() / RAND_MAX;
+            const auto v = (float)std::rand() / RAND_MAX;
+            const auto a = i * angle + angle * r;
+            p.dir.setX(std::cos(a));
+            p.dir.setY(std::sin(a));
+            p.dir *= v;
+            p.pos  = position;
+            p.a    = 0.8f;
+            particles_.push_back(p);
+        }
+    }
+    virtual bool update(quint64 dt, float tick, TransformState&) override
+    {
+        time_ += dt;
+        if (time_ < start_)
+            return true;
+
+        if (time_ - start_ > life_)
+            return false;
+
+        for (auto& p : particles_)
+        {
+            p.pos += p.dir * (dt / 2500.0);
+            p.a = clamp(0.0, p.a - (dt / 2000.0), 1.0);
+        }
+        return true;
+    }
+
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        if (time_ < start_)
+            return;        
+
+        QColor color(255, 255, 68);
+        QBrush brush(color);
+        for (const auto& particle : particles_)
+        {
+            color.setAlpha(0xff * particle.a);            
+            brush.setColor(color);
+            const auto pos = state.toViewSpace(particle.pos);
+            painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
+        }        
+    }
+private:
+    struct particle {
+        QVector2D dir;
+        QVector2D pos;
+        float a;
+    };
+    std::vector<particle> particles_;    
+private:
+    QVector2D position_;
+    quint64 start_;
+    quint64 life_;
+    quint64 time_;
+};
+
 class GameWidget::Invader : public GameWidget::Animation
 {
 public:
     enum class ShipType {
-        cruiser, destroyer, mother
+        cargo, cruiser, destroyer
     };
 
     Invader(QVector2D position, QString str, unsigned speed, ShipType type) : 
@@ -365,9 +437,9 @@ public:
     { 
         switch (type_)
         {
-            case ShipType::cruiser:   return 2.0f;
-            case ShipType::destroyer: return 2.5f;
-            case ShipType::mother:    return 4.0f;
+            case ShipType::cargo:     return 6.0f;
+            case ShipType::cruiser:   return 4.0f;
+            case ShipType::destroyer: return 9.5f;
         }
         return 1.0f;
     }
@@ -382,7 +454,10 @@ public:
         QPixmap tex = Invader::texture(type_);
         const float width  = tex.width();
         const float height = tex.height();
-        const float aspect = height / width;
+        //const float aspect = width / height;
+        //const float scaledHeight = spriteScale.y();
+        //const float scaledWidth  = scaledHeight * aspect;
+        const float aspect = height / width;        
         const float scaledWidth  = spriteScale.x();
         const float scaledHeight = scaledWidth * aspect;
 
@@ -433,15 +508,20 @@ public:
     void showHelp(const QString& help)
     { text_ = help; }
 
+    void setKillString(QString killstring)
+    {
+        text_ = killstring;
+    }
+
 private:
     static const QPixmap& texture(ShipType type) 
     {
-        static QPixmap destroyer(R("textures/Destroyer.png"));
-        static QPixmap cruiser(R("textures/Cruiser.png"));
-        if (type == ShipType::destroyer)
-            return destroyer;
-
-        return cruiser;
+        static QPixmap textures[] = {
+            QPixmap(R("textures/Cargoship.png")),            
+            QPixmap(R("textures/Cruiser.png")),
+            QPixmap(R("textures/Destroyer.png"))
+        };
+        return textures[(int)type];
     }
 
 private:
@@ -1173,7 +1253,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
     BigExplosion::prepare();
 
-    game_.reset(new Game(20, 10));
+    game_.reset(new Game(40, 10));
 
     game_->onMissileKill = [&](const Game::invader& i, const Game::missile& m)
     {
@@ -1195,7 +1275,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         const auto missileDir       = missileEnd - missileBeg;
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
-        std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
+        std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime, true));
         std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, i.score));        
 
         invader->expireIn(missileFlyTime);
@@ -1209,12 +1289,38 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         invaders_.erase(it);
     };
 
+    game_->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)
+    {
+        auto it = invaders_.find(i.identity);
+        auto& inv = it->second;
+
+        TransformState state(rect(), *game_);
+
+        const auto tick = 1000.0 / profiles_[profile_].speed;
+
+        const auto missileFlyTime  = 500;
+        const auto missileFlyTicks = missileFlyTime / tick;
+        const auto missileEnd      =  inv->getPosition(missileFlyTicks, state);
+        const auto missileBeg      = m.position;
+        const auto missileDir      = missileEnd - missileBeg;
+
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
+        //std::unique_ptr<Animation> debris(new Debris(missileEnd, missileFlyTime, 500));
+        std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, 500, false));
+        explosion->setScale(inv->getScale() * 0.5);
+
+        inv->setKillString(i.viewstring);
+
+        animations_.push_back(std::move(missile));
+        animations_.push_back(std::move(explosion));
+    };
+
     game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b)
     {
         auto it = invaders_.find(i.identity);
         auto& inv = it->second;
 
-        std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000));
+        std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000, true));
         std::unique_ptr<Animation> score(new Score(inv->getPosition(), 1000, 2000, i.score));
         animations_.push_back(std::move(explosion));
         animations_.push_back(std::move(score));
@@ -1237,18 +1343,24 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         warpDuration_ = w.duration;
     };
 
-    game_->onInvaderSpawn = [&](const Game::invader& inv) 
+    game_->onInvaderSpawn = [&](const Game::invader& inv, bool boss)
     {
         TransformState state(rect(), *game_);
 
         const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
         const auto posi = state.toNormalizedViewSpace(view);        
-        const auto type = inv.speed == 1 ? Invader::ShipType::cruiser :
-            Invader::ShipType::destroyer ;
 
-        std::unique_ptr<Invader> invader(new Invader(posi, inv.string, inv.speed, type));
+        Invader::ShipType type = Invader::ShipType::destroyer;
+        if (boss)
+            type = Invader::ShipType::destroyer;
+        else if (inv.speed == 1)
+            type = Invader::ShipType::cargo;
+        else type = Invader::ShipType::cruiser;
+
+        std::unique_ptr<Invader> invader(new Invader(posi, inv.viewstring, inv.speed, type));
         invaders_[inv.identity] = std::move(invader);
     };
+
 
     game_->onInvaderVictory = [&](const Game::invader& inv) 
     {

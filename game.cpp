@@ -33,7 +33,7 @@ const unsigned DangerZone = 3;
 namespace invaders
 {
 
-Game::Game(unsigned width, unsigned height) : tick_(0), width_(width), height_(height), identity_(1), level_(nullptr)
+Game::Game(unsigned width, unsigned height) : tick_(0), width_(width), height_(height), identity_(1), level_(nullptr), haveBoss_(false)
 {}
 
 Game::~Game()
@@ -72,10 +72,15 @@ void Game::tick()
 
     if (spawned_ == setup_.numEnemies)
     {
-        // todo: spawn THE BOSS
-        //spawnBoss();
-
-        if (invaders_.empty())
+        if (!haveBoss_)
+        {
+            if (invaders_.empty())
+            {
+                spawnBoss();
+                haveBoss_ = true;
+            }
+        }
+        else if (invaders_.empty())
         {
             onLevelComplete(score_);
             level_ = nullptr;
@@ -93,7 +98,7 @@ void Game::fire(const Game::missile& missile)
 {
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.killstring == missile.string;
+            return i.killList[0] == missile.string;
         });
     if (end == std::begin(invaders_))
         return;
@@ -104,15 +109,26 @@ void Game::fire(const Game::missile& missile)
         });
 
     auto& inv = *it;
-    inv.score = killScore(inv);
 
-    score_.points += inv.score;
-    score_.killed++;
-    score_.pending--;
-
-    onMissileKill(*it, missile);
-
-    invaders_.erase(it);
+    QString kill = inv.killList.first();
+    QString view = inv.viewList.first();
+    inv.viewList.pop_front();
+    inv.killList.pop_front();
+    inv.killstring.remove(0, kill.size());
+    inv.viewstring.remove(0, view.size());
+    if (inv.killstring.isEmpty())
+    {
+        inv.score = killScore(inv);
+        score_.points += inv.score;
+        score_.killed++;
+        score_.pending--;
+        onMissileKill(inv, missile);
+        invaders_.erase(it);
+    }
+    else
+    {
+        onMissileDamage(inv, missile);
+    }
 }
 
 void Game::ignite(const bomb& b)
@@ -163,6 +179,7 @@ void Game::play(Level* level, Game::setup setup)
     score_.maxpoints = 0;    
     score_.pending   = setup.numEnemies;
     setup_ = setup;
+    haveBoss_ = false;
 }
 
 void Game::quitLevel()
@@ -205,14 +222,16 @@ void Game::spawn()
         const auto enemy = level_->spawn();
         invader inv;
         inv.killstring = enemy.killstring;
-        inv.string     = enemy.string;
+        inv.viewstring = enemy.string;        
+        inv.killList.append(enemy.killstring);
+        inv.viewList.append(enemy.string);
         inv.score      = enemy.score;            
         inv.ypos       = std::rand() % height_;
         inv.xpos       = width_ + batch[inv.ypos] + i + 1;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
-        onInvaderSpawn(inv);
+        onInvaderSpawn(inv, false);
 
         spawned_++;
         batch[inv.ypos]++;        
@@ -224,7 +243,25 @@ void Game::spawn()
 
 void Game::spawnBoss()
 {
-    // todo:
+    invader theBoss;    
+    theBoss.ypos = height_ / 2;
+    theBoss.xpos = width_ + 5;
+    theBoss.identity = identity_++;
+    theBoss.speed = 1;
+
+    for (int i=0; i<5; ++i)
+    {
+        const auto enemy = level_->spawn();
+        theBoss.killstring.append(enemy.killstring);
+        theBoss.viewstring.append(enemy.string);
+        theBoss.viewList.append(enemy.string);        
+        theBoss.killList.append(enemy.killstring);
+        theBoss.score += enemy.score;
+    }
+
+    onInvaderSpawn(theBoss, true);
+
+    invaders_.push_back(theBoss);    
 }
 
 bool Game::isSpawnTick() const
