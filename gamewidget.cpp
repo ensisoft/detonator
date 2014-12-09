@@ -299,7 +299,7 @@ class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
     Sparks(QVector2D position, quint64 start, quint64 lifetime)
-        : start_(start), life_(lifetime), time_(0)
+        : start_(start), life_(lifetime), time_(0), color_(0xff, 0xff, 0xff)
     {
         const auto particles = 100;
         const auto angle = (M_PI * 2) / particles;
@@ -340,7 +340,7 @@ public:
         if (time_ < start_)
             return;        
 
-        QColor color(255, 255, 68);
+        QColor color(color_);
         QBrush brush(color);
         for (const auto& particle : particles_)
         {
@@ -350,6 +350,9 @@ public:
             painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
         }        
     }
+
+    void setColor(QColor color)
+    { color_ = color; }
 
 private:
     struct particle {
@@ -362,6 +365,8 @@ private:
     quint64 start_;
     quint64 life_;
     quint64 time_;
+private:
+    QColor color_;
 };
 
 
@@ -370,18 +375,18 @@ class GameWidget::Debris : public GameWidget::Animation
 {
 public:
     Debris(QPixmap texture, QVector2D position, quint64 start, quint64 lifetime) 
-        : texture_(texture), start_(start), life_(lifetime), time_(0)
+        : texture_(texture), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {
-        
-        const auto particleWidth  = 16; //texture.width() / 8;
-        const auto particleHeight = 16; //texture.height() / 8;
-        const auto xparticles = texture.width() / particleWidth;
-        const auto yparticles = texture.height() / particleHeight;
-        const auto numParticles = xparticles * yparticles;
+        const auto xparticles = 4;
+        const auto yparticles = 2;
+
+        const auto particleWidth  = texture.width() / xparticles;
+        const auto particleHeight = texture.height() / yparticles;
+        const auto numParticles   = xparticles * yparticles;
 
         const auto angle = (M_PI * 2) / numParticles;
 
-        for (auto i=numParticles / 2 / 2; i<numParticles / 2; ++i)
+        for (auto i=0; i<numParticles; ++i)
         {
             const auto col = i % xparticles;
             const auto row = i / xparticles;
@@ -398,7 +403,7 @@ public:
             p.dir.setY(std::sin(a));
             p.dir *= v;
             p.pos = position;
-            p.alpha = 0.8f;
+            p.alpha = 1.0f;
             p.angle = (M_PI * 2 ) * (float)std::rand() / RAND_MAX;
             particles_.push_back(p);
         }
@@ -415,7 +420,7 @@ public:
         for (auto& p : particles_)
         {
             p.pos += p.dir * (dt / 4500.0);
-            p.alpha = clamp(0.0, p.alpha - (dt / 2000.0), 1.0);
+            p.alpha = clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
             p.angle += (M_PI * 2) * (dt / 2000.0);
         }
 
@@ -426,21 +431,37 @@ public:
         if (time_ < start_)
             return;
 
+        const auto spriteScale = state.getScale();
+
         for (const auto& p : particles_)
         {
             const auto pos = state.toViewSpace(p.pos);
 
-            QTransform rotation;
-            rotation.translate(pos.x(), pos.y());
-            rotation.rotateRadians(p.angle, Qt::ZAxis);
-            rotation.translate(-pos.x(), -pos.y());
+            const float width  = p.rc.width();
+            const float height = p.rc.height();
+            const float aspect = height / width;
+            const float scaledWidth  = spriteScale.x();
+            const float scaledHeight = scaledWidth * aspect;
 
+            QRect target(pos.x(), pos.y(), scaledWidth, scaledHeight);
+
+            QTransform rotation;
+            rotation.translate(pos.x() + scaledWidth / 2, pos.y() + scaledHeight / 2);
+            rotation.rotateRadians(p.angle, Qt::ZAxis);
+            rotation.translate(-pos.x() - scaledWidth / 2, -pos.y() - scaledHeight / 2);
             painter.setTransform(rotation);
-            painter.setOpacity(0xff * p.alpha);
-            painter.drawPixmap(pos, texture_, p.rc);
+            painter.setOpacity(p.alpha);
+            painter.drawPixmap(target, texture_, p.rc);
         }
         painter.resetTransform();
     }
+
+    float getScale() const
+    { return scale_; }
+
+    void setScale(float f)
+    { scale_ = f;}
+
 private:
     struct particle {
         QRect rc;
@@ -455,6 +476,8 @@ private:
     quint64 start_;
     quint64 life_;
     quint64 time_;
+private:
+    float scale_;
 };
 
 class GameWidget::Invader : public GameWidget::Animation
@@ -613,7 +636,7 @@ public:
         return true;
     }
 
-    void paint(QPainter& painter, TransformState& state)
+    virtual void paint(QPainter& painter, TransformState& state) override
     {
         const auto dim = state.getScale();
         const auto pos = state.toViewSpace(position_);
@@ -1308,7 +1331,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
     game_.reset(new Game(40, 10));
 
-    game_->onMissileKill = [&](const Game::invader& i, const Game::missile& m)
+    game_->onMissileKill = [&](const Game::invader& i, const Game::missile& m, unsigned killScore)
     {
         auto it = invaders_.find(i.identity);
 
@@ -1329,12 +1352,14 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
-        std::unique_ptr<Animation> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 100));
-        std::unique_ptr<Animation> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
-        std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, i.score));        
+        std::unique_ptr<Debris> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 500));
+        std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
+        std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));        
 
         invader->expireIn(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
+        //debris->setScale(invader->getScale());
+        sparks->setColor(QColor(255, 255, 68));
 
         animations_.push_back(std::move(invader));
         animations_.push_back(std::move(missile));
@@ -1362,9 +1387,10 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         const auto missileDir      = missileEnd - missileBeg;
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
-        std::unique_ptr<Animation> sparks(new Sparks(missileEnd, missileFlyTime, 500));
+        std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
         //std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, 500, false));
         //explosion->setScale(inv->getScale() * 0.5);
+        sparks->setColor(Qt::darkGray);
 
         auto viewString = i.viewList.join("");
         inv->setViewString(viewString);
@@ -1374,17 +1400,25 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         animations_.push_back(std::move(sparks));
     };
 
-    game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b)
+    game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b, unsigned killScore)
     {
         auto it = invaders_.find(i.identity);
         auto& inv = it->second;
 
         std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000));
-        std::unique_ptr<Animation> score(new Score(inv->getPosition(), 1000, 2000, i.score));
+        std::unique_ptr<Animation> score(new Score(inv->getPosition(), 1000, 2000, killScore));
         animations_.push_back(std::move(explosion));
         animations_.push_back(std::move(score));
 
         invaders_.erase(it);
+    };
+
+    game_->onBombDamage = [&](const Game::invader& i, const Game::bomb& b)
+    {
+        auto it = invaders_.find(i.identity);
+        auto& inv = it->second;
+        auto str = i.viewList.join("");
+        inv->setViewString(str);
     };
 
     game_->onBomb = [&](const Game::bomb& b) 
@@ -1509,11 +1543,11 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.numWarps      = unlimitedWarps_ ? std::numeric_limits<unsigned>::max() : 2;
     game_->play(levels_[levelIndex].get(), setup);
 
-    level_        = levelIndex;
-    profile_      = profileIndex;
-    tickDelta_    = 0;
-    warpFactor_   = 1.0;
-    warpDuration_ = 0;
+    level_         = levelIndex;
+    profile_       = profileIndex;
+    tickDelta_     = 0;
+    warpFactor_    = 1.0;
+    warpDuration_  = 0;
 }
 
 void GameWidget::loadLevels(const QString& file)
@@ -1657,7 +1691,6 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             qDebug() << "warp ended";
         }
     }
-
 }
 
 void GameWidget::paintEvent(QPaintEvent* paint)

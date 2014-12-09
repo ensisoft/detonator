@@ -121,6 +121,7 @@ namespace invaders
         class Score;
         class Invader;
         class Missile;
+        class Laser;
         class Background;
         class Scoreboard;        
         class Display;

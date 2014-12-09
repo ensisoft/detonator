@@ -27,6 +27,7 @@
 #  include <QtGui/QVector2D>
 #  include <QString>
 #  include <QStringList>
+#  include <QElapsedTimer>
 #include "warnpop.h"
 
 #include <memory>
@@ -80,9 +81,10 @@ namespace invaders
             unsigned numWarps;
         };
 
-        std::function<void (const invader&, const missile& m)> onMissileKill;
+        std::function<void (const invader&, const missile& m, unsigned score)> onMissileKill;
         std::function<void (const invader&, const missile& m)> onMissileDamage;
-        std::function<void (const invader&, const bomb& b)> onBombKill;
+        std::function<void (const invader&, const bomb& b, unsigned score)> onBombKill;
+        std::function<void (const invader&, const bomb& b)> onBombDamage;
         std::function<void (const bomb& b)> onBomb;
         std::function<void (const timewarp& w)> onWarp;
         std::function<void (const invader&, bool boss)> onInvaderSpawn;        

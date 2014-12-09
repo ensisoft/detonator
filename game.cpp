@@ -118,8 +118,9 @@ void Game::fire(const Game::missile& missile)
         score_.points += inv.score;
         score_.killed++;
         score_.pending--;
-        onMissileKill(inv, missile);
-        invaders_.erase(it);
+
+        onMissileKill(inv, missile, inv.score);
+        invaders_.erase(it);        
     }
     else
     {
@@ -132,9 +133,19 @@ void Game::ignite(const bomb& b)
     if (!setup_.numBombs)
         return;
 
+    for (auto it = std::begin(invaders_); it != std::end(invaders_); ++it)
+    {
+        auto& i = *it;
+        if (i.xpos < width_)
+        {
+            i.killList.pop_front();
+            i.viewList.pop_front();
+        }
+    }
+
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
-            return i.xpos < width_;
+            return i.killList.isEmpty();
         });
 
     for (auto it = std::begin(invaders_); it != end; ++it)
@@ -144,8 +155,14 @@ void Game::ignite(const bomb& b)
         score_.points += inv.score;
         score_.killed++;
         score_.pending--;
-        onBombKill(inv, b);
+        onBombKill(inv, b, inv.score);
     }
+    for (auto it = end; it != std::end(invaders_); ++it)
+    {
+        auto& inv = *it;
+        onBombDamage(inv, b);
+    }
+
     invaders_.erase(std::begin(invaders_), end);
 
     onBomb(b);    
