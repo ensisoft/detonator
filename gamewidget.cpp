@@ -62,15 +62,12 @@ QString R(const QString& s)
     return inst + "/" + s;
 }
 
-QString F(const QString& s) 
-{ 
-    const auto inst = QApplication::applicationDirPath();
-    return inst + s;
-}
-
 // game space is discrete space from 0 to game::width() - 1 on X axis
 // and from 0 to game::height() - 1 on Y axis
 // we use QPoint to represent this.
+struct GameSpace {
+    unsigned x, y;
+};
 
 // normalized widget/view space is expressed with floats from 0 to 1.0 on Y and X
 // 0.0, 0.0 being the window top left and 1.0,1.0 being the window bottom right
@@ -89,8 +86,7 @@ public:
         // according to the game's size. We also add one extra row 
         // for HUD display at the top of the screen and for the player
         // at the bottom of the screen. This provides the basic layout
-        // for the game in a way that doesnt depend on any actual
-        // viewport size.        
+        // for the game in a way that doesnt depend on any actual viewport size.
         const auto numCols = game.width();
         const auto numRows = game.height() + 2;
         // divide the widget's client area int equal sized cells
@@ -116,10 +112,10 @@ public:
         return {top, bot};
     }
 
-    QPoint toViewSpace(const QPoint& game) const
+    QPoint toViewSpace(const QPoint& cell) const
     {
-        const int xpos = game.x() * scale_.x() + origin_.x();
-        const int ypos = game.y() * scale_.y() + origin_.y();
+        const int xpos = cell.x() * scale_.x() + origin_.x();
+        const int ypos = cell.y() * scale_.y() + origin_.y();
         return { xpos, ypos };
     }
 
@@ -130,10 +126,30 @@ public:
         return { xpos, ypos };
     }
 
+    QVector2D toNormalizedViewSpace(const GameSpace& g) const 
+    {
+        const float cols = numCols();// - 2.0;
+        const float rows = numRows();
+
+        const float p_scale_x = (widget_.x() - origin_.x()) / cols;
+        const float p_scale_y = (widget_.y() - origin_.y()) / rows;
+
+        const float x = g.x; // - 1.0;
+        const float y = g.y;
+
+        const float px = x * p_scale_x;
+        const float py = y * p_scale_y;
+
+        const float xpos = px / (widget_.x() - origin_.x());
+        const float ypos = py / (widget_.y() - origin_.y());
+
+        return {xpos, ypos};
+    }
+
     QVector2D toNormalizedViewSpace(const QPoint& p) const 
     {
-        const float xpos = (float)p.x() / widget_.x();
-        const float ypos = (float)p.y() / widget_.y();
+        const float xpos = (float)p.x() / (widget_.x() - origin_.x());
+        const float ypos = (float)p.y() / (widget_.y() - origin_.y());
         return {xpos, ypos};
     }
 
@@ -454,6 +470,7 @@ public:
             painter.drawPixmap(target, texture_, p.rc);
         }
         painter.resetTransform();
+        painter.setOpacity(1.0);
     }
 
     float getScale() const
@@ -498,9 +515,8 @@ public:
 
     bool update(quint64 dt, float tick, TransformState& state)
     {
-        const auto unit = state.toViewSpace(QPoint(-(int)speed_, 0));
-        const auto norm = state.toNormalizedViewSpace(unit);
-        position_ += (norm * tick);
+        const auto v = getVelocityVector(state);
+        position_ += (v * tick);
         if (expire_)
         {
             time_ += dt;
@@ -571,9 +587,8 @@ public:
     // get the position at ticksLater ticks time
     QVector2D getPosition(float ticksLater, const TransformState& state) const 
     {
-        const auto unit = state.toViewSpace(QPoint(-(int)speed_, 0));
-        const auto norm = state.toNormalizedViewSpace(unit);
-        return position_ + norm * ticksLater;
+        const auto v = getVelocityVector(state);
+        return position_ + v * ticksLater;
     }
 
     void expireIn(quint64 ms)
@@ -598,6 +613,16 @@ private:
             QPixmap(R("textures/Destroyer.png"))
         };
         return textures[(int)type];
+    }
+
+private:
+    QVector2D getVelocityVector(const TransformState& state) const 
+    {
+        const float cols = state.numCols(); // - 2.0;
+        const float pxw  = state.viewWidth() / cols;
+        const float x    = pxw / state.viewWidth();
+        const float y    = 0.0f;
+        return {speed_ * -x, y};
     }
 
 private:
@@ -1440,8 +1465,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     {
         TransformState state(rect(), *game_);
 
-        const auto view = state.toViewSpace(QPoint(inv.xpos, inv.ypos));
-        const auto posi = state.toNormalizedViewSpace(view);        
+        const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
 
         Invader::ShipType type = Invader::ShipType::destroyer;
         if (boss)
@@ -1453,7 +1477,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         const auto killString = inv.killList.join("");
         const auto viewString = inv.viewList.join("");
 
-        std::unique_ptr<Invader> invader(new Invader(posi, viewString, inv.speed, type));
+        std::unique_ptr<Invader> invader(new Invader(pos, viewString, inv.speed, type));
         invaders_[inv.identity] = std::move(invader);
     };
 
@@ -1487,7 +1511,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         info.highScore = std::max(info.highScore, (unsigned)final);
 
         unsigned unlockLevel = 0;
-        if ((base / (float)score.maxpoints) > LevelUnlockCriteria)
+        if ((base / (float)score.maxpoints) >= LevelUnlockCriteria)
         {
             if (level_ < levels_.size())
             {
@@ -1639,16 +1663,20 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             // advance game by one tick
             game_->tick();
 
+            const auto delta = tickDelta_ - tick;
+            const auto ticks = delta / tick; 
+
             // synchronize invader position with the actual game position
             const auto& invaders = game_->invaders();
             for (const auto& i : invaders)
             {
                 auto it   = invaders_.find(i.identity);
                 auto& inv = it->second;
-                const auto view = state.toViewSpace(QPoint(i.xpos, i.ypos + 1));
-                const auto pos  = state.toNormalizedViewSpace(view);
+                const auto pos = state.toNormalizedViewSpace(GameSpace{i.xpos, i.ypos + 1});
                 inv->setPosition(pos);
+                inv->update(delta * warpFactor_, ticks, state);
             }
+
             tickDelta_ = 0;
         }
         else

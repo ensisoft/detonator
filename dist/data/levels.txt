@@ -13,89 +13,89 @@
 
 BEGIN
 Numerals
-一 yi  10 one / 1 / single
-二 er  10 two / 2
-三 san 10 three / 3
-四 si  10 four / 4
-五 wu  10 five / 5
-六 liu 10 six / 6
-七 qi  10 seven / 7
-八 ba  10 eight / 8
-九 jiu 10 nine / 9
-十 shi 10 ten / 10
+一 yi  1 one / 1 / single
+二 er  2 two / 2
+三 san 3 three / 3
+四 si  5 four / 4
+五 wu  4 five / 5
+六 liu 4 six / 6
+七 qi  2 seven / 7
+八 ba  2 eight / 8
+九 jiu 2 nine / 9
+十 shi 2 ten / 10
 END
 
 BEGIN
 You and I
-我 wo  20 I / me / my
-你 ni  20 you
-是 shi 20 is / are / am 
-要 yao 20 to want / to ask
-有 you 20 to have / there is 
-不 bu  15 no / not 
-很 hen 25 quite / very 
-嗎 ma  30 question particle
+我 wo  7  I / me / my
+你 ni  7  you
+是 shi 9  is / are / am 
+要 yao 9  to want / to ask
+有 you 6  to have / there is 
+不 bu  4  no / not 
+很 hen 9  quite / very 
+嗎 ma  13 question particle
 END
 
 BEGIN
 QingWen...
-的 de    20 possessive particle
-在 zai   10 at / in / exist
-上 shang 10 on top / above / upper
-這 zhe   10 this / these
-那 na    10 that / those / then
-裡 li    10 away / from
-請 qing  30 to invite / please
+的 de    8  possessive particle
+在 zai   6  at / in / exist
+上 shang 3  on top / above / upper
+這 zhe   11 this / these
+那 na    7  that / those / then
+裡 li    12 away / from
+請 qing  15 to invite / please
 問 wen   10 to ask
 END
 
 BEGIN
 Keyi!
-好 hao   5 good / well
-沒 mei   5 have not / not
-天 tian  5 day
-能 neng  5 to be able to to
-下 xia   5 down / downwards
-中 zhong 5 middle / center
-可 ke    5 can / may 
-以 yi    5 to use 
+好 hao   6  good / well
+沒 mei   7  have not / not
+天 tian  4  day
+能 neng  10 to be able to to
+下 xia   3  down / downwards
+中 zhong 4  middle / center
+可 ke    5  can / may 
+以 yi    5  to use 
 END
 
 
 BEGIN
 O'le!
-了 le   5  modal particle
-回 hui  5  to go back
-來 lai  5  to come / arrive
+了 le   2  modal particle
+回 hui  6  to go back
+來 lai  8  to come / arrive
 他 ta   5  she / he / him / her
-就 jiu  30 at once / right away
-還 hai  30 still
-也 ye   20 also / too
-看 kan  20 to see / to look
+就 jiu  12 at once / right away
+還 hai  17 still
+也 ye   3  also / too
+看 kan  9  to see / to look
 END
 
 BEGIN
 What & How
-公   gong   5  public
-車   che    5  car / vehicle
-哪   na     5  how / which
+公   gong   4  public
+車   che    7  car / vehicle
+哪   na     10 how / which
 去   qu     5  to go 
-太   tai    5  very / too much
-百   bai    5  hundred / numerous
-人   ren    5  person
-怎麼 zenme  40 how? / why?
-什麼 shenme 40 what? / who?
+太   tai    4  very / too much
+百   bai    6  hundred / numerous
+人   ren    2  person
+怎麼 zenme  23 how? / why?
+什麼 shenme 19 what? / who?
 END
 
 BEGIN
 Shuo Hua
-大 da   10 big / huge
-買 mai  20 to buy / to purchase
-得 dei  20 to have to / to must
-小 xiao 10 small / tiny
-書 shu  20 book / letter
-再 zai  20 again / once more
-都 dou  20 all / both
-說 shuo 20 to speak / say
+大 da   3  big / huge
+買 mai  12 to buy / to purchase
+得 dei  11 to have to / to must
+小 xiao 3  small / tiny
+書 shu  10 book / letter
+再 zai  6  again / once more
+都 dou  11 all / both
+說 shuo 14 to speak / say
 END
 

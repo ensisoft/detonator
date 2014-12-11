@@ -190,7 +190,7 @@ void Game::play(Level* level, Game::setup setup)
     score_.points    = 0;
     score_.victor    = 0;
     score_.maxpoints = 0;    
-    score_.pending   = setup.numEnemies;
+    score_.pending   = setup.numEnemies + 1; // +1 for the BOSS
     setup_ = setup;
     haveBoss_ = false;
 }
@@ -238,7 +238,7 @@ void Game::spawn()
         inv.viewList.append(enemy.string);
         inv.score      = enemy.score;            
         inv.ypos       = std::rand() % height_;
-        inv.xpos       = width_ + batch[inv.ypos] + i + 1;
+        inv.xpos       = width_ + batch[inv.ypos] * 5 + i * 2;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
@@ -247,7 +247,7 @@ void Game::spawn()
         spawned_++;
         batch[inv.ypos]++;        
 
-        inv.xpos = width_ - 1;
+        inv.xpos = width_ - DangerZone - 1;
         score_.maxpoints += killScore(inv);
     }
 }
@@ -271,6 +271,10 @@ void Game::spawnBoss()
     onInvaderSpawn(theBoss, true);
 
     invaders_.push_back(theBoss);    
+
+    theBoss.xpos = width_ - DangerZone - 1;
+    score_.maxpoints += killScore(theBoss);
+
 }
 
 bool Game::isSpawnTick() const
