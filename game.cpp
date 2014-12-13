@@ -28,7 +28,7 @@
 #include "game.h"
 #include "level.h"
 
-const unsigned DangerZone = 3;
+const unsigned DangerZone = 8;
 
 namespace invaders
 {
@@ -218,7 +218,8 @@ unsigned Game::killScore(const invader& inv) const
     const auto points = inv.score * inv.speed;
     const auto bonus  = xpos / width;
 
-    return points +  (points * bonus);
+    // put more weight on just killing the invader than on when it's being killed
+    return 0.8 * points + 0.2 * (points * bonus);
 }
 
 void Game::spawn()
@@ -236,16 +237,16 @@ void Game::spawn()
         invader inv;
         inv.killList.append(enemy.killstring);
         inv.viewList.append(enemy.string);
-        inv.score      = enemy.score;            
+        inv.score      = enemy.score * 10;
         inv.ypos       = std::rand() % height_;
-        inv.xpos       = width_ + batch[inv.ypos] * 5 + i * 2;
+        inv.xpos       = width_ + batch[inv.ypos] * 6 + i * 2;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         invaders_.push_back(inv);
         onInvaderSpawn(inv, false);
 
-        spawned_++;
-        batch[inv.ypos]++;        
+        ++spawned_;
+        ++batch[inv.ypos];
 
         inv.xpos = width_ - DangerZone - 1;
         score_.maxpoints += killScore(inv);
@@ -255,10 +256,11 @@ void Game::spawn()
 void Game::spawnBoss()
 {
     invader theBoss;    
-    theBoss.ypos = height_ / 2;
-    theBoss.xpos = width_ + 5;
+    theBoss.ypos     = height_ / 2;
+    theBoss.xpos     = width_ + 5;
     theBoss.identity = identity_++;
-    theBoss.speed = 1;
+    theBoss.score    = 0;    
+    theBoss.speed    = 1;
 
     for (int i=0; i<5; ++i)
     {
@@ -267,6 +269,7 @@ void Game::spawnBoss()
         theBoss.killList.append(enemy.killstring);
         theBoss.score += enemy.score;
     }
+    theBoss.score *= 17;
 
     onInvaderSpawn(theBoss, true);
 

@@ -64,8 +64,8 @@ MainWindow::MainWindow()
     }
 
     const GameWidget::Profile EASY {"Easy", 1.8f, 2, 7, 30};
-    const GameWidget::Profile MEDIUM {"Medium", 2.5f, 2, 4, 30};
-    const GameWidget::Profile CHINESE {"Chinese", 3.5f, 2, 3, 30};
+    const GameWidget::Profile MEDIUM {"Medium", 2.0f, 2, 4, 35};
+    const GameWidget::Profile CHINESE {"Chinese", 2.2f, 2, 4, 40};
 
     loadProfile(EASY);
     loadProfile(MEDIUM);

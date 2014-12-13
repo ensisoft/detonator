@@ -49,7 +49,7 @@
 namespace invaders
 {
 
-const auto LevelUnlockCriteria = 0.85;
+const auto LevelUnlockCriteria = 0.82;
 
 QString R(const QString& s) 
 { 
@@ -128,13 +128,13 @@ public:
 
     QVector2D toNormalizedViewSpace(const GameSpace& g) const 
     {
-        const float cols = numCols();// - 2.0;
+        const float cols = numCols() - 8.0;
         const float rows = numRows();
 
         const float p_scale_x = (widget_.x() - origin_.x()) / cols;
         const float p_scale_y = (widget_.y() - origin_.y()) / rows;
 
-        const float x = g.x; // - 1.0;
+        const float x = g.x - 4.0;
         const float y = g.y;
 
         const float px = x * p_scale_x;
@@ -618,7 +618,8 @@ private:
 private:
     QVector2D getVelocityVector(const TransformState& state) const 
     {
-        const float cols = state.numCols(); // - 2.0;
+        // todo: fix this, calculation should be in TransformState 
+        const float cols = state.numCols() - 8.0;
         const float pxw  = state.viewWidth() / cols;
         const float x    = pxw / state.viewWidth();
         const float y    = 0.0f;
@@ -1570,7 +1571,7 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     level_         = levelIndex;
     profile_       = profileIndex;
     tickDelta_     = 0;
-    warpFactor_    = 1.0;
+    warpFactor_    = 1.0; //0.4; //1.0;
     warpDuration_  = 0;
 }
 
@@ -1648,8 +1649,8 @@ void GameWidget::timerEvent(QTimerEvent* timer)
 
     // milliseconds
     const auto now  = timer_.elapsed();
-    const auto time = (now - timeStamp_);
-    const auto tick  = 1000.0 / profiles_[profile_].speed;    
+    const auto time = now - timeStamp_;
+    const auto tick = 1000.0 / profiles_[profile_].speed;    
     if (!time) 
         return;
 
@@ -1663,6 +1664,8 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             // advance game by one tick
             game_->tick();
 
+            //qDebug() << "tick!";
+
             const auto delta = tickDelta_ - tick;
             const auto ticks = delta / tick; 
 
@@ -1674,7 +1677,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
                 auto& inv = it->second;
                 const auto pos = state.toNormalizedViewSpace(GameSpace{i.xpos, i.ypos + 1});
                 inv->setPosition(pos);
-                inv->update(delta * warpFactor_, ticks, state);
+                inv->update(delta, ticks, state);
             }
 
             tickDelta_ = 0;
@@ -1683,6 +1686,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         {
             // fragment of time expressed in ticks
             const auto ticks = (time * warpFactor_) / tick;
+
             for (auto& pair : invaders_)
             {
                 auto& invader = pair.second;
@@ -1712,11 +1716,15 @@ void GameWidget::timerEvent(QTimerEvent* timer)
 
     if (warpDuration_) 
     {
-        warpDuration_ = clamp(0, (int)warpDuration_ - (int)time, (int)warpDuration_);
-        if (!warpDuration_)
+        if (time >= warpDuration_)
         {
-            warpFactor_ = 1.0;
+            warpFactor_   = 1.0;
+            warpDuration_ = 0;            
             qDebug() << "warp ended";
+        }
+        else
+        {
+            warpDuration_ -= time;
         }
     }
 }

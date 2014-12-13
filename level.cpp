@@ -194,7 +194,7 @@ std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
             Level::enemy enemy;
             enemy.string     = toks[0];
             enemy.killstring = toks[1];
-            enemy.score      = toks[2].toInt() * 10;
+            enemy.score      = toks[2].toInt();
             enemy.help       = joinTokens(toks, 3);
             next->enemies_.push_back(enemy);                
         }
