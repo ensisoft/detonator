@@ -29,10 +29,11 @@ project invaders :
   <include>. 
   ;
 
-#lib pulseaudio : : <name>pulse ;
-#lib soundfile  : : <name>sndfile ;
+lib pulseaudio : : <name>pulse ;
+lib soundfile  : : <name>sndfile ;
 
 exe invaders : 
+  audio.cpp
   level.cpp
   game.cpp
   main.cpp
@@ -45,12 +46,12 @@ exe invaders :
   /qt//QtCore
   /qt//QtGui
  
-  #pulseaudio
-  #soundfile
+  pulseaudio
+  soundfile
 
   qtmain_win.cpp
 
   : <user-interface>gui
 ;
 
-install dist : invaders  README.md ;
+install dist : invaders  README.md invaders.sh ;

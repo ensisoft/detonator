@@ -45,6 +45,7 @@
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
+#include "audio.h"
 
 namespace invaders
 {
@@ -1351,6 +1352,18 @@ private:
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
     level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
 {
+    // PulseAudio pa("Invaders");
+
+    // while (pa.state() != AudioDevice::State::ready)
+    //     pa.poll();
+
+    // std::shared_ptr<AudioSample> sample = std::make_shared<AudioSample>(R("sounds/explode.wav"));
+    // std::unique_ptr<AudioStream> stream = pa.prepare(sample);
+
+    // pa.play(std::move(stream));
+    // while (pa.num_streams())
+    //     pa.poll();
+
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
     BigExplosion::prepare();
