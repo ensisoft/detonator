@@ -50,7 +50,7 @@
 namespace invaders
 {
 
-const auto LevelUnlockCriteria = 0.82;
+const auto LevelUnlockCriteria = 0.85;
 
 QString R(const QString& s) 
 { 
@@ -1349,9 +1349,16 @@ private:
 };
 
 
+extern AudioPlayer* g_audio;
+
+
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
     level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
 {
+
+    static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"));
+
+
     // PulseAudio pa("Invaders");
 
     // while (pa.state() != AudioDevice::State::ready)
@@ -1408,6 +1415,8 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         animations_.push_back(std::move(score));
 
         invaders_.erase(it);
+
+        g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
     };
 
     game_->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)

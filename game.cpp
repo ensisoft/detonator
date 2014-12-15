@@ -219,7 +219,7 @@ unsigned Game::killScore(const invader& inv) const
     const auto bonus  = xpos / width;
 
     // put more weight on just killing the invader than on when it's being killed
-    return 0.8 * points + 0.2 * (points * bonus);
+    return 0.6 * points + 0.4 * (points * bonus);
 }
 
 void Game::spawn()

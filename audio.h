@@ -37,6 +37,8 @@
 #include <functional>
 #include <vector>
 #include <list>
+#include <queue>
+#include <chrono>
 #include <cstring>
 
 namespace invaders
@@ -101,6 +103,7 @@ namespace invaders
     };
 
 
+    // access to the native audio playback system
     class AudioDevice
     {
     public:
@@ -110,18 +113,26 @@ namespace invaders
 
         virtual ~AudioDevice() = default;
 
+        // prepare a new audio stream from the already loaded audio sample
         virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
 
+        virtual std::size_t num_streams() const = 0;
+
+        // play the audio stream right away. 
         virtual void play(std::unique_ptr<AudioStream> stream) = 0;
 
+        // poll and dispatch pending audio device events. 
+        // Todo: this needs a proper waiting/signaling mechanism. 
         virtual void poll() = 0;
 
+        // get the current audio device state.
         virtual State state() const = 0;
 
     protected:
     private:
     };
 
+    // AudioDevice implementation for PulseAudio
     class PulseAudio : public AudioDevice
     {
     public:
@@ -180,7 +191,7 @@ namespace invaders
             return state_;
         }
 
-        std::size_t num_streams() const
+        virtual std::size_t num_streams() const override
         { return playlist_.size(); }
 
 
@@ -207,6 +218,7 @@ namespace invaders
 
            ~Stream()
             {
+                pa_stream_disconnect(stream_);
                 pa_stream_unref(stream_);
             }
 
@@ -322,7 +334,7 @@ namespace invaders
     class AudioPlayer 
     {
     public:
-        AudioPlayer(std::unique_ptr<AudioDevice> device)
+        AudioPlayer(std::unique_ptr<AudioDevice> device) : stop_(false)
         {
             thread_.reset(new std::thread(std::bind(&AudioPlayer::runLoop, this, device.get())));
             device.release();
@@ -330,47 +342,107 @@ namespace invaders
 
        ~AudioPlayer()
         {
-            //thread_.detach();
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                stop_ = true;
+                cond_.notify_one();
+            }
+            thread_->join();
         }
 
-        void play(std::unique_ptr<AudioSample> sample)
+        void play(std::shared_ptr<AudioSample> sample)
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            list_.push_back(std::move(sample));
+
+            struct sample s;
+            s.s = sample;
+            s.p = std::chrono::steady_clock::now();
+            samples_.push(s);
+
             cond_.notify_one();
         }
+
+
+        void play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms)
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+
+            struct sample s;
+            s.s = sample;
+            s.p = std::chrono::steady_clock::now() + ms;
+            samples_.push(s);
+
+            cond_.notify_one();
+        }
+
     private:
         void runLoop(AudioDevice* ptr)
         {
             std::unique_ptr<AudioDevice> dev(ptr);
             for (;;)
             {
-                std::unique_lock<std::mutex> lock(mutex_);
-                if (list_.empty())
-                    cond_.wait(lock);
+                if (dev->num_streams())
+                    dev->poll();
 
-                if (list_.empty())
+                std::unique_lock<std::mutex> lock(mutex_);
+                if (stop_)
+                    return;
+
+                if (samples_.empty())
+                {
+                    if (dev->num_streams())
+                        continue;
+
+                    cond_.wait(lock);
+                }
+                if (samples_.empty())
                     continue;
 
-                auto beg = std::begin(list_);
-                auto end = std::end(list_);
-                lock.unlock();
-
-                while (beg != end)
+                auto top = samples_.top();
+                auto now = std::chrono::steady_clock::now();
+                if (!dev->num_streams())
                 {
-
-
-                    std::lock_guard<std::mutex> lock(mutex_);
-                    end = std::end(list_);
-                    beg++;
+                    auto ret = cond_.wait_until(lock, top.p);
+                    if (ret == std::cv_status::timeout)
+                    {
+                        auto sample = top.s;
+                        auto stream = dev->prepare(sample);
+                        dev->play(std::move(stream)); 
+                        samples_.pop();
+                    }
+                }
+                else if (now >= top.p)
+                {
+                    auto sample = top.s;
+                    auto stream = dev->prepare(sample);
+                    dev->play(std::move(stream));
+                    samples_.pop();
                 }
             }
         }
     private:
+        struct sample {
+            std::shared_ptr<AudioSample> s;
+            std::chrono::steady_clock::time_point p;
+
+            bool operator<(const sample& other) const {
+                return p < other.p;
+            }
+            bool operator>(const sample& other) const {
+                return p > other.p;
+            }
+        };
+
+    private:
         std::unique_ptr<std::thread> thread_;
         std::mutex mutex_;
-        std::list<std::unique_ptr<AudioSample>> list_;
+
+        std::priority_queue<sample,
+            std::vector<sample>,
+            std::greater<sample>> samples_;
+
         std::condition_variable cond_;
+        bool stop_;
     };
 
 } // invaders

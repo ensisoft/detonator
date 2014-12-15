@@ -99,3 +99,27 @@ Shuo Hua
 說 shuo 14 to speak / say
 END
 
+BEGIN
+Duzi Dong
+子 zi    3   noun suffix
+電 dian  13  o'clock / point 
+真 zhen  10  really / truly
+想 xiang 13  to think / want / miss
+跟 gen   13  with someone
+對 dui   14  right / correct / treat
+水 shui  5   water / river
+先 xian  6   early / prior
+END
+
+
+BEGIN
+Alishan
+次 ci   6  next in sequence
+打 da   5  to beat / strike / break
+工 gong 3  work / worker
+過 guo  13 experienced action 
+坐 zuo  7  to sit / to take a seat
+茶 cha  9  tea
+會 hui  13 can / to be able to 
+做 zuo  11 to do / to make
+END
