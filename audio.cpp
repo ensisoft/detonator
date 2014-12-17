@@ -21,6 +21,9 @@
 //  THE SOFTWARE.            
 
 #include "config.h"
+
+#ifdef ENABLE_AUDIO
+
 #include "warnpush.h"
 #  include <QResource>
 #  include <QFile>
@@ -179,7 +182,6 @@ AudioSample::AudioSample(const QString& path)
     }
 }
 
-
-
-
 } // invaders
+
+#endif // ENABLE_AUDIO

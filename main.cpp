@@ -30,7 +30,9 @@
 #  include <fenv.h>
 #endif
 #include "mainwindow.h"
-#include "audio.h"
+
+#if defined(ENABLE_AUDIO)
+#  include "audio.h"
 
 namespace invaders {
 
@@ -38,12 +40,15 @@ AudioPlayer* g_audio;
 
 } // invaders
 
+#endif
+
 int main(int argc, char* argv[])
 {
+#ifdef ENABLE_AUDIO
     std::unique_ptr<invaders::AudioDevice> pa(new invaders::PulseAudio("Pinyin-Invaders"));
     invaders::AudioPlayer player(std::move(pa));
     invaders::g_audio = &player;
-
+#endif
 
 #if defined(LINUX_OS)
     // SIGFPE on floating point exception

@@ -45,7 +45,13 @@
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
-#include "audio.h"
+
+#ifdef ENABLE_AUDIO
+#  include "audio.h"
+namespace invaders {
+  extern AudioPlayer* g_audio;
+}
+#endif
 
 namespace invaders
 {
@@ -1349,27 +1355,16 @@ private:
 };
 
 
-extern AudioPlayer* g_audio;
+
 
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
     level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
 {
 
+#ifdef ENABLE_AUDIO
     static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"));
-
-
-    // PulseAudio pa("Invaders");
-
-    // while (pa.state() != AudioDevice::State::ready)
-    //     pa.poll();
-
-    // std::shared_ptr<AudioSample> sample = std::make_shared<AudioSample>(R("sounds/explode.wav"));
-    // std::unique_ptr<AudioStream> stream = pa.prepare(sample);
-
-    // pa.play(std::move(stream));
-    // while (pa.num_streams())
-    //     pa.poll();
+#endif
 
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
@@ -1416,7 +1411,9 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         invaders_.erase(it);
 
+#ifdef ENABLE_AUDIO
         g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
+#endif
     };
 
     game_->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)

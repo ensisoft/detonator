@@ -66,5 +66,7 @@
     typedef int max_align_t;
 #  endif
 #  define LINUX_OS
+
+#  define ENABLE_AUDIO
 #endif
 
