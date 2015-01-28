@@ -72,3 +72,14 @@
 #  define ENABLE_AUDIO
 #endif
 
+
+namespace invaders {
+
+const int MAJOR_VERSION = 0;
+const int MINOR_VERSION = 1;
+
+} // invaders
+
+#ifdef NDEBUG
+#  define QT_NO_DEBUG_OUTPUT
+#endif

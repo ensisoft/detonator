@@ -70,6 +70,8 @@ MainWindow::MainWindow()
     loadProfile(EASY);
     loadProfile(MEDIUM);
     loadProfile(CHINESE);
+
+    setWindowTitle(tr("Invaders %1.%2").arg(MAJOR_VERSION).arg(MINOR_VERSION));
 }
 
 
