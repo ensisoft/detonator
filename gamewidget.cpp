@@ -1018,7 +1018,7 @@ public:
             else if (text_ == "WARP")
             {
                 Game::timewarp w;
-                w.duration = 3000;
+                w.duration = 4000;
                 w.factor   = 0.2f;
                 game.enter(w);
             }
@@ -1359,7 +1359,7 @@ private:
 
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
-    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false)
+    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false), playSounds_(true)
 {
 
 #ifdef ENABLE_AUDIO
@@ -1412,7 +1412,10 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         invaders_.erase(it);
 
 #ifdef ENABLE_AUDIO
-        g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
+        if (playSounds_)
+        {
+            g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
+        }
 #endif
     };
 
@@ -1553,7 +1556,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
-    startTimer(0);
+    startTimer(15);
 
     timer_.start();
     showMenu();
@@ -1590,7 +1593,7 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     level_         = levelIndex;
     profile_       = profileIndex;
     tickDelta_     = 0;
-    warpFactor_    = 1.0; //0.4; //1.0;
+    warpFactor_    = 1.0; //(0.4; //1.0; //0.4; //1.0;
     warpDuration_  = 0;
 }
 
@@ -1656,6 +1659,11 @@ void GameWidget::setUnlimitedWarps(bool onOff)
     unlimitedWarps_ = onOff;
 }
 
+void GameWidget::setPlaySounds(bool onOff)
+{
+    playSounds_ = onOff;
+}
+
 void GameWidget::setUnlimitedBombs(bool onOff)
 {
     unlimitedBombs_ = onOff;
@@ -1669,7 +1677,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     // milliseconds
     const auto now  = timer_.elapsed();
     const auto time = now - timeStamp_;
-    const auto tick = 1000.0 / profiles_[profile_].speed;    
+    const auto tick = 1000.0 / profiles_[profile_].speed;
     if (!time) 
         return;
 
@@ -1682,8 +1690,6 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         {
             // advance game by one tick
             game_->tick();
-
-            //qDebug() << "tick!";
 
             const auto delta = tickDelta_ - tick;
             const auto ticks = delta / tick; 
@@ -1699,9 +1705,9 @@ void GameWidget::timerEvent(QTimerEvent* timer)
                 inv->update(delta, ticks, state);
             }
 
-            tickDelta_ = 0;
+            tickDelta_ = tickDelta_ - tick;
         }
-        else
+        else 
         {
             // fragment of time expressed in ticks
             const auto ticks = (time * warpFactor_) / tick;

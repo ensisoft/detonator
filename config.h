@@ -48,6 +48,8 @@
 #if defined(__GNUG__)
 #  define __GCC__
 #  define LINUX_OS
+
+#  define ENABLE_AUDIO
 #endif
 
 #if defined(__clang__)

@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
     bool masterUnlock = false;
     bool unlimitedWarps = false;
     bool unlimitedBombs = false;
+    bool playSound = true;
 
     const auto& args = app.arguments();
     for (const auto& a : args)
@@ -73,6 +74,8 @@ int main(int argc, char* argv[])
             unlimitedWarps = true;
         else if (a == "--unlimited-bombs")
             unlimitedBombs = true;
+        else if (a == "--no-sound")
+            playSound = false;
     }
 
     invaders::MainWindow window;
@@ -80,6 +83,7 @@ int main(int argc, char* argv[])
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
     window.setUnlimitedBombs(unlimitedBombs);
+    window.setPlaySound(playSound);
     window.show();
 
     return app.exec();

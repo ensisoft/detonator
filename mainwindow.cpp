@@ -111,6 +111,11 @@ void MainWindow::setUnlimitedBombs(bool onOff)
     ui_.game->setUnlimitedBombs(onOff);
 }
 
+void MainWindow::setPlaySound(bool onOff)
+{
+    ui_.game->setPlaySounds(onOff);
+}
+
 void MainWindow::loadProfile(GameWidget::Profile profile)
 {
     QSettings settings("Ensisoft", "Invaders");

@@ -94,6 +94,8 @@ namespace invaders
 
         void setUnlimitedBombs(bool onOff);
 
+        void setPlaySounds(bool onOff);
+
     signals:
         void quitGame();
 
@@ -157,6 +159,7 @@ namespace invaders
         bool masterUnlock_;
         bool unlimitedBombs_;
         bool unlimitedWarps_;
+        bool playSounds_;
     };
 
 } // invaders

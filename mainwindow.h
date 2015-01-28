@@ -46,6 +46,8 @@ namespace invaders
         void setUnlimitedWarps(bool onOff);
         void setUnlimitedBombs(bool onOff);
 
+        void setPlaySound(bool onOff);
+
     private:
         void loadProfile(GameWidget::Profile profile);
     private:
