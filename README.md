@@ -9,7 +9,8 @@ them down with pinyin missiles and detonating bombs.
 Running on Windows
 -----------------------
 
-1. install the vcredist_x66.exe package to install runtime libraries.
+1. Unzip invaders.zip
+1. install the vcredist_x86.exe package to install runtime libraries.
 2. run invaders.exe
 3. play
 
@@ -17,8 +18,8 @@ Running on Windows
 Running on Linux
 -----------------------
 
-1. run invaders.sh
-
+1. Extract the invaders.tar.gz
+2. run dist/invaders.sh
 
 
 
