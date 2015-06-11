@@ -1110,7 +1110,8 @@ public:
             "Good luck.\n\n"
             "Enter - Fire\n"
             "Esc - Exit\n"
-            "F1 - Help\n\n"
+            "F1 - Help\n"
+            "F2 - Settings\n\n"
             "Difficulty\n");
 
         rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
@@ -1300,6 +1301,75 @@ public:
             "Type WARP to enter a timewarp\n\n"
             "Press Esc to exit\n").arg(str));
     }
+};
+
+class GameWidget::Settings
+{
+public:
+    Settings(bool sounds) : sounds_(sounds)
+    {}
+    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
+    {
+        QPen regular;
+        regular.setWidth(1);
+        regular.setColor(Qt::darkGray);
+
+        QPen selected;
+        selected.setWidth(1);
+        selected.setColor(Qt::darkGreen);
+
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(scale.y() / 2);
+
+        painter.setPen(regular);
+        painter.setFont(font);
+
+        QFont underline;
+        underline.setFamily("Arcade");
+        underline.setUnderline(true);
+        underline.setPixelSize(scale.y() / 2);
+
+#ifndef ENABLE_AUDIO
+        painter.drawText(rect, Qt::AlignCenter, 
+            "Audio is not supported on this platform.\n\n"
+            "Press Esc to exit\n");
+        return;
+#endif
+
+        const auto cols = 1;
+        const auto rows = 6;
+        TransformState state(rect, cols, rows);
+
+        QRect rc;
+        rc = state.toViewSpaceRect(QPoint(0, 1), QPoint(1, 2));
+        painter.drawText(rc, Qt::AlignCenter,
+            "Press space to toggle a setting.");
+
+        rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
+        painter.setPen(selected);
+        painter.drawText(rc, Qt::AlignCenter, 
+            tr("Sound Effects are: %1").arg(sounds_ ? "On" : "Off"));
+
+        rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
+        painter.setPen(regular);
+        painter.drawText(rc, Qt::AlignCenter,
+            "Press Esc to exit");
+    }
+
+    void keyPress(const QKeyEvent* keyPress)
+    {
+        const auto key = keyPress->key();
+        if (key == Qt::Key_Space)
+        {
+            sounds_ = !sounds_;
+        }
+    }
+
+    bool enableSounds() const
+    { return sounds_; }
+private:
+    bool sounds_;
 };
 
 class GameWidget::Fleet
@@ -1556,7 +1626,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
-    startTimer(15);
+    startTimer(10);
 
     timer_.start();
     showMenu();
@@ -1772,6 +1842,11 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         help_->paint(painter, rect, state.getScale());
         return;
     }
+    else if (settings_)
+    {
+        settings_->paint(painter, rect, state.getScale());
+        return;
+    }
     else if (menu_)
     {
         menu_->paint(painter, rect, state.getScale());
@@ -1827,6 +1902,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             quitHelp();
             return;
         }
+        else if (settings_)
+        {
+            quitSettings();
+            return;
+        }
         else if (menu_)
         {
             emit quitGame();
@@ -1844,6 +1924,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         if (help_)
         {
+            return;
+        }
+        else if (settings_)
+        {
+            settings_->keyPress(press);
             return;
         }
         else if (menu_)
@@ -1871,6 +1956,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         showHelp();
     }
+    else if (key == Qt::Key_F2)
+    {
+        showSettings();
+    }
     else if (menu_)
     {
         menu_->keyPress(press);
@@ -1879,13 +1968,17 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         player_->keyPress(press, *game_);
     }
+    else if (settings_)
+    {
+        settings_->keyPress(press);
+    }
 
     update();
 }
 
 bool GameWidget::gameIsRunning() const
 {
-    return !menu_ && !fleet_ && !help_;
+    return !menu_ && !fleet_ && !help_ && !settings_;
 }
 
 void GameWidget::showMenu()
@@ -1898,6 +1991,20 @@ void GameWidget::showMenu()
 void GameWidget::showHelp()
 {
     help_.reset(new Help);
+}
+
+void GameWidget::showSettings()
+{
+    settings_.reset(new Settings(playSounds_));
+}
+
+void GameWidget::quitSettings()
+{
+    playSounds_ = settings_->enableSounds();    
+
+    qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
+
+    settings_.reset();
 }
 
 void GameWidget::showFleet()

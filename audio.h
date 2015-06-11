@@ -153,7 +153,7 @@ namespace invaders
             pa_mainloop_free(loop_);
         }
 
-        virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample)
+        virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
         {
             std::unique_ptr<Stream> s(new Stream(sample, context_));
 
