@@ -123,3 +123,51 @@ Alishan
 會 hui  13 can / to be able to 
 做 zuo  11 to do / to make
 END
+
+BEGIN
+Hao Nan
+文 wen   4  language / writing
+學 xue   16 to learn / to study
+兩 liang 8  two / both / some 
+每 mei   8  each / every
+生 sheng 5  student / to be born 
+個 ge    10 this / that / MW 
+多 duo   6  many / much / often / a lot of
+少 shao  4  few / less / to lack
+END
+
+
+BEGIN
+Bu Yiyang
+時 shi  10 time / hour / season
+候 hou  10 to wait / to inquire after
+吃 chi  6  to eat / to consume
+台 tai  5  tai
+樣 yang 15 manner / pattern
+最 zui  12 most / the most
+家 jia  10 home / family
+前 qian 9  front / forward / ahead
+END
+
+
+BEGIN
+East & West
+到 dao  8  arrive / untill / up to
+給 gei  12 to / for / give
+東 dong 8  east
+西 xi   6  west
+現 xian 12 present / now / to appear
+後 hou  9  back / behind / after / later
+出 chu  7  to go out
+END
+
+BEGIN
+Ba ba ba...
+著 zhe  12 action in progress
+用 yong 5  to use / employ
+見 jian 7  to see / meet
+開 kai  12 to open / start / turn on
+關 guan 19 to close / shut / turn off
+電 dian 13 electric / electricity
+冰 bing 6  ice
+END
