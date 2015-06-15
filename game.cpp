@@ -109,6 +109,9 @@ void Game::fire(const Game::missile& missile)
         });
 
     auto& inv = *it;
+    // if it's not yet visible it cannot be killed ;)
+    if (inv.xpos >= width_)
+        return;
 
     inv.viewList.pop_front();
     inv.killList.pop_front();
