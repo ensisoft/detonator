@@ -1306,7 +1306,7 @@ public:
 class GameWidget::Settings
 {
 public:
-    Settings(bool sounds) : sounds_(sounds)
+    Settings(bool sounds, bool fullscreen) : sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
     {}
     void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
     {
@@ -1346,10 +1346,21 @@ public:
         painter.drawText(rc, Qt::AlignCenter,
             "Press space to toggle a setting.");
 
+        painter.setPen(regular);
+
+        if (setting_index_ == 0)
+            painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
-        painter.setPen(selected);
         painter.drawText(rc, Qt::AlignCenter, 
             tr("Sound Effects are: %1").arg(sounds_ ? "On" : "Off"));
+
+        painter.setPen(regular);
+
+        rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
+        if (setting_index_ == 1)
+            painter.setPen(selected);
+        painter.drawText(rc, Qt::AlignCenter,
+            tr("Fullscreen: %1").arg(fullscreen_ ? "On" : "Off"));
 
         rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
         painter.setPen(regular);
@@ -1362,14 +1373,32 @@ public:
         const auto key = keyPress->key();
         if (key == Qt::Key_Space)
         {
-            sounds_ = !sounds_;
+            if (setting_index_ == 0)
+                sounds_ = !sounds_;
+            else if (setting_index_ == 1)
+                fullscreen_ = !fullscreen_;
+        }
+        else if (key == Qt::Key_Up)
+        {
+            if (--setting_index_ < 0)
+                setting_index_ = 1;
+        }
+        else if (key == Qt::Key_Down)
+        {
+            setting_index_ = (setting_index_ + 1) % 2;
         }
     }
 
     bool enableSounds() const
     { return sounds_; }
+
+    bool fullScreen() const 
+    { return fullscreen_; }
 private:
     bool sounds_;
+    bool fullscreen_;
+private:
+    int setting_index_;    
 };
 
 class GameWidget::Fleet
@@ -1429,7 +1458,8 @@ private:
 
 
 GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
-    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false), playSounds_(true)
+    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), 
+    masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false), playSounds_(true), fullScreen_(false)
 {
 
 #ifdef ENABLE_AUDIO
@@ -1734,6 +1764,11 @@ void GameWidget::setPlaySounds(bool onOff)
     playSounds_ = onOff;
 }
 
+void GameWidget::setFullscreen(bool onOff)
+{
+    fullScreen_ = onOff;
+}
+
 void GameWidget::setUnlimitedBombs(bool onOff)
 {
     unlimitedBombs_ = onOff;
@@ -1960,6 +1995,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         showSettings();
     }
+    else if (settings_)
+    {
+        settings_->keyPress(press);
+    }
     else if (menu_)
     {
         menu_->keyPress(press);
@@ -1968,11 +2007,6 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         player_->keyPress(press, *game_);
     }
-    else if (settings_)
-    {
-        settings_->keyPress(press);
-    }
-
     update();
 }
 
@@ -1995,7 +2029,7 @@ void GameWidget::showHelp()
 
 void GameWidget::showSettings()
 {
-    settings_.reset(new Settings(playSounds_));
+    settings_.reset(new Settings(playSounds_, fullScreen_));
 }
 
 void GameWidget::quitSettings()
@@ -2003,6 +2037,10 @@ void GameWidget::quitSettings()
     playSounds_ = settings_->enableSounds();    
 
     qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
+
+    if (settings_->fullScreen())
+        emit enterFullScreen();
+    else emit leaveFullScreen();
 
     settings_.reset();
 }

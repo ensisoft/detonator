@@ -47,6 +47,11 @@ MainWindow::MainWindow()
     QObject::connect(ui_.game, SIGNAL(quitGame()), 
         this, SLOT(close()));
 
+    QObject::connect(ui_.game, SIGNAL(enterFullScreen()),
+        this, SLOT(enterFullScreen()));
+    QObject::connect(ui_.game, SIGNAL(leaveFullScreen()),
+        this, SLOT(leaveFullScreen()));
+
     const auto& inst = QApplication::applicationDirPath();
     const auto& file = inst + "/data/levels.txt";
 
@@ -78,8 +83,16 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
     QSettings settings("Ensisoft", "Invaders");
-    settings.setValue("window/width", width());
-    settings.setValue("window/height", height());
+    if (isFullScreen())
+    {
+        settings.setValue("window/width", width_);
+        settings.setValue("window/height", height_);
+    }
+    else
+    {
+        settings.setValue("window/width", width());
+        settings.setValue("window/height", height());
+    }
     settings.setValue("window/xpos", x());
     settings.setValue("window/ypos", y());
 
@@ -116,6 +129,25 @@ void MainWindow::setUnlimitedBombs(bool onOff)
 void MainWindow::setPlaySound(bool onOff)
 {
     ui_.game->setPlaySounds(onOff);
+}
+
+void MainWindow::enterFullScreen()
+{
+    width_  = width();
+    height_ = height();
+
+    showFullScreen();
+
+    ui_.game->setFullscreen(true);
+}
+
+void MainWindow::leaveFullScreen()
+{
+    showNormal();
+    
+    resize(width_, height_);
+
+    ui_.game->setFullscreen(false);
 }
 
 void MainWindow::loadProfile(GameWidget::Profile profile)

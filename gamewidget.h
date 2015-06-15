@@ -96,8 +96,12 @@ namespace invaders
 
         void setPlaySounds(bool onOff);
 
+        void setFullscreen(bool onOff);
+
     signals:
         void quitGame();
+        void enterFullScreen();
+        void leaveFullScreen();
 
     private:
         virtual void timerEvent(QTimerEvent* timer) override;
@@ -163,6 +167,7 @@ namespace invaders
         bool unlimitedBombs_;
         bool unlimitedWarps_;
         bool playSounds_;
+        bool fullScreen_;
     };
 
 } // invaders

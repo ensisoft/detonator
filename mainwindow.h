@@ -48,11 +48,18 @@ namespace invaders
 
         void setPlaySound(bool onOff);
 
+    public slots:
+        void enterFullScreen();
+        void leaveFullScreen();
+
     private:
         void loadProfile(GameWidget::Profile profile);
     private:
 
         Ui::MainWindow ui_;
+    private:
+        int width_;
+        int height_;
     };
 
 } // invaders
