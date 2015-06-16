@@ -143,6 +143,9 @@ void MainWindow::enterFullScreen()
 
 void MainWindow::leaveFullScreen()
 {
+    if (!isFullScreen())
+        return;
+    
     showNormal();
     
     resize(width_, height_);

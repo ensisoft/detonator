@@ -1104,14 +1104,16 @@ public:
         QRect rect;
 
         rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
-        painter.drawText(rect, Qt::AlignCenter,
+        painter.drawText(rect, Qt::AlignHCenter | Qt::AlignBottom,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
+//
             "Enter - Fire\n"
             "Esc - Exit\n"
             "F1 - Help\n"
-            "F2 - Settings\n\n"
+            "F2 - Settings\n"
+            "F3 - About\n\n"
             "Difficulty\n");
 
         rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
@@ -1306,6 +1308,8 @@ public:
 class GameWidget::Settings
 {
 public:
+    std::function<void (bool)> onToggleFullscreen;
+
     Settings(bool sounds, bool fullscreen) : sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
     {}
     void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
@@ -1376,7 +1380,10 @@ public:
             if (setting_index_ == 0)
                 sounds_ = !sounds_;
             else if (setting_index_ == 1)
+            {
                 fullscreen_ = !fullscreen_;
+                onToggleFullscreen(fullscreen_);
+            }
         }
         else if (key == Qt::Key_Up)
         {
@@ -1399,6 +1406,35 @@ private:
     bool fullscreen_;
 private:
     int setting_index_;    
+};
+
+class GameWidget::About
+{
+public:
+    void paint(QPainter& painter, const QRect& area, const QPoint& scale) const
+    {
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(scale.y() / 2);
+        painter.setFont(font);
+
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkGray);
+        painter.setPen(pen);
+
+        painter.drawText(area, Qt::AlignCenter,
+            QString::fromUtf8("Pinyin-Invaders %1.%2\n"
+                "Design and programming by\n"
+                "Sami Vaisanen\n"
+                "(c) 2014-2015 Ensisoft\n"
+                "http://www.ensisoft.com\n"
+                "http://www.github.com/ensisoft/pinyin-invaders\n\n"
+                "Graphics by MillionthVector\n\n"
+                "http://opengameart.org/"
+                ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
+    }
+private:
 };
 
 class GameWidget::Fleet
@@ -1882,6 +1918,11 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         settings_->paint(painter, rect, state.getScale());
         return;
     }
+    else if (about_)
+    {
+        about_->paint(painter, rect, state.getScale());
+        return;
+    }
     else if (menu_)
     {
         menu_->paint(painter, rect, state.getScale());
@@ -1942,6 +1983,11 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             quitSettings();
             return;
         }
+        else if(about_)
+        {
+            quitAbout();
+            return;
+        }
         else if (menu_)
         {
             emit quitGame();
@@ -1995,6 +2041,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     {
         showSettings();
     }
+    else if (key == Qt::Key_F3)
+    {
+        showAbout();
+    }
     else if (settings_)
     {
         settings_->keyPress(press);
@@ -2012,7 +2062,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
 bool GameWidget::gameIsRunning() const
 {
-    return !menu_ && !fleet_ && !help_ && !settings_;
+    return !menu_ && !fleet_ && !help_ && !settings_ && !about_;
 }
 
 void GameWidget::showMenu()
@@ -2030,6 +2080,16 @@ void GameWidget::showHelp()
 void GameWidget::showSettings()
 {
     settings_.reset(new Settings(playSounds_, fullScreen_));
+    settings_->onToggleFullscreen = [this](bool onOff) {
+        if (onOff)
+            emit enterFullScreen();
+        else emit leaveFullScreen();
+    };
+}
+
+void GameWidget::showAbout()
+{
+    about_.reset(new About);
 }
 
 void GameWidget::quitSettings()
@@ -2038,11 +2098,12 @@ void GameWidget::quitSettings()
 
     qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
 
-    if (settings_->fullScreen())
-        emit enterFullScreen();
-    else emit leaveFullScreen();
-
     settings_.reset();
+}
+
+void GameWidget::quitAbout()
+{
+    about_.reset();
 }
 
 void GameWidget::showFleet()

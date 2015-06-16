@@ -113,7 +113,9 @@ namespace invaders
         void showFleet();
         void showHelp();
         void showSettings();
+        void showAbout();
         void quitSettings();
+        void quitAbout();
         void quitHelp();
         void quitFleet();
         void quitMenu();
@@ -138,6 +140,7 @@ namespace invaders
         class Help;
         class Fleet;
         class Settings;
+        class About;
 
     private:
         std::unique_ptr<Background> background_;
@@ -147,6 +150,7 @@ namespace invaders
         std::unique_ptr<Menu> menu_;
         std::unique_ptr<Help> help_;
         std::unique_ptr<Settings> settings_;
+        std::unique_ptr<About> about_;
         std::unique_ptr<Fleet> fleet_;
         std::unique_ptr<Game> game_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
