@@ -38,11 +38,13 @@
 #  include <QResource>
 #  include <QFileInfo>
 #  include <QtDebug>
+#  include <boost/random/mersenne_twister.hpp>
 #include "warnpop.h"
 #include <cmath>
 #include <ctime>
-
-#include "gamewidget.h"
+#include "warnpush.h"
+#  include "gamewidget.h"
+#include "warnpop.h"
 #include "game.h"
 #include "level.h"
 
@@ -56,6 +58,8 @@ namespace invaders {
 namespace invaders
 {
 
+
+
 const auto LevelUnlockCriteria = 0.85;
 
 QString R(const QString& s) 
@@ -68,6 +72,18 @@ QString R(const QString& s)
     static const auto& inst = QApplication::applicationDirPath();
     return inst + "/" + s;
 }
+
+// generate a random number in the range of min max (inclusive)
+template<typename T>
+T rand(T min, T max)
+{
+    static boost::random::mt19937 generator;
+
+    const auto range = max - min;
+    const auto value = (double)generator() / (double)generator.max();
+    return min + (range * value);
+}
+
 
 // game space is discrete space from 0 to game::width() - 1 on X axis
 // and from 0 to game::height() - 1 on Y axis
@@ -701,6 +717,89 @@ private:
     QString text_;
 };
 
+class GameWidget::Alien : public GameWidget::Animation
+{
+public:
+    Alien() : lifetime_(10000), time_(0)
+    {
+        position_.setX(rand(0.0, 1.0));
+        position_.setY(rand(0.0, 1.0));
+
+        const auto x = rand(-1.0, 1.0);
+        const auto y = rand(-1.0, 1.0);
+        direction_ = QVector2D(x, y);
+        direction_.normalize();
+    }
+
+    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    {
+        time_ += dt;
+        if (time_ > lifetime_)
+            return false;
+
+        QVector2D fuzzy;
+        fuzzy.setY(std::sin(((time_ % 3000) / 3000.0) * 2 * M_PI));
+        fuzzy.setX(direction_.x());
+        fuzzy.normalize();
+
+        position_ += (dt / 10000.0) * fuzzy;
+        const auto x = position_.x();
+        const auto y = position_.y(); 
+        position_.setX(wrap(1.0, 0.0, x));
+        position_.setY(wrap(1.0, 0.0, y));
+        return true;
+    }
+
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        const auto phase = 1000 / 10;
+        const auto index = (time_ / phase) % 6;
+
+        const auto pixmap = loadTexture(index);
+
+        const auto pxw = pixmap.width();
+        const auto pxh = pixmap.height();
+        const auto aspect = (float)pxh / (float)pxw;
+
+        QRect target(0, 0, pxw, pxh);
+        target.moveTo(state.toViewSpace(position_));
+
+        const auto opa = painter.opacity();
+
+        painter.setOpacity(0.5);
+        painter.drawPixmap(target, pixmap, pixmap.rect());
+        painter.setOpacity(opa);
+
+    }
+    static void prepare()
+    {
+        loadTexture(0);
+    }
+private:
+    static std::vector<QPixmap> loadTextures()
+    {
+        std::vector<QPixmap> v;
+        for (int i=1; i<=6; ++i)
+        {
+            const auto name = QString("textures/alien/e_f%1").arg(i);
+            v.push_back(R(name));
+        }
+        return v;
+    }
+    static QPixmap loadTexture(unsigned index)
+    {
+        static auto textures = loadTextures();
+        Q_ASSERT(index < textures.size());
+        return textures[index];
+    }
+private:
+    quint64 lifetime_;
+    quint64 time_;
+private:
+    QVector2D direction_;
+    QVector2D position_;
+};
+
 
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
@@ -754,7 +853,8 @@ private:
         std::vector<QPixmap> v;
         for (int i=1; i<=90; ++i)
         {
-            v.push_back(R("textures/bomb/explosion1_00%1.png").arg(i));
+            const auto name = QString("textures/bomb/explosion1_00%1.png").arg(i);
+            v.push_back(R(name));
         }
         return v;
     }
@@ -822,7 +922,7 @@ class GameWidget::Background
 public:
     Background() : texture_(R("textures/SpaceBackground.png"))
     {
-        std::srand(std::time(nullptr));
+        //std::srand(std::time(nullptr));
 
         direction_ = QVector2D(4, 3);
         direction_.normalize();
@@ -830,10 +930,10 @@ public:
         for (std::size_t i=0; i<300; ++i)
         {
             particle p;
-            p.x = (float)std::rand() / RAND_MAX;
-            p.y = (float)std::rand() / RAND_MAX;
-            p.a = 0.5 + (0.5 * (float)std::rand() / RAND_MAX);
-            p.v = 0.05 + (0.05 * (float)std::rand() / RAND_MAX);
+            p.x = rand(0.0, 1.0); 
+            p.y = rand(0.0, 1.0); 
+            p.a = 0.5 + rand(0.0, 0.5);
+            p.v = 0.05 + rand(0.0, 0.05);
             p.b = !(i % 7);
             particles_.push_back(p);
         }
@@ -1505,6 +1605,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
     BigExplosion::prepare();
+    Alien::prepare();
 
     game_.reset(new Game(40, 10));
 
@@ -1822,6 +1923,18 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     if (!time) 
         return;
 
+    if (rand(0, 5000) == 7)
+    {
+        if (!alien_)
+            alien_.reset(new Alien);
+    }
+
+    if (alien_)
+    {
+        if (!alien_->update(time * warpFactor_, 0.0, state))
+            alien_.reset();
+    }
+
     background_->update(time * warpFactor_);
 
     if (gameIsRunning())
@@ -1907,6 +2020,9 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     const auto rect = this->rect();    
 
     background_->paint(painter, rect, state.getScale());
+
+    if (alien_)
+        alien_->paint(painter, state);    
 
     if (help_)
     {

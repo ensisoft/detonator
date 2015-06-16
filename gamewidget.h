@@ -131,7 +131,7 @@ namespace invaders
         class Score;
         class Invader;
         class Missile;
-        class Laser;
+        class Alien;
         class Background;
         class Scoreboard;        
         class Display;
@@ -153,6 +153,7 @@ namespace invaders
         std::unique_ptr<About> about_;
         std::unique_ptr<Fleet> fleet_;
         std::unique_ptr<Game> game_;
+        std::unique_ptr<Alien> alien_;
         std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
         std::vector<std::unique_ptr<Level>> levels_;
         std::vector<LevelInfo> info_;

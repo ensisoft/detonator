@@ -31,6 +31,7 @@
 #  pragma clang diagnostic ignored "-Wdeprecated-register"
 #  pragma clang diagnostic ignored "-Wuninitialized"
 #  pragma clang diagnostic ignored "-Wc++11-long-long"
+#  pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #elif defined(__GCC__)
   // for boost
 #  pragma GCC diagnostic push 
