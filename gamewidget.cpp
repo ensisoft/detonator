@@ -1269,13 +1269,15 @@ public:
         const auto& right = levels_[next];
 
         rect = state.toViewSpaceRect(QPoint(1, 4), QPoint(2, 5));
-        drawLevel(painter, rect, *left, prev);
+        drawLevel(painter, rect, *left, prev, false);
 
+        bool hilite = false;
         if (selrow_ == 1)
         {
             if (infos_[level_].locked)
                  painter.setPen(locked);
             else painter.setPen(selected);
+            hilite = true;
         }
         else
         {
@@ -1283,12 +1285,12 @@ public:
         }
 
         rect = state.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
-        drawLevel(painter, rect, *mid, level_);
+        drawLevel(painter, rect, *mid, level_, hilite);
 
         painter.setPen(regular);
         rect = state.toViewSpaceRect(QPoint(5, 4), QPoint(6, 5));
         painter.drawRect(rect);
-        drawLevel(painter, rect, *right, next);
+        drawLevel(painter, rect, *right, next, false);
 
 
         rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
@@ -1349,7 +1351,7 @@ public:
     void selectProfile(unsigned profile)
     { profile_ = profile; }
 private:
-    void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index)
+    void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index, bool hilite)
     {
         const auto& info = infos_[index];
 
@@ -1359,6 +1361,18 @@ private:
         else if (info.highScore)
             locked = QString("%1 points").arg(info.highScore);
         else locked = "Play!";
+
+        if (hilite)
+        {
+            QPen glow   = painter.pen();
+            QPen normal = painter.pen();
+            glow.setWidth(12);
+            painter.setPen(glow);
+            painter.setOpacity(0.2);            
+            painter.drawRect(rect);
+            painter.setOpacity(1.0);
+            painter.setPen(normal);
+        }
 
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter,
@@ -1524,13 +1538,14 @@ public:
         painter.setPen(pen);
 
         painter.drawText(area, Qt::AlignCenter,
-            QString::fromUtf8("Pinyin-Invaders %1.%2\n"
+            QString::fromUtf8("Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by\n"
                 "Sami Vaisanen\n"
                 "(c) 2014-2015 Ensisoft\n"
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
-                "Graphics by MillionthVector\n\n"
+                "Graphics by\n"
+                "MillionthVector and Gamedevtuts\n"
                 "http://opengameart.org/"
                 ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
     }
