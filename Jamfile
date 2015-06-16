@@ -10,6 +10,7 @@ import path ;
 import qt ;
 
 path-constant QT_PATH : "../qt-4.8.6" ;
+path-constant BOOST_PATH : "boost_1_51_0" ;
 
 # or if using using a system Qt
 # using qt ;
@@ -21,6 +22,7 @@ project invaders :
 
   <include>$(QT_PATH)/include/QtCore
   <include>$(QT_PATH)/include
+  <include>$(BOOST_PATH)
   <threading>multi
   <toolset>gcc:<cflags>-std=c++11
   <toolset>clang:<cflags>-std=c++11
