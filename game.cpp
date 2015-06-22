@@ -240,7 +240,7 @@ void Game::spawn()
         invader inv;
         inv.killList.append(enemy.killstring);
         inv.viewList.append(enemy.string);
-        inv.score      = enemy.score * 10;
+        inv.score      = enemy.score;
         inv.ypos       = std::rand() % height_;
         inv.xpos       = width_ + batch[inv.ypos] * 6 + i * 2;
         inv.identity   = identity_++;
@@ -249,12 +249,15 @@ void Game::spawn()
 
         if (!(std::rand() % 6))
         {
+            const auto enemy = level_->spawn();
             inv.killList.append(enemy.killstring);
             inv.viewList.append(enemy.string);
             inv.type = InvaderType::special;
             inv.score *= 2;
             inv.speed  = 1;
         }
+
+        inv.score *= 10;
 
         invaders_.push_back(inv);
         onInvaderSpawn(inv);

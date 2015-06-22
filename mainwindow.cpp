@@ -68,9 +68,9 @@ MainWindow::MainWindow()
         ui_.game->setLevelInfo(info);
     }
 
-    const GameWidget::Profile EASY {"Easy", 1.8f, 2, 7, 30};
-    const GameWidget::Profile MEDIUM {"Medium", 2.0f, 2, 4, 35};
-    const GameWidget::Profile CHINESE {"Chinese", 2.2f, 2, 4, 40};
+    const GameWidget::Profile EASY {"Easy", 1.6f, 2, 7, 30};
+    const GameWidget::Profile MEDIUM {"Medium", 1.8f, 2, 4, 35};
+    const GameWidget::Profile CHINESE {"Chinese", 2.0f, 2, 4, 40};
 
     loadProfile(EASY);
     loadProfile(MEDIUM);
