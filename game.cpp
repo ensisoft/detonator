@@ -245,8 +245,19 @@ void Game::spawn()
         inv.xpos       = width_ + batch[inv.ypos] * 6 + i * 2;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
+        inv.type       = InvaderType::regular;
+
+        if (!(std::rand() % 6))
+        {
+            inv.killList.append(enemy.killstring);
+            inv.viewList.append(enemy.string);
+            inv.type = InvaderType::special;
+            inv.score *= 2;
+            inv.speed  = 1;
+        }
+
         invaders_.push_back(inv);
-        onInvaderSpawn(inv, false);
+        onInvaderSpawn(inv);
 
         ++spawned_;
         ++batch[inv.ypos];
@@ -264,6 +275,7 @@ void Game::spawnBoss()
     theBoss.identity = identity_++;
     theBoss.score    = 0;    
     theBoss.speed    = 1;
+    theBoss.type     = InvaderType::boss;
 
     for (int i=0; i<5; ++i)
     {
@@ -274,7 +286,7 @@ void Game::spawnBoss()
     }
     theBoss.score *= 17;
 
-    onInvaderSpawn(theBoss, true);
+    onInvaderSpawn(theBoss);
 
     invaders_.push_back(theBoss);    
 

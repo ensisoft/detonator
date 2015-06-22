@@ -524,7 +524,7 @@ class GameWidget::Invader : public GameWidget::Animation
 {
 public:
     enum class ShipType {
-        cargo, cruiser, destroyer
+        cargo, cruiser, destroyer, fighter
     };
 
     Invader(QVector2D position, QString str, unsigned speed, ShipType type) : 
@@ -556,6 +556,7 @@ public:
             case ShipType::cargo:     return 6.0f;
             case ShipType::cruiser:   return 4.0f;
             case ShipType::destroyer: return 9.5f;
+            case ShipType::fighter:   return 5.5f;
         }
         return 1.0f;
     }
@@ -633,7 +634,8 @@ private:
         static QPixmap textures[] = {
             QPixmap(R("textures/Cargoship.png")),            
             QPixmap(R("textures/Cruiser.png")),
-            QPixmap(R("textures/Destroyer.png"))
+            QPixmap(R("textures/Destroyer.png")),
+            QPixmap(R("textures/Fighter.png"))
         };
         return textures[(int)type];
     }
@@ -1736,18 +1738,25 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         warpDuration_ = w.duration;
     };
 
-    game_->onInvaderSpawn = [&](const Game::invader& inv, bool boss)
+    game_->onInvaderSpawn = [&](const Game::invader& inv)
     {
         TransformState state(rect(), *game_);
 
         const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
 
         Invader::ShipType type = Invader::ShipType::destroyer;
-        if (boss)
+        if (inv.type == Game::InvaderType::boss)
             type = Invader::ShipType::destroyer;
-        else if (inv.speed == 1)
-            type = Invader::ShipType::cargo;
-        else type = Invader::ShipType::cruiser;
+        else if (inv.type == Game::InvaderType::regular)
+        {
+            if (inv.speed == 1)
+                type = Invader::ShipType::cargo;
+            else type = Invader::ShipType::cruiser;
+        }
+        else if (inv.type == Game::InvaderType::special)
+        {
+            type = Invader::ShipType::fighter;
+        }
 
         const auto killString = inv.killList.join("");
         const auto viewString = inv.viewList.join("");

@@ -41,6 +41,10 @@ namespace invaders
     class Game
     {
     public:
+        enum class InvaderType {
+            regular, special, boss
+        };
+
         struct invader {
             unsigned ypos;
             unsigned xpos;
@@ -49,6 +53,7 @@ namespace invaders
             unsigned speed;
             QStringList killList;
             QStringList viewList;
+            InvaderType type;
         };
 
         struct missile {
@@ -81,13 +86,15 @@ namespace invaders
             unsigned numWarps;
         };
 
+
+
         std::function<void (const invader&, const missile& m, unsigned score)> onMissileKill;
         std::function<void (const invader&, const missile& m)> onMissileDamage;
         std::function<void (const invader&, const bomb& b, unsigned score)> onBombKill;
         std::function<void (const invader&, const bomb& b)> onBombDamage;
         std::function<void (const bomb& b)> onBomb;
         std::function<void (const timewarp& w)> onWarp;
-        std::function<void (const invader&, bool boss)> onInvaderSpawn;        
+        std::function<void (const invader&)> onInvaderSpawn;        
         std::function<void (const invader&)> onInvaderVictory;
         std::function<void (const invader&)> onInvaderWarning;
         std::function<void (const score&)> onLevelComplete;
