@@ -94,14 +94,14 @@ void Game::tick()
     ++tick_;
 }
 
-void Game::fire(const Game::missile& missile)
+bool Game::fire(const Game::missile& missile)
 {
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
         [&](const invader& i) {
             return i.killList[0] == missile.string;
         });
     if (end == std::begin(invaders_))
-        return;
+        return false;
 
     auto it = std::min_element(std::begin(invaders_), end, 
         [&](const invader& a, const invader& b) {
@@ -111,7 +111,7 @@ void Game::fire(const Game::missile& missile)
     auto& inv = *it;
     // if it's not yet visible it cannot be killed ;)
     if (inv.xpos >= width_)
-        return;
+        return false;
 
     inv.viewList.pop_front();
     inv.killList.pop_front();
@@ -129,6 +129,7 @@ void Game::fire(const Game::missile& missile)
     {
         onMissileDamage(inv, missile);
     }
+    return true;
 }
 
 void Game::ignite(const bomb& b)

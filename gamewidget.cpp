@@ -1110,30 +1110,7 @@ public:
             text_.clear();
 
         const auto key = press->key();
-        if (key == Qt::Key_Space || key == Qt::Key_Return)
-        {
-            if (text_ == "BOMB")
-            {
-                Game::bomb b;
-                game.ignite(b);
-            }
-            else if (text_ == "WARP")
-            {
-                Game::timewarp w;
-                w.duration = 4000;
-                w.factor   = 0.2f;
-                game.enter(w);
-            }
-            else
-            {
-                Game::missile m;
-                m.position = missile_;
-                m.string = text_.toLower();
-                game.fire(m);                
-            }
-            text_.clear();
-        }
-        else if (key == Qt::Key_Backspace)
+        if (key == Qt::Key_Backspace)
         {
             if (!text_.isEmpty())
                 text_.resize(text_.size()-1);
@@ -1141,6 +1118,29 @@ public:
         else if (key >= 0x41 && key <= 0x5a)
         {
             text_.append(key);
+            if (text_ == "BOMB")
+            {
+                Game::bomb b;
+                game.ignite(b);
+                text_.clear();
+            }
+            else if (text_ == "WARP")
+            {
+                Game::timewarp w;
+                w.duration = 4000;
+                w.factor   = 0.2f;
+                game.enter(w);
+                text_.clear();
+            }
+            else
+            {
+                Game::missile m;
+                m.position = missile_;
+                m.string = text_.toLower();
+                if (game.fire(m))
+                    text_.clear();
+
+            }
         }
     }
     void reset()

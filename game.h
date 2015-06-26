@@ -106,7 +106,7 @@ namespace invaders
         void tick();
 
         // launch a missile at the current player position
-        void fire(const missile& m);
+        bool fire(const missile& m);
 
         void ignite(const bomb& b);
 
