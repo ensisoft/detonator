@@ -138,6 +138,8 @@ void MainWindow::enterFullScreen()
 
     showFullScreen();
 
+    QApplication::setOverrideCursor(Qt::BlankCursor);
+
     ui_.game->setFullscreen(true);
 }
 
@@ -149,6 +151,8 @@ void MainWindow::leaveFullScreen()
     showNormal();
     
     resize(width_, height_);
+
+    QApplication::restoreOverrideCursor();
 
     ui_.game->setFullscreen(false);
 }
