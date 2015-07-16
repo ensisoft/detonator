@@ -197,3 +197,40 @@ Fuxi II
 現 xian  12 present / now / to appear
 做 zuo   11 to do / to make
 END
+
+
+BEGIN
+Chiwan
+走 zou  7  to walk / go / leave 
+路 lu   13 road 
+店 dian 8  inn / shop / store
+門 men  8  gate / door
+完 wan  7  to finish / to be over
+心 xin  4  heart / mind / intention
+面 mian 8  face / side / surface
+久 jiu  3  (long) time / duration 
+END
+
+BEGIN
+Maibuqi 
+號 hao  13 ord. number / day of a month
+菜 cai  12 dish / vegetable
+市 shi  5  market / city
+起 qi   9  to afford / rise / get up
+放 fang 8  to put / place 
+樓 lou  15 storied building
+熱 re   15 to warm/heat up / hot 
+帶 dai  10 area / zone / region
+END
+
+BEGIN
+Beitou
+日 ri    4  sun / day / day of the month
+萬 wan   13 ten thousand
+千 qian  3  thousand
+和 he    8  and / together / with
+貴 gui   12 expensive / noble
+飯 fan   13 food / cuisine / cooked rice
+便 pian  9  cheap
+常 chang 12 always / often / frequently
+END
