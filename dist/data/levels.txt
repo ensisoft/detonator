@@ -120,7 +120,7 @@ Duzi Dong
 想 xiang 13  to think / want / miss
 跟 gen   13  with someone
 對 dui   14  right / correct / treat
-水 shui  5   water / river
+水 shui  4   water / river
 先 xian  6   early / prior
 END
 
@@ -142,7 +142,7 @@ Hao Nan
 文 wen   4  language / writing
 學 xue   16 to learn / to study
 兩 liang 8  two / both / some 
-每 mei   8  each / every
+每 mei   7  each / every
 生 sheng 5  student / to be born 
 個 ge    10 this / that / MW 
 多 duo   6  many / much / often / a lot of
@@ -169,9 +169,9 @@ East & West
 給 gei  12 to / for / give
 東 dong 8  east
 西 xi   6  west
-現 xian 12 present / now / to appear
+現 xian 11 present / now / to appear
 後 hou  9  back / behind / after / later
-出 chu  7  to go out
+出 chu  5  to go out
 END
 
 BEGIN
@@ -189,12 +189,12 @@ BEGIN
 Fuxi II
 次 ci    6  next in sequence
 冰 bing  6  ice
-水 shui  5  water / river
+水 shui  4  water / river
 樣 yang  15 manner / pattern
 對 dui   14 right / correct / treat
 想 xiang 13 to think / want / miss
 見 jian  7  to see / meet
-現 xian  12 present / now / to appear
+現 xian  11 present / now / to appear
 做 zuo   11 to do / to make
 END
 
@@ -207,7 +207,7 @@ Chiwan
 門 men  8  gate / door
 完 wan  7  to finish / to be over
 心 xin  4  heart / mind / intention
-面 mian 8  face / side / surface
+面 mian 9  face / side / surface
 久 jiu  3  (long) time / duration 
 END
 
@@ -216,11 +216,11 @@ Maibuqi
 號 hao  13 ord. number / day of a month
 菜 cai  12 dish / vegetable
 市 shi  5  market / city
-起 qi   9  to afford / rise / get up
+起 qi   10  to afford / rise / get up
 放 fang 8  to put / place 
 樓 lou  15 storied building
 熱 re   15 to warm/heat up / hot 
-帶 dai  10 area / zone / region
+帶 dai  11 area / zone / region
 END
 
 BEGIN
@@ -230,7 +230,7 @@ Beitou
 千 qian  3  thousand
 和 he    8  and / together / with
 貴 gui   12 expensive / noble
-飯 fan   13 food / cuisine / cooked rice
+飯 fan   12 food / cuisine / cooked rice
 便 pian  9  cheap
-常 chang 12 always / often / frequently
+常 chang 11 always / often / frequently
 END
