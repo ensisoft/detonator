@@ -10,7 +10,7 @@
             "-I${home}/coding/qt-4.8.2/include/QtCore",
 
             // for MOC and UIC generated headers
-            "-I${home}/coding/pinyin-invaders/bin/gcc-4.9.2/debug/threading-multi/"
+            "-I${home}/coding/pinyin-invaders/bin/gcc-5.1.0/debug/threading-multi/"
         ]
     }
 }
