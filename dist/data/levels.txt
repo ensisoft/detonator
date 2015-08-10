@@ -170,8 +170,8 @@ East & West
 東 dong 8  east
 西 xi   6  west
 現 xian 11 present / now / to appear
-後 hou  9  back / behind / after / later
 出 chu  5  to go out
+後 hou  9  back / behind / after / later
 END
 
 BEGIN
