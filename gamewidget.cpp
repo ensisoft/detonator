@@ -761,7 +761,7 @@ public:
 
         const auto pxw = pixmap.width();
         const auto pxh = pixmap.height();
-        const auto aspect = (float)pxh / (float)pxw;
+        //const auto aspect = (float)pxh / (float)pxw;
 
         QRect target(0, 0, pxw, pxh);
         target.moveTo(state.toViewSpace(position_));
@@ -1784,7 +1784,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     {
         qDebug() << "Level complete: points" << score.points << "maxpoints" << score.maxpoints;
 
-        auto& level   = levels_[level_];
+        //auto& level   = levels_[level_];
         auto& info    = info_[level_];
         auto& profile = profiles_[profile_];
         
