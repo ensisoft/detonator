@@ -4,6 +4,8 @@ pinyin-invaders
 Evil chinese characters are invading. Your job is to kill them by shooting
 them down with pinyin missiles and detonating bombs.
 
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/menu.png "Main menu")
+
 ![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/invaders.png "pinyin-invaders are attacking!")
 
 Running on Windows
