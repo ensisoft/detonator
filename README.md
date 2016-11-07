@@ -44,10 +44,43 @@ Building from source for Linux
 ```
   $ qmake-qt4
   $ make
+  $ dist/invaders 
 ```
 
 
 Building from source for Windows
 ---------------------------------
 
-todo:
+The code is written against Qt4. The latest Qt4.x prebuilt binaries for Windows target 
+Microsoft Visual Studio 2010. However the code uses some C++11 features  so a newer
+Visual Studio Version is needed.
+
+1. Install Microsoft Visual Studio 2015 Community
+https://www.visualstudio.com/downloads/
+
+2. Install prebuilt Qt 
+https://download.qt.io/archive/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2010.exe
+
+3. Install prebuilt Boost
+https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-64.exe/download
+
+4. Open command prompt
+```
+  $ set PATH=%PATH%;c:\Qt\4.8.4\bin
+  $ cd pinyin-invaders
+  $ qmake -tp vc invaders.pro
+``` 
+
+5. Open the invaders.vcxproj
+Since your Visual Studio version is newer you'll need to retarget the solution for the newer toolchain.
+Right click on the solution in the solution browser and select "Retarget solution". 
+
+Select Release config and hit build. Debug build by default builds against Qt's debug libraries which
+require msvs2010 debug runtime which you don't necessarily have.
+
+6. Run the game 
+```
+  $ set PATH=%PATH%;c\Qt\4.8.4\bin
+  $ cd pinyin-invaders
+  $ dist\invaders.exe
+```

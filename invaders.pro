@@ -4,10 +4,6 @@ CONFIG += sse
 CONFIG += ss2
 CONFIG += debug_and_release
 
-QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS += -Wno-unused-parameter
-
-
 SOURCES = audio.cpp\
 	game.cpp\
 	gamewidget.cpp\
@@ -26,8 +22,12 @@ FORMS = mainwindow.ui \
 
 TARGET = invaders
 
+unix:QMAKE_CXXFLAGS += -std=c++11
+unix:QMAKE_CXXFLAGS += -Wno-unused-parameter
 unix:LIBS += -lpulse
 unix:LIBS += -lsndfile
+
+win32:INCLUDEPATH += "c:/local/boost_1_61_0"
 
 CONFIG(debug, debug|release){
     DESTDIR = dist
