@@ -42,7 +42,7 @@ Building from source for Linux
 2. build the game
 
 ```
-  $ qmake
+  $ qmake-qt4
   $ make
 ```
 
