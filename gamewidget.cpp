@@ -623,7 +623,10 @@ class GameWidget::Invader : public GameWidget::Animation
 {
 public:
     enum class ShipType {
-        cargo, cruiser, destroyer, fighter
+        Slow,
+        Fast,
+        Tough,
+        Boss
     };
 
     Invader(QVector2D position, QString str, float velocity, ShipType type) :
@@ -652,10 +655,10 @@ public:
     {
         switch (type_)
         {
-            case ShipType::cargo:     return 6.0f;
-            case ShipType::cruiser:   return 4.0f;
-            case ShipType::destroyer: return 9.5f;
-            case ShipType::fighter:   return 5.5f;
+            case ShipType::Slow:  return 5.0f;
+            case ShipType::Fast:  return 4.0f;
+            case ShipType::Boss:  return 6.5f;
+            case ShipType::Tough: return 3.5f;
         }
         return 1.0f;
     }
@@ -667,31 +670,43 @@ public:
         const auto spriteScale = state.getScale() * getScale();
         const auto position    = state.toViewSpace(position_);
 
-        QPixmap tex = Invader::texture(type_);
-        const float width  = tex.width();
-        const float height = tex.height();
-        //const float aspect = width / height;
-        //const float scaledHeight = spriteScale.y();
-        //const float scaledWidth  = scaledHeight * aspect;
-        const float aspect = height / width;
-        const float scaledWidth  = spriteScale.x();
-        const float scaledHeight = scaledWidth * aspect;
+        // draw the ship texture
+        QPixmap ship = getShipTexture(type_);
+        const float shipWidth  = ship.width();
+        const float shipHeight = ship.height();
+        const float shipAspect = shipHeight / shipWidth;
+        const float shipScaledWidth  = spriteScale.x();
+        const float shipScaledHeight = shipScaledWidth * shipAspect;
+
+        // draw the jet stream first
+        QPixmap jet = getJetStreamTexture(type_);
+        const float jetWidth  = jet.width();
+        const float jetHeight = jet.height();
+        const float jetAspect = jetHeight / jetWidth;
+        const float jetScaledWidth  = spriteScale.x();
+        const float jetScaledHeight = jetScaledWidth * jetAspect;
 
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
-        QRect target(0, 0, scaledWidth, scaledHeight);
-
+        QRect target(0, 0, shipScaledWidth, shipScaledHeight);
         // offset it so that the center is aligned with the unit position
         target.moveTo(position -
-            QPoint(scaledWidth / 2.0, scaledHeight / 2.0));
+            QPoint(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
+        //painter.draw(target, ship, ship.rect()); // draw the jet stream first.
 
-        painter.drawPixmap(target, tex, tex.rect());
+        QRect shipRect = target;
 
-        target.translate(scaledWidth, 0);
+        target.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
+        target.setSize(QSize(jetScaledWidth, jetScaledHeight));
+        painter.drawPixmap(target, jet, jet.rect());
+        target.translate(jetScaledWidth*0.75, 0);
 
+        painter.drawPixmap(shipRect, ship, ship.rect());
+
+        // draw the kill string
         QFont font;
         font.setFamily("Monospace");
-        font.setPixelSize(unitScale.y() / 2);
+        font.setPixelSize(unitScale.y() / 1.75);
 
         QPen pen;
         pen.setWidth(2);
@@ -699,6 +714,7 @@ public:
         painter.setFont(font);
         painter.setPen(pen);
         painter.drawText(target, Qt::AlignVCenter, text_);
+
     }
 
     // get current position
@@ -722,16 +738,26 @@ public:
         text_ = str;
     }
     QPixmap getTexture() const
-    { return texture(type_); }
+    { return getShipTexture(type_); }
 
 private:
-    static const QPixmap& texture(ShipType type)
+    static const QPixmap& getShipTexture(ShipType type)
     {
         static QPixmap textures[] = {
-            QPixmap(R("textures/Cargoship.png")),
-            QPixmap(R("textures/Cruiser.png")),
-            QPixmap(R("textures/Destroyer.png")),
-            QPixmap(R("textures/Fighter.png"))
+            QPixmap(R("textures/Cricket.png")),
+            QPixmap(R("textures/Mantis.png")),
+            QPixmap(R("textures/Scarab.png")),
+            QPixmap(R("textures/Locust.png"))
+        };
+        return textures[(int)type];
+    }
+    static const QPixmap& getJetStreamTexture(ShipType type)
+    {
+        static QPixmap textures[] = {
+            QPixmap(R("textures/Cricket_jet.png")),
+            QPixmap(R("textures/Mantis_jet.png")),
+            QPixmap(R("textures/Scarab_jet.png")),
+            QPixmap(R("textures/Locust_jet.png"))
         };
         return textures[(int)type];
     }
@@ -1644,7 +1670,7 @@ public:
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
                 "Graphics by\n"
-                "MillionthVector\n"
+                "Tatermand\n"
                 "Gamedevtuts\n"
                 "Kenney\n"
                 "http://www.opengameart.org\n"
@@ -1842,18 +1868,18 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
 
-        Invader::ShipType type = Invader::ShipType::destroyer;
+        Invader::ShipType type = Invader::ShipType::Slow;
         if (inv.type == Game::InvaderType::boss)
-            type = Invader::ShipType::destroyer;
+            type = Invader::ShipType::Boss;
         else if (inv.type == Game::InvaderType::regular)
         {
             if (inv.speed == 1)
-                type = Invader::ShipType::cargo;
-            else type = Invader::ShipType::cruiser;
+                type = Invader::ShipType::Slow;
+            else type = Invader::ShipType::Fast;
         }
         else if (inv.type == Game::InvaderType::special)
         {
-            type = Invader::ShipType::fighter;
+            type = Invader::ShipType::Tough;
         }
 
         // the game expresses invader speed as the number of discrete steps it takes
