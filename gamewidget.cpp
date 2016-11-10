@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -62,8 +62,8 @@ namespace invaders
 
 const auto LevelUnlockCriteria = 0.85;
 
-QString R(const QString& s) 
-{ 
+QString R(const QString& s)
+{
     QString resname = ":/dist/" + s;
     QResource resource(resname);
     if (resource.isValid())
@@ -100,13 +100,13 @@ struct GameSpace {
 // which runs from 0 to widget::width() on X axis and from 0 to widget::height()
 // on the Y axis. this is also represented by QPoint
 
-class TransformState 
+class TransformState
 {
 public:
     TransformState(const QRect& window, const Game& game)
     {
         // we divide the widget's client area into a equal sized cells
-        // according to the game's size. We also add one extra row 
+        // according to the game's size. We also add one extra row
         // for HUD display at the top of the screen and for the player
         // at the bottom of the screen. This provides the basic layout
         // for the game in a way that doesnt depend on any actual viewport size.
@@ -115,7 +115,7 @@ public:
         // divide the widget's client area int equal sized cells
         origin_ = QPoint(window.x(), window.y());
         widget_ = QPoint(window.width(), window.height());
-        scale_  = QPoint(window.width() / numCols, window.height() / numRows);        
+        scale_  = QPoint(window.width() / numCols, window.height() / numRows);
         size_   = QPoint(numCols, numRows);
     }
 
@@ -125,10 +125,10 @@ public:
         origin_ = QPoint(window.x(), window.y());
         widget_ = QPoint(window.width(), window.height());
         scale_  = QPoint(window.width() / numCols, window.height() / numRows);
-        size_   = QPoint(numCols, numRows);        
+        size_   = QPoint(numCols, numRows);
     }
 
-    QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const 
+    QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const
     {
         const QPoint top = toViewSpace(gameTopLeft);
         const QPoint bot = toViewSpace(gameTopBottom);
@@ -142,15 +142,18 @@ public:
         return { xpos, ypos };
     }
 
-    QPoint toViewSpace(const QVector2D& norm) const 
+    QPoint toViewSpace(const QVector2D& norm) const
     {
         const int xpos = widget_.x() * norm.x() + origin_.x();
         const int ypos = widget_.y() * norm.y() + origin_.y();
         return { xpos, ypos };
     }
 
-    QVector2D toNormalizedViewSpace(const GameSpace& g) const 
+    QVector2D toNormalizedViewSpace(const GameSpace& g) const
     {
+        // we add 4 units on the gaming area on both sides to allow
+        // the invaders to appear and disappear smoothly.
+
         const float cols = numCols() - 8.0;
         const float rows = numRows();
 
@@ -169,19 +172,19 @@ public:
         return {xpos, ypos};
     }
 
-    QVector2D toNormalizedViewSpace(const QPoint& p) const 
+    QVector2D toNormalizedViewSpace(const QPoint& p) const
     {
         const float xpos = (float)p.x() / (widget_.x() - origin_.x());
         const float ypos = (float)p.y() / (widget_.y() - origin_.y());
         return {xpos, ypos};
     }
 
-    QPoint getScale() const 
-    { 
-        return scale_; 
+    QPoint getScale() const
+    {
+        return scale_;
     }
 
-    QVector2D getNormalizedScale() const 
+    QVector2D getNormalizedScale() const
     {
         const auto scale  = getScale();
         const auto width  = (float)viewWidth();
@@ -190,27 +193,27 @@ public:
     }
 
     // get whole widget rect in widget coordinates
-    QRect viewRect() const 
-    { 
-        return {origin_.x(), origin_.y(), widget_.x(), widget_.y()}; 
+    QRect viewRect() const
+    {
+        return {origin_.x(), origin_.y(), widget_.x(), widget_.y()};
     }
 
     // get widget width
-    int viewWidth() const 
-    { 
+    int viewWidth() const
+    {
         return widget_.x();
     }
 
     // get widget heigth
-    int viewHeight() const 
-    { 
-        return widget_.y(); 
+    int viewHeight() const
+    {
+        return widget_.y();
     }
 
     int numCols() const
     { return size_.x(); }
 
-    int numRows() const 
+    int numRows() const
     { return size_.y(); }
 private:
     QPoint origin_;
@@ -249,9 +252,9 @@ public:
 
     // returns true if animation is still valid
     // otherwise false and the animation is expired.
-    virtual bool update(quint64 dt, float tick, TransformState& state) = 0;
+    virtual bool update(quint64 dt, TransformState& state) = 0;
 
-    // 
+    //
     virtual void paint(QPainter& painter, TransformState& state) = 0;
 
 protected:
@@ -262,11 +265,11 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(QVector2D position, quint64 start, quint64 lifetime) : 
+    Explosion(QVector2D position, quint64 start, quint64 lifetime) :
         position_(position), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {}
 
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    virtual bool update(quint64 dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -298,7 +301,7 @@ public:
         const auto x = col * w;
         const auto y = row * h;
         const QRect src(x, y, w, h);
-            
+
         const auto scaledWidth  = unitScale.x() * scale_;
         const auto scaledHeight = unitScale.x() * scale_; // * ascpect;
 
@@ -324,7 +327,7 @@ private:
     }
 
 private:
-    QVector2D position_;    
+    QVector2D position_;
     quint64 start_;
     quint64 life_;
     quint64 time_;
@@ -357,7 +360,7 @@ public:
             particles_.push_back(p);
         }
     }
-    virtual bool update(quint64 dt, float tick, TransformState&) override
+    virtual bool update(quint64 dt, TransformState&) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -377,17 +380,17 @@ public:
     virtual void paint(QPainter& painter, TransformState& state) override
     {
         if (time_ < start_)
-            return;        
+            return;
 
         QColor color(color_);
         QBrush brush(color);
         for (const auto& particle : particles_)
         {
-            color.setAlpha(0xff * particle.a);            
+            color.setAlpha(0xff * particle.a);
             brush.setColor(color);
             const auto pos = state.toViewSpace(particle.pos);
             painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
-        }        
+        }
     }
 
     void setColor(QColor color)
@@ -399,7 +402,7 @@ private:
         QVector2D pos;
         float a;
     };
-    std::vector<particle> particles_;    
+    std::vector<particle> particles_;
 private:
     quint64 start_;
     quint64 life_;
@@ -413,7 +416,7 @@ private:
 class GameWidget::Debris : public GameWidget::Animation
 {
 public:
-    Debris(QPixmap texture, QVector2D position, quint64 start, quint64 lifetime) 
+    Debris(QPixmap texture, QVector2D position, quint64 start, quint64 lifetime)
         : texture_(texture), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {
         const auto xparticles = 4;
@@ -447,7 +450,7 @@ public:
             particles_.push_back(p);
         }
     }
-    virtual bool update(quint64 dt, float tick, TransformState&) override
+    virtual bool update(quint64 dt, TransformState&) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -527,8 +530,8 @@ public:
         cargo, cruiser, destroyer, fighter
     };
 
-    Invader(QVector2D position, QString str, unsigned speed, ShipType type) : 
-        position_(position), text_(str), time_(0), expire_(0), speed_(speed), type_(type)
+    Invader(QVector2D position, QString str, float velocity, ShipType type) :
+        position_(position), text_(str), time_(0), expire_(0), velocity_(velocity), type_(type)
     {}
 
     void setPosition(QVector2D position)
@@ -536,10 +539,10 @@ public:
         position_ = position;
     }
 
-    bool update(quint64 dt, float tick, TransformState& state)
+    bool update(quint64 dt, TransformState& state)
     {
         const auto v = getVelocityVector(state);
-        position_ += (v * tick);
+        position_ += (v * dt);
         if (expire_)
         {
             time_ += dt;
@@ -549,8 +552,8 @@ public:
         return true;
     }
 
-    float getScale() const 
-    { 
+    float getScale() const
+    {
         switch (type_)
         {
             case ShipType::cargo:     return 6.0f;
@@ -574,11 +577,11 @@ public:
         //const float aspect = width / height;
         //const float scaledHeight = spriteScale.y();
         //const float scaledWidth  = scaledHeight * aspect;
-        const float aspect = height / width;        
+        const float aspect = height / width;
         const float scaledWidth  = spriteScale.x();
         const float scaledHeight = scaledWidth * aspect;
 
-        // set the target rectangle with the dimensions of the 
+        // set the target rectangle with the dimensions of the
         // sprite we want to draw.
         QRect target(0, 0, scaledWidth, scaledHeight);
 
@@ -603,36 +606,33 @@ public:
     }
 
     // get current position
-    QVector2D getPosition() const 
+    QVector2D getPosition() const
     {
         return position_;
     }
 
     // get the position at ticksLater ticks time
-    QVector2D getPosition(float ticksLater, const TransformState& state) const 
+    QVector2D getFuturePosition(float dtLater, const TransformState& state) const
     {
         const auto v = getVelocityVector(state);
-        return position_ + v * ticksLater;
+        return position_ + v * dtLater;
     }
 
     void expireIn(quint64 ms)
     { expire_ = ms; }
 
-    unsigned getSpeed() const 
-    { return speed_; }
-
     void setViewString(QString str)
     {
         text_ = str;
     }
-    QPixmap getTexture() const 
+    QPixmap getTexture() const
     { return texture(type_); }
 
 private:
-    static const QPixmap& texture(ShipType type) 
+    static const QPixmap& texture(ShipType type)
     {
         static QPixmap textures[] = {
-            QPixmap(R("textures/Cargoship.png")),            
+            QPixmap(R("textures/Cargoship.png")),
             QPixmap(R("textures/Cruiser.png")),
             QPixmap(R("textures/Destroyer.png")),
             QPixmap(R("textures/Fighter.png"))
@@ -641,14 +641,15 @@ private:
     }
 
 private:
-    QVector2D getVelocityVector(const TransformState& state) const 
+    QVector2D getVelocityVector(const TransformState& state) const
     {
-        // todo: fix this, calculation should be in TransformState 
+        // todo: fix this, calculation should be in TransformState
         const float cols = state.numCols() - 8.0;
         const float pxw  = state.viewWidth() / cols;
         const float x    = pxw / state.viewWidth();
         const float y    = 0.0f;
-        return {speed_ * -x, y};
+        const auto velo = QVector2D(-x, y) * velocity_;
+        return velo;
     }
 
 private:
@@ -657,7 +658,7 @@ private:
     quint64 time_;
     quint64 expire_;
 private:
-    unsigned speed_;
+    float velocity_;
 private:
     ShipType type_;
 };
@@ -665,7 +666,7 @@ private:
 class GameWidget::Missile : public GameWidget::Animation
 {
 public:
-    Missile(QVector2D pos, QVector2D dir, quint64 lifetime, QString str) : 
+    Missile(QVector2D pos, QVector2D dir, quint64 lifetime, QString str) :
         position_(pos), direction_(dir), life_(lifetime), time_(0), text_(str)
     {}
 
@@ -675,7 +676,7 @@ public:
         position_ = pos;
     }
 
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    virtual bool update(quint64 dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > life_)
@@ -733,7 +734,7 @@ public:
         direction_.normalize();
     }
 
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    virtual bool update(quint64 dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > lifetime_)
@@ -746,7 +747,7 @@ public:
 
         position_ += (dt / 10000.0) * fuzzy;
         const auto x = position_.x();
-        const auto y = position_.y(); 
+        const auto y = position_.y();
         position_.setX(wrap(1.0, 0.0, x));
         position_.setY(wrap(1.0, 0.0, y));
         return true;
@@ -809,7 +810,7 @@ public:
     BigExplosion(quint64 lifetime) : lifetime_(lifetime), time_(0)
     {}
 
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    virtual bool update(quint64 dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > lifetime_)
@@ -836,7 +837,7 @@ public:
         const auto ypos = (state.viewHeight() - explosionHeight) / 2;
 
         auto yoffset = 50.0;
-        auto xoffset = -explosionWidth / 2.0;        
+        auto xoffset = -explosionWidth / 2.0;
         for (auto i=0; i<numExplosions; ++i)
         {
             painter.drawPixmap((i+1) * xpos + xoffset, ypos + yoffset, explosionWidth, explosionHeight, pixmap);
@@ -863,7 +864,7 @@ private:
     static QPixmap loadTexture(unsigned index)
     {
         static auto textures = loadTextures();
-        Q_ASSERT(index < textures.size());        
+        Q_ASSERT(index < textures.size());
         return textures[index];
     }
 private:
@@ -874,11 +875,11 @@ private:
 class GameWidget::Score : public GameWidget::Animation
 {
 public:
-    Score(QVector2D position, quint64 start, quint64 lifetime, unsigned score) : 
+    Score(QVector2D position, quint64 start, quint64 lifetime, unsigned score) :
         position_(position), start_(start), life_(lifetime), time_(0), score_(score)
     {}
 
-    virtual bool update(quint64 dt, float tick, TransformState& state) override
+    virtual bool update(quint64 dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -892,7 +893,7 @@ public:
             return;
 
         const auto alpha = 1.0 - (float)(time_ - start_ )/ (float)life_;
-        const auto dim = state.getScale();        
+        const auto dim = state.getScale();
         const auto top = state.toViewSpace(position_);
         const auto end = top + dim;
 
@@ -932,8 +933,8 @@ public:
         for (std::size_t i=0; i<400; ++i)
         {
             particle p;
-            p.x = rand(0.0, 1.0); 
-            p.y = rand(0.0, 1.0); 
+            p.x = rand(0.0, 1.0);
+            p.y = rand(0.0, 1.0);
             p.a = 0.5 + rand(0.0, 0.5);
             p.v = 0.05 + rand(0.0, 0.05);
             p.b = !(i % 7);
@@ -971,20 +972,20 @@ public:
 private:
     struct particle {
         float x, y;
-        float a; 
+        float a;
         float v;
         int   b;
     };
-    std::vector<particle> particles_; 
+    std::vector<particle> particles_;
 private:
     QVector2D direction_;
     QPixmap texture_;
 };
 
-class GameWidget::Scoreboard 
+class GameWidget::Scoreboard
 {
 public:
-    Scoreboard(unsigned score, unsigned bonus, bool isHighScore, int unlockedLevel) 
+    Scoreboard(unsigned score, unsigned bonus, bool isHighScore, int unlockedLevel)
     {
         text_.append("Level complete!\n\n");
         text_.append(QString("You scored %1 points\n").arg(score));
@@ -1027,16 +1028,16 @@ public:
     void paint(QPainter& painter, const QRect& area, const QPoint& scale)
     {
         const auto& score  = game_.getScore();
-        const auto& result = score.maxpoints ? 
+        const auto& result = score.maxpoints ?
             (float)score.points / (float)score.maxpoints * 100 : 0.0;
-        const auto& format = QString("%1").arg(result, 0, 'f', 0);            
+        const auto& format = QString("%1").arg(result, 0, 'f', 0);
         const auto bombs   = game_.numBombs();
         const auto warps   = game_.numWarps();
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
         pen.setWidth(1);
-        painter.setPen(pen);        
+        painter.setPen(pen);
 
         QFont font;
         font.setFamily("Arcade");
@@ -1061,7 +1062,7 @@ private:
 };
 
 // player representation on the screen
-class GameWidget::Player 
+class GameWidget::Player
 {
 public:
     Player() : text_(initString())
@@ -1072,7 +1073,7 @@ public:
         QFont font;
         font.setFamily("Arcade");
         font.setPixelSize(area.height() / 2);
-        painter.setFont(font);        
+        painter.setFont(font);
 
         QFontMetrics fm(font);
         const auto width  = fm.width(text_);
@@ -1085,14 +1086,14 @@ public:
         if (false)
         {
             QPen pen;
-            pen.setWidth(2);        
+            pen.setWidth(2);
             pen.setColor(Qt::darkRed);
             painter.setPen(pen);
-            painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text_);                
+            painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text_);
         }
 
         QPen pen;
-        pen.setWidth(2);        
+        pen.setWidth(2);
         pen.setColor(Qt::darkGray);
         painter.setPen(pen);
 
@@ -1148,14 +1149,14 @@ public:
         text_ = initString();
     }
 private:
-    static 
-    QString initString() 
+    static
+    QString initString()
     {
         static const QString init {
             "Type the correct pinyin to kill the enemies!"
         };
         return init;
-    } 
+    }
     QString text_;
     QVector2D missile_;
 };
@@ -1183,7 +1184,7 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(unit.y() / 2);        
+        font.setPixelSize(unit.y() / 2);
         painter.setFont(font);
 
         QFont underline;
@@ -1198,7 +1199,7 @@ public:
         QPen locked;
         locked.setWidth(2);
         locked.setColor(Qt::darkRed);
-        
+
         const auto cols = 7;
         const auto rows = 6;
         TransformState state(area, cols, rows);
@@ -1223,12 +1224,12 @@ public:
 
 
         TransformState sub(rect, 3, 1);
-        rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));        
+        rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));
         if (profile_ == 0)
         {
-            painter.setFont(underline);            
+            painter.setFont(underline);
             if (selrow_ == 0)
-                painter.setPen(selected);        
+                painter.setPen(selected);
         }
 
         painter.drawText(rect, Qt::AlignTop | Qt::AlignRight, "Easy");
@@ -1238,26 +1239,26 @@ public:
         rect = sub.toViewSpaceRect(QPoint(1, 0), QPoint(2, 1));
         if (profile_ == 1)
         {
-            painter.setFont(underline);                        
-            if (selrow_ == 0)        
+            painter.setFont(underline);
+            if (selrow_ == 0)
                 painter.setPen(selected);
         }
 
         painter.drawText(rect, Qt::AlignTop | Qt::AlignHCenter, "Normal");
         painter.setPen(regular);
-        painter.setFont(font);        
+        painter.setFont(font);
 
         rect = sub.toViewSpaceRect(QPoint(2, 0), QPoint(3, 1));
         if (profile_ == 2)
         {
-            painter.setFont(underline);            
+            painter.setFont(underline);
             if (selrow_ == 0)
                 painter.setPen(selected);
         }
 
         painter.drawText(rect, Qt::AlignTop | Qt::AlignLeft, "Chinese");
         painter.setPen(regular);
-        painter.setFont(font);        
+        painter.setFont(font);
 
         QFont small;
         small.setFamily("Arcade");
@@ -1341,10 +1342,10 @@ public:
         }
     }
 
-    unsigned selectedLevel() const 
+    unsigned selectedLevel() const
     { return level_; }
 
-    unsigned selectedProfile() const 
+    unsigned selectedProfile() const
     { return profile_; }
 
     void selectLevel(unsigned level)
@@ -1370,7 +1371,7 @@ private:
             QPen normal = painter.pen();
             glow.setWidth(12);
             painter.setPen(glow);
-            painter.setOpacity(0.2);            
+            painter.setOpacity(0.2);
             painter.drawRect(rect);
             painter.setOpacity(1.0);
             painter.setPen(normal);
@@ -1393,7 +1394,7 @@ private:
 class GameWidget::Help
 {
 public:
-    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
+    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const
     {
         QPen pen;
         pen.setWidth(1);
@@ -1407,7 +1408,7 @@ public:
 
         painter.setPen(pen);
         painter.setFont(font);
-        painter.drawText(rect, Qt::AlignCenter, 
+        painter.drawText(rect, Qt::AlignCenter,
             QString("Kill the invaders by typing the correct pinyin.\n"
             "You get scored based on how fast you kill and\n"
             "how complicated the characters are.\n\n"
@@ -1428,7 +1429,7 @@ public:
 
     Settings(bool sounds, bool fullscreen) : sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
     {}
-    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const 
+    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const
     {
         QPen regular;
         regular.setWidth(1);
@@ -1451,7 +1452,7 @@ public:
         underline.setPixelSize(scale.y() / 2);
 
 #ifndef ENABLE_AUDIO
-        painter.drawText(rect, Qt::AlignCenter, 
+        painter.drawText(rect, Qt::AlignCenter,
             "Audio is not supported on this platform.\n\n"
             "Press Esc to exit\n");
         return;
@@ -1471,7 +1472,7 @@ public:
         if (setting_index_ == 0)
             painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
-        painter.drawText(rc, Qt::AlignCenter, 
+        painter.drawText(rc, Qt::AlignCenter,
             tr("Sound Effects are: %1").arg(sounds_ ? "On" : "Off"));
 
         painter.setPen(regular);
@@ -1515,13 +1516,13 @@ public:
     bool enableSounds() const
     { return sounds_; }
 
-    bool fullScreen() const 
+    bool fullScreen() const
     { return fullscreen_; }
 private:
     bool sounds_;
     bool fullscreen_;
 private:
-    int setting_index_;    
+    int setting_index_;
 };
 
 class GameWidget::About
@@ -1583,7 +1584,7 @@ public:
         const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 1));
         const auto footer = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
 
-        painter.drawText(header, Qt::AlignCenter, 
+        painter.drawText(header, Qt::AlignCenter,
             "Kill the following enemies\n");
 
         for (size_t i=0; i<enemies.size(); ++i)
@@ -1610,8 +1611,8 @@ private:
 
 
 
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent), 
-    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0), 
+GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
+    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0),
     masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false), playSounds_(true), fullScreen_(false)
 {
 
@@ -1636,12 +1637,9 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         // calculate position for the invader to be in at now + missile fly time
         // and then aim the missile to that position.
-        const auto tick  = 1000.0 / profiles_[profile_].speed;
-
         const auto missileFlyTime   = 500;
         const auto explosionTime    = 1000;
-        const auto missileFlyTicks  = missileFlyTime / tick;
-        const auto missileEnd       = invader->getPosition(missileFlyTicks, state);
+        const auto missileEnd       = invader->getFuturePosition(missileFlyTime, state);
         const auto missileBeg       = m.position;
         const auto missileDir       = missileEnd - missileBeg;
 
@@ -1649,7 +1647,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Debris> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 500));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
-        std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));        
+        std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));
 
         invader->expireIn(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
@@ -1659,7 +1657,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         animations_.push_back(std::move(invader));
         animations_.push_back(std::move(missile));
         animations_.push_back(std::move(debris));
-        animations_.push_back(std::move(sparks));        
+        animations_.push_back(std::move(sparks));
         animations_.push_back(std::move(explosion));
         animations_.push_back(std::move(score));
 
@@ -1680,11 +1678,8 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         TransformState state(rect(), *game_);
 
-        const auto tick = 1000.0 / profiles_[profile_].speed;
-
         const auto missileFlyTime  = 500;
-        const auto missileFlyTicks = missileFlyTime / tick;
-        const auto missileEnd      =  inv->getPosition(missileFlyTicks, state);
+        const auto missileEnd      =  inv->getFuturePosition(missileFlyTime, state);
         const auto missileBeg      = m.position;
         const auto missileDir      = missileEnd - missileBeg;
 
@@ -1723,7 +1718,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         inv->setViewString(str);
     };
 
-    game_->onBomb = [&](const Game::bomb& b) 
+    game_->onBomb = [&](const Game::bomb& b)
     {
         std::unique_ptr<Animation> explosion(new BigExplosion(1500));
 
@@ -1758,15 +1753,23 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
             type = Invader::ShipType::fighter;
         }
 
+        // the game expresses invader speed as the number of discrete steps it takes
+        // per each tick of game.
+        // here well want to express this velocity as a normalized distance over seconds
+        const auto tick       = 1000.0 / profiles_[profile_].speed;
+        const auto numTicks   = state.numCols() / (double)inv.speed;
+        const auto numSeconds = tick * numTicks;
+        const auto velocity   = state.numCols() / numSeconds;
+
         const auto killString = inv.killList.join("");
         const auto viewString = inv.viewList.join("");
 
-        std::unique_ptr<Invader> invader(new Invader(pos, viewString, inv.speed, type));
+        std::unique_ptr<Invader> invader(new Invader(pos, viewString, velocity, type));
         invaders_[inv.identity] = std::move(invader);
     };
 
 
-    game_->onInvaderVictory = [&](const Game::invader& inv) 
+    game_->onInvaderVictory = [&](const Game::invader& inv)
     {
         invaders_.erase(inv.identity);
     };
@@ -1787,7 +1790,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
         //auto& level   = levels_[level_];
         auto& info    = info_[level_];
         auto& profile = profiles_[profile_];
-        
+
         const auto base    = score.points;
         const auto bonus   = profile.speed * score.points;
         const auto final   = score.points + bonus;
@@ -1812,8 +1815,8 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     };
 
     background_.reset(new Background);
-    display_.reset(new Display(*game_));    
-    player_.reset(new Player);    
+    display_.reset(new Display(*game_));
+    player_.reset(new Player);
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
@@ -1897,7 +1900,7 @@ void GameWidget::setLevelInfo(const LevelInfo& info)
     }
 }
 
-bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const 
+bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const
 {
     if (index >= levels_.size())
         return false;
@@ -1944,7 +1947,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
     const auto now  = timer_.elapsed();
     const auto time = now - timeStamp_;
     const auto tick = 1000.0 / profiles_[profile_].speed;
-    if (!time) 
+    if (!time)
         return;
 
     if (rand(0, 5000) == 7)
@@ -1955,7 +1958,7 @@ void GameWidget::timerEvent(QTimerEvent* timer)
 
     if (alien_)
     {
-        if (!alien_->update(time * warpFactor_, 0.0, state))
+        if (!alien_->update(time * warpFactor_, state))
             alien_.reset();
     }
 
@@ -1969,60 +1972,39 @@ void GameWidget::timerEvent(QTimerEvent* timer)
             // advance game by one tick
             game_->tick();
 
-            const auto delta = tickDelta_ - tick;
-            const auto ticks = delta / tick; 
-
-            // synchronize invader position with the actual game position
-            const auto& invaders = game_->invaders();
-            for (const auto& i : invaders)
-            {
-                auto it   = invaders_.find(i.identity);
-                auto& inv = it->second;
-                const auto pos = state.toNormalizedViewSpace(GameSpace{i.xpos, i.ypos + 1});
-                inv->setPosition(pos);
-                inv->update(delta, ticks, state);
-            }
-
             tickDelta_ = tickDelta_ - tick;
         }
-        else 
+        // update invaders
+        for (auto& pair : invaders_)
         {
-            // fragment of time expressed in ticks
-            const auto ticks = (time * warpFactor_) / tick;
-
-            for (auto& pair : invaders_)
-            {
-                auto& invader = pair.second;
-                invader->update(time * warpFactor_, ticks, state);
-            }
+            auto& invader = pair.second;
+            invader->update(time * warpFactor_, state);
         }
     }
-
-    const auto ticks = time / tick;
 
     // update animations
     for (auto it = std::begin(animations_); it != std::end(animations_);)
     {
         auto& anim = *it;
-        if (!anim->update(time, ticks, state))
+        if (!anim->update(time, state))
         {
             it = animations_.erase(it);
             continue;
         }
         ++it;
-    }    
+    }
 
     // trigger redraw
     update();
 
     timeStamp_ = now;
 
-    if (warpDuration_) 
+    if (warpDuration_)
     {
         if (time >= warpDuration_)
         {
             warpFactor_   = 1.0;
-            warpDuration_ = 0;            
+            warpDuration_ = 0;
             qDebug() << "warp ended";
         }
         else
@@ -2041,12 +2023,12 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     const auto cols = state.numCols();
     const auto rows = state.numRows();
-    const auto rect = this->rect();    
+    const auto rect = this->rect();
 
     background_->paint(painter, rect, state.getScale());
 
     if (alien_)
-        alien_->paint(painter, state);    
+        alien_->paint(painter, state);
 
     if (help_)
     {
@@ -2067,7 +2049,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     {
         menu_->paint(painter, rect, state.getScale());
         return;
-    } 
+    }
     else if (fleet_)
     {
         fleet_->paint(painter, rect, state.getScale());
@@ -2079,7 +2061,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     {
         score_->paint(painter, rect, state.getScale());
         return;
-    }        
+    }
 
     QPoint top;
     QPoint bot;
@@ -2139,7 +2121,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             quitFleet();
 
         quitLevel();
-        showMenu();        
+        showMenu();
     }
     else if (key == Qt::Key_Space)
     {
@@ -2192,7 +2174,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
     else if (menu_)
     {
         menu_->keyPress(press);
-    }    
+    }
     else if (player_)
     {
         player_->keyPress(press, *game_);
@@ -2234,7 +2216,7 @@ void GameWidget::showAbout()
 
 void GameWidget::quitSettings()
 {
-    playSounds_ = settings_->enableSounds();    
+    playSounds_ = settings_->enableSounds();
 
     qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
 
