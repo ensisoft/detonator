@@ -411,6 +411,102 @@ private:
     QColor color_;
 };
 
+class GameWidget::Smoke : public GameWidget::Animation
+{
+public:
+    Smoke(QVector2D position, quint64 start, quint64 lifetime)
+        : position_(position), starttime_(start), lifetime_(lifetime), time_(0), scale_(1.0)
+    {}
+
+    virtual bool update(quint64 dt, TransformState&) override
+    {
+        time_ += dt;
+        if (time_ < starttime_)
+            return true;
+
+        if (time_ - starttime_ > lifetime_)
+            return false;
+
+        return true;
+    }
+
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        if (time_ < starttime_)
+            return;
+
+        const auto unitScale = state.getScale();
+
+        const auto fps = 10;
+        const auto frames = 25;
+        const auto frameInterval = (1000 / fps);
+        const auto curr = (time_ / frameInterval) % frames;
+        const auto next = (curr + 1) % frames;
+        const auto lerp = (time_ % frameInterval) / (float)frameInterval;
+
+        const auto currPixmap = loadTexture(curr);
+        const auto nextPixmap = loadTexture(next);
+
+        const auto opacity = 1.0 * (1.0 - ((float)time_ / (float)lifetime_));
+        const auto opa = painter.opacity();
+
+        // note that the pixmaps are not necessarily equal size.
+        {
+            const auto aspect = (float)currPixmap.height() / (float)currPixmap.width();
+            const auto pxw = unitScale.x() * scale_;
+            const auto pxh = unitScale.x() * aspect * scale_;
+            QRect target(0, 0, pxw, pxh);
+            target.moveTo(state.toViewSpace(position_) - QPoint(pxw/2.0, pxh/2.0));
+            painter.setOpacity(opacity * (1.0 - lerp));
+            painter.drawPixmap(target, currPixmap, currPixmap.rect());
+        }
+        {
+            const auto aspect = (float)nextPixmap.height() / (float)nextPixmap.width();
+            const auto pxw = unitScale.x() * scale_;
+            const auto pxh = unitScale.x() * aspect * scale_;
+            QRect target(0, 0, pxw, pxh);
+            target.moveTo(state.toViewSpace(position_) - QPoint(pxw/2.0, pxh/2.0));
+            painter.setOpacity(opacity * lerp);
+            painter.drawPixmap(target, nextPixmap, nextPixmap.rect());
+        }
+        painter.setOpacity(opa);
+    }
+
+    void setScale(float scale)
+    { scale_ = scale; }
+
+    static void prepare()
+    {
+        loadTexture(0);
+    }
+private:
+    static std::vector<QPixmap> loadTextures()
+    {
+        std::vector<QPixmap> textures;
+        for (int i=0; i<=24; ++i)
+        {
+            const auto name = QString("textures/smoke/blackSmoke%1.png").arg(i);
+            textures.push_back(R(name));
+        }
+        return textures;
+    }
+    static QPixmap loadTexture(unsigned index)
+    {
+        static auto textures = loadTextures();
+        Q_ASSERT(index < textures.size());
+        return textures[index];
+    }
+
+private:
+    QVector2D position_;
+private:
+    quint64 starttime_;
+    quint64 lifetime_;
+    quint64 time_;
+private:
+    float scale_;
+};
+
 
 // slower moving debris, remnants of enemy. uses enemy texture as particle texture.
 class GameWidget::Debris : public GameWidget::Animation
@@ -1544,12 +1640,15 @@ public:
             QString::fromUtf8("Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by\n"
                 "Sami Vaisanen\n"
-                "(c) 2014-2015 Ensisoft\n"
+                "(c) 2014-2016 Ensisoft\n"
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
                 "Graphics by\n"
-                "MillionthVector and Gamedevtuts\n"
-                "http://opengameart.org/"
+                "MillionthVector\n"
+                "Gamedevtuts\n"
+                "Kenney\n"
+                "http://www.opengameart.org\n"
+                "http://www.kenney.nl"
                 ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
     }
 private:
@@ -1623,6 +1722,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
     BigExplosion::prepare();
+    Smoke::prepare();
     Alien::prepare();
 
     game_.reset(new Game(40, 10));
@@ -1645,17 +1745,20 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
+        std::unique_ptr<Smoke> smoke(new Smoke(missileEnd, missileFlyTime + 100, explosionTime + 500));
         std::unique_ptr<Debris> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 500));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));
 
         invader->expireIn(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
+        smoke->setScale(invader->getScale() * 2.5);
         //debris->setScale(invader->getScale());
         sparks->setColor(QColor(255, 255, 68));
 
         animations_.push_back(std::move(invader));
         animations_.push_back(std::move(missile));
+        animations_.push_back(std::move(smoke));
         animations_.push_back(std::move(debris));
         animations_.push_back(std::move(sparks));
         animations_.push_back(std::move(explosion));

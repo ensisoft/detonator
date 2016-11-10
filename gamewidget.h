@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -75,7 +75,7 @@ namespace invaders
         // unlock the level identified by it's name
         void unlockLevel(const QString& name);
 
-        // restore previously stored level info 
+        // restore previously stored level info
         void setLevelInfo(const LevelInfo& info);
 
         // retrieve the lavel info for the level at index.
@@ -125,7 +125,8 @@ namespace invaders
     private:
         class Animation;
         class Explosion;
-        class Sparks;   
+        class Smoke;
+        class Sparks;
         class Debris;
         class BigExplosion;
         class Score;
@@ -133,7 +134,7 @@ namespace invaders
         class Missile;
         class Alien;
         class Background;
-        class Scoreboard;        
+        class Scoreboard;
         class Display;
         class Player;
         class Menu;
@@ -154,7 +155,7 @@ namespace invaders
         std::unique_ptr<Fleet> fleet_;
         std::unique_ptr<Game> game_;
         std::unique_ptr<Alien> alien_;
-        std::map<unsigned, std::unique_ptr<Invader>> invaders_;        
+        std::map<unsigned, std::unique_ptr<Invader>> invaders_;
         std::vector<std::unique_ptr<Level>> levels_;
         std::vector<LevelInfo> info_;
         std::vector<Profile> profiles_;
