@@ -1052,7 +1052,7 @@ public:
         direction_ = QVector2D(4, 3);
         direction_.normalize();
 
-        for (std::size_t i=0; i<400; ++i)
+        for (std::size_t i=0; i<800; ++i)
         {
             particle p;
             p.x = rand(0.0, 1.0);
