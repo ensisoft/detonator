@@ -1045,8 +1045,12 @@ private:
 class GameWidget::Background
 {
 public:
-    Background() : texture_(R("textures/SpaceBackground.png"))
+    Background() : background_(R("textures/SpaceBackground.png"))
     {
+        asteroid_[0] = QPixmap(R("textures/asteroid0.png"));
+        asteroid_[1] = QPixmap(R("textures/asteroid1.png"));
+        asteroid_[2] = QPixmap(R("textures/asteroid2.png"));
+
         //std::srand(std::time(nullptr));
 
         direction_ = QVector2D(4, 3);
@@ -1062,14 +1066,42 @@ public:
             p.b = !(i % 7);
             particles_.push_back(p);
         }
+
+        for (std::size_t i=0; i<20; ++i)
+        {
+            asteroid a;
+            a.x = rand(0.0, 1.0);
+            a.y = rand(0.0, 1.0);
+            a.v = 0.08 + rand(0.0, 0.08);
+            a.scale = rand(0.2, 0.8);
+            a.texture = i % 3;
+            asteroids_.push_back(a);
+        }
     }
 
     void paint(QPainter& painter, const QRect& rect, const QPoint&)
     {
+        // draw the space background.
         QBrush space(Qt::black);
         painter.fillRect(rect, space);
-        painter.drawPixmap(rect, texture_, texture_.rect());
+        painter.drawPixmap(rect, background_, background_.rect());
 
+        const auto opa = painter.opacity();
+        painter.setOpacity(0.8);
+        // draw asteroids.
+        for (const auto& a : asteroids_)
+        {
+            QPixmap pix = asteroid_[a.texture];
+            QRect target(0, 0, pix.width() * a.scale, pix.height() * a.scale);
+            const auto x = a.x * rect.width();
+            const auto y = a.y * rect.height();
+            target.moveTo(x, y);
+            painter.drawPixmap(target, pix, pix.rect());
+        }
+
+        painter.setOpacity(opa);
+
+        // draw the little stars/particles
         QBrush star(Qt::white);
         QColor col(Qt::white);
 
@@ -1090,18 +1122,33 @@ public:
             p.x = wrap(1.0, 0.0, p.x + d.x() * p.v);
             p.y = wrap(1.0, 0.0, p.y + d.y() * p.v);
         }
+
+        for (auto& a : asteroids_)
+        {
+            a.x = wrap(1.0, -0.2, a.x + d.x() * a.v);
+            a.y = wrap(1.0, -0.2, a.y + d.y() * a.v);
+        }
     }
 private:
+    struct asteroid {
+        float x, y;
+        float v;
+        float scale;
+        unsigned texture;
+    };
+
     struct particle {
         float x, y;
         float a;
         float v;
         int   b;
     };
+    std::vector<asteroid> asteroids_;
     std::vector<particle> particles_;
 private:
     QVector2D direction_;
-    QPixmap texture_;
+    QPixmap background_;
+    QPixmap asteroid_[3];
 };
 
 class GameWidget::Scoreboard
