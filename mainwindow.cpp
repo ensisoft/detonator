@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -44,7 +44,12 @@ MainWindow::MainWindow()
     resize(wwidth, wheight);
     move(xpos, ypos);
 
-    QObject::connect(ui_.game, SIGNAL(quitGame()), 
+    const auto playSound = settings.value("audio/sound", true).toBool();
+    const auto playMusic = settings.value("audio/music", true).toBool();
+    ui_.game->setPlayMusic(playMusic);
+    ui_.game->setPlaySounds(playSound);
+
+    QObject::connect(ui_.game, SIGNAL(quitGame()),
         this, SLOT(close()));
 
     QObject::connect(ui_.game, SIGNAL(enterFullScreen()),
@@ -55,7 +60,7 @@ MainWindow::MainWindow()
     const auto& inst = QApplication::applicationDirPath();
     const auto& file = inst + "/data/levels.txt";
 
-    ui_.game->loadLevels(file); 
+    ui_.game->loadLevels(file);
 
     QStringList levels = settings.value("game/levels").toStringList();
     for (int i=0; i<levels.size(); ++i)
@@ -109,6 +114,8 @@ MainWindow::~MainWindow()
     }
     settings.setValue("game/levels", levels);
 
+    settings.setValue("audio/sound", ui_.game->getPlaySounds());
+    settings.setValue("audio/music", ui_.game->getPlayMusic());
 }
 
 void MainWindow::setMasterUnlock(bool onOff)
@@ -126,9 +133,9 @@ void MainWindow::setUnlimitedBombs(bool onOff)
     ui_.game->setUnlimitedBombs(onOff);
 }
 
-void MainWindow::setPlaySound(bool onOff)
+void MainWindow::launchGame()
 {
-    ui_.game->setPlaySounds(onOff);
+    ui_.game->launch();
 }
 
 void MainWindow::enterFullScreen()
@@ -147,9 +154,9 @@ void MainWindow::leaveFullScreen()
 {
     if (!isFullScreen())
         return;
-    
+
     showNormal();
-    
+
     resize(width_, height_);
 
     QApplication::restoreOverrideCursor();

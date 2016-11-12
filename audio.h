@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <queue>
+#include <string>
 #include <chrono>
 #include <cstring>
 
@@ -55,32 +56,40 @@ namespace invaders
         };
 
         // load sample from the provided byte buffer
-        AudioSample(const u8* ptr, std::size_t len);
+        AudioSample(const u8* ptr, std::size_t len,
+            const std::string& name = std::string());
 
         // load sample from either a resource or from a file
-        AudioSample(const QString& path);
+        AudioSample(const QString& path,
+            const std::string& name = std::string());
 
         // return the sample rate in hz
-        unsigned rate() const 
+        unsigned rate() const
         { return sample_rate_; }
 
         // return the number of channels in the sample
         unsigned channels() const
         { return num_channels_; }
 
-        unsigned frames() const 
+        unsigned frames() const
         { return num_frames_; }
 
-        unsigned size() const 
+        unsigned size() const
         { return buffer_.size(); }
 
-        const void* data(std::size_t offset) const 
-        { 
+        const void* data(std::size_t offset) const
+        {
             assert(offset < buffer_.size());
-            return &buffer_[offset]; 
+            return &buffer_[offset];
+        }
+
+        std::string name() const
+        {
+            return !name_.empty() ? name_ : "sample";
         }
 
     private:
+        std::string name_;
         std::vector<u8> buffer_;
         unsigned sample_rate_;
         unsigned num_channels_;
@@ -96,7 +105,17 @@ namespace invaders
 
         virtual ~AudioStream() = default;
 
+        // get current stream state
         virtual State state() const = 0;
+
+        // get the stream name if any
+        virtual std::string name() const = 0;
+
+        // start playing the audio stream
+        virtual void play() = 0;
+
+        // pause the stream
+        virtual void pause() = 0;
 
     protected:
     private:
@@ -113,17 +132,17 @@ namespace invaders
 
         virtual ~AudioDevice() = default;
 
-        // prepare a new audio stream from the already loaded audio sample
+        // prepare a new audio stream from the already loaded audio sample.
+        // the stream is initially paused but ready to play once play is called.
         virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
 
-        virtual std::size_t num_streams() const = 0;
-
-        // play the audio stream right away. 
-        virtual void play(std::unique_ptr<AudioStream> stream) = 0;
-
-        // poll and dispatch pending audio device events. 
-        // Todo: this needs a proper waiting/signaling mechanism. 
+        // poll and dispatch pending audio device events.
+        // Todo: this needs a proper waiting/signaling mechanism.
         virtual void poll() = 0;
+
+        // initialize the audio device.
+        // this should be called *once* after the device is created.
+        virtual void init() = 0;
 
         // get the current audio device state.
         virtual State state() const = 0;
@@ -142,7 +161,7 @@ namespace invaders
             main_ = pa_mainloop_get_api(loop_);
             context_ = pa_context_new(main_, appname);
 
-            pa_context_set_state_callback(context_, state, this); 
+            pa_context_set_state_callback(context_, state, this);
             pa_context_connect(context_, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr);
         }
 
@@ -157,33 +176,32 @@ namespace invaders
         {
             std::unique_ptr<Stream> s(new Stream(sample, context_));
 
-            return std::move(s);
-        }
+            while (s->state() == AudioStream::State::none)
+            {
+                pa_mainloop_iterate(loop_, 0, nullptr);
+            }
+            if (s->state() == AudioStream::State::error)
+                throw std::runtime_error("pulseaudio stream error");
 
-        virtual void play(std::unique_ptr<AudioStream> stream) override
-        {
-            auto* priv = dynamic_cast<Stream*>(stream.get());
-            assert(priv);
-
-            priv->play();
-
-            playlist_.push_back(std::move(stream));
+            return s;
         }
 
         virtual void poll() override
         {
-            int retval = 0;
-            pa_mainloop_iterate(loop_, 0, &retval);
+            pa_mainloop_iterate(loop_, 0, nullptr);
+        }
 
-            for (auto it = std::begin(playlist_); it != std::end(playlist_);)
+        virtual void init() override
+        {
+            // this is kinda ugly...
+            while (state_ == AudioDevice::State::none)
             {
-                const auto state = (*it)->state();
-                if (state == AudioStream::State::complete)
-                {
-                    it = playlist_.erase(it);
-                }
-                else it++;
+                pa_mainloop_iterate(loop_, 0, nullptr);
             }
+
+            if (state_ == AudioDevice::State::error)
+                throw std::runtime_error("pulseaudio error");
+
         }
 
         virtual State state() const override
@@ -191,29 +209,34 @@ namespace invaders
             return state_;
         }
 
-        virtual std::size_t num_streams() const override
-        { return playlist_.size(); }
-
-
         PulseAudio(const PulseAudio&) = delete;
         PulseAudio& operator=(const PulseAudio&) = delete;
     private:
         class Stream  : public AudioStream
         {
-        public: 
-            Stream(std::shared_ptr<const AudioSample> sample, pa_context* context) 
-                : sample_(sample), stream_(nullptr), state_(AudioStream::State::none)
+        public:
+            Stream(std::shared_ptr<const AudioSample> sample, pa_context* context)
+                : sample_(sample), stream_(nullptr), state_(AudioStream::State::none), offset_(0)
             {
+                const std::string sample_name = sample->name();
                 pa_sample_spec spec;
                 spec.channels = sample->channels();
-                spec.rate     = sample->rate();                
+                spec.rate     = sample->rate();
                 spec.format   = PA_SAMPLE_S16NE;
-                stream_ = pa_stream_new(context, "sample", &spec, nullptr);
+                stream_ = pa_stream_new(context, sample_name.c_str(), &spec, nullptr);
                 if (!stream_)
                     throw std::runtime_error("create stream failed");
 
                 pa_stream_set_state_callback(stream_, state, this);
                 pa_stream_set_write_callback(stream_, write, this);
+                pa_stream_set_underflow_callback(stream_, underflow, this);
+
+                pa_stream_connect_playback(stream_,
+                    nullptr, // device
+                    nullptr, // pa_buffer_attr
+                    PA_STREAM_START_CORKED, // stream flags 0 for default
+                    nullptr,  // volume
+                    nullptr); // sync stream
             }
 
            ~Stream()
@@ -225,22 +248,30 @@ namespace invaders
             virtual AudioStream::State state() const override
             { return state_; }
 
-            void play()
+            virtual std::string name() const override
+            { return sample_->name(); }
+
+            virtual void play() override
             {
-                offset_ = 0;
-                pa_stream_connect_playback(stream_, 
-                    nullptr, // device 
-                    nullptr, // pa_buffer_attr
-                    (pa_stream_flags)0, // stream flags 0 for default
-                    nullptr,  // volume
-                    nullptr); // sync stream
+                pa_stream_cork(stream_, 0, nullptr, nullptr);
+            }
+
+            virtual void pause() override
+            {
+                pa_stream_cork(stream_, 1, nullptr, nullptr);
             }
 
         private:
+            static void underflow(pa_stream* stream, void* user)
+            {
+                qDebug("underflow!");
+            }
+
             static void drain(pa_stream* stream, int success, void* user)
             {
-                auto* this_ = static_cast<Stream*>(user);
+                qDebug("Drained stream!");
 
+                auto* this_ = static_cast<Stream*>(user);
                 this_->state_ = AudioStream::State::complete;
             }
             static void write(pa_stream* stream, size_t length, void* user)
@@ -254,16 +285,18 @@ namespace invaders
 
                 if (bytes == 0)
                     return;
-                else if (bytes < length)
-                {
-                    pa_operation_unref(pa_stream_drain(this_->stream_, drain, this_));
-                    return;
-                }
 
                 const auto* ptr  = sample->data(this_->offset_);
 
                 pa_stream_write(this_->stream_, ptr, bytes, nullptr, 0, PA_SEEK_RELATIVE);
                 this_->offset_ += bytes;
+
+                if (this_->offset_ == size)
+                {
+                    // reaching the end of the stream, i.e. we're providing the last
+                    // write of data. schedule the drain operation callback on the stream.
+                    pa_operation_unref(pa_stream_drain(this_->stream_, drain, this_));
+                }
             }
 
             static void state(pa_stream* stream, void* user)
@@ -272,19 +305,27 @@ namespace invaders
                 switch (pa_stream_get_state(stream))
                 {
                     case PA_STREAM_CREATING:
+                        qDebug("PA_STREAM_CREATING");
                         break;
 
                     case PA_STREAM_UNCONNECTED:
+                        qDebug("PA_STREAM_UNCONNECTED");
                         break;
 
+                    // stream finished cleanly, but this state transition
+                    // only is dispatched when the pa_stream_disconnect is connected.
                     case PA_STREAM_TERMINATED:
+                        qDebug("PA_STREAM_TERMINATED");
+                        //this_->state_ = AudioStream::State::complete;
                         break;
 
                     case PA_STREAM_FAILED:
+                       qDebug("PA_STREAM_FAILED");
                        this_->state_ = AudioStream::State::error;
                        break;
 
                     case PA_STREAM_READY:
+                        qDebug("PA_STREAM_READY");
                         this_->state_ = AudioStream::State::ready;
                         break;
                 }
@@ -294,6 +335,7 @@ namespace invaders
             pa_stream*  stream_;
             AudioStream::State state_;
             std::size_t offset_;
+        private:
         };
 
 
@@ -304,38 +346,48 @@ namespace invaders
             switch (pa_context_get_state(context))
             {
                 case PA_CONTEXT_CONNECTING:
+                    qDebug("PA_CONTEXT_CONNECTING");
+                    break;
                 case PA_CONTEXT_AUTHORIZING:
+                    qDebug("PA_CONTEXT_AUTHORIZING");
+                    break;
                 case PA_CONTEXT_SETTING_NAME:
+                    qDebug("PA_CONTEXT_SETTING_NAME");
+                    break;
                 case PA_CONTEXT_UNCONNECTED:
+                    qDebug("PA_CONTEXT_UNCONNECTED");
+                    break;
                 case PA_CONTEXT_TERMINATED:
+                    qDebug("PA_CONTEXT_TERMINATED");
                     break;
 
                 case PA_CONTEXT_READY:
+                    qDebug("PA_CONTEXT_READY");
                     this_->state_ = State::ready;
                     break;
 
                 case PA_CONTEXT_FAILED:
+                    qDebug("PA_CONTEXT_FAILED");
                     this_->state_ = State::error;
                     break;
 
             }
         }
     private:
-        std::list<std::unique_ptr<AudioStream>> playlist_;
-    private:
         pa_mainloop* loop_;
         pa_mainloop_api* main_;
-        pa_context* context_;        
+        pa_context* context_;
     private:
         State state_;
     };
 
 
-    class AudioPlayer 
+    class AudioPlayer
     {
     public:
         AudioPlayer(std::unique_ptr<AudioDevice> device) : stop_(false)
         {
+            trackid_ = 1;
             thread_.reset(new std::thread(std::bind(&AudioPlayer::runLoop, this, device.get())));
             device.release();
         }
@@ -350,29 +402,47 @@ namespace invaders
             thread_->join();
         }
 
-        void play(std::shared_ptr<AudioSample> sample)
+        std::size_t play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false)
         {
             std::lock_guard<std::mutex> lock(mutex_);
 
-            struct sample s;
-            s.s = sample;
-            s.p = std::chrono::steady_clock::now();
-            samples_.push(s);
+            size_t id = trackid_++;
+            Track track;
+            track.id       = id;
+            track.sample   = sample;
+            track.when     = std::chrono::steady_clock::now() + ms;
+            track.looping  = looping;
+            waiting_.push(std::move(track));
 
             cond_.notify_one();
+            return id;
         }
 
+        std::size_t play(std::shared_ptr<AudioSample> sample, bool looping = false)
+        {
+            return play(sample, std::chrono::milliseconds(0), looping);
+        }
 
-        void play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms)
+        void pause(std::size_t id)
         {
             std::lock_guard<std::mutex> lock(mutex_);
 
-            struct sample s;
-            s.s = sample;
-            s.p = std::chrono::steady_clock::now() + ms;
-            samples_.push(s);
+            for (auto& track : playing_)
+            {
+                if (track.id == id)
+                    track.stream->pause();
+            }
+        }
 
-            cond_.notify_one();
+        void resume(std::size_t id)
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+
+            for (auto& track : playing_)
+            {
+                if (track.id == id)
+                    track.stream->play();
+            }
         }
 
     private:
@@ -381,55 +451,103 @@ namespace invaders
             std::unique_ptr<AudioDevice> dev(ptr);
             for (;;)
             {
-                if (dev->num_streams())
-                    dev->poll();
-
                 std::unique_lock<std::mutex> lock(mutex_);
                 if (stop_)
                     return;
 
-                if (samples_.empty())
+                // todo: get rid of the polling (and the waiting) and move
+                // to threaded audio device (or waitable audio device)
+                // this wait is here to avoid "overheating the cpu" so to speak.
+                // however this creates two problems.
+                // a) it increases latency in terms of starting the playback of new audio sample.
+                // b) creates possibility for a buffer underruns in the audio playback stream.
+                cond_.wait_until(lock, std::chrono::steady_clock::now() +
+                    std::chrono::milliseconds(10));
+
+                dev->poll();
+
+                for (auto it = std::begin(playing_); it != std::end(playing_);)
                 {
-                    if (dev->num_streams())
+                    auto& track = *it;
+                    const auto state = track.stream->state();
+                    if (state == AudioStream::State::complete)
+                    {
+                        if (track.looping)
+                        {
+                            track.stream = dev->prepare(track.sample);
+                            track.stream->play();
+                            qDebug("Looping track ...");
+                        }
+                        else
+                        {
+                            it = playing_.erase(it);
+                        }
+                    }
+                    else if (state == AudioStream::State::error)
+                    {
+                        it = playing_.erase(it);
+                    }
+                    else it++;
+                }
+
+
+                if (waiting_.empty())
+                {
+                    if (!playing_.empty())
                         continue;
+
+                    qDebug("No audio to play, waiting ....");
 
                     cond_.wait(lock);
                 }
-                if (samples_.empty())
+                if (waiting_.empty())
                     continue;
 
-                auto top = samples_.top();
+                auto& top = waiting_.top();
                 auto now = std::chrono::steady_clock::now();
-                if (!dev->num_streams())
+                if (playing_.empty())
                 {
-                    auto ret = cond_.wait_until(lock, top.p);
+                    auto ret = cond_.wait_until(lock, top.when);
                     if (ret == std::cv_status::timeout)
                     {
-                        auto sample = top.s;
-                        auto stream = dev->prepare(sample);
-                        dev->play(std::move(stream)); 
-                        samples_.pop();
+                        play_top(*dev);
                     }
                 }
-                else if (now >= top.p)
+                else if (now >= top.when)
                 {
-                    auto sample = top.s;
-                    auto stream = dev->prepare(sample);
-                    dev->play(std::move(stream));
-                    samples_.pop();
+                    play_top(*dev);
                 }
             }
         }
-    private:
-        struct sample {
-            std::shared_ptr<AudioSample> s;
-            std::chrono::steady_clock::time_point p;
+        void play_top(AudioDevice& dev)
+        {
+            // top is const...
+            auto& top = waiting_.top();
+            Track item;
+            item.id      = top.id;
+            item.sample  = top.sample;
+            item.stream  = dev.prepare(top.sample);
+            item.when    = top.when;
+            item.looping = top.looping;
+            item.stream->play();
 
-            bool operator<(const sample& other) const {
-                return p < other.p;
+            waiting_.pop();
+            playing_.push_back(std::move(item));
+        }
+
+    private:
+        struct Track {
+            std::size_t id;
+            std::shared_ptr<AudioSample> sample;
+            std::unique_ptr<AudioStream> stream;
+            std::chrono::steady_clock::time_point when;
+            bool looping;
+
+            bool operator<(const Track& other) const {
+                return when < other.when;
             }
-            bool operator>(const sample& other) const {
-                return p > other.p;
+            bool operator>(const Track& other) const {
+                return when > other.when;
             }
         };
 
@@ -437,9 +555,16 @@ namespace invaders
         std::unique_ptr<std::thread> thread_;
         std::mutex mutex_;
 
-        std::priority_queue<sample,
-            std::vector<sample>,
-            std::greater<sample>> samples_;
+        // unique track id
+        std::size_t trackid_;
+
+        // currently enqueued and waiting tracks.
+        std::priority_queue<Track,
+            std::vector<Track>,
+            std::greater<Track>> waiting_;
+
+        // currently playing tracks
+        std::list<Track> playing_;
 
         std::condition_variable cond_;
         bool stop_;

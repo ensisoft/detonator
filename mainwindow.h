@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -46,7 +46,7 @@ namespace invaders
         void setUnlimitedWarps(bool onOff);
         void setUnlimitedBombs(bool onOff);
 
-        void setPlaySound(bool onOff);
+        void launchGame();
 
     public slots:
         void enterFullScreen();

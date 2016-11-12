@@ -1595,8 +1595,9 @@ class GameWidget::Settings
 {
 public:
     std::function<void (bool)> onToggleFullscreen;
+    std::function<void (bool)> onTogglePlayMusic;
 
-    Settings(bool sounds, bool fullscreen) : sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
+    Settings(bool music, bool sounds, bool fullscreen) : music_(music), sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
     {}
     void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const
     {
@@ -1628,7 +1629,7 @@ public:
 #endif
 
         const auto cols = 1;
-        const auto rows = 6;
+        const auto rows = 7;
         TransformState state(rect, cols, rows);
 
         QRect rc;
@@ -1642,17 +1643,25 @@ public:
             painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
         painter.drawText(rc, Qt::AlignCenter,
-            tr("Sound Effects are: %1").arg(sounds_ ? "On" : "Off"));
+            tr("Sound Effects: %1").arg(sounds_ ? "On" : "Off"));
 
         painter.setPen(regular);
 
-        rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
         if (setting_index_ == 1)
+            painter.setPen(selected);
+        rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
+        painter.drawText(rc, Qt::AlignCenter,
+            tr("Awsome Music: %1").arg(music_ ? "On" : "Off"));
+
+        painter.setPen(regular);
+
+        rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
+        if (setting_index_ == 2)
             painter.setPen(selected);
         painter.drawText(rc, Qt::AlignCenter,
             tr("Fullscreen: %1").arg(fullscreen_ ? "On" : "Off"));
 
-        rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
+        rc = state.toViewSpaceRect(QPoint(0, 5), QPoint(1, 6));
         painter.setPen(regular);
         painter.drawText(rc, Qt::AlignCenter,
             "Press Esc to exit");
@@ -1667,6 +1676,11 @@ public:
                 sounds_ = !sounds_;
             else if (setting_index_ == 1)
             {
+                music_ = !music_;
+                onTogglePlayMusic(music_);
+            }
+            else if (setting_index_ == 2)
+            {
                 fullscreen_ = !fullscreen_;
                 onToggleFullscreen(fullscreen_);
             }
@@ -1674,20 +1688,24 @@ public:
         else if (key == Qt::Key_Up)
         {
             if (--setting_index_ < 0)
-                setting_index_ = 1;
+                setting_index_ = 2;
         }
         else if (key == Qt::Key_Down)
         {
-            setting_index_ = (setting_index_ + 1) % 2;
+            setting_index_ = (setting_index_ + 1) % 3;
         }
     }
 
     bool enableSounds() const
     { return sounds_; }
 
+    bool enableMusic() const
+    { return music_; }
+
     bool fullScreen() const
     { return fullscreen_; }
 private:
+    bool music_;
     bool sounds_;
     bool fullscreen_;
 private:
@@ -1711,17 +1729,18 @@ public:
 
         painter.drawText(area, Qt::AlignCenter,
             QString::fromUtf8("Pinyin-Invaders %1.%2\n\n"
-                "Design and programming by\n"
+                "Design and programming by:\n"
                 "Sami Vaisanen\n"
                 "(c) 2014-2016 Ensisoft\n"
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
-                "Graphics by\n"
-                "Tatermand\n"
-                "Gamedevtuts\n"
-                "Kenney\n"
+                "Graphics by:\n"
+                "Tatermand, Gamedevtuts, Kenny\n"
                 "http://www.opengameart.org\n"
-                "http://www.kenney.nl"
+                "http://www.kenney.nl\n\n"
+                "Music by:\n"
+                "cynicmusic\n"
+                "http://www.cynicmusic.com"
                 ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
     }
 private:
@@ -1780,16 +1799,26 @@ private:
 };
 
 
-
-
-
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
-    level_(0), profile_(0), tickDelta_(0), timeStamp_(0), warpFactor_(1.0), warpDuration_(0),
-    masterUnlock_(false), unlimitedBombs_(false), unlimitedWarps_(false), playSounds_(true), fullScreen_(false)
+GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 {
+    level_          = 0;
+    profile_        = 0;
+    tickDelta_      = 0;
+    timeStamp_      = 0;
+    warpFactor_     = 1.0;
+    warpDuration_   = 0;
+    masterUnlock_   = false;
+    unlimitedBombs_ = false;
+    unlimitedWarps_ = false;
+    playSounds_     = true;
+    playMusic_      = true;
+    fullScreen_     = false;
 
 #ifdef ENABLE_AUDIO
-    static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"));
+    musicTrackId_ = 0;
+
+    // sound effects FX
+    static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"), "explosion");
 #endif
 
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
@@ -1999,7 +2028,6 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent),
     startTimer(10);
 
     timer_.start();
-    showMenu();
 }
 
 GameWidget::~GameWidget()
@@ -2104,6 +2132,11 @@ void GameWidget::setPlaySounds(bool onOff)
     playSounds_ = onOff;
 }
 
+void GameWidget::setPlayMusic(bool onOff)
+{
+    playMusic_ = onOff;
+}
+
 void GameWidget::setFullscreen(bool onOff)
 {
     fullScreen_ = onOff;
@@ -2114,6 +2147,11 @@ void GameWidget::setUnlimitedBombs(bool onOff)
     unlimitedBombs_ = onOff;
 }
 
+void GameWidget::launch()
+{
+    showMenu();
+    playMusic();
+}
 
 void GameWidget::timerEvent(QTimerEvent* timer)
 {
@@ -2377,11 +2415,15 @@ void GameWidget::showHelp()
 
 void GameWidget::showSettings()
 {
-    settings_.reset(new Settings(playSounds_, fullScreen_));
+    settings_.reset(new Settings(playMusic_, playSounds_, fullScreen_));
     settings_->onToggleFullscreen = [this](bool onOff) {
         if (onOff)
             emit enterFullScreen();
         else emit leaveFullScreen();
+    };
+    settings_->onTogglePlayMusic = [this](bool onOff) {
+        playMusic_ = onOff;
+        playMusic();
     };
 }
 
@@ -2393,10 +2435,14 @@ void GameWidget::showAbout()
 void GameWidget::quitSettings()
 {
     playSounds_ = settings_->enableSounds();
+    playMusic_  = settings_->enableMusic();
 
     qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
+    qDebug() << "PlayMusic"  << (playMusic_ ? "On" : "Off");
 
     settings_.reset();
+
+    playMusic();
 }
 
 void GameWidget::quitAbout()
@@ -2438,6 +2484,32 @@ void GameWidget::quitLevel()
         animations_.clear();
     }
     warpFactor_ = 1.0;
+}
+
+void GameWidget::playMusic()
+{
+#ifdef ENABLE_AUDIO
+    static auto music = std::make_shared<AudioSample>(R("music/awake10_megaWall.ogg"), "MainMusic");
+
+    if (playMusic_)
+    {
+        qDebug("Play music");
+
+        if (musicTrackId_)
+             g_audio->resume(musicTrackId_);
+        else
+        {
+            musicTrackId_ = g_audio->play(music, true);
+        }
+    }
+    else
+    {
+        qDebug("Stop music");
+
+        if (musicTrackId_)
+            g_audio->pause(musicTrackId_);
+    }
+#endif
 }
 
 } // invaders

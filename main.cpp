@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -26,6 +26,9 @@
 #  include <QStringList>
 #include "warnpop.h"
 
+#include <exception>
+#include <iostream>
+
 #if defined(LINUX_OS)
 #  include <fenv.h>
 #endif
@@ -40,30 +43,31 @@ AudioPlayer* g_audio;
 
 } // invaders
 
-#endif
+#endif // ENABLE_AUDIO
 
-int main(int argc, char* argv[])
+int game_main(int argc, char* argv[])
 {
 #ifdef ENABLE_AUDIO
     std::unique_ptr<invaders::AudioDevice> pa(new invaders::PulseAudio("Pinyin-Invaders"));
+    pa->init();
     invaders::AudioPlayer player(std::move(pa));
     invaders::g_audio = &player;
 #endif
 
 #if defined(LINUX_OS)
     // SIGFPE on floating point exception
-    feenableexcept(FE_INVALID   | 
-                   FE_DIVBYZERO | 
-                   FE_OVERFLOW  | 
+    feenableexcept(FE_INVALID   |
+                   FE_DIVBYZERO |
+                   FE_OVERFLOW  |
                    FE_UNDERFLOW);
 #endif
 
     QApplication app(argc, argv);
+    app.setApplicationName("Pinyin-Invaders");
 
     bool masterUnlock = false;
     bool unlimitedWarps = false;
     bool unlimitedBombs = false;
-    bool playSound = true;
 
     const auto& args = app.arguments();
     for (const auto& a : args)
@@ -74,8 +78,6 @@ int main(int argc, char* argv[])
             unlimitedWarps = true;
         else if (a == "--unlimited-bombs")
             unlimitedBombs = true;
-        else if (a == "--no-sound")
-            playSound = false;
     }
 
     invaders::MainWindow window;
@@ -83,8 +85,21 @@ int main(int argc, char* argv[])
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
     window.setUnlimitedBombs(unlimitedBombs);
-    window.setPlaySound(playSound);
+    window.launchGame();
     window.show();
 
     return app.exec();
+}
+
+int main(int argc, char* argv[])
+{
+    try
+    {
+        return game_main(argc, argv);
+    }
+    catch (const std::exception& bollocks)
+    {
+        std::cerr << "Oops.. there was a problem: " << bollocks.what();
+    }
+    return 1;
 }

@@ -96,7 +96,17 @@ namespace invaders
 
         void setPlaySounds(bool onOff);
 
+        void setPlayMusic(bool onOff);
+
         void setFullscreen(bool onOff);
+
+        void launch();
+
+        bool getPlaySounds() const
+        { return playSounds_; }
+
+        bool getPlayMusic() const
+        { return playMusic_; }
 
     signals:
         void quitGame();
@@ -121,6 +131,7 @@ namespace invaders
         void quitMenu();
         void quitScore();
         void quitLevel();
+        void playMusic();
 
     private:
         class Animation;
@@ -173,7 +184,10 @@ namespace invaders
         bool unlimitedBombs_;
         bool unlimitedWarps_;
         bool playSounds_;
+        bool playMusic_;
         bool fullScreen_;
+    private:
+        std::size_t musicTrackId_;
     };
 
 } // invaders

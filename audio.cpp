@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -18,7 +18,7 @@
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.            
+//  THE SOFTWARE.
 
 #include "config.h"
 
@@ -35,7 +35,7 @@
 
 namespace {
 
-class io_buffer 
+class io_buffer
 {
 public:
     using u8 = std::uint8_t;
@@ -56,7 +56,7 @@ public:
             throw std::runtime_error("sf_open_virtual failed");
 
         sample_rate_  = sfinfo.samplerate;
-        num_channels_ = sfinfo.channels;    
+        num_channels_ = sfinfo.channels;
         num_frames_   = sfinfo.frames;
 
         // reserve space for the PCM data
@@ -66,7 +66,7 @@ public:
         if (sf_readf_short(sffile, (short*)&buffer_[0], num_frames_) !=  num_frames_)
         {
             sf_close(sffile);
-            throw std::runtime_error("sf_readf_short failed");            
+            throw std::runtime_error("sf_readf_short failed");
         }
         sf_close(sffile);
     }
@@ -74,7 +74,7 @@ public:
     std::vector<u8> get_buffer() &&
     { return std::move(buffer_); }
 
-    unsigned rate() const 
+    unsigned rate() const
     { return sample_rate_; }
 
     unsigned channels() const
@@ -89,19 +89,19 @@ private:
         const auto* this_ = static_cast<io_buffer*>(user);
         return this_->len_;
     }
-    
+
     static sf_count_t ioSeek(sf_count_t offset, int whence, void* user)
     {
         auto* this_ = static_cast<io_buffer*>(user);
         switch (whence)
         {
-            case SEEK_CUR: 
+            case SEEK_CUR:
                 this_->position_ += offset;
                 break;
-            case SEEK_SET: 
+            case SEEK_SET:
                 this_->position_ = offset;
                 break;
-            case SEEK_END: 
+            case SEEK_END:
                 this_->position_ = this_->len_ - offset;
                 break;
         }
@@ -146,7 +146,7 @@ private:
 namespace invaders
 {
 
-AudioSample::AudioSample(const u8* ptr, std::size_t len)
+AudioSample::AudioSample(const u8* ptr, std::size_t len, const std::string& name)
 {
     io_buffer buff(ptr, len);
 
@@ -154,9 +154,10 @@ AudioSample::AudioSample(const u8* ptr, std::size_t len)
     sample_rate_  = buff.rate();
     num_channels_ = buff.channels();
     num_frames_   = buff.frames();
+    name_ = name;
 }
 
-AudioSample::AudioSample(const QString& path)
+AudioSample::AudioSample(const QString& path, const std::string& name)
 {
     QResource resource(path);
     if (resource.isValid())
@@ -180,6 +181,7 @@ AudioSample::AudioSample(const QString& path)
         num_frames_   = buff.frames();
         buffer_       = std::move(buff).get_buffer();
     }
+    name_ = name;
 }
 
 } // invaders

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -30,7 +30,7 @@
 
    // execlude some stuff from the windows headers we dont need
 #  define WIN32_LEAN_AND_MEAN
-   
+
    // get rid of the stupid MIN MAX macros..
 #  define NOMINMAX
 
@@ -40,7 +40,7 @@
 
    // we're building in unicode
 #  define UNICODE
-   
+
    // msvc wants this for M_PI
 #  define _USE_MATH_DEFINES
 #endif
@@ -58,13 +58,13 @@
     // clang has a problem with gcc 4.9.0 stdlib and it complains
     // about max_align_t in cstddef (pulls it into std:: from global scope)
     // however the problem is only affecting sublimeclang in SublimeText
-    // 
+    //
     // https://bugs.archlinux.org/task/40229
     // http://reviews.llvm.org/rL201729
     //
     // As a workaround we define some type with a matching typename
-    // in the global namespace. 
-    // the macro is enabled in 'pime.sublime-project'    
+    // in the global namespace.
+    // the macro is enabled in 'pime.sublime-project'
     typedef int max_align_t;
 #  endif
 #  define LINUX_OS
@@ -80,6 +80,6 @@ const int MINOR_VERSION = 2;
 
 } // invaders
 
-#ifdef NDEBUG
+#ifdef QT_NO_DEBUG
 #  define QT_NO_DEBUG_OUTPUT
 #endif

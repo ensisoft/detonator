@@ -5,12 +5,8 @@
         [
             "-std=c++11",
             "-DSUBLIME_CLANG_WORKAROUNDS",
-            "-I${home}/coding/boost_1_51_0",
-            "-I${home}/coding/qt-4.8.2/include",
-            "-I${home}/coding/qt-4.8.2/include/QtCore",
-
-            // for MOC and UIC generated headers
-            "-I${home}/coding/pinyin-invaders/bin/gcc-5.1.0/debug/threading-multi/"
+            "-I/usr/include/qt4",
+            "-I/usr/include/qt4/QtCore"
         ]
     }
 }

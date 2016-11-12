@@ -17,7 +17,7 @@ HEADERS = audio.h\
 	gamewidget.h\
 	level.h\
 	mainwindow.h\
-	
+
 FORMS = mainwindow.ui \
 
 TARGET = invaders
