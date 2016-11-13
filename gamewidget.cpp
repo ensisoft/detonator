@@ -1381,11 +1381,10 @@ public:
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
 //
-            "Enter - Fire\n"
             "Esc - Exit\n"
             "F1 - Help\n"
             "F2 - Settings\n"
-            "F3 - About\n\n"
+            "F3 - Credits\n\n"
             "Difficulty\n");
 
         rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
@@ -1581,12 +1580,12 @@ public:
             QString("Kill the invaders by typing the correct pinyin.\n"
             "You get scored based on how fast you kill and\n"
             "how complicated the characters are.\n\n"
-            "Invaders that approach the left edge will show the\n"
+            "Invaders that approach the left edge will show\n"
             "the pinyin string and score no points.\n"
             "You will lose points for invaders that you faill to kill.\n"
             "Score %1% or higher to unlock the next level.\n\n"
-            "Type BOMB to ignite a bomb\n"
-            "Type WARP to enter a timewarp\n\n"
+            "Type BOMB to ignite a bomb.\n"
+            "Type WARP to enter a time warp.\n\n"
             "Press Esc to exit\n").arg(str));
     }
 };
@@ -1735,7 +1734,7 @@ public:
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
                 "Graphics by:\n"
-                "Tatermand, Gamedevtuts, Kenny\n"
+                "Tatermand, Gamedevtuts, Kenney\n"
                 "http://www.opengameart.org\n"
                 "http://www.kenney.nl\n\n"
                 "Music by:\n"
