@@ -23,11 +23,22 @@
 #pragma once
 
 #include "config.h"
+
 #include "warnpush.h"
 #  include <QString>
 #  include <QDebug>
 #include "warnpop.h"
-#include <pulse/pulseaudio.h>
+
+#ifdef USE_PULSEAUDIO
+#  include <pulse/pulseaudio.h>
+#endif
+
+#ifdef USE_WAVEOUT
+#  include <Windows.h>
+#  include <Mmsystem.h>
+#  pragma comment(lib, "Winmm.lib")
+#endif
+
 #include <stdexcept>
 #include <mutex>
 #include <thread>
@@ -41,6 +52,7 @@
 #include <string>
 #include <chrono>
 #include <cstring>
+#include <cassert>
 
 namespace invaders
 {
@@ -111,11 +123,16 @@ namespace invaders
         // get the stream name if any
         virtual std::string name() const = 0;
 
-        // start playing the audio stream
+        // start playing the audio stream.
+        // this should be called only once, when the stream is 
+        // initially started. to control the playback use pause/resume
         virtual void play() = 0;
-
+        
         // pause the stream
         virtual void pause() = 0;
+
+        // resume a paused stream
+        virtual void resume() = 0;        
 
     protected:
     private:
@@ -134,7 +151,7 @@ namespace invaders
 
         // prepare a new audio stream from the already loaded audio sample.
         // the stream is initially paused but ready to play once play is called.
-        virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
+        virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
 
         // poll and dispatch pending audio device events.
         // Todo: this needs a proper waiting/signaling mechanism.
@@ -151,6 +168,265 @@ namespace invaders
     private:
     };
 
+#ifdef USE_WAVEOUT
+    // AudioDevice implementation for Waveout
+    class Waveout : public AudioDevice
+    {
+    public:
+        Waveout(const char*)
+        {}
+        virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
+        {
+            auto s = std::make_shared<Stream>(sample);
+            streams_.push_back(s);
+            return s;
+        }
+        virtual void poll() 
+        {
+            for (auto it = std::begin(streams_); it != std::end(streams_); )
+            {
+                auto& stream = *it;
+                if (stream.expired())
+                {
+                    it = streams_.erase(it);
+                }
+                else
+                {
+                    std::shared_ptr<Stream> s = stream.lock();
+                    s->poll();
+                    it++;
+                }
+            }
+        }
+
+        virtual void init()
+        {}
+
+        virtual State state() const override
+        { return AudioDevice::State::ready; }
+    private:
+        // a waveout buffer
+        class Buffer 
+        {
+        public:
+            Buffer(HWAVEOUT hWave, std::size_t bytes, std::size_t alignment) 
+            {
+                hWave_  = hWave;                
+                size_   = bytes;                
+                buffer_ = _aligned_malloc(bytes, alignment);
+                if (!buffer_)
+                    throw std::runtime_error("waveout buffer allocation failed");
+            }
+           ~Buffer()
+            {
+                // todo: should we somehow make sure here not to free the buffer
+                // while it's being used in the waveout write??
+                const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
+                assert(ret == MMSYSERR_NOERROR);
+
+                _aligned_free(buffer_);
+            }
+            std::size_t fill(const void* data, std::size_t chunk_size)
+            {
+                const auto avail = size_;
+                const auto bytes = std::min(chunk_size, avail);
+
+                CopyMemory(buffer_, data, bytes);
+
+                ZeroMemory(&header_, sizeof(header_));
+                header_.lpData         = (LPSTR)buffer_;
+                header_.dwBufferLength = bytes;
+                const auto ret = waveOutPrepareHeader(hWave_, &header_, sizeof(header_));
+                assert(ret == MMSYSERR_NOERROR);
+                return bytes;
+            }
+            void play()
+            {
+                const auto ret = waveOutWrite(hWave_, &header_, sizeof(header_));
+                if (ret != MMSYSERR_NOERROR)
+                    throw std::runtime_error("waveOutWrite failed");
+            }
+
+            Buffer(const Buffer&) = delete;
+            Buffer& operator=(const Buffer&) = delete;
+        private:
+            HWAVEOUT hWave_;
+            WAVEHDR  header_;
+            std::size_t size_;
+            void* buffer_;
+        };
+
+        class Stream : public AudioStream 
+        {
+        public:
+            Stream(std::shared_ptr<const AudioSample> sample) 
+            {
+                std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+                sample_      = sample;
+                done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
+                last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
+                state_       = AudioStream::State::none;
+                offset_      = 0;
+
+                WAVEFORMATEX wfx = {0};
+                wfx.nSamplesPerSec  = sample->rate();
+                wfx.wBitsPerSample  = 16;
+                wfx.nChannels       = 2;
+                wfx.cbSize          = 0; // extra info
+                wfx.wFormatTag      = WAVE_FORMAT_PCM;
+                wfx.nBlockAlign     = (wfx.wBitsPerSample * wfx.nChannels) / 8;
+                wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
+                MMRESULT ret = waveOutOpen(
+                    &handle_,
+                    WAVE_MAPPER, 
+                    &wfx, 
+                    (DWORD_PTR)waveOutProc, 
+                    (DWORD_PTR)this,
+                    CALLBACK_FUNCTION);
+                if (ret != MMSYSERR_NOERROR)
+                    throw std::runtime_error("waveOutOpen failed");
+
+                const auto block_size = wfx.nBlockAlign;
+
+                // todo: cache and recycle audio buffers, or maybe 
+                // we need to cache audio streams since the buffers are per HWAVEOUT ?
+                buffers_.resize(3);
+                for (size_t i=0; i<buffers_.size(); ++i)
+                {
+                    buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, block_size * 10000, block_size));
+                }
+            }
+           ~Stream()
+            {
+                auto ret = waveOutReset(handle_);
+                assert(ret == MMSYSERR_NOERROR);
+
+                for (size_t i=0; i<buffers_.size(); ++i)
+                {
+                    buffers_[i].reset();
+                }
+
+                ret = waveOutClose(handle_);
+                assert(ret == MMSYSERR_NOERROR);
+            }
+
+            virtual AudioStream::State state() const override
+            {
+                std::lock_guard<std::recursive_mutex> lock(mutex_);
+                return state_;
+            }
+
+            virtual std::string name() const override
+            { return sample_->name(); }
+
+            virtual void play() 
+            {
+                // enter initial play state. fill all buffers with audio
+                // and enqueue them to the device. once a signal is 
+                // received that the device has consumed a buffer
+                // we update the buffer with new data and send it again
+                // to the device.  
+                // we continue this untill all data is consumed or an error 
+                // has occurred.
+                const auto size = sample_->size();
+                
+                for (size_t i=0; i<buffers_.size(); ++i)
+                {
+                    offset_ += buffers_[i]->fill(sample_->data(offset_), size - offset_);
+                }
+                for (size_t i=0; i<buffers_.size(); ++i)
+                {
+                    buffers_[i]->play();
+                }
+
+            }
+
+            virtual void pause()
+            {
+                waveOutPause(handle_);
+            }
+
+            virtual void resume()
+            {
+                waveOutRestart(handle_);
+            }
+
+            void poll()
+            {
+                std::lock_guard<std::recursive_mutex> lock(mutex_);
+                if (done_buffer_ == last_buffer_)
+                    return;
+                
+                if (state_ == AudioStream::State::error || 
+                    state_ == AudioStream::State::complete)
+                    return;
+
+                // todo: we have a possible problem here that we might skip 
+                // a buffer. This would happen if if WOL_DONE occurs more than 
+                // 1 time between calls to poll()
+                
+                const auto num_buffers = buffers_.size();
+                const auto free_buffer = done_buffer_ % num_buffers;
+                const auto size = sample_->size();                  
+
+                offset_ += buffers_[free_buffer]->fill(sample_->data(offset_), size - offset_);
+
+                buffers_[free_buffer]->play();
+
+                last_buffer_ = done_buffer_; 
+            }
+
+        private:
+            static void CALLBACK waveOutProc(HWAVEOUT handle, UINT uMsg, 
+                DWORD_PTR dwInstance,
+                DWORD_PTR dwParam1, 
+                DWORD_PTR dwParam2)
+            {
+                if (dwInstance == 0) 
+                    return;
+
+                auto* this_ = reinterpret_cast<Stream*>(dwInstance);
+
+                std::lock_guard<std::recursive_mutex> lock(this_->mutex_);    
+
+                switch (uMsg)
+                {
+                    case WOM_CLOSE:
+                        break;
+
+                    case WOM_DONE: 
+                        this_->done_buffer_++;
+                        if (this_->offset_ == this_->sample_->size())
+                            this_->state_ = AudioStream::State::complete;
+                        break;
+
+                    case WOM_OPEN:
+                        this_->state_ = AudioStream::State::ready;
+                        break;
+                }
+            } 
+
+        private:
+            std::shared_ptr<const AudioSample> sample_;
+            std::size_t offset_;
+        private:
+            HWAVEOUT handle_;
+            std::vector<std::unique_ptr<Buffer>> buffers_;
+            std::size_t last_buffer_;
+            std::size_t done_buffer_;
+            mutable std::recursive_mutex mutex_;
+        private:
+            State state_;
+        };
+    private:
+        // currently active streams that we have to pump
+        std::list<std::weak_ptr<Stream>> streams_;
+    };
+
+#endif // USE_WAVEOUT
+
+#ifdef USE_PULSEAUDIO
     // AudioDevice implementation for PulseAudio
     class PulseAudio : public AudioDevice
     {
@@ -172,9 +448,9 @@ namespace invaders
             pa_mainloop_free(loop_);
         }
 
-        virtual std::unique_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
+        virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
         {
-            std::unique_ptr<Stream> s(new Stream(sample, context_));
+            auto s = std::make_shared<Stream>(sample, context_);
 
             while (s->state() == AudioStream::State::none)
             {
@@ -259,6 +535,11 @@ namespace invaders
             virtual void pause() override
             {
                 pa_stream_cork(stream_, 1, nullptr, nullptr);
+            }
+
+            virtual void resume() override
+            {
+                pa_stream_cork(stream_, 0, nullptr, nullptr);
             }
 
         private:
@@ -380,6 +661,7 @@ namespace invaders
     private:
         State state_;
     };
+#endif // USE_PULSEAUDIO
 
 
     class AudioPlayer
@@ -441,7 +723,7 @@ namespace invaders
             for (auto& track : playing_)
             {
                 if (track.id == id)
-                    track.stream->play();
+                    track.stream->resume();
             }
         }
 
@@ -539,7 +821,7 @@ namespace invaders
         struct Track {
             std::size_t id;
             std::shared_ptr<AudioSample> sample;
-            std::unique_ptr<AudioStream> stream;
+            std::shared_ptr<AudioStream> stream;
             std::chrono::steady_clock::time_point when;
             bool looping;
 

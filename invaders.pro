@@ -28,6 +28,8 @@ unix:LIBS += -lpulse
 unix:LIBS += -lsndfile
 
 win32:INCLUDEPATH += "c:/local/boost_1_61_0"
+win32:INCLUDEPATH += "libsndfile"
+win32:LIBS += "libsndfile/libsndfile-1.lib"
 
 CONFIG(debug, debug|release){
     DESTDIR = dist

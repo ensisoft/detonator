@@ -48,7 +48,12 @@ AudioPlayer* g_audio;
 int game_main(int argc, char* argv[])
 {
 #ifdef ENABLE_AUDIO
+    #ifdef USE_PULSEAUDIO
     std::unique_ptr<invaders::AudioDevice> pa(new invaders::PulseAudio("Pinyin-Invaders"));
+    #endif
+    #ifdef USE_WAVEOUT
+    std::unique_ptr<invaders::AudioDevice> pa(new invaders::Waveout("Pinyin-Invaders"));
+    #endif
     pa->init();
     invaders::AudioPlayer player(std::move(pa));
     invaders::g_audio = &player;

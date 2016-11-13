@@ -39,7 +39,9 @@
 #  define _SCL_SECURE_NO_WARNINGS
 
    // we're building in unicode
-#  define UNICODE
+#  ifndef UNICODE
+#    define UNICODE
+#  endif
 
    // msvc wants this for M_PI
 #  define _USE_MATH_DEFINES
@@ -48,8 +50,6 @@
 #if defined(__GNUG__)
 #  define __GCC__
 #  define LINUX_OS
-
-#  define ENABLE_AUDIO
 #endif
 
 #if defined(__clang__)
@@ -69,7 +69,6 @@
 #  endif
 #  define LINUX_OS
 
-#  define ENABLE_AUDIO
 #endif
 
 
@@ -82,4 +81,14 @@ const int MINOR_VERSION = 2;
 
 #ifdef QT_NO_DEBUG
 #  define QT_NO_DEBUG_OUTPUT
+#endif
+
+#ifdef LINUX_OS
+# define ENABLE_AUDIO
+# define USE_PULSEAUDIO
+#endif
+
+#ifdef WINDOWS_OS
+#  define ENABLE_AUDIO
+#  define USE_WAVEOUT
 #endif
