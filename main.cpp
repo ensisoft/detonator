@@ -24,10 +24,14 @@
 #include "warnpush.h"
 #  include <QtGui/QApplication>
 #  include <QStringList>
+#  include <QTime>
+#  include <QtDebug>
 #include "warnpop.h"
 
+#include <algorithm>
 #include <exception>
 #include <iostream>
+#include <thread>
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -73,6 +77,7 @@ int game_main(int argc, char* argv[])
     bool masterUnlock = false;
     bool unlimitedWarps = false;
     bool unlimitedBombs = false;
+    bool showFps = false;
 
     const auto& args = app.arguments();
     for (const auto& a : args)
@@ -83,6 +88,8 @@ int game_main(int argc, char* argv[])
             unlimitedWarps = true;
         else if (a == "--unlimited-bombs")
             unlimitedBombs = true;
+        else if (a == "--show-fps")
+            showFps = true;
     }
 
     invaders::MainWindow window;
@@ -90,10 +97,56 @@ int game_main(int argc, char* argv[])
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
     window.setUnlimitedBombs(unlimitedBombs);
+    window.setShowFps(showFps);
     window.launchGame();
     window.show();
 
-    return app.exec();
+    const auto TimeStep = 1000/60;
+
+    unsigned frames  = 0;
+    unsigned second  = 0;
+
+    QTime stamp = QTime::currentTime();
+    while (window.isVisible())
+    {
+        const auto time = QTime::currentTime();
+        const auto msec = stamp.msecsTo(time);
+
+        app.processEvents();
+
+        auto step = msec;
+        while (step > 0)
+        {
+            const auto dt = std::min(TimeStep, step);
+            window.updateGame(dt);
+            step -= dt;
+            stamp = time;
+        }
+
+        frames++;
+        second += msec;
+        if (second >= 1000)
+        {
+            float fps = frames / (second / 1000.0f);
+            //qDebug("Fps: %f", fps);
+            frames = 0;
+            second = 0;
+            window.setFps(fps);
+        }
+
+        window.renderGame();
+
+        // since we're drawing on the CPU our framerates will be all over the place
+        // not to mention sucking all the CPU, we're going to do a little wait here
+        // to simulate vsync and throttle the frames a little.
+        const auto now = QTime::currentTime();
+        const auto ms  = time.msecsTo(now);
+        if (ms < TimeStep)
+            std::this_thread::sleep_for(std::chrono::milliseconds(TimeStep - ms));
+
+    }
+    return 0;
+    //return app.exec();
 }
 
 int main(int argc, char* argv[])

@@ -1803,8 +1803,8 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     level_          = 0;
     profile_        = 0;
     tickDelta_      = 0;
-    timeStamp_      = 0;
     warpFactor_     = 1.0;
+    currentfps_     = 0;
     warpDuration_   = 0;
     masterUnlock_   = false;
     unlimitedBombs_ = false;
@@ -1812,6 +1812,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
     playSounds_     = true;
     playMusic_      = true;
     fullScreen_     = false;
+    showfps_        = false;
 
 #ifdef ENABLE_AUDIO
     musicTrackId_ = 0;
@@ -2024,9 +2025,6 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
-    startTimer(10);
-
-    timer_.start();
 }
 
 GameWidget::~GameWidget()
@@ -2152,16 +2150,12 @@ void GameWidget::launch()
     playMusic();
 }
 
-void GameWidget::timerEvent(QTimerEvent* timer)
+void GameWidget::step(quint64 dt)
 {
     TransformState state(rect(), *game_);
 
-    // milliseconds
-    const auto now  = timer_.elapsed();
-    const auto time = now - timeStamp_;
+    const auto time = dt;
     const auto tick = 1000.0 / profiles_[profile_].speed;
-    if (!time)
-        return;
 
     if (rand(0, 5000) == 7)
     {
@@ -2207,11 +2201,6 @@ void GameWidget::timerEvent(QTimerEvent* timer)
         ++it;
     }
 
-    // trigger redraw
-    update();
-
-    timeStamp_ = now;
-
     if (warpDuration_)
     {
         if (time >= warpDuration_)
@@ -2239,6 +2228,17 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     const auto rect = this->rect();
 
     background_->paint(painter, rect, state.getScale());
+
+    if (showfps_)
+    {
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkRed);
+        painter.setPen(pen);
+
+        painter.drawText(QPointF(10.0f, 20.0f),
+            QString("fps: %1").arg(currentfps_));
+    }
 
     if (alien_)
         alien_->paint(painter, state);

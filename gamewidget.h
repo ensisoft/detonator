@@ -101,6 +101,13 @@ namespace invaders
         void setFullscreen(bool onOff);
 
         void launch();
+        void step(quint64 dt);
+
+        void setShowFps(bool onOff)
+        { showfps_ = onOff; }
+
+        void setFps(float fps)
+        { currentfps_ = fps; }
 
         bool getPlaySounds() const
         { return playSounds_; }
@@ -114,7 +121,6 @@ namespace invaders
         void leaveFullScreen();
 
     private:
-        virtual void timerEvent(QTimerEvent* timer) override;
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
@@ -174,11 +180,10 @@ namespace invaders
         unsigned level_;
         unsigned profile_;
     private:
-        QElapsedTimer timer_;
         quint64 tickDelta_;
-        quint64 timeStamp_;
+        quint64 warpDuration_;
         float warpFactor_;
-        unsigned warpDuration_;
+        float currentfps_;
     private:
         bool masterUnlock_;
         bool unlimitedBombs_;
@@ -186,6 +191,7 @@ namespace invaders
         bool playSounds_;
         bool playMusic_;
         bool fullScreen_;
+        bool showfps_;
     private:
         std::size_t musicTrackId_;
     };

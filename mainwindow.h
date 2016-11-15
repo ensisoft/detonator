@@ -45,8 +45,16 @@ namespace invaders
 
         void setUnlimitedWarps(bool onOff);
         void setUnlimitedBombs(bool onOff);
+        void setShowFps(bool onOff);
+
+        void setFps(float fps);
 
         void launchGame();
+
+        // update game. dt is in milliseconds.
+        void updateGame(quint64 dt);
+
+        void renderGame();
 
     public slots:
         void enterFullScreen();

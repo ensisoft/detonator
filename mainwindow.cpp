@@ -133,9 +133,29 @@ void MainWindow::setUnlimitedBombs(bool onOff)
     ui_.game->setUnlimitedBombs(onOff);
 }
 
+void MainWindow::setShowFps(bool onOff)
+{
+    ui_.game->setShowFps(onOff);
+}
+
+void MainWindow::setFps(float fps)
+{
+    ui_.game->setFps(fps);
+}
+
 void MainWindow::launchGame()
 {
     ui_.game->launch();
+}
+
+void MainWindow::updateGame(quint64 dt)
+{
+    ui_.game->step(dt);
+}
+
+void MainWindow::renderGame()
+{
+    ui_.game->repaint();
 }
 
 void MainWindow::enterFullScreen()
