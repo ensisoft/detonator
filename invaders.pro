@@ -4,6 +4,8 @@ CONFIG += sse
 CONFIG += ss2
 CONFIG += debug_and_release
 
+QT += opengl
+
 SOURCES = audio.cpp\
 	game.cpp\
 	gamewidget.cpp\

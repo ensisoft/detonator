@@ -1798,7 +1798,7 @@ private:
 };
 
 
-GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
+GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
 {
     level_          = 0;
     profile_        = 0;
