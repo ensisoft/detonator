@@ -110,42 +110,42 @@ public:
         // for HUD display at the top of the screen and for the player
         // at the bottom of the screen. This provides the basic layout
         // for the game in a way that doesnt depend on any actual viewport size.
-        const auto numCols = game.width();
-        const auto numRows = game.height() + 2;
+        const float numCols = game.width();
+        const float numRows = game.height() + 2;
         // divide the widget's client area int equal sized cells
-        origin_ = QPoint(window.x(), window.y());
-        widget_ = QPoint(window.width(), window.height());
-        scale_  = QPoint(window.width() / numCols, window.height() / numRows);
-        size_   = QPoint(numCols, numRows);
+        origin_ = QPointF(window.x(), window.y());
+        widget_ = QPointF(window.width(), window.height());
+        scale_  = QPointF(window.width() / numCols, window.height() / numRows);
+        size_   = QPointF(numCols, numRows);
     }
 
-    TransformState(const QRect& window, int numCols, int numRows)
+    TransformState(const QRectF& window, float numCols, float numRows)
     {
         // divide the widget's client area int equal sized cells
-        origin_ = QPoint(window.x(), window.y());
-        widget_ = QPoint(window.width(), window.height());
-        scale_  = QPoint(window.width() / numCols, window.height() / numRows);
-        size_   = QPoint(numCols, numRows);
+        origin_ = QPointF(window.x(), window.y());
+        widget_ = QPointF(window.width(), window.height());
+        scale_  = QPointF(window.width() / numCols, window.height() / numRows);
+        size_   = QPointF(numCols, numRows);
     }
 
-    QRect toViewSpaceRect(const QPoint& gameTopLeft, const QPoint& gameTopBottom) const
+    QRectF toViewSpaceRect(const QPointF& gameTopLeft, const QPointF& gameTopBottom) const
     {
-        const QPoint top = toViewSpace(gameTopLeft);
-        const QPoint bot = toViewSpace(gameTopBottom);
+        const QPointF top = toViewSpace(gameTopLeft);
+        const QPointF bot = toViewSpace(gameTopBottom);
         return {top, bot};
     }
 
-    QPoint toViewSpace(const QPoint& cell) const
+    QPointF toViewSpace(const QPointF& cell) const
     {
-        const int xpos = cell.x() * scale_.x() + origin_.x();
-        const int ypos = cell.y() * scale_.y() + origin_.y();
+        const float xpos = cell.x() * scale_.x() + origin_.x();
+        const float ypos = cell.y() * scale_.y() + origin_.y();
         return { xpos, ypos };
     }
 
-    QPoint toViewSpace(const QVector2D& norm) const
+    QPointF toViewSpace(const QVector2D& norm) const
     {
-        const int xpos = widget_.x() * norm.x() + origin_.x();
-        const int ypos = widget_.y() * norm.y() + origin_.y();
+        const float xpos = widget_.x() * norm.x() + origin_.x();
+        const float ypos = widget_.y() * norm.y() + origin_.y();
         return { xpos, ypos };
     }
 
@@ -179,7 +179,7 @@ public:
         return {xpos, ypos};
     }
 
-    QPoint getScale() const
+    QPointF getScale() const
     {
         return scale_;
     }
@@ -193,7 +193,7 @@ public:
     }
 
     // get whole widget rect in widget coordinates
-    QRect viewRect() const
+    QRectF viewRect() const
     {
         return {origin_.x(), origin_.y(), widget_.x(), widget_.y()};
     }
@@ -216,10 +216,10 @@ public:
     int numRows() const
     { return size_.y(); }
 private:
-    QPoint origin_;
-    QPoint widget_;
-    QPoint scale_;
-    QPoint size_;
+    QPointF origin_;
+    QPointF widget_;
+    QPointF scale_;
+    QPointF size_;
 };
 
 template<typename T>
@@ -305,9 +305,9 @@ public:
         const auto scaledWidth  = unitScale.x() * scale_;
         const auto scaledHeight = unitScale.x() * scale_; // * ascpect;
 
-        QRect dst(0, 0, scaledWidth, scaledHeight);
+        QRectF dst(0, 0, scaledWidth, scaledHeight);
         dst.moveTo(position -
-            QPoint(scaledWidth / 2.0, scaledHeight / 2.0));
+            QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
 
         QPixmap tex = Explosion::texture();
         painter.drawPixmap(dst, tex, src);
@@ -455,8 +455,8 @@ public:
             const auto aspect = (float)currPixmap.height() / (float)currPixmap.width();
             const auto pxw = unitScale.x() * scale_;
             const auto pxh = unitScale.x() * aspect * scale_;
-            QRect target(0, 0, pxw, pxh);
-            target.moveTo(state.toViewSpace(position_) - QPoint(pxw/2.0, pxh/2.0));
+            QRectF target(0, 0, pxw, pxh);
+            target.moveTo(state.toViewSpace(position_) - QPointF(pxw/2.0, pxh/2.0));
             painter.setOpacity(opacity * (1.0 - lerp));
             painter.drawPixmap(target, currPixmap, currPixmap.rect());
         }
@@ -464,8 +464,8 @@ public:
             const auto aspect = (float)nextPixmap.height() / (float)nextPixmap.width();
             const auto pxw = unitScale.x() * scale_;
             const auto pxh = unitScale.x() * aspect * scale_;
-            QRect target(0, 0, pxw, pxh);
-            target.moveTo(state.toViewSpace(position_) - QPoint(pxw/2.0, pxh/2.0));
+            QRectF target(0, 0, pxw, pxh);
+            target.moveTo(state.toViewSpace(position_) - QPointF(pxw/2.0, pxh/2.0));
             painter.setOpacity(opacity * lerp);
             painter.drawPixmap(target, nextPixmap, nextPixmap.rect());
         }
@@ -688,13 +688,13 @@ public:
 
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
-        QRect target(0, 0, shipScaledWidth, shipScaledHeight);
+        QRectF target(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
         // offset it so that the center is aligned with the unit position
         target.moveTo(position -
-            QPoint(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
+            QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
         //painter.draw(target, ship, ship.rect()); // draw the jet stream first.
 
-        QRect shipRect = target;
+        QRectF shipRect = target;
 
         target.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
         target.setSize(QSize(jetScaledWidth, jetScaledHeight));
@@ -816,7 +816,7 @@ public:
         const auto pos = state.toViewSpace(position_);
 
         QFont font;
-        QRect rect;
+        QRectF rect;
         font.setFamily("Arcade");
         font.setPixelSize(dim.y() / 2);
         rect = QFontMetrics(font).boundingRect(text_);
@@ -886,7 +886,7 @@ public:
         const auto pxh = pixmap.height();
         //const auto aspect = (float)pxh / (float)pxw;
 
-        QRect target(0, 0, pxw, pxh);
+        QRectF target(0, 0, pxw, pxh);
         target.moveTo(state.toViewSpace(position_));
 
         const auto opa = painter.opacity();
@@ -1029,7 +1029,7 @@ public:
         font.setPixelSize(dim.y() / 2.0);
         painter.setPen(pen);
         painter.setFont(font);
-        painter.drawText(QRect(top, end), QString("%1").arg(score_));
+        painter.drawText(QRectF(top, end), QString("%1").arg(score_));
     }
 private:
     QVector2D position_;
@@ -1079,7 +1079,7 @@ public:
         }
     }
 
-    void paint(QPainter& painter, const QRect& rect, const QPoint&)
+    void paint(QPainter& painter, const QRectF& rect, const QPointF&)
     {
         // draw the space background.
         QBrush space(Qt::black);
@@ -1170,7 +1170,7 @@ public:
         text_.append("\nPress Space to continue");
     }
 
-    void paint(QPainter& painter, const QRect& area, const QPoint& scale)
+    void paint(QPainter& painter, const QRectF& area, const QPointF& scale)
     {
         QPen pen;
         pen.setWidth(1);
@@ -1194,7 +1194,7 @@ class GameWidget::Display
 public:
     Display(const Game& game) : game_(game), level_(0)
     {}
-    void paint(QPainter& painter, const QRect& area, const QPoint& scale)
+    void paint(QPainter& painter, const QRectF& area, const QPointF& scale)
     {
         const auto& score  = game_.getScore();
         const auto& result = score.maxpoints ?
@@ -1237,7 +1237,7 @@ public:
     Player() : text_(initString())
     {}
 
-    void paint(QPainter& painter, const QRect& area, const TransformState& transform)
+    void paint(QPainter& painter, const QRectF& area, const TransformState& transform)
     {
         QFont font;
         font.setFamily("Arcade");
@@ -1344,7 +1344,7 @@ public:
     void update(quint64 time)
     {}
 
-    void paint(QPainter& painter, const QRect& area, const QPoint& unit)
+    void paint(QPainter& painter, const QRectF& area, const QPointF& unit)
     {
         QPen regular;
         regular.setWidth(1);
@@ -1373,7 +1373,7 @@ public:
         const auto rows = 6;
         TransformState state(area, cols, rows);
 
-        QRect rect;
+        QRectF rect;
 
         rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
         painter.drawText(rect, Qt::AlignHCenter | Qt::AlignBottom,
@@ -1522,7 +1522,7 @@ public:
     void selectProfile(unsigned profile)
     { profile_ = profile; }
 private:
-    void drawLevel(QPainter& painter, const QRect& rect, const Level& level, int index, bool hilite)
+    void drawLevel(QPainter& painter, const QRectF& rect, const Level& level, int index, bool hilite)
     {
         const auto& info = infos_[index];
 
@@ -1562,7 +1562,7 @@ private:
 class GameWidget::Help
 {
 public:
-    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const
+    void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) const
     {
         QPen pen;
         pen.setWidth(1);
@@ -1598,7 +1598,7 @@ public:
 
     Settings(bool music, bool sounds, bool fullscreen) : music_(music), sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
     {}
-    void paint(QPainter& painter, const QRect& rect, const QPoint& scale) const
+    void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) const
     {
         QPen regular;
         regular.setWidth(1);
@@ -1631,8 +1631,8 @@ public:
         const auto rows = 7;
         TransformState state(rect, cols, rows);
 
-        QRect rc;
-        rc = state.toViewSpaceRect(QPoint(0, 1), QPoint(1, 2));
+        QRectF rc;
+        rc = state.toViewSpaceRect(QPointF(0, 1), QPointF(1, 2));
         painter.drawText(rc, Qt::AlignCenter,
             "Press space to toggle a setting.");
 
@@ -1714,7 +1714,7 @@ private:
 class GameWidget::About
 {
 public:
-    void paint(QPainter& painter, const QRect& area, const QPoint& scale) const
+    void paint(QPainter& painter, const QRectF& area, const QPointF& scale) const
     {
         QFont font;
         font.setFamily("Arcade");
@@ -1754,7 +1754,7 @@ public:
     void update(quint64 dt)
     {}
 
-    void paint(QPainter& painter, const QRect& area, const QPoint& scale) const
+    void paint(QPainter& painter, const QRectF& area, const QPointF& scale) const
     {
         QPen pen;
         pen.setWidth(1);
@@ -2025,6 +2025,7 @@ GameWidget::GameWidget(QWidget* parent) : QWidget(parent)
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
+
 }
 
 GameWidget::~GameWidget()
@@ -2276,12 +2277,12 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         return;
     }
 
-    QPoint top;
-    QPoint bot;
+    QPointF top;
+    QPointF bot;
     // layout the HUD at the first "game row"
     top = state.toViewSpace(QPoint(0, 0));
     bot = state.toViewSpace(QPoint(cols, 1));
-    display_->paint(painter, QRect(top, bot), state.getScale());
+    display_->paint(painter, QRectF(top, bot), state.getScale());
 
     // paint the invaders
     for (auto& pair : invaders_)
@@ -2299,7 +2300,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // layout the player at the last "game row"
     top = state.toViewSpace(QPoint(0, rows-1));
     bot = state.toViewSpace(QPoint(cols, rows));
-    player_->paint(painter, QRect(top, bot), state);
+    player_->paint(painter, QRectF(top, bot), state);
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
