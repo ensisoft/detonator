@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -18,13 +18,15 @@
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.            
+//  THE SOFTWARE.
 
 #include "config.h"
+
 #include <algorithm>
 #include <map>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 #include "game.h"
 #include "level.h"
 
@@ -34,7 +36,9 @@ namespace invaders
 {
 
 Game::Game(unsigned width, unsigned height) : tick_(0), width_(width), height_(height), identity_(1), level_(nullptr), haveBoss_(false)
-{}
+{
+    slots_.resize(height);
+}
 
 Game::~Game()
 {}
@@ -43,6 +47,16 @@ void Game::tick()
 {
     if (!level_)
         return;
+
+    // decrement slots. each slot corresponds to a row in the game space.
+    // and the number in the slot is the "length of queue" of invaders queued
+    // onto that row, i.e. it's the additional x distance they must travel.
+    for (size_t i=0; i<slots_.size(); ++i)
+    {
+        if (slots_[i])
+            slots_[i] = slots_[i] - 1;
+    }
+
 
     // prune invaders
     auto end = std::partition(std::begin(invaders_), std::end(invaders_),
@@ -103,7 +117,7 @@ bool Game::fire(const Game::missile& missile)
     if (end == std::begin(invaders_))
         return false;
 
-    auto it = std::min_element(std::begin(invaders_), end, 
+    auto it = std::min_element(std::begin(invaders_), end,
         [&](const invader& a, const invader& b) {
             return a.xpos < b.xpos;
         });
@@ -123,7 +137,7 @@ bool Game::fire(const Game::missile& missile)
         score_.pending--;
 
         onMissileKill(inv, missile, inv.score);
-        invaders_.erase(it);        
+        invaders_.erase(it);
     }
     else
     {
@@ -169,7 +183,7 @@ void Game::ignite(const bomb& b)
 
     invaders_.erase(std::begin(invaders_), end);
 
-    onBomb(b);    
+    onBomb(b);
 
     setup_.numBombs--;
 }
@@ -193,7 +207,7 @@ void Game::play(Level* level, Game::setup setup)
     score_.killed    = 0;
     score_.points    = 0;
     score_.victor    = 0;
-    score_.maxpoints = 0;    
+    score_.maxpoints = 0;
     score_.pending   = setup.numEnemies + 1; // +1 for the BOSS
     setup_ = setup;
     haveBoss_ = false;
@@ -230,20 +244,26 @@ void Game::spawn()
 {
     const auto spawnCount = setup_.spawnCount;
     const auto enemyCount = setup_.numEnemies;
-    std::map<unsigned, unsigned> batch;
+
+    // pull a random row for the batch
+    const auto batch_row = std::rand() % height_;
 
     for (unsigned i=0; i<spawnCount; ++i)
     {
         if (spawned_ == enemyCount)
             break;
 
+        const auto row   = (batch_row + i * 3) % height_;
+        assert(row <= slots_.size());
+        const auto queue = slots_[row];
+
         const auto enemy = level_->spawn();
         invader inv;
         inv.killList.append(enemy.killstring);
         inv.viewList.append(enemy.string);
         inv.score      = enemy.score;
-        inv.ypos       = std::rand() % height_;
-        inv.xpos       = width_ + batch[inv.ypos] * 6 + i * 2;
+        inv.ypos       = row;
+        inv.xpos       = width_  + queue;
         inv.identity   = identity_++;
         inv.speed      = 1 + (!(std::rand() % 5));
         inv.type       = InvaderType::regular;
@@ -264,27 +284,29 @@ void Game::spawn()
         onInvaderSpawn(inv);
 
         ++spawned_;
-        ++batch[inv.ypos];
 
         inv.xpos = width_ - DangerZone - 1;
         score_.maxpoints += killScore(inv);
+
+        // increment the slot
+        slots_[row] = queue + 5;
     }
 }
 
 void Game::spawnBoss()
 {
-    invader theBoss;    
+    invader theBoss;
     theBoss.ypos     = height_ / 2;
     theBoss.xpos     = width_ + 5;
     theBoss.identity = identity_++;
-    theBoss.score    = 0;    
+    theBoss.score    = 0;
     theBoss.speed    = 1;
     theBoss.type     = InvaderType::boss;
 
     for (int i=0; i<5; ++i)
     {
         const auto enemy = level_->spawn();
-        theBoss.viewList.append(enemy.string);        
+        theBoss.viewList.append(enemy.string);
         theBoss.killList.append(enemy.killstring);
         theBoss.score += enemy.score;
     }
@@ -292,7 +314,7 @@ void Game::spawnBoss()
 
     onInvaderSpawn(theBoss);
 
-    invaders_.push_back(theBoss);    
+    invaders_.push_back(theBoss);
 
     theBoss.xpos = width_ - DangerZone - 1;
     score_.maxpoints += killScore(theBoss);

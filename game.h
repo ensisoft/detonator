@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -32,6 +32,7 @@
 
 #include <memory>
 #include <deque>
+#include <vector>
 #include <functional>
 
 namespace invaders
@@ -94,7 +95,7 @@ namespace invaders
         std::function<void (const invader&, const bomb& b)> onBombDamage;
         std::function<void (const bomb& b)> onBomb;
         std::function<void (const timewarp& w)> onWarp;
-        std::function<void (const invader&)> onInvaderSpawn;        
+        std::function<void (const invader&)> onInvaderSpawn;
         std::function<void (const invader&)> onInvaderVictory;
         std::function<void (const invader&)> onInvaderWarning;
         std::function<void (const score&)> onLevelComplete;
@@ -118,28 +119,28 @@ namespace invaders
         void quitLevel();
 
         // get game space width
-        unsigned width() const 
+        unsigned width() const
         { return width_; }
 
         // get game space height
         unsigned height() const
         { return height_; }
 
-        unsigned numBombs() const 
+        unsigned numBombs() const
         { return setup_.numBombs; }
 
         unsigned numWarps() const
         { return setup_.numWarps; }
 
-        const 
-        score& getScore() const 
+        const
+        score& getScore() const
         { return score_; }
 
         const
-        std::deque<invader>& invaders() const 
+        std::deque<invader>& invaders() const
         { return invaders_; }
 
-        bool isRunning() const 
+        bool isRunning() const
         { return level_ != nullptr; }
 
 
@@ -151,6 +152,7 @@ namespace invaders
 
     private:
         std::deque<invader> invaders_;
+        std::vector<unsigned> slots_;
         unsigned tick_;
         unsigned spawned_;
         unsigned width_;
