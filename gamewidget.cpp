@@ -2026,6 +2026,14 @@ GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
 
+    // indicates that the widget has no background and
+    // the system doesn't automatically paint the background. 
+    // this is fine for us since we draw everything everytime anyway.
+    setAttribute(Qt::WA_NoSystemBackground);
+
+    // indicates that the widget draws all its pixels every time, 
+    // thus there's no need to erase widget before painting.
+    setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
 GameWidget::~GameWidget()
