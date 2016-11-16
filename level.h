@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -33,8 +33,8 @@
 
 namespace invaders
 {
-    // Level is a factory for spawning enemies and configuring the game 
-    class Level 
+    // Level is a factory for spawning enemies and configuring the game
+    class Level
     {
     public:
         struct enemy {
@@ -48,7 +48,7 @@ namespace invaders
             // the correct killstring to kill the enemy
             QString  killstring;
 
-            // help/description of the enemy 
+            // help/description of the enemy
             // (word definition)
             QString  help;
         };
@@ -61,10 +61,12 @@ namespace invaders
 
         void reset();
 
+        bool validate() const;
+
         // spawn a new enemy
         enemy spawn();
 
-        QString name() const 
+        QString name() const
         { return name_; }
 
         // get a list of available enemies in this level.

@@ -6,7 +6,7 @@
 # BEGIN
 # name of the level
 # list of enemies:
-# [chinese Character String] [pinyin kill string] [score] [help] 
+# [chinese Character String] [pinyin kill string] [score] [help]
 #     ....
 #
 # END
@@ -29,11 +29,11 @@ BEGIN
 You and I
 我 wo  7  I / me / my
 你 ni  7  you
-是 shi 9  is / are / am 
+是 shi 9  is / are / am
 要 yao 9  to want / to ask
-有 you 6  to have / there is 
-不 bu  4  no / not 
-很 hen 9  quite / very 
+有 you 6  to have / there is
+不 bu  4  no / not
+很 hen 9  quite / very
 嗎 ma  13 question particle
 END
 
@@ -57,8 +57,8 @@ Keyi!
 能 neng  10 to be able to to
 下 xia   3  down / downwards
 中 zhong 4  middle / center
-可 ke    5  can / may 
-以 yi    5  to use 
+可 ke    5  can / may
+以 yi    5  to use
 END
 
 
@@ -77,9 +77,9 @@ END
 BEGIN
 What & How
 公   gong   4  public
-車   che    7  car / vehicle
+書   shu    10 book / letter
 哪   na     10 how / which
-去   qu     5  to go 
+去   qu     5  to go
 太   tai    4  very / too much
 百   bai    6  hundred / numerous
 人   ren    2  person
@@ -93,7 +93,7 @@ Shuo Hua
 買 mai  12 to buy / to purchase
 得 dei  11 to have to / to must
 小 xiao 3  small / tiny
-書 shu  10 book / letter
+車 che  7  car / vehicle
 再 zai  6  again / once more
 都 dou  11 all / both
 說 shuo 14 to speak / say
@@ -102,12 +102,12 @@ END
 BEGIN
 Fuxi I
 車 che  7  car / vehicle
-書 shu  10 book / letter
+買 mai  12 to buy / to purchase
 哪 na   10 how / which
 都 dou  11 all / both
 說 shuo 14 to speak / say
 就 jiu  12 at once / right away
-很 hen  9  quite / very 
+很 hen  9  quite / very
 得 dei  11 to have to / to must
 看 kan  9  to see / to look
 END
@@ -115,25 +115,25 @@ END
 BEGIN
 Duzi Dong
 子 zi    3   noun suffix
-電 dian  13  o'clock / point 
+電 dian  13  o'clock / point
 真 zhen  10  really / truly
 想 xiang 13  to think / want / miss
 跟 gen   13  with someone
 對 dui   14  right / correct / treat
 水 shui  4   water / river
-先 xian  6   early / prior
+次 ci    6   next in sequence
 END
 
 
 BEGIN
 Alishan
-次 ci   6  next in sequence
+先 xian 6   early / prior
 打 da   5  to beat / strike / break
 工 gong 3  work / worker
-過 guo  13 experienced action 
+過 guo  13 experienced action
 坐 zuo  7  to sit / to take a seat
 茶 cha  9  tea
-會 hui  13 can / to be able to 
+會 hui  13 can / to be able to
 做 zuo  11 to do / to make
 END
 
@@ -141,10 +141,10 @@ BEGIN
 Hao Nan
 文 wen   4  language / writing
 學 xue   16 to learn / to study
-兩 liang 8  two / both / some 
+兩 liang 8  two / both / some
 每 mei   7  each / every
-生 sheng 5  student / to be born 
-個 ge    10 this / that / MW 
+生 sheng 5  student / to be born
+個 ge    10 this / that / MW
 多 duo   6  many / much / often / a lot of
 少 shao  4  few / less / to lack
 END
@@ -169,7 +169,7 @@ East & West
 給 gei  12 to / for / give
 東 dong 8  east
 西 xi   6  west
-現 xian 11 present / now / to appear
+開 kai  12 to open / start / turn on
 出 chu  5  to go out
 後 hou  9  back / behind / after / later
 END
@@ -179,7 +179,7 @@ Ba ba ba...
 著 zhe  12 action in progress
 用 yong 5  to use / employ
 見 jian 7  to see / meet
-開 kai  12 to open / start / turn on
+現 xian 11 present / now / to appear
 關 guan 19 to close / shut / turn off
 電 dian 13 electric / electricity
 冰 bing 6  ice
@@ -192,7 +192,7 @@ Fuxi II
 水 shui  4  water / river
 樣 yang  15 manner / pattern
 對 dui   14 right / correct / treat
-想 xiang 13 to think / want / miss
+電 dian  13 electric / electricity
 見 jian  7  to see / meet
 現 xian  11 present / now / to appear
 做 zuo   11 to do / to make
@@ -201,25 +201,25 @@ END
 
 BEGIN
 Chiwan
-走 zou  7  to walk / go / leave 
-路 lu   13 road 
+走 zou  7  to walk / go / leave
+路 lu   13 road
 店 dian 8  inn / shop / store
 門 men  8  gate / door
 完 wan  7  to finish / to be over
 心 xin  4  heart / mind / intention
 面 mian 9  face / side / surface
-久 jiu  3  (long) time / duration 
+久 jiu  3  (long) time / duration
 END
 
 BEGIN
-Maibuqi 
+Maibuqi
 號 hao  13 ord. number / day of a month
 菜 cai  12 dish / vegetable
 市 shi  5  market / city
 起 qi   10  to afford / rise / get up
-放 fang 8  to put / place 
+放 fang 8  to put / place
 樓 lou  15 storied building
-熱 re   15 to warm/heat up / hot 
+熱 re   15 to warm/heat up / hot
 帶 dai  11 area / zone / region
 END
 

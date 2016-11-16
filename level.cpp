@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -112,7 +112,7 @@ void Level::load(const QString& file)
         throw std::runtime_error("failed to load levels");
 
     QTextStream stream(&io);
-    stream.setCodec("UTF-8");    
+    stream.setCodec("UTF-8");
 
     const auto beg = readLine(stream);
     if (beg != "BEGIN")
@@ -144,7 +144,43 @@ void Level::reset()
     randMax_ = enemies_.size();
 }
 
-Level::enemy Level::spawn() 
+bool Level::validate() const
+{
+    // scan the contents of the level data to make sure that
+    // we don't have any problems.
+    // one particular problem we must check for is that
+    // of having syllables that are prefix of another syllable.
+    // this will be confusing. for example if a level has both:
+    // 書 shu  10 book / letter
+    // 說 shuo 14 to speak / say
+    // shu is a prefix of shuo and the if the player is intending to kill
+    // "shuo" but there's a "shu" in the game play "shu" will be destroyed.
+    // easist fix for this problem is to make sure that levels do not
+    // contain data where syllables are each others prefix.
+
+    for (size_t i=0; i<enemies_.size(); ++i)
+    {
+        for (size_t j=0; j<enemies_.size(); ++j)
+        {
+            // don't compare to self
+            if (j == i) continue;
+            // we can have for example "zuo" and "zuo" with different meaning.
+            // this is fine.
+            if (enemies_[j].killstring == enemies_[i].killstring)
+                continue;
+            // catch a case of "shuo" and "shu"
+            if (enemies_[j].killstring.startsWith(enemies_[i].killstring))
+            {
+                qDebug() << enemies_[j].killstring << " - " << enemies_[i].killstring;
+                return false;
+            }
+        }
+    }
+    return true;
+
+}
+
+Level::enemy Level::spawn()
 {
     const auto n = std::rand() % randMax_;
     const auto r = enemies_[n];
@@ -196,7 +232,7 @@ std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
             enemy.killstring = toks[1];
             enemy.score      = toks[2].toInt();
             enemy.help       = joinTokens(toks, 3);
-            next->enemies_.push_back(enemy);                
+            next->enemies_.push_back(enemy);
         }
         if (!end)
             throw std::runtime_error("no end in sight...");
