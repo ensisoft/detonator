@@ -51,6 +51,7 @@
 #include <queue>
 #include <string>
 #include <chrono>
+#include <algorithm>
 #include <cstring>
 #include <cassert>
 
@@ -205,6 +206,66 @@ namespace invaders
         virtual State state() const override
         { return AudioDevice::State::ready; }
     private:
+        class AlignedAllocator 
+        {
+        public:
+           ~AlignedAllocator()
+            {
+                for (auto& buff : buffers_)
+                    _aligned_free(buff.base);
+            } 
+
+            static AlignedAllocator& get() 
+            {
+                static AlignedAllocator allocator;
+                return allocator;
+            }
+            void* allocate(std::size_t bytes, std::size_t alignment)
+            {
+                auto it = std::find_if(std::begin(buffers_), std::end(buffers_),
+                    [=](const auto& buffer) {
+                        return buffer.used == false && buffer.size >= bytes && buffer.alignment == alignment;
+                    });
+                if (it != std::end(buffers_))
+                {
+                    buffer& buff = *it;
+                    buff.used = true; 
+                    return buff.base;
+                }
+                void* base = _aligned_malloc(bytes, alignment);
+                if (base == nullptr)
+                    throw std::runtime_error("buffer allocation failed");
+                buffer buff;
+                buff.base = base;
+                buff.size = bytes;
+                buff.used = true;
+                buff.alignment = alignment;
+                buffers_.push_back(buff);
+                return base;
+            }
+
+            void free(void* base)
+            {
+                auto it = std::find_if(std::begin(buffers_), std::end(buffers_), 
+                    [=](const auto& buffer) {
+                        return buffer.base == base;
+                    });
+                assert(it != std::end(buffers_));
+                auto& buff = *it;
+                buff.used = false;
+            }
+
+        private:
+            struct buffer {
+                void* base;
+                bool used;
+                size_t size;
+                size_t alignment;
+            };
+
+            std::vector<buffer> buffers_; 
+        };
+
         // a waveout buffer
         class Buffer 
         {
@@ -212,10 +273,8 @@ namespace invaders
             Buffer(HWAVEOUT hWave, std::size_t bytes, std::size_t alignment) 
             {
                 hWave_  = hWave;                
-                size_   = bytes;                
-                buffer_ = _aligned_malloc(bytes, alignment);
-                if (!buffer_)
-                    throw std::runtime_error("waveout buffer allocation failed");
+                size_   = bytes;
+                buffer_ = AlignedAllocator::get().allocate(bytes, alignment);                
             }
            ~Buffer()
             {
@@ -224,7 +283,7 @@ namespace invaders
                 const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
                 assert(ret == MMSYSERR_NOERROR);
 
-                _aligned_free(buffer_);
+                AlignedAllocator::get().free(buffer_);
             }
             std::size_t fill(const void* data, std::size_t chunk_size)
             {
