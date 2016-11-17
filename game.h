@@ -43,7 +43,7 @@ namespace invaders
     {
     public:
         enum class InvaderType {
-            regular, special, boss
+            regular, boss
         };
 
         struct invader {
@@ -55,6 +55,9 @@ namespace invaders
             QStringList killList;
             QStringList viewList;
             InvaderType type;
+            bool shield;
+            unsigned shield_on_ticks;
+            unsigned shield_off_ticks;
         };
 
         struct missile {
@@ -88,11 +91,12 @@ namespace invaders
         };
 
 
-
         std::function<void (const invader&, const missile& m, unsigned score)> onMissileKill;
         std::function<void (const invader&, const missile& m)> onMissileDamage;
+        std::function<void (const invader&, const missile& m)> onMissileFire;
         std::function<void (const invader&, const bomb& b, unsigned score)> onBombKill;
         std::function<void (const invader&, const bomb& b)> onBombDamage;
+        std::function<void (const invader&, bool)> onToggleShield;
         std::function<void (const bomb& b)> onBomb;
         std::function<void (const timewarp& w)> onWarp;
         std::function<void (const invader&)> onInvaderSpawn;
@@ -146,6 +150,7 @@ namespace invaders
 
     private:
         unsigned killScore(const invader& inv) const;
+        bool hasShield(const invader& inv) const;
         void spawn();
         void spawnBoss();
         bool isSpawnTick() const;

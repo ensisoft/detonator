@@ -82,6 +82,7 @@ void Game::tick()
         {
             onInvaderWarning(i);
         }
+        onToggleShield(i, hasShield(i));
     }
 
     if (spawned_ == setup_.numEnemies)
@@ -127,6 +128,13 @@ bool Game::fire(const Game::missile& missile)
     if (inv.xpos >= width_)
         return false;
 
+    // if the invader has it's shield up we can't kill it
+    if (hasShield(inv))
+    {
+        onMissileFire(inv, missile);
+        return true;
+    }
+
     inv.viewList.pop_front();
     inv.killList.pop_front();
     if (inv.killList.isEmpty())
@@ -154,6 +162,10 @@ void Game::ignite(const bomb& b)
     for (auto it = std::begin(invaders_); it != std::end(invaders_); ++it)
     {
         auto& i = *it;
+
+        if (hasShield(i))
+            continue;
+
         if (i.xpos < width_)
         {
             i.killList.pop_front();
@@ -178,6 +190,9 @@ void Game::ignite(const bomb& b)
     for (auto it = end; it != std::end(invaders_); ++it)
     {
         auto& inv = *it;
+        if (hasShield(inv))
+            continue;
+
         onBombDamage(inv, b);
     }
 
@@ -240,6 +255,19 @@ unsigned Game::killScore(const invader& inv) const
     return 0.6 * points + 0.4 * (points * bonus);
 }
 
+bool Game::hasShield(const invader& inv) const
+{
+    const auto cycle = inv.shield_on_ticks + inv.shield_off_ticks;
+    if (cycle == 0)
+        return false;
+
+    const auto phase = tick_ % cycle;
+    if (phase >= inv.shield_on_ticks)
+        return true;
+
+    return false;
+}
+
 void Game::spawn()
 {
     const auto spawnCount = setup_.spawnCount;
@@ -265,18 +293,34 @@ void Game::spawn()
         inv.ypos       = row;
         inv.xpos       = width_  + queue;
         inv.identity   = identity_++;
-        inv.speed      = 1 + (!(std::rand() % 5));
+        inv.speed      = 1;
         inv.type       = InvaderType::regular;
+        inv.shield     = false;
+
+
+        if (!(std::rand() % 5))
+        {
+            inv.speed = 2;
+        }
 
         if (!(std::rand() % 6))
         {
             const auto enemy = level_->spawn();
             inv.killList.append(enemy.killstring);
             inv.viewList.append(enemy.string);
-            inv.type = InvaderType::special;
             inv.score *= 2;
             inv.speed  = 1;
         }
+
+        if (inv.speed == 1 && inv.killList.size() == 1)
+        {
+            if (!(std::rand() % 5))
+            {
+                inv.shield_on_ticks  = 2;
+                inv.shield_off_ticks = 2;
+            }
+        }
+
 
         inv.score *= 10;
 

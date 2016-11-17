@@ -631,7 +631,9 @@ public:
 
     Invader(QVector2D position, QString str, float velocity, ShipType type) :
         position_(position), text_(str), time_(0), expire_(0), velocity_(velocity), type_(type)
-    {}
+    {
+        shield_ = false;
+    }
 
     void setPosition(QVector2D position)
     {
@@ -715,6 +717,23 @@ public:
         painter.setPen(pen);
         painter.drawText(target, Qt::AlignVCenter, text_);
 
+        if (shield_)
+        {
+            QPixmap shield = QPixmap(R("textures/spr_shield.png"));
+            QRectF rect;
+            // we don't bother to calculate the size for the shield properly
+            // in order to cover the whole ship. instead we use a little fudge
+            // factor to expand the shield.
+            const auto fudge = 1.25f;
+            const auto width = shipRect.width();
+            rect.setHeight(width * fudge);
+            rect.setWidth(width * fudge);
+            rect.moveTo(shipRect.topLeft());
+            rect.translate((rect.width()-shipRect.width()) / -2.0f,
+                (rect.height()-shipRect.height()) / -2.0f);
+            painter.drawPixmap(rect, shield, shield.rect());
+        }
+
     }
 
     // get current position
@@ -739,6 +758,9 @@ public:
     }
     QPixmap getTexture() const
     { return getShipTexture(type_); }
+
+    void setShield(bool onOff)
+    { shield_ = onOff; }
 
 private:
     static const QPixmap& getShipTexture(ShipType type)
@@ -783,6 +805,8 @@ private:
     float velocity_;
 private:
     ShipType type_;
+private:
+    bool shield_;
 };
 
 class GameWidget::Missile : public GameWidget::Animation
@@ -1890,17 +1914,17 @@ GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
-        //std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, 500, false));
-        //explosion->setScale(inv->getScale() * 0.5);
+
         sparks->setColor(Qt::darkGray);
 
         auto viewString = i.viewList.join("");
         inv->setViewString(viewString);
 
         animations_.push_back(std::move(missile));
-        //animations_.push_back(std::move(explosion));
         animations_.push_back(std::move(sparks));
     };
+
+    game_->onMissileFire = game_->onMissileDamage;
 
     game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b, unsigned killScore)
     {
@@ -1938,6 +1962,13 @@ GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
         warpDuration_ = w.duration;
     };
 
+    game_->onToggleShield = [&](const Game::invader& i, bool onOff)
+    {
+        auto it = invaders_.find(i.identity);
+        auto& inv = it->second;
+        inv->setShield(onOff);
+    };
+
     game_->onInvaderSpawn = [&](const Game::invader& inv)
     {
         TransformState state(rect(), *game_);
@@ -1946,16 +1977,26 @@ GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
 
         Invader::ShipType type = Invader::ShipType::Slow;
         if (inv.type == Game::InvaderType::boss)
+        {
             type = Invader::ShipType::Boss;
-        else if (inv.type == Game::InvaderType::regular)
+        }
+        else
         {
             if (inv.speed == 1)
-                type = Invader::ShipType::Slow;
-            else type = Invader::ShipType::Fast;
-        }
-        else if (inv.type == Game::InvaderType::special)
-        {
-            type = Invader::ShipType::Tough;
+            {
+                if (inv.killList.size() == 1)
+                {
+                    type = Invader::ShipType::Slow;
+                }
+                else
+                {
+                    type = Invader::ShipType::Fast;
+                }
+            }
+            else
+            {
+                type = Invader::ShipType::Tough;
+            }
         }
 
         // the game expresses invader speed as the number of discrete steps it takes
@@ -1970,6 +2011,7 @@ GameWidget::GameWidget(QWidget* parent) : QGLWidget(parent)
         const auto viewString = inv.viewList.join("");
 
         std::unique_ptr<Invader> invader(new Invader(pos, viewString, velocity, type));
+        invader->setShield(inv.shield_on_ticks != 0);
         invaders_[inv.identity] = std::move(invader);
     };
 
