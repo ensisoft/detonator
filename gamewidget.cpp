@@ -34,7 +34,7 @@
 #  include <QtGui/QPixmap>
 #  include <QtGui/QFont>
 #  include <QtGui/QFontMetrics>
-#  include <QtGui/QApplication>
+#  include <QApplication>
 #  include <QResource>
 #  include <QFileInfo>
 #  include <QtDebug>
@@ -189,7 +189,7 @@ public:
         const auto scale  = getScale();
         const auto width  = (float)viewWidth();
         const auto height = (float)viewHeight();
-        return {scale.x() / width, scale.y() / height};
+        return QVector2D(scale.x() / width, scale.y() / height);
     }
 
     // get whole widget rect in widget coordinates
@@ -894,8 +894,8 @@ public:
         position_ += (dt / 10000.0) * fuzzy;
         const auto x = position_.x();
         const auto y = position_.y();
-        position_.setX(wrap(1.0, 0.0, x));
-        position_.setY(wrap(1.0, 0.0, y));
+        position_.setX(wrap(1.0f, 0.0f, x));
+        position_.setY(wrap(1.0f, 0.0f, y));
         return true;
     }
 
@@ -1143,14 +1143,14 @@ public:
         const auto d = direction_ * (time / 1000.0);
         for (auto& p : particles_)
         {
-            p.x = wrap(1.0, 0.0, p.x + d.x() * p.v);
-            p.y = wrap(1.0, 0.0, p.y + d.y() * p.v);
+            p.x = wrap(1.0f, 0.0f, p.x + d.x() * p.v);
+            p.y = wrap(1.0f, 0.0f, p.y + d.y() * p.v);
         }
 
         for (auto& a : asteroids_)
         {
-            a.x = wrap(1.0, -0.2, a.x + d.x() * a.v);
-            a.y = wrap(1.0, -0.2, a.y + d.y() * a.v);
+            a.x = wrap(1.0f, -0.2f, a.x + d.x() * a.v);
+            a.y = wrap(1.0f, -0.2f, a.y + d.y() * a.v);
         }
     }
 private:

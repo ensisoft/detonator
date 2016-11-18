@@ -24,7 +24,7 @@
 
 #include "config.h"
 #include "warnpush.h"
-#  include <QtGui/QMainWindow>
+#  include <QtWidgets/QMainWindow>
 #  include <QObject>
 #  include "ui_mainwindow.h"
 #include "warnpop.h"

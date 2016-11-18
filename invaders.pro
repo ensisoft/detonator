@@ -1,3 +1,4 @@
+CONFIG += 64bit
 CONFIG += qt
 CONFIG += c++11
 CONFIG += sse

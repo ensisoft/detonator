@@ -22,7 +22,7 @@
 
 #include "config.h"
 #include "warnpush.h"
-#  include <QtGui/QApplication>
+#  include <QApplication>
 #  include <QStringList>
 #  include <QTime>
 #  include <QtDebug>
