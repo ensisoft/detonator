@@ -24,7 +24,7 @@
 
 #include "config.h"
 #include "warnpush.h"
-#  include <QtOpenGL/QGLWidget>
+#  include <QOpenGLWidget>
 #  include <QObject>
 #  include <QTimer>
 #  include <QElapsedTimer>
@@ -41,7 +41,7 @@ namespace invaders
     class Game;
     class Level;
 
-    class GameWidget : public QGLWidget
+    class GameWidget : public QOpenGLWidget
     {
         Q_OBJECT
 
