@@ -148,7 +148,7 @@ void MainWindow::launchGame()
     ui_.game->launch();
 }
 
-void MainWindow::updateGame(quint64 dt)
+void MainWindow::updateGame(float dt)
 {
     ui_.game->step(dt);
 }

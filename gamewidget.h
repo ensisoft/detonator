@@ -101,7 +101,7 @@ namespace invaders
         void setFullscreen(bool onOff);
 
         void launch();
-        void step(quint64 dt);
+        void step(float dt);
 
         void setShowFps(bool onOff)
         { showfps_ = onOff; }
@@ -180,8 +180,8 @@ namespace invaders
         unsigned level_;
         unsigned profile_;
     private:
-        quint64 tickDelta_;
-        quint64 warpDuration_;
+        float tickDelta_;
+        float warpDuration_;
         float warpFactor_;
         float currentfps_;
     private:

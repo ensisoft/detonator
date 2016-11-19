@@ -101,7 +101,7 @@ int game_main(int argc, char* argv[])
     window.launchGame();
     window.show();
 
-    const auto TimeStep = 1000/60;
+    const float TimeStep = 1000/60.0;
 
     unsigned frames  = 0;
     unsigned second  = 0;
@@ -114,8 +114,8 @@ int game_main(int argc, char* argv[])
 
         app.processEvents();
 
-        auto step = msec;
-        while (step > 0)
+        float step = msec;
+        while (step > 0.0f)
         {
             const auto dt = std::min(TimeStep, step);
             window.updateGame(dt);
@@ -142,7 +142,7 @@ int game_main(int argc, char* argv[])
         const auto now = QTime::currentTime();
         const auto ms  = time.msecsTo(now);
         if (ms < TimeStep)
-            std::this_thread::sleep_for(std::chrono::milliseconds(TimeStep - ms));
+            std::this_thread::sleep_for(std::chrono::milliseconds(unsigned(TimeStep - ms)));
 
     }
     return 0;

@@ -52,7 +52,7 @@ namespace invaders
         void launchGame();
 
         // update game. dt is in milliseconds.
-        void updateGame(quint64 dt);
+        void updateGame(float dt);
 
         void renderGame();
 

@@ -252,7 +252,7 @@ public:
 
     // returns true if animation is still valid
     // otherwise false and the animation is expired.
-    virtual bool update(quint64 dt, TransformState& state) = 0;
+    virtual bool update(float dt, TransformState& state) = 0;
 
     //
     virtual void paint(QPainter& painter, TransformState& state) = 0;
@@ -265,11 +265,11 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(QVector2D position, quint64 start, quint64 lifetime) :
+    Explosion(QVector2D position, float start, float lifetime) :
         position_(position), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {}
 
-    virtual bool update(quint64 dt, TransformState& state) override
+    virtual bool update(float dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -328,9 +328,9 @@ private:
 
 private:
     QVector2D position_;
-    quint64 start_;
-    quint64 life_;
-    quint64 time_;
+    float start_;
+    float life_;
+    float time_;
 private:
     float scale_;
 };
@@ -340,7 +340,7 @@ private:
 class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
-    Sparks(QVector2D position, quint64 start, quint64 lifetime)
+    Sparks(QVector2D position, float start, float lifetime)
         : start_(start), life_(lifetime), time_(0), color_(0xff, 0xff, 0xff)
     {
         const auto particles = 100;
@@ -360,7 +360,7 @@ public:
             particles_.push_back(p);
         }
     }
-    virtual bool update(quint64 dt, TransformState&) override
+    virtual bool update(float dt, TransformState&) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -404,9 +404,9 @@ private:
     };
     std::vector<particle> particles_;
 private:
-    quint64 start_;
-    quint64 life_;
-    quint64 time_;
+    float start_;
+    float life_;
+    float time_;
 private:
     QColor color_;
 };
@@ -414,11 +414,11 @@ private:
 class GameWidget::Smoke : public GameWidget::Animation
 {
 public:
-    Smoke(QVector2D position, quint64 start, quint64 lifetime)
+    Smoke(QVector2D position, float start, float lifetime)
         : position_(position), starttime_(start), lifetime_(lifetime), time_(0), scale_(1.0)
     {}
 
-    virtual bool update(quint64 dt, TransformState&) override
+    virtual bool update(float dt, TransformState&) override
     {
         time_ += dt;
         if (time_ < starttime_)
@@ -437,12 +437,12 @@ public:
 
         const auto unitScale = state.getScale();
 
-        const auto fps = 10;
+        const auto fps = 10.0;
         const auto frames = 25;
-        const auto frameInterval = (1000 / fps);
-        const auto curr = (time_ / frameInterval) % frames;
+        const auto frameInterval = (1000.0 / fps);
+        const auto curr = (int)(time_ / frameInterval) % frames;
         const auto next = (curr + 1) % frames;
-        const auto lerp = (time_ % frameInterval) / (float)frameInterval;
+        const auto lerp = (fmodf(time_, frameInterval)) / frameInterval;
 
         const auto currPixmap = loadTexture(curr);
         const auto nextPixmap = loadTexture(next);
@@ -500,9 +500,9 @@ private:
 private:
     QVector2D position_;
 private:
-    quint64 starttime_;
-    quint64 lifetime_;
-    quint64 time_;
+    float starttime_;
+    float lifetime_;
+    float time_;
 private:
     float scale_;
 };
@@ -512,7 +512,7 @@ private:
 class GameWidget::Debris : public GameWidget::Animation
 {
 public:
-    Debris(QPixmap texture, QVector2D position, quint64 start, quint64 lifetime)
+    Debris(QPixmap texture, QVector2D position, float start, float lifetime)
         : texture_(texture), start_(start), life_(lifetime), time_(0), scale_(1.0)
     {
         const auto xparticles = 4;
@@ -546,7 +546,7 @@ public:
             particles_.push_back(p);
         }
     }
-    virtual bool update(quint64 dt, TransformState&) override
+    virtual bool update(float dt, TransformState&) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -612,9 +612,9 @@ private:
     std::vector<particle> particles_;
 private:
     QPixmap texture_;
-    quint64 start_;
-    quint64 life_;
-    quint64 time_;
+    float start_;
+    float life_;
+    float time_;
 private:
     float scale_;
 };
@@ -640,7 +640,7 @@ public:
         position_ = position;
     }
 
-    bool update(quint64 dt, TransformState& state)
+    bool update(float dt, TransformState& state)
     {
         const auto v = getVelocityVector(state);
         position_ += (v * dt);
@@ -799,8 +799,8 @@ private:
 private:
     QVector2D position_;
     QString text_;
-    quint64 time_;
-    quint64 expire_;
+    float time_;
+    float expire_;
 private:
     float velocity_;
 private:
@@ -822,7 +822,7 @@ public:
         position_ = pos;
     }
 
-    virtual bool update(quint64 dt, TransformState& state) override
+    virtual bool update(float dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > life_)
@@ -861,15 +861,15 @@ public:
 private:
     QVector2D position_;
     QVector2D direction_;
-    quint64 life_;
-    quint64 time_;
+    float life_;
+    float time_;
     QString text_;
 };
 
 class GameWidget::Alien : public GameWidget::Animation
 {
 public:
-    Alien() : lifetime_(10000), time_(0)
+    Alien() : lifetime_(10000.0f), time_(0.0f)
     {
         position_.setX(rand(0.0, 1.0));
         position_.setY(rand(0.0, 1.0));
@@ -880,14 +880,14 @@ public:
         direction_.normalize();
     }
 
-    virtual bool update(quint64 dt, TransformState& state) override
+    virtual bool update(float dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > lifetime_)
             return false;
 
         QVector2D fuzzy;
-        fuzzy.setY(std::sin(((time_ % 3000) / 3000.0) * 2 * M_PI));
+        fuzzy.setY(std::sin((fmodf(time_, 3000) / 3000.0) * 2 * M_PI));
         fuzzy.setX(direction_.x());
         fuzzy.normalize();
 
@@ -901,8 +901,8 @@ public:
 
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        const auto phase = 1000 / 10;
-        const auto index = (time_ / phase) % 6;
+        const auto phase = 1000 / 10.0;
+        const auto index = unsigned(time_ / phase) % 6;
 
         const auto pixmap = loadTexture(index);
 
@@ -942,8 +942,8 @@ private:
         return textures[index];
     }
 private:
-    quint64 lifetime_;
-    quint64 time_;
+    float lifetime_;
+    float time_;
 private:
     QVector2D direction_;
     QVector2D position_;
@@ -953,10 +953,10 @@ private:
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(quint64 lifetime) : lifetime_(lifetime), time_(0)
+    BigExplosion(float lifetime) : lifetime_(lifetime), time_(0)
     {}
 
-    virtual bool update(quint64 dt, TransformState& state) override
+    virtual bool update(float dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ > lifetime_)
@@ -966,7 +966,7 @@ public:
     virtual void paint(QPainter& painter, TransformState& state) override
     {
         const auto phase  = lifetime_ / 90.0;
-        const auto index  = time_ / phase;
+        const int  index  = time_ / phase;
         if (index >= 90)
             return;
         const auto pixmap = loadTexture(index);
@@ -1014,18 +1014,18 @@ private:
         return textures[index];
     }
 private:
-    quint64 lifetime_;
-    quint64 time_;
+    float lifetime_;
+    float time_;
 };
 
 class GameWidget::Score : public GameWidget::Animation
 {
 public:
-    Score(QVector2D position, quint64 start, quint64 lifetime, unsigned score) :
+    Score(QVector2D position, float start, float lifetime, unsigned score) :
         position_(position), start_(start), life_(lifetime), time_(0), score_(score)
     {}
 
-    virtual bool update(quint64 dt, TransformState& state) override
+    virtual bool update(float dt, TransformState& state) override
     {
         time_ += dt;
         if (time_ < start_)
@@ -1057,9 +1057,11 @@ public:
     }
 private:
     QVector2D position_;
-    quint64 start_;
-    quint64 life_;
-    quint64 time_;
+private:
+    float start_;
+    float life_;
+    float time_;
+private:
     unsigned score_;
 };
 
@@ -1138,9 +1140,9 @@ public:
             painter.fillRect(x, y, 1 + p.b, 1 + p.b, star);
         }
     }
-    void update(quint64 time)
+    void update(float dt)
     {
-        const auto d = direction_ * (time / 1000.0);
+        const auto d = direction_ * (dt / 1000.0);
         for (auto& p : particles_)
         {
             p.x = wrap(1.0f, 0.0f, p.x + d.x() * p.v);
@@ -2207,7 +2209,7 @@ void GameWidget::launch()
     playMusic();
 }
 
-void GameWidget::step(quint64 dt)
+void GameWidget::step(float dt)
 {
     TransformState state(rect(), *game_);
 
