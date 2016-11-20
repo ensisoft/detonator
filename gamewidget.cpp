@@ -1311,6 +1311,10 @@ public:
             if (!text_.isEmpty())
                 text_.resize(text_.size()-1);
         }
+        else if (key == Qt::Key_Space)
+        {
+            text_.clear();
+        }
         else if (key >= 0x41 && key <= 0x5a)
         {
             text_.append(key);
@@ -1611,7 +1615,8 @@ public:
             "You will lose points for invaders that you faill to kill.\n"
             "Score %1% or higher to unlock the next level.\n\n"
             "Type BOMB to ignite a bomb.\n"
-            "Type WARP to enter a time warp.\n\n"
+            "Type WARP to enter a time warp.\n"
+            "Press Space to clear the input.\n\n"
             "Press Esc to exit\n").arg(str));
     }
 };
@@ -2405,6 +2410,10 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         else if (fleet_)
         {
             quitFleet();
+        }
+        else if (player_)
+        {
+            player_->keyPress(press, *game_);
         }
     }
     else if (key == Qt::Key_F1)
