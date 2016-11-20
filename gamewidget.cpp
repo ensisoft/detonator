@@ -1681,7 +1681,7 @@ public:
             painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
         painter.drawText(rc, Qt::AlignCenter,
-            tr("Awsome Music: %1").arg(music_ ? "On" : "Off"));
+            tr("Awesome Music: %1").arg(music_ ? "On" : "Off"));
 
         painter.setPen(regular);
 
