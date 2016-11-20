@@ -1792,10 +1792,15 @@ public:
         pen.setColor(Qt::darkGray);
         painter.setPen(pen);
 
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
-        painter.setFont(font);
+        QFont bigFont;
+        bigFont.setFamily("Arcade");
+        bigFont.setPixelSize(scale.y() / 2);
+        painter.setFont(bigFont);
+
+        QFont smallFont;
+        smallFont.setFamily("Arcade");
+        smallFont.setPixelSize(scale.y() / 3);
+
 
         const auto& enemies = level_.getEnemies();
         const auto cols = 3;
@@ -1814,14 +1819,17 @@ public:
             const auto col  = i % cols;
             const auto row  = i / cols;
             const auto rect = state.toViewSpaceRect(QPoint(col, row + 1), QPoint(col+1, row+2));
+            painter.setFont(bigFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
-                QString("%1 (%2) \n %3")
+                QString("%1 %2\n\n")
                 .arg(e.string)
-                .arg(e.killstring)
-                .arg(e.help));
+                .arg(e.killstring));
+            painter.setFont(smallFont);
+            painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
+                QString("\n\n\n%1").arg(e.help));
         }
-
-        painter.drawText(footer, Qt::AlignCenter, "Press Space to play!");
+        painter.setFont(bigFont);
+        painter.drawText(footer, Qt::AlignCenter, "\n\nPress Space to play!");
     }
 
 private:
