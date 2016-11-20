@@ -151,6 +151,7 @@ namespace invaders
         void leaveFullScreen();
 
     private:
+        virtual void closeEvent(QCloseEvent* close) override;
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:

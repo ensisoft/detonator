@@ -2250,6 +2250,11 @@ void GameWidget::renderGame()
     repaint();
 }
 
+void GameWidget::closeEvent(QCloseEvent* close)
+{
+    runGame_ = false;
+}
+
 void GameWidget::paintEvent(QPaintEvent* paint)
 {
     QPainter painter(this);
