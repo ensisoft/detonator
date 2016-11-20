@@ -62,7 +62,7 @@ namespace invaders
             unsigned numEnemies;
         };
 
-        GameWidget(QWidget* parent);
+        GameWidget();
        ~GameWidget();
 
         // start a new game. index is the number of the level to play
@@ -85,27 +85,42 @@ namespace invaders
         // set the gaming profile
         void setProfile(const Profile& profile);
 
-        // if set to true unlocks all profiles regardless
-        // of current level status.
-        // if set to false restores normal level based behaviour.
-        void setMasterUnlock(bool onOff);
+        // launch the game contents.
+        void launchGame();
 
-        void setUnlimitedWarps(bool onOff);
+        // step the game forward by dt milliseconds.
+        void updateGame(float dt);
 
-        void setUnlimitedBombs(bool onOff);
+        // render current game state.
+        void renderGame();
 
-        void setPlaySounds(bool onOff);
+        // set to true to unlock all levels.
+        void setMasterUnlock(bool onOff)
+        { masterUnlock_ = onOff; }
 
-        void setPlayMusic(bool onOff);
+        // set to true to have unlimited time warps
+        void setUnlimitedWarps(bool onOff)
+        { unlimitedWarps_ = onOff; }
 
-        void setFullscreen(bool onOff);
+        // set to true to have unlimited bombs
+        void setUnlimitedBombs(bool onOff)
+        { unlimitedBombs_ = onOff; }
 
-        void launch();
-        void step(float dt);
+        // set to true to play sound effects.
+        void setPlaySounds(bool onOff)
+        { playSounds_ = onOff; }
 
+        // set to true to play awesome game music
+        void setPlayMusic(bool onOff)
+        { playMusic_ = onOff; }
+
+        // set to true to display current fps
         void setShowFps(bool onOff)
         { showfps_ = onOff; }
 
+        // set most current fps.
+        // if setShowFps has been set to true will display
+        // the current fps in the top left corner of the window.
         void setFps(float fps)
         { currentfps_ = fps; }
 
@@ -115,8 +130,23 @@ namespace invaders
         bool getPlayMusic() const
         { return playMusic_; }
 
+        bool running() const
+        { return runGame_; }
+
+        int lastWindowWidth() const
+        {
+            if (isFullScreen())
+                return windowWidth_;
+            return width();
+        }
+        int lastWindowHeight() const
+        {
+            if (isFullScreen())
+                return windowHeight_;
+            return height();
+        }
+
     signals:
-        void quitGame();
         void enterFullScreen();
         void leaveFullScreen();
 
@@ -190,10 +220,15 @@ namespace invaders
         bool unlimitedWarps_;
         bool playSounds_;
         bool playMusic_;
-        bool fullScreen_;
         bool showfps_;
+        bool runGame_;
     private:
         std::size_t musicTrackId_;
+    private:
+        int windowXPos_;
+        int windowYPos_;
+        int windowWidth_;
+        int windowHeight_;
     };
 
 } // invaders

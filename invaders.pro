@@ -12,16 +12,12 @@ SOURCES = audio.cpp\
 	gamewidget.cpp\
 	level.cpp\
 	main.cpp\
-	mainwindow.cpp\
 	qtmain_win.cpp
 
 HEADERS = audio.h\
 	game.h\
 	gamewidget.h\
 	level.h\
-	mainwindow.h\
-
-FORMS = mainwindow.ui \
 
 TARGET = invaders
 

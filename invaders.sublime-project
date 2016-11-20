@@ -5,8 +5,9 @@
         [
             "-std=c++11",
             "-DSUBLIME_CLANG_WORKAROUNDS",
-            "-I/usr/include/qt4",
-            "-I/usr/include/qt4/QtCore"
+            "-I/usr/include/qt",
+            "-I/usr/include/qt/QtCore",
+            "-I/usr/include/qt/QtWidgets"
         ]
     }
 }

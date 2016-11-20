@@ -26,6 +26,7 @@
 #  include <QStringList>
 #  include <QTime>
 #  include <QtDebug>
+#  include <QSettings>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -36,7 +37,7 @@
 #if defined(LINUX_OS)
 #  include <fenv.h>
 #endif
-#include "mainwindow.h"
+#include "gamewidget.h"
 
 #if defined(ENABLE_AUDIO)
 #  include "audio.h"
@@ -48,6 +49,25 @@ AudioPlayer* g_audio;
 } // invaders
 
 #endif // ENABLE_AUDIO
+
+void loadProfile(invaders::GameWidget::Profile profile,
+                 invaders::GameWidget& widget,
+                 const QSettings& settings)
+{
+    QString name          = profile.name;
+    profile.speed         = settings.value(name + "/speed", profile.speed).toFloat();
+    profile.spawnCount    = settings.value(name + "/spawnCount", profile.spawnCount).toUInt();
+    profile.spawnInterval = settings.value(name + "/spawnInterval", profile.spawnInterval).toUInt();
+    profile.numEnemies    = settings.value(name + "/enemyCount", profile.numEnemies).toUInt();
+
+    widget.setProfile(profile);
+
+    qDebug() << "Game Profile:" << profile.name;
+    qDebug() << "Speed:" << profile.speed;
+    qDebug() << "spawnCount:" << profile.spawnCount;
+    qDebug() << "spawnInterval:" << profile.spawnInterval;
+    qDebug() << "enemyCount: " << profile.numEnemies;
+}
 
 int game_main(int argc, char* argv[])
 {
@@ -92,12 +112,48 @@ int game_main(int argc, char* argv[])
             showFps = true;
     }
 
-    invaders::MainWindow window;
+    invaders::GameWidget window;
 
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
     window.setUnlimitedBombs(unlimitedBombs);
     window.setShowFps(showFps);
+
+    QSettings settings("Ensisoft", "Invaders");
+    const auto width  = settings.value("window/width", 1200).toInt();
+    const auto height = settings.value("window/height", 700).toInt();
+    const auto xpos = settings.value("window/xpos", window.x()).toInt();
+    const auto ypos = settings.value("window/ypos", window.y()).toInt();
+    window.resize(width, height);
+    window.move(xpos, ypos);
+
+    const auto playSound = settings.value("audio/sound", true).toBool();
+    const auto playMusic = settings.value("audio/music", true).toBool();
+    window.setPlayMusic(playMusic);
+    window.setPlaySounds(playSound);
+
+    const auto& levels_txt = QApplication::applicationDirPath() + "/data/levels.txt";
+    window.loadLevels(levels_txt);
+
+    QStringList levels = settings.value("game/levels").toStringList();
+    for (int i=0; i<levels.size(); ++i)
+    {
+        const auto name = levels[i];
+        invaders::GameWidget::LevelInfo info;
+        info.name = name;
+        info.highScore = settings.value(name + "/highscore").toUInt();
+        info.locked = settings.value(name + "/locked").toBool();
+        window.setLevelInfo(info);
+    }
+
+    const invaders::GameWidget::Profile EASY    {"Easy",    1.6f, 2, 7, 30};
+    const invaders::GameWidget::Profile MEDIUM  {"Medium",  1.8f, 2, 4, 35};
+    const invaders::GameWidget::Profile CHINESE {"Chinese", 2.0f, 2, 4, 40};
+
+    loadProfile(EASY, window, settings);
+    loadProfile(MEDIUM, window, settings);
+    loadProfile(CHINESE, window, settings);
+
     window.launchGame();
     window.show();
 
@@ -107,7 +163,7 @@ int game_main(int argc, char* argv[])
     unsigned second  = 0;
 
     QTime stamp = QTime::currentTime();
-    while (window.isVisible())
+    while (window.running())
     {
         const auto time = QTime::currentTime();
         const auto msec = stamp.msecsTo(time);
@@ -145,8 +201,29 @@ int game_main(int argc, char* argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(unsigned(TimeStep - ms)));
 
     }
+
+    settings.setValue("window/width",  window.lastWindowWidth());
+    settings.setValue("window/height", window.lastWindowHeight());
+    settings.setValue("window/xpos", window.x());
+    settings.setValue("window/ypos", window.y());
+
+    levels.clear();
+    for (unsigned i=0; ; ++i)
+    {
+        invaders::GameWidget::LevelInfo info;
+        if (!window.getLevelInfo(info, i))
+            break;
+
+        levels << info.name;
+        settings.setValue(info.name + "/highscore", info.highScore);
+        settings.setValue(info.name + "/locked", info.locked);
+    }
+    settings.setValue("game/levels", levels);
+    settings.setValue("audio/sound", window.getPlaySounds());
+    settings.setValue("audio/music", window.getPlayMusic());
+    settings.sync();
+
     return 0;
-    //return app.exec();
 }
 
 int main(int argc, char* argv[])

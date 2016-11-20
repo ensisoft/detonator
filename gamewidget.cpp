@@ -1824,7 +1824,7 @@ private:
 };
 
 
-GameWidget::GameWidget(QWidget* parent) : QOpenGLWidget(parent)
+GameWidget::GameWidget()
 {
     level_          = 0;
     profile_        = 0;
@@ -1837,8 +1837,8 @@ GameWidget::GameWidget(QWidget* parent) : QOpenGLWidget(parent)
     unlimitedWarps_ = false;
     playSounds_     = true;
     playMusic_      = true;
-    fullScreen_     = false;
     showfps_        = false;
+    runGame_        = true;
 
 #ifdef ENABLE_AUDIO
     musicTrackId_ = 0;
@@ -2173,43 +2173,13 @@ void GameWidget::setProfile(const Profile& profile)
     profiles_.push_back(profile);
 }
 
-void GameWidget::setMasterUnlock(bool onOff)
-{
-    masterUnlock_ = onOff;
-}
-
-void GameWidget::setUnlimitedWarps(bool onOff)
-{
-    unlimitedWarps_ = onOff;
-}
-
-void GameWidget::setPlaySounds(bool onOff)
-{
-    playSounds_ = onOff;
-}
-
-void GameWidget::setPlayMusic(bool onOff)
-{
-    playMusic_ = onOff;
-}
-
-void GameWidget::setFullscreen(bool onOff)
-{
-    fullScreen_ = onOff;
-}
-
-void GameWidget::setUnlimitedBombs(bool onOff)
-{
-    unlimitedBombs_ = onOff;
-}
-
-void GameWidget::launch()
+void GameWidget::launchGame()
 {
     showMenu();
     playMusic();
 }
 
-void GameWidget::step(float dt)
+void GameWidget::updateGame(float dt)
 {
     TransformState state(rect(), *game_);
 
@@ -2273,6 +2243,11 @@ void GameWidget::step(float dt)
             warpDuration_ -= time;
         }
     }
+}
+
+void GameWidget::renderGame()
+{
+    repaint();
 }
 
 void GameWidget::paintEvent(QPaintEvent* paint)
@@ -2384,7 +2359,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         }
         else if (menu_)
         {
-            emit quitGame();
+            runGame_ = false;
             return;
         }
         if (score_)
@@ -2473,11 +2448,26 @@ void GameWidget::showHelp()
 
 void GameWidget::showSettings()
 {
-    settings_.reset(new Settings(playMusic_, playSounds_, fullScreen_));
+    const bool isCurrentlyFullScreen = isFullScreen();
+
+    settings_.reset(new Settings(playMusic_, playSounds_, isCurrentlyFullScreen));
     settings_->onToggleFullscreen = [this](bool onOff) {
         if (onOff)
-            emit enterFullScreen();
-        else emit leaveFullScreen();
+        {
+            windowWidth_  = width();
+            windowHeight_ = height();
+            windowXPos_   = x();
+            windowYPos_   = y();
+            showFullScreen();
+            QApplication::setOverrideCursor(Qt::BlankCursor);
+        }
+        else
+        {
+            showNormal();
+            resize(windowWidth_, windowHeight_);
+            move(windowXPos_, windowYPos_);
+            QApplication::restoreOverrideCursor();
+        }
     };
     settings_->onTogglePlayMusic = [this](bool onOff) {
         playMusic_ = onOff;
