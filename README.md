@@ -33,7 +33,7 @@ Building from source for Linux
   (for Ubuntu based systems)
 ```
   $ sudo apt-get install libboost-dev
-  $ sudo apt-get install qt4-dev-tools
+  $ sudo apt-get install qtbase5-dev
   $ sudo apt-get install libpulse-dev
   $ sudo apt-get install libsnd-dev
 
@@ -42,7 +42,7 @@ Building from source for Linux
 2. build the game
 
 ```
-  $ qmake-qt4
+  $ qmake
   $ make
   $ dist/invaders 
 ```
