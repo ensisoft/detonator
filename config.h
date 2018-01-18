@@ -92,3 +92,8 @@ const int MINOR_VERSION = 2;
 #  define ENABLE_AUDIO
 #  define USE_WAVEOUT
 #endif
+
+// define this to enable game feature SHIELD , 
+// i.e some invaders will have shields on during which they can't be destroyed.
+// #define ENABLE_GAME_FEATURE_SHIELD
+

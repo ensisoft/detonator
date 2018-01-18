@@ -257,6 +257,7 @@ unsigned Game::killScore(const invader& inv) const
 
 bool Game::hasShield(const invader& inv) const
 {
+#if ENABLE_GAME_FEATURE_SHIELD
     const auto cycle = inv.shield_on_ticks + inv.shield_off_ticks;
     if (cycle == 0)
         return false;
@@ -264,6 +265,7 @@ bool Game::hasShield(const invader& inv) const
     const auto phase = tick_ % cycle;
     if (phase >= inv.shield_on_ticks)
         return true;
+#endif
 
     return false;
 }
