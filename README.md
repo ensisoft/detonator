@@ -39,12 +39,19 @@ Building from source for Linux
 
 ```
 
-2. build the game
+2. Build the game
 
 ```
   $ qmake
   $ make
   $ dist/invaders 
+```
+
+3. Debug the game / enable console logging
+```
+  $ qmake
+  $ make debug
+  $ cgdb dist/invaders
 ```
 
 
