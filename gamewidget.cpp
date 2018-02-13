@@ -58,9 +58,8 @@ namespace invaders {
 namespace invaders
 {
 
-
-
 const auto LevelUnlockCriteria = 0.85;
+const auto TextBlinkFrameCycle = 90;
 
 QString R(const QString& s)
 {
@@ -1368,11 +1367,13 @@ public:
     Menu(const std::vector<std::unique_ptr<Level>>& levels,
          const std::vector<GameWidget::LevelInfo>& infos,
          const std::vector<GameWidget::Profile>& profiles)
-    : levels_(levels), infos_(infos), profiles_(profiles), level_(0), profile_(0), selrow_(1)
+    : levels_(levels), infos_(infos)
     {}
 
     void update(quint64 time)
-    {}
+    {
+        blinking_text_frame_counter_++;
+    }
 
     void paint(QPainter& painter, const QRectF& area, const QPointF& unit)
     {
@@ -1418,8 +1419,6 @@ public:
             "Difficulty\n");
 
         rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
-
-
 
         TransformState sub(rect, 3, 1);
         rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));
@@ -1493,11 +1492,14 @@ public:
         painter.drawRect(rect);
         drawLevel(painter, rect, *right, next, false);
 
-
-        rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
-        painter.setPen(regular);
-        painter.setFont(font);
-        painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
+        const bool draw_text = (blinking_text_frame_counter_ % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
+        if (draw_text)
+        {
+            rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+            painter.setPen(regular);
+            painter.setFont(font);
+            painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
+        }
     }
     void keyPress(QKeyEvent* press)
     {
@@ -1583,10 +1585,12 @@ private:
 private:
     const std::vector<std::unique_ptr<Level>>& levels_;
     const std::vector<LevelInfo>& infos_;
-    const std::vector<Profile>& profiles_;
-    unsigned level_;
-    unsigned profile_;
-    unsigned selrow_;
+    unsigned level_   = 0;
+    unsigned profile_ = 0;
+    unsigned selrow_  = 1;
+    unsigned blinking_text_frame_counter_ = 0;
+private:
+
 };
 
 class GameWidget::Help
@@ -1783,7 +1787,9 @@ public:
     {}
 
     void update(quint64 dt)
-    {}
+    {
+        blinking_text_frame_counter_++;
+    }
 
     void paint(QPainter& painter, const QRectF& area, const QPointF& scale) const
     {
@@ -1828,9 +1834,16 @@ public:
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
                 QString("\n\n\n%1").arg(e.help));
         }
-        painter.setFont(bigFont);
-        painter.drawText(footer, Qt::AlignCenter, "\n\nPress Space to play!");
+
+        const bool draw_text = (blinking_text_frame_counter_ % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
+        if (draw_text)
+        {
+            painter.setFont(bigFont);
+            painter.drawText(footer, Qt::AlignCenter, "\n\nPress Space to play!");
+        }
     }
+private:
+    unsigned blinking_text_frame_counter_ = 0;
 
 private:
     const Level& level_;
@@ -2210,6 +2223,15 @@ void GameWidget::updateGame(float dt)
         if (!alien_->update(time * warpFactor_, state))
             alien_.reset();
     }
+    if (menu_)
+    {
+        menu_->update(time * warpFactor_);
+    }
+    else if (fleet_)
+    {
+        fleet_->update(time * warpFactor_);
+    }
+
 
     background_->update(time * warpFactor_);
 
