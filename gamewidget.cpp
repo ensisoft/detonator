@@ -865,10 +865,10 @@ private:
     QString text_;
 };
 
-class GameWidget::Alien : public GameWidget::Animation
+class GameWidget::UFO : public GameWidget::Animation
 {
 public:
-    Alien() : lifetime_(10000.0f), time_(0.0f)
+    UFO()
     {
         position_.setX(rand(0.0, 1.0));
         position_.setY(rand(0.0, 1.0));
@@ -881,12 +881,12 @@ public:
 
     virtual bool update(float dt, TransformState& state) override
     {
-        time_ += dt;
-        if (time_ > lifetime_)
+        runtime_ += dt;
+        if (runtime_ > lifetime_)
             return false;
 
         QVector2D fuzzy;
-        fuzzy.setY(std::sin((fmodf(time_, 3000) / 3000.0) * 2 * M_PI));
+        fuzzy.setY(std::sin((fmodf(runtime_, 3000) / 3000.0) * 2 * M_PI));
         fuzzy.setX(direction_.x());
         fuzzy.normalize();
 
@@ -901,7 +901,7 @@ public:
     virtual void paint(QPainter& painter, TransformState& state) override
     {
         const auto phase = 1000 / 10.0;
-        const auto index = unsigned(time_ / phase) % 6;
+        const auto index = unsigned(runtime_ / phase) % 6;
 
         const auto pixmap = loadTexture(index);
 
@@ -941,8 +941,8 @@ private:
         return textures[index];
     }
 private:
-    float lifetime_;
-    float time_;
+    float lifetime_ = 10000.0f;
+    float runtime_  = 0.0f;
 private:
     QVector2D direction_;
     QVector2D position_;
@@ -1877,7 +1877,7 @@ GameWidget::GameWidget()
 
     BigExplosion::prepare();
     Smoke::prepare();
-    Alien::prepare();
+    UFO::prepare();
 
     game_.reset(new Game(40, 10));
 
@@ -2214,15 +2214,10 @@ void GameWidget::updateGame(float dt)
 
     if (rand(0, 5000) == 7)
     {
-        if (!alien_)
-            alien_.reset(new Alien);
+        auto ufo = std::make_unique<UFO>();
+        animations_.push_back(std::move(ufo));
     }
 
-    if (alien_)
-    {
-        if (!alien_->update(time * warpFactor_, state))
-            alien_.reset();
-    }
     if (menu_)
     {
         menu_->update(time * warpFactor_);
@@ -2257,7 +2252,7 @@ void GameWidget::updateGame(float dt)
     for (auto it = std::begin(animations_); it != std::end(animations_);)
     {
         auto& anim = *it;
-        if (!anim->update(time, state))
+        if (!anim->update(time * warpFactor_, state))
         {
             it = animations_.erase(it);
             continue;
@@ -2313,9 +2308,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         painter.drawText(QPointF(10.0f, 20.0f),
             QString("fps: %1").arg(currentfps_));
     }
-
-    if (alien_)
-        alien_->paint(painter, state);
 
     if (help_)
     {
