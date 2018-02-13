@@ -1,6 +1,6 @@
 CONFIG += 64bit
 CONFIG += qt
-CONFIG += c++11
+CONFIG += c++14
 CONFIG += sse
 CONFIG += ss2
 CONFIG += debug_and_release
