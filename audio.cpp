@@ -40,17 +40,17 @@ class io_buffer
 public:
     using u8 = std::uint8_t;
 
-    io_buffer(const void* ptr, std::size_t len) : ptr_((const std::uint8_t*)ptr), len_(len), position_(0)
+    io_buffer(const void* ptr, std::size_t len) : ptr_((const std::uint8_t*)ptr), len_(len)
     {
         // set up a virtual IO device for libsound and then read all the frames
         // into a conversion buffer so we have the raw data.
-        SF_VIRTUAL_IO io = {0};
+        SF_VIRTUAL_IO io = {};
         io.get_filelen = ioGetLength;
         io.seek        = ioSeek;
         io.read        = ioRead;
         io.tell        = ioTell;
 
-        SF_INFO sfinfo  = {0};
+        SF_INFO sfinfo  = {};
         SNDFILE* sffile = sf_open_virtual(&io, SFM_READ, &sfinfo, (void*)this);
         if (!sffile)
             throw std::runtime_error("sf_open_virtual failed");
@@ -127,14 +127,14 @@ private:
         return this_->position_;
     }
 private:
-    const std::uint8_t* ptr_;
-    const std::size_t len_;
+    const std::uint8_t* ptr_ = nullptr;
+    const std::size_t len_   = 0;
 private:
-    sf_count_t position_;
+    sf_count_t position_ = 0;
 private:
-    unsigned sample_rate_;
-    unsigned num_channels_;
-    unsigned num_frames_;
+    unsigned sample_rate_  = 0;
+    unsigned num_channels_ = 0;
+    unsigned num_frames_   = 0;
 private:
     std::vector<u8> buffer_;
 };
