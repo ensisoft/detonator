@@ -542,6 +542,7 @@ public:
             p.pos = position;
             p.alpha = 1.0f;
             p.angle = (M_PI * 2 ) * (float)std::rand() / RAND_MAX;
+            p.rotation_coefficient = rand(-1.0f, 1.0f);
             particles_.push_back(p);
         }
     }
@@ -558,7 +559,7 @@ public:
         {
             p.pos += p.dir * (dt / 4500.0);
             p.alpha = clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
-            p.angle += (M_PI * 2) * (dt / 2000.0);
+            p.angle += ((M_PI * 2) * (dt / 2000.0) * p.rotation_coefficient);
         }
 
         return true;
@@ -605,8 +606,9 @@ private:
         QRect rc;
         QVector2D dir;
         QVector2D pos;
-        float angle;
-        float alpha;
+        float angle = 0.0f;
+        float alpha = 0.0f;
+        float rotation_coefficient = 1.0f;
     };
     std::vector<particle> particles_;
 private:
