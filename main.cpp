@@ -24,9 +24,10 @@
 #include "warnpush.h"
 #  include <QApplication>
 #  include <QStringList>
-#  include <QTime>
 #  include <QtDebug>
 #  include <QSettings>
+#  include <QElapsedTimer>
+#  include <QtGui/QScreen>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -67,6 +68,16 @@ void loadProfile(invaders::GameWidget::Profile profile,
     qDebug() << "spawnCount:" << profile.spawnCount;
     qDebug() << "spawnInterval:" << profile.spawnInterval;
     qDebug() << "enemyCount: " << profile.numEnemies;
+}
+
+float computeDefaultTimeStep()
+{
+    const QScreen* screen = QGuiApplication::primaryScreen();
+    const auto refresh_rate = screen->refreshRate();
+    const auto time_step = 1000.0f / refresh_rate;
+    qDebug() << "Screen Hz " << refresh_rate;
+    qDebug() << "Time Step " << time_step;
+    return time_step;
 }
 
 int game_main(int argc, char* argv[])
@@ -157,49 +168,30 @@ int game_main(int argc, char* argv[])
     window.launchGame();
     window.show();
 
-    const float TimeStep = 1000/60.0;
+    const float TimeStep = computeDefaultTimeStep();
 
-    unsigned frames  = 0;
-    unsigned second  = 0;
+    unsigned frames = 0;
 
-    QTime stamp = QTime::currentTime();
+    QElapsedTimer timer;
+    timer.start();
+
     while (window.running())
     {
-        const auto time = QTime::currentTime();
-        const auto msec = stamp.msecsTo(time);
-
         app.processEvents();
 
-        float step = msec;
-        while (step > 0.0f)
-        {
-            const auto dt = std::min(TimeStep, step);
-            window.updateGame(dt);
-            step -= dt;
-            stamp = time;
-        }
-
+        window.updateGame(TimeStep);
+        window.renderGame();
         frames++;
-        second += msec;
-        if (second >= 1000)
+
+        const auto ms = timer.elapsed();
+
+        if (ms >= 1000)
         {
-            float fps = frames / (second / 1000.0f);
-            //qDebug("Fps: %f", fps);
-            frames = 0;
-            second = 0;
+            const float fps = frames / (ms / 1000.0f);
+            frames    = 0;
+            timer.restart();
             window.setFps(fps);
         }
-
-        window.renderGame();
-
-        // since we're drawing on the CPU our framerates will be all over the place
-        // not to mention sucking all the CPU, we're going to do a little wait here
-        // to simulate vsync and throttle the frames a little.
-        const auto now = QTime::currentTime();
-        const auto ms  = time.msecsTo(now);
-        if (ms < TimeStep)
-            std::this_thread::sleep_for(std::chrono::milliseconds(unsigned(TimeStep - ms)));
-
     }
 
     settings.setValue("window/width",  window.lastWindowWidth());
