@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
+// Copyright (c) 2014-2018 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -22,27 +22,39 @@
 
 #pragma once
 
-// this is the application config file
+#include "config.h"
 
-#include "base/config.h"
+#include <string>
 
-namespace invaders {
+namespace invaders
+{
+    class AudioStream
+    {
+    public:
+        enum class State {
+            none, ready, error, complete
+        };
 
-const int MAJOR_VERSION = 0;
-const int MINOR_VERSION = 2;
+        virtual ~AudioStream() = default;
 
-} // invaders
+        // get current stream state
+        virtual State state() const = 0;
 
-#ifdef QT_NO_DEBUG
-#  define QT_NO_DEBUG_OUTPUT
-#endif
+        // get the stream name if any
+        virtual std::string name() const = 0;
 
-#define APP_TITLE   "Pinyin-Invaders"
-#define APP_VERSION "0.2"
+        // start playing the audio stream.
+        // this should be called only once, when the stream is
+        // initially started. to control the playback use pause/resume
+        virtual void play() = 0;
 
-#define ENABLE_AUDIO
+        // pause the stream
+        virtual void pause() = 0;
 
-// define this to enable game feature SHIELD ,
-// i.e some invaders will have shields on during which they can't be destroyed.
-// #define ENABLE_GAME_FEATURE_SHIELD
+        // resume a paused stream
+        virtual void resume() = 0;
+    protected:
+    private:
+    };
 
+} // namespace

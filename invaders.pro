@@ -7,20 +7,25 @@ CONFIG += debug_and_release
 
 QT += opengl
 
-SOURCES = audio.cpp\
-	game.cpp\
+SOURCES = game.cpp\
 	gamewidget.cpp\
 	level.cpp\
 	main.cpp\
 	qtmain_win.cpp\
+	audio/device.cpp\
+	audio/sample.cpp\
+	audio/player.cpp\
 	base/assert.cpp\
 	base/format.cpp\
 	base/logging.cpp\
 
-HEADERS = audio.h\
-	game.h\
+HEADERS = game.h\
 	gamewidget.h\
 	level.h\
+	audio/stream.h\
+	audio/sample.h\
+	audio/player.h\
+	audio/device.h\
 	base/assert.h\
 	base/format.h\
 	base/logging.h\

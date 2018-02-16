@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
+// Copyright (c) 2014-2018 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -22,27 +22,45 @@
 
 #pragma once
 
-// this is the application config file
+#include "config.h"
 
-#include "base/config.h"
+#include <memory>
 
-namespace invaders {
+namespace invaders
+{
+    class AudioSample;
+    class AudioStream;
 
-const int MAJOR_VERSION = 0;
-const int MINOR_VERSION = 2;
+    // access to the native audio playback system
+    class AudioDevice
+    {
+    public:
+        enum class State {
+            none, ready, error
+        };
 
-} // invaders
+        virtual ~AudioDevice() = default;
 
-#ifdef QT_NO_DEBUG
-#  define QT_NO_DEBUG_OUTPUT
-#endif
+        // prepare a new audio stream from the already loaded audio sample.
+        // the stream is initially paused but ready to play once play is called.
+        virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
 
-#define APP_TITLE   "Pinyin-Invaders"
-#define APP_VERSION "0.2"
+        // poll and dispatch pending audio device events.
+        // Todo: this needs a proper waiting/signaling mechanism.
+        virtual void poll() = 0;
 
-#define ENABLE_AUDIO
+        // initialize the audio device.
+        // this should be called *once* after the device is created.
+        virtual void init() = 0;
 
-// define this to enable game feature SHIELD ,
-// i.e some invaders will have shields on during which they can't be destroyed.
-// #define ENABLE_GAME_FEATURE_SHIELD
+        // get the current audio device state.
+        virtual State state() const = 0;
 
+        static
+        std::unique_ptr<AudioDevice> create(const char* appname);
+
+    protected:
+    private:
+    };
+
+} // namespace

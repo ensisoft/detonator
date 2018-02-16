@@ -35,6 +35,8 @@
 #include <iostream>
 #include <thread>
 
+#include "audio/player.h"
+#include "audio/device.h"
 #include "base/logging.h"
 
 #if defined(LINUX_OS)
@@ -42,16 +44,13 @@
 #endif
 #include "gamewidget.h"
 
-#if defined(ENABLE_AUDIO)
-#  include "audio.h"
-
 namespace invaders {
 
-AudioPlayer* g_audio;
+    AudioPlayer* g_audio;
 
 } // invaders
 
-#endif // ENABLE_AUDIO
+
 
 void loadProfile(invaders::GameWidget::Profile profile,
                  invaders::GameWidget& widget,
@@ -123,17 +122,8 @@ int game_main(int argc, char* argv[])
 
     base::EnableDebugLog(debugLog);
 
-#ifdef ENABLE_AUDIO
-    #ifdef USE_PULSEAUDIO
-    std::unique_ptr<invaders::AudioDevice> pa(new invaders::PulseAudio("Pinyin-Invaders"));
-    #endif
-    #ifdef USE_WAVEOUT
-    std::unique_ptr<invaders::AudioDevice> pa(new invaders::Waveout("Pinyin-Invaders"));
-    #endif
-    pa->init();
-    invaders::AudioPlayer player(std::move(pa));
-    invaders::g_audio = &player;
-#endif
+    invaders::AudioPlayer audio_player(invaders::AudioDevice::create(APP_TITLE));
+    invaders::g_audio = &audio_player;
 
 #if defined(LINUX_OS)
     // SIGFPE on floating point exception

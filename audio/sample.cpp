@@ -22,16 +22,17 @@
 
 #include "config.h"
 
-#ifdef ENABLE_AUDIO
-
 #include "warnpush.h"
 #  include <QResource>
 #  include <QFile>
 #include "warnpop.h"
+
 #include <algorithm>
 #include <stdexcept>
+#include <cstring> // for memcpy
 #include <sndfile.h>
-#include "audio.h"
+
+#include "sample.h"
 
 namespace {
 
@@ -139,8 +140,6 @@ private:
     std::vector<u8> buffer_;
 };
 
-
-
 } // namespace
 
 namespace invaders
@@ -185,5 +184,3 @@ AudioSample::AudioSample(const QString& path, const std::string& name)
 }
 
 } // invaders
-
-#endif // ENABLE_AUDIO

@@ -45,21 +45,17 @@
 #include <cmath>
 #include <ctime>
 
+#include "audio/sample.h"
+#include "audio/player.h"
 #include "base/logging.h"
-
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
 
-#ifdef ENABLE_AUDIO
-#  include "audio.h"
-namespace invaders {
-  extern AudioPlayer* g_audio;
-}
-#endif
-
 namespace invaders
 {
+
+extern AudioPlayer* g_audio;
 
 const auto LevelUnlockCriteria = 0.85;
 const auto TextBlinkFrameCycle = 90;
