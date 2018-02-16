@@ -26,7 +26,6 @@
 
 #include "warnpush.h"
 #  include <QString>
-#  include <QDebug>
 #include "warnpop.h"
 
 #ifdef USE_PULSEAUDIO
@@ -54,6 +53,8 @@
 #include <algorithm>
 #include <cstring>
 #include <cassert>
+
+#include "base/logging.h"
 
 namespace invaders
 {
@@ -601,12 +602,12 @@ namespace invaders
         private:
             static void underflow_callback(pa_stream* stream, void* user)
             {
-                qDebug("underflow!");
+                DEBUG("underflow!");
             }
 
             static void drain_callback(pa_stream* stream, int success, void* user)
             {
-                qDebug("Drained stream!");
+                DEBUG("Drained stream!");
 
                 auto* this_ = static_cast<PlaybackStream*>(user);
                 this_->state_ = AudioStream::State::complete;
@@ -642,27 +643,27 @@ namespace invaders
                 switch (pa_stream_get_state(stream))
                 {
                     case PA_STREAM_CREATING:
-                        qDebug("PA_STREAM_CREATING");
+                        DEBUG("PA_STREAM_CREATING");
                         break;
 
                     case PA_STREAM_UNCONNECTED:
-                        qDebug("PA_STREAM_UNCONNECTED");
+                        DEBUG("PA_STREAM_UNCONNECTED");
                         break;
 
                     // stream finished cleanly, but this state transition
                     // only is dispatched when the pa_stream_disconnect is connected.
                     case PA_STREAM_TERMINATED:
-                        qDebug("PA_STREAM_TERMINATED");
+                        DEBUG("PA_STREAM_TERMINATED");
                         //this_->state_ = AudioStream::State::complete;
                         break;
 
                     case PA_STREAM_FAILED:
-                       qDebug("PA_STREAM_FAILED");
+                       DEBUG("PA_STREAM_FAILED");
                        this_->state_ = AudioStream::State::error;
                        break;
 
                     case PA_STREAM_READY:
-                        qDebug("PA_STREAM_READY");
+                        DEBUG("PA_STREAM_READY");
                         this_->state_ = AudioStream::State::ready;
                         break;
                 }
@@ -683,28 +684,28 @@ namespace invaders
             switch (pa_context_get_state(context))
             {
                 case PA_CONTEXT_CONNECTING:
-                    qDebug("PA_CONTEXT_CONNECTING");
+                    DEBUG("PA_CONTEXT_CONNECTING");
                     break;
                 case PA_CONTEXT_AUTHORIZING:
-                    qDebug("PA_CONTEXT_AUTHORIZING");
+                    DEBUG("PA_CONTEXT_AUTHORIZING");
                     break;
                 case PA_CONTEXT_SETTING_NAME:
-                    qDebug("PA_CONTEXT_SETTING_NAME");
+                    DEBUG("PA_CONTEXT_SETTING_NAME");
                     break;
                 case PA_CONTEXT_UNCONNECTED:
-                    qDebug("PA_CONTEXT_UNCONNECTED");
+                    DEBUG("PA_CONTEXT_UNCONNECTED");
                     break;
                 case PA_CONTEXT_TERMINATED:
-                    qDebug("PA_CONTEXT_TERMINATED");
+                    DEBUG("PA_CONTEXT_TERMINATED");
                     break;
 
                 case PA_CONTEXT_READY:
-                    qDebug("PA_CONTEXT_READY");
+                    DEBUG("PA_CONTEXT_READY");
                     this_->state_ = State::ready;
                     break;
 
                 case PA_CONTEXT_FAILED:
-                    qDebug("PA_CONTEXT_FAILED");
+                    DEBUG("PA_CONTEXT_FAILED");
                     this_->state_ = State::error;
                     break;
 
@@ -813,7 +814,7 @@ namespace invaders
                         {
                             track.stream = dev->prepare(track.sample);
                             track.stream->play();
-                            qDebug("Looping track ...");
+                            DEBUG("Looping track ...");
                         }
                         else
                         {
@@ -833,7 +834,7 @@ namespace invaders
                     if (!playing_.empty())
                         continue;
 
-                    qDebug("No audio to play, waiting ....");
+                    DEBUG("No audio to play, waiting ....");
 
                     cond_.wait(lock);
                 }

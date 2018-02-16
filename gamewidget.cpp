@@ -21,6 +21,7 @@
 //  THE SOFTWARE.
 
 #include "config.h"
+
 #include "warnpush.h"
 #  include <QtGui/QPaintEvent>
 #  include <QtGui/QKeyEvent>
@@ -40,11 +41,13 @@
 #  include <QtDebug>
 #  include <boost/random/mersenne_twister.hpp>
 #include "warnpop.h"
+
 #include <cmath>
 #include <ctime>
-#include "warnpush.h"
-#  include "gamewidget.h"
-#include "warnpop.h"
+
+#include "base/logging.h"
+
+#include "gamewidget.h"
 #include "game.h"
 #include "level.h"
 
@@ -1987,7 +1990,7 @@ GameWidget::GameWidget()
 
     game_->onWarp = [&](const Game::timewarp& w)
     {
-        qDebug() << "begin time warp";
+        DEBUG("begin time warp");
         warpFactor_   = w.factor;
         warpDuration_ = w.duration;
     };
@@ -2062,7 +2065,7 @@ GameWidget::GameWidget()
 
     game_->onLevelComplete = [&](const Game::score& score)
     {
-        qDebug() << "Level complete: points" << score.points << "maxpoints" << score.maxpoints;
+        DEBUG("Level complete %1 / %2 points (points / max)",  score.points, score.maxpoints);
 
         //auto& level   = levels_[level_];
         auto& info    = info_[level_];
@@ -2118,7 +2121,7 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
 
     const auto& level   = levels_[levelIndex];
     const auto& profile = profiles_[profileIndex];
-    qDebug() << "Start game: " << level->name() << profile.name;
+    DEBUG("Start game: %1 / %2", level->name(), profile.name);
 
     // todo: use a deterministic seed or not?
     //std::srand(std::time(nullptr));
@@ -2268,7 +2271,7 @@ void GameWidget::updateGame(float dt)
         {
             warpFactor_   = 1.0;
             warpDuration_ = 0;
-            qDebug() << "warp ended";
+            DEBUG("Warp ended");
         }
         else
         {
@@ -2523,8 +2526,8 @@ void GameWidget::quitSettings()
     playSounds_ = settings_->enableSounds();
     playMusic_  = settings_->enableMusic();
 
-    qDebug() << "PlaySounds" << (playSounds_ ? "On" : "Off");
-    qDebug() << "PlayMusic"  << (playMusic_ ? "On" : "Off");
+    DEBUG("Play Sounds %1", (playSounds_ ? "On" : "Off"));
+    DEBUG("Play Music %1",  (playMusic_  ? "On" : "Off"));
 
     settings_.reset();
 
@@ -2579,7 +2582,7 @@ void GameWidget::playMusic()
 
     if (playMusic_)
     {
-        qDebug("Play music");
+        DEBUG("Play music");
 
         if (musicTrackId_)
              g_audio->resume(musicTrackId_);
@@ -2590,7 +2593,7 @@ void GameWidget::playMusic()
     }
     else
     {
-        qDebug("Stop music");
+        DEBUG("Stop music");
 
         if (musicTrackId_)
             g_audio->pause(musicTrackId_);

@@ -21,10 +21,10 @@
 //  THE SOFTWARE.
 
 #include "config.h"
+
 #include "warnpush.h"
 #  include <QApplication>
 #  include <QStringList>
-#  include <QtDebug>
 #  include <QSettings>
 #  include <QElapsedTimer>
 #  include <QtGui/QScreen>
@@ -34,6 +34,8 @@
 #include <exception>
 #include <iostream>
 #include <thread>
+
+#include "base/logging.h"
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -63,11 +65,11 @@ void loadProfile(invaders::GameWidget::Profile profile,
 
     widget.setProfile(profile);
 
-    qDebug() << "Game Profile:" << profile.name;
-    qDebug() << "Speed:" << profile.speed;
-    qDebug() << "spawnCount:" << profile.spawnCount;
-    qDebug() << "spawnInterval:" << profile.spawnInterval;
-    qDebug() << "enemyCount: " << profile.numEnemies;
+    DEBUG("Game Profile: %1", profile.name);
+    DEBUG("Speed %1", profile.speed);
+    DEBUG("Spawn Count %1", profile.spawnCount);
+    DEBUG("Spawn Interval %1", profile.spawnInterval);
+    DEBUG("Enemy Count %1", profile.numEnemies);
 }
 
 float computeDefaultTimeStep()
@@ -75,13 +77,52 @@ float computeDefaultTimeStep()
     const QScreen* screen = QGuiApplication::primaryScreen();
     const auto refresh_rate = screen->refreshRate();
     const auto time_step = 1000.0f / refresh_rate;
-    qDebug() << "Screen Hz " << refresh_rate;
-    qDebug() << "Time Step " << time_step;
+    DEBUG("Screen Hz %1", refresh_rate);
+    DEBUG("Time Step %1", time_step);
     return time_step;
 }
 
 int game_main(int argc, char* argv[])
 {
+    base::CursesLogger logger;
+    base::SetThreadLog(&logger);
+
+    DEBUG("It's alive!");
+    INFO("%1 %2", APP_TITLE, APP_VERSION);
+    INFO("Copyright (c) 2010-2018 Sami Vaisanen");
+    INFO("http://www.ensisoft.com");
+    INFO("http://github.com/ensisoft/pinyin-invaders");
+
+    bool masterUnlock = false;
+    bool unlimitedWarps = false;
+    bool unlimitedBombs = false;
+    bool showFps = false;
+#if defined(_NDEBUG)
+    bool debugLog = true;
+#else
+    bool debugLog = false;
+#endif
+
+    QApplication app(argc, argv);
+    app.setApplicationName("Pinyin-Invaders");
+
+    const auto& args = app.arguments();
+    for (const auto& a : args)
+    {
+        if (a == "--unlock-all")
+            masterUnlock = true;
+        else if (a == "--unlimited-warps")
+            unlimitedWarps = true;
+        else if (a == "--unlimited-bombs")
+            unlimitedBombs = true;
+        else if (a == "--show-fps")
+            showFps = true;
+        else if (a == "--debug-log")
+            debugLog = true;
+    }
+
+    base::EnableDebugLog(debugLog);
+
 #ifdef ENABLE_AUDIO
     #ifdef USE_PULSEAUDIO
     std::unique_ptr<invaders::AudioDevice> pa(new invaders::PulseAudio("Pinyin-Invaders"));
@@ -100,28 +141,10 @@ int game_main(int argc, char* argv[])
                    FE_DIVBYZERO |
                    FE_OVERFLOW  |
                    FE_UNDERFLOW);
+    DEBUG("Enabled floating point exceptions");
 #endif
 
-    QApplication app(argc, argv);
-    app.setApplicationName("Pinyin-Invaders");
 
-    bool masterUnlock = false;
-    bool unlimitedWarps = false;
-    bool unlimitedBombs = false;
-    bool showFps = false;
-
-    const auto& args = app.arguments();
-    for (const auto& a : args)
-    {
-        if (a == "--unlock-all")
-            masterUnlock = true;
-        else if (a == "--unlimited-warps")
-            unlimitedWarps = true;
-        else if (a == "--unlimited-bombs")
-            unlimitedBombs = true;
-        else if (a == "--show-fps")
-            showFps = true;
-    }
 
     invaders::GameWidget window;
 
