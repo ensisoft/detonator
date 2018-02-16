@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft 
 //
 // http://www.ensisoft.com
 //
@@ -24,4 +24,8 @@
 
 #include "config.h"
 
-#include "base/warnpush.h"
+#if defined(__CLANG__)
+#  pragma clang diagnostic pop
+#elif defined(__GCC__)
+#  pragma GCC diagnostic pop
+#endif

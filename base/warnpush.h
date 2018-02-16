@@ -24,4 +24,28 @@
 
 #include "config.h"
 
-#include "base/warnpush.h"
+// some universally useful warning suppressions
+
+// you can make your own application level warnpush.h and warnpop.h
+// headers which will then include the base/warnpush and base/warnpop
+// (don't have to but can be useful)
+// then you'll wrap any third party header inclusions that cause problems
+// inside the warnpush.h and warnpop.h inclusions.
+
+// note that GCC and clang don't give the same warnings, hence
+// the suppressions are different
+
+#if defined(__CLANG__)
+  // for Qt
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-register"
+#  pragma clang diagnostic ignored "-Wuninitialized"
+#  pragma clang diagnostic ignored "-Wc++11-long-long"
+#  pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#elif defined(__GCC__)
+  // for boost
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#  pragma GCC diagnostic ignored "-Wlong-long"
+#  pragma GCC diagnostic ignored "-Wunused-function"
+#endif
