@@ -5,6 +5,10 @@ CONFIG += sse
 CONFIG += ss2
 CONFIG += debug_and_release
 
+# this is the magic that makes having several source files with
+# same filename to actually work and build properly.
+CONFIG += object_parallel_to_source
+
 QT += opengl
 
 SOURCES = game.cpp\
@@ -18,6 +22,8 @@ SOURCES = game.cpp\
 	base/assert.cpp\
 	base/format.cpp\
 	base/logging.cpp\
+	graphics/device.cpp\
+	graphics/painter.cpp\
 
 HEADERS = game.h\
 	gamewidget.h\
@@ -29,6 +35,12 @@ HEADERS = game.h\
 	base/assert.h\
 	base/format.h\
 	base/logging.h\
+	graphics/painter.h\
+	graphics/types.h\
+	graphics/device.h\
+	graphics/program.h\
+	graphics/shader.h\
+	graphics/geometry.h\
 
 TARGET = invaders
 
