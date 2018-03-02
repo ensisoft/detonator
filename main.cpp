@@ -148,11 +148,18 @@ int game_main(int argc, char* argv[])
     const auto height = settings.value("window/height", 700).toInt();
     const auto xpos = settings.value("window/xpos", window.x()).toInt();
     const auto ypos = settings.value("window/ypos", window.y()).toInt();
-    window.resize(width, height);
-    window.move(xpos, ypos);
-
+    const auto fullscreen = settings.value("window/fullscreen", false).toBool();
     const auto playSound = settings.value("audio/sound", true).toBool();
     const auto playMusic = settings.value("audio/music", true).toBool();
+    if (!fullscreen)
+    {
+        window.resize(width, height);
+        window.move(xpos, ypos);
+    }
+    else
+    {
+        window.resize(1200, 700);
+    }
     window.setPlayMusic(playMusic);
     window.setPlaySounds(playSound);
 
@@ -178,8 +185,8 @@ int game_main(int argc, char* argv[])
     loadProfile(MEDIUM, window, settings);
     loadProfile(CHINESE, window, settings);
 
-    window.launchGame();
     window.show();
+    window.launchGame();
 
     const float TimeStep = computeDefaultTimeStep();
 
@@ -188,7 +195,7 @@ int game_main(int argc, char* argv[])
     QElapsedTimer timer;
     timer.start();
 
-    while (window.running())
+    while (window.isRunning())
     {
         app.processEvents();
 
@@ -207,8 +214,11 @@ int game_main(int argc, char* argv[])
         }
     }
 
-    settings.setValue("window/width",  window.lastWindowWidth());
-    settings.setValue("window/height", window.lastWindowHeight());
+    window.close();
+
+    settings.setValue("window/width",  window.width());
+    settings.setValue("window/height", window.height());
+    settings.setValue("window/fullscreen", window.isFullScreen());
     settings.setValue("window/xpos", window.x());
     settings.setValue("window/ypos", window.y());
 

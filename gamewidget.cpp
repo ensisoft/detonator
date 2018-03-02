@@ -59,6 +59,16 @@ extern AudioPlayer* g_audio;
 
 const auto LevelUnlockCriteria = 0.85;
 const auto TextBlinkFrameCycle = 90;
+const auto GameCols = 40;
+const auto GameRows = 10;
+
+// we divide the widget's client area into a equal sized cells
+// according to the game's size. We also add one extra row
+// for HUD display at the top of the screen and for the player
+// at the bottom of the screen. This provides the basic layout
+// for the game in a way that doesnt depend on any actual viewport size.
+const auto ViewCols = GameCols;
+const auto ViewRows = GameRows + 2;
 
 QString R(const QString& s)
 {
@@ -101,22 +111,6 @@ struct GameSpace {
 class TransformState
 {
 public:
-    TransformState(const QRect& window, const Game& game)
-    {
-        // we divide the widget's client area into a equal sized cells
-        // according to the game's size. We also add one extra row
-        // for HUD display at the top of the screen and for the player
-        // at the bottom of the screen. This provides the basic layout
-        // for the game in a way that doesnt depend on any actual viewport size.
-        const float numCols = game.width();
-        const float numRows = game.height() + 2;
-        // divide the widget's client area int equal sized cells
-        origin_ = QPointF(window.x(), window.y());
-        widget_ = QPointF(window.width(), window.height());
-        scale_  = QPointF(window.width() / numCols, window.height() / numRows);
-        size_   = QPointF(numCols, numRows);
-    }
-
     TransformState(const QRectF& window, float numCols, float numRows)
     {
         // divide the widget's client area int equal sized cells
@@ -240,7 +234,29 @@ T clamp(T min, T val, T max)
     return val;
 }
 
+class GameWidget::State
+{
+public:
+    virtual ~State() = default;
 
+    enum class Action {
+        None,
+        OpenHelp,
+        OpenSettings,
+        OpenAbout,
+        CloseState,
+        QuitApp
+    };
+
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
+    virtual void update(float dt) = 0;
+    virtual Action mapAction(const QKeyEvent* press) const = 0;
+    virtual void keyPress(const QKeyEvent* press) = 0;
+    virtual bool isGameRunning() const
+    { return false; }
+
+private:
+};
 
 
 class GameWidget::Animation
@@ -1177,26 +1193,26 @@ private:
     QPixmap asteroid_[3];
 };
 
-class GameWidget::Scoreboard
+class GameWidget::Scoreboard : public GameWidget::State
 {
 public:
     Scoreboard(unsigned score, unsigned bonus, bool isHighScore, int unlockedLevel)
     {
-        text_.append("Level complete!\n\n");
-        text_.append(QString("You scored %1 points\n").arg(score));
-        text_.append(QString("Difficulty bonus %1 points\n").arg(bonus));
-        text_.append(QString("Total %1 points\n\n").arg(score + bonus));
+        mText.append("Level complete!\n\n");
+        mText.append(QString("You scored %1 points\n").arg(score));
+        mText.append(QString("Difficulty bonus %1 points\n").arg(bonus));
+        mText.append(QString("Total %1 points\n\n").arg(score + bonus));
 
         if (isHighScore)
-            text_.append("New high score!\n");
+            mText.append("New high score!\n");
 
         if (unlockedLevel)
-            text_.append(QString("Level %1 unlocked!\n").arg(unlockedLevel + 1));
+            mText.append(QString("Level %1 unlocked!\n").arg(unlockedLevel + 1));
 
-        text_.append("\nPress Space to continue");
+        mText.append("\nPress any key to continue");
     }
 
-    void paint(QPainter& painter, const QRectF& area, const QPointF& scale)
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
     {
         QPen pen;
         pen.setWidth(1);
@@ -1208,175 +1224,55 @@ public:
 
         painter.setPen(pen);
         painter.setFont(font);
-        painter.drawText(area, Qt::AlignCenter, text_);
+        painter.drawText(area, Qt::AlignCenter, mText);
     }
-private:
-    QString text_;
-};
 
-// Heads Up Display, display scoreboards etc.
-class GameWidget::Display
-{
-public:
-    Display(const Game& game) : game_(game), level_(0)
-    {}
-    void paint(QPainter& painter, const QRectF& area, const QPointF& scale)
-    {
-        const auto& score  = game_.getScore();
-        const auto& result = score.maxpoints ?
-            (float)score.points / (float)score.maxpoints * 100 : 0.0;
-        const auto& format = QString("%1").arg(result, 0, 'f', 0);
-        const auto bombs   = game_.numBombs();
-        const auto warps   = game_.numWarps();
-
-        QPen pen;
-        pen.setColor(Qt::darkGreen);
-        pen.setWidth(1);
-        painter.setPen(pen);
-
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
-        painter.setFont(font);
-
-        painter.drawText(area, Qt::AlignCenter,
-            QString("Level %1 Score %2 (%3%) | Enemies x %4 | Bombs x %5 | Warps x %6 | (F1 for help)")
-                .arg(level_)
-                .arg(score.points)
-                .arg(format)
-                .arg(score.pending)
-                .arg(bombs)
-                .arg(warps));
-    }
-    void setLevel(unsigned number)
-    { level_ = number; }
-
-private:
-    const Game& game_;
-    unsigned level_;
-};
-
-// player representation on the screen
-class GameWidget::Player
-{
-public:
-    Player() : text_(initString())
+    virtual void update(float dt) override
     {}
 
-    void paint(QPainter& painter, const QRectF& area, const TransformState& transform)
+    virtual Action mapAction(const QKeyEvent* press) const override
     {
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(area.height() / 2);
-        painter.setFont(font);
-
-        QFontMetrics fm(font);
-        const auto width  = fm.width(text_);
-        const auto height = fm.height();
-
-        // calculate text X, Y (top left)
-        const auto x = area.x() + ((area.width() - width) / 2.0);
-        const auto y = area.y() + ((area.height() - height) / 2.0);
-
-        if (false)
-        {
-            QPen pen;
-            pen.setWidth(2);
-            pen.setColor(Qt::darkRed);
-            painter.setPen(pen);
-            painter.drawText(area, Qt::AlignCenter | Qt::AlignVCenter, text_);
-        }
-
-        QPen pen;
-        pen.setWidth(2);
-        pen.setColor(Qt::darkGray);
-        painter.setPen(pen);
-
-        QRect rect(QPoint(x, y), QPoint(x + width, y + height));
-        painter.drawRect(rect);
-        painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, text_);
-
-        // save the missile launch position
-        missile_ = transform.toNormalizedViewSpace(QPoint(x, y));
+        return Action::CloseState;
     }
-
-    void keyPress(QKeyEvent* press, Game& game)
-    {
-        if (text_ == initString())
-            text_.clear();
-
-        const auto key = press->key();
-        if (key == Qt::Key_Backspace)
-        {
-            if (!text_.isEmpty())
-                text_.resize(text_.size()-1);
-        }
-        else if (key == Qt::Key_Space)
-        {
-            text_.clear();
-        }
-        else if (key >= 0x41 && key <= 0x5a)
-        {
-            text_.append(key);
-            if (text_ == "BOMB")
-            {
-                Game::bomb b;
-                game.ignite(b);
-                text_.clear();
-            }
-            else if (text_ == "WARP")
-            {
-                Game::timewarp w;
-                w.duration = 4000;
-                w.factor   = 0.2f;
-                game.enter(w);
-                text_.clear();
-            }
-            else
-            {
-                Game::missile m;
-                m.position = missile_;
-                m.string = text_.toLower();
-                if (game.fire(m))
-                    text_.clear();
-
-            }
-        }
-    }
-    void reset()
-    {
-        text_ = initString();
-    }
+    virtual void keyPress(const QKeyEvent* press) override
+    {}
 private:
-    static
-    QString initString()
-    {
-        static const QString init {
-            "Type the correct pinyin to kill the enemies!"
-        };
-        return init;
-    }
-    QString text_;
-    QVector2D missile_;
+    QString mText;
 };
 
 
 // initial greeting and instructions
-class GameWidget::Menu
+class GameWidget::MainMenu : public GameWidget::State
 {
 public:
-    Menu(const std::vector<std::unique_ptr<Level>>& levels,
-         const std::vector<GameWidget::LevelInfo>& infos,
-         const std::vector<GameWidget::Profile>& profiles)
-    : levels_(levels), infos_(infos)
+    std::function<void (unsigned level, unsigned profile)> onBeginPlay;
+
+    MainMenu(const std::vector<std::unique_ptr<Level>>& levels,
+             const std::vector<GameWidget::LevelInfo>& infos)
+    : mLevels(levels)
+    , infos_(infos)
     {}
 
-    void update(quint64 time)
+    virtual void update(float dt) override
+    {}
+
+    virtual Action mapAction(const QKeyEvent* event) const
     {
-        blinking_text_frame_counter_++;
+        switch (event->key())
+        {
+            case Qt::Key_F1:
+                return Action::OpenHelp;
+            case Qt::Key_F2:
+                return Action::OpenSettings;
+            case Qt::Key_F3:
+                return Action::OpenAbout;
+            case Qt::Key_Escape:
+                return Action::QuitApp;
+        }
+        return Action::None;
     }
 
-    void paint(QPainter& painter, const QRectF& area, const QPointF& unit)
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
     {
         QPen regular;
         regular.setWidth(1);
@@ -1412,7 +1308,6 @@ public:
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
             "Good luck.\n\n"
-//
             "Esc - Exit\n"
             "F1 - Help\n"
             "F2 - Settings\n"
@@ -1463,11 +1358,11 @@ public:
         small.setPixelSize(unit.y() / 2.5);
         painter.setFont(small);
 
-        const auto prev = level_ > 0 ? level_ - 1 : levels_.size() - 1;
-        const auto next = (level_ + 1) % levels_.size();
-        const auto& left  = levels_[prev];
-        const auto& mid   = levels_[level_];
-        const auto& right = levels_[next];
+        const auto prev = level_ > 0 ? level_ - 1 : mLevels.size() - 1;
+        const auto next = (level_ + 1) % mLevels.size();
+        const auto& left  = mLevels[prev];
+        const auto& mid   = mLevels[level_];
+        const auto& right = mLevels[next];
 
         rect = state.toViewSpaceRect(QPoint(1, 4), QPoint(2, 5));
         drawLevel(painter, rect, *left, prev, false);
@@ -1493,7 +1388,9 @@ public:
         painter.drawRect(rect);
         drawLevel(painter, rect, *right, next, false);
 
-        const bool draw_text = (blinking_text_frame_counter_ % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
+        static unsigned blink_text = 0;
+
+        const bool draw_text = (blink_text % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
         if (draw_text)
         {
             rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
@@ -1501,11 +1398,12 @@ public:
             painter.setFont(font);
             painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
         }
+        ++blink_text;
     }
-    void keyPress(QKeyEvent* press)
+    virtual void keyPress(const QKeyEvent* press) override
     {
         const int numLevelsMin = 0;
-        const int numLevelsMax = levels_.size() - 1;
+        const int numLevelsMax = mLevels.size() - 1;
         const int numProfilesMin = 0;
         const int numProfilesMax = 2;
 
@@ -1540,6 +1438,10 @@ public:
         else if (key == Qt::Key_Down)
         {
             selrow_ = wrap(1, 0, (int)selrow_ + 1);
+        }
+        else if (key == Qt::Key_Space)
+        {
+            onBeginPlay(level_, profile_);
         }
     }
 
@@ -1584,20 +1486,31 @@ private:
     }
 
 private:
-    const std::vector<std::unique_ptr<Level>>& levels_;
+    const std::vector<std::unique_ptr<Level>>& mLevels;
     const std::vector<LevelInfo>& infos_;
     unsigned level_   = 0;
     unsigned profile_ = 0;
     unsigned selrow_  = 1;
-    unsigned blinking_text_frame_counter_ = 0;
 private:
 
 };
 
-class GameWidget::Help
+class GameWidget::GameHelp : public GameWidget::State
 {
 public:
-    void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) const
+    virtual void update(float dt)
+    {}
+
+    virtual Action mapAction(const QKeyEvent* event) const override
+    {
+        if (event->key() == Qt::Key_Escape)
+            return Action::CloseState;
+        return Action::None;
+    }
+    virtual void keyPress(const QKeyEvent* event) override
+    {}
+
+    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
     {
         QPen pen;
         pen.setWidth(1);
@@ -1624,17 +1537,26 @@ public:
             "Press Space to clear the input.\n\n"
             "Press Esc to exit\n").arg(str));
     }
+private:
 };
 
-class GameWidget::Settings
+class GameWidget::Settings : public GameWidget::State
 {
 public:
     std::function<void (bool)> onToggleFullscreen;
     std::function<void (bool)> onTogglePlayMusic;
+    std::function<void (bool)> onTogglePlaySounds;
 
-    Settings(bool music, bool sounds, bool fullscreen) : music_(music), sounds_(sounds), fullscreen_(fullscreen), setting_index_(0)
+    Settings(bool music, bool sounds, bool fullscreen)
+      : mPlayMusic(music)
+      , mPlaySounds(sounds)
+      , mFullscreen(fullscreen)
     {}
-    void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) const
+
+    virtual void update(float dt) override
+    {}
+
+    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
     {
         QPen regular;
         regular.setWidth(1);
@@ -1674,27 +1596,27 @@ public:
 
         painter.setPen(regular);
 
-        if (setting_index_ == 0)
+        if (mSettingIndex == 0)
             painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
         painter.drawText(rc, Qt::AlignCenter,
-            tr("Sound Effects: %1").arg(sounds_ ? "On" : "Off"));
+            tr("Sound Effects: %1").arg(mPlaySounds ? "On" : "Off"));
 
         painter.setPen(regular);
 
-        if (setting_index_ == 1)
+        if (mSettingIndex == 1)
             painter.setPen(selected);
         rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
         painter.drawText(rc, Qt::AlignCenter,
-            tr("Awesome Music: %1").arg(music_ ? "On" : "Off"));
+            tr("Awesome Music: %1").arg(mPlayMusic ? "On" : "Off"));
 
         painter.setPen(regular);
 
         rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
-        if (setting_index_ == 2)
+        if (mSettingIndex == 2)
             painter.setPen(selected);
         painter.drawText(rc, Qt::AlignCenter,
-            tr("Fullscreen: %1").arg(fullscreen_ ? "On" : "Off"));
+            tr("Fullscreen: %1").arg(mFullscreen ? "On" : "Off"));
 
         rc = state.toViewSpaceRect(QPoint(0, 5), QPoint(1, 6));
         painter.setPen(regular);
@@ -1702,55 +1624,53 @@ public:
             "Press Esc to exit");
     }
 
-    void keyPress(const QKeyEvent* keyPress)
+    virtual Action mapAction(const QKeyEvent* press) const override
+    {
+        if (press->key() == Qt::Key_Escape)
+            return Action::CloseState;
+        return Action::None;
+    }
+
+    virtual void keyPress(const QKeyEvent* keyPress) override
     {
         const auto key = keyPress->key();
         if (key == Qt::Key_Space)
         {
-            if (setting_index_ == 0)
-                sounds_ = !sounds_;
-            else if (setting_index_ == 1)
+            if (mSettingIndex == 0)
+                mPlaySounds = !mPlaySounds;
+            else if (mSettingIndex == 1)
             {
-                music_ = !music_;
-                onTogglePlayMusic(music_);
+                mPlayMusic = !mPlayMusic;
+                onTogglePlayMusic(mPlayMusic);
             }
-            else if (setting_index_ == 2)
+            else if (mSettingIndex == 2)
             {
-                fullscreen_ = !fullscreen_;
-                onToggleFullscreen(fullscreen_);
+                mFullscreen = !mFullscreen;
+                onToggleFullscreen(mFullscreen);
             }
         }
         else if (key == Qt::Key_Up)
         {
-            if (--setting_index_ < 0)
-                setting_index_ = 2;
+            if (--mSettingIndex < 0)
+                mSettingIndex = 2;
         }
         else if (key == Qt::Key_Down)
         {
-            setting_index_ = (setting_index_ + 1) % 3;
+            mSettingIndex = (mSettingIndex + 1) % 3;
         }
     }
-
-    bool enableSounds() const
-    { return sounds_; }
-
-    bool enableMusic() const
-    { return music_; }
-
-    bool fullScreen() const
-    { return fullscreen_; }
 private:
-    bool music_;
-    bool sounds_;
-    bool fullscreen_;
+    bool mPlayMusic  = false;
+    bool mPlaySounds = false;
+    bool mFullscreen = false;
 private:
-    int setting_index_;
+    int mSettingIndex = 0;
 };
 
-class GameWidget::About
+class GameWidget::About : public State
 {
 public:
-    void paint(QPainter& painter, const QRectF& area, const QPointF& scale) const
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
     {
         QFont font;
         font.setFamily("Arcade");
@@ -1775,24 +1695,146 @@ public:
                 "http://www.kenney.nl\n\n"
                 "Music by:\n"
                 "cynicmusic\n"
-                "http://www.cynicmusic.com"
+                "http://www.cynicmusic.com\n\n"
+                "Press Esc to exit"
                 ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
     }
+
+    virtual void update(float dt) override
+    {}
+
+    virtual Action mapAction(const QKeyEvent* press) const override
+    {
+        if (press->key() == Qt::Key_Escape)
+            return Action::CloseState;
+        return Action::None;
+    }
+    virtual void keyPress(const QKeyEvent* press) override
+    {}
 private:
 };
 
-class GameWidget::Fleet
+class GameWidget::PlayGame : public GameWidget::State
 {
 public:
-    Fleet(const Level& level) : level_(level)
-    {}
-
-    void update(quint64 dt)
+    PlayGame(const Game::setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
     {
-        blinking_text_frame_counter_++;
+        mCurrentText = initString();
     }
 
-    void paint(QPainter& painter, const QRectF& area, const QPointF& scale) const
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
+    {
+        switch (mState)
+        {
+            case GameState::Prepare:
+                paintFleet(painter, area, unit);
+                break;
+            case GameState::Playing:
+                {
+                    TransformState state(area, ViewCols, ViewRows);
+
+                    QPointF top;
+                    QPointF bot;
+
+                    // layout the HUD at the first "game row"
+                    top = state.toViewSpace(QPoint(0, 0));
+                    bot = state.toViewSpace(QPoint(ViewCols, 1));
+                    paintHUD(painter, QRectF(top, bot), unit);
+
+                    // paint the player at the last "game row"
+                    top = state.toViewSpace(QPoint(0, ViewRows-1));
+                    bot = state.toViewSpace(QPoint(ViewCols, ViewRows));
+                    paintPlayer(painter, QRectF(top, bot), area, unit);
+                }
+                break;
+        }
+    }
+    virtual void update(float dt) override
+    {}
+
+    virtual Action mapAction(const QKeyEvent* press) const override
+    {
+        const auto key = press->key();
+        if (key == Qt::Key_Escape)
+            return Action::CloseState;
+
+        switch (mState)
+        {
+            case GameState::Prepare:
+                break;
+
+            case GameState::Playing:
+                if (key == Qt::Key_F1)
+                    return Action::OpenHelp;
+                else if (key == Qt::Key_F2)
+                    return Action::OpenSettings;
+                break;
+        }
+        return Action::None;
+    }
+    virtual void keyPress(const QKeyEvent* press) override
+    {
+        const auto key = press->key();
+
+        if (mState == GameState::Prepare)
+        {
+            if (key == Qt::Key_Space)
+            {
+                std::srand(0x7f6a4b);
+                mLevel.reset();
+                mGame.play(&mLevel, mSetup);
+                mState = GameState::Playing;
+            }
+        }
+        else if (mState == GameState::Playing)
+        {
+            if (mCurrentText == initString())
+                mCurrentText.clear();
+
+            if (key == Qt::Key_Backspace)
+            {
+                if (!mCurrentText.isEmpty())
+                    mCurrentText.chop(1);
+            }
+            else if (key == Qt::Key_Space)
+            {
+                mCurrentText.clear();
+            }
+            else if (key >= 0x41 && key <= 0x5a)
+            {
+                mCurrentText.append(key);
+                if (mCurrentText == "BOMB")
+                {
+                    Game::bomb bomb;
+                    mGame.ignite(bomb);
+                    mCurrentText.clear();
+                }
+                else if (mCurrentText == "WARP")
+                {
+                    Game::timewarp warp;
+                    warp.duration = 4000;
+                    warp.factor = 0.2f;
+                    mGame.enter(warp);
+                    mCurrentText.clear();
+                }
+                else
+                {
+                    Game::missile missile;
+                    missile.position = mMissileLaunchPosition; // todo: fix this
+                    missile.string   = mCurrentText.toLower();
+                    if (mGame.fire(missile))
+                        mCurrentText.clear();
+                }
+            }
+        }
+    }
+    virtual bool isGameRunning() const override
+    {
+        return mState == GameState::Playing;
+    }
+
+private:
+    void paintFleet(QPainter& painter, const QRectF& area, const QPointF& scale) const
     {
         QPen pen;
         pen.setWidth(1);
@@ -1808,8 +1850,7 @@ public:
         smallFont.setFamily("Arcade");
         smallFont.setPixelSize(scale.y() / 3);
 
-
-        const auto& enemies = level_.getEnemies();
+        const auto& enemies = mLevel.getEnemies();
         const auto cols = 3;
         const auto rows = (enemies.size() / cols) + 2;
 
@@ -1836,40 +1877,97 @@ public:
                 QString("\n\n\n%1").arg(e.help));
         }
 
-        const bool draw_text = (blinking_text_frame_counter_ % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
+        static unsigned text_blink = 0;
+
+        const bool draw_text = (text_blink % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
         if (draw_text)
         {
             painter.setFont(bigFont);
             painter.drawText(footer, Qt::AlignCenter, "\n\nPress Space to play!");
         }
+        ++text_blink;
     }
-private:
-    unsigned blinking_text_frame_counter_ = 0;
+
+    void paintHUD(QPainter& painter, const QRectF& area, const QPointF& unit) const
+    {
+        const auto& score  = mGame.getScore();
+        const auto& result = score.maxpoints ?
+            (float)score.points / (float)score.maxpoints * 100 : 0.0;
+        const auto& format = QString("%1").arg(result, 0, 'f', 0);
+        const auto bombs   = mGame.numBombs();
+        const auto warps   = mGame.numWarps();
+
+        QPen pen;
+        pen.setColor(Qt::darkGreen);
+        pen.setWidth(1);
+        painter.setPen(pen);
+
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(unit.y() / 2);
+        painter.setFont(font);
+
+        painter.drawText(area, Qt::AlignCenter,
+            QString("Score %2 (%3%) | Enemies x %4 | Bombs x %5 | Warps x %6 | (F1 for help)")
+                .arg(score.points)
+                .arg(format)
+                .arg(score.pending)
+                .arg(bombs)
+                .arg(warps));
+    }
+
+    void paintPlayer(QPainter& painter, const QRectF& area, const QRectF& window, const QPointF& unit)
+    {
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(area.height() / 2);
+        painter.setFont(font);
+
+        QFontMetrics fm(font);
+        const auto width  = fm.width(mCurrentText);
+        const auto height = fm.height();
+
+        // calculate text X, Y (top left)
+        const auto x = area.x() + ((area.width() - width) / 2.0);
+        const auto y = area.y() + ((area.height() - height) / 2.0);
+
+        QPen pen;
+        pen.setWidth(2);
+        pen.setColor(Qt::darkGray);
+        painter.setPen(pen);
+
+        QRect rect(QPoint(x, y), QPoint(x + width, y + height));
+        painter.drawRect(rect);
+        painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, mCurrentText);
+
+        TransformState transform(window, ViewCols, ViewRows);
+
+        // save the missile launch position
+        // todo: fix this
+        mMissileLaunchPosition = transform.toNormalizedViewSpace(QPoint(x, y));
+    }
+
+    static QString initString()
+    { return "Type the correct pinyin to kill the enemies!"; }
 
 private:
-    const Level& level_;
+    const Game::setup mSetup;
+    Level& mLevel;
+    Game&  mGame;
+
+    enum class GameState {
+        Prepare,
+        Playing
+    };
+    GameState mState = GameState::Prepare;
+    QString mCurrentText;
+    QVector2D mMissileLaunchPosition;
 };
 
 
 GameWidget::GameWidget()
 {
-    level_          = 0;
-    profile_        = 0;
-    tickDelta_      = 0;
-    warpFactor_     = 1.0;
-    currentfps_     = 0;
-    warpDuration_   = 0;
-    masterUnlock_   = false;
-    unlimitedBombs_ = false;
-    unlimitedWarps_ = false;
-    playSounds_     = true;
-    playMusic_      = true;
-    showfps_        = false;
-    runGame_        = true;
-
 #ifdef ENABLE_AUDIO
-    musicTrackId_ = 0;
-
     // sound effects FX
     static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"), "explosion");
 #endif
@@ -1880,13 +1978,13 @@ GameWidget::GameWidget()
     Smoke::prepare();
     UFO::prepare();
 
-    game_.reset(new Game(40, 10));
+    mGame.reset(new Game(GameCols, GameRows));
 
-    game_->onMissileKill = [&](const Game::invader& i, const Game::missile& m, unsigned killScore)
+    mGame->onMissileKill = [&](const Game::invader& i, const Game::missile& m, unsigned killScore)
     {
-        auto it = invaders_.find(i.identity);
+        auto it = mInvaders.find(i.identity);
 
-        TransformState state(rect(), *game_);
+        TransformState state(rect(), ViewCols, ViewRows);
 
         std::unique_ptr<Invader> invader(it->second.release());
 
@@ -1908,33 +2006,32 @@ GameWidget::GameWidget()
         invader->expireIn(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
-        //debris->setScale(invader->getScale());
         sparks->setColor(QColor(255, 255, 68));
 
-        animations_.push_back(std::move(invader));
-        animations_.push_back(std::move(missile));
-        animations_.push_back(std::move(smoke));
-        animations_.push_back(std::move(debris));
-        animations_.push_back(std::move(sparks));
-        animations_.push_back(std::move(explosion));
-        animations_.push_back(std::move(score));
+        mAnimations.push_back(std::move(invader));
+        mAnimations.push_back(std::move(missile));
+        mAnimations.push_back(std::move(smoke));
+        mAnimations.push_back(std::move(debris));
+        mAnimations.push_back(std::move(sparks));
+        mAnimations.push_back(std::move(explosion));
+        mAnimations.push_back(std::move(score));
 
-        invaders_.erase(it);
+        mInvaders.erase(it);
 
 #ifdef ENABLE_AUDIO
-        if (playSounds_)
+        if (mPlaySounds)
         {
             g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
         }
 #endif
     };
 
-    game_->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)
+    mGame->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)
     {
-        auto it = invaders_.find(i.identity);
+        auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
 
-        TransformState state(rect(), *game_);
+        TransformState state(rect(), ViewCols, ViewRows);
 
         const auto missileFlyTime  = 500;
         const auto missileEnd      =  inv->getFuturePosition(missileFlyTime, state);
@@ -1949,58 +2046,58 @@ GameWidget::GameWidget()
         auto viewString = i.viewList.join("");
         inv->setViewString(viewString);
 
-        animations_.push_back(std::move(missile));
-        animations_.push_back(std::move(sparks));
+        mAnimations.push_back(std::move(missile));
+        mAnimations.push_back(std::move(sparks));
     };
 
-    game_->onMissileFire = game_->onMissileDamage;
+    mGame->onMissileFire = mGame->onMissileDamage;
 
-    game_->onBombKill = [&](const Game::invader& i, const Game::bomb& b, unsigned killScore)
+    mGame->onBombKill = [&](const Game::invader& i, const Game::bomb& b, unsigned killScore)
     {
-        auto it = invaders_.find(i.identity);
+        auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
 
         std::unique_ptr<Animation> explosion(new Explosion(inv->getPosition(), 0, 1000));
         std::unique_ptr<Animation> score(new Score(inv->getPosition(), 1000, 2000, killScore));
-        animations_.push_back(std::move(explosion));
-        animations_.push_back(std::move(score));
+        mAnimations.push_back(std::move(explosion));
+        mAnimations.push_back(std::move(score));
 
-        invaders_.erase(it);
+        mInvaders.erase(it);
     };
 
-    game_->onBombDamage = [&](const Game::invader& i, const Game::bomb& b)
+    mGame->onBombDamage = [&](const Game::invader& i, const Game::bomb& b)
     {
-        auto it = invaders_.find(i.identity);
+        auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
         auto str = i.viewList.join("");
         inv->setViewString(str);
     };
 
-    game_->onBomb = [&](const Game::bomb& b)
+    mGame->onBomb = [&](const Game::bomb& b)
     {
         std::unique_ptr<Animation> explosion(new BigExplosion(1500));
 
 
-        animations_.push_back(std::move(explosion));
+        mAnimations.push_back(std::move(explosion));
     };
 
-    game_->onWarp = [&](const Game::timewarp& w)
+    mGame->onWarp = [&](const Game::timewarp& w)
     {
         DEBUG("begin time warp");
-        warpFactor_   = w.factor;
-        warpDuration_ = w.duration;
+        mWarpFactor   = w.factor;
+        mWarpDuration = w.duration;
     };
 
-    game_->onToggleShield = [&](const Game::invader& i, bool onOff)
+    mGame->onToggleShield = [&](const Game::invader& i, bool onOff)
     {
-        auto it = invaders_.find(i.identity);
+        auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
         inv->setShield(onOff);
     };
 
-    game_->onInvaderSpawn = [&](const Game::invader& inv)
+    mGame->onInvaderSpawn = [&](const Game::invader& inv)
     {
-        TransformState state(rect(), *game_);
+        TransformState state(rect(), ViewCols, ViewRows);
 
         const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
 
@@ -2031,7 +2128,7 @@ GameWidget::GameWidget()
         // the game expresses invader speed as the number of discrete steps it takes
         // per each tick of game.
         // here well want to express this velocity as a normalized distance over seconds
-        const auto tick       = 1000.0 / profiles_[profile_].speed;
+        const auto tick       = 1000.0 / mProfiles[mCurrentProfile].speed;
         const auto numTicks   = state.numCols() / (double)inv.speed;
         const auto numSeconds = tick * numTicks;
         const auto velocity   = state.numCols() / numSeconds;
@@ -2041,31 +2138,30 @@ GameWidget::GameWidget()
 
         std::unique_ptr<Invader> invader(new Invader(pos, viewString, velocity, type));
         invader->setShield(inv.shield_on_ticks != 0);
-        invaders_[inv.identity] = std::move(invader);
+        mInvaders[inv.identity] = std::move(invader);
     };
 
 
-    game_->onInvaderVictory = [&](const Game::invader& inv)
+    mGame->onInvaderVictory = [&](const Game::invader& inv)
     {
-        invaders_.erase(inv.identity);
+        mInvaders.erase(inv.identity);
     };
 
     // invader is almost escaping unharmed. we help the player to learn
     // by changing the text from chinese to the pinyin kill string
-    game_->onInvaderWarning = [&](const Game::invader& inv)
+    mGame->onInvaderWarning = [&](const Game::invader& inv)
     {
-        auto it  = invaders_.find(inv.identity);
+        auto it  = mInvaders.find(inv.identity);
         auto str = inv.killList.join("");
         it->second->setViewString(str);
     };
 
-    game_->onLevelComplete = [&](const Game::score& score)
+    mGame->onLevelComplete = [&](const Game::score& score)
     {
         DEBUG("Level complete %1 / %2 points (points / max)",  score.points, score.maxpoints);
 
-        //auto& level   = levels_[level_];
-        auto& info    = info_[level_];
-        auto& profile = profiles_[profile_];
+        auto& info    = mLevelInfos[mCurrentLevel];
+        auto& profile = mProfiles[mCurrentProfile];
 
         const auto base    = score.points;
         const auto bonus   = profile.speed * score.points;
@@ -2076,23 +2172,28 @@ GameWidget::GameWidget()
         unsigned unlockLevel = 0;
         if ((base / (float)score.maxpoints) >= LevelUnlockCriteria)
         {
-            if (level_ < levels_.size())
+            if (mCurrentLevel < mLevels.size())
             {
-                if (info_[level_+1].locked)
+                if (mLevelInfos[mCurrentLevel + 1].locked)
                 {
-                    unlockLevel = level_ + 1;
-                    info_[unlockLevel].locked = false;
+                    unlockLevel = mCurrentLevel + 1;
+                    mLevelInfos[unlockLevel].locked = false;
                 }
             }
         }
-
-        score_.reset(new Scoreboard(base, bonus, hiscore, unlockLevel));
-
+        auto scoreboard = std::make_unique<Scoreboard>(base, bonus, hiscore, unlockLevel);
+        mStates.pop();
+        mStates.push(std::move(scoreboard));
     };
 
-    background_.reset(new Background);
-    display_.reset(new Display(*game_));
-    player_.reset(new Player);
+    // create the background object.
+    mBackground.reset(new Background);
+
+    // initialize the input/state stack with the main menu.
+    auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos);
+    menu->onBeginPlay = std::bind(&GameWidget::beginPlay, this,
+        std::placeholders::_1, std::placeholders::_2);
+    mStates.push(std::move(menu));
 
     // enable keyboard events
     setFocusPolicy(Qt::StrongFocus);
@@ -2107,25 +2208,22 @@ GameWidget::GameWidget()
     setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
-GameWidget::~GameWidget()
-{}
+GameWidget::~GameWidget() = default;
 
-void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
+void GameWidget::beginPlay(unsigned levelIndex, unsigned profileIndex)
 {
-    Q_ASSERT(levelIndex < levels_.size());
-    Q_ASSERT(profileIndex < profiles_.size());
+    ASSERT(levelIndex   < mLevels.size());
+    ASSERT(profileIndex < mProfiles.size());
 
-    const auto& level   = levels_[levelIndex];
-    const auto& profile = profiles_[profileIndex];
+    const auto& level   = mLevels[levelIndex];
+    const auto& profile = mProfiles[profileIndex];
     DEBUG("Start game: %1 / %2", level->name(), profile.name);
 
-    // todo: use a deterministic seed or not?
-    //std::srand(std::time(nullptr));
-    std::srand(0x7f6a4b + (levelIndex ^ profileIndex));
-
-    level->reset();
-    player_->reset();
-    display_->setLevel(levelIndex + 1);
+    mCurrentLevel   = levelIndex;
+    mCurrentProfile = profileIndex;
+    mTickDelta      = 0;
+    mWarpFactor     = 1.0;
+    mWarpDuration   = 0;
 
     Game::setup setup;
     setup.numEnemies    = profile.numEnemies;
@@ -2133,26 +2231,22 @@ void GameWidget::startGame(unsigned levelIndex, unsigned profileIndex)
     setup.spawnInterval = profile.spawnInterval;
     setup.numBombs      = unlimitedBombs_ ? std::numeric_limits<unsigned>::max() : 2;
     setup.numWarps      = unlimitedWarps_ ? std::numeric_limits<unsigned>::max() : 2;
-    game_->play(levels_[levelIndex].get(), setup);
 
-    level_         = levelIndex;
-    profile_       = profileIndex;
-    tickDelta_     = 0;
-    warpFactor_    = 1.0; //(0.4; //1.0; //0.4; //1.0;
-    warpDuration_  = 0;
+    auto playing = std::make_unique<PlayGame>(setup, *mLevels[levelIndex], *mGame);
+    mStates.push(std::move(playing));
 }
 
 void GameWidget::loadLevels(const QString& file)
 {
-    levels_ = Level::loadLevels(file);
+    mLevels = Level::loadLevels(file);
 
-    for (const auto& level : levels_)
+    for (const auto& level : mLevels)
     {
         LevelInfo info;
         info.highScore = 0;
         info.name      = level->name();
         info.locked    = true;
-        info_.push_back(info);
+        mLevelInfos.push_back(info);
         if (!level->validate())
         {
             auto name  = level->name();
@@ -2160,12 +2254,12 @@ void GameWidget::loadLevels(const QString& file)
             qFatal("Level is broken: %s!", ascii.c_str());
         }
     }
-    info_[0].locked = false;
+    mLevelInfos[0].locked = false;
 }
 
 void GameWidget::unlockLevel(const QString& name)
 {
-    for (auto& info : info_)
+    for (auto& info : mLevelInfos)
     {
         if (info.name != name)
             continue;
@@ -2177,7 +2271,7 @@ void GameWidget::unlockLevel(const QString& name)
 
 void GameWidget::setLevelInfo(const LevelInfo& info)
 {
-    for (auto& i : info_)
+    for (auto& i : mLevelInfos)
     {
         if (i.name != info.name)
             continue;
@@ -2189,89 +2283,82 @@ void GameWidget::setLevelInfo(const LevelInfo& info)
 
 bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const
 {
-    if (index >= levels_.size())
+    if (index >= mLevels.size())
         return false;
-    info = info_[index];
+    info = mLevelInfos[index];
     return true;
 }
 
 void GameWidget::setProfile(const Profile& profile)
 {
-    profiles_.push_back(profile);
+    mProfiles.push_back(profile);
 }
 
 void GameWidget::launchGame()
 {
-    showMenu();
     playMusic();
 }
 
 void GameWidget::updateGame(float dt)
 {
-    TransformState state(rect(), *game_);
+    TransformState state(rect(), GameCols, GameRows + 2);
 
-    const auto time = dt;
-    const auto tick = 1000.0 / profiles_[profile_].speed;
+    const auto time = dt * mWarpFactor;
+    const auto tick = 1000.0 / mProfiles[mCurrentProfile].speed;
 
     if (rand(0, 5000) == 7)
     {
         auto ufo = std::make_unique<UFO>();
-        animations_.push_back(std::move(ufo));
+        mAnimations.push_back(std::move(ufo));
     }
 
-    if (menu_)
-    {
-        menu_->update(time * warpFactor_);
-    }
-    else if (fleet_)
-    {
-        fleet_->update(time * warpFactor_);
-    }
+    mBackground->update(time);
 
+    mStates.top()->update(time);
 
-    background_->update(time * warpFactor_);
+    const bool bGameIsRunning = mStates.top()->isGameRunning();
 
-    if (gameIsRunning())
+    if (bGameIsRunning)
     {
-        tickDelta_ += (time * warpFactor_);
-        if (tickDelta_ >= tick)
+        mTickDelta += (time);
+        if (mTickDelta >= tick)
         {
             // advance game by one tick
-            game_->tick();
+            mGame->tick();
 
-            tickDelta_ = tickDelta_ - tick;
+            mTickDelta = mTickDelta - tick;
         }
         // update invaders
-        for (auto& pair : invaders_)
+        for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->update(time * warpFactor_, state);
+            invader->update(time, state);
         }
     }
 
     // update animations
-    for (auto it = std::begin(animations_); it != std::end(animations_);)
+    for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
     {
         auto& anim = *it;
-        if (!anim->update(time * warpFactor_, state))
+        if (!anim->update(time, state))
         {
-            it = animations_.erase(it);
+            it = mAnimations.erase(it);
             continue;
         }
         ++it;
     }
 
-    if (warpDuration_)
+    if (mWarpDuration)
     {
-        if (time >= warpDuration_)
+        if (time >= mWarpDuration)
         {
-            warpFactor_   = 1.0;
-            warpDuration_ = 0;
+            mWarpFactor   = 1.0;
+            mWarpDuration = 0;
             DEBUG("Warp ended");
         }
         else
         {
-            warpDuration_ -= time;
+            mWarpDuration -= time;
         }
     }
 }
@@ -2283,7 +2370,7 @@ void GameWidget::renderGame()
 
 void GameWidget::closeEvent(QCloseEvent* close)
 {
-    runGame_ = false;
+    mRunning = false;
 }
 
 void GameWidget::paintEvent(QPaintEvent* paint)
@@ -2291,284 +2378,103 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     QPainter painter(this);
     painter.setRenderHints(QPainter::HighQualityAntialiasing);
 
-    TransformState state(rect(), *game_);
+    TransformState state(rect(), ViewCols, ViewRows);
 
-    const auto cols = state.numCols();
-    const auto rows = state.numRows();
-    const auto rect = this->rect();
+    // implement simple painter's algorithm here
+    // i.e. paint the game scene from back to front.
 
-    background_->paint(painter, rect, state.getScale());
-
-    if (showfps_)
-    {
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkRed);
-        painter.setPen(pen);
-
-        painter.drawText(QPointF(10.0f, 20.0f),
-            QString("fps: %1").arg(currentfps_));
-    }
-
-    if (help_)
-    {
-        help_->paint(painter, rect, state.getScale());
-        return;
-    }
-    else if (settings_)
-    {
-        settings_->paint(painter, rect, state.getScale());
-        return;
-    }
-    else if (about_)
-    {
-        about_->paint(painter, rect, state.getScale());
-        return;
-    }
-    else if (menu_)
-    {
-        menu_->paint(painter, rect, state.getScale());
-        return;
-    }
-    else if (fleet_)
-    {
-        fleet_->paint(painter, rect, state.getScale());
-        return;
-    }
-
-
-    if (score_ && animations_.empty())
-    {
-        score_->paint(painter, rect, state.getScale());
-        return;
-    }
-
-    QPointF top;
-    QPointF bot;
-    // layout the HUD at the first "game row"
-    top = state.toViewSpace(QPoint(0, 0));
-    bot = state.toViewSpace(QPoint(cols, 1));
-    display_->paint(painter, QRectF(top, bot), state.getScale());
-
-    // paint the invaders
-    for (auto& pair : invaders_)
-    {
-        auto& invader = pair.second;
-        invader->paint(painter, state);
-    }
+    mBackground->paint(painter, rect(), state.getScale());
 
     // paint animations
-    for (auto& anim : animations_)
+    for (auto& anim : mAnimations)
     {
         anim->paint(painter, state);
     }
 
-    // layout the player at the last "game row"
-    top = state.toViewSpace(QPoint(0, rows-1));
-    bot = state.toViewSpace(QPoint(cols, rows));
-    player_->paint(painter, QRectF(top, bot), state);
+    // paint the invaders
+    const bool bIsGameRunning = mStates.top()->isGameRunning();
+    if (bIsGameRunning)
+    {
+        for (auto& pair : mInvaders)
+        {
+            auto& invader = pair.second;
+            invader->paint(painter, state);
+        }
+    }
+
+    // finally paint the menu/HUD
+    mStates.top()->paint(painter, rect(), state.getScale());
+
+    if (mShowFps)
+    {
+        QFont font;
+        font.setFamily("Arcade");
+        font.setPixelSize(18);
+
+        QPen pen;
+        pen.setWidth(1);
+        pen.setColor(Qt::darkRed);
+        painter.setFont(font);
+        painter.setPen(pen);
+        painter.drawText(QPointF(10.0f, 20.0f), QString("fps: %1").arg(mCurrentfps));
+    }
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
 {
-    const auto key = press->key();
-
-    if (key == Qt::Key_Escape)
+    const auto action = mStates.top()->mapAction(press);
+    switch (action)
     {
-        if (help_)
-        {
-            quitHelp();
-            return;
-        }
-        else if (settings_)
-        {
-            quitSettings();
-            return;
-        }
-        else if(about_)
-        {
-            quitAbout();
-            return;
-        }
-        else if (menu_)
-        {
-            runGame_ = false;
-            return;
-        }
-        if (score_)
-            quitScore();
-        else if (fleet_)
-            quitFleet();
-
-        quitLevel();
-        showMenu();
-    }
-    else if (key == Qt::Key_Space)
-    {
-        if (help_)
-        {
-            return;
-        }
-        else if (settings_)
-        {
-            settings_->keyPress(press);
-            return;
-        }
-        else if (menu_)
-        {
-            const auto level   = menu_->selectedLevel();
-            const auto profile = menu_->selectedProfile();
-            if (!info_[level].locked || masterUnlock_)
+        case State::Action::None:
+            mStates.top()->keyPress(press);
+            break;
+        case State::Action::OpenHelp:
+            mStates.push(std::make_unique<GameHelp>());
+            break;
+        case State::Action::OpenSettings:
             {
-                startGame(level, profile);
-                quitMenu();
-                showFleet();
+                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds, isFullScreen());
+                settings->onToggleFullscreen = [this](bool fullscreen) {
+                    if (fullscreen)
+                    {
+                        showFullScreen();
+                        QApplication::setOverrideCursor(Qt::BlankCursor);
+                    }
+                    else
+                    {
+                        showNormal();
+                        QApplication::restoreOverrideCursor();
+                    }
+                };
+                settings->onTogglePlayMusic = [this](bool play) {
+                    mPlayMusic = play;
+                    playMusic();
+                };
+                settings->onTogglePlaySounds = [this](bool play) {
+                    mPlaySounds = play;
+                };
+                mStates.push(std::move(settings));
             }
-        }
-        else if (score_)
-        {
-            quitScore();
-            showMenu();
-        }
-        else if (fleet_)
-        {
-            quitFleet();
-        }
-        else if (player_)
-        {
-            player_->keyPress(press, *game_);
-        }
+            break;
+        case State::Action::OpenAbout:
+            mStates.push(std::make_unique<About>());
+            break;
+        case State::Action::QuitApp:
+            close();
+            break;
+        case State::Action::CloseState:
+            {
+                const bool bIsGameRunning = mStates.top()->isGameRunning();
+                if (bIsGameRunning)
+                {
+                    mGame->quitLevel();
+                    mInvaders.clear();
+                    mAnimations.clear();
+                }
+                mStates.pop();
+            }
+            break;
     }
-    else if (key == Qt::Key_F1)
-    {
-        showHelp();
-    }
-    else if (key == Qt::Key_F2)
-    {
-        showSettings();
-    }
-    else if (key == Qt::Key_F3)
-    {
-        showAbout();
-    }
-    else if (settings_)
-    {
-        settings_->keyPress(press);
-    }
-    else if (menu_)
-    {
-        menu_->keyPress(press);
-    }
-    else if (player_)
-    {
-        player_->keyPress(press, *game_);
-    }
-    update();
-}
-
-bool GameWidget::gameIsRunning() const
-{
-    return !menu_ && !fleet_ && !help_ && !settings_ && !about_;
-}
-
-void GameWidget::showMenu()
-{
-    menu_.reset(new Menu(levels_, info_, profiles_));
-    menu_->selectLevel(level_);
-    menu_->selectProfile(profile_);
-}
-
-void GameWidget::showHelp()
-{
-    help_.reset(new Help);
-}
-
-void GameWidget::showSettings()
-{
-    const bool isCurrentlyFullScreen = isFullScreen();
-
-    settings_.reset(new Settings(playMusic_, playSounds_, isCurrentlyFullScreen));
-    settings_->onToggleFullscreen = [this](bool onOff) {
-        if (onOff)
-        {
-            windowWidth_  = width();
-            windowHeight_ = height();
-            windowXPos_   = x();
-            windowYPos_   = y();
-            showFullScreen();
-            QApplication::setOverrideCursor(Qt::BlankCursor);
-        }
-        else
-        {
-            showNormal();
-            resize(windowWidth_, windowHeight_);
-            move(windowXPos_, windowYPos_);
-            QApplication::restoreOverrideCursor();
-        }
-    };
-    settings_->onTogglePlayMusic = [this](bool onOff) {
-        playMusic_ = onOff;
-        playMusic();
-    };
-}
-
-void GameWidget::showAbout()
-{
-    about_.reset(new About);
-}
-
-void GameWidget::quitSettings()
-{
-    playSounds_ = settings_->enableSounds();
-    playMusic_  = settings_->enableMusic();
-
-    DEBUG("Play Sounds %1", (playSounds_ ? "On" : "Off"));
-    DEBUG("Play Music %1",  (playMusic_  ? "On" : "Off"));
-
-    settings_.reset();
-
-    playMusic();
-}
-
-void GameWidget::quitAbout()
-{
-    about_.reset();
-}
-
-void GameWidget::showFleet()
-{
-    const auto& level = *levels_[level_];
-    fleet_.reset(new Fleet(level));
-}
-void GameWidget::quitHelp()
-{
-    help_.reset();
-}
-
-void GameWidget::quitFleet()
-{
-    fleet_.reset();
-}
-
-void GameWidget::quitMenu()
-{
-    menu_.reset();
-}
-
-void GameWidget::quitScore()
-{
-    score_.reset();
-}
-
-void GameWidget::quitLevel()
-{
-    if (game_->isRunning())
-    {
-        game_->quitLevel();
-        invaders_.clear();
-        animations_.clear();
-    }
-    warpFactor_ = 1.0;
 }
 
 void GameWidget::playMusic()
@@ -2576,23 +2482,27 @@ void GameWidget::playMusic()
 #ifdef ENABLE_AUDIO
     static auto music = std::make_shared<AudioSample>(R("music/awake10_megaWall.ogg"), "MainMusic");
 
-    if (playMusic_)
+    if (mPlayMusic)
     {
         DEBUG("Play music");
 
-        if (musicTrackId_)
-             g_audio->resume(musicTrackId_);
+        if (mMusicTrackId)
+        {
+             g_audio->resume(mMusicTrackId);
+        }
         else
         {
-            musicTrackId_ = g_audio->play(music, true);
+            mMusicTrackId = g_audio->play(music, true);
         }
     }
     else
     {
         DEBUG("Stop music");
 
-        if (musicTrackId_)
-            g_audio->pause(musicTrackId_);
+        if (mMusicTrackId)
+        {
+            g_audio->pause(mMusicTrackId);
+        }
     }
 #endif
 }

@@ -35,6 +35,7 @@
 #include <map>
 #include <memory>
 #include <chrono>
+#include <stack>
 
 namespace invaders
 {
@@ -64,10 +65,6 @@ namespace invaders
 
         GameWidget();
        ~GameWidget();
-
-        // start a new game. index is the number of the level to play
-        // and profile is the index of the difficulty profile to play
-        void startGame(unsigned level, unsigned profile);
 
         // load level data from the specified data file
         void loadLevels(const QString& file);
@@ -108,43 +105,30 @@ namespace invaders
 
         // set to true to play sound effects.
         void setPlaySounds(bool onOff)
-        { playSounds_ = onOff; }
+        { mPlaySounds = onOff; }
 
         // set to true to play awesome game music
         void setPlayMusic(bool onOff)
-        { playMusic_ = onOff; }
+        { mPlayMusic = onOff; }
 
         // set to true to display current fps
         void setShowFps(bool onOff)
-        { showfps_ = onOff; }
+        { mShowFps = onOff; }
 
         // set most current fps.
         // if setShowFps has been set to true will display
         // the current fps in the top left corner of the window.
         void setFps(float fps)
-        { currentfps_ = fps; }
+        { mCurrentfps = fps; }
 
         bool getPlaySounds() const
-        { return playSounds_; }
+        { return mPlaySounds; }
 
         bool getPlayMusic() const
-        { return playMusic_; }
+        { return mPlayMusic; }
 
-        bool running() const
-        { return runGame_; }
-
-        int lastWindowWidth() const
-        {
-            if (isFullScreen())
-                return windowWidth_;
-            return width();
-        }
-        int lastWindowHeight() const
-        {
-            if (isFullScreen())
-                return windowHeight_;
-            return height();
-        }
+        bool isRunning() const
+        { return mRunning; }
 
     signals:
         void enterFullScreen();
@@ -155,22 +139,18 @@ namespace invaders
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
-        bool gameIsRunning() const;
-        void showMenu();
-        void showFleet();
-        void showHelp();
-        void showSettings();
-        void showAbout();
-        void quitSettings();
-        void quitAbout();
-        void quitHelp();
-        void quitFleet();
-        void quitMenu();
-        void quitScore();
-        void quitLevel();
+        void beginPlay(unsigned levelIndex, unsigned profileIndex);
         void playMusic();
 
     private:
+        class State;
+        class MainMenu;
+        class GameHelp;
+        class Settings;
+        class About;
+        class PlayGame;
+        class Scoreboard;
+
         class Animation;
         class Explosion;
         class Smoke;
@@ -182,53 +162,34 @@ namespace invaders
         class Missile;
         class UFO;
         class Background;
-        class Scoreboard;
-        class Display;
-        class Player;
-        class Menu;
-        class Help;
-        class Fleet;
-        class Settings;
-        class About;
 
     private:
-        std::unique_ptr<Background> background_;
-        std::unique_ptr<Scoreboard> score_;
-        std::unique_ptr<Display> display_;
-        std::unique_ptr<Player> player_;
-        std::unique_ptr<Menu> menu_;
-        std::unique_ptr<Help> help_;
-        std::unique_ptr<Settings> settings_;
-        std::unique_ptr<About> about_;
-        std::unique_ptr<Fleet> fleet_;
-        std::unique_ptr<Game> game_;
-        std::map<unsigned, std::unique_ptr<Invader>> invaders_;
-        std::vector<std::unique_ptr<Level>> levels_;
-        std::vector<LevelInfo> info_;
-        std::vector<Profile> profiles_;
-        std::list<std::unique_ptr<Animation>> animations_;
-        unsigned level_;
-        unsigned profile_;
+        std::unique_ptr<Background> mBackground;
+        std::stack<std::unique_ptr<State>> mStates;
+
+        std::map<unsigned, std::unique_ptr<Invader>> mInvaders;
+        std::vector<std::unique_ptr<Level>> mLevels;
+        std::vector<LevelInfo> mLevelInfos;
+        std::vector<Profile> mProfiles;
+        std::list<std::unique_ptr<Animation>> mAnimations;
+
+        std::unique_ptr<Game> mGame;
+        unsigned mCurrentLevel   = 0;
+        unsigned mCurrentProfile = 0;
+        float mTickDelta    = 0.0f;
+        float mWarpDuration = 0.0f;
+        float mWarpFactor   = 1.0f;
+        float mCurrentfps  = 0.0f;
     private:
-        float tickDelta_;
-        float warpDuration_;
-        float warpFactor_;
-        float currentfps_;
+        bool masterUnlock_ = false;
+        bool unlimitedBombs_ = false;
+        bool unlimitedWarps_ = false;
+        bool mPlaySounds = true;
+        bool mPlayMusic  = true;
+        bool mShowFps    = false;
+        bool mRunning    = true;
     private:
-        bool masterUnlock_;
-        bool unlimitedBombs_;
-        bool unlimitedWarps_;
-        bool playSounds_;
-        bool playMusic_;
-        bool showfps_;
-        bool runGame_;
-    private:
-        std::size_t musicTrackId_;
-    private:
-        int windowXPos_;
-        int windowYPos_;
-        int windowWidth_;
-        int windowHeight_;
+        std::size_t mMusicTrackId = 0;
     };
 
 } // invaders
