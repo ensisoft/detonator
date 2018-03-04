@@ -28,6 +28,7 @@
 #  include <QSettings>
 #  include <QElapsedTimer>
 #  include <QtGui/QScreen>
+#  include <QtGui/QSurfaceFormat>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -104,6 +105,12 @@ int game_main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     app.setApplicationName("Pinyin-Invaders");
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setStencilBufferSize(8);
+    format.setSamples(4);
+    format.setColorSpace(QSurfaceFormat::sRGBColorSpace);
+    QSurfaceFormat::setDefaultFormat(format);
 
     const auto& args = app.arguments();
     for (const auto& a : args)
