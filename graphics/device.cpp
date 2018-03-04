@@ -375,9 +375,22 @@ private:
         }
         void Draw(GLuint program)
         {
-            GLint pos = glGetAttribLocation(program,  "aPosition");
-            GL_CHECK(glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), &mData[0]));
-            GL_CHECK(glEnableVertexAttribArray(pos));
+            GLint aPosition = glGetAttribLocation(program, "aPosition");
+            GLint aTexCoord = glGetAttribLocation(program, "aTexCoord");
+
+            uint8_t* base = reinterpret_cast<uint8_t*>(&mData[0]);
+            if (aPosition != -1)
+            {
+                GL_CHECK(glVertexAttribPointer(aPosition, 2, GL_FLOAT, GL_FALSE,
+                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aPosition))));
+                GL_CHECK(glEnableVertexAttribArray(aPosition));
+            }
+            if (aTexCoord != -1)
+            {
+                GL_CHECK(glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE,
+                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
+                GL_CHECK(glEnableVertexAttribArray(aTexCoord));
+            }
             GL_CHECK(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
         }
     private:
