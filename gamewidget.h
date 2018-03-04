@@ -41,6 +41,8 @@ namespace invaders
 {
     class Game;
     class Level;
+    class Painter;
+    class GraphicsDevice;
 
     class GameWidget : public QOpenGLWidget
     {
@@ -135,6 +137,7 @@ namespace invaders
         void leaveFullScreen();
 
     private:
+        virtual void initializeGL() override;
         virtual void closeEvent(QCloseEvent* close) override;
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
@@ -190,6 +193,9 @@ namespace invaders
         bool mRunning    = true;
     private:
         std::size_t mMusicTrackId = 0;
+    private:
+        std::shared_ptr<GraphicsDevice> mCustomGraphicsDevice;
+        std::unique_ptr<Painter> mCustomGraphicsPainter;
     };
 
 } // invaders

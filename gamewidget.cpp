@@ -48,6 +48,8 @@
 #include "audio/sample.h"
 #include "audio/player.h"
 #include "base/logging.h"
+#include "graphics/device.h"
+#include "graphics/painter.h"
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
@@ -248,10 +250,24 @@ public:
         QuitApp
     };
 
+    // paint the user interface state
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
-    virtual void update(float dt) = 0;
+
+    // paint the user interface state with the custom painter
+    virtual void paint(Painter& painter, const TransformState& transform) const
+    {}
+
+    // update the state.. umh.. state from the delta time
+    virtual void update(float dt)
+    {}
+
+    // map keyboard input to an action.
     virtual Action mapAction(const QKeyEvent* press) const = 0;
+
+    // handle the raw unmapped keyboard event
     virtual void keyPress(const QKeyEvent* press) = 0;
+
+    // returns true if state represents the running game.
     virtual bool isGameRunning() const
     { return false; }
 
@@ -1254,22 +1270,30 @@ public:
     {}
 
     virtual void update(float dt) override
-    {}
+    { mTotalTimeRun += dt; }
 
-    virtual Action mapAction(const QKeyEvent* event) const
+    virtual void paint(Painter& painter, const TransformState& parentTransform) const override
     {
-        switch (event->key())
-        {
-            case Qt::Key_F1:
-                return Action::OpenHelp;
-            case Qt::Key_F2:
-                return Action::OpenSettings;
-            case Qt::Key_F3:
-                return Action::OpenAbout;
-            case Qt::Key_Escape:
-                return Action::QuitApp;
-        }
-        return Action::None;
+        const auto cols = 7;
+        const auto rows = 6;
+        TransformState myTransform(parentTransform.viewRect(), cols, rows);
+
+        QRectF rc = myTransform.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
+        const auto x = rc.x();
+        const auto y = rc.y();
+        const auto w = rc.width();
+        const auto h = rc.height();
+
+        Transform dt, mt;
+        dt.MoveTo(x, y);
+        dt.Resize(w, h);
+
+        mt.MoveTo(x, y+2);
+        mt.Resize(w, h-4);
+
+        SlidingGlintEffect effect;
+        effect.SetAppRuntime(mTotalTimeRun/1000.0f);
+        painter.DrawMasked(Rect(), dt, Rect(), mt, effect);
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
@@ -1400,6 +1424,23 @@ public:
         }
         ++blink_text;
     }
+
+    virtual Action mapAction(const QKeyEvent* event) const
+    {
+        switch (event->key())
+        {
+            case Qt::Key_F1:
+                return Action::OpenHelp;
+            case Qt::Key_F2:
+                return Action::OpenSettings;
+            case Qt::Key_F3:
+                return Action::OpenAbout;
+            case Qt::Key_Escape:
+                return Action::QuitApp;
+        }
+        return Action::None;
+    }
+
     virtual void keyPress(const QKeyEvent* press) override
     {
         const int numLevelsMin = 0;
@@ -1492,6 +1533,7 @@ private:
     unsigned profile_ = 0;
     unsigned selrow_  = 1;
 private:
+    float mTotalTimeRun = 0.0f;
 
 };
 
@@ -2368,6 +2410,14 @@ void GameWidget::renderGame()
     repaint();
 }
 
+void GameWidget::initializeGL()
+{
+    DEBUG("Initialize OpenGL");
+    // create custom painter for fancier shader based effects.
+    mCustomGraphicsDevice  = GraphicsDevice::Create(GraphicsDevice::Type::OpenGL_ES2);
+    mCustomGraphicsPainter = Painter::Create(mCustomGraphicsDevice);
+}
+
 void GameWidget::closeEvent(QCloseEvent* close)
 {
     mRunning = false;
@@ -2404,6 +2454,21 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     // finally paint the menu/HUD
     mStates.top()->paint(painter, rect(), state.getScale());
+
+    // do a second pass painter using the custom painter.
+    // since we're drawing using the same OpenGL context the
+    // state management is somewhat tricky.
+    painter.beginNativePainting();
+
+    GraphicsDevice::StateBuffer currentState;
+    mCustomGraphicsDevice->GetState(&currentState);
+    mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+
+    mStates.top()->paint(*mCustomGraphicsPainter, state);
+
+    mCustomGraphicsDevice->SetState(currentState);
+    painter.endNativePainting();
+
 
     if (mShowFps)
     {

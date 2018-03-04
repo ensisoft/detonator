@@ -171,4 +171,19 @@ namespace invaders
     public:
     };
 
+    class SlidingGlintEffect : public Material
+    {
+    public:
+        virtual void Apply(Program& prog) const override
+        {
+            prog.SetUniform("uRuntime", mRunTime);
+        }
+
+        void SetAppRuntime(float r)
+        { mRunTime = r; }
+    private:
+        float mRunTime = 0.0f;
+    };
+
+
 } // namespace

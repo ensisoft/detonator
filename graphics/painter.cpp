@@ -126,6 +126,8 @@ private:
         // map material to the shader we use to implement it.
         if (dynamic_cast<const Fill*>(&mat))
             material_shader = "fill_color.glsl";
+        else if (dynamic_cast<const SlidingGlintEffect*>(&mat))
+            material_shader = "sliding_glint_effect.glsl";
 
         ASSERT(!material_shader.empty());
 
