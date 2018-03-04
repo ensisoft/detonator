@@ -27,6 +27,7 @@
 #include <string>
 
 #include "geometry.h"
+#include "program.h"
 
 namespace invaders
 {
@@ -74,27 +75,28 @@ namespace invaders
     };
 
 
-    class Shape
+
+    class Drawable
     {
     public:
-        virtual ~Shape() = default;
+        virtual ~Drawable() = default;
         virtual void Upload(Geometry& geom) const = 0;
     private:
     };
 
-    class Rect : public Shape
+    class Rect : public Drawable
     {
     public:
         virtual void Upload(Geometry& geom) const
         {
             const Vertex verts[6] = {
-                { 0,  0 },
-                { 0, -1 },
-                { 1, -1 },
+                { {0,  0}, {0, 1} },
+                { {0, -1}, {0, 0} },
+                { {1, -1}, {1, 0} },
 
-                { 0,  0 },
-                { 1, -1 },
-                { 1,  0 }
+                { {0,  0}, {0, 1} },
+                { {1, -1}, {1, 0} },
+                { {1,  0}, {1, 1} }
             };
             geom.Update(verts, 6);
         }
@@ -144,14 +146,23 @@ namespace invaders
         float mAlpha = 1.0f;
     };
 
+    class Material
+    {
+    public:
+        virtual ~Material() = default;
+        virtual void Apply(Program& prog) const = 0;
+    };
+
     class Gradient
     {
     public:
     };
 
-    class Fill
+    class Fill : public Material
     {
     public:
+        virtual void Apply(Program& prog) const override
+        {}
     private:
     };
 

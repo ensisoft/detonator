@@ -40,7 +40,11 @@ namespace invaders
 
         virtual void Clear(const Color4f& color) = 0;
 
-        virtual void Draw(const Rect& rc, const Transform& t, const Fill& color) = 0;
+        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
+
+        virtual void DrawMasked(const Drawable& drawShape, const Transform& drawTransform,
+                                const Drawable& maskShape, const Transform& maskTransform,
+                                const Material& material) = 0;
 
         static
         std::unique_ptr<Painter> Create(std::shared_ptr<GraphicsDevice> device);

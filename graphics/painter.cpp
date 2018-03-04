@@ -61,12 +61,12 @@ public:
         mDevice->ClearColor(color);
     }
 
-    virtual void Draw(const Rect& rc, const Transform& t, const Fill& fill) override
+    virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) override
     {
-        Geometry* geom = ToDeviceGeometry(rc);
-        Program* prog = GetProgram("FillRect", "vertex_array.glsl", "fill_color.glsl");
-        prog->SetUniform("kScalingFactor", t.Width(), t.Height());
-        prog->SetUniform("kTranslationTerm", t.X(), t.Y());
+        Geometry* geom = ToDeviceGeometry(shape);
+        Program* prog = GetProgram(shape, mat);
+        prog->SetUniform("kScalingFactor", transform.Width(), transform.Height());
+        prog->SetUniform("kTranslationTerm", transform.X(), transform.Y());
         prog->SetUniform("kViewport", mViewW, mViewH);
 
         GraphicsDevice::State state;
@@ -77,7 +77,63 @@ public:
         mDevice->Draw(*prog, *geom, state);
     }
 
+    virtual void DrawMasked(const Drawable& drawShape, const Transform& drawTransform,
+                            const Drawable& maskShape, const Transform& maskTransform,
+                            const Material& material) override
+    {
+
+        mDevice->ClearStencil(1);
+
+        GraphicsDevice::State state;
+        state.viewport.x      = mViewX;
+        state.viewport.y      = mViewY;
+        state.viewport.width  = mViewW;
+        state.viewport.height = mViewH;
+        state.stencil_func    = GraphicsDevice::State::StencilFunc::PassAlways;
+        state.stencil_dpass   = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_ref     = 0;
+        state.bWriteColor     = false;
+
+        Geometry* maskGeom = ToDeviceGeometry(maskShape);
+        Program* maskProg = GetProgram(maskShape, Fill());
+        maskProg->SetUniform("kScalingFactor", maskTransform.Width(), maskTransform.Height());
+        maskProg->SetUniform("kTranslationTerm", maskTransform.X(), maskTransform.Y());
+        maskProg->SetUniform("kViewport", mViewW, mViewH);
+        material.Apply(*maskProg);
+        mDevice->Draw(*maskProg, *maskGeom, state);
+
+        state.stencil_func    = GraphicsDevice::State::StencilFunc::RefIsEqual;
+        state.stencil_dpass   = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_ref     = 1;
+        state.bWriteColor     = true;
+        state.bEnableBlend    = true;
+
+        Geometry* drawGeom = ToDeviceGeometry(drawShape);
+        Program* drawProg = GetProgram(drawShape, material);
+        drawProg->SetUniform("kScalingFactor", drawTransform.Width(), drawTransform.Height());
+        drawProg->SetUniform("kTranslationTerm", drawTransform.X(), drawTransform.Y());
+        drawProg->SetUniform("kViewport", mViewW, mViewH);
+        material.Apply(*drawProg);
+
+        mDevice->Draw(*drawProg, *drawGeom, state);
+    }
+
 private:
+    Program* GetProgram(const Drawable& shape, const Material& mat)
+    {
+        std::string drawable_shader = "vertex_array.glsl";
+        std::string material_shader;
+        // map material to the shader we use to implement it.
+        if (dynamic_cast<const Fill*>(&mat))
+            material_shader = "fill_color.glsl";
+
+        ASSERT(!material_shader.empty());
+
+        // program is a combination of the vertex shader + fragment shader.
+        return GetProgram(drawable_shader + "/" + material_shader,
+            drawable_shader, material_shader);
+    }
+
     Program* GetProgram(const std::string& name,
         const std::string& vshader_file, const std::string& fshader_file)
     {
@@ -122,10 +178,9 @@ private:
         }
         return it->second.get();
     }
-    template<typename Shape>
-    Geometry* ToDeviceGeometry(const Shape& shape)
+    Geometry* ToDeviceGeometry(const Drawable& shape)
     {
-        const auto& name = typeid(Shape).name();
+        const auto& name = typeid(shape).name();
         auto it = mGeoms.find(name);
         if (it == std::end(mGeoms))
         {
