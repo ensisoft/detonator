@@ -58,7 +58,7 @@ public:
 
     virtual void Clear(const Color4f& color) override
     {
-        mDevice->Clear(color);
+        mDevice->ClearColor(color);
     }
 
     virtual void Draw(const Rect& rc, const Transform& t, const Fill& fill) override

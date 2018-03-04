@@ -130,11 +130,46 @@ namespace invaders
 class OpenGLES2GraphicsDevice : public GraphicsDevice
 {
 public:
-    virtual void Clear(const Color4f& color) override
+    OpenGLES2GraphicsDevice()
     {
-        GL_CHECK(glClearDepth(1.0f));
+        // it'd make sense to create own context here but the but
+        // problem is that currently we're using Qt widget as the window
+        // and it creates a FBO into which all the rendering is done.
+        // The FBOs are not shareable between contexts so then we'd need
+        // to render to a texture shared between the widget context and
+        // our context.
+
+        GLint stencil_bits = 0;
+        GLint red_bits   = 0;
+        GLint green_bits = 0;
+        GLint blue_bits  = 0;
+        GLint alpha_bits = 0;
+        GLint depth_bits = 0;
+        glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
+        glGetIntegerv(GL_RED_BITS, &red_bits);
+        glGetIntegerv(GL_GREEN_BITS, &green_bits);
+        glGetIntegerv(GL_BLUE_BITS, &blue_bits);
+        glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
+        glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
+
+        INFO("OpenGLESGraphicsDevice");
+        INFO("Stencil bits: %1", stencil_bits);
+        INFO("Red bits: %1", red_bits);
+        INFO("Blue bits: %1", blue_bits);
+        INFO("Green bits: %1", green_bits);
+        INFO("Alpha bits: %1", alpha_bits);
+        INFO("Depth bits: %1", depth_bits);
+    }
+
+    virtual void ClearColor(const Color4f& color) override
+    {
         GL_CHECK(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
+    }
+    virtual void ClearStencil(int value) override
+    {
+        GL_CHECK(glClearStencil(value));
+        GL_CHECK(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
     virtual std::unique_ptr<Shader> NewShader() override
@@ -167,6 +202,14 @@ public:
         glGetIntegerv(GL_BLEND_DST_RGB,   &s.gl_blend_dst_rgb);
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &s.gl_blend_src_alpha);
         glGetIntegerv(GL_BLEND_DST_ALPHA, &s.gl_blend_dst_alpha);
+        glGetIntegerv(GL_STENCIL_TEST, &s.gl_stencil_enabled);
+        glGetIntegerv(GL_STENCIL_VALUE_MASK, &s.gl_stencil_mask);
+        glGetIntegerv(GL_STENCIL_REF, &s.gl_stencil_ref);
+        glGetIntegerv(GL_STENCIL_FUNC, &s.gl_stencil_func);
+        glGetIntegerv(GL_STENCIL_FAIL, &s.gl_stencil_fail);
+        glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &s.gl_stencil_dpass);
+        glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &s.gl_stencil_dfail);
+        glGetIntegerv(GL_COLOR_WRITEMASK, s.gl_color_mask);
 
         state->resize(sizeof(s));
         std::memcpy(&(*state)[0], &s, sizeof(s));
@@ -208,26 +251,80 @@ public:
         NativeState s;
         std::memcpy((void*)&s, &state[0], sizeof(NativeState));
 
-        Toggle(GL_BLEND, s.gl_blend_enabled);
+        EnableIf(GL_BLEND, s.gl_blend_enabled);
         glBlendFunc(s.gl_blend_src_rgb,   s.gl_blend_dst_rgb);
         glBlendFunc(s.gl_blend_src_alpha, s.gl_blend_dst_alpha);
+
+        EnableIf(GL_STENCIL_TEST, s.gl_stencil_enabled);
+        glStencilFunc(s.gl_stencil_func, s.gl_stencil_ref, s.gl_stencil_mask);
+        glStencilOp(s.gl_stencil_fail, s.gl_stencil_dfail, s.gl_stencil_dpass);
+
+        glColorMask(s.gl_color_mask[0], s.gl_color_mask[1], s.gl_color_mask[2], s.gl_color_mask[3]);
 
         GL_CHECK((void)0);
     }
 private:
     struct NativeState {
-        int gl_blend_src_rgb = 0;
-        int gl_blend_dst_rgb = 0;
+        int gl_blend_src_rgb   = 0;
+        int gl_blend_dst_rgb   = 0;
         int gl_blend_src_alpha = 0;
         int gl_blend_dst_alpha = 0;
-        int gl_blend_enabled = 0;
+        int gl_blend_enabled   = 0;
+
+        int gl_stencil_enabled = 0;
+        int gl_stencil_func    = 0;
+        int gl_stencil_ref     = 0;
+        int gl_stencil_mask    = 0;
+        int gl_stencil_fail    = 0;
+        int gl_stencil_dfail   = 0;
+        int gl_stencil_dpass   = 0;
+
+        int gl_color_mask[4]   = {};
     };
 
-    void Toggle(GLenum flag, bool on_off)
+    bool EnableIf(GLenum flag, bool on_off)
     {
         if (on_off)
-            glEnable(flag);
-        else glDisable(flag);
+        {
+            GL_CHECK(glEnable(flag));
+        }
+        else
+        {
+            GL_CHECK(glDisable(flag));
+        }
+        return on_off;
+    }
+    static GLenum ToGLEnum(State::StencilFunc func)
+    {
+        using Func = State::StencilFunc;
+        switch (func)
+        {
+            case Func::Disabled:         return GL_NONE;
+            case Func::PassAlways:       return GL_ALWAYS;
+            case Func::PassNever:        return GL_NEVER;
+            case Func::RefIsLess:        return GL_LESS;
+            case Func::RefIsLessOrEqual: return GL_LEQUAL;
+            case Func::RefIsMore:        return GL_GREATER;
+            case Func::RefIsMoreOrEqual: return GL_GEQUAL;
+            case Func::RefIsEqual:       return GL_EQUAL;
+            case Func::RefIsNotEqual:    return GL_NOTEQUAL;
+        }
+        ASSERT(!"???");
+        return GL_NONE;
+    }
+    static GLenum ToGLEnum(State::StencilOp op)
+    {
+        using Op = State::StencilOp;
+        switch (op)
+        {
+            case Op::DontModify: return GL_KEEP;
+            case Op::WriteZero:  return GL_ZERO;
+            case Op::WriteRef:   return GL_REPLACE;
+            case Op::Increment:  return GL_INCR;
+            case Op::Decrement:  return GL_DECR;
+        }
+        ASSERT("???");
+        return GL_NONE;
     }
 
     void SetState(const State& state)
@@ -235,16 +332,28 @@ private:
         GL_CHECK(glViewport(state.viewport.x, state.viewport.y,
             state.viewport.width, state.viewport.height));
 
-        if (state.bEnableBlend)
+        if (EnableIf(GL_BLEND, state.bEnableBlend))
         {
             GL_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-            GL_CHECK(glEnable(GL_BLEND));
+        }
+
+        if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))
+        {
+            const auto stencil_func  = ToGLEnum(state.stencil_func);
+            const auto stencil_fail  = ToGLEnum(state.stencil_fail);
+            const auto stencil_dpass = ToGLEnum(state.stencil_dpass);
+            const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
+            GL_CHECK(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+            GL_CHECK(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        }
+        if (state.bWriteColor)
+        {
+            GL_CHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
         }
         else
         {
-            GL_CHECK(glDisable(GL_BLEND));
+            GL_CHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         }
-
     }
 
 private:

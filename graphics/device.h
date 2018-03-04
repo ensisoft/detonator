@@ -48,6 +48,32 @@ namespace invaders
 
         struct State {
             bool bEnableBlend = false;
+            bool bWriteColor = true;
+
+            enum class StencilFunc {
+                Disabled,
+                PassAlways,
+                PassNever,
+                RefIsLess,
+                RefIsLessOrEqual,
+                RefIsMore,
+                RefIsMoreOrEqual,
+                RefIsEqual,
+                RefIsNotEqual
+            };
+            enum class StencilOp {
+                DontModify,
+                WriteZero,
+                WriteRef,
+                Increment,
+                Decrement
+            };
+            StencilFunc  stencil_func  = StencilFunc::Disabled;
+            StencilOp    stencil_fail  = StencilOp::DontModify;
+            StencilOp    stencil_dpass = StencilOp::DontModify;
+            StencilOp    stencil_dfail = StencilOp::DontModify;
+            std::uint8_t stencil_mask  = 0xff;
+            std::uint8_t stencil_ref   = 0x0;
 
             Rect viewport;
         };
@@ -58,7 +84,8 @@ namespace invaders
 
         virtual ~GraphicsDevice() = default;
 
-        virtual void Clear(const Color4f& color) = 0;
+        virtual void ClearColor(const Color4f& color) = 0;
+        virtual void ClearStencil(int value) = 0;
 
         // Create a new device specific shader object.
         virtual std::unique_ptr<Shader> NewShader() = 0;
