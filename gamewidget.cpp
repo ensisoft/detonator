@@ -1679,7 +1679,10 @@ public:
         if (key == Qt::Key_Space)
         {
             if (mSettingIndex == 0)
+            {
                 mPlaySounds = !mPlaySounds;
+                onTogglePlaySounds(mPlaySounds);
+            }
             else if (mSettingIndex == 1)
             {
                 mPlayMusic = !mPlayMusic;
