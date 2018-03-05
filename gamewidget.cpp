@@ -271,6 +271,9 @@ public:
     virtual bool isGameRunning() const
     { return false; }
 
+    virtual void setPlaySounds(bool on)
+    {}
+
 private:
 };
 
@@ -1264,9 +1267,11 @@ public:
     std::function<void (unsigned level, unsigned profile)> onBeginPlay;
 
     MainMenu(const std::vector<std::unique_ptr<Level>>& levels,
-             const std::vector<GameWidget::LevelInfo>& infos)
+             const std::vector<GameWidget::LevelInfo>& infos,
+             bool bPlaySounds)
     : mLevels(levels)
-    , infos_(infos)
+    , mInfos(infos)
+    , mPlaySounds(bPlaySounds)
     {}
 
     virtual void update(float dt) override
@@ -1342,10 +1347,10 @@ public:
 
         TransformState sub(rect, 3, 1);
         rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));
-        if (profile_ == 0)
+        if (mCurrentProfileIndex == 0)
         {
             painter.setFont(underline);
-            if (selrow_ == 0)
+            if (mCurrentRowIndex == 0)
                 painter.setPen(selected);
         }
 
@@ -1354,10 +1359,10 @@ public:
         painter.setFont(font);
 
         rect = sub.toViewSpaceRect(QPoint(1, 0), QPoint(2, 1));
-        if (profile_ == 1)
+        if (mCurrentProfileIndex == 1)
         {
             painter.setFont(underline);
-            if (selrow_ == 0)
+            if (mCurrentRowIndex == 0)
                 painter.setPen(selected);
         }
 
@@ -1366,10 +1371,10 @@ public:
         painter.setFont(font);
 
         rect = sub.toViewSpaceRect(QPoint(2, 0), QPoint(3, 1));
-        if (profile_ == 2)
+        if (mCurrentProfileIndex == 2)
         {
             painter.setFont(underline);
-            if (selrow_ == 0)
+            if (mCurrentRowIndex == 0)
                 painter.setPen(selected);
         }
 
@@ -1382,19 +1387,19 @@ public:
         small.setPixelSize(unit.y() / 2.5);
         painter.setFont(small);
 
-        const auto prev = level_ > 0 ? level_ - 1 : mLevels.size() - 1;
-        const auto next = (level_ + 1) % mLevels.size();
+        const auto prev = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevels.size() - 1;
+        const auto next = (mCurrentLevelIndex + 1) % mLevels.size();
         const auto& left  = mLevels[prev];
-        const auto& mid   = mLevels[level_];
+        const auto& mid   = mLevels[mCurrentLevelIndex];
         const auto& right = mLevels[next];
 
         rect = state.toViewSpaceRect(QPoint(1, 4), QPoint(2, 5));
         drawLevel(painter, rect, *left, prev, false);
 
         bool hilite = false;
-        if (selrow_ == 1)
+        if (mCurrentRowIndex == 1)
         {
-            if (infos_[level_].locked)
+            if (mInfos[mCurrentLevelIndex].locked)
                  painter.setPen(locked);
             else painter.setPen(selected);
             hilite = true;
@@ -1405,7 +1410,7 @@ public:
         }
 
         rect = state.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
-        drawLevel(painter, rect, *mid, level_, hilite);
+        drawLevel(painter, rect, *mid, mCurrentLevelIndex, hilite);
 
         painter.setPen(regular);
         rect = state.toViewSpaceRect(QPoint(5, 4), QPoint(6, 5));
@@ -1448,59 +1453,62 @@ public:
         const int numProfilesMin = 0;
         const int numProfilesMax = 2;
 
+        bool bPlaySound = false;
+
         const auto key = press->key();
         if (key == Qt::Key_Left)
         {
-            if (selrow_ == 0)
+            if (mCurrentRowIndex == 0)
             {
-                profile_ = wrap(numProfilesMax, numProfilesMin, (int)profile_ - 1);
+                mCurrentProfileIndex = wrap(numProfilesMax, numProfilesMin, mCurrentProfileIndex - 1);
             }
             else
             {
-                level_ = wrap(numLevelsMax, numLevelsMin, (int)level_ -1);
+                mCurrentLevelIndex = wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex -1);
             }
-
+            bPlaySound = true;
         }
         else if (key == Qt::Key_Right)
         {
-            if (selrow_ == 0)
+            if (mCurrentRowIndex == 0)
             {
-                profile_ = wrap(numProfilesMax, numProfilesMin, (int)profile_ + 1);
+                mCurrentProfileIndex = wrap(numProfilesMax, numProfilesMin,  mCurrentProfileIndex + 1);
             }
             else
             {
-                level_ = wrap(numLevelsMax, numLevelsMin, (int)level_ + 1);
+                mCurrentLevelIndex = wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex + 1);
             }
+            bPlaySound = true;
         }
         else if (key == Qt::Key_Up)
         {
-            selrow_ = wrap(1, 0, (int)selrow_  - 1);
+            mCurrentRowIndex = wrap(1, 0, mCurrentRowIndex - 1);
         }
         else if (key == Qt::Key_Down)
         {
-            selrow_ = wrap(1, 0, (int)selrow_ + 1);
+            mCurrentRowIndex = wrap(1, 0, mCurrentRowIndex + 1);
         }
         else if (key == Qt::Key_Space)
         {
-            onBeginPlay(level_, profile_);
+            onBeginPlay(mCurrentLevelIndex, mCurrentProfileIndex);
+        }
+
+        if (bPlaySound && mPlaySounds)
+        {
+        #ifdef ENABLE_AUDIO
+            static auto swoosh = std::make_shared<AudioSample>(R("sounds/Slide_Soft_00.ogg"), "swoosh");
+            g_audio->play(swoosh);
+        #endif
         }
     }
 
-    unsigned selectedLevel() const
-    { return level_; }
+    virtual void setPlaySounds(bool on) override
+    { mPlaySounds = on; }
 
-    unsigned selectedProfile() const
-    { return profile_; }
-
-    void selectLevel(unsigned level)
-    { level_ = level; }
-
-    void selectProfile(unsigned profile)
-    { profile_ = profile; }
 private:
     void drawLevel(QPainter& painter, const QRectF& rect, const Level& level, int index, bool hilite)
     {
-        const auto& info = infos_[index];
+        const auto& info = mInfos[index];
 
         QString locked;
         if (info.locked)
@@ -1528,12 +1536,14 @@ private:
 
 private:
     const std::vector<std::unique_ptr<Level>>& mLevels;
-    const std::vector<LevelInfo>& infos_;
-    unsigned level_   = 0;
-    unsigned profile_ = 0;
-    unsigned selrow_  = 1;
+    const std::vector<LevelInfo>& mInfos;
+    int mCurrentLevelIndex   = 0;
+    int mCurrentProfileIndex = 0;
+    int mCurrentRowIndex  = 1;
 private:
     float mTotalTimeRun = 0.0f;
+private:
+    bool mPlaySounds = true;
 
 };
 
@@ -2235,7 +2245,7 @@ GameWidget::GameWidget()
     mBackground.reset(new Background);
 
     // initialize the input/state stack with the main menu.
-    auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos);
+    auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, true);
     menu->onBeginPlay = std::bind(&GameWidget::beginPlay, this,
         std::placeholders::_1, std::placeholders::_2);
     mStates.push(std::move(menu));
@@ -2413,6 +2423,12 @@ void GameWidget::renderGame()
     repaint();
 }
 
+void GameWidget::setPlaySounds(bool onOff)
+{
+    mPlaySounds = onOff;
+    mStates.top()->setPlaySounds(onOff);
+}
+
 void GameWidget::initializeGL()
 {
     DEBUG("Initialize OpenGL");
@@ -2540,6 +2556,8 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
                     mAnimations.clear();
                 }
                 mStates.pop();
+                mStates.top()->setPlaySounds(mPlaySounds);
+
             }
             break;
     }

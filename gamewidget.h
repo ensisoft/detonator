@@ -106,8 +106,7 @@ namespace invaders
         { unlimitedBombs_ = onOff; }
 
         // set to true to play sound effects.
-        void setPlaySounds(bool onOff)
-        { mPlaySounds = onOff; }
+        void setPlaySounds(bool onOff);
 
         // set to true to play awesome game music
         void setPlayMusic(bool onOff)
