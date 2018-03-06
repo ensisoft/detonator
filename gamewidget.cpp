@@ -247,7 +247,8 @@ public:
         OpenSettings,
         OpenAbout,
         CloseState,
-        QuitApp
+        QuitApp,
+        NewGame
     };
 
     // paint the user interface state
@@ -272,6 +273,8 @@ public:
     { return false; }
 
     virtual void setPlaySounds(bool on)
+    {}
+    virtual void setMasterUnlock(bool on)
     {}
 
 private:
@@ -1271,8 +1274,6 @@ private:
 class GameWidget::MainMenu : public GameWidget::State
 {
 public:
-    std::function<void (unsigned level, unsigned profile)> onBeginPlay;
-
     MainMenu(const std::vector<std::unique_ptr<Level>>& levels,
              const std::vector<GameWidget::LevelInfo>& infos,
              bool bPlaySounds)
@@ -1432,7 +1433,14 @@ public:
             rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
             painter.setPen(regular);
             painter.setFont(font);
-            painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
+            if (mInfos[mCurrentLevelIndex].locked)
+            {
+                painter.drawText(rect, Qt::AlignCenter, "This level is locked!\n");
+            }
+            else
+            {
+                painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
+            }
         }
         ++blink_text;
     }
@@ -1449,6 +1457,14 @@ public:
                 return Action::OpenAbout;
             case Qt::Key_Escape:
                 return Action::QuitApp;
+            case Qt::Key_Space:
+                {
+                    if (!mInfos[mCurrentLevelIndex].locked || mMasterUnlock)
+                    {
+                        return Action::NewGame;
+                    }
+                }
+                break;
         }
         return Action::None;
     }
@@ -1495,10 +1511,6 @@ public:
         {
             mCurrentRowIndex = wrap(1, 0, mCurrentRowIndex + 1);
         }
-        else if (key == Qt::Key_Space)
-        {
-            onBeginPlay(mCurrentLevelIndex, mCurrentProfileIndex);
-        }
 
         if (bPlaySound && mPlaySounds)
         {
@@ -1511,6 +1523,18 @@ public:
 
     virtual void setPlaySounds(bool on) override
     { mPlaySounds = on; }
+
+    virtual void setMasterUnlock(bool on) override
+    { mMasterUnlock = on; }
+
+    size_t getLevelIndex() const
+    {
+        return static_cast<size_t>(mCurrentLevelIndex);
+    }
+    size_t getProfileIndex() const
+    {
+        return static_cast<size_t>(mCurrentProfileIndex);
+    }
 
 private:
     void drawLevel(QPainter& painter, const QRectF& rect, const Level& level, int index, bool hilite)
@@ -1551,6 +1575,7 @@ private:
     float mTotalTimeRun = 0.0f;
 private:
     bool mPlaySounds = true;
+    bool mMasterUnlock = false;
 
 };
 
@@ -2253,8 +2278,6 @@ GameWidget::GameWidget()
 
     // initialize the input/state stack with the main menu.
     auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, true);
-    menu->onBeginPlay = std::bind(&GameWidget::beginPlay, this,
-        std::placeholders::_1, std::placeholders::_2);
     mStates.push(std::move(menu));
 
     // enable keyboard events
@@ -2271,32 +2294,6 @@ GameWidget::GameWidget()
 }
 
 GameWidget::~GameWidget() = default;
-
-void GameWidget::beginPlay(unsigned levelIndex, unsigned profileIndex)
-{
-    ASSERT(levelIndex   < mLevels.size());
-    ASSERT(profileIndex < mProfiles.size());
-
-    const auto& level   = mLevels[levelIndex];
-    const auto& profile = mProfiles[profileIndex];
-    DEBUG("Start game: %1 / %2", level->name(), profile.name);
-
-    mCurrentLevel   = levelIndex;
-    mCurrentProfile = profileIndex;
-    mTickDelta      = 0;
-    mWarpFactor     = 1.0;
-    mWarpDuration   = 0;
-
-    Game::setup setup;
-    setup.numEnemies    = profile.numEnemies;
-    setup.spawnCount    = profile.spawnCount;
-    setup.spawnInterval = profile.spawnInterval;
-    setup.numBombs      = unlimitedBombs_ ? std::numeric_limits<unsigned>::max() : 2;
-    setup.numWarps      = unlimitedWarps_ ? std::numeric_limits<unsigned>::max() : 2;
-
-    auto playing = std::make_unique<PlayGame>(setup, *mLevels[levelIndex], *mGame);
-    mStates.push(std::move(playing));
-}
 
 void GameWidget::loadLevels(const QString& file)
 {
@@ -2435,6 +2432,12 @@ void GameWidget::setPlaySounds(bool onOff)
     mStates.top()->setPlaySounds(onOff);
 }
 
+void GameWidget::setMasterUnlock(bool onOff)
+{
+    mMasterUnlock = onOff;
+    mStates.top()->setMasterUnlock(onOff);
+}
+
 void GameWidget::initializeGL()
 {
     DEBUG("Initialize OpenGL");
@@ -2552,6 +2555,38 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         case State::Action::QuitApp:
             close();
             break;
+        case State::Action::NewGame:
+            {
+                // todo: packge the parameters with the return action
+                // and get rid of this casting here.
+                const auto* mainMenu = dynamic_cast<const MainMenu*>(mStates.top().get());
+                const auto levelIndex   = mainMenu->getLevelIndex();
+                const auto profileIndex = mainMenu->getProfileIndex();
+
+                ASSERT(mLevels.size() == mLevelInfos.size());
+                ASSERT(levelIndex < mLevels.size());
+                ASSERT(profileIndex < mProfiles.size());
+
+                const auto& profile = mProfiles[profileIndex];
+                const auto& level   = mLevels[levelIndex];
+                DEBUG("Start game: %1 / %2", level->name(), profile.name);
+
+                Game::setup setup;
+                setup.numEnemies    = profile.numEnemies;
+                setup.spawnCount    = profile.spawnCount;
+                setup.spawnInterval = profile.spawnInterval;
+                setup.numBombs      = mUnlimitedBombs ? std::numeric_limits<unsigned>::max() : 2;
+                setup.numWarps      = mUnlimitedWarps ? std::numeric_limits<unsigned>::max() : 2;
+                auto playing = std::make_unique<PlayGame>(setup, *mLevels[levelIndex], *mGame);
+                mStates.push(std::move(playing));
+
+                mCurrentLevel   = levelIndex;
+                mCurrentProfile = profileIndex;
+                mTickDelta  = 0;
+                mWarpFactor = 1.0;
+                mWarpDuration = 0.0f;
+            }
+            break;
         case State::Action::CloseState:
             {
                 const bool bIsGameRunning = mStates.top()->isGameRunning();
@@ -2563,7 +2598,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
                 }
                 mStates.pop();
                 mStates.top()->setPlaySounds(mPlaySounds);
-
+                mStates.top()->setMasterUnlock(mMasterUnlock);
             }
             break;
     }

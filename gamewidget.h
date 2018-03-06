@@ -94,16 +94,15 @@ namespace invaders
         void renderGame();
 
         // set to true to unlock all levels.
-        void setMasterUnlock(bool onOff)
-        { masterUnlock_ = onOff; }
+        void setMasterUnlock(bool onOff);
 
         // set to true to have unlimited time warps
         void setUnlimitedWarps(bool onOff)
-        { unlimitedWarps_ = onOff; }
+        { mUnlimitedWarps = onOff; }
 
         // set to true to have unlimited bombs
         void setUnlimitedBombs(bool onOff)
-        { unlimitedBombs_ = onOff; }
+        { mUnlimitedBombs = onOff; }
 
         // set to true to play sound effects.
         void setPlaySounds(bool onOff);
@@ -131,17 +130,12 @@ namespace invaders
         bool isRunning() const
         { return mRunning; }
 
-    signals:
-        void enterFullScreen();
-        void leaveFullScreen();
-
     private:
         virtual void initializeGL() override;
         virtual void closeEvent(QCloseEvent* close) override;
         virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
-        void beginPlay(unsigned levelIndex, unsigned profileIndex);
         void playMusic();
 
     private:
@@ -183,9 +177,9 @@ namespace invaders
         float mWarpFactor   = 1.0f;
         float mCurrentfps  = 0.0f;
     private:
-        bool masterUnlock_ = false;
-        bool unlimitedBombs_ = false;
-        bool unlimitedWarps_ = false;
+        bool mMasterUnlock   = false;
+        bool mUnlimitedBombs = false;
+        bool mUnlimitedWarps = false;
         bool mPlaySounds = true;
         bool mPlayMusic  = true;
         bool mShowFps    = false;
