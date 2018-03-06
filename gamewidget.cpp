@@ -2171,8 +2171,8 @@ GameWidget::GameWidget()
     mGame->onWarp = [&](const Game::timewarp& w)
     {
         DEBUG("begin time warp");
-        mWarpFactor   = w.factor;
-        mWarpDuration = w.duration;
+        mWarpFactor    = w.factor;
+        mWarpRemaining = w.duration;
     };
 
     mGame->onToggleShield = [&](const Game::invader& i, bool onOff)
@@ -2406,17 +2406,17 @@ void GameWidget::updateGame(float dt)
         ++it;
     }
 
-    if (mWarpDuration)
+    if (mWarpRemaining)
     {
-        if (time >= mWarpDuration)
+        if (time >= mWarpRemaining)
         {
-            mWarpFactor   = 1.0;
-            mWarpDuration = 0;
+            mWarpFactor    = 1.0;
+            mWarpRemaining = 0;
             DEBUG("Warp ended");
         }
         else
         {
-            mWarpDuration -= time;
+            mWarpRemaining -= dt;
         }
     }
 }
@@ -2584,7 +2584,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
                 mCurrentProfile = profileIndex;
                 mTickDelta  = 0;
                 mWarpFactor = 1.0;
-                mWarpDuration = 0.0f;
+                mWarpRemaining = 0.0f;
             }
             break;
         case State::Action::CloseState:

@@ -172,10 +172,10 @@ namespace invaders
         std::unique_ptr<Game> mGame;
         unsigned mCurrentLevel   = 0;
         unsigned mCurrentProfile = 0;
-        float mTickDelta    = 0.0f;
-        float mWarpDuration = 0.0f;
-        float mWarpFactor   = 1.0f;
-        float mCurrentfps  = 0.0f;
+        float mTickDelta     = 0.0f;
+        float mWarpRemaining = 0.0f;
+        float mWarpFactor    = 1.0f;
+        float mCurrentfps    = 0.0f;
     private:
         bool mMasterUnlock   = false;
         bool mUnlimitedBombs = false;
