@@ -2259,7 +2259,7 @@ GameWidget::GameWidget()
         unsigned unlockLevel = 0;
         if ((base / (float)score.maxpoints) >= LevelUnlockCriteria)
         {
-            if (mCurrentLevel < mLevels.size())
+            if (mCurrentLevel < mLevels.size() - 1)
             {
                 if (mLevelInfos[mCurrentLevel + 1].locked)
                 {
