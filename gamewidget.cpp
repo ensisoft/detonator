@@ -950,7 +950,7 @@ public:
 
         const auto opa = painter.opacity();
 
-        painter.setOpacity(0.5);
+        painter.setOpacity(1.0);
         painter.drawPixmap(target, pixmap, pixmap.rect());
         painter.setOpacity(opa);
 
@@ -958,6 +958,13 @@ public:
     static void prepare()
     {
         loadTexture(0);
+    }
+
+    static bool shouldMakeRandomAppearance()
+    {
+        if (rand(0, 5000) == 7)
+            return true;
+        return false;
     }
 private:
     static std::vector<QPixmap> loadTextures()
@@ -2361,10 +2368,9 @@ void GameWidget::updateGame(float dt)
     const auto time = dt * mWarpFactor;
     const auto tick = 1000.0 / mProfiles[mCurrentProfile].speed;
 
-    if (rand(0, 5000) == 7)
+    if (UFO::shouldMakeRandomAppearance())
     {
-        auto ufo = std::make_unique<UFO>();
-        mAnimations.push_back(std::move(ufo));
+        mAnimations.emplace_back(new UFO);
     }
 
     mBackground->update(time);
