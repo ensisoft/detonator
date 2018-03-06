@@ -148,6 +148,7 @@ namespace invaders
         class Scoreboard;
 
         class Animation;
+        class Asteroid;
         class Explosion;
         class Smoke;
         class Sparks;

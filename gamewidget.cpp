@@ -297,6 +297,52 @@ protected:
 private:
 };
 
+class GameWidget::Asteroid : public GameWidget::Animation
+{
+public:
+    Asteroid(const QVector2D& direction)
+    {
+        mX = rand(0.0f, 1.0f);
+        mY = rand(0.0f, 1.0f);
+        mVelocity  = 0.08 + rand(0.0, 0.08);
+        mScale     = rand(0.2, 0.8);
+        mTexture   = rand(0, 2);
+        mDirection = direction;
+    }
+    virtual bool update(float dt, TransformState& state) override
+    {
+        const auto d = mDirection * mVelocity * (dt / 1000.0f);
+        mX = wrap(1.0f, -0.2f, mX + d.x());
+        mY = wrap(1.0f, -0.2f, mY + d.y());
+        return true;
+    }
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
+        static QPixmap textures[] = {
+            QPixmap(R("textures/asteroid0.png")),
+            QPixmap(R("textures/asteroid1.png")),
+            QPixmap(R("textures/asteroid2.png"))
+        };
+        const QPixmap texture = textures[mTexture];
+        const QRectF rect = state.viewRect();
+        QRectF target(0.0f, 0.0f, texture.width() * mScale,
+            texture.height() * mScale);
+
+        const auto x = mX * rect.width();
+        const auto y = mY * rect.height();
+        target.moveTo(x, y);
+        painter.drawPixmap(target, texture, texture.rect());
+    }
+
+private:
+    float mVelocity = 0.0f;
+    float mScale = 1.0f;
+    float mX = 0.0f;
+    float mY = 0.0f;
+    QVector2D mDirection;
+    unsigned mTexture = 0;
+};
+
 // Flame/Smoke emitter
 class GameWidget::Explosion : public GameWidget::Animation
 {
@@ -1116,17 +1162,8 @@ private:
 class GameWidget::Background
 {
 public:
-    Background() : background_(R("textures/SpaceBackground.png"))
+    Background(const QVector2D& direction)
     {
-        asteroid_[0] = QPixmap(R("textures/asteroid0.png"));
-        asteroid_[1] = QPixmap(R("textures/asteroid1.png"));
-        asteroid_[2] = QPixmap(R("textures/asteroid2.png"));
-
-        //std::srand(std::time(nullptr));
-
-        direction_ = QVector2D(4, 3);
-        direction_.normalize();
-
         for (std::size_t i=0; i<800; ++i)
         {
             particle p;
@@ -1135,48 +1172,23 @@ public:
             p.a = 0.5 + rand(0.0, 0.5);
             p.v = 0.05 + rand(0.0, 0.05);
             p.b = !(i % 7);
-            particles_.push_back(p);
+            mParticles.push_back(p);
         }
-
-        for (std::size_t i=0; i<20; ++i)
-        {
-            asteroid a;
-            a.x = rand(0.0, 1.0);
-            a.y = rand(0.0, 1.0);
-            a.v = 0.08 + rand(0.0, 0.08);
-            a.scale = rand(0.2, 0.8);
-            a.texture = i % 3;
-            asteroids_.push_back(a);
-        }
+        mBackground = R("textures/SpaceBackground.png");
+        mDirection  = direction;
     }
-
     void paint(QPainter& painter, const QRectF& rect, const QPointF&)
     {
         // draw the space background.
         QBrush space(Qt::black);
         painter.fillRect(rect, space);
-        painter.drawPixmap(rect, background_, background_.rect());
-
-        const auto opa = painter.opacity();
-        painter.setOpacity(0.8);
-        // draw asteroids.
-        for (const auto& a : asteroids_)
-        {
-            QPixmap pix = asteroid_[a.texture];
-            QRect target(0, 0, pix.width() * a.scale, pix.height() * a.scale);
-            const auto x = a.x * rect.width();
-            const auto y = a.y * rect.height();
-            target.moveTo(x, y);
-            painter.drawPixmap(target, pix, pix.rect());
-        }
-
-        painter.setOpacity(opa);
+        painter.drawPixmap(rect, mBackground, mBackground.rect());
 
         // draw the little stars/particles
         QBrush star(Qt::white);
         QColor col(Qt::white);
 
-        for (const auto& p : particles_)
+        for (const auto& p : mParticles)
         {
             col.setAlpha(p.a * 0xff);
             star.setColor(col);
@@ -1187,39 +1199,24 @@ public:
     }
     void update(float dt)
     {
-        const auto d = direction_ * (dt / 1000.0);
-        for (auto& p : particles_)
+        const auto d = mDirection * (dt / 1000.0);
+        for (auto& p : mParticles)
         {
             p.x = wrap(1.0f, 0.0f, p.x + d.x() * p.v);
             p.y = wrap(1.0f, 0.0f, p.y + d.y() * p.v);
         }
-
-        for (auto& a : asteroids_)
-        {
-            a.x = wrap(1.0f, -0.2f, a.x + d.x() * a.v);
-            a.y = wrap(1.0f, -0.2f, a.y + d.y() * a.v);
-        }
     }
 private:
-    struct asteroid {
-        float x, y;
-        float v;
-        float scale;
-        unsigned texture;
-    };
-
     struct particle {
-        float x, y;
-        float a;
-        float v;
-        int   b;
+        float x = 0.0f;
+        float y = 0.0f;
+        float a = 0.0f;;
+        float v = 0.0f;;
+        int   b = 0;
     };
-    std::vector<asteroid> asteroids_;
-    std::vector<particle> particles_;
-private:
-    QVector2D direction_;
-    QPixmap background_;
-    QPixmap asteroid_[3];
+    std::vector<particle> mParticles;
+    QVector2D mDirection;
+    QPixmap mBackground;
 };
 
 class GameWidget::Scoreboard : public GameWidget::State
@@ -2273,8 +2270,17 @@ GameWidget::GameWidget()
         mStates.push(std::move(scoreboard));
     };
 
+    // in this space all the background objects travel to the same direction
+    QVector2D spaceJunkDirection(4, 3);
+    spaceJunkDirection.normalize();
+
     // create the background object.
-    mBackground.reset(new Background);
+    mBackground.reset(new Background(spaceJunkDirection));
+
+    for (size_t i=0; i<20; ++i)
+    {
+        mAnimations.emplace_back(new Asteroid(spaceJunkDirection));
+    }
 
     // initialize the input/state stack with the main menu.
     auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, true);
