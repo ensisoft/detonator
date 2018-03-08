@@ -594,8 +594,10 @@ private:
 class GameWidget::Debris : public GameWidget::Animation
 {
 public:
-    Debris(QPixmap texture, QVector2D position, float start, float lifetime)
-        : texture_(texture), start_(start), life_(lifetime), time_(0), scale_(1.0)
+    Debris(const QPixmap& texture, const QVector2D& position, float starttime, float lifetime)
+        : mStartTime(starttime)
+        , mLifeTime(lifetime)
+        , mTexture(texture)
     {
         const auto xparticles = 4;
         const auto yparticles = 2;
@@ -626,19 +628,19 @@ public:
             p.alpha = 1.0f;
             p.angle = (M_PI * 2 ) * (float)std::rand() / RAND_MAX;
             p.rotation_coefficient = rand(-1.0f, 1.0f);
-            particles_.push_back(p);
+            mParticles.push_back(p);
         }
     }
     virtual bool update(float dt, TransformState&) override
     {
-        time_ += dt;
-        if (time_ < start_)
+        mTime += dt;
+        if (mTime < mStartTime)
             return true;
 
-        if  (time_ - start_ > life_)
+        if  (mTime - mStartTime > mLifeTime)
             return false;
 
-        for (auto& p : particles_)
+        for (auto& p : mParticles)
         {
             p.pos += p.dir * (dt / 4500.0);
             p.alpha = clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
@@ -649,19 +651,17 @@ public:
     }
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        if (time_ < start_)
+        if (mTime < mStartTime)
             return;
 
-        const auto spriteScale = state.getScale();
-
-        for (const auto& p : particles_)
+        for (const auto& p : mParticles)
         {
             const auto pos = state.toViewSpace(p.pos);
 
             const float width  = p.rc.width();
             const float height = p.rc.height();
             const float aspect = height / width;
-            const float scaledWidth  = spriteScale.x();
+            const float scaledWidth  = mScale;
             const float scaledHeight = scaledWidth * aspect;
 
             QRect target(pos.x(), pos.y(), scaledWidth, scaledHeight);
@@ -672,17 +672,14 @@ public:
             rotation.translate(-pos.x() - scaledWidth / 2, -pos.y() - scaledHeight / 2);
             painter.setTransform(rotation);
             painter.setOpacity(p.alpha);
-            painter.drawPixmap(target, texture_, p.rc);
+            painter.drawPixmap(target, mTexture, p.rc);
         }
         painter.resetTransform();
         painter.setOpacity(1.0);
     }
 
-    float getScale() const
-    { return scale_; }
-
-    void setScale(float f)
-    { scale_ = f;}
+    void setScale(float scale)
+    { mScale = scale;}
 
 private:
     struct particle {
@@ -693,14 +690,13 @@ private:
         float alpha = 0.0f;
         float rotation_coefficient = 1.0f;
     };
-    std::vector<particle> particles_;
+    std::vector<particle> mParticles;
 private:
-    QPixmap texture_;
-    float start_;
-    float life_;
-    float time_;
-private:
-    float scale_;
+    const float mStartTime = 0.0f;;
+    const float mLifeTime  = 0.0f;;
+    QPixmap mTexture;
+    float mTime  = 0.0f;
+    float mScale = 1.0f;
 };
 
 class GameWidget::Invader : public GameWidget::Animation
@@ -2069,6 +2065,7 @@ GameWidget::GameWidget()
         auto it = mInvaders.find(i.identity);
 
         TransformState state(rect(), ViewCols, ViewRows);
+        const auto scale = state.getScale();
 
         std::unique_ptr<Invader> invader(it->second.release());
 
@@ -2091,6 +2088,7 @@ GameWidget::GameWidget()
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
         sparks->setColor(QColor(255, 255, 68));
+        debris->setScale(scale.x());
 
         mAnimations.push_back(std::move(invader));
         mAnimations.push_back(std::move(missile));
