@@ -47,6 +47,7 @@
 
 #include "audio/sample.h"
 #include "audio/player.h"
+#include "base/bitflag.h"
 #include "base/logging.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
@@ -94,6 +95,20 @@ T rand(T min, T max)
     return min + (range * value);
 }
 
+template<typename To, typename From>
+To* CollisionCast(From* lhs, From* rhs)
+{
+    To* ptr = dynamic_cast<To*>(lhs);
+    if (ptr) return ptr;
+    return dynamic_cast<To*>(rhs);
+}
+
+template<typename To, typename From>
+To* CollisionCast(const std::unique_ptr<From>& lhs,
+                  const std::unique_ptr<From>& rhs)
+{
+    return CollisionCast<To>(lhs.get(), rhs.get());
+}
 
 // game space is discrete space from 0 to game::width() - 1 on X axis
 // and from 0 to game::height() - 1 on Y axis
@@ -293,6 +308,19 @@ public:
     //
     virtual void paint(QPainter& painter, TransformState& state) = 0;
 
+    virtual QRectF getBounds(const TransformState& state) const
+    {
+        return QRectF{};
+    }
+    enum class ColliderType {
+        None,
+        UFO,
+        Asteroid,
+    };
+
+    virtual ColliderType getColliderType() const
+    { return ColliderType::None; }
+
 protected:
 private:
 };
@@ -318,22 +346,34 @@ public:
     }
     virtual void paint(QPainter& painter, TransformState& state) override
     {
+        const QPixmap& pixmap = getTexture(mTexture);
+
+        QRectF rect;
+        rect.setSize(pixmap.size() * mScale);
+        rect.moveTo(state.toViewSpace(QVector2D(mX, mY)));
+        painter.drawPixmap(rect, pixmap, pixmap.rect());
+    }
+    virtual QRectF getBounds(const TransformState& state) const override
+    {
+        const QPixmap& pixmap = getTexture(mTexture);
+
+        QRectF bounds;
+        bounds.setSize(pixmap.size() * mScale);
+        bounds.moveTo(state.toViewSpace(QVector2D(mX, mY)));
+        return bounds;
+    }
+    virtual ColliderType getColliderType() const override
+    { return ColliderType::Asteroid; }
+private:
+    static QPixmap& getTexture(unsigned index)
+    {
         static QPixmap textures[] = {
             QPixmap(R("textures/asteroid0.png")),
             QPixmap(R("textures/asteroid1.png")),
             QPixmap(R("textures/asteroid2.png"))
         };
-        const QPixmap texture = textures[mTexture];
-        const QRectF rect = state.viewRect();
-        QRectF target(0.0f, 0.0f, texture.width() * mScale,
-            texture.height() * mScale);
-
-        const auto x = mX * rect.width();
-        const auto y = mY * rect.height();
-        target.moveTo(x, y);
-        painter.drawPixmap(target, texture, texture.rect());
+        return textures[index];
     }
-
 private:
     float mVelocity = 0.0f;
     float mScale = 1.0f;
@@ -958,59 +998,67 @@ class GameWidget::UFO : public GameWidget::Animation
 public:
     UFO()
     {
-        position_.setX(rand(0.0, 1.0));
-        position_.setY(rand(0.0, 1.0));
+        mPosition.setX(rand(0.0, 1.0));
+        mPosition.setY(rand(0.0, 1.0));
 
         const auto x = rand(-1.0, 1.0);
         const auto y = rand(-1.0, 1.0);
-        direction_ = QVector2D(x, y);
-        direction_.normalize();
+        mDirection = QVector2D(x, y);
+        mDirection.normalize();
     }
 
     virtual bool update(float dt, TransformState& state) override
     {
-        runtime_ += dt;
-        if (runtime_ > lifetime_)
+        const auto maxLifeTime = 10000.0f;
+
+        mRuntime += dt;
+        if (mRuntime >= maxLifeTime)
             return false;
 
         QVector2D fuzzy;
-        fuzzy.setY(std::sin((fmodf(runtime_, 3000) / 3000.0) * 2 * M_PI));
-        fuzzy.setX(direction_.x());
+        fuzzy.setY(std::sin((fmodf(mRuntime, 3000) / 3000.0) * 2 * M_PI));
+        fuzzy.setX(mDirection.x());
         fuzzy.normalize();
 
-        position_ += (dt / 10000.0) * fuzzy;
-        const auto x = position_.x();
-        const auto y = position_.y();
-        position_.setX(wrap(1.0f, 0.0f, x));
-        position_.setY(wrap(1.0f, 0.0f, y));
+        mPosition += (dt / 10000.0) * fuzzy;
+        const auto x = mPosition.x();
+        const auto y = mPosition.y();
+        mPosition.setX(wrap(1.0f, 0.0f, x));
+        mPosition.setY(wrap(1.0f, 0.0f, y));
         return true;
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        const auto phase = 1000 / 10.0;
-        const auto index = unsigned(runtime_ / phase) % 6;
-
-        const auto pixmap = loadTexture(index);
-
+        const auto& pixmap = getCurrentTexture();
         const auto pxw = pixmap.width();
         const auto pxh = pixmap.height();
-        //const auto aspect = (float)pxh / (float)pxw;
 
         QRectF target(0, 0, pxw, pxh);
-        target.moveTo(state.toViewSpace(position_));
-
-        const auto opa = painter.opacity();
-
-        painter.setOpacity(1.0);
+        target.moveTo(state.toViewSpace(mPosition));
         painter.drawPixmap(target, pixmap, pixmap.rect());
-        painter.setOpacity(opa);
+    }
 
-    }
-    static void prepare()
+    virtual QRectF getBounds(const TransformState& state) const override
     {
-        loadTexture(0);
+        const QPixmap& pixmap = getCurrentTexture();
+
+        QRectF bounds;
+        bounds.moveTo(state.toViewSpace(mPosition));
+        bounds.setSize(pixmap.size());
+        return bounds;
     }
+
+    virtual ColliderType getColliderType() const override
+    { return ColliderType::UFO; }
+
+    void invertDirection()
+    {
+        mDirection *= -1.0f;
+    }
+
+    QVector2D getPosition() const
+    { return mPosition; }
 
     static bool shouldMakeRandomAppearance()
     {
@@ -1018,29 +1066,27 @@ public:
             return true;
         return false;
     }
-private:
-    static std::vector<QPixmap> loadTextures()
+
+    const QPixmap& getCurrentTexture() const
     {
-        std::vector<QPixmap> v;
-        for (int i=1; i<=6; ++i)
+        const auto phase = 1000.0f / 10.0f;
+        const auto index = unsigned(mRuntime / phase) % 6;
+
+        static std::vector<QPixmap> pixmaps;
+        if (pixmaps.empty())
         {
-            const auto name = QString("textures/alien/e_f%1").arg(i);
-            v.push_back(R(name));
+            for (int i=1; i<=6; ++i)
+            {
+                pixmaps.push_back(R(QString("textures/alien/e_f%1").arg(i)));
+            }
         }
-        return v;
-    }
-    static QPixmap loadTexture(unsigned index)
-    {
-        static auto textures = loadTextures();
-        Q_ASSERT(index < textures.size());
-        return textures[index];
+        ASSERT(index < pixmaps.size());
+        return pixmaps[index];
     }
 private:
-    float lifetime_ = 10000.0f;
-    float runtime_  = 0.0f;
-private:
-    QVector2D direction_;
-    QVector2D position_;
+    float mRuntime = 0.0f;
+    QVector2D mDirection;
+    QVector2D mPosition;
 };
 
 
@@ -2063,7 +2109,6 @@ GameWidget::GameWidget()
 
     BigExplosion::prepare();
     Smoke::prepare();
-    UFO::prepare();
 
     mGame.reset(new Game(GameCols, GameRows));
 
@@ -2413,6 +2458,79 @@ void GameWidget::updateGame(float dt)
         {
             it = mAnimations.erase(it);
             continue;
+        }
+        ++it;
+    }
+
+    // do some simple collision resolution.
+    using CollisionType = base::bitflag<Animation::ColliderType>;
+
+    static const CollisionType Asteroid_UFO_Collision =
+        { Animation::ColliderType::UFO, Animation::ColliderType::Asteroid };
+
+    static const CollisionType UFO_UFO_Collision =
+        { Animation::ColliderType::UFO, Animation::ColliderType::UFO };
+
+    for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
+    {
+        auto& lhsAnim = *it;
+        const auto lhsColliderType = lhsAnim->getColliderType();
+        if (lhsColliderType == Animation::ColliderType::None)
+        {
+            ++it;
+            continue;
+        }
+
+        auto other = std::find_if(std::begin(mAnimations), std::end(mAnimations),
+            [&](auto& animation) {
+                const auto type = animation->getColliderType();
+                if (type == Animation::ColliderType::None)
+                    return false;
+                if (animation == lhsAnim)
+                    return false;
+                const auto collision = CollisionType {lhsColliderType, type };
+                if (collision == Asteroid_UFO_Collision || collision == UFO_UFO_Collision)
+                {
+                    const auto& lhsBounds = lhsAnim->getBounds(state);
+                    const auto& rhsBounds = animation->getBounds(state);
+                    if (lhsBounds.intersects(rhsBounds) || rhsBounds.intersects(lhsBounds))
+                        return true;
+                }
+                return false;
+            });
+        if (other == std::end(mAnimations))
+        {
+            ++it;
+            continue;
+        }
+        auto& rhsAnim = *other;
+        const auto rhsColliderType = rhsAnim->getColliderType();
+        const auto collision = CollisionType { lhsColliderType, rhsColliderType };
+        if (collision == Asteroid_UFO_Collision)
+        {
+            DEBUG("UFO - Asteroid collision!");
+            const auto* UFO = CollisionCast<const GameWidget::UFO>(lhsAnim, rhsAnim);
+            const auto position = UFO->getPosition();
+            const auto startNow = 0.0f;
+            const auto lifetime = 1000.0f;
+
+            std::unique_ptr<Explosion> explosion(new Explosion(position, startNow, lifetime));
+            std::unique_ptr<Debris> debris(new Debris(UFO->getCurrentTexture(),
+                position, startNow, lifetime + 500));
+            explosion->setScale(3.0f);
+            mAnimations.push_back(std::move(debris));
+            mAnimations.push_back(std::move(explosion));
+
+            if (lhsColliderType == Animation::ColliderType::UFO)
+                it = mAnimations.erase(it);
+            else mAnimations.erase(other);
+            continue;
+        }
+        else if (collision == UFO_UFO_Collision)
+        {
+            DEBUG("UFO - UFO collision!");
+            dynamic_cast<UFO*>(lhsAnim.get())->invertDirection();
+            dynamic_cast<UFO*>(rhsAnim.get())->invertDirection();
         }
         ++it;
     }
