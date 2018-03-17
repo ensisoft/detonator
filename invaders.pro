@@ -33,6 +33,7 @@ HEADERS = game.h\
 	audio/player.h\
 	audio/device.h\
 	base/assert.h\
+	base/bitflag.h\
 	base/format.h\
 	base/logging.h\
 	graphics/painter.h\
