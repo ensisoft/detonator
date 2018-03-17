@@ -661,7 +661,7 @@ public:
             const float width  = p.rc.width();
             const float height = p.rc.height();
             const float aspect = height / width;
-            const float scaledWidth  = mScale;
+            const float scaledWidth  = width * mScale;
             const float scaledHeight = scaledWidth * aspect;
 
             QRect target(pos.x(), pos.y(), scaledWidth, scaledHeight);
@@ -678,8 +678,14 @@ public:
         painter.setOpacity(1.0);
     }
 
-    void setScale(float scale)
-    { mScale = scale;}
+    void setTextureScaleFromWidth(float width)
+    {
+        const auto realWidth = mTexture.width();
+        mScale = width / realWidth;
+    }
+
+    void setTextureScale(float scale)
+    { mScale = scale; }
 
 private:
     struct particle {
@@ -694,9 +700,10 @@ private:
 private:
     const float mStartTime = 0.0f;;
     const float mLifeTime  = 0.0f;;
-    QPixmap mTexture;
     float mTime  = 0.0f;
     float mScale = 1.0f;
+    QPixmap mTexture;
+
 };
 
 class GameWidget::Invader : public GameWidget::Animation
@@ -2088,7 +2095,7 @@ GameWidget::GameWidget()
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
         sparks->setColor(QColor(255, 255, 68));
-        debris->setScale(scale.x());
+        debris->setTextureScaleFromWidth(scale.x());
 
         mAnimations.push_back(std::move(invader));
         mAnimations.push_back(std::move(missile));
