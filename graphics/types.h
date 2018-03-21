@@ -110,6 +110,21 @@ namespace invaders
     private:
     };
 
+    class Triangle : public Drawable
+    {
+    public:
+        virtual void Upload(Geometry& geom) const
+        {
+            const Vertex verts[6] = {
+                { {0.5,  0.0}, {0.5, 1.0} },
+                { {0.0, -1.0}, {0.0, 0.0} },
+                { {1.0, -1.0}, {1.0, 0.0} }
+            };
+            geom.Update(verts, 3);
+        }
+    private:
+    };
+
     enum class Color {
         White,
         Black,
