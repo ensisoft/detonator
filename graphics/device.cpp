@@ -475,6 +475,24 @@ private:
             GL_CHECK(glUseProgram(mProgram));
             GL_CHECK(glUniform2f(ret, x, y));
         }
+        virtual void SetUniform(const char* name, float x, float y, float z) override
+        {
+            glUseProgram(mProgram);
+
+            auto ret = glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CHECK(glUniform3f(ret, x, y, z));
+        }
+        virtual void SetUniform(const char* name, float x, float y, float z, float w) override
+        {
+            glUseProgram(mProgram);
+
+            auto ret = glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CHECK(glUniform4f(ret, x, y, z, w));
+        }
 
         void SetState() //const
         {

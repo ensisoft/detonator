@@ -41,6 +41,8 @@ namespace invaders
 
         virtual void SetUniform(const char* name, float x) = 0;
         virtual void SetUniform(const char* name, float x, float y) = 0;
+        virtual void SetUniform(const char* name, float x, float y, float z) = 0;
+        virtual void SetUniform(const char* name, float x, float y, float z, float w) = 0;
     private:
     };
 

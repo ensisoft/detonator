@@ -110,6 +110,18 @@ namespace invaders
     private:
     };
 
+    enum class Color {
+        White,
+        Black,
+        Red,     DarkRed,
+        Green,   DarkGreen,
+        Blue,    DarkBlue,
+        Cyan,    DarkCyan,
+        Magenta, DarkMagenta,
+        Yellow,  DarkYellow,
+        Gray,    DarkGray, LightGray
+    };
+
     // linear floating point color
     class Color4f
     {
@@ -121,6 +133,67 @@ namespace invaders
           , mBlue(blue)
           , mAlpha(alpha)
         {}
+
+        Color4f(Color c)
+          : mRed(0.0f)
+          , mGreen(0.0f)
+          , mBlue(0.0f)
+          , mAlpha(1.0f)
+        {
+            switch (c)
+            {
+                case Color::White:
+                    mRed = mGreen = mBlue = 1.0f;
+                    break;
+                case Color::Black:
+                    break;
+                case Color::Red:
+                    mRed = 1.0f;
+                    break;
+                case Color::DarkRed:
+                    mRed = 0.5f;
+                    break;
+                case Color::Green:
+                    mGreen = 1.0f;
+                    break;
+                case Color::DarkGreen:
+                    mGreen = 0.5f;
+                    break;
+                case Color::Blue:
+                    mBlue = 1.0f;
+                    break;
+                case Color::DarkBlue:
+                    mBlue = 0.5f;
+                    break;
+                case Color::Cyan:
+                    mGreen = mBlue = 1.0f;
+                    break;
+                case Color::DarkCyan:
+                    mGreen = mBlue = 0.5f;
+                    break;
+                case Color::Magenta:
+                    mRed = mBlue = 1.0f;
+                    break;
+                case Color::DarkMagenta:
+                    mRed = mBlue = 0.5f;
+                    break;
+                case Color::Yellow:
+                    mRed = mGreen = 1.0f;
+                    break;
+                case Color::DarkYellow:
+                    mRed = mGreen = 0.5f;
+                    break;
+                case Color::Gray:
+                    mRed = mGreen = mBlue = 0.62;
+                    break;
+                case Color::DarkGray:
+                    mRed = mGreen = mBlue = 0.5;
+                    break;
+                case Color::LightGray:
+                    mRed = mGreen = mBlue = 0.75;
+                    break;
+            }
+        }
 
         float Red() const
         { return mRed; }
@@ -168,10 +241,25 @@ namespace invaders
     class Fill : public Material
     {
     public:
-        virtual void Apply(Program& prog) const override
+        Fill()
         {}
+
+        Fill(const Color4f& color) : mColor(color)
+        {}
+
+        virtual void Apply(Program& prog) const override
+        {
+            prog.SetUniform("kFillColor",
+                mColor.Red(), mColor.Green(), mColor.Blue(),
+                mColor.Alpha());
+        }
+
+        void SetColor(const Color4f color)
+        { mColor = color; }
     private:
+        Color4f mColor;
     };
+
 
     class Texture
     {
@@ -191,6 +279,5 @@ namespace invaders
     private:
         float mRunTime = 0.0f;
     };
-
 
 } // namespace

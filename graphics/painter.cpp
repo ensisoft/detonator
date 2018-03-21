@@ -69,6 +69,7 @@ public:
         prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
         prog->SetUniform("kViewport", mViewW, mViewH);
         prog->SetUniform("kRotation", transform.GetRotation());
+        mat.Apply(*prog);
 
         GraphicsDevice::State state;
         state.viewport.x      = mViewX;
