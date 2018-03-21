@@ -65,9 +65,10 @@ public:
     {
         Geometry* geom = ToDeviceGeometry(shape);
         Program* prog = GetProgram(shape, mat);
-        prog->SetUniform("kScalingFactor", transform.Width(), transform.Height());
-        prog->SetUniform("kTranslationTerm", transform.X(), transform.Y());
+        prog->SetUniform("kScalingFactor", transform.GetWidth(), transform.GetHeight());
+        prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
         prog->SetUniform("kViewport", mViewW, mViewH);
+        prog->SetUniform("kRotation", transform.GetRotation());
 
         GraphicsDevice::State state;
         state.viewport.x      = mViewX;
@@ -96,9 +97,10 @@ public:
 
         Geometry* maskGeom = ToDeviceGeometry(maskShape);
         Program* maskProg = GetProgram(maskShape, Fill());
-        maskProg->SetUniform("kScalingFactor", maskTransform.Width(), maskTransform.Height());
-        maskProg->SetUniform("kTranslationTerm", maskTransform.X(), maskTransform.Y());
+        maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
+        maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
         maskProg->SetUniform("kViewport", mViewW, mViewH);
+        maskProg->SetUniform("kRotation", maskTransform.GetRotation());
         material.Apply(*maskProg);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
@@ -110,9 +112,10 @@ public:
 
         Geometry* drawGeom = ToDeviceGeometry(drawShape);
         Program* drawProg = GetProgram(drawShape, material);
-        drawProg->SetUniform("kScalingFactor", drawTransform.Width(), drawTransform.Height());
-        drawProg->SetUniform("kTranslationTerm", drawTransform.X(), drawTransform.Y());
+        drawProg->SetUniform("kScalingFactor", drawTransform.GetWidth(), drawTransform.GetHeight());
+        drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
         drawProg->SetUniform("kViewport", mViewW, mViewH);
+        drawProg->SetUniform("kRotation", drawTransform.GetRotation());
         material.Apply(*drawProg);
 
         mDevice->Draw(*drawProg, *drawGeom, state);

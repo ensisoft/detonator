@@ -54,27 +54,34 @@ namespace invaders
             mScaleX = sx;
             mScaleY = sy;
         }
-        float Width() const
+
+        // around the depth axis, positive angle (expressed in degrees)
+        // is clockwise rotation.
+        void Rotate(float degrees)
+        { mRotation = degrees; }
+
+        float GetWidth() const
         { return mScaleX; }
 
-        float Height() const
+        float GetHeight() const
         { return mScaleY; }
 
-        float X() const
+        float GetXPosition() const
         { return mPosX; }
 
-        float Y() const
+        float GetYPosition() const
         { return mPosY; }
+
+        float GetRotation() const
+        { return mRotation; }
 
     private:
         float mScaleX = 1.0f;
         float mScaleY = 1.0f;
         float mPosX = 0.0f;
         float mPosY = 0.0f;
-
+        float mRotation = 0.0f;
     };
-
-
 
     class Drawable
     {
