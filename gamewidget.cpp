@@ -640,24 +640,27 @@ private:
 class GameWidget::Debris : public GameWidget::Animation
 {
 public:
+    // how to split the debris texture into debris rectangles
+    enum {
+        NumParticleCols = 4,
+        NumParticleRows = 2
+    };
+
     Debris(const QPixmap& texture, const QVector2D& position, float starttime, float lifetime)
         : mStartTime(starttime)
         , mLifeTime(lifetime)
         , mTexture(texture)
     {
-        const auto xparticles = 4;
-        const auto yparticles = 2;
-
-        const auto particleWidth  = texture.width() / xparticles;
-        const auto particleHeight = texture.height() / yparticles;
-        const auto numParticles   = xparticles * yparticles;
+        const auto particleWidth  = texture.width() / NumParticleCols;
+        const auto particleHeight = texture.height() / NumParticleRows;
+        const auto numParticles   = NumParticleCols * NumParticleRows;
 
         const auto angle = (M_PI * 2) / numParticles;
 
         for (auto i=0; i<numParticles; ++i)
         {
-            const auto col = i % xparticles;
-            const auto row = i / xparticles;
+            const auto col = i % NumParticleCols;
+            const auto row = i / NumParticleCols;
             const auto x = col * particleWidth;
             const auto y = row * particleHeight;
 
@@ -726,8 +729,8 @@ public:
 
     void setTextureScaleFromWidth(float width)
     {
-        const auto realWidth = mTexture.width();
-        mScale = width / realWidth;
+        const auto particleWidth = (mTexture.width() / NumParticleCols);
+        mScale = width / particleWidth;
     }
 
     void setTextureScale(float scale)
