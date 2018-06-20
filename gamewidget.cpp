@@ -270,7 +270,7 @@ public:
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
 
     // paint the user interface state with the custom painter
-    virtual void paint(Painter& painter, const TransformState& transform) const
+    virtual void paintPostEffect(Painter& painter, const TransformState& transform) const
     {}
 
     // update the state.. umh.. state from the delta time
@@ -305,8 +305,14 @@ public:
     // otherwise false and the animation is expired.
     virtual bool update(float dt, TransformState& state) = 0;
 
+    virtual void paintPreEffect(Painter& painter, const TransformState& state)
+    {}
+
     //
     virtual void paint(QPainter& painter, TransformState& state) = 0;
+
+    virtual void paintPostEffect(Painter& painter, const TransformState& state)
+    {}
 
     virtual QRectF getBounds(const TransformState& state) const
     {
@@ -1331,7 +1337,7 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paint(Painter& painter, const TransformState& parentTransform) const override
+    virtual void paintPostEffect(Painter& painter, const TransformState& parentTransform) const override
     {
         const auto cols = 7;
         const auto rows = 6;
@@ -2592,6 +2598,35 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
     mBackground->paint(painter, rect(), state.getScale());
 
+    const bool bIsGameRunning = mStates.top()->isGameRunning();
+
+    // do a first pass using custom painter
+    {
+        painter.beginNativePainting();
+
+        GraphicsDevice::StateBuffer currentState;
+        mCustomGraphicsDevice->GetState(&currentState);
+        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+
+        for (auto& anim : mAnimations)
+        {
+            anim->paintPreEffect(*mCustomGraphicsPainter, state);
+        }
+
+        if (bIsGameRunning)
+        {
+            for (auto& pair : mInvaders)
+            {
+                auto& invader = pair.second;
+                invader->paintPreEffect(*mCustomGraphicsPainter, state);
+            }
+        }
+
+        mCustomGraphicsDevice->SetState(currentState);
+        painter.endNativePainting();
+    }
+
+
     // paint animations
     for (auto& anim : mAnimations)
     {
@@ -2599,7 +2634,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     }
 
     // paint the invaders
-    const bool bIsGameRunning = mStates.top()->isGameRunning();
     if (bIsGameRunning)
     {
         for (auto& pair : mInvaders)
@@ -2612,20 +2646,35 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // finally paint the menu/HUD
     mStates.top()->paint(painter, rect(), state.getScale());
 
-    // do a second pass painter using the custom painter.
-    // since we're drawing using the same OpenGL context the
-    // state management is somewhat tricky.
-    painter.beginNativePainting();
+    {
+        // do a second pass painter using the custom painter.
+        // since we're drawing using the same OpenGL context the
+        // state management is somewhat tricky.
+        painter.beginNativePainting();
 
-    GraphicsDevice::StateBuffer currentState;
-    mCustomGraphicsDevice->GetState(&currentState);
-    mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+        GraphicsDevice::StateBuffer currentState;
+        mCustomGraphicsDevice->GetState(&currentState);
+        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
-    mStates.top()->paint(*mCustomGraphicsPainter, state);
+        for (auto& anim : mAnimations)
+        {
+            anim->paintPostEffect(*mCustomGraphicsPainter, state);
+        }
 
-    mCustomGraphicsDevice->SetState(currentState);
-    painter.endNativePainting();
+        if (bIsGameRunning)
+        {
+            for (auto& pair : mInvaders)
+            {
+                auto& invader = pair.second;
+                invader->paintPostEffect(*mCustomGraphicsPainter, state);
+            }
+        }
 
+        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, state);
+
+        mCustomGraphicsDevice->SetState(currentState);
+        painter.endNativePainting();
+    }
 
     if (mShowFps)
     {
