@@ -127,11 +127,12 @@ namespace invaders
 // try to keep this implementantation free of Qt in
 // order to promote portability to possibly emscripten
 // or Qt free implementation.
-class OpenGLES2GraphicsDevice : public GraphicsDevice
+class OpenGLES2GraphicsDevice : public GraphicsDevice, protected QOpenGLFunctions
 {
 public:
     OpenGLES2GraphicsDevice()
     {
+        initializeOpenGLFunctions();        
         // it'd make sense to create own context here but the but
         // problem is that currently we're using Qt widget as the window
         // and it creates a FBO into which all the rendering is done.
@@ -196,25 +197,26 @@ public:
 
     virtual void GetState(StateBuffer* state) const
     {
+        auto* fucking_qt_const_failure = const_cast<OpenGLES2GraphicsDevice*>(this);
+
         NativeState s;
-        glGetIntegerv(GL_BLEND, &s.gl_blend_enabled);
-        glGetIntegerv(GL_BLEND_SRC_RGB,   &s.gl_blend_src_rgb);
-        glGetIntegerv(GL_BLEND_DST_RGB,   &s.gl_blend_dst_rgb);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &s.gl_blend_src_alpha);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &s.gl_blend_dst_alpha);
-        glGetIntegerv(GL_STENCIL_TEST, &s.gl_stencil_enabled);
-        glGetIntegerv(GL_STENCIL_VALUE_MASK, &s.gl_stencil_mask);
-        glGetIntegerv(GL_STENCIL_REF, &s.gl_stencil_ref);
-        glGetIntegerv(GL_STENCIL_FUNC, &s.gl_stencil_func);
-        glGetIntegerv(GL_STENCIL_FAIL, &s.gl_stencil_fail);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &s.gl_stencil_dpass);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &s.gl_stencil_dfail);
-        glGetIntegerv(GL_COLOR_WRITEMASK, s.gl_color_mask);
+        fucking_qt_const_failure->glGetIntegerv(GL_BLEND, &s.gl_blend_enabled);
+        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_SRC_RGB,   &s.gl_blend_src_rgb);
+        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_DST_RGB,   &s.gl_blend_dst_rgb);
+        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_SRC_ALPHA, &s.gl_blend_src_alpha);
+        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_DST_ALPHA, &s.gl_blend_dst_alpha);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_TEST, &s.gl_stencil_enabled);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_VALUE_MASK, &s.gl_stencil_mask);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_REF, &s.gl_stencil_ref);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_FUNC, &s.gl_stencil_func);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_FAIL, &s.gl_stencil_fail);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &s.gl_stencil_dpass);
+        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &s.gl_stencil_dfail);
+        fucking_qt_const_failure->glGetIntegerv(GL_COLOR_WRITEMASK, s.gl_color_mask);
 
         state->resize(sizeof(s));
         std::memcpy(&(*state)[0], &s, sizeof(s));
-
-        GL_CHECK((void)0);
+        //GL_CHECK((void)0);
     }
     virtual void SetState(const StateBuffer& state) override
     {
