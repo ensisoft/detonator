@@ -16,13 +16,13 @@ SOURCES = game.cpp\
 	level.cpp\
 	main.cpp\
 	qtmain_win.cpp\
-	audio/device.cpp\
+	audio/fucking_audio_device.cpp\
 	audio/sample.cpp\
 	audio/player.cpp\
 	base/assert.cpp\
 	base/format.cpp\
 	base/logging.cpp\
-	graphics/device.cpp\
+	graphics/fucking_graphics_device.cpp\
 	graphics/painter.cpp\
 
 HEADERS = game.h\

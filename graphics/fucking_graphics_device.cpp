@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2018 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2019 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
