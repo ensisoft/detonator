@@ -29,7 +29,7 @@
 namespace invaders {
 
 const int MAJOR_VERSION = 0;
-const int MINOR_VERSION = 2;
+const int MINOR_VERSION = 3;
 
 } // invaders
 
@@ -38,7 +38,7 @@ const int MINOR_VERSION = 2;
 #endif
 
 #define APP_TITLE   "Pinyin-Invaders"
-#define APP_VERSION "0.2"
+#define APP_VERSION "0.3"
 
 #define ENABLE_AUDIO
 

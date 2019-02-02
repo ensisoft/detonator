@@ -1828,7 +1828,7 @@ public:
             QString::fromUtf8("Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by:\n"
                 "Sami Vaisanen\n"
-                "(c) 2014-2016 Ensisoft\n"
+                "(c) 2014-2019 Ensisoft\n"
                 "http://www.ensisoft.com\n"
                 "http://www.github.com/ensisoft/pinyin-invaders\n\n"
                 "Graphics by:\n"
