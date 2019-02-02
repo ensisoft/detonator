@@ -9,13 +9,13 @@ CONFIG += debug_and_release
 # same filename to actually work and build properly.
 CONFIG += object_parallel_to_source
 
-QT += opengl
+QT += opengl 
+QT += core gui
 
 SOURCES = game.cpp\
 	gamewidget.cpp\
 	level.cpp\
 	main.cpp\
-	qtmain_win.cpp\
 	audio/fucking_audio_device.cpp\
 	audio/sample.cpp\
 	audio/player.cpp\
