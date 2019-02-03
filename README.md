@@ -79,3 +79,8 @@ https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-
   $ dist\invaders.exe
 ``` 
 
+5. Package dependencies for distribution
+```
+  $ cd dist
+  $ windeployqt invaders.exe
+```
