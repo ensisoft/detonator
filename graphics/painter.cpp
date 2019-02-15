@@ -143,8 +143,8 @@ private:
     Program* GetProgram(const std::string& name,
         const std::string& vshader_file, const std::string& fshader_file)
     {
-        auto it = mPrograms.find(name);
-        if (it == std::end(mPrograms))
+        Program* ret = mDevice->FindProgram(name);
+        if (ret == nullptr)
         {
             Shader* vs = GetShader(vshader_file);
             Shader* fs = GetShader(fshader_file);
@@ -155,18 +155,16 @@ private:
             shaders.push_back(vs);
             shaders.push_back(fs);
 
-            std::unique_ptr<Program> program = mDevice->NewProgram();
-            if (!program->Build(shaders))
+            ret = mDevice->MakeProgram(name);
+            if (!ret->Build(shaders))
                 return nullptr;
-
-            it = mPrograms.insert(std::make_pair(name, std::move(program))).first;
         }
-        return it->second.get();
+        return ret;
     }
     Shader* GetShader(const std::string& file)
     {
-        auto it = mShaders.find(file);
-        if (it == std::end(mShaders))
+        Shader* ret = mDevice->FindShader(file);
+        if (ret == nullptr)
         {
             // todo: maybe add some abstraction
             std::ifstream stream;
@@ -176,29 +174,23 @@ private:
 
             const std::string source(std::istreambuf_iterator<char>(stream), {});
 
-            std::unique_ptr<Shader> shader = mDevice->NewShader();
-            if (!shader->CompileSource(source))
+            ret = mDevice->MakeShader(file);
+            if (!ret->CompileSource(source))
                 return nullptr;
-
-            it = mShaders.insert(std::make_pair(file, std::move(shader))).first;
         }
-        return it->second.get();
+        return ret;
     }
     Geometry* ToDeviceGeometry(const Drawable& shape)
     {
         const auto& name = typeid(shape).name();
-        auto it = mGeoms.find(name);
-        if (it == std::end(mGeoms))
+        Geometry* ret = mDevice->FindGeometry(name);
+        if (ret == nullptr)
         {
-            std::unique_ptr<Geometry> geom = mDevice->NewGeometry();
-            shape.Upload(*geom);
-            it = mGeoms.insert(std::make_pair(name, std::move(geom))).first;
+            ret = mDevice->MakeGeometry(name);
+            shape.Upload(*ret);
         }
-        return it->second.get();
+        return ret;
     }
-    std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
-    std::map<std::string, std::unique_ptr<Shader>> mShaders;
-    std::map<std::string, std::unique_ptr<Program>> mPrograms;
 
 private:
     std::shared_ptr<GraphicsDevice> mDevice;

@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -132,7 +133,7 @@ class OpenGLES2GraphicsDevice : public GraphicsDevice, protected QOpenGLFunction
 public:
     OpenGLES2GraphicsDevice()
     {
-        initializeOpenGLFunctions();        
+        initializeOpenGLFunctions();
         // it'd make sense to create own context here but the but
         // problem is that currently we're using Qt widget as the window
         // and it creates a FBO into which all the rendering is done.
@@ -173,14 +174,53 @@ public:
         GL_CHECK(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
-    virtual std::unique_ptr<Shader> NewShader() override
-    { return std::make_unique<ShaderImpl>(); }
+    virtual Shader* FindShader(const std::string& name) override
+    {
+        auto it = mShaders.find(name);
+        if (it == std::end(mShaders))
+            return nullptr;
+        return it->second.get();
+    }
 
-    virtual std::unique_ptr<Program> NewProgram() override
-    { return std::make_unique<ProgImpl>(); }
+    virtual Shader* MakeShader(const std::string& name) override
+    {
+        auto shader = std::make_unique<ShaderImpl>();
+        auto* ret   = shader.get();
+        mShaders[name] = std::move(shader);
+        return ret;
+    }
 
-    virtual std::unique_ptr<Geometry> NewGeometry() override
-    { return std::make_unique<GeomImpl>(); }
+    virtual Program* FindProgram(const std::string& name) override
+    {
+        auto it = mPrograms.find(name);
+        if (it == std::end(mPrograms))
+            return nullptr;
+        return it->second.get();
+    }
+
+    virtual Program* MakeProgram(const std::string& name) override
+    {
+        auto program = std::make_unique<ProgImpl>();
+        auto* ret    = program.get();
+        mPrograms[name] = std::move(program);
+        return ret;
+    }
+
+    virtual Geometry* FindGeometry(const std::string& name) override
+    {
+        auto it = mGeoms.find(name);
+        if (it == std::end(mGeoms))
+            return nullptr;
+        return it->second.get();
+    }
+
+    virtual Geometry* MakeGeometry(const std::string& name) override
+    {
+        auto geometry = std::make_unique<GeomImpl>();
+        auto* ret = geometry.get();
+        mGeoms[name] = std::move(geometry);
+        return ret;
+    }
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
@@ -583,7 +623,9 @@ private:
         GLuint mVersion = 0;
     };
 private:
-
+    std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
+    std::map<std::string, std::unique_ptr<Shader>> mShaders;
+    std::map<std::string, std::unique_ptr<Program>> mPrograms;
 };
 
 // static

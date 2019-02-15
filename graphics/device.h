@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 #include <cstdint>
+#include <string>
 
 #include "types.h"
 
@@ -87,14 +88,13 @@ namespace invaders
         virtual void ClearColor(const Color4f& color) = 0;
         virtual void ClearStencil(int value) = 0;
 
-        // Create a new device specific shader object.
-        virtual std::unique_ptr<Shader> NewShader() = 0;
-
-        // Create new device specific program object.
-        virtual std::unique_ptr<Program> NewProgram() = 0;
-
-        // Create a new device specific geometry object.
-        virtual std::unique_ptr<Geometry> NewGeometry() = 0;
+        // resource creation APIs
+        virtual Shader* FindShader(const std::string& name) = 0;
+        virtual Shader* MakeShader(const std::string& name) = 0;
+        virtual Program* FindProgram(const std::string& name) = 0;
+        virtual Program* MakeProgram(const std::string& name) = 0;
+        virtual Geometry* FindGeometry(const std::string& name) = 0;
+        virtual Geometry* MakeGeometry(const std::string& name) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
