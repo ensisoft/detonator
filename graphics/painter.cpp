@@ -37,6 +37,9 @@
 #include "program.h"
 #include "geometry.h"
 #include "painter.h"
+#include "drawable.h"
+#include "material.h"
+#include "types.h"
 
 namespace invaders
 {
@@ -123,63 +126,30 @@ public:
     }
 
 private:
-    Program* GetProgram(const Drawable& shape, const Material& mat)
+    Program* GetProgram(const Drawable& drawable, const Material& material)
     {
-        std::string drawable_shader = "vertex_array.glsl";
-        std::string material_shader;
-        // map material to the shader we use to implement it.
-        if (dynamic_cast<const Fill*>(&mat))
-            material_shader = "fill_color.glsl";
-        else if (dynamic_cast<const SlidingGlintEffect*>(&mat))
-            material_shader = "sliding_glint_effect.glsl";
-
-        ASSERT(!material_shader.empty());
-
-        // program is a combination of the vertex shader + fragment shader.
-        return GetProgram(drawable_shader + "/" + material_shader,
-            drawable_shader, material_shader);
-    }
-
-    Program* GetProgram(const std::string& name,
-        const std::string& vshader_file, const std::string& fshader_file)
-    {
-        Program* ret = mDevice->FindProgram(name);
-        if (ret == nullptr)
+        const std::string& name = typeid(drawable).name() + std::string("/") +
+            typeid(material).name();
+        Program* prog = mDevice->FindProgram(name);
+        if (!prog)
         {
-            Shader* vs = GetShader(vshader_file);
-            Shader* fs = GetShader(fshader_file);
-            if (vs == nullptr || fs == nullptr)
+            Shader* drawable_shader = drawable.GetShader(*mDevice);
+            if (!drawable_shader)
+                return nullptr;
+            Shader* material_shader = material.GetShader(*mDevice);
+            if (!material_shader)
                 return nullptr;
 
             std::vector<const Shader*> shaders;
-            shaders.push_back(vs);
-            shaders.push_back(fs);
-
-            ret = mDevice->MakeProgram(name);
-            if (!ret->Build(shaders))
+            shaders.push_back(drawable_shader);
+            shaders.push_back(material_shader);
+            prog = mDevice->MakeProgram(name);
+            if (!prog->Build(shaders))
                 return nullptr;
         }
-        return ret;
+        return prog;
     }
-    Shader* GetShader(const std::string& file)
-    {
-        Shader* ret = mDevice->FindShader(file);
-        if (ret == nullptr)
-        {
-            // todo: maybe add some abstraction
-            std::ifstream stream;
-            stream.open("shaders/es2/" + file);
-            if (!stream.is_open())
-                throw std::runtime_error("failed to open file: " + file);
 
-            const std::string source(std::istreambuf_iterator<char>(stream), {});
-
-            ret = mDevice->MakeShader(file);
-            if (!ret->CompileSource(source))
-                return nullptr;
-        }
-        return ret;
-    }
     Geometry* ToDeviceGeometry(const Drawable& shape)
     {
         const auto& name = typeid(shape).name();

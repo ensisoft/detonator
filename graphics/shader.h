@@ -41,6 +41,8 @@ namespace invaders
         // any previously compiled state.
         virtual bool CompileSource(const std::string& source) = 0;
 
+        virtual bool CompileFile(const std::string& file) = 0;
+
         // Returns true if the shader has been compiled succesfully.
         virtual bool IsValid() const = 0;
     private:

@@ -26,9 +26,6 @@
 
 #include <string>
 
-#include "geometry.h"
-#include "program.h"
-
 namespace invaders
 {
     class Transform
@@ -53,6 +50,20 @@ namespace invaders
         {
             mScaleX = sx;
             mScaleY = sy;
+        }
+
+        template<typename T>
+        void MoveTo(const T& t)
+        {
+            mPosX = t.x();
+            mPosY = t.y();
+        }
+
+        template<typename T>
+        void Resize(const T& t)
+        {
+            mScaleX = t.width();
+            mScaleY = t.height();
         }
 
         // around the depth axis, positive angle (expressed in degrees)
@@ -81,48 +92,6 @@ namespace invaders
         float mPosX = 0.0f;
         float mPosY = 0.0f;
         float mRotation = 0.0f;
-    };
-
-    class Drawable
-    {
-    public:
-        virtual ~Drawable() = default;
-        virtual void Upload(Geometry& geom) const = 0;
-    private:
-    };
-
-    class Rect : public Drawable
-    {
-    public:
-        virtual void Upload(Geometry& geom) const
-        {
-            const Vertex verts[6] = {
-                { {0,  0}, {0, 1} },
-                { {0, -1}, {0, 0} },
-                { {1, -1}, {1, 0} },
-
-                { {0,  0}, {0, 1} },
-                { {1, -1}, {1, 0} },
-                { {1,  0}, {1, 1} }
-            };
-            geom.Update(verts, 6);
-        }
-    private:
-    };
-
-    class Triangle : public Drawable
-    {
-    public:
-        virtual void Upload(Geometry& geom) const
-        {
-            const Vertex verts[6] = {
-                { {0.5,  0.0}, {0.5, 1.0} },
-                { {0.0, -1.0}, {0.0, 0.0} },
-                { {1.0, -1.0}, {1.0, 0.0} }
-            };
-            geom.Update(verts, 3);
-        }
-    private:
     };
 
     enum class Color {
@@ -239,60 +208,6 @@ namespace invaders
         float mGreen = 1.0f;
         float mBlue  = 1.0f;
         float mAlpha = 1.0f;
-    };
-
-    class Material
-    {
-    public:
-        virtual ~Material() = default;
-        virtual void Apply(Program& prog) const = 0;
-    };
-
-    class Gradient
-    {
-    public:
-    };
-
-    class Fill : public Material
-    {
-    public:
-        Fill()
-        {}
-
-        Fill(const Color4f& color) : mColor(color)
-        {}
-
-        virtual void Apply(Program& prog) const override
-        {
-            prog.SetUniform("kFillColor",
-                mColor.Red(), mColor.Green(), mColor.Blue(),
-                mColor.Alpha());
-        }
-
-        void SetColor(const Color4f color)
-        { mColor = color; }
-    private:
-        Color4f mColor;
-    };
-
-
-    class Texture
-    {
-    public:
-    };
-
-    class SlidingGlintEffect : public Material
-    {
-    public:
-        virtual void Apply(Program& prog) const override
-        {
-            prog.SetUniform("uRuntime", mRunTime);
-        }
-
-        void SetAppRuntime(float r)
-        { mRunTime = r; }
-    private:
-        float mRunTime = 0.0f;
     };
 
 } // namespace

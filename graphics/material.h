@@ -1,0 +1,103 @@
+// Copyright (c) 2010-2018 Sami Väisänen, Ensisoft
+//
+// http://www.ensisoft.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
+
+#pragma once
+
+#include "config.h"
+
+#include "device.h"
+#include "shader.h"
+#include "program.h"
+#include "types.h"
+
+namespace invaders
+{
+    class Material
+    {
+    public:
+        virtual ~Material() = default;
+        virtual Shader* GetShader(GraphicsDevice& device) const = 0;
+        virtual void Apply(Program& prog) const = 0;
+    };
+
+    class Fill : public Material
+    {
+    public:
+        Fill()
+        {}
+
+        Fill(const Color4f& color) : mColor(color)
+        {}
+        virtual Shader* GetShader(GraphicsDevice& device) const override
+        {
+            Shader* s = device.FindShader("fill_color.glsl");
+            if (s == nullptr || !s->IsValid())
+            {
+                if (s == nullptr)
+                    s = device.MakeShader("fill_color.glsl");
+                if (!s->CompileFile("fill_color.glsl"))
+                    return nullptr;
+            }
+            return s;
+        }
+
+        virtual void Apply(Program& prog) const override
+        {
+            prog.SetUniform("kFillColor",
+                mColor.Red(), mColor.Green(), mColor.Blue(),
+                mColor.Alpha());
+        }
+
+        void SetColor(const Color4f color)
+        { mColor = color; }
+    private:
+        Color4f mColor;
+    };
+
+    class SlidingGlintEffect : public Material
+    {
+    public:
+        virtual Shader* GetShader(GraphicsDevice& device) const override
+        {
+            Shader* s = device.FindShader("sliding_glint_effect.glsl");
+            if (s == nullptr || !s->IsValid())
+            {
+                if (s == nullptr)
+                    s = device.MakeShader("sliding_glint_effect.glsl");
+                if (!s->CompileFile("sliding_glint_effect.glsl"))
+                    return nullptr;
+            }
+            return s;
+        }
+
+        virtual void Apply(Program& prog) const override
+        {
+            prog.SetUniform("uRuntime", mRunTime);
+        }
+
+        void SetAppRuntime(float r)
+        { mRunTime = r; }
+    private:
+        float mRunTime = 0.0f;
+    };
+
+} // namespace

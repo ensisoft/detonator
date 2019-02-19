@@ -26,11 +26,13 @@
 
 #include <memory>
 
-#include "types.h"
-
 namespace invaders
 {
     class GraphicsDevice;
+    class Drawable;
+    class Material;
+    class Color4f;
+    class Transform;
 
     // Custom painter implementation for fancier graphics
     class Painter

@@ -563,6 +563,18 @@ private:
                 GL_CHECK(glDeleteShader(mShader));
             }
         }
+        virtual bool CompileFile(const std::string& file) override
+        {
+            std::ifstream stream;
+            stream.open("shaders/es2/" + file);
+            if (!stream.is_open())
+                throw std::runtime_error("failed to open file: " + file);
+
+            const std::string source(std::istreambuf_iterator<char>(stream), {});
+
+            return CompileSource(source);
+        }
+
         virtual bool CompileSource(const std::string& source) override
         {
             GLenum type = GL_NONE;

@@ -51,6 +51,9 @@
 #include "base/logging.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
+#include "graphics/types.h"
+#include "graphics/drawable.h"
+#include "graphics/material.h"
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
@@ -765,59 +768,42 @@ public:
         Boss
     };
 
-    Invader(QVector2D position, QString str, float velocity, ShipType type) :
-        position_(position), text_(str), time_(0), expire_(0), velocity_(velocity), type_(type)
+    Invader(QVector2D position, QString str, float velocity, ShipType type)
+      : mPosition(position)
+      , mText(str)
+      , mVelocity(velocity)
+      , mShipType(type)
     {
-        shield_ = false;
     }
 
-    void setPosition(QVector2D position)
-    {
-        position_ = position;
-    }
-
-    bool update(float dt, TransformState& state)
+    virtual bool update(float dt, TransformState& state) override
     {
         const auto v = getVelocityVector(state);
-        position_ += (v * dt);
-        if (expire_)
+        mPosition += (v * dt);
+        if (mMaxLifeTime)
         {
-            time_ += dt;
-            if (time_ > expire_)
+            mLifeTime += dt;
+            if (mLifeTime > mMaxLifeTime)
                 return false;
         }
         return true;
     }
 
-    float getScale() const
-    {
-        switch (type_)
-        {
-            case ShipType::Slow:  return 5.0f;
-            case ShipType::Fast:  return 4.0f;
-            case ShipType::Boss:  return 6.5f;
-            case ShipType::Tough: return 3.5f;
-        }
-        return 1.0f;
-    }
-
-    void paint(QPainter& painter, TransformState& state)
+    virtual void paint(QPainter& painter, TransformState& state) override
     {
         // offset the texture to be centered around the position
         const auto unitScale   = state.getScale();
         const auto spriteScale = state.getScale() * getScale();
-        const auto position    = state.toViewSpace(position_);
+        const auto position    = state.toViewSpace(mPosition);
 
-        // draw the ship texture
-        QPixmap ship = getShipTexture(type_);
+        QPixmap ship = getShipTexture(mShipType);
         const float shipWidth  = ship.width();
         const float shipHeight = ship.height();
         const float shipAspect = shipHeight / shipWidth;
         const float shipScaledWidth  = spriteScale.x();
         const float shipScaledHeight = shipScaledWidth * shipAspect;
 
-        // draw the jet stream first
-        QPixmap jet = getJetStreamTexture(type_);
+        QPixmap jet = getJetStreamTexture(mShipType);
         const float jetWidth  = jet.width();
         const float jetHeight = jet.height();
         const float jetAspect = jetHeight / jetWidth;
@@ -826,34 +812,35 @@ public:
 
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
-        QRectF target(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
+        // the ship rect is the coordinate to which the jet stream and
+        // the text are relative to.
+        QRectF shipRect(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
         // offset it so that the center is aligned with the unit position
-        target.moveTo(position -
+        shipRect.moveTo(position -
             QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
-        //painter.draw(target, ship, ship.rect()); // draw the jet stream first.
 
-        QRectF shipRect = target;
+        QRectF jetStreamRect = shipRect;
+        jetStreamRect.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
+        jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
 
-        target.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
-        target.setSize(QSize(jetScaledWidth, jetScaledHeight));
-        painter.drawPixmap(target, jet, jet.rect());
-        target.translate(jetScaledWidth*0.75, 0);
+        QRectF textRect = jetStreamRect;
+        textRect.translate(jetScaledWidth * 0.75, 0);
 
-        painter.drawPixmap(shipRect, ship, ship.rect());
-
-        // draw the kill string
         QFont font;
         font.setFamily("Monospace");
         font.setPixelSize(unitScale.y() / 1.75);
-
         QPen pen;
         pen.setWidth(2);
         pen.setColor(Qt::darkYellow);
+
+        // draw textures
         painter.setFont(font);
         painter.setPen(pen);
-        painter.drawText(target, Qt::AlignVCenter, text_);
+        painter.drawPixmap(jetStreamRect, jet, jet.rect());
+        painter.drawPixmap(shipRect, ship, ship.rect());
+        painter.drawText(textRect, Qt::AlignVCenter, mText);
 
-        if (shield_)
+        if (mShieldIsOn)
         {
             QPixmap shield = QPixmap(R("textures/spr_shield.png"));
             QRectF rect;
@@ -872,31 +859,43 @@ public:
 
     }
 
-    // get current position
-    QVector2D getPosition() const
+    float getScale() const
     {
-        return position_;
+        switch (mShipType)
+        {
+            case ShipType::Slow:  return 5.0f;
+            case ShipType::Fast:  return 4.0f;
+            case ShipType::Boss:  return 6.5f;
+            case ShipType::Tough: return 3.5f;
+        }
+        return 1.0f;
     }
 
     // get the position at ticksLater ticks time
     QVector2D getFuturePosition(float dtLater, const TransformState& state) const
     {
         const auto v = getVelocityVector(state);
-        return position_ + v * dtLater;
+        return mPosition + v * dtLater;
     }
 
-    void expireIn(quint64 ms)
-    { expire_ = ms; }
+    // get current position
+    QVector2D getPosition() const
+    { return mPosition; }
+
+    void setPosition(QVector2D position)
+    { mPosition = position; }
+
+    void setMaxLifetime(quint64 ms)
+    { mMaxLifeTime = ms; }
 
     void setViewString(QString str)
-    {
-        text_ = str;
-    }
-    QPixmap getTexture() const
-    { return getShipTexture(type_); }
+    { mText = str; }
 
-    void setShield(bool onOff)
-    { shield_ = onOff; }
+    QPixmap getTexture() const
+    { return getShipTexture(mShipType); }
+
+    void enableShield(bool onOff)
+    { mShieldIsOn = onOff; }
 
 private:
     static const QPixmap& getShipTexture(ShipType type)
@@ -928,21 +927,20 @@ private:
         const float pxw  = state.viewWidth() / cols;
         const float x    = pxw / state.viewWidth();
         const float y    = 0.0f;
-        const auto velo = QVector2D(-x, y) * velocity_;
+        const auto velo = QVector2D(-x, y) * mVelocity;
         return velo;
     }
 
 private:
-    QVector2D position_;
-    QString text_;
-    float time_;
-    float expire_;
+    QVector2D mPosition;
+    QString mText;
+    float mLifeTime    = 0.0f;
+    float mMaxLifeTime = 0.0f;
+    float mVelocity    = 0.0f;
 private:
-    float velocity_;
+    ShipType mShipType = ShipType::Slow;
 private:
-    ShipType type_;
-private:
-    bool shield_;
+    bool mShieldIsOn = false;
 };
 
 class GameWidget::Missile : public GameWidget::Animation
@@ -2145,7 +2143,7 @@ GameWidget::GameWidget()
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));
 
-        invader->expireIn(missileFlyTime);
+        invader->setMaxLifetime(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
         sparks->setColor(QColor(255, 255, 68));
@@ -2235,7 +2233,7 @@ GameWidget::GameWidget()
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
-        inv->setShield(onOff);
+        inv->enableShield(onOff);
     };
 
     mGame->onInvaderSpawn = [&](const Game::invader& inv)
@@ -2280,7 +2278,7 @@ GameWidget::GameWidget()
         const auto viewString = inv.viewList.join("");
 
         std::unique_ptr<Invader> invader(new Invader(pos, viewString, velocity, type));
-        invader->setShield(inv.shield_on_ticks != 0);
+        invader->enableShield(inv.shield_on_ticks != 0);
         mInvaders[inv.identity] = std::move(invader);
     };
 

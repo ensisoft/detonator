@@ -42,6 +42,8 @@ HEADERS = game.h\
 	graphics/program.h\
 	graphics/shader.h\
 	graphics/geometry.h\
+	graphics/material.h\
+	graphics/drawable.h\
 
 TARGET = invaders
 
