@@ -66,7 +66,7 @@ public:
 
     virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) override
     {
-        Geometry* geom = ToDeviceGeometry(shape);
+        Geometry* geom = shape.Upload(*mDevice);
         Program* prog = GetProgram(shape, mat);
         prog->SetUniform("kScalingFactor", transform.GetWidth(), transform.GetHeight());
         prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
@@ -99,7 +99,7 @@ public:
         state.stencil_ref     = 0;
         state.bWriteColor     = false;
 
-        Geometry* maskGeom = ToDeviceGeometry(maskShape);
+        Geometry* maskGeom = maskShape.Upload(*mDevice);
         Program* maskProg = GetProgram(maskShape, Fill());
         maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
         maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
@@ -114,7 +114,7 @@ public:
         state.bWriteColor     = true;
         state.bEnableBlend    = true;
 
-        Geometry* drawGeom = ToDeviceGeometry(drawShape);
+        Geometry* drawGeom = drawShape.Upload(*mDevice);
         Program* drawProg = GetProgram(drawShape, material);
         drawProg->SetUniform("kScalingFactor", drawTransform.GetWidth(), drawTransform.GetHeight());
         drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
@@ -148,18 +148,6 @@ private:
                 return nullptr;
         }
         return prog;
-    }
-
-    Geometry* ToDeviceGeometry(const Drawable& shape)
-    {
-        const auto& name = typeid(shape).name();
-        Geometry* ret = mDevice->FindGeometry(name);
-        if (ret == nullptr)
-        {
-            ret = mDevice->MakeGeometry(name);
-            shape.Upload(*ret);
-        }
-        return ret;
     }
 
 private:

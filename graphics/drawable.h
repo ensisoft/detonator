@@ -37,7 +37,7 @@ namespace invaders
     public:
         virtual ~Drawable() = default;
         virtual Shader* GetShader(GraphicsDevice& device) const = 0;
-        virtual void Upload(Geometry& geom) const = 0;
+        virtual Geometry* Upload(GraphicsDevice& device) const = 0;
     private:
     };
 
@@ -57,18 +57,24 @@ namespace invaders
             return s;
         }
 
-        virtual void Upload(Geometry& geom) const
+        virtual Geometry* Upload(GraphicsDevice& device) const override
         {
-            const Vertex verts[6] = {
-                { {0,  0}, {0, 1} },
-                { {0, -1}, {0, 0} },
-                { {1, -1}, {1, 0} },
+            Geometry* geom = device.FindGeometry("rect");
+            if (!geom)
+            {
+                const Vertex verts[6] = {
+                    { {0,  0}, {0, 1} },
+                    { {0, -1}, {0, 0} },
+                    { {1, -1}, {1, 0} },
 
-                { {0,  0}, {0, 1} },
-                { {1, -1}, {1, 0} },
-                { {1,  0}, {1, 1} }
-            };
-            geom.Update(verts, 6);
+                    { {0,  0}, {0, 1} },
+                    { {1, -1}, {1, 0} },
+                    { {1,  0}, {1, 1} }
+                };
+                geom = device.MakeGeometry("rect");
+                geom->Update(verts, 6);
+            }
+            return geom;
         }
     private:
     };
@@ -89,14 +95,20 @@ namespace invaders
             return s;
         }
 
-        virtual void Upload(Geometry& geom) const
+        virtual Geometry* Upload(GraphicsDevice& device) const override
         {
-            const Vertex verts[6] = {
-                { {0.5,  0.0}, {0.5, 1.0} },
-                { {0.0, -1.0}, {0.0, 0.0} },
-                { {1.0, -1.0}, {1.0, 0.0} }
-            };
-            geom.Update(verts, 3);
+            Geometry* geom = device.FindGeometry("triangle");
+            if (!geom)
+            {
+                const Vertex verts[6] = {
+                    { {0.5,  0.0}, {0.5, 1.0} },
+                    { {0.0, -1.0}, {0.0, 0.0} },
+                    { {1.0, -1.0}, {1.0, 0.0} }
+                };
+                geom = device.MakeGeometry("triangle");
+                geom->Update(verts, 3);
+            }
+            return geom;
         }
     private:
     };
