@@ -36,6 +36,7 @@ namespace invaders
     class Shader;
     class Program;
     class Geometry;
+    class Texture;
 
     class GraphicsDevice
     {
@@ -95,6 +96,8 @@ namespace invaders
         virtual Program* MakeProgram(const std::string& name) = 0;
         virtual Geometry* FindGeometry(const std::string& name) = 0;
         virtual Geometry* MakeGeometry(const std::string& name) = 0;
+        virtual Texture* FindTexture(const std::string& name) = 0;
+        virtual Texture* MakeTexture(const std::string& name) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;

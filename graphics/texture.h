@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2018 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2019 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -24,29 +24,43 @@
 
 #include "config.h"
 
-#include <vector>
-
 namespace invaders
 {
-    class Shader;
-    class Texture;
-
-    class Program
+    class Texture
     {
     public:
-        virtual ~Program() = default;
+        virtual ~Texture() = default;
 
-        virtual bool Build(const std::vector<const Shader*>& shaders) = 0;
+        enum class Format {
+            RGB, RGBA
+        };
+        enum class MinFilter {
+            Nearest, Linear, Mipmap
+        };
+        enum class MagFilter {
+            Nearest, Linear
+        };
 
-        virtual bool IsValid() const = 0;
+        // default filtering.
+        virtual void SetFilter(MinFilter filter) = 0;
+        virtual void SetFilter(MagFilter filter) = 0;
 
-        virtual void SetUniform(const char* name, float x) = 0;
-        virtual void SetUniform(const char* name, float x, float y) = 0;
-        virtual void SetUniform(const char* name, float x, float y, float z) = 0;
-        virtual void SetUniform(const char* name, float x, float y, float z, float w) = 0;
+        virtual MinFilter GetMinFilter() const = 0;
+        virtual MagFilter GetMagFilter() const = 0;
 
-        virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) = 0;
+        // upload the texture contents from the given buffer.
+        virtual void Upload(const void* bytes,
+            unsigned xres, unsigned yres, Format format) = 0;
+
+        // upload the texture contents from the given file.
+        virtual void UploadFromFile(const std::string& filename) = 0;
+
+        virtual unsigned GetWidth() const = 0;
+        virtual unsigned GetHeight() const = 0;
+
+    protected:
     private:
     };
 
-} //
+
+} // namespace

@@ -72,13 +72,14 @@ public:
         prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
         prog->SetUniform("kViewport", mViewW, mViewH);
         prog->SetUniform("kRotation", transform.GetRotation());
-        mat.Apply(*prog);
+        mat.Apply(*mDevice, *prog);
 
         GraphicsDevice::State state;
         state.viewport.x      = mViewX;
         state.viewport.y      = mViewY;
         state.viewport.width  = mViewW;
         state.viewport.height = mViewH;
+        state.bEnableBlend    = mat.IsTransparent();
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -100,12 +101,12 @@ public:
         state.bWriteColor     = false;
 
         Geometry* maskGeom = maskShape.Upload(*mDevice);
-        Program* maskProg = GetProgram(maskShape, Fill());
+        Program* maskProg = GetProgram(maskShape, ColorFill());
         maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
         maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
         maskProg->SetUniform("kViewport", mViewW, mViewH);
         maskProg->SetUniform("kRotation", maskTransform.GetRotation());
-        material.Apply(*maskProg);
+        material.Apply(*mDevice, *maskProg);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
         state.stencil_func    = GraphicsDevice::State::StencilFunc::RefIsEqual;
@@ -120,7 +121,7 @@ public:
         drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
         drawProg->SetUniform("kViewport", mViewW, mViewH);
         drawProg->SetUniform("kRotation", drawTransform.GetRotation());
-        material.Apply(*drawProg);
+        material.Apply(*mDevice, *drawProg);
 
         mDevice->Draw(*drawProg, *drawGeom, state);
     }

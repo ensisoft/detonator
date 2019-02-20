@@ -42,6 +42,9 @@
 #include "program.h"
 #include "device.h"
 #include "geometry.h"
+#include "texture.h"
+
+#include "stb_image.h"
 
 #define GL_CHECK(x) \
     do {                                                                        \
@@ -222,6 +225,22 @@ public:
         return ret;
     }
 
+    virtual Texture* FindTexture(const std::string& name) override
+    {
+        auto it = mTextures.find(name);
+        if (it == std::end(mTextures))
+            return nullptr;
+        return it->second.get();
+    }
+
+    virtual Texture* MakeTexture(const std::string& name) override
+    {
+        auto texture = std::make_unique<TextureImpl>();
+        auto* ret = texture.get();
+        mTextures[name] = std::move(texture);
+        return ret;
+    }
+
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
         SetState(state);
@@ -399,6 +418,184 @@ private:
     }
 
 private:
+    class TextureImpl : public Texture,  protected QOpenGLFunctions
+    {
+    public:
+        TextureImpl()
+        {
+            initializeOpenGLFunctions();
+
+            GL_CHECK(glGenTextures(1, &mName));
+            DEBUG("New texture object %1 name = %2", (void*)this, mName);
+
+            mMinFilter = MinFilter::Mipmap;
+            mMagFilter = MagFilter::Linear;
+            GL_CHECK(glActiveTexture(GL_TEXTURE0));
+            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        }
+        ~TextureImpl()
+        {
+            GL_CHECK(glDeleteTextures(1, &mName));
+            DEBUG("Deleted texture %1", mName);
+        }
+
+        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) override
+        {
+            DEBUG("Loading texture %1 %2x%3 px", mName, xres, yres);
+
+            GLenum sizeFormat = 0;
+            GLenum baseFormat = 0;
+            switch (format)
+            {
+                case Format::RGB:
+                    sizeFormat = GL_RGB;
+                    baseFormat = GL_RGB;
+                    break;
+                case Format::RGBA:
+                    sizeFormat = GL_RGBA;
+                    baseFormat = GL_RGBA;
+                    break;
+                default: assert(!"unknown texture format."); break;
+            }
+
+            GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+            GL_CHECK(glActiveTexture(GL_TEXTURE0));
+            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CHECK(glTexImage2D(GL_TEXTURE_2D,
+                0, // mip level
+                sizeFormat,
+                xres,
+                yres,
+                0, // border must be 0
+                baseFormat,
+                GL_UNSIGNED_BYTE,
+                bytes));
+            GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+            mWidth  = xres;
+            mHeight = yres;
+        }
+
+        virtual void UploadFromFile(const std::string& filename) override
+        {
+            DEBUG("Loading texture %1", filename);
+
+            std::ifstream in(filename, std::ios::in | std::ios::binary);
+            if (!in)
+                throw std::runtime_error("failed to open file: " + filename);
+
+            in.seekg(0, std::ios::end);
+            const auto size = (std::size_t)in.tellg();
+            in.seekg(0, std::ios::beg);
+
+            std::vector<char> data;
+            data.resize(size);
+            in.read(&data[0], size);
+            if ((std::size_t)in.gcount() != size)
+                throw std::runtime_error("failed to read all of: " + filename);
+
+            int xres  = 0;
+            int yres  = 0;
+            int depth = 0;
+            auto* bmp = stbi_load_from_memory((const stbi_uc*)data.data(),
+                (int)data.size(), &xres, &yres, &depth, 0);
+            if (bmp == nullptr)
+                throw std::runtime_error("failed to decompress texture: " + filename);
+
+            DEBUG("Decompressed texture %1x%2 px @ %3bits", xres, yres, depth * 8);
+
+            Format format = Format::RGB;
+            switch (depth)
+            {
+                //case 1: format = Format::Grayscale; break;
+                case 3: format = Format::RGB; break;
+                case 4: format = Format::RGBA; break;
+                default:
+                   stbi_image_free(bmp);
+                   throw std::runtime_error("unknown texture format (depth): " + filename);
+            }
+
+            Upload(bmp, xres, yres, format);
+
+            stbi_image_free(bmp);
+        }
+
+        virtual void SetFilter(MinFilter filter) override
+        {
+            mMinFilter = filter;
+            GL_CHECK(glActiveTexture(GL_TEXTURE0));
+            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getMinFilterAsGLEnum()));
+        }
+
+        virtual void SetFilter(MagFilter filter) override
+        {
+            mMagFilter = filter;
+            GL_CHECK(glActiveTexture(GL_TEXTURE0));
+            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getMagFilterAsGLEnum()));
+        }
+
+        Texture::MinFilter GetMinFilter() const override
+        { return mMinFilter; }
+
+        Texture::MagFilter GetMagFilter() const override
+        { return mMagFilter; }
+
+        virtual unsigned GetWidth() const override
+        { return mWidth; }
+
+        virtual unsigned GetHeight() const override
+        { return mHeight; }
+
+        void bind(GLuint unit)
+        {
+            //GL_CHECK(glBindTextureUnit(unit, m_name));
+            //DEBUG("Texture %1 bound to unit %2", m_name, unit);
+        }
+
+        GLenum getMinFilterAsGLEnum() const
+        {
+            switch (mMinFilter)
+            {
+                case Texture::MinFilter::Nearest:
+                return GL_NEAREST;
+                case Texture::MinFilter::Linear:
+                return GL_LINEAR;
+                case Texture::MinFilter::Mipmap:
+                return GL_LINEAR_MIPMAP_LINEAR;
+            }
+            assert(!"Incorrect texture minifying filter.");
+            return GL_NONE;
+        }
+
+        GLenum getMagFilterAsGLEnum() const
+        {
+            switch (mMagFilter)
+            {
+                case Texture::MagFilter::Nearest:
+                return GL_NEAREST;
+                case Texture::MagFilter::Linear:
+                return GL_LINEAR;
+            }
+            assert(!"Incorrect texture magnifying filter setting.");
+            return GL_NONE;
+        }
+
+        GLuint GetName() const
+        { return mName; }
+
+    private:
+        GLuint mName = 0;
+    private:
+        MinFilter mMinFilter = MinFilter::Nearest;
+        MagFilter mMagFilter = MagFilter::Nearest;
+    private:
+        unsigned mWidth  = 0;
+        unsigned mHeight = 0;
+    };
+
     class GeomImpl : public Geometry, protected QOpenGLFunctions
     {
     public:
@@ -535,6 +732,18 @@ private:
                 return;
             GL_CHECK(glUniform4f(ret, x, y, z, w));
         }
+        virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
+        {
+            const auto& texture_impl = dynamic_cast<const TextureImpl&>(texture);
+            const auto  texture_name = texture_impl.GetName();
+
+            auto ret =  glGetUniformLocation(mProgram, sampler);
+            if (ret == -1)
+                return;
+            GL_CHECK(glActiveTexture(GL_TEXTURE0 + unit));
+            GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture_name));
+            GL_CHECK(glUniform1i(ret, unit));
+        }
 
         void SetState() //const
         {
@@ -638,6 +847,7 @@ private:
     std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
     std::map<std::string, std::unique_ptr<Shader>> mShaders;
     std::map<std::string, std::unique_ptr<Program>> mPrograms;
+    std::map<std::string, std::unique_ptr<Texture>> mTextures;
 };
 
 // static

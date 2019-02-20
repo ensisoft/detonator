@@ -24,9 +24,12 @@
 
 #include "config.h"
 
+#include <string>
+
 #include "device.h"
 #include "shader.h"
 #include "program.h"
+#include "texture.h"
 #include "types.h"
 
 namespace invaders
@@ -36,16 +39,18 @@ namespace invaders
     public:
         virtual ~Material() = default;
         virtual Shader* GetShader(GraphicsDevice& device) const = 0;
-        virtual void Apply(Program& prog) const = 0;
+        virtual void Apply(GraphicsDevice& device, Program& prog) const = 0;
+        virtual bool IsTransparent() const
+        { return false; }
     };
 
-    class Fill : public Material
+    class ColorFill : public Material
     {
     public:
-        Fill()
+        ColorFill()
         {}
 
-        Fill(const Color4f& color) : mColor(color)
+        ColorFill(const Color4f& color) : mColor(color)
         {}
         virtual Shader* GetShader(GraphicsDevice& device) const override
         {
@@ -60,17 +65,69 @@ namespace invaders
             return s;
         }
 
-        virtual void Apply(Program& prog) const override
+        virtual void Apply(GraphicsDevice&, Program& prog) const override
         {
             prog.SetUniform("kFillColor",
                 mColor.Red(), mColor.Green(), mColor.Blue(),
                 mColor.Alpha());
         }
+        virtual bool IsTransparent() const override
+        { return mTransparency; }
 
         void SetColor(const Color4f color)
         { mColor = color; }
+
+        void EnableTransparency(bool on_off)
+        { mTransparency = on_off; }
     private:
         Color4f mColor;
+        bool mTransparency = false;
+    };
+
+    class TextureFill : public Material
+    {
+    public:
+        TextureFill() = default;
+        TextureFill(const std::string& texture, bool transparency = true)
+          : mTexture(texture)
+          , mTransparency(transparency)
+        {}
+
+        virtual Shader* GetShader(GraphicsDevice& device) const override
+        {
+            Shader* shader = device.FindShader("fill_texture.glsl");
+            if (shader == nullptr || !shader->IsValid())
+            {
+                if (!shader)
+                    shader = device.MakeShader("fill_texture.glsl");
+                if (!shader->CompileFile("fill_texture.glsl"))
+                    return nullptr;
+            }
+            return shader;
+        }
+        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        {
+            Texture* texture = device.FindTexture(mTexture);
+            if (texture == nullptr)
+            {
+                texture = device.MakeTexture(mTexture);
+                texture->UploadFromFile(mTexture);
+            }
+            prog.SetTexture("kTexture", 0, *texture);
+        }
+
+        virtual bool IsTransparent() const override
+        { return mTransparency; }
+
+        void EnableTransparenty(bool on_off)
+        { mTransparency = on_off; }
+
+        void SetTexture(const std::string& texfile)
+        { mTexture = texfile; }
+    private:
+        std::string mTexture;
+        bool mTransparency = false;
+
     };
 
     class SlidingGlintEffect : public Material
@@ -89,7 +146,7 @@ namespace invaders
             return s;
         }
 
-        virtual void Apply(Program& prog) const override
+        virtual void Apply(GraphicsDevice&, Program& prog) const override
         {
             prog.SetUniform("uRuntime", mRunTime);
         }

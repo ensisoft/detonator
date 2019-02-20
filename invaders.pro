@@ -9,7 +9,7 @@ CONFIG += debug_and_release
 # same filename to actually work and build properly.
 CONFIG += object_parallel_to_source
 
-QT += opengl 
+QT += opengl
 QT += core gui
 
 SOURCES = game.cpp\
@@ -24,6 +24,7 @@ SOURCES = game.cpp\
 	base/logging.cpp\
 	graphics/fucking_graphics_device.cpp\
 	graphics/painter.cpp\
+	graphics/stb_image.c\
 
 HEADERS = game.h\
 	gamewidget.h\
@@ -44,6 +45,8 @@ HEADERS = game.h\
 	graphics/geometry.h\
 	graphics/material.h\
 	graphics/drawable.h\
+	graphics/texture.h\
+	graphics/stb_image.h\
 
 TARGET = invaders
 
