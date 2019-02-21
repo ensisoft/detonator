@@ -68,6 +68,8 @@ public:
     {
         Geometry* geom = shape.Upload(*mDevice);
         Program* prog = GetProgram(shape, mat);
+        if (!prog)
+            return;
         prog->SetUniform("kScalingFactor", transform.GetWidth(), transform.GetHeight());
         prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
         prog->SetUniform("kViewport", mViewW, mViewH);
@@ -102,6 +104,8 @@ public:
 
         Geometry* maskGeom = maskShape.Upload(*mDevice);
         Program* maskProg = GetProgram(maskShape, ColorFill());
+        if (!maskProg)
+            return;
         maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
         maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
         maskProg->SetUniform("kViewport", mViewW, mViewH);
@@ -117,6 +121,8 @@ public:
 
         Geometry* drawGeom = drawShape.Upload(*mDevice);
         Program* drawProg = GetProgram(drawShape, material);
+        if (!drawProg)
+            return;
         drawProg->SetUniform("kScalingFactor", drawTransform.GetWidth(), drawTransform.GetHeight());
         drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
         drawProg->SetUniform("kViewport", mViewW, mViewH);
