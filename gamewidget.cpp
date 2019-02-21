@@ -2694,6 +2694,16 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
 void GameWidget::keyPressEvent(QKeyEvent* press)
 {
+    const auto key = press->key();
+    const auto mod = press->modifiers();
+    if (key == Qt::Key_R && mod == Qt::ShiftModifier)
+    {
+        DEBUG("Recompile shaders");
+        mCustomGraphicsDevice->DeleteShaders();
+        mCustomGraphicsDevice->DeletePrograms();
+        return;
+    }
+
     const auto action = mStates.top()->mapAction(press);
     switch (action)
     {

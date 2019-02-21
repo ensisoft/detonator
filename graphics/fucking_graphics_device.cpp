@@ -241,6 +241,15 @@ public:
         return ret;
     }
 
+    virtual void DeleteShaders()
+    {
+        mShaders.clear();
+    }
+    virtual void DeletePrograms()
+    {
+        mPrograms.clear();
+    }
+
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
         SetState(state);

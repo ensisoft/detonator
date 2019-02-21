@@ -99,6 +99,9 @@ namespace invaders
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
 
+        virtual void DeleteShaders() = 0;
+        virtual void DeletePrograms() = 0;
+
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
 
