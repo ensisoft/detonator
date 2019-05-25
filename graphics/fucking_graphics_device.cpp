@@ -612,6 +612,8 @@ private:
         {
             initializeOpenGLFunctions();
         }
+        virtual void SetDrawType(DrawType type) override
+        { mDrawType = type; }
         virtual void Update(const Vertex* verts, std::size_t count) override
         {
             mData.clear();
@@ -639,10 +641,14 @@ private:
                     sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
                 GL_CHECK(glEnableVertexAttribArray(aTexCoord));
             }
-            GL_CHECK(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
+            if (mDrawType == DrawType::Triangles)
+                GL_CHECK(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
+            else if (mDrawType == DrawType::Points)
+                GL_CHECK(glDrawArrays(GL_POINTS, 0, mData.size()));
         }
     private:
         std::vector<Vertex> mData;
+        DrawType mDrawType = DrawType::Triangles;
     };
 
     class ProgImpl : public Program, protected QOpenGLFunctions

@@ -41,8 +41,18 @@ namespace invaders
     class Geometry
     {
     public:
-        virtual ~Geometry() = default;
+        enum class DrawType {
+            // Draw the given vertices as triangles, i.e.
+            // each 3 vertices make a single triangle.
+            Triangles,
+            // Draw each given vertex as a point
+            Points
+        };
 
+        virtual ~Geometry() = default;
+        // Set the expected type for the geometry when drawn.
+        virtual void SetDrawType(DrawType type) = 0;
+        // Update the geometry object's data buffer contents.
         virtual void Update(const Vertex* verts, std::size_t count) = 0;
     private:
     };
