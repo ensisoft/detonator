@@ -76,12 +76,16 @@ public:
         prog->SetUniform("kRotation", transform.GetRotation());
         mat.Apply(*mDevice, *prog);
 
+        const auto draw = geom->GetDrawType();
+
         GraphicsDevice::State state;
-        state.viewport.x      = mViewX;
-        state.viewport.y      = mViewY;
-        state.viewport.width  = mViewW;
-        state.viewport.height = mViewH;
-        state.bEnableBlend    = mat.IsTransparent();
+        state.viewport.x         = mViewX;
+        state.viewport.y         = mViewY;
+        state.viewport.width     = mViewW;
+        state.viewport.height    = mViewH;
+        state.bEnableBlend       = mat.IsTransparent();
+        state.bEnablePointSprite = mat.IsPointSprite();
+        state.bEnablePointSize   = draw == Geometry::DrawType::Points;
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -92,20 +96,22 @@ public:
 
         mDevice->ClearStencil(1);
 
-        GraphicsDevice::State state;
-        state.viewport.x      = mViewX;
-        state.viewport.y      = mViewY;
-        state.viewport.width  = mViewW;
-        state.viewport.height = mViewH;
-        state.stencil_func    = GraphicsDevice::State::StencilFunc::PassAlways;
-        state.stencil_dpass   = GraphicsDevice::State::StencilOp::WriteRef;
-        state.stencil_ref     = 0;
-        state.bWriteColor     = false;
-
         Geometry* maskGeom = maskShape.Upload(*mDevice);
         Program* maskProg = GetProgram(maskShape, ColorFill());
         if (!maskProg)
             return;
+
+        GraphicsDevice::State state;
+        state.viewport.x       = mViewX;
+        state.viewport.y       = mViewY;
+        state.viewport.width   = mViewW;
+        state.viewport.height  = mViewH;
+        state.stencil_func     = GraphicsDevice::State::StencilFunc::PassAlways;
+        state.stencil_dpass    = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_ref      = 0;
+        state.bWriteColor      = false;
+        state.bEnablePointSize = maskGeom->GetDrawType() == Geometry::DrawType::Points;
+
         maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
         maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
         maskProg->SetUniform("kViewport", mViewW, mViewH);
@@ -113,16 +119,19 @@ public:
         material.Apply(*mDevice, *maskProg);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
-        state.stencil_func    = GraphicsDevice::State::StencilFunc::RefIsEqual;
-        state.stencil_dpass   = GraphicsDevice::State::StencilOp::WriteRef;
-        state.stencil_ref     = 1;
-        state.bWriteColor     = true;
-        state.bEnableBlend    = true;
-
         Geometry* drawGeom = drawShape.Upload(*mDevice);
         Program* drawProg = GetProgram(drawShape, material);
         if (!drawProg)
             return;
+
+        state.stencil_func       = GraphicsDevice::State::StencilFunc::RefIsEqual;
+        state.stencil_dpass      = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_ref        = 1;
+        state.bWriteColor        = true;
+        state.bEnableBlend       = material.IsTransparent();
+        state.bEnablePointSprite = material.IsPointSprite();
+        state.bEnablePointSize   = drawGeom->GetDrawType() == Geometry::DrawType::Points;
+
         drawProg->SetUniform("kScalingFactor", drawTransform.GetWidth(), drawTransform.GetHeight());
         drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
         drawProg->SetUniform("kViewport", mViewW, mViewH);

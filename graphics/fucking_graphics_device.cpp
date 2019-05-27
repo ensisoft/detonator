@@ -402,6 +402,9 @@ private:
         GL_CHECK(glViewport(state.viewport.x, state.viewport.y,
             state.viewport.width, state.viewport.height));
 
+        EnableIf(GL_PROGRAM_POINT_SIZE, state.bEnablePointSize);
+        EnableIf(GL_POINT_SPRITE, state.bEnablePointSprite);
+
         if (EnableIf(GL_BLEND, state.bEnableBlend))
         {
             GL_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -612,8 +615,13 @@ private:
         {
             initializeOpenGLFunctions();
         }
+
         virtual void SetDrawType(DrawType type) override
         { mDrawType = type; }
+
+        virtual DrawType GetDrawType() const override
+        { return mDrawType; }
+
         virtual void Update(const Vertex* verts, std::size_t count) override
         {
             mData.clear();

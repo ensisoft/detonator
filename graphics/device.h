@@ -49,7 +49,9 @@ namespace invaders
         };
 
         struct State {
-            bool bEnableBlend = false;
+            bool bEnableBlend       = false;
+            bool bEnablePointSize   = false;
+            bool bEnablePointSprite = false;
             bool bWriteColor = true;
 
             enum class StencilFunc {

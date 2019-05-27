@@ -42,6 +42,8 @@ namespace invaders
         virtual void Apply(GraphicsDevice& device, Program& prog) const = 0;
         virtual bool IsTransparent() const
         { return false; }
+        virtual bool IsPointSprite() const
+        { return false; }
     };
 
     class ColorFill : public Material
