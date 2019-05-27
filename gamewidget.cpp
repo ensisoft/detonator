@@ -1190,59 +1190,41 @@ class GameWidget::Background
 public:
     Background(const QVector2D& direction)
     {
-        for (std::size_t i=0; i<800; ++i)
-        {
-            particle p;
-            p.x = math::rand(0.0, 1.0);
-            p.y = math::rand(0.0, 1.0);
-            p.a = 0.5 + math::rand(0.0, 0.5);
-            p.v = 0.05 + math::rand(0.0, 0.05);
-            p.b = !(i % 7);
-            mParticles.push_back(p);
-        }
-        mBackground = R("textures/SpaceBackground.png");
-        mDirection  = direction;
+        ParticleEngine::Params params;
+        params.max_init_xpos = 1024;
+        params.max_init_ypos = 1024;
+        params.max_xpos = 1024;
+        params.max_ypos = 1024;
+        params.num_particles = 800;
+        params.min_velocity = 5.0f;
+        params.max_velocity = 100.0f;
+        params.min_point_size = 1.0f;
+        params.max_point_size = 8.0f;
+        params.direction_sector_start_angle = std::acos(direction.x());
+        params.direction_sector_size = 0.0f;
+        mStars = std::make_unique<ParticleEngine>("engine", params);
     }
-    void paint(QPainter& painter, const QRectF& rect, const QPointF&)
+    void paint(Painter& painter, const QRectF& rect)
     {
-        // draw the space background.
-        QBrush space(Qt::black);
-        painter.fillRect(rect, space);
-        painter.drawPixmap(rect, mBackground, mBackground.rect());
+        Transform t;
+        t.MoveTo(0, 0);
+        t.Resize(rect.width(), rect.height());
 
-        // draw the little stars/particles
-        QBrush star(Qt::white);
-        QColor col(Qt::white);
-
-        for (const auto& p : mParticles)
-        {
-            col.setAlpha(p.a * 0xff);
-            star.setColor(col);
-            const auto x = p.x * rect.width();
-            const auto y = p.y * rect.height();
-            painter.fillRect(x, y, 1 + p.b, 1 + p.b, star);
-        }
+        // first draw the static background image.
+        painter.Draw(Rect(), t, TextureFill("textures/SpaceBackground.png"));
+        // then draw the particle engine
+        painter.Draw(*mStars, t,
+            TextureFill("textures/Star.png")
+            .EnableTransparency(true)
+            .SetRenderPoints(true));
     }
+
     void update(float dt)
     {
-        const auto d = mDirection * (dt / 1000.0);
-        for (auto& p : mParticles)
-        {
-            p.x = math::wrap(1.0f, 0.0f, p.x + d.x() * p.v);
-            p.y = math::wrap(1.0f, 0.0f, p.y + d.y() * p.v);
-        }
+        mStars->Update(dt/1000.0f);
     }
 private:
-    struct particle {
-        float x = 0.0f;
-        float y = 0.0f;
-        float a = 0.0f;;
-        float v = 0.0f;;
-        int   b = 0;
-    };
-    std::vector<particle> mParticles;
-    QVector2D mDirection;
-    QPixmap mBackground;
+    std::unique_ptr<ParticleEngine> mStars;
 };
 
 class GameWidget::Scoreboard : public GameWidget::State
@@ -2567,8 +2549,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
 
-    mBackground->paint(painter, rect(), state.getScale());
-
     const bool bIsGameRunning = mStates.top()->isGameRunning();
 
     // do a first pass using custom painter
@@ -2578,6 +2558,8 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         GraphicsDevice::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+
+        mBackground->paint(*mCustomGraphicsPainter, rect());
 
         for (auto& anim : mAnimations)
         {
