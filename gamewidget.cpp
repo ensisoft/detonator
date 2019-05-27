@@ -39,7 +39,6 @@
 #  include <QResource>
 #  include <QFileInfo>
 #  include <QtDebug>
-#  include <boost/random/mersenne_twister.hpp>
 #include "warnpop.h"
 
 #include <cmath>
@@ -49,6 +48,7 @@
 #include "audio/player.h"
 #include "base/bitflag.h"
 #include "base/logging.h"
+#include "base/math.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
 #include "graphics/types.h"
@@ -87,16 +87,6 @@ QString R(const QString& s)
     return inst + "/" + s;
 }
 
-// generate a random number in the range of min max (inclusive)
-template<typename T>
-T rand(T min, T max)
-{
-    static boost::random::mt19937 generator;
-
-    const auto range = max - min;
-    const auto value = (double)generator() / (double)generator.max();
-    return min + (range * value);
-}
 
 template<typename To, typename From>
 To* CollisionCast(From* lhs, From* rhs)
@@ -234,26 +224,6 @@ private:
     QPointF size_;
 };
 
-template<typename T>
-T wrap(T max, T min, T val)
-{
-    if (val > max)
-        return min;
-    if (val < min)
-        return max;
-    return val;
-}
-
-template<typename T>
-T clamp(T min, T val, T max)
-{
-    if (val < min)
-        return min;
-    if (val > max)
-        return max;
-    return val;
-}
-
 class GameWidget::State
 {
 public:
@@ -339,18 +309,18 @@ class GameWidget::Asteroid : public GameWidget::Animation
 public:
     Asteroid(const QVector2D& direction)
     {
-        mX = rand(0.0f, 1.0f);
-        mY = rand(0.0f, 1.0f);
-        mVelocity  = 0.08 + rand(0.0, 0.08);
-        mScale     = rand(0.2, 0.8);
-        mTexture   = rand(0, 2);
+        mX = math::rand(0.0f, 1.0f);
+        mY = math::rand(0.0f, 1.0f);
+        mVelocity  = 0.08 + math::rand(0.0, 0.08);
+        mScale     = math::rand(0.2, 0.8);
+        mTexture   = math::rand(0, 2);
         mDirection = direction;
     }
     virtual bool update(float dt, TransformState& state) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
-        mX = wrap(1.0f, -0.2f, mX + d.x());
-        mY = wrap(1.0f, -0.2f, mY + d.y());
+        mX = math::wrap(1.0f, -0.2f, mX + d.x());
+        mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -503,7 +473,7 @@ public:
         for (auto& p : particles_)
         {
             p.pos += p.dir * (dt / 2500.0);
-            p.a = clamp(0.0, p.a - (dt / 2000.0), 1.0);
+            p.a = math::clamp(0.0, p.a - (dt / 2000.0), 1.0);
         }
         return true;
     }
@@ -679,7 +649,7 @@ public:
             p.pos = position;
             p.alpha = 1.0f;
             p.angle = (M_PI * 2 ) * (float)std::rand() / RAND_MAX;
-            p.rotation_coefficient = rand(-1.0f, 1.0f);
+            p.rotation_coefficient = math::rand(-1.0f, 1.0f);
             mParticles.push_back(p);
         }
     }
@@ -695,7 +665,7 @@ public:
         for (auto& p : mParticles)
         {
             p.pos += p.dir * (dt / 4500.0);
-            p.alpha = clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
+            p.alpha = math::clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
             p.angle += ((M_PI * 2) * (dt / 2000.0) * p.rotation_coefficient);
         }
 
@@ -1005,11 +975,11 @@ class GameWidget::UFO : public GameWidget::Animation
 public:
     UFO()
     {
-        mPosition.setX(rand(0.0, 1.0));
-        mPosition.setY(rand(0.0, 1.0));
+        mPosition.setX(math::rand(0.0, 1.0));
+        mPosition.setY(math::rand(0.0, 1.0));
 
-        const auto x = rand(-1.0, 1.0);
-        const auto y = rand(-1.0, 1.0);
+        const auto x = math::rand(-1.0, 1.0);
+        const auto y = math::rand(-1.0, 1.0);
         mDirection = QVector2D(x, y);
         mDirection.normalize();
     }
@@ -1030,8 +1000,8 @@ public:
         mPosition += (dt / 10000.0) * fuzzy;
         const auto x = mPosition.x();
         const auto y = mPosition.y();
-        mPosition.setX(wrap(1.0f, 0.0f, x));
-        mPosition.setY(wrap(1.0f, 0.0f, y));
+        mPosition.setX(math::wrap(1.0f, 0.0f, x));
+        mPosition.setY(math::wrap(1.0f, 0.0f, y));
         return true;
     }
 
@@ -1069,7 +1039,7 @@ public:
 
     static bool shouldMakeRandomAppearance()
     {
-        if (rand(0, 5000) == 7)
+        if (math::rand(0, 5000) == 7)
             return true;
         return false;
     }
@@ -1223,10 +1193,10 @@ public:
         for (std::size_t i=0; i<800; ++i)
         {
             particle p;
-            p.x = rand(0.0, 1.0);
-            p.y = rand(0.0, 1.0);
-            p.a = 0.5 + rand(0.0, 0.5);
-            p.v = 0.05 + rand(0.0, 0.05);
+            p.x = math::rand(0.0, 1.0);
+            p.y = math::rand(0.0, 1.0);
+            p.a = 0.5 + math::rand(0.0, 0.5);
+            p.v = 0.05 + math::rand(0.0, 0.05);
             p.b = !(i % 7);
             mParticles.push_back(p);
         }
@@ -1258,8 +1228,8 @@ public:
         const auto d = mDirection * (dt / 1000.0);
         for (auto& p : mParticles)
         {
-            p.x = wrap(1.0f, 0.0f, p.x + d.x() * p.v);
-            p.y = wrap(1.0f, 0.0f, p.y + d.y() * p.v);
+            p.x = math::wrap(1.0f, 0.0f, p.x + d.x() * p.v);
+            p.y = math::wrap(1.0f, 0.0f, p.y + d.y() * p.v);
         }
     }
 private:
@@ -1536,11 +1506,11 @@ public:
         {
             if (mCurrentRowIndex == 0)
             {
-                mCurrentProfileIndex = wrap(numProfilesMax, numProfilesMin, mCurrentProfileIndex - 1);
+                mCurrentProfileIndex = math::wrap(numProfilesMax, numProfilesMin, mCurrentProfileIndex - 1);
             }
             else
             {
-                mCurrentLevelIndex = wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex -1);
+                mCurrentLevelIndex = math::wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex -1);
             }
             bPlaySound = true;
         }
@@ -1548,21 +1518,21 @@ public:
         {
             if (mCurrentRowIndex == 0)
             {
-                mCurrentProfileIndex = wrap(numProfilesMax, numProfilesMin,  mCurrentProfileIndex + 1);
+                mCurrentProfileIndex = math::wrap(numProfilesMax, numProfilesMin,  mCurrentProfileIndex + 1);
             }
             else
             {
-                mCurrentLevelIndex = wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex + 1);
+                mCurrentLevelIndex = math::wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex + 1);
             }
             bPlaySound = true;
         }
         else if (key == Qt::Key_Up)
         {
-            mCurrentRowIndex = wrap(1, 0, mCurrentRowIndex - 1);
+            mCurrentRowIndex = math::wrap(1, 0, mCurrentRowIndex - 1);
         }
         else if (key == Qt::Key_Down)
         {
-            mCurrentRowIndex = wrap(1, 0, mCurrentRowIndex + 1);
+            mCurrentRowIndex = math::wrap(1, 0, mCurrentRowIndex + 1);
         }
 
         if (bPlaySound && mPlaySounds)
