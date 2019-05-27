@@ -32,4 +32,10 @@ void main()
     vTexCoord = aTexCoord;
 
     gl_Position = vec4(ret, 1.0, 1.0);
+    // we're abusing the vertex type here and packing
+    // the pointsize in the texture coordinate field.
+    // if the rendering is points the texture coord
+    // is irrelevant since the fragment shader needs to
+    // sample from gl_PointCoord
+    gl_PointSize = vTexCoord.x;
 }
