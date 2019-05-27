@@ -116,19 +116,36 @@ namespace invaders
                 texture->UploadFromFile(mTexture);
             }
             prog.SetTexture("kTexture", 0, *texture);
+            prog.SetUniform("kRenderPoints", mRenderPoints ? 1.0f : 0.0f);
         }
 
         virtual bool IsTransparent() const override
         { return mTransparency; }
+        virtual bool IsPointSprite() const override
+        { return mRenderPoints; }
 
-        void EnableTransparenty(bool on_off)
-        { mTransparency = on_off; }
+        TextureFill& EnableTransparency(bool on_off)
+        {
+            mTransparency = on_off;
+            return *this;
+        }
 
-        void SetTexture(const std::string& texfile)
-        { mTexture = texfile; }
+        // set this to true if rendering a textured point
+        TextureFill& SetRenderPoints(bool value)
+        {
+            mRenderPoints = value;
+            return *this;
+        }
+
+        TextureFill& SetTexture(const std::string& texfile)
+        {
+            mTexture = texfile;
+            return *this;
+        }
     private:
         std::string mTexture;
         bool mTransparency = false;
+        bool mRenderPoints = false;
 
     };
 
