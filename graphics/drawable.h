@@ -117,20 +117,89 @@ namespace invaders
     private:
     };
 
-    class ParticleEngine : public Drawable
+    struct Particle {
+        math::Vector2D pos;
+        math::Vector2D dir;
+        float pointsize = 1.0f;
+        float lifetime  = 0.0f;
+    };
+
+
+    // simulate simple linear particle movement into the direction
+    // of the particle's direction vector
+    struct LinearParticleMovement {
+        bool Update(Particle& p, float dt, float time)
+        {
+            p.pos = p.pos + p.dir * dt;
+            return true;
+        }
+    };
+
+    // wrap particle position around its bounds.
+    struct WrapParticleAtBounds {
+        bool Update(Particle& p, const math::Vector2D& bounds) const
+        {
+            const auto pos = p.pos;
+            const auto x = math::wrap(bounds.X(), 0.0f, pos.X());
+            const auto y = math::wrap(bounds.Y(), 0.0f, pos.Y());
+            p.pos = math::Vector2D(x, y);
+            return true;
+        }
+    };
+
+    // clamp particle position to maximum bounds
+    struct ClampParticleAtBounds {
+        bool Update(Particle& p, const math::Vector2D& bounds) const
+        {
+            const auto pos = p.pos;
+            const auto x = math::clamp(0.0f, bounds.X(), pos.X());
+            const auto y = math::clamp(0.0f, bounds.Y(), pos.Y());
+            p.pos = math::Vector2D(x, y);
+            return true;
+        }
+
+    };
+
+    // advice to kill the particle if the current particle position
+    // exceeds some defined bounds.
+    struct KillParticleAtBounds {
+        bool Update(Particle& p, const math::Vector2D& bounds) const
+        {
+            const auto pos = p.pos;
+            if (pos.X() > bounds.X() || pos.Y() > bounds.Y())
+                return false;
+            return true;
+        }
+    };
+
+    // kill particle if its lifetime exceeds the current engine time.
+    struct KillParticleAtLifetime {
+        bool Update(Particle& p, float dt, float time)
+        {
+            if (time >= p.lifetime)
+                return false;
+            return true;
+        }
+    };
+
+    // no change in particle state.
+    struct ParticleIdentity {
+        bool Update(Particle& p, float dt, float time, const math::Vector2D& bounds) const
+        { return true; }
+    };
+
+    template<typename ParticleMotionPolicy   = LinearParticleMovement,
+             typename ParticleBoundsPolicy   = WrapParticleAtBounds,
+             typename ParticleUpdatePolicy   = ParticleIdentity,
+             typename ParticleLifetimePolicy = KillParticleAtLifetime>
+    class TParticleEngine : public Drawable,
+                            public ParticleMotionPolicy,
+                            public ParticleBoundsPolicy,
+                            public ParticleUpdatePolicy,
+                            public ParticleLifetimePolicy
     {
     public:
-        // what to do when the particle reaches the maximum
-        // distance in either x or y axis
-        enum class BoundaryFunction {
-            // Wrap over to 0
-            Wrap,
-            // Clamp to the boundary
-            Clamp,
-            // Kill the particle
-            Kill
-        };
-
+        // initial engine configuration params
         struct Params {
             // the number of particles this engine shall create
             std::size_t num_particles = 100;
@@ -156,32 +225,15 @@ namespace invaders
             // min max points sizes.
             float min_point_size = 1.0f;
             float max_point_size = 1.0f;
-            // what to do at the boundary
-            BoundaryFunction boundary = BoundaryFunction::Wrap;
+            // whether to spawn new particles to replace the ones killed.
+            bool respawn = true;
         };
 
-        ParticleEngine(const std::string& name, const Params& init)
+        TParticleEngine(const std::string& name, const Params& init)
           : mEngineName(name)
-          , mMaxX(init.max_xpos)
-          , mMaxY(init.max_ypos)
-          , mBoundary(init.boundary)
+          , mParams(init)
         {
-            for (size_t i=0; i<init.num_particles; ++i)
-            {
-                const auto v = math::rand(init.min_velocity, init.max_velocity);
-                const auto x = math::rand(0.0f, init.max_init_xpos);
-                const auto y = math::rand(0.0f, init.max_init_ypos);
-                const auto a = math::rand(0.0f, init.direction_sector_size) +
-                   init.direction_sector_start_angle;
-
-                Particle p;
-                p.lifetime  = math::rand(init.min_lifetime, init.max_lifetime);
-                p.pointsize = math::rand(init.min_point_size, init.max_point_size);
-                p.pos = math::Vector2D(x, y);
-                p.dir = math::Vector2D(std::cos(a), std::sin(a));
-                p.dir *= v; // baking the velocity in the direction vector.
-                mParticles.push_back(p);
-            }
+            InitParticles(mParams.num_particles);
         }
         virtual Shader* GetShader(GraphicsDevice& device) const override
         {
@@ -209,8 +261,8 @@ namespace invaders
                 // in order to use vertex_arary.glsl we need to convert the points to
                 // lower right quadrant coordinates.
                 Vertex v;
-                v.aPosition.x = p.pos.X() / mMaxX;
-                v.aPosition.y = p.pos.Y() / mMaxY * -1.0;
+                v.aPosition.x = p.pos.X() / mParams.max_xpos;
+                v.aPosition.y = p.pos.Y() / mParams.max_ypos * -1.0;
                 v.aTexCoord.x = p.pointsize;
                 verts.push_back(v);
             }
@@ -223,37 +275,32 @@ namespace invaders
         {
             mTime += dt;
 
+            const math::Vector2D bounds(mParams.max_xpos, mParams.max_ypos);
+
             // update each particle
             for (size_t i=0; i<mParticles.size();)
             {
                 auto& p = mParticles[i];
-                const auto last = mParticles.size() - 1;
-                const auto pos = p.pos + p.dir * dt;
 
-                auto x = pos.X();
-                auto y = pos.Y();
-                if (mBoundary == BoundaryFunction::Wrap)
+                // if any particle policy returns false we kill the particle.
+                if (!ParticleMotionPolicy::Update(p, dt, mTime) ||
+                    !ParticleUpdatePolicy::Update(p, dt, mTime, bounds) ||
+                    !ParticleBoundsPolicy::Update(p, bounds) ||
+                    !ParticleLifetimePolicy::Update(p, dt, mTime))
                 {
-                    x = math::wrap(mMaxX, 0.0f, x);
-                    y = math::wrap(mMaxY, 0.0f, y);
-                }
-                else if (mBoundary == BoundaryFunction::Clamp)
-                {
-                    x = math::clamp(0.0f, mMaxX, x);
-                    y = math::clamp(0.0f, mMaxY, y);
-                }
-
-                // see if it should be killed, happens if the pos
-                // has exceeded max bounds (no clamp/wrap) or lifetime
-                // exceeds max lifetime
-                if (x > mMaxX || y > mMaxY || mTime > p.lifetime)
-                {
+                    const auto last = mParticles.size() - 1;
                     std::swap(mParticles[i], mParticles[last]);
                     mParticles.pop_back();
                     continue;
                 }
-                p.pos = math::Vector2D(x, y);
                 ++i;
+            }
+            if (mParams.respawn)
+            {
+                const auto num_should_have = mParams.num_particles;
+                const auto num_have = mParticles.size();
+                const auto num_needed = num_should_have - num_have;
+                InitParticles(num_needed);
             }
         }
         bool HasParticles() const
@@ -261,20 +308,35 @@ namespace invaders
 
         size_t NumParticlesAlive() const
         { return mParticles.size(); }
+
     private:
-        struct Particle {
-            math::Vector2D pos;
-            math::Vector2D dir;
-            float pointsize = 1.0f;
-            float lifetime  = 0.0f;
-         };
+        void InitParticles(size_t num)
+        {
+            for (size_t i=0; i<num; ++i)
+            {
+                const auto v = math::rand(mParams.min_velocity, mParams.max_velocity);
+                const auto x = math::rand(0.0f, mParams.max_init_xpos);
+                const auto y = math::rand(0.0f, mParams.max_init_ypos);
+                const auto a = math::rand(0.0f, mParams.direction_sector_size) +
+                   mParams.direction_sector_start_angle;
+
+                Particle p;
+                p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
+                p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
+                p.pos = math::Vector2D(x, y);
+                p.dir = math::Vector2D(std::cos(a), std::sin(a));
+                p.dir *= v; // baking the velocity in the direction vector.
+                mParticles.push_back(p);
+            }
+        }
     private:
         const std::string mEngineName;
-        const float mMaxX = 0.0f;
-        const float mMaxY = 0.0f;
-        const BoundaryFunction mBoundary = BoundaryFunction::Wrap;
+        const Params mParams;
+
         float mTime = 0.0f;
         std::vector<Particle> mParticles;
     };
+
+    using ParticleEngine = TParticleEngine<>;
 
 } // namespace
