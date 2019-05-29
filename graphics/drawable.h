@@ -128,11 +128,15 @@ namespace invaders
     // simulate simple linear particle movement into the direction
     // of the particle's direction vector
     struct LinearParticleMovement {
-        bool Update(Particle& p, float dt, float time)
+        void BeginIteration(float dt, float time) const
+        {}
+        bool Update(Particle& p, float dt, float time) const
         {
             p.pos = p.pos + p.dir * dt;
             return true;
         }
+        void EndIteration() const
+        {}
     };
 
     // wrap particle position around its bounds.
@@ -174,7 +178,7 @@ namespace invaders
 
     // kill particle if its lifetime exceeds the current engine time.
     struct KillParticleAtLifetime {
-        bool Update(Particle& p, float dt, float time)
+        bool Update(Particle& p, float dt, float time) const
         {
             if (time >= p.lifetime)
                 return false;
@@ -184,8 +188,12 @@ namespace invaders
 
     // no change in particle state.
     struct ParticleIdentity {
+        void BeginIteration(float dt, float time, const math::Vector2D& bounds) const
+        {}
         bool Update(Particle& p, float dt, float time, const math::Vector2D& bounds) const
         { return true; }
+        void EndIteration() const
+        {}
     };
 
     template<typename ParticleMotionPolicy   = LinearParticleMovement,
@@ -276,6 +284,8 @@ namespace invaders
             mTime += dt;
 
             const math::Vector2D bounds(mParams.max_xpos, mParams.max_ypos);
+            ParticleMotionPolicy::BeginIteration(dt, mTime);
+            ParticleUpdatePolicy::BeginIteration(dt, mTime, bounds);
 
             // update each particle
             for (size_t i=0; i<mParticles.size();)
@@ -295,6 +305,9 @@ namespace invaders
                 }
                 ++i;
             }
+            ParticleMotionPolicy::EndIteration();
+            ParticleUpdatePolicy::EndIteration();
+
             if (mParams.respawn)
             {
                 const auto num_should_have = mParams.num_particles;
