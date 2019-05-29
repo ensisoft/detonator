@@ -819,8 +819,8 @@ public:
             const auto num_particles = area * num_particles_per_unit_area;
 
             ParticleEngine::Params params;
-            params.max_init_xpos = 0.0f;
-            params.max_init_ypos = jetScaledHeight;
+            params.init_rect_width  = 0.0f;
+            params.init_rect_height = jetScaledHeight;
             params.max_xpos = jetScaledWidth;
             params.max_ypos = jetScaledHeight;
             params.num_particles = num_particles;
@@ -1319,8 +1319,8 @@ public:
     Background(const QVector2D& direction)
     {
         ParticleEngine::Params params;
-        params.max_init_xpos = 1024;
-        params.max_init_ypos = 1024;
+        params.init_rect_width  = 1024;
+        params.init_rect_height = 1024;
         params.max_xpos = 1024;
         params.max_ypos = 1024;
         params.num_particles = 800;

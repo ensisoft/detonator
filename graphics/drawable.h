@@ -224,8 +224,10 @@ namespace invaders
             float max_ypos = 1.0f;
             // the starting rectangle for each particle. each particle
             // begins life at a random location within this rectangle
-            float max_init_xpos = 1.0f;
-            float max_init_ypos = 1.0f;
+            float init_rect_xpos   = 0.0f;
+            float init_rect_ypos   = 0.0f;
+            float init_rect_width  = 1.0f;
+            float init_rect_height = 1.0f;
             // each particle has an initial velocity between min and max
             float min_velocity = 1.0f;
             float max_velocity = 1.0f;
@@ -332,15 +334,15 @@ namespace invaders
             for (size_t i=0; i<num; ++i)
             {
                 const auto v = math::rand(mParams.min_velocity, mParams.max_velocity);
-                const auto x = math::rand(0.0f, mParams.max_init_xpos);
-                const auto y = math::rand(0.0f, mParams.max_init_ypos);
+                const auto x = math::rand(0.0f, mParams.init_rect_width);
+                const auto y = math::rand(0.0f, mParams.init_rect_height);
                 const auto a = math::rand(0.0f, mParams.direction_sector_size) +
                    mParams.direction_sector_start_angle;
 
                 Particle p;
                 p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
                 p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
-                p.pos = math::Vector2D(x, y);
+                p.pos = math::Vector2D(mParams.init_rect_xpos + x, mParams.init_rect_ypos + y);
                 p.dir = math::Vector2D(std::cos(a), std::sin(a));
                 p.dir *= v; // baking the velocity in the direction vector.
                 mParticles.push_back(p);
