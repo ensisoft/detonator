@@ -63,6 +63,16 @@ namespace math
         Vector2D() {}
         Vector2D(float x, float y) : mX(x), mY(y) {}
 
+        void Set(float x, float y)
+        {
+            mX = x;
+            mY = y;
+        }
+        void SetX(float x)
+        { mX = x; }
+        void SetY(float y)
+        { mY = y; }
+
         float X() const
         { return mX; }
 
