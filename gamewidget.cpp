@@ -441,75 +441,75 @@ private:
 class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
-    Sparks(QVector2D position, float start, float lifetime)
-        : start_(start), life_(lifetime), time_(0), color_(0xff, 0xff, 0xff)
-    {
-        const auto particles = 100;
-        const auto angle = (M_PI * 2) / particles;
+    using ParticleEngine = TParticleEngine<
+        LinearParticleMovement,
+        KillParticleAtBounds>;
 
-        for (int i=0; i<particles; ++i)
-        {
-            particle p;
-            const auto r = (float)std::rand() / RAND_MAX;
-            const auto v = (float)std::rand() / RAND_MAX;
-            const auto a = i * angle + angle * r;
-            p.dir.setX(std::cos(a));
-            p.dir.setY(std::sin(a));
-            p.dir *= v;
-            p.pos  = position;
-            p.a    = 0.8f;
-            particles_.push_back(p);
-        }
+    Sparks(QVector2D position, float start, float lifetime)
+        : mStartTime(start)
+        , mLifeTime(lifetime)
+        , mPosition(position)
+    {
+        ParticleEngine::Params params;
+        params.max_xpos = 500;
+        params.max_ypos = 500;
+        params.init_rect_xpos = 250;
+        params.init_rect_ypos = 250;
+        params.init_rect_width = 0.0f;
+        params.init_rect_height = 0.0f;
+        params.num_particles = 200;
+        params.min_point_size = 2.0f;
+        params.max_point_size = 5.0f;
+        params.min_velocity = 200.0f;
+        params.max_velocity = 300.0f;
+        params.respawn = false;
+        mParticles = std::make_unique<ParticleEngine>("explosion-sparks", params);
     }
     virtual bool update(float dt, TransformState&) override
     {
-        time_ += dt;
-        if (time_ < start_)
+        mTimeAccum += dt;
+        if (mTimeAccum < mStartTime)
             return true;
 
-        if (time_ - start_ > life_)
+        if (mTimeAccum - mStartTime > mLifeTime)
             return false;
 
-        for (auto& p : particles_)
-        {
-            p.pos += p.dir * (dt / 2500.0);
-            p.a = math::clamp(0.0, p.a - (dt / 2000.0), 1.0);
-        }
+        mParticles->Update(dt / 1000.0f);
         return true;
     }
+    virtual void paint(QPainter&, TransformState&) override
+    {}
 
-    virtual void paint(QPainter& painter, TransformState& state) override
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
     {
-        if (time_ < start_)
+        if (mTimeAccum < mStartTime)
             return;
 
-        QColor color(color_);
-        QBrush brush(color);
-        for (const auto& particle : particles_)
-        {
-            color.setAlpha(0xff * particle.a);
-            brush.setColor(color);
-            const auto pos = state.toViewSpace(particle.pos);
-            painter.fillRect(pos.x(),pos.y(), 2, 2, brush);
-        }
+        const auto pos = state.toViewSpace(mPosition);
+        const auto x = pos.x();
+        const auto y = pos.y();
+
+        Transform t;
+        t.Resize(500, 500);
+        t.MoveTo(x-250, y-250);
+
+        painter.Draw(*mParticles, t,
+            TextureFill("textures/RoundParticle.png")
+            .EnableTransparency(true)
+            .SetRenderPoints(true)
+            .SetBaseColor(mColor));
     }
 
-    void setColor(QColor color)
-    { color_ = color; }
-
+    void setColor(const Color4f& color)
+    { mColor = color; }
 private:
-    struct particle {
-        QVector2D dir;
-        QVector2D pos;
-        float a;
-    };
-    std::vector<particle> particles_;
+    float mStartTime = 0.0f;
+    float mLifeTime  = 0.0f;
+    float mTimeAccum = 0.0f;
+    std::unique_ptr<ParticleEngine> mParticles;
 private:
-    float start_;
-    float life_;
-    float time_;
-private:
-    QColor color_;
+    QVector2D mPosition;
+    Color4f mColor;
 };
 
 class GameWidget::Smoke : public GameWidget::Animation
@@ -2226,7 +2226,7 @@ GameWidget::GameWidget()
         invader->setMaxLifetime(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
-        sparks->setColor(QColor(255, 255, 68));
+        sparks->setColor(Color4f(255, 255, 68, 180));
         debris->setTextureScaleFromWidth(scale.x());
 
         mAnimations.push_back(std::move(invader));
@@ -2262,7 +2262,7 @@ GameWidget::GameWidget()
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
 
-        sparks->setColor(Qt::darkGray);
+        sparks->setColor(Color::DarkGray);
 
         auto viewString = i.viewList.join("");
         inv->setViewString(viewString);
