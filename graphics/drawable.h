@@ -170,7 +170,11 @@ namespace invaders
         bool Update(Particle& p, const math::Vector2D& bounds) const
         {
             const auto pos = p.pos;
-            if (pos.X() > bounds.X() || pos.Y() > bounds.Y())
+            const auto x = pos.X();
+            const auto y = pos.Y();
+            if (x < 0 || x > bounds.X())
+                return false;
+            if (y < 0 || y > bounds.Y())
                 return false;
             return true;
         }
