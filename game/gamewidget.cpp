@@ -1330,6 +1330,14 @@ public:
             gfx::TextureFill("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true));
+
+        gfx::Transform x;
+        x.MoveTo(100, 100);
+        x.Resize(400, 400);
+
+        //painter.Draw(gfx::Rectangle(), x,
+        //    gfx::ConcentricRingsEffect(0));
+        //    //gfx::ColorFill(gfx::Color::Yellow));
     }
 
     void update(float dt)
@@ -1896,8 +1904,8 @@ public:
                 "http://www.opengameart.org\n"
                 "http://www.kenney.nl\n\n"
                 "Music by:\n"
-                "cynicmusic\n"
-                "http://www.cynicmusic.com\n\n"
+                "level27\n"
+                "http://soundcloud.com/level27\n\n"
                 "Press Esc to exit"
                 ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
     }
@@ -2489,7 +2497,12 @@ void GameWidget::updateGame(float dt)
     while (g_audio->get_event(&event))
     {
         DEBUG("Audio event (%1)", event.id);
-    }
+        if (event.id != mMusicTrackId)
+            continue;
+        mMusicTrackId = 0;
+        mMusicTrackIndex++;
+        playMusic();
+    }   
 
 #endif
 
@@ -2774,6 +2787,19 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         mCustomGraphicsDevice->DeletePrograms();
         return;
     }
+    else if (key == Qt::Key_N && mod == Qt::ShiftModifier)
+    {
+        DEBUG("Next music track");
+        if (mPlayMusic)
+        {
+        #ifdef GAME_ENABLE_AUDIO
+            g_audio->cancel(mMusicTrackId);
+            mMusicTrackId = 0;
+            mMusicTrackIndex++;
+            playMusic();
+        #endif
+        }
+    }
 
     const auto action = mStates.top()->mapAction(press);
     switch (action)
@@ -2867,27 +2893,38 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 void GameWidget::playMusic()
 {
 #ifdef GAME_ENABLE_AUDIO
-    static auto music = std::make_shared<audio::AudioSample>("music/awake10_megaWall.ogg", "MainMusic");
+    static const char* tracks[] = {
+        "music/01_speedway.ogg",
+        "music/02_chip_beach.ogg",
+        "music/03_press_any_key_to_continue.ogg",
+        "music/04_i_want_more_candy.ogg",
+        "music/05_rain_island.ogg",
+        "music/06_space_troopers.ogg",
+        "music/07_stars_dont_twinkle.ogg",
+        "music/08_the_club_entrance.ogg",
+    };
 
     if (mPlayMusic)
     {
-        DEBUG("Play music");
-
         if (mMusicTrackId)
         {
+            DEBUG("Resume music");
              g_audio->resume(mMusicTrackId);
         }
         else
         {
-            mMusicTrackId = g_audio->play(music, true);
+            const auto num_tracks  = sizeof(tracks) / sizeof(tracks[0]);
+            const auto track_index = mMusicTrackIndex % num_tracks;
+            DEBUG("Play music track: %1, '%2'", track_index, tracks[track_index]);
+            auto music = std::make_shared<audio::AudioSample>(tracks[track_index], "MainMusic");
+            mMusicTrackId = g_audio->play(music);
         }
     }
     else
     {
-        DEBUG("Stop music");
-
         if (mMusicTrackId)
         {
+            DEBUG("Stop music");            
             g_audio->pause(mMusicTrackId);
         }
     }

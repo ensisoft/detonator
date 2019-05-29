@@ -42,6 +42,10 @@ namespace gfx {
     class Device;
 } // namespace
 
+namespace audio {
+    class AudioSample;
+}
+
 namespace invaders
 {
     class Game;
@@ -189,7 +193,11 @@ namespace invaders
         bool mShowFps    = false;
         bool mRunning    = true;
     private:
+#ifdef GAME_ENABLE_AUDIO
+        std::vector<std::shared_ptr<audio::AudioSample>> mMusicTracks;
         std::size_t mMusicTrackId = 0;
+        std::size_t mMusicTrackIndex = 0;
+#endif
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;

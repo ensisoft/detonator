@@ -92,6 +92,15 @@ void AudioPlayer::resume(std::size_t id)
     track_actions_.push(a);
 }
 
+void AudioPlayer::cancel(std::size_t id)
+{
+    // todo: should maybe be able to cancel currently waiting tracks too?
+    Action a;
+    a.do_what = Action::Type::Cancel;
+    a.track_id = id;
+    track_actions_.push(a);
+}
+
 bool AudioPlayer::get_event(TrackEvent* event)
 {
     std::lock_guard<std::mutex> lock(event_mutex_);
@@ -115,14 +124,22 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
         Action track_action;    
         while (track_actions_.pop(track_action))
         {
-            for (auto& p : playing_)
+            auto it = std::find_if(std::begin(playing_), std::end(playing_),
+                [=](const Track& t) {
+                    return t.id == track_action.track_id;
+                });
+            if (it == std::end(playing_))
+                continue;
+
+            auto& p = *it;
+            if (track_action.do_what == Action::Type::Pause)
+                p.stream->pause();
+            else if (track_action.do_what == Action::Type::Resume)
+                p.stream->resume();
+            else if (track_action.do_what == Action::Type::Cancel)
             {
-                if (p.id != track_action.track_id)
-                    continue;
-                if (track_action.do_what == Action::Type::Pause)
-                    p.stream->pause();
-                else if (track_action.do_what == Action::Type::Resume)
-                    p.stream->resume();
+                p.stream->pause();
+                playing_.erase(it);
             }
         }
 

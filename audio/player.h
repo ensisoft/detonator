@@ -84,6 +84,9 @@ namespace audio
         // resume the currently paused audio stream.
         void resume(std::size_t id);
 
+        // cancel (stop playback and delete the rest of the stream) of the given audio stream.
+        void cancel(std::size_t id);
+
         // get next historical track event.
         // returns true if there was a track event otherwise false.
         bool get_event(TrackEvent* event);
@@ -108,7 +111,7 @@ namespace audio
         };
         struct Action {
             enum class Type {
-                None, Resume, Pause
+                None, Resume, Pause,  Cancel
             };
             Type do_what = Type::None;
             std::size_t track_id = 0;
