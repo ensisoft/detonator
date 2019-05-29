@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#include "base/math.h"
+
 #include <string>
 
 namespace invaders
@@ -111,12 +113,30 @@ namespace invaders
     {
     public:
         Color4f() {}
+        // construct a Color4f object from floating point
+        // channel values in the range of [0.0f, 1.0f]
         Color4f(float red, float green, float blue, float alpha)
-          : mRed(red)
-          , mGreen(green)
-          , mBlue(blue)
-          , mAlpha(alpha)
-        {}
+        {
+            mRed   = math::clamp(0.0f, red, 1.0f);
+            mGreen = math::clamp(0.0f, green, 1.0f);
+            mBlue  = math::clamp(0.0f, blue, 1.0f);
+            mAlpha = math::clamp(0.0f, alpha, 1.0f);
+        }
+
+        // construct a new color object from integers
+        // each integer gets clamped to [0, 255] range
+        Color4f(int red, int green, int blue, int alpha)
+        {
+            // note: we take integers (as opposed to some
+            // type unsinged) so that the simple syntax of
+            // Color4f(10, 20, 200, 255) works without tricks.
+            // Otherwise the conversion with the floats would
+            // be ambiguous but the ints are a perfect match.
+            mRed   = math::clamp(0, red, 255) / 255.0f;
+            mGreen = math::clamp(0, green, 255) / 255.0f;
+            mBlue  = math::clamp(0, blue, 255) / 255.0f;
+            mAlpha = math::clamp(0, alpha, 255) / 255.0f;
+        }
 
         Color4f(Color c)
           : mRed(0.0f)
@@ -192,16 +212,24 @@ namespace invaders
         { return mAlpha; }
 
         void SetRed(float red)
-        { mRed = red; }
+        { mRed = math::clamp(0.0f, red, 1.0f); }
+        void SetRed(int red)
+        { mRed = math::clamp(0, red, 255) / 255.0f; }
 
         void setBlue(float blue)
-        { mBlue = blue; }
+        { mBlue = math::clamp(0.0f, blue, 1.0f); }
+        void SetBlue(int blue)
+        { mBlue = math::clamp(0, blue, 255) / 255.0f; }
 
         void SetGreen(float green)
-        { mGreen = green; }
+        { mGreen = math::clamp(0.0f, green, 1.0f); }
+        void SetGreen(int green)
+        { mGreen = math::clamp(0, green, 255) / 255.0f; }
 
         void SetAlpha(float alpha)
-        { mAlpha = alpha;}
+        { mAlpha = math::clamp(0.0f, alpha, 1.0f); }
+        void SetAlpha(int alpha)
+        { mAlpha = math::clamp(0, alpha, 255) / 255.0f; }
 
     private:
         float mRed   = 1.0f;
