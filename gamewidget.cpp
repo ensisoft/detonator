@@ -463,7 +463,7 @@ public:
         params.min_velocity = 200.0f;
         params.max_velocity = 300.0f;
         params.respawn = false;
-        mParticles = std::make_unique<ParticleEngine>("explosion-sparks", params);
+        mParticles = std::make_unique<ParticleEngine>(params);
     }
     virtual bool update(float dt, TransformState&) override
     {
@@ -831,7 +831,7 @@ public:
             params.direction_sector_start_angle = 0.0f;
             params.direction_sector_size = 0.0f;
             params.respawn = true;
-            mParticles = std::make_unique<ParticleEngine>("jet-particles", params);
+            mParticles = std::make_unique<ParticleEngine>(params);
         }
 
         // set the target rectangle with the dimensions of the
@@ -1330,7 +1330,7 @@ public:
         params.max_point_size = 8.0f;
         params.direction_sector_start_angle = std::acos(direction.x());
         params.direction_sector_size = 0.0f;
-        mStars = std::make_unique<ParticleEngine>("engine", params);
+        mStars = std::make_unique<ParticleEngine>(params);
     }
     void paint(Painter& painter, const QRectF& rect)
     {

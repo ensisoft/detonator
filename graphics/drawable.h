@@ -243,9 +243,7 @@ namespace invaders
             bool respawn = true;
         };
 
-        TParticleEngine(const std::string& name, const Params& init)
-          : mEngineName(name)
-          , mParams(init)
+        TParticleEngine(const Params& init) : mParams(init)
         {
             InitParticles(mParams.num_particles);
         }
@@ -264,10 +262,10 @@ namespace invaders
         }
         virtual Geometry* Upload(GraphicsDevice& device) const override
         {
-            Geometry* geom = device.FindGeometry(mEngineName);
+            Geometry* geom = device.FindGeometry("particle-buffer");
             if (!geom)
             {
-                geom = device.MakeGeometry(mEngineName);
+                geom = device.MakeGeometry("particle-buffer");
             }
             std::vector<Vertex> verts;
             for (const auto& p : mParticles)
@@ -349,7 +347,6 @@ namespace invaders
             }
         }
     private:
-        const std::string mEngineName;
         const Params mParams;
 
         float mTime = 0.0f;
