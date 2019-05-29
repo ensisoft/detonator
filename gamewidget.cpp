@@ -2503,6 +2503,18 @@ void GameWidget::launchGame()
 
 void GameWidget::updateGame(float dt)
 {
+
+#ifdef ENABLE_AUDIO
+    // handle audio events.
+    AudioPlayer::TrackEvent event;
+    while (g_audio->get_event(&event))
+    {
+        DEBUG("Audio event (%1)", event.id);
+    }
+
+#endif
+
+
     TransformState state(rect(), GameCols, GameRows + 2);
 
     const auto time = dt * mWarpFactor;

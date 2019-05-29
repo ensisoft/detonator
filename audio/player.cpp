@@ -42,7 +42,7 @@ AudioPlayer::AudioPlayer(std::unique_ptr<AudioDevice> device)
 AudioPlayer::~AudioPlayer()
 {
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(queue_mutex_);
         stop_ = true;
         cond_.notify_one();
     }
@@ -51,7 +51,7 @@ AudioPlayer::~AudioPlayer()
 
 std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(queue_mutex_);
 
     size_t id = trackid_++;
     Track track;
@@ -72,7 +72,7 @@ std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, bool looping)
 
 void AudioPlayer::pause(std::size_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(queue_mutex_);
 
     for (auto& track : playing_)
     {
@@ -83,7 +83,7 @@ void AudioPlayer::pause(std::size_t id)
 
 void AudioPlayer::resume(std::size_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(queue_mutex_);
 
     for (auto& track : playing_)
     {
@@ -92,12 +92,22 @@ void AudioPlayer::resume(std::size_t id)
     }
 }
 
+bool AudioPlayer::get_event(TrackEvent* event)
+{
+    std::lock_guard<std::mutex> lock(event_mutex_);
+    if (events_.empty())
+        return false;
+    *event = events_.front();
+    events_.pop();
+    return true;
+}
+
 void AudioPlayer::runLoop(AudioDevice* ptr)
 {
     std::unique_ptr<AudioDevice> dev(ptr);
     for (;;)
     {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::unique_lock<std::mutex> lock(queue_mutex_);
         if (stop_)
             return;
 
@@ -116,6 +126,21 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
         {
             auto& track = *it;
             const auto state = track.stream->state();
+            if (state == AudioStream::State::complete ||
+                state == AudioStream::State::error)
+            {
+                TrackEvent event;
+                event.id      = track.id;
+                event.sample  = track.sample;
+                event.when    = track.when;
+                event.looping = track.looping;
+                event.status  = TrackStatus::Success;
+                {
+                    std::lock_guard<std::mutex> lock(event_mutex_);
+                    events_.push(std::move(event));
+                }
+            }
+
             if (state == AudioStream::State::complete)
             {
                 if (track.looping)

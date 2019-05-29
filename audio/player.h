@@ -41,6 +41,27 @@ namespace invaders
     class AudioPlayer
     {
     public:
+        enum class TrackStatus {
+            // track was played succesfully.
+            Success,
+            // track failed to play
+            Failure
+        };
+        // historical event/record of some sample playback.
+        // you can get this data through a call to get_event
+        struct TrackEvent {
+            // the id of the track that was played.
+            std::size_t id = 0;
+            // the audio sample that was played
+            std::shared_ptr<AudioSample> sample;
+            // the time point when the track was played.
+            std::chrono::steady_clock::time_point when;
+            // what was the result
+            TrackStatus status = TrackStatus::Success;
+            // whether set to looping or not
+            bool looping = false;
+        };
+
         AudioPlayer(std::unique_ptr<AudioDevice> device);
        ~AudioPlayer();
 
@@ -59,6 +80,10 @@ namespace invaders
 
         // resume the currently paused audio stream.
         void resume(std::size_t id);
+
+        // get next historical track event.
+        // returns true if there was a track event otherwise false.
+        bool get_event(TrackEvent* event);
 
     private:
         void runLoop(AudioDevice* ptr);
@@ -82,7 +107,8 @@ namespace invaders
 
     private:
         std::unique_ptr<std::thread> thread_;
-        std::mutex mutex_;
+        std::mutex queue_mutex_;
+        std::mutex event_mutex_;
 
         // unique track id
         std::size_t trackid_ = 1;
@@ -93,6 +119,10 @@ namespace invaders
 
         // currently playing tracks
         std::list<Track> playing_;
+
+        // list of track completion events of tracks
+        // that were played.
+        std::queue<TrackEvent> events_;
 
         std::condition_variable cond_;
         bool stop_ = false;
