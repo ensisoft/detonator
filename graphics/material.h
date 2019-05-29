@@ -117,12 +117,20 @@ namespace invaders
             }
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kRenderPoints", mRenderPoints ? 1.0f : 0.0f);
+            prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
+                mColor.Blue(), mColor.Alpha());
         }
 
         virtual bool IsTransparent() const override
         { return mTransparency; }
         virtual bool IsPointSprite() const override
         { return mRenderPoints; }
+
+        TextureFill& SetBaseColor(const Color4f& color)
+        {
+            mColor = color;
+            return *this;
+        }
 
         TextureFill& EnableTransparency(bool on_off)
         {
@@ -144,9 +152,9 @@ namespace invaders
         }
     private:
         std::string mTexture;
-        bool mTransparency = false;
-        bool mRenderPoints = false;
-
+        bool mTransparency    = false;
+        bool mRenderPoints    = false;
+        Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
     };
 
     class SlidingGlintEffect : public Material
