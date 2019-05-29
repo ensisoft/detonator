@@ -731,6 +731,32 @@ private:
 class GameWidget::Invader : public GameWidget::Animation
 {
 public:
+    struct MyParticleUpdate {
+        void BeginIteration(float dt, float time, const math::Vector2D& bounds) const
+        {}
+        bool Update(Particle& p, float dt, float time, const math::Vector2D& bounds) const {
+            // decrease the size of the particle as it approaches the edge of the
+            // particle space.
+            const auto bx = bounds.X();
+            const auto by = bounds.Y();
+            const auto x  = p.pos.X();
+            const auto y  = p.pos.Y();
+            const auto vdm = std::abs(y - (by * 0.5f)); // vertical distance to middle of stream
+            const auto fvdm = vdm / (by * 0.5f); // fractional vmd
+            const auto hdr = bx * 0.7 + (bx * 0.3 * (1.0f - fvdm)); // horizontal distance required
+            const auto fd  = x / hdr; // fractional distance
+            p.pointsize = 40.0f - (fd * 40.0f);
+            return true;
+        }
+        void EndIteration() {}
+    };
+
+    using ParticleEngine = TParticleEngine<
+        LinearParticleMovement,
+        KillParticleAtBounds,
+        MyParticleUpdate,
+        KillParticleAtLifetime>;
+
     enum class ShipType {
         Slow,
         Fast,
@@ -756,7 +782,86 @@ public:
             if (mLifeTime > mMaxLifeTime)
                 return false;
         }
+        if (mParticles)
+            mParticles->Update(dt/1000.0f);
         return true;
+    }
+
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    {
+        // offset the texture to be centered around the position
+        const auto unitScale   = state.getScale();
+        const auto spriteScale = state.getScale() * getScale();
+        const auto position    = state.toViewSpace(mPosition);
+
+        QPixmap ship = getShipTexture(mShipType);
+        const float shipWidth  = ship.width();
+        const float shipHeight = ship.height();
+        const float shipAspect = shipHeight / shipWidth;
+        const float shipScaledWidth  = spriteScale.x();
+        const float shipScaledHeight = shipScaledWidth * shipAspect;
+
+        QPixmap jet = getJetStreamTexture(mShipType);
+        const float jetWidth  = jet.width();
+        const float jetHeight = jet.height();
+        const float jetAspect = jetHeight / jetWidth;
+        const float jetScaledWidth  = spriteScale.x();
+        const float jetScaledHeight = jetScaledWidth * jetAspect;
+
+        if (!mParticles)
+        {
+            // compute number of particles as function of the size of
+            // the jet stream. otherwise small jet streams will have too
+            // many particles and look too "busy" while larger streams
+            // dont have enough.
+            const auto area = jetScaledHeight * jetScaledWidth;
+            const auto num_particles_per_unit_area = 0.02;
+            const auto num_particles = area * num_particles_per_unit_area;
+
+            ParticleEngine::Params params;
+            params.max_init_xpos = 0.0f;
+            params.max_init_ypos = jetScaledHeight;
+            params.max_xpos = jetScaledWidth;
+            params.max_ypos = jetScaledHeight;
+            params.num_particles = num_particles;
+            params.min_velocity = 100.0f;
+            params.max_velocity = 150.0f;
+            params.min_point_size = 20.0f;
+            params.max_point_size = 20.0f;
+            params.direction_sector_start_angle = 0.0f;
+            params.direction_sector_size = 0.0f;
+            params.respawn = true;
+            mParticles = std::make_unique<ParticleEngine>("jet-particles", params);
+        }
+
+        // set the target rectangle with the dimensions of the
+        // sprite we want to draw.
+        // the ship rect is the coordinate to which the jet stream and
+        // the text are relative to.
+        QRectF shipRect(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
+        // offset it so that the center is aligned with the unit position
+        shipRect.moveTo(position -
+            QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
+
+        // have to do a little fudge here since the scarab ship has
+        // a contour such that positioning the particle engine just behind
+        // the ship texture will leave a silly gap between the ship and the
+        // particles.
+        const auto fudgeFactor = mShipType == ShipType::Slow ? 0.8 : 1.0f;
+
+        QRectF jetStreamRect = shipRect;
+        jetStreamRect.translate(shipScaledWidth * fudgeFactor, (shipScaledHeight - jetScaledHeight) / 2.0);
+        jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
+
+        Transform t;
+        t.MoveTo(jetStreamRect);
+        t.Resize(jetStreamRect);
+
+        painter.Draw(*mParticles, t,
+            TextureFill("textures/RoundParticle.png")
+            .EnableTransparency(true)
+            .SetRenderPoints(true)
+            .SetBaseColor(getJetStreamColor(mShipType)));
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -793,8 +898,8 @@ public:
         jetStreamRect.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
         jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
 
-        QRectF textRect = jetStreamRect;
-        textRect.translate(jetScaledWidth * 0.75, 0);
+        QRectF textRect = shipRect;
+        textRect.translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
 
         QFont font;
         font.setFamily("Monospace");
@@ -806,7 +911,7 @@ public:
         // draw textures
         painter.setFont(font);
         painter.setPen(pen);
-        painter.drawPixmap(jetStreamRect, jet, jet.rect());
+        //painter.drawPixmap(jetStreamRect, jet, jet.rect());
         painter.drawPixmap(shipRect, ship, ship.rect());
         painter.drawText(textRect, Qt::AlignVCenter, mText);
 
@@ -868,6 +973,17 @@ public:
     { mShieldIsOn = onOff; }
 
 private:
+    static Color4f getJetStreamColor(ShipType type)
+    {
+        static Color4f colors[] = {
+            Color4f(117, 221, 234, 100),
+            Color4f(252, 214, 131, 100),
+            Color4f(126, 200, 255, 100),
+            Color4f(5, 244, 159, 100)
+        };
+        return colors[(int)type];
+    }
+
     static const QPixmap& getShipTexture(ShipType type)
     {
         static QPixmap textures[] = {
@@ -878,6 +994,17 @@ private:
         };
         return textures[(int)type];
     }
+    static const char* getJetStreamTextureIdentifier(ShipType type)
+    {
+        static const char* textures[] = {
+            "textures/Cricket_jet.png",
+            "textures/Mantis_jet.png",
+            "textures/Scarab_jet.png",
+            "textures/Locust_jet.png"
+        };
+        return textures[(int)type];
+    }
+
     static const QPixmap& getJetStreamTexture(ShipType type)
     {
         static QPixmap textures[] = {
@@ -907,6 +1034,7 @@ private:
     float mLifeTime    = 0.0f;
     float mMaxLifeTime = 0.0f;
     float mVelocity    = 0.0f;
+    std::unique_ptr<ParticleEngine> mParticles;
 private:
     ShipType mShipType = ShipType::Slow;
 private:
