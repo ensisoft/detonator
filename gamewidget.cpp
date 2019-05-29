@@ -1214,7 +1214,7 @@ public:
         painter.Draw(Rect(), t, TextureFill("textures/SpaceBackground.png"));
         // then draw the particle engine
         painter.Draw(*mStars, t,
-            TextureFill("textures/Star.png")
+            TextureFill("textures/RoundParticle.png")
             .EnableTransparency(true)
             .SetRenderPoints(true));
     }
