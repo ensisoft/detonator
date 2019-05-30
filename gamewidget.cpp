@@ -457,9 +457,9 @@ public:
         params.init_rect_ypos = 250;
         params.init_rect_width = 0.0f;
         params.init_rect_height = 0.0f;
-        params.num_particles = 200;
+        params.num_particles = 100;
         params.min_point_size = 2.0f;
-        params.max_point_size = 5.0f;
+        params.max_point_size = 2.0f;
         params.min_velocity = 200.0f;
         params.max_velocity = 300.0f;
         params.respawn = false;
@@ -495,9 +495,9 @@ public:
 
         painter.Draw(*mParticles, t,
             TextureFill("textures/RoundParticle.png")
-            .SetSurfaceType(Material::SurfaceType::Transparent)
+            .SetSurfaceType(Material::SurfaceType::Emissive)
             .SetRenderPoints(true)
-            .SetBaseColor(mColor));
+            .SetBaseColor(mColor * 0.8));
     }
 
     void setColor(const Color4f& color)
