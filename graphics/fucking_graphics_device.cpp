@@ -281,6 +281,9 @@ public:
         fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &s.gl_stencil_dpass);
         fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &s.gl_stencil_dfail);
         fucking_qt_const_failure->glGetIntegerv(GL_COLOR_WRITEMASK, s.gl_color_mask);
+        fucking_qt_const_failure->glGetIntegerv(GL_PROGRAM_POINT_SIZE, &s.gl_point_size_enabled);
+        fucking_qt_const_failure->glGetIntegerv(GL_POINT_SPRITE, &s.gl_point_sprite_enabled);
+        fucking_qt_const_failure->glGetIntegerv(GL_UNPACK_ALIGNMENT, &s.gl_pixel_unpack_alignment);
 
         state->resize(sizeof(s));
         std::memcpy(&(*state)[0], &s, sizeof(s));
@@ -325,10 +328,14 @@ public:
         glBlendFunc(s.gl_blend_src_rgb,   s.gl_blend_dst_rgb);
         glBlendFunc(s.gl_blend_src_alpha, s.gl_blend_dst_alpha);
 
+        EnableIf(GL_PROGRAM_POINT_SIZE, s.gl_point_size_enabled);
+        EnableIf(GL_POINT_SPRITE, s.gl_point_sprite_enabled);
+
         EnableIf(GL_STENCIL_TEST, s.gl_stencil_enabled);
         glStencilFunc(s.gl_stencil_func, s.gl_stencil_ref, s.gl_stencil_mask);
         glStencilOp(s.gl_stencil_fail, s.gl_stencil_dfail, s.gl_stencil_dpass);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, s.gl_pixel_unpack_alignment);
         glColorMask(s.gl_color_mask[0], s.gl_color_mask[1], s.gl_color_mask[2], s.gl_color_mask[3]);
 
         GL_CHECK((void)0);
@@ -340,6 +347,8 @@ private:
         int gl_blend_src_alpha = 0;
         int gl_blend_dst_alpha = 0;
         int gl_blend_enabled   = 0;
+        int gl_point_size_enabled = 0;
+        int gl_point_sprite_enabled = 0;
 
         int gl_stencil_enabled = 0;
         int gl_stencil_func    = 0;
@@ -348,6 +357,7 @@ private:
         int gl_stencil_fail    = 0;
         int gl_stencil_dfail   = 0;
         int gl_stencil_dpass   = 0;
+        int gl_pixel_unpack_alignment = 0;
 
         int gl_color_mask[4]   = {};
     };
