@@ -49,10 +49,16 @@ namespace invaders
         };
 
         struct State {
-            bool bEnableBlend       = false;
             bool bEnablePointSize   = false;
             bool bEnablePointSprite = false;
             bool bWriteColor = true;
+
+            enum class BlendOp {
+                None,
+                Transparent,
+                Additive
+            };
+            BlendOp blending = BlendOp::None;
 
             enum class StencilFunc {
                 Disabled,

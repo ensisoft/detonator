@@ -415,9 +415,25 @@ private:
         EnableIf(GL_PROGRAM_POINT_SIZE, state.bEnablePointSize);
         EnableIf(GL_POINT_SPRITE, state.bEnablePointSprite);
 
-        if (EnableIf(GL_BLEND, state.bEnableBlend))
+        switch (state.blending)
         {
-            GL_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            case State::BlendOp::None:
+                {
+                    GL_CHECK(glDisable(GL_BLEND));
+                }
+                break;
+            case State::BlendOp::Transparent:
+                {
+                    GL_CHECK(glEnable(GL_BLEND));
+                    GL_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                }
+                break;
+            case State::BlendOp::Additive:
+                {
+                    GL_CHECK(glEnable(GL_BLEND));
+                    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE));
+                }
+                break;
         }
 
         if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))

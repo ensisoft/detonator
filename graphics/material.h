@@ -37,13 +37,33 @@ namespace invaders
     class Material
     {
     public:
+        enum class SurfaceType {
+            // Surface is opaque and no blending is done.
+            Opaque,
+            // Surface is transparent and is blended with the destination
+            // to create a interpolated mix of the colors.
+            Transparent,
+            // Surface gives off color (light)
+            Emissive
+        };
+
         virtual ~Material() = default;
+
+        // Create the shader for this material on the given device.
+        // Returns the new shader object or nullptr if the shader
+        // failed to compile.
         virtual Shader* GetShader(GraphicsDevice& device) const = 0;
+
+        // Apply the material properties in the given program object.
         virtual void Apply(GraphicsDevice& device, Program& prog) const = 0;
-        virtual bool IsTransparent() const
-        { return false; }
-        virtual bool IsPointSprite() const
-        { return false; }
+
+        // Get the material surface type.
+        virtual SurfaceType GetSurfaceType() const = 0;
+
+        // Get whether the material is used as material for point sprites.
+        virtual bool IsPointSprite() const = 0;
+    protected:
+    private:
     };
 
     class ColorFill : public Material
@@ -73,8 +93,14 @@ namespace invaders
                 mColor.Red(), mColor.Green(), mColor.Blue(),
                 mColor.Alpha());
         }
-        virtual bool IsTransparent() const override
-        { return mTransparency; }
+        virtual SurfaceType GetSurfaceType() const override
+        {
+            if (mTransparency)
+                return SurfaceType::Transparent;
+            return SurfaceType::Opaque;
+        }
+        virtual bool IsPointSprite() const override
+        { return false; }
 
         void SetColor(const Color4f color)
         { mColor = color; }
@@ -90,9 +116,7 @@ namespace invaders
     {
     public:
         TextureFill() = default;
-        TextureFill(const std::string& texture, bool transparency = true)
-          : mTexture(texture)
-          , mTransparency(transparency)
+        TextureFill(const std::string& texture) : mTexture(texture)
         {}
 
         virtual Shader* GetShader(GraphicsDevice& device) const override
@@ -122,8 +146,9 @@ namespace invaders
             prog.SetUniform("kGamma", mGamma);
         }
 
-        virtual bool IsTransparent() const override
-        { return mTransparency; }
+        virtual SurfaceType GetSurfaceType() const override
+        { return mSurfaceType; }
+
         virtual bool IsPointSprite() const override
         { return mRenderPoints; }
 
@@ -132,12 +157,12 @@ namespace invaders
             mColor = color;
             return *this;
         }
-
-        TextureFill& EnableTransparency(bool on_off)
+        TextureFill& SetSurfaceType(SurfaceType type)
         {
-            mTransparency = on_off;
+            mSurfaceType = type;
             return *this;
         }
+
 
         // set this to true if rendering a textured point
         TextureFill& SetRenderPoints(bool value)
@@ -158,7 +183,7 @@ namespace invaders
         }
     private:
         std::string mTexture;
-        bool mTransparency    = false;
+        SurfaceType mSurfaceType = SurfaceType::Opaque;
         bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float mGamma   = 1.0f;
@@ -184,8 +209,11 @@ namespace invaders
         {
             prog.SetUniform("uRuntime", mRunTime);
         }
-        virtual bool IsTransparent() const override
-        { return true; }
+        virtual SurfaceType GetSurfaceType() const override
+        { return SurfaceType::Transparent; }
+
+        virtual bool IsPointSprite() const override
+        { return false; }
 
         void SetAppRuntime(float r)
         { mRunTime = r; }

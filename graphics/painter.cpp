@@ -83,7 +83,17 @@ public:
         state.viewport.y         = mViewY;
         state.viewport.width     = mViewW;
         state.viewport.height    = mViewH;
-        state.bEnableBlend       = mat.IsTransparent();
+        switch (mat.GetSurfaceType()) {
+            case Material::SurfaceType::Opaque:
+                state.blending = GraphicsDevice::State::BlendOp::None;
+                break;
+            case Material::SurfaceType::Transparent:
+                state.blending = GraphicsDevice::State::BlendOp::Transparent;
+                break;
+            case Material::SurfaceType::Emissive:
+                state.blending = GraphicsDevice::State::BlendOp::Additive;
+                break;
+        }
         state.bEnablePointSprite = mat.IsPointSprite();
         state.bEnablePointSize   = draw == Geometry::DrawType::Points;
         mDevice->Draw(*prog, *geom, state);
@@ -128,7 +138,17 @@ public:
         state.stencil_dpass      = GraphicsDevice::State::StencilOp::WriteRef;
         state.stencil_ref        = 1;
         state.bWriteColor        = true;
-        state.bEnableBlend       = material.IsTransparent();
+        switch (material.GetSurfaceType()) {
+            case Material::SurfaceType::Opaque:
+                state.blending = GraphicsDevice::State::BlendOp::None;
+                break;
+            case Material::SurfaceType::Transparent:
+                state.blending = GraphicsDevice::State::BlendOp::Transparent;
+                break;
+            case Material::SurfaceType::Emissive:
+                state.blending = GraphicsDevice::State::BlendOp::Additive;
+                break;
+        }
         state.bEnablePointSprite = material.IsPointSprite();
         state.bEnablePointSize   = drawGeom->GetDrawType() == Geometry::DrawType::Points;
 
