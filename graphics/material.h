@@ -119,6 +119,7 @@ namespace invaders
             prog.SetUniform("kRenderPoints", mRenderPoints ? 1.0f : 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
+            prog.SetUniform("kGamma", mGamma);
         }
 
         virtual bool IsTransparent() const override
@@ -150,11 +151,17 @@ namespace invaders
             mTexture = texfile;
             return *this;
         }
+        TextureFill& SetGamma(float gamma)
+        {
+            mGamma = gamma;
+            return *this;
+        }
     private:
         std::string mTexture;
         bool mTransparency    = false;
         bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        float mGamma   = 1.0f;
     };
 
     class SlidingGlintEffect : public Material
