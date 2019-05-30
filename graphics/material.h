@@ -177,6 +177,8 @@ namespace invaders
         {
             prog.SetUniform("uRuntime", mRunTime);
         }
+        virtual bool IsTransparent() const override
+        { return true; }
 
         void SetAppRuntime(float r)
         { mRunTime = r; }
