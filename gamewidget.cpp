@@ -1338,8 +1338,21 @@ public:
         t.MoveTo(0, 0);
         t.Resize(rect.width(), rect.height());
 
+    #ifdef WINDOWS_OS
+        // have a problem on windows that the background texture looks very dark.
+        // seems that something is incorrectly doing sRGB -> linear conversion
+        // while the data is actually already linear. the issue is most promiment
+        // with the background texture so we add little gamma hack here.
+        const float gamma = 1.0f/2.2f;
+    #else
+        const float gamma = 1.0f;
+    #endif
+
         // first draw the static background image.
-        painter.Draw(Rect(), t, TextureFill("textures/SpaceBackground.png"));
+        painter.Draw(Rect(), t,
+            TextureFill("textures/SpaceBackground.png")
+            .SetGamma(gamma));
+
         // then draw the particle engine
         painter.Draw(*mStars, t,
             TextureFill("textures/RoundParticle.png")
