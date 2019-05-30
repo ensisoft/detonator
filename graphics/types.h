@@ -238,4 +238,14 @@ namespace invaders
         float mAlpha = 1.0f;
     };
 
+    inline
+    Color4f operator * (const Color4f& color, float scalar)
+    {
+        const auto r = color.Red();
+        const auto g = color.Green();
+        const auto b = color.Blue();
+        const auto a = color.Alpha();
+        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+
 } // namespace
