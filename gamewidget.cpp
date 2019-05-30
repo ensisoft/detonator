@@ -1331,11 +1331,9 @@ public:
         t.Resize(rect.width(), rect.height());
 
     #ifdef WINDOWS_OS
-        // have a problem on windows that the background texture looks very dark.
-        // seems that something is incorrectly doing sRGB -> linear conversion
-        // while the data is actually already linear. the issue is most promiment
-        // with the background texture so we add little gamma hack here.
-        const float gamma = 1.0f/2.2f;
+        // have a problem on windows that the background texture looks very dark
+        // so we add little gamma hack here.
+        const float gamma = 1.0f/1.4f;
     #else
         const float gamma = 1.0f;
     #endif
