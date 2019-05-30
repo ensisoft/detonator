@@ -810,24 +810,16 @@ public:
 
         if (!mParticles)
         {
-            // compute number of particles as function of the size of
-            // the jet stream. otherwise small jet streams will have too
-            // many particles and look too "busy" while larger streams
-            // dont have enough.
-            const auto area = jetScaledHeight * jetScaledWidth;
-            const auto num_particles_per_unit_area = 0.02;
-            const auto num_particles = area * num_particles_per_unit_area;
-
             ParticleEngine::Params params;
             params.init_rect_width  = 0.0f;
             params.init_rect_height = jetScaledHeight;
             params.max_xpos = jetScaledWidth;
             params.max_ypos = jetScaledHeight;
-            params.num_particles = num_particles;
+            params.num_particles = 30;
             params.min_velocity = 100.0f;
             params.max_velocity = 150.0f;
-            params.min_point_size = 20.0f;
-            params.max_point_size = 20.0f;
+            params.min_point_size = 40.0f;
+            params.max_point_size = 40.0f;
             params.direction_sector_start_angle = 0.0f;
             params.direction_sector_size = 0.0f;
             params.respawn = true;
