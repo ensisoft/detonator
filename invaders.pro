@@ -16,7 +16,8 @@ SOURCES = game.cpp\
 	gamewidget.cpp\
 	level.cpp\
 	main.cpp\
-	audio/fucking_audio_device.cpp\
+	audio/pulseaudio.cpp\
+	audio/waveout.cpp\
 	audio/sample.cpp\
 	audio/player.cpp\
 	base/assert.cpp\
