@@ -1651,7 +1651,7 @@ public:
         if (bPlaySound && mPlaySounds)
         {
         #ifdef ENABLE_AUDIO
-            static auto swoosh = std::make_shared<AudioSample>(R("sounds/Slide_Soft_00.ogg"), "swoosh");
+            static auto swoosh = std::make_shared<AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
             g_audio->play(swoosh);
         #endif
         }
@@ -2192,7 +2192,7 @@ GameWidget::GameWidget()
 {
 #ifdef ENABLE_AUDIO
     // sound effects FX
-    static auto sndExplosion = std::make_shared<AudioSample>(R("sounds/explode.wav"), "explosion");
+    static auto sndExplosion = std::make_shared<AudioSample>("sounds/explode.wav", "explosion");
 #endif
 
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
@@ -2891,7 +2891,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 void GameWidget::playMusic()
 {
 #ifdef ENABLE_AUDIO
-    static auto music = std::make_shared<AudioSample>(R("music/awake10_megaWall.ogg"), "MainMusic");
+    static auto music = std::make_shared<AudioSample>("music/awake10_megaWall.ogg", "MainMusic");
 
     if (mPlayMusic)
     {

@@ -24,10 +24,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <QString>
-#include "warnpop.h"
-
 #include "base/assert.h"
 
 #include <string>
@@ -49,8 +45,8 @@ namespace invaders
         // load sample from the provided byte buffer
         AudioSample(const u8* ptr, std::size_t len, const std::string& name);
 
-        // load sample from either a resource or from a file
-        AudioSample(const QString& path, const std::string& name);
+        // load sample from a file.
+        AudioSample(const std::string& file, const std::string& name);
 
         // return the sample rate in hz
         unsigned rate() const

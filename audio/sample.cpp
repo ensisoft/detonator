@@ -22,14 +22,10 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <QResource>
-#  include <QFile>
-#include "warnpop.h"
-
 #include <algorithm>
 #include <stdexcept>
 #include <cstring> // for memcpy
+#include <cstdio>
 #include <sndfile.h>
 
 #include "sample.h"
@@ -156,30 +152,28 @@ AudioSample::AudioSample(const u8* ptr, std::size_t len, const std::string& name
     name_ = name;
 }
 
-AudioSample::AudioSample(const QString& path, const std::string& name)
+AudioSample::AudioSample(const std::string& file, const std::string& name)
 {
-    QResource resource(path);
-    if (resource.isValid())
-    {
-        io_buffer buff(resource.data(), resource.size());
-        sample_rate_  = buff.rate();
-        num_channels_ = buff.channels();
-        num_frames_   = buff.frames();
-        buffer_       = std::move(buff).get_buffer();
-    }
-    else
-    {
-        QFile io(path);
-        if (!io.open(QIODevice::ReadOnly))
-            throw std::runtime_error("open audio file failed");
-        QByteArray data = io.readAll();
+    FILE* fptr = std::fopen(file.c_str(), "rb");
+    if (!fptr)
+        throw std::runtime_error("open audio file failed");
 
-        io_buffer buff(data.constData(), data.size());
-        sample_rate_  = buff.rate();
-        num_channels_ = buff.channels();
-        num_frames_   = buff.frames();
-        buffer_       = std::move(buff).get_buffer();
-    }
+    std::fseek(fptr, 0, SEEK_END);
+    const long size = std::ftell(fptr);
+    std::fseek(fptr, 0, SEEK_SET);
+
+    std::vector<char> buff;
+    buff.resize(size);
+
+    std::fread(&buff[0], 1, size, fptr);
+    std::fclose(fptr);
+
+    io_buffer io(buff.data(), buff.size());
+
+    sample_rate_  = io.rate();
+    num_channels_ = io.channels();
+    num_frames_   = io.frames();
+    buffer_       = std::move(io).get_buffer();
     name_ = name;
 }
 
