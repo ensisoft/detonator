@@ -35,101 +35,104 @@ const unsigned DangerZone = 8;
 namespace invaders
 {
 
-Game::Game(unsigned width, unsigned height) : tick_(0), width_(width), height_(height), identity_(1), level_(nullptr), haveBoss_(false)
+Game::Game(unsigned width, unsigned height)
+  : mWidth(width)
+  , mHeight(height)
 {
-    slots_.resize(height);
+    // each slot corresponds to a row in the game space
+    // and keeps track of additional distance each invader
+    // spawned onto that row must travel.
+    // This adds some distance between each invader spawned
+    // onto the same row. Otherwise they'd all cluster up.
+    mSlots.resize(height);
 }
 
 Game::~Game()
 {}
 
-void Game::tick()
+void Game::Tick()
 {
-    if (!level_)
+    if (!mLevel)
         return;
 
-    // decrement slots. each slot corresponds to a row in the game space.
-    // and the number in the slot is the "length of queue" of invaders queued
-    // onto that row, i.e. it's the additional x distance they must travel.
-    for (size_t i=0; i<slots_.size(); ++i)
+    for (size_t i=0; i<mSlots.size(); ++i)
     {
-        if (slots_[i])
-            slots_[i] = slots_[i] - 1;
+        if (mSlots[i])
+            mSlots[i] = mSlots[i] - 1;
     }
 
 
     // prune invaders
-    auto end = std::partition(std::begin(invaders_), std::end(invaders_),
-        [&](const invader& i) {
+    auto end = std::partition(std::begin(mInvaders), std::end(mInvaders),
+        [&](const Invader& i) {
             return i.xpos > i.speed;
         });
-    for (auto it = end; it != std::end(invaders_); ++it)
+    for (auto it = end; it != std::end(mInvaders); ++it)
     {
         const auto& inv = *it;
         onInvaderVictory(inv);
-        score_.points -= std::min(inv.score, score_.points);
-        score_.victor++;
-        score_.pending--;
+        mScore.points -= std::min(inv.score, mScore.points);
+        mScore.pending--;
     }
 
-    invaders_.erase(end, std::end(invaders_));
+    mInvaders.erase(end, std::end(mInvaders));
 
     // update live invaders
-    for (auto& i : invaders_)
+    for (auto& i : mInvaders)
     {
         i.xpos -= i.speed;
         if (i.xpos < DangerZone)
         {
             onInvaderWarning(i);
         }
-        onToggleShield(i, hasShield(i));
+        onToggleShield(i, HasShield(i));
     }
 
-    if (spawned_ == setup_.numEnemies)
+    if (mSpawnCount == mSetup.numEnemies)
     {
-        if (!haveBoss_)
+        if (!mHaveBoss)
         {
-            if (invaders_.empty())
+            if (mInvaders.empty())
             {
-                spawnBoss();
-                haveBoss_ = true;
+                SpawnBoss();
+                mHaveBoss = true;
             }
         }
-        else if (invaders_.empty())
+        else if (mInvaders.empty())
         {
-            onLevelComplete(score_);
-            level_ = nullptr;
+            onLevelComplete(mScore);
+            mLevel = nullptr;
         }
     }
-    else if (isSpawnTick())
+    else if (IsTimeToSpawn())
     {
-        spawn();
+        SpawnNext();
     }
 
-    ++tick_;
+    ++mCurrentTick;
 }
 
-bool Game::fire(const Game::missile& missile)
+bool Game::FireMissile(const Game::Missile& missile)
 {
-    auto end = std::partition(std::begin(invaders_), std::end(invaders_),
-        [&](const invader& i) {
+    auto end = std::partition(std::begin(mInvaders), std::end(mInvaders),
+        [&](const Invader& i) {
             return i.killList[0] == missile.string;
         });
-    if (end == std::begin(invaders_))
+    if (end == std::begin(mInvaders))
         return false;
 
-    auto it = std::min_element(std::begin(invaders_), end,
-        [&](const invader& a, const invader& b) {
+    auto it = std::min_element(std::begin(mInvaders), end,
+        [&](const Invader& a, const Invader& b) {
             return a.xpos < b.xpos;
         });
 
     auto& inv = *it;
     // if it's not yet visible it cannot be killed ;)
-    if (inv.xpos >= width_)
+    if (inv.xpos >= mWidth)
         return false;
 
-    // if the invader has it's shield up we can't kill it
-    if (hasShield(inv))
+    // if the Invader has it's shield up we can't kill it
+    if (HasShield(inv))
     {
         onMissileFire(inv, missile);
         return true;
@@ -139,13 +142,13 @@ bool Game::fire(const Game::missile& missile)
     inv.killList.pop_front();
     if (inv.killList.isEmpty())
     {
-        inv.score = killScore(inv);
-        score_.points += inv.score;
-        score_.killed++;
-        score_.pending--;
+        inv.score = ComputeKillScore(inv);
+        mScore.points += inv.score;
+        mScore.killed++;
+        mScore.pending--;
 
         onMissileKill(inv, missile, inv.score);
-        invaders_.erase(it);
+        mInvaders.erase(it);
     }
     else
     {
@@ -154,115 +157,116 @@ bool Game::fire(const Game::missile& missile)
     return true;
 }
 
-void Game::ignite(const bomb& b)
+bool Game::IgniteBomb(const Bomb& b)
 {
-    if (!setup_.numBombs)
-        return;
+    if (!mSetup.numBombs)
+        return false;
 
-    for (auto it = std::begin(invaders_); it != std::end(invaders_); ++it)
+    for (auto it = std::begin(mInvaders); it != std::end(mInvaders); ++it)
     {
         auto& i = *it;
 
-        if (hasShield(i))
+        if (HasShield(i))
             continue;
 
-        if (i.xpos < width_)
+        if (i.xpos < mWidth)
         {
             i.killList.pop_front();
             i.viewList.pop_front();
         }
     }
 
-    auto end = std::partition(std::begin(invaders_), std::end(invaders_),
-        [&](const invader& i) {
+    auto end = std::partition(std::begin(mInvaders), std::end(mInvaders),
+        [&](const Invader& i) {
             return i.killList.isEmpty();
         });
 
-    for (auto it = std::begin(invaders_); it != end; ++it)
+    for (auto it = std::begin(mInvaders); it != end; ++it)
     {
         auto& inv = *it;
-        inv.score = killScore(inv);
-        score_.points += inv.score;
-        score_.killed++;
-        score_.pending--;
+        inv.score = ComputeKillScore(inv);
+        mScore.points += inv.score;
+        mScore.killed++;
+        mScore.pending--;
         onBombKill(inv, b, inv.score);
     }
-    for (auto it = end; it != std::end(invaders_); ++it)
+    for (auto it = end; it != std::end(mInvaders); ++it)
     {
         auto& inv = *it;
-        if (hasShield(inv))
+        if (HasShield(inv))
             continue;
 
         onBombDamage(inv, b);
     }
 
-    invaders_.erase(std::begin(invaders_), end);
+    mInvaders.erase(std::begin(mInvaders), end);
 
     onBomb(b);
 
-    setup_.numBombs--;
+    mSetup.numBombs--;
+    return true;
 }
 
-void Game::enter(const timewarp& w)
+bool Game::EnterTimewarp(const Timewarp& w)
 {
-    if (!setup_.numWarps)
-        return;
+    if (!mSetup.numWarps)
+        return false;
 
     onWarp(w);
 
-    setup_.numWarps--;
+    mSetup.numWarps--;
+    return true;
 }
 
-void Game::play(Level* level, Game::setup setup)
+void Game::Play(Level* level, const Game::Setup& setup)
 {
-    invaders_.clear();
-    level_           = level;
-    tick_            = 0;
-    spawned_         = 0;
-    score_.killed    = 0;
-    score_.points    = 0;
-    score_.victor    = 0;
-    score_.maxpoints = 0;
-    score_.pending   = setup.numEnemies + 1; // +1 for the BOSS
-    setup_ = setup;
-    haveBoss_ = false;
+    mInvaders.clear();
+    mLevel           = level;
+    mCurrentTick     = 0;
+    mSpawnCount      = 0;
+    mScore.killed    = 0;
+    mScore.points    = 0;
+    mScore.maxpoints = 0;
+    mScore.pending   = setup.numEnemies + 1; // +1 for the BOSS
+    mSetup    = setup;
+    mHaveBoss = false;
 }
 
-void Game::quitLevel()
+void Game::Quit()
 {
-    invaders_.clear();
-    level_ = nullptr;
-    std::memset(&score_, 0, sizeof(score_));
-    std::memset(&setup_, 0, sizeof(setup_));
+    mInvaders.clear();
+    mLevel = nullptr;
+    mScore = Score{};
+    mSetup = Setup{};
 }
 
-unsigned Game::killScore(const invader& inv) const
+unsigned Game::ComputeKillScore(const Invader& inv) const
 {
     // scoring goes as follows.
-    // there's a time factor that decreases as the invader approaches an escape.
+    // there's a time factor that decreases as the Invader approaches an escape.
     // if the enemy is in the warning zone (we're showing the kill string)
     // then there's no points to be given (but no penalty either)
-    // otherwise award the player the invader base points  + bonus
+    // otherwise award the player the Invader base points  + bonus
     if (inv.xpos < DangerZone)
         return 0;
 
     const auto xpos   = (float)inv.xpos - DangerZone;
-    const auto width  = (float)width_ - DangerZone - 1; // width_'th column is not even visible
+    const auto width  = (float)mWidth - DangerZone - 1; // width'th column is not even visible
     const auto points = inv.score * inv.speed;
     const auto bonus  = xpos / width;
 
-    // put more weight on just killing the invader than on when it's being killed
+    // put more weight on just killing the Invader than on when it's being killed
     return 0.6 * points + 0.4 * (points * bonus);
 }
 
-bool Game::hasShield(const invader& inv) const
+bool Game::HasShield(const Invader& inv) const
 {
 #if ENABLE_GAME_FEATURE_SHIELD
     const auto cycle = inv.shield_on_ticks + inv.shield_off_ticks;
     if (cycle == 0)
         return false;
 
-    const auto phase = tick_ % cycle;
+    const auto phase = mCurrentTick % cycle;
     if (phase >= inv.shield_on_ticks)
         return true;
 #endif
@@ -270,33 +274,33 @@ bool Game::hasShield(const invader& inv) const
     return false;
 }
 
-void Game::spawn()
+void Game::SpawnNext()
 {
-    const auto spawnCount = setup_.spawnCount;
-    const auto enemyCount = setup_.numEnemies;
+    const auto spawnCount = mSetup.spawnCount;
+    const auto enemyCount = mSetup.numEnemies;
 
     // pull a random row for the batch
-    const auto batch_row = std::rand() % height_;
+    const auto batch_row = std::rand() % mHeight;
 
     for (unsigned i=0; i<spawnCount; ++i)
     {
-        if (spawned_ == enemyCount)
+        if (mSpawnCount == enemyCount)
             break;
 
-        const auto row   = (batch_row + i * 3) % height_;
-        assert(row <= slots_.size());
-        const auto queue = slots_[row];
+        const auto row   = (batch_row + i * 3) % mHeight;
+        assert(row <= mSlots.size());
+        const auto queue = mSlots[row];
 
-        const auto enemy = level_->spawn();
-        invader inv;
+        const auto enemy = mLevel->spawn();
+        Invader inv;
         inv.killList.append(enemy.killstring);
         inv.viewList.append(enemy.string);
         inv.score      = enemy.score;
         inv.ypos       = row;
-        inv.xpos       = width_  + queue;
-        inv.identity   = identity_++;
+        inv.xpos       = mWidth  + queue;
+        inv.identity   = mSpawnCount; // use the spawn counter as the id value.
         inv.speed      = 1;
-        inv.type       = InvaderType::regular;
+        inv.type       = InvaderType::Regular;
         inv.shield     = false;
 
 
@@ -307,7 +311,7 @@ void Game::spawn()
 
         if (!(std::rand() % 6))
         {
-            const auto enemy = level_->spawn();
+            const auto enemy = mLevel->spawn();
             inv.killList.append(enemy.killstring);
             inv.viewList.append(enemy.string);
             inv.score *= 2;
@@ -326,50 +330,50 @@ void Game::spawn()
 
         inv.score *= 10;
 
-        invaders_.push_back(inv);
+        mInvaders.push_back(inv);
         onInvaderSpawn(inv);
 
-        ++spawned_;
+        ++mSpawnCount;
 
-        inv.xpos = width_ - DangerZone - 1;
-        score_.maxpoints += killScore(inv);
+        inv.xpos = mWidth - DangerZone - 1;
+        mScore.maxpoints += ComputeKillScore(inv);
 
         // increment the slot
-        slots_[row] = queue + 5;
+        mSlots[row] = queue + 5;
     }
 }
 
-void Game::spawnBoss()
+void Game::SpawnBoss()
 {
-    invader theBoss;
-    theBoss.ypos     = height_ / 2;
-    theBoss.xpos     = width_ + 5;
-    theBoss.identity = identity_++;
-    theBoss.score    = 0;
-    theBoss.speed    = 1;
-    theBoss.type     = InvaderType::boss;
+    Invader boss;
+    boss.ypos     = mHeight / 2;
+    boss.xpos     = mWidth + 5;
+    boss.identity = mSpawnCount + 1;
+    boss.score    = 0;
+    boss.speed    = 1;
+    boss.type     = InvaderType::Boss;
 
     for (int i=0; i<5; ++i)
     {
-        const auto enemy = level_->spawn();
-        theBoss.viewList.append(enemy.string);
-        theBoss.killList.append(enemy.killstring);
-        theBoss.score += enemy.score;
+        const auto enemy = mLevel->spawn();
+        boss.viewList.append(enemy.string);
+        boss.killList.append(enemy.killstring);
+        boss.score += enemy.score;
     }
-    theBoss.score *= 17;
+    boss.score *= 17;
 
-    onInvaderSpawn(theBoss);
+    onInvaderSpawn(boss);
 
-    invaders_.push_back(theBoss);
+    mInvaders.push_back(boss);
 
-    theBoss.xpos = width_ - DangerZone - 1;
-    score_.maxpoints += killScore(theBoss);
+    boss.xpos = mWidth - DangerZone - 1;
+    mScore.maxpoints += ComputeKillScore(boss);
 
 }
 
-bool Game::isSpawnTick() const
+bool Game::IsTimeToSpawn() const
 {
-    return !(tick_ % setup_.spawnInterval);
+    return !(mCurrentTick % mSetup.spawnInterval);
 }
 
 } // invaders

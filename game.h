@@ -39,134 +39,177 @@ namespace invaders
 {
     class Level;
 
+    // Implements the main game logic
     class Game
     {
     public:
+        // the type of the invader
         enum class InvaderType {
-            regular, boss
+            // Normal enemy
+            Regular,
+            // Boss of the level
+            Boss
         };
 
-        struct invader {
-            unsigned ypos;
-            unsigned xpos;
-            unsigned identity;
-            unsigned score;
-            unsigned speed;
+        struct Invader {
+            // The current x position of the invader
+            // in the game space
+            unsigned ypos = 0;
+            // The current y position of the invader
+            // in the game space.
+            unsigned xpos = 0;
+            // Unique id for each invader.
+            unsigned identity = 0;
+            // The final score when the invader is killed.
+            // Initially zero and only computed later.
+            unsigned score = 0;
+            // The speed of the invader expressed in units/ticks,
+            // i.e. how many game space units does the invader
+            // advance on each game tick.
+            unsigned speed = 0;
+            // The list of characters (in Pinyin) required
+            // to kill this invader.
             QStringList killList;
+            // The list of characters (in Chinese) required
+            // to kill this invader.
             QStringList viewList;
+            // The type of the invader. Either boss or normal.
             InvaderType type;
+            // True when the shield is on.
             bool shield;
+            // How many ticks the shield is on.
             unsigned shield_on_ticks;
+            // How many ticks the shield is off.
             unsigned shield_off_ticks;
         };
 
-        struct missile {
+        struct Missile {
             QVector2D position;
             QString string;
         };
 
-        struct bomb {
+        struct Bomb {
 
         };
 
-        struct timewarp {
-            float duration;
-            float factor;
+        struct Timewarp {
+            float duration = 0.0f;
+            float factor   = 0.0f;
         };
 
-        struct score {
-            unsigned points;
-            unsigned killed;
-            unsigned victor;
-            unsigned pending;
-            unsigned maxpoints;
+        // The aggregate score/tally of the game play.
+        struct Score {
+            // Current combined score.
+            unsigned points = 0;
+            // How many enemies have been killed.
+            unsigned killed = 0;
+            // How many enemies are still coming.
+            unsigned pending = 0;
+            // Maximum points that can be scored in the current level.
+            unsigned maxpoints = 0;
         };
 
-        struct setup {
-            unsigned numEnemies;
-            unsigned spawnCount;
-            unsigned spawnInterval;
-            unsigned numBombs;
-            unsigned numWarps;
+        // Setup the game with some parameters that control
+        // the game play.
+        struct Setup {
+            // How many enemies are to be played in total.
+            unsigned numEnemies    = 0;
+            // How many enemies to spawn at a single spawn tick.
+            unsigned spawnCount    = 0;
+            // The interval between spawning enemies expressed in ticks.
+            unsigned spawnInterval = 0;
+            // The number of bombs allotted to the player.
+            unsigned numBombs      = 0;
+            // The number of warps allotted to the player.
+            unsigned numWarps      = 0;
         };
 
 
-        std::function<void (const invader&, const missile& m, unsigned score)> onMissileKill;
-        std::function<void (const invader&, const missile& m)> onMissileDamage;
-        std::function<void (const invader&, const missile& m)> onMissileFire;
-        std::function<void (const invader&, const bomb& b, unsigned score)> onBombKill;
-        std::function<void (const invader&, const bomb& b)> onBombDamage;
-        std::function<void (const invader&, bool)> onToggleShield;
-        std::function<void (const bomb& b)> onBomb;
-        std::function<void (const timewarp& w)> onWarp;
-        std::function<void (const invader&)> onInvaderSpawn;
-        std::function<void (const invader&)> onInvaderVictory;
-        std::function<void (const invader&)> onInvaderWarning;
-        std::function<void (const score&)> onLevelComplete;
+        std::function<void (const Invader&, const Missile& m, unsigned score)> onMissileKill;
+        std::function<void (const Invader&, const Missile& m)> onMissileDamage;
+        std::function<void (const Invader&, const Missile& m)> onMissileFire;
+        std::function<void (const Invader&, const Bomb& b, unsigned score)> onBombKill;
+        std::function<void (const Invader&, const Bomb& b)> onBombDamage;
+        std::function<void (const Invader&, bool)> onToggleShield;
+        std::function<void (const Bomb& b)> onBomb;
+        std::function<void (const Timewarp& w)> onWarp;
+        std::function<void (const Invader&)> onInvaderSpawn;
+        std::function<void (const Invader&)> onInvaderVictory;
+        std::function<void (const Invader&)> onInvaderWarning;
+        std::function<void (const Score&)> onLevelComplete;
 
+        // Construct a new game with the given game space
+        // dimesions.
         Game(unsigned width, unsigned heigth);
        ~Game();
-
-        // advance game simulation by one increment
-        void tick();
-
-        // launch a missile at the current player position
-        bool fire(const missile& m);
-
-        void ignite(const bomb& b);
-
-        void enter(const timewarp& w);
-
-        // start playing a level
-        void play(Level* level, Game::setup setup);
-
-        void quitLevel();
-
-        // get game space width
-        unsigned width() const
-        { return width_; }
-
-        // get game space height
-        unsigned height() const
-        { return height_; }
-
-        unsigned numBombs() const
-        { return setup_.numBombs; }
-
-        unsigned numWarps() const
-        { return setup_.numWarps; }
-
-        const
-        score& getScore() const
-        { return score_; }
-
-        const
-        std::deque<invader>& invaders() const
-        { return invaders_; }
-
-        bool isRunning() const
-        { return level_ != nullptr; }
-
+        // Advance game simulation by one increment.
+        void Tick();
+        // Launch a missile at the current player position.
+        // Returns true if the missile was actually fired at
+        // any enemy. Otherwise false.
+        bool FireMissile(const Missile& m);
+        // Ignite a bomb in the game if any currently exist.
+        // Returns true if bomb was ignited, otherwise false.
+        bool IgniteBomb(const Bomb& b);
+        // Enter a timewarp.
+        // Returns true if timewarp was started, otherwise false
+        bool EnterTimewarp(const Timewarp& w);
+        // Start playing a level.
+        void Play(Level* level, const Game::Setup& setup);
+        // Quit playing the current level/game.
+        void Quit();
+        // Get game space width.
+        unsigned GetWidth() const
+        { return mWidth; }
+        // Get game space height.
+        unsigned GetHeight() const
+        { return mHeight; }
+        // Get the number of currently available bombs.
+        unsigned GetNumBombs() const
+        { return mSetup.numBombs; }
+        // Get the number of currently available warps.
+        unsigned GetNumWarps() const
+        { return mSetup.numWarps; }
+        // Get the current score.
+        const Score& GetScore() const
+        { return mScore; }
+        // Returns true if game is currently running
+        // otherwise false.
+        bool IsRunning() const
+        { return mLevel != nullptr; }
 
     private:
-        unsigned killScore(const invader& inv) const;
-        bool hasShield(const invader& inv) const;
-        void spawn();
-        void spawnBoss();
-        bool isSpawnTick() const;
+        unsigned ComputeKillScore(const Invader& inv) const;
+        bool HasShield(const Invader& inv) const;
+        void SpawnNext();
+        void SpawnBoss();
+        bool IsTimeToSpawn() const;
 
     private:
-        std::deque<invader> invaders_;
-        std::vector<unsigned> slots_;
-        unsigned tick_;
-        unsigned spawned_;
-        unsigned width_;
-        unsigned height_;
-        unsigned identity_;
-        score score_;
-        setup setup_;
-        Level* level_;
-        bool haveBoss_;
+        // Width of the game space.
+        const unsigned mWidth  = 0;
+        // Height of the game space.
+        const unsigned mHeight = 0;
+        // The current tick counter.
+        // Used to express the passing of time
+        // in game ticks.
+        unsigned mCurrentTick  = 0;
+        // How many enemies have been spawned so far.
+        unsigned mSpawnCount   = 0;
+        // The enemies/invaders currently in the game.
+        std::vector<Invader> mInvaders;
+        // Per game space row queue size added to the
+        // Invaders xposition when spawed. (additional
+        // distance they need to travel).
+        std::vector<unsigned> mSlots;
+        // Tally of the game scoring.
+        Score mScore;
+        // Game play parameters
+        Setup mSetup;
+        // Current level we're playing.
+        Level* mLevel  = nullptr;
+        // Have spawned boss or not.
+        bool mHaveBoss = false;
     };
 
 } // invaders

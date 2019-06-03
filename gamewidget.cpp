@@ -1940,7 +1940,7 @@ private:
 class GameWidget::PlayGame : public GameWidget::State
 {
 public:
-    PlayGame(const Game::setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
+    PlayGame(const Game::Setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
     {
         mCurrentText = initString();
     }
@@ -2005,7 +2005,7 @@ public:
             {
                 std::srand(0x7f6a4b);
                 mLevel.reset();
-                mGame.play(&mLevel, mSetup);
+                mGame.Play(&mLevel, mSetup);
                 mState = GameState::Playing;
             }
         }
@@ -2028,24 +2028,24 @@ public:
                 mCurrentText.append(key);
                 if (mCurrentText == "BOMB")
                 {
-                    Game::bomb bomb;
-                    mGame.ignite(bomb);
+                    Game::Bomb bomb;
+                    mGame.IgniteBomb(bomb);
                     mCurrentText.clear();
                 }
                 else if (mCurrentText == "WARP")
                 {
-                    Game::timewarp warp;
+                    Game::Timewarp warp;
                     warp.duration = 4000;
                     warp.factor = 0.2f;
-                    mGame.enter(warp);
+                    mGame.EnterTimewarp(warp);
                     mCurrentText.clear();
                 }
                 else
                 {
-                    Game::missile missile;
+                    Game::Missile missile;
                     missile.position = mMissileLaunchPosition; // todo: fix this
                     missile.string   = mCurrentText.toLower();
-                    if (mGame.fire(missile))
+                    if (mGame.FireMissile(missile))
                         mCurrentText.clear();
                 }
             }
@@ -2113,12 +2113,12 @@ private:
 
     void paintHUD(QPainter& painter, const QRectF& area, const QPointF& unit) const
     {
-        const auto& score  = mGame.getScore();
+        const auto& score  = mGame.GetScore();
         const auto& result = score.maxpoints ?
             (float)score.points / (float)score.maxpoints * 100 : 0.0;
         const auto& format = QString("%1").arg(result, 0, 'f', 0);
-        const auto bombs   = mGame.numBombs();
-        const auto warps   = mGame.numWarps();
+        const auto bombs   = mGame.GetNumBombs();
+        const auto warps   = mGame.GetNumWarps();
 
         QPen pen;
         pen.setColor(Qt::darkGreen);
@@ -2174,7 +2174,7 @@ private:
     { return "Type the correct pinyin to kill the enemies!"; }
 
 private:
-    const Game::setup mSetup;
+    const Game::Setup mSetup;
     Level& mLevel;
     Game&  mGame;
 
@@ -2202,7 +2202,7 @@ GameWidget::GameWidget()
 
     mGame.reset(new Game(GameCols, GameRows));
 
-    mGame->onMissileKill = [&](const Game::invader& i, const Game::missile& m, unsigned killScore)
+    mGame->onMissileKill = [&](const Game::Invader& i, const Game::Missile& m, unsigned killScore)
     {
         auto it = mInvaders.find(i.identity);
 
@@ -2250,7 +2250,7 @@ GameWidget::GameWidget()
 #endif
     };
 
-    mGame->onMissileDamage = [&](const Game::invader& i, const Game::missile& m)
+    mGame->onMissileDamage = [&](const Game::Invader& i, const Game::Missile& m)
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
@@ -2276,7 +2276,7 @@ GameWidget::GameWidget()
 
     mGame->onMissileFire = mGame->onMissileDamage;
 
-    mGame->onBombKill = [&](const Game::invader& i, const Game::bomb& b, unsigned killScore)
+    mGame->onBombKill = [&](const Game::Invader& i, const Game::Bomb& b, unsigned killScore)
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
@@ -2289,7 +2289,7 @@ GameWidget::GameWidget()
         mInvaders.erase(it);
     };
 
-    mGame->onBombDamage = [&](const Game::invader& i, const Game::bomb& b)
+    mGame->onBombDamage = [&](const Game::Invader& i, const Game::Bomb& b)
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
@@ -2297,7 +2297,7 @@ GameWidget::GameWidget()
         inv->setViewString(str);
     };
 
-    mGame->onBomb = [&](const Game::bomb& b)
+    mGame->onBomb = [&](const Game::Bomb& b)
     {
         std::unique_ptr<Animation> explosion(new BigExplosion(1500));
 
@@ -2305,28 +2305,28 @@ GameWidget::GameWidget()
         mAnimations.push_back(std::move(explosion));
     };
 
-    mGame->onWarp = [&](const Game::timewarp& w)
+    mGame->onWarp = [&](const Game::Timewarp& w)
     {
         DEBUG("begin time warp");
         mWarpFactor    = w.factor;
         mWarpRemaining = w.duration;
     };
 
-    mGame->onToggleShield = [&](const Game::invader& i, bool onOff)
+    mGame->onToggleShield = [&](const Game::Invader& i, bool onOff)
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
         inv->enableShield(onOff);
     };
 
-    mGame->onInvaderSpawn = [&](const Game::invader& inv)
+    mGame->onInvaderSpawn = [&](const Game::Invader& inv)
     {
         TransformState state(rect(), ViewCols, ViewRows);
 
         const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
 
         Invader::ShipType type = Invader::ShipType::Slow;
-        if (inv.type == Game::InvaderType::boss)
+        if (inv.type == Game::InvaderType::Boss)
         {
             type = Invader::ShipType::Boss;
         }
@@ -2366,21 +2366,21 @@ GameWidget::GameWidget()
     };
 
 
-    mGame->onInvaderVictory = [&](const Game::invader& inv)
+    mGame->onInvaderVictory = [&](const Game::Invader& inv)
     {
         mInvaders.erase(inv.identity);
     };
 
     // invader is almost escaping unharmed. we help the player to learn
     // by changing the text from chinese to the pinyin kill string
-    mGame->onInvaderWarning = [&](const Game::invader& inv)
+    mGame->onInvaderWarning = [&](const Game::Invader& inv)
     {
         auto it  = mInvaders.find(inv.identity);
         auto str = inv.killList.join("");
         it->second->setViewString(str);
     };
 
-    mGame->onLevelComplete = [&](const Game::score& score)
+    mGame->onLevelComplete = [&](const Game::Score& score)
     {
         DEBUG("Level complete %1 / %2 points (points / max)",  score.points, score.maxpoints);
 
@@ -2540,7 +2540,7 @@ void GameWidget::updateGame(float dt)
         if (mTickDelta >= tick)
         {
             // advance game by one tick
-            mGame->tick();
+            mGame->Tick();
 
             mTickDelta = mTickDelta - tick;
         }
@@ -2855,7 +2855,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
                 const auto& level   = mLevels[levelIndex];
                 DEBUG("Start game: %1 / %2", level->name(), profile.name);
 
-                Game::setup setup;
+                Game::Setup setup;
                 setup.numEnemies    = profile.numEnemies;
                 setup.spawnCount    = profile.spawnCount;
                 setup.spawnInterval = profile.spawnInterval;
@@ -2876,7 +2876,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
                 const bool bIsGameRunning = mStates.top()->isGameRunning();
                 if (bIsGameRunning)
                 {
-                    mGame->quitLevel();
+                    mGame->Quit();
                     mInvaders.clear();
                     mAnimations.clear();
                 }
