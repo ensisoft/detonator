@@ -1439,10 +1439,7 @@ public:
 
         mt.MoveTo(x, y+2);
         mt.Resize(w, h-4);
-
-        SlidingGlintEffect effect;
-        effect.SetAppRuntime(mTotalTimeRun/1000.0f);
-        painter.DrawMasked(Rect(), dt, Rect(), mt, effect);
+        painter.DrawMasked(Rect(), dt, Rect(), mt, SlidingGlintEffect(mTotalTimeRun/1000.0f));
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override

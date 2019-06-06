@@ -189,36 +189,49 @@ namespace invaders
         float mGamma   = 1.0f;
     };
 
-    class SlidingGlintEffect : public Material
+    // base class for material effects.
+    class MaterialEffect : public Material
     {
     public:
         virtual Shader* GetShader(GraphicsDevice& device) const override
         {
-            Shader* s = device.FindShader("sliding_glint_effect.glsl");
-            if (s == nullptr || !s->IsValid())
+            Shader* shader = device.FindShader(mShader);
+            if (shader == nullptr || !shader->IsValid())
             {
-                if (s == nullptr)
-                    s = device.MakeShader("sliding_glint_effect.glsl");
-                if (!s->CompileFile("sliding_glint_effect.glsl"))
+                if (shader == nullptr)
+                    shader = device.MakeShader(mShader);
+                if (!shader->CompileFile(mShader))
                     return nullptr;
             }
-            return s;
+            return shader;
         }
 
         virtual void Apply(GraphicsDevice&, Program& prog) const override
         {
-            prog.SetUniform("uRuntime", mRunTime);
+            prog.SetUniform("uRuntime", mRuntime);
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
 
         virtual bool IsPointSprite() const override
         { return false; }
-
-        void SetAppRuntime(float r)
-        { mRunTime = r; }
+    protected:
+        MaterialEffect(const std::string& shader, float runtime)
+          : mShader(shader)
+          , mRuntime(runtime)
+        {}
     private:
-        float mRunTime = 0.0f;
+        const std::string mShader;
+        const float mRuntime = 0.0f;
+    };
+
+    class SlidingGlintEffect : public MaterialEffect
+    {
+    public:
+        SlidingGlintEffect(float runtime)
+          : MaterialEffect("sliding_glint_effect.glsl", runtime)
+        {}
+    private:
     };
 
 } // namespace
