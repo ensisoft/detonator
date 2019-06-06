@@ -209,20 +209,31 @@ namespace invaders
         virtual void Apply(GraphicsDevice&, Program& prog) const override
         {
             prog.SetUniform("uRuntime", mRuntime);
+            prog.SetUniform("kBaseColor", mBaseColor.Red(), mBaseColor.Green(),
+                mBaseColor.Blue(), mBaseColor.Alpha());
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
 
         virtual bool IsPointSprite() const override
         { return false; }
+
+        MaterialEffect& SetBaseColor(const Color4f& color)
+        {
+            mBaseColor = color;
+            return *this;
+        }
+
     protected:
         MaterialEffect(const std::string& shader, float runtime)
           : mShader(shader)
           , mRuntime(runtime)
         {}
+
     private:
         const std::string mShader;
         const float mRuntime = 0.0f;
+        Color4f mBaseColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
     };
 
     class SlidingGlintEffect : public MaterialEffect
@@ -230,6 +241,15 @@ namespace invaders
     public:
         SlidingGlintEffect(float runtime)
           : MaterialEffect("sliding_glint_effect.glsl", runtime)
+        {}
+    private:
+    };
+
+    class ConcentricRingsEffect : public MaterialEffect
+    {
+    public:
+        ConcentricRingsEffect(float runtime)
+          : MaterialEffect("concentric_rings_effect.glsl", runtime)
         {}
     private:
     };
