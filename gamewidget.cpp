@@ -1125,6 +1125,11 @@ public:
         return true;
     }
 
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    {
+
+    }
+
     virtual void paint(QPainter& painter, TransformState& state) override
     {
         const auto& pixmap = getCurrentTexture();
@@ -1440,6 +1445,14 @@ public:
         mt.MoveTo(x, y+2);
         mt.Resize(w, h-4);
         painter.DrawMasked(Rect(), dt, Rect(), mt, SlidingGlintEffect(mTotalTimeRun/1000.0f));
+
+
+        {
+            Transform x;
+            x.MoveTo(100, 100);
+            x.Resize(200, 200);
+            painter.Draw(Rect(), x, ConcentricRingsEffect(mTotalTimeRun/1000.0f));
+        }
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override

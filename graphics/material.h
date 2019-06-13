@@ -24,7 +24,10 @@
 
 #include "config.h"
 
+#include <vector>
 #include <string>
+#include <cmath>
+#include <cassert>
 
 #include "device.h"
 #include "shader.h"
@@ -188,6 +191,97 @@ namespace invaders
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float mGamma   = 1.0f;
     };
+
+    // Sprite is a material which renders a simple animation
+    // by cycling through a set of textures at some fps.
+    // The assumption is that cycling through the textures
+    // renders a coherent animation.
+    class Sprite : public Material
+    {
+    public:
+        // Create a new sprite with an initializer list of texture names.
+        Sprite(const std::initializer_list<std::string>& textures)
+          : mTextures(textures)
+        {}
+        // Create a new sprite with a vector of texture names.
+        Sprite(const std::vector<std::string>& textures)
+          : mTextures(textures)
+        {}
+        // Create an empty sprite.
+        // You must then manually call AddTexture before using
+        // the sprite to render something.
+        Sprite()
+        {}
+
+        virtual Shader* GetShader(GraphicsDevice& device) const override
+        {
+            Shader* shader = device.FindShader("sprite.glsl");
+            if (shader == nullptr || !shader->IsValid())
+            {
+                if (shader == nullptr)
+                    shader = device.MakeShader("sprite.glsl");
+                if (!shader->CompileFile("sprite.glsl"))
+                    return nullptr;
+            }
+            return shader;
+        }
+        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        {
+            assert(!mTextures.empty() &&
+                "The sprite has no textures and cannot be used to draw.");
+
+            const auto num_textures = (unsigned)mTextures.size();
+            const auto frame_interval = 1.0f / mFps;
+            const unsigned frame_index[2] = {
+                (unsigned(mRuntime / frame_interval) + 0) % num_textures,
+                (unsigned(mRuntime / frame_interval) + 1) % num_textures
+            };
+            for (unsigned i=0; i<2; ++i)
+            {
+                const auto index = frame_index[i];
+                Texture* texture = device.FindTexture(mTextures[index]);
+                if (!texture)
+                {
+                    texture = device.MakeTexture(mTextures[index]);
+                    texture->UploadFromFile(mTextures[index]);
+                }
+                const auto sampler = "kTexture" + std::to_string(i);
+                prog.SetTexture(sampler.c_str(), i, *texture);
+            }
+            // blend factor between the two textures.
+            const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
+            prog.SetUniform("kBlendCoeff", coeff);
+        }
+        virtual SurfaceType GetSurfaceType() const override
+        { return SurfaceType::Transparent; }
+        virtual bool IsPointSprite() const override
+        { return false; }
+
+        // Set the desired frame rate per second.
+        Sprite& SetFps(float fps)
+        {
+            mFps = fps;
+            return *this;
+        }
+        // Set the current runtime. This is used to compute
+        // the current texture to be rendered.
+        Sprite& SetAppRuntime(float time)
+        {
+            mRuntime = time;
+            return *this;
+        }
+        // Add a new texture name to the sprite.
+        Sprite& AddTexture(const std::string& texture)
+        {
+            mTextures.push_back(texture);
+            return *this;
+        }
+    private:
+        std::vector<std::string> mTextures;
+        float mRuntime = 0;
+        float mFps = 1.0f;
+    };
+
 
     // base class for material effects.
     class MaterialEffect : public Material
