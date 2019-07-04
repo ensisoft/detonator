@@ -554,6 +554,21 @@ private:
                    throw std::runtime_error("unknown texture format (depth): " + filename);
             }
 
+            const auto stride = xres * depth;
+
+            // swap the order of the scanlines
+            for (int y=0; y<yres/2; ++y)
+            {
+                const auto top = y;
+                const auto bot = yres - 1 - y;
+                auto* src = ((unsigned char*)bmp) + top * stride;
+                auto* dst = ((unsigned char*)bmp) + bot * stride;
+                for (int x=0; x<stride; ++x)
+                {
+                    std::swap(src[x], dst[x]);
+                }
+            }
+
             Upload(bmp, xres, yres, format);
 
             stbi_image_free(bmp);
