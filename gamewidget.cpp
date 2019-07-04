@@ -1102,6 +1102,14 @@ public:
         const auto y = math::rand(-1.0, 1.0);
         mDirection = QVector2D(x, y);
         mDirection.normalize();
+
+        mSprite.AddTexture("textures/alien/e_f1.png");
+        mSprite.AddTexture("textures/alien/e_f2.png");
+        mSprite.AddTexture("textures/alien/e_f3.png");
+        mSprite.AddTexture("textures/alien/e_f4.png");
+        mSprite.AddTexture("textures/alien/e_f5.png");
+        mSprite.AddTexture("textures/alien/e_f6.png");
+        mSprite.SetFps(10);
     }
 
     virtual bool update(float dt, TransformState& state) override
@@ -1127,27 +1135,33 @@ public:
 
     virtual void paintPreEffect(Painter& painter, const TransformState& state) override
     {
+        const auto sec = mRuntime / 1000.0f;
+        const auto pos = state.toViewSpace(mPosition);
 
+        mSprite.SetAppRuntime(sec);
+
+        Transform rings;
+        rings.Resize(200, 200);
+        rings.MoveTo(pos - QPoint(100, 100));
+        painter.Draw(Rect(), rings, ConcentricRingsEffect(sec));
+
+        Transform ufo;
+        ufo.Resize(40, 40);
+        ufo.MoveTo(pos - QPoint(20, 20));
+        painter.Draw(Rect(), ufo, mSprite);
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        const auto& pixmap = getCurrentTexture();
-        const auto pxw = pixmap.width();
-        const auto pxh = pixmap.height();
-
-        QRectF target(0, 0, pxw, pxh);
-        target.moveTo(state.toViewSpace(mPosition));
-        painter.drawPixmap(target, pixmap, pixmap.rect());
     }
 
     virtual QRectF getBounds(const TransformState& state) const override
     {
-        const QPixmap& pixmap = getCurrentTexture();
+        const auto pos = state.toViewSpace(mPosition);
 
         QRectF bounds;
-        bounds.moveTo(state.toViewSpace(mPosition));
-        bounds.setSize(pixmap.size());
+        bounds.moveTo(pos - QPoint(20, 20));
+        bounds.setSize(QSize(40, 40));
         return bounds;
     }
 
@@ -1171,24 +1185,19 @@ public:
 
     const QPixmap& getCurrentTexture() const
     {
-        const auto phase = 1000.0f / 10.0f;
-        const auto index = unsigned(mRuntime / phase) % 6;
-
-        static std::vector<QPixmap> pixmaps;
-        if (pixmaps.empty())
-        {
-            for (int i=1; i<=6; ++i)
-            {
-                pixmaps.push_back(R(QString("textures/alien/e_f%1").arg(i)));
-            }
-        }
-        ASSERT(index < pixmaps.size());
-        return pixmaps[index];
+        // this is now a dummy function and is used
+        // to get the pixmap for rendering the debris
+        // animation. once the debris has been refactored
+        // we can remove this too.
+        static QPixmap p(R("textures/alien/e_f1.png"));
+        return p;
     }
 private:
     float mRuntime = 0.0f;
     QVector2D mDirection;
     QVector2D mPosition;
+private:
+    Sprite mSprite;
 };
 
 
@@ -1445,14 +1454,6 @@ public:
         mt.MoveTo(x, y+2);
         mt.Resize(w, h-4);
         painter.DrawMasked(Rect(), dt, Rect(), mt, SlidingGlintEffect(mTotalTimeRun/1000.0f));
-
-
-        {
-            Transform x;
-            x.MoveTo(100, 100);
-            x.Resize(200, 200);
-            painter.Draw(Rect(), x, ConcentricRingsEffect(mTotalTimeRun/1000.0f));
-        }
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
