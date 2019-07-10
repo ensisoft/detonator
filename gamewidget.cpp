@@ -1211,7 +1211,7 @@ private:
     QVector2D mDirection;
     QVector2D mPosition;
 private:
-    Sprite mSprite;
+    SpriteSet mSprite;
 };
 
 

@@ -192,35 +192,35 @@ namespace invaders
         float mGamma   = 1.0f;
     };
 
-    // Sprite is a material which renders a simple animation
+    // SpriteSet is a material which renders a simple animation
     // by cycling through a set of textures at some fps.
     // The assumption is that cycling through the textures
     // renders a coherent animation.
-    class Sprite : public Material
+    class SpriteSet : public Material
     {
     public:
         // Create a new sprite with an initializer list of texture names.
-        Sprite(const std::initializer_list<std::string>& textures)
+        SpriteSet(const std::initializer_list<std::string>& textures)
           : mTextures(textures)
         {}
         // Create a new sprite with a vector of texture names.
-        Sprite(const std::vector<std::string>& textures)
+        SpriteSet(const std::vector<std::string>& textures)
           : mTextures(textures)
         {}
         // Create an empty sprite.
         // You must then manually call AddTexture before using
         // the sprite to render something.
-        Sprite()
+        SpriteSet()
         {}
 
         virtual Shader* GetShader(GraphicsDevice& device) const override
         {
-            Shader* shader = device.FindShader("sprite.glsl");
+            Shader* shader = device.FindShader("sprite_set.glsl");
             if (shader == nullptr || !shader->IsValid())
             {
                 if (shader == nullptr)
-                    shader = device.MakeShader("sprite.glsl");
-                if (!shader->CompileFile("sprite.glsl"))
+                    shader = device.MakeShader("sprite_set.glsl");
+                if (!shader->CompileFile("sprite_set.glsl"))
                     return nullptr;
             }
             return shader;
@@ -258,20 +258,20 @@ namespace invaders
         { return false; }
 
         // Set the desired frame rate per second.
-        Sprite& SetFps(float fps)
+        SpriteSet& SetFps(float fps)
         {
             mFps = fps;
             return *this;
         }
         // Set the current runtime. This is used to compute
         // the current texture to be rendered.
-        Sprite& SetAppRuntime(float time)
+        SpriteSet& SetAppRuntime(float time)
         {
             mRuntime = time;
             return *this;
         }
         // Add a new texture name to the sprite.
-        Sprite& AddTexture(const std::string& texture)
+        SpriteSet& AddTexture(const std::string& texture)
         {
             mTextures.push_back(texture);
             return *this;
