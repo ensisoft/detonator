@@ -323,35 +323,49 @@ public:
         mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    {
+        const auto& size = getTextureSize(mTexture);
+        const char* name = getTextureName(mTexture);
+
+        Transform t;
+        t.Resize(size * mScale);
+        t.MoveTo(state.toViewSpace(QVector2D(mX, mY)));
+        painter.Draw(Rect(), t, TextureFill(name).SetSurfaceType(Material::SurfaceType::Transparent));
+    }
+
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        const QPixmap& pixmap = getTexture(mTexture);
-
-        QRectF rect;
-        rect.setSize(pixmap.size() * mScale);
-        rect.moveTo(state.toViewSpace(QVector2D(mX, mY)));
-        painter.drawPixmap(rect, pixmap, pixmap.rect());
     }
     virtual QRectF getBounds(const TransformState& state) const override
     {
-        const QPixmap& pixmap = getTexture(mTexture);
+        const auto& size = getTextureSize(mTexture);
 
         QRectF bounds;
-        bounds.setSize(pixmap.size() * mScale);
+        bounds.setSize(size * mScale);
         bounds.moveTo(state.toViewSpace(QVector2D(mX, mY)));
         return bounds;
     }
     virtual ColliderType getColliderType() const override
     { return ColliderType::Asteroid; }
 private:
-    static QPixmap& getTexture(unsigned index)
+    static const char* getTextureName(unsigned index)
     {
-        static QPixmap textures[] = {
-            QPixmap(R("textures/asteroid0.png")),
-            QPixmap(R("textures/asteroid1.png")),
-            QPixmap(R("textures/asteroid2.png"))
+        static const char* textures[] = {
+            "textures/asteroid0.png",
+            "textures/asteroid1.png",
+            "textures/asteroid2.png"
         };
         return textures[index];
+    }
+    static QSize getTextureSize(unsigned index)
+    {
+        static QSize sizes[] = {
+            QSize(78, 74),
+            QSize(74, 63),
+            QSize(72, 58)
+        };
+        return sizes[index];
     }
 private:
     float mVelocity = 0.0f;
