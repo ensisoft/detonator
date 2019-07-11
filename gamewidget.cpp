@@ -380,74 +380,79 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(QVector2D position, float start, float lifetime) :
-        position_(position), start_(start), life_(lifetime), time_(0), scale_(1.0)
-    {}
+    Explosion(const QVector2D& position, float start, float lifetime)
+      : mPosition(position)
+      , mStartTime(start)
+      , mLifeTime(lifetime)
+    {
+        mSprite.SetTexture("textures/ExplosionMap.png");
+        mSprite.SetFps(80.0 / (lifetime/1000.0f));
+
+        // each explosion frame is 100x100 px
+        // and there are 80 frames total.
+        for (unsigned i=0; i<80; ++i)
+        {
+            const auto row = i / 10;
+            const auto col = i % 10;
+            const auto w = 100;
+            const auto h = 100;
+            SpriteMap::Frame frame;
+            frame.x = col * w;
+            frame.y = row * h;
+            frame.w = w;
+            frame.h = h;
+            mSprite.AddFrame(frame);
+        }
+    }
 
     virtual bool update(float dt, TransformState& state) override
     {
-        time_ += dt;
-        if (time_ < start_)
+        mTime += dt;
+        if (mTime < mStartTime)
             return true;
 
-        if (time_ - start_ > life_)
+        if (mTime - mStartTime > mLifeTime)
             return false;
 
         return true;
     }
-    virtual void paint(QPainter& painter, TransformState& state) override
+
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
     {
-        if (time_ < start_)
+        if (mTime < mStartTime)
             return;
 
+        mSprite.SetAppRuntime((mTime - mStartTime) / 1000.0f);
+
         const auto unitScale = state.getScale();
-        const auto position  = state.toViewSpace(position_);
+        const auto position  = state.toViewSpace(mPosition);
+        const auto scaledWidth = unitScale.x() * mScale;
+        const auto scaledHeight = unitScale.x() * mScale; // * aspect;
 
-        // explosion texture has 80 phases for the explosion
-        const auto phase  = life_ / 80.0;
-        const int  index  = (time_ - start_) / phase;
+        Transform t;
+        t.Resize(scaledWidth, scaledHeight);
+        t.MoveTo(position - QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
+        painter.Draw(Rect(), t, mSprite);
+    }
 
-        const auto row = index / 10;
-        const auto col = index % 10;
-
-        // each explosion texture is 100x100px
-        const auto w = 100;
-        const auto h = 100;
-        const auto x = col * w;
-        const auto y = row * h;
-        const QRect src(x, y, w, h);
-
-        const auto scaledWidth  = unitScale.x() * scale_;
-        const auto scaledHeight = unitScale.x() * scale_; // * ascpect;
-
-        QRectF dst(0, 0, scaledWidth, scaledHeight);
-        dst.moveTo(position -
-            QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
-
-        QPixmap tex = Explosion::texture();
-        painter.drawPixmap(dst, tex, src);
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {
     }
 
     void setScale(float scale)
-    { scale_ = scale; }
+    { mScale = scale; }
 
     QVector2D getPosition() const
-    { return position_; }
+    { return mPosition; }
 
 private:
-    static QPixmap texture()
-    {
-        static QPixmap px(R("textures/ExplosionMap.png"));
-        return px;
-    }
-
+    const QVector2D mPosition;
+    const float mStartTime = 0.0f;
+    const float mLifeTime  = 0.0f;
+    float mTime  = 0.0f;
+    float mScale = 1.0f;
 private:
-    QVector2D position_;
-    float start_;
-    float life_;
-    float time_;
-private:
-    float scale_;
+    SpriteMap mSprite;
 };
 
 
