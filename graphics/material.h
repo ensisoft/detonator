@@ -283,6 +283,130 @@ namespace invaders
     };
 
 
+    // SpriteMap is a material which renders a simple animation
+    // by cycling through different subregions of a single sprite
+    // texture at some fps.
+    // The assumption is that cycling through the regions
+    // renders a coherent animation.
+    class SpriteMap : public Material
+    {
+    public:
+        // Frame identifies a sub-region in the given sprite map
+        // texture that is used as a single frame in the animation.
+        struct Frame {
+            // x position (distance from the texture's left edge)
+            // of the top left corner of the frame within the texture
+            // in units of texels.
+            unsigned x = 0;
+            // y position (distance from the texture's top left corner)
+            // of the top left corner of the frame within the texture
+            // in units of texels.
+            unsigned y = 0;
+            // width of the texture sub-region used as the frame
+            // in units of texels.
+            unsigned w = 0;
+            // height of the texture sub-region used as the frame
+            // in units of texels.
+            unsigned h = 0;
+        };
+
+        // Create a new sprite with texture name and a init list of frames.
+        SpriteMap(const std::string& texture, const std::initializer_list<Frame>& frames)
+          : mTexture(texture)
+          , mFrames(frames)
+        {}
+        // Create a new sprite with texture name and a vector of frames.
+        SpriteMap(const std::string& texture, const std::vector<Frame> frames)
+          : mTexture(texture)
+          , mFrames(frames)
+        {}
+        // Create an empty sprite map. You must then manually
+        // call AddFrame and SetTexture before the sprite
+        // can be used to draw.
+        SpriteMap()
+        {}
+
+        virtual Shader* GetShader(GraphicsDevice& device) const override
+        {
+            Shader* shader = device.FindShader("sprite_map.glsl");
+            if (shader == nullptr || !shader->IsValid())
+            {
+                if (shader == nullptr)
+                    shader = device.MakeShader("sprite_map.glsl");
+                if (!shader->CompileFile("sprite_map.glsl"))
+                    return nullptr;
+            }
+            return shader;
+        }
+        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        {
+            assert(!mTexture.empty() &&
+                "The sprite has no texture and cannot be used to draw.");
+            assert(!mFrames.empty() &&
+                "The sprite has no frames and cannot be used to draw.");
+
+            const auto num_frames = (unsigned)mFrames.size();
+            const auto frame_interval = 1.0f / mFps;
+            const unsigned frame_index[2] = {
+                (unsigned(mRuntime / frame_interval) + 0) % num_frames,
+                (unsigned(mRuntime / frame_interval) + 1) % num_frames
+            };
+            Texture* texture = device.FindTexture(mTexture);
+            if (!texture)
+            {
+                texture = device.MakeTexture(mTexture);
+                texture->UploadFromFile(mTexture);
+            }
+            const float width  = texture->GetWidth();
+            const float height = texture->GetHeight();
+
+            for (unsigned i=0; i<2; ++i)
+            {
+                const auto index = frame_index[i];
+                const auto& frame = mFrames[index];
+                const auto& uniform_name = "kTextureFrame" + std::to_string(i);
+                const auto x = frame.x / width;
+                const auto y = 1.0 - ((frame.y + frame.h) / height);
+                const auto w = frame.w / width;
+                const auto h = frame.h / height;
+                prog.SetUniform(uniform_name.c_str(), x, y, w, h);
+            }
+            const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
+            prog.SetUniform("kBlendCoeff", coeff);
+            prog.SetTexture("kTexture", 0, *texture);
+        }
+        virtual SurfaceType GetSurfaceType() const override
+        { return SurfaceType::Transparent; }
+        virtual bool IsPointSprite() const override
+        { return false; }
+
+        SpriteMap& SetTexture(const std::string& texture)
+        {
+            mTexture = texture;
+            return *this;
+        }
+        SpriteMap& SetFps(float fps)
+        {
+            mFps = fps;
+            return *this;
+        }
+        SpriteMap& SetAppRuntime(float time)
+        {
+            mRuntime = time;
+            return *this;
+        }
+        SpriteMap& AddFrame(const Frame& frame)
+        {
+            mFrames.push_back(frame);
+            return *this;
+        }
+    private:
+        std::string mTexture;
+        std::vector<Frame> mFrames;
+        float mRuntime = 0.0f;
+        float mFps = 1.0f;
+    };
+
     // base class for material effects.
     class MaterialEffect : public Material
     {
