@@ -534,97 +534,66 @@ private:
 class GameWidget::Smoke : public GameWidget::Animation
 {
 public:
-    Smoke(QVector2D position, float start, float lifetime)
-        : position_(position), starttime_(start), lifetime_(lifetime), time_(0), scale_(1.0)
-    {}
+    Smoke(const QVector2D& position, float start, float lifetime)
+        : mPosition(position)
+        , mStartTime(start)
+        , mLifeTime(lifetime)
+    {
+        mSprite.SetFps(10);
+        for (int i=0; i<=24; ++i)
+        {
+            const auto& name = base::FormatString("textures/smoke/blackSmoke%1.png",  i);
+            mSprite.AddTexture(name);
+        }
+    }
 
     virtual bool update(float dt, TransformState&) override
     {
-        time_ += dt;
-        if (time_ < starttime_)
+        mTime += dt;
+        if (mTime < mStartTime)
             return true;
 
-        if (time_ - starttime_ > lifetime_)
+        if (mTime - mStartTime > mLifeTime)
             return false;
 
         return true;
     }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
     {
-        if (time_ < starttime_)
+        if (mTime < mStartTime)
             return;
 
+        const auto time  = mTime - mStartTime;
+        const auto alpha = 0.4 - 0.4 * (time / mLifeTime);
+        mSprite.SetAppRuntime(time / 1000.0f);
+        mSprite.SetBaseColor(Color4f(1.0f, 1.0f, 1.0f, alpha));
+
         const auto unitScale = state.getScale();
+        const auto pxw = unitScale.x() * mScale;
+        const auto pxh = unitScale.x() * mScale;
+        const auto pos = state.toViewSpace(mPosition);
 
-        const auto fps = 10.0;
-        const auto frames = 25;
-        const auto frameInterval = (1000.0 / fps);
-        const auto curr = (int)(time_ / frameInterval) % frames;
-        const auto next = (curr + 1) % frames;
-        const auto lerp = (fmodf(time_, frameInterval)) / frameInterval;
+        Transform t;
+        t.MoveTo(pos - QPointF(pxw/2.0f, pxh/2.0f));
+        t.Resize(pxw, pxh);
+        painter.Draw(Rect(), t, mSprite);
 
-        const auto currPixmap = loadTexture(curr);
-        const auto nextPixmap = loadTexture(next);
-
-        const auto opacity = 1.0 * (1.0 - ((float)time_ / (float)lifetime_));
-        const auto opa = painter.opacity();
-
-        // note that the pixmaps are not necessarily equal size.
-        {
-            const auto aspect = (float)currPixmap.height() / (float)currPixmap.width();
-            const auto pxw = unitScale.x() * scale_;
-            const auto pxh = unitScale.x() * aspect * scale_;
-            QRectF target(0, 0, pxw, pxh);
-            target.moveTo(state.toViewSpace(position_) - QPointF(pxw/2.0, pxh/2.0));
-            painter.setOpacity(opacity * (1.0 - lerp));
-            painter.drawPixmap(target, currPixmap, currPixmap.rect());
-        }
-        {
-            const auto aspect = (float)nextPixmap.height() / (float)nextPixmap.width();
-            const auto pxw = unitScale.x() * scale_;
-            const auto pxh = unitScale.x() * aspect * scale_;
-            QRectF target(0, 0, pxw, pxh);
-            target.moveTo(state.toViewSpace(position_) - QPointF(pxw/2.0, pxh/2.0));
-            painter.setOpacity(opacity * lerp);
-            painter.drawPixmap(target, nextPixmap, nextPixmap.rect());
-        }
-        painter.setOpacity(opa);
     }
+
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {}
 
     void setScale(float scale)
-    { scale_ = scale; }
-
-    static void prepare()
-    {
-        loadTexture(0);
-    }
-private:
-    static std::vector<QPixmap> loadTextures()
-    {
-        std::vector<QPixmap> textures;
-        for (int i=0; i<=24; ++i)
-        {
-            const auto name = QString("textures/smoke/blackSmoke%1.png").arg(i);
-            textures.push_back(R(name));
-        }
-        return textures;
-    }
-    static QPixmap loadTexture(unsigned index)
-    {
-        static auto textures = loadTextures();
-        Q_ASSERT(index < textures.size());
-        return textures[index];
-    }
+    { mScale = scale; }
 
 private:
-    QVector2D position_;
+    const QVector2D mPosition;
+    const float mStartTime = 0.0f;
+    const float mLifeTime  = 0.0f;
+    float mTime  = 0.0f;
+    float mScale = 1.0f;
 private:
-    float starttime_;
-    float lifetime_;
-    float time_;
-private:
-    float scale_;
+    SpriteSet mSprite;
 };
 
 
@@ -2228,7 +2197,6 @@ GameWidget::GameWidget()
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
     BigExplosion::prepare();
-    Smoke::prepare();
 
     mGame.reset(new Game(GameCols, GameRows));
 
