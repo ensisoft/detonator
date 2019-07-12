@@ -251,6 +251,8 @@ namespace invaders
             // blend factor between the two textures.
             const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
             prog.SetUniform("kBlendCoeff", coeff);
+            prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
+                mColor.Blue(), mColor.Alpha());
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
@@ -276,10 +278,16 @@ namespace invaders
             mTextures.push_back(texture);
             return *this;
         }
+        SpriteSet& SetBaseColor(const Color4f& color)
+        {
+            mColor = color;
+            return *this;
+        }
     private:
         std::vector<std::string> mTextures;
         float mRuntime = 0;
         float mFps = 1.0f;
+        Color4f mColor = Color::White;
     };
 
 
@@ -374,6 +382,8 @@ namespace invaders
             const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
             prog.SetUniform("kBlendCoeff", coeff);
             prog.SetTexture("kTexture", 0, *texture);
+            prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
+                mColor.Blue(), mColor.Alpha());
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
@@ -400,11 +410,17 @@ namespace invaders
             mFrames.push_back(frame);
             return *this;
         }
+        SpriteMap& SetBaseColor(const Color4f& color)
+        {
+            mColor = color;
+            return *this;
+        }
     private:
         std::string mTexture;
         std::vector<Frame> mFrames;
         float mRuntime = 0.0f;
         float mFps = 1.0f;
+        Color4f mColor = Color::White;
     };
 
     // base class for material effects.
