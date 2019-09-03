@@ -44,7 +44,7 @@
 #include "geometry.h"
 #include "texture.h"
 
-#include "stb_image.h"
+#include <stb/stb_image.h>
 
 #define GL_CHECK(x) \
     do {                                                                        \

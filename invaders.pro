@@ -25,7 +25,7 @@ SOURCES = game.cpp\
 	base/logging.cpp\
 	graphics/opengl_es2_device.cpp\
 	graphics/painter.cpp\
-	graphics/stb_image.c\
+	third_party/stb/stb_image.c\
 
 HEADERS = game.h\
 	gamewidget.h\
@@ -47,9 +47,11 @@ HEADERS = game.h\
 	graphics/material.h\
 	graphics/drawable.h\
 	graphics/texture.h\
-	graphics/stb_image.h\
+	third_party/stb/stb_image.h\
 
 TARGET = invaders
+
+INCLUDEPATH += "third_party"
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 unix:QMAKE_CXXFLAGS += -Wno-unused-parameter
@@ -58,8 +60,8 @@ unix:LIBS += -lsndfile
 unix:LIBS += -lncurses
 
 win32:INCLUDEPATH += "c:/local/boost_1_61_0"
-win32:INCLUDEPATH += "libsndfile"
-win32:LIBS        += "libsndfile/libsndfile-1.lib"
+win32:INCLUDEPATH += "third_party/libsndfile"
+win32:LIBS        += "third_party/libsndfile/libsndfile-1.lib"
 
 CONFIG(debug, debug|release){
     DESTDIR = dist
