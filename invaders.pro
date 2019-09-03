@@ -23,7 +23,7 @@ SOURCES = game.cpp\
 	base/assert.cpp\
 	base/format.cpp\
 	base/logging.cpp\
-	graphics/fucking_graphics_device.cpp\
+	graphics/opengl_es2_device.cpp\
 	graphics/painter.cpp\
 	graphics/stb_image.c\
 
