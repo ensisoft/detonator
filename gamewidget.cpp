@@ -243,7 +243,7 @@ public:
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
 
     // paint the user interface state with the custom painter
-    virtual void paintPostEffect(Painter& painter, const TransformState& transform) const
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const
     {}
 
     // update the state.. umh.. state from the delta time
@@ -278,13 +278,13 @@ public:
     // otherwise false and the animation is expired.
     virtual bool update(float dt, TransformState& state) = 0;
 
-    virtual void paintPreEffect(Painter& painter, const TransformState& state)
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state)
     {}
 
     //
     virtual void paint(QPainter& painter, TransformState& state) = 0;
 
-    virtual void paintPostEffect(Painter& painter, const TransformState& state)
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state)
     {}
 
     virtual QRectF getBounds(const TransformState& state) const
@@ -323,15 +323,15 @@ public:
         mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         const auto& size = getTextureSize(mTexture);
         const char* name = getTextureName(mTexture);
 
-        Transform t;
+        gfx::Transform t;
         t.Resize(size * mScale);
         t.MoveTo(state.toViewSpace(QVector2D(mX, mY)));
-        painter.Draw(Rect(), t, TextureFill(name).SetSurfaceType(Material::SurfaceType::Transparent));
+        painter.Draw(gfx::Rect(), t, gfx::TextureFill(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -396,7 +396,7 @@ public:
             const auto col = i % 10;
             const auto w = 100;
             const auto h = 100;
-            SpriteMap::Frame frame;
+            gfx::SpriteMap::Frame frame;
             frame.x = col * w;
             frame.y = row * h;
             frame.w = w;
@@ -417,7 +417,7 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -429,10 +429,10 @@ public:
         const auto scaledWidth = unitScale.x() * mScale;
         const auto scaledHeight = unitScale.x() * mScale; // * aspect;
 
-        Transform t;
+        gfx::Transform t;
         t.Resize(scaledWidth, scaledHeight);
         t.MoveTo(position - QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
-        painter.Draw(Rect(), t, mSprite);
+        painter.Draw(gfx::Rect(), t, mSprite);
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -452,7 +452,7 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    SpriteMap mSprite;
+    gfx::SpriteMap mSprite;
 };
 
 
@@ -460,9 +460,9 @@ private:
 class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
-    using ParticleEngine = TParticleEngine<
-        LinearParticleMovement,
-        KillParticleAtBounds>;
+    using ParticleEngine = gfx::TParticleEngine<
+        gfx::LinearParticleMovement,
+        gfx::KillParticleAtBounds>;
 
     Sparks(QVector2D position, float start, float lifetime)
         : mStartTime(start)
@@ -499,7 +499,7 @@ public:
     virtual void paint(QPainter&, TransformState&) override
     {}
 
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -508,18 +508,18 @@ public:
         const auto x = pos.x();
         const auto y = pos.y();
 
-        Transform t;
+        gfx::Transform t;
         t.Resize(500, 500);
         t.MoveTo(x-250, y-250);
 
         painter.Draw(*mParticles, t,
-            TextureFill("textures/RoundParticle.png")
-            .SetSurfaceType(Material::SurfaceType::Emissive)
+            gfx::TextureFill("textures/RoundParticle.png")
+            .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
             .SetRenderPoints(true)
             .SetBaseColor(mColor * 0.8));
     }
 
-    void setColor(const Color4f& color)
+    void setColor(const gfx::Color4f& color)
     { mColor = color; }
 private:
     float mStartTime = 0.0f;
@@ -528,7 +528,7 @@ private:
     std::unique_ptr<ParticleEngine> mParticles;
 private:
     QVector2D mPosition;
-    Color4f mColor;
+    gfx::Color4f mColor;
 };
 
 class GameWidget::Smoke : public GameWidget::Animation
@@ -558,7 +558,7 @@ public:
 
         return true;
     }
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -566,17 +566,17 @@ public:
         const auto time  = mTime - mStartTime;
         const auto alpha = 0.4 - 0.4 * (time / mLifeTime);
         mSprite.SetAppRuntime(time / 1000.0f);
-        mSprite.SetBaseColor(Color4f(1.0f, 1.0f, 1.0f, alpha));
+        mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
 
         const auto unitScale = state.getScale();
         const auto pxw = unitScale.x() * mScale;
         const auto pxh = unitScale.x() * mScale;
         const auto pos = state.toViewSpace(mPosition);
 
-        Transform t;
+        gfx::Transform t;
         t.MoveTo(pos - QPointF(pxw/2.0f, pxh/2.0f));
         t.Resize(pxw, pxh);
-        painter.Draw(Rect(), t, mSprite);
+        painter.Draw(gfx::Rect(), t, mSprite);
 
     }
 
@@ -593,7 +593,7 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    SpriteSet mSprite;
+    gfx::SpriteSet mSprite;
 };
 
 
@@ -722,7 +722,7 @@ public:
     struct MyParticleUpdate {
         void BeginIteration(float dt, float time, const math::Vector2D& bounds) const
         {}
-        bool Update(Particle& p, float dt, float time, const math::Vector2D& bounds) const {
+        bool Update(gfx::Particle& p, float dt, float time, const math::Vector2D& bounds) const {
             // decrease the size of the particle as it approaches the edge of the
             // particle space.
             const auto bx = bounds.X();
@@ -739,11 +739,11 @@ public:
         void EndIteration() {}
     };
 
-    using ParticleEngine = TParticleEngine<
-        LinearParticleMovement,
-        KillParticleAtBounds,
+    using ParticleEngine = gfx::TParticleEngine<
+        gfx::LinearParticleMovement,
+        gfx::KillParticleAtBounds,
         MyParticleUpdate,
-        KillParticleAtLifetime>;
+        gfx::KillParticleAtLifetime>;
 
     enum class ShipType {
         Slow,
@@ -775,7 +775,7 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         // offset the texture to be centered around the position
         const auto unitScale   = state.getScale();
@@ -833,13 +833,13 @@ public:
         jetStreamRect.translate(shipScaledWidth * fudgeFactor, (shipScaledHeight - jetScaledHeight) / 2.0);
         jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
 
-        Transform t;
+        gfx::Transform t;
         t.MoveTo(jetStreamRect);
         t.Resize(jetStreamRect);
 
         painter.Draw(*mParticles, t,
-            TextureFill("textures/RoundParticle.png")
-            .SetSurfaceType(Material::SurfaceType::Transparent)
+            gfx::TextureFill("textures/RoundParticle.png")
+            .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true)
             .SetBaseColor(getJetStreamColor(mShipType)));
     }
@@ -953,13 +953,13 @@ public:
     { mShieldIsOn = onOff; }
 
 private:
-    static Color4f getJetStreamColor(ShipType type)
+    static gfx::Color4f getJetStreamColor(ShipType type)
     {
-        static Color4f colors[] = {
-            Color4f(117, 221, 234, 100),
-            Color4f(252, 214, 131, 100),
-            Color4f(126, 200, 255, 100),
-            Color4f(5, 244, 159, 100)
+        static gfx::Color4f colors[] = {
+            gfx::Color4f(117, 221, 234, 100),
+            gfx::Color4f(252, 214, 131, 100),
+            gfx::Color4f(126, 200, 255, 100),
+            gfx::Color4f(5, 244, 159, 100)
         };
         return colors[(int)type];
     }
@@ -1121,22 +1121,22 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         const auto sec = mRuntime / 1000.0f;
         const auto pos = state.toViewSpace(mPosition);
 
         mSprite.SetAppRuntime(sec);
 
-        Transform rings;
+        gfx::Transform rings;
         rings.Resize(200, 200);
         rings.MoveTo(pos - QPoint(100, 100));
-        painter.Draw(Rect(), rings, ConcentricRingsEffect(sec));
+        painter.Draw(gfx::Rect(), rings, gfx::ConcentricRingsEffect(sec));
 
-        Transform ufo;
+        gfx::Transform ufo;
         ufo.Resize(40, 40);
         ufo.MoveTo(pos - QPoint(20, 20));
-        painter.Draw(Rect(), ufo, mSprite);
+        painter.Draw(gfx::Rect(), ufo, mSprite);
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -1185,7 +1185,7 @@ private:
     QVector2D mDirection;
     QVector2D mPosition;
 private:
-    SpriteSet mSprite;
+    gfx::SpriteSet mSprite;
 };
 
 
@@ -1209,7 +1209,7 @@ public:
             return false;
         return true;
     }
-    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
     {
         mSprite.SetAppRuntime(mRunTime / 1000.0f);
 
@@ -1219,10 +1219,10 @@ public:
         const auto x = state.viewWidth() / 2 - (ExplosionWidth * 0.5);
         const auto y = state.viewHeight() / 2 - (ExplosionHeight * 0.5);
 
-        Transform bang;
+        gfx::Transform bang;
         bang.Resize(ExplosionWidth, ExplosionHeight);
         bang.MoveTo(x, y);
-        painter.Draw(Rect(), bang, mSprite);
+        painter.Draw(gfx::Rect(), bang, mSprite);
 
     }
 
@@ -1233,7 +1233,7 @@ private:
     const float mLifeTime = 0.0f;
     float mRunTime = 0.0f;
 private:
-    SpriteSet mSprite;
+    gfx::SpriteSet mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation
@@ -1291,7 +1291,7 @@ class GameWidget::Background
 public:
     Background(const QVector2D& direction)
     {
-        ParticleEngine::Params params;
+        gfx::ParticleEngine::Params params;
         params.init_rect_width  = 1024;
         params.init_rect_height = 1024;
         params.max_xpos = 1024;
@@ -1303,11 +1303,11 @@ public:
         params.max_point_size = 8.0f;
         params.direction_sector_start_angle = std::acos(direction.x());
         params.direction_sector_size = 0.0f;
-        mStars = std::make_unique<ParticleEngine>(params);
+        mStars = std::make_unique<gfx::ParticleEngine>(params);
     }
-    void paint(Painter& painter, const QRectF& rect)
+    void paint(gfx::Painter& painter, const QRectF& rect)
     {
-        Transform t;
+        gfx::Transform t;
         t.MoveTo(0, 0);
         t.Resize(rect.width(), rect.height());
 
@@ -1320,14 +1320,14 @@ public:
     #endif
 
         // first draw the static background image.
-        painter.Draw(Rect(), t,
-            TextureFill("textures/SpaceBackground.png")
+        painter.Draw(gfx::Rect(), t,
+            gfx::TextureFill("textures/SpaceBackground.png")
             .SetGamma(gamma));
 
         // then draw the particle engine
         painter.Draw(*mStars, t,
-            TextureFill("textures/RoundParticle.png")
-            .SetSurfaceType(Material::SurfaceType::Transparent)
+            gfx::TextureFill("textures/RoundParticle.png")
+            .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true));
     }
 
@@ -1336,7 +1336,7 @@ public:
         mStars->Update(dt/1000.0f);
     }
 private:
-    std::unique_ptr<ParticleEngine> mStars;
+    std::unique_ptr<gfx::ParticleEngine> mStars;
 };
 
 class GameWidget::Scoreboard : public GameWidget::State
@@ -1402,7 +1402,7 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paintPostEffect(Painter& painter, const TransformState& parentTransform) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& parentTransform) const override
     {
         const auto cols = 7;
         const auto rows = 6;
@@ -1414,13 +1414,13 @@ public:
         const auto w = rc.width();
         const auto h = rc.height();
 
-        Transform dt, mt;
+        gfx::Transform dt, mt;
         dt.MoveTo(x, y);
         dt.Resize(w, h);
 
         mt.MoveTo(x, y+2);
         mt.Resize(w, h-4);
-        painter.DrawMasked(Rect(), dt, Rect(), mt, SlidingGlintEffect(mTotalTimeRun/1000.0f));
+        painter.DrawMasked(gfx::Rect(), dt, gfx::Rect(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
@@ -2204,7 +2204,7 @@ GameWidget::GameWidget()
         invader->setMaxLifetime(missileFlyTime);
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
-        sparks->setColor(Color4f(255, 255, 68, 180));
+        sparks->setColor(gfx::Color4f(255, 255, 68, 180));
         debris->setTextureScaleFromWidth(scale.x());
 
         mAnimations.push_back(std::move(invader));
@@ -2240,7 +2240,7 @@ GameWidget::GameWidget()
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
 
-        sparks->setColor(Color::DarkGray);
+        sparks->setColor(gfx::Color::DarkGray);
 
         auto viewString = i.viewList.join("");
         inv->setViewString(viewString);
@@ -2648,8 +2648,8 @@ void GameWidget::initializeGL()
 {
     DEBUG("Initialize OpenGL");
     // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = GraphicsDevice::Create(GraphicsDevice::Type::OpenGL_ES2);
-    mCustomGraphicsPainter = Painter::Create(mCustomGraphicsDevice);
+    mCustomGraphicsDevice  = gfx::GraphicsDevice::Create(gfx::GraphicsDevice::Type::OpenGL_ES2);
+    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 
 void GameWidget::closeEvent(QCloseEvent* close)
@@ -2673,7 +2673,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     {
         painter.beginNativePainting();
 
-        GraphicsDevice::StateBuffer currentState;
+        gfx::GraphicsDevice::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
@@ -2723,7 +2723,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         // state management is somewhat tricky.
         painter.beginNativePainting();
 
-        GraphicsDevice::StateBuffer currentState;
+        gfx::GraphicsDevice::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 

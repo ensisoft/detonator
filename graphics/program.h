@@ -26,7 +26,7 @@
 
 #include <vector>
 
-namespace invaders
+namespace gfx
 {
     class Shader;
     class Texture;

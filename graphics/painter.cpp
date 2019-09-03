@@ -41,7 +41,7 @@
 #include "material.h"
 #include "types.h"
 
-namespace invaders
+namespace gfx
 {
 
 class StandardPainter : public Painter

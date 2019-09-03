@@ -26,7 +26,7 @@
 
 #include <cstddef>
 
-namespace invaders
+namespace gfx
 {
     struct Vec2 {
         float x;// = 0.0f;

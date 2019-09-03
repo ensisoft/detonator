@@ -26,7 +26,7 @@
 
 #include <string>
 
-namespace invaders
+namespace gfx
 {
     class Shader
     {
@@ -48,4 +48,4 @@ namespace invaders
     private:
     };
 
-} //
+} // namespace

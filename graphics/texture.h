@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-namespace invaders
+namespace gfx
 {
     class Texture
     {

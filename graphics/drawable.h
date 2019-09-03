@@ -34,7 +34,7 @@
 #include "shader.h"
 #include "geometry.h"
 
-namespace invaders
+namespace gfx
 {
     class Drawable
     {

@@ -28,7 +28,7 @@
 
 #include <string>
 
-namespace invaders
+namespace gfx
 {
     class Transform
     {

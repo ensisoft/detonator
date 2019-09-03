@@ -123,7 +123,7 @@ const To* SafeCast(const From* from)
 
 } // namespace
 
-namespace invaders
+namespace gfx
 {
 
 //

@@ -37,12 +37,15 @@
 #include <chrono>
 #include <stack>
 
+namespace gfx {
+    class Painter;
+    class GraphicsDevice;
+} // namespace
+
 namespace invaders
 {
     class Game;
     class Level;
-    class Painter;
-    class GraphicsDevice;
 
     class GameWidget : public QOpenGLWidget
     {
@@ -188,8 +191,8 @@ namespace invaders
     private:
         std::size_t mMusicTrackId = 0;
     private:
-        std::shared_ptr<GraphicsDevice> mCustomGraphicsDevice;
-        std::unique_ptr<Painter> mCustomGraphicsPainter;
+        std::shared_ptr<gfx::GraphicsDevice> mCustomGraphicsDevice;
+        std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
     };
 
 } // invaders

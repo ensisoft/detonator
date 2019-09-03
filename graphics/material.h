@@ -35,7 +35,7 @@
 #include "texture.h"
 #include "types.h"
 
-namespace invaders
+namespace gfx
 {
     class Material
     {

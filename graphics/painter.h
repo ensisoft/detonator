@@ -26,7 +26,7 @@
 
 #include <memory>
 
-namespace invaders
+namespace gfx
 {
     class GraphicsDevice;
     class Drawable;

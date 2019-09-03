@@ -31,7 +31,7 @@
 
 #include "types.h"
 
-namespace invaders
+namespace gfx
 {
     class Shader;
     class Program;
