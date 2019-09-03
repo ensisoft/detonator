@@ -1192,69 +1192,48 @@ private:
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(float lifetime) : lifetime_(lifetime), time_(0)
-    {}
+    BigExplosion(float lifetime) : mLifeTime(lifetime)
+    {
+        for (int i=1; i<=90; ++i)
+        {
+            const auto& name = base::FormatString("textures/bomb/explosion1_00%1.png", i);
+            mSprite.AddTexture(name);
+        }
+        mSprite.SetFps(90 / (lifetime/1000.0f));
+    }
 
     virtual bool update(float dt, TransformState& state) override
     {
-        time_ += dt;
-        if (time_ > lifetime_)
+        mRunTime += dt;
+        if (mRunTime > mLifeTime)
             return false;
         return true;
     }
+    virtual void paintPreEffect(Painter& painter, const TransformState& state) override
+    {
+        mSprite.SetAppRuntime(mRunTime / 1000.0f);
+
+        const auto ExplosionWidth = state.viewWidth() * 2.0f;
+        const auto ExplosionHeight = state.viewHeight() * 2.3f;
+
+        const auto x = state.viewWidth() / 2 - (ExplosionWidth * 0.5);
+        const auto y = state.viewHeight() / 2 - (ExplosionHeight * 0.5);
+
+        Transform bang;
+        bang.Resize(ExplosionWidth, ExplosionHeight);
+        bang.MoveTo(x, y);
+        painter.Draw(Rect(), bang, mSprite);
+
+    }
+
     virtual void paint(QPainter& painter, TransformState& state) override
     {
-        const auto phase  = lifetime_ / 90.0;
-        const int  index  = time_ / phase;
-        if (index >= 90)
-            return;
-        const auto pixmap = loadTexture(index);
-
-        const auto pxw = pixmap.width();
-        const auto pxh = pixmap.height();
-        const auto aspect = (float)pxh / (float)pxw;
-
-        const auto numExplosions = 3;
-
-        const auto explosionWidth  = state.viewWidth();
-        const auto explosionHeight = explosionWidth * aspect;
-        const auto xpos = state.viewWidth() / (numExplosions + 1);
-        const auto ypos = (state.viewHeight() - explosionHeight) / 2;
-
-        auto yoffset = 50.0;
-        auto xoffset = -explosionWidth / 2.0;
-        for (auto i=0; i<numExplosions; ++i)
-        {
-            painter.drawPixmap((i+1) * xpos + xoffset, ypos + yoffset, explosionWidth, explosionHeight, pixmap);
-            yoffset *= -1;
-        }
-    }
-
-    static void prepare()
-    {
-        loadTexture(0);
-    }
-
-private:
-    static std::vector<QPixmap> loadTextures()
-    {
-        std::vector<QPixmap> v;
-        for (int i=1; i<=90; ++i)
-        {
-            const auto name = QString("textures/bomb/explosion1_00%1.png").arg(i);
-            v.push_back(R(name));
-        }
-        return v;
-    }
-    static QPixmap loadTexture(unsigned index)
-    {
-        static auto textures = loadTextures();
-        Q_ASSERT(index < textures.size());
-        return textures[index];
     }
 private:
-    float lifetime_;
-    float time_;
+    const float mLifeTime = 0.0f;
+    float mRunTime = 0.0f;
+private:
+    SpriteSet mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation
@@ -2195,8 +2174,6 @@ GameWidget::GameWidget()
 #endif
 
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
-
-    BigExplosion::prepare();
 
     mGame.reset(new Game(GameCols, GameRows));
 
