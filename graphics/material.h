@@ -55,10 +55,10 @@ namespace gfx
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
         // failed to compile.
-        virtual Shader* GetShader(GraphicsDevice& device) const = 0;
+        virtual Shader* GetShader(Device& device) const = 0;
 
         // Apply the material properties in the given program object.
-        virtual void Apply(GraphicsDevice& device, Program& prog) const = 0;
+        virtual void Apply(Device& device, Program& prog) const = 0;
 
         // Get the material surface type.
         virtual SurfaceType GetSurfaceType() const = 0;
@@ -77,7 +77,7 @@ namespace gfx
 
         ColorFill(const Color4f& color) : mColor(color)
         {}
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("fill_color.glsl");
             if (s == nullptr || !s->IsValid())
@@ -90,7 +90,7 @@ namespace gfx
             return s;
         }
 
-        virtual void Apply(GraphicsDevice&, Program& prog) const override
+        virtual void Apply(Device&, Program& prog) const override
         {
             prog.SetUniform("kFillColor",
                 mColor.Red(), mColor.Green(), mColor.Blue(),
@@ -122,7 +122,7 @@ namespace gfx
         TextureFill(const std::string& texture) : mTexture(texture)
         {}
 
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("fill_texture.glsl");
             if (shader == nullptr || !shader->IsValid())
@@ -134,7 +134,7 @@ namespace gfx
             }
             return shader;
         }
-        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        virtual void Apply(Device& device, Program& prog) const override
         {
             Texture* texture = device.FindTexture(mTexture);
             if (texture == nullptr)
@@ -213,7 +213,7 @@ namespace gfx
         SpriteSet()
         {}
 
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("sprite_set.glsl");
             if (shader == nullptr || !shader->IsValid())
@@ -225,7 +225,7 @@ namespace gfx
             }
             return shader;
         }
-        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        virtual void Apply(Device& device, Program& prog) const override
         {
             assert(!mTextures.empty() &&
                 "The sprite has no textures and cannot be used to draw.");
@@ -334,7 +334,7 @@ namespace gfx
         SpriteMap()
         {}
 
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("sprite_map.glsl");
             if (shader == nullptr || !shader->IsValid())
@@ -346,7 +346,7 @@ namespace gfx
             }
             return shader;
         }
-        virtual void Apply(GraphicsDevice& device, Program& prog) const override
+        virtual void Apply(Device& device, Program& prog) const override
         {
             assert(!mTexture.empty() &&
                 "The sprite has no texture and cannot be used to draw.");
@@ -427,7 +427,7 @@ namespace gfx
     class MaterialEffect : public Material
     {
     public:
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader(mShader);
             if (shader == nullptr || !shader->IsValid())
@@ -440,7 +440,7 @@ namespace gfx
             return shader;
         }
 
-        virtual void Apply(GraphicsDevice&, Program& prog) const override
+        virtual void Apply(Device&, Program& prog) const override
         {
             prog.SetUniform("uRuntime", mRuntime);
             prog.SetUniform("kBaseColor", mBaseColor.Red(), mBaseColor.Green(),

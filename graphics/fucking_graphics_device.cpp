@@ -131,7 +131,7 @@ namespace gfx
 // try to keep this implementantation free of Qt in
 // order to promote portability to possibly emscripten
 // or Qt free implementation.
-class OpenGLES2GraphicsDevice : public GraphicsDevice, protected QOpenGLFunctions
+class OpenGLES2GraphicsDevice : public Device, protected QOpenGLFunctions
 {
 public:
     OpenGLES2GraphicsDevice()
@@ -915,7 +915,7 @@ private:
 };
 
 // static
-std::shared_ptr<GraphicsDevice> GraphicsDevice::Create(Type type)
+std::shared_ptr<Device> Device::Create(Type type)
 {
     return std::make_shared<OpenGLES2GraphicsDevice>();
 }

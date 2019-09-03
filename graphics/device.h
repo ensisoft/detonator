@@ -38,7 +38,7 @@ namespace gfx
     class Geometry;
     class Texture;
 
-    class GraphicsDevice
+    class Device
     {
     public:
         struct Rect {
@@ -92,7 +92,7 @@ namespace gfx
             OpenGL_ES2
         };
 
-        virtual ~GraphicsDevice() = default;
+        virtual ~Device() = default;
 
         virtual void ClearColor(const Color4f& color) = 0;
         virtual void ClearStencil(int value) = 0;
@@ -122,7 +122,7 @@ namespace gfx
         virtual void SetState(const StateBuffer& state) = 0;
 
         static
-        std::shared_ptr<GraphicsDevice> Create(Type type);
+        std::shared_ptr<Device> Create(Type type);
     private:
     };
 

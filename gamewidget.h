@@ -39,7 +39,7 @@
 
 namespace gfx {
     class Painter;
-    class GraphicsDevice;
+    class Device;
 } // namespace
 
 namespace invaders
@@ -191,7 +191,7 @@ namespace invaders
     private:
         std::size_t mMusicTrackId = 0;
     private:
-        std::shared_ptr<gfx::GraphicsDevice> mCustomGraphicsDevice;
+        std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
     };
 

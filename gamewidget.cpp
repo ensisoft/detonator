@@ -2648,7 +2648,7 @@ void GameWidget::initializeGL()
 {
     DEBUG("Initialize OpenGL");
     // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = gfx::GraphicsDevice::Create(gfx::GraphicsDevice::Type::OpenGL_ES2);
+    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2);
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 
@@ -2673,7 +2673,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     {
         painter.beginNativePainting();
 
-        gfx::GraphicsDevice::StateBuffer currentState;
+        gfx::Device::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
@@ -2723,7 +2723,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         // state management is somewhat tricky.
         painter.beginNativePainting();
 
-        gfx::GraphicsDevice::StateBuffer currentState;
+        gfx::Device::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 

@@ -40,15 +40,15 @@ namespace gfx
     {
     public:
         virtual ~Drawable() = default;
-        virtual Shader* GetShader(GraphicsDevice& device) const = 0;
-        virtual Geometry* Upload(GraphicsDevice& device) const = 0;
+        virtual Shader* GetShader(Device& device) const = 0;
+        virtual Geometry* Upload(Device& device) const = 0;
     private:
     };
 
     class Rect : public Drawable
     {
     public:
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
             if (s == nullptr || !s->IsValid())
@@ -61,7 +61,7 @@ namespace gfx
             return s;
         }
 
-        virtual Geometry* Upload(GraphicsDevice& device) const override
+        virtual Geometry* Upload(Device& device) const override
         {
             Geometry* geom = device.FindGeometry("rect");
             if (!geom)
@@ -86,7 +86,7 @@ namespace gfx
     class Triangle : public Drawable
     {
     public:
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
             if (s == nullptr || !s->IsValid())
@@ -99,7 +99,7 @@ namespace gfx
             return s;
         }
 
-        virtual Geometry* Upload(GraphicsDevice& device) const override
+        virtual Geometry* Upload(Device& device) const override
         {
             Geometry* geom = device.FindGeometry("triangle");
             if (!geom)
@@ -247,7 +247,7 @@ namespace gfx
         {
             InitParticles(mParams.num_particles);
         }
-        virtual Shader* GetShader(GraphicsDevice& device) const override
+        virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("vertex_array.glsl");
             if (shader == nullptr || !shader->IsValid())
@@ -260,7 +260,7 @@ namespace gfx
             return shader;
 
         }
-        virtual Geometry* Upload(GraphicsDevice& device) const override
+        virtual Geometry* Upload(Device& device) const override
         {
             Geometry* geom = device.FindGeometry("particle-buffer");
             if (!geom)

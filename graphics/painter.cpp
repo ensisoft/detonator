@@ -47,7 +47,7 @@ namespace gfx
 class StandardPainter : public Painter
 {
 public:
-    StandardPainter(std::shared_ptr<GraphicsDevice> device)
+    StandardPainter(std::shared_ptr<Device> device)
       : mDevice(device)
     {}
 
@@ -78,20 +78,20 @@ public:
 
         const auto draw = geom->GetDrawType();
 
-        GraphicsDevice::State state;
+        Device::State state;
         state.viewport.x         = mViewX;
         state.viewport.y         = mViewY;
         state.viewport.width     = mViewW;
         state.viewport.height    = mViewH;
         switch (mat.GetSurfaceType()) {
             case Material::SurfaceType::Opaque:
-                state.blending = GraphicsDevice::State::BlendOp::None;
+                state.blending = Device::State::BlendOp::None;
                 break;
             case Material::SurfaceType::Transparent:
-                state.blending = GraphicsDevice::State::BlendOp::Transparent;
+                state.blending = Device::State::BlendOp::Transparent;
                 break;
             case Material::SurfaceType::Emissive:
-                state.blending = GraphicsDevice::State::BlendOp::Additive;
+                state.blending = Device::State::BlendOp::Additive;
                 break;
         }
         state.bEnablePointSprite = mat.IsPointSprite();
@@ -111,13 +111,13 @@ public:
         if (!maskProg)
             return;
 
-        GraphicsDevice::State state;
+        Device::State state;
         state.viewport.x       = mViewX;
         state.viewport.y       = mViewY;
         state.viewport.width   = mViewW;
         state.viewport.height  = mViewH;
-        state.stencil_func     = GraphicsDevice::State::StencilFunc::PassAlways;
-        state.stencil_dpass    = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_func     = Device::State::StencilFunc::PassAlways;
+        state.stencil_dpass    = Device::State::StencilOp::WriteRef;
         state.stencil_ref      = 0;
         state.bWriteColor      = false;
         state.bEnablePointSize = maskGeom->GetDrawType() == Geometry::DrawType::Points;
@@ -134,19 +134,19 @@ public:
         if (!drawProg)
             return;
 
-        state.stencil_func       = GraphicsDevice::State::StencilFunc::RefIsEqual;
-        state.stencil_dpass      = GraphicsDevice::State::StencilOp::WriteRef;
+        state.stencil_func       = Device::State::StencilFunc::RefIsEqual;
+        state.stencil_dpass      = Device::State::StencilOp::WriteRef;
         state.stencil_ref        = 1;
         state.bWriteColor        = true;
         switch (material.GetSurfaceType()) {
             case Material::SurfaceType::Opaque:
-                state.blending = GraphicsDevice::State::BlendOp::None;
+                state.blending = Device::State::BlendOp::None;
                 break;
             case Material::SurfaceType::Transparent:
-                state.blending = GraphicsDevice::State::BlendOp::Transparent;
+                state.blending = Device::State::BlendOp::Transparent;
                 break;
             case Material::SurfaceType::Emissive:
-                state.blending = GraphicsDevice::State::BlendOp::Additive;
+                state.blending = Device::State::BlendOp::Additive;
                 break;
         }
         state.bEnablePointSprite = material.IsPointSprite();
@@ -187,7 +187,7 @@ private:
     }
 
 private:
-    std::shared_ptr<GraphicsDevice> mDevice;
+    std::shared_ptr<Device> mDevice;
 private:
     float mViewW = 0.0f;
     float mViewH = 0.0f;
@@ -197,7 +197,7 @@ private:
 };
 
 // static
-std::unique_ptr<Painter> Painter::Create(std::shared_ptr<GraphicsDevice> device)
+std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 {
     return std::make_unique<StandardPainter>(device);
 }
