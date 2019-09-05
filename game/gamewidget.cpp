@@ -332,7 +332,7 @@ public:
         gfx::Transform t;
         t.Resize(size * mScale);
         t.MoveTo(state.toViewSpace(QVector2D(mX, mY)));
-        painter.Draw(gfx::Rect(), t, gfx::TextureFill(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        painter.Draw(gfx::Rectangle(), t, gfx::TextureFill(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -433,7 +433,7 @@ public:
         gfx::Transform t;
         t.Resize(scaledWidth, scaledHeight);
         t.MoveTo(position - QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
-        painter.Draw(gfx::Rect(), t, mSprite);
+        painter.Draw(gfx::Rectangle(), t, mSprite);
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -577,7 +577,7 @@ public:
         gfx::Transform t;
         t.MoveTo(pos - QPointF(pxw/2.0f, pxh/2.0f));
         t.Resize(pxw, pxh);
-        painter.Draw(gfx::Rect(), t, mSprite);
+        painter.Draw(gfx::Rectangle(), t, mSprite);
 
     }
 
@@ -1132,12 +1132,12 @@ public:
         gfx::Transform rings;
         rings.Resize(200, 200);
         rings.MoveTo(pos - QPoint(100, 100));
-        painter.Draw(gfx::Rect(), rings, gfx::ConcentricRingsEffect(sec));
+        painter.Draw(gfx::Rectangle(), rings, gfx::ConcentricRingsEffect(sec));
 
         gfx::Transform ufo;
         ufo.Resize(40, 40);
         ufo.MoveTo(pos - QPoint(20, 20));
-        painter.Draw(gfx::Rect(), ufo, mSprite);
+        painter.Draw(gfx::Rectangle(), ufo, mSprite);
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -1223,7 +1223,7 @@ public:
         gfx::Transform bang;
         bang.Resize(ExplosionWidth, ExplosionHeight);
         bang.MoveTo(x, y);
-        painter.Draw(gfx::Rect(), bang, mSprite);
+        painter.Draw(gfx::Rectangle(), bang, mSprite);
 
     }
 
@@ -1321,7 +1321,7 @@ public:
     #endif
 
         // first draw the static background image.
-        painter.Draw(gfx::Rect(), t,
+        painter.Draw(gfx::Rectangle(), t,
             gfx::TextureFill("textures/SpaceBackground.png")
             .SetGamma(gamma));
 
@@ -1421,7 +1421,7 @@ public:
 
         mt.MoveTo(x, y+2);
         mt.Resize(w, h-4);
-        painter.DrawMasked(gfx::Rect(), dt, gfx::Rect(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
+        painter.DrawMasked(gfx::Rectangle(), dt, gfx::Rectangle(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
     }
 
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override

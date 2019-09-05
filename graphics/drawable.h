@@ -45,7 +45,7 @@ namespace gfx
     private:
     };
 
-    class Rect : public Drawable
+    class Rectangle : public Drawable
     {
     public:
         virtual Shader* GetShader(Device& device) const override
