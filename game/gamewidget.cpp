@@ -61,7 +61,7 @@
 namespace invaders
 {
 
-extern AudioPlayer* g_audio;
+extern audio::AudioPlayer* g_audio;
 
 const auto LevelUnlockCriteria = 0.85;
 const auto TextBlinkFrameCycle = 90;
@@ -1629,7 +1629,7 @@ public:
         if (bPlaySound && mPlaySounds)
         {
         #ifdef GAME_ENABLE_AUDIO
-            static auto swoosh = std::make_shared<AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
+            static auto swoosh = std::make_shared<audio::AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
             g_audio->play(swoosh);
         #endif
         }
@@ -2170,7 +2170,7 @@ GameWidget::GameWidget()
 {
 #ifdef GAME_ENABLE_AUDIO
     // sound effects FX
-    static auto sndExplosion = std::make_shared<AudioSample>("sounds/explode.wav", "explosion");
+    static auto sndExplosion = std::make_shared<audio::AudioSample>("sounds/explode.wav", "explosion");
 #endif
 
     QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
@@ -2484,7 +2484,7 @@ void GameWidget::updateGame(float dt)
 
 #ifdef GAME_ENABLE_AUDIO
     // handle audio events.
-    AudioPlayer::TrackEvent event;
+    audio::AudioPlayer::TrackEvent event;
     while (g_audio->get_event(&event))
     {
         DEBUG("Audio event (%1)", event.id);
@@ -2866,7 +2866,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 void GameWidget::playMusic()
 {
 #ifdef GAME_ENABLE_AUDIO
-    static auto music = std::make_shared<AudioSample>("music/awake10_megaWall.ogg", "MainMusic");
+    static auto music = std::make_shared<audio::AudioSample>("music/awake10_megaWall.ogg", "MainMusic");
 
     if (mPlayMusic)
     {

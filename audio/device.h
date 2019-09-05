@@ -26,7 +26,7 @@
 
 #include <memory>
 
-namespace invaders
+namespace audio
 {
     class AudioSample;
     class AudioStream;

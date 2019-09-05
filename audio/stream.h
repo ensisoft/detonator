@@ -26,7 +26,7 @@
 
 #include <string>
 
-namespace invaders
+namespace audio
 {
     class AudioStream
     {

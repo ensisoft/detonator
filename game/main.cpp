@@ -47,7 +47,7 @@
 
 namespace invaders {
 
-    AudioPlayer* g_audio;
+    audio::AudioPlayer* g_audio;
 
 } // invaders
 
@@ -129,7 +129,7 @@ int game_main(int argc, char* argv[])
 
     base::EnableDebugLog(debugLog);
 
-    invaders::AudioPlayer audio_player(invaders::AudioDevice::create(GAME_TITLE));
+    audio::AudioPlayer audio_player(audio::AudioDevice::create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 
 #if defined(LINUX_OS)

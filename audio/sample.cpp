@@ -138,7 +138,7 @@ private:
 
 } // namespace
 
-namespace invaders
+namespace audio
 {
 
 AudioSample::AudioSample(const u8* ptr, std::size_t len, const std::string& name)
@@ -177,4 +177,4 @@ AudioSample::AudioSample(const std::string& file, const std::string& name)
     name_ = name;
 }
 
-} // invaders
+} // namespace

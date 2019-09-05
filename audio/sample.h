@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace invaders
+namespace audio
 {
     // audiosample is class to encapsulate loading and the details
     // of simple audio samples such as wav.

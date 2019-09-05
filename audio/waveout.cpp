@@ -36,7 +36,7 @@
 #include "stream.h"
 #include "device.h"
 
-namespace invaders
+namespace audio
 {
 
 #ifdef WINDOWS_OS

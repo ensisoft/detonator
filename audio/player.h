@@ -32,7 +32,7 @@
 #include <list>
 #include <chrono>
 
-namespace invaders
+namespace audio
 {
     class AudioDevice;
     class AudioStream;

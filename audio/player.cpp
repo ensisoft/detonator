@@ -30,7 +30,7 @@
 #include "sample.h"
 #include "stream.h"
 
-namespace invaders
+namespace audio
 {
 
 AudioPlayer::AudioPlayer(std::unique_ptr<AudioDevice> device)
