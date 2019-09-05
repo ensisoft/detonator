@@ -1628,7 +1628,7 @@ public:
 
         if (bPlaySound && mPlaySounds)
         {
-        #ifdef ENABLE_AUDIO
+        #ifdef GAME_ENABLE_AUDIO
             static auto swoosh = std::make_shared<AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
             g_audio->play(swoosh);
         #endif
@@ -1776,7 +1776,7 @@ public:
         underline.setUnderline(true);
         underline.setPixelSize(scale.y() / 2);
 
-#ifndef ENABLE_AUDIO
+#ifndef GAME_ENABLE_AUDIO
         painter.drawText(rect, Qt::AlignCenter,
             "Audio is not supported on this platform.\n\n"
             "Press Esc to exit\n");
@@ -2168,7 +2168,7 @@ private:
 
 GameWidget::GameWidget()
 {
-#ifdef ENABLE_AUDIO
+#ifdef GAME_ENABLE_AUDIO
     // sound effects FX
     static auto sndExplosion = std::make_shared<AudioSample>("sounds/explode.wav", "explosion");
 #endif
@@ -2217,7 +2217,7 @@ GameWidget::GameWidget()
 
         mInvaders.erase(it);
 
-#ifdef ENABLE_AUDIO
+#ifdef GAME_ENABLE_AUDIO
         if (mPlaySounds)
         {
             g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
@@ -2482,7 +2482,7 @@ void GameWidget::launchGame()
 void GameWidget::updateGame(float dt)
 {
 
-#ifdef ENABLE_AUDIO
+#ifdef GAME_ENABLE_AUDIO
     // handle audio events.
     AudioPlayer::TrackEvent event;
     while (g_audio->get_event(&event))
@@ -2865,7 +2865,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
 void GameWidget::playMusic()
 {
-#ifdef ENABLE_AUDIO
+#ifdef GAME_ENABLE_AUDIO
     static auto music = std::make_shared<AudioSample>("music/awake10_megaWall.ogg", "MainMusic");
 
     if (mPlayMusic)

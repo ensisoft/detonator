@@ -24,7 +24,7 @@
 
 // this is the application config file
 
-#include "base/config.h"
+#include "base/platform.h"
 
 namespace invaders {
 
@@ -37,10 +37,17 @@ const int MINOR_VERSION = 3;
 #  define QT_NO_DEBUG_OUTPUT
 #endif
 
-#define APP_TITLE   "Pinyin-Invaders"
-#define APP_VERSION "0.3"
+// you can put your definitions that pertain to base here.
+#define BASE_LOGGING_ENABLE_LOG
+#define BASE_FORMAT_SUPPORT_QT
+#ifdef POSIX_OS
+  #define BASE_LOGGING_ENABLE_CURSES
+#endif
 
-#define ENABLE_AUDIO
+// game specific definitions go here.
+#define GAME_TITLE   "Pinyin-Invaders"
+#define GAME_VERSION "0.3"
+#define GAME_ENABLE_AUDIO
 
 // define this to enable game feature SHIELD ,
 // i.e some invaders will have shields on during which they can't be destroyed.

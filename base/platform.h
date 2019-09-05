@@ -21,7 +21,12 @@
 //  THE SOFTWARE.
 
 
-// this is the base config file with universally useful definitions etc.
+// this is the base platform file with universally useful definitions etc.
+// the idea is that in your project you can make a file named "config.h"
+// which should #include "base/platform.h"
+// the config.h can then add additional project/application specific
+// definitions and can reside in an application specific folder.
+// all the rest of the source files in the whole tree then just #include "config.h"
 
 #pragma once
 
@@ -98,11 +103,3 @@
 #  endif
 #endif
 
-// you can put your definitions that pertain to base here.
-#define BASE_LOGGING_ENABLE_LOG
-
-#ifdef POSIX_OS
-  #define BASE_LOGGING_ENABLE_CURSES
-#endif
-
-#define BASE_FORMAT_SUPPORT_QT

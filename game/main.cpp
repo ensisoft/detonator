@@ -88,7 +88,7 @@ int game_main(int argc, char* argv[])
     base::SetThreadLog(&logger);
 
     DEBUG("It's alive!");
-    INFO("%1 %2", APP_TITLE, APP_VERSION);
+    INFO("%1 %2", GAME_TITLE, GAME_VERSION);
     INFO("Copyright (c) 2010-2018 Sami Vaisanen");
     INFO("http://www.ensisoft.com");
     INFO("http://github.com/ensisoft/pinyin-invaders");
@@ -129,7 +129,7 @@ int game_main(int argc, char* argv[])
 
     base::EnableDebugLog(debugLog);
 
-    invaders::AudioPlayer audio_player(invaders::AudioDevice::create(APP_TITLE));
+    invaders::AudioPlayer audio_player(invaders::AudioDevice::create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 
 #if defined(LINUX_OS)
