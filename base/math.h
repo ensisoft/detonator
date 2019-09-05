@@ -24,7 +24,9 @@
 
 #include "config.h"
 
-#include <boost/random/mersenne_twister.hpp>
+#include "warnpush.h"
+#  include <boost/random/mersenne_twister.hpp>
+#include "warnpop.h"
 #include <cmath>
 
 namespace math

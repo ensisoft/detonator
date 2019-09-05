@@ -32,7 +32,7 @@
 #include "warnpop.h"
 
 #include <sstream>
-#include <iosfwd>
+#include <string>
 
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
@@ -62,40 +62,61 @@ namespace base
 {
     namespace detail {
 
-        template<typename T>
-        std::string replace(std::size_t index, const std::string& fmt, const T& value)
+        // generic version trying to use stringstream based conversion.
+        template<typename T> inline
+        std::string ToString(const T& value)
         {
-            std::string key;
             std::stringstream ss;
-            ss << "%" << index;
-            ss >> key;
-
-            ss.str("");
-            ss.clear();
             ss << value;
-            return boost::replace_all_copy(fmt, key, ss.str());
+            return ss.str();
         }
+        inline std::string ToString(const std::string& s)
+        { return s; }
+        inline std::string ToString(int value)
+        { return std::to_string(value); }
+        inline std::string ToString(long value)
+        { return std::to_string(value); }
+        inline std::string ToString(long long value)
+        { return std::to_string(value); }
+        inline std::string ToString(unsigned value)
+        { return std::to_string(value); }
+        inline std::string ToString(unsigned long value)
+        { return std::to_string(value); }
+        inline std::string ToString(unsigned long long value)
+        { return std::to_string(value); }
+        inline std::string ToString(float value)
+        { return std::to_string(value); }
+        inline std::string ToString(double value)
+        { return std::to_string(value); }
+        inline std::string ToString(long double value)
+        { return std::to_string(value); }
 
-        inline
-        std::string replace(std::size_t index, const std::string& fmt, const std::string& val)
+        template<typename T>
+        std::string ReplaceIndex(std::size_t index, const std::string& fmt, const T& value)
         {
+            // generate the key to be replaced in the string
             std::string key;
             std::stringstream ss;
             ss << "%" << index;
             ss >> key;
-            return boost::replace_all_copy(fmt, key, val);
+            // ToString can be looked up through ADL
+            // so any user defined type can define a ToString in the namespace of T
+            // and this implementation can use that method for the T->string conversion
+            return boost::replace_all_copy(fmt, key, ToString(value));
         }
 
         template<typename T>
         std::string FormatString(std::size_t index, const std::string& fmt, const T& value)
         {
-            return replace(index, fmt, value);
+            return ReplaceIndex(index, fmt, value);
         }
 
         template<typename T, typename... Args>
         std::string FormatString(std::size_t index, const std::string& fmt, const T& value, const Args&... args)
         {
-            return FormatString(index + 1, replace(index, fmt, value), args...);
+            auto ret = ReplaceIndex(index, fmt, value);
+
+            return FormatString(index + 1, std::move(ret), args...);
         }
 
     } // detail

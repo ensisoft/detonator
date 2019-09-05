@@ -34,18 +34,29 @@
 
 // note that GCC and clang don't give the same warnings, hence
 // the suppressions are different
-
-#if defined(__CLANG__)
+#if defined(__GCC__)
+  // for boost
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#  pragma GCC diagnostic ignored "-Wlong-long"
+#  pragma GCC diagnostic ignored "-Wunused-function"
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__CLANG__)
   // for Qt
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wdeprecated-register"
 #  pragma clang diagnostic ignored "-Wuninitialized"
 #  pragma clang diagnostic ignored "-Wc++11-long-long"
 #  pragma clang diagnostic ignored "-Winconsistent-missing-override"
-#elif defined(__GCC__)
-  // for boost
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#  pragma GCC diagnostic ignored "-Wlong-long"
-#  pragma GCC diagnostic ignored "-Wunused-function"
+#  pragma clang diagnostic ignored "-Wunused-local-typedefs"
+#elif defined(__MSVC__)
+#  pragma warning(push)
+#  pragma warning(disable: 4091) // msvs14 DbgHelp.h
+#  pragma warning(disable: 4244) // boost.spirit (conversion from double to float)
+#  pragma warning(disable: 4251) // Qt warning about not having a dll-interface
+#  pragma warning(disable: 4800) // Qt warning about forcing value to bool
+#  pragma warning(disable: 4244) // Qt warning about conversion from double to float
+#  pragma warning(disable: 4275) // Qt, no dll-interface class std::exception used as baseclass for QException
+#  pragma warning(disable: 4003) // protobuf, not enough actual parameters
+#  pragma warning(disable: 4267) // protobuf, conversion from size_t to int
 #endif

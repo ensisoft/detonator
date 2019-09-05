@@ -25,19 +25,29 @@
 #ifdef BASE_LOGGING_ENABLE_CURSES
 #  include <curses.h>
 #endif
+#include <cassert>
 #include <iostream>
+#include <atomic>
 #include "logging.h"
 
-// todo: make this a TLS object
+// a thread specific logger object.
+thread_local base::Logger* threadLogger;
 
-base::Logger* threadLogger;
+// global logger
+base::Logger* globalLogger;
+// global logger mutex. must be acquired before
+// - writing to the logger from multiple threads
+// - setting/resetting the logger object
+std::mutex globalLoggerMutex;
 
-bool debugLog = false;
+// atomic flag to globally specify whether debug
+// logs are allowed to go through or not
+std::atomic<bool> isGlobalDebugLogEnabled(false);
 
 namespace base
 {
 
-const char* str(base::LogEvent e)
+const char* ToString(base::LogEvent e)
 {
     switch (e)
     {
@@ -57,22 +67,22 @@ const char* str(base::LogEvent e)
 OStreamLogger::OStreamLogger(std::ostream& out) : m_out(out)
 {}
 
-void OStreamLogger::Write(LogEvent type, const std::string& msg, const char* file, int line)
+void OStreamLogger::Write(LogEvent type, const char* msg) const
 {
-    const char* s = str(type);
-    const char* m = msg.c_str();
-    std::printf("%s: %s:%d \"%s\"\n", s, file, line, m);
+    m_out << msg;
+}
+
+void OStreamLogger::Flush()
+{
+    m_out.flush();
 }
 
 CursesLogger::CursesLogger()
 {
 #ifdef BASE_LOGGING_ENABLE_CURSES
     initscr();
-
     start_color();
-
     use_default_colors();
-
     scrollok(stdscr, TRUE);
 
     // init some colors
@@ -90,14 +100,11 @@ CursesLogger::~CursesLogger()
 #endif
 }
 
-void CursesLogger::Write(LogEvent type, const std::string& msg, const char* file, int line)
+void CursesLogger::Write(LogEvent type, const char* msg) const
 {
-    const char* s = str(type);
-    const char* m = msg.c_str();
-
-#ifdef BASE_LOGGING_ENABLE_CURSES
+ #ifdef BASE_LOGGING_ENABLE_CURSES
     attron(COLOR_PAIR(1 + (short)type));
-    printw("%s: %s:%d \"%s\"\n", s, file, line, m);
+    printw(msg);
     refresh();
     attroff(COLOR_PAIR(1 + (short)type));
 
@@ -110,10 +117,26 @@ void CursesLogger::Write(LogEvent type, const std::string& msg, const char* file
         addch('\n');
 
 #else
-    std::printf("%s: %s:%d \"%s\"\n", s, file, line, m);
+    std::printf(msg);
 #endif
 }
 
+Logger* SetGlobalLog(Logger* log)
+{
+    std::unique_lock<std::mutex> lock(globalLoggerMutex);
+    auto ret = globalLogger;
+    globalLogger = log;
+    return ret;
+}
+
+GlobalLogAccess GetGlobalLog()
+{
+    std::unique_lock<std::mutex> lock(globalLoggerMutex);
+    GlobalLogAccess access;
+    access.logger = globalLogger;
+    access.lock   = std::move(lock);
+    return access;
+}
 
 Logger* GetThreadLog()
 {
@@ -127,15 +150,30 @@ Logger* SetThreadLog(Logger* log)
     return ret;
 }
 
+void FlushThreadLog()
+{
+    auto* ret = threadLogger;
+    if (!ret)
+        return;
+    ret->Flush();
+}
+
+void FlushGlobalLog()
+{
+    std::unique_lock<std::mutex> lock(globalLoggerMutex);
+    if (!globalLogger)
+        return;
+    globalLogger->Flush();
+}
+
 bool IsDebugLogEnabled()
 {
-    return debugLog;
+    return isGlobalDebugLogEnabled;
 }
 
 void EnableDebugLog(bool on_off)
 {
-    debugLog = on_off;
+    isGlobalDebugLogEnabled = on_off;
 }
-
 
 } // base

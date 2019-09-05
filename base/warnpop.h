@@ -24,8 +24,10 @@
 
 #include "config.h"
 
-#if defined(__CLANG__)
-#  pragma clang diagnostic pop
-#elif defined(__GCC__)
+#if defined(__GCC__)
 #  pragma GCC diagnostic pop
+#elif defined(__CLANG__)
+#  pragma clang diagnostic pop
+#elif defined(__MSVC__)
+#  pragma warning(pop)
 #endif

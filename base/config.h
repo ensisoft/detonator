@@ -61,7 +61,7 @@
 
 #if defined(__GNUG__)
   #define __GCC__
-  #define LINUX_OS
+  #define POSIX_OS
   #ifdef __LP64__
     #define X86_64
   #endif
@@ -76,7 +76,7 @@
     #define X86_64
   #endif
   #define __CLANG__
-  #define LINUX_OS
+  #define POSIX_OS
   #ifndef COMPILER_NAME
   #  define COMPILER_NAME    "clang"
   #endif
@@ -88,12 +88,20 @@
 #endif
 
 
+// how to distinguish between Linux and MacOS ?
+// https://stackoverflow.com/questions/2166483/which-macro-to-wrap-mac-os-x-specific-code-in-c-c
+#ifdef POSIX_OS
+#  ifdef __APPLE__
+#    define APPLE_OS
+#  else
+#    define LINUX_OS
+#  endif
+#endif
+
 // you can put your definitions that pertain to base here.
-
-
 #define BASE_LOGGING_ENABLE_LOG
 
-#ifdef LINUX_OS
+#ifdef POSIX_OS
   #define BASE_LOGGING_ENABLE_CURSES
 #endif
 
