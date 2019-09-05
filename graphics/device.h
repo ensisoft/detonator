@@ -29,6 +29,8 @@
 #include <cstdint>
 #include <string>
 
+#include "types.h"
+
 namespace gfx
 {
     class Shader;
@@ -40,13 +42,6 @@ namespace gfx
     class Device
     {
     public:
-        struct Rect {
-            int x = 0;
-            int y = 0;
-            unsigned width  = 0;
-            unsigned height = 0;
-        };
-
         struct State {
             bool bEnablePointSize   = false;
             bool bEnablePointSprite = false;

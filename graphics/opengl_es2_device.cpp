@@ -410,8 +410,8 @@ private:
 
     void SetState(const State& state)
     {
-        GL_CHECK(glViewport(state.viewport.x, state.viewport.y,
-            state.viewport.width, state.viewport.height));
+        GL_CHECK(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+            state.viewport.GetWidth(), state.viewport.GetHeight()));
 
         EnableIf(GL_PROGRAM_POINT_SIZE, state.bEnablePointSize);
         EnableIf(GL_POINT_SPRITE, state.bEnablePointSprite);

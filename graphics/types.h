@@ -41,4 +41,40 @@ namespace gfx
         Gray,    DarkGray, LightGray
     };
 
+    // simple rectangle definition
+    class Rect
+    {
+    public:
+        Rect() {}
+        Rect(unsigned x, unsigned y, unsigned w, unsigned h)
+          : mX(x)
+          , mY(y)
+          , mWidth(w)
+          , mHeight(h)
+        {}
+        unsigned GetHeight() const
+        { return mHeight; }
+        unsigned GetWidth() const
+        { return mWidth; }
+        unsigned GetX() const
+        { return mX; }
+        unsigned GetY() const
+        { return mX; }
+        void Resize(unsigned width, unsigned height)
+        {
+            mWidth = width;
+            mHeight = height;
+        }
+        void Move(unsigned x, unsigned y)
+        {
+            mX = x;
+            mY = y;
+        }
+    private:
+        unsigned mX = 0;
+        unsigned mY = 0;
+        unsigned mWidth = 0;
+        unsigned mHeight = 0;
+    };
+
 } // namespace
