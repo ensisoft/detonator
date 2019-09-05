@@ -33,7 +33,7 @@
 #include "shader.h"
 #include "program.h"
 #include "texture.h"
-#include "types.h"
+#include "color4f.h"
 
 namespace gfx
 {

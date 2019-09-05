@@ -39,6 +39,7 @@
 #include "painter.h"
 #include "drawable.h"
 #include "material.h"
+#include "transform.h"
 #include "types.h"
 
 namespace gfx

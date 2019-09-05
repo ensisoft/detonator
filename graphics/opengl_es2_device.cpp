@@ -43,6 +43,7 @@
 #include "device.h"
 #include "geometry.h"
 #include "texture.h"
+#include "color4f.h"
 
 #include <stb/stb_image.h>
 

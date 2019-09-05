@@ -29,14 +29,13 @@
 #include <cstdint>
 #include <string>
 
-#include "types.h"
-
 namespace gfx
 {
     class Shader;
     class Program;
     class Geometry;
     class Texture;
+    class Color4f;
 
     class Device
     {

@@ -54,6 +54,7 @@
 #include "graphics/types.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/transform.h"
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
