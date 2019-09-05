@@ -181,6 +181,7 @@ struct OpenGLFunctions
     PFNGLDISABLEPROC                 glDisable;
     PFNGLGETINTEGERVPROC             glGetIntegerv;
     PFNGLREADPIXELSPROC              glReadPixels;
+    PFNGLLINEWIDTHPROC               glLineWidth;
 };
 
 //
@@ -248,6 +249,7 @@ public:
         RESOLVE(glDisable);
         RESOLVE(glGetIntegerv);
         RESOLVE(glReadPixels);
+        RESOLVE(glLineWidth);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -670,6 +672,8 @@ private:
 
         virtual DrawType GetDrawType() const override
         { return mDrawType; }
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
 
         virtual void Update(const Vertex* verts, std::size_t count) override
         {
@@ -711,6 +715,13 @@ private:
                 GL_CALL(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
             else if (mDrawType == DrawType::Points)
                 GL_CALL(glDrawArrays(GL_POINTS, 0, mData.size()));
+            else if (mDrawType == DrawType::TriangleFan)
+                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, mData.size()));
+            else if (mDrawType == DrawType::Lines)
+            {
+                GL_CALL(glLineWidth(mLineWidth));
+                GL_CALL(glDrawArrays(GL_LINES, 0, mData.size()));
+            }
         }
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }
@@ -720,6 +731,7 @@ private:
         std::size_t mFrameNumber = 0;
         std::vector<Vertex> mData;
         DrawType mDrawType = DrawType::Triangles;
+        float mLineWidth = 1.0f;
     };
 
     class ProgImpl : public Program

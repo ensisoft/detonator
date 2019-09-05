@@ -41,6 +41,7 @@
 #include <optional>
 
 #include "base/utility.h"
+#include "base/assert.h"
 #include "bitmap.h"
 #include "color4f.h"
 #include "device.h"
@@ -251,7 +252,8 @@ namespace gfx
             : mShader(shader)
             , mType(type)
         {}
-
+        // allow "invalid" material to be constructed.
+        Material() = default;
 
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
@@ -284,6 +286,10 @@ namespace gfx
         // and set the rasterizer state.
         void Apply(const Environment& env, Device& device, Program& prog, RasterState& state) const
         {
+            // The default constructed material cannot be used to render.
+            ASSERT(!mShader.empty() &&
+                "No material shader resource is set. Did you forget to call SetShader ?");
+
             // set rasterizer state.
             if (mSurfaceType == SurfaceType::Opaque)
                 state.blending = RasterState::Blending::None;
@@ -632,10 +638,6 @@ namespace gfx
             ASSERT(!"no such material type");
             return Material("", type);
         }
-
-    private:
-        // allow private construction with "invalid/incomplete" state.
-        Material() = default;
 
     private:
         std::string mShader;

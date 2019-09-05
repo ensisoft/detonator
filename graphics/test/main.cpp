@@ -26,6 +26,7 @@
 #include <vector>
 #include <cstring>
 #include <chrono>
+#include <cmath>
 
 #include "base/logging.h"
 #include "graphics/device.h"
@@ -49,6 +50,44 @@ public:
     virtual void Render(gfx::Painter& painter) = 0;
     virtual void Update(float dts) {}
 private:
+};
+
+// render some different simple shapes.
+class ShapesTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        transform.Resize(100, 100);
+        transform.MoveTo(10, 10);
+
+        gfx::Material materials[3];
+        materials[0] = gfx::SolidColor(gfx::Color::Red);
+        materials[1] = gfx::TextureMap("textures/Checkerboard.png");
+        materials[2] = gfx::SolidColor(gfx::Color::HotPink);
+
+        for (int i=0; i<3; ++i)
+        {
+            painter.Draw(gfx::Rectangle(), transform, materials[i]);
+            transform.Scale(1.5, 1.5);
+            transform.Translate(100 * std::pow(1.5, i), 0.0f);
+        }
+
+        transform.Reset();
+        transform.Resize(100, 100);
+        transform.MoveTo(10, 200);
+        for (int i=0; i<3; ++i)
+        {
+            painter.Draw(gfx::Circle(), transform, materials[i]);
+            transform.Scale(1.5, 1.5);
+            transform.Translate(100 * std::pow(1.5, i), 0.0f);
+        }
+    }
+    virtual void Update(float dts)
+    {}
+private:
+
 };
 
 class RenderParticleTest : public GraphicsTest
@@ -389,6 +428,7 @@ int main(int argc, char* argv[])
     std::vector<std::unique_ptr<GraphicsTest>> tests;
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
+    tests.emplace_back(new ShapesTest);
 
     wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());

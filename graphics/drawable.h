@@ -65,7 +65,63 @@ namespace gfx
     private:
     };
 
-    // 2D rectangle.
+    class Circle : public Drawable
+    {
+    public:
+        virtual Shader* GetShader(Device& device) const override
+        {
+            Shader* s = device.FindShader("vertex_array.glsl");
+            if (s == nullptr || !s->IsValid())
+            {
+                if (s == nullptr)
+                    s = device.MakeShader("vertex_array.glsl");
+                if (!s->CompileFile("vertex_array.glsl"))
+                    return nullptr;
+            }
+            return s;
+        }
+        virtual Geometry* Upload(Device& device) const override
+        {
+            // todo: we could use some information here about the
+            // eventual transform on the screen and use that to compute
+            // some kind of "LOD" value for figuring out how many slices we should have.
+            const auto slices = 100;
+
+            Geometry* geom = device.FindGeometry("circle_" + std::to_string(slices));
+            if (!geom)
+            {
+                Vertex c;
+                c.aPosition.x =  0.5;
+                c.aPosition.y = -0.5;
+                c.aTexCoord.x = 0.5;
+                c.aTexCoord.y = 0.5;
+                std::vector<Vertex> vs;
+                vs.push_back(c);
+
+                const float angle_increment = (float)(math::Pi * 2.0f) / slices;
+                float angle = 0.0f;
+                for (unsigned i=0; i<=slices; ++i)
+                {
+                    const auto x = std::cos(angle) * 0.5;
+                    const auto y = std::sin(angle) * 0.5;
+                    angle += angle_increment;
+                    Vertex v;
+                    v.aPosition.x = x + 0.5;
+                    v.aPosition.y = y - 0.5;
+                    v.aTexCoord.x = x + 0.5;
+                    v.aTexCoord.y = y + 0.5;
+                    vs.push_back(v);
+                }
+                geom = device.MakeGeometry("circle_" + std::to_string(slices));
+                geom->Update(&vs[0], vs.size());
+                geom->SetDrawType(Geometry::DrawType::TriangleFan);
+            }
+            return geom;
+        }
+    private:
+    };
+
+
     class Rectangle : public Drawable
     {
     public:

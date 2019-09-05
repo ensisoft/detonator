@@ -39,22 +39,37 @@ namespace gfx
         Vec2 aTexCoord;
     };
 
+    // Encapsulate information about a particular geometry
+    // and how how that geometry is to be rendered and
+    // rasterized.
     class Geometry
     {
     public:
+        // Define how the geometry is to be rasterized.
         enum class DrawType {
             // Draw the given vertices as triangles, i.e.
             // each 3 vertices make a single triangle.
             Triangles,
             // Draw each given vertex as a point
-            Points
+            Points,
+            // Draw a series of triangles all connected to the
+            // first vertex
+            TriangleFan,
+            // Draw the vertices as a series of conneced lines
+            // where each pair of adjacent vertices are connected
+            // by a line.
+            // In this draw the line width setting applies.
+            Lines
         };
 
         virtual ~Geometry() = default;
-        // get the current draw type
+        // Get the current draw type
         virtual DrawType GetDrawType() const = 0;
         // Set the expected type for the geometry when drawn.
         virtual void SetDrawType(DrawType type) = 0;
+        // Set (request) the line width to be using when rasterizing
+        // the geometry as a series of lines.
+        virtual void SetLineWidth(float width) = 0;
         // Update the geometry object's data buffer contents.
         virtual void Update(const Vertex* verts, std::size_t count) = 0;
         // Update the geometry objects' data buffer contents 
