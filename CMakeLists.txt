@@ -81,9 +81,9 @@ message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 
 # output the executable in dist folder
-set(EXECUTABLE_OUTPUT_PATH  "${CMAKE_CURRENT_LIST_DIR}/dist")
+set(EXECUTABLE_OUTPUT_PATH  "${CMAKE_CURRENT_LIST_DIR}/game/dist")
 
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/game")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
@@ -118,10 +118,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(invaders
-    level.cpp
-    gamewidget.cpp
-    game.cpp
-    main.cpp
+    game/level.cpp
+    game/gamewidget.cpp
+    game/game.cpp
+    game/main.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/sample.cpp
@@ -137,7 +137,7 @@ add_executable(invaders
 target_link_libraries(invaders Qt5::Widgets Qt5::OpenGL)
 
 if (WIN32)
-  include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")  
+  include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")
   target_link_libraries(invaders "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
 elseif (UNIX)
   target_link_libraries(invaders ncurses)
