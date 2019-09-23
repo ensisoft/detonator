@@ -56,11 +56,17 @@ public:
         num_channels_ = sfinfo.channels;
         num_frames_   = sfinfo.frames;
 
+        // change the output format into floats.
+        // see this bug that confirms crackling playback wrt ogg files.
+        // https://github.com/UniversityRadioYork/ury-playd/issues/111
+        // sndfile-play however uses floats and is able to play
+        // the same test ogg (mentioned in the bug) without crackles.
+
         // reserve space for the PCM data
-        buffer_.resize(num_frames_ * num_channels_ * sizeof(short));
+        buffer_.resize(num_frames_ * num_channels_ * sizeof(float));
 
         // read and convert the whole audio clip into 16bit NE
-        if (sf_readf_short(sffile, (short*)&buffer_[0], num_frames_) !=  num_frames_)
+        if (sf_readf_float(sffile, (float*)&buffer_[0], num_frames_) !=  num_frames_)
         {
             sf_close(sffile);
             throw std::runtime_error("sf_readf_short failed");

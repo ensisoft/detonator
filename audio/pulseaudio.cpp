@@ -108,7 +108,7 @@ private:
             pa_sample_spec spec;
             spec.channels = sample_->channels();
             spec.rate     = sample_->rate();
-            spec.format   = PA_SAMPLE_S16NE;
+            spec.format   = PA_SAMPLE_FLOAT32NE;
             stream_ = pa_stream_new(context, sample_name.c_str(), &spec, nullptr);
             if (!stream_)
                 throw std::runtime_error("create stream failed");

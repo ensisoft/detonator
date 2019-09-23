@@ -69,6 +69,8 @@ int main(int argc, char* argv[])
     std::vector<std::string> test_files;
     if (ogg_files)
     {
+        // https://github.com/UniversityRadioYork/ury-playd/issues/111
+        test_files.push_back("OGG/testshort.ogg");
         test_files.push_back("OGG/a2002011001-e02-128k.ogg");
         test_files.push_back("OGG/a2002011001-e02-32k.ogg");
         test_files.push_back("OGG/a2002011001-e02-64k.ogg");

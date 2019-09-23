@@ -201,10 +201,10 @@ private:
 
             WAVEFORMATEX wfx = {0};
             wfx.nSamplesPerSec  = sample->rate();
-            wfx.wBitsPerSample  = 16;
+            wfx.wBitsPerSample  = 32;
             wfx.nChannels       = 2;
             wfx.cbSize          = 0; // extra info
-            wfx.wFormatTag      = WAVE_FORMAT_PCM;
+            wfx.wFormatTag      = WAVE_FORMAT_IEEE_FLOAT;
             wfx.nBlockAlign     = (wfx.wBitsPerSample * wfx.nChannels) / 8;
             wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
             MMRESULT ret = waveOutOpen(
