@@ -24,6 +24,10 @@
 
 #include <functional>
 
+#ifdef POSIX_OS
+#  include <pthread.h>
+#endif
+
 #include "base/logging.h"
 #include "player.h"
 #include "device.h"
@@ -33,19 +37,22 @@
 namespace audio
 {
 
-AudioPlayer::AudioPlayer(std::unique_ptr<AudioDevice> device)
+AudioPlayer::AudioPlayer(std::unique_ptr<AudioDevice> device) : track_actions_(128)
 {
+    run_thread_.test_and_set(std::memory_order_acquire);
     thread_.reset(new std::thread(std::bind(&AudioPlayer::runLoop, this, device.get())));
+#ifdef POSIX_OS
+    sched_param p;
+    p.sched_priority = 99;
+    ::pthread_setschedparam(thread_->native_handle(), SCHED_FIFO, &p);
+#endif
     device.release();
 }
 
 AudioPlayer::~AudioPlayer()
 {
-    {
-        std::lock_guard<std::mutex> lock(queue_mutex_);
-        stop_ = true;
-        cond_.notify_one();
-    }
+    // signal the audio thread to exit
+    run_thread_.clear(std::memory_order_release);
     thread_->join();
 }
 
@@ -60,8 +67,7 @@ std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, std::chrono::
     track.when     = std::chrono::steady_clock::now() + ms;
     track.looping  = looping;
     waiting_.push(std::move(track));
-
-    cond_.notify_one();
+    
     return id;
 }
 
@@ -72,24 +78,18 @@ std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, bool looping)
 
 void AudioPlayer::pause(std::size_t id)
 {
-    std::lock_guard<std::mutex> lock(queue_mutex_);
-
-    for (auto& track : playing_)
-    {
-        if (track.id == id)
-            track.stream->pause();
-    }
+    Action a;
+    a.do_what = Action::Type::Pause;
+    a.track_id = id;
+    track_actions_.push(a);
 }
 
 void AudioPlayer::resume(std::size_t id)
 {
-    std::lock_guard<std::mutex> lock(queue_mutex_);
-
-    for (auto& track : playing_)
-    {
-        if (track.id == id)
-            track.stream->resume();
-    }
+    Action a;
+    a.do_what  = Action::Type::Resume;
+    a.track_id = id;
+    track_actions_.push(a);
 }
 
 bool AudioPlayer::get_event(TrackEvent* event)
@@ -105,23 +105,29 @@ bool AudioPlayer::get_event(TrackEvent* event)
 void AudioPlayer::runLoop(AudioDevice* ptr)
 {
     std::unique_ptr<AudioDevice> dev(ptr);
-    for (;;)
+
+    while (run_thread_.test_and_set(std::memory_order_acquire))
     {
-        std::unique_lock<std::mutex> lock(queue_mutex_);
-        if (stop_)
-            return;
-
-        // todo: get rid of the polling (and the waiting) and move
-        // to threaded audio device (or waitable audio device)
-        // this wait is here to avoid "overheating the cpu" so to speak.
-        // however this creates two problems.
-        // a) it increases latency in terms of starting the playback of new audio sample.
-        // b) creates possibility for a buffer underruns in the audio playback stream.
-        cond_.wait_until(lock, std::chrono::steady_clock::now() +
-            std::chrono::milliseconds(10));
-
+        // iterate audio device state once. (dispatches stream/device state changes)
         dev->poll();
 
+        // dispatch the queued track actions
+        Action track_action;    
+        while (track_actions_.pop(track_action))
+        {
+            for (auto& p : playing_)
+            {
+                if (p.id != track_action.track_id)
+                    continue;
+                if (track_action.do_what == Action::Type::Pause)
+                    p.stream->pause();
+                else if (track_action.do_what == Action::Type::Resume)
+                    p.stream->resume();
+            }
+        }
+
+        // realize the state updates (if any) of currently playing audio  streams
+        // and create outgoing stream events (if any).
         for (auto it = std::begin(playing_); it != std::end(playing_);)
         {
             auto& track = *it;
@@ -160,53 +166,45 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
             }
             else it++;
         }
-
-
-        if (waiting_.empty())
+        // service the waiting queue once
+        do 
         {
-            if (!playing_.empty())
-                continue;
+            // don't wait around if the lock is contended but   
+            // instead just proceed to service the currently playing
+            // audio streams.
+            std::unique_lock<std::mutex> lock(queue_mutex_, std::try_to_lock);
+            if (!lock.owns_lock())
+                break;
 
-            DEBUG("No audio to play, waiting ....");
+            if (waiting_.empty())
+                break;
+    
+            // look at the top item (needs to play earliest)
+            auto& top = waiting_.top();
+            auto now  = std::chrono::steady_clock::now();
+            if (now < top.when)
+                break;
 
-            cond_.wait(lock);
+            // top is const...          
+            Track item;
+            item.id      = top.id;
+            item.sample  = top.sample;
+            item.stream  = dev->prepare(top.sample);
+            item.when    = top.when;
+            item.looping = top.looping;
+            item.stream->play();
+            waiting_.pop();
+            playing_.push_back(std::move(item));            
         }
-        if (waiting_.empty())
-            continue;
+        while (false);
 
-        auto& top = waiting_.top();
-        auto now = std::chrono::steady_clock::now();
-        if (playing_.empty())
-        {
-            auto ret = cond_.wait_until(lock, top.when);
-            if (ret == std::cv_status::timeout)
-            {
-                playTop(*dev);
-            }
-        }
-        else if (now >= top.when)
-        {
-            playTop(*dev);
-        }
+        // this wait is here to avoid "overheating the cpu" so to speak.
+        // however this creates two problems.
+        // a) it increases latency in terms of starting the playback of new audio sample.
+        // b) creates possibility for a buffer underruns in the audio playback stream. 
+        // todo: probably need something more sophisticated ?
+        std::this_thread::sleep_for(std::chrono::milliseconds(playing_.empty() ? 5 : 1));
     }
 }
-
-
-void AudioPlayer::playTop(AudioDevice& dev)
-{
-    // top is const...
-    auto& top = waiting_.top();
-    Track item;
-    item.id      = top.id;
-    item.sample  = top.sample;
-    item.stream  = dev.prepare(top.sample);
-    item.when    = top.when;
-    item.looping = top.looping;
-    item.stream->play();
-
-    waiting_.pop();
-    playing_.push_back(std::move(item));
-}
-
 
 } // namespace

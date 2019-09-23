@@ -27,10 +27,13 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 #include <queue>
 #include <memory>
 #include <list>
 #include <chrono>
+
+#include <boost/lockfree/queue.hpp>
 
 namespace audio
 {
@@ -87,7 +90,6 @@ namespace audio
 
     private:
         void runLoop(AudioDevice* ptr);
-        void playTop(AudioDevice& dev);
 
     private:
         struct Track {
@@ -104,12 +106,21 @@ namespace audio
                 return when > other.when;
             }
         };
-
+        struct Action {
+            enum class Type {
+                None, Resume, Pause
+            };
+            Type do_what = Type::None;
+            std::size_t track_id = 0;
+        };
     private:
         std::unique_ptr<std::thread> thread_;
         std::mutex queue_mutex_;
         std::mutex event_mutex_;
 
+        // queue of actions for tracks (pause/resume)
+        boost::lockfree::queue<Action> track_actions_;
+        
         // unique track id
         std::size_t trackid_ = 1;
 
@@ -124,8 +135,8 @@ namespace audio
         // that were played.
         std::queue<TrackEvent> events_;
 
-        std::condition_variable cond_;
-        bool stop_ = false;
+        // audio thread stop flag
+        std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;
     };
 
 
