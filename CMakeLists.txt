@@ -80,9 +80,6 @@ endif()
 message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 
-# output the executable in dist folder
-set(EXECUTABLE_OUTPUT_PATH  "${CMAKE_CURRENT_LIST_DIR}/game/dist")
-
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/game")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
@@ -145,3 +142,5 @@ elseif (UNIX)
   target_link_libraries(invaders sndfile)
   target_link_libraries(invaders pthread)
 endif()
+
+install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
