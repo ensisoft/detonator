@@ -130,17 +130,33 @@ add_executable(invaders
     graphics/painter.cpp
     third_party/stb/stb_image.c
 )
-
+add_executable(audio_test
+    audio/pulseaudio.cpp
+    audio/waveout.cpp
+    audio/sample.cpp
+    audio/player.cpp
+    audio/test/main.cpp
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+)
+target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(invaders Qt5::Widgets Qt5::OpenGL)
 
 if (WIN32)
   include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")
   target_link_libraries(invaders "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
+  target_link_libraries(audio_test "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
 elseif (UNIX)
   target_link_libraries(invaders ncurses)
   target_link_libraries(invaders pulse)
   target_link_libraries(invaders sndfile)
   target_link_libraries(invaders pthread)
+
+  target_link_libraries(audio_test ncurses)
+  target_link_libraries(audio_test pulse)
+  target_link_libraries(audio_test sndfile)
+  target_link_libraries(audio_test pthread)  
 endif()
 
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
