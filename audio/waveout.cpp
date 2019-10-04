@@ -199,6 +199,8 @@ private:
             state_       = AudioStream::State::none;
             offset_      = 0;
 
+            const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
+
             WAVEFORMATEX wfx = {0};
             wfx.nSamplesPerSec  = sample->rate();
             wfx.wBitsPerSample  = 32;
