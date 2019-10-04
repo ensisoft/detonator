@@ -53,6 +53,11 @@
   #define _CRT_SECURE_NO_WARNINGS
   #define _SCL_SECURE_NO_WARNINGS
 
+  // acknowledge a fix in vs2015 update 2 regarding atomic object alignment
+  // the fix changes the binary layout of objects and breaks interoperability
+  // with code that has been compilied/linked with an older toolchain  
+  #define _ENABLE_ATOMIC_ALIGNMENT_FIX
+
   // we're building in unicode
 #ifndef UNICODE
   #define UNICODE
