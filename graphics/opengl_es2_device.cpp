@@ -496,6 +496,10 @@ private:
                     sizeFormat = GL_RGBA;
                     baseFormat = GL_RGBA;
                     break;
+                case Format::Grayscale:
+                    sizeFormat = GL_RED;
+                    baseFormat = GL_RED;
+                    break;
                 default: assert(!"unknown texture format."); break;
             }
 

@@ -1,3 +1,4 @@
+
 // Copyright (c) 2010-2019 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
@@ -32,7 +33,7 @@ namespace gfx
         virtual ~Texture() = default;
 
         enum class Format {
-            RGB, RGBA
+            RGB, RGBA, Grayscale
         };
         enum class MinFilter {
             Nearest, Linear, Mipmap
