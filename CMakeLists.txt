@@ -156,7 +156,10 @@ elseif (UNIX)
   target_link_libraries(audio_test ncurses)
   target_link_libraries(audio_test pulse)
   target_link_libraries(audio_test sndfile)
-  target_link_libraries(audio_test pthread)  
+  target_link_libraries(audio_test pthread)
 endif()
+
+enable_testing()
+add_executable(unit_test_bitmap        graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
 
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
