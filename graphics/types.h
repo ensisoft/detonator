@@ -59,7 +59,7 @@ namespace gfx
         unsigned GetX() const
         { return mX; }
         unsigned GetY() const
-        { return mX; }
+        { return mY; }
         void Resize(unsigned width, unsigned height)
         {
             mWidth = width;
