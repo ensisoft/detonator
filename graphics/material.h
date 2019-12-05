@@ -443,15 +443,37 @@ namespace gfx
         }
         virtual void Apply(Device& device, Program& prog) const override
         {
-            auto bmp = mText.Rasterize();
-            Texture* texture = device.FindTexture("text-bitmap");
-            if (!texture)
-                texture = device.MakeTexture("text-bitmap");
+            std::string name = mText.GetName();
+            if (name.empty())
+                name = "text-bitmap";
 
-            bmp.FlipHorizontally();
-            texture->Upload(bmp.GetData(), bmp.GetWidth(), bmp.GetHeight(), 
-                Texture::Format::Grayscale);
-            
+            Texture* texture = device.FindTexture(name);
+            if (!texture)
+                texture = device.MakeTexture(name);
+
+            if (mText.IsDynamic())
+            {
+                // always update. the contents of the text buffer are changing
+                // for each frame.
+                auto bmp = mText.Rasterize();
+                bmp.FlipHorizontally();                
+                texture->Upload(bmp.GetData(), bmp.GetWidth(), bmp.GetHeight(), 
+                    Texture::Format::Grayscale);                
+            }       
+            else
+            {
+                // trigger reupload if the dimensions have changed.
+                const auto width  = mText.GetWidth();
+                const auto height = mText.GetHeight();
+                const auto prev_width = texture->GetWidth();
+                const auto prev_height = texture->GetHeight();
+                if (prev_width != width || prev_height != height) 
+                {
+                    auto bmp = mText.Rasterize();
+                    bmp.FlipHorizontally();
+                    texture->Upload(bmp.GetData(), width, height, Texture::Format::Grayscale);
+                }
+            }     
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kRenderPoints", 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(), 

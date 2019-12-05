@@ -45,8 +45,21 @@ namespace gfx
         // The dimensions are used when aligning and positioning
         // the rasterized text in the buffer.
         // the units are pixels. 
+        // This creates an "unnamed" TextBuffer which means
+        // that the contents are always updated on the device
+        // when it's being rendered. 
         TextBuffer(float width, float height)
           : mWidth(width)
+          , mHeight(height)
+        {}  
+
+        // Like above except that gives a name to the text buffer.
+        // When a buffer is named the contents are assumed to be static
+        // and are only updated on the GPU if the buffer dimensions have
+        // changed. 
+        TextBuffer(const std::string& name,  float width, float height)
+          : mName(name)
+          , mWidth(width)
           , mHeight(height)
         {}
 
@@ -83,6 +96,20 @@ namespace gfx
         void AddText(const std::string& text, const std::string& font, float font_size_pt,
             HorizontalAlignment ha = HorizontalAlignment::AlignCenter, 
             VerticalAlignment va = VerticalAlignment::AlignCenter);
+
+        // An unnamed text buffer is considered dynamic
+        // i.e. the contents are expected to change continuously 
+        // A dynamic text buffer will get rasterized and uploaded
+        // to the GPU every time it's rendered.
+        bool IsDynamic() const 
+        { return mName.empty(); }
+        
+        // Get the current buffer name (if any)
+        // See comments in IsDynamic and in the ctor about
+        // the semantic meaning of a buffer name.
+        const std::string& GetName() const
+        { return mName; }
+
     private:
         struct FontLibrary;
         mutable std::shared_ptr<FontLibrary> mFreetype;
@@ -92,6 +119,7 @@ namespace gfx
             float font_size_pt) const;
 
     private:
+        const std::string mName;
         const float mWidth  = 0;
         const float mHeight = 0;
 
