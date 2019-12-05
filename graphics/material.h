@@ -443,7 +443,7 @@ namespace gfx
         }
         virtual void Apply(Device& device, Program& prog) const override
         {
-            auto bmp = mText.GetBitmap();
+            auto bmp = mText.Rasterize();
             Texture* texture = device.FindTexture("text-bitmap");
             if (!texture)
                 texture = device.MakeTexture("text-bitmap");

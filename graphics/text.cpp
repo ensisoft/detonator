@@ -80,8 +80,104 @@ struct TextBuffer::FontLibrary {
 };
 std::weak_ptr<TextBuffer::FontLibrary> TextBuffer::Freetype;
 
+Bitmap<Grayscale> TextBuffer::Rasterize() const 
+{
+    Bitmap<Grayscale> out;
+    out.Resize(mWidth, mHeight);
 
-TextBuffer::TextBuffer(const std::string& font, const std::string& text, float font_size)
+    for (const auto& text : mText)
+    {
+        std::stringstream ss(text.text);
+        std::string line;
+        std::vector<Bitmap<Grayscale>> line_bitmaps;
+
+        int total_height = 0.0f;
+
+        // rasterize each line
+        while (std::getline(ss, line))
+        {
+            // if there's a new line without content what's the height of the line ?
+            // we could probably solve this by looking at some font metrics
+            // but for now we're just going to rasterize some character with the font
+            // and font size setting and use the height of that as the height of an empty line.
+            const bool was_empty = line.empty();
+            if (line.empty())
+                line = "k";
+            
+            auto bmp = Rasterize(line, text.font, text.font_size);
+            if (was_empty)
+                bmp.Fill(Grayscale{0});
+
+            total_height += bmp.GetHeight();
+            line_bitmaps.push_back(std::move(bmp));
+        }
+        int ypos = 0;
+        if (text.use_absolute_position) 
+            ypos = text.ypos;
+        else if (text.va == VerticalAlignment::AlignTop)
+            ypos = 0;
+        else if (text.va == VerticalAlignment::AlignCenter)
+            ypos = ((int)mHeight - total_height) / 2;
+        else if (text.va == VerticalAlignment::AlignBottom)
+            ypos = mHeight - total_height;
+        
+        for (const auto& bmp : line_bitmaps) 
+        {
+            int xpos = 0;
+            if (text.use_absolute_position)
+                xpos = text.xpos;
+            else if (text.ha == HorizontalAlignment::AlignLeft)
+                xpos = 0;
+            else if (text.ha == HorizontalAlignment::AlignCenter)
+                xpos = ((int)mWidth - (int)bmp.GetWidth()) / 2;
+            else if (text.ha == HorizontalAlignment::AlignRight)
+                xpos = mWidth - bmp.GetWidth();
+            
+            out.Copy(xpos, ypos, bmp);
+            ypos += bmp.GetHeight();
+        }
+    }
+    // for debugging purposes dump the rasterized bitmap as .ppm file
+#if 0
+    Bitmap<RGB> tmp;
+    tmp.Resize(out.GetWidth(), out.GetHeight());
+    tmp.Copy(0, 0, mBitmap);
+    WritePPM(tmp, "/tmp/text-buffer.ppm");
+    DEBUG("Wrote rasterized text buffer in '%1'", "/tmp/text-buffer.ppm");
+#endif  
+
+    return out;
+}
+
+
+void TextBuffer::AddText(const std::string& text, const std::string& font,
+    float font_size_pt,  float xpos, float ypos)
+{
+    Text t;
+    t.text = text;
+    t.font = font;
+    t.font_size = font_size_pt;
+    t.use_absolute_position = true;
+    t.xpos = xpos;
+    t.ypos = ypos;
+    mText.push_back(t);
+}
+
+void TextBuffer::AddText(const std::string& text, const std::string& font,
+    float font_size_pt, HorizontalAlignment ha, VerticalAlignment va)
+{
+    Text t;
+    t.text = text;
+    t.font = font;
+    t.font_size = font_size_pt;
+    t.use_absolute_position = false;
+    t.ha = ha;
+    t.va = va;
+    mText.push_back(t);
+}
+
+Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::string& font,
+    float font_size) const
 {
     // this is some fucking weird magic scaling factor, not sure
     // if anyone really knows what the fuck it's supposed to do.
@@ -142,8 +238,13 @@ TextBuffer::TextBuffer(const std::string& font, const std::string& text, float f
     // orientation with the Y axis upwards.
     float descent = 0.0f;
 
+    // pen position
     float pen_x = 0.0f;
     float pen_y = 0.0f;
+
+    // the extents of the text block when rasterized
+    float height = 0.0f;
+    float width  = 0.0f;
 
     const auto glyph_count = hb_buffer_get_length(hb_buff);
     hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buff, nullptr);
@@ -200,14 +301,15 @@ TextBuffer::TextBuffer(const std::string& font, const std::string& text, float f
         ascent  = std::max(ascent, glyph_top);
         descent = std::min(descent, glyph_bot);
 
-        mHeight = ascent - descent; // todo: + linegap (where to find linegap?)
-        mWidth  = x + info.width;
+        height = ascent - descent; // todo: + linegap (where to find linegap?)
+        width  = x + info.width;
 
         pen_x += xa;
         pen_y += ya;
     }    
     
-    mBitmap.Resize(mWidth, mHeight);
+    Bitmap<Grayscale> bmp;
+    bmp.Resize(width, height);
 
     // the bitmap has 0,0 at top left and y grows down.
     //
@@ -238,7 +340,7 @@ TextBuffer::TextBuffer(const std::string& font, const std::string& text, float f
         const auto x = pen_x + info.bearing_x + xo;
         const auto y = pen_y + info.bearing_y + yo;
 
-        mBitmap.Copy(x, baseline - y, info.bitmap);
+        bmp.Copy(x, baseline - y, info.bitmap);
 
         pen_x += xa;
         pen_y += ya; 
@@ -246,15 +348,7 @@ TextBuffer::TextBuffer(const std::string& font, const std::string& text, float f
 
     hb_font_destroy(hb_font);
     hb_buffer_destroy(hb_buff);
-
-    // for debugging purposes dump the rasterized bitmap as .ppm file
-#if 0
-    Bitmap<RGB> tmp;
-    tmp.Resize(mBitmap.GetWidth(), mBitmap.GetHeight());
-    tmp.Copy(0, 0, mBitmap);
-    WritePPM(tmp, "/tmp/text-buffer.ppm");
-    DEBUG("Wrote rasterized text buffer in '%1'", "/tmp/text-buffer.ppm");
-#endif    
+    return bmp;
 }
 
 }  //namespace

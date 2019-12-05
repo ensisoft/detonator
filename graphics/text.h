@@ -40,36 +40,72 @@ namespace gfx
     class TextBuffer
     {
     public:
-        // Construct a text object with the given font font size and content.
-        TextBuffer(const std::string& font, const std::string& text, float font_size);
-       
-        // Get handle to the rasterized text.
-        const Bitmap<Grayscale>& GetBitmap() const 
-        { return mBitmap; }
+        // Construct the text buffer with given maximum
+        // width and height dimensions. 
+        // The dimensions are used when aligning and positioning
+        // the rasterized text in the buffer.
+        // the units are pixels. 
+        TextBuffer(float width, float height)
+          : mWidth(width)
+          , mHeight(height)
+        {}
 
-        // get the width (length) of the text in the buffer 
-        // in pixels
-        const float GetLineWidth() const 
+        // get the width (length) of the buffer
+        float GetWidth() const 
         { return mWidth; }
 
-        // get the height of the text in the buffer. 
-        // this is the distance between the minimum point (of any glyph)
-        // below the baseline and the maximum point (of any glyph) above
-        // the baseline.
-        const float GetLineHeight() const 
+        // get the height of the buffer.
+        float GetHeight() const 
         { return mHeight; }
 
+        // Rasterize the text buffer contents into a bitmap
+        Bitmap<Grayscale> Rasterize() const;
+
+        // Add text relative to the top left origin 
+        // of the TextBuffer. Origin is 0,0 and y growns down.
+        void AddText(const std::string& text, const std::string& font,
+            float font_size_pt,
+            float xpos, float ypos);
+
+        enum class HorizontalAlignment {
+            AlignLeft,
+            AlignCenter,
+            AlignRight
+        };
+        enum class VerticalAlignment {
+            AlignTop,
+            AlignCenter,
+            AlignBottom
+        };
+
+        // Add text to the buffer and position automatically 
+        // relative to the TextBuffer origin. 
+        void AddText(const std::string& text, const std::string& font, float font_size_pt,
+            HorizontalAlignment ha = HorizontalAlignment::AlignCenter, 
+            VerticalAlignment va = VerticalAlignment::AlignCenter);
     private:
         struct FontLibrary;
-        std::shared_ptr<FontLibrary> mFreetype;
+        mutable std::shared_ptr<FontLibrary> mFreetype;
         static std::weak_ptr<FontLibrary> Freetype;
 
-    private:
-        float mWidth  = 0;
-        float mHeight = 0;
+        Bitmap<Grayscale> Rasterize(const std::string& text, const std::string& font, 
+            float font_size_pt) const;
 
-        // rasterized text
-        Bitmap<Grayscale> mBitmap;
+    private:
+        const float mWidth  = 0;
+        const float mHeight = 0;
+
+        struct Text {
+            std::string text;
+            std::string font;
+            float font_size = 0.0f;
+            float xpos = 0.0f;
+            float ypos = 0.0f;
+            bool use_absolute_position = false;
+            HorizontalAlignment ha;
+            VerticalAlignment va;
+        };
+        std::vector<Text> mText;
     };
 
 } // namespace

@@ -382,8 +382,8 @@ namespace gfx
             if (!geom)
                 geom = device.MakeGeometry("text-buffer");
 
-            const auto w = mBuffer.GetLineWidth();
-            const auto h = mBuffer.GetLineHeight();
+            const auto w = mBuffer.GetWidth();
+            const auto h = mBuffer.GetHeight();
             // scaling so that the longest side of the text buffer is 1.0
             // and the shorter side (most likely the height) is a fraction of the width
             const auto sx = w >= h ? 1.0f : w/h;
