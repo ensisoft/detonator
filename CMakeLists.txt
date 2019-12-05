@@ -14,6 +14,21 @@ https://github.com/ensisoft/pinyin-invaders
 
 ")
 
+# begin with the turds in 3rd party libs
+
+# Freetype2
+option(WITH_ZLIB "Freetype: Enable zlib " OFF)
+option(WITH_BZip2 "Freetype: Enable bzip2 " OFF)
+option(WITH_HarfBuzz "Freetype: Enable harfbuzz" OFF)
+option(WITH_PNG "Freetype: Build with PNG" OFF)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype)
+
+# harfbuzz (depends on freetype2)
+set(HARFBUZZ_FREETYPE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include" CACHE STRING "Freetype2 include folder")
+set(HARFBUZZ_FREETYPE_LIBRARY "freetype_custom_build" CACHE STRING "Name of the Freetype2 library build.")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/harfbuzz)
+
+
 # Unfortunately we need boost...
 set(Boost_USE_STATIC_LIBS ON)
 if(WIN32)
@@ -82,6 +97,9 @@ message(STATUS "${Boost_LIBRARY_DIRS}")
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/game")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/freetype/include")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src/generated")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
 
@@ -128,6 +146,7 @@ add_executable(invaders
     base/logging.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
+    graphics/text.cpp
     third_party/stb/stb_image.c
 )
 add_executable(audio_test
@@ -142,6 +161,8 @@ add_executable(audio_test
 )
 target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(invaders Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(invaders freetype_custom_build)
+target_link_libraries(invaders harfbuzz_custom_build)
 
 if (WIN32)
   include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")

@@ -34,6 +34,7 @@
 #include "program.h"
 #include "texture.h"
 #include "color4f.h"
+#include "text.h"
 
 namespace gfx
 {
@@ -422,6 +423,63 @@ namespace gfx
         float mFps = 1.0f;
         Color4f mColor = Color::White;
     };
+
+    class BitmapText : public Material
+    {
+    public:
+        BitmapText(const TextBuffer& text) : mText(text)
+        {}
+        virtual Shader* GetShader(Device& device) const override
+        {
+            Shader* shader = device.FindShader("texture_alpha_mask.glsl");
+            if (shader == nullptr || !shader->IsValid())
+            {
+                if (!shader)
+                    shader = device.MakeShader("texture_alpha_mask.glsl");
+                if (!shader->CompileFile("texture_alpha_mask.glsl"));
+                    return nullptr;
+            }
+            return shader;
+        }
+        virtual void Apply(Device& device, Program& prog) const override
+        {
+            auto bmp = mText.GetBitmap();
+            Texture* texture = device.FindTexture("text-bitmap");
+            if (!texture)
+                texture = device.MakeTexture("text-bitmap");
+
+            bmp.FlipHorizontally();
+            texture->Upload(bmp.GetData(), bmp.GetWidth(), bmp.GetHeight(), 
+                Texture::Format::Grayscale);
+            
+            prog.SetTexture("kTexture", 0, *texture);
+            prog.SetUniform("kRenderPoints", 0.0f);
+            prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(), 
+                mColor.Blue(), mColor.Alpha());
+            prog.SetUniform("kGamma", mGamma);
+        }
+        virtual SurfaceType GetSurfaceType() const override
+        { return SurfaceType::Transparent; }
+        virtual bool IsPointSprite() const override
+        { return false; }
+
+        BitmapText& SetBaseColor(const Color4f& color)
+        {
+            mColor = color;
+            return *this;
+        }
+        BitmapText& SetGamma(float gamma)
+        {
+            mGamma = gamma;
+            return *this;
+        }
+
+    private:
+        const TextBuffer& mText;
+        Color4f mColor = Color::White;
+        float mGamma   = 1.0f;
+    };
+
 
     // base class for material effects.
     class MaterialEffect : public Material
