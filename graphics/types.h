@@ -30,8 +30,7 @@ namespace gfx
 {
     // Predefined color enum.
     enum class Color {
-        White,
-        Black,
+        Black,   White,
         Red,     DarkRed,
         Green,   DarkGreen,
         Blue,    DarkBlue,
