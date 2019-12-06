@@ -199,8 +199,11 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
 
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
         throw std::runtime_error("Font doesn't support Unicode");
-    if (FT_Set_Char_Size(face, font_size * FUCKING_MAGIC_SCALE, font_size * FUCKING_MAGIC_SCALE, 0, 0))
-        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));
+
+    if (FT_Set_Pixel_Sizes(face, 0, font_size))
+        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));    
+    //if (FT_Set_Char_Size(face, font_size * FUCKING_MAGIC_SCALE, font_size * FUCKING_MAGIC_SCALE, 0, 0))
+    //    throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));
 
     // simple example for harfbuzz is here
     // https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
