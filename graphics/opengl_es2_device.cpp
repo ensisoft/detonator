@@ -801,6 +801,32 @@ private:
                 return;
             GL_CHECK(glUniform4f(ret, x, y, z, w));
         }
+        virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
+        {
+            glUseProgram(mProgram);
+            auto ret = glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CHECK(glUniformMatrix2fv(ret, 1, GL_FALSE /* transpose */, (const float*)&matrix));
+        }
+        virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
+        {
+            glUseProgram(mProgram);
+
+            auto ret = glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CHECK(glUniformMatrix3fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+        }
+        virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
+        {
+            glUseProgram(mProgram);
+            auto ret = glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CHECK(glUniformMatrix4fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+        }
+
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
         {
             const auto& texture_impl = dynamic_cast<const TextureImpl&>(texture);
