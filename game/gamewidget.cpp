@@ -47,9 +47,11 @@
 #include "audio/sample.h"
 #include "audio/player.h"
 #include "base/bitflag.h"
+#include "base/format.h"
 #include "base/logging.h"
 #include "base/math.h"
 #include "graphics/device.h"
+#include "graphics/text.h"
 #include "graphics/painter.h"
 #include "graphics/types.h"
 #include "graphics/drawable.h"
@@ -1330,14 +1332,6 @@ public:
             gfx::TextureFill("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true));
-
-        gfx::Transform x;
-        x.MoveTo(100, 100);
-        x.Resize(400, 400);
-
-        //painter.Draw(gfx::Rectangle(), x,
-        //    gfx::ConcentricRingsEffect(0));
-        //    //gfx::ColorFill(gfx::Color::Yellow));
     }
 
     void update(float dt)
@@ -1880,20 +1874,15 @@ private:
 class GameWidget::About : public State
 {
 public:
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const override
     {
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
-        painter.setFont(font);
+        const auto& rc = transform.viewRect();
+        const auto& s  = transform.getScale();
+        const auto w = rc.width();
+        const auto h = rc.height();
 
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkGray);
-        painter.setPen(pen);
-
-        painter.drawText(area, Qt::AlignCenter,
-            QString::fromUtf8("Pinyin-Invaders %1.%2\n\n"
+        gfx::TextBuffer buff("about", w, h);
+        buff.AddText(base::FormatString("Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by:\n"
                 "Sami Vaisanen\n"
                 "(c) 2014-2019 Ensisoft\n"
@@ -1906,9 +1895,16 @@ public:
                 "Music by:\n"
                 "level27\n"
                 "http://soundcloud.com/level27\n\n"
-                "Press Esc to exit"
-                ).arg(MAJOR_VERSION).arg(MINOR_VERSION));
+                "Press Esc to exit", MAJOR_VERSION, MINOR_VERSION),
+            "fonts/ARCADE.TTF", s.y() / 2);
+        gfx::Transform t;
+        t.MoveTo(0, 0);
+        t.Resize(w, h);
+        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
     }
+
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    {}
 
     virtual void update(float dt) override
     {}
