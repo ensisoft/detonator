@@ -311,6 +311,11 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
         pen_y += ya;
     }    
     
+    const auto line_spacing = face->size->metrics.height / FUCKING_MAGIC_SCALE;
+    const auto margin = line_spacing > height ? line_spacing - height : 0;
+
+    height += margin;
+
     Bitmap<Grayscale> bmp;
     bmp.Resize(width, height);
 
@@ -321,7 +326,7 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
     //     |  ---baseline---  |
     //     |__________________| descent (below baseline)
     //
-    const auto baseline = ascent;
+    const auto baseline = ascent + (margin / 2);
 
     // finally compose the glyphs into a text buffer starting at the current pen position
     pen_x = 0.0f;
