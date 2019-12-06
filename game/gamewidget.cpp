@@ -2758,22 +2758,22 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         mStates.top()->paintPostEffect(*mCustomGraphicsPainter, state);
 
+        if (mShowFps)
+        {
+            gfx::TextBuffer text(100, 100);
+            text.AddText(base::FormatString("fps: %1", mCurrentfps), 
+                "fonts/VeraMono.ttf", 18, 
+                gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
+                gfx::TextBuffer::VerticalAlignment::AlignTop);
+            gfx::Transform t;
+            t.MoveTo(10, 20);
+            t.Resize(100, 100);
+            mCustomGraphicsPainter->Draw(gfx::Rectangle(), t, 
+                gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkRed));
+        }
+
         mCustomGraphicsDevice->SetState(currentState);
         painter.endNativePainting();
-    }
-
-    if (mShowFps)
-    {
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(18);
-
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkRed);
-        painter.setFont(font);
-        painter.setPen(pen);
-        painter.drawText(QPointF(10.0f, 20.0f), QString("fps: %1").arg(mCurrentfps));
     }
 }
 
