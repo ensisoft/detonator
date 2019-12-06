@@ -451,12 +451,19 @@ namespace gfx
             if (!texture)
                 texture = device.MakeTexture(name);
 
+            // use texture matrix to flip the sample point
+            // then we don't have to flip the bitmap (expensive operation)
+            static const float kMatrix[3][3] =  {
+                {1.0f, 0.0f, 0.0f},
+                {0.0f, -1.0f, 0.0f},
+                {0.0f, 1.0f, 1.0f}
+            };
+
             if (mText.IsDynamic())
             {
                 // always update. the contents of the text buffer are changing
                 // for each frame.
-                auto bmp = mText.Rasterize();
-                bmp.FlipHorizontally();                
+                const auto& bmp = mText.Rasterize();
                 texture->Upload(bmp.GetData(), bmp.GetWidth(), bmp.GetHeight(), 
                     Texture::Format::Grayscale);                
             }       
@@ -469,8 +476,7 @@ namespace gfx
                 const auto prev_height = texture->GetHeight();
                 if (prev_width != width || prev_height != height) 
                 {
-                    auto bmp = mText.Rasterize();
-                    bmp.FlipHorizontally();
+                    const auto& bmp = mText.Rasterize();
                     texture->Upload(bmp.GetData(), width, height, Texture::Format::Grayscale);
                 }
             }     
@@ -479,6 +485,7 @@ namespace gfx
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(), 
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
+            prog.SetUniform("kMatrix", kMatrix);
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
