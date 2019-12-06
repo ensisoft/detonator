@@ -1242,48 +1242,53 @@ private:
 class GameWidget::Score : public GameWidget::Animation
 {
 public:
-    Score(QVector2D position, float start, float lifetime, unsigned score) :
-        position_(position), start_(start), life_(lifetime), time_(0), score_(score)
+    Score(QVector2D position, float start, float lifetime, unsigned score) 
+        : mPosition(position)
+        , mStartTime(start)
+        , mLifeTime(lifetime) 
+        , mScore(score)
     {}
 
     virtual bool update(float dt, TransformState& state) override
     {
-        time_ += dt;
-        if (time_ < start_)
+        mTimeAccum += dt;
+        if (mTimeAccum < mStartTime)
             return true;
-        return time_ - start_ < life_;
+        return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paint(QPainter& painter, TransformState& state) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) override
     {
-        if (time_ < start_)
+        if (mTimeAccum < mStartTime)
             return;
 
-        const auto alpha = 1.0 - (float)(time_ - start_ )/ (float)life_;
+        const auto alpha = 1.0 - (float)(mTimeAccum - mStartTime)/ (float)mLifeTime;
         const auto dim = state.getScale();
-        const auto top = state.toViewSpace(position_);
-        const auto end = top + dim;
+        const auto top = state.toViewSpace(mPosition);
+        
+        const auto font_size = dim.y() / 2;
 
-        QColor color(Qt::darkYellow);
-        color.setAlpha(0xff * alpha);
+        gfx::TextBuffer text(dim.x()*2, dim.y());
+        text.AddText(base::FormatString("%1", mScore), 
+            "fonts/ARCADE.TTF", font_size, 
+            gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
+            gfx::TextBuffer::VerticalAlignment::AlignTop);
 
-        QPen pen;
-        pen.setWidth(2);
-        pen.setColor(color);
-        QFont font("Arcade");
-        font.setPixelSize(dim.y() / 2.0);
-        painter.setPen(pen);
-        painter.setFont(font);
-        painter.drawText(QRectF(top, end), QString("%1").arg(score_));
+        gfx::Transform t;
+        t.MoveTo(top);
+        t.Resize(dim.x()*2, dim.y());
+        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkYellow));
     }
+    virtual void paint(QPainter&, TransformState& state) override
+    {}
 private:
-    QVector2D position_;
+    const QVector2D mPosition;
 private:
-    float start_;
-    float life_;
-    float time_;
+    const float mStartTime = 0.0f;
+    const float mLifeTime = 0.0f;
+    const unsigned mScore = 0;
+    float mTimeAccum = 0.0f;
 private:
-    unsigned score_;
 };
 
 
