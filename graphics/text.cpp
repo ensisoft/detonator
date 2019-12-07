@@ -33,6 +33,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <map>
 
 #include "base/logging.h"
 #include "base/utility.h"
@@ -80,16 +81,34 @@ struct TextBuffer::FontLibrary {
 };
 std::weak_ptr<TextBuffer::FontLibrary> TextBuffer::Freetype;
 
-Bitmap<Grayscale> TextBuffer::Rasterize() const 
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const 
 {
-    Bitmap<Grayscale> out;
-    out.Resize(mWidth, mHeight);
+    // the repeated allocation bitmaps for rasterizing content is 
+    // actually more expensive than the actual rasterization.
+    // we can keep a small cache of frequently used bitmap sizes.
+    static std::map<std::uint64_t, 
+        std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
+
+    std::shared_ptr<Bitmap<Grayscale>> out;
+
+    const std::uint64_t key = ((uint64_t)mWidth << 32) | mHeight;
+    auto it = cache.find(key);
+    if (it == std::end(cache)) 
+    {
+        out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
+        cache[key] = out;
+    } 
+    else 
+    { 
+        out = it->second;
+        out->Fill(Grayscale(0));                
+    }
 
     for (const auto& text : mText)
     {
         std::stringstream ss(text.text);
         std::string line;
-        std::vector<Bitmap<Grayscale>> line_bitmaps;
+        std::vector<std::shared_ptr<Bitmap<Grayscale>>> line_bitmaps;
 
         int total_height = 0.0f;
 
@@ -106,9 +125,9 @@ Bitmap<Grayscale> TextBuffer::Rasterize() const
             
             auto bmp = Rasterize(line, text.font, text.font_size);
             if (was_empty)
-                bmp.Fill(Grayscale{0});
+                bmp->Fill(Grayscale{0});
 
-            total_height += bmp.GetHeight();
+            total_height += bmp->GetHeight();
             line_bitmaps.push_back(std::move(bmp));
         }
         int ypos = 0;
@@ -129,12 +148,12 @@ Bitmap<Grayscale> TextBuffer::Rasterize() const
             else if (text.ha == HorizontalAlignment::AlignLeft)
                 xpos = 0;
             else if (text.ha == HorizontalAlignment::AlignCenter)
-                xpos = ((int)mWidth - (int)bmp.GetWidth()) / 2;
+                xpos = ((int)mWidth - (int)bmp->GetWidth()) / 2;
             else if (text.ha == HorizontalAlignment::AlignRight)
-                xpos = mWidth - bmp.GetWidth();
+                xpos = mWidth - bmp->GetWidth();
             
-            out.Copy(xpos, ypos, bmp);
-            ypos += bmp.GetHeight();
+            out->Copy(xpos, ypos, *bmp);
+            ypos += bmp->GetHeight();
         }
     }
     // for debugging purposes dump the rasterized bitmap as .ppm file
@@ -176,8 +195,8 @@ void TextBuffer::AddText(const std::string& text, const std::string& font,
     mText.push_back(t);
 }
 
-Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::string& font,
-    float font_size) const
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text, 
+    const std::string& font, float font_size) const
 {
     // this is some fucking weird magic scaling factor, not sure
     // if anyone really knows what the fuck it's supposed to do.
@@ -246,8 +265,8 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
     float pen_y = 0.0f;
 
     // the extents of the text block when rasterized
-    float height = 0.0f;
-    float width  = 0.0f;
+    unsigned height = 0.0f;
+    unsigned width  = 0.0f;
 
     const auto glyph_count = hb_buffer_get_length(hb_buff);
     hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buff, nullptr);
@@ -316,8 +335,26 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
 
     height += margin;
 
-    Bitmap<Grayscale> bmp;
-    bmp.Resize(width, height);
+    // the repeated allocation bitmaps for rasterizing content is 
+    // actually more expensive than the actual rasterization.
+    // we can keep a small cache of frequently used bitmap sizes.
+    static std::map<std::uint64_t, 
+        std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
+
+    std::shared_ptr<Bitmap<Grayscale>> bmp;
+
+    const std::uint64_t key = ((uint64_t)width << 32) | height;
+    auto it = cache.find(key);
+    if (it == std::end(cache)) 
+    {
+        bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
+        cache[key] = bmp;
+    } 
+    else 
+    { 
+        bmp = it->second;
+        bmp->Fill(Grayscale(0));                
+    }
 
     // the bitmap has 0,0 at top left and y grows down.
     //
@@ -348,7 +385,7 @@ Bitmap<Grayscale> TextBuffer::Rasterize(const std::string& text, const std::stri
         const auto x = pen_x + info.bearing_x + xo;
         const auto y = pen_y + info.bearing_y + yo;
 
-        bmp.Copy(x, baseline - y, info.bitmap);
+        bmp->Copy(x, baseline - y, info.bitmap);
 
         pen_x += xa;
         pen_y += ya; 

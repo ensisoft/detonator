@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <map>
 
 #include "base/assert.h"
 #include "bitmap.h"
@@ -48,7 +47,7 @@ namespace gfx
         // This creates an "unnamed" TextBuffer which means
         // that the contents are always updated on the device
         // when it's being rendered. 
-        TextBuffer(float width, float height)
+        TextBuffer(unsigned width, unsigned height)
           : mWidth(width)
           , mHeight(height)
         {}  
@@ -57,22 +56,22 @@ namespace gfx
         // When a buffer is named the contents are assumed to be static
         // and are only updated on the GPU if the buffer dimensions have
         // changed. 
-        TextBuffer(const std::string& name,  float width, float height)
+        TextBuffer(const std::string& name,  unsigned width, unsigned height)
           : mName(name)
           , mWidth(width)
           , mHeight(height)
         {}
 
         // get the width (length) of the buffer
-        float GetWidth() const 
+        unsigned GetWidth() const 
         { return mWidth; }
 
         // get the height of the buffer.
-        float GetHeight() const 
+        unsigned GetHeight() const 
         { return mHeight; }
 
         // Rasterize the text buffer contents into a bitmap
-        Bitmap<Grayscale> Rasterize() const;
+        std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
 
         // Add text relative to the top left origin 
         // of the TextBuffer. Origin is 0,0 and y growns down.
@@ -115,13 +114,13 @@ namespace gfx
         mutable std::shared_ptr<FontLibrary> mFreetype;
         static std::weak_ptr<FontLibrary> Freetype;
 
-        Bitmap<Grayscale> Rasterize(const std::string& text, const std::string& font, 
-            float font_size_pt) const;
+        std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, 
+            const std::string& font, float font_size_pt) const;
 
     private:
         const std::string mName;
-        const float mWidth  = 0;
-        const float mHeight = 0;
+        const unsigned mWidth  = 0;
+        const unsigned mHeight = 0;
 
         struct Text {
             std::string text;

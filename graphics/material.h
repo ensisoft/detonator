@@ -464,7 +464,7 @@ namespace gfx
                 // always update. the contents of the text buffer are changing
                 // for each frame.
                 const auto& bmp = mText.Rasterize();
-                texture->Upload(bmp.GetData(), bmp.GetWidth(), bmp.GetHeight(), 
+                texture->Upload(bmp->GetData(), bmp->GetWidth(), bmp->GetHeight(), 
                     Texture::Format::Grayscale);                
             }       
             else
@@ -477,7 +477,7 @@ namespace gfx
                 if (prev_width != width || prev_height != height) 
                 {
                     const auto& bmp = mText.Rasterize();
-                    texture->Upload(bmp.GetData(), width, height, Texture::Format::Grayscale);
+                    texture->Upload(bmp->GetData(), width, height, Texture::Format::Grayscale);
                 }
             }     
             prog.SetTexture("kTexture", 0, *texture);
