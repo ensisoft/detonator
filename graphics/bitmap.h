@@ -41,8 +41,8 @@ namespace gfx
     using u8 = std::uint8_t;
 
     struct Grayscale {
-        u8 i = 0;
-        Grayscale(u8 i) : i(i) 
+        u8 r = 0;
+        Grayscale(u8 r) : r(r) 
         {}
         Grayscale() {}
     };
@@ -112,7 +112,7 @@ namespace gfx
         } // ctor
         RGB(const Grayscale& grayscale)
         {
-            r = g = b = grayscale.i;
+            r = g = b = grayscale.r;
         }
     };
 
@@ -135,7 +135,7 @@ namespace gfx
         }
         RGBA(const Grayscale& grayscale)
         {
-            r = g = b = grayscale.i;
+            r = g = b = grayscale.r;
             a = 255;
         }
     };
@@ -431,8 +431,15 @@ namespace gfx
         // Fill the entire bitmap with the given pixel value.
         void Fill(const Pixel& value)
         {
-            const Rect rc(0, 0, mWidth, mHeight);
-            Fill(rc, value);
+            if (sizeof(Pixel) == 1) 
+            {
+                std::memset(&mPixels[0], value.r, mPixels.size());
+            }
+            else
+            {
+                const Rect rc(0, 0, mWidth, mHeight);
+                Fill(rc, value);
+            }
         }
 
         template<typename PixelType>
