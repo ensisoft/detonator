@@ -85,7 +85,7 @@ float computeDefaultTimeStep()
 int game_main(int argc, char* argv[])
 {
     base::CursesLogger logger;
-    base::SetThreadLog(&logger);
+    base::SetGlobalLog(&logger);
 
     DEBUG("It's alive!");
     INFO("%1 %2", GAME_TITLE, GAME_VERSION);
