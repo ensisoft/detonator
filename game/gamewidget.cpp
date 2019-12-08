@@ -1886,7 +1886,7 @@ public:
         const auto w = rc.width();
         const auto h = rc.height();
 
-        gfx::TextBuffer buff("about", w, h);
+        gfx::TextBuffer buff(w, h);
         buff.AddText(base::FormatString("Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by:\n"
                 "Sami Vaisanen\n"

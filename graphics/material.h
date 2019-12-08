@@ -443,13 +443,28 @@ namespace gfx
         }
         virtual void Apply(Device& device, Program& prog) const override
         {
-            std::string name = mText.GetName();
-            if (name.empty())
-                name = "text-bitmap";
+            const auto hash = mText.GetHash();
+            const auto name = std::to_string(hash);
 
             Texture* texture = device.FindTexture(name);
-            if (!texture)
+            if (!texture) 
+            {
                 texture = device.MakeTexture(name);
+                const auto& bmp = mText.Rasterize();
+                texture->Upload(bmp->GetData(), bmp->GetWidth(), bmp->GetHeight(), 
+                    Texture::Format::Grayscale);                                
+            }
+
+            // trigger reupload if the dimensions have changed.
+            const auto width  = mText.GetWidth();
+            const auto height = mText.GetHeight();
+            const auto prev_width = texture->GetWidth();
+            const auto prev_height = texture->GetHeight();
+            if (prev_width != width || prev_height != height) 
+            {
+                const auto& bmp = mText.Rasterize();
+                texture->Upload(bmp->GetData(), width, height, Texture::Format::Grayscale);
+            }                
 
             // use texture matrix to flip the sample point
             // then we don't have to flip the bitmap (expensive operation)
@@ -459,27 +474,6 @@ namespace gfx
                 {0.0f, 1.0f, 1.0f}
             };
 
-            if (mText.IsDynamic())
-            {
-                // always update. the contents of the text buffer are changing
-                // for each frame.
-                const auto& bmp = mText.Rasterize();
-                texture->Upload(bmp->GetData(), bmp->GetWidth(), bmp->GetHeight(), 
-                    Texture::Format::Grayscale);                
-            }       
-            else
-            {
-                // trigger reupload if the dimensions have changed.
-                const auto width  = mText.GetWidth();
-                const auto height = mText.GetHeight();
-                const auto prev_width = texture->GetWidth();
-                const auto prev_height = texture->GetHeight();
-                if (prev_width != width || prev_height != height) 
-                {
-                    const auto& bmp = mText.Rasterize();
-                    texture->Upload(bmp->GetData(), width, height, Texture::Format::Grayscale);
-                }
-            }     
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kRenderPoints", 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(), 

@@ -195,6 +195,18 @@ void TextBuffer::AddText(const std::string& text, const std::string& font,
     mText.push_back(t);
 }
 
+std::size_t TextBuffer::GetHash() const 
+{
+    boost::hash<std::string> string_hash;
+
+    std::size_t hash = 0;
+    for (const auto& t : mText) 
+    {
+        hash ^= string_hash(t.text);
+    }
+    return hash;
+}
+
 std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text, 
     const std::string& font, float font_size) const
 {

@@ -28,6 +28,10 @@
 #include <vector>
 #include <memory>
 
+#include "warnpush.h"
+#  include <boost/functional/hash.hpp>
+#include "warnpop.h"
+
 #include "base/assert.h"
 #include "bitmap.h"
 
@@ -44,23 +48,10 @@ namespace gfx
         // The dimensions are used when aligning and positioning
         // the rasterized text in the buffer.
         // the units are pixels. 
-        // This creates an "unnamed" TextBuffer which means
-        // that the contents are always updated on the device
-        // when it's being rendered. 
         TextBuffer(unsigned width, unsigned height)
           : mWidth(width)
           , mHeight(height)
         {}  
-
-        // Like above except that gives a name to the text buffer.
-        // When a buffer is named the contents are assumed to be static
-        // and are only updated on the GPU if the buffer dimensions have
-        // changed. 
-        TextBuffer(const std::string& name,  unsigned width, unsigned height)
-          : mName(name)
-          , mWidth(width)
-          , mHeight(height)
-        {}
 
         // get the width (length) of the buffer
         unsigned GetWidth() const 
@@ -96,18 +87,8 @@ namespace gfx
             HorizontalAlignment ha = HorizontalAlignment::AlignCenter, 
             VerticalAlignment va = VerticalAlignment::AlignCenter);
 
-        // An unnamed text buffer is considered dynamic
-        // i.e. the contents are expected to change continuously 
-        // A dynamic text buffer will get rasterized and uploaded
-        // to the GPU every time it's rendered.
-        bool IsDynamic() const 
-        { return mName.empty(); }
-        
-        // Get the current buffer name (if any)
-        // See comments in IsDynamic and in the ctor about
-        // the semantic meaning of a buffer name.
-        const std::string& GetName() const
-        { return mName; }
+        // Compute hash of the contents of the string buffer.
+        std::size_t GetHash() const;
 
     private:
         struct FontLibrary;
