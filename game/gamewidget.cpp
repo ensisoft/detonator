@@ -2682,6 +2682,8 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
 
+    mCustomGraphicsDevice->BeginFrame();
+
     const bool bIsGameRunning = mStates.top()->isGameRunning();
 
     // do a first pass using custom painter
@@ -2775,6 +2777,9 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         mCustomGraphicsDevice->SetState(currentState);
         painter.endNativePainting();
     }
+
+    mCustomGraphicsDevice->EndFrame();
+    mCustomGraphicsDevice->CleanGarbage(30);
 }
 
 void GameWidget::keyPressEvent(QKeyEvent* press)

@@ -59,6 +59,12 @@ namespace gfx
         virtual unsigned GetWidth() const = 0;
         virtual unsigned GetHeight() const = 0;
 
+        // Enable or disable this texture from being garbage collected.
+        // When this is enabled the texture may be deleted if it goes
+        // unused long enough.
+        // The default state is false. I.e. no garbage collection.
+        virtual void EnableGarbageCollection(bool gc) = 0;
+
     protected:
     private:
     };

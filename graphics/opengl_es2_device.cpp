@@ -257,7 +257,9 @@ public:
 
         auto* myprog = (ProgImpl*)(&program);
         auto* mygeom = (GeomImpl*)(&geometry);
+        myprog->SetLastUseFrameNumber(mFrameNumber);
         myprog->SetState();
+        mygeom->SetLastUseFrameNumber(mFrameNumber);
         mygeom->Draw(myprog->GetName());
     }
 
@@ -341,6 +343,44 @@ public:
 
         GL_CHECK((void)0);
     }
+    virtual void CleanGarbage(size_t max_num_idle_frames) override
+    {
+        /* not needed atm.
+        for (auto it = mPrograms.begin(); it != mPrograms.end();)
+        {
+            auto* impl = static_cast<ProgImpl*>(it->second.get());
+            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+            if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
+                it = mPrograms.erase(it);
+            else ++it;
+        }
+        */
+
+        for (auto it = mTextures.begin(); it != mTextures.end();)
+        {
+            auto* impl = static_cast<TextureImpl*>(it->second.get());
+            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+            const auto is_eligible = impl->IsEligibleForGarbageCollection();
+            const auto is_expired  = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
+            if (is_eligible && is_expired)
+                it = mTextures.erase(it);
+            else ++it;
+        }
+    }
+
+    virtual void BeginFrame() override
+    {
+        for (auto& pair : mPrograms)
+        {
+            auto* impl = static_cast<ProgImpl*>(pair.second.get());
+            impl->BeginFrame();
+        }
+    }
+    virtual void EndFrame() override
+    { 
+        mFrameNumber++; 
+    }
+
 private:
     struct NativeState {
         int gl_blend_src_rgb   = 0;
@@ -606,6 +646,8 @@ private:
 
         virtual unsigned GetHeight() const override
         { return mHeight; }
+        virtual void EnableGarbageCollection(bool gc) override
+        { mEnableGC = gc; }
 
         void bind(GLuint unit)
         {
@@ -644,6 +686,13 @@ private:
         GLuint GetName() const
         { return mName; }
 
+        void SetLastUseFrameNumber(size_t frame_number)
+        { mFrameNumber = frame_number; }
+        size_t GetLastUsedFrameNumber() const 
+        { return mFrameNumber; }
+        bool IsEligibleForGarbageCollection() const 
+        { return mEnableGC; }
+
     private:
         GLuint mName = 0;
     private:
@@ -652,6 +701,8 @@ private:
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
+        std::size_t mFrameNumber = 0;
+        bool mEnableGC = false;
     };
 
     class GeomImpl : public Geometry, protected QOpenGLFunctions
@@ -700,7 +751,10 @@ private:
             else if (mDrawType == DrawType::Points)
                 GL_CHECK(glDrawArrays(GL_POINTS, 0, mData.size()));
         }
+        void SetLastUseFrameNumber(size_t frame_number)
+        { mFrameNumber = frame_number; }        
     private:
+        std::size_t mFrameNumber = 0;
         std::vector<Vertex> mData;
         DrawType mDrawType = DrawType::Triangles;
     };
@@ -838,6 +892,11 @@ private:
             GL_CHECK(glActiveTexture(GL_TEXTURE0 + unit));
             GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture_name));
             GL_CHECK(glUniform1i(ret, unit));
+
+            // keep track of textures being used so that if/when this
+            // program is actually used to draw stuff we can realize
+            // which textures have actually been used to draw.
+            mFrameTextures.push_back(const_cast<TextureImpl*>(&texture_impl));
         }
 
         void SetState() //const
@@ -847,10 +906,26 @@ private:
         GLuint GetName() const
         { return mProgram; }
 
+        void SetLastUseFrameNumber(size_t frame_number)
+        { 
+            mFrameNumber = frame_number; 
+            for (auto* texture : mFrameTextures)
+            {
+                texture->SetLastUseFrameNumber(frame_number);
+            }
+        }
+        void BeginFrame()
+        {
+            mFrameTextures.clear();
+        }
+        size_t GetLastUsedFrameNumber() const 
+        { return mFrameNumber; }
+
     private:
         GLuint mProgram = 0;
         GLuint mVersion = 0;
-
+        std::vector<TextureImpl*> mFrameTextures;
+        std::size_t mFrameNumber = 0;
     };
 
     class ShaderImpl : public Shader, protected QOpenGLFunctions
@@ -943,6 +1018,7 @@ private:
     std::map<std::string, std::unique_ptr<Shader>> mShaders;
     std::map<std::string, std::unique_ptr<Program>> mPrograms;
     std::map<std::string, std::unique_ptr<Texture>> mTextures;
+    std::size_t mFrameNumber = 0;
 };
 
 // static

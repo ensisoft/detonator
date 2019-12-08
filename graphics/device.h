@@ -115,6 +115,18 @@ namespace gfx
 
         virtual void SetState(const StateBuffer& state) = 0;
 
+        // Delete GPU resources that are no longer being used and that are
+        // eligible for garbage collection (i.e. are marked as okay to delete).
+        // Resources that have not been used in the last N frames can be deleted.
+        // For example if a texture was last used to render frame N and we're
+        // currently at frame N+max_num_idle_frames then the texture is deleted.
+        virtual void CleanGarbage(size_t max_num_idle_frames) = 0;
+
+        // Prepare the device for the next frame.
+        virtual void BeginFrame() = 0;
+        // End redering a frame.
+        virtual void EndFrame() = 0;
+
         static
         std::shared_ptr<Device> Create(Type type);
     private:

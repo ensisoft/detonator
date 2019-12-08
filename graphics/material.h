@@ -450,6 +450,7 @@ namespace gfx
             if (!texture) 
             {
                 texture = device.MakeTexture(name);
+                texture->EnableGarbageCollection(true);
                 const auto& bmp = mText.Rasterize();
                 texture->Upload(bmp->GetData(), bmp->GetWidth(), bmp->GetHeight(), 
                     Texture::Format::Grayscale);                                
