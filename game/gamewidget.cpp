@@ -1353,34 +1353,40 @@ public:
     Scoreboard(unsigned score, unsigned bonus, bool isHighScore, int unlockedLevel)
     {
         mText.append("Level complete!\n\n");
-        mText.append(QString("You scored %1 points\n").arg(score));
-        mText.append(QString("Difficulty bonus %1 points\n").arg(bonus));
-        mText.append(QString("Total %1 points\n\n").arg(score + bonus));
+        mText.append(base::FormatString("You scored %1 points\n", score));
+        mText.append(base::FormatString("Difficulty bonus %1 points\n", bonus));
+        mText.append(base::FormatString("Total %1 points\n\n", score + bonus));
 
         if (isHighScore)
             mText.append("New high score!\n");
 
         if (unlockedLevel)
-            mText.append(QString("Level %1 unlocked!\n").arg(unlockedLevel + 1));
+            mText.append(base::FormatString("Level %1 unlocked!\n", unlockedLevel + 1));
 
         mText.append("\nPress any key to continue");
     }
 
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) const override
     {
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkGray);
+        const auto& rc = state.viewRect();
+        const auto& s  = state.getScale();
+        const auto w = rc.width();
+        const auto h = rc.height();
 
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
+        const auto font_size = s.y() / 2;
 
-        painter.setPen(pen);
-        painter.setFont(font);
-        painter.drawText(area, Qt::AlignCenter, mText);
+        gfx::TextBuffer buff(w, h);
+        buff.AddText(mText, "fonts/ARCADE.TTF", font_size);
+        gfx::Transform t;
+        t.MoveTo(0, 0);
+        t.Resize(w, h);
+        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
+        
     }
 
+    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    {}
+    
     virtual void update(float dt) override
     {}
 
@@ -1391,7 +1397,7 @@ public:
     virtual void keyPress(const QKeyEvent* press) override
     {}
 private:
-    QString mText;
+    std::string mText;
 };
 
 
