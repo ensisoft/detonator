@@ -23,13 +23,11 @@
 #pragma once
 
 #include "config.h"
-#include "warnpush.h"
-#  include <QString>
-#include "warnpop.h"
 
 #include <cstddef>
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace invaders
 {
@@ -43,14 +41,14 @@ namespace invaders
             unsigned score = 0;
 
             // enemy representation string.
-            QString  viewstring;
+            std::wstring viewstring;
 
             // the correct killstring to kill the enemy
-            QString  killstring;
+            std::wstring killstring;
 
             // help/description of the enemy
             // (word definition)
-            QString  help;
+            std::wstring help;
         };
 
         // Reset level for the next game play using this level.
@@ -63,7 +61,7 @@ namespace invaders
         Enemy SpawnEnemy();
 
         // Get the human readable name of the level.
-        QString GetName() const
+        std::wstring GetName() const
         { return mName; }
 
         // Get a list of available enemies in this level.
@@ -72,10 +70,10 @@ namespace invaders
 
         // load a list of levels from a level file.
         static
-        std::vector<std::unique_ptr<Level>> LoadLevels(const QString& file);
+        std::vector<std::unique_ptr<Level>> LoadLevels(const std::wstring& file);
 
     private:
-        QString  mName;
+        std::wstring mName;
         std::vector<Enemy> mEnemies;
         std::size_t mRandMax = 0;
     };

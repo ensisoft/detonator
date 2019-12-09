@@ -293,8 +293,8 @@ void Game::SpawnNext()
 
         const auto enemy = mLevel->SpawnEnemy();
         Invader inv;
-        inv.killList.append(enemy.killstring);
-        inv.viewList.append(enemy.viewstring);
+        inv.killList.append(QString::fromStdWString(enemy.killstring));
+        inv.viewList.append(QString::fromStdWString(enemy.viewstring));
         inv.score      = enemy.score;
         inv.ypos       = row;
         inv.xpos       = mWidth  + queue;
@@ -312,8 +312,8 @@ void Game::SpawnNext()
         if (!(std::rand() % 6))
         {
             const auto enemy = mLevel->SpawnEnemy();
-            inv.killList.append(enemy.killstring);
-            inv.viewList.append(enemy.viewstring);
+            inv.killList.append(QString::fromStdWString(enemy.killstring));
+            inv.viewList.append(QString::fromStdWString(enemy.viewstring));
             inv.score *= 2;
             inv.speed  = 1;
         }
@@ -356,8 +356,8 @@ void Game::SpawnBoss()
     for (int i=0; i<5; ++i)
     {
         const auto enemy = mLevel->SpawnEnemy();
-        boss.viewList.append(enemy.viewstring);
-        boss.killList.append(enemy.killstring);
+        boss.viewList.append(QString::fromStdWString(enemy.viewstring));
+        boss.killList.append(QString::fromStdWString(enemy.killstring));
         boss.score += enemy.score;
     }
     boss.score *= 17;

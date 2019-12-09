@@ -1688,9 +1688,11 @@ private:
             painter.setPen(normal);
         }
 
+        const auto& name = QString::fromStdWString(level.GetName());
+
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter,
-            QString("Level %1\n%2\n%3").arg(index+1).arg(level.GetName()).arg(locked));
+            QString("Level %1\n%2\n%3").arg(index+1).arg(name).arg(locked));
     }
 
 private:
@@ -2088,11 +2090,11 @@ private:
             painter.setFont(bigFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
                 QString("%1 %2\n\n")
-                .arg(e.viewstring)
-                .arg(e.killstring));
+                .arg(QString::fromStdWString(e.viewstring))
+                .arg(QString::fromStdWString(e.killstring)));
             painter.setFont(smallFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
-                QString("\n\n\n%1").arg(e.help));
+                QString("\n\n\n%1").arg(QString::fromStdWString(e.help)));
         }
 
         static unsigned text_blink = 0;
@@ -2435,21 +2437,17 @@ GameWidget::~GameWidget() = default;
 
 void GameWidget::loadLevels(const QString& file)
 {
-    mLevels = Level::LoadLevels(file);
+    mLevels = Level::LoadLevels(file.toStdWString());
 
     for (const auto& level : mLevels)
     {
         LevelInfo info;
         info.highScore = 0;
-        info.name      = level->GetName();
+        info.name      = QString::fromStdWString(level->GetName());
         info.locked    = true;
         mLevelInfos.push_back(info);
         if (!level->Validate())
-        {
-            auto name  = level->GetName();
-            auto ascii = name.toStdString();
-            qFatal("Level is broken: %s!", ascii.c_str());
-        }
+            throw std::runtime_error(base::FormatString("Broken level detected: '%s'", level->GetName()));
     }
     mLevelInfos[0].locked = false;
 }

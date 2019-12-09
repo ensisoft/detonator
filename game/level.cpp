@@ -127,11 +127,8 @@ bool Level::Validate() const
             if (mEnemies[j].killstring == mEnemies[i].killstring)
                 continue;
             // catch a case of "shuo" and "shu"
-            if (mEnemies[j].killstring.startsWith(mEnemies[i].killstring))
-            {
-                qDebug() << mEnemies[j].killstring << " - " << mEnemies[i].killstring;
+            if (mEnemies[j].killstring.find(mEnemies[i].killstring) == std::wstring::size_type(0))
                 return false;
-            }
         }
     }
     return true;
@@ -151,9 +148,9 @@ Level::Enemy Level::SpawnEnemy()
     return r;
 }
 
-std::vector<std::unique_ptr<Level>> Level::LoadLevels(const QString& file)
+std::vector<std::unique_ptr<Level>> Level::LoadLevels(const std::wstring& file)
 {
-    QFile io(file);
+    QFile io(QString::fromStdWString(file));
     if (!io.open(QIODevice::ReadOnly))
         throw std::runtime_error("failed to load levels");
 
@@ -169,7 +166,7 @@ std::vector<std::unique_ptr<Level>> Level::LoadLevels(const QString& file)
             continue;
 
         std::unique_ptr<Level> next(new Level);
-        next->mName = readLine(stream);
+        next->mName = readLine(stream).toStdWString();
 
         // read the enemy data
         bool end = false;
@@ -186,10 +183,10 @@ std::vector<std::unique_ptr<Level>> Level::LoadLevels(const QString& file)
                 throw std::runtime_error("level data format error");
 
             Level::Enemy enemy;
-            enemy.viewstring = toks[0];
-            enemy.killstring = toks[1];
+            enemy.viewstring = toks[0].toStdWString();
+            enemy.killstring = toks[1].toStdWString();
             enemy.score      = toks[2].toInt();
-            enemy.help       = joinTokens(toks, 3);
+            enemy.help       = joinTokens(toks, 3).toStdWString();
             next->mEnemies.push_back(enemy);
         }
         if (!end)
