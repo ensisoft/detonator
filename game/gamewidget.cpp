@@ -1722,22 +1722,15 @@ public:
     virtual void keyPress(const QKeyEvent* event) override
     {}
 
-    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const override
     {
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkGray);
+        const auto& rc = transform.viewRect();
+        const auto& s  = transform.getScale();
+        const auto w = rc.width();
+        const auto h = rc.height();
 
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
-
-        auto str = QString("%1").arg(LevelUnlockCriteria * 100, 0, 'f', 0);
-
-        painter.setPen(pen);
-        painter.setFont(font);
-        painter.drawText(rect, Qt::AlignCenter,
-            QString("Kill the invaders by typing the correct pinyin.\n"
+        gfx::TextBuffer buff(w, h);
+        buff.AddText(base::FormatString("Kill the invaders by typing the correct pinyin.\n"
             "You get scored based on how fast you kill and\n"
             "how complicated the characters are.\n\n"
             "Invaders that approach the left edge will show\n"
@@ -1747,8 +1740,16 @@ public:
             "Type BOMB to ignite a bomb.\n"
             "Type WARP to enter a time warp.\n"
             "Press Space to clear the input.\n\n"
-            "Press Esc to exit\n").arg(str));
+            "Press Esc to exit\n", (int)(LevelUnlockCriteria * 100)),
+            "fonts/ARCADE.TTF", s.y() / 2);
+        gfx::Transform t;
+        t.MoveTo(0, 0);
+        t.Resize(w, h);
+        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
     }
+
+    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
+    {}
 private:
 };
 
