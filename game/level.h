@@ -37,13 +37,13 @@ namespace invaders
     class Level
     {
     public:
-        struct enemy {
+        struct Enemy {
 
             // the points you get for killing this bastard
-            unsigned score;
+            unsigned score = 0;
 
             // enemy representation string.
-            QString  string;
+            QString  viewstring;
 
             // the correct killstring to kill the enemy
             QString  killstring;
@@ -53,32 +53,30 @@ namespace invaders
             QString  help;
         };
 
-        Level();
-       ~Level();
+        // Reset level for the next game play using this level.
+        void Reset();
 
-        // load data from the a single file
-        void load(const QString& file);
+        // Validate that the loaded contents are valid.
+        bool Validate() const;
 
-        void reset();
+        // Spawn a new enemy.
+        Enemy SpawnEnemy();
 
-        bool validate() const;
+        // Get the human readable name of the level.
+        QString GetName() const
+        { return mName; }
 
-        // spawn a new enemy
-        enemy spawn();
-
-        QString name() const
-        { return name_; }
-
-        // get a list of available enemies in this level.
-        const std::vector<enemy>& getEnemies() const
-        { return enemies_; }
+        // Get a list of available enemies in this level.
+        const std::vector<Enemy>& GetEnemies() const
+        { return mEnemies; }
 
         // load a list of levels from a level file.
-        static std::vector<std::unique_ptr<Level>> loadLevels(const QString& file);
+        static
+        std::vector<std::unique_ptr<Level>> LoadLevels(const QString& file);
 
     private:
-        QString  name_;
-        std::vector<enemy> enemies_;
-        std::size_t randMax_;
+        QString  mName;
+        std::vector<Enemy> mEnemies;
+        std::size_t mRandMax = 0;
     };
 } // invaders

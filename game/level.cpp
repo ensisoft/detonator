@@ -97,54 +97,12 @@ QString joinTokens(const QStringList& toks, int from)
 namespace invaders
 {
 
-Level::Level()
+void Level::Reset()
 {
-    reset();
+    mRandMax = mEnemies.size();
 }
 
-Level::~Level()
-{}
-
-void Level::load(const QString& file)
-{
-    QFile io(file);
-    if (!io.open(QIODevice::ReadOnly))
-        throw std::runtime_error("failed to load levels");
-
-    QTextStream stream(&io);
-    stream.setCodec("UTF-8");
-
-    const auto beg = readLine(stream);
-    if (beg != "BEGIN")
-        throw std::runtime_error("no level begin was found");
-
-    name_ = readLine(stream);
-
-    // read the enemy data
-    while (!stream.atEnd())
-    {
-        const auto line = readLine(stream);
-        if (line == "END")
-            break;
-        const auto toks = line.split(" ", QString::SkipEmptyParts);
-        if (toks.size() < 3)
-            throw std::runtime_error("level data format error");
-
-        Level::enemy enemy;
-        enemy.string     = toks[0];
-        enemy.killstring = toks[1];
-        enemy.score      = toks[2].toInt();
-        enemy.help       = joinTokens(toks, 3);
-        enemies_.push_back(enemy);
-    }
-}
-
-void Level::reset()
-{
-    randMax_ = enemies_.size();
-}
-
-bool Level::validate() const
+bool Level::Validate() const
 {
     // scan the contents of the level data to make sure that
     // we don't have any problems.
@@ -158,20 +116,20 @@ bool Level::validate() const
     // easist fix for this problem is to make sure that levels do not
     // contain data where syllables are each others prefix.
 
-    for (size_t i=0; i<enemies_.size(); ++i)
+    for (size_t i=0; i<mEnemies.size(); ++i)
     {
-        for (size_t j=0; j<enemies_.size(); ++j)
+        for (size_t j=0; j<mEnemies.size(); ++j)
         {
             // don't compare to self
             if (j == i) continue;
             // we can have for example "zuo" and "zuo" with different meaning.
             // this is fine.
-            if (enemies_[j].killstring == enemies_[i].killstring)
+            if (mEnemies[j].killstring == mEnemies[i].killstring)
                 continue;
             // catch a case of "shuo" and "shu"
-            if (enemies_[j].killstring.startsWith(enemies_[i].killstring))
+            if (mEnemies[j].killstring.startsWith(mEnemies[i].killstring))
             {
-                qDebug() << enemies_[j].killstring << " - " << enemies_[i].killstring;
+                qDebug() << mEnemies[j].killstring << " - " << mEnemies[i].killstring;
                 return false;
             }
         }
@@ -180,20 +138,20 @@ bool Level::validate() const
 
 }
 
-Level::enemy Level::spawn()
+Level::Enemy Level::SpawnEnemy()
 {
-    const auto n = std::rand() % randMax_;
-    const auto r = enemies_[n];
-    std::swap(enemies_[n], enemies_[randMax_-1]);
+    const auto n = std::rand() % mRandMax;
+    const auto r = mEnemies[n];
+    std::swap(mEnemies[n], mEnemies[mRandMax - 1]);
 
-    if (randMax_ > 1)
-        randMax_--;
-    else randMax_ = enemies_.size();
+    if (mRandMax > 1)
+        mRandMax--;
+    else mRandMax = mEnemies.size();
 
     return r;
 }
 
-std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
+std::vector<std::unique_ptr<Level>> Level::LoadLevels(const QString& file)
 {
     QFile io(file);
     if (!io.open(QIODevice::ReadOnly))
@@ -211,7 +169,7 @@ std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
             continue;
 
         std::unique_ptr<Level> next(new Level);
-        next->name_ = readLine(stream);
+        next->mName = readLine(stream);
 
         // read the enemy data
         bool end = false;
@@ -227,12 +185,12 @@ std::vector<std::unique_ptr<Level>> Level::loadLevels(const QString& file)
             if (toks.size() < 3)
                 throw std::runtime_error("level data format error");
 
-            Level::enemy enemy;
-            enemy.string     = toks[0];
+            Level::Enemy enemy;
+            enemy.viewstring = toks[0];
             enemy.killstring = toks[1];
             enemy.score      = toks[2].toInt();
             enemy.help       = joinTokens(toks, 3);
-            next->enemies_.push_back(enemy);
+            next->mEnemies.push_back(enemy);
         }
         if (!end)
             throw std::runtime_error("no end in sight...");

@@ -291,10 +291,10 @@ void Game::SpawnNext()
         assert(row <= mSlots.size());
         const auto queue = mSlots[row];
 
-        const auto enemy = mLevel->spawn();
+        const auto enemy = mLevel->SpawnEnemy();
         Invader inv;
         inv.killList.append(enemy.killstring);
-        inv.viewList.append(enemy.string);
+        inv.viewList.append(enemy.viewstring);
         inv.score      = enemy.score;
         inv.ypos       = row;
         inv.xpos       = mWidth  + queue;
@@ -311,9 +311,9 @@ void Game::SpawnNext()
 
         if (!(std::rand() % 6))
         {
-            const auto enemy = mLevel->spawn();
+            const auto enemy = mLevel->SpawnEnemy();
             inv.killList.append(enemy.killstring);
-            inv.viewList.append(enemy.string);
+            inv.viewList.append(enemy.viewstring);
             inv.score *= 2;
             inv.speed  = 1;
         }
@@ -355,8 +355,8 @@ void Game::SpawnBoss()
 
     for (int i=0; i<5; ++i)
     {
-        const auto enemy = mLevel->spawn();
-        boss.viewList.append(enemy.string);
+        const auto enemy = mLevel->SpawnEnemy();
+        boss.viewList.append(enemy.viewstring);
         boss.killList.append(enemy.killstring);
         boss.score += enemy.score;
     }

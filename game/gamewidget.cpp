@@ -1690,7 +1690,7 @@ private:
 
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter,
-            QString("Level %1\n%2\n%3").arg(index+1).arg(level.name()).arg(locked));
+            QString("Level %1\n%2\n%3").arg(index+1).arg(level.GetName()).arg(locked));
     }
 
 private:
@@ -1999,7 +1999,7 @@ public:
             if (key == Qt::Key_Space)
             {
                 std::srand(0x7f6a4b);
-                mLevel.reset();
+                mLevel.Reset();
                 mGame.Play(&mLevel, mSetup);
                 mState = GameState::Playing;
             }
@@ -2068,7 +2068,7 @@ private:
         smallFont.setFamily("Arcade");
         smallFont.setPixelSize(scale.y() / 3);
 
-        const auto& enemies = mLevel.getEnemies();
+        const auto& enemies = mLevel.GetEnemies();
         const auto cols = 3;
         const auto rows = (enemies.size() / cols) + 2;
 
@@ -2088,7 +2088,7 @@ private:
             painter.setFont(bigFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
                 QString("%1 %2\n\n")
-                .arg(e.string)
+                .arg(e.viewstring)
                 .arg(e.killstring));
             painter.setFont(smallFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
@@ -2435,18 +2435,18 @@ GameWidget::~GameWidget() = default;
 
 void GameWidget::loadLevels(const QString& file)
 {
-    mLevels = Level::loadLevels(file);
+    mLevels = Level::LoadLevels(file);
 
     for (const auto& level : mLevels)
     {
         LevelInfo info;
         info.highScore = 0;
-        info.name      = level->name();
+        info.name      = level->GetName();
         info.locked    = true;
         mLevelInfos.push_back(info);
-        if (!level->validate())
+        if (!level->Validate())
         {
-            auto name  = level->name();
+            auto name  = level->GetName();
             auto ascii = name.toStdString();
             qFatal("Level is broken: %s!", ascii.c_str());
         }
@@ -2868,7 +2868,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
 
                 const auto& profile = mProfiles[profileIndex];
                 const auto& level   = mLevels[levelIndex];
-                DEBUG("Start game: %1 / %2", level->name(), profile.name);
+                DEBUG("Start game: %1 / %2", level->GetName(), profile.name);
 
                 Game::Setup setup;
                 setup.numEnemies    = profile.numEnemies;
