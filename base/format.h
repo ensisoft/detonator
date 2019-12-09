@@ -33,6 +33,8 @@
 
 #include <sstream>
 #include <string>
+#include <locale>
+#include <codecvt>
 
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
@@ -70,6 +72,15 @@ namespace base
             ss << value;
             return ss.str();
         }
+        inline std::string ToString(const std::wstring& s)
+        { 
+            //setup converter
+            using convert_type = std::codecvt_utf8<wchar_t>;
+            std::wstring_convert<convert_type, wchar_t> converter;            
+            std::string converted_str = converter.to_bytes(s);
+            return converted_str;
+        }
+
         inline std::string ToString(const std::string& s)
         { return s; }
         inline std::string ToString(int value)
