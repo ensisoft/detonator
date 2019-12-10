@@ -21,74 +21,36 @@
 //  THE SOFTWARE.
 
 #include "config.h"
-#include "warnpush.h"
-#  include <QTextStream>
-#  include <QDir>
-#  include <QFile>
-#  include <QtDebug>
-#include "warnpop.h"
 
 #include <stdexcept>
-#include <cstdlib>
-#include <cassert>
+#include <sstream>
+#include <fstream>
 
+#include "base/utility.h"
+#include "base/format.h"
 #include "level.h"
 
 namespace {
 
-QString readLine(QTextStream& stream)
+std::vector<std::string> Split(const std::string& s)
 {
-    QString line;
-    while (!stream.atEnd())
+    std::vector<std::string> ret;
+    std::stringstream ss(s);
+    while (ss.good())
     {
-        line = stream.readLine();
-        if (line.isEmpty())
-            continue;
-        if (line[0] == '#')
-            continue;
-        break;
+        std::string tok;
+        ss >> tok;
+        ret.push_back(std::move(tok));
     }
-    return line;
-}
-
-unsigned readInt(QTextStream& stream, const QString& key)
-{
-    const auto line = readLine(stream);
-    const auto toks = line.split("=", QString::SkipEmptyParts);
-    if (toks.size() != 2)
-        throw std::runtime_error("unexpected data");
-
-    const auto tok = toks[0].trimmed();
-
-    if (tok != key)
-        throw std::runtime_error("invalid key");
-
-    const auto ret = toks[1].toUInt();
     return ret;
 }
 
-QString readStr(QTextStream& stream, const QString& key)
+std::string Concat(const std::vector<std::string>& toks, size_t from)
 {
-    const auto line = readLine(stream);
-    const auto toks = line.split("=", QString::SkipEmptyParts);
-    if (toks.size() != 2)
-        throw std::runtime_error("unexpected data");
+    std::string ret;
+    for (; from < toks.size(); ++from)
+        ret += (toks[from] + " ");
 
-    const auto tok = toks[0].trimmed();
-    if (tok != key)
-        throw std::runtime_error("invalid key");
-
-    return toks[1].trimmed();
-}
-
-QString joinTokens(const QStringList& toks, int from)
-{
-    QString ret;
-    for (int i=from; i < toks.size(); ++i)
-    {
-        ret.append(toks[i]);
-        ret.append(" ");
-    }
     return ret;
 }
 
@@ -150,51 +112,63 @@ Level::Enemy Level::SpawnEnemy()
 
 std::vector<std::unique_ptr<Level>> Level::LoadLevels(const std::wstring& file)
 {
-    QFile io(QString::fromStdWString(file));
-    if (!io.open(QIODevice::ReadOnly))
-        throw std::runtime_error("failed to load levels");
+#if defined(WINDOWS_OS)
+    std::fstream in(file); // msvs extension
+#elif defined(LINUX_OS)
+    std::fstream in(base::ToUtf8(file), std::ios::in | std::ios::binary);
+#endif
+    if (!in.is_open())
+        throw std::runtime_error("Failed to open file: " + base::detail::ToString(file));
 
-    QTextStream stream(&io);
-    stream.setCodec("UTF-8");
+    std::vector<std::unique_ptr<Level>> levels;
 
-    std::vector<std::unique_ptr<Level>> ret;
-
-    while (!stream.atEnd())
+    while (in.good() && !in.eof())
     {
-        const auto line = readLine(stream);
-        if (line != "BEGIN")
+        std::string line;
+        std::getline(in, line);
+        if (line.empty())
+            continue;
+        else if (line[0] == '#')
+            continue;
+        else if (line != "BEGIN")
             continue;
 
-        std::unique_ptr<Level> next(new Level);
-        next->mName = readLine(stream).toStdWString();
+        std::getline(in, line);
+
+        auto level = std::make_unique<Level>();
+        level->mName = base::FromUtf8(line);
 
         // read the enemy data
-        bool end = false;
-        while (!stream.atEnd())
+        bool read_end = false;
+        while (in.good() && !in.eof())
         {
-            const auto line = readLine(stream);
-            if (line == "END")
-            {
-                end = true;
+            std::string line;
+            std::getline(in, line);
+            if (line.empty())
+                continue;
+            else if(line[0] == '#')
+                continue;
+            else if (line == "END") {
+                read_end = true;
                 break;
             }
-            const auto toks = line.split(" ", QString::SkipEmptyParts);
+            const auto& toks = Split(line);
             if (toks.size() < 3)
-                throw std::runtime_error("level data format error");
+                throw std::runtime_error("Level data format error: " + line);
 
             Level::Enemy enemy;
-            enemy.viewstring = toks[0].toStdWString();
-            enemy.killstring = toks[1].toStdWString();
-            enemy.score      = toks[2].toInt();
-            enemy.help       = joinTokens(toks, 3).toStdWString();
-            next->mEnemies.push_back(enemy);
+            enemy.viewstring  = base::FromUtf8(toks[0]);
+            enemy.killstring  = base::FromUtf8(toks[1]);
+            enemy.score       = std::stoul(toks[2]);
+            enemy.help        = base::FromUtf8(Concat(toks, 3));
+            level->mEnemies.push_back(std::move(enemy));
         }
-        if (!end)
-            throw std::runtime_error("no end in sight...");
+        if (!read_end)
+            throw std::runtime_error("Level data is corrupt. No END marker was found.");
 
-        ret.push_back(std::move(next));
+        levels.push_back(std::move(level));
     }
-    return ret;
+    return levels;
 }
 
 } // invaders

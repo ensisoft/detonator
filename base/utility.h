@@ -23,6 +23,9 @@
 #pragma once
 
 #include <memory> // for unique_ptr
+#include <string>
+#include <locale>
+#include <codecvt>
 
 namespace base
 {
@@ -33,5 +36,26 @@ std::unique_ptr<T, Deleter> make_unique_ptr(T* ptr, Deleter del)
     return std::unique_ptr<T, Deleter>(ptr, del);
 }
 
+inline
+std::string ToUtf8(const std::wstring& str)
+{
+    // this way of converting is depcreated since c++17 but
+    // this works good enough for now so we'll go with it.
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;            
+    std::string converted_str = converter.to_bytes(str);
+    return converted_str;    
+}
+
+inline 
+std::wstring FromUtf8(const std::string& str)
+{
+    // this way of converting is deprecated since c++17 but
+    // this works good enough for now so we'll go with it.
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;                
+    std::wstring converted_str = converter.from_bytes(str);
+    return converted_str;
+}
 
 } // base
