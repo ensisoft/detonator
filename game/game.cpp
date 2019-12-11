@@ -140,7 +140,7 @@ bool Game::FireMissile(const Game::Missile& missile)
 
     inv.viewList.pop_front();
     inv.killList.pop_front();
-    if (inv.killList.isEmpty())
+    if (inv.killList.empty())
     {
         inv.score = ComputeKillScore(inv);
         mScore.points += inv.score;
@@ -178,7 +178,7 @@ bool Game::IgniteBomb(const Bomb& b)
 
     auto end = std::partition(std::begin(mInvaders), std::end(mInvaders),
         [&](const Invader& i) {
-            return i.killList.isEmpty();
+            return i.killList.empty();
         });
 
     for (auto it = std::begin(mInvaders); it != end; ++it)
@@ -293,8 +293,8 @@ void Game::SpawnNext()
 
         const auto enemy = mLevel->SpawnEnemy();
         Invader inv;
-        inv.killList.append(QString::fromStdWString(enemy.killstring));
-        inv.viewList.append(QString::fromStdWString(enemy.viewstring));
+        inv.killList.push_back(enemy.killstring);
+        inv.viewList.push_back(enemy.viewstring);
         inv.score      = enemy.score;
         inv.ypos       = row;
         inv.xpos       = mWidth  + queue;
@@ -312,8 +312,8 @@ void Game::SpawnNext()
         if (!(std::rand() % 6))
         {
             const auto enemy = mLevel->SpawnEnemy();
-            inv.killList.append(QString::fromStdWString(enemy.killstring));
-            inv.viewList.append(QString::fromStdWString(enemy.viewstring));
+            inv.killList.push_back(enemy.killstring);
+            inv.viewList.push_back(enemy.viewstring);
             inv.score *= 2;
             inv.speed  = 1;
         }
@@ -356,8 +356,8 @@ void Game::SpawnBoss()
     for (int i=0; i<5; ++i)
     {
         const auto enemy = mLevel->SpawnEnemy();
-        boss.viewList.append(QString::fromStdWString(enemy.viewstring));
-        boss.killList.append(QString::fromStdWString(enemy.killstring));
+        boss.viewList.push_back(enemy.viewstring);
+        boss.killList.push_back(enemy.killstring);
         boss.score += enemy.score;
     }
     boss.score *= 17;

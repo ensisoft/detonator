@@ -2040,8 +2040,9 @@ public:
                 else
                 {
                     Game::Missile missile;
-                    missile.position = mMissileLaunchPosition; // todo: fix this
-                    missile.string   = mCurrentText.toLower();
+                    missile.launch_position_x = mMissileLaunchPosition.x();
+                    missile.launch_position_y = mMissileLaunchPosition.y();
+                    missile.string  = mCurrentText.toLower().toStdWString();
                     if (mGame.FireMissile(missile))
                         mCurrentText.clear();
                 }
@@ -2210,10 +2211,10 @@ GameWidget::GameWidget()
         const auto missileFlyTime   = 500;
         const auto explosionTime    = 1000;
         const auto missileEnd       = invader->getFuturePosition(missileFlyTime, state);
-        const auto missileBeg       = m.position;
+        const auto missileBeg       = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir       = missileEnd - missileBeg;
 
-        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, QString::fromStdWString(m.string).toUpper()));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Smoke> smoke(new Smoke(missileEnd, missileFlyTime + 100, explosionTime + 500));
         std::unique_ptr<Debris> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 500));
@@ -2253,16 +2254,19 @@ GameWidget::GameWidget()
 
         const auto missileFlyTime  = 500;
         const auto missileEnd      =  inv->getFuturePosition(missileFlyTime, state);
-        const auto missileBeg      = m.position;
+        const auto missileBeg      = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir      = missileEnd - missileBeg;
 
-        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, m.string.toUpper()));
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, QString::fromStdWString(m.string).toUpper()));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
 
         sparks->setColor(gfx::Color::DarkGray);
 
-        auto viewString = i.viewList.join("");
-        inv->setViewString(viewString);
+        std::wstring viewstring;
+        for (const auto& s : i.viewList)
+            viewstring += s;
+
+        inv->setViewString(QString::fromStdWString(viewstring));
 
         mAnimations.push_back(std::move(missile));
         mAnimations.push_back(std::move(sparks));
@@ -2287,8 +2291,10 @@ GameWidget::GameWidget()
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
-        auto str = i.viewList.join("");
-        inv->setViewString(str);
+        std::wstring viewstring;
+        for (const auto& s: i.viewList)
+            viewstring += s;
+        inv->setViewString(QString::fromStdWString(viewstring));
     };
 
     mGame->onBomb = [&](const Game::Bomb& b)
@@ -2351,10 +2357,11 @@ GameWidget::GameWidget()
         const auto numSeconds = tick * numTicks;
         const auto velocity   = state.numCols() / numSeconds;
 
-        const auto killString = inv.killList.join("");
-        const auto viewString = inv.viewList.join("");
-
-        std::unique_ptr<Invader> invader(new Invader(pos, viewString, velocity, type));
+        std::wstring viewstring;
+        for (const auto& s : inv.viewList)
+            viewstring += s;
+        
+        std::unique_ptr<Invader> invader(new Invader(pos, QString::fromStdWString(viewstring), velocity, type));
         invader->enableShield(inv.shield_on_ticks != 0);
         mInvaders[inv.identity] = std::move(invader);
     };
@@ -2370,8 +2377,11 @@ GameWidget::GameWidget()
     mGame->onInvaderWarning = [&](const Game::Invader& inv)
     {
         auto it  = mInvaders.find(inv.identity);
-        auto str = inv.killList.join("");
-        it->second->setViewString(str);
+        std::wstring killstr;
+        for (const auto& s : inv.killList)
+            killstr += s;
+
+        it->second->setViewString(QString::fromStdWString(killstr));
     };
 
     mGame->onLevelComplete = [&](const Game::Score& score)

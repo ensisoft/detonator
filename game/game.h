@@ -23,15 +23,10 @@
 #pragma once
 
 #include "config.h"
-#include "warnpush.h"
-#  include <QtGui/QVector2D>
-#  include <QString>
-#  include <QStringList>
-#  include <QElapsedTimer>
-#include "warnpop.h"
 
 #include <memory>
 #include <deque>
+#include <string>
 #include <vector>
 #include <functional>
 
@@ -69,23 +64,24 @@ namespace invaders
             unsigned speed = 0;
             // The list of characters (in Pinyin) required
             // to kill this invader.
-            QStringList killList;
+            std::deque<std::wstring> killList;
             // The list of characters (in Chinese) required
             // to kill this invader.
-            QStringList viewList;
+            std::deque<std::wstring> viewList;
             // The type of the invader. Either boss or normal.
             InvaderType type;
             // True when the shield is on.
-            bool shield;
+            bool shield = false;
             // How many ticks the shield is on.
-            unsigned shield_on_ticks;
+            unsigned shield_on_ticks = 0;
             // How many ticks the shield is off.
-            unsigned shield_off_ticks;
+            unsigned shield_off_ticks = 0;
         };
 
         struct Missile {
-            QVector2D position;
-            QString string;
+            float launch_position_x = 0.0f;
+            float launch_position_y = 0.0f;
+            std::wstring string;
         };
 
         struct Bomb {
