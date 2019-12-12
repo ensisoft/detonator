@@ -40,11 +40,17 @@ namespace gfx
 {
     using u8 = std::uint8_t;
 
+    struct RGB;
+    struct RGBA;
+
     struct Grayscale {
         u8 r = 0;
         Grayscale(u8 r) : r(r) 
         {}
         Grayscale() {}
+        Grayscale(const RGB& rgb); // defined after RGB
+        Grayscale(const RGBA& rgba); // defined after RGBA
+
     };
 
     struct RGB {
@@ -159,6 +165,31 @@ namespace gfx
     inline bool operator!=(const RGBA& lhs, const RGBA& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    // Grayscale methods that depend on RGB/A come here.
+    inline Grayscale::Grayscale(const RGB& rgb)
+    {
+        // assume linear values here.
+        // https://en.wikipedia.org/wiki/Grayscale 
+        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale            
+        const float y = 
+            0.2126f * rgb.r + 
+            0.7252f * rgb.g +
+            0.0722  * rgb.b;
+        r = y / 255.0f;
+    }
+    inline Grayscale::Grayscale(const RGBA& rgba)
+    {
+        // assume linear values
+        // https://en.wikipedia.org/wiki/Grayscale
+        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale            
+        const float a = rgba.a / 255.0f;
+        const float y = 
+            0.2126f * rgba.r +
+            0.7252f * rgba.g +
+            0.0722  * rgba.b;
+        r = (y * a) / 255.0f;
     }
 
     template<typename Pixel>
