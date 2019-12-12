@@ -50,6 +50,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/math.h"
+#include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/text.h"
 #include "graphics/painter.h"
@@ -761,6 +762,20 @@ public:
       , mVelocity(velocity)
       , mShipType(type)
     {
+        // keep in mind that the exact shape of the jet stream depends
+        // on the contours of the ship in the texture. 
+        // for example a ship that has only one exhaust pipe in the 
+        // middle of the ship would not emit exhaust particles for the
+        // entire height of the ship.
+        // therefore we must still look up this data from the image
+        // even if we're not actually using the image data per se anymore.
+        const gfx::Image ship(getShipTextureIdentifier(type));
+        const gfx::Image jet(getJetStreamTextureIdentifier(type));
+        mShipWidth  = ship.GetWidth();
+        mShipHeight = ship.GetHeight();
+        // see comments above about the shape and size of the exhaust area
+        mJetWidth  = jet.GetWidth();
+        mJetHeight = jet.GetHeight();
     }
 
     virtual bool update(float dt, TransformState& state) override
@@ -785,16 +800,14 @@ public:
         const auto spriteScale = state.getScale() * getScale();
         const auto position    = state.toViewSpace(mPosition);
 
-        QPixmap ship = getShipTexture(mShipType);
-        const float shipWidth  = ship.width();
-        const float shipHeight = ship.height();
+        const float shipWidth  = mShipWidth; 
+        const float shipHeight = mShipHeight; 
         const float shipAspect = shipHeight / shipWidth;
         const float shipScaledWidth  = spriteScale.x();
         const float shipScaledHeight = shipScaledWidth * shipAspect;
 
-        QPixmap jet = getJetStreamTexture(mShipType);
-        const float jetWidth  = jet.width();
-        const float jetHeight = jet.height();
+        const float jetWidth  = mJetWidth; 
+        const float jetHeight = mJetHeight; 
         const float jetAspect = jetHeight / jetWidth;
         const float jetScaledWidth  = spriteScale.x();
         const float jetScaledHeight = jetScaledWidth * jetAspect;
@@ -840,11 +853,42 @@ public:
         t.MoveTo(jetStreamRect);
         t.Resize(jetStreamRect);
 
+        // draw the particles first
         painter.Draw(*mParticles, t,
             gfx::TextureFill("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true)
             .SetBaseColor(getJetStreamColor(mShipType)));
+
+        t.MoveTo(shipRect);
+        t.Resize(shipRect);
+        // then draw the ship so that it creates a nice clear cut where
+        // the exhaust particles begin at the end of the ship
+        painter.Draw(gfx::Rectangle(), t, 
+            gfx::TextureFill(getShipTextureIdentifier(mShipType))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+
+        if (mShieldIsOn)
+        {
+            QRectF rect;
+            // we don't bother to calculate the size for the shield properly
+            // in order to cover the whole ship. instead we use a little fudge
+            // factor to expand the shield.
+            const auto fudge = 1.25f;
+            const auto width = shipRect.width();
+            rect.setHeight(width * fudge);
+            rect.setWidth(width * fudge);
+            rect.moveTo(shipRect.topLeft());
+            rect.translate((rect.width()-shipRect.width()) / -2.0f,
+                (rect.height()-shipRect.height()) / -2.0f);
+
+            gfx::Transform t;
+            t.Resize(rect);
+            t.MoveTo(rect);
+            painter.Draw(gfx::Rectangle(), t, 
+                gfx::TextureFill("textures/spr_shield.png")
+                    .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        }                
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -854,16 +898,14 @@ public:
         const auto spriteScale = state.getScale() * getScale();
         const auto position    = state.toViewSpace(mPosition);
 
-        QPixmap ship = getShipTexture(mShipType);
-        const float shipWidth  = ship.width();
-        const float shipHeight = ship.height();
+        const float shipWidth  = mShipWidth;
+        const float shipHeight = mShipHeight;
         const float shipAspect = shipHeight / shipWidth;
         const float shipScaledWidth  = spriteScale.x();
         const float shipScaledHeight = shipScaledWidth * shipAspect;
 
-        QPixmap jet = getJetStreamTexture(mShipType);
-        const float jetWidth  = jet.width();
-        const float jetHeight = jet.height();
+        const float jetWidth  = mJetWidth;
+        const float jetHeight = mJetHeight;
         const float jetAspect = jetHeight / jetWidth;
         const float jetScaledWidth  = spriteScale.x();
         const float jetScaledHeight = jetScaledWidth * jetAspect;
@@ -876,10 +918,6 @@ public:
         // offset it so that the center is aligned with the unit position
         shipRect.moveTo(position -
             QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
-
-        QRectF jetStreamRect = shipRect;
-        jetStreamRect.translate(shipScaledWidth*0.6, (shipScaledHeight - jetScaledHeight) / 2.0);
-        jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
 
         QRectF textRect = shipRect;
         textRect.translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
@@ -894,26 +932,8 @@ public:
         // draw textures
         painter.setFont(font);
         painter.setPen(pen);
-        //painter.drawPixmap(jetStreamRect, jet, jet.rect());
-        painter.drawPixmap(shipRect, ship, ship.rect());
         painter.drawText(textRect, Qt::AlignVCenter, mText);
 
-        if (mShieldIsOn)
-        {
-            QPixmap shield = QPixmap(R("textures/spr_shield.png"));
-            QRectF rect;
-            // we don't bother to calculate the size for the shield properly
-            // in order to cover the whole ship. instead we use a little fudge
-            // factor to expand the shield.
-            const auto fudge = 1.25f;
-            const auto width = shipRect.width();
-            rect.setHeight(width * fudge);
-            rect.setWidth(width * fudge);
-            rect.moveTo(shipRect.topLeft());
-            rect.translate((rect.width()-shipRect.width()) / -2.0f,
-                (rect.height()-shipRect.height()) / -2.0f);
-            painter.drawPixmap(rect, shield, shield.rect());
-        }
 
     }
 
@@ -966,6 +986,16 @@ private:
         };
         return colors[(int)type];
     }
+    static const char* getShipTextureIdentifier(ShipType type)
+    {
+        static const char* textures[] = {
+            "textures/Cricket.png",
+            "textures/Mantis.png",
+            "textures/Scarab.png",
+            "textures/Locust.png"
+        };
+        return textures[(int)type];
+    }
 
     static const QPixmap& getShipTexture(ShipType type)
     {
@@ -1017,6 +1047,12 @@ private:
     float mLifeTime    = 0.0f;
     float mMaxLifeTime = 0.0f;
     float mVelocity    = 0.0f;
+    // texture dimension in pixels
+    unsigned mShipWidth   = 0.0f;
+    unsigned mShipHeight  = 0.0f;
+    // texture dimension in pixels
+    unsigned mJetWidth    = 0.0f;
+    unsigned mJetHeight   = 0.0f;
     std::unique_ptr<ParticleEngine> mParticles;
 private:
     ShipType mShipType = ShipType::Slow;
