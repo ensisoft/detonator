@@ -50,7 +50,6 @@ namespace gfx
         Grayscale() {}
         Grayscale(const RGB& rgb); // defined after RGB
         Grayscale(const RGBA& rgba); // defined after RGBA
-
     };
 
     struct RGB {
@@ -120,6 +119,7 @@ namespace gfx
         {
             r = g = b = grayscale.r;
         }
+        RGB(const RGBA& rgba);
     };
 
     struct RGBA {
@@ -144,6 +144,12 @@ namespace gfx
             r = g = b = grayscale.r;
             a = 255;
         }
+        RGBA(const RGB& rgb)
+        {
+            r = rgb.r;
+            g = rgb.g;
+            b = rgb.b;
+        }
     };
     inline bool operator==(const RGB& lhs, const RGB& rhs)
     {
@@ -165,6 +171,16 @@ namespace gfx
     inline bool operator!=(const RGBA& lhs, const RGBA& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    // RGB methods that depend on RGBA
+    inline RGB::RGB(const RGBA& rgba)
+    {
+        const float a = rgba.a / 255.0f;
+        // bake the alpha in the color channels
+        r = rgba.r * a;
+        g = rgba.g * a;
+        b = rgba.b * a;
     }
 
     // Grayscale methods that depend on RGB/A come here.
