@@ -192,6 +192,13 @@ namespace gfx
         r = (y * a) / 255.0f;
     }
 
+    static_assert(sizeof(Grayscale) == 1, 
+        "Unexpected size of Grayscale pixel struct type.");
+    static_assert(sizeof(RGB) == 3,
+        "Unexpected size of RGB pixel struct type.");
+    static_assert(sizeof(RGBA) == 4,
+        "Unexpected size of RGBA pixel struct type.");
+
     template<typename Pixel>
     class Bitmap
     {
