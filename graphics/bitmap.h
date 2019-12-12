@@ -187,10 +187,10 @@ namespace gfx
     inline Grayscale::Grayscale(const RGB& rgb)
     {
         // assume linear values here.
-        // https://en.wikipedia.org/wiki/Grayscale 
-        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale            
-        const float y = 
-            0.2126f * rgb.r + 
+        // https://en.wikipedia.org/wiki/Grayscale
+        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
+        const float y =
+            0.2126f * rgb.r +
             0.7252f * rgb.g +
             0.0722  * rgb.b;
         r = y / 255.0f;
@@ -199,16 +199,16 @@ namespace gfx
     {
         // assume linear values
         // https://en.wikipedia.org/wiki/Grayscale
-        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale            
+        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
         const float a = rgba.a / 255.0f;
-        const float y = 
+        const float y =
             0.2126f * rgba.r +
             0.7252f * rgba.g +
             0.0722  * rgba.b;
         r = (y * a) / 255.0f;
     }
 
-    static_assert(sizeof(Grayscale) == 1, 
+    static_assert(sizeof(Grayscale) == 1,
         "Unexpected size of Grayscale pixel struct type.");
     static_assert(sizeof(RGB) == 3,
         "Unexpected size of RGB pixel struct type.");
@@ -322,7 +322,7 @@ namespace gfx
             }
         }
 
-        Bitmap(const Bitmap& other) 
+        Bitmap(const Bitmap& other)
             : mPixels(other.mPixels)
             , mWidth(other.mWidth)
             , mHeight(other.mHeight)
@@ -343,7 +343,7 @@ namespace gfx
             mHeight = height;
         }
 
-        // Get a pixel from within the bitmap. 
+        // Get a pixel from within the bitmap.
         // The pixel must be within the this bitmap's width and height.
         Pixel GetPixel(std::size_t row, std::size_t col) const
         {
@@ -354,8 +354,8 @@ namespace gfx
         }
 
         // Set a pixel within the bitmap to a new pixel value.
-        // The pixel's coordinates must be within this bitmap's 
-        // width and height. 
+        // The pixel's coordinates must be within this bitmap's
+        // width and height.
         void SetPixel(std::size_t row, std::size_t col, const Pixel& pixel)
         {
             ASSERT(row < mHeight);
@@ -366,12 +366,13 @@ namespace gfx
 
         // Compare the pixels in this bitmap within the given rectangle
         // against the given reference pixel value using the given
-        // compare functor. 
+        // compare functor.
         // returns false if the compare_functor identifies non-equality
-        // for any pixel. otherwise returns true and all pixels equal 
+        // for any pixel. otherwise returns true and all pixels equal
         // the reference pixel as determined by the compare functor.
-        template<typename Comp>
-        bool Compare(const Rect& rc, const Pixel& reference, Comp compare_functor) const
+        // This is mostly useful as a testing utility.
+        template<typename CompareF>
+        bool Compare(const Rect& rc, const Pixel& reference, CompareF comparer) const
         {
             const auto right  = rc.GetX() + rc.GetWidth();
             const auto bottom = rc.GetY() + rc.GetHeight();
@@ -383,84 +384,40 @@ namespace gfx
                 for (std::size_t x=rc.GetX(); x<xend; ++x)
                 {
                     const auto& px = GetPixel(y, x);
-                    if (!(compare_functor(px, reference)))
+                    if (!(comparer(px, reference)))
                         return false;
                 }
             }
             return true;
         }
-        bool Compare(const Rect& rc, const Pixel& p) const
+
+        // Compare the pixels in this bitmap within the given
+        // rectangle against the given reference pixel and expect
+        // pixel perfect matching.
+        bool Compare(const Rect& rc, const Pixel& reference) const
         {
-            return Compare(rc, p, Pixel2Pixel());
+            return Compare(rc, reference, Pixel2Pixel());
         }
 
-        template<typename Comp>
-        bool Compare(const Pixel& val, Comp c) const
+        // Compare all pixels in this bitmap against the given
+        // reference pixel for equality using the given comparer functor.
+        // Returns false if the compare functor identifies non-equality
+        // for any pixel otherwise true.
+        template<typename ComparerF>
+        bool Compare(const Pixel& reference, ComparerF comparer) const
         {
             const Rect rc(0, 0, mWidth, mHeight);
-            return Compare(rc, val, c);
+            return Compare(rc, reference, comparer);
         }
-        bool Compare(const Pixel& p) const
+
+        // Compare all pixels in this bitmap against the given
+        // reference pixel and expect pixel perfect matching.
+        // Returns false if any pixel doesn't match the reference
+        // otherwise true.
+        bool Compare(const Pixel& reference) const
         {
-            return Compare(p, Pixel2Pixel());
+            return Compare(reference, Pixel2Pixel());
         }
-
-        // Compare the pixels between two pixmaps within the given rectangle using
-        // the given compare functor. 
-        // The rectangle is clipped to stay within the bounds of both bitmaps.
-        // Returns false if the compare functor identifies non-equality for any pixel.
-        // Otherwise returns true the pixels between the two bitmaps compare equal
-        // as determined by the compare functor.
-        template<typename Comp> static
-        bool Compare(const Bitmap& lhs, const Rect& rc, const Bitmap& rhs, Comp compare_functor)
-        {
-            const auto right = rc.GetX() + rc.GetWidth();
-            const auto bottom = rc.GetY() + rc.GetHeight();
-            const auto xend = std::min(right, std::min(lhs.mWidth, rhs.mWidth));
-            const auto yend = std::min(bottom, std::min(lhs.mHeight, rhs.mHeight));
-
-            for (std::size_t y=rc.GetY(); y<yend; ++y)
-            {
-                for (std::size_t x=rc.GetX(); x<xend; ++x)
-                {
-                    const auto& px1  = lhs.GetPixel(y, x);
-                    const auto& px2  = rhs.GetPixel(y, x);
-                    if (!compare_functor(px1, px2))
-                        return false;
-                }
-            }
-            return true;
-        }
-
-        static bool Compare(const Bitmap& lhs, const Rect& rc, const Bitmap& rhs)
-        {
-            return Compare(lhs, rc, rhs, Pixel2Pixel());
-        }
-
-
-        // Compare two bitmaps for equality. The bitmaps are equal
-        // if they have equal dimensions and the given comparison
-        // functor considers each pixel value to be equal.
-        template<typename Comp>
-        static bool Compare(const Bitmap& lhs, const Bitmap& rhs, Comp c)
-        {
-            if (lhs.mHeight != rhs.mHeight)
-                return false;
-            if (lhs.mWidth != rhs.mWidth)
-                return false;
-            const Rect rc (0, 0, lhs.mWidth, lhs.mHeight);
-
-            return Compare(lhs, rc, rhs, c);
-        }
-
-        // Compare two bitmaps for equality. The bitmaps are equal
-        // if the have equal dimensions and all the pixels
-        // have equal pixel values.
-        static bool Compare(const Bitmap& lhs, const Bitmap& rhs)
-        {
-            return Compare(lhs, rhs, Pixel2Pixel());
-        }
-
 
         // Fill the area defined by the rectangle rc with the given pixel value.
         // The rectangle is clipped to the pixmap borders.
@@ -483,7 +440,7 @@ namespace gfx
         // Fill the entire bitmap with the given pixel value.
         void Fill(const Pixel& value)
         {
-            if (sizeof(Pixel) == 1) 
+            if (sizeof(Pixel) == 1)
             {
                 std::memset(&mPixels[0], value.r, mPixels.size());
             }
@@ -519,9 +476,9 @@ namespace gfx
             const auto bottom = y + bmp.GetHeight();
             const auto xend = std::min(right, mWidth);
             const auto yend = std::min(bottom, mHeight);
-            for (size_t row=y; row<yend; ++row) 
+            for (size_t row=y; row<yend; ++row)
             {
-                for (size_t col=x; col<xend; ++col) 
+                for (size_t col=x; col<xend; ++col)
                 {
                     SetPixel(row, col, bmp.GetPixel(row-y, col-x));
                 }
@@ -541,7 +498,7 @@ namespace gfx
         { return mPixels.empty() ? nullptr : &mPixels[0]; }
 
         // Returns true if any dimension is 0
-        bool IsEmpty() const 
+        bool IsEmpty() const
         { return mWidth == 0 || mHeight == 0; }
 
         // Flip the rows of the bitmap around horizontal center line/row.
@@ -549,7 +506,7 @@ namespace gfx
         // aaaa           cccc
         // bbbb  becomes  bbbb
         // cccc           aaaa
-        void FlipHorizontally() 
+        void FlipHorizontally()
         {
             for (unsigned y=0; y<mHeight/2; ++y)
             {
@@ -563,7 +520,7 @@ namespace gfx
             }
         }
 
-        Bitmap& operator=(Bitmap&& other) 
+        Bitmap& operator=(Bitmap&& other)
         {
             if (this == &other)
                 return *this;
@@ -582,11 +539,71 @@ namespace gfx
         template<typename T> friend bool operator!=(const Bitmap<T>& lhs, const Bitmap<T>& rhs);
     };
 
+    // Compare the pixels between two pixmaps within the given rectangle using
+    // the given compare functor.
+    // The rectangle is clipped to stay within the bounds of both bitmaps.
+    // Returns false if the compare functor identifies non-equality for any pixel.
+    // Otherwise returns true the pixels between the two bitmaps compare equal
+    // as determined by the compare functor.
+    template<typename CompareF, typename PixelT>
+    bool Compare(const Bitmap<PixelT>& lhs, const Rect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
+    {
+        const auto right = rc.GetX() + rc.GetWidth();
+        const auto bottom = rc.GetY() + rc.GetHeight();
+        const auto xend = std::min(right, std::min(lhs.GetWidth(), rhs.GetWidth()));
+        const auto yend = std::min(bottom, std::min(lhs.GetHeight(), rhs.GetHeight()));
+
+        for (std::size_t y=rc.GetY(); y<yend; ++y)
+        {
+            for (std::size_t x=rc.GetX(); x<xend; ++x)
+            {
+                const auto& px1  = lhs.GetPixel(y, x);
+                const auto& px2  = rhs.GetPixel(y, x);
+                if (!comparer(px1, px2))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    template<typename PixelT>
+    bool Compare(const Bitmap<PixelT>& lhs, const Rect& rc, const Bitmap<PixelT>& rhs)
+    {
+        using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
+        return Compare(lhs, rc, rhs, ComparerF());
+    }
+
+
+    // Compare two bitmaps for equality. The bitmaps are equal
+    // if they have equal dimensions and the given comparison
+    // functor considers each pixel value to be equal.
+    template<typename CompareF, typename PixelT>
+    bool Compare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs, CompareF comparer)
+    {
+        if (lhs.GetHeight() != rhs.GetHeight())
+            return false;
+        if (lhs.GetWidth != rhs.GetWidth())
+            return false;
+        const Rect rc (0, 0, lhs.GetWidth(), lhs.GetHeight());
+
+        return Compare(lhs, rc, rhs, comparer);
+    }
+
+    // Compare two bitmaps for equality. The bitmaps are equal
+    // if the have equal dimensions and all the pixels
+    // have equal pixel values.
+    template<typename PixelT>
+    bool Compare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs)
+    {
+        using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
+        return Compare(lhs, rhs, ComparerF());
+    }
+
 
     template<typename Pixel>
     bool operator==(const Bitmap<Pixel>& lhs, const Bitmap<Pixel>& rhs)
     {
-        return Bitmap<Pixel>::Compare(lhs, rhs);
+        return Compare(lhs, rhs);
     }
 
     template<typename Pixel>
@@ -607,7 +624,7 @@ namespace gfx
         std::copy(std::begin(header), std::end(header), out);
 
         // todo: fix if out is pointer.
-        static_assert(sizeof(RGB) == 3, 
+        static_assert(sizeof(RGB) == 3,
             "Padding bytes found. Cannot copy RGB data as a byte stream.");
 
         const auto bytes = w * h * sizeof(RGB);
