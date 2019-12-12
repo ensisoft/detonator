@@ -45,7 +45,7 @@ namespace gfx
 
     struct Grayscale {
         u8 r = 0;
-        Grayscale(u8 r) : r(r) 
+        Grayscale(u8 r) : r(r)
         {}
         Grayscale() {}
         Grayscale(const RGB& rgb); // defined after RGB
@@ -227,41 +227,39 @@ namespace gfx
 
         // mean-squared-error
         struct MSE {
+            bool operator()(const Grayscale& lhs, const Grayscale& rhs) const
+            {
+                const auto r = (int)lhs.r - (int)rhs.r;
+                const auto sum = r*r;
+                const auto mse = sum / 1.0;
+                return mse < max_mse;
+            }
+
             bool operator()(const RGB& lhs, const RGB& rhs) const
             {
-                const auto diff = RGB(
-                    lhs.r - rhs.r,
-                    lhs.g - rhs.g,
-                    lhs.b - rhs.b);
+                const auto r = (int)lhs.r - (int)rhs.r;
+                const auto g = (int)lhs.g - (int)rhs.g;
+                const auto b = (int)lhs.b - (int)rhs.b;
 
-                const auto square = RGB(
-                    diff.r * diff.r,
-                    diff.g * diff.g,
-                    diff.b * diff.b);
-
-                const auto sum = square.r + square.g + square.b;
-                const auto mse = (1.0 / 3.0) * sum;
-
+                const auto sum = r*r + g*g + b*b;
+                const auto mse = sum / 3;
                 return mse < max_mse;
             }
             bool operator()(const RGBA& lhs, const RGBA& rhs) const
             {
-                const auto diff = RGBA(
-                    lhs.r - rhs.r,
-                    lhs.g - rhs.g,
-                    lhs.b - rhs.b,
-                    lhs.a - rhs.a);
-                const auto square = RGBA(
-                    diff.r * diff.r,
-                    diff.g * diff.g,
-                    diff.b * diff.b,
-                    diff.a * diff.a);
+                const auto r = (int)lhs.r - (int)rhs.r;
+                const auto g = (int)lhs.g - (int)rhs.g;
+                const auto b = (int)lhs.b - (int)rhs.b;
+                const auto a = (int)lhs.a - (int)rhs.a;
 
-                const auto sum = square.r + square.g + square.b + square.a;
-                const auto mse = (1.0 / 4.0) * sum;
+                const auto sum = r*r + g*g + b*b + a*a;
+                const auto mse = sum / 4.0;
                 return mse < max_mse;
             }
-
+            void SetErrorTreshold(double se)
+            {
+                max_mse = se * se;
+            }
             double max_mse;
         };
 
