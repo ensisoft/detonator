@@ -97,6 +97,7 @@ message(STATUS "${Boost_LIBRARY_DIRS}")
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/game")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/freetype/include")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src/generated")
