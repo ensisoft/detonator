@@ -578,8 +578,8 @@ public:
         const auto pos = state.toViewSpace(mPosition);
 
         gfx::Transform t;
+        t.Resize(pxw, pxh);        
         t.MoveTo(pos - QPointF(pxw/2.0f, pxh/2.0f));
-        t.Resize(pxw, pxh);
         painter.Draw(gfx::Rectangle(), t, mSprite);
 
     }
@@ -850,8 +850,8 @@ public:
         jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
 
         gfx::Transform t;
+        t.Resize(jetStreamRect);        
         t.MoveTo(jetStreamRect);
-        t.Resize(jetStreamRect);
 
         // draw the particles first
         painter.Draw(*mParticles, t,
@@ -860,8 +860,10 @@ public:
             .SetRenderPoints(true)
             .SetBaseColor(getJetStreamColor(mShipType)));
 
-        t.MoveTo(shipRect);
+        t.Reset();
         t.Resize(shipRect);
+        t.MoveTo(shipRect);
+        
         // then draw the ship so that it creates a nice clear cut where
         // the exhaust particles begin at the end of the ship
         painter.Draw(gfx::Rectangle(), t, 
@@ -1311,8 +1313,8 @@ public:
             gfx::TextBuffer::VerticalAlignment::AlignTop);
 
         gfx::Transform t;
+        t.Resize(dim.x()*2, dim.y());        
         t.MoveTo(top);
-        t.Resize(dim.x()*2, dim.y());
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkYellow));
     }
     virtual void paint(QPainter&, TransformState& state) override
@@ -1465,11 +1467,11 @@ public:
         const auto h = rc.height();
 
         gfx::Transform dt, mt;
+        dt.Resize(w, h);        
         dt.MoveTo(x, y);
-        dt.Resize(w, h);
-
-        mt.MoveTo(x, y+2);
+        
         mt.Resize(w, h-4);
+        mt.MoveTo(x, y+2);
         painter.DrawMasked(gfx::Rectangle(), dt, gfx::Rectangle(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
     }
 
@@ -2819,8 +2821,8 @@ void GameWidget::paintEvent(QPaintEvent* paint)
                 gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
                 gfx::TextBuffer::VerticalAlignment::AlignTop);
             gfx::Transform t;
+            t.Resize(100, 100);            
             t.MoveTo(10, 20);
-            t.Resize(100, 100);
             mCustomGraphicsPainter->Draw(gfx::Rectangle(), t, 
                 gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkRed));
         }

@@ -24,72 +24,105 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/gtc/matrix_transform.hpp>
+#  include <glm/gtx/euler_angles.hpp>
+#  include <glm/mat4x4.hpp>
+#include "warnpop.h"
+
 namespace gfx
 {
+    // Express a series of graphics operations such as 
+    // translation, scaling and rotation as a simple 
+    // transform object.
     class Transform
     {
     public:
-        Transform() = default;
-
-        Transform(float sx, float sy, float x, float y)
-          : mScaleX(sx)
-          , mScaleY(sy)
-          , mPosX(x)
-          , mPosY(y)
-        {}
-
+        // Set absolute position. This will override any previously
+        // accumulated translation. 
         void MoveTo(float x, float y)
         {
-            mPosX = x;
-            mPosY = y;
+            mTransform[3] = glm::vec4(x, y, 0.0f, 1.0f);
         }
 
+        // Accumulate a translation to the current transform, i.e.
+        // the the movement is relative to the current position.
+        void Translate(float x, float y)
+        {
+            mTransform = glm::translate(glm::mat4(1.0f), 
+                glm::vec3(x, y, 0.0f)) * mTransform;
+        }
+
+        template<typename T>
+        void Translate(const T& t)
+        {
+            Translate(t.x(), t.y());
+        }
+
+        // Set absolute resize. This will override any previously
+        // accumulated scaling. 
         void Resize(float sx, float sy)
         {
-            mScaleX = sx;
-            mScaleY = sy;
+            mTransform = glm::scale(glm::mat4(1.0f), 
+                glm::vec3(1.0f/mScale.x, 1.0f/mScale.y, 1.0f)) * mTransform;
+            mTransform = glm::scale(glm::mat4(1.0f), 
+                glm::vec3(sx, sy, 1.0f)) * mTransform;
+            mScale = glm::vec2(sx, sy);
         }
 
+        // Accumulate a scaling operation to the current transform, i.e.
+        // the scaling is relative to the current transform.
+        void Scale(float sx, float sy)
+        {
+            mTransform = glm::scale(glm::mat4(1.0f), 
+                glm::vec3(sx, sy, 1.0f)) * mTransform;
+            mScale *= glm::vec2(sx, sy);
+        }
+
+        template<typename T>
+        void Scale(const T& t)
+        {
+            Scale(t.width(), t.height());
+        }
+
+        // Accumulate rotation to the current transformation
+        void Rotate(float radians)
+        {
+            mTransform = glm::eulerAngleZ(radians) * mTransform;
+        }
+
+        // Set absolute position. This will override any previously
+        // accumulated translation. Works with any type T that has
+        // x() and y() methods.
         template<typename T>
         void MoveTo(const T& t)
         {
-            mPosX = t.x();
-            mPosY = t.y();
+            MoveTo(t.x(),t.y());
         }
 
+        // Set absolute resize. This will override any previously
+        // accumulated scaling. Works with any type T that has
+        // width() and height() methods.
         template<typename T>
         void Resize(const T& t)
         {
-            mScaleX = t.width();
-            mScaleY = t.height();
+            Resize(t.width(), t.height());
         }
 
-        // around the depth axis, positive angle (expressed in degrees)
-        // is clockwise rotation.
-        void Rotate(float degrees)
-        { mRotation = degrees; }
+        // Reset any transformation to identity, i.e. no transformation.
+        void Reset()
+        {
+            mTransform = glm::mat4(1.0f);
+            mScale = glm::vec2(1.0f, 1.0f);
+        }
 
-        float GetWidth() const
-        { return mScaleX; }
-
-        float GetHeight() const
-        { return mScaleY; }
-
-        float GetXPosition() const
-        { return mPosX; }
-
-        float GetYPosition() const
-        { return mPosY; }
-
-        float GetRotation() const
-        { return mRotation; }
+        // Get the transformation expressed as a matrix.
+        const glm::mat4& GetAsMatrix() const 
+        { return mTransform; }
 
     private:
-        float mScaleX = 1.0f;
-        float mScaleY = 1.0f;
-        float mPosX = 0.0f;
-        float mPosY = 0.0f;
-        float mRotation = 0.0f;
+        glm::mat4 mTransform = glm::mat4(1.0f);
+        glm::vec2 mScale = glm::vec2(1.0f, 1.0f);
     };
 
 } // namespace

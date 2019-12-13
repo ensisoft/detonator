@@ -77,9 +77,7 @@ public:
         // create simple orthographic projection matrix. 
         // 0,0 is the window top left, x grows left and y grows down
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
-        const auto& kViewMatrix = 
-            glm::translate(glm::mat4(1.0), glm::vec3(transform.GetXPosition(), transform.GetYPosition(), 0.0f)) *
-            glm::scale(glm::mat4(1.0), glm::vec3(transform.GetWidth(), transform.GetHeight(), 1.0f));
+        const auto& kViewMatrix = transform.GetAsMatrix();
 
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
@@ -120,12 +118,8 @@ public:
         // create simple orthographic projection matrix. 
         // 0,0 is the window top left, x grows left and y grows down
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
-        const auto& kViewMatrixDrawShape = 
-            glm::translate(glm::mat4(1.0), glm::vec3(drawTransform.GetXPosition(), drawTransform.GetYPosition(), 0.0f)) *
-            glm::scale(glm::mat4(1.0), glm::vec3(drawTransform.GetWidth(), drawTransform.GetHeight(), 1.0f));        
-        const auto& kViewMatrixMaskShape = 
-            glm::translate(glm::mat4(1.0), glm::vec3(maskTransform.GetXPosition(), maskTransform.GetYPosition(), 0.0f)) *
-            glm::scale(glm::mat4(1.0), glm::vec3(maskTransform.GetWidth(), maskTransform.GetHeight(), 1.0f));                    
+        const auto& kViewMatrixDrawShape = drawTransform.GetAsMatrix();
+        const auto& kViewMatrixMaskShape = maskTransform.GetAsMatrix();
 
         Device::State state;
         state.viewport         = Rect(mViewX, mViewY, mViewW, mViewH);
