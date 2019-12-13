@@ -70,71 +70,94 @@ namespace gfx
     private:
     };
 
-    class ColorFill : public Material
+    // This material will fill the drawn shape with solid color value.
+    class SolidColor : public Material
     {
     public:
-        ColorFill()
+        // Construct with default color value.
+        // You can  use SetColor later to set the desired color.
+        SolidColor() = default;
+        // Construct with the given color value.
+        SolidColor(const Color4f& color) : mColor(color)
         {}
-
-        ColorFill(const Color4f& color) : mColor(color)
-        {}
+        // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
-            Shader* s = device.FindShader("fill_color.glsl");
+            Shader* s = device.FindShader("solid_color.glsl");
             if (s == nullptr || !s->IsValid())
             {
                 if (s == nullptr)
-                    s = device.MakeShader("fill_color.glsl");
-                if (!s->CompileFile("fill_color.glsl"))
+                    s = device.MakeShader("solid_color.glsl");
+                if (!s->CompileFile("solid_color.glsl"))
                     return nullptr;
             }
             return s;
         }
-
+        // Apply the material state on the program object.
         virtual void Apply(Device&, Program& prog) const override
         {
-            prog.SetUniform("kFillColor",
+            prog.SetUniform("kColor",
                 mColor.Red(), mColor.Green(), mColor.Blue(),
                 mColor.Alpha());
         }
+        // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         {
             if (mTransparency)
                 return SurfaceType::Transparent;
             return SurfaceType::Opaque;
         }
+        // Should be rendered as points or not?
         virtual bool IsPointSprite() const override
         { return false; }
 
-        void SetColor(const Color4f color)
-        { mColor = color; }
+        // Set the fill color for the material.
+        SolidColor& SetColor(const Color4f color)
+        { 
+            mColor = color; 
+            return *this;
+        }
 
-        void EnableTransparency(bool on_off)
-        { mTransparency = on_off; }
+        // Enable/Disable transparency.
+        SolidColor& EnableTransparency(bool on_off)
+        { 
+            mTransparency = on_off; 
+            return *this;
+        }
     private:
         Color4f mColor;
         bool mTransparency = false;
     };
 
-    class TextureFill : public Material
+    // This material will map the given texture onto the
+    // the shape being drawn. 
+    // The object being drawn must provide texture coordinates.
+    class TextureMap : public Material
     {
     public:
-        TextureFill() = default;
-        TextureFill(const std::string& texture) : mTexture(texture)
+        // Construct without any texture name.
+        // You should then use SetTexture later before using the
+        // material to draw anything.
+        TextureMap() = default;
+        // Construct with the given texture name.
+        // The texture name currently indicates a texture filename
+        // relative to the current workig directory.
+        TextureMap(const std::string& texture) : mTexture(texture)
         {}
-
+        // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
-            Shader* shader = device.FindShader("fill_texture.glsl");
+            Shader* shader = device.FindShader("texture_map.glsl");
             if (shader == nullptr || !shader->IsValid())
             {
                 if (!shader)
-                    shader = device.MakeShader("fill_texture.glsl");
-                if (!shader->CompileFile("fill_texture.glsl"))
+                    shader = device.MakeShader("texture_map.glsl");
+                if (!shader->CompileFile("texture_map.glsl"))
                     return nullptr;
             }
             return shader;
         }
+        // Apply the material state on program object.
         virtual void Apply(Device& device, Program& prog) const override
         {
             Texture* texture = device.FindTexture(mTexture);
@@ -149,38 +172,58 @@ namespace gfx
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
         }
-
+        // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return mSurfaceType; }
-
+        // Should be rendered as points or not ?
         virtual bool IsPointSprite() const override
         { return mRenderPoints; }
 
-        TextureFill& SetBaseColor(const Color4f& color)
+        // Set the base color for color modulation.
+        // Each channel sampled from the texture is multiplied
+        // by the base color's corresponding channel value. 
+        // This can then  used to modulate the output from
+        // texture sampling per channel basis.
+        // For example setting base color to (1.0f, 0.0f, 0.0f, 1.0f)
+        // would result only R channel having value and the output
+        // being in shades of red.
+        TextureMap& SetBaseColor(const Color4f& color)
         {
             mColor = color;
             return *this;
         }
-        TextureFill& SetSurfaceType(SurfaceType type)
+
+        // Set the surface type. This is most likely
+        // either Transparent (if the texture contains an alpha channel)
+        // or Opaque if no transparent blending is desired.
+        TextureMap& SetSurfaceType(SurfaceType type)
         {
             mSurfaceType = type;
             return *this;
         }
 
-
-        // set this to true if rendering a textured point
-        TextureFill& SetRenderPoints(bool value)
+        // Set this to true if rendering a textured point.
+        // This is useful when for example rendering a particle system.
+        TextureMap& SetRenderPoints(bool value)
         {
             mRenderPoints = value;
             return *this;
         }
 
-        TextureFill& SetTexture(const std::string& texfile)
+        // Set the texture identifier/name.
+        // Currently the meaning of texture name is a path
+        // relative to the current working directory.
+        TextureMap& SetTexture(const std::string& texfile)
         {
             mTexture = texfile;
             return *this;
         }
-        TextureFill& SetGamma(float gamma)
+
+        // Set the gamma (in)correction value.
+        // Values below 1.0f will result in the rendered image
+        // being "brighter" and above 1.0f will make it "darker".
+        // The default is 1.0f
+        TextureMap& SetGamma(float gamma)
         {
             mGamma = gamma;
             return *this;
@@ -197,6 +240,8 @@ namespace gfx
     // by cycling through a set of textures at some fps.
     // The assumption is that cycling through the textures
     // renders a coherent animation.
+    // In order to blend between the frames of the animation
+    // the current time value needs to be set.
     class SpriteSet : public Material
     {
     public:
@@ -213,7 +258,7 @@ namespace gfx
         // the sprite to render something.
         SpriteSet()
         {}
-
+        // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("sprite_set.glsl");
@@ -226,6 +271,7 @@ namespace gfx
             }
             return shader;
         }
+        // Apply the material state on program object.
         virtual void Apply(Device& device, Program& prog) const override
         {
             assert(!mTextures.empty() &&
@@ -255,8 +301,10 @@ namespace gfx
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
         }
+        // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
+        // Should be rendered as points or not ? 
         virtual bool IsPointSprite() const override
         { return false; }
 
@@ -267,7 +315,8 @@ namespace gfx
             return *this;
         }
         // Set the current runtime. This is used to compute
-        // the current texture to be rendered.
+        // the current texture to be rendered and the blend 
+        // coefficient.
         SpriteSet& SetAppRuntime(float time)
         {
             mRuntime = time;
@@ -279,6 +328,14 @@ namespace gfx
             mTextures.push_back(texture);
             return *this;
         }
+        // Set the base color for color modulation.
+        // Each channel sampled from the texture is multiplied
+        // by the base color's corresponding channel value. 
+        // This can then  used to modulate the output from
+        // texture sampling per channel basis.
+        // For example setting base color to (1.0f, 0.0f, 0.0f, 1.0f)
+        // would result only R channel having value and the output
+        // being in shades of red.        
         SpriteSet& SetBaseColor(const Color4f& color)
         {
             mColor = color;
@@ -334,7 +391,7 @@ namespace gfx
         // can be used to draw.
         SpriteMap()
         {}
-
+        // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("sprite_map.glsl");
@@ -347,6 +404,7 @@ namespace gfx
             }
             return shader;
         }
+        // Apply the material state on program object.
         virtual void Apply(Device& device, Program& prog) const override
         {
             assert(!mTexture.empty() &&
@@ -386,21 +444,29 @@ namespace gfx
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
         }
+        // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
+        // Should be rendered as points or not ?
         virtual bool IsPointSprite() const override
         { return false; }
-
+        // Set the texture identifier/name.
+        // Currently the meaning of texture name is a path
+        // relative to the current working directory.
         SpriteMap& SetTexture(const std::string& texture)
         {
             mTexture = texture;
             return *this;
         }
+        // Set the desired frame rate per second.
         SpriteMap& SetFps(float fps)
         {
             mFps = fps;
             return *this;
         }
+        // Set the current runtime. This is used to compute
+        // the current texture to be rendered and the blend 
+        // coefficient.
         SpriteMap& SetAppRuntime(float time)
         {
             mRuntime = time;
@@ -411,6 +477,14 @@ namespace gfx
             mFrames.push_back(frame);
             return *this;
         }
+        // Set the base color for color modulation.
+        // Each channel sampled from the texture is multiplied
+        // by the base color's corresponding channel value. 
+        // This can then  used to modulate the output from
+        // texture sampling per channel basis.
+        // For example setting base color to (1.0f, 0.0f, 0.0f, 1.0f)
+        // would result only R channel having value and the output
+        // being in shades of red.
         SpriteMap& SetBaseColor(const Color4f& color)
         {
             mColor = color;
@@ -424,11 +498,18 @@ namespace gfx
         Color4f mColor = Color::White;
     };
 
+    // This material will use the given text buffer object to
+    // display text by rasterizing the text and creating a new
+    // texture object of it. The resulting texture object is then
+    // mapped onto the shape being drawn.
+    // The drawable shape must provide texture coordinates.
     class BitmapText : public Material
     {
     public:
+        // Construct with the reference to the texture buffer.
         BitmapText(const TextBuffer& text) : mText(text)
         {}
+        // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("texture_alpha_mask.glsl");
@@ -441,6 +522,7 @@ namespace gfx
             }
             return shader;
         }
+        // Apply the material state on the program object.
         virtual void Apply(Device& device, Program& prog) const override
         {
             const auto hash = mText.GetHash();
@@ -482,16 +564,31 @@ namespace gfx
             prog.SetUniform("kGamma", mGamma);
             prog.SetUniform("kMatrix", kMatrix);
         }
+        // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
+        // Should be rendered as points or not ? 
         virtual bool IsPointSprite() const override
         { return false; }
 
+        // Set the color for the text being rendered.
+        // The rasterized text will contain AA alpha mask
+        // which is used to modulate the output color values.
+        // In other words pixels (fragments) that are not
+        // covered by rasterized text will have 1 alpha from
+        // the mask and be fully transparent and pixels that
+        // are fully covered by the rasterized text will have 0 alpha
+        // and be fully opaque. The rest of the pixels are somewhere
+        // in between i.e partially transparent/opaque.
         BitmapText& SetBaseColor(const Color4f& color)
         {
             mColor = color;
             return *this;
         }
+        // Set the gamma (in)correction value.
+        // Values below 1.0f will result in the rendered image
+        // being "brighter" and above 1.0f will make it "darker".
+        // The default is 1.0f        
         BitmapText& SetGamma(float gamma)
         {
             mGamma = gamma;

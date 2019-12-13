@@ -105,7 +105,7 @@ public:
         mDevice->ClearStencil(1);
 
         Geometry* maskGeom = maskShape.Upload(*mDevice);
-        Program* maskProg = GetProgram(maskShape, ColorFill());
+        Program* maskProg = GetProgram(maskShape, SolidColor());
         if (!maskProg)
             return;
 

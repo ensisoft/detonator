@@ -335,7 +335,7 @@ public:
         gfx::Transform t;
         t.Resize(size * mScale);
         t.MoveTo(state.toViewSpace(QVector2D(mX, mY)));
-        painter.Draw(gfx::Rectangle(), t, gfx::TextureFill(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
@@ -517,7 +517,7 @@ public:
         t.MoveTo(x-250, y-250);
 
         painter.Draw(*mParticles, t,
-            gfx::TextureFill("textures/RoundParticle.png")
+            gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
             .SetRenderPoints(true)
             .SetBaseColor(mColor * 0.8));
@@ -855,7 +855,7 @@ public:
 
         // draw the particles first
         painter.Draw(*mParticles, t,
-            gfx::TextureFill("textures/RoundParticle.png")
+            gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true)
             .SetBaseColor(getJetStreamColor(mShipType)));
@@ -865,7 +865,7 @@ public:
         // then draw the ship so that it creates a nice clear cut where
         // the exhaust particles begin at the end of the ship
         painter.Draw(gfx::Rectangle(), t, 
-            gfx::TextureFill(getShipTextureIdentifier(mShipType))
+            gfx::TextureMap(getShipTextureIdentifier(mShipType))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
 
         if (mShieldIsOn)
@@ -886,7 +886,7 @@ public:
             t.Resize(rect);
             t.MoveTo(rect);
             painter.Draw(gfx::Rectangle(), t, 
-                gfx::TextureFill("textures/spr_shield.png")
+                gfx::TextureMap("textures/spr_shield.png")
                     .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
         }                
     }
@@ -1365,12 +1365,12 @@ public:
 
         // first draw the static background image.
         painter.Draw(gfx::Rectangle(), t,
-            gfx::TextureFill("textures/SpaceBackground.png")
+            gfx::TextureMap("textures/SpaceBackground.png")
             .SetGamma(gamma));
 
         // then draw the particle engine
         painter.Draw(*mStars, t,
-            gfx::TextureFill("textures/RoundParticle.png")
+            gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
             .SetRenderPoints(true));
     }
