@@ -23,6 +23,8 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <glm/gtc/type_ptr.hpp>
+#  include <glm/gtc/matrix_transform.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -71,10 +73,16 @@ public:
         Program* prog = GetProgram(shape, mat);
         if (!prog)
             return;
-        prog->SetUniform("kScalingFactor", transform.GetWidth(), transform.GetHeight());
-        prog->SetUniform("kTranslationTerm", transform.GetXPosition(), transform.GetYPosition());
-        prog->SetUniform("kViewport", mViewW, mViewH);
-        prog->SetUniform("kRotation", transform.GetRotation());
+
+        // create simple orthographic projection matrix. 
+        // 0,0 is the window top left, x grows left and y grows down
+        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+        const auto& kViewMatrix = 
+            glm::translate(glm::mat4(1.0), glm::vec3(transform.GetXPosition(), transform.GetYPosition(), 0.0f)) *
+            glm::scale(glm::mat4(1.0), glm::vec3(transform.GetWidth(), transform.GetHeight(), 1.0f));
+
+        prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+        prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
         mat.Apply(*mDevice, *prog);
 
         const auto draw = geom->GetDrawType();
@@ -109,6 +117,16 @@ public:
         if (!maskProg)
             return;
 
+        // create simple orthographic projection matrix. 
+        // 0,0 is the window top left, x grows left and y grows down
+        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+        const auto& kViewMatrixDrawShape = 
+            glm::translate(glm::mat4(1.0), glm::vec3(drawTransform.GetXPosition(), drawTransform.GetYPosition(), 0.0f)) *
+            glm::scale(glm::mat4(1.0), glm::vec3(drawTransform.GetWidth(), drawTransform.GetHeight(), 1.0f));        
+        const auto& kViewMatrixMaskShape = 
+            glm::translate(glm::mat4(1.0), glm::vec3(maskTransform.GetXPosition(), maskTransform.GetYPosition(), 0.0f)) *
+            glm::scale(glm::mat4(1.0), glm::vec3(maskTransform.GetWidth(), maskTransform.GetHeight(), 1.0f));                    
+
         Device::State state;
         state.viewport         = Rect(mViewX, mViewY, mViewW, mViewH);
         state.stencil_func     = Device::State::StencilFunc::PassAlways;
@@ -117,10 +135,9 @@ public:
         state.bWriteColor      = false;
         state.bEnablePointSize = maskGeom->GetDrawType() == Geometry::DrawType::Points;
 
-        maskProg->SetUniform("kScalingFactor", maskTransform.GetWidth(), maskTransform.GetHeight());
-        maskProg->SetUniform("kTranslationTerm", maskTransform.GetXPosition(), maskTransform.GetYPosition());
-        maskProg->SetUniform("kViewport", mViewW, mViewH);
-        maskProg->SetUniform("kRotation", maskTransform.GetRotation());
+        maskProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+        maskProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixMaskShape));
+
         material.Apply(*mDevice, *maskProg);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
@@ -146,11 +163,10 @@ public:
         }
         state.bEnablePointSprite = material.IsPointSprite();
         state.bEnablePointSize   = drawGeom->GetDrawType() == Geometry::DrawType::Points;
-
-        drawProg->SetUniform("kScalingFactor", drawTransform.GetWidth(), drawTransform.GetHeight());
-        drawProg->SetUniform("kTranslationTerm", drawTransform.GetXPosition(), drawTransform.GetYPosition());
-        drawProg->SetUniform("kViewport", mViewW, mViewH);
-        drawProg->SetUniform("kRotation", drawTransform.GetRotation());
+        
+        drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+        drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));        
+        
         material.Apply(*mDevice, *drawProg);
 
         mDevice->Draw(*drawProg, *drawGeom, state);
