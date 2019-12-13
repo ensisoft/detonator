@@ -215,8 +215,58 @@ namespace gfx
     static_assert(sizeof(RGBA) == 4,
         "Unexpected size of RGBA pixel struct type.");
 
+    // Bitmap interface. Mostly designed so that it's possible
+    // to keep bitmap objects around as generic bitmaps
+    // regardless of their actual underlying pixel representation.
+    class IBitmap
+    {
+    public:
+        virtual ~IBitmap() = default;
+        // Get the width of the bitmap
+        virtual unsigned GetWidth() const = 0;
+        // Get the height of the bitmap
+        virtual unsigned GetHeight() const = 0;
+        // Get the depth of the bitmap
+        virtual unsigned GetDepthBits() const = 0;
+        // Get whether bitmap is valid or not (has been allocated)
+        virtual bool IsValid() const = 0;
+        // Resize the bitmap. Previous are undefined.
+        virtual void Resize(unsigned width, unsigned height) = 0;
+        // Get pointer to underlying data. Can be nullptr if the bitmap
+        // is not currently valid, i.e no pixel storage has been allocated.
+        // Access to the data through this pointer is potentially
+        // unsafe since the type of the pixel (i.e. the memory layout)
+        // information is lost. However in some cases the generic
+        // access is useful for example when passing the pointer to some
+        // other APIs
+        virtual const void* GetDataPtr() const = 0;
+        // Flip the rows of the bitmap around horizontal center line/row.
+        // Transforms the bitmap as follows:
+        // aaaa           cccc
+        // bbbb  becomes  bbbb
+        // cccc           aaaa        
+        virtual void FlipHorizontally() = 0;
+
+        // Here we could have methods for dynamically getting
+        // And setting pixels. I.e. there'd be a method for set/get
+        // for each type of pixel and when the format would not match
+        // there'd be a conversion. 
+        // This is potentially doing something unexpected and there's
+        // no current use case for this API so this is omitted
+        // and instead one must use the statically typed methods 
+        // provided by the actual implementation (Bitmap template)
+                
+        // No dynamic copying or assignment
+        IBitmap(const IBitmap&) = delete;
+        IBitmap& operator=(const IBitmap&) = delete;
+    protected:
+        IBitmap() = default;
+    private:
+    };
+
+
     template<typename Pixel>
-    class Bitmap
+    class Bitmap : public IBitmap
     {
     public:
         // pixel to pixel
@@ -334,13 +384,46 @@ namespace gfx
             mHeight = other.mHeight;
         }
 
+        // IBitmap interface implementation
+
+        // Get the width of the bitmap.
+        virtual unsigned GetWidth() const override
+        { return mWidth; }
+        // Get the height of the bitmap.
+        virtual unsigned GetHeight() const override
+        { return mHeight; }
+        // Get the depth of the bitmap
+        virtual unsigned GetDepthBits() const override
+        { return sizeof(Pixel) * 8; }
+        // Get whether the bitmap is valid or not (has been allocated)
+        virtual bool IsValid() const override
+        { return mWidth != 0 && mHeight != 0; }
         // Resize the bitmap with the given dimensions.
-        void Resize(unsigned width, unsigned height)
+        virtual void Resize(unsigned width, unsigned height) override
         {
             Bitmap b(width, height);
             mPixels = std::move(b.mPixels);
             mWidth  = width;
             mHeight = height;
+        }
+        // Get the unsafe data pointer.
+        virtual const void* GetDataPtr() const override
+        {
+            return mPixels.empty() ? nullptr : (const void*)&mPixels[0];
+        }
+        // Flip the rows of the bitmap around horizontal axis (the middle row)
+        virtual void FlipHorizontally() override
+        {
+            for (unsigned y=0; y<mHeight/2; ++y)
+            {
+                const auto top = y;
+                const auto bot = mHeight - 1 - y;
+                auto* src = &mPixels[top * mWidth];
+                auto* dst = &mPixels[bot * mWidth];
+                for (unsigned x=0; x<mWidth; ++x) {
+                    std::swap(src[x], dst[x]);
+                }
+            }
         }
 
         // Get a pixel from within the bitmap.
@@ -485,40 +568,9 @@ namespace gfx
             }
         }
 
-        // Get the width of the bitmap.
-        unsigned GetWidth() const
-        { return mWidth; }
-
-        // Get the height of the bitmap.
-        unsigned GetHeight() const
-        { return mHeight; }
-
         // Get pixel pointer to the raw data.
         const Pixel* GetData() const
         { return mPixels.empty() ? nullptr : &mPixels[0]; }
-
-        // Returns true if any dimension is 0
-        bool IsEmpty() const
-        { return mWidth == 0 || mHeight == 0; }
-
-        // Flip the rows of the bitmap around horizontal center line/row.
-        // Transforms the bitmap as follows:
-        // aaaa           cccc
-        // bbbb  becomes  bbbb
-        // cccc           aaaa
-        void FlipHorizontally()
-        {
-            for (unsigned y=0; y<mHeight/2; ++y)
-            {
-                const auto top = y;
-                const auto bot = mHeight - 1 - y;
-                auto* src = &mPixels[top * mWidth];
-                auto* dst = &mPixels[bot * mWidth];
-                for (unsigned x=0; x<mWidth; ++x) {
-                    std::swap(src[x], dst[x]);
-                }
-            }
-        }
 
         Bitmap& operator=(Bitmap&& other)
         {
@@ -538,6 +590,10 @@ namespace gfx
         template<typename T> friend bool operator==(const Bitmap<T>& lhs, const Bitmap<T>& rhs);
         template<typename T> friend bool operator!=(const Bitmap<T>& lhs, const Bitmap<T>& rhs);
     };
+
+    using GrayscaleBitmap = Bitmap<Grayscale>;
+    using RgbBitmap  = Bitmap<RGB>;
+    using RgbaBitmap = Bitmap<RGBA>;
 
     // Compare the pixels between two pixmaps within the given rectangle using
     // the given compare functor.

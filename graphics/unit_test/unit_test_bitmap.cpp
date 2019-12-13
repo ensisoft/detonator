@@ -36,7 +36,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(bmp.GetWidth() == 0);
         TEST_REQUIRE(bmp.GetHeight() == 0);
         TEST_REQUIRE(bmp.GetData() == nullptr);
-        TEST_REQUIRE(bmp.IsEmpty() == true);
+        TEST_REQUIRE(bmp.IsValid() == false);
     }
 
     // test initialized bitmap for "non emptyness"
@@ -46,7 +46,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(bmp.GetWidth() == 2);
         TEST_REQUIRE(bmp.GetHeight() == 2);
         TEST_REQUIRE(bmp.GetData() != nullptr);        
-        TEST_REQUIRE(bmp.IsEmpty() == false);
+        TEST_REQUIRE(bmp.IsValid() == true);
     }
 
     // test pixel set/get
