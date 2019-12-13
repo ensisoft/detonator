@@ -70,9 +70,6 @@ namespace gfx
         virtual void Upload(const void* bytes,
             unsigned xres, unsigned yres, Format format) = 0;
 
-        // upload the texture contents from the given file.
-        virtual void UploadFromFile(const std::string& filename) = 0;
-
         virtual unsigned GetWidth() const = 0;
         virtual unsigned GetHeight() const = 0;
 

@@ -45,8 +45,6 @@
 #include "texture.h"
 #include "color4f.h"
 
-#include <stb/stb_image.h>
-
 #define GL_CHECK(x) \
     do {                                                                        \
         x;                                                                      \
@@ -559,66 +557,6 @@ private:
             mWidth  = xres;
             mHeight = yres;
         }
-
-        virtual void UploadFromFile(const std::string& filename) override
-        {
-            DEBUG("Loading texture %1", filename);
-
-            std::ifstream in(filename, std::ios::in | std::ios::binary);
-            if (!in)
-                throw std::runtime_error("failed to open file: " + filename);
-
-            in.seekg(0, std::ios::end);
-            const auto size = (std::size_t)in.tellg();
-            in.seekg(0, std::ios::beg);
-
-            std::vector<char> data;
-            data.resize(size);
-            in.read(&data[0], size);
-            if ((std::size_t)in.gcount() != size)
-                throw std::runtime_error("failed to read all of: " + filename);
-
-            int xres  = 0;
-            int yres  = 0;
-            int depth = 0;
-            auto* bmp = stbi_load_from_memory((const stbi_uc*)data.data(),
-                (int)data.size(), &xres, &yres, &depth, 0);
-            if (bmp == nullptr)
-                throw std::runtime_error("failed to decompress texture: " + filename);
-
-            DEBUG("Decompressed texture %1x%2 px @ %3bits", xres, yres, depth * 8);
-
-            Format format = Format::RGB;
-            switch (depth)
-            {
-                //case 1: format = Format::Grayscale; break;
-                case 3: format = Format::RGB; break;
-                case 4: format = Format::RGBA; break;
-                default:
-                   stbi_image_free(bmp);
-                   throw std::runtime_error("unknown texture format (depth): " + filename);
-            }
-
-            const auto stride = xres * depth;
-
-            // swap the order of the scanlines
-            for (int y=0; y<yres/2; ++y)
-            {
-                const auto top = y;
-                const auto bot = yres - 1 - y;
-                auto* src = ((unsigned char*)bmp) + top * stride;
-                auto* dst = ((unsigned char*)bmp) + bot * stride;
-                for (int x=0; x<stride; ++x)
-                {
-                    std::swap(src[x], dst[x]);
-                }
-            }
-
-            Upload(bmp, xres, yres, format);
-
-            stbi_image_free(bmp);
-        }
-
         virtual void SetFilter(MinFilter filter) override
         {
             mMinFilter = filter;
