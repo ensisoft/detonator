@@ -41,39 +41,44 @@ namespace gfx
     };
 
     // simple rectangle definition
-    class Rect
+    template<typename T>
+    class TRect
     {
     public:
-        Rect() {}
-        Rect(unsigned x, unsigned y, unsigned w, unsigned h)
+        TRect() {}
+        TRect(T x, T y, T w, T h)
           : mX(x)
           , mY(y)
           , mWidth(w)
           , mHeight(h)
         {}
-        unsigned GetHeight() const
+        T GetHeight() const
         { return mHeight; }
-        unsigned GetWidth() const
+        T GetWidth() const
         { return mWidth; }
-        unsigned GetX() const
+        T GetX() const
         { return mX; }
-        unsigned GetY() const
+        T GetY() const
         { return mY; }
-        void Resize(unsigned width, unsigned height)
+        T Resize(T width, T height)
         {
             mWidth = width;
             mHeight = height;
         }
-        void Move(unsigned x, unsigned y)
+        T Move(T x, T y)
         {
             mX = x;
             mY = y;
         }
     private:
-        unsigned mX = 0;
-        unsigned mY = 0;
-        unsigned mWidth = 0;
-        unsigned mHeight = 0;
+        T mX = 0;
+        T mY = 0;
+        T mWidth = 0;
+        T mHeight = 0;
     };
+
+    using Rect  = TRect<unsigned>;
+    using RectF = TRect<float>;
+    using RectI = TRect<int>;
 
 } // namespace
