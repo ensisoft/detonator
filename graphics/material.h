@@ -28,12 +28,16 @@
 #include <string>
 #include <cmath>
 #include <cassert>
+#include <memory>
+#include <stdexcept>
 
-#include "device.h"
-#include "shader.h"
-#include "program.h"
-#include "texture.h"
+#include "bitmap.h"
 #include "color4f.h"
+#include "device.h"
+#include "image.h"
+#include "program.h"
+#include "shader.h"
+#include "texture.h"
 #include "text.h"
 
 namespace gfx
@@ -135,15 +139,13 @@ namespace gfx
     class TextureMap : public Material
     {
     public:
-        // Construct without any texture name.
-        // You should then use SetTexture later before using the
-        // material to draw anything.
-        TextureMap() = default;
         // Construct with the given texture name.
         // The texture name currently indicates a texture filename
         // relative to the current workig directory.
-        TextureMap(const std::string& texture) : mTexture(texture)
-        {}
+        TextureMap(const std::string& texture)
+        { 
+            mSource = std::make_unique<FileSource>(texture);
+        }
         // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
@@ -160,17 +162,37 @@ namespace gfx
         // Apply the material state on program object.
         virtual void Apply(Device& device, Program& prog) const override
         {
-            Texture* texture = device.FindTexture(mTexture);
+            const auto& name = mSource->GetName();
+
+            Texture* texture = device.FindTexture(name);
             if (texture == nullptr)
             {
-                texture = device.MakeTexture(mTexture);
-                texture->UploadFromFile(mTexture);
+                texture = device.MakeTexture(name);
+                auto bmp = mSource->GetData();
+                const auto width  = bmp->GetWidth();
+                const auto height = bmp->GetHeight();
+                const auto format = Texture::DepthToFormat(bmp->GetDepthBits());
+                texture->Upload(bmp->GetDataPtr(), width, height, format);
             }
+            // Use texture matrix to flip the sample point
+            // todo: actually this would really depend on the device
+            // with opengl device the expected memory layout for the
+            // texture upload is not matching our CPU based memory layout
+            // i.e. the order of rows are swapped. 
+            // some other device might work differently
+            // this would need to be refactored somehow.
+            static const float kMatrix[3][3] = {
+                {1.0f, 0.0f, 0.0f},
+                {0.0f, -1.0f, 0.0f},
+                {0.0f, 1.0f, 1.0f}
+            };
+
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kRenderPoints", mRenderPoints ? 1.0f : 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
+            prog.SetUniform("kMatrix", kMatrix);
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
@@ -210,15 +232,6 @@ namespace gfx
             return *this;
         }
 
-        // Set the texture identifier/name.
-        // Currently the meaning of texture name is a path
-        // relative to the current working directory.
-        TextureMap& SetTexture(const std::string& texfile)
-        {
-            mTexture = texfile;
-            return *this;
-        }
-
         // Set the gamma (in)correction value.
         // Values below 1.0f will result in the rendered image
         // being "brighter" and above 1.0f will make it "darker".
@@ -229,7 +242,42 @@ namespace gfx
             return *this;
         }
     private:
-        std::string mTexture;
+        // Abstract interface for acquiring the actual texture data.
+        class TextureSource
+        {
+        public: 
+            virtual ~TextureSource() = default;
+            virtual std::string GetName() const = 0;
+            virtual std::unique_ptr<IBitmap> GetData() const = 0;
+        };
+        // Source texture data from an image file.
+        class FileSource : public TextureSource
+        {
+        public: 
+            FileSource(const std::string& filename)
+              : mFilename(filename)
+            {}
+            virtual std::string GetName() const override
+            { return mFilename; }
+            virtual std::unique_ptr<IBitmap> GetData() const override
+            {
+                Image file(mFilename);
+                if (file.GetDepthBits() == 8)
+                    return std::make_unique<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
+                else if (file.GetDepthBits() == 24)
+                    return std::make_unique<RgbBitmap>(file.AsBitmap<RGB>());
+                else if (file.GetDepthBits() == 32)
+                    return std::make_unique<RgbaBitmap>(file.AsBitmap<RGBA>());
+                else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits())); 
+                return nullptr;
+            }
+        private:
+            const std::string mFilename;
+        };
+        // todo: implement a class template for allowing
+        // for user defined types to be used as texture sources
+    private:
+        std::unique_ptr<TextureSource> mSource;        
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
