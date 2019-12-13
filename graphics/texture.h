@@ -24,6 +24,7 @@
 #pragma once
 
 #include "config.h"
+#include "base/assert.h"
 
 namespace gfx
 {
@@ -41,6 +42,22 @@ namespace gfx
         enum class MagFilter {
             Nearest, Linear
         };
+
+        // Identify texture format based on the bit depth
+        static Format DepthToFormat(unsigned bit_depth)
+        {
+            if (bit_depth == 8)
+                return Format::Grayscale;
+            else if (bit_depth == 24)
+                return Format::RGB; 
+            else if (bit_depth == 32)
+                return Format::RGBA;
+            // this function is only valid for the above bit depths.
+            // everything else is considered a bug.
+            // when reading data from external sources validation
+            // of expected formats needs to be done elsewhere.
+            ASSERT(!"Unexpected bit depth detected.");
+        }
 
         // default filtering.
         virtual void SetFilter(MinFilter filter) = 0;
