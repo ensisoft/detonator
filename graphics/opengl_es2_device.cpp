@@ -831,6 +831,33 @@ private:
             GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture_name));
             GL_CHECK(glUniform1i(ret, unit));
 
+            // in OpenGL the expected memory layout of texture data that
+            // is given to glTexImage2D doesn't match the "typical" layout
+            // that is used by many toolkits/libraries. The order of scan lines
+            // is reversed and glTexImage expects the first scanline (in memory)
+            // to be the bottom scanline of the image.
+            // There are two ways to deal with this dilemma:
+            // - flip all images on the horizontal axis before calling glTexImage2D.
+            // - use a matrix to transform the texture coordinates to counter this.
+            // 
+            // If the program being used to render stuff is using a texture 
+            // we helpfully setup here a "device texture matrix" that will be provided
+            // for the program and should be used to transform the texture coordinates
+            // before sampling textures.
+            // This will avoid having to do any image flips which is especilly
+            // handy when dealing with data that gets re-uploaded often 
+            // I.e. dynamically changing/procedural texture data.
+            // 
+            // It should also be possible to use the device texture matrix for example
+            // in cases where the device would bake some often used textures into an atlas
+            // and implicitly alter the texture coordinates.
+            static const float kDeviceTextureMatrix[3][3] = {
+                {1.0f, 0.0f, 0.0f},
+                {0.0f, -1.0f, 0.0f},
+                {0.0f, 1.0f, 0.0f}
+            };
+            SetUniform("kDeviceTextureMatrix", kDeviceTextureMatrix);
+
             // keep track of textures being used so that if/when this
             // program is actually used to draw stuff we can realize
             // which textures have actually been used to draw.

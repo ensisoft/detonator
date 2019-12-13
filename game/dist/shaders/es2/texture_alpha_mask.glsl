@@ -6,13 +6,13 @@ uniform sampler2D kTexture;
 uniform float kRenderPoints; // 1.0 when rendering points
 uniform float kGamma;
 uniform vec4  kBaseColor;
-uniform mat3  kMatrix;
+uniform mat3  kDeviceTextureMatrix;
 varying vec2  vTexCoord;
 
 void main()
 {
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-    vec3 transformed_coords = kMatrix * vec3(coords.xy, 1.0);
+    vec3 transformed_coords = kDeviceTextureMatrix * vec3(coords.xy, 1.0);
     coords = transformed_coords.xy;
 
     vec4 tex = texture2D(kTexture, coords);
