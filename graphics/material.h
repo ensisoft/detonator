@@ -488,7 +488,11 @@ namespace gfx
             if (!texture)
             {
                 texture = device.MakeTexture(mTexture);
-                texture->UploadFromFile(mTexture);
+                Image file(mTexture);
+                const auto width  = file.GetWidth();
+                const auto height = file.GetHeight();
+                const auto format = Texture::DepthToFormat(file.GetDepthBits());
+                texture->Upload(file.GetData(), width, height, format);
             }
             const float width  = texture->GetWidth();
             const float height = texture->GetHeight();
@@ -504,11 +508,25 @@ namespace gfx
                 const auto h = frame.h / height;
                 prog.SetUniform(uniform_name.c_str(), x, y, w, h);
             }
+            // Use texture matrix to flip the sample point
+            // todo: actually this would really depend on the device
+            // with opengl device the expected memory layout for the
+            // texture upload is not matching our CPU based memory layout
+            // i.e. the order of rows are swapped. 
+            // some other device might work differently
+            // this would need to be refactored somehow.
+            static const float kMatrix[3][3] = {
+                {1.0f, 0.0f, 0.0f},
+                {0.0f, -1.0f, 0.0f},
+                {0.0f, 1.0f, 1.0f}
+            };            
+
             const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
             prog.SetUniform("kBlendCoeff", coeff);
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
+            prog.SetUniform("kMatrix", kMatrix);
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
