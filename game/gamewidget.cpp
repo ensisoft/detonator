@@ -32,7 +32,6 @@
 #  include <QtGui/QFontDatabase>
 #  include <QtGui/QCursor>
 #  include <QtGui/QVector2D>
-#  include <QtGui/QPixmap>
 #  include <QtGui/QFont>
 #  include <QtGui/QFontMetrics>
 #  include <QApplication>
@@ -611,13 +610,14 @@ public:
         NumParticleRows = 2
     };
 
-    Debris(const QPixmap& texture, const QVector2D& position, float starttime, float lifetime)
+    Debris(const std::string& texture, const QVector2D& position, float starttime, float lifetime)
         : mStartTime(starttime)
         , mLifeTime(lifetime)
         , mTexture(texture)
     {
-        const auto particleWidth  = texture.width() / NumParticleCols;
-        const auto particleHeight = texture.height() / NumParticleRows;
+        gfx::Image file(mTexture);
+        const auto particleWidth  = file.GetWidth() / NumParticleCols;
+        const auto particleHeight = file.GetHeight() / NumParticleRows;
         const auto numParticles   = NumParticleCols * NumParticleRows;
 
         const auto angle = (M_PI * 2) / numParticles;
@@ -634,7 +634,7 @@ public:
             const auto a = i * angle + angle * r;
 
             particle p;
-            p.rc  = QRect(x, y, particleWidth, particleHeight);
+            p.rc  = gfx::RectI(x, y, particleWidth, particleHeight);
             p.dir.setX(std::cos(a));
             p.dir.setY(std::sin(a));
             p.dir *= v;
@@ -663,7 +663,7 @@ public:
 
         return true;
     }
-    virtual void paint(QPainter& painter, TransformState& state) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -672,29 +672,32 @@ public:
         {
             const auto pos = state.toViewSpace(p.pos);
 
-            const float width  = p.rc.width();
-            const float height = p.rc.height();
+            const float width  = p.rc.GetWidth();
+            const float height = p.rc.GetHeight();
             const float aspect = height / width;
             const float scaledWidth  = width * mScale;
             const float scaledHeight = scaledWidth * aspect;
 
-            QRect target(pos.x(), pos.y(), scaledWidth, scaledHeight);
-
-            QTransform rotation;
-            rotation.translate(pos.x() + scaledWidth / 2, pos.y() + scaledHeight / 2);
-            rotation.rotateRadians(p.angle, Qt::ZAxis);
-            rotation.translate(-pos.x() - scaledWidth / 2, -pos.y() - scaledHeight / 2);
-            painter.setTransform(rotation);
-            painter.setOpacity(p.alpha);
-            painter.drawPixmap(target, mTexture, p.rc);
+            gfx::Transform rotation;
+            rotation.Resize(scaledWidth, scaledHeight);
+            rotation.Translate(-scaledWidth / 2, -scaledHeight / 2);
+            rotation.Rotate(p.angle);
+            rotation.Translate(scaledWidth / 2, scaledHeight / 2);
+            rotation.Translate(pos);
+            painter.Draw(gfx::Rectangle(), rotation, 
+                gfx::TextureMap(mTexture)
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
+                .SetRect(p.rc)
+                .SetOpacity(p.alpha));
         }
-        painter.resetTransform();
-        painter.setOpacity(1.0);
     }
+    virtual void paint(QPainter&, TransformState& state) override
+    {}
 
     void setTextureScaleFromWidth(float width)
     {
-        const auto particleWidth = (mTexture.width() / NumParticleCols);
+        gfx::Image file(mTexture);
+        const auto particleWidth = (file.GetWidth() / NumParticleCols);
         mScale = width / particleWidth;
     }
 
@@ -703,7 +706,7 @@ public:
 
 private:
     struct particle {
-        QRect rc;
+        gfx::RectI rc;
         QVector2D dir;
         QVector2D pos;
         float angle = 0.0f;
@@ -716,7 +719,7 @@ private:
     const float mLifeTime  = 0.0f;;
     float mTime  = 0.0f;
     float mScale = 1.0f;
-    QPixmap mTexture;
+    std::string mTexture;
 
 };
 
@@ -971,8 +974,8 @@ public:
     void setViewString(QString str)
     { mText = str; }
 
-    QPixmap getTexture() const
-    { return getShipTexture(mShipType); }
+    std::string getTextureName() const
+    { return getShipTextureIdentifier(mShipType); }
 
     void enableShield(bool onOff)
     { mShieldIsOn = onOff; }
@@ -999,16 +1002,6 @@ private:
         return textures[(int)type];
     }
 
-    static const QPixmap& getShipTexture(ShipType type)
-    {
-        static QPixmap textures[] = {
-            QPixmap(R("textures/Cricket.png")),
-            QPixmap(R("textures/Mantis.png")),
-            QPixmap(R("textures/Scarab.png")),
-            QPixmap(R("textures/Locust.png"))
-        };
-        return textures[(int)type];
-    }
     static const char* getJetStreamTextureIdentifier(ShipType type)
     {
         static const char* textures[] = {
@@ -1016,17 +1009,6 @@ private:
             "textures/Mantis_jet.png",
             "textures/Scarab_jet.png",
             "textures/Locust_jet.png"
-        };
-        return textures[(int)type];
-    }
-
-    static const QPixmap& getJetStreamTexture(ShipType type)
-    {
-        static QPixmap textures[] = {
-            QPixmap(R("textures/Cricket_jet.png")),
-            QPixmap(R("textures/Mantis_jet.png")),
-            QPixmap(R("textures/Scarab_jet.png")),
-            QPixmap(R("textures/Locust_jet.png"))
         };
         return textures[(int)type];
     }
@@ -1212,15 +1194,8 @@ public:
         return false;
     }
 
-    const QPixmap& getCurrentTexture() const
-    {
-        // this is now a dummy function and is used
-        // to get the pixmap for rendering the debris
-        // animation. once the debris has been refactored
-        // we can remove this too.
-        static QPixmap p(R("textures/alien/e_f1.png"));
-        return p;
-    }
+    std::string getTextureName() const
+    { return "textures/alien/e_f1.png"; }
 private:
     float mRuntime = 0.0f;
     QVector2D mDirection;
@@ -2255,7 +2230,7 @@ GameWidget::GameWidget()
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, QString::fromStdWString(m.string).toUpper()));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Smoke> smoke(new Smoke(missileEnd, missileFlyTime + 100, explosionTime + 500));
-        std::unique_ptr<Debris> debris(new Debris(invader->getTexture(), missileEnd, missileFlyTime, explosionTime + 500));
+        std::unique_ptr<Debris> debris(new Debris(invader->getTextureName(), missileEnd, missileFlyTime, explosionTime + 500));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));
 
@@ -2660,7 +2635,7 @@ void GameWidget::updateGame(float dt)
             const auto lifetime = 1000.0f;
 
             std::unique_ptr<Explosion> explosion(new Explosion(position, startNow, lifetime));
-            std::unique_ptr<Debris> debris(new Debris(UFO->getCurrentTexture(),
+            std::unique_ptr<Debris> debris(new Debris(UFO->getTextureName(),
                 position, startNow, lifetime + 500));
             explosion->setScale(3.0f);
             mAnimations.push_back(std::move(debris));
