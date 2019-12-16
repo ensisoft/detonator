@@ -49,6 +49,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/math.h"
+#include "base/utility.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/text.h"
@@ -759,7 +760,7 @@ public:
         Boss
     };
 
-    Invader(QVector2D position, QString str, float velocity, ShipType type)
+    Invader(QVector2D position, const std::wstring& str, float velocity, ShipType type)
       : mPosition(position)
       , mText(str)
       , mVelocity(velocity)
@@ -832,29 +833,25 @@ public:
             params.respawn = true;
             mParticles = std::make_unique<ParticleEngine>(params);
         }
-
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
         // the ship rect is the coordinate to which the jet stream and
         // the text are relative to.
-        QRectF shipRect(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
-        // offset it so that the center is aligned with the unit position
-        shipRect.moveTo(position -
-            QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
-
+        // the ship's x,y coordinate is offset so that the center of the 
+        // sprite is where the ship's game space coordinate maps to.
+        const auto shipTopLeft = position - 
+            QPointF(shipScaledWidth / 2.0f, shipScaledHeight / 2.0f);
+        
         // have to do a little fudge here since the scarab ship has
         // a contour such that positioning the particle engine just behind
         // the ship texture will leave a silly gap between the ship and the
         // particles.
         const auto fudgeFactor = mShipType == ShipType::Slow ? 0.8 : 1.0f;
 
-        QRectF jetStreamRect = shipRect;
-        jetStreamRect.translate(shipScaledWidth * fudgeFactor, (shipScaledHeight - jetScaledHeight) / 2.0);
-        jetStreamRect.setSize(QSize(jetScaledWidth, jetScaledHeight));
-
         gfx::Transform t;
-        t.Resize(jetStreamRect);        
-        t.MoveTo(jetStreamRect);
+        t.Resize(jetScaledWidth, jetScaledHeight);        
+        t.MoveTo(shipTopLeft);        
+        t.Translate(shipScaledWidth * fudgeFactor, (shipScaledHeight - jetScaledHeight) / 2.0f);
 
         // draw the particles first
         painter.Draw(*mParticles, t,
@@ -864,14 +861,25 @@ public:
             .SetBaseColor(getJetStreamColor(mShipType)));
 
         t.Reset();
-        t.Resize(shipRect);
-        t.MoveTo(shipRect);
-        
+        t.Resize(shipScaledWidth, shipScaledHeight);
+        t.MoveTo(shipTopLeft);
+
         // then draw the ship so that it creates a nice clear cut where
         // the exhaust particles begin at the end of the ship
         painter.Draw(gfx::Rectangle(), t, 
             gfx::TextureMap(getShipTextureIdentifier(mShipType))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+
+        const auto fontsize = unitScale.y() / 1.75;
+        gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
+        text.AddText(base::ToUtf8(mText),"fonts/SourceHanSerifTC-SemiBold.otf", fontsize,
+            gfx::TextBuffer::HorizontalAlignment::AlignLeft,
+            gfx::TextBuffer::VerticalAlignment::AlignCenter);
+
+        t.Translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
+
+        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text)
+            .SetBaseColor(gfx::Color::DarkYellow));
 
         if (mShieldIsOn)
         {
@@ -880,12 +888,12 @@ public:
             // in order to cover the whole ship. instead we use a little fudge
             // factor to expand the shield.
             const auto fudge = 1.25f;
-            const auto width = shipRect.width();
+            const auto width = shipScaledWidth;
             rect.setHeight(width * fudge);
             rect.setWidth(width * fudge);
-            rect.moveTo(shipRect.topLeft());
-            rect.translate((rect.width()-shipRect.width()) / -2.0f,
-                (rect.height()-shipRect.height()) / -2.0f);
+            rect.moveTo(shipTopLeft);
+            rect.translate((rect.width()-shipScaledWidth) / -2.0f,
+                (rect.height()-shipScaledHeight) / -2.0f);
 
             gfx::Transform t;
             t.Resize(rect);
@@ -897,50 +905,7 @@ public:
     }
 
     virtual void paint(QPainter& painter, TransformState& state) override
-    {
-        // offset the texture to be centered around the position
-        const auto unitScale   = state.getScale();
-        const auto spriteScale = state.getScale() * getScale();
-        const auto position    = state.toViewSpace(mPosition);
-
-        const float shipWidth  = mShipWidth;
-        const float shipHeight = mShipHeight;
-        const float shipAspect = shipHeight / shipWidth;
-        const float shipScaledWidth  = spriteScale.x();
-        const float shipScaledHeight = shipScaledWidth * shipAspect;
-
-        const float jetWidth  = mJetWidth;
-        const float jetHeight = mJetHeight;
-        const float jetAspect = jetHeight / jetWidth;
-        const float jetScaledWidth  = spriteScale.x();
-        const float jetScaledHeight = jetScaledWidth * jetAspect;
-
-        // set the target rectangle with the dimensions of the
-        // sprite we want to draw.
-        // the ship rect is the coordinate to which the jet stream and
-        // the text are relative to.
-        QRectF shipRect(0.0f, 0.0f, shipScaledWidth, shipScaledHeight);
-        // offset it so that the center is aligned with the unit position
-        shipRect.moveTo(position -
-            QPointF(shipScaledWidth / 2.0, shipScaledHeight / 2.0));
-
-        QRectF textRect = shipRect;
-        textRect.translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
-
-        QFont font;
-        font.setFamily("Monospace");
-        font.setPixelSize(unitScale.y() / 1.75);
-        QPen pen;
-        pen.setWidth(2);
-        pen.setColor(Qt::darkYellow);
-
-        // draw textures
-        painter.setFont(font);
-        painter.setPen(pen);
-        painter.drawText(textRect, Qt::AlignVCenter, mText);
-
-
-    }
+    {}
 
     float getScale() const
     {
@@ -971,7 +936,7 @@ public:
     void setMaxLifetime(quint64 ms)
     { mMaxLifeTime = ms; }
 
-    void setViewString(QString str)
+    void setViewString(const std::wstring& str)
     { mText = str; }
 
     std::string getTextureName() const
@@ -1027,7 +992,7 @@ private:
 
 private:
     QVector2D mPosition;
-    QString mText;
+    std::wstring mText;
     float mLifeTime    = 0.0f;
     float mMaxLifeTime = 0.0f;
     float mVelocity    = 0.0f;
@@ -2279,7 +2244,7 @@ GameWidget::GameWidget()
         for (const auto& s : i.viewList)
             viewstring += s;
 
-        inv->setViewString(QString::fromStdWString(viewstring));
+        inv->setViewString(viewstring);
 
         mAnimations.push_back(std::move(missile));
         mAnimations.push_back(std::move(sparks));
@@ -2307,7 +2272,7 @@ GameWidget::GameWidget()
         std::wstring viewstring;
         for (const auto& s: i.viewList)
             viewstring += s;
-        inv->setViewString(QString::fromStdWString(viewstring));
+        inv->setViewString(viewstring);
     };
 
     mGame->onBomb = [&](const Game::Bomb& b)
@@ -2374,7 +2339,7 @@ GameWidget::GameWidget()
         for (const auto& s : inv.viewList)
             viewstring += s;
         
-        std::unique_ptr<Invader> invader(new Invader(pos, QString::fromStdWString(viewstring), velocity, type));
+        std::unique_ptr<Invader> invader(new Invader(pos, viewstring, velocity, type));
         invader->enableShield(inv.shield_on_ticks != 0);
         mInvaders[inv.identity] = std::move(invader);
     };
@@ -2394,7 +2359,7 @@ GameWidget::GameWidget()
         for (const auto& s : inv.killList)
             killstr += s;
 
-        it->second->setViewString(QString::fromStdWString(killstr));
+        it->second->setViewString(killstr);
     };
 
     mGame->onLevelComplete = [&](const Game::Score& score)
