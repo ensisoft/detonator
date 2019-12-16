@@ -282,14 +282,8 @@ public:
     // otherwise false and the animation is expired.
     virtual bool update(float dt, TransformState& state) = 0;
 
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state)
-    {}
-
-    //
-    virtual void paint(QPainter& painter, TransformState& state) = 0;
-
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state)
-    {}
+    // Paint/Draw the animation 
+    virtual void paint(gfx::Painter& painter, const TransformState& state) = 0;
 
     virtual QRectF getBounds(const TransformState& state) const
     {
@@ -327,7 +321,7 @@ public:
         mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         const auto& size = getTextureSize(mTexture);
         const char* name = getTextureName(mTexture);
@@ -338,9 +332,6 @@ public:
         painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {
-    }
     virtual QRectF getBounds(const TransformState& state) const override
     {
         const auto& size = getTextureSize(mTexture);
@@ -421,7 +412,7 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -437,10 +428,6 @@ public:
         t.Resize(scaledWidth, scaledHeight);
         t.MoveTo(position - QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
         painter.Draw(gfx::Rectangle(), t, mSprite);
-    }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {
     }
 
     void setScale(float scale)
@@ -500,10 +487,7 @@ public:
         mParticles->Update(dt / 1000.0f);
         return true;
     }
-    virtual void paint(QPainter&, TransformState&) override
-    {}
-
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -562,7 +546,7 @@ public:
 
         return true;
     }
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -583,9 +567,6 @@ public:
         painter.Draw(gfx::Rectangle(), t, mSprite);
 
     }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {}
 
     void setScale(float scale)
     { mScale = scale; }
@@ -664,7 +645,7 @@ public:
 
         return true;
     }
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTime < mStartTime)
             return;
@@ -692,8 +673,6 @@ public:
                 .SetOpacity(p.alpha));
         }
     }
-    virtual void paint(QPainter&, TransformState& state) override
-    {}
 
     void setTextureScaleFromWidth(float width)
     {
@@ -797,7 +776,7 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         // offset the texture to be centered around the position
         const auto unitScale   = state.getScale();
@@ -903,9 +882,6 @@ public:
                     .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
         }                
     }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {}
 
     float getScale() const
     {
@@ -1032,7 +1008,7 @@ public:
         mPosition += p;
         return true;
     }
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state)  override
+    virtual void paint(gfx::Painter& painter, const TransformState& state)  override
     {
         const auto dim = state.getScale();
         const auto pos = state.toViewSpace(mPosition);
@@ -1052,8 +1028,6 @@ public:
             gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
 
     }
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {}
 
 private:
     const QVector2D mDirection;
@@ -1106,7 +1080,7 @@ public:
         return true;
     }
 
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         const auto sec = mRuntime / 1000.0f;
         const auto pos = state.toViewSpace(mPosition);
@@ -1122,10 +1096,6 @@ public:
         ufo.Resize(40, 40);
         ufo.MoveTo(pos - QPoint(20, 20));
         painter.Draw(gfx::Rectangle(), ufo, mSprite);
-    }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {
     }
 
     virtual QRectF getBounds(const TransformState& state) const override
@@ -1187,7 +1157,7 @@ public:
             return false;
         return true;
     }
-    virtual void paintPreEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         mSprite.SetAppRuntime(mRunTime / 1000.0f);
 
@@ -1202,10 +1172,6 @@ public:
         bang.MoveTo(x, y);
         painter.Draw(gfx::Rectangle(), bang, mSprite);
 
-    }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
-    {
     }
 private:
     const float mLifeTime = 0.0f;
@@ -1232,7 +1198,7 @@ public:
         return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const TransformState& state) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -1254,8 +1220,7 @@ public:
         t.MoveTo(top);
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkYellow));
     }
-    virtual void paint(QPainter&, TransformState& state) override
-    {}
+
 private:
     const QVector2D mPosition;
 private:
@@ -2688,7 +2653,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         for (auto& anim : mAnimations)
         {
-            anim->paintPreEffect(*mCustomGraphicsPainter, state);
+            anim->paint(*mCustomGraphicsPainter, state);
         }
 
         if (bIsGameRunning)
@@ -2696,29 +2661,12 @@ void GameWidget::paintEvent(QPaintEvent* paint)
             for (auto& pair : mInvaders)
             {
                 auto& invader = pair.second;
-                invader->paintPreEffect(*mCustomGraphicsPainter, state);
+                invader->paint(*mCustomGraphicsPainter, state);
             }
         }
 
         mCustomGraphicsDevice->SetState(currentState);
         painter.endNativePainting();
-    }
-
-
-    // paint animations
-    for (auto& anim : mAnimations)
-    {
-        anim->paint(painter, state);
-    }
-
-    // paint the invaders
-    if (bIsGameRunning)
-    {
-        for (auto& pair : mInvaders)
-        {
-            auto& invader = pair.second;
-            invader->paint(painter, state);
-        }
     }
 
     // finally paint the menu/HUD
@@ -2733,20 +2681,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         gfx::Device::StateBuffer currentState;
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
-
-        for (auto& anim : mAnimations)
-        {
-            anim->paintPostEffect(*mCustomGraphicsPainter, state);
-        }
-
-        if (bIsGameRunning)
-        {
-            for (auto& pair : mInvaders)
-            {
-                auto& invader = pair.second;
-                invader->paintPostEffect(*mCustomGraphicsPainter, state);
-            }
-        }
 
         mStates.top()->paintPostEffect(*mCustomGraphicsPainter, state);
 
