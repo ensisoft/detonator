@@ -1012,58 +1012,55 @@ private:
 class GameWidget::Missile : public GameWidget::Animation
 {
 public:
-    Missile(QVector2D pos, QVector2D dir, quint64 lifetime, QString str) :
-        position_(pos), direction_(dir), life_(lifetime), time_(0), text_(str)
+    Missile(const QVector2D& position, 
+            const QVector2D& direction, 
+            const std::wstring& str,
+            quint64 lifetime) 
+        : mDirection(direction)
+        , mText(str)
+        , mLifetime(lifetime)
+        , mPosition(position)
     {}
-
-    // set position in normalized widget space
-    void setPosition(QVector2D pos)
-    {
-        position_ = pos;
-    }
-
     virtual bool update(float dt, TransformState& state) override
     {
-        time_ += dt;
-        if (time_ > life_)
+        mTimeAccum += dt;
+        if (mTimeAccum > mLifetime)
             return false;
 
-        const auto d = (float)dt / (float)life_;
-        const auto p = direction_ * d;
-        position_ += p;
+        const auto d = (float)dt / (float)mLifetime;
+        const auto p = mDirection * d;
+        mPosition += p;
         return true;
     }
-
-    virtual void paint(QPainter& painter, TransformState& state) override
+    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state)  override
     {
         const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(position_);
+        const auto pos = state.toViewSpace(mPosition);
+        const auto font_size = dim.y() / 2;
 
-        QFont font;
-        QRectF rect;
-        font.setFamily("Arcade");
-        font.setPixelSize(dim.y() / 2);
-        rect = QFontMetrics(font).boundingRect(text_);
-        rect.moveTo(pos);
+        // todo: we used QFontMetrics before to estimate the size
+        // of the bounding box for the text.
+        const auto w = 100.0f;
+        const auto h = font_size * 2;
+        gfx::Transform t;
+        t.Resize(w, h);
+        t.MoveTo(pos);
 
-        QPen pen;
-        pen.setWidth(2);
-        pen.setColor(Qt::darkGray);
-        painter.setFont(font);
-        painter.setPen(pen);
-        painter.drawText(rect, Qt::AlignCenter, text_);
+        gfx::TextBuffer buff(w, h);
+        buff.AddText(base::ToUtf8(mText), "fonts/ARCADE.TTF", font_size);
+        painter.Draw(gfx::Rectangle(), t, 
+            gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
+
     }
-    QVector2D getPosition() const
-    {
-        return position_;
-    }
+    virtual void paint(QPainter& painter, TransformState& state) override
+    {}
 
 private:
-    QVector2D position_;
-    QVector2D direction_;
-    float life_;
-    float time_;
-    QString text_;
+    const QVector2D mDirection;
+    const std::wstring mText;
+    const float mLifetime = 0.0f;
+    float mTimeAccum = 0.0f;
+    QVector2D mPosition;
 };
 
 class GameWidget::UFO : public GameWidget::Animation
@@ -2192,7 +2189,7 @@ GameWidget::GameWidget()
         const auto missileBeg       = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir       = missileEnd - missileBeg;
 
-        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, QString::fromStdWString(m.string).toUpper()));
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, base::ToUpper(m.string), missileFlyTime));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Smoke> smoke(new Smoke(missileEnd, missileFlyTime + 100, explosionTime + 500));
         std::unique_ptr<Debris> debris(new Debris(invader->getTextureName(), missileEnd, missileFlyTime, explosionTime + 500));
@@ -2235,7 +2232,7 @@ GameWidget::GameWidget()
         const auto missileBeg      = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir      = missileEnd - missileBeg;
 
-        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, missileFlyTime, QString::fromStdWString(m.string).toUpper()));
+        std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, base::ToUpper(m.string), missileFlyTime));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, 500));
 
         sparks->setColor(gfx::Color::DarkGray);

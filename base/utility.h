@@ -26,6 +26,7 @@
 #include <string>
 #include <locale>
 #include <codecvt>
+#include <cwctype>
 
 namespace base
 {
@@ -57,5 +58,15 @@ std::wstring FromUtf8(const std::string& str)
     std::wstring converted_str = converter.from_bytes(str);
     return converted_str;
 }
+
+inline
+std::wstring ToUpper(const std::wstring& str)
+{
+    std::wstring ret;
+    for (auto c : str)
+        ret.push_back(std::towupper(c));
+    return ret;
+}
+
 
 } // base
