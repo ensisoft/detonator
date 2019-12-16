@@ -2790,13 +2790,13 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         if (mShowFps)
         {
-            gfx::TextBuffer text(100, 100);
-            text.AddText(base::FormatString("fps: %1", mCurrentfps), 
-                "fonts/VeraMono.ttf", 18, 
+            gfx::TextBuffer text(150, 100);
+            text.AddText(base::FormatString("FPS: %1", mCurrentfps), 
+                "fonts/ARCADE.TTF", 28, 
                 gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
                 gfx::TextBuffer::VerticalAlignment::AlignTop);
             gfx::Transform t;
-            t.Resize(100, 100);            
+            t.Resize(150, 100);            
             t.MoveTo(10, 20);
             mCustomGraphicsPainter->Draw(gfx::Rectangle(), t, 
                 gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkRed));
