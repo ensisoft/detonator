@@ -256,6 +256,15 @@ namespace gfx
             mNormalizedBox = true;
             return *this;
         }
+        // Set the material alpha/opacity value. 
+        // The expected range is between 0.0f and 1.0f
+        // 0.0f being completely transparent and 1.0f
+        // being completely opaque.
+        TextureMap& SetOpacity(float alpha)
+        {
+            mColor.SetAlpha(alpha);
+            return *this;
+        }
 
     private:
         // Abstract interface for acquiring the actual texture data.
