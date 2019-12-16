@@ -52,6 +52,15 @@ namespace gfx
           , mWidth(w)
           , mHeight(h)
         {}
+        template<typename F> explicit 
+        TRect(const TRect<F>& other)
+        {
+            mX = other.GetX();
+            mY = other.GetY();
+            mWidth = other.GetWidth();
+            mHeight = other.GetHeight();
+        }
+
         T GetHeight() const
         { return mHeight; }
         T GetWidth() const

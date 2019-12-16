@@ -38,6 +38,7 @@
 #include "program.h"
 #include "shader.h"
 #include "texture.h"
+#include "types.h"
 #include "text.h"
 
 namespace gfx
@@ -180,6 +181,14 @@ namespace gfx
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
+
+            const float w = texture->GetWidth();
+            const float h = texture->GetHeight();
+            const float x = mNormalizedBox ? mBox.GetX() : mBox.GetX() / w;
+            const float y = mNormalizedBox ? 1.0f - mBox.GetY() : 1.0f - ((mBox.GetY() + mBox.GetHeight()) / h);
+            const float sx = mNormalizedBox ? mBox.GetWidth() : mBox.GetWidth() / w;
+            const float sy = mNormalizedBox ? mBox.GetHeight() : mBox.GetHeight() / h;
+            prog.SetUniform("kTextureBox", x, y, sx, sy);
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
@@ -228,6 +237,26 @@ namespace gfx
             mGamma = gamma;
             return *this;
         }
+
+        // Set texture sampling subrectangle, i.e. the x,y offset
+        // and the width and height of the texture subrect to use.
+        // This will set the box in texture units i.e. pixels
+        TextureMap& SetRect(const RectI& rc)
+        {
+            mBox = RectF(rc);
+            mNormalizedBox = false;
+            return *this;
+        }
+        // Set texture sampling subrectangle, i.e. the x,y offset
+        // and the width and height of the texture subrect to use.
+        // This will expect the box to be in normalized units.
+        TextureMap& SetRect(const RectF& rc)
+        {
+            mBox = rc;
+            mNormalizedBox = true;
+            return *this;
+        }
+
     private:
         // Abstract interface for acquiring the actual texture data.
         class TextureSource
@@ -269,6 +298,8 @@ namespace gfx
         bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float mGamma   = 1.0f;
+        RectF mBox = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+        bool  mNormalizedBox = true;
     };
 
     // SpriteSet is a material which renders a simple animation
