@@ -170,12 +170,12 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
 
 
 void TextBuffer::AddText(const std::string& text, const std::string& font,
-    float font_size_pt,  float xpos, float ypos)
+    unsigned font_size_px,  int xpos, int ypos)
 {
     Text t;
     t.text = text;
     t.font = font;
-    t.font_size = font_size_pt;
+    t.font_size = font_size_px;
     t.use_absolute_position = true;
     t.xpos = xpos;
     t.ypos = ypos;
@@ -183,12 +183,12 @@ void TextBuffer::AddText(const std::string& text, const std::string& font,
 }
 
 void TextBuffer::AddText(const std::string& text, const std::string& font,
-    float font_size_pt, HorizontalAlignment ha, VerticalAlignment va)
+    unsigned font_size_px, HorizontalAlignment ha, VerticalAlignment va)
 {
     Text t;
     t.text = text;
     t.font = font;
-    t.font_size = font_size_pt;
+    t.font_size = font_size_px;
     t.use_absolute_position = false;
     t.ha = ha;
     t.va = va;
@@ -208,12 +208,13 @@ std::size_t TextBuffer::GetHash() const
 }
 
 std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text, 
-    const std::string& font, float font_size) const
+    const std::string& font, unsigned font_size) const
 {
-    // this is some fucking weird magic scaling factor, not sure
-    // if anyone really knows what the fuck it's supposed to do.
-    // but I've seen it in several sources using these dogshit libs (harfbuzz and freetype)
-    // https://stackoverflow.com/questions/50292283/units-used-by-hb-position-t-in-harfbuzz
+    // FreeType 2 uses size objects to model all information related to a given character
+    // size for a given face. For example, a size object holds the value of certain metrics
+    // like the ascender or text height, expressed in 1/64th of a pixel, for a character
+    // size of 12 points (however, those values are rounded to integers, i.e., multiples of 64).
+    // https://www.freetype.org/freetype2/docs/tutorial/step1.html
     const auto FUCKING_MAGIC_SCALE = 64;
 
     mFreetype = Freetype.lock();
@@ -253,8 +254,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     struct GlyphRasterInfo {
         unsigned width  = 0;
         unsigned height = 0;
-        unsigned bearing_x = 0;
-        unsigned bearing_y = 0;
+        int bearing_x = 0;
+        int bearing_y = 0;
         Bitmap<Grayscale> bitmap;
     };
         
@@ -266,15 +267,15 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     // the distance from the baseline to the highest or upper grid coordinate
     // used to place an outline point. It's a positive value due to the grid's
     // orientation with the Y axis upwards.
-    float ascent = 0.0f;
+    int ascent = 0.0f;
     // the distance from the baseline to the lowest grid coordinate to used to
     // place an outline point. It's a negative value due to the grid's 
     // orientation with the Y axis upwards.
-    float descent = 0.0f;
+    int descent = 0.0f;
 
     // pen position
-    float pen_x = 0.0f;
-    float pen_y = 0.0f;
+    int pen_x = 0.0f;
+    int pen_y = 0.0f;
 
     // the extents of the text block when rasterized
     unsigned height = 0.0f;
@@ -317,20 +318,20 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         // compute the extents of the text i.e. the required height and width 
         // of the bitmap into which to composit the glyphs
 
-        const float xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
-        const float ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;        
+        const int xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
+        const int ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;        
         // the x and y offsets from harfbuzz seem to be just for modifying
         // the x and y offsets (bearings) from freetype
-        const float xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;        
-        const float yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;        
+        const int xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;        
+        const int yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;        
         
         // this is the glyph top left corner relative to the imaginery baseline
         // where the baseline is at y=0 and y grows up
-        const auto x = pen_x + info.bearing_x + xo;
-        const auto y = pen_y + info.bearing_y + yo;
+        const int x = pen_x + info.bearing_x + xo;
+        const int y = pen_y + info.bearing_y + yo;
         
-        const auto glyph_top = y;
-        const auto glyph_bot = y - info.height;
+        const int glyph_top = y;
+        const int glyph_bot = y - info.height;
 
         ascent  = std::max(ascent, glyph_top);
         descent = std::min(descent, glyph_bot);
@@ -378,8 +379,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     const auto baseline = ascent + (margin / 2);
 
     // finally compose the glyphs into a text buffer starting at the current pen position
-    pen_x = 0.0f;
-    pen_y = 0.0f;
+    pen_x = 0;
+    pen_y = 0;
 
     for (unsigned i=0; i<glyph_count; ++i) 
     {
@@ -387,15 +388,15 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         const auto& info = glyph_raster_info[codepoint];
 
         // advances tell us how much to move the pen in x/y direction for the next glyph
-        const float xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
-        const float ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;
+        const int xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
+        const int ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;
 
         // offsets tell us how the glyph should be offset wrt the current pen position
-        const float xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;
-        const float yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;
+        const int xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;
+        const int yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;
 
-        const auto x = pen_x + info.bearing_x + xo;
-        const auto y = pen_y + info.bearing_y + yo;
+        const int x = pen_x + info.bearing_x + xo;
+        const int y = pen_y + info.bearing_y + yo;
 
         bmp->Copy(x, baseline - y, info.bitmap);
 

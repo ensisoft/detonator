@@ -67,8 +67,7 @@ namespace gfx
         // Add text relative to the top left origin 
         // of the TextBuffer. Origin is 0,0 and y growns down.
         void AddText(const std::string& text, const std::string& font,
-            float font_size_pt,
-            float xpos, float ypos);
+            unsigned font_size_px, int xpos, int ypos);
 
         enum class HorizontalAlignment {
             AlignLeft,
@@ -83,7 +82,7 @@ namespace gfx
 
         // Add text to the buffer and position automatically 
         // relative to the TextBuffer origin. 
-        void AddText(const std::string& text, const std::string& font, float font_size_pt,
+        void AddText(const std::string& text, const std::string& font, unsigned font_size_px,
             HorizontalAlignment ha = HorizontalAlignment::AlignCenter, 
             VerticalAlignment va = VerticalAlignment::AlignCenter);
 
@@ -96,7 +95,7 @@ namespace gfx
         static std::weak_ptr<FontLibrary> Freetype;
 
         std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, 
-            const std::string& font, float font_size_pt) const;
+            const std::string& font, unsigned font_size_px) const;
 
     private:
         const std::string mName;
@@ -106,9 +105,9 @@ namespace gfx
         struct Text {
             std::string text;
             std::string font;
-            float font_size = 0.0f;
-            float xpos = 0.0f;
-            float ypos = 0.0f;
+            unsigned font_size = 0.0f;
+            int xpos = 0.0f;
+            int ypos = 0.0f;
             bool use_absolute_position = false;
             HorizontalAlignment ha;
             VerticalAlignment va;
