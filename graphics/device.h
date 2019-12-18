@@ -79,7 +79,7 @@ namespace gfx
             std::uint8_t stencil_mask  = 0xff;
             std::uint8_t stencil_ref   = 0x0;
 
-            Rect viewport;
+            IRect viewport;
         };
 
         enum class Type {

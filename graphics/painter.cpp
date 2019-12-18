@@ -86,7 +86,7 @@ public:
         const auto draw = geom->GetDrawType();
 
         Device::State state;
-        state.viewport = Rect(mViewX, mViewY, mViewW, mViewH);
+        state.viewport = IRect(mViewX, mViewY, mViewW, mViewH);
         switch (mat.GetSurfaceType()) {
             case Material::SurfaceType::Opaque:
                 state.blending = Device::State::BlendOp::None;
@@ -122,7 +122,7 @@ public:
         const auto& kViewMatrixMaskShape = maskTransform.GetAsMatrix();
 
         Device::State state;
-        state.viewport         = Rect(mViewX, mViewY, mViewW, mViewH);
+        state.viewport         = IRect(mViewX, mViewY, mViewW, mViewH);
         state.stencil_func     = Device::State::StencilFunc::PassAlways;
         state.stencil_dpass    = Device::State::StencilOp::WriteRef;
         state.stencil_ref      = 0;

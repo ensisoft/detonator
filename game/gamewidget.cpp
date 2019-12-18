@@ -616,7 +616,7 @@ public:
             const auto a = i * angle + angle * r;
 
             particle p;
-            p.rc  = gfx::RectI(x, y, particleWidth, particleHeight);
+            p.rc  = gfx::URect(x, y, particleWidth, particleHeight);
             p.dir.setX(std::cos(a));
             p.dir.setY(std::sin(a));
             p.dir *= v;
@@ -686,7 +686,7 @@ public:
 
 private:
     struct particle {
-        gfx::RectI rc;
+        gfx::URect rc;
         QVector2D dir;
         QVector2D pos;
         float angle = 0.0f;

@@ -26,8 +26,8 @@
 #include "base/test_float.h"
 #include "../types.h"
 
-bool operator==(const gfx::TRect<float>& lhs,
-                const gfx::TRect<float>& rhs)
+bool operator==(const gfx::Rect<float>& lhs,
+                const gfx::Rect<float>& rhs)
 {
     return real::equals(lhs.GetX(), rhs.GetX()) &&
             real::equals(lhs.GetY(), rhs.GetY()) &&
@@ -36,8 +36,8 @@ bool operator==(const gfx::TRect<float>& lhs,
 }
 
 template<typename T>
-bool operator==(const gfx::TRect<T>& lhs, 
-                const gfx::TRect<T>& rhs)
+bool operator==(const gfx::Rect<T>& lhs, 
+                const gfx::Rect<T>& rhs)
 {
     return lhs.GetX() == rhs.GetX() &&
         lhs.GetY() == rhs.GetY() &&
@@ -48,7 +48,7 @@ bool operator==(const gfx::TRect<T>& lhs,
 template<typename T>
 void TestRect()
 {
-    using R = gfx::TRect<T>;
+    using R = gfx::Rect<T>;
 
     struct TestCase {
         R lhs; 

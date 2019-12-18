@@ -43,11 +43,11 @@ namespace gfx
     };
 
     template<typename T>
-    class TPoint
+    class Point
     {
     public:
-        TPoint() = default;
-        TPoint(T x, T y)
+        Point() = default;
+        Point(T x, T y)
           : mX(x)
           , mY(y)
         {}
@@ -58,24 +58,24 @@ namespace gfx
         T mY = T();
     };
 
-    using Point  = TPoint<unsigned>;
-    using PointF = TPoint<float>;
-    using PointI = TPoint<int>;
+    using UPoint = Point<unsigned>;
+    using FPoint = Point<float>;
+    using IPoint = Point<int>;
 
     // simple rectangle definition
     template<typename T>
-    class TRect
+    class Rect
     {
     public:
-        TRect() {}
-        TRect(T x, T y, T w, T h)
+        Rect() {}
+        Rect(T x, T y, T w, T h)
           : mX(x)
           , mY(y)
           , mWidth(w)
           , mHeight(h)
         {}
         template<typename F> explicit 
-        TRect(const TRect<F>& other)
+        Rect(const Rect<F>& other)
         {
             mX = other.GetX();
             mY = other.GetY();
@@ -111,31 +111,32 @@ namespace gfx
         // Map a local point relative to the rect origin
         // into a global point relative to the origin of the
         // coordinate system.
-        TPoint<T> MapToGlobal(T x, T y) const 
+        Point<T> MapToGlobal(T x, T y) const 
         {
-            return TPoint<T>(mX + x, mY + y);
+            return Point<T>(mX + x, mY + y);
         }
+
         // Map a local point relative to the rect origin 
         // into a global point relative to the origin of the
         // coordinate system
-        TPoint<T> MapToGlobal(const TPoint<T>& p) const
+        Point<T> MapToGlobal(const Point<T>& p) const
         {
-            return TPoint<T>(mX + p.GetX(), mY + p.GetY());
+            return Point<T>(mX + p.GetX(), mY + p.GetY());
         }
 
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
-        TPoint<T> MapToLocal(T x, T y) const 
+        Point<T> MapToLocal(T x, T y) const 
         {
-            return TPoint<T>(x - mX, y - mY);
+            return Point<T>(x - mX, y - mY);
         }
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
-        TPoint<T> MapToLocal(const TPoint<T>& p) const 
+        Point<T> MapToLocal(const Point<T>& p) const 
         {
-            return TPoint<T>(p.GetX() - mX, p.GetY() - mY);
+            return Point<T>(p.GetX() - mX, p.GetY() - mY);
         }
 
     private:
@@ -145,16 +146,16 @@ namespace gfx
         T mHeight = 0;
     };
 
-    using Rect  = TRect<unsigned>;
-    using RectF = TRect<float>;
-    using RectI = TRect<int>;
+    using URect = Rect<unsigned>;
+    using FRect = Rect<float>;
+    using IRect = Rect<int>;
 
     // Find the itersection of the two rectangles
     // and return the rectangle that represents the intersect.
     template<typename T>
-    TRect<T> Intersect(const TRect<T>& lhs, const TRect<T>& rhs)
+    Rect<T> Intersect(const Rect<T>& lhs, const Rect<T>& rhs)
     {
-        using R = TRect<T>;
+        using R = Rect<T>;
         if (lhs.IsEmpty() || rhs.IsEmpty())
             return R();
 

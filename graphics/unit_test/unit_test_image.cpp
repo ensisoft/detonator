@@ -65,7 +65,7 @@ int test_main(int argc, char* argv[])
 
         gfx::Bitmap<gfx::RGB>::MSE mse;
         mse.SetErrorTreshold(10);
-        TEST_REQUIRE(Compare(bmp, gfx::Rect(0, 0, 4, 4), ref, mse));
+        TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
     }
 
@@ -104,7 +104,7 @@ int test_main(int argc, char* argv[])
 
         gfx::Bitmap<gfx::RGBA>::MSE mse;
         mse.SetErrorTreshold(10);
-        TEST_REQUIRE(Compare(bmp, gfx::Rect(0, 0, 4, 4), ref, mse));
+        TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
     }
 
@@ -130,7 +130,7 @@ int test_main(int argc, char* argv[])
 
         gfx::Bitmap<gfx::Grayscale>::MSE mse;
         mse.SetErrorTreshold(10);
-        TEST_REQUIRE(Compare(bmp, gfx::Rect(0, 0, 4, 4), ref, mse));
+        TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
     }
 
 

@@ -241,16 +241,16 @@ namespace gfx
         // Set texture sampling subrectangle, i.e. the x,y offset
         // and the width and height of the texture subrect to use.
         // This will set the box in texture units i.e. pixels
-        TextureMap& SetRect(const RectI& rc)
+        TextureMap& SetRect(const URect& rc)
         {
-            mBox = RectF(rc);
+            mBox = FRect(rc);
             mNormalizedBox = false;
             return *this;
         }
         // Set texture sampling subrectangle, i.e. the x,y offset
         // and the width and height of the texture subrect to use.
         // This will expect the box to be in normalized units.
-        TextureMap& SetRect(const RectF& rc)
+        TextureMap& SetRect(const FRect& rc)
         {
             mBox = rc;
             mNormalizedBox = true;
@@ -307,7 +307,7 @@ namespace gfx
         bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float mGamma   = 1.0f;
-        RectF mBox = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+        FRect mBox = FRect(0.0f, 0.0f, 1.0f, 1.0f);
         bool  mNormalizedBox = true;
     };
 

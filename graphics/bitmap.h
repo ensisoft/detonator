@@ -435,7 +435,7 @@ namespace gfx
             const auto src = row * mWidth + col;
             return mPixels[src];
         }
-        Pixel GetPixel(const Point& p) const 
+        Pixel GetPixel(const UPoint& p) const 
         {
             return GetPixel(p.GetY(), p.GetX());
         }
@@ -450,7 +450,7 @@ namespace gfx
             const auto dst = row * mWidth + col;
             mPixels[dst] = value;
         }
-        void SetPixel(const Point& p, const Pixel& value)
+        void SetPixel(const UPoint& p, const Pixel& value)
         {
             SetPixel(p.GetY(), p.GetX(), value);
         }
@@ -463,7 +463,7 @@ namespace gfx
         // the reference pixel as determined by the compare functor.
         // This is mostly useful as a testing utility.
         template<typename CompareF>
-        bool Compare(const Rect& rc, const Pixel& reference, CompareF comparer) const
+        bool Compare(const URect& rc, const Pixel& reference, CompareF comparer) const
         {
             const auto& dst = Intersect(GetRect(), rc);
 
@@ -482,7 +482,7 @@ namespace gfx
         // Compare the pixels in this bitmap within the given
         // rectangle against the given reference pixel and expect
         // pixel perfect matching.
-        bool Compare(const Rect& rc, const Pixel& reference) const
+        bool Compare(const URect& rc, const Pixel& reference) const
         {
             return Compare(rc, reference, Pixel2Pixel());
         }
@@ -494,7 +494,7 @@ namespace gfx
         template<typename ComparerF>
         bool Compare(const Pixel& reference, ComparerF comparer) const
         {
-            const Rect rc(0, 0, mWidth, mHeight);
+            const URect rc(0, 0, mWidth, mHeight);
             return Compare(rc, reference, comparer);
         }
 
@@ -509,7 +509,7 @@ namespace gfx
 
         // Fill the area defined by the rectangle rc with the given pixel value.
         // The rectangle is clipped to the pixmap borders.
-        void Fill(const Rect& rc, const Pixel& value)
+        void Fill(const URect& rc, const Pixel& value)
         {
             const auto& dst = Intersect(GetRect(), rc);
 
@@ -531,7 +531,7 @@ namespace gfx
             }
             else
             {
-                const Rect rc(0, 0, mWidth, mHeight);
+                const URect rc(0, 0, mWidth, mHeight);
                 Fill(rc, value);
             }
         }
@@ -539,7 +539,7 @@ namespace gfx
         template<typename PixelType>
         void Copy(unsigned x, unsigned y, unsigned width, unsigned height, const PixelType* data)
         {
-            const auto& src = Rect(x, y, width, height);
+            const auto& src = URect(x, y, width, height);
             const auto& dst = Intersect(GetRect(), src);
             
             for (unsigned y=0; y<dst.GetHeight(); ++y)
@@ -554,7 +554,7 @@ namespace gfx
         template<typename PixelType>
         void Copy(unsigned x, unsigned y, const Bitmap<PixelType>& bmp)
         {
-            const auto& src = Rect(x, y, bmp.GetWidth(), bmp.GetHeight());
+            const auto& src = URect(x, y, bmp.GetWidth(), bmp.GetHeight());
             const auto& dst = Intersect(GetRect(), src);
             
             for (unsigned y=0; y<dst.GetHeight(); ++y)
@@ -580,8 +580,8 @@ namespace gfx
             return *this;
         }
 
-        Rect GetRect() const 
-        { return Rect(0u, 0u, mWidth, mHeight); }
+        URect GetRect() const 
+        { return URect(0u, 0u, mWidth, mHeight); }
 
     private:
         std::vector<Pixel> mPixels;
@@ -603,7 +603,7 @@ namespace gfx
     // Otherwise returns true the pixels between the two bitmaps compare equal
     // as determined by the compare functor.
     template<typename CompareF, typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const Rect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
+    bool Compare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
     {
         // take the intersection of the bitmaps and then intersection
         // of the minimum bitmap rect and the rect of interest
@@ -627,7 +627,7 @@ namespace gfx
     }
 
     template<typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const Rect& rc, const Bitmap<PixelT>& rhs)
+    bool Compare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs)
     {
         using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
         return Compare(lhs, rc, rhs, ComparerF());
@@ -644,7 +644,7 @@ namespace gfx
             return false;
         if (lhs.GetWidth != rhs.GetWidth())
             return false;
-        const Rect rc (0, 0, lhs.GetWidth(), lhs.GetHeight());
+        const URect rc (0, 0, lhs.GetWidth(), lhs.GetHeight());
 
         return Compare(lhs, rc, rhs, comparer);
     }

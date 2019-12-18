@@ -77,19 +77,19 @@ int test_main(int argc, char* argv[])
             TEST_REQUIRE(bmp.GetPixel(1, 1) == gfx::Color::White);
             TEST_REQUIRE(bmp.GetPixel(0, 1) == gfx::Color::White);
 
-            bmp.Fill(gfx::Rect(0, 0, 6, 6), gfx::Color::Red);
+            bmp.Fill(gfx::URect(0, 0, 6, 6), gfx::Color::Red);
             TEST_REQUIRE(bmp.GetPixel(0, 0) == gfx::Color::Red);
             TEST_REQUIRE(bmp.GetPixel(1, 0) == gfx::Color::Red);
             TEST_REQUIRE(bmp.GetPixel(1, 1) == gfx::Color::Red);
             TEST_REQUIRE(bmp.GetPixel(0, 1) == gfx::Color::Red);        
 
-            bmp.Fill(gfx::Rect(0, 0, 1, 1), gfx::Color::Green);
+            bmp.Fill(gfx::URect(0, 0, 1, 1), gfx::Color::Green);
             TEST_REQUIRE(bmp.GetPixel(0, 0) == gfx::Color::Green);
             TEST_REQUIRE(bmp.GetPixel(1, 0) == gfx::Color::Red);        
             TEST_REQUIRE(bmp.GetPixel(1, 1) == gfx::Color::Red);
             TEST_REQUIRE(bmp.GetPixel(0, 1) == gfx::Color::Red);                
 
-            bmp.Fill(gfx::Rect(1, 1, 1, 1), gfx::Color::Green);        
+            bmp.Fill(gfx::URect(1, 1, 1, 1), gfx::Color::Green);        
             TEST_REQUIRE(bmp.GetPixel(0, 0) == gfx::Color::Green);
             TEST_REQUIRE(bmp.GetPixel(1, 0) == gfx::Color::Red);        
             TEST_REQUIRE(bmp.GetPixel(1, 1) == gfx::Color::Green);
@@ -115,7 +115,7 @@ int test_main(int argc, char* argv[])
         for (const auto& r : test_rects) 
         {
             bmp.Fill(gfx::Color::White);
-            bmp.Fill(gfx::Rect(r.x, r.y, r.w, r.h), gfx::Color::Green);
+            bmp.Fill(gfx::URect(r.x, r.y, r.w, r.h), gfx::Color::Green);
             for (int y=0; y<100; ++y)
             {
                 for (int x=0; x<100; ++x)
@@ -153,7 +153,7 @@ int test_main(int argc, char* argv[])
         };
         for (const auto& r : test_rects) 
         {
-            const auto& rc = gfx::Rect(r.x, r.y, r.w, r.h);
+            const auto& rc = gfx::URect(r.x, r.y, r.w, r.h);
             // we've tested the fill operation previously already.
             bmp.Fill(gfx::Color::White);
             bmp.Fill(rc, gfx::Color::Green);
