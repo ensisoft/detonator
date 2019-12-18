@@ -163,22 +163,25 @@ int test_main(int argc, char* argv[])
     }
 
 
-    // test copying of data 
+    // test copying of data from a pixel buffer pointer
     {
         gfx::Bitmap<gfx::RGB> dst(4, 4);
         dst.Fill(gfx::Color::White);
 
         const gfx::RGB red_data[2*2] = {
-            gfx::Color::Red, gfx::Color::Red,
-            gfx::Color::Red, gfx::Color::Red
+            gfx::Color::Red, gfx::Color::Green,
+            gfx::Color::Yellow, gfx::Color::Blue
         };
 
         dst.Copy(0, 0, 2, 2, red_data);
         TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::Red);
-        TEST_REQUIRE(dst.GetPixel(1, 0) == gfx::Color::Red);
-        TEST_REQUIRE(dst.GetPixel(0, 1) == gfx::Color::Red);
-        TEST_REQUIRE(dst.GetPixel(1, 1) == gfx::Color::Red);
+        TEST_REQUIRE(dst.GetPixel(1, 0) == gfx::Color::Yellow);
+        TEST_REQUIRE(dst.GetPixel(0, 1) == gfx::Color::Green);
+        TEST_REQUIRE(dst.GetPixel(1, 1) == gfx::Color::Blue);
         TEST_REQUIRE(dst.GetPixel(2, 2) == gfx::Color::White);
+        TEST_REQUIRE(dst.GetPixel(3, 2) == gfx::Color::White);        
+        TEST_REQUIRE(dst.GetPixel(2, 3) == gfx::Color::White);
+        TEST_REQUIRE(dst.GetPixel(3, 3) == gfx::Color::White);                
 
         dst.Fill(gfx::Color::White);
         dst.Copy(2, 2, 2, 2, red_data);
@@ -187,22 +190,18 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(dst.GetPixel(0, 1) == gfx::Color::White);
         TEST_REQUIRE(dst.GetPixel(1, 1) == gfx::Color::White);
         TEST_REQUIRE(dst.GetPixel(2, 2) == gfx::Color::Red);
+        TEST_REQUIRE(dst.GetPixel(2, 3) == gfx::Color::Green);
+        TEST_REQUIRE(dst.GetPixel(3, 2) == gfx::Color::Yellow);
+        TEST_REQUIRE(dst.GetPixel(3, 3) == gfx::Color::Blue);        
 
         dst.Fill(gfx::Color::White);
+        dst.Copy(-1, -1, 2, 2, red_data);
+        TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::Blue);
+        TEST_REQUIRE(dst.GetPixel(1, 0) == gfx::Color::White);
 
-        const gfx::Grayscale gray_data[2*2] = {
-            127, 127, 
-            127, 127
-        };
-        dst.Copy(0, 0, 2, 2, gray_data);
-        TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::DarkGray);
-        TEST_REQUIRE(dst.GetPixel(1, 0) == gfx::Color::DarkGray);
-        TEST_REQUIRE(dst.GetPixel(0, 1) == gfx::Color::DarkGray);
-        TEST_REQUIRE(dst.GetPixel(1, 1) == gfx::Color::DarkGray);
-        TEST_REQUIRE(dst.GetPixel(2, 2) == gfx::Color::White);        
-
-        
-
+        dst.Fill(gfx::Color::White);
+        dst.Copy(-2, -2, 2, 2, red_data);
+        TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::White);
     }
 
     // test copying of data from a bitmap
@@ -242,8 +241,16 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(dst.GetPixel(2, 2) == gfx::Color::White);                        
         TEST_REQUIRE(dst.GetPixel(2, 3) == gfx::Color::White);                                
         TEST_REQUIRE(dst.GetPixel(3, 2) == gfx::Color::White);                        
-        TEST_REQUIRE(dst.GetPixel(3, 3) == gfx::Color::Red);                                        
-    
+        TEST_REQUIRE(dst.GetPixel(3, 3) == gfx::Color::Red);     
+
+        dst.Fill(gfx::Color::White);
+        dst.Copy(-1, -1, src);                                   
+        TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::Yellow);    
+
+        dst.Fill(gfx::Color::White);
+        dst.Fill(gfx::Color::White);
+        dst.Copy(-2, -2, src);                                   
+        TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::White);
     }
 
     // test flip

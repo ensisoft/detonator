@@ -27,6 +27,7 @@
 #include "base/assert.h"
 #include "types.h"
 
+#include <limits>
 #include <vector>
 #include <cassert>
 #include <cstring>
@@ -536,32 +537,53 @@ namespace gfx
             }
         }
 
+        // Copy data from given pixel array pointer into this bitmap.
+        // The data is expected to point to a total of width*height worth of pixels.
+        // The offset (position) of where to start copying the data into can be negative.
+        // Any pixel that is not within the bounds of this bitmap is silently clipped.
         template<typename PixelType>
-        void Copy(unsigned x, unsigned y, unsigned width, unsigned height, const PixelType* data)
+        void Copy(int x, int y, unsigned width, unsigned height, const PixelType* data)
         {
-            const auto& src = URect(x, y, width, height);
-            const auto& dst = Intersect(GetRect(), src);
+            ASSERT(width < std::numeric_limits<int>::max());
+            ASSERT(height < std::numeric_limits<int>::max());
+
+            const auto& src = IRect(x, y, width, height);
+            const auto& own = IRect(GetRect());
+            const auto& dst = Intersect(own, src);
             
             for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
                 for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    SetPixel(dst.MapToGlobal(x, y), data[y * width + x]);
+                    const auto& g = dst.MapToGlobal(x, y);
+                    const auto& l = src.MapToLocal(g);
+                    SetPixel(UPoint(g), data[l.GetY() * width + l.GetX()]);
                 }
             }
         }
 
+        // Copy data from the given other bitmap into this bitmap.
+        // The offset (position) of where to start copying the data into can be negative.
+        // Any pixel that is not within the bounds of this bitmap is silently clipped.
         template<typename PixelType>
-        void Copy(unsigned x, unsigned y, const Bitmap<PixelType>& bmp)
+        void Copy(int x, int y, const Bitmap<PixelType>& bmp)
         {
-            const auto& src = URect(x, y, bmp.GetWidth(), bmp.GetHeight());
-            const auto& dst = Intersect(GetRect(), src);
+            const auto w = bmp.GetWidth();
+            const auto h = bmp.GetHeight();
+            ASSERT(w < std::numeric_limits<int>::max());
+            ASSERT(h < std::numeric_limits<int>::max());
+
+            const auto& src = IRect(x, y, w, h);
+            const auto& own = IRect(GetRect());
+            const auto& dst = Intersect(own, src);
             
             for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
                 for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    SetPixel(dst.MapToGlobal(x, y), bmp.GetPixel(y, x));
+                    const auto& g = dst.MapToGlobal(x, y);
+                    const auto& l = src.MapToLocal(g);
+                    SetPixel(UPoint(g), bmp.GetPixel(UPoint(l)));
                 }
             }
         }

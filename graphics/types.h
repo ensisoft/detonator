@@ -51,6 +51,12 @@ namespace gfx
           : mX(x)
           , mY(y)
         {}
+        template<typename F> explicit
+        Point(const Point<F>& other)
+          : mX(other.GetX())
+          , mY(other.GetY())
+        {}
+
         T GetX() const { return mX; }
         T GetY() const { return mY; }
     private:
