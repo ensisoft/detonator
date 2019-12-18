@@ -428,23 +428,31 @@ namespace gfx
 
         // Get a pixel from within the bitmap.
         // The pixel must be within the this bitmap's width and height.
-        Pixel GetPixel(std::size_t row, std::size_t col) const
+        Pixel GetPixel(unsigned row, unsigned col) const
         {
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto src = row * mWidth + col;
             return mPixels[src];
         }
+        Pixel GetPixel(const Point& p) const 
+        {
+            return GetPixel(p.GetY(), p.GetX());
+        }
 
         // Set a pixel within the bitmap to a new pixel value.
         // The pixel's coordinates must be within this bitmap's
         // width and height.
-        void SetPixel(std::size_t row, std::size_t col, const Pixel& pixel)
+        void SetPixel(unsigned row, unsigned col, const Pixel& value)
         {
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto dst = row * mWidth + col;
-            mPixels[dst] = pixel;
+            mPixels[dst] = value;
+        }
+        void SetPixel(const Point& p, const Pixel& value)
+        {
+            SetPixel(p.GetY(), p.GetX(), value);
         }
 
         // Compare the pixels in this bitmap within the given rectangle
@@ -457,16 +465,13 @@ namespace gfx
         template<typename CompareF>
         bool Compare(const Rect& rc, const Pixel& reference, CompareF comparer) const
         {
-            const auto right  = rc.GetX() + rc.GetWidth();
-            const auto bottom = rc.GetY() + rc.GetHeight();
-            const auto xend = std::min(right, mWidth);
-            const auto yend = std::min(bottom, mHeight);
+            const auto& dst = Intersect(GetRect(), rc);
 
-            for (std::size_t y=rc.GetY(); y<yend; ++y)
+            for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
-                for (std::size_t x=rc.GetX(); x<xend; ++x)
+                for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    const auto& px = GetPixel(y, x);
+                    const auto& px = GetPixel(dst.MapToGlobal(x,y));
                     if (!(comparer(px, reference)))
                         return false;
                 }
@@ -506,16 +511,13 @@ namespace gfx
         // The rectangle is clipped to the pixmap borders.
         void Fill(const Rect& rc, const Pixel& value)
         {
-            const auto right  = rc.GetX() + rc.GetWidth();
-            const auto bottom = rc.GetY() + rc.GetHeight();
-            const auto xend = std::min(right, mWidth);
-            const auto yend = std::min(bottom, mHeight);
+            const auto& dst = Intersect(GetRect(), rc);
 
-            for (std::size_t y=rc.GetY(); y<yend; ++y)
+            for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
-                for (std::size_t x=rc.GetX(); x<xend; ++x)
+                for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    SetPixel(y, x, value);
+                    SetPixel(dst.MapToGlobal(x, y), value);
                 }
             }
         }
@@ -535,19 +537,16 @@ namespace gfx
         }
 
         template<typename PixelType>
-        void Copy(const Rect& rc, const PixelType* data)
+        void Copy(unsigned x, unsigned y, unsigned width, unsigned height, const PixelType* data)
         {
-            const auto right  = rc.GetX() + rc.GetWidth();
-            const auto bottom = rc.GetY() + rc.GetHeight();
-            const auto stride = rc.GetWidth();
-            const auto xend = std::min(right, mWidth);
-            const auto yend = std::min(bottom, mHeight);
-            size_t offset = 0;
-            for (size_t y=rc.GetY(); y<yend; ++y)
+            const auto& src = Rect(x, y, width, height);
+            const auto& dst = Intersect(GetRect(), src);
+            
+            for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
-                for (size_t x=rc.GetX(); x<xend; ++x)
+                for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    SetPixel(y, x, data[offset++]);
+                    SetPixel(dst.MapToGlobal(x, y), data[y * width + x]);
                 }
             }
         }
@@ -555,15 +554,14 @@ namespace gfx
         template<typename PixelType>
         void Copy(unsigned x, unsigned y, const Bitmap<PixelType>& bmp)
         {
-            const auto right  = x + bmp.GetWidth();
-            const auto bottom = y + bmp.GetHeight();
-            const auto xend = std::min(right, mWidth);
-            const auto yend = std::min(bottom, mHeight);
-            for (size_t row=y; row<yend; ++row)
+            const auto& src = Rect(x, y, bmp.GetWidth(), bmp.GetHeight());
+            const auto& dst = Intersect(GetRect(), src);
+            
+            for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
-                for (size_t col=x; col<xend; ++col)
+                for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
-                    SetPixel(row, col, bmp.GetPixel(row-y, col-x));
+                    SetPixel(dst.MapToGlobal(x, y), bmp.GetPixel(y, x));
                 }
             }
         }
@@ -581,6 +579,9 @@ namespace gfx
             mHeight = other.mHeight;
             return *this;
         }
+
+        Rect GetRect() const 
+        { return Rect(0u, 0u, mWidth, mHeight); }
 
     private:
         std::vector<Pixel> mPixels;
@@ -604,17 +605,20 @@ namespace gfx
     template<typename CompareF, typename PixelT>
     bool Compare(const Bitmap<PixelT>& lhs, const Rect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
     {
-        const auto right = rc.GetX() + rc.GetWidth();
-        const auto bottom = rc.GetY() + rc.GetHeight();
-        const auto xend = std::min(right, std::min(lhs.GetWidth(), rhs.GetWidth()));
-        const auto yend = std::min(bottom, std::min(lhs.GetHeight(), rhs.GetHeight()));
+        // take the intersection of the bitmaps and then intersection
+        // of the minimum bitmap rect and the rect of interest
+        const auto& min_bitmap_rect = Intersect(lhs.GetRect(), rhs.GetRect());
+        const auto& min_rect = Intersect(rc, min_bitmap_rect);
+        if (min_rect.IsEmpty())
+            return false;
 
-        for (std::size_t y=rc.GetY(); y<yend; ++y)
+        for (unsigned y=0; y<min_rect.GetHeight(); ++y)
         {
-            for (std::size_t x=rc.GetX(); x<xend; ++x)
+            for (unsigned x=0; x<min_rect.GetWidth(); ++x)
             {
-                const auto& px1  = lhs.GetPixel(y, x);
-                const auto& px2  = rhs.GetPixel(y, x);
+                const auto& point = min_rect.MapToGlobal(x, y);
+                const auto& px1  = lhs.GetPixel(point);
+                const auto& px2  = rhs.GetPixel(point);
                 if (!comparer(px1, px2))
                     return false;
             }

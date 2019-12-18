@@ -89,16 +89,14 @@ namespace gfx
             ASSERT(mData);
             if (mDepth == sizeof(PixelT))
                 return Bitmap<PixelT>(reinterpret_cast<const PixelT*>(mData), mWidth, mHeight);
-                    
-            const Rect rc(0, 0, mWidth, mHeight);
 
             Bitmap<PixelT> ret(mWidth, mHeight);        
             if (mDepth == 1)
-                ret.Copy(rc, reinterpret_cast<const Grayscale*>(mData));
+                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const Grayscale*>(mData));
             else if (mDepth == 3)
-                ret.Copy(rc, reinterpret_cast<const RGB*>(mData));
+                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGB*>(mData));
             else if (mDepth == 4)
-                ret.Copy(rc, reinterpret_cast<const RGBA*>(mData));
+                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
             
             return ret;
         }
