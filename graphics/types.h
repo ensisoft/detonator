@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#include <algorithm> // for min, max
+
 // simple type definitions
 
 namespace gfx
@@ -39,6 +41,26 @@ namespace gfx
         Yellow,  DarkYellow,
         Gray,    DarkGray, LightGray
     };
+
+    template<typename T>
+    class TPoint
+    {
+    public:
+        TPoint() = default;
+        TPoint(T x, T y)
+          : mX(x)
+          , mY(y)
+        {}
+        T GetX() const { return mX; }
+        T GetY() const { return mY; }
+    private:
+        T mX = T();
+        T mY = T();
+    };
+
+    using Point  = TPoint<unsigned>;
+    using PointF = TPoint<float>;
+    using PointI = TPoint<int>;
 
     // simple rectangle definition
     template<typename T>
@@ -79,6 +101,43 @@ namespace gfx
             mX = x;
             mY = y;
         }
+        bool IsEmpty() const 
+        { 
+            const bool has_width  = mWidth != T();
+            const bool has_height = mHeight != T();
+            return !has_width || !has_height;
+        }
+
+        // Map a local point relative to the rect origin
+        // into a global point relative to the origin of the
+        // coordinate system.
+        TPoint<T> MapToGlobal(T x, T y) const 
+        {
+            return TPoint<T>(mX + x, mY + y);
+        }
+        // Map a local point relative to the rect origin 
+        // into a global point relative to the origin of the
+        // coordinate system
+        TPoint<T> MapToGlobal(const TPoint<T>& p) const
+        {
+            return TPoint<T>(mX + p.GetX(), mY + p.GetY());
+        }
+
+        // Map a global point relative to the origin of the
+        // coordinate system to a local point relative to the
+        // origin of the rect.
+        TPoint<T> MapToLocal(T x, T y) const 
+        {
+            return TPoint<T>(x - mX, y - mY);
+        }
+        // Map a global point relative to the origin of the
+        // coordinate system to a local point relative to the
+        // origin of the rect.
+        TPoint<T> MapToLocal(const TPoint<T>& p) const 
+        {
+            return TPoint<T>(p.GetX() - mX, p.GetY() - mY);
+        }
+
     private:
         T mX = 0;
         T mY = 0;
@@ -89,5 +148,39 @@ namespace gfx
     using Rect  = TRect<unsigned>;
     using RectF = TRect<float>;
     using RectI = TRect<int>;
+
+    // Find the itersection of the two rectangles
+    // and return the rectangle that represents the intersect.
+    template<typename T>
+    TRect<T> Intersect(const TRect<T>& lhs, const TRect<T>& rhs)
+    {
+        using R = TRect<T>;
+        if (lhs.IsEmpty() || rhs.IsEmpty())
+            return R();
+
+        const auto lhs_top    = lhs.GetY();
+        const auto lhs_left   = lhs.GetX();
+        const auto lhs_right  = lhs_left + lhs.GetWidth();
+        const auto lhs_bottom = lhs_top + lhs.GetHeight();
+        const auto rhs_top    = rhs.GetY();
+        const auto rhs_left   = rhs.GetX();
+        const auto rhs_right  = rhs_left + rhs.GetWidth();
+        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+        // no intersection conditions
+        if (lhs_right <= rhs_left)
+            return R();
+        else if (lhs_left >= rhs_right)
+            return R();
+        else if (lhs_top >= rhs_bottom)
+            return R();
+        else if (lhs_bottom <= rhs_top)
+            return R();
+
+        const auto right  = std::min(lhs_right, rhs_right);
+        const auto left   = std::max(lhs_left, rhs_left);
+        const auto top    = std::max(lhs_top, rhs_top);
+        const auto bottom = std::min(lhs_bottom, rhs_bottom);
+        return R(left, top, right - left, bottom - top);
+    }
 
 } // namespace

@@ -185,5 +185,6 @@ enable_testing()
 add_executable(unit_test_bitmap graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
 add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp base/assert.cpp
     third_party/stb/stb_image.c)
+add_executable(unit_test graphics/unit_test/unit_test.cpp)
 
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
