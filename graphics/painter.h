@@ -40,6 +40,8 @@ namespace gfx
     class Painter
     {
     public:
+        virtual ~Painter() = default;
+
         // Set the current render target view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
