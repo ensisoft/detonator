@@ -131,7 +131,7 @@ int test_main(int argc, char* argv[])
                 }
             }
             static int i = 0;
-            WritePPM(bmp, "/tmp/test_fill_" + std::to_string(i++) + ".ppm");
+            WritePPM(bmp, "test_fill_" + std::to_string(i++) + ".ppm");
         }
     }
 
@@ -290,7 +290,7 @@ int test_main(int argc, char* argv[])
                     bmp.SetPixel(y, x, gfx::Color::Red);
             }
         }
-        WritePPM(bmp, "/tmp/bitmap.ppm");
+        WritePPM(bmp, "bitmap.ppm");
     }
 
     return 0;
