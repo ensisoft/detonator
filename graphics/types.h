@@ -26,6 +26,8 @@
 
 #include <algorithm> // for min, max
 
+#undef RGB
+
 // simple type definitions
 
 namespace gfx
