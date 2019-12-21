@@ -56,6 +56,7 @@
 #include "graphics/painter.h"
 #include "graphics/types.h"
 #include "graphics/drawable.h"
+#include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "gamewidget.h"
@@ -167,6 +168,11 @@ public:
 
     // get whole widget rect in widget coordinates
     QRectF GetRect() const
+    {
+        return {mOriginX, mOriginY, mWidth, mHeight};
+    }
+
+    gfx::FRect GetGfxRect() const 
     {
         return {mOriginX, mOriginY, mWidth, mHeight};
     }
@@ -1048,15 +1054,13 @@ public:
         // of the bounding box for the text.
         const auto w = 100.0f;
         const auto h = font_size * 2;
-        gfx::Transform t;
-        t.Resize(w, h);
-        t.MoveTo(pos - QPointF(w*0.5, h*0.5));
+        const auto p = pos - QPointF(w*0.5, h*0.5);
 
-        gfx::TextBuffer buff(w, h);
-        buff.AddText(base::ToUtf8(mText), "fonts/ARCADE.TTF", font_size);
-        painter.Draw(gfx::Rectangle(), t, 
-            gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
-
+        gfx::DrawTextRect(painter, 
+            base::ToUtf8(mText),
+            "fonts/ARCADE.TTF", font_size, 
+            gfx::FRect(p.x(), p.y(), w, h), 
+            gfx::Color::DarkGray);
     }
 
 private:
@@ -1252,16 +1256,12 @@ public:
         
         const auto font_size = dim.y() / 2;
 
-        gfx::TextBuffer text(dim.x()*2, dim.y());
-        text.AddText(base::FormatString("%1", mScore), 
+        gfx::DrawTextRect(painter, 
+            base::FormatString("%1", mScore),
             "fonts/ARCADE.TTF", font_size, 
-            gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
-            gfx::TextBuffer::VerticalAlignment::AlignTop);
-
-        gfx::Transform t;
-        t.Resize(dim.x()*2, dim.y());        
-        t.MoveTo(top);
-        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkYellow));
+            gfx::FRect(top.x(), top.y(), dim.x() * 2, dim.y()),
+            gfx::Color::DarkYellow, 
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
 
 private:
@@ -1356,14 +1356,11 @@ public:
         const auto width  = layout.GetGridWidth();
         const auto height = layout.GetGridHeight();
 
-        gfx::TextBuffer buff(width, height);
-        buff.AddText(mText, "fonts/ARCADE.TTF", layout.GetFontSize());
-
-        gfx::Transform t;
-        t.MoveTo(0, 0);
-        t.Resize(width, height);
-        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
-        
+        gfx::DrawTextRect(painter, 
+            mText, 
+            "fonts/ARCADE.TTF", layout.GetFontSize(),
+            gfx::FRect(0, 0, width, height), 
+            gfx::Color::DarkGray);
     }
 
     virtual void paint(QPainter&, const QRect&) override
@@ -1709,28 +1706,22 @@ public:
     {
         const GridLayout layout(rect, 1, 20);
 
-        const auto w = layout.GetGridWidth();
-        const auto h = layout.GetGridHeight();
-
-        gfx::TextBuffer buff(w, h);
-        buff.AddText(base::FormatString("Kill the invaders by typing the correct pinyin.\n"
-            "You get scored based on how fast you kill and\n"
-            "how complicated the characters are.\n\n"
-            "Invaders that approach the left edge will show\n"
-            "the pinyin string and score no points.\n"
-            "You will lose points for invaders that you faill to kill.\n"
-            "Score %1% or higher to unlock the next level.\n\n"
-            "Type BOMB to ignite a bomb.\n"
-            "Type WARP to enter a time warp.\n"
-            "Press Space to clear the input.\n\n"
-            "Press Esc to exit\n", (int)(LevelUnlockCriteria * 100)),
-            "fonts/ARCADE.TTF", 
-            layout.GetFontSize());
-
-        gfx::Transform t;
-        t.MoveTo(0, 0);
-        t.Resize(w, h);
-        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
+        gfx::DrawTextRect(painter, 
+            base::FormatString(
+                "Kill the invaders by typing the correct pinyin.\n"
+                "You get scored based on how fast you kill and\n"
+                "how complicated the characters are.\n\n"
+                "Invaders that approach the left edge will show\n"
+                "the pinyin string and score no points.\n"
+                "You will lose points for invaders that you faill to kill.\n"
+                "Score %1% or higher to unlock the next level.\n\n"
+                "Type BOMB to ignite a bomb.\n"
+                "Type WARP to enter a time warp.\n"
+                "Press Space to clear the input.\n\n"
+                "Press Esc to exit\n", (int)(LevelUnlockCriteria * 100)),
+            "fonts/ARCADE.TTF", layout.GetFontSize(),
+            layout.GetGfxRect(),            
+            gfx::Color::DarkGray);
     }
 
     virtual void paint(QPainter&, const QRect&) override
@@ -1874,12 +1865,9 @@ public:
     virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
-        
-        const auto w = layout.GetGridWidth();
-        const auto h = layout.GetGridHeight();
 
-        gfx::TextBuffer buff(w, h);
-        buff.AddText(base::FormatString(
+        gfx::DrawTextRect(painter, 
+            base::FormatString(
                 "Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by:\n"
                 "Sami Vaisanen\n"
@@ -1894,13 +1882,9 @@ public:
                 "level27\n"
                 "http://soundcloud.com/level27\n\n"
                 "Press Esc to exit", MAJOR_VERSION, MINOR_VERSION),
-            "fonts/ARCADE.TTF", 
-            layout.GetFontSize());
-
-        gfx::Transform t;
-        t.MoveTo(0, 0);
-        t.Resize(w, h);
-        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
+            "fonts/ARCADE.TTF", layout.GetFontSize(),
+            layout.GetGfxRect(),             
+            gfx::Color::DarkGray);
     }
 
     virtual void paint(QPainter&, const QRect&) override
@@ -2722,16 +2706,12 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         if (mShowFps)
         {
-            gfx::TextBuffer text(150, 100);
-            text.AddText(base::FormatString("FPS: %1", mCurrentfps), 
-                "fonts/ARCADE.TTF", 28, 
-                gfx::TextBuffer::HorizontalAlignment::AlignLeft, 
-                gfx::TextBuffer::VerticalAlignment::AlignTop);
-            gfx::Transform t;
-            t.Resize(150, 100);            
-            t.MoveTo(10, 20);
-            mCustomGraphicsPainter->Draw(gfx::Rectangle(), t, 
-                gfx::BitmapText(text).SetBaseColor(gfx::Color::DarkRed));
+            gfx::DrawTextRect(*mCustomGraphicsPainter, 
+                base::FormatString("FPS: %1", mCurrentfps),            
+                "fonts/ARCADE.TTF", 28,               
+                gfx::FRect(10, 20, 150, 100),
+                gfx::Color::DarkRed,
+                gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
         }
 
         mCustomGraphicsDevice->SetState(currentState);

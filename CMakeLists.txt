@@ -145,6 +145,7 @@ add_executable(invaders
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
+    graphics/drawing.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
