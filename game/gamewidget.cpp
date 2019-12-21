@@ -107,126 +107,132 @@ To* CollisionCast(const std::unique_ptr<From>& lhs,
     return CollisionCast<To>(lhs.get(), rhs.get());
 }
 
-// game space is discrete space from 0 to game::width() - 1 on X axis
-// and from 0 to game::height() - 1 on Y axis
-// we use QPoint to represent this.
-struct GameSpace {
-    unsigned x, y;
-};
-
-// normalized widget/view space is expressed with floats from 0 to 1.0 on Y and X
-// 0.0, 0.0 being the window top left and 1.0,1.0 being the window bottom right
-// we use QVector2D to represent this
-
-// eventually QPainter paint operations require coordinates in pixel space
-// which runs from 0 to widget::width() on X axis and from 0 to widget::height()
-// on the Y axis. this is also represented by QPoint
-
-class TransformState
+//
+// GridLayout divides the given area (rectangle) in whatever units (pixels really)
+// into a grid of rows and columns.
+// Then it provides operations for mapping points and coordinates in some space
+// into the coordinate space the GridLayout is relative to.
+// 
+// We have the following coordinate spaces:
+// - layout space expressed with row/column pairs and which expresses positions
+//   relative to the grid layout.
+// - layout space expressed in normalized units (floats) and which expresses positions
+//   relative to the grid layout so that x=0.0 maps to left edge and x=1.0 maps to right edge
+//   of the space. y=0.0 maps to the top of the layout and y=1.0 maps to the bottom.
+//   
+// Coordinates in all the above coordinate spaces get mapped to pixel space suitable
+// for drawing objects in the window using QPainter or gfx::Painter.
+// For example a layout space row/col pair will get mapped to the top left corner of the
+// cell in window/pixel space so it's easy to draw. 
+// 
+class GridLayout
 {
 public:
-    TransformState(const QRectF& window, float numCols, float numRows)
-    {
-        // divide the widget's client area int equal sized cells
-        origin_ = QPointF(window.x(), window.y());
-        widget_ = QPointF(window.width(), window.height());
-        scale_  = QPointF(window.width() / numCols, window.height() / numRows);
-        size_   = QPointF(numCols, numRows);
-    }
+    // Divide the given rectangle into a grid of columns and rows.
+    GridLayout(const QRectF& rect, unsigned num_cols, unsigned num_rows)
+        : mNumCols(num_cols)
+        , mNumRows(num_rows)
+        , mOriginX(rect.x())
+        , mOriginY(rect.y())
+        , mWidth(rect.width())
+        , mHeight(rect.height())
+    {}
 
-    QRectF toViewSpaceRect(const QPointF& gameTopLeft, const QPointF& gameTopBottom) const
+    // Map a range of cells into a rectangle so that the returned
+    // rectangle covers the cells from the top left cell's top left corner
+    // to the bottom right cell's bottom right corner.
+    QRectF MapRect(const QPoint& top_left_cell, const QPoint& bottom_right_cell) const
     {
-        const QPointF top = toViewSpace(gameTopLeft);
-        const QPointF bot = toViewSpace(gameTopBottom);
+        const QPointF top = MapPoint(top_left_cell);
+        const QPointF bot = MapPoint(bottom_right_cell);
         return {top, bot};
     }
 
-    QPointF toViewSpace(const QPointF& cell) const
+    // Map a a grid position in layout grid space into 
+    // parent coordinate space.
+    QPointF MapPoint(const QPoint& cell) const
     {
-        const float xpos = cell.x() * scale_.x() + origin_.x();
-        const float ypos = cell.y() * scale_.y() + origin_.y();
+        const auto& scale = GetCellDimensions();
+        const float xpos = cell.x() * scale.x() + mOriginX;
+        const float ypos = cell.y() * scale.y() + mOriginY;
         return { xpos, ypos };
     }
 
-    QPointF toViewSpace(const QVector2D& norm) const
+    // Map a normalized position in the layout space into
+    // parent coordinate space.
+    QPointF MapPoint(const QVector2D& norm) const
     {
-        const float xpos = widget_.x() * norm.x() + origin_.x();
-        const float ypos = widget_.y() * norm.y() + origin_.y();
+        const float xpos = mWidth * norm.x() + mOriginX;
+        const float ypos = mHeight * norm.y() + mOriginY;
         return { xpos, ypos };
     }
 
-    QVector2D toNormalizedViewSpace(const GameSpace& g) const
+    QPoint GetCellDimensions() const
     {
-        // we add 4 units on the gaming area on both sides to allow
-        // the invaders to appear and disappear smoothly.
-
-        const float cols = numCols() - 8.0;
-        const float rows = numRows();
-
-        const float p_scale_x = (widget_.x() - origin_.x()) / cols;
-        const float p_scale_y = (widget_.y() - origin_.y()) / rows;
-
-        const float x = g.x - 4.0;
-        const float y = g.y;
-
-        const float px = x * p_scale_x;
-        const float py = y * p_scale_y;
-
-        const float xpos = px / (widget_.x() - origin_.x());
-        const float ypos = py / (widget_.y() - origin_.y());
-
-        return {xpos, ypos};
-    }
-
-    QVector2D toNormalizedViewSpace(const QPoint& p) const
-    {
-        const float xpos = (float)p.x() / (widget_.x() - origin_.x());
-        const float ypos = (float)p.y() / (widget_.y() - origin_.y());
-        return {xpos, ypos};
-    }
-
-    QPointF getScale() const
-    {
-        return scale_;
-    }
-
-    QVector2D getNormalizedScale() const
-    {
-        const auto scale  = getScale();
-        const auto width  = (float)viewWidth();
-        const auto height = (float)viewHeight();
-        return QVector2D(scale.x() / width, scale.y() / height);
+        return { mWidth / mNumCols, 
+                 mHeight / mNumRows };
     }
 
     // get whole widget rect in widget coordinates
-    QRectF viewRect() const
+    QRectF GetRect() const
     {
-        return {origin_.x(), origin_.y(), widget_.x(), widget_.y()};
+        return {mOriginX, mOriginY, mWidth, mHeight};
     }
 
-    // get widget width
-    int viewWidth() const
-    {
-        return widget_.x();
-    }
+    // Get Width of the grid layout in Pixel
+    unsigned GetGridWidth() const 
+    { return mWidth; }
 
-    // get widget heigth
-    int viewHeight() const
-    {
-        return widget_.y();
-    }
+    unsigned GetGridHeight() const 
+    { return mHeight; }
 
-    int numCols() const
-    { return size_.x(); }
+    unsigned GetNumCols() const
+    { return mNumCols; }
 
-    int numRows() const
-    { return size_.y(); }
+    unsigned GetNumRows() const
+    { return mNumRows; }
 private:
-    QPointF origin_;
-    QPointF widget_;
-    QPointF scale_;
-    QPointF size_;
+    const unsigned mNumCols = 0;
+    const unsigned mNumRows = 0;
+
+    // origin of this GridLayout relative to parent.
+    const float mOriginX = 0.0f;
+    const float mOriginY = 0.0f;
+
+    // extents of this grid layout
+    const float mWidth  = 0.0f;
+    const float mHeight = 0.0f;
 };
+
+using GameLayout = GridLayout;
+
+// Compute game layout object for the window with the given window
+// width and height.
+GameLayout GetGameWindowLayout(unsigned width, unsigned height)
+{
+    // the invader position is expressed in normalized units.
+    // we need to map those coordinates into pixel space,
+    // while maintaining aspect ratio and also doing a little kludge
+    // to map the position so that the invaders would appear and disappear
+    // smoothly instead of abruptly. For this we only map a partial
+    // amount of GameCol columns in the visible window. (4 columns each side
+    // will be outside of the visible window).
+    // Similarly we reserve some space at the top and at the bottom of the 
+    // window for the HUD so that it won't obstruct the game objects.
+    const auto cell_width  = width / (GameCols - 8);
+    const auto cell_height = height / (GameRows + 2);
+    const auto game_width  = cell_width * GameCols;
+    const auto game_height = cell_height * GameRows;
+    const auto half_width_diff  = (game_width - width) / 2;
+    const auto half_height_diff = (height - game_height) / 2 ;
+
+    QRect rect;        
+    rect.setWidth(game_width);
+    rect.setHeight(game_height);
+    rect.moveTo(-half_width_diff, half_height_diff);
+
+    return GameLayout(rect, GameCols, GameRows);
+}
 
 class GameWidget::State
 {
@@ -247,7 +253,7 @@ public:
     virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
 
     // paint the user interface state with the custom painter
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const
+    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const
     {}
 
     // update the state.. umh.. state from the delta time
@@ -280,12 +286,12 @@ public:
 
     // returns true if animation is still valid
     // otherwise false and the animation is expired.
-    virtual bool update(float dt, TransformState& state) = 0;
+    virtual bool update(float dt) = 0;
 
     // Paint/Draw the animation 
-    virtual void paint(gfx::Painter& painter, const TransformState& state) = 0;
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) = 0;
 
-    virtual QRectF getBounds(const TransformState& state) const
+    virtual QRectF getBounds(const GridLayout& layout) const
     {
         return QRectF{};
     }
@@ -314,31 +320,31 @@ public:
         mTexture   = math::rand(0, 2);
         mDirection = direction;
     }
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
         mX = math::wrap(1.0f, -0.2f, mX + d.x());
         mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         const auto& size = getTextureSize(mTexture);
         const char* name = getTextureName(mTexture);
 
         gfx::Transform t;
         t.Resize(size * mScale);
-        t.MoveTo(state.toViewSpace(QVector2D(mX, mY)));
+        t.MoveTo(layout.MapPoint(QVector2D(mX, mY)));
         painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
-    virtual QRectF getBounds(const TransformState& state) const override
+    virtual QRectF getBounds(const GridLayout& layout) const override
     {
         const auto& size = getTextureSize(mTexture);
 
         QRectF bounds;
         bounds.setSize(size * mScale);
-        bounds.moveTo(state.toViewSpace(QVector2D(mX, mY)));
+        bounds.moveTo(layout.MapPoint(QVector2D(mX, mY)));
         return bounds;
     }
     virtual ColliderType getColliderType() const override
@@ -400,7 +406,7 @@ public:
         }
     }
 
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -412,15 +418,15 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         if (mTime < mStartTime)
             return;
 
         mSprite.SetAppRuntime((mTime - mStartTime) / 1000.0f);
 
-        const auto unitScale = state.getScale();
-        const auto position  = state.toViewSpace(mPosition);
+        const auto unitScale = layout.GetCellDimensions();
+        const auto position  = layout.MapPoint(mPosition);
         const auto scaledWidth = unitScale.x() * mScale;
         const auto scaledHeight = unitScale.x() * mScale; // * aspect;
 
@@ -475,7 +481,7 @@ public:
         params.respawn = false;
         mParticles = std::make_unique<ParticleEngine>(params);
     }
-    virtual bool update(float dt, TransformState&) override
+    virtual bool update(float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum < mStartTime)
@@ -487,12 +493,12 @@ public:
         mParticles->Update(dt / 1000.0f);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         if (mTimeAccum < mStartTime)
             return;
 
-        const auto pos = state.toViewSpace(mPosition);
+        const auto pos = layout.MapPoint(mPosition);
         const auto x = pos.x();
         const auto y = pos.y();
 
@@ -535,7 +541,7 @@ public:
         }
     }
 
-    virtual bool update(float dt, TransformState&) override
+    virtual bool update(float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -546,7 +552,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         if (mTime < mStartTime)
             return;
@@ -556,10 +562,10 @@ public:
         mSprite.SetAppRuntime(time / 1000.0f);
         mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
 
-        const auto unitScale = state.getScale();
+        const auto unitScale = layout.GetCellDimensions();
         const auto pxw = unitScale.x() * mScale;
         const auto pxh = unitScale.x() * mScale;
-        const auto pos = state.toViewSpace(mPosition);
+        const auto pos = layout.MapPoint(mPosition);
 
         gfx::Transform t;
         t.Resize(pxw, pxh);        
@@ -627,7 +633,7 @@ public:
             mParticles.push_back(p);
         }
     }
-    virtual bool update(float dt, TransformState&) override
+    virtual bool update(float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -645,14 +651,14 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         if (mTime < mStartTime)
             return;
 
         for (const auto& p : mParticles)
         {
-            const auto pos = state.toViewSpace(p.pos);
+            const auto pos = layout.MapPoint(p.pos);
 
             const float width  = p.rc.GetWidth();
             const float height = p.rc.GetHeight();
@@ -739,7 +745,7 @@ public:
         Boss
     };
 
-    Invader(QVector2D position, const std::wstring& str, float velocity, ShipType type)
+    Invader(const QVector2D& position, const std::wstring& str, float velocity, ShipType type)
       : mPosition(position)
       , mText(str)
       , mVelocity(velocity)
@@ -761,10 +767,11 @@ public:
         mJetHeight = jet.GetHeight();
     }
 
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
-        const auto v = getVelocityVector(state);
-        mPosition += (v * dt);
+        const auto direction = QVector2D(-1.0f, 0.0f);
+
+        mPosition += mVelocity * dt * direction;
         if (mMaxLifeTime)
         {
             mLifeTime += dt;
@@ -776,12 +783,15 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& window) override
     {
+        const GridLayout layout = GetGameWindowLayout(window.GetGridWidth(), 
+            window.GetGridHeight());
+
         // offset the texture to be centered around the position
-        const auto unitScale   = state.getScale();
-        const auto spriteScale = state.getScale() * getScale();
-        const auto position    = state.toViewSpace(mPosition);
+        const auto unitScale   = layout.GetCellDimensions();
+        const auto spriteScale = layout.GetCellDimensions() * getScale();
+        const auto position    = layout.MapPoint(mPosition);
 
         const float shipWidth  = mShipWidth; 
         const float shipHeight = mShipHeight; 
@@ -895,19 +905,18 @@ public:
         return 1.0f;
     }
 
-    // get the position at ticksLater ticks time
-    QVector2D getFuturePosition(float dtLater, const TransformState& state) const
+    // get the invader position in game space at some later time
+    // where time is in seconds.
+    QVector2D getFuturePosition(float seconds) const
     {
-        const auto v = getVelocityVector(state);
-        return mPosition + v * dtLater;
+        const auto direction = QVector2D(-1.0f, 0.0f);
+
+        return mPosition + seconds * mVelocity * direction;
     }
 
     // get current position
     QVector2D getPosition() const
     { return mPosition; }
-
-    void setPosition(QVector2D position)
-    { mPosition = position; }
 
     void setMaxLifetime(quint64 ms)
     { mMaxLifeTime = ms; }
@@ -955,18 +964,6 @@ private:
     }
 
 private:
-    QVector2D getVelocityVector(const TransformState& state) const
-    {
-        // todo: fix this, calculation should be in TransformState
-        const float cols = state.numCols() - 8.0;
-        const float pxw  = state.viewWidth() / cols;
-        const float x    = pxw / state.viewWidth();
-        const float y    = 0.0f;
-        const auto velo = QVector2D(-x, y) * mVelocity;
-        return velo;
-    }
-
-private:
     QVector2D mPosition;
     std::wstring mText;
     float mLifeTime    = 0.0f;
@@ -997,7 +994,7 @@ public:
         , mLifetime(lifetime)
         , mPosition(position)
     {}
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum > mLifetime)
@@ -1008,10 +1005,13 @@ public:
         mPosition += p;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state)  override
+    virtual void paint(gfx::Painter& painter, const GridLayout& window)  override
     {
-        const auto dim = state.getScale();
-        const auto pos = state.toViewSpace(mPosition);
+        const GridLayout layout = GetGameWindowLayout(window.GetGridWidth(), 
+            window.GetGridHeight());
+
+        const auto dim = layout.GetCellDimensions();
+        const auto pos = layout.MapPoint(mPosition);
         const auto font_size = dim.y() / 2;
 
         // todo: we used QFontMetrics before to estimate the size
@@ -1020,7 +1020,7 @@ public:
         const auto h = font_size * 2;
         gfx::Transform t;
         t.Resize(w, h);
-        t.MoveTo(pos);
+        t.MoveTo(pos - QPointF(w*0.5, h*0.5));
 
         gfx::TextBuffer buff(w, h);
         buff.AddText(base::ToUtf8(mText), "fonts/ARCADE.TTF", font_size);
@@ -1059,7 +1059,7 @@ public:
         mSprite.SetFps(10);
     }
 
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         const auto maxLifeTime = 10000.0f;
 
@@ -1080,10 +1080,10 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         const auto sec = mRuntime / 1000.0f;
-        const auto pos = state.toViewSpace(mPosition);
+        const auto pos = layout.MapPoint(mPosition);
 
         mSprite.SetAppRuntime(sec);
 
@@ -1098,9 +1098,9 @@ public:
         painter.Draw(gfx::Rectangle(), ufo, mSprite);
     }
 
-    virtual QRectF getBounds(const TransformState& state) const override
+    virtual QRectF getBounds(const GridLayout& layout) const override
     {
-        const auto pos = state.toViewSpace(mPosition);
+        const auto pos = layout.MapPoint(mPosition);
 
         QRectF bounds;
         bounds.moveTo(pos - QPoint(20, 20));
@@ -1150,22 +1150,22 @@ public:
         mSprite.SetFps(90 / (lifetime/1000.0f));
     }
 
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         mRunTime += dt;
         if (mRunTime > mLifeTime)
             return false;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         mSprite.SetAppRuntime(mRunTime / 1000.0f);
 
-        const auto ExplosionWidth = state.viewWidth() * 2.0f;
-        const auto ExplosionHeight = state.viewHeight() * 2.3f;
+        const auto ExplosionWidth = layout.GetGridWidth() * 2.0f;
+        const auto ExplosionHeight = layout.GetGridHeight() * 2.3f;
 
-        const auto x = state.viewWidth() / 2 - (ExplosionWidth * 0.5);
-        const auto y = state.viewHeight() / 2 - (ExplosionHeight * 0.5);
+        const auto x = layout.GetGridWidth() / 2 - (ExplosionWidth * 0.5);
+        const auto y = layout.GetGridHeight() / 2 - (ExplosionHeight * 0.5);
 
         gfx::Transform bang;
         bang.Resize(ExplosionWidth, ExplosionHeight);
@@ -1190,7 +1190,7 @@ public:
         , mScore(score)
     {}
 
-    virtual bool update(float dt, TransformState& state) override
+    virtual bool update(float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum < mStartTime)
@@ -1198,14 +1198,14 @@ public:
         return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paint(gfx::Painter& painter, const TransformState& state) override
+    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
     {
         if (mTimeAccum < mStartTime)
             return;
 
         const auto alpha = 1.0 - (float)(mTimeAccum - mStartTime)/ (float)mLifeTime;
-        const auto dim = state.getScale();
-        const auto top = state.toViewSpace(mPosition);
+        const auto dim = layout.GetCellDimensions();
+        const auto top = layout.MapPoint(mPosition);
         
         const auto font_size = dim.y() / 2;
 
@@ -1306,10 +1306,10 @@ public:
         mText.append("\nPress any key to continue");
     }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& state) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
     {
-        const auto& rc = state.viewRect();
-        const auto& s  = state.getScale();
+        const auto& rc = layout.GetRect();
+        const auto& s  = layout.GetCellDimensions();
         const auto w = rc.width();
         const auto h = rc.height();
 
@@ -1356,13 +1356,13 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& parentTransform) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
     {
         const auto cols = 7;
         const auto rows = 6;
-        TransformState myTransform(parentTransform.viewRect(), cols, rows);
+        GridLayout mylayout(layout.GetRect(), cols, rows);
 
-        QRectF rc = myTransform.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
+        QRectF rc = mylayout.MapRect(QPoint(3, 4), QPoint(4, 5));
         const auto x = rc.x();
         const auto y = rc.y();
         const auto w = rc.width();
@@ -1404,11 +1404,11 @@ public:
 
         const auto cols = 7;
         const auto rows = 6;
-        TransformState state(area, cols, rows);
+        GridLayout state(area, cols, rows);
 
         QRectF rect;
 
-        rect = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 3));
+        rect = state.MapRect(QPoint(0, 0), QPoint(cols, 3));
         painter.drawText(rect, Qt::AlignHCenter | Qt::AlignBottom,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
@@ -1419,10 +1419,10 @@ public:
             "F3 - Credits\n\n"
             "Difficulty\n");
 
-        rect = state.toViewSpaceRect(QPoint(2, 3), QPoint(5, 4));
+        rect = state.MapRect(QPoint(2, 3), QPoint(5, 4));
 
-        TransformState sub(rect, 3, 1);
-        rect = sub.toViewSpaceRect(QPoint(0, 0), QPoint(1, 1));
+        GridLayout sub(rect, 3, 1);
+        rect = sub.MapRect(QPoint(0, 0), QPoint(1, 1));
         if (mCurrentProfileIndex == 0)
         {
             painter.setFont(underline);
@@ -1434,7 +1434,7 @@ public:
         painter.setPen(regular);
         painter.setFont(font);
 
-        rect = sub.toViewSpaceRect(QPoint(1, 0), QPoint(2, 1));
+        rect = sub.MapRect(QPoint(1, 0), QPoint(2, 1));
         if (mCurrentProfileIndex == 1)
         {
             painter.setFont(underline);
@@ -1446,7 +1446,7 @@ public:
         painter.setPen(regular);
         painter.setFont(font);
 
-        rect = sub.toViewSpaceRect(QPoint(2, 0), QPoint(3, 1));
+        rect = sub.MapRect(QPoint(2, 0), QPoint(3, 1));
         if (mCurrentProfileIndex == 2)
         {
             painter.setFont(underline);
@@ -1469,7 +1469,7 @@ public:
         const auto& mid   = mLevels[mCurrentLevelIndex];
         const auto& right = mLevels[next];
 
-        rect = state.toViewSpaceRect(QPoint(1, 4), QPoint(2, 5));
+        rect = state.MapRect(QPoint(1, 4), QPoint(2, 5));
         drawLevel(painter, rect, *left, prev, false);
 
         bool hilite = false;
@@ -1485,11 +1485,11 @@ public:
             painter.setPen(regular);
         }
 
-        rect = state.toViewSpaceRect(QPoint(3, 4), QPoint(4, 5));
+        rect = state.MapRect(QPoint(3, 4), QPoint(4, 5));
         drawLevel(painter, rect, *mid, mCurrentLevelIndex, hilite);
 
         painter.setPen(regular);
-        rect = state.toViewSpaceRect(QPoint(5, 4), QPoint(6, 5));
+        rect = state.MapRect(QPoint(5, 4), QPoint(6, 5));
         painter.drawRect(rect);
         drawLevel(painter, rect, *right, next, false);
 
@@ -1498,7 +1498,7 @@ public:
         const bool draw_text = (blink_text % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
         if (draw_text)
         {
-            rect = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+            rect = state.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
             painter.setPen(regular);
             painter.setFont(font);
             if (mInfos[mCurrentLevelIndex].locked)
@@ -1664,10 +1664,10 @@ public:
     virtual void keyPress(const QKeyEvent* event) override
     {}
 
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
     {
-        const auto& rc = transform.viewRect();
-        const auto& s  = transform.getScale();
+        const auto& rc = layout.GetRect();
+        const auto& s  = layout.GetCellDimensions();
         const auto w = rc.width();
         const auto h = rc.height();
 
@@ -1742,10 +1742,10 @@ public:
 
         const auto cols = 1;
         const auto rows = 7;
-        TransformState state(rect, cols, rows);
+        GridLayout state(rect, cols, rows);
 
         QRectF rc;
-        rc = state.toViewSpaceRect(QPointF(0, 1), QPointF(1, 2));
+        rc = state.MapRect(QPoint(0, 1), QPoint(1, 2));
         painter.drawText(rc, Qt::AlignCenter,
             "Press space to toggle a setting.");
 
@@ -1753,7 +1753,7 @@ public:
 
         if (mSettingIndex == 0)
             painter.setPen(selected);
-        rc = state.toViewSpaceRect(QPoint(0, 2), QPoint(1, 3));
+        rc = state.MapRect(QPoint(0, 2), QPoint(1, 3));
         painter.drawText(rc, Qt::AlignCenter,
             tr("Sound Effects: %1").arg(mPlaySounds ? "On" : "Off"));
 
@@ -1761,19 +1761,19 @@ public:
 
         if (mSettingIndex == 1)
             painter.setPen(selected);
-        rc = state.toViewSpaceRect(QPoint(0, 3), QPoint(1, 4));
+        rc = state.MapRect(QPoint(0, 3), QPoint(1, 4));
         painter.drawText(rc, Qt::AlignCenter,
             tr("Awesome Music: %1").arg(mPlayMusic ? "On" : "Off"));
 
         painter.setPen(regular);
 
-        rc = state.toViewSpaceRect(QPoint(0, 4), QPoint(1, 5));
+        rc = state.MapRect(QPoint(0, 4), QPoint(1, 5));
         if (mSettingIndex == 2)
             painter.setPen(selected);
         painter.drawText(rc, Qt::AlignCenter,
             tr("Fullscreen: %1").arg(mFullscreen ? "On" : "Off"));
 
-        rc = state.toViewSpaceRect(QPoint(0, 5), QPoint(1, 6));
+        rc = state.MapRect(QPoint(0, 5), QPoint(1, 6));
         painter.setPen(regular);
         painter.drawText(rc, Qt::AlignCenter,
             "Press Esc to exit");
@@ -1828,10 +1828,10 @@ private:
 class GameWidget::About : public State
 {
 public:
-    virtual void paintPostEffect(gfx::Painter& painter, const TransformState& transform) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
     {
-        const auto& rc = transform.viewRect();
-        const auto& s  = transform.getScale();
+        const auto& rc = layout.GetRect();
+        const auto& s  = layout.GetCellDimensions();
         const auto w = rc.width();
         const auto h = rc.height();
 
@@ -1891,19 +1891,19 @@ public:
                 break;
             case GameState::Playing:
                 {
-                    TransformState state(area, ViewCols, ViewRows);
+                    GridLayout state(area, ViewCols, ViewRows);
 
                     QPointF top;
                     QPointF bot;
 
                     // layout the HUD at the first "game row"
-                    top = state.toViewSpace(QPoint(0, 0));
-                    bot = state.toViewSpace(QPoint(ViewCols, 1));
+                    top = state.MapPoint(QPoint(0, 0));
+                    bot = state.MapPoint(QPoint(ViewCols, 1));
                     paintHUD(painter, QRectF(top, bot), unit);
 
                     // paint the player at the last "game row"
-                    top = state.toViewSpace(QPoint(0, ViewRows-1));
-                    bot = state.toViewSpace(QPoint(ViewCols, ViewRows));
+                    top = state.MapPoint(QPoint(0, ViewRows-1));
+                    bot = state.MapPoint(QPoint(ViewCols, ViewRows));
                     paintPlayer(painter, QRectF(top, bot), area, unit);
                 }
                 break;
@@ -1980,8 +1980,10 @@ public:
                 else
                 {
                     Game::Missile missile;
-                    missile.launch_position_x = mMissileLaunchPosition.x();
-                    missile.launch_position_y = mMissileLaunchPosition.y();
+                    // we can directly map the launch position into game space
+                    // i.e. it's in the middle of the bottom row
+                    missile.launch_position_x = 0.5; 
+                    missile.launch_position_y = 1.0f;
                     missile.string  = mCurrentText.toLower().toStdWString();
                     if (mGame.FireMissile(missile))
                         mCurrentText.clear();
@@ -2015,9 +2017,9 @@ private:
         const auto cols = 3;
         const auto rows = (enemies.size() / cols) + 2;
 
-        TransformState state(area, cols, rows);
-        const auto header = state.toViewSpaceRect(QPoint(0, 0), QPoint(cols, 1));
-        const auto footer = state.toViewSpaceRect(QPoint(0, rows-1), QPoint(cols, rows));
+        GridLayout layout(area, cols, rows);
+        const auto header = layout.MapRect(QPoint(0, 0), QPoint(cols, 1));
+        const auto footer = layout.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
 
         painter.drawText(header, Qt::AlignCenter,
             "Kill the following enemies\n");
@@ -2027,7 +2029,7 @@ private:
             const auto& e   = enemies[i];
             const auto col  = i % cols;
             const auto row  = i / cols;
-            const auto rect = state.toViewSpaceRect(QPoint(col, row + 1), QPoint(col+1, row+2));
+            const auto rect = layout.MapRect(QPoint(col, row + 1), QPoint(col+1, row+2));
             painter.setFont(bigFont);
             painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
                 QString("%1 %2\n\n")
@@ -2100,12 +2102,6 @@ private:
         QRect rect(QPoint(x, y), QPoint(x + width, y + height));
         painter.drawRect(rect);
         painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, mCurrentText);
-
-        TransformState transform(window, ViewCols, ViewRows);
-
-        // save the missile launch position
-        // todo: fix this
-        mMissileLaunchPosition = transform.toNormalizedViewSpace(QPoint(x, y));
     }
 
     static QString initString()
@@ -2122,7 +2118,6 @@ private:
     };
     GameState mState = GameState::Prepare;
     QString mCurrentText;
-    QVector2D mMissileLaunchPosition;
 };
 
 
@@ -2141,8 +2136,9 @@ GameWidget::GameWidget()
     {
         auto it = mInvaders.find(i.identity);
 
-        TransformState state(rect(), ViewCols, ViewRows);
-        const auto scale = state.getScale();
+        //GridLayout state(rect(), ViewCols, ViewRows);
+        const auto layout = GetGameWindowLayout(width(), height());
+        const auto scale = layout.GetCellDimensions();
 
         std::unique_ptr<Invader> invader(it->second.release());
 
@@ -2150,7 +2146,7 @@ GameWidget::GameWidget()
         // and then aim the missile to that position.
         const auto missileFlyTime   = 500;
         const auto explosionTime    = 1000;
-        const auto missileEnd       = invader->getFuturePosition(missileFlyTime, state);
+        const auto missileEnd       = invader->getFuturePosition(missileFlyTime/1000.0f);
         const auto missileBeg       = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir       = missileEnd - missileBeg;
 
@@ -2190,10 +2186,8 @@ GameWidget::GameWidget()
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
 
-        TransformState state(rect(), ViewCols, ViewRows);
-
         const auto missileFlyTime  = 500;
-        const auto missileEnd      =  inv->getFuturePosition(missileFlyTime, state);
+        const auto missileEnd      = inv->getFuturePosition(missileFlyTime/1000.0f);
         const auto missileBeg      = QVector2D(m.launch_position_x, m.launch_position_y);
         const auto missileDir      = missileEnd - missileBeg;
 
@@ -2261,10 +2255,6 @@ GameWidget::GameWidget()
 
     mGame->onInvaderSpawn = [&](const Game::Invader& inv)
     {
-        TransformState state(rect(), ViewCols, ViewRows);
-
-        const auto pos = state.toNormalizedViewSpace(GameSpace{inv.xpos, inv.ypos+1});
-
         Invader::ShipType type = Invader::ShipType::Slow;
         if (inv.type == Game::InvaderType::Boss)
         {
@@ -2289,19 +2279,24 @@ GameWidget::GameWidget()
             }
         }
 
+        // where's the invader ? 
+        // transform the position into normalized coordinates
+        const float x = inv.xpos / (float)GameCols;
+        const float y = inv.ypos / (float)GameRows;
+
         // the game expresses invader speed as the number of discrete steps it takes
         // per each tick of game.
         // here well want to express this velocity as a normalized distance over seconds
-        const auto tick       = 1000.0 / mProfiles[mCurrentProfile].speed;
-        const auto numTicks   = state.numCols() / (double)inv.speed;
-        const auto numSeconds = tick * numTicks;
-        const auto velocity   = state.numCols() / numSeconds;
+        const auto tick_length_secs = 1000.0 / mProfiles[mCurrentProfile].speed;
+        const auto journey_duration_in_ticks = GameCols / (double)inv.speed;
+        const auto journey_duration_in_secs  = tick_length_secs * journey_duration_in_ticks;
+        const auto velocity  = 1.0f / journey_duration_in_secs;
 
         std::wstring viewstring;
         for (const auto& s : inv.viewList)
             viewstring += s;
         
-        std::unique_ptr<Invader> invader(new Invader(pos, viewstring, velocity, type));
+        std::unique_ptr<Invader> invader(new Invader(QVector2D(x, y), viewstring, velocity, type));
         invader->enableShield(inv.shield_on_ticks != 0);
         mInvaders[inv.identity] = std::move(invader);
     };
@@ -2463,7 +2458,7 @@ void GameWidget::updateGame(float dt)
 #endif
 
 
-    TransformState state(rect(), GameCols, GameRows + 2);
+    GridLayout layout(rect(), GameCols, GameRows + 2);
 
     const auto time = dt * mWarpFactor;
     const auto tick = 1000.0 / mProfiles[mCurrentProfile].speed;
@@ -2493,7 +2488,7 @@ void GameWidget::updateGame(float dt)
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->update(time, state);
+            invader->update(time);
         }
     }
 
@@ -2501,7 +2496,7 @@ void GameWidget::updateGame(float dt)
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
     {
         auto& anim = *it;
-        if (!anim->update(time, state))
+        if (!anim->update(time))
         {
             it = mAnimations.erase(it);
             continue;
@@ -2538,8 +2533,8 @@ void GameWidget::updateGame(float dt)
                 const auto collision = CollisionType {lhsColliderType, type };
                 if (collision == Asteroid_UFO_Collision || collision == UFO_UFO_Collision)
                 {
-                    const auto& lhsBounds = lhsAnim->getBounds(state);
-                    const auto& rhsBounds = animation->getBounds(state);
+                    const auto& lhsBounds = lhsAnim->getBounds(layout);
+                    const auto& rhsBounds = animation->getBounds(layout);
                     if (lhsBounds.intersects(rhsBounds) || rhsBounds.intersects(lhsBounds))
                         return true;
                 }
@@ -2632,7 +2627,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     QPainter painter(this);
     painter.setRenderHints(QPainter::HighQualityAntialiasing);
 
-    TransformState state(rect(), ViewCols, ViewRows);
+    GridLayout layout(rect(), ViewCols, ViewRows);
 
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
@@ -2653,7 +2648,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         for (auto& anim : mAnimations)
         {
-            anim->paint(*mCustomGraphicsPainter, state);
+            anim->paint(*mCustomGraphicsPainter, layout);
         }
 
         if (bIsGameRunning)
@@ -2661,7 +2656,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
             for (auto& pair : mInvaders)
             {
                 auto& invader = pair.second;
-                invader->paint(*mCustomGraphicsPainter, state);
+                invader->paint(*mCustomGraphicsPainter, layout);
             }
         }
 
@@ -2670,7 +2665,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(painter, rect(), state.getScale());
+    mStates.top()->paint(painter, rect(), layout.GetCellDimensions());
 
     {
         // do a second pass painter using the custom painter.
@@ -2682,7 +2677,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
-        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, state);
+        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, layout);
 
         if (mShowFps)
         {
