@@ -72,14 +72,6 @@ const auto TextBlinkFrameCycle = 90;
 const auto GameCols = 40;
 const auto GameRows = 10;
 
-// we divide the widget's client area into a equal sized cells
-// according to the game's size. We also add one extra row
-// for HUD display at the top of the screen and for the player
-// at the bottom of the screen. This provides the basic layout
-// for the game in a way that doesnt depend on any actual viewport size.
-const auto ViewCols = GameCols;
-const auto ViewRows = GameRows + 2;
-
 QString R(const QString& s)
 {
     QString resname = ":/dist/" + s;
@@ -179,6 +171,11 @@ public:
         return {mOriginX, mOriginY, mWidth, mHeight};
     }
 
+    unsigned GetFontSize() const 
+    {
+        return (mHeight / mNumRows);
+    }
+
     // Get Width of the grid layout in Pixel
     unsigned GetGridWidth() const 
     { return mWidth; }
@@ -255,11 +252,17 @@ public:
         NewGame
     };
 
-    // paint the user interface state
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) = 0;
+    // Paint the user interface state with the painter in the render target.
+    // The given rect defines the sub-rectangle (the box) inside the 
+    // render target where the painting should occur. 
+    virtual void paint(QPainter& painter, const QRect& rect) = 0;
 
-    // paint the user interface state with the custom painter
-    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const
+    // Paint the user interface state with the painter in the render target.
+    // The given rect defines the sub-rectangle (the box) inside the
+    // render target where the painting should occur.
+    // No scissor is set by default instead the state should set the
+    // scissor as needed once the final transformation is done.
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const
     {}
 
     // update the state.. umh.. state from the delta time
@@ -1346,25 +1349,24 @@ public:
         mText.append("\nPress any key to continue");
     }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
-        const auto& rc = layout.GetRect();
-        const auto& s  = layout.GetCellDimensions();
-        const auto w = rc.width();
-        const auto h = rc.height();
+        const GridLayout layout(rect, 1, 20);
 
-        const auto font_size = s.y() / 2;
+        const auto width  = layout.GetGridWidth();
+        const auto height = layout.GetGridHeight();
 
-        gfx::TextBuffer buff(w, h);
-        buff.AddText(mText, "fonts/ARCADE.TTF", font_size);
+        gfx::TextBuffer buff(width, height);
+        buff.AddText(mText, "fonts/ARCADE.TTF", layout.GetFontSize());
+
         gfx::Transform t;
         t.MoveTo(0, 0);
-        t.Resize(w, h);
+        t.Resize(width, height);
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
         
     }
 
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    virtual void paint(QPainter&, const QRect&) override
     {}
     
     virtual void update(float dt) override
@@ -1396,13 +1398,13 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
         const auto cols = 7;
         const auto rows = 6;
-        GridLayout mylayout(layout.GetRect(), cols, rows);
+        const GridLayout layout(rect, cols, rows);
 
-        QRectF rc = mylayout.MapRect(QPoint(3, 4), QPoint(4, 5));
+        const QRectF rc = layout.MapRect(QPoint(3, 4), QPoint(4, 5));
         const auto x = rc.x();
         const auto y = rc.y();
         const auto w = rc.width();
@@ -1417,8 +1419,12 @@ public:
         painter.DrawMasked(gfx::Rectangle(), dt, gfx::Rectangle(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
     }
 
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
+    virtual void paint(QPainter& painter, const QRect& rc) override
     {
+        const auto cols = 7;
+        const auto rows = 6;
+        const GridLayout layout(rc, cols, rows);
+
         QPen regular;
         regular.setWidth(1);
         regular.setColor(Qt::darkGray);
@@ -1426,13 +1432,13 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(unit.y() / 2);
+        font.setPixelSize(layout.GetFontSize() * 0.2);
         painter.setFont(font);
 
         QFont underline;
         underline.setFamily("Arcade");
         underline.setUnderline(true);
-        underline.setPixelSize(unit.y() / 2);
+        underline.setPixelSize(layout.GetFontSize() * 0.2);
 
         QPen selected;
         selected.setWidth(2);
@@ -1442,13 +1448,8 @@ public:
         locked.setWidth(2);
         locked.setColor(Qt::darkRed);
 
-        const auto cols = 7;
-        const auto rows = 6;
-        GridLayout state(area, cols, rows);
-
         QRectF rect;
-
-        rect = state.MapRect(QPoint(0, 0), QPoint(cols, 3));
+        rect = layout.MapRect(QPoint(0, 0), QPoint(cols, 3));
         painter.drawText(rect, Qt::AlignHCenter | Qt::AlignBottom,
             "Evil chinese characters are attacking!\n"
             "Only you can stop them by typing the right pinyin.\n"
@@ -1459,9 +1460,9 @@ public:
             "F3 - Credits\n\n"
             "Difficulty\n");
 
-        rect = state.MapRect(QPoint(2, 3), QPoint(5, 4));
+        rect = layout.MapRect(QPoint(2, 3), QPoint(5, 4));
 
-        GridLayout sub(rect, 3, 1);
+        const GridLayout sub(rect, 3, 1);
         rect = sub.MapRect(QPoint(0, 0), QPoint(1, 1));
         if (mCurrentProfileIndex == 0)
         {
@@ -1500,7 +1501,7 @@ public:
 
         QFont small;
         small.setFamily("Arcade");
-        small.setPixelSize(unit.y() / 2.5);
+        small.setPixelSize(layout.GetFontSize() * 0.2);
         painter.setFont(small);
 
         const auto prev = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevels.size() - 1;
@@ -1509,7 +1510,7 @@ public:
         const auto& mid   = mLevels[mCurrentLevelIndex];
         const auto& right = mLevels[next];
 
-        rect = state.MapRect(QPoint(1, 4), QPoint(2, 5));
+        rect = layout.MapRect(QPoint(1, 4), QPoint(2, 5));
         drawLevel(painter, rect, *left, prev, false);
 
         bool hilite = false;
@@ -1525,11 +1526,11 @@ public:
             painter.setPen(regular);
         }
 
-        rect = state.MapRect(QPoint(3, 4), QPoint(4, 5));
+        rect = layout.MapRect(QPoint(3, 4), QPoint(4, 5));
         drawLevel(painter, rect, *mid, mCurrentLevelIndex, hilite);
 
         painter.setPen(regular);
-        rect = state.MapRect(QPoint(5, 4), QPoint(6, 5));
+        rect = layout.MapRect(QPoint(5, 4), QPoint(6, 5));
         painter.drawRect(rect);
         drawLevel(painter, rect, *right, next, false);
 
@@ -1538,7 +1539,7 @@ public:
         const bool draw_text = (blink_text % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
         if (draw_text)
         {
-            rect = state.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
+            rect = layout.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
             painter.setPen(regular);
             painter.setFont(font);
             if (mInfos[mCurrentLevelIndex].locked)
@@ -1704,12 +1705,12 @@ public:
     virtual void keyPress(const QKeyEvent* event) override
     {}
 
-    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
-        const auto& rc = layout.GetRect();
-        const auto& s  = layout.GetCellDimensions();
-        const auto w = rc.width();
-        const auto h = rc.height();
+        const GridLayout layout(rect, 1, 20);
+
+        const auto w = layout.GetGridWidth();
+        const auto h = layout.GetGridHeight();
 
         gfx::TextBuffer buff(w, h);
         buff.AddText(base::FormatString("Kill the invaders by typing the correct pinyin.\n"
@@ -1723,14 +1724,16 @@ public:
             "Type WARP to enter a time warp.\n"
             "Press Space to clear the input.\n\n"
             "Press Esc to exit\n", (int)(LevelUnlockCriteria * 100)),
-            "fonts/ARCADE.TTF", s.y() / 2);
+            "fonts/ARCADE.TTF", 
+            layout.GetFontSize());
+
         gfx::Transform t;
         t.MoveTo(0, 0);
         t.Resize(w, h);
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
     }
 
-    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
+    virtual void paint(QPainter&, const QRect&) override
     {}
 private:
 };
@@ -1751,8 +1754,10 @@ public:
     virtual void update(float dt) override
     {}
 
-    virtual void paint(QPainter& painter, const QRectF& rect, const QPointF& scale) override
+    virtual void paint(QPainter& painter, const QRect& rect) override
     {
+        const GridLayout layout(rect, 1, 7);
+
         QPen regular;
         regular.setWidth(1);
         regular.setColor(Qt::darkGray);
@@ -1763,7 +1768,7 @@ public:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(scale.y() / 2);
+        font.setPixelSize(layout.GetFontSize() * 0.3);
 
         painter.setPen(regular);
         painter.setFont(font);
@@ -1771,7 +1776,7 @@ public:
         QFont underline;
         underline.setFamily("Arcade");
         underline.setUnderline(true);
-        underline.setPixelSize(scale.y() / 2);
+        underline.setPixelSize(layout.GetFontSize() * 0.3);
 
 #ifndef GAME_ENABLE_AUDIO
         painter.drawText(rect, Qt::AlignCenter,
@@ -1780,12 +1785,10 @@ public:
         return;
 #endif
 
-        const auto cols = 1;
-        const auto rows = 7;
-        GridLayout state(rect, cols, rows);
+
 
         QRectF rc;
-        rc = state.MapRect(QPoint(0, 1), QPoint(1, 2));
+        rc = layout.MapRect(QPoint(0, 1), QPoint(1, 2));
         painter.drawText(rc, Qt::AlignCenter,
             "Press space to toggle a setting.");
 
@@ -1793,7 +1796,7 @@ public:
 
         if (mSettingIndex == 0)
             painter.setPen(selected);
-        rc = state.MapRect(QPoint(0, 2), QPoint(1, 3));
+        rc = layout.MapRect(QPoint(0, 2), QPoint(1, 3));
         painter.drawText(rc, Qt::AlignCenter,
             tr("Sound Effects: %1").arg(mPlaySounds ? "On" : "Off"));
 
@@ -1801,19 +1804,19 @@ public:
 
         if (mSettingIndex == 1)
             painter.setPen(selected);
-        rc = state.MapRect(QPoint(0, 3), QPoint(1, 4));
+        rc = layout.MapRect(QPoint(0, 3), QPoint(1, 4));
         painter.drawText(rc, Qt::AlignCenter,
             tr("Awesome Music: %1").arg(mPlayMusic ? "On" : "Off"));
 
         painter.setPen(regular);
 
-        rc = state.MapRect(QPoint(0, 4), QPoint(1, 5));
+        rc = layout.MapRect(QPoint(0, 4), QPoint(1, 5));
         if (mSettingIndex == 2)
             painter.setPen(selected);
         painter.drawText(rc, Qt::AlignCenter,
             tr("Fullscreen: %1").arg(mFullscreen ? "On" : "Off"));
 
-        rc = state.MapRect(QPoint(0, 5), QPoint(1, 6));
+        rc = layout.MapRect(QPoint(0, 5), QPoint(1, 6));
         painter.setPen(regular);
         painter.drawText(rc, Qt::AlignCenter,
             "Press Esc to exit");
@@ -1868,15 +1871,16 @@ private:
 class GameWidget::About : public State
 {
 public:
-    virtual void paintPostEffect(gfx::Painter& painter, const GridLayout& layout) const override
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
-        const auto& rc = layout.GetRect();
-        const auto& s  = layout.GetCellDimensions();
-        const auto w = rc.width();
-        const auto h = rc.height();
+        const GridLayout layout(rect, 1, 20);
+        
+        const auto w = layout.GetGridWidth();
+        const auto h = layout.GetGridHeight();
 
         gfx::TextBuffer buff(w, h);
-        buff.AddText(base::FormatString("Pinyin-Invaders %1.%2\n\n"
+        buff.AddText(base::FormatString(
+                "Pinyin-Invaders %1.%2\n\n"
                 "Design and programming by:\n"
                 "Sami Vaisanen\n"
                 "(c) 2014-2019 Ensisoft\n"
@@ -1890,14 +1894,16 @@ public:
                 "level27\n"
                 "http://soundcloud.com/level27\n\n"
                 "Press Esc to exit", MAJOR_VERSION, MINOR_VERSION),
-            "fonts/ARCADE.TTF", s.y() / 2);
+            "fonts/ARCADE.TTF", 
+            layout.GetFontSize());
+
         gfx::Transform t;
         t.MoveTo(0, 0);
         t.Resize(w, h);
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
     }
 
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& scale) override
+    virtual void paint(QPainter&, const QRect&) override
     {}
 
     virtual void update(float dt) override
@@ -1922,29 +1928,29 @@ public:
         mCurrentText = initString();
     }
 
-    virtual void paint(QPainter& painter, const QRectF& area, const QPointF& unit) override
+    virtual void paint(QPainter& painter, const QRect& rect) override
     {
         switch (mState)
         {
             case GameState::Prepare:
-                paintFleet(painter, area, unit);
+                paintFleet(painter, rect);
                 break;
             case GameState::Playing:
                 {
-                    GridLayout state(area, ViewCols, ViewRows);
+                    const auto& layout = GetGameWindowLayout(rect);
 
                     QPointF top;
                     QPointF bot;
 
                     // layout the HUD at the first "game row"
-                    top = state.MapPoint(QPoint(0, 0));
-                    bot = state.MapPoint(QPoint(ViewCols, 1));
-                    paintHUD(painter, QRectF(top, bot), unit);
+                    top = layout.MapPoint(QPoint(0, -1));
+                    bot = layout.MapPoint(QPoint(GameCols, 0));
+                    paintHUD(painter, QRectF(top, bot), layout.GetFontSize() / 2);
 
                     // paint the player at the last "game row"
-                    top = state.MapPoint(QPoint(0, ViewRows-1));
-                    bot = state.MapPoint(QPoint(ViewCols, ViewRows));
-                    paintPlayer(painter, QRectF(top, bot), area, unit);
+                    top = layout.MapPoint(QPoint(0, GameRows));
+                    bot = layout.MapPoint(QPoint(GameCols, GameRows+1));
+                    paintPlayer(painter, QRectF(top, bot), layout.GetFontSize() / 2);
                 }
                 break;
         }
@@ -2037,8 +2043,13 @@ public:
     }
 
 private:
-    void paintFleet(QPainter& painter, const QRectF& area, const QPointF& scale) const
+    void paintFleet(QPainter& painter, const QRect& rect) const
     {
+        const auto& enemies = mLevel.GetEnemies();
+        const auto cols = 3;
+        const auto rows = (enemies.size() / cols) + 2;
+        const GridLayout layout(rect, cols, rows);
+
         QPen pen;
         pen.setWidth(1);
         pen.setColor(Qt::darkGray);
@@ -2046,18 +2057,13 @@ private:
 
         QFont bigFont;
         bigFont.setFamily("Arcade");
-        bigFont.setPixelSize(scale.y() / 2);
+        bigFont.setPixelSize(layout.GetFontSize() * 0.2);
         painter.setFont(bigFont);
 
         QFont smallFont;
         smallFont.setFamily("Arcade");
-        smallFont.setPixelSize(scale.y() / 3);
+        smallFont.setPixelSize(layout.GetFontSize() * 0.15);
 
-        const auto& enemies = mLevel.GetEnemies();
-        const auto cols = 3;
-        const auto rows = (enemies.size() / cols) + 2;
-
-        GridLayout layout(area, cols, rows);
         const auto header = layout.MapRect(QPoint(0, 0), QPoint(cols, 1));
         const auto footer = layout.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
 
@@ -2091,7 +2097,7 @@ private:
         ++text_blink;
     }
 
-    void paintHUD(QPainter& painter, const QRectF& area, const QPointF& unit) const
+    void paintHUD(QPainter& painter, const QRectF& rect, unsigned font_size) const
     {
         const auto& score  = mGame.GetScore();
         const auto& result = score.maxpoints ?
@@ -2107,10 +2113,10 @@ private:
 
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(unit.y() / 2);
+        font.setPixelSize(font_size);
         painter.setFont(font);
 
-        painter.drawText(area, Qt::AlignCenter,
+        painter.drawText(rect, Qt::AlignCenter,
             QString("Score %2 (%3%) | Enemies x %4 | Bombs x %5 | Warps x %6 | (F1 for help)")
                 .arg(score.points)
                 .arg(format)
@@ -2119,11 +2125,11 @@ private:
                 .arg(warps));
     }
 
-    void paintPlayer(QPainter& painter, const QRectF& area, const QRectF& window, const QPointF& unit)
+    void paintPlayer(QPainter& painter, const QRectF& rect, unsigned font_size) const
     {
         QFont font;
         font.setFamily("Arcade");
-        font.setPixelSize(area.height() / 2);
+        font.setPixelSize(font_size);
         painter.setFont(font);
 
         QFontMetrics fm(font);
@@ -2131,17 +2137,17 @@ private:
         const auto height = fm.height();
 
         // calculate text X, Y (top left)
-        const auto x = area.x() + ((area.width() - width) / 2.0);
-        const auto y = area.y() + ((area.height() - height) / 2.0);
+        const auto x = rect.x() + ((rect.width() - width) / 2.0);
+        const auto y = rect.y() + ((rect.height() - height) / 2.0);
 
         QPen pen;
         pen.setWidth(2);
         pen.setColor(Qt::darkGray);
         painter.setPen(pen);
 
-        QRect rect(QPoint(x, y), QPoint(x + width, y + height));
-        painter.drawRect(rect);
-        painter.drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, mCurrentText);
+        const QRect rc(QPoint(x, y), QPoint(x + width, y + height));
+        painter.drawRect(rc);
+        painter.drawText(rc, Qt::AlignCenter | Qt::AlignVCenter, mCurrentText);
     }
 
     static QString initString()
@@ -2664,8 +2670,6 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     QPainter painter(this);
     painter.setRenderHints(QPainter::HighQualityAntialiasing);
 
-    GridLayout layout(rect(), ViewCols, ViewRows);
-
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
 
@@ -2702,7 +2706,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(painter, rect(), layout.GetCellDimensions());
+    mStates.top()->paint(painter, rect());
 
     {
         // do a second pass painter using the custom painter.
@@ -2714,7 +2718,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
         mCustomGraphicsDevice->GetState(&currentState);
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
-        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, layout);
+        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, rect());
 
         if (mShowFps)
         {
