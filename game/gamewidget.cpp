@@ -234,6 +234,12 @@ GameLayout GetGameWindowLayout(unsigned width, unsigned height)
     return GameLayout(rect, GameCols, GameRows);
 }
 
+GameLayout GetGameWindowLayout(const QRect& rect)
+{
+    // todo: we should work out the x/y offset
+    return GetGameWindowLayout(rect.width(), rect.height());
+}
+
 class GameWidget::State
 {
 public:
@@ -288,10 +294,16 @@ public:
     // otherwise false and the animation is expired.
     virtual bool update(float dt) = 0;
 
-    // Paint/Draw the animation 
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) = 0;
+    // Paint/Draw the animation with the painter in the render target.
+    // The given rect defines the sub-rectangle (the box) inside the 
+    // render target where the painting should occur. 
+    // No scissor is set by default instead the animatiojn should
+    // set the scissor as needed once the final transformation is done.
+    virtual void paint(gfx::Painter& painter, const QRect& rect) = 0;
 
-    virtual QRectF getBounds(const GridLayout& layout) const
+    // Get the bounds of the animation object with respect to the 
+    // given window rect.
+    virtual QRectF getBounds(const QRect& rect) const
     {
         return QRectF{};
     }
@@ -327,24 +339,36 @@ public:
         mY = math::wrap(1.0f, -0.2f, mY + d.y());
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         const auto& size = getTextureSize(mTexture);
         const char* name = getTextureName(mTexture);
 
+        // the asteroids are just in their own space which we simply map
+        // to the whole of the given rectangle
+        const auto width  = rect.width();
+        const auto height = rect.height();
+        const auto xpos = rect.x();
+        const auto ypos = rect.y();
+
         gfx::Transform t;
         t.Resize(size * mScale);
-        t.MoveTo(layout.MapPoint(QVector2D(mX, mY)));
+        t.MoveTo(width * mX + xpos, height * mY + ypos);
         painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
-    virtual QRectF getBounds(const GridLayout& layout) const override
+    virtual QRectF getBounds(const QRect& rect) const override
     {
         const auto& size = getTextureSize(mTexture);
 
+        const auto width  = rect.width();
+        const auto height = rect.height();
+        const auto xpos = rect.x();
+        const auto ypos = rect.y();
+
         QRectF bounds;
         bounds.setSize(size * mScale);
-        bounds.moveTo(layout.MapPoint(QVector2D(mX, mY)));
+        bounds.moveTo(width * mX + xpos, height * mY + ypos);
         return bounds;
     }
     virtual ColliderType getColliderType() const override
@@ -418,13 +442,14 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         if (mTime < mStartTime)
             return;
 
         mSprite.SetAppRuntime((mTime - mStartTime) / 1000.0f);
 
+        const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
         const auto position  = layout.MapPoint(mPosition);
         const auto scaledWidth = unitScale.x() * mScale;
@@ -461,7 +486,7 @@ public:
         gfx::LinearParticleMovement,
         gfx::KillParticleAtBounds>;
 
-    Sparks(QVector2D position, float start, float lifetime)
+    Sparks(const QVector2D& position, float start, float lifetime)
         : mStartTime(start)
         , mLifeTime(lifetime)
         , mPosition(position)
@@ -493,11 +518,12 @@ public:
         mParticles->Update(dt / 1000.0f);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
 
+        const auto& layout = GetGameWindowLayout(rect);
         const auto pos = layout.MapPoint(mPosition);
         const auto x = pos.x();
         const auto y = pos.y();
@@ -552,7 +578,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -562,6 +588,7 @@ public:
         mSprite.SetAppRuntime(time / 1000.0f);
         mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
 
+        const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
         const auto pxw = unitScale.x() * mScale;
         const auto pxh = unitScale.x() * mScale;
@@ -651,10 +678,13 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         if (mTime < mStartTime)
             return;
+
+        // todo: this is actually incorrect when using debris with the UFO explosion.
+        const auto& layout = GetGameWindowLayout(rect);
 
         for (const auto& p : mParticles)
         {
@@ -783,10 +813,9 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const GridLayout& window) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
-        const GridLayout layout = GetGameWindowLayout(window.GetGridWidth(), 
-            window.GetGridHeight());
+        const auto& layout = GetGameWindowLayout(rect);
 
         // offset the texture to be centered around the position
         const auto unitScale   = layout.GetCellDimensions();
@@ -1005,11 +1034,9 @@ public:
         mPosition += p;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& window)  override
+    virtual void paint(gfx::Painter& painter, const QRect& rect)  override
     {
-        const GridLayout layout = GetGameWindowLayout(window.GetGridWidth(), 
-            window.GetGridHeight());
-
+        const auto& layout = GetGameWindowLayout(rect);
         const auto dim = layout.GetCellDimensions();
         const auto pos = layout.MapPoint(mPosition);
         const auto font_size = dim.y() / 2;
@@ -1080,10 +1107,16 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
+        const auto width  = rect.width();
+        const auto height = rect.height();
+        const auto xpos   = rect.x();
+        const auto ypos   = rect.y();
+
         const auto sec = mRuntime / 1000.0f;
-        const auto pos = layout.MapPoint(mPosition);
+        const auto pos = QPointF(mPosition.x() * width + xpos,
+                                 mPosition.y() * height + ypos);
 
         mSprite.SetAppRuntime(sec);
 
@@ -1098,10 +1131,15 @@ public:
         painter.Draw(gfx::Rectangle(), ufo, mSprite);
     }
 
-    virtual QRectF getBounds(const GridLayout& layout) const override
+    virtual QRectF getBounds(const QRect& rect) const override
     {
-        const auto pos = layout.MapPoint(mPosition);
+        const auto width  = rect.width();
+        const auto height = rect.height();
+        const auto xpos = rect.x();
+        const auto ypos = rect.y();
 
+        const auto pos = QPointF(mPosition.x() * width + xpos,
+                                 mPosition.y() * height + ypos);
         QRectF bounds;
         bounds.moveTo(pos - QPoint(20, 20));
         bounds.setSize(QSize(40, 40));
@@ -1157,10 +1195,11 @@ public:
             return false;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         mSprite.SetAppRuntime(mRunTime / 1000.0f);
 
+        const auto& layout = GetGameWindowLayout(rect);
         const auto ExplosionWidth = layout.GetGridWidth() * 2.0f;
         const auto ExplosionHeight = layout.GetGridHeight() * 2.3f;
 
@@ -1198,11 +1237,12 @@ public:
         return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paint(gfx::Painter& painter, const GridLayout& layout) override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
 
+        const auto& layout = GetGameWindowLayout(rect);
         const auto alpha = 1.0 - (float)(mTimeAccum - mStartTime)/ (float)mLifeTime;
         const auto dim = layout.GetCellDimensions();
         const auto top = layout.MapPoint(mPosition);
@@ -2457,9 +2497,6 @@ void GameWidget::updateGame(float dt)
 
 #endif
 
-
-    GridLayout layout(rect(), GameCols, GameRows + 2);
-
     const auto time = dt * mWarpFactor;
     const auto tick = 1000.0 / mProfiles[mCurrentProfile].speed;
 
@@ -2533,8 +2570,8 @@ void GameWidget::updateGame(float dt)
                 const auto collision = CollisionType {lhsColliderType, type };
                 if (collision == Asteroid_UFO_Collision || collision == UFO_UFO_Collision)
                 {
-                    const auto& lhsBounds = lhsAnim->getBounds(layout);
-                    const auto& rhsBounds = animation->getBounds(layout);
+                    const auto& lhsBounds = lhsAnim->getBounds(rect());
+                    const auto& rhsBounds = animation->getBounds(rect());
                     if (lhsBounds.intersects(rhsBounds) || rhsBounds.intersects(lhsBounds))
                         return true;
                 }
@@ -2648,7 +2685,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
 
         for (auto& anim : mAnimations)
         {
-            anim->paint(*mCustomGraphicsPainter, layout);
+            anim->paint(*mCustomGraphicsPainter, rect());
         }
 
         if (bIsGameRunning)
@@ -2656,7 +2693,7 @@ void GameWidget::paintEvent(QPaintEvent* paint)
             for (auto& pair : mInvaders)
             {
                 auto& invader = pair.second;
-                invader->paint(*mCustomGraphicsPainter, layout);
+                invader->paint(*mCustomGraphicsPainter, rect());
             }
         }
 
