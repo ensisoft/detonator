@@ -123,7 +123,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             if (line.empty())
                 line = "k";
             
-            auto bmp = Rasterize(line, text.font, text.font_size);
+            auto bmp = Rasterize(line, text.font, text.style);
             if (was_empty)
                 bmp->Fill(Grayscale{0});
 
@@ -131,25 +131,21 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             line_bitmaps.push_back(std::move(bmp));
         }
         int ypos = 0;
-        if (text.use_absolute_position) 
-            ypos = text.ypos;
-        else if (text.va == VerticalAlignment::AlignTop)
+        if (text.style.mVAlignment == VerticalAlignment::AlignTop)
             ypos = 0;
-        else if (text.va == VerticalAlignment::AlignCenter)
+        else if (text.style.mVAlignment == VerticalAlignment::AlignCenter)
             ypos = ((int)mHeight - total_height) / 2;
-        else if (text.va == VerticalAlignment::AlignBottom)
+        else if (text.style.mVAlignment == VerticalAlignment::AlignBottom)
             ypos = mHeight - total_height;
         
         for (const auto& bmp : line_bitmaps) 
         {
             int xpos = 0;
-            if (text.use_absolute_position)
-                xpos = text.xpos;
-            else if (text.ha == HorizontalAlignment::AlignLeft)
+            if (text.style.mHAlignment == HorizontalAlignment::AlignLeft)
                 xpos = 0;
-            else if (text.ha == HorizontalAlignment::AlignCenter)
+            else if (text.style.mHAlignment == HorizontalAlignment::AlignCenter)
                 xpos = ((int)mWidth - (int)bmp->GetWidth()) / 2;
-            else if (text.ha == HorizontalAlignment::AlignRight)
+            else if (text.style.mHAlignment == HorizontalAlignment::AlignRight)
                 xpos = mWidth - bmp->GetWidth();
             
             out->Copy(xpos, ypos, *bmp);
@@ -168,31 +164,15 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     return out;
 }
 
-
-void TextBuffer::AddText(const std::string& text, const std::string& font,
-    unsigned font_size_px,  int xpos, int ypos)
+TextBuffer::TextStyle& TextBuffer::AddText(const std::string& text, const std::string& font, unsigned font_size_px)
 {
     Text t;
     t.text = text;
     t.font = font;
-    t.font_size = font_size_px;
-    t.use_absolute_position = true;
-    t.xpos = xpos;
-    t.ypos = ypos;
-    mText.push_back(t);
-}
+    t.style.SetFontsize(font_size_px);
 
-void TextBuffer::AddText(const std::string& text, const std::string& font,
-    unsigned font_size_px, HorizontalAlignment ha, VerticalAlignment va)
-{
-    Text t;
-    t.text = text;
-    t.font = font;
-    t.font_size = font_size_px;
-    t.use_absolute_position = false;
-    t.ha = ha;
-    t.va = va;
     mText.push_back(t);
+    return mText.back().style;
 }
 
 std::size_t TextBuffer::GetHash() const 
@@ -208,7 +188,7 @@ std::size_t TextBuffer::GetHash() const
 }
 
 std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text, 
-    const std::string& font, unsigned font_size) const
+    const std::string& font, const TextStyle& style) const 
 {
     // FreeType 2 uses size objects to model all information related to a given character
     // size for a given face. For example, a size object holds the value of certain metrics
@@ -232,8 +212,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
         throw std::runtime_error("Font doesn't support Unicode");
 
-    if (FT_Set_Pixel_Sizes(face, 0, font_size))
-        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));    
+    if (FT_Set_Pixel_Sizes(face, 0, style.mFontsize))
+        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(style.mFontsize));    
     //if (FT_Set_Char_Size(face, font_size * FUCKING_MAGIC_SCALE, font_size * FUCKING_MAGIC_SCALE, 0, 0))
     //    throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));
 
@@ -343,7 +323,12 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         pen_y += ya;
     }    
     
-    const auto line_spacing = face->size->metrics.height / FUCKING_MAGIC_SCALE;
+    // offset to the baseline. if negative then it's below the baseline
+    // if positive it's above the baseline.
+    const auto underline_position  = face->underline_position / FUCKING_MAGIC_SCALE;
+    // vertical thickness of the underline.. units ??
+    const auto underline_thickness = 2; // face->underline_thickness ? face->underline_thickness : 1;
+    const auto line_spacing = (face->size->metrics.height / FUCKING_MAGIC_SCALE) * style.mLineHeight;
     const auto margin = line_spacing > height ? line_spacing - height : 0;
 
     height += margin;
@@ -402,6 +387,14 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
 
         pen_x += xa;
         pen_y += ya; 
+    }
+
+    if (style.mUnderline)
+    {
+        const auto width = bmp->GetWidth();
+        const URect underline(0, baseline + underline_position, 
+            width, underline_thickness);
+        bmp->Fill(underline, gfx::Grayscale(0xff));
     }
 
     hb_font_destroy(hb_font);

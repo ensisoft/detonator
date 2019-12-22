@@ -899,9 +899,9 @@ public:
 
         const auto fontsize = unitScale.y() / 1.75;
         gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
-        text.AddText(base::ToUtf8(mText),"fonts/SourceHanSerifTC-SemiBold.otf", fontsize,
-            gfx::TextBuffer::HorizontalAlignment::AlignLeft,
-            gfx::TextBuffer::VerticalAlignment::AlignCenter);
+        text.AddText(base::ToUtf8(mText),"fonts/SourceHanSerifTC-SemiBold.otf", fontsize)
+            .SetAlign(gfx::TextBuffer::HorizontalAlignment::AlignLeft)
+            .SetAlign(gfx::TextBuffer::VerticalAlignment::AlignCenter);
 
         t.Translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
 

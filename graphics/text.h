@@ -64,11 +64,6 @@ namespace gfx
         // Rasterize the text buffer contents into a bitmap
         std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
 
-        // Add text relative to the top left origin 
-        // of the TextBuffer. Origin is 0,0 and y growns down.
-        void AddText(const std::string& text, const std::string& font,
-            unsigned font_size_px, int xpos, int ypos);
-
         enum class HorizontalAlignment {
             AlignLeft,
             AlignCenter,
@@ -80,11 +75,61 @@ namespace gfx
             AlignBottom
         };
 
-        // Add text to the buffer and position automatically 
-        // relative to the TextBuffer origin. 
-        void AddText(const std::string& text, const std::string& font, unsigned font_size_px,
-            HorizontalAlignment ha = HorizontalAlignment::AlignCenter, 
-            VerticalAlignment va = VerticalAlignment::AlignCenter);
+        // TextStyle object can be used to set some text styling properties
+        // such as the line height scaling factor, underline and text
+        // alignment. 
+        // Some general notes about text styling:
+        // Common "styling" options such as Italic and Bold text are normally
+        // variations of the "Regular" font. Therefore this API provides no
+        // facilities for dealing with "bold" or "italic" text. Simply use
+        // the appropriate font file when adding text to the TextBuffer.
+        class TextStyle
+        {   
+        public:
+            // Set underlining on/off. 
+            TextStyle& SetUnderline(bool underline)
+            {
+                mUnderline = underline;
+                return *this;
+            }
+            // Set text horizontal alignment wrt TextBuffer bounds.
+            TextStyle& SetAlign(HorizontalAlignment align)
+            {
+                mHAlignment = align;
+                return *this;
+            }
+            // Set text vertical alignment wrt TextBuffer bounds.
+            TextStyle& SetAlign(VerticalAlignment align)
+            {
+                mVAlignment = align;
+                return *this;
+            }
+            // Set text font size.
+            TextStyle& SetFontsize(unsigned fontsize)
+            {
+                mFontsize = fontsize;
+                return *this;
+            }
+            // Set the line height scaling factor. Default is 1.0
+            // which uses the line height from the font unscaled.
+            TextStyle& SetLineHeight(float height)
+            {
+                mLineHeight = height;
+                return *this;
+            }
+        private:
+            float mLineHeight = 1.0f;
+            bool mUnderline = false;
+            unsigned mFontsize = 0;
+            HorizontalAlignment mHAlignment = HorizontalAlignment::AlignCenter;
+            VerticalAlignment mVAlignment = VerticalAlignment::AlignCenter;
+            friend class TextBuffer;
+        };
+
+        // Add text to the buffer and position automatically wrt TextBuffer bounds.
+        // Returns a TextStyle object which can be used to set individual 
+        // text style properties.
+        TextStyle& AddText(const std::string& text, const std::string& font, unsigned font_size_px);
 
         // Compute hash of the contents of the string buffer.
         std::size_t GetHash() const;
@@ -93,9 +138,11 @@ namespace gfx
         struct FontLibrary;
         mutable std::shared_ptr<FontLibrary> mFreetype;
         static std::weak_ptr<FontLibrary> Freetype;
-
-        std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, 
-            const std::string& font, unsigned font_size_px) const;
+        struct Text;
+        std::shared_ptr<Bitmap<Grayscale>> Rasterize(
+            const std::string& text, 
+            const std::string& font,
+            const TextStyle& style) const;
 
     private:
         const std::string mName;
@@ -105,12 +152,7 @@ namespace gfx
         struct Text {
             std::string text;
             std::string font;
-            unsigned font_size = 0.0f;
-            int xpos = 0.0f;
-            int ypos = 0.0f;
-            bool use_absolute_position = false;
-            HorizontalAlignment ha;
-            VerticalAlignment va;
+            TextStyle style;            
         };
         std::vector<Text> mText;
     };

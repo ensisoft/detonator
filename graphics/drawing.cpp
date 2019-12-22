@@ -59,7 +59,7 @@ void DrawTextRect(Painter& painter,
     else if ((alignment & 0xf0) == AlignRight)
         ha = TextBuffer::HorizontalAlignment::AlignRight;
 
-    buff.AddText(text, font, font_size_px, ha, va);
+    buff.AddText(text, font, font_size_px).SetAlign(va).SetAlign(va);
 
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());    
