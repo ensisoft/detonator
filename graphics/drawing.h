@@ -34,6 +34,7 @@ namespace gfx
 
 class Painter;
 class Transform;
+class Material;
 class Color4f;
 
 // Text alignment inside a rect
@@ -57,6 +58,18 @@ void DrawTextRect(Painter& painter,
     unsigned font_size_px,
     const FRect& rect,     
     const Color4f& color,    
-    unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter);
+    unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
+    bool underline = false);
+
+// Draw the outline of a rectangle. the rectangle is defined in pixels
+// and positioned relative to the top left corer of the render target/surface.
+void DrawRectOutline(Painter&,
+    const FRect& rect, 
+    const Color4f& color,
+    float line_width);
+void DrawRectOutline(Painter&,
+    const FRect& rect, 
+    const Material& material, 
+    float line_width);
 
 } // namespace

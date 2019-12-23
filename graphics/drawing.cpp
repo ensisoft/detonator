@@ -39,7 +39,8 @@ void DrawTextRect(Painter& painter,
     const std::string& font, unsigned font_size_px,
     const FRect& rect,  
     const Color4f& color,
-    unsigned alignment)
+    unsigned alignment, 
+    bool underline)
 {
     TextBuffer buff(rect.GetWidth(), rect.GetHeight());
 
@@ -59,7 +60,8 @@ void DrawTextRect(Painter& painter,
     else if ((alignment & 0xf0) == AlignRight)
         ha = TextBuffer::HorizontalAlignment::AlignRight;
 
-    buff.AddText(text, font, font_size_px).SetAlign(va).SetAlign(va);
+    buff.AddText(text, font, font_size_px)
+        .SetAlign(va).SetAlign(va).SetUnderline(underline);
 
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());    
@@ -68,4 +70,35 @@ void DrawTextRect(Painter& painter,
         gfx::BitmapText(buff).SetBaseColor(color));
 }
 
+void DrawRectOutline(Painter& painter,
+    const FRect& rect,
+    const Color4f& color,
+    float line_width)
+{
+    DrawRectOutline(painter, rect, SolidColor(color), line_width);
+}
+
+void DrawRectOutline(Painter& painter, 
+    const FRect& rect, 
+    const Material& material,
+    float line_width)
+{
+    const auto width  = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    const auto x = rect.GetX();
+    const auto y = rect.GetY();
+
+    Transform outline_transform;
+    outline_transform.Resize(width, height);
+    outline_transform.MoveTo(x, y);
+
+    Transform mask_transform;
+    mask_transform.Resize(width - 2 * line_width, height - 2 * line_width);
+    mask_transform.MoveTo(x + line_width, y + line_width);
+    painter.DrawMasked(
+        Rectangle(), outline_transform,
+        Rectangle(), mask_transform, 
+        material);
+
+}
 } // namespace
