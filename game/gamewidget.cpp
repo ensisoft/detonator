@@ -168,8 +168,8 @@ public:
 
     QPoint GetCellDimensions() const
     {
-        return { mWidth / mNumCols, 
-                 mHeight / mNumRows };
+        return QPoint(mWidth / mNumCols, 
+                 mHeight / mNumRows);
     }
 
     // get whole widget rect in widget coordinates
