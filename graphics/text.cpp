@@ -183,6 +183,12 @@ std::size_t TextBuffer::GetHash() const
     for (const auto& t : mText) 
     {
         hash ^= string_hash(t.text);
+        // have the style properties also contribute to the hash so that
+        // text buffer with similar text content but different properties
+        // generates a different hash.
+        hash ^= (int)t.style.mLineHeight + (int)t.style.mFontsize + 
+                (int)t.style.mHAlignment + (int)t.style.mVAlignment + 
+                (int)t.style.mUnderline;
     }
     return hash;
 }
