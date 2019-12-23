@@ -141,6 +141,12 @@ public:
         return {top, bot};
     }
 
+    gfx::FRect MapGfxRect(const QPoint& top_left_cell, const QPoint& bottom_right_cell) const 
+    {
+        const QRectF& rc = MapRect(top_left_cell, bottom_right_cell);
+        return gfx::FRect(rc.x(), rc.y(), rc.width(), rc.height());
+    }
+
     // Map a a grid position in layout grid space into 
     // parent coordinate space.
     QPointF MapPoint(const QPoint& cell) const
@@ -1401,19 +1407,53 @@ public:
         const auto rows = 6;
         const GridLayout layout(rect, cols, rows);
 
-        const QRectF rc = layout.MapRect(QPoint(3, 4), QPoint(4, 5));
-        const auto x = rc.x();
-        const auto y = rc.y();
-        const auto w = rc.width();
-        const auto h = rc.height();
+        const auto font_size_l = layout.GetFontSize() * 0.25;
+        const auto font_size_s = layout.GetFontSize() * 0.2;
 
-        gfx::Transform dt, mt;
-        dt.Resize(w, h);        
-        dt.MoveTo(x, y);
+        gfx::DrawTextRect(painter, 
+            "Evil chinese characters are attacking!\n"
+            "Only you can stop them by typing the right pinyin.\n"
+            "Good luck.\n\n"
+            "Esc - Exit\n"
+            "F1 - Help\n"
+            "F2 - Settings\n"
+            "F3 - Credits\n\n"
+            "Difficulty",
+            "fonts/ARCADE.TTF", font_size_l,
+            layout.MapGfxRect(QPoint(0, 0), QPoint(cols, 3)),            
+            gfx::Color::DarkGray, 
+            gfx::AlignHCenter | gfx::AlignVCenter);
         
-        mt.Resize(w, h-4);
-        mt.MoveTo(x, y+2);
-        painter.DrawMasked(gfx::Rectangle(), dt, gfx::Rectangle(), mt, gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f));
+        // draw the difficulty settings
+        {
+            const GridLayout temp(layout.MapRect(QPoint(2, 3), QPoint(5, 4)), 3, 1);
+            gfx::DrawTextRect(painter,
+                "Easy", 
+                "fonts/ARCADE.TTF", font_size_s,
+                temp.MapGfxRect(QPoint(0, 0), QPoint(1, 1)),
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 0 ?  gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                gfx::AlignTop | gfx::AlignRight,
+                mCurrentProfileIndex == 0);
+            gfx::DrawTextRect(painter,
+                "Normal", 
+                "fonts/ARCADE.TTF", font_size_s,
+                temp.MapGfxRect(QPoint(1, 0), QPoint(2, 1)),
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                gfx::AlignTop | gfx::AlignHCenter,
+                mCurrentProfileIndex == 1);
+            gfx::DrawTextRect(painter,
+                "Chinese", 
+                "fonts/ARCADE.TTF", font_size_s,
+                temp.MapGfxRect(QPoint(2, 0), QPoint(3, 1)),
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                gfx::AlignTop | gfx::AlignLeft,
+                mCurrentProfileIndex == 2);
+        }
+
+        // Draw a little glint effect on top of the middle rectangle 
+        gfx::DrawRectOutline(painter, 
+            layout.MapGfxRect(QPoint(3, 4), QPoint(4, 5)),
+            gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f), 1);
     }
 
     virtual void paint(QPainter& painter, const QRect& rc) override
@@ -1432,11 +1472,6 @@ public:
         font.setPixelSize(layout.GetFontSize() * 0.2);
         painter.setFont(font);
 
-        QFont underline;
-        underline.setFamily("Arcade");
-        underline.setUnderline(true);
-        underline.setPixelSize(layout.GetFontSize() * 0.2);
-
         QPen selected;
         selected.setWidth(2);
         selected.setColor(Qt::darkGreen);
@@ -1446,53 +1481,6 @@ public:
         locked.setColor(Qt::darkRed);
 
         QRectF rect;
-        rect = layout.MapRect(QPoint(0, 0), QPoint(cols, 3));
-        painter.drawText(rect, Qt::AlignHCenter | Qt::AlignBottom,
-            "Evil chinese characters are attacking!\n"
-            "Only you can stop them by typing the right pinyin.\n"
-            "Good luck.\n\n"
-            "Esc - Exit\n"
-            "F1 - Help\n"
-            "F2 - Settings\n"
-            "F3 - Credits\n\n"
-            "Difficulty\n");
-
-        rect = layout.MapRect(QPoint(2, 3), QPoint(5, 4));
-
-        const GridLayout sub(rect, 3, 1);
-        rect = sub.MapRect(QPoint(0, 0), QPoint(1, 1));
-        if (mCurrentProfileIndex == 0)
-        {
-            painter.setFont(underline);
-            if (mCurrentRowIndex == 0)
-                painter.setPen(selected);
-        }
-
-        painter.drawText(rect, Qt::AlignTop | Qt::AlignRight, "Easy");
-        painter.setPen(regular);
-        painter.setFont(font);
-
-        rect = sub.MapRect(QPoint(1, 0), QPoint(2, 1));
-        if (mCurrentProfileIndex == 1)
-        {
-            painter.setFont(underline);
-            if (mCurrentRowIndex == 0)
-                painter.setPen(selected);
-        }
-
-        painter.drawText(rect, Qt::AlignTop | Qt::AlignHCenter, "Normal");
-        painter.setPen(regular);
-        painter.setFont(font);
-
-        rect = sub.MapRect(QPoint(2, 0), QPoint(3, 1));
-        if (mCurrentProfileIndex == 2)
-        {
-            painter.setFont(underline);
-            if (mCurrentRowIndex == 0)
-                painter.setPen(selected);
-        }
-
-        painter.drawText(rect, Qt::AlignTop | Qt::AlignLeft, "Chinese");
         painter.setPen(regular);
         painter.setFont(font);
 
