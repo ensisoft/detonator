@@ -602,7 +602,7 @@ namespace gfx
             {
                 if (!shader)
                     shader = device.MakeShader("texture_alpha_mask.glsl");
-                if (!shader->CompileFile("texture_alpha_mask.glsl"));
+                if (!shader->CompileFile("texture_alpha_mask.glsl"))
                     return nullptr;
             }
             return shader;
