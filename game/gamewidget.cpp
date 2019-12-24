@@ -1661,74 +1661,50 @@ public:
 
     virtual void update(float dt) override
     {}
-
-    virtual void paint(QPainter& painter, const QRect& rect) override
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 7);
 
-        QPen regular;
-        regular.setWidth(1);
-        regular.setColor(Qt::darkGray);
+        const auto font_size = layout.GetFontSize() * 0.3;
 
-        QPen selected;
-        selected.setWidth(1);
-        selected.setColor(Qt::darkGreen);
-
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(layout.GetFontSize() * 0.3);
-
-        painter.setPen(regular);
-        painter.setFont(font);
-
-        QFont underline;
-        underline.setFamily("Arcade");
-        underline.setUnderline(true);
-        underline.setPixelSize(layout.GetFontSize() * 0.3);
-
-#ifndef GAME_ENABLE_AUDIO
-        painter.drawText(rect, Qt::AlignCenter,
-            "Audio is not supported on this platform.\n\n"
-            "Press Esc to exit\n");
-        return;
+        gfx::DrawTextRect(painter, 
+            "Press space to toggle a setting.", 
+            "fonts/ARCADE.TTF", font_size, 
+            layout.MapGfxRect(QPoint(0, 1), QPoint(1, 2)),
+            gfx::Color::DarkGray);
+#ifdef GAME_ENABLE_AUDIO 
+        gfx::DrawTextRect(painter,
+            base::FormatString("Sounds Effects: %1", mPlaySounds ? "On" : "Off"),
+            "fonts/ARCADE.TTF", font_size, 
+            layout.MapGfxRect(QPoint(0, 2), QPoint(1, 3)), 
+            mSettingIndex == 0 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
+        gfx::DrawTextRect(painter, 
+            base::FormatString("Awesome Music: %1", mPlayMusic ? "On" : "Off"), 
+            "fonts/ARCADE.TTF", font_size,
+            layout.MapGfxRect(QPoint(0, 3), QPoint(1, 4)), 
+            mSettingIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
+#else
+        gfx::DrawTextRect(painter, 
+            "Audio is not supported on this platform."
+            "fonts/ARCADE.TTF", font_size, 
+            layout.MapGfxRect(QPoint(0, 2), QPoint(1, 4)),
+            gfx::Color::DarkGray);
 #endif
+        gfx::DrawTextRect(painter,
+            base::FormatString("Fullscreen: %1", mFullscreen ? "On" : "Off"),
+            "fonts/ARCADE.TTF", font_size,
+            layout.MapGfxRect(QPoint(0, 4), QPoint(1, 5)),
+            mSettingIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
 
+        gfx::DrawTextRect(painter,
+            "Press Esc to exit",
+            "fonts/ARCADE.TTF", font_size,
+            layout.MapGfxRect(QPoint(0, 5), QPoint(1, 6)),
+            gfx::Color::DarkGray);
 
-
-        QRectF rc;
-        rc = layout.MapRect(QPoint(0, 1), QPoint(1, 2));
-        painter.drawText(rc, Qt::AlignCenter,
-            "Press space to toggle a setting.");
-
-        painter.setPen(regular);
-
-        if (mSettingIndex == 0)
-            painter.setPen(selected);
-        rc = layout.MapRect(QPoint(0, 2), QPoint(1, 3));
-        painter.drawText(rc, Qt::AlignCenter,
-            tr("Sound Effects: %1").arg(mPlaySounds ? "On" : "Off"));
-
-        painter.setPen(regular);
-
-        if (mSettingIndex == 1)
-            painter.setPen(selected);
-        rc = layout.MapRect(QPoint(0, 3), QPoint(1, 4));
-        painter.drawText(rc, Qt::AlignCenter,
-            tr("Awesome Music: %1").arg(mPlayMusic ? "On" : "Off"));
-
-        painter.setPen(regular);
-
-        rc = layout.MapRect(QPoint(0, 4), QPoint(1, 5));
-        if (mSettingIndex == 2)
-            painter.setPen(selected);
-        painter.drawText(rc, Qt::AlignCenter,
-            tr("Fullscreen: %1").arg(mFullscreen ? "On" : "Off"));
-
-        rc = layout.MapRect(QPoint(0, 5), QPoint(1, 6));
-        painter.setPen(regular);
-        painter.drawText(rc, Qt::AlignCenter,
-            "Press Esc to exit");
     }
+    virtual void paint(QPainter& painter, const QRect& rect) override
+    {}
 
     virtual Action mapAction(const QKeyEvent* press) const override
     {
