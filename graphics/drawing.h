@@ -49,6 +49,11 @@ enum TextAlign {
     AlignRight   = 0x40
 };
 
+enum TextProp {
+    Underline = 0x1,
+    Blinking  = 0x2
+};
+
 // Draw text inside the given rectangle. The rectangle is defined in 
 // pixels and positioned relative to the top left corner of the rendering
 // target (e.g. the window surface)
@@ -59,7 +64,7 @@ void DrawTextRect(Painter& painter,
     const FRect& rect,     
     const Color4f& color,    
     unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
-    bool underline = false);
+    unsigned properties = 0x0);
 
 // Draw the outline of a rectangle. the rectangle is defined in pixels
 // and positioned relative to the top left corer of the render target/surface.

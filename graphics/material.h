@@ -28,9 +28,11 @@
 #include <string>
 #include <cmath>
 #include <cassert>
+#include <chrono>
 #include <memory>
 #include <stdexcept>
 
+#include "base/utility.h"
 #include "bitmap.h"
 #include "color4f.h"
 #include "device.h"
@@ -633,12 +635,15 @@ namespace gfx
                 const auto& bmp = mText.Rasterize();
                 texture->Upload(bmp->GetData(), width, height, Texture::Format::Grayscale);
             }                
+            const float secs = base::GetRuntimeSec();
 
             prog.SetTexture("kTexture", 0, *texture);
             prog.SetUniform("kRenderPoints", 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(), 
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
+            prog.SetUniform("kTimeSecs", secs);  
+            prog.SetUniform("kBlinkPeriod", mBlinkText ? 1.5f :0.0f);          
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
@@ -671,10 +676,17 @@ namespace gfx
             return *this;
         }
 
+        BitmapText& SetBlinkText(bool blink)
+        {
+            mBlinkText = blink;
+            return *this;
+        }
+
     private:
         const TextBuffer& mText;
         Color4f mColor = Color::White;
         float mGamma   = 1.0f;
+        bool mBlinkText = false;
     };
 
 

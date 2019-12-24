@@ -1433,21 +1433,21 @@ public:
                 temp.MapGfxRect(QPoint(0, 0), QPoint(1, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 0 ?  gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignRight,
-                mCurrentProfileIndex == 0);
+                mCurrentProfileIndex == 0 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Normal", 
                 "fonts/ARCADE.TTF", font_size_s,
                 temp.MapGfxRect(QPoint(1, 0), QPoint(2, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignHCenter,
-                mCurrentProfileIndex == 1);
+                mCurrentProfileIndex == 1 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Chinese", 
                 "fonts/ARCADE.TTF", font_size_s,
                 temp.MapGfxRect(QPoint(2, 0), QPoint(3, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignLeft,
-                mCurrentProfileIndex == 2);
+                mCurrentProfileIndex == 2 ? gfx::TextProp::Underline : 0);
         }
 
         // Draw a little glint effect on top of the middle rectangle 

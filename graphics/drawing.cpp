@@ -40,7 +40,7 @@ void DrawTextRect(Painter& painter,
     const FRect& rect,  
     const Color4f& color,
     unsigned alignment, 
-    bool underline)
+    unsigned properties)
 {
     TextBuffer buff(rect.GetWidth(), rect.GetHeight());
 
@@ -60,6 +60,9 @@ void DrawTextRect(Painter& painter,
     else if ((alignment & 0xf0) == AlignRight)
         ha = TextBuffer::HorizontalAlignment::AlignRight;
 
+    const bool underline = properties & TextProp::Underline;
+    const bool blinking  = properties & TextProp::Blinking;
+
     buff.AddText(text, font, font_size_px)
         .SetAlign(va).SetAlign(va).SetUnderline(underline);
 
@@ -67,7 +70,7 @@ void DrawTextRect(Painter& painter,
     t.Resize(rect.GetWidth(), rect.GetHeight());    
     t.MoveTo(rect.GetX(), rect.GetY());
     painter.Draw(Rectangle(), t, 
-        gfx::BitmapText(buff).SetBaseColor(color));
+        gfx::BitmapText(buff).SetBaseColor(color).SetBlinkText(blinking));
 }
 
 void DrawRectOutline(Painter& painter,

@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory> // for unique_ptr
 #include <string>
 #include <locale>
@@ -30,6 +31,16 @@
 
 namespace base
 {
+
+inline double GetRuntimeSec() 
+{
+    using steady_clock = std::chrono::steady_clock;
+    static const auto start = steady_clock::now();
+    const auto now = steady_clock::now();
+    const auto gone = now - start;
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(gone);
+    return ms.count() / 1000.0; 
+}
 
 template<typename T, typename Deleter>
 std::unique_ptr<T, Deleter> make_unique_ptr(T* ptr, Deleter del)
