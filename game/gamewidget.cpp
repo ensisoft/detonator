@@ -1450,94 +1450,34 @@ public:
                 mCurrentProfileIndex == 2 ? gfx::TextProp::Underline : 0);
         }
 
+        // Draw the levesl
+        const auto prev_level_index = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevels.size() - 1;
+        const auto next_level_index = (mCurrentLevelIndex + 1) % mLevels.size();
+        drawLevel(painter, layout.MapGfxRect(QPoint(1, 4), QPoint(2, 5)),
+            prev_level_index, font_size_s, false);
+        drawLevel(painter, layout.MapGfxRect(QPoint(3, 4), QPoint(4, 5)),
+            mCurrentLevelIndex, font_size_s, mCurrentRowIndex == 1);
+        drawLevel(painter, layout.MapGfxRect(QPoint(5, 4), QPoint(6, 5)),
+            next_level_index, font_size_s, false);
+
         // Draw a little glint effect on top of the middle rectangle 
         gfx::DrawRectOutline(painter, 
             layout.MapGfxRect(QPoint(3, 4), QPoint(4, 5)),
             gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f), 1);
+
+        const auto& play_or_not = mInfos[mCurrentLevelIndex].locked ?
+            "This level is locked!" : "Press Space to play!";
+        gfx::DrawTextRect(painter, 
+            play_or_not, 
+            "fonts/ARCADE.TTF", font_size_l, 
+            layout.MapGfxRect(QPoint(0, rows-1), QPoint(cols, rows)),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
+            gfx::TextProp::Blinking);
     }
 
-    virtual void paint(QPainter& painter, const QRect& rc) override
-    {
-        const auto cols = 7;
-        const auto rows = 6;
-        const GridLayout layout(rc, cols, rows);
-
-        QPen regular;
-        regular.setWidth(1);
-        regular.setColor(Qt::darkGray);
-        painter.setPen(regular);
-
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(layout.GetFontSize() * 0.2);
-        painter.setFont(font);
-
-        QPen selected;
-        selected.setWidth(2);
-        selected.setColor(Qt::darkGreen);
-
-        QPen locked;
-        locked.setWidth(2);
-        locked.setColor(Qt::darkRed);
-
-        QRectF rect;
-        painter.setPen(regular);
-        painter.setFont(font);
-
-        QFont small;
-        small.setFamily("Arcade");
-        small.setPixelSize(layout.GetFontSize() * 0.2);
-        painter.setFont(small);
-
-        const auto prev = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevels.size() - 1;
-        const auto next = (mCurrentLevelIndex + 1) % mLevels.size();
-        const auto& left  = mLevels[prev];
-        const auto& mid   = mLevels[mCurrentLevelIndex];
-        const auto& right = mLevels[next];
-
-        rect = layout.MapRect(QPoint(1, 4), QPoint(2, 5));
-        drawLevel(painter, rect, *left, prev, false);
-
-        bool hilite = false;
-        if (mCurrentRowIndex == 1)
-        {
-            if (mInfos[mCurrentLevelIndex].locked)
-                 painter.setPen(locked);
-            else painter.setPen(selected);
-            hilite = true;
-        }
-        else
-        {
-            painter.setPen(regular);
-        }
-
-        rect = layout.MapRect(QPoint(3, 4), QPoint(4, 5));
-        drawLevel(painter, rect, *mid, mCurrentLevelIndex, hilite);
-
-        painter.setPen(regular);
-        rect = layout.MapRect(QPoint(5, 4), QPoint(6, 5));
-        painter.drawRect(rect);
-        drawLevel(painter, rect, *right, next, false);
-
-        static unsigned blink_text = 0;
-
-        const bool draw_text = (blink_text % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
-        if (draw_text)
-        {
-            rect = layout.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
-            painter.setPen(regular);
-            painter.setFont(font);
-            if (mInfos[mCurrentLevelIndex].locked)
-            {
-                painter.drawText(rect, Qt::AlignCenter, "This level is locked!\n");
-            }
-            else
-            {
-                painter.drawText(rect, Qt::AlignCenter, "Press Space to play!\n");
-            }
-        }
-        ++blink_text;
-    }
+    virtual void paint(QPainter&, const QRect&) override
+    {}
 
     virtual Action mapAction(const QKeyEvent* event) const
     {
@@ -1631,36 +1571,25 @@ public:
     }
 
 private:
-    void drawLevel(QPainter& painter, const QRectF& rect, const Level& level, int index, bool hilite)
+    void drawLevel(gfx::Painter& painter, const gfx::FRect& rect, 
+        unsigned index, unsigned font_size, bool hilite) const
     {
+        const auto& level = mLevels[index];
         const auto& info = mInfos[index];
+        const auto& text = info.locked ? std::string("Locked") :
+            info.highScore ? base::FormatString("%1 points", info.highScore) : 
+            std::string("Play");
+        const auto outline_width = 2;
+        const auto outline_color = hilite ? 
+            (info.locked ? gfx::Color::DarkRed : gfx::Color::DarkGreen) : gfx::Color::DarkGray;    
 
-        QString locked;
-        if (info.locked)
-            locked = "Locked";
-        else if (info.highScore)
-            locked = QString("%1 points").arg(info.highScore);
-        else locked = "Play!";
-
-        if (hilite)
-        {
-            QPen glow   = painter.pen();
-            QPen normal = painter.pen();
-            glow.setWidth(12);
-            painter.setPen(glow);
-            painter.setOpacity(0.2);
-            painter.drawRect(rect);
-            painter.setOpacity(1.0);
-            painter.setPen(normal);
-        }
-
-        const auto& name = QString::fromStdWString(level.GetName());
-
-        painter.drawRect(rect);
-        painter.drawText(rect, Qt::AlignCenter,
-            QString("Level %1\n%2\n%3").arg(index+1).arg(name).arg(locked));
+        gfx::DrawRectOutline(painter, rect, outline_color, 4, 0.7f); 
+        gfx::DrawTextRect(painter, 
+            base::FormatString("Level %1\n%2\n%3", index + 1, level->GetName(), text),
+            "fonts/ARCADE.TTF", font_size,
+            rect, outline_color, 
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
     }
-
 private:
     const std::vector<std::unique_ptr<Level>>& mLevels;
     const std::vector<LevelInfo>& mInfos;

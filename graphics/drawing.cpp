@@ -76,9 +76,12 @@ void DrawTextRect(Painter& painter,
 void DrawRectOutline(Painter& painter,
     const FRect& rect,
     const Color4f& color,
-    float line_width)
+    float line_width,
+    float opacity)
 {
-    DrawRectOutline(painter, rect, SolidColor(color), line_width);
+    DrawRectOutline(painter, rect, 
+        SolidColor(color).SetOpacity(opacity).EnableTransparency(true), 
+        line_width);
 }
 
 void DrawRectOutline(Painter& painter, 

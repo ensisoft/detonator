@@ -71,7 +71,8 @@ void DrawTextRect(Painter& painter,
 void DrawRectOutline(Painter&,
     const FRect& rect, 
     const Color4f& color,
-    float line_width);
+    float line_width, 
+    float opacity = 1.0f);
 void DrawRectOutline(Painter&,
     const FRect& rect, 
     const Material& material, 
