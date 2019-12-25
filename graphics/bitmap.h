@@ -350,6 +350,10 @@ namespace gfx
             , mHeight(height)
         {
             mPixels.resize(width * height);
+            // if the bitmap is being constructed with 0 width or 0 height
+            // early return here because accessing mPixels[0] would then be invalid.
+            if (mPixels.empty())
+                return;
 
             if (!stride)
                 stride = sizeof(Pixel) * width;
