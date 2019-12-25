@@ -139,8 +139,8 @@ namespace invaders
 
     private:
         virtual void initializeGL() override;
+        virtual void paintGL() override;
         virtual void closeEvent(QCloseEvent* close) override;
-        virtual void paintEvent(QPaintEvent* paint) override;
         virtual void keyPressEvent(QKeyEvent* press) override;
     private:
         void playMusic();

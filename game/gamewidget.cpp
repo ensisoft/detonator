@@ -25,15 +25,8 @@
 #include "warnpush.h"
 #  include <QtGui/QPaintEvent>
 #  include <QtGui/QKeyEvent>
-#  include <QtGui/QPen>
-#  include <QtGui/QBrush>
-#  include <QtGui/QColor>
-#  include <QtGui/QPainter>
-#  include <QtGui/QFontDatabase>
-#  include <QtGui/QCursor>
 #  include <QtGui/QVector2D>
-#  include <QtGui/QFont>
-#  include <QtGui/QFontMetrics>
+#  include <QtGui/QPainter>
 #  include <QApplication>
 #  include <QResource>
 #  include <QFileInfo>
@@ -264,27 +257,22 @@ public:
     };
 
     // Paint the user interface state with the painter in the render target.
-    // The given rect defines the sub-rectangle (the box) inside the 
-    // render target where the painting should occur. 
-    virtual void paint(QPainter& painter, const QRect& rect) = 0;
-
-    // Paint the user interface state with the painter in the render target.
     // The given rect defines the sub-rectangle (the box) inside the
     // render target where the painting should occur.
     // No scissor is set by default instead the state should set the
     // scissor as needed once the final transformation is done.
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const
-    {}
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const = 0;
+
+    // map keyboard input to an action.
+    virtual Action mapAction(const QKeyEvent* press) const = 0;
 
     // update the state.. umh.. state from the delta time
     virtual void update(float dt)
     {}
 
-    // map keyboard input to an action.
-    virtual Action mapAction(const QKeyEvent* press) const = 0;
-
     // handle the raw unmapped keyboard event
-    virtual void keyPress(const QKeyEvent* press) = 0;
+    virtual void keyPress(const QKeyEvent* press)
+    {}
 
     // returns true if state represents the running game.
     virtual bool isGameRunning() const
@@ -1354,7 +1342,7 @@ public:
         mText.append("\nPress any key to continue");
     }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1367,19 +1355,11 @@ public:
             gfx::FRect(0, 0, width, height), 
             gfx::Color::DarkGray);
     }
-
-    virtual void paint(QPainter&, const QRect&) override
-    {}
     
-    virtual void update(float dt) override
-    {}
-
     virtual Action mapAction(const QKeyEvent* press) const override
     {
         return Action::CloseState;
     }
-    virtual void keyPress(const QKeyEvent* press) override
-    {}
 private:
     std::string mText;
 };
@@ -1400,7 +1380,7 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         const auto cols = 7;
         const auto rows = 6;
@@ -1474,9 +1454,6 @@ public:
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             gfx::TextProp::Blinking);
     }
-
-    virtual void paint(QPainter&, const QRect&) override
-    {}
 
     virtual Action mapAction(const QKeyEvent* event) const
     {
@@ -1618,7 +1595,7 @@ public:
     virtual void keyPress(const QKeyEvent* event) override
     {}
 
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1639,9 +1616,6 @@ public:
             layout.GetGfxRect(),            
             gfx::Color::DarkGray);
     }
-
-    virtual void paint(QPainter&, const QRect&) override
-    {}
 private:
 };
 
@@ -1658,9 +1632,7 @@ public:
       , mFullscreen(fullscreen)
     {}
 
-    virtual void update(float dt) override
-    {}
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 7);
 
@@ -1702,8 +1674,6 @@ public:
             gfx::Color::DarkGray);
 
     }
-    virtual void paint(QPainter& painter, const QRect& rect) override
-    {}
 
     virtual Action mapAction(const QKeyEvent* press) const override
     {
@@ -1754,7 +1724,7 @@ private:
 class GameWidget::About : public State
 {
 public:
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1778,21 +1748,12 @@ public:
             layout.GetGfxRect(),             
             gfx::Color::DarkGray);
     }
-
-    virtual void paint(QPainter&, const QRect&) override
-    {}
-
-    virtual void update(float dt) override
-    {}
-
     virtual Action mapAction(const QKeyEvent* press) const override
     {
         if (press->key() == Qt::Key_Escape)
             return Action::CloseState;
         return Action::None;
     }
-    virtual void keyPress(const QKeyEvent* press) override
-    {}
 private:
 };
 
@@ -1802,8 +1763,7 @@ public:
     PlayGame(const Game::Setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
     {}
 
-    virtual void paint(QPainter&, const QRect&) {}
-    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
     {
         switch (mState)
         {
@@ -1815,8 +1775,6 @@ public:
                 break;
         }
     }
-    virtual void update(float dt) override
-    {}
 
     virtual Action mapAction(const QKeyEvent* press) const override
     {
@@ -1991,8 +1949,6 @@ GameWidget::GameWidget()
     // sound effects FX
     static auto sndExplosion = std::make_shared<audio::AudioSample>("sounds/explode.wav", "explosion");
 #endif
-
-    QFontDatabase::addApplicationFont(R("fonts/ARCADE.TTF"));
 
     mGame.reset(new Game(GameCols, GameRows));
 
@@ -2483,73 +2439,48 @@ void GameWidget::closeEvent(QCloseEvent* close)
     mRunning = false;
 }
 
-void GameWidget::paintEvent(QPaintEvent* paint)
+void GameWidget::paintGL()
 {
-    QPainter painter(this);
-    painter.setRenderHints(QPainter::HighQualityAntialiasing);
-
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
 
     mCustomGraphicsDevice->BeginFrame();
+    mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+
+    // paint the background
+    mBackground->paint(*mCustomGraphicsPainter, rect());
+
+    // then paint the animations on top of the background
+    for (auto& anim : mAnimations)
+    {
+        anim->paint(*mCustomGraphicsPainter, rect());
+    }
 
     const bool bIsGameRunning = mStates.top()->isGameRunning();
-
-    // do a first pass using custom painter
+    // paint the invaders if the game is running, need to check whether 
+    // the game is running or not because it could be paused 
+    // because the player is looking at the settings/help
+    
+    if (bIsGameRunning)
     {
-        painter.beginNativePainting();
-
-        gfx::Device::StateBuffer currentState;
-        mCustomGraphicsDevice->GetState(&currentState);
-        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
-
-        mBackground->paint(*mCustomGraphicsPainter, rect());
-
-        for (auto& anim : mAnimations)
+        for (auto& pair : mInvaders)
         {
-            anim->paint(*mCustomGraphicsPainter, rect());
+            auto& invader = pair.second;
+            invader->paint(*mCustomGraphicsPainter, rect());
         }
-
-        if (bIsGameRunning)
-        {
-            for (auto& pair : mInvaders)
-            {
-                auto& invader = pair.second;
-                invader->paint(*mCustomGraphicsPainter, rect());
-            }
-        }
-
-        mCustomGraphicsDevice->SetState(currentState);
-        painter.endNativePainting();
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(painter, rect());
+    mStates.top()->paint(*mCustomGraphicsPainter, rect());
 
+    if (mShowFps)
     {
-        // do a second pass painter using the custom painter.
-        // since we're drawing using the same OpenGL context the
-        // state management is somewhat tricky.
-        painter.beginNativePainting();
-
-        gfx::Device::StateBuffer currentState;
-        mCustomGraphicsDevice->GetState(&currentState);
-        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
-
-        mStates.top()->paintPostEffect(*mCustomGraphicsPainter, rect());
-
-        if (mShowFps)
-        {
-            gfx::DrawTextRect(*mCustomGraphicsPainter, 
-                base::FormatString("FPS: %1", mCurrentfps),            
-                "fonts/ARCADE.TTF", 28,               
-                gfx::FRect(10, 20, 150, 100),
-                gfx::Color::DarkRed,
-                gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
-        }
-
-        mCustomGraphicsDevice->SetState(currentState);
-        painter.endNativePainting();
+        gfx::DrawTextRect(*mCustomGraphicsPainter, 
+            base::FormatString("FPS: %1", mCurrentfps),            
+            "fonts/ARCADE.TTF", 28,               
+            gfx::FRect(10, 20, 150, 100),
+            gfx::Color::DarkRed,
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
 
     mCustomGraphicsDevice->EndFrame();
