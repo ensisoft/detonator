@@ -79,5 +79,13 @@ std::wstring ToUpper(const std::wstring& str)
     return ret;
 }
 
+inline
+std::wstring ToLower(const std::wstring& str)
+{
+    std::wstring ret;
+    for (auto c : str)
+        ret.push_back(std::towlower(c));
+    return ret;
+}
 
 } // base

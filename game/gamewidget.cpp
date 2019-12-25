@@ -69,7 +69,6 @@ namespace invaders
 extern audio::AudioPlayer* g_audio;
 
 const auto LevelUnlockCriteria = 0.85;
-const auto TextBlinkFrameCycle = 90;
 const auto GameCols = 40;
 const auto GameRows = 10;
 
@@ -1801,11 +1800,10 @@ class GameWidget::PlayGame : public GameWidget::State
 {
 public:
     PlayGame(const Game::Setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
-    {
-        mCurrentText = initString();
-    }
+    {}
 
-    virtual void paint(QPainter& painter, const QRect& rect) override
+    virtual void paint(QPainter&, const QRect&) {}
+    virtual void paintPostEffect(gfx::Painter& painter, const QRect& rect) const override
     {
         switch (mState)
         {
@@ -1813,22 +1811,7 @@ public:
                 paintFleet(painter, rect);
                 break;
             case GameState::Playing:
-                {
-                    const auto& layout = GetGameWindowLayout(rect);
-
-                    QPointF top;
-                    QPointF bot;
-
-                    // layout the HUD at the first "game row"
-                    top = layout.MapPoint(QPoint(0, -1));
-                    bot = layout.MapPoint(QPoint(GameCols, 0));
-                    paintHUD(painter, QRectF(top, bot), layout.GetFontSize() / 2);
-
-                    // paint the player at the last "game row"
-                    top = layout.MapPoint(QPoint(0, GameRows));
-                    bot = layout.MapPoint(QPoint(GameCols, GameRows+1));
-                    paintPlayer(painter, QRectF(top, bot), layout.GetFontSize() / 2);
-                }
+                paintHUD(painter, rect);
                 break;
         }
     }
@@ -1871,13 +1854,10 @@ public:
         }
         else if (mState == GameState::Playing)
         {
-            if (mCurrentText == initString())
-                mCurrentText.clear();
-
             if (key == Qt::Key_Backspace)
             {
-                if (!mCurrentText.isEmpty())
-                    mCurrentText.chop(1);
+                if (!mCurrentText.empty())
+                    mCurrentText.pop_back();
             }
             else if (key == Qt::Key_Space)
             {
@@ -1885,14 +1865,14 @@ public:
             }
             else if (key >= 0x41 && key <= 0x5a)
             {
-                mCurrentText.append(key);
-                if (mCurrentText == "BOMB")
+                mCurrentText.push_back(key);
+                if (mCurrentText == L"BOMB")
                 {
                     Game::Bomb bomb;
                     mGame.IgniteBomb(bomb);
                     mCurrentText.clear();
                 }
-                else if (mCurrentText == "WARP")
+                else if (mCurrentText == L"WARP")
                 {
                     Game::Timewarp warp;
                     warp.duration = 4000;
@@ -1907,7 +1887,7 @@ public:
                     // i.e. it's in the middle of the bottom row
                     missile.launch_position_x = 0.5; 
                     missile.launch_position_y = 1.0f;
-                    missile.string  = mCurrentText.toLower().toStdWString();
+                    missile.string  = base::ToLower(mCurrentText);
                     if (mGame.FireMissile(missile))
                         mCurrentText.clear();
                 }
@@ -1920,116 +1900,77 @@ public:
     }
 
 private:
-    void paintFleet(QPainter& painter, const QRect& rect) const
+    void paintFleet(gfx::Painter& painter, const QRect& rect) const
     {
         const auto& enemies = mLevel.GetEnemies();
         const auto cols = 3;
-        const auto rows = (enemies.size() / cols) + 2;
+        const auto rows = (enemies.size() / cols) + 3;
         const GridLayout layout(rect, cols, rows);
 
-        QPen pen;
-        pen.setWidth(1);
-        pen.setColor(Qt::darkGray);
-        painter.setPen(pen);
+        const auto font_size_s = layout.GetFontSize() * 0.15;
+        const auto font_size_l = layout.GetFontSize() * 0.2;
+        const auto header = layout.MapGfxRect(QPoint(0, 0), QPoint(cols, 1));
+        const auto footer = layout.MapGfxRect(QPoint(0, rows-1), QPoint(cols, rows));
 
-        QFont bigFont;
-        bigFont.setFamily("Arcade");
-        bigFont.setPixelSize(layout.GetFontSize() * 0.2);
-        painter.setFont(bigFont);
-
-        QFont smallFont;
-        smallFont.setFamily("Arcade");
-        smallFont.setPixelSize(layout.GetFontSize() * 0.15);
-
-        const auto header = layout.MapRect(QPoint(0, 0), QPoint(cols, 1));
-        const auto footer = layout.MapRect(QPoint(0, rows-1), QPoint(cols, rows));
-
-        painter.drawText(header, Qt::AlignCenter,
-            "Kill the following enemies\n");
+        gfx::DrawTextRect(painter, 
+            "Kill the following enemies\n", 
+            "fonts/ARCADE.TTF", font_size_l, 
+            header, 
+            gfx::Color::DarkGray);
+        gfx::DrawTextRect(painter, 
+            "Press Space to play!",
+            "fonts/ARCADE.TTF", font_size_l,
+            footer, 
+            gfx::Color::DarkGray, 
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
+            gfx::TextProp::Blinking);
 
         for (size_t i=0; i<enemies.size(); ++i)
         {
-            const auto& e   = enemies[i];
-            const auto col  = i % cols;
-            const auto row  = i / cols;
-            const auto rect = layout.MapRect(QPoint(col, row + 1), QPoint(col+1, row+2));
-            painter.setFont(bigFont);
-            painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
-                QString("%1 %2\n\n")
-                .arg(QString::fromStdWString(e.viewstring))
-                .arg(QString::fromStdWString(e.killstring)));
-            painter.setFont(smallFont);
-            painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop,
-                QString("\n\n\n%1").arg(QString::fromStdWString(e.help)));
+            const auto& e = enemies[i];
+            const auto col = i % cols;
+            const auto row = i / cols;
+            const auto& rect = layout.MapGfxRect(QPoint(col, row + 1), QPoint(col + 1, row + 2));
+            gfx::DrawTextRect(painter, 
+                base::FormatString("%1 %2", e.viewstring, e.killstring),
+                "fonts/SourceHanSerifTC-SemiBold.otf", font_size_l, 
+                rect, 
+                gfx::Color::DarkGray, 
+                gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop);
+            gfx::DrawTextRect(painter, 
+                base::ToUtf8(e.help), 
+                "fonts/ARCADE.TTF", font_size_s, 
+                rect, 
+                gfx::Color::DarkGray, 
+                gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
         }
-
-        static unsigned text_blink = 0;
-
-        const bool draw_text = (text_blink % TextBlinkFrameCycle) < (TextBlinkFrameCycle / 2);
-        if (draw_text)
-        {
-            painter.setFont(bigFont);
-            painter.drawText(footer, Qt::AlignCenter, "\n\nPress Space to play!");
-        }
-        ++text_blink;
     }
 
-    void paintHUD(QPainter& painter, const QRectF& rect, unsigned font_size) const
+    void paintHUD(gfx::Painter& painter, const QRect& rect) const
     {
         const auto& score  = mGame.GetScore();
         const auto& result = score.maxpoints ?
             (float)score.points / (float)score.maxpoints * 100 : 0.0;
-        const auto& format = QString("%1").arg(result, 0, 'f', 0);
         const auto bombs   = mGame.GetNumBombs();
         const auto warps   = mGame.GetNumWarps();
 
-        QPen pen;
-        pen.setColor(Qt::darkGreen);
-        pen.setWidth(1);
-        painter.setPen(pen);
-
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(font_size);
-        painter.setFont(font);
-
-        painter.drawText(rect, Qt::AlignCenter,
-            QString("Score %2 (%3%) | Enemies x %4 | Bombs x %5 | Warps x %6 | (F1 for help)")
-                .arg(score.points)
-                .arg(format)
-                .arg(score.pending)
-                .arg(bombs)
-                .arg(warps));
+        const auto& layout = GetGameWindowLayout(rect);
+        const auto font_size = layout.GetFontSize() * 0.5;
+                    
+        gfx::DrawTextRect(painter, 
+            base::FormatString("Score %1 (%2%) / Enemies x %3 / Bombs x %4 / Warps x %5 (F1 for Help)",
+                score.points, (int)result, score.pending, bombs, warps),
+            "fonts/ARCADE.TTF", font_size, 
+            layout.MapGfxRect(QPoint(0, -1), QPoint(GameCols, 0)), 
+            gfx::Color::Gray);
+        gfx::DrawTextRect(painter,
+            mCurrentText.empty() ? "Type the correct pinyin to kill the enemies!" : base::ToUtf8(mCurrentText),
+            "fonts/ARCADE.TTF", font_size,
+            layout.MapGfxRect(QPoint(0, GameRows), QPoint(GameCols, GameRows+1)),
+            gfx::Color::DarkGray, 
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
+            mCurrentText.empty() ? gfx::TextProp::Blinking : 0);
     }
-
-    void paintPlayer(QPainter& painter, const QRectF& rect, unsigned font_size) const
-    {
-        QFont font;
-        font.setFamily("Arcade");
-        font.setPixelSize(font_size);
-        painter.setFont(font);
-
-        QFontMetrics fm(font);
-        const auto width  = fm.width(mCurrentText);
-        const auto height = fm.height();
-
-        // calculate text X, Y (top left)
-        const auto x = rect.x() + ((rect.width() - width) / 2.0);
-        const auto y = rect.y() + ((rect.height() - height) / 2.0);
-
-        QPen pen;
-        pen.setWidth(2);
-        pen.setColor(Qt::darkGray);
-        painter.setPen(pen);
-
-        const QRect rc(QPoint(x, y), QPoint(x + width, y + height));
-        painter.drawRect(rc);
-        painter.drawText(rc, Qt::AlignCenter | Qt::AlignVCenter, mCurrentText);
-    }
-
-    static QString initString()
-    { return "Type the correct pinyin to kill the enemies!"; }
-
 private:
     const Game::Setup mSetup;
     Level& mLevel;
@@ -2040,7 +1981,7 @@ private:
         Playing
     };
     GameState mState = GameState::Prepare;
-    QString mCurrentText;
+    std::wstring mCurrentText;
 };
 
 
