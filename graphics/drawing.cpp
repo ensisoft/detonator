@@ -64,7 +64,7 @@ void DrawTextRect(Painter& painter,
     const bool blinking  = properties & TextProp::Blinking;
 
     buff.AddText(text, font, font_size_px)
-        .SetAlign(va).SetAlign(va).SetUnderline(underline);
+        .SetAlign(va).SetAlign(ha).SetUnderline(underline);
 
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());    
