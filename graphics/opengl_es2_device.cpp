@@ -437,8 +437,9 @@ private:
                     baseFormat = GL_RGBA;
                     break;
                 case Format::Grayscale:
-                    sizeFormat = GL_RED;
-                    baseFormat = GL_RED;
+                    // when sampling R = G = B = 0.0 and A is the alpha value from here.
+                    sizeFormat = GL_ALPHA;
+                    baseFormat = GL_ALPHA;
                     break;
                 default: assert(!"unknown texture format."); break;
             }

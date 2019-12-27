@@ -27,6 +27,6 @@ void main()
     coords = transformed_coords.xy;
 
     vec4 tex = texture2D(kTexture, coords);
-    vec4 col = kBaseColor * tex.r;
+    vec4 col = kBaseColor * tex.a; // use the texture as the alpha mask
     gl_FragColor = pow(col, vec4(kGamma, kGamma, kGamma, kGamma));
 }
