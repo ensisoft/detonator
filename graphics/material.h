@@ -65,14 +65,15 @@ namespace gfx
         // failed to compile.
         virtual Shader* GetShader(Device& device) const = 0;
 
+        struct Environment {
+            bool render_points = false;
+        };
+
         // Apply the material properties in the given program object.
-        virtual void Apply(Device& device, Program& prog) const = 0;
+        virtual void Apply(const Environment& env, Device& device, Program& prog) const = 0;
 
         // Get the material surface type.
         virtual SurfaceType GetSurfaceType() const = 0;
-
-        // Get whether the material is used as material for point sprites.
-        virtual bool IsPointSprite() const = 0;
     protected:
     private:
     };
@@ -101,7 +102,7 @@ namespace gfx
             return s;
         }
         // Apply the material state on the program object.
-        virtual void Apply(Device&, Program& prog) const override
+        virtual void Apply(const Environment& env, Device&, Program& prog) const override
         {
             prog.SetUniform("kColor",
                 mColor.Red(), mColor.Green(), mColor.Blue(),
@@ -114,9 +115,6 @@ namespace gfx
                 return SurfaceType::Transparent;
             return SurfaceType::Opaque;
         }
-        // Should be rendered as points or not?
-        virtual bool IsPointSprite() const override
-        { return false; }
 
         // Set the fill color for the material.
         SolidColor& SetColor(const Color4f color)
@@ -168,7 +166,7 @@ namespace gfx
             return shader;
         }
         // Apply the material state on program object.
-        virtual void Apply(Device& device, Program& prog) const override
+        virtual void Apply(const Environment& env, Device& device, Program& prog) const override
         {
             const auto& name = mSource->GetName();
 
@@ -184,7 +182,7 @@ namespace gfx
             }
 
             prog.SetTexture("kTexture", 0, *texture);
-            prog.SetUniform("kRenderPoints", mRenderPoints ? 1.0f : 0.0f);
+            prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
             prog.SetUniform("kGamma", mGamma);
@@ -200,9 +198,6 @@ namespace gfx
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return mSurfaceType; }
-        // Should be rendered as points or not ?
-        virtual bool IsPointSprite() const override
-        { return mRenderPoints; }
 
         // Set the base color for color modulation.
         // Each channel sampled from the texture is multiplied
@@ -224,14 +219,6 @@ namespace gfx
         TextureMap& SetSurfaceType(SurfaceType type)
         {
             mSurfaceType = type;
-            return *this;
-        }
-
-        // Set this to true if rendering a textured point.
-        // This is useful when for example rendering a particle system.
-        TextureMap& SetRenderPoints(bool value)
-        {
-            mRenderPoints = value;
             return *this;
         }
 
@@ -311,7 +298,6 @@ namespace gfx
     private:
         std::unique_ptr<TextureSource> mSource;        
         SurfaceType mSurfaceType = SurfaceType::Opaque;
-        bool mRenderPoints    = false;
         Color4f mColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float mGamma   = 1.0f;
         FRect mBox = FRect(0.0f, 0.0f, 1.0f, 1.0f);
@@ -354,7 +340,7 @@ namespace gfx
             return shader;
         }
         // Apply the material state on program object.
-        virtual void Apply(Device& device, Program& prog) const override
+        virtual void Apply(const Environment& env, Device& device, Program& prog) const override
         {
             assert(!mTextures.empty() &&
                 "The sprite has no textures and cannot be used to draw.");
@@ -391,9 +377,6 @@ namespace gfx
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
-        // Should be rendered as points or not ? 
-        virtual bool IsPointSprite() const override
-        { return false; }
 
         // Set the desired frame rate per second.
         SpriteSet& SetFps(float fps)
@@ -492,7 +475,7 @@ namespace gfx
             return shader;
         }
         // Apply the material state on program object.
-        virtual void Apply(Device& device, Program& prog) const override
+        virtual void Apply(const Environment& env, Device& device, Program& prog) const override
         {
             assert(!mTexture.empty() &&
                 "The sprite has no texture and cannot be used to draw.");
@@ -539,9 +522,7 @@ namespace gfx
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
-        // Should be rendered as points or not ?
-        virtual bool IsPointSprite() const override
-        { return false; }
+
         // Set the texture identifier/name.
         // Currently the meaning of texture name is a path
         // relative to the current working directory.
@@ -615,7 +596,7 @@ namespace gfx
             return shader;
         }
         // Apply the material state on the program object.
-        virtual void Apply(Device& device, Program& prog) const override
+        virtual void Apply(const Environment& env, Device& device, Program& prog) const override
         {
             const auto hash = mText.GetHash();
             const auto name = std::to_string(hash);
@@ -653,9 +634,6 @@ namespace gfx
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
-        // Should be rendered as points or not ? 
-        virtual bool IsPointSprite() const override
-        { return false; }
 
         // Set the color for the text being rendered.
         // The rasterized text will contain AA alpha mask
@@ -712,7 +690,7 @@ namespace gfx
             return shader;
         }
 
-        virtual void Apply(Device&, Program& prog) const override
+        virtual void Apply(const Environment& env, Device&, Program& prog) const override
         {
             prog.SetUniform("uRuntime", mRuntime);
             prog.SetUniform("kBaseColor", mBaseColor.Red(), mBaseColor.Green(),
@@ -720,9 +698,6 @@ namespace gfx
         }
         virtual SurfaceType GetSurfaceType() const override
         { return SurfaceType::Transparent; }
-
-        virtual bool IsPointSprite() const override
-        { return false; }
 
         MaterialEffect& SetBaseColor(const Color4f& color)
         {

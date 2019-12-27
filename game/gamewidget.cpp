@@ -537,7 +537,6 @@ public:
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
-            .SetRenderPoints(true)
             .SetBaseColor(mColor * 0.8));
     }
 
@@ -877,7 +876,6 @@ public:
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-            .SetRenderPoints(true)
             .SetBaseColor(getJetStreamColor(mShipType)));
 
         t.Reset();
@@ -1311,8 +1309,7 @@ public:
         // then draw the particle engine
         painter.Draw(*mStars, t,
             gfx::TextureMap("textures/RoundParticle.png")
-            .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-            .SetRenderPoints(true));
+            .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
     void update(float dt)

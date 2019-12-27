@@ -79,9 +79,13 @@ public:
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
         const auto& kViewMatrix = transform.GetAsMatrix();
 
+        const auto draw_type = geom->GetDrawType();
+        Material::Environment env;
+        env.render_points = draw_type == Geometry::DrawType::Points,
+
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
-        mat.Apply(*mDevice, *prog);
+        mat.Apply(env, *mDevice, *prog);
 
         const auto draw = geom->GetDrawType();
 
@@ -98,8 +102,8 @@ public:
                 state.blending = Device::State::BlendOp::Additive;
                 break;
         }
-        state.bEnablePointSprite = mat.IsPointSprite();
-        state.bEnablePointSize   = draw == Geometry::DrawType::Points;
+        state.bEnablePointSprite = draw_type == Geometry::DrawType::Points;
+        state.bEnablePointSize   = draw_type == Geometry::DrawType::Points;
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -127,12 +131,16 @@ public:
         state.stencil_dpass    = Device::State::StencilOp::WriteRef;
         state.stencil_ref      = 0;
         state.bWriteColor      = false;
+        state.bEnablePointSprite = maskGeom->GetDrawType() == Geometry::DrawType::Points;
         state.bEnablePointSize = maskGeom->GetDrawType() == Geometry::DrawType::Points;
 
         maskProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         maskProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixMaskShape));
 
-        material.Apply(*mDevice, *maskProg);
+        Material::Environment env;
+        env.render_points = maskGeom->GetDrawType() == Geometry::DrawType::Points;
+
+        material.Apply(env, *mDevice, *maskProg);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
         Geometry* drawGeom = drawShape.Upload(*mDevice);
@@ -155,14 +163,14 @@ public:
                 state.blending = Device::State::BlendOp::Additive;
                 break;
         }
-        state.bEnablePointSprite = material.IsPointSprite();
+        state.bEnablePointSprite = drawGeom->GetDrawType() == Geometry::DrawType::Points;
         state.bEnablePointSize   = drawGeom->GetDrawType() == Geometry::DrawType::Points;
         
+        env.render_points = drawGeom->GetDrawType() == Geometry::DrawType::Points;
+
         drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));        
-        
-        material.Apply(*mDevice, *drawProg);
-
+        material.Apply(env, *mDevice, *drawProg);
         mDevice->Draw(*drawProg, *drawGeom, state);
     }
 
