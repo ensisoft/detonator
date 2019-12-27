@@ -149,20 +149,25 @@ public:
         GLint blue_bits  = 0;
         GLint alpha_bits = 0;
         GLint depth_bits = 0;
+        GLint point_size[2];
         glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
         glGetIntegerv(GL_RED_BITS, &red_bits);
         glGetIntegerv(GL_GREEN_BITS, &green_bits);
         glGetIntegerv(GL_BLUE_BITS, &blue_bits);
         glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
         glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
+        glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size);
 
         INFO("OpenGLESGraphicsDevice");
+        INFO("GL %1 Vendor: %2, %3", 
+            glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
         INFO("Stencil bits: %1", stencil_bits);
         INFO("Red bits: %1", red_bits);
         INFO("Blue bits: %1", blue_bits);
         INFO("Green bits: %1", green_bits);
         INFO("Alpha bits: %1", alpha_bits);
         INFO("Depth bits: %1", depth_bits);
+        INFO("Point size: %1-%2", point_size[0], point_size[1]);
     }
 
     virtual void ClearColor(const Color4f& color) override
@@ -352,9 +357,6 @@ private:
     {
         GL_CHECK(glViewport(state.viewport.GetX(), state.viewport.GetY(),
             state.viewport.GetWidth(), state.viewport.GetHeight()));
-
-        EnableIf(GL_PROGRAM_POINT_SIZE, state.bEnablePointSize);
-        EnableIf(GL_POINT_SPRITE, state.bEnablePointSprite);
 
         switch (state.blending)
         {

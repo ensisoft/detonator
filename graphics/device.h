@@ -42,8 +42,6 @@ namespace gfx
     {
     public:
         struct State {
-            bool bEnablePointSize   = false;
-            bool bEnablePointSprite = false;
             bool bWriteColor = true;
 
             enum class BlendOp {

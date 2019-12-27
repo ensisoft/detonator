@@ -102,8 +102,6 @@ public:
                 state.blending = Device::State::BlendOp::Additive;
                 break;
         }
-        state.bEnablePointSprite = draw_type == Geometry::DrawType::Points;
-        state.bEnablePointSize   = draw_type == Geometry::DrawType::Points;
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -131,8 +129,6 @@ public:
         state.stencil_dpass    = Device::State::StencilOp::WriteRef;
         state.stencil_ref      = 0;
         state.bWriteColor      = false;
-        state.bEnablePointSprite = maskGeom->GetDrawType() == Geometry::DrawType::Points;
-        state.bEnablePointSize = maskGeom->GetDrawType() == Geometry::DrawType::Points;
 
         maskProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         maskProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixMaskShape));
@@ -163,8 +159,6 @@ public:
                 state.blending = Device::State::BlendOp::Additive;
                 break;
         }
-        state.bEnablePointSprite = drawGeom->GetDrawType() == Geometry::DrawType::Points;
-        state.bEnablePointSize   = drawGeom->GetDrawType() == Geometry::DrawType::Points;
         
         env.render_points = drawGeom->GetDrawType() == Geometry::DrawType::Points;
 

@@ -107,6 +107,8 @@ int game_main(int argc, char* argv[])
     app.setApplicationName("Pinyin-Invaders");
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setVersion(2, 0);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
     format.setStencilBufferSize(8);
     format.setSamples(4);
     format.setColorSpace(QSurfaceFormat::sRGBColorSpace);
