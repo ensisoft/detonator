@@ -101,6 +101,7 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/freetype/include")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src/generated")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
 

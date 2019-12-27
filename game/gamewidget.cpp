@@ -27,6 +27,7 @@
 #  include <QtGui/QKeyEvent>
 #  include <QtGui/QVector2D>
 #  include <QtGui/QPainter>
+#  include <QtGui/QOpenGLContext>
 #  include <QApplication>
 #  include <QResource>
 #  include <QFileInfo>
@@ -2426,8 +2427,32 @@ void GameWidget::setMasterUnlock(bool onOff)
 void GameWidget::initializeGL()
 {
     DEBUG("Initialize OpenGL");
+
+    // Context implementation based on widget/context provided by Qt.
+    class WidgetContext : public gfx::Device::Context 
+    {
+    public: 
+        WidgetContext(QOpenGLWidget* widget) : mWidget(widget)
+        {}
+        virtual void Display() override
+        {
+            // No need to implement this, Qt will take care of this
+        }
+        virtual void MakeCurrent() override
+        {
+            // No need to implement this, Qt will take care of this.
+        }
+        virtual void* Resolve(const char* name) override
+        {
+            return (void*)mWidget->context()->getProcAddress(name);             
+        }
+    private:
+        QOpenGLWidget* mWidget = nullptr;
+    };
+
     // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2);
+    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+        std::make_shared<WidgetContext>(this));
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 

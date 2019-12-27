@@ -83,6 +83,37 @@ namespace gfx
             OpenGL_ES2
         };
 
+        // OpenGL graphics context. The context is the interface for the device
+        // to resolve the (possibly context specific) OpenGL entry points.
+        // This abstraction allows the device to remain agnostic as to 
+        // what kind of windowing system/graphics subsystem is creating the context
+        // and what is the ultimate rendering target (pbuffer, fbo, pixmap or window)
+        class Context 
+        {
+        public: 
+            virtual ~Context() = default;
+            // Display the current contents of the rendering target.
+            virtual void Display() = 0;
+            // Make this context as the current context for the
+            // calling thread. 
+            // Note: In OpenGL all the API functions assume
+            // an "implicit" context for the calling thread to be a global
+            // object that is set through the window system integration layer
+            // i.e. through calling some method on  WGL, GLX, EGL or AGL.
+            // So if an application is creating multiple contexts in some thread
+            // before starting to use any particular context it has to be 
+            // made the "current contet". The context contains all the 
+            // OpenGL API state. 
+            virtual void MakeCurrent() = 0;
+            // Resolve an OpenGL API function to a function pointer. 
+            // Note: The function pointers can indeed be different for
+            // different contexts depending on their specific configuration.
+            // Returns a valid pointer or nullptr if there's no such 
+            // function. (For example an extension function is not available).
+            virtual void* Resolve(const char* name) = 0;
+        private:
+        };
+
         virtual ~Device() = default;
 
         virtual void ClearColor(const Color4f& color) = 0;
@@ -115,11 +146,18 @@ namespace gfx
 
         // Prepare the device for the next frame.
         virtual void BeginFrame() = 0;
-        // End redering a frame.
-        virtual void EndFrame() = 0;
+        // End redering a frame. If display is true then this will call
+        // Context::Display as well as a convenience. If you're still
+        // planning to do further rendering/drawing in the same render
+        // surface then you should probably pass false for display.
+        virtual void EndFrame(bool display = true) = 0;
 
+        // Create a rendering device of the requested type. 
+        // Context should be a valid non null context object with the
+        // right version.
+        // Type = OpenGL_ES2, Context 2.0
         static
-        std::shared_ptr<Device> Create(Type type);
+        std::shared_ptr<Device> Create(Type type, std::shared_ptr<Context> context);
     private:
     };
 

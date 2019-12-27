@@ -22,9 +22,7 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <QtGui/QOpenGLFunctions>
-#include "warnpop.h"
+#include <GLES2/gl2.h>
 
 #include <cstdio>
 #include <cassert>
@@ -45,11 +43,11 @@
 #include "texture.h"
 #include "color4f.h"
 
-#define GL_CHECK(x) \
+#define GL_CALL(x) \
     do {                                                                        \
-        x;                                                                      \
+        mGL.x;                                                           \
         {                                                                       \
-            const auto err = glGetError();                                      \
+            const auto err = mGL.glGetError();                           \
             if (err != GL_NO_ERROR) {                                           \
                 std::printf("GL Error 0x%04x '%s' @ %s,%d\n", err, GLEnumToStr(err),  \
                     __FILE__, __LINE__);                                        \
@@ -79,31 +77,9 @@ const char* GLEnumToStr(GLenum eval)
 
         // framebuffer
         CASE(GL_FRAMEBUFFER_COMPLETE);
-        CASE(GL_FRAMEBUFFER_UNDEFINED);
         CASE(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
         CASE(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-        CASE(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
-        CASE(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
         CASE(GL_FRAMEBUFFER_UNSUPPORTED);
-        CASE(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-        CASE(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
-
-        // ARB_debug_output
-        CASE(GL_DEBUG_SOURCE_API_ARB);
-        CASE(GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB);
-        CASE(GL_DEBUG_SOURCE_SHADER_COMPILER_ARB);
-        CASE(GL_DEBUG_SOURCE_THIRD_PARTY_ARB);
-        CASE(GL_DEBUG_SOURCE_APPLICATION_ARB);
-        CASE(GL_DEBUG_SOURCE_OTHER_ARB);
-        CASE(GL_DEBUG_TYPE_ERROR_ARB);
-        CASE(GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB);
-        CASE(GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB);
-        CASE(GL_DEBUG_TYPE_PORTABILITY_ARB);
-        CASE(GL_DEBUG_TYPE_PERFORMANCE_ARB);
-        CASE(GL_DEBUG_TYPE_OTHER_ARB);
-        CASE(GL_DEBUG_SEVERITY_HIGH_ARB);
-        CASE(GL_DEBUG_SEVERITY_MEDIUM_ARB);
-        CASE(GL_DEBUG_SEVERITY_LOW_ARB);
 
         CASE(GL_FRAGMENT_SHADER);
         CASE(GL_VERTEX_SHADER);
@@ -125,23 +101,152 @@ const To* SafeCast(const From* from)
 namespace gfx
 {
 
+// This struct holds the OpenGL ES 2.0 entry points that 
+// we need in this device implementation. 
+// 
+// Few notes about this particular implementation:
+//
+// 1. The pointers are members of an object instead of global
+// function pointers because in fact it's possible that the
+// pointers would change between one context to another context
+// depending on the particular configuration used to create the
+// context. (For example GDI pixel format on windows).
+// So obviously one set of global function pointers would not then
+// work for multiple devices should the function addresses change.
+// 
+// 2. We're not using something like GLEW here because GLEW has a
+// problem in that it doesn't use runtime "get proc" type of function
+// resolution for *all* functions. I.e. it leaves the old functions
+// (back from the OpenGL 1, fixed pipeline age) unresolved and expects
+// them to be exported by the GL library and that the user also then
+// links against -lGL.
+// This however is incorrect in cases where the OpenGL context is 
+// provided by some "virtual context system", e.e libANGLE or Qt's
+// QOpenGLWidget.We do not know the underlying OpenGL implementation
+// and should not know any such details that GLEW would expect us to
+// know. Rather a better way to deal with the problem is to resolve all
+// functions in the same manner.
+struct OpenGLFunctions 
+{
+    PFNGLCREATEPROGRAMPROC           glCreateProgram;
+    PFNGLCREATESHADERPROC            glCreateShader;
+    PFNGLSHADERSOURCEPROC            glShaderSource;
+    PFNGLGETERRORPROC                glGetError;
+    PFNGLCOMPILESHADERPROC           glCompileShader;
+    PFNGLDETACHSHADERPROC            glAttachShader;
+    PFNGLDELETESHADERPROC            glDeleteShader;
+    PFNGLLINKPROGRAMPROC             glLinkProgram;
+    PFNGLUSEPROGRAMPROC              glUseProgram;
+    PFNGLVALIDATEPROGRAMPROC         glValidateProgram;
+    PFNGLDELETEPROGRAMPROC           glDeleteProgram;
+    PFNGLCOLORMASKPROC               glColorMask;
+    PFNGLSTENCILFUNCPROC             glStencilFunc;
+    PFNGLSTENCILOPPROC               glStencilOp;
+    PFNGLCLEARCOLORPROC              glClearColor;
+    PFNGLCLEARPROC                   glClear;
+    PFNGLCLEARSTENCILPROC            glClearStencil;
+    PFNGLCLEARDEPTHFPROC             glClearDepthf;
+    PFNGLBLENDFUNCPROC               glBlendFunc;
+    PFNGLVIEWPORTPROC                glViewport;
+    PFNGLDRAWARRAYSPROC              glDrawArrays;
+    PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
+    PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
+    PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+    PFNGLGETSTRINGPROC               glGetString;
+    PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
+    PFNGLUNIFORM1IPROC               glUniform1i;
+    PFNGLUNIFORM1FPROC               glUniform1f;
+    PFNGLUNIFORM2FPROC               glUniform2f;
+    PFNGLUNIFORM3FPROC               glUniform3f;
+    PFNGLUNIFORM4FPROC               glUniform4f;
+    PFNGLUNIFORM2FVPROC              glUniform2fv;
+    PFNGLUNIFORM3FVPROC              glUniform3fv;
+    PFNGLUNIFORM4FPROC               glUniform4fv;
+    PFNGLUNIFORMMATRIX2FVPROC        glUniformMatrix2fv;
+    PFNGLUNIFORMMATRIX3FVPROC        glUniformMatrix3fv;
+    PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv;
+    PFNGLGETPROGRAMIVPROC            glGetProgramiv;
+    PFNGLGETSHADERIVPROC             glGetShaderiv;
+    PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog;    
+    PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog;
+    PFNGLDELETETEXTURESPROC          glDeleteTextures;
+    PFNGLGENTEXTURESPROC             glGenTextures;
+    PFNGLBINDTEXTUREPROC             glBindTexture;
+    PFNGLACTIVETEXTUREPROC           glActiveTexture;
+    PFNGLGENERATEMIPMAPPROC          glGenerateMipmap;
+    PFNGLTEXIMAGE2DPROC              glTexImage2D;
+    PFNGLTEXPARAMETERIPROC           glTexParameteri;
+    PFNGLPIXELSTOREIPROC             glPixelStorei;
+    PFNGLENABLEPROC                  glEnable;
+    PFNGLDISABLEPROC                 glDisable;
+    PFNGLGETINTEGERVPROC             glGetIntegerv;
+};
+
 //
 // OpenGL ES 2.0 based custom graphics device implementation
 // try to keep this implementantation free of Qt in
 // order to promote portability to possibly emscripten
 // or Qt free implementation.
-class OpenGLES2GraphicsDevice : public Device, protected QOpenGLFunctions
+class OpenGLES2GraphicsDevice : public Device
 {
 public:
-    OpenGLES2GraphicsDevice()
+    OpenGLES2GraphicsDevice(std::shared_ptr<Device::Context> context)
+        : mContext(context)
     {
-        initializeOpenGLFunctions();
-        // it'd make sense to create own context here but the but
-        // problem is that currently we're using Qt widget as the window
-        // and it creates a FBO into which all the rendering is done.
-        // The FBOs are not shareable between contexts so then we'd need
-        // to render to a texture shared between the widget context and
-        // our context.
+    #define RESOLVE(x) mGL.x = reinterpret_cast<decltype(mGL.x)>(mContext->Resolve(#x));
+        RESOLVE(glCreateProgram);
+        RESOLVE(glCreateShader);
+        RESOLVE(glShaderSource);
+        RESOLVE(glGetError);
+        RESOLVE(glCompileShader);
+        RESOLVE(glAttachShader);
+        RESOLVE(glDeleteShader);
+        RESOLVE(glLinkProgram);
+        RESOLVE(glUseProgram);
+        RESOLVE(glValidateProgram);
+        RESOLVE(glDeleteProgram);
+        RESOLVE(glColorMask);
+        RESOLVE(glStencilFunc);
+        RESOLVE(glStencilOp);
+        RESOLVE(glClearColor);
+        RESOLVE(glClear);
+        RESOLVE(glClearStencil);
+        RESOLVE(glClearDepthf);
+        RESOLVE(glBlendFunc);
+        RESOLVE(glViewport);
+        RESOLVE(glDrawArrays);
+        RESOLVE(glGetAttribLocation);
+        RESOLVE(glVertexAttribPointer);
+        RESOLVE(glEnableVertexAttribArray);
+        RESOLVE(glGetString);
+        RESOLVE(glGetUniformLocation);
+        RESOLVE(glUniform1i);
+        RESOLVE(glUniform1f);
+        RESOLVE(glUniform2f);
+        RESOLVE(glUniform3f);
+        RESOLVE(glUniform4f);
+        RESOLVE(glUniform2fv);
+        RESOLVE(glUniform3fv);
+        RESOLVE(glUniform4fv);
+        RESOLVE(glUniformMatrix2fv);
+        RESOLVE(glUniformMatrix3fv);
+        RESOLVE(glUniformMatrix4fv);
+        RESOLVE(glGetProgramiv);
+        RESOLVE(glGetShaderiv);
+        RESOLVE(glGetProgramInfoLog);
+        RESOLVE(glGetShaderInfoLog);
+        RESOLVE(glDeleteTextures);
+        RESOLVE(glGenTextures);
+        RESOLVE(glBindTexture);
+        RESOLVE(glActiveTexture);
+        RESOLVE(glGenerateMipmap);
+        RESOLVE(glTexImage2D);
+        RESOLVE(glTexParameteri);
+        RESOLVE(glPixelStorei);
+        RESOLVE(glEnable);
+        RESOLVE(glDisable);
+        RESOLVE(glGetIntegerv);
+    #undef RESOLVE
 
         GLint stencil_bits = 0;
         GLint red_bits   = 0;
@@ -150,17 +255,19 @@ public:
         GLint alpha_bits = 0;
         GLint depth_bits = 0;
         GLint point_size[2];
-        glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
-        glGetIntegerv(GL_RED_BITS, &red_bits);
-        glGetIntegerv(GL_GREEN_BITS, &green_bits);
-        glGetIntegerv(GL_BLUE_BITS, &blue_bits);
-        glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
-        glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
-        glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size);
+        GL_CALL(glGetIntegerv(GL_STENCIL_BITS, &stencil_bits));
+        GL_CALL(glGetIntegerv(GL_RED_BITS, &red_bits));
+        GL_CALL(glGetIntegerv(GL_GREEN_BITS, &green_bits));
+        GL_CALL(glGetIntegerv(GL_BLUE_BITS, &blue_bits));
+        GL_CALL(glGetIntegerv(GL_ALPHA_BITS, &alpha_bits));
+        GL_CALL(glGetIntegerv(GL_DEPTH_BITS, &depth_bits));
+        GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
 
         INFO("OpenGLESGraphicsDevice");
         INFO("GL %1 Vendor: %2, %3", 
-            glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+            mGL.glGetString(GL_VERSION),
+            mGL.glGetString(GL_VENDOR), 
+            mGL.glGetString(GL_RENDERER));
         INFO("Stencil bits: %1", stencil_bits);
         INFO("Red bits: %1", red_bits);
         INFO("Blue bits: %1", blue_bits);
@@ -172,13 +279,13 @@ public:
 
     virtual void ClearColor(const Color4f& color) override
     {
-        GL_CHECK(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
-        GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
+        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
     }
     virtual void ClearStencil(int value) override
     {
-        GL_CHECK(glClearStencil(value));
-        GL_CHECK(glClear(GL_STENCIL_BUFFER_BIT));
+        GL_CALL(glClearStencil(value));
+        GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
     virtual Shader* FindShader(const std::string& name) override
@@ -191,7 +298,7 @@ public:
 
     virtual Shader* MakeShader(const std::string& name) override
     {
-        auto shader = std::make_unique<ShaderImpl>();
+        auto shader = std::make_unique<ShaderImpl>(mGL);
         auto* ret   = shader.get();
         mShaders[name] = std::move(shader);
         return ret;
@@ -207,7 +314,7 @@ public:
 
     virtual Program* MakeProgram(const std::string& name) override
     {
-        auto program = std::make_unique<ProgImpl>();
+        auto program = std::make_unique<ProgImpl>(mGL);
         auto* ret    = program.get();
         mPrograms[name] = std::move(program);
         return ret;
@@ -223,7 +330,7 @@ public:
 
     virtual Geometry* MakeGeometry(const std::string& name) override
     {
-        auto geometry = std::make_unique<GeomImpl>();
+        auto geometry = std::make_unique<GeomImpl>(mGL);
         auto* ret = geometry.get();
         mGeoms[name] = std::move(geometry);
         return ret;
@@ -239,7 +346,7 @@ public:
 
     virtual Texture* MakeTexture(const std::string& name) override
     {
-        auto texture = std::make_unique<TextureImpl>();
+        auto texture = std::make_unique<TextureImpl>(mGL);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
         return ret;
@@ -302,9 +409,11 @@ public:
             impl->BeginFrame();
         }
     }
-    virtual void EndFrame() override
+    virtual void EndFrame(bool display) override
     { 
         mFrameNumber++; 
+        if (display)
+            mContext->Display();
     }
 
 private:
@@ -312,11 +421,11 @@ private:
     {
         if (on_off)
         {
-            GL_CHECK(glEnable(flag));
+            GL_CALL(glEnable(flag));
         }
         else
         {
-            GL_CHECK(glDisable(flag));
+            GL_CALL(glDisable(flag));
         }
         return on_off;
     }
@@ -355,26 +464,26 @@ private:
 
     void SetState(const State& state)
     {
-        GL_CHECK(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
             state.viewport.GetWidth(), state.viewport.GetHeight()));
 
         switch (state.blending)
         {
             case State::BlendOp::None:
                 {
-                    GL_CHECK(glDisable(GL_BLEND));
+                    GL_CALL(glDisable(GL_BLEND));
                 }
                 break;
             case State::BlendOp::Transparent:
                 {
-                    GL_CHECK(glEnable(GL_BLEND));
-                    GL_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                    GL_CALL(glEnable(GL_BLEND));
+                    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 }
                 break;
             case State::BlendOp::Additive:
                 {
-                    GL_CHECK(glEnable(GL_BLEND));
-                    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE));
+                    GL_CALL(glEnable(GL_BLEND));
+                    GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
                 }
                 break;
         }
@@ -385,40 +494,38 @@ private:
             const auto stencil_fail  = ToGLEnum(state.stencil_fail);
             const auto stencil_dpass = ToGLEnum(state.stencil_dpass);
             const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
-            GL_CHECK(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
-            GL_CHECK(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
         }
         if (state.bWriteColor)
         {
-            GL_CHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
         }
         else
         {
-            GL_CHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         }
     }
 
 private:
-    class TextureImpl : public Texture,  protected QOpenGLFunctions
+    class TextureImpl : public Texture,  protected OpenGLFunctions
     {
     public:
-        TextureImpl()
+        TextureImpl(const OpenGLFunctions& funcs) : mGL(funcs)
         {
-            initializeOpenGLFunctions();
-
-            GL_CHECK(glGenTextures(1, &mName));
+            GL_CALL(glGenTextures(1, &mName));
             DEBUG("New texture object %1 name = %2", (void*)this, mName);
 
             mMinFilter = MinFilter::Mipmap;
             mMagFilter = MagFilter::Linear;
-            GL_CHECK(glActiveTexture(GL_TEXTURE0));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
         ~TextureImpl()
         {
-            GL_CHECK(glDeleteTextures(1, &mName));
+            GL_CALL(glDeleteTextures(1, &mName));
             DEBUG("Deleted texture %1", mName);
         }
 
@@ -446,10 +553,10 @@ private:
                 default: assert(!"unknown texture format."); break;
             }
 
-            GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-            GL_CHECK(glActiveTexture(GL_TEXTURE0));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CHECK(glTexImage2D(GL_TEXTURE_2D,
+            GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexImage2D(GL_TEXTURE_2D,
                 0, // mip level
                 sizeFormat,
                 xres,
@@ -458,24 +565,24 @@ private:
                 baseFormat,
                 GL_UNSIGNED_BYTE,
                 bytes));
-            GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+            GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
             mWidth  = xres;
             mHeight = yres;
         }
         virtual void SetFilter(MinFilter filter) override
         {
             mMinFilter = filter;
-            GL_CHECK(glActiveTexture(GL_TEXTURE0));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getMinFilterAsGLEnum()));
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getMinFilterAsGLEnum()));
         }
 
         virtual void SetFilter(MagFilter filter) override
         {
             mMagFilter = filter;
-            GL_CHECK(glActiveTexture(GL_TEXTURE0));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getMagFilterAsGLEnum()));
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getMagFilterAsGLEnum()));
         }
 
         Texture::MinFilter GetMinFilter() const override
@@ -494,7 +601,7 @@ private:
 
         void bind(GLuint unit)
         {
-            //GL_CHECK(glBindTextureUnit(unit, m_name));
+            //GL_CALL(glBindTextureUnit(unit, m_name));
             //DEBUG("Texture %1 bound to unit %2", m_name, unit);
         }
 
@@ -537,6 +644,8 @@ private:
         { return mEnableGC; }
 
     private:
+        const OpenGLFunctions& mGL;
+
         GLuint mName = 0;
     private:
         MinFilter mMinFilter = MinFilter::Nearest;
@@ -548,13 +657,11 @@ private:
         bool mEnableGC = false;
     };
 
-    class GeomImpl : public Geometry, protected QOpenGLFunctions
+    class GeomImpl : public Geometry, protected OpenGLFunctions
     {
     public:
-        GeomImpl()
-        {
-            initializeOpenGLFunctions();
-        }
+        GeomImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        {}
 
         virtual void SetDrawType(DrawType type) override
         { mDrawType = type; }
@@ -573,78 +680,79 @@ private:
         }
         void Draw(GLuint program)
         {
-            GLint aPosition = glGetAttribLocation(program, "aPosition");
-            GLint aTexCoord = glGetAttribLocation(program, "aTexCoord");
+            GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
+            GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
 
             uint8_t* base = reinterpret_cast<uint8_t*>(&mData[0]);
             if (aPosition != -1)
             {
-                GL_CHECK(glVertexAttribPointer(aPosition, 2, GL_FLOAT, GL_FALSE,
+                GL_CALL(glVertexAttribPointer(aPosition, 2, GL_FLOAT, GL_FALSE,
                     sizeof(Vertex), (void*)(base + offsetof(Vertex, aPosition))));
-                GL_CHECK(glEnableVertexAttribArray(aPosition));
+                GL_CALL(glEnableVertexAttribArray(aPosition));
             }
             if (aTexCoord != -1)
             {
-                GL_CHECK(glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE,
+                GL_CALL(glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE,
                     sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
-                GL_CHECK(glEnableVertexAttribArray(aTexCoord));
+                GL_CALL(glEnableVertexAttribArray(aTexCoord));
             }
             if (mDrawType == DrawType::Triangles)
-                GL_CHECK(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
             else if (mDrawType == DrawType::Points)
-                GL_CHECK(glDrawArrays(GL_POINTS, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_POINTS, 0, mData.size()));
         }
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }        
+    private:
+        const OpenGLFunctions& mGL;
     private:
         std::size_t mFrameNumber = 0;
         std::vector<Vertex> mData;
         DrawType mDrawType = DrawType::Triangles;
     };
 
-    class ProgImpl : public Program, protected QOpenGLFunctions
+    class ProgImpl : public Program, protected OpenGLFunctions
     {
     public:
-        ProgImpl()
-        {
-            initializeOpenGLFunctions();
-        }
+        ProgImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        {}
+
        ~ProgImpl()
         {
             if (mProgram)
             {
-                GL_CHECK(glDeleteProgram(mProgram));
+                GL_CALL(glDeleteProgram(mProgram));
             }
         }
         virtual bool Build(const std::vector<const Shader*>& shaders) override
         {
-            GLuint prog = glCreateProgram();
+            GLuint prog = mGL.glCreateProgram();
             DEBUG("New program %1", prog);
 
             for (const auto* shader : shaders)
             {
-                GL_CHECK(glAttachShader(prog,
+                GL_CALL(glAttachShader(prog,
                     static_cast<const ShaderImpl*>(shader)->GetName()));
             }
-            GL_CHECK(glLinkProgram(prog));
-            GL_CHECK(glValidateProgram(prog));
+            GL_CALL(glLinkProgram(prog));
+            GL_CALL(glValidateProgram(prog));
 
             GLint link_status = 0;
             GLint valid_status = 0;
-            GL_CHECK(glGetProgramiv(prog, GL_LINK_STATUS, &link_status));
-            GL_CHECK(glGetProgramiv(prog, GL_VALIDATE_STATUS, &valid_status));
+            GL_CALL(glGetProgramiv(prog, GL_LINK_STATUS, &link_status));
+            GL_CALL(glGetProgramiv(prog, GL_VALIDATE_STATUS, &valid_status));
 
             GLint length = 0;
-            GL_CHECK(glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &length));
+            GL_CALL(glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &length));
 
             std::string build_info;
             build_info.resize(length);
-            GL_CHECK(glGetProgramInfoLog(prog, length, nullptr, &build_info[0]));
+            GL_CALL(glGetProgramInfoLog(prog, length, nullptr, &build_info[0]));
 
             if ((link_status == 0) || (valid_status == 0))
             {
                 ERROR("Program build error: %1", build_info);
-                GL_CHECK(glDeleteProgram(prog));
+                GL_CALL(glDeleteProgram(prog));
                 return false;
             }
 
@@ -652,8 +760,8 @@ private:
             DEBUG("Program info: %1", build_info);
             if (mProgram)
             {
-                GL_CHECK(glDeleteProgram(mProgram));
-                GL_CHECK(glUseProgram(0));
+                GL_CALL(glDeleteProgram(mProgram));
+                GL_CALL(glUseProgram(0));
             }
             mProgram = prog;
             mVersion++;
@@ -664,64 +772,59 @@ private:
 
         virtual void SetUniform(const char* name, float x) override
         {
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUseProgram(mProgram));
-            GL_CHECK(glUniform1f(ret, x));
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glUniform1f(ret, x));
         }
         virtual void SetUniform(const char* name, float x, float y) override
         {
-            glUseProgram(mProgram);
-
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUseProgram(mProgram));
-            GL_CHECK(glUniform2f(ret, x, y));
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glUniform2f(ret, x, y));
         }
         virtual void SetUniform(const char* name, float x, float y, float z) override
         {
-            glUseProgram(mProgram);
-
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUniform3f(ret, x, y, z));
+            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUniform3f(ret, x, y, z));
         }
         virtual void SetUniform(const char* name, float x, float y, float z, float w) override
         {
-            glUseProgram(mProgram);
-
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUniform4f(ret, x, y, z, w));
+            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUniform4f(ret, x, y, z, w));
         }
         virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
         {
-            glUseProgram(mProgram);
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUniformMatrix2fv(ret, 1, GL_FALSE /* transpose */, (const float*)&matrix));
+            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUniformMatrix2fv(ret, 1, GL_FALSE /* transpose */, (const float*)&matrix));
         }
         virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
         {
-            glUseProgram(mProgram);
-
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUniformMatrix3fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUniformMatrix3fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
         }
         virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
         {
-            glUseProgram(mProgram);
-            auto ret = glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CHECK(glUniformMatrix4fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUniformMatrix4fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
         }
 
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
@@ -729,12 +832,13 @@ private:
             const auto& texture_impl = dynamic_cast<const TextureImpl&>(texture);
             const auto  texture_name = texture_impl.GetName();
 
-            auto ret =  glGetUniformLocation(mProgram, sampler);
+            auto ret =  mGL.glGetUniformLocation(mProgram, sampler);
             if (ret == -1)
                 return;
-            GL_CHECK(glActiveTexture(GL_TEXTURE0 + unit));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, texture_name));
-            GL_CHECK(glUniform1i(ret, unit));
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+            GL_CALL(glUniform1i(ret, unit));
 
             // in OpenGL the expected memory layout of texture data that
             // is given to glTexImage2D doesn't match the "typical" layout
@@ -771,7 +875,7 @@ private:
 
         void SetState() //const
         {
-            GL_CHECK(glUseProgram(mProgram));
+            GL_CALL(glUseProgram(mProgram));
         }
         GLuint GetName() const
         { return mProgram; }
@@ -792,24 +896,26 @@ private:
         { return mFrameNumber; }
 
     private:
+        const OpenGLFunctions& mGL;
+
+    private:
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::vector<TextureImpl*> mFrameTextures;
         std::size_t mFrameNumber = 0;
     };
 
-    class ShaderImpl : public Shader, protected QOpenGLFunctions
+    class ShaderImpl : public Shader, protected OpenGLFunctions
     {
     public:
-        ShaderImpl()
-        {
-            initializeOpenGLFunctions();
-        }
+        ShaderImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        {}
+
        ~ShaderImpl()
         {
             if (mShader)
             {
-                GL_CHECK(glDeleteShader(mShader));
+                GL_CALL(glDeleteShader(mShader));
             }
         }
         virtual bool CompileFile(const std::string& file) override
@@ -839,24 +945,24 @@ private:
             ASSERT(type != GL_NONE);
 
             GLint status = 0;
-            GLint shader = glCreateShader(type);
+            GLint shader = mGL.glCreateShader(type);
             DEBUG("New shader %1 %2", shader, GLEnumToStr(type));
 
             const char* source_ptr = source.c_str();
-            GL_CHECK(glShaderSource(shader, 1, &source_ptr, nullptr));
-            GL_CHECK(glCompileShader(shader));
-            GL_CHECK(glGetShaderiv(shader, GL_COMPILE_STATUS, &status));
+            GL_CALL(glShaderSource(shader, 1, &source_ptr, nullptr));
+            GL_CALL(glCompileShader(shader));
+            GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &status));
 
             GLint length = 0;
-            GL_CHECK(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
+            GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
 
             std::string compile_info;
             compile_info.resize(length);
-            GL_CHECK(glGetShaderInfoLog(shader, length, nullptr, &compile_info[0]));
+            GL_CALL(glGetShaderInfoLog(shader, length, nullptr, &compile_info[0]));
 
             if (status == 0)
             {
-                GL_CHECK(glDeleteShader(shader));
+                GL_CALL(glDeleteShader(shader));
                 ERROR("Shader compile error %1", compile_info);
                 return false;
             }
@@ -868,7 +974,7 @@ private:
 
             if (mShader)
             {
-                GL_CHECK(glDeleteShader(mShader));
+                GL_CALL(glDeleteShader(mShader));
             }
             mShader = shader;
             mVersion++;
@@ -879,6 +985,10 @@ private:
 
         GLuint GetName() const
         { return mShader; }
+
+    private:
+        const OpenGLFunctions& mGL;
+
     private:
         GLuint mShader  = 0;
         GLuint mVersion = 0;
@@ -888,13 +998,16 @@ private:
     std::map<std::string, std::unique_ptr<Shader>> mShaders;
     std::map<std::string, std::unique_ptr<Program>> mPrograms;
     std::map<std::string, std::unique_ptr<Texture>> mTextures;
+    std::shared_ptr<Context> mContext;
     std::size_t mFrameNumber = 0;
+    OpenGLFunctions mGL;
 };
 
 // static
-std::shared_ptr<Device> Device::Create(Type type)
+std::shared_ptr<Device> Device::Create(Type type, 
+    std::shared_ptr<Device::Context> context)
 {
-    return std::make_shared<OpenGLES2GraphicsDevice>();
+    return std::make_shared<OpenGLES2GraphicsDevice>(context);
 }
 
 
