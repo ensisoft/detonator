@@ -263,84 +263,7 @@ public:
 
     virtual Type GetDeviceType() const override
     { return Type::OpenGL_ES2; }
-
-    virtual void GetState(StateBuffer* state) const
-    {
-        auto* fucking_qt_const_failure = const_cast<OpenGLES2GraphicsDevice*>(this);
-
-        NativeState s;
-        fucking_qt_const_failure->glGetIntegerv(GL_BLEND, &s.gl_blend_enabled);
-        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_SRC_RGB,   &s.gl_blend_src_rgb);
-        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_DST_RGB,   &s.gl_blend_dst_rgb);
-        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_SRC_ALPHA, &s.gl_blend_src_alpha);
-        fucking_qt_const_failure->glGetIntegerv(GL_BLEND_DST_ALPHA, &s.gl_blend_dst_alpha);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_TEST, &s.gl_stencil_enabled);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_VALUE_MASK, &s.gl_stencil_mask);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_REF, &s.gl_stencil_ref);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_FUNC, &s.gl_stencil_func);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_FAIL, &s.gl_stencil_fail);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &s.gl_stencil_dpass);
-        fucking_qt_const_failure->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &s.gl_stencil_dfail);
-        fucking_qt_const_failure->glGetIntegerv(GL_COLOR_WRITEMASK, s.gl_color_mask);
-        fucking_qt_const_failure->glGetIntegerv(GL_PROGRAM_POINT_SIZE, &s.gl_point_size_enabled);
-        fucking_qt_const_failure->glGetIntegerv(GL_POINT_SPRITE, &s.gl_point_sprite_enabled);
-        fucking_qt_const_failure->glGetIntegerv(GL_UNPACK_ALIGNMENT, &s.gl_pixel_unpack_alignment);
-
-        state->resize(sizeof(s));
-        std::memcpy(&(*state)[0], &s, sizeof(s));
-        //GL_CHECK((void)0);
-    }
-    virtual void SetState(const StateBuffer& state) override
-    {
-        // there's a bunch of implicit state which should be made explicit
-        // - polygon front face
-        // - stencil test, stencil func
-        // - depth test, depth func
-        // - blend test, blend function
-        // - face culling
-        // - write masks
-        // - scissor, viewport
-        // - etc.
-        //
-        // The problem is that Qt painter restores some of this set
-        // in a call to endNativePainting but not all of this state.
-        // additionally the state managed by Qt can change between
-        // versions.
-        // So really what this means is that the custom device should
-        // be able to deal with state so that the state perceived by Qt
-        // does not change.
-        // This means reading back any state values that we're planning to
-        // change in our drawing, saving them for the duration of custom
-        // drawing and restoring before using Qt to paint again.
-        //
-        // Ok, you might think maybe it'd be easier to just create own context.
-        // And yeah that would (even with share groups for resource sharing)
-        // except that the Qt widget is backed by a FBO and FBOs are not shareable
-        // between contexts. Douh!
-        //
-        // Anyway for the time being we're lazy and just leave most of the state to
-        // "higher powers" and hope that it'd work. Excpect bugs.
-
-        ASSERT(state.size() == sizeof(NativeState));
-        NativeState s;
-        std::memcpy((void*)&s, &state[0], sizeof(NativeState));
-
-        EnableIf(GL_BLEND, s.gl_blend_enabled);
-        glBlendFunc(s.gl_blend_src_rgb,   s.gl_blend_dst_rgb);
-        glBlendFunc(s.gl_blend_src_alpha, s.gl_blend_dst_alpha);
-
-        EnableIf(GL_PROGRAM_POINT_SIZE, s.gl_point_size_enabled);
-        EnableIf(GL_POINT_SPRITE, s.gl_point_sprite_enabled);
-
-        EnableIf(GL_STENCIL_TEST, s.gl_stencil_enabled);
-        glStencilFunc(s.gl_stencil_func, s.gl_stencil_ref, s.gl_stencil_mask);
-        glStencilOp(s.gl_stencil_fail, s.gl_stencil_dfail, s.gl_stencil_dpass);
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, s.gl_pixel_unpack_alignment);
-        glColorMask(s.gl_color_mask[0], s.gl_color_mask[1], s.gl_color_mask[2], s.gl_color_mask[3]);
-
-        GL_CHECK((void)0);
-    }
+    
     virtual void CleanGarbage(size_t max_num_idle_frames) override
     {
         /* not needed atm.
@@ -380,27 +303,6 @@ public:
     }
 
 private:
-    struct NativeState {
-        int gl_blend_src_rgb   = 0;
-        int gl_blend_dst_rgb   = 0;
-        int gl_blend_src_alpha = 0;
-        int gl_blend_dst_alpha = 0;
-        int gl_blend_enabled   = 0;
-        int gl_point_size_enabled = 0;
-        int gl_point_sprite_enabled = 0;
-
-        int gl_stencil_enabled = 0;
-        int gl_stencil_func    = 0;
-        int gl_stencil_ref     = 0;
-        int gl_stencil_mask    = 0;
-        int gl_stencil_fail    = 0;
-        int gl_stencil_dfail   = 0;
-        int gl_stencil_dpass   = 0;
-        int gl_pixel_unpack_alignment = 0;
-
-        int gl_color_mask[4]   = {};
-    };
-
     bool EnableIf(GLenum flag, bool on_off)
     {
         if (on_off)

@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include <memory>
-#include <vector>
 #include <cstdint>
 #include <string>
 
@@ -108,12 +107,6 @@ namespace gfx
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
 
         virtual Type GetDeviceType() const = 0;
-
-        using StateBuffer = std::vector<uint8_t>;
-
-        virtual void GetState(StateBuffer* state) const = 0;
-
-        virtual void SetState(const StateBuffer& state) = 0;
 
         // Delete GPU resources that are no longer being used and that are
         // eligible for garbage collection (i.e. are marked as okay to delete).
