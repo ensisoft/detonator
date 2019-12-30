@@ -196,3 +196,5 @@ target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/g
 
 
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders" 
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/game/dist")
