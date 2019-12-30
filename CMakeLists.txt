@@ -95,7 +95,6 @@ endif()
 message(STATUS "${Boost_INCLUDE_DIRS}")
 message(STATUS "${Boost_LIBRARY_DIRS}")
 
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/game")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/freetype/include")
@@ -152,6 +151,8 @@ add_executable(invaders
     graphics/text.cpp
     third_party/stb/stb_image.c
 )
+target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game")
+
 add_executable(audio_test
     audio/pulseaudio.cpp
     audio/waveout.cpp
@@ -162,6 +163,8 @@ add_executable(audio_test
     base/format.cpp
     base/logging.cpp
 )
+target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
+
 target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(invaders Qt5::Widgets Qt5::OpenGL)
 target_link_libraries(invaders freetype_custom_build)
@@ -185,8 +188,11 @@ endif()
 
 enable_testing()
 add_executable(unit_test_bitmap graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
-add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp base/assert.cpp
-    third_party/stb/stb_image.c)
-add_executable(unit_test graphics/unit_test/unit_test.cpp)
+add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp base/assert.cpp third_party/stb/stb_image.c)
+add_executable(unit_test        graphics/unit_test/unit_test.cpp)
+target_include_directories(unit_test_bitmap PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_image  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+
 
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
