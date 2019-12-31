@@ -745,15 +745,15 @@ class GameWidget::Invader : public GameWidget::Animation
 {
 public:
     struct MyParticleUpdate {
-        void BeginIteration(float dt, float time, const math::Vector2D& bounds) const
+        void BeginIteration(float dt, float time, const glm::vec2& bounds) const
         {}
-        bool Update(gfx::Particle& p, float dt, float time, const math::Vector2D& bounds) const {
+        bool Update(gfx::Particle& p, float dt, float time, const glm::vec2& bounds) const {
             // decrease the size of the particle as it approaches the edge of the
             // particle space.
-            const auto bx = bounds.X();
-            const auto by = bounds.Y();
-            const auto x  = p.pos.X();
-            const auto y  = p.pos.Y();
+            const auto bx = bounds.x;
+            const auto by = bounds.y;
+            const auto x  = p.pos.x;
+            const auto y  = p.pos.y;
             const auto vdm = std::abs(y - (by * 0.5f)); // vertical distance to middle of stream
             const auto fvdm = vdm / (by * 0.5f); // fractional vmd
             const auto hdr = bx * 0.7 + (bx * 0.3 * (1.0f - fvdm)); // horizontal distance required

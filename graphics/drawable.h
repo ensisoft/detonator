@@ -24,6 +24,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec2.hpp>
+#include "warnpop.h"
+
 #include <string>
 #include <vector>
 #include <limits>
@@ -119,8 +123,8 @@ namespace gfx
     };
 
     struct Particle {
-        math::Vector2D pos;
-        math::Vector2D dir;
+        glm::vec2 pos;
+        glm::vec2 dir;
         float pointsize = 1.0f;
         float lifetime  = 0.0f;
     };
@@ -142,24 +146,24 @@ namespace gfx
 
     // wrap particle position around its bounds.
     struct WrapParticleAtBounds {
-        bool Update(Particle& p, const math::Vector2D& bounds) const
+        bool Update(Particle& p, const glm::vec2& bounds) const
         {
             const auto pos = p.pos;
-            const auto x = math::wrap(bounds.X(), 0.0f, pos.X());
-            const auto y = math::wrap(bounds.Y(), 0.0f, pos.Y());
-            p.pos = math::Vector2D(x, y);
+            const auto x = math::wrap(bounds.x, 0.0f, pos.x);
+            const auto y = math::wrap(bounds.y, 0.0f, pos.y);
+            p.pos = glm::vec2(x, y);
             return true;
         }
     };
 
     // clamp particle position to maximum bounds
     struct ClampParticleAtBounds {
-        bool Update(Particle& p, const math::Vector2D& bounds) const
+        bool Update(Particle& p, const glm::vec2& bounds) const
         {
             const auto pos = p.pos;
-            const auto x = math::clamp(0.0f, bounds.X(), pos.X());
-            const auto y = math::clamp(0.0f, bounds.Y(), pos.Y());
-            p.pos = math::Vector2D(x, y);
+            const auto x = math::clamp(0.0f, bounds.x, pos.x);
+            const auto y = math::clamp(0.0f, bounds.y, pos.y);
+            p.pos = glm::vec2(x, y);
             return true;
         }
 
@@ -168,14 +172,14 @@ namespace gfx
     // advice to kill the particle if the current particle position
     // exceeds some defined bounds.
     struct KillParticleAtBounds {
-        bool Update(Particle& p, const math::Vector2D& bounds) const
+        bool Update(Particle& p, const glm::vec2& bounds) const
         {
             const auto pos = p.pos;
-            const auto x = pos.X();
-            const auto y = pos.Y();
-            if (x < 0 || x > bounds.X())
+            const auto x = pos.x;
+            const auto y = pos.y;
+            if (x < 0 || x > bounds.x)
                 return false;
-            if (y < 0 || y > bounds.Y())
+            if (y < 0 || y > bounds.y)
                 return false;
             return true;
         }
@@ -193,9 +197,9 @@ namespace gfx
 
     // no change in particle state.
     struct ParticleIdentity {
-        void BeginIteration(float dt, float time, const math::Vector2D& bounds) const
+        void BeginIteration(float dt, float time, const glm::vec2& bounds) const
         {}
-        bool Update(Particle& p, float dt, float time, const math::Vector2D& bounds) const
+        bool Update(Particle& p, float dt, float time, const glm::vec2& bounds) const
         { return true; }
         void EndIteration() const
         {}
@@ -274,8 +278,8 @@ namespace gfx
                 // in order to use vertex_arary.glsl we need to convert the points to
                 // lower right quadrant coordinates.
                 Vertex v;
-                v.aPosition.x = p.pos.X() / mParams.max_xpos;
-                v.aPosition.y = p.pos.Y() / mParams.max_ypos * -1.0;
+                v.aPosition.x = p.pos.x / mParams.max_xpos;
+                v.aPosition.y = p.pos.y / mParams.max_ypos * -1.0;
                 v.aTexCoord.x = p.pointsize;
                 verts.push_back(v);
             }
@@ -288,7 +292,7 @@ namespace gfx
         {
             mTime += dt;
 
-            const math::Vector2D bounds(mParams.max_xpos, mParams.max_ypos);
+            const glm::vec2 bounds(mParams.max_xpos, mParams.max_ypos);
             ParticleMotionPolicy::BeginIteration(dt, mTime);
             ParticleUpdatePolicy::BeginIteration(dt, mTime, bounds);
 
@@ -341,8 +345,8 @@ namespace gfx
                 Particle p;
                 p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
                 p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
-                p.pos = math::Vector2D(mParams.init_rect_xpos + x, mParams.init_rect_ypos + y);
-                p.dir = math::Vector2D(std::cos(a), std::sin(a));
+                p.pos = glm::vec2(mParams.init_rect_xpos + x, mParams.init_rect_ypos + y);
+                p.dir = glm::vec2(std::cos(a), std::sin(a));
                 p.dir *= v; // baking the velocity in the direction vector.
                 mParticles.push_back(p);
             }
