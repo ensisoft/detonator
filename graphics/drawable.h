@@ -122,103 +122,165 @@ namespace gfx
     private:
     };
 
-    struct Particle {
-        glm::vec2 pos;
-        glm::vec2 dir;
-        float pointsize = 1.0f;
-        float lifetime  = 0.0f;
+    // Particle engine interface. Particle engines implement some kind of
+    // "particle" / n-body simulation where a variable number of small objects 
+    // are simulated or animated in some particular way.
+    class ParticleEngine 
+    {
+    public: 
+        // Destructor
+        virtual ~ParticleEngine() = default;
+        // Update the particle simulation by one step with the current
+        // delta timestep in seconds.
+        virtual void Update(float dt) = 0;
+        // Returns true if the simulation has particles and is still running.
+        virtual bool IsAlive() const = 0;
+        // Restart the simulation if no longer alive.
+        virtual void Restart() = 0;
+        // todo: add more methods as needed. 
+    private:
     };
 
+    // Runtime configurable kinematic particle engine
+    // update policy class for updating the particles
+    // based on the configured parameters of the policy.
+    class DefaultKinematicsParticleUpdatePolicy
+    {
+    public: 
+        // Define the motion of the particle.
+        enum class Motion {
+            // Follow a linear path. 
+            Linear
+        };
+            // Control what happens to the particle when it reaches
+        // the boundary of the simulation.
+        enum class BoundaryPolicy {
+            // Clamp boundary to the boundary value. 
+            // Use case example: Bursts of particles that blow up
+            // and then remain stationary once they land. 
+            Clamp, 
+            // Wraps around the boundary. 
+            // Use case example: never ending star field animation 
+            Wrap, 
+            // Kill the particle at the boundary.
+            Kill
+        };
 
-    // simulate simple linear particle movement into the direction
-    // of the particle's direction vector
-    struct LinearParticleMovement {
-        void BeginIteration(float dt, float time) const
-        {}
-        bool Update(Particle& p, float dt, float time) const
+        inline void BeginIteration(float dt, float time) const
+        { /* intentionally empty */ }
+        inline void EndIteration() const 
+        { /* intentionally empty */ }
+
+        // If the particle is still considered to be alive then
+        // update the properties of the particle and return false.
+        // Otherwise return false to indicate that the particle has
+        // expired and should be expunged.
+        template<typename Particle> inline
+        bool Update(Particle& p, float dt, float time, const glm::vec2& bounds) const 
         {
-            p.pos = p.pos + p.dir * dt;
-            return true;
-        }
-        void EndIteration() const
-        {}
-    };
+            const auto p0 = p.position;
+            
+            // update change in position
+            if (mMotion == Motion::Linear) 
+                p.position += (p.direction * dt);
 
-    // wrap particle position around its bounds.
-    struct WrapParticleAtBounds {
-        bool Update(Particle& p, const glm::vec2& bounds) const
-        {
-            const auto pos = p.pos;
-            const auto x = math::wrap(bounds.x, 0.0f, pos.x);
-            const auto y = math::wrap(bounds.y, 0.0f, pos.y);
-            p.pos = glm::vec2(x, y);
-            return true;
-        }
-    };
+            const auto& p1 = p.position;
+            const auto& dp = p1 - p0;
+            const auto dist = dp.length();
 
-    // clamp particle position to maximum bounds
-    struct ClampParticleAtBounds {
-        bool Update(Particle& p, const glm::vec2& bounds) const
-        {
-            const auto pos = p.pos;
-            const auto x = math::clamp(0.0f, bounds.x, pos.x);
-            const auto y = math::clamp(0.0f, bounds.y, pos.y);
-            p.pos = glm::vec2(x, y);
-            return true;
-        }
-
-    };
-
-    // advice to kill the particle if the current particle position
-    // exceeds some defined bounds.
-    struct KillParticleAtBounds {
-        bool Update(Particle& p, const glm::vec2& bounds) const
-        {
-            const auto pos = p.pos;
-            const auto x = pos.x;
-            const auto y = pos.y;
-            if (x < 0 || x > bounds.x)
+            // update change in size with respect to time.
+            p.pointsize += (dt * dSdT);
+            // update change in size with respect to distance 
+            p.pointsize += (dist * dSdD);
+            if (p.pointsize <= 0.0f)
                 return false;
-            if (y < 0 || y > bounds.y)
-                return false;
+
+            // boundary conditions.
+            if (mBoundaryPolicy == BoundaryPolicy::Wrap) 
+            {
+                p.position.x = math::wrap(bounds.x, 0.0f, p.position.x);
+                p.position.y = math::wrap(bounds.y, 0.0f, p.position.y);
+            }
+            else if (mBoundaryPolicy == BoundaryPolicy::Clamp)
+            {
+                p.position.x = math::clamp(0.0f, bounds.x, p.position.x);
+                p.position.y = math::clamp(0.0f, bounds.y, p.position.y);
+            }
+            else if (mBoundaryPolicy == BoundaryPolicy::Kill)
+            {
+                if (p.position.x < 0.0f || p.position.x > bounds.x)
+                    return false;
+                else if (p.position.y < 0.0f || p.position.y > bounds.y)
+                    return false;
+            }
             return true;
         }
+        
+        void SetGrowthWithRespectToTime(float rate)
+        { dSdT = rate; }
+        void SetGrowthWithRespectToDistance(float rate)
+        { dSdD = rate; }
+
+        void SetMotion(Motion m) 
+        { mMotion = m; }
+        void SetBoundaryPolicy(BoundaryPolicy p)
+        { mBoundaryPolicy = p; }
+
+    protected:
+        // no virtual destruction dynamically through this type
+        ~DefaultKinematicsParticleUpdatePolicy() {}
+    private:
+        Motion mMotion = Motion::Linear;
+        BoundaryPolicy mBoundaryPolicy = BoundaryPolicy::Wrap;
+        // rate of change with respect to unit of time.
+        float dSdT = 0.0f;
+        // rate of change with respect to unit of distance 
+        // travelled.
+        float dSdD = 0.0f;
     };
 
-    // kill particle if its lifetime exceeds the current engine time.
-    struct KillParticleAtLifetime {
-        bool Update(Particle& p, float dt, float time) const
-        {
-            if (time >= p.lifetime)
-                return false;
-            return true;
-        }
-    };
-
-    // no change in particle state.
-    struct ParticleIdentity {
-        void BeginIteration(float dt, float time, const glm::vec2& bounds) const
-        {}
-        bool Update(Particle& p, float dt, float time, const glm::vec2& bounds) const
-        { return true; }
-        void EndIteration() const
-        {}
-    };
-
-    template<typename ParticleMotionPolicy   = LinearParticleMovement,
-             typename ParticleBoundsPolicy   = WrapParticleAtBounds,
-             typename ParticleUpdatePolicy   = ParticleIdentity,
-             typename ParticleLifetimePolicy = KillParticleAtLifetime>
-    class TParticleEngine : public Drawable,
-                            public ParticleMotionPolicy,
-                            public ParticleBoundsPolicy,
-                            public ParticleUpdatePolicy,
-                            public ParticleLifetimePolicy
+    // KinematicsParticleEngine implements particle simulation
+    // based on pure motion without reference to the forces
+    // or the masses acting upon the particles.
+    template<typename ParticleUpdatePolicy = DefaultKinematicsParticleUpdatePolicy>
+    class TKinematicsParticleEngine : public Drawable,
+                                      public ParticleEngine,
+                                      public ParticleUpdatePolicy
     {
     public:
+        struct Particle {
+            // The current particle position in simulation space.
+            glm::vec2 position;
+            // The current direction of travel in simulation space
+            // times velocity. 
+            glm::vec2 direction;
+            // The current particle point size.
+            float pointsize = 1.0f;
+            // The expected lifetime of the particle.
+            float lifetime  = 0.0f;
+            // The current distance travelled in simulation units.
+            float distance  = 0.0f;
+        };
+
+        // Control when to spawn particles.
+        enum SpawnPolicy {
+            // Spawn only once the initial number of particles
+            // and then no more particles.
+            Once,
+            // Maintain a fixed number of particles in the
+            // simulation spawning new particles as old ones die.
+            Maintain, 
+            // Continuously spawn new particles on every update
+            // of the simulation. Todo: maybe this should be rate limited
+            // i.e. num of particles per second. 
+            Continuous
+        };
+
         // initial engine configuration params
         struct Params {
+            SpawnPolicy mode = SpawnPolicy::Maintain;
             // the number of particles this engine shall create
+            // the behaviour of this parameter depends on the spawn mode.
             std::size_t num_particles = 100;
             // maximum particle lifetime
             float min_lifetime = 0.0f;
@@ -244,14 +306,14 @@ namespace gfx
             // min max points sizes.
             float min_point_size = 1.0f;
             float max_point_size = 1.0f;
-            // whether to spawn new particles to replace the ones killed.
-            bool respawn = true;
         };
 
-        TParticleEngine(const Params& init) : mParams(init)
+        TKinematicsParticleEngine(const Params& init) : mParams(init)
         {
             InitParticles(mParams.num_particles);
         }
+
+        // Drawable implementation. Compile the shader.
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("vertex_array.glsl");
@@ -265,6 +327,7 @@ namespace gfx
             return shader;
 
         }
+        // Drawable implementation. Upload particles to the device.
         virtual Geometry* Upload(Device& device) const override
         {
             Geometry* geom = device.FindGeometry("particle-buffer");
@@ -278,9 +341,9 @@ namespace gfx
                 // in order to use vertex_arary.glsl we need to convert the points to
                 // lower right quadrant coordinates.
                 Vertex v;
-                v.aPosition.x = p.pos.x / mParams.max_xpos;
-                v.aPosition.y = p.pos.y / mParams.max_ypos * -1.0;
-                v.aTexCoord.x = p.pointsize;
+                v.aPosition.x = p.position.x / mParams.max_xpos;
+                v.aPosition.y = p.position.y / mParams.max_ypos * -1.0;
+                v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize : 0.0f;
                 verts.push_back(v);
             }
 
@@ -288,68 +351,82 @@ namespace gfx
             geom->SetDrawType(Geometry::DrawType::Points);
             return geom;
         }
-        void Update(float dt /*seconds */)
+
+        // ParticleEngine implementation. Update the particle simulation.
+        virtual void Update(float dt) override
         {
             mTime += dt;
 
             const glm::vec2 bounds(mParams.max_xpos, mParams.max_ypos);
-            ParticleMotionPolicy::BeginIteration(dt, mTime);
-            ParticleUpdatePolicy::BeginIteration(dt, mTime, bounds);
+            
+            ParticleUpdatePolicy::BeginIteration(dt, mTime);
 
             // update each particle
             for (size_t i=0; i<mParticles.size();)
             {
-                auto& p = mParticles[i];
+                // countdown to end of lifetime
+                mParticles[i].lifetime -= dt;
 
-                // if any particle policy returns false we kill the particle.
-                if (!ParticleMotionPolicy::Update(p, dt, mTime) ||
-                    !ParticleUpdatePolicy::Update(p, dt, mTime, bounds) ||
-                    !ParticleBoundsPolicy::Update(p, bounds) ||
-                    !ParticleLifetimePolicy::Update(p, dt, mTime))
+                if (mParticles[i].lifetime > 0.0f &&
+                    ParticleUpdatePolicy::Update(mParticles[i], dt, mTime, bounds))
                 {
-                    const auto last = mParticles.size() - 1;
-                    std::swap(mParticles[i], mParticles[last]);
-                    mParticles.pop_back();
+                    ++i;
                     continue;
                 }
-                ++i;
+                KillParticle(i);
             }
-            ParticleMotionPolicy::EndIteration();
+
             ParticleUpdatePolicy::EndIteration();
 
-            if (mParams.respawn)
-            {
-                const auto num_should_have = mParams.num_particles;
-                const auto num_have = mParticles.size();
-                const auto num_needed = num_should_have - num_have;
-                InitParticles(num_needed);
-            }
+            // Spawn new particles if needed.
+            if (mParams.mode == SpawnPolicy::Maintain)
+                InitParticles(mParams.num_particles - mParticles.size());
+            else if (mParams.mode == SpawnPolicy::Continuous) 
+                InitParticles(mParams.num_particles);
         }
-        bool HasParticles() const
+
+        // ParticleEngine implementation. 
+        virtual bool IsAlive() const override
         { return !mParticles.empty(); }
 
-        size_t NumParticlesAlive() const
-        { return mParticles.size(); }
+        // ParticleEngine implementation. Restart the simulation
+        // with the previous parameters if possible to do so.
+        virtual void Restart() override
+        {
+            if (!mParticles.empty())
+                return;
+            if (mParams.mode != SpawnPolicy::Once)
+                return;
+            InitParticles(mParams.num_particles);
+            mTime = 0.0f;
+        }
 
     private:
         void InitParticles(size_t num)
         {
             for (size_t i=0; i<num; ++i)
             {
-                const auto v = math::rand(mParams.min_velocity, mParams.max_velocity);
-                const auto x = math::rand(0.0f, mParams.init_rect_width);
-                const auto y = math::rand(0.0f, mParams.init_rect_height);
-                const auto a = math::rand(0.0f, mParams.direction_sector_size) +
+                const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
+                const auto initx = math::rand(0.0f, mParams.init_rect_width);
+                const auto inity = math::rand(0.0f, mParams.init_rect_height);
+                const auto angle = math::rand(0.0f, mParams.direction_sector_size) +
                    mParams.direction_sector_start_angle;
 
                 Particle p;
                 p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
                 p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
-                p.pos = glm::vec2(mParams.init_rect_xpos + x, mParams.init_rect_ypos + y);
-                p.dir = glm::vec2(std::cos(a), std::sin(a));
-                p.dir *= v; // baking the velocity in the direction vector.
+                p.position  = glm::vec2(mParams.init_rect_xpos + initx, mParams.init_rect_ypos + inity);
+                // note that the velocity vector is baked into the 
+                // direction vector in order to save space.
+                p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
                 mParticles.push_back(p);
             }
+        }
+        void KillParticle(size_t i)
+        {
+            const auto last = mParticles.size() - 1;
+            std::swap(mParticles[i], mParticles[last]);
+            mParticles.pop_back();            
         }
     private:
         const Params mParams;
@@ -358,6 +435,6 @@ namespace gfx
         std::vector<Particle> mParticles;
     };
 
-    using ParticleEngine = TParticleEngine<>;
+    using KinematicsParticleEngine = TKinematicsParticleEngine<>;
 
 } // namespace

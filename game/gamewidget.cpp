@@ -60,6 +60,8 @@
 namespace invaders
 {
 
+using ParticleEngine = gfx::KinematicsParticleEngine;
+
 extern audio::AudioPlayer* g_audio;
 
 const auto LevelUnlockCriteria = 0.85;
@@ -485,10 +487,6 @@ private:
 class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
-    using ParticleEngine = gfx::TParticleEngine<
-        gfx::LinearParticleMovement,
-        gfx::KillParticleAtBounds>;
-
     Sparks(const QVector2D& position, float start, float lifetime)
         : mStartTime(start)
         , mLifeTime(lifetime)
@@ -506,7 +504,7 @@ public:
         params.max_point_size = 2.0f;
         params.min_velocity = 200.0f;
         params.max_velocity = 300.0f;
-        params.respawn = false;
+        params.mode = ParticleEngine::SpawnPolicy::Once;
         mParticles = std::make_unique<ParticleEngine>(params);
     }
     virtual bool update(float dt) override
@@ -744,32 +742,6 @@ private:
 class GameWidget::Invader : public GameWidget::Animation
 {
 public:
-    struct MyParticleUpdate {
-        void BeginIteration(float dt, float time, const glm::vec2& bounds) const
-        {}
-        bool Update(gfx::Particle& p, float dt, float time, const glm::vec2& bounds) const {
-            // decrease the size of the particle as it approaches the edge of the
-            // particle space.
-            const auto bx = bounds.x;
-            const auto by = bounds.y;
-            const auto x  = p.pos.x;
-            const auto y  = p.pos.y;
-            const auto vdm = std::abs(y - (by * 0.5f)); // vertical distance to middle of stream
-            const auto fvdm = vdm / (by * 0.5f); // fractional vmd
-            const auto hdr = bx * 0.7 + (bx * 0.3 * (1.0f - fvdm)); // horizontal distance required
-            const auto fd  = x / hdr; // fractional distance
-            p.pointsize = 40.0f - (fd * 40.0f);
-            return true;
-        }
-        void EndIteration() {}
-    };
-
-    using ParticleEngine = gfx::TParticleEngine<
-        gfx::LinearParticleMovement,
-        gfx::KillParticleAtBounds,
-        MyParticleUpdate,
-        gfx::KillParticleAtLifetime>;
-
     enum class ShipType {
         Slow,
         Fast,
@@ -843,15 +815,16 @@ public:
             params.init_rect_height = jetScaledHeight;
             params.max_xpos = jetScaledWidth;
             params.max_ypos = jetScaledHeight;
-            params.num_particles = 30;
+            params.num_particles = 2;
             params.min_velocity = 100.0f;
             params.max_velocity = 150.0f;
-            params.min_point_size = 40.0f;
-            params.max_point_size = 40.0f;
+            params.min_point_size = 20.0f;
+            params.max_point_size = 30.0f;
             params.direction_sector_start_angle = 0.0f;
             params.direction_sector_size = 0.0f;
-            params.respawn = true;
+            params.mode = ParticleEngine::SpawnPolicy::Continuous;
             mParticles = std::make_unique<ParticleEngine>(params);
+            mParticles->SetGrowthWithRespectToTime(-20.0f);
         }
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
@@ -1274,7 +1247,7 @@ class GameWidget::Background
 public:
     Background(const QVector2D& direction)
     {
-        gfx::ParticleEngine::Params params;
+        ParticleEngine::Params params;
         params.init_rect_width  = 1024;
         params.init_rect_height = 1024;
         params.max_xpos = 1024;
@@ -1286,7 +1259,7 @@ public:
         params.max_point_size = 8.0f;
         params.direction_sector_start_angle = std::acos(direction.x());
         params.direction_sector_size = 0.0f;
-        mStars = std::make_unique<gfx::ParticleEngine>(params);
+        mStars = std::make_unique<ParticleEngine>(params);
     }
     void paint(gfx::Painter& painter, const QRectF& rect)
     {
@@ -1318,7 +1291,7 @@ public:
         mStars->Update(dt/1000.0f);
     }
 private:
-    std::unique_ptr<gfx::ParticleEngine> mStars;
+    std::unique_ptr<ParticleEngine> mStars;
 };
 
 class GameWidget::Scoreboard : public GameWidget::State
