@@ -26,11 +26,12 @@
 
 #include <vector>
 #include <string>
-#include <cmath>
-#include <cassert>
 #include <chrono>
 #include <memory>
 #include <stdexcept>
+#include <functional> // for hash
+#include <cmath>
+#include <cassert>
 
 #include "base/utility.h"
 #include "bitmap.h"
@@ -145,13 +146,40 @@ namespace gfx
     class TextureMap : public Material
     {
     public:
+        // Abstract interface for acquiring the actual texture data.
+        class TextureSource
+        {
+        public: 
+            virtual ~TextureSource() = default;
+            // Get the name for the texture. This is expected to be unique
+            // and is used to map the source to a device texture resource.
+            virtual std::string GetName() const = 0;
+            // Generate or load the data as a bitmap. 
+            virtual std::shared_ptr<IBitmap> GetData() const = 0;
+        private:
+        };
+
         // Construct with the given texture name.
         // The texture name currently indicates a texture filename
         // relative to the current workig directory.
         TextureMap(const std::string& texture)
-        { 
-            mSource = std::make_unique<FileSource>(texture);
-        }
+            : mSource(new FileSource(texture))
+        {}
+
+        template<typename T>
+        TextureMap(const Bitmap<T>& bitmap) 
+            : mSource(new BitmapSource<T>(bitmap))
+        {}
+        template<typename T>
+        TextureMap(Bitmap<T>&& bitmap) 
+            : mSource(new BitmapSource<T>(std::move(bitmap)))
+        {}
+
+        // Construct from a custom texture source.
+        TextureMap(std::unique_ptr<TextureSource> source) 
+            : mSource(std::move(source))
+        {}
+
         // Get/Create the corresponding shader object.
         virtual Shader* GetShader(Device& device) const override
         {
@@ -261,14 +289,6 @@ namespace gfx
         }
 
     private:
-        // Abstract interface for acquiring the actual texture data.
-        class TextureSource
-        {
-        public: 
-            virtual ~TextureSource() = default;
-            virtual std::string GetName() const = 0;
-            virtual std::unique_ptr<IBitmap> GetData() const = 0;
-        };
         // Source texture data from an image file.
         class FileSource : public TextureSource
         {
@@ -278,23 +298,60 @@ namespace gfx
             {}
             virtual std::string GetName() const override
             { return mFilename; }
-            virtual std::unique_ptr<IBitmap> GetData() const override
+            virtual std::shared_ptr<IBitmap> GetData() const override
             {
                 Image file(mFilename);
                 if (file.GetDepthBits() == 8)
-                    return std::make_unique<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
+                    return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
                 else if (file.GetDepthBits() == 24)
-                    return std::make_unique<RgbBitmap>(file.AsBitmap<RGB>());
+                    return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
                 else if (file.GetDepthBits() == 32)
-                    return std::make_unique<RgbaBitmap>(file.AsBitmap<RGBA>());
+                    return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
                 else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits())); 
                 return nullptr;
             }
         private:
             const std::string mFilename;
         };
-        // todo: implement a class template for allowing
-        // for user defined types to be used as texture sources
+        template<typename T>
+        class BitmapSource : public TextureSource
+        {
+        public:
+            BitmapSource(const Bitmap<T>& bmp) : mBitmap(new Bitmap<T>(bmp))
+            {}
+            BitmapSource(Bitmap<T>&& bmp) : mBitmap(new Bitmap<T>(std::move(bmp)))
+            {}
+            virtual std::string GetName() const override
+            { 
+                // generate a name for the bitmap based on the contents.
+                if (!mName.empty())
+                    return mName;
+                
+                const auto w = mBitmap->GetWidth();
+                const auto h = mBitmap->GetHeight();
+                std::size_t hash_value = 0;
+                for (size_t y=0; y<h; ++y) 
+                {
+                    for (size_t x=0; x<w; ++x) 
+                    {
+                        const auto& pixel = mBitmap->GetPixel(y, x);
+                        static_assert(sizeof(pixel) <= sizeof(std::uint32_t), 
+                            "pixel doesn't fit in an 32bit integer");
+                        std::uint32_t value = 0;
+                        std::memcpy(&value, (const void*)&pixel, sizeof(pixel));
+                        hash_value ^= std::hash<std::uint32_t>()(value);
+                    }
+                }
+                mName = std::to_string(hash_value);
+                return mName;
+            }
+            virtual std::shared_ptr<IBitmap> GetData() const 
+            { return mBitmap; }
+        private:
+            std::string mName;
+            std::shared_ptr<Bitmap<T>> mBitmap;
+        };
+            
     private:
         std::unique_ptr<TextureSource> mSource;        
         SurfaceType mSurfaceType = SurfaceType::Opaque;
