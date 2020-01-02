@@ -1,0 +1,18 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
+    <file>16x16_ico_png/log_warning.png</file>
+    <file>16x16_ico_png/log_error.png</file>
+    <file>16x16_ico_png/log_info.png</file>
+
+    <file>16x16_ico_png/app_exit.png</file>    
+    <file>16x16_ico_png/app_next_window.png</file>    
+    <file>16x16_ico_png/app_prev_window.png</file>    
+    <file>16x16_ico_png/app_close_window.png</file>        
+
+    <file>32x32_ico_png/log_empty.png</file>
+    <file>32x32_ico_png/tool_move.png</file>
+    <file>32x32_ico_png/tool_scale.png</file>
+    <file>32x32_ico_png/tool_rotate.png</file>
+  </qresource>
+</RCC>
