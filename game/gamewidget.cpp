@@ -340,8 +340,8 @@ public:
     virtual bool update(float dt) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
-        mX = math::wrap(1.0f, -0.2f, mX + d.x());
-        mY = math::wrap(1.0f, -0.2f, mY + d.y());
+        mX = math::wrap(-0.2f, 1.0f, mX + d.x());
+        mY = math::wrap(-0.2f, 1.0f, mY + d.y());
         return true;
     }
     virtual void paint(gfx::Painter& painter, const QRect& rect) override
@@ -672,7 +672,7 @@ public:
         for (auto& p : mParticles)
         {
             p.pos += p.dir * (dt / 4500.0);
-            p.alpha = math::clamp(0.0, p.alpha - (dt / 3000.0), 1.0);
+            p.alpha = math::clamp(0.0, 1.0, p.alpha - (dt / 3000.0));
             p.angle += ((M_PI * 2) * (dt / 2000.0) * p.rotation_coefficient);
         }
 
@@ -1074,8 +1074,8 @@ public:
         mPosition += (dt / 10000.0) * fuzzy;
         const auto x = mPosition.x();
         const auto y = mPosition.y();
-        mPosition.setX(math::wrap(1.0f, 0.0f, x));
-        mPosition.setY(math::wrap(1.0f, 0.0f, y));
+        mPosition.setX(math::wrap(0.0f, 1.0f, x));
+        mPosition.setY(math::wrap(0.0f, 1.0f, y));
         return true;
     }
 
@@ -1464,11 +1464,11 @@ public:
         {
             if (mCurrentRowIndex == 0)
             {
-                mCurrentProfileIndex = math::wrap(numProfilesMax, numProfilesMin, mCurrentProfileIndex - 1);
+                mCurrentProfileIndex = math::wrap(numProfilesMin, numProfilesMax, mCurrentProfileIndex - 1);
             }
             else
             {
-                mCurrentLevelIndex = math::wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex -1);
+                mCurrentLevelIndex = math::wrap(numLevelsMin, numLevelsMax, mCurrentLevelIndex -1);
             }
             bPlaySound = true;
         }
@@ -1476,21 +1476,21 @@ public:
         {
             if (mCurrentRowIndex == 0)
             {
-                mCurrentProfileIndex = math::wrap(numProfilesMax, numProfilesMin,  mCurrentProfileIndex + 1);
+                mCurrentProfileIndex = math::wrap(numProfilesMin, numProfilesMax,  mCurrentProfileIndex + 1);
             }
             else
             {
-                mCurrentLevelIndex = math::wrap(numLevelsMax, numLevelsMin, mCurrentLevelIndex + 1);
+                mCurrentLevelIndex = math::wrap(numLevelsMin, numLevelsMax, mCurrentLevelIndex + 1);
             }
             bPlaySound = true;
         }
         else if (key == Qt::Key_Up)
         {
-            mCurrentRowIndex = math::wrap(1, 0, mCurrentRowIndex - 1);
+            mCurrentRowIndex = math::wrap(0, 1, mCurrentRowIndex - 1);
         }
         else if (key == Qt::Key_Down)
         {
-            mCurrentRowIndex = math::wrap(1, 0, mCurrentRowIndex + 1);
+            mCurrentRowIndex = math::wrap(0, 1, mCurrentRowIndex + 1);
         }
 
         if (bPlaySound && mPlaySounds)

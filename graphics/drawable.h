@@ -198,8 +198,8 @@ namespace gfx
             // boundary conditions.
             if (mBoundaryPolicy == BoundaryPolicy::Wrap) 
             {
-                p.position.x = math::wrap(bounds.x, 0.0f, p.position.x);
-                p.position.y = math::wrap(bounds.y, 0.0f, p.position.y);
+                p.position.x = math::wrap(0.0f, bounds.x, p.position.x);
+                p.position.y = math::wrap(0.0f, bounds.y, p.position.y);
             }
             else if (mBoundaryPolicy == BoundaryPolicy::Clamp)
             {

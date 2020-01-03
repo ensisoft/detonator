@@ -130,7 +130,7 @@ namespace math
     }
 
     template<typename T> inline
-    T wrap(T max, T min, T val)
+    T wrap(T min, T max, T val)
     {
         if (val > max)
             return min;
@@ -140,7 +140,7 @@ namespace math
     }
 
     template<typename T> inline
-    T clamp(T min, T val, T max)
+    T clamp(T min, T max, T val)
     {
         if (val < min)
             return min;
