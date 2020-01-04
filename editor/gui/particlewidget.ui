@@ -1,0 +1,874 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ParticleWidget</class>
+ <widget class="QWidget" name="ParticleWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1093</width>
+    <height>842</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Particle System</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/32x32_ico_png/particle.png</normaloff>:/32x32_ico_png/particle.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Particle system</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="title">
+           <string>Material</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>Texture</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string>Color</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="browseTexture">
+             <property name="text">
+              <string>Browse ...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="filename">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="color_widgets::ColorSelector" name="color"/>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="surfaceType">
+             <item>
+              <property name="text">
+               <string>Opaque</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Transparent</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Emissive</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_25">
+             <property name="text">
+              <string>Type</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="transform">
+          <property name="title">
+           <string>Transform</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="translateX">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Y pos</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="scaleX">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>X pos</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDoubleSpinBox" name="rotation">
+             <property name="wrapping">
+              <bool>true</bool>
+             </property>
+             <property name="minimum">
+              <double>-180.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>180.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Height</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="scaleY">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Width</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>Rotation</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="translateY">
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QPushButton" name="plus90">
+               <property name="text">
+                <string>+ 90°</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="minus90">
+               <property name="text">
+                <string>- 90°</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="resetTransform">
+               <property name="text">
+                <string>Reset</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="gui::GfxWidget" name="widget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Time</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="curTime">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Particles</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="curNumParticles">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="groupBox_5">
+          <property name="title">
+           <string>Simulation</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Width</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>At boundary</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" colspan="2">
+            <widget class="QComboBox" name="boundary">
+             <item>
+              <property name="text">
+               <string>Clamp</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Wrap</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Kill</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Motion</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" colspan="2">
+            <widget class="QComboBox" name="motion">
+             <item>
+              <property name="text">
+               <string>Linear</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Height</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="simWidth">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="simHeight">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Spawning</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>When</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="when">
+               <item>
+                <property name="text">
+                 <string>Once</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Maintain</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Continuous</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Num</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="numParticles">
+               <property name="maximum">
+                <number>16000</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="initRect">
+             <property name="title">
+              <string>Inside this rectangle</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_3">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>X pos</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Y pos</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="initX">
+                <property name="minimum">
+                 <double>-1000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="initY">
+                <property name="minimum">
+                 <double>-99.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="initWidth">
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="initHeight">
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="dirSector">
+             <property name="title">
+              <string>Direction sector</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Start angle</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Size angle</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="dirStartAngle">
+                <property name="minimum">
+                 <double>-180.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>180.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="dirSizeAngle">
+                <property name="maximum">
+                 <double>360.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>360.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="title">
+           <string>Per particle properties (min/max)</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="2" column="2">
+              <widget class="QSpinBox" name="maxPointsize">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>10</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Velocity</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Lifetime</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Pointsize</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="minVelocity">
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QDoubleSpinBox" name="maxVelocity">
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="minLifetime">
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QDoubleSpinBox" name="maxLifetime">
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+               <property name="value">
+                <double>10.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="minPointsize">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="growth">
+          <property name="title">
+           <string>Systemic rates of particle growth</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_26">
+             <property name="text">
+              <string>Per unit time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="timeDerivative">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>Per unit dist</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="distDerivative">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionPlay">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play</string>
+   </property>
+   <property name="shortcut">
+    <string>Return</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/stop.png</normaloff>:/32x32_ico_png/stop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/pause.png</normaloff>:/32x32_ico_png/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pause</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>filename</tabstop>
+  <tabstop>browseTexture</tabstop>
+  <tabstop>surfaceType</tabstop>
+  <tabstop>transform</tabstop>
+  <tabstop>translateX</tabstop>
+  <tabstop>translateY</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>rotation</tabstop>
+  <tabstop>plus90</tabstop>
+  <tabstop>minus90</tabstop>
+  <tabstop>resetTransform</tabstop>
+  <tabstop>simWidth</tabstop>
+  <tabstop>simHeight</tabstop>
+  <tabstop>motion</tabstop>
+  <tabstop>boundary</tabstop>
+  <tabstop>when</tabstop>
+  <tabstop>numParticles</tabstop>
+  <tabstop>initRect</tabstop>
+  <tabstop>initX</tabstop>
+  <tabstop>initY</tabstop>
+  <tabstop>initWidth</tabstop>
+  <tabstop>initHeight</tabstop>
+  <tabstop>dirSector</tabstop>
+  <tabstop>dirStartAngle</tabstop>
+  <tabstop>dirSizeAngle</tabstop>
+  <tabstop>minVelocity</tabstop>
+  <tabstop>maxVelocity</tabstop>
+  <tabstop>minLifetime</tabstop>
+  <tabstop>maxLifetime</tabstop>
+  <tabstop>minPointsize</tabstop>
+  <tabstop>maxPointsize</tabstop>
+  <tabstop>growth</tabstop>
+  <tabstop>timeDerivative</tabstop>
+  <tabstop>distDerivative</tabstop>
+  <tabstop>curTime</tabstop>
+  <tabstop>curNumParticles</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../resource/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

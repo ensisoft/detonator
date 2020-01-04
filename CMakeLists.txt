@@ -141,12 +141,18 @@ add_executable(Editor
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
+    graphics/drawing.cpp
+    graphics/opengl_es2_device.cpp
+    graphics/painter.cpp
+    graphics/text.cpp
+    third_party/stb/stb_image.c
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
     editor/app/format.h
     editor/app/utility.h
     editor/app/utility.cpp
+    editor/gui/gfxwidget.h
     editor/gui/mainwidget.h
     editor/gui/mainwindow.h
     editor/gui/mainwindow.cpp
@@ -155,16 +161,25 @@ add_executable(Editor
     editor/gui/eventwidget.h
     editor/gui/eventwidget.cpp
     editor/gui/eventwidget.ui
+    editor/gui/particlewidget.h
+    editor/gui/particlewidget.cpp
+    editor/gui/particlewidget.ui
     editor/resource/resource.qrc)
 
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL)
-target_link_libraries(Editor ${COLOR_WIDGETS_LIBRARY})
+target_link_libraries(Editor ColorWidgets-qt5)
+target_link_libraries(Editor freetype_custom_build)
+target_link_libraries(Editor harfbuzz_custom_build)
 if (UNIX)
     target_link_libraries(Editor ncurses)
 endif()
+install(TARGETS Editor DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders" 
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 add_executable(invaders
     game/level.cpp

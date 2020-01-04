@@ -403,6 +403,8 @@ namespace gfx
             InitParticles(mParams.num_particles);
             mTime = 0.0f;
         }
+        size_t GetNumParticlesAlive() const 
+        { return mParticles.size(); }
 
     private:
         void InitParticles(size_t num)

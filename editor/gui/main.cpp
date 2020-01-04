@@ -42,6 +42,7 @@
 #include "app/utility.h"
 #include "settings.h"
 #include "eventwidget.h"
+#include "particlewidget.h"
 #include "mainwindow.h"
 
 void copyright()
@@ -115,6 +116,10 @@ int main(int argc, char* argv[])
         // main widgets.
         gui::MainWindow window(settings);
     
+        // only one editor window for particles for now.
+        gui::ParticleEditorWidget particles;
+        window.attachPermanentWidget(&particles);
+
         // Event widget
         gui::EventWidget events;
         window.attachPermanentWidget(&events);
