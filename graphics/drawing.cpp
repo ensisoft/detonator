@@ -77,11 +77,14 @@ void DrawRectOutline(Painter& painter,
     const FRect& rect,
     const Color4f& color,
     float line_width,
-    float opacity,
     float rotation)
 {
+    const float alpha = color.Alpha();
+
     DrawRectOutline(painter, rect, 
-        SolidColor(color).SetOpacity(opacity).EnableTransparency(true), 
+        SolidColor(color).SetSurfaceType(alpha == 1.0f 
+            ? Material::SurfaceType::Opaque 
+            : Material::SurfaceType::Transparent),
         line_width, rotation);
 }
 

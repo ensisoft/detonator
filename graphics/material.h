@@ -111,11 +111,7 @@ namespace gfx
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
-        {
-            if (mTransparency)
-                return SurfaceType::Transparent;
-            return SurfaceType::Opaque;
-        }
+        { return mType; }
 
         // Set the fill color for the material.
         SolidColor& SetColor(const Color4f color)
@@ -130,14 +126,14 @@ namespace gfx
         }
 
         // Enable/Disable transparency.
-        SolidColor& EnableTransparency(bool on_off)
+        SolidColor& SetSurfaceType(SurfaceType type)
         { 
-            mTransparency = on_off; 
+            mType = type;
             return *this;
         }
     private:
         Color4f mColor;
-        bool mTransparency = false;
+        SurfaceType mType = SurfaceType::Opaque;
     };
 
     // This material will map the given texture onto the
@@ -434,7 +430,7 @@ namespace gfx
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
-        { return SurfaceType::Transparent; }
+        { return mType; }
 
         // Set the desired frame rate per second.
         SpriteSet& SetFps(float fps)
@@ -469,11 +465,19 @@ namespace gfx
             mColor = color;
             return *this;
         }
+
+        SpriteSet& SetSurfaceType(SurfaceType type)
+        {
+            mType = type;
+            return *this;
+        }
+        
     private:
         std::vector<std::string> mTextures;
         float mRuntime = 0;
         float mFps = 1.0f;
         Color4f mColor = Color::White;
+        SurfaceType mType = SurfaceType::Transparent; // likely to be alpha blended
     };
 
 
@@ -579,7 +583,7 @@ namespace gfx
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
-        { return SurfaceType::Transparent; }
+        { return mType; }
 
         // Set the texture identifier/name.
         // Currently the meaning of texture name is a path
@@ -621,12 +625,19 @@ namespace gfx
             mColor = color;
             return *this;
         }
+
+        SpriteMap& SetSurfaceType(SurfaceType type)
+        {
+            mType = type;
+            return *this;
+        }
     private:
         std::string mTexture;
         std::vector<Frame> mFrames;
         float mRuntime = 0.0f;
         float mFps = 1.0f;
         Color4f mColor = Color::White;
+        SurfaceType mType = SurfaceType::Transparent;
     };
 
     // This material will use the given text buffer object to

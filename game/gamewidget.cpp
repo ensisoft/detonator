@@ -1530,7 +1530,7 @@ private:
         const auto outline_color = hilite ? 
             (info.locked ? gfx::Color::DarkRed : gfx::Color::DarkGreen) : gfx::Color::DarkGray;    
 
-        gfx::DrawRectOutline(painter, rect, outline_color, 4, 0.7f); 
+        gfx::DrawRectOutline(painter, rect, gfx::Color4f(outline_color, 0.7f), 4);
         gfx::DrawTextRect(painter, 
             base::FormatString("Level %1\n%2\n%3", index + 1, level->GetName(), text),
             "fonts/ARCADE.TTF", font_size,
