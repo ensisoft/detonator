@@ -194,6 +194,8 @@ namespace gfx
             p.pointsize += (dist * dSdD);
             if (p.pointsize <= 0.0f)
                 return false;
+            // accumulate distance approximation
+            p.distance += dist;
 
             // boundary conditions.
             if (mBoundaryPolicy == BoundaryPolicy::Wrap) 
