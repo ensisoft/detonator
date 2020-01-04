@@ -154,13 +154,16 @@ void MainWindow::loadState()
     mUI.actionViewToolbar->setChecked(show_toolbar);
     mUI.actionViewStatusbar->setChecked(show_statbar);
 
+    bool success = true;
+
+    // load the currently attached widgets. These should all be
+    // Permanent widgets, i.e. added in the main function and live
+    // on the stack.
     for (std::size_t i=0; i<mWidgets.size(); ++i)
     {
         const auto text = mWidgets[i]->objectName();
-        Q_ASSERT(!text.isEmpty());
         const auto icon = mWidgets[i]->windowIcon();
-        //const auto info = mWidgets[i]->getInformation();
-        const auto show = mSettings.getValue("window_visible_tabs", text, true);
+        const auto show = mSettings.getValue("VisibleTabs", text, true);
         if (show)
         {
             const auto title = mWidgets[i]->windowTitle();
@@ -169,18 +172,10 @@ void MainWindow::loadState()
         if (i < mActions.size())
             mActions[i]->setChecked(show);
 
-        mWidgets[i]->loadState(mSettings);
+        DEBUG("Loading widget '%1'", text);
+        success |= mWidgets[i]->loadState(mSettings);
     }
-
-
-    bool success = true;
-
-    for (auto* widget : mWidgets)
-    {
-        DEBUG("Loading widget '%1'", widget->windowTitle());
-
-        success |= widget->loadState(mSettings);
-    }
+    
     if (!success)
     {
         QMessageBox msg(this);
@@ -545,14 +540,21 @@ bool MainWindow::saveState()
     mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
     mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());    
  
-    for (const auto* widget : mWidgets)
+    // actions only goes as count as permanent widgets go.
+    for (size_t i=0; i<mActions.size(); ++i)
     {
-        if (widget->property("permanent").toBool())
+        const bool visible   = mActions[i]->isChecked();
+        const bool permanent = mWidgets[i]->property("permanent").toBool();
+        if (permanent) 
         {
-            DEBUG("Saving widget '%1'", widget->windowTitle());
-            success |= widget->saveState(mSettings);
+            DEBUG("Saving widget '%1'", mWidgets[i]->windowTitle());
+            mSettings.setValue("VisibleTabs", mWidgets[i]->objectName(), visible);
+            success |= mWidgets[i]->saveState(mSettings);
+            continue;
         }
-
+        // todo: 
+        // for transient widgets generate a unique state file where
+        // they can persist their state and then load on next run.
     }
     return success;
 }
