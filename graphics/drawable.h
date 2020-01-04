@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <glm/vec2.hpp>
+#  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -186,16 +187,16 @@ namespace gfx
 
             const auto& p1 = p.position;
             const auto& dp = p1 - p0;
-            const auto dist = dp.length();
+            const auto  dd = glm::length(dp);
 
             // update change in size with respect to time.
             p.pointsize += (dt * dSdT);
             // update change in size with respect to distance 
-            p.pointsize += (dist * dSdD);
+            p.pointsize += (dd * dSdD);
             if (p.pointsize <= 0.0f)
                 return false;
             // accumulate distance approximation
-            p.distance += dist;
+            p.distance += dd;
 
             // boundary conditions.
             if (mBoundaryPolicy == BoundaryPolicy::Wrap) 
