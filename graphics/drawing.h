@@ -68,14 +68,17 @@ void DrawTextRect(Painter& painter,
 
 // Draw the outline of a rectangle. the rectangle is defined in pixels
 // and positioned relative to the top left corer of the render target/surface.
+// If rotation is non-zero the rect is first rotated *then* translated.
 void DrawRectOutline(Painter&,
     const FRect& rect, 
     const Color4f& color,
     float line_width, 
-    float opacity = 1.0f);
+    float opacity = 1.0f, 
+    float rotation = 0.0f);
 void DrawRectOutline(Painter&,
     const FRect& rect, 
     const Material& material, 
-    float line_width);
+    float line_width, 
+    float rotation = 0.0f);
 
 } // namespace

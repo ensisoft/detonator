@@ -77,17 +77,19 @@ void DrawRectOutline(Painter& painter,
     const FRect& rect,
     const Color4f& color,
     float line_width,
-    float opacity)
+    float opacity,
+    float rotation)
 {
     DrawRectOutline(painter, rect, 
         SolidColor(color).SetOpacity(opacity).EnableTransparency(true), 
-        line_width);
+        line_width, rotation);
 }
 
 void DrawRectOutline(Painter& painter, 
     const FRect& rect, 
     const Material& material,
-    float line_width)
+    float line_width, 
+    float rotation)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -96,15 +98,41 @@ void DrawRectOutline(Painter& painter,
 
     Transform outline_transform;
     outline_transform.Resize(width, height);
-    outline_transform.MoveTo(x, y);
+    if (rotation > 0.0f)  // todo: some delta value ?
+    {
+        outline_transform.Translate(-width*0.5, -height*0.5);
+        outline_transform.Rotate(rotation);
+        outline_transform.Translate(width*0.5, height*0.5);
+    }
+
+    outline_transform.Translate(x, y);
 
     Transform mask_transform;
-    mask_transform.Resize(width - 2 * line_width, height - 2 * line_width);
-    mask_transform.MoveTo(x + line_width, y + line_width);
+    const auto mask_width  = width - 2 * line_width;
+    const auto mask_height = height - 2 * line_width;
+    mask_transform.Resize(mask_width, mask_height);
+    if (rotation > 0.0f) // todo: some delta value check ?
+    {
+        mask_transform.Translate(-mask_width *0.5, -mask_height * 0.5);
+        mask_transform.Rotate(rotation);
+        mask_transform.Translate(mask_width * 0.5, mask_height * 0.5);
+    }
+
+    mask_transform.Translate(x + line_width, y + line_width);
+
+    // todo: if the stencil buffer is not multisampled this 
+    // could produce some aliasing artifacts if there's a rotational
+    // component in the transformation. Not sure if a better way to 
+    // draw the outline then would be to just draw lines. 
+    // However the line rasterization leaves the gaps at the end where
+    // the lines meet which becomes clearly visible at higher 
+    // line widths. One possible solution could be to use 
+    // NV_path_rendering (when available) or then manually fill
+    // the line gaps with quads.
+
     painter.DrawMasked(
         Rectangle(), outline_transform,
         Rectangle(), mask_transform, 
         material);
-
 }
 } // namespace
