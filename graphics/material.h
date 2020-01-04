@@ -430,6 +430,7 @@ namespace gfx
             prog.SetUniform("kBlendCoeff", coeff);
             prog.SetUniform("kBaseColor", mColor.Red(), mColor.Green(),
                 mColor.Blue(), mColor.Alpha());
+            prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
         }
         // Get material surface type.
         virtual SurfaceType GetSurfaceType() const override
