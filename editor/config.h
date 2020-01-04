@@ -35,3 +35,7 @@
 #ifdef POSIX_OS
   #define LINUX_OS
 #endif
+
+#ifdef POSIX_OS
+  #define BASE_LOGGING_ENABLE_CURSES
+#endif
