@@ -42,8 +42,11 @@ namespace gui
             : mSettings(organization, application)
         {}
 
+        // Get a value from the settings object under the specific key 
+        // under a specific module. If the module/key pair doesn't exist
+        // then the default value is returned.
         template<typename T>
-        T get(const QString& module, const QString& key, const T& defaultValue) const
+        T getValue(const QString& module, const QString& key, const T& defaultValue) const
         {
             const auto& value = mSettings.value(module + "/" + key);
             if (!value.isValid())
@@ -51,13 +54,16 @@ namespace gui
             return qvariant_cast<T>(value);
         }
 
+        // Set a value in the settings object under the specific key
+        // under a specific module. 
         template<typename T>
-        void set(const QString& module, const QString& key, const T& value)
+        void setValue(const QString& module, const QString& key, const T& value)
         {
             mSettings.setValue(module + "/" + key, value);
         }
 
-        void set(const QString& module, const QTableView* table)
+        // Save the UI state of a widget.
+        void saveWidget(const QString& module, const QTableView* table)
         {
             const auto* model  = table->model();
             const auto objName = table->objectName();
@@ -67,34 +73,35 @@ namespace gui
             {
                 const auto& key = QString("%1_column_%2").arg(objName).arg(i);
                 const auto width = table->columnWidth(i);
-                set(module, key, width);
+                setValue(module, key, width);
             }
             if (table->isSortingEnabled())
             {
                 const QHeaderView* header = table->horizontalHeader();
                 const auto sortColumn = header->sortIndicatorSection();
                 const auto sortOrder  = header->sortIndicatorOrder();
-                set(module, objName + "/sort_column", sortColumn);
-                set(module, objName + "/sort_order", sortOrder);
+                setValue(module, objName + "/sort_column", sortColumn);
+                setValue(module, objName + "/sort_order", sortOrder);
             }
         }
 
-        void set(const QString& module, const QCheckBox* chk)
+        // Save the UI state of a widget.
+        void saveWidget(const QString& module, const QCheckBox* chk)
         {
-            set(module, chk->objectName(), chk->isChecked());
+            setValue(module, chk->objectName(), chk->isChecked());
         }
-
-        void set(const QString& module, const QSplitter* splitter)
+        // Save the UI state of a widget.
+        void saveWidget(const QString& module, const QSplitter* splitter)
         {
-            set(module, splitter->objectName(), splitter->saveState());
+            setValue(module, splitter->objectName(), splitter->saveState());
         }
-
-        void get(const QString& module, QSplitter* splitter) const
+        // Load the UI state of a widget.
+        void loadWidget(const QString& module, QSplitter* splitter) const
         {
-            splitter->restoreState(get(module, splitter->objectName(), splitter->saveState()));
+            splitter->restoreState(getValue(module, splitter->objectName(), splitter->saveState()));
         }
-
-        void get(const QString& module, QTableView* table) const
+        // Load the UI state of a widget.
+        void loadWidget(const QString& module, QTableView* table) const
         {
             const auto* model  = table->model();
             const auto objName = table->objectName();
@@ -103,23 +110,23 @@ namespace gui
             for (int i=0; i<numCols-1; ++i)
             {
                 const auto& key  = QString("%1_column_%2").arg(objName).arg(i);
-                const auto width = get(module, key, table->columnWidth(i));
+                const auto width = getValue(module, key, table->columnWidth(i));
                 table->setColumnWidth(i, width);
             }
             if (table->isSortingEnabled())
             {
                 const QHeaderView* header = table->horizontalHeader();
-                const auto column = get(module, objName + "/sort_column",
+                const auto column = getValue(module, objName + "/sort_column",
                     (int)header->sortIndicatorSection());
-                const auto order = get(module, objName + "/sort_order",
+                const auto order = getValue(module, objName + "/sort_order",
                     (int)header->sortIndicatorOrder());
                 table->sortByColumn(column,(Qt::SortOrder)order);
             }
         }
-
-        void get(const QString& module, QCheckBox* chk) const
+        // Load the UI state of a widget.
+        void loadWidget(const QString& module, QCheckBox* chk) const
         {
-            const bool value = get<bool>(module, chk->objectName(), false);
+            const bool value = getValue<bool>(module, chk->objectName(), false);
             chk->setChecked(value);
         }
 

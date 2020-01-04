@@ -135,10 +135,10 @@ void MainWindow::closeWidget(MainWidget* widget)
 
 void MainWindow::loadState()
 {
-    const auto xdim = mSettings.get("MainWindow", "width",  width());
-    const auto ydim = mSettings.get("MainWindow", "height", height());
-    const auto xpos = mSettings.get("MainWindow", "xpos", x());
-    const auto ypos = mSettings.get("MainWindow", "ypos", y());
+    const auto xdim = mSettings.getValue("MainWindow", "width",  width());
+    const auto ydim = mSettings.getValue("MainWindow", "height", height());
+    const auto xpos = mSettings.getValue("MainWindow", "xpos", x());
+    const auto ypos = mSettings.getValue("MainWindow", "ypos", y());
 
     QDesktopWidget desktop;
     const auto screen = desktop.availableGeometry();
@@ -147,8 +147,8 @@ void MainWindow::loadState()
 
     resize(xdim, ydim);
 
-    const auto show_statbar = mSettings.get("window", "show_statusbar", true);
-    const auto show_toolbar = mSettings.get("window", "show_toolbar", true);
+    const auto show_statbar = mSettings.getValue("MainWindow", "show_statusbar", true);
+    const auto show_toolbar = mSettings.getValue("MainWindow", "show_toolbar", true);
     mUI.mainToolBar->setVisible(show_toolbar);
     mUI.statusbar->setVisible(show_statbar);
     mUI.actionViewToolbar->setChecked(show_toolbar);
@@ -160,7 +160,7 @@ void MainWindow::loadState()
         Q_ASSERT(!text.isEmpty());
         const auto icon = mWidgets[i]->windowIcon();
         //const auto info = mWidgets[i]->getInformation();
-        const auto show = mSettings.get("window_visible_tabs", text, true);
+        const auto show = mSettings.getValue("window_visible_tabs", text, true);
         if (show)
         {
             const auto title = mWidgets[i]->windowTitle();
@@ -538,12 +538,12 @@ bool MainWindow::saveState()
 {
     bool success = true;
 
-    mSettings.set("MainWindow", "width", width());
-    mSettings.set("MainWindow", "height", height());
-    mSettings.set("MainWindow", "xpos", x());
-    mSettings.set("MainWindow", "ypos", y());
-    mSettings.set("window", "show_toolbar", mUI.mainToolBar->isVisible());
-    mSettings.set("window", "show_statusbar", mUI.statusbar->isVisible());    
+    mSettings.setValue("MainWindow", "width", width());
+    mSettings.setValue("MainWindow", "height", height());
+    mSettings.setValue("MainWindow", "xpos", x());
+    mSettings.setValue("MainWindow", "ypos", y());
+    mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
+    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());    
  
     for (const auto* widget : mWidgets)
     {
