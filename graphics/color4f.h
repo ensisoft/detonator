@@ -60,12 +60,12 @@ namespace gfx
             mAlpha = math::clamp(0, 255, alpha) / 255.0f;
         }
 
-        Color4f(Color c)
+        Color4f(Color c, float alpha = 1.0f)
           : mRed(0.0f)
           , mGreen(0.0f)
           , mBlue(0.0f)
-          , mAlpha(1.0f)
         {
+            mAlpha = math::clamp(0.0f, 1.0f, alpha);
             switch (c)
             {
                 case Color::White:
