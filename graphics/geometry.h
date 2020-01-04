@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include <cstddef>
+#include <vector>
 
 namespace gfx
 {
@@ -56,6 +57,12 @@ namespace gfx
         virtual void SetDrawType(DrawType type) = 0;
         // Update the geometry object's data buffer contents.
         virtual void Update(const Vertex* verts, std::size_t count) = 0;
+        // Update the geometry objects' data buffer contents 
+        // with the given vector of data.
+        virtual void Update(const std::vector<Vertex>& verts) = 0;
+        // Update the geoemtry object's data buffer contents
+        // by moving the contents of verts into geometry object.
+        virtual void Update(std::vector<Vertex>&& verts) = 0;
     private:
     };
 } // namespace

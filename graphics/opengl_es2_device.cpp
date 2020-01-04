@@ -678,6 +678,15 @@ private:
                 mData[i] = verts[i];
             }
         }
+        virtual void Update(const std::vector<Vertex>& verts) override
+        {
+            mData = verts;
+        }
+        virtual void Update(std::vector<Vertex>&& verts) override
+        {
+            mData = std::move(verts);
+        }
+        
         void Draw(GLuint program)
         {
             GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");

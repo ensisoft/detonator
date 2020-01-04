@@ -350,7 +350,7 @@ namespace gfx
                 verts.push_back(v);
             }
 
-            geom->Update(&verts[0], verts.size());
+            geom->Update(std::move(verts));
             geom->SetDrawType(Geometry::DrawType::Points);
             return geom;
         }
