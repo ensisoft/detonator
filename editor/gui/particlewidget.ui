@@ -460,6 +460,9 @@
                <property name="stepType">
                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                </property>
+               <property name="value">
+                <double>100.000000000000000</double>
+               </property>
               </widget>
              </item>
             </layout>
