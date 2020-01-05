@@ -815,7 +815,7 @@ public:
             params.init_rect_height = jetScaledHeight;
             params.max_xpos = jetScaledWidth;
             params.max_ypos = jetScaledHeight;
-            params.num_particles = 2;
+            params.num_particles = 200;
             params.min_velocity = 100.0f;
             params.max_velocity = 150.0f;
             params.min_point_size = 20.0f;
