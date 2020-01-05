@@ -1,0 +1,5 @@
+Atari Font is a Arcade font that was created by Genshichi Yasui in 2008. It was added to FontSpace on Apr 18, 2008
+
+Atari Font is a bitmap font, which means that it is best displayed at 20pt (points) — need help?
+
+Atari Font is licensed as Freeware, which means it is 100% free for both personal use and commercial use.

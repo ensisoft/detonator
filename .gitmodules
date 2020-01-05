@@ -1,0 +1,3 @@
+[submodule "wdk"]
+	path = wdk
+	url = https://github.com/ensisoft/wdk

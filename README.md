@@ -43,6 +43,7 @@ Building from source for Linux
 
 ```
   $ git clone https://github.com/ensisoft/pinyin-invaders
+  $ git submodule init
   $ cd pinyin-invaders
   $ mkdir dist
   $ cd dist
@@ -54,6 +55,7 @@ Building from source for Linux
 3. Debug the game / enable console logging
 ```
   $ git clone https://github.com/ensisoft/pinyin-invaders
+  $ git submodule init
   $ cd pinyin-invaders
   $ mkdir dist_d
   $ cd dist_d
@@ -81,6 +83,7 @@ https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-
 ```
   $ set PATH=%PATH%;c:\Qt\Qt5.11.3\5.11.3\msvc2015_64\bin
   $ git clone https://github.com/ensisoft/pinyin-invaders
+  $ git submodule init
   $ cd pinyin-invaders
   $ mkdir dist
   $ cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Release ..
