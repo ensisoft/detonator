@@ -247,77 +247,6 @@ void MainWindow::showWindow()
 }
 
 
-void MainWindow::showWidget(const QString& title)
-{
-    const auto it = std::find_if(std::begin(mWidgets), std::end(mWidgets),
-        [&](const MainWidget* widget) {
-            return widget->windowTitle() == title;
-        });
-    if (it == std::end(mWidgets))
-        return;
-
-    showWidget(std::distance(std::begin(mWidgets), it));
-}
-
-void MainWindow::showWidget(MainWidget* widget)
-{
-    auto it = std::find(std::begin(mWidgets), std::end(mWidgets), widget);
-    if (it == std::end(mWidgets))
-        return;
-
-    showWidget(std::distance(std::begin(mWidgets), it));
-}
-
-void MainWindow::showWidget(std::size_t index)
-{
-    //BOUNDSCHECK(mWidgets, index);
-    //BOUNDSCHECK(mActions, index);
-    auto* widget = mWidgets[index];
-    auto* action = mActions[index];
-
-    // if already show, then do nothing
-    auto pos = mUI.mainTab->indexOf(widget);
-    if (pos != -1)
-        return;
-
-    action->setChecked(true);
-
-    const auto& icon = widget->windowIcon();
-    const auto& text = widget->windowTitle();
-    mUI.mainTab->insertTab(index, widget, icon, text);
-    prepareWindowMenu();
-
-}
-
-void MainWindow::hideWidget(MainWidget* widget)
-{
-    auto it = std::find(std::begin(mWidgets), std::end(mWidgets), widget);
-
-    Q_ASSERT(it != std::end(mWidgets));
-
-    auto index = std::distance(std::begin(mWidgets), it);
-
-    hideWidget(index);
-}
-
-void MainWindow::hideWidget(std::size_t index)
-{
-    auto* widget = mWidgets[index];
-    auto* action = mActions[index];
-
-    // if already not shown then do nothing
-    auto pos = mUI.mainTab->indexOf(widget);
-    if (pos == -1)
-        return;
-
-    action->setChecked(false);
-
-    mUI.mainTab->removeTab(pos);
-
-    prepareWindowMenu();
-}
-
-
 void MainWindow::on_mainTab_currentChanged(int index)
 {
     if (mCurrentWidget)
@@ -445,17 +374,26 @@ void MainWindow::actionWindowToggleView_triggered()
     const auto index   = action->property("index").toInt();
     const bool visible = action->isChecked();
 
-    //BOUNDSCHECK(mWidgets, index);
-    //BOUNDSCHECK(mActions, index);
+    ASSERT(index < mWidgets.size());
+    ASSERT(index < mActions.size());
+
+    auto* widget = mWidgets[index];
+    auto* view_menu_action = mActions[index];
 
     if (visible)
     {
-        showWidget(index);
+        view_menu_action->setChecked(true);
+        const auto& icon = widget->windowIcon();
+        const auto& text = widget->windowTitle();
+        mUI.mainTab->insertTab(index, widget, icon, text);
     }
     else
     {
-        hideWidget(index);
+        const auto widget_tab_index = mUI.mainTab->indexOf(widget);
+        view_menu_action->setChecked(false);
+        mUI.mainTab->removeTab(widget_tab_index);
     }
+    prepareWindowMenu();    
 }
 
 void MainWindow::actionWindowFocus_triggered()
