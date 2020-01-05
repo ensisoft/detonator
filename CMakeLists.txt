@@ -29,7 +29,7 @@ set(HARFBUZZ_FREETYPE_LIBRARY "freetype_custom_build" CACHE STRING "Name of the 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/harfbuzz)
 
 # Qt color widgets
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/Qt-Color-Widgets)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/Qt-Color-Widgets)
 
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
@@ -116,7 +116,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 # we also need Qt for the time being
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.11.3/5.11.3/msvc2015_64")
+    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.6/msvc2015_64")
 endif()
 
 find_package(Qt5Widgets)
@@ -148,7 +148,6 @@ add_executable(Editor
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
-    third_party/stb/stb_image.c
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -167,14 +166,54 @@ add_executable(Editor
     editor/gui/particlewidget.h
     editor/gui/particlewidget.cpp
     editor/gui/particlewidget.ui
-    editor/resource/resource.qrc)
-
+    editor/resource/resource.qrc
+    third_party/stb/stb_image.c    
+    third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
+    third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
+    third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
+    third_party/Qt-Color-Widgets/src/color_delegate.cpp
+    third_party/Qt-Color-Widgets/src/color_dialog.cpp
+    third_party/Qt-Color-Widgets/src/color_dialog.ui
+    third_party/Qt-Color-Widgets/src/color_line_edit.cpp
+    third_party/Qt-Color-Widgets/src/color_list_widget.cpp
+    third_party/Qt-Color-Widgets/src/color_names.cpp
+    third_party/Qt-Color-Widgets/src/color_palette.cpp
+    third_party/Qt-Color-Widgets/src/color_palette_model.cpp
+    third_party/Qt-Color-Widgets/src/color_palette_widget.cpp
+    third_party/Qt-Color-Widgets/src/color_palette_widget.ui
+    third_party/Qt-Color-Widgets/src/color_preview.cpp
+    third_party/Qt-Color-Widgets/src/color_selector.cpp
+    third_party/Qt-Color-Widgets/src/color_utils.cpp
+    third_party/Qt-Color-Widgets/src/color_wheel.cpp
+    third_party/Qt-Color-Widgets/src/color_widgets.qrc
+    third_party/Qt-Color-Widgets/src/gradient_slider.cpp
+    third_party/Qt-Color-Widgets/src/hue_slider.cpp
+    third_party/Qt-Color-Widgets/src/swatch.cpp
+    third_party/Qt-Color-Widgets/include/abstract_widget_list.hpp
+    third_party/Qt-Color-Widgets/include/bound_color_selector.hpp
+    third_party/Qt-Color-Widgets/include/color_2d_slider.hpp
+    third_party/Qt-Color-Widgets/include/color_delegate.hpp
+    third_party/Qt-Color-Widgets/include/color_dialog.hpp
+    third_party/Qt-Color-Widgets/include/color_line_edit.hpp
+    third_party/Qt-Color-Widgets/include/color_list_widget.hpp
+    third_party/Qt-Color-Widgets/include/color_names.hpp
+    third_party/Qt-Color-Widgets/include/color_palette.hpp
+    third_party/Qt-Color-Widgets/include/color_palette_model.hpp
+    third_party/Qt-Color-Widgets/include/color_palette_widget.hpp
+    third_party/Qt-Color-Widgets/include/color_preview.hpp
+    third_party/Qt-Color-Widgets/include/color_selector.hpp
+    third_party/Qt-Color-Widgets/include/color_wheel.hpp
+    third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
+    third_party/Qt-Color-Widgets/include/gradient_slider.hpp
+    third_party/Qt-Color-Widgets/include/hue_slider.hpp
+    third_party/Qt-Color-Widgets/include/swatch.hpp    
+)
+target_compile_definitions(Editor PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL)
-target_link_libraries(Editor ColorWidgets-qt5)
+target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core)
 target_link_libraries(Editor freetype_custom_build)
 target_link_libraries(Editor harfbuzz_custom_build)
 if (UNIX)
