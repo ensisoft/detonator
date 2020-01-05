@@ -51,14 +51,12 @@ ParticleEditorWidget::ParticleEditorWidget()
     mUI.widget->setFramerate(60);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene, 
         this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onInitScene = [&](unsigned w, unsigned h) {
-        mUI.scaleX->setValue(w);
-        mUI.scaleY->setValue(h);
-    };
-    const auto w = mUI.widget->width();
-    const auto h = mUI.widget->height();
-    mUI.scaleX->setValue(w);
-    mUI.scaleY->setValue(h);
+
+    // Set default transform state here. if there's a previous user setting
+    // they'll get loaded in loadState and will override these values.
+    mUI.transform->setChecked(false);
+    mUI.scaleX->setValue(500);
+    mUI.scaleY->setValue(500);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
 }
@@ -88,13 +86,80 @@ void ParticleEditorWidget::addActions(QMenu& menu)
 
 bool ParticleEditorWidget::saveState(Settings& settings) const
 {
-    // todo:
+    settings.setValue("Particle", "textures", mTextures);
+    settings.saveWidget("Particle", mUI.color);
+    settings.saveWidget("Particle", mUI.surfaceType);
+    settings.saveWidget("Particle", mUI.transform);
+    settings.saveWidget("Particle", mUI.translateX);
+    settings.saveWidget("Particle", mUI.translateY);
+    settings.saveWidget("Particle", mUI.scaleX);
+    settings.saveWidget("Particle", mUI.scaleY);
+    settings.saveWidget("Particle", mUI.rotation);
+    settings.saveWidget("Particle", mUI.simWidth);
+    settings.saveWidget("Particle", mUI.simHeight);
+    settings.saveWidget("Particle", mUI.motion);
+    settings.saveWidget("Particle", mUI.boundary);
+    settings.saveWidget("Particle", mUI.when);
+    settings.saveWidget("Particle", mUI.numParticles);
+    settings.saveWidget("Particle", mUI.initRect);
+    settings.saveWidget("Particle", mUI.initX);
+    settings.saveWidget("Particle", mUI.initY);
+    settings.saveWidget("Particle", mUI.initWidth);
+    settings.saveWidget("Particle", mUI.initHeight);
+    settings.saveWidget("Particle", mUI.dirSector);
+    settings.saveWidget("Particle", mUI.dirStartAngle);
+    settings.saveWidget("Particle", mUI.dirSizeAngle);
+    settings.saveWidget("Particle", mUI.minVelocity);
+    settings.saveWidget("Particle", mUI.maxVelocity);
+    settings.saveWidget("Particle", mUI.minLifetime);
+    settings.saveWidget("Particle", mUI.maxLifetime);    
+    settings.saveWidget("Particle", mUI.minPointsize);
+    settings.saveWidget("Particle", mUI.maxPointsize);
+    settings.saveWidget("Particle", mUI.growth);
+    settings.saveWidget("Particle", mUI.timeDerivative);
+    settings.saveWidget("Particle", mUI.distDerivative);
     return true;
 }
 
 bool ParticleEditorWidget::loadState(const Settings& settings)
 {
-    // todo:
+    mTextures = settings.getValue("Particle", "textures", mTextures);
+    if (mTextures.count() == 1)
+        mUI.filename->setText(mTextures[0]);
+    else if (mTextures.count() > 1)
+        mUI.filename->setText("Multiple files ...");
+
+    settings.loadWidget("Particle", mUI.color);
+    settings.loadWidget("Particle", mUI.surfaceType);
+    settings.loadWidget("Particle", mUI.transform);
+    settings.loadWidget("Particle", mUI.translateX);
+    settings.loadWidget("Particle", mUI.translateY);
+    settings.loadWidget("Particle", mUI.scaleX);
+    settings.loadWidget("Particle", mUI.scaleY);
+    settings.loadWidget("Particle", mUI.rotation);
+    settings.loadWidget("Particle", mUI.simWidth);
+    settings.loadWidget("Particle", mUI.simHeight);
+    settings.loadWidget("Particle", mUI.motion);
+    settings.loadWidget("Particle", mUI.boundary);
+    settings.loadWidget("Particle", mUI.when);
+    settings.loadWidget("Particle", mUI.numParticles);
+    settings.loadWidget("Particle", mUI.initRect);
+    settings.loadWidget("Particle", mUI.initX);
+    settings.loadWidget("Particle", mUI.initY);
+    settings.loadWidget("Particle", mUI.initWidth);
+    settings.loadWidget("Particle", mUI.initHeight);
+    settings.loadWidget("Particle", mUI.dirSector);
+    settings.loadWidget("Particle", mUI.dirStartAngle);
+    settings.loadWidget("Particle", mUI.dirSizeAngle);
+    settings.loadWidget("Particle", mUI.minVelocity);
+    settings.loadWidget("Particle", mUI.maxVelocity);
+    settings.loadWidget("Particle", mUI.minLifetime);
+    settings.loadWidget("Particle", mUI.maxLifetime);    
+    settings.loadWidget("Particle", mUI.minPointsize);
+    settings.loadWidget("Particle", mUI.maxPointsize);
+    settings.loadWidget("Particle", mUI.growth);
+    settings.loadWidget("Particle", mUI.timeDerivative);
+    settings.loadWidget("Particle", mUI.distDerivative);    
     return true;
 }
 
@@ -205,7 +270,7 @@ void ParticleEditorWidget::on_browseTexture_clicked()
     if (list.isEmpty())
         return;
     if (list.count() > 1)
-        mUI.filename->setText("Multiple files");
+        mUI.filename->setText("Multiple files ... ");
     else mUI.filename->setText(list[0]);
     mTextures = list;
 }

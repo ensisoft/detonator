@@ -29,6 +29,9 @@
 #  include <QVariant>
 #  include <QString>
 #  include <QtWidgets>
+#  include <QSignalBlocker>
+
+#  include <color_selector.hpp> // from Qt color widgets 
 #include "warnpop.h"
 
 namespace gui
@@ -84,7 +87,30 @@ namespace gui
                 setValue(module, objName + "/sort_order", sortOrder);
             }
         }
-
+        void saveWidget(const QString& module, const color_widgets::ColorSelector* color)
+        {
+            setValue(module, color->objectName(), color->color());
+        }
+        void saveWidget(const QString& module, const QComboBox* cmb)
+        {
+            setValue(module, cmb->objectName(), cmb->currentText());
+        }
+        void saveWidget(const QString& module, const QLineEdit* line)
+        {
+            setValue(module, line->objectName(), line->text());
+        }
+        void saveWidget(const QString& module, const QSpinBox* spin) 
+        {
+            setValue(module, spin->objectName(), spin->value());
+        }
+        void saveWidget(const QString& module, const QDoubleSpinBox* spin)
+        {
+            setValue(module, spin->objectName(), spin->value());
+        }
+        void saveWidget(const QString& module, const QGroupBox* grp)
+        {   
+            setValue(module, grp->objectName(), grp->isChecked());
+        }
         // Save the UI state of a widget.
         void saveWidget(const QString& module, const QCheckBox* chk)
         {
@@ -107,6 +133,8 @@ namespace gui
             const auto objName = table->objectName();
             const auto numCols = model->columnCount();
 
+            QSignalBlocker s(table);
+
             for (int i=0; i<numCols-1; ++i)
             {
                 const auto& key  = QString("%1_column_%2").arg(objName).arg(i);
@@ -124,13 +152,56 @@ namespace gui
             }
         }
         // Load the UI state of a widget.
+        void loadWidget(const QString& module, QComboBox* cmb) const 
+        {   
+            const auto& text = getValue(module, cmb->objectName(), 
+                cmb->currentText());
+            const auto index = cmb->findText(text);
+            if (index != -1)
+                cmb->setCurrentIndex(index);
+        }
         void loadWidget(const QString& module, QCheckBox* chk) const
         {
-            const bool value = getValue<bool>(module, chk->objectName(), false);
+            const bool value = getValue<bool>(module, chk->objectName(), 
+                chk->isChecked());
+            QSignalBlocker s(chk);
             chk->setChecked(value);
         }
-
-
+        void loadWidget(const QString& module, QGroupBox* grp) const 
+        {
+            const bool value = getValue<bool>(module, grp->objectName(), 
+                grp->isChecked());
+            QSignalBlocker s(grp);
+            grp->setChecked(value);
+        }
+        void loadWidget(const QString& module, QDoubleSpinBox* spin) const 
+        {
+            const double value = getValue<double>(module, spin->objectName(), 
+                spin->value());
+            QSignalBlocker s(spin);
+            spin->setValue(value);
+        }
+        void loadWidget(const QString& module, QSpinBox* spin) const 
+        {
+            const int value = getValue<int>(module, spin->objectName(), 
+                spin->value());
+            QSignalBlocker s(spin);
+            spin->setValue(value);
+        }
+        void loadWidget(const QString& module, QLineEdit* line) const 
+        {
+            const auto& str = getValue<QString>(module, line->objectName(), 
+                line->text());
+            QSignalBlocker s(line);
+            line->setText(str);
+        }
+        void loadWidget(const QString& module, color_widgets::ColorSelector* selector) const 
+        {
+            const auto& color = getValue<QColor>(module, selector->objectName(), 
+                selector->color());
+            QSignalBlocker s(selector);
+            selector->setColor(color);
+        }
     private:
         QSettings mSettings;
     };
