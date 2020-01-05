@@ -43,23 +43,26 @@ Building from source for Linux
 
 ```
   $ git clone https://github.com/ensisoft/pinyin-invaders
-  $ git submodule init
+  $ git submodule update --init --recursive
   $ cd pinyin-invaders
   $ mkdir dist
   $ cd dist
   $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
   $ make
-  $ ../dist/invaders
+  $ cd ../game/dist/
+  $ ./invaders
 ```
 
 3. Debug the game / enable console logging
 ```
   $ git clone https://github.com/ensisoft/pinyin-invaders
-  $ git submodule init
+  $ git submodule update --init --recursive
   $ cd pinyin-invaders
   $ mkdir dist_d
   $ cd dist_d
   $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+  $ make 
+  $ cd ../game/dist/
   $ cgdb ../dist/invaders
 ```
 
@@ -72,8 +75,9 @@ These build instructions are for MSVS 2015 Community Edition and for 64bit build
 1. Install Microsoft Visual Studio 2015 Community
 https://www.visualstudio.com/downloads/
 
-2. Install prebuilt Qt
-http://download.qt.io/official_releases/qt/5.11/5.11.3/qt-opensource-windows-x86-5.11.3.exe
+2. Install prebuilt Qt 5.12.6 
+
+http://download.qt.io/official_releases/qt/5.12/5.12.6/qt-opensource-windows-x86-5.12.6.exe
 
 
 3. Install prebuilt Boost
@@ -81,14 +85,15 @@ https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-
 
 4. Open "VS2015 x64 Native Tools" command prompt
 ```
-  $ set PATH=%PATH%;c:\Qt\Qt5.11.3\5.11.3\msvc2015_64\bin
   $ git clone https://github.com/ensisoft/pinyin-invaders
-  $ git submodule init
+  $ git submodule update --init --recursive
   $ cd pinyin-invaders
   $ mkdir dist
   $ cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Release ..
   $ msbuild invaders.vcxproj /property:Configuration=Release /property:Platform=x64
-  $ ..\dist\invaders.exe
+  $ msbuild INSTALL.vcxproj
+  $ cd ..\game\dist
+  $ invaders.exe
 ```
 
 5. Package dependencies for distribution
