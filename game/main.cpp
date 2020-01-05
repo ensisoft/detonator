@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QApplication>
 #  include <QStringList>
 #  include <QSettings>
@@ -102,6 +103,11 @@ int game_main(int argc, char* argv[])
 #else
     bool debugLog = false;
 #endif
+    // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
+    // turns out this attribute is needed in order to make Qt
+    // create a GLES2 context.
+    // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
+    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
     QApplication app(argc, argv);
     app.setApplicationName("Pinyin-Invaders");

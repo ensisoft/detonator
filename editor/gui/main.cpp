@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QApplication>
 #  include <QSurfaceFormat>
 #  include <QStringList>
@@ -90,6 +91,11 @@ int main(int argc, char* argv[])
 
     try
     {
+        // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
+        // turns out this attribute is needed in order to make Qt
+        // create a GLES2 context.
+        // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html        
+        QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
         QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
         QDir::setSearchPaths("level", QStringList(":/32x32_ico_png"));
