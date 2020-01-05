@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1093</width>
+    <width>1094</width>
     <height>842</height>
    </rect>
   </property>
@@ -453,12 +453,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="numParticles">
+              <widget class="QDoubleSpinBox" name="numParticles">
                <property name="maximum">
-                <number>16000</number>
+                <double>1000.000000000000000</double>
                </property>
-               <property name="value">
-                <number>100</number>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                </property>
               </widget>
              </item>
@@ -619,7 +619,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <number>100</number>
+                <number>2047</number>
                </property>
                <property name="value">
                 <number>10</number>

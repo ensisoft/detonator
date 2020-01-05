@@ -274,8 +274,8 @@ namespace gfx
             // simulation spawning new particles as old ones die.
             Maintain, 
             // Continuously spawn new particles on every update
-            // of the simulation. Todo: maybe this should be rate limited
-            // i.e. num of particles per second. 
+            // of the simulation. num particles is the number of 
+            // particles to spawn per second.
             Continuous
         };
 
@@ -284,7 +284,7 @@ namespace gfx
             SpawnPolicy mode = SpawnPolicy::Maintain;
             // the number of particles this engine shall create
             // the behaviour of this parameter depends on the spawn mode.
-            std::size_t num_particles = 100;
+            float num_particles = 100;
             // maximum particle lifetime
             float min_lifetime = 0.0f;
             float max_lifetime = std::numeric_limits<float>::max();
@@ -385,12 +385,24 @@ namespace gfx
             if (mParams.mode == SpawnPolicy::Maintain)
                 InitParticles(mParams.num_particles - mParticles.size());
             else if (mParams.mode == SpawnPolicy::Continuous) 
-                InitParticles(mParams.num_particles);
+            {
+                // the number of particles is taken as the rate of particles per
+                // second. fractionally cumulate partciles and then 
+                // spawn when we have some number non-fractional particles.
+                mNumParticlesHatching += mParams.num_particles * dt; 
+                const auto num = size_t(mNumParticlesHatching);
+                InitParticles(num);
+                mNumParticlesHatching -= num;
+            }
         }
 
         // ParticleEngine implementation. 
         virtual bool IsAlive() const override
-        { return !mParticles.empty(); }
+        { 
+            if (mParams.mode == SpawnPolicy::Continuous)
+                return true;
+            return !mParticles.empty(); 
+        }
 
         // ParticleEngine implementation. Restart the simulation
         // with the previous parameters if possible to do so.
@@ -402,6 +414,7 @@ namespace gfx
                 return;
             InitParticles(mParams.num_particles);
             mTime = 0.0f;
+            mNumParticlesHatching = 0;
         }
         size_t GetNumParticlesAlive() const 
         { return mParticles.size(); }
@@ -435,7 +448,7 @@ namespace gfx
         }
     private:
         const Params mParams;
-
+        float mNumParticlesHatching = 0.0f;
         float mTime = 0.0f;
         std::vector<Particle> mParticles;
     };
