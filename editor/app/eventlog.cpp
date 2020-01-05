@@ -40,9 +40,11 @@ EventLog::~EventLog()
 
 void EventLog::write(Event::Type type, const QString& msg, const QString& tag)
 {
-    const auto time  = QTime::currentTime();
-    const auto event = Event {type, msg, tag, time };
-
+    Event event;
+    event.type = type;
+    event.message = msg;
+    event.logtag = tag;
+    event.time = QTime::currentTime();
     emit newEvent(event);
     if (type == Event::Type::Note)
         return;
