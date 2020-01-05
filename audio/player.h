@@ -41,16 +41,23 @@ namespace audio
     class AudioStream;
     class AudioSample;
 
+    // Play audio samples using the given audio device. Once audio 
+    // is played the results are stored in TrackEvents which can be
+    // retrieved by a call to GetEvent. The application should 
+    // periodically call this function and remove the pending
+    // track events and do any processing (such as starting the next
+    // audio track) it wishes to do.
     class AudioPlayer
     {
     public:
+        // Track specific playback status.
         enum class TrackStatus {
             // track was played succesfully.
             Success,
             // track failed to play
             Failure
         };
-        // historical event/record of some sample playback.
+        // Historical event/record of some sample playback.
         // you can get this data through a call to get_event
         struct TrackEvent {
             // the id of the track that was played.
@@ -65,34 +72,36 @@ namespace audio
             bool looping = false;
         };
 
+        // Create a new audio player using the given audio device.
         AudioPlayer(std::unique_ptr<AudioDevice> device);
+        // dtor.
        ~AudioPlayer();
 
-        // play the audio sample after the given time elapses.
+        // Play the audio sample after the given time elapses (i.e. in X milliseconds after now)
+        // Returns an identifier for the audio play back that will happen later.
+        // The same id can be used in a call to pause/resume.
+        std::size_t Play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false);
+
+        // Play the audio sample immediately.
         // returns an identifier for the audio play back that will happen later.
         // the same id can be used in a call to pause/resume.
-        std::size_t play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false);
+        std::size_t Play(std::shared_ptr<AudioSample> sample, bool looping = false);
 
-        // play the audio sample immediately.
-        // returns an identifier for the audio play back that will happen later.
-        // the same id can be used in a call to pause/resume.
-        std::size_t play(std::shared_ptr<AudioSample> sample, bool looping = false);
+        // Pause the audio stream identified by id. 
+        void Pause(std::size_t id);
 
-        // pause the currently playing audio stream
-        void pause(std::size_t id);
+        // Resume the audio stream identified by id.
+        void Resume(std::size_t id);
 
-        // resume the currently paused audio stream.
-        void resume(std::size_t id);
+        // Cancel (stop playback and delete the rest of the stream) of the given audio stream.
+        void Cancel(std::size_t id);
 
-        // cancel (stop playback and delete the rest of the stream) of the given audio stream.
-        void cancel(std::size_t id);
-
-        // get next historical track event.
-        // returns true if there was a track event otherwise false.
-        bool get_event(TrackEvent* event);
+        // Get next historical track event.
+        // Returns true if there was a track event otherwise false.
+        bool GetEvent(TrackEvent* event);
 
     private:
-        void runLoop(AudioDevice* ptr);
+        void AudioThreadLoop(AudioDevice* ptr);
 
     private:
         struct Track {

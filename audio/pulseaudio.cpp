@@ -59,39 +59,39 @@ public:
         pa_mainloop_free(loop_);
     }
 
-    virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
+    virtual std::shared_ptr<AudioStream> Prepare(std::shared_ptr<const AudioSample> sample) override
     {
         auto stream = std::make_shared<PlaybackStream>(sample, context_);
 
-        while (stream->state() == AudioStream::State::none)
+        while (stream->GetState() == AudioStream::State::None)
         {
             pa_mainloop_iterate(loop_, 0, nullptr);
         }
-        if (stream->state() == AudioStream::State::error)
+        if (stream->GetState() == AudioStream::State::Error)
             throw std::runtime_error("pulseaudio stream error");
 
         return stream;
     }
 
-    virtual void poll() override
+    virtual void Poll() override
     {
         pa_mainloop_iterate(loop_, 0, nullptr);
     }
 
-    virtual void init() override
+    virtual void Init() override
     {
         // this is kinda ugly...
-        while (state_ == AudioDevice::State::none)
+        while (state_ == AudioDevice::State::None)
         {
             pa_mainloop_iterate(loop_, 0, nullptr);
         }
 
-        if (state_ == AudioDevice::State::error)
+        if (state_ == AudioDevice::State::Error)
             throw std::runtime_error("pulseaudio error");
 
     }
 
-    virtual State state() const override
+    virtual State GetState() const override
     {
         return state_;
     }
@@ -104,10 +104,10 @@ private:
     public:
         PlaybackStream(std::shared_ptr<const AudioSample> sample, pa_context* context) : sample_(sample)
         {
-            const std::string& sample_name = sample_->name();
+            const std::string& sample_name = sample_->GetName();
             pa_sample_spec spec;
-            spec.channels = sample_->channels();
-            spec.rate     = sample_->rate();
+            spec.channels = sample_->GetNumChannels();
+            spec.rate     = sample_->GetRateHz();
             spec.format   = PA_SAMPLE_FLOAT32NE;
             stream_ = pa_stream_new(context, sample_name.c_str(), &spec, nullptr);
             if (!stream_)
@@ -131,23 +131,23 @@ private:
             pa_stream_unref(stream_);
         }
 
-        virtual AudioStream::State state() const override
+        virtual AudioStream::State GetState() const override
         { return state_; }
 
-        virtual std::string name() const override
-        { return sample_->name(); }
+        virtual std::string GetName() const override
+        { return sample_->GetName(); }
 
-        virtual void play() override
+        virtual void Play() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
         }
 
-        virtual void pause() override
+        virtual void Pause() override
         {
             pa_stream_cork(stream_, 1, nullptr, nullptr);
         }
 
-        virtual void resume() override
+        virtual void Resume() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
         }
@@ -162,21 +162,21 @@ private:
             DEBUG("Drained stream!");
 
             auto* this_ = static_cast<PlaybackStream*>(user);
-            this_->state_ = AudioStream::State::complete;
+            this_->state_ = AudioStream::State::Complete;
         }
         static void write_callback(pa_stream* stream, size_t length, void* user)
         {
             auto* this_  = static_cast<PlaybackStream*>(user);
             auto& sample = this_->sample_;
 
-            const auto size  = sample->size();
+            const auto size  = sample->GetBufferSize();
             const auto avail = size - this_->offset_;
             const auto bytes = std::min(avail, length);
 
             if (bytes == 0)
                 return;
 
-            const auto* ptr  = sample->data(this_->offset_);
+            const auto* ptr  = sample->GetDataPtr(this_->offset_);
 
             pa_stream_write(this_->stream_, ptr, bytes, nullptr, 0, PA_SEEK_RELATIVE);
             this_->offset_ += bytes;
@@ -211,19 +211,19 @@ private:
 
                 case PA_STREAM_FAILED:
                    DEBUG("PA_STREAM_FAILED");
-                   this_->state_ = AudioStream::State::error;
+                   this_->state_ = AudioStream::State::Error;
                    break;
 
                 case PA_STREAM_READY:
                     DEBUG("PA_STREAM_READY");
-                    this_->state_ = AudioStream::State::ready;
+                    this_->state_ = AudioStream::State::Ready;
                     break;
             }
         }
     private:
         std::shared_ptr<const AudioSample> sample_;
         pa_stream*  stream_  = nullptr;
-        AudioStream::State state_ = AudioStream::State::none;
+        AudioStream::State state_ = AudioStream::State::None;
         std::size_t offset_ = 0;
     private:
     };
@@ -253,12 +253,12 @@ private:
 
             case PA_CONTEXT_READY:
                 DEBUG("PA_CONTEXT_READY");
-                this_->state_ = State::ready;
+                this_->state_ = State::Ready;
                 break;
 
             case PA_CONTEXT_FAILED:
                 DEBUG("PA_CONTEXT_FAILED");
-                this_->state_ = State::error;
+                this_->state_ = State::Error;
                 break;
 
         }
@@ -268,16 +268,16 @@ private:
     pa_mainloop_api* main_ = nullptr;
     pa_context* context_   = nullptr;
 private:
-    State state_ = AudioDevice::State::none;
+    State state_ = AudioDevice::State::None;
 };
 
 // static
-std::unique_ptr<AudioDevice> AudioDevice::create(const char* appname)
+std::unique_ptr<AudioDevice> AudioDevice::Create(const char* appname)
 {
     std::unique_ptr<AudioDevice> device;
     device = std::make_unique<PulseAudio>(appname);
     if (device)
-        device->init();
+        device->Init();
 
     return device;
 }

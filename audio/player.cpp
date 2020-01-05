@@ -40,7 +40,7 @@ namespace audio
 AudioPlayer::AudioPlayer(std::unique_ptr<AudioDevice> device) : track_actions_(128)
 {
     run_thread_.test_and_set(std::memory_order_acquire);
-    thread_.reset(new std::thread(std::bind(&AudioPlayer::runLoop, this, device.get())));
+    thread_.reset(new std::thread(std::bind(&AudioPlayer::AudioThreadLoop, this, device.get())));
 #ifdef POSIX_OS
     sched_param p;
     p.sched_priority = 99;
@@ -56,7 +56,7 @@ AudioPlayer::~AudioPlayer()
     thread_->join();
 }
 
-std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
+std::size_t AudioPlayer::Play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
 {
     std::lock_guard<std::mutex> lock(queue_mutex_);
 
@@ -71,12 +71,12 @@ std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, std::chrono::
     return id;
 }
 
-std::size_t AudioPlayer::play(std::shared_ptr<AudioSample> sample, bool looping)
+std::size_t AudioPlayer::Play(std::shared_ptr<AudioSample> sample, bool looping)
 {
-    return play(sample, std::chrono::milliseconds(0), looping);
+    return Play(sample, std::chrono::milliseconds(0), looping);
 }
 
-void AudioPlayer::pause(std::size_t id)
+void AudioPlayer::Pause(std::size_t id)
 {
     Action a;
     a.do_what = Action::Type::Pause;
@@ -84,7 +84,7 @@ void AudioPlayer::pause(std::size_t id)
     track_actions_.push(a);
 }
 
-void AudioPlayer::resume(std::size_t id)
+void AudioPlayer::Resume(std::size_t id)
 {
     Action a;
     a.do_what  = Action::Type::Resume;
@@ -92,7 +92,7 @@ void AudioPlayer::resume(std::size_t id)
     track_actions_.push(a);
 }
 
-void AudioPlayer::cancel(std::size_t id)
+void AudioPlayer::Cancel(std::size_t id)
 {
     // todo: should maybe be able to cancel currently waiting tracks too?
     Action a;
@@ -101,7 +101,7 @@ void AudioPlayer::cancel(std::size_t id)
     track_actions_.push(a);
 }
 
-bool AudioPlayer::get_event(TrackEvent* event)
+bool AudioPlayer::GetEvent(TrackEvent* event)
 {
     std::lock_guard<std::mutex> lock(event_mutex_);
     if (events_.empty())
@@ -111,14 +111,14 @@ bool AudioPlayer::get_event(TrackEvent* event)
     return true;
 }
 
-void AudioPlayer::runLoop(AudioDevice* ptr)
+void AudioPlayer::AudioThreadLoop(AudioDevice* ptr)
 {
     std::unique_ptr<AudioDevice> dev(ptr);
 
     while (run_thread_.test_and_set(std::memory_order_acquire))
     {
         // iterate audio device state once. (dispatches stream/device state changes)
-        dev->poll();
+        dev->Poll();
 
         // dispatch the queued track actions
         Action track_action;    
@@ -133,12 +133,12 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
 
             auto& p = *it;
             if (track_action.do_what == Action::Type::Pause)
-                p.stream->pause();
+                p.stream->Pause();
             else if (track_action.do_what == Action::Type::Resume)
-                p.stream->resume();
+                p.stream->Resume();
             else if (track_action.do_what == Action::Type::Cancel)
             {
-                p.stream->pause();
+                p.stream->Pause();
                 playing_.erase(it);
             }
         }
@@ -148,9 +148,9 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
         for (auto it = std::begin(playing_); it != std::end(playing_);)
         {
             auto& track = *it;
-            const auto state = track.stream->state();
-            if (state == AudioStream::State::complete ||
-                state == AudioStream::State::error)
+            const auto state = track.stream->GetState();
+            if (state == AudioStream::State::Complete ||
+                state == AudioStream::State::Error)
             {
                 TrackEvent event;
                 event.id      = track.id;
@@ -164,12 +164,12 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
                 }
             }
 
-            if (state == AudioStream::State::complete)
+            if (state == AudioStream::State::Complete)
             {
                 if (track.looping)
                 {
-                    track.stream = dev->prepare(track.sample);
-                    track.stream->play();
+                    track.stream = dev->Prepare(track.sample);
+                    track.stream->Play();
                     DEBUG("Looping track ...");
                 }
                 else
@@ -177,7 +177,7 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
                     it = playing_.erase(it);
                 }
             }
-            else if (state == AudioStream::State::error)
+            else if (state == AudioStream::State::Error)
             {
                 it = playing_.erase(it);
             }
@@ -206,10 +206,10 @@ void AudioPlayer::runLoop(AudioDevice* ptr)
             Track item;
             item.id      = top.id;
             item.sample  = top.sample;
-            item.stream  = dev->prepare(top.sample);
+            item.stream  = dev->Prepare(top.sample);
             item.when    = top.when;
             item.looping = top.looping;
-            item.stream->play();
+            item.stream->Play();
             waiting_.pop();
             playing_.push_back(std::move(item));            
         }

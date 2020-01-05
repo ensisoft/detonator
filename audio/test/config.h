@@ -3,4 +3,4 @@
 
 #include "base/platform.h"
 
-// currently intentionally empty
+#define BASE_LOGGING_ENABLE_LOG

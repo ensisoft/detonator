@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 
@@ -37,18 +38,13 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc < 2)
-    {
-        std::printf("You need to give the path the test WAV folder as a parameter.\n");
-        return 1;
-    }
-    const std::string p(argv[1]);
+    std::string path(".");
 
     bool ogg_files = false;
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
     bool pcm_24bit_files = false;
-    for (int i=2; i<argc; ++i)
+    for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--ogg"))
             ogg_files = true;
@@ -58,23 +54,37 @@ int main(int argc, char* argv[])
             pcm_16bit_files = true;
         else if (!std::strcmp(argv[i], "--24bit"))
             pcm_24bit_files = true;
+        else if (!std::strcmp(argv[i], "--path"))
+            path = argv[++i];
     }
 
-    base::CursesLogger logger;
+    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files))
+    {
+        std::printf("You haven't actually opted to play any files.\n"
+            "You have the following options:\n"
+            "\t--ogg\t\tTest Ogg Vorbis encoded files.\n"
+            "\t--8bit\t\tTest 8bit PCM encoded files.\n"
+            "\t--16bit\t\tTest 16bit PCM encoded files.\n"
+            "\t--24bit\t\tTest 24bit PCM encoded files.\n");
+        std::printf("Have a good day.\n");
+        return 0;
+    }
+
+    base::OStreamLogger logger(std::cout);
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
     
-    audio::AudioPlayer player(audio::AudioDevice::create("audio_test"));
+    audio::AudioPlayer player(audio::AudioDevice::Create("audio_test"));
 
     std::vector<std::string> test_files;
     if (ogg_files)
     {
         // https://github.com/UniversityRadioYork/ury-playd/issues/111
-        test_files.push_back("OGG/testshort.ogg");
-        test_files.push_back("OGG/a2002011001-e02-128k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-32k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-64k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-96k.ogg");
+        test_files.push_back("/OGG/testshort.ogg");
+        test_files.push_back("/OGG/a2002011001-e02-128k.ogg");
+        test_files.push_back("/OGG/a2002011001-e02-32k.ogg");
+        test_files.push_back("/OGG/a2002011001-e02-64k.ogg");
+        test_files.push_back("/OGG/a2002011001-e02-96k.ogg");
     }
     if (pcm_8bit_files)
     {
@@ -135,23 +145,23 @@ int main(int argc, char* argv[])
     }
     
 
-    for (const auto& t : test_files)
+    for (const auto& file : test_files)
     {
-        const auto& file = p + t;
-        INFO("Testing: '%1'", file);
+        const auto& filename = path + file;
+        INFO("Testing: '%1'", filename);
         base::FlushGlobalLog();
 
-        auto sample = std::make_shared<audio::AudioSample>(file, "test");
+        auto sample = std::make_shared<audio::AudioSample>(filename, "test");
         const auto looping = false;
-        player.play(sample, looping);
+        player.Play(sample, looping);
 
         for (;;) 
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             audio::AudioPlayer::TrackEvent e;
-            if (player.get_event(&e))
+            if (player.GetEvent(&e))
                 break;
         }
     }
     return 0;
-}
+}   

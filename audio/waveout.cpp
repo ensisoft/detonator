@@ -47,13 +47,13 @@ class Waveout : public AudioDevice
 public:
     Waveout(const char*)
     {}
-    virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) override
+    virtual std::shared_ptr<AudioStream> Prepare(std::shared_ptr<const AudioSample> sample) override
     {
         auto s = std::make_shared<Stream>(sample);
         streams_.push_back(s);
         return s;
     }
-    virtual void poll()
+    virtual void Poll()
     {
         for (auto it = std::begin(streams_); it != std::end(streams_); )
         {
@@ -71,11 +71,11 @@ public:
         }
     }
 
-    virtual void init()
+    virtual void Init()
     {}
 
-    virtual State state() const override
-    { return AudioDevice::State::ready; }
+    virtual State GetState() const override
+    { return AudioDevice::State::Ready; }
 private:
     class AlignedAllocator
     {
@@ -196,13 +196,13 @@ private:
             sample_      = sample;
             done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
             last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
-            state_       = AudioStream::State::none;
+            state_       = AudioStream::State::None;
             offset_      = 0;
 
             const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
 
             WAVEFORMATEX wfx = {0};
-            wfx.nSamplesPerSec  = sample->rate();
+            wfx.nSamplesPerSec  = sample->GetRateHz();
             wfx.wBitsPerSample  = 32;
             wfx.nChannels       = 2;
             wfx.cbSize          = 0; // extra info
@@ -243,16 +243,16 @@ private:
             assert(ret == MMSYSERR_NOERROR);
         }
 
-        virtual AudioStream::State state() const override
+        virtual AudioStream::State GetState() const override
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             return state_;
         }
 
-        virtual std::string name() const override
-        { return sample_->name(); }
+        virtual std::string GetName() const override
+        { return sample_->GetName(); }
 
-        virtual void play()
+        virtual void Play()
         {
             // enter initial play state. fill all buffers with audio
             // and enqueue them to the device. once a signal is
@@ -261,11 +261,11 @@ private:
             // to the device.
             // we continue this untill all data is consumed or an error
             // has occurred.
-            const auto size = sample_->size();
+            const auto size = sample_->GetBufferSize();
 
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                offset_ += buffers_[i]->fill(sample_->data(offset_), size - offset_);
+                offset_ += buffers_[i]->fill(sample_->GetDataPtr(offset_), size - offset_);
             }
             for (size_t i=0; i<buffers_.size(); ++i)
             {
@@ -274,12 +274,12 @@ private:
 
         }
 
-        virtual void pause()
+        virtual void Pause()
         {
             waveOutPause(handle_);
         }
 
-        virtual void resume()
+        virtual void Resume()
         {
             waveOutRestart(handle_);
         }
@@ -290,8 +290,8 @@ private:
             if (done_buffer_ == last_buffer_)
                 return;
 
-            if (state_ == AudioStream::State::error ||
-                state_ == AudioStream::State::complete)
+            if (state_ == AudioStream::State::Error ||
+                state_ == AudioStream::State::Complete)
                 return;
 
             // todo: we have a possible problem here that we might skip
@@ -300,9 +300,9 @@ private:
 
             const auto num_buffers = buffers_.size();
             const auto free_buffer = done_buffer_ % num_buffers;
-            const auto size = sample_->size();
+            const auto size = sample_->GetBufferSize();
 
-            offset_ += buffers_[free_buffer]->fill(sample_->data(offset_), size - offset_);
+            offset_ += buffers_[free_buffer]->fill(sample_->GetDataPtr(offset_), size - offset_);
 
             buffers_[free_buffer]->play();
 
@@ -329,27 +329,27 @@ private:
 
                 case WOM_DONE:
                     this_->done_buffer_++;
-                    if (this_->offset_ == this_->sample_->size())
-                        this_->state_ = AudioStream::State::complete;
+                    if (this_->offset_ == this_->sample_->GetBufferSize())
+                        this_->state_ = AudioStream::State::Complete;
                     break;
 
                 case WOM_OPEN:
-                    this_->state_ = AudioStream::State::ready;
+                    this_->state_ = AudioStream::State::Ready;
                     break;
             }
         }
 
     private:
         std::shared_ptr<const AudioSample> sample_;
-        std::size_t offset_;
+        std::size_t offset_ = 0;
     private:
         HWAVEOUT handle_;
         std::vector<std::unique_ptr<Buffer>> buffers_;
-        std::size_t last_buffer_;
-        std::size_t done_buffer_;
+        std::size_t last_buffer_ = 0;
+        std::size_t done_buffer_ = 0;
         mutable std::recursive_mutex mutex_;
     private:
-        State state_;
+        State state_ = State::None;
     };
 private:
     // currently active streams that we have to pump
@@ -357,12 +357,12 @@ private:
 };
 
 // static
-std::unique_ptr<AudioDevice> AudioDevice::create(const char* appname)
+std::unique_ptr<AudioDevice> AudioDevice::Create(const char* appname)
 {
     std::unique_ptr<AudioDevice> device;
     device = std::make_unique<Waveout>(appname);
     if (device)
-        device->init();
+        device->Init();
 
     return device;
 }

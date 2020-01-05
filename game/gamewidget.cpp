@@ -1497,7 +1497,7 @@ public:
         {
         #ifdef GAME_ENABLE_AUDIO
             static auto swoosh = std::make_shared<audio::AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
-            g_audio->play(swoosh);
+            g_audio->Play(swoosh);
         #endif
         }
     }
@@ -1967,7 +1967,7 @@ GameWidget::GameWidget()
 #ifdef GAME_ENABLE_AUDIO
         if (mPlaySounds)
         {
-            g_audio->play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
+            g_audio->Play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
         }
 #endif
     };
@@ -2236,7 +2236,7 @@ void GameWidget::updateGame(float dt)
 #ifdef GAME_ENABLE_AUDIO
     // handle audio events.
     audio::AudioPlayer::TrackEvent event;
-    while (g_audio->get_event(&event))
+    while (g_audio->GetEvent(&event))
     {
         DEBUG("Audio event (%1)", event.id);
         if (event.id != mMusicTrackId)
@@ -2499,7 +2499,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
         if (mPlayMusic)
         {
         #ifdef GAME_ENABLE_AUDIO
-            g_audio->cancel(mMusicTrackId);
+            g_audio->Cancel(mMusicTrackId);
             mMusicTrackId = 0;
             mMusicTrackIndex++;
             playMusic();
@@ -2615,7 +2615,7 @@ void GameWidget::playMusic()
         if (mMusicTrackId)
         {
             DEBUG("Resume music");
-             g_audio->resume(mMusicTrackId);
+             g_audio->Resume(mMusicTrackId);
         }
         else
         {
@@ -2623,7 +2623,7 @@ void GameWidget::playMusic()
             const auto track_index = mMusicTrackIndex % num_tracks;
             DEBUG("Play music track: %1, '%2'", track_index, tracks[track_index]);
             auto music = std::make_shared<audio::AudioSample>(tracks[track_index], "MainMusic");
-            mMusicTrackId = g_audio->play(music);
+            mMusicTrackId = g_audio->Play(music);
         }
     }
     else
@@ -2631,7 +2631,7 @@ void GameWidget::playMusic()
         if (mMusicTrackId)
         {
             DEBUG("Stop music");            
-            g_audio->pause(mMusicTrackId);
+            g_audio->Pause(mMusicTrackId);
         }
     }
 #endif

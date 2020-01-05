@@ -31,15 +31,17 @@
 
 namespace audio
 {
-    // audiosample is class to encapsulate loading and the details
+    // Audiosample is class to encapsulate loading and the details
     // of simple audio samples such as wav.
     class AudioSample
     {
     public:
         using u8 = std::uint8_t;
 
-        enum class format {
-            S16LE
+        // The audio sample format.
+        enum class Format {
+            // 32bit float Native Endian
+            Float32_NE 
         };
 
         // load sample from the provided byte buffer
@@ -49,26 +51,30 @@ namespace audio
         AudioSample(const std::string& file, const std::string& name);
 
         // return the sample rate in hz
-        unsigned rate() const
+        unsigned GetRateHz() const
         { return sample_rate_; }
 
         // return the number of channels in the sample
-        unsigned channels() const
+        unsigned GetNumChannels() const
         { return num_channels_; }
 
-        unsigned frames() const
+        // Get the number of audio frames in the sample.
+        unsigned GetNumFrames() const
         { return num_frames_; }
 
-        unsigned size() const
+        // Get the complete current buffer size in bytes.
+        unsigned GetBufferSize() const
         { return buffer_.size(); }
 
-        const void* data(std::size_t offset) const
+        // Get pointer to the data at the given offset.
+        const void* GetDataPtr(std::size_t offset) const
         {
             ASSERT(offset < buffer_.size());
             return &buffer_[offset];
         }
 
-        std::string name() const
+        // Get the name (of the file) for this sample
+        std::string GetName() const
         { return name_; }
 
     private:

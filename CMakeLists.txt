@@ -246,6 +246,7 @@ elseif (UNIX)
     target_link_libraries(audio_test sndfile)
     target_link_libraries(audio_test pthread)
 endif()
+install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 
 # graphics test application. Uses the graphics APIs to draw stuff.
 add_executable(graphics_test

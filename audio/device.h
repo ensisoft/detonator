@@ -31,33 +31,40 @@ namespace audio
     class AudioSample;
     class AudioStream;
 
-    // access to the native audio playback system
+    // Access to the native audio playback system
     class AudioDevice
     {
     public:
+        // State of the audio device.
         enum class State {
-            none, ready, error
+            // Created but not yet initialized.
+            None, 
+            // Initialized succesfully and currently ready to play audio.
+            Ready, 
+            // An error has occurred and audio cannot be played.
+            Error
         };
 
         virtual ~AudioDevice() = default;
 
-        // prepare a new audio stream from the already loaded audio sample.
+        // Prepare a new audio stream from the already loaded audio sample.
         // the stream is initially paused but ready to play once play is called.
-        virtual std::shared_ptr<AudioStream> prepare(std::shared_ptr<const AudioSample> sample) = 0;
+        virtual std::shared_ptr<AudioStream> Prepare(std::shared_ptr<const AudioSample> sample) = 0;
 
-        // poll and dispatch pending audio device events.
+        // Poll and dispatch pending audio device events.
         // Todo: this needs a proper waiting/signaling mechanism.
-        virtual void poll() = 0;
+        virtual void Poll() = 0;
 
-        // initialize the audio device.
+        // Initialize the audio device.
         // this should be called *once* after the device is created.
-        virtual void init() = 0;
+        virtual void Init() = 0;
 
-        // get the current audio device state.
-        virtual State state() const = 0;
+        // Get the current audio device state.
+        virtual State GetState() const = 0;
 
+        // Create the appropriate audio device for this platform.
         static
-        std::unique_ptr<AudioDevice> create(const char* appname);
+        std::unique_ptr<AudioDevice> Create(const char* appname);
 
     protected:
     private:

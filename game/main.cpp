@@ -137,7 +137,7 @@ int game_main(int argc, char* argv[])
 
     base::EnableDebugLog(debugLog);
 
-    audio::AudioPlayer audio_player(audio::AudioDevice::create(GAME_TITLE));
+    audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 
 #if defined(LINUX_OS)

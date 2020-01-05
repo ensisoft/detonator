@@ -28,31 +28,43 @@
 
 namespace audio
 {
+    // Audio stream is the currently running state of some 
+    // audio stream that exists on the device and is possibly
+    // being played back.
     class AudioStream
     {
     public:
+        // State of the stream.
         enum class State {
-            none, ready, error, complete
+            // Initial state, stream object exists but the stream
+            // is not yet available on the actual audio device.
+            None, 
+            // Stream exists on the device and is ready play.
+            Ready, 
+            // An error has occurred.
+            Error, 
+            // Stream playback is complete.
+            Complete
         };
-
+        // dtor.
         virtual ~AudioStream() = default;
 
-        // get current stream state
-        virtual State state() const = 0;
+        // Get current stream state.
+        virtual State GetState() const = 0;
 
-        // get the stream name if any
-        virtual std::string name() const = 0;
+        // Get the human readable stream name if any.
+        virtual std::string GetName() const = 0;
 
-        // start playing the audio stream.
-        // this should be called only once, when the stream is
-        // initially started. to control the playback use pause/resume
-        virtual void play() = 0;
+        // Start playing the audio stream.
+        // This should be called only once, when the stream is initially started. 
+        // To control the subsequent playback use Pause and Resume.
+        virtual void Play() = 0;
 
-        // pause the stream
-        virtual void pause() = 0;
+        // Pause the stream if currently playing.
+        virtual void Pause() = 0;
 
-        // resume a paused stream
-        virtual void resume() = 0;
+        // Resume the stream if currently paused.
+        virtual void Resume() = 0;
     protected:
     private:
     };
