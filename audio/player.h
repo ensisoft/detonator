@@ -62,8 +62,6 @@ namespace audio
         struct TrackEvent {
             // the id of the track that was played.
             std::size_t id = 0;
-            // the audio sample that was played
-            std::shared_ptr<AudioSample> sample;
             // the time point when the track was played.
             std::chrono::steady_clock::time_point when;
             // what was the result
@@ -80,12 +78,12 @@ namespace audio
         // Play the audio sample after the given time elapses (i.e. in X milliseconds after now)
         // Returns an identifier for the audio play back that will happen later.
         // The same id can be used in a call to pause/resume.
-        std::size_t Play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false);
+        std::size_t Play(std::unique_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false);
 
         // Play the audio sample immediately.
         // returns an identifier for the audio play back that will happen later.
         // the same id can be used in a call to pause/resume.
-        std::size_t Play(std::shared_ptr<AudioSample> sample, bool looping = false);
+        std::size_t Play(std::unique_ptr<AudioSample> sample, bool looping = false);
 
         // Pause the audio stream identified by id. 
         void Pause(std::size_t id);
@@ -106,7 +104,7 @@ namespace audio
     private:
         struct Track {
             std::size_t id = 0;
-            std::shared_ptr<AudioSample> sample;
+            std::unique_ptr<AudioSample> sample;
             std::shared_ptr<AudioStream> stream;
             std::chrono::steady_clock::time_point when;
             bool looping = false;
@@ -137,8 +135,9 @@ namespace audio
         std::size_t trackid_ = 1;
 
         // currently enqueued and waiting tracks.
-        std::priority_queue<Track, std::vector<Track>,
-            std::greater<Track>> waiting_;
+        using audio_pq = std::priority_queue<Track, std::vector<Track>,
+            std::greater<Track>>;
+        audio_pq waiting_;
 
         // currently playing tracks
         std::list<Track> playing_;

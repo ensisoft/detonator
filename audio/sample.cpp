@@ -28,17 +28,60 @@
 #include <cstdio>
 #include <sndfile.h>
 
+#include "base/assert.h"
 #include "sample.h"
 
-namespace {
+namespace audio
+{
 
-class io_buffer
+// Audio buffer using and reading buffers of encoded data in various
+// formats and converting into PCM using sndfile library.
+class SndfileAudioBuffer
 {
 public:
     using u8 = std::uint8_t;
 
-    io_buffer(const void* ptr, std::size_t len) : ptr_((const std::uint8_t*)ptr), len_(len)
+    // Given the buffer of incoming "raw" data, use sndfile library
+    // to convert the contents into PCM.
+    // After the constructor returns ptr can be freed.
+    SndfileAudioBuffer(std::vector<u8>&& buffer) : buffer_(std::move(buffer))
+    {}
+    
+    SndfileAudioBuffer(const SndfileAudioBuffer&) = delete;
+   ~SndfileAudioBuffer()
     {
+        ::sf_close(file_);
+    }
+
+    unsigned FillBuffer(void* buff, unsigned max_bytes) const 
+    {
+        const auto frame_size = num_channels_ * sizeof(float);
+        const auto possible_num_frames = max_bytes / frame_size;
+        // change the output format into floats.
+        // see this bug that confirms crackling playback wrt ogg files.
+        // https://github.com/UniversityRadioYork/ury-playd/issues/111
+        // sndfile-play however uses floats and is able to play
+        // the same test ogg (mentioned in the bug) without crackles.
+        const auto actual_num_frames = sf_readf_float(file_, (float*)buff, 
+            possible_num_frames);
+        return actual_num_frames * frame_size;
+    }
+    unsigned GetNumFrames() const
+    { return num_frames_; }
+    unsigned GetSize() const
+    { return buffer_.size(); }
+    unsigned GetSampleRate() const
+    { return sample_rate_; }
+    unsigned GetNumChannels() const
+    { return num_channels_; }
+
+    void Open()
+    {
+        if (file_)
+            ::sf_close(file_);
+
+        offset_ = 0;
+
         // set up a virtual IO device for libsound and then read all the frames
         // into a conversion buffer so we have the raw data.
         SF_VIRTUAL_IO io = {};
@@ -48,139 +91,135 @@ public:
         io.tell        = ioTell;
 
         SF_INFO sfinfo  = {};
-        SNDFILE* sffile = sf_open_virtual(&io, SFM_READ, &sfinfo, (void*)this);
-        if (!sffile)
+        file_ = sf_open_virtual(&io, SFM_READ, &sfinfo, (void*)this);
+        if (!file_)
             throw std::runtime_error("sf_open_virtual failed");
 
         sample_rate_  = sfinfo.samplerate;
         num_channels_ = sfinfo.channels;
-        num_frames_   = sfinfo.frames;
-
-        // change the output format into floats.
-        // see this bug that confirms crackling playback wrt ogg files.
-        // https://github.com/UniversityRadioYork/ury-playd/issues/111
-        // sndfile-play however uses floats and is able to play
-        // the same test ogg (mentioned in the bug) without crackles.
-
-        // reserve space for the PCM data
-        buffer_.resize(num_frames_ * num_channels_ * sizeof(float));
-
-        // read and convert the whole audio clip into 16bit NE
-        if (sf_readf_float(sffile, (float*)&buffer_[0], num_frames_) !=  num_frames_)
-        {
-            sf_close(sffile);
-            throw std::runtime_error("sf_readf_short failed");
-        }
-        sf_close(sffile);
+        num_frames_   = sfinfo.frames;                   
     }
-
-    std::vector<u8> get_buffer() &&
-    { return std::move(buffer_); }
-
-    unsigned rate() const
-    { return sample_rate_; }
-
-    unsigned channels() const
-    { return num_channels_; }
-
-    unsigned frames() const
-    { return num_frames_; }
 
 private:
     static sf_count_t ioGetLength(void* user)
     {
-        const auto* this_ = static_cast<io_buffer*>(user);
-        return this_->len_;
+        const auto* this_ = static_cast<SndfileAudioBuffer*>(user);
+        return this_->buffer_.size();
     }
 
     static sf_count_t ioSeek(sf_count_t offset, int whence, void* user)
     {
-        auto* this_ = static_cast<io_buffer*>(user);
+        auto* this_ = static_cast<SndfileAudioBuffer*>(user);
         switch (whence)
         {
             case SEEK_CUR:
-                this_->position_ += offset;
+                this_->offset_ += offset;
                 break;
             case SEEK_SET:
-                this_->position_ = offset;
+                this_->offset_ = offset;
                 break;
             case SEEK_END:
-                this_->position_ = this_->len_ - offset;
+                this_->offset_ = this_->buffer_.size() - offset;
                 break;
         }
-        return this_->position_;
+        return this_->offset_;
     }
 
     static sf_count_t ioRead(void* ptr, sf_count_t count, void* user)
     {
-        auto* this_ = static_cast<io_buffer*>(user);
+        auto* this_ = static_cast<SndfileAudioBuffer*>(user);
 
-        const auto num_bytes = this_->len_;
-        const auto num_avail = num_bytes - this_->position_;
-        const auto num_readb = std::min((sf_count_t)num_avail, count);
+        const auto num_bytes = this_->buffer_.size();
+        const auto num_avail = num_bytes - this_->offset_;
+        const auto num_bytes_to_read = std::min((sf_count_t)num_avail, count);
+        if (num_bytes_to_read == 0)
+            return 0;
 
-        std::memcpy(ptr, &this_->ptr_[this_->position_], num_readb);
-        this_->position_ += num_readb;
-        return num_readb;
+        std::memcpy(ptr, &this_->buffer_[this_->offset_], num_bytes_to_read);
+        this_->offset_ += num_bytes_to_read;
+        return num_bytes_to_read;
     }
 
     static sf_count_t ioTell(void* user)
     {
-        const auto* this_ = static_cast<io_buffer*>(user);
-        return this_->position_;
+        const auto* this_ = static_cast<SndfileAudioBuffer*>(user);
+        return this_->offset_;
     }
 private:
-    const std::uint8_t* ptr_ = nullptr;
-    const std::size_t len_   = 0;
-private:
-    sf_count_t position_ = 0;
+    SNDFILE* file_ = nullptr;
 private:
     unsigned sample_rate_  = 0;
     unsigned num_channels_ = 0;
     unsigned num_frames_   = 0;
 private:
-    std::vector<u8> buffer_;
+    // Buffer containing the source data.
+    const std::vector<u8> buffer_;
+    sf_count_t offset_ = 0; // offset into the buffer data above
 };
 
-} // namespace
-
-namespace audio
+AudioFile::AudioFile(const std::string& filename, const std::string& name)
+    : filename_(filename)
+    , name_(name)
 {
-
-AudioSample::AudioSample(const u8* ptr, std::size_t len, const std::string& name)
-{
-    io_buffer buff(ptr, len);
-
-    buffer_ = std::move(buff).get_buffer();
-    sample_rate_  = buff.rate();
-    num_channels_ = buff.channels();
-    num_frames_   = buff.frames();
-    name_ = name;
-}
-
-AudioSample::AudioSample(const std::string& file, const std::string& name)
-{
-    FILE* fptr = std::fopen(file.c_str(), "rb");
+    FILE* fptr = std::fopen(filename.c_str(), "rb");
     if (!fptr)
         throw std::runtime_error("open audio file failed");
 
+    // read the whole file into a single buffer.
     std::fseek(fptr, 0, SEEK_END);
     const long size = std::ftell(fptr);
     std::fseek(fptr, 0, SEEK_SET);
 
-    std::vector<char> buff;
+    std::vector<std::uint8_t> buff;
     buff.resize(size);
 
     std::fread(&buff[0], 1, size, fptr);
     std::fclose(fptr);
 
-    io_buffer io(buff.data(), buff.size());
+    // allocate just a single buffer that does the 
+    // data conversion from the buffer that we read from the file
+    // and which contains the encoded data (for example in ogg vorbis)
+    buffer_ = std::make_unique<SndfileAudioBuffer>(std::move(buff));
+    buffer_->Open();
+}
 
-    sample_rate_  = io.rate();
-    num_channels_ = io.channels();
-    num_frames_   = io.frames();
-    buffer_       = std::move(io).get_buffer();
-    name_ = name;
+AudioFile::~AudioFile() = default;
+
+unsigned AudioFile::GetRateHz() const 
+{
+    return buffer_->GetSampleRate();
+}
+
+unsigned AudioFile::GetNumChannels() const 
+{
+    return buffer_->GetNumChannels();
+}
+
+std::string AudioFile::GetName() const 
+{
+    if (name_.empty())
+        return filename_;
+    return name_;
+}
+
+unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes) 
+{ 
+    return buffer_->FillBuffer(buff, max_bytes); 
+}
+
+bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const 
+{
+    const auto num_frames = buffer_->GetNumFrames();
+    const auto num_channels = buffer_->GetNumChannels();
+    const auto num_bytes = num_frames * num_channels * sizeof(float);
+    if (num_bytes == num_bytes_read)
+        return false;
+    return true;
+}
+
+void AudioFile::Reset() 
+{
+    buffer_->Open();
 }
 
 } // namespace

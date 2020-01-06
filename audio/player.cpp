@@ -56,14 +56,14 @@ AudioPlayer::~AudioPlayer()
     thread_->join();
 }
 
-std::size_t AudioPlayer::Play(std::shared_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
+std::size_t AudioPlayer::Play(std::unique_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
 {
     std::lock_guard<std::mutex> lock(queue_mutex_);
 
     size_t id = trackid_++;
     Track track;
     track.id       = id;
-    track.sample   = sample;
+    track.sample   = std::move(sample);
     track.when     = std::chrono::steady_clock::now() + ms;
     track.looping  = looping;
     waiting_.push(std::move(track));
@@ -71,9 +71,9 @@ std::size_t AudioPlayer::Play(std::shared_ptr<AudioSample> sample, std::chrono::
     return id;
 }
 
-std::size_t AudioPlayer::Play(std::shared_ptr<AudioSample> sample, bool looping)
+std::size_t AudioPlayer::Play(std::unique_ptr<AudioSample> sample, bool looping)
 {
-    return Play(sample, std::chrono::milliseconds(0), looping);
+    return Play(std::move(sample), std::chrono::milliseconds(0), looping);
 }
 
 void AudioPlayer::Pause(std::size_t id)
@@ -106,7 +106,7 @@ bool AudioPlayer::GetEvent(TrackEvent* event)
     std::lock_guard<std::mutex> lock(event_mutex_);
     if (events_.empty())
         return false;
-    *event = events_.front();
+    *event = std::move(events_.front());
     events_.pop();
     return true;
 }
@@ -152,34 +152,31 @@ void AudioPlayer::AudioThreadLoop(AudioDevice* ptr)
             if (state == AudioStream::State::Complete ||
                 state == AudioStream::State::Error)
             {
+                auto sample = track.stream->GetFinishedSample();
+
+                if (state == AudioStream::State::Complete && track.looping)
+                {
+                    // reset sample state for replay.
+                    sample->Reset();
+
+                    track.stream = dev->Prepare(std::move(sample));
+                    track.stream->Play();
+                    DEBUG("Looping track ...");                    
+                }
+                // generate a track completion event
                 TrackEvent event;
                 event.id      = track.id;
-                event.sample  = track.sample;
                 event.when    = track.when;
+                event.status  = state == AudioStream::State::Complete 
+                    ? TrackStatus::Success 
+                    : TrackStatus::Failure; 
                 event.looping = track.looping;
-                event.status  = TrackStatus::Success;
                 {
                     std::lock_guard<std::mutex> lock(event_mutex_);
                     events_.push(std::move(event));
                 }
-            }
-
-            if (state == AudioStream::State::Complete)
-            {
-                if (track.looping)
-                {
-                    track.stream = dev->Prepare(track.sample);
-                    track.stream->Play();
-                    DEBUG("Looping track ...");
-                }
-                else
-                {
+                if (!track.looping)
                     it = playing_.erase(it);
-                }
-            }
-            else if (state == AudioStream::State::Error)
-            {
-                it = playing_.erase(it);
             }
             else it++;
         }
@@ -202,11 +199,17 @@ void AudioPlayer::AudioThreadLoop(AudioDevice* ptr)
             if (now < top.when)
                 break;
 
-            // top is const...          
+            // std::priority_queue only provides a const public interface
+            // because it tries to protect from people changing parameters
+            // of the contained objects so that the priority order invariable
+            // would no longer hold. however this is also super annoying
+            // in cases where you for example want to get a std::unique_ptr<T>
+            // out of the damn thing. 
+            using pq_value_type = std::remove_cv<audio_pq::value_type>::type;
+            
             Track item;
             item.id      = top.id;
-            item.sample  = top.sample;
-            item.stream  = dev->Prepare(top.sample);
+            item.stream  = dev->Prepare(std::move(const_cast<pq_value_type&>(top).sample));
             item.when    = top.when;
             item.looping = top.looping;
             item.stream->Play();

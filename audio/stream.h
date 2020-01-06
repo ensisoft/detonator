@@ -28,6 +28,8 @@
 
 namespace audio
 {
+    class AudioSample;
+
     // Audio stream is the currently running state of some 
     // audio stream that exists on the device and is possibly
     // being played back.
@@ -51,6 +53,10 @@ namespace audio
 
         // Get current stream state.
         virtual State GetState() const = 0;
+
+        // Returns the audio sample but only when the state is
+        // either error or complete.
+        virtual std::unique_ptr<AudioSample> GetFinishedSample() = 0;
 
         // Get the human readable stream name if any.
         virtual std::string GetName() const = 0;

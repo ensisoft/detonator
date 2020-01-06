@@ -1496,8 +1496,8 @@ public:
         if (bPlaySound && mPlaySounds)
         {
         #ifdef GAME_ENABLE_AUDIO
-            static auto swoosh = std::make_shared<audio::AudioSample>("sounds/Slide_Soft_00.ogg", "swoosh");
-            g_audio->Play(swoosh);
+            auto swoosh = std::make_unique<audio::AudioFile>("sounds/Slide_Soft_00.ogg", "swoosh");
+            g_audio->Play(std::move(swoosh));
         #endif
         }
     }
@@ -1916,10 +1916,7 @@ private:
 
 GameWidget::GameWidget()
 {
-#ifdef GAME_ENABLE_AUDIO
-    // sound effects FX
-    static auto sndExplosion = std::make_shared<audio::AudioSample>("sounds/explode.wav", "explosion");
-#endif
+
 
     mGame.reset(new Game(GameCols, GameRows));
 
@@ -1967,7 +1964,9 @@ GameWidget::GameWidget()
 #ifdef GAME_ENABLE_AUDIO
         if (mPlaySounds)
         {
-            g_audio->Play(sndExplosion, std::chrono::milliseconds(missileFlyTime));
+            // sound effects FX
+            auto sndExplosion = std::make_unique<audio::AudioFile>("sounds/explode.wav", "explosion");
+            g_audio->Play(std::move(sndExplosion), std::chrono::milliseconds(missileFlyTime));
         }
 #endif
     };
@@ -2622,8 +2621,8 @@ void GameWidget::playMusic()
             const auto num_tracks  = sizeof(tracks) / sizeof(tracks[0]);
             const auto track_index = mMusicTrackIndex % num_tracks;
             DEBUG("Play music track: %1, '%2'", track_index, tracks[track_index]);
-            auto music = std::make_shared<audio::AudioSample>(tracks[track_index], "MainMusic");
-            mMusicTrackId = g_audio->Play(music);
+            auto music = std::make_unique<audio::AudioFile>(tracks[track_index], "MainMusic");
+            mMusicTrackId = g_audio->Play(std::move(music));
         }
     }
     else

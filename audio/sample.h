@@ -24,65 +24,101 @@
 
 #include "config.h"
 
-#include "base/assert.h"
-
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace audio
 {
-    // Audiosample is class to encapsulate loading and the details
-    // of simple audio samples such as wav.
+    // for general audio terminology see the below reference
+    // https://larsimmisch.github.io/pyalsaaudio/terminology.html
+
+    // AudioSample provides access to series of buffers
+    // of PCM encoded audio sample data.
+    // todo: maybe rename to AudioSource
     class AudioSample
     {
     public:
-        using u8 = std::uint8_t;
-
         // The audio sample format.
         enum class Format {
             // 32bit float Native Endian
             Float32_NE 
         };
+        virtual ~AudioSample() = default;
 
-        // load sample from the provided byte buffer
-        AudioSample(const u8* ptr, std::size_t len, const std::string& name);
-
-        // load sample from a file.
-        AudioSample(const std::string& file, const std::string& name);
-
-        // return the sample rate in hz
-        unsigned GetRateHz() const
-        { return sample_rate_; }
-
-        // return the number of channels in the sample
-        unsigned GetNumChannels() const
-        { return num_channels_; }
-
-        // Get the number of audio frames in the sample.
-        unsigned GetNumFrames() const
-        { return num_frames_; }
-
-        // Get the complete current buffer size in bytes.
-        unsigned GetBufferSize() const
-        { return buffer_.size(); }
-
-        // Get pointer to the data at the given offset.
-        const void* GetDataPtr(std::size_t offset) const
-        {
-            ASSERT(offset < buffer_.size());
-            return &buffer_[offset];
-        }
-
-        // Get the name (of the file) for this sample
-        std::string GetName() const
-        { return name_; }
-
+        // Get the sample rate in Hz.
+        virtual unsigned GetRateHz() const = 0;
+        // Get the number of channels. Typically either 1 for Mono
+        // or 2 for stereo sound.
+        virtual unsigned GetNumChannels() const = 0;
+        // Get the PCM byte format of the sample.
+        virtual Format GetFormat() const = 0;
+        // Get the (human readable) name of the sample if any
+        // For example the underlying filename.
+        virtual std::string GetName() const = 0;
+        // Fill the given buffer with PCM data. 
+        // Returns the number of *bytes* written into buff.
+        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) = 0;
+        // Returns true if there's more audio data available 
+        // or false if the source has been depleted.
+        // num bytes is the current number of PCM data extracted
+        // and played back from the sample.
+        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const = 0;
+        // Reset the sample for looped playback, i.e. possibly rewind
+        // to the start of the data.
+        virtual void Reset() = 0;
     private:
-        std::string name_;
-        std::vector<u8> buffer_;
-        unsigned sample_rate_  = 0;
-        unsigned num_channels_ = 0;
-        unsigned num_frames_   = 0;
+    };
+
+    // only forward declare, keep the implementation
+    // inside a translation unit.
+    class SndfileAudioBuffer;
+
+    // AudioFile implements reading audio samples from an
+    // encoded audio file on the file system.
+    // Supported formats, WAV, OGG, MP3 (todo: check which others)
+    class AudioFile : public AudioSample
+    {
+    public: 
+        // Construct audio file audio sample by reading the contents
+        // of the given file. If name is empty the name of the file
+        // is used instead.
+        AudioFile(const std::string& filename, 
+                  const std::string& name);
+       ~AudioFile();
+
+        // Get the sample rate in Hz.
+        virtual unsigned GetRateHz() const override;
+
+        // Get the number of channels in the sample
+        virtual unsigned GetNumChannels() const override;
+
+        // Get the PCM byte format of the sample.
+        virtual Format GetFormat() const override
+        { return Format::Float32_NE; }
+
+        // Get the human readable name of the sample if any.
+        virtual std::string GetName() const override;
+
+        // Fill the buffer with PCM data.
+        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
+
+        // Returns true if there's more audio data available
+        // or false if the source has been depleted.
+        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const override;
+
+        // Reset the sample for looped playback, i.e. possibly rewind
+        // to the start of the data. 
+        virtual void Reset() override;
+
+        // Get the filename.
+        std::string GetFilename() const
+        { return filename_; }
+        
+    private:
+        const std::string filename_;
+        const std::string name_;
+        std::unique_ptr<SndfileAudioBuffer> buffer_;
     };
 
 } // namespace

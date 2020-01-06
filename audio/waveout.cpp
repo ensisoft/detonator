@@ -47,9 +47,9 @@ class Waveout : public AudioDevice
 public:
     Waveout(const char*)
     {}
-    virtual std::shared_ptr<AudioStream> Prepare(std::shared_ptr<const AudioSample> sample) override
+    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSample> sample) override
     {
-        auto s = std::make_shared<Stream>(sample);
+        auto s = std::make_shared<Stream>(std::move(sample));
         streams_.push_back(s);
         return s;
     }
@@ -156,19 +156,16 @@ private:
 
             AlignedAllocator::get().free(buffer_);
         }
-        std::size_t fill(const void* data, std::size_t chunk_size)
+        std::size_t fill(AudioSample& sample)
         {
-            const auto avail = size_;
-            const auto bytes = std::min(chunk_size, avail);
-
-            CopyMemory(buffer_, data, bytes);
+            const auto pcm_bytes = sample.FillBuffer(buffer_, size_);
 
             ZeroMemory(&header_, sizeof(header_));
             header_.lpData         = (LPSTR)buffer_;
-            header_.dwBufferLength = bytes;
+            header_.dwBufferLength = pcm_bytes;
             const auto ret = waveOutPrepareHeader(hWave_, &header_, sizeof(header_));
             assert(ret == MMSYSERR_NOERROR);
-            return bytes;
+            return pcm_bytes;
         }
         void play()
         {
@@ -180,29 +177,29 @@ private:
         Buffer(const Buffer&) = delete;
         Buffer& operator=(const Buffer&) = delete;
     private:
-        HWAVEOUT hWave_;
+        HWAVEOUT hWave_ = NULL;
         WAVEHDR  header_;
-        std::size_t size_;
-        void* buffer_;
+        std::size_t size_ = 0;
+        void* buffer_ = nullptr;
     };
 
     class Stream : public AudioStream
     {
     public:
-        Stream(std::shared_ptr<const AudioSample> sample)
+        Stream(std::unique_ptr<AudioSample> sample) 
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-            sample_      = sample;
+            sample_      = std::move(sample);
             done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
             last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
             state_       = AudioStream::State::None;
-            offset_      = 0;
+            num_pcm_bytes_ = 0;
 
             const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
 
             WAVEFORMATEX wfx = {0};
-            wfx.nSamplesPerSec  = sample->GetRateHz();
+            wfx.nSamplesPerSec  = sample_->GetRateHz();
             wfx.wBitsPerSample  = 32;
             wfx.nChannels       = 2;
             wfx.cbSize          = 0; // extra info
@@ -249,6 +246,15 @@ private:
             return state_;
         }
 
+        virtual std::unique_ptr<AudioSample> GetFinishedSample() override
+        {
+            std::unique_ptr<AudioSample> ret;
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            if (state_ == State::Complete || state_ == State::Error)
+                ret = std::move(sample_);
+            return ret;
+        }
+
         virtual std::string GetName() const override
         { return sample_->GetName(); }
 
@@ -260,12 +266,11 @@ private:
             // we update the buffer with new data and send it again
             // to the device.
             // we continue this untill all data is consumed or an error
-            // has occurred.
-            const auto size = sample_->GetBufferSize();
+            // has occurred 
 
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                offset_ += buffers_[i]->fill(sample_->GetDataPtr(offset_), size - offset_);
+                num_pcm_bytes_ += buffers_[i]->fill(*sample_);
             }
             for (size_t i=0; i<buffers_.size(); ++i)
             {
@@ -300,9 +305,8 @@ private:
 
             const auto num_buffers = buffers_.size();
             const auto free_buffer = done_buffer_ % num_buffers;
-            const auto size = sample_->GetBufferSize();
-
-            offset_ += buffers_[free_buffer]->fill(sample_->GetDataPtr(offset_), size - offset_);
+            
+            num_pcm_bytes_ += buffers_[free_buffer]->fill(*sample_);
 
             buffers_[free_buffer]->play();
 
@@ -329,7 +333,7 @@ private:
 
                 case WOM_DONE:
                     this_->done_buffer_++;
-                    if (this_->offset_ == this_->sample_->GetBufferSize())
+                    if (this_->sample_ && !this_->sample_->HasNextBuffer(this_->num_pcm_bytes_))
                         this_->state_ = AudioStream::State::Complete;
                     break;
 
@@ -340,10 +344,10 @@ private:
         }
 
     private:
-        std::shared_ptr<const AudioSample> sample_;
-        std::size_t offset_ = 0;
+        std::unique_ptr<AudioSample> sample_;
+        std::uint64_t num_pcm_bytes_ = 0;
     private:
-        HWAVEOUT handle_;
+        HWAVEOUT handle_ = NULL;
         std::vector<std::unique_ptr<Buffer>> buffers_;
         std::size_t last_buffer_ = 0;
         std::size_t done_buffer_ = 0;

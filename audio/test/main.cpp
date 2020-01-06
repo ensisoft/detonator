@@ -39,7 +39,7 @@
 int main(int argc, char* argv[])
 {
     std::string path(".");
-
+    unsigned loops = 1;
     bool ogg_files = false;
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
             pcm_24bit_files = true;
         else if (!std::strcmp(argv[i], "--path"))
             path = argv[++i];
+        else if (!std::strcmp(argv[i], "--loops"))
+            loops = std::stoi(argv[++i]);
     }
 
     if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files))
@@ -151,17 +153,26 @@ int main(int argc, char* argv[])
         INFO("Testing: '%1'", filename);
         base::FlushGlobalLog();
 
-        auto sample = std::make_shared<audio::AudioSample>(filename, "test");
-        const auto looping = false;
-        player.Play(sample, looping);
+        auto sample = std::make_unique<audio::AudioFile>(filename, "test");
+        const auto looping = loops > 1;
+        const auto id = player.Play(std::move(sample), looping);
+        DEBUG("New track. id = %1", id);
 
-        for (;;) 
+        unsigned completed_loop_count = 0;
+        while (completed_loop_count != loops)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             audio::AudioPlayer::TrackEvent e;
             if (player.GetEvent(&e))
-                break;
+            {
+                DEBUG("Track id = %1 event", e.id);
+                INFO("Track status %1", e.status == audio::AudioPlayer::TrackStatus::Failure 
+                    ? "Failed" : "Success");
+                completed_loop_count++;
+            }
         }
+        if (looping)
+            player.Cancel(id);
     }
     return 0;
 }   
