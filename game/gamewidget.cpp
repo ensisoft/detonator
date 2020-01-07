@@ -25,7 +25,6 @@
 #include "warnpush.h"
 #  include <QtGui/QPaintEvent>
 #  include <QtGui/QKeyEvent>
-#  include <QtGui/QVector2D>
 #  include <QtGui/QPainter>
 #  include <QtGui/QOpenGLContext>
 #  include <QApplication>
@@ -36,6 +35,8 @@
 
 #include <cmath>
 #include <ctime>
+
+#include <glm/vec2.hpp>
 
 #include "audio/sample.h"
 #include "audio/player.h"
@@ -154,10 +155,10 @@ public:
 
     // Map a normalized position in the layout space into
     // parent coordinate space.
-    QPointF MapPoint(const QVector2D& norm) const
+    QPointF MapPoint(const glm::vec2& norm) const
     {
-        const float xpos = mWidth * norm.x() + mOriginX;
-        const float ypos = mHeight * norm.y() + mOriginY;
+        const float xpos = mWidth * norm.x + mOriginX;
+        const float ypos = mHeight * norm.y + mOriginY;
         return { xpos, ypos };
     }
 
@@ -328,7 +329,7 @@ private:
 class GameWidget::Asteroid : public GameWidget::Animation
 {
 public:
-    Asteroid(const QVector2D& direction)
+    Asteroid(const glm::vec2& direction)
     {
         mX = math::rand(0.0f, 1.0f);
         mY = math::rand(0.0f, 1.0f);
@@ -340,8 +341,8 @@ public:
     virtual bool update(float dt) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
-        mX = math::wrap(-0.2f, 1.0f, mX + d.x());
-        mY = math::wrap(-0.2f, 1.0f, mY + d.y());
+        mX = math::wrap(-0.2f, 1.0f, mX + d.x);
+        mY = math::wrap(-0.2f, 1.0f, mY + d.y);
         return true;
     }
     virtual void paint(gfx::Painter& painter, const QRect& rect) override
@@ -402,7 +403,7 @@ private:
     float mScale = 1.0f;
     float mX = 0.0f;
     float mY = 0.0f;
-    QVector2D mDirection;
+    glm::vec2 mDirection;
     unsigned mTexture = 0;
 };
 
@@ -410,7 +411,7 @@ private:
 class GameWidget::Explosion : public GameWidget::Animation
 {
 public:
-    Explosion(const QVector2D& position, float start, float lifetime)
+    Explosion(const glm::vec2& position, float start, float lifetime)
       : mPosition(position)
       , mStartTime(start)
       , mLifeTime(lifetime)
@@ -469,11 +470,11 @@ public:
     void setScale(float scale)
     { mScale = scale; }
 
-    QVector2D getPosition() const
+    glm::vec2 getPosition() const
     { return mPosition; }
 
 private:
-    const QVector2D mPosition;
+    const glm::vec2 mPosition;
     const float mStartTime = 0.0f;
     const float mLifeTime  = 0.0f;
     float mTime  = 0.0f;
@@ -487,7 +488,7 @@ private:
 class GameWidget::Sparks : public GameWidget::Animation
 {
 public:
-    Sparks(const QVector2D& position, float start, float lifetime)
+    Sparks(const glm::vec2& position, float start, float lifetime)
         : mStartTime(start)
         , mLifeTime(lifetime)
         , mPosition(position)
@@ -547,14 +548,14 @@ private:
     float mTimeAccum = 0.0f;
     std::unique_ptr<ParticleEngine> mParticles;
 private:
-    QVector2D mPosition;
+    glm::vec2 mPosition;
     gfx::Color4f mColor;
 };
 
 class GameWidget::Smoke : public GameWidget::Animation
 {
 public:
-    Smoke(const QVector2D& position, float start, float lifetime)
+    Smoke(const glm::vec2& position, float start, float lifetime)
         : mPosition(position)
         , mStartTime(start)
         , mLifeTime(lifetime)
@@ -605,7 +606,7 @@ public:
     { mScale = scale; }
 
 private:
-    const QVector2D mPosition;
+    const glm::vec2 mPosition;
     const float mStartTime = 0.0f;
     const float mLifeTime  = 0.0f;
     float mTime  = 0.0f;
@@ -625,7 +626,7 @@ public:
         NumParticleRows = 2
     };
 
-    Debris(const std::string& texture, const QVector2D& position, float starttime, float lifetime)
+    Debris(const std::string& texture, const glm::vec2& position, float starttime, float lifetime)
         : mStartTime(starttime)
         , mLifeTime(lifetime)
         , mTexture(texture)
@@ -650,8 +651,8 @@ public:
 
             particle p;
             p.rc  = gfx::URect(x, y, particleWidth, particleHeight);
-            p.dir.setX(std::cos(a));
-            p.dir.setY(std::sin(a));
+            p.dir.x = std::cos(a);
+            p.dir.y = std::sin(a);
             p.dir *= v;
             p.pos = position;
             p.alpha = 1.0f;
@@ -671,9 +672,9 @@ public:
 
         for (auto& p : mParticles)
         {
-            p.pos += p.dir * (dt / 4500.0);
-            p.alpha = math::clamp(0.0, 1.0, p.alpha - (dt / 3000.0));
-            p.angle += ((M_PI * 2) * (dt / 2000.0) * p.rotation_coefficient);
+            p.pos += p.dir * (dt / 4500.0f);
+            p.alpha = math::clamp(0.0f, 1.0f, p.alpha - (dt / 3000.0f));
+            p.angle += ((M_PI * 2.0f) * (dt / 2000.0f) * p.rotation_coefficient);
         }
 
         return true;
@@ -723,8 +724,8 @@ public:
 private:
     struct particle {
         gfx::URect rc;
-        QVector2D dir;
-        QVector2D pos;
+        glm::vec2 dir;
+        glm::vec2 pos;
         float angle = 0.0f;
         float alpha = 0.0f;
         float rotation_coefficient = 1.0f;
@@ -749,7 +750,7 @@ public:
         Boss
     };
 
-    Invader(const QVector2D& position, const std::wstring& str, float velocity, ShipType type)
+    Invader(const glm::vec2& position, const std::wstring& str, float velocity, ShipType type)
       : mPosition(position)
       , mText(str)
       , mVelocity(velocity)
@@ -773,7 +774,7 @@ public:
 
     virtual bool update(float dt) override
     {
-        const auto direction = QVector2D(-1.0f, 0.0f);
+        const auto direction = glm::vec2(-1.0f, 0.0f);
 
         mPosition += mVelocity * dt * direction;
         if (mMaxLifeTime)
@@ -910,15 +911,15 @@ public:
 
     // get the invader position in game space at some later time
     // where time is in seconds.
-    QVector2D getFuturePosition(float seconds) const
+    glm::vec2 getFuturePosition(float seconds) const
     {
-        const auto direction = QVector2D(-1.0f, 0.0f);
+        const auto direction = glm::vec2(-1.0f, 0.0f);
 
         return mPosition + seconds * mVelocity * direction;
     }
 
     // get current position
-    QVector2D getPosition() const
+    glm::vec2 getPosition() const
     { return mPosition; }
 
     void setMaxLifetime(quint64 ms)
@@ -967,7 +968,7 @@ private:
     }
 
 private:
-    QVector2D mPosition;
+    glm::vec2 mPosition;
     std::wstring mText;
     float mLifeTime    = 0.0f;
     float mMaxLifeTime = 0.0f;
@@ -988,8 +989,8 @@ private:
 class GameWidget::Missile : public GameWidget::Animation
 {
 public:
-    Missile(const QVector2D& position, 
-            const QVector2D& direction, 
+    Missile(const glm::vec2& position, 
+            const glm::vec2& direction, 
             const std::wstring& str,
             quint64 lifetime) 
         : mDirection(direction)
@@ -1029,11 +1030,11 @@ public:
     }
 
 private:
-    const QVector2D mDirection;
+    const glm::vec2 mDirection;
     const std::wstring mText;
     const float mLifetime = 0.0f;
     float mTimeAccum = 0.0f;
-    QVector2D mPosition;
+    glm::vec2 mPosition;
 };
 
 class GameWidget::UFO : public GameWidget::Animation
@@ -1041,13 +1042,12 @@ class GameWidget::UFO : public GameWidget::Animation
 public:
     UFO()
     {
-        mPosition.setX(math::rand(0.0, 1.0));
-        mPosition.setY(math::rand(0.0, 1.0));
+        mPosition.x = math::rand(0.0, 1.0);
+        mPosition.y = math::rand(0.0, 1.0);
 
         const auto x = math::rand(-1.0, 1.0);
         const auto y = math::rand(-1.0, 1.0);
-        mDirection = QVector2D(x, y);
-        mDirection.normalize();
+        mDirection = glm::normalize(glm::vec2(x, y));
 
         mSprite.AddTexture("textures/alien/e_f1.png");
         mSprite.AddTexture("textures/alien/e_f2.png");
@@ -1066,16 +1066,16 @@ public:
         if (mRuntime >= maxLifeTime)
             return false;
 
-        QVector2D fuzzy;
-        fuzzy.setY(std::sin((fmodf(mRuntime, 3000) / 3000.0) * 2 * M_PI));
-        fuzzy.setX(mDirection.x());
-        fuzzy.normalize();
+        glm::vec2 fuzzy;
+        fuzzy.y = std::sin((fmodf(mRuntime, 3000) / 3000.0) * 2 * M_PI);
+        fuzzy.x = mDirection.x;
+        fuzzy = glm::normalize(fuzzy);
 
-        mPosition += (dt / 10000.0) * fuzzy;
-        const auto x = mPosition.x();
-        const auto y = mPosition.y();
-        mPosition.setX(math::wrap(0.0f, 1.0f, x));
-        mPosition.setY(math::wrap(0.0f, 1.0f, y));
+        mPosition += (dt / 10000.0f) * fuzzy;
+        const auto x = mPosition.x;
+        const auto y = mPosition.y;
+        mPosition.x = math::wrap(0.0f, 1.0f, x);
+        mPosition.y = math::wrap(0.0f, 1.0f, y);
         return true;
     }
 
@@ -1087,8 +1087,8 @@ public:
         const auto ypos   = rect.y();
 
         const auto sec = mRuntime / 1000.0f;
-        const auto pos = QPointF(mPosition.x() * width + xpos,
-                                 mPosition.y() * height + ypos);
+        const auto pos = QPointF(mPosition.x * width + xpos,
+                                 mPosition.y * height + ypos);
 
         mSprite.SetAppRuntime(sec);
 
@@ -1110,8 +1110,8 @@ public:
         const auto xpos = rect.x();
         const auto ypos = rect.y();
 
-        const auto pos = QPointF(mPosition.x() * width + xpos,
-                                 mPosition.y() * height + ypos);
+        const auto pos = QPointF(mPosition.x * width + xpos,
+                                 mPosition.y * height + ypos);
         QRectF bounds;
         bounds.moveTo(pos - QPoint(20, 20));
         bounds.setSize(QSize(40, 40));
@@ -1126,7 +1126,7 @@ public:
         mDirection *= -1.0f;
     }
 
-    QVector2D getPosition() const
+    glm::vec2 getPosition() const
     { return mPosition; }
 
     static bool shouldMakeRandomAppearance()
@@ -1140,8 +1140,8 @@ public:
     { return "textures/alien/e_f1.png"; }
 private:
     float mRuntime = 0.0f;
-    QVector2D mDirection;
-    QVector2D mPosition;
+    glm::vec2 mDirection;
+    glm::vec2 mPosition;
 private:
     gfx::SpriteSet mSprite;
 };
@@ -1194,7 +1194,7 @@ private:
 class GameWidget::Score : public GameWidget::Animation
 {
 public:
-    Score(QVector2D position, float start, float lifetime, unsigned score) 
+    Score(glm::vec2 position, float start, float lifetime, unsigned score) 
         : mPosition(position)
         , mStartTime(start)
         , mLifeTime(lifetime) 
@@ -1230,7 +1230,7 @@ public:
     }
 
 private:
-    const QVector2D mPosition;
+    const glm::vec2 mPosition;
 private:
     const float mStartTime = 0.0f;
     const float mLifeTime = 0.0f;
@@ -1245,7 +1245,7 @@ private:
 class GameWidget::Background
 {
 public:
-    Background(const QVector2D& direction)
+    Background(const glm::vec2& direction)
     {
         ParticleEngine::Params params;
         params.init_rect_width  = 1024;
@@ -1257,7 +1257,7 @@ public:
         params.max_velocity = 100.0f;
         params.min_point_size = 1.0f;
         params.max_point_size = 8.0f;
-        params.direction_sector_start_angle = std::acos(direction.x());
+        params.direction_sector_start_angle = std::acos(direction.x);
         params.direction_sector_size = 0.0f;
         mStars = std::make_unique<ParticleEngine>(params);
     }
@@ -1935,7 +1935,7 @@ GameWidget::GameWidget()
         const auto missileFlyTime   = 500;
         const auto explosionTime    = 1000;
         const auto missileEnd       = invader->getFuturePosition(missileFlyTime/1000.0f);
-        const auto missileBeg       = QVector2D(m.launch_position_x, m.launch_position_y);
+        const auto missileBeg       = glm::vec2(m.launch_position_x, m.launch_position_y);
         const auto missileDir       = missileEnd - missileBeg;
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, base::ToUpper(m.string), missileFlyTime));
@@ -1978,7 +1978,7 @@ GameWidget::GameWidget()
 
         const auto missileFlyTime  = 500;
         const auto missileEnd      = inv->getFuturePosition(missileFlyTime/1000.0f);
-        const auto missileBeg      = QVector2D(m.launch_position_x, m.launch_position_y);
+        const auto missileBeg      = glm::vec2(m.launch_position_x, m.launch_position_y);
         const auto missileDir      = missileEnd - missileBeg;
 
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, base::ToUpper(m.string), missileFlyTime));
@@ -2086,7 +2086,7 @@ GameWidget::GameWidget()
         for (const auto& s : inv.viewList)
             viewstring += s;
         
-        std::unique_ptr<Invader> invader(new Invader(QVector2D(x, y), viewstring, velocity, type));
+        std::unique_ptr<Invader> invader(new Invader(glm::vec2(x, y), viewstring, velocity, type));
         invader->enableShield(inv.shield_on_ticks != 0);
         mInvaders[inv.identity] = std::move(invader);
     };
@@ -2140,15 +2140,14 @@ GameWidget::GameWidget()
     };
 
     // in this space all the background objects travel to the same direction
-    QVector2D spaceJunkDirection(4, 3);
-    spaceJunkDirection.normalize();
-
+    const glm::vec2 spaceJunkDirection(4, 3);
+    
     // create the background object.
-    mBackground.reset(new Background(spaceJunkDirection));
+    mBackground.reset(new Background(glm::normalize(spaceJunkDirection)));
 
     for (size_t i=0; i<20; ++i)
     {
-        mAnimations.emplace_back(new Asteroid(spaceJunkDirection));
+        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection)));
     }
 
     // initialize the input/state stack with the main menu.
