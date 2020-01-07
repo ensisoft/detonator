@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
     bool pcm_24bit_files = false;
+    bool sine = false;
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--ogg"))
@@ -54,20 +55,26 @@ int main(int argc, char* argv[])
             pcm_16bit_files = true;
         else if (!std::strcmp(argv[i], "--24bit"))
             pcm_24bit_files = true;
+        else if (!std::strcmp(argv[i], "--sine"))
+            sine = true;
         else if (!std::strcmp(argv[i], "--path"))
             path = argv[++i];
         else if (!std::strcmp(argv[i], "--loops"))
             loops = std::stoi(argv[++i]);
+        
     }
 
-    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files))
+
+
+    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine))
     {
-        std::printf("You haven't actually opted to play any files.\n"
+        std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
             "\t--ogg\t\tTest Ogg Vorbis encoded files.\n"
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
-            "\t--24bit\t\tTest 24bit PCM encoded files.\n");
+            "\t--24bit\t\tTest 24bit PCM encoded files.\n"
+            "\t--sine\t\tTest procedural audio (sine wave).\n");
         std::printf("Have a good day.\n");
         return 0;
     }
@@ -77,6 +84,16 @@ int main(int argc, char* argv[])
     base::EnableDebugLog(true);
     
     audio::AudioPlayer player(audio::AudioDevice::Create("audio_test"));
+    if (sine)
+    {
+        auto sample = std::make_unique<audio::SineGenerator>(500);
+        const auto id = player.Play(std::move(sample), false /*looping*/);
+        DEBUG("New sine wave stream = %1", id);        
+        INFO("Playing procedural sine audio for 10 seconds.");
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        player.Cancel(id);
+    }
+
 
     std::vector<std::string> test_files;
     if (ogg_files)

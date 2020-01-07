@@ -28,6 +28,11 @@
 #include <vector>
 #include <memory>
 
+#if defined(AUDIO_ENABLE_TEST_SOUND)
+#  include "base/math.h"
+#  include <cmath>
+#endif
+
 namespace audio
 {
     // for general audio terminology see the below reference
@@ -120,5 +125,44 @@ namespace audio
         const std::string name_;
         std::unique_ptr<SndfileAudioBuffer> buffer_;
     };
+
+#ifdef AUDIO_ENABLE_TEST_SOUND
+    class SineGenerator : public AudioSample
+    {
+    public:
+        SineGenerator(unsigned frequency) : frequency_(frequency)
+        {}
+        virtual unsigned GetRateHz() const
+        { return 44100; }
+        virtual unsigned GetNumChannels() const override
+        { return 1; }
+        virtual Format GetFormat() const override
+        { return Format::Float32_NE; }
+        virtual std::string GetName() const override
+        { return "Sine"; }
+        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override
+        {
+            const auto num_channels = 1;
+            const auto frame_size = num_channels * sizeof(float);
+            const auto frames = max_bytes / frame_size;
+            const auto radial_velocity = math::Pi * 2.0 * frequency_;
+            const auto sample_increment = 1.0/44100.0 * radial_velocity;
+            float* ptr = (float*)buff;
+
+            for (unsigned i=0; i<frames; ++i)
+            {
+                ptr[i] = std::sin(sample_++ * sample_increment);
+            }
+            return frames * frame_size;
+        }
+        virtual bool HasNextBuffer(std::uint64_t) const override
+        { return true; }
+        virtual void Reset() override
+        { /* intentionally empty */ }
+    private:
+        const unsigned frequency_ = 0;
+        unsigned sample_ = 0;
+    };
+#endif
 
 } // namespace
