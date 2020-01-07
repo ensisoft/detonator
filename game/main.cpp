@@ -58,7 +58,7 @@ void loadProfile(invaders::GameWidget::Profile profile,
                  invaders::GameWidget& widget,
                  const QSettings& settings)
 {
-    QString name          = profile.name;
+    QString name          = QString::fromStdWString(profile.name);
     profile.speed         = settings.value(name + "/speed", profile.speed).toFloat();
     profile.spawnCount    = settings.value(name + "/spawnCount", profile.spawnCount).toUInt();
     profile.spawnInterval = settings.value(name + "/spawnInterval", profile.spawnInterval).toUInt();
@@ -179,22 +179,22 @@ int game_main(int argc, char* argv[])
     window.setPlaySounds(playSound);
 
     const auto& levels_txt = QApplication::applicationDirPath() + "/data/levels.txt";
-    window.loadLevels(levels_txt);
+    window.loadLevels(levels_txt.toStdWString());
 
     QStringList levels = settings.value("game/levels").toStringList();
     for (int i=0; i<levels.size(); ++i)
     {
         const auto name = levels[i];
         invaders::GameWidget::LevelInfo info;
-        info.name = name;
+        info.name = name.toStdWString();
         info.highScore = settings.value(name + "/highscore").toUInt();
         info.locked = settings.value(name + "/locked").toBool();
         window.setLevelInfo(info);
     }
 
-    const invaders::GameWidget::Profile EASY    {"Easy",    1.6f, 2, 7, 30};
-    const invaders::GameWidget::Profile MEDIUM  {"Medium",  1.8f, 2, 4, 35};
-    const invaders::GameWidget::Profile CHINESE {"Chinese", 2.0f, 2, 4, 40};
+    const invaders::GameWidget::Profile EASY    {L"Easy",    1.6f, 2, 7, 30};
+    const invaders::GameWidget::Profile MEDIUM  {L"Medium",  1.8f, 2, 4, 35};
+    const invaders::GameWidget::Profile CHINESE {L"Chinese", 2.0f, 2, 4, 40};
 
     loadProfile(EASY, window, settings);
     loadProfile(MEDIUM, window, settings);
@@ -244,9 +244,9 @@ int game_main(int argc, char* argv[])
         if (!window.getLevelInfo(info, i))
             break;
 
-        levels << info.name;
-        settings.setValue(info.name + "/highscore", info.highScore);
-        settings.setValue(info.name + "/locked", info.locked);
+        levels << QString::fromStdWString(info.name);
+        settings.setValue(QString::fromStdWString(info.name + L"/highscore"), info.highScore);
+        settings.setValue(QString::fromStdWString(info.name + L"/locked"), info.locked);
     }
     settings.setValue("game/levels", levels);
     settings.setValue("audio/sound", window.getPlaySounds());

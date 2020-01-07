@@ -23,14 +23,9 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QtGui/QPaintEvent>
-#  include <QtGui/QKeyEvent>
-#  include <QtGui/QPainter>
-#  include <QtGui/QOpenGLContext>
 #  include <QApplication>
-#  include <QResource>
-#  include <QFileInfo>
-#  include <QtDebug>
+#  include <QtGui/QKeyEvent>
+#  include <QtGui/QOpenGLContext>
 #include "warnpop.h"
 
 #include <cmath>
@@ -68,18 +63,6 @@ extern audio::AudioPlayer* g_audio;
 const auto LevelUnlockCriteria = 0.85;
 const auto GameCols = 40;
 const auto GameRows = 10;
-
-QString R(const QString& s)
-{
-    QString resname = ":/dist/" + s;
-    QResource resource(resname);
-    if (resource.isValid())
-        return resname;
-
-    static const auto& inst = QApplication::applicationDirPath();
-    return inst + "/" + s;
-}
-
 
 template<typename To, typename From>
 To* CollisionCast(From* lhs, From* rhs)
@@ -2169,15 +2152,15 @@ GameWidget::GameWidget()
 
 GameWidget::~GameWidget() = default;
 
-void GameWidget::loadLevels(const QString& file)
+void GameWidget::loadLevels(const std::wstring& file)
 {
-    mLevels = Level::LoadLevels(file.toStdWString());
+    mLevels = Level::LoadLevels(file);
 
     for (const auto& level : mLevels)
     {
         LevelInfo info;
         info.highScore = 0;
-        info.name      = QString::fromStdWString(level->GetName());
+        info.name      = level->GetName();
         info.locked    = true;
         mLevelInfos.push_back(info);
         if (!level->Validate())
@@ -2186,7 +2169,7 @@ void GameWidget::loadLevels(const QString& file)
     mLevelInfos[0].locked = false;
 }
 
-void GameWidget::unlockLevel(const QString& name)
+void GameWidget::unlockLevel(const std::wstring& name)
 {
     for (auto& info : mLevelInfos)
     {

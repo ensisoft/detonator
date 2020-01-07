@@ -26,9 +26,6 @@
 #include "warnpush.h"
 #  include <QOpenGLWidget>
 #  include <QObject>
-#  include <QTimer>
-#  include <QElapsedTimer>
-#  include <QString>
 #include "warnpop.h"
 
 #include <list>
@@ -36,6 +33,7 @@
 #include <memory>
 #include <chrono>
 #include <stack>
+#include <string>
 
 namespace gfx {
     class Painter;
@@ -58,28 +56,28 @@ namespace invaders
     public:
         // Level info for persisting level data
         struct LevelInfo {
-            QString name;
-            unsigned highScore;
-            bool locked;
+            std::wstring name;
+            unsigned highScore = 0;
+            bool locked = true;
         };
 
         // game profile settings, for example "easy", "medium" etc.
         struct Profile {
-            QString  name;
-            float speed;
-            unsigned spawnCount;
-            unsigned spawnInterval;
-            unsigned numEnemies;
+            std::wstring name;
+            float speed = 0.0f; 
+            unsigned spawnCount = 0;
+            unsigned spawnInterval = 0;
+            unsigned numEnemies = 0;
         };
 
         GameWidget();
        ~GameWidget();
 
         // load level data from the specified data file
-        void loadLevels(const QString& file);
+        void loadLevels(const std::wstring& file);
 
         // unlock the level identified by it's name
-        void unlockLevel(const QString& name);
+        void unlockLevel(const std::wstring& name);
 
         // restore previously stored level info
         void setLevelInfo(const LevelInfo& info);
