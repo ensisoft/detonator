@@ -57,6 +57,10 @@ namespace invaders
 {
 
 using ParticleEngine = gfx::KinematicsParticleEngine;
+using FRect  = gfx::FRect;
+using IRect  = gfx::IRect;
+using FPoint = gfx::FPoint;
+using IPoint = gfx::IPoint;
 
 extern audio::AudioPlayer* g_audio;
 
@@ -101,60 +105,54 @@ class GridLayout
 {
 public:
     // Divide the given rectangle into a grid of columns and rows.
-    GridLayout(const QRectF& rect, unsigned num_cols, unsigned num_rows)
+    GridLayout(const IRect& rect, unsigned num_cols, unsigned num_rows)
         : mNumCols(num_cols)
         , mNumRows(num_rows)
-        , mOriginX(rect.x())
-        , mOriginY(rect.y())
-        , mWidth(rect.width())
-        , mHeight(rect.height())
+        , mOriginX(rect.GetX())
+        , mOriginY(rect.GetY())
+        , mWidth(rect.GetWidth())
+        , mHeight(rect.GetHeight())
     {}
 
     // Map a range of cells into a rectangle so that the returned
     // rectangle covers the cells from the top left cell's top left corner
     // to the bottom right cell's bottom right corner.
-    QRectF MapRect(const QPoint& top_left_cell, const QPoint& bottom_right_cell) const
+    IRect MapRect(const IPoint& top_left_cell, const IPoint& bottom_right_cell) const
     {
-        const QPointF top = MapPoint(top_left_cell);
-        const QPointF bot = MapPoint(bottom_right_cell);
-        return {top, bot};
+        const FPoint& top = MapPoint(top_left_cell);
+        const FPoint& bot = MapPoint(bottom_right_cell);
+        const FPoint& dim = bot - top;
+        return IRect(top.GetX(), top.GetY(), dim.GetX(), dim.GetY());
     }
 
-    gfx::FRect MapGfxRect(const QPoint& top_left_cell, const QPoint& bottom_right_cell) const 
+    gfx::FRect MapGfxRect(const IPoint& top_left_cell, const IPoint& bottom_right_cell) const 
     {
-        const QRectF& rc = MapRect(top_left_cell, bottom_right_cell);
-        return gfx::FRect(rc.x(), rc.y(), rc.width(), rc.height());
+        const auto& rc = MapRect(top_left_cell, bottom_right_cell);
+        return gfx::FRect(rc);
     }
 
     // Map a a grid position in layout grid space into 
     // parent coordinate space.
-    QPointF MapPoint(const QPoint& cell) const
+    FPoint MapPoint(const IPoint& cell) const
     {
         const auto& scale = GetCellDimensions();
-        const float xpos = cell.x() * scale.x() + mOriginX;
-        const float ypos = cell.y() * scale.y() + mOriginY;
+        const float xpos = cell.GetX() * scale.GetX() + mOriginX;
+        const float ypos = cell.GetY() * scale.GetY() + mOriginY;
         return { xpos, ypos };
     }
 
     // Map a normalized position in the layout space into
     // parent coordinate space.
-    QPointF MapPoint(const glm::vec2& norm) const
+    FPoint MapPoint(const glm::vec2& norm) const
     {
         const float xpos = mWidth * norm.x + mOriginX;
         const float ypos = mHeight * norm.y + mOriginY;
-        return { xpos, ypos };
+        return FPoint(xpos, ypos);
     }
 
-    QPoint GetCellDimensions() const
+    IPoint GetCellDimensions() const
     {
-        return QPoint(mWidth / mNumCols, 
-                 mHeight / mNumRows);
-    }
-
-    // get whole widget rect in widget coordinates
-    QRectF GetRect() const
-    {
-        return {mOriginX, mOriginY, mWidth, mHeight};
+        return IPoint(mWidth / mNumCols, mHeight / mNumRows);
     }
 
     gfx::FRect GetGfxRect() const 
@@ -214,18 +212,17 @@ GameLayout GetGameWindowLayout(unsigned width, unsigned height)
     const auto half_width_diff  = (game_width - width) / 2;
     const auto half_height_diff = (height - game_height) / 2 ;
 
-    QRect rect;        
-    rect.setWidth(game_width);
-    rect.setHeight(game_height);
-    rect.moveTo(-half_width_diff, half_height_diff);
+    IRect rect;        
+    rect.Resize(game_width, game_height);
+    rect.Move(-half_width_diff, half_height_diff);
 
     return GameLayout(rect, GameCols, GameRows);
 }
 
-GameLayout GetGameWindowLayout(const QRect& rect)
+GameLayout GetGameWindowLayout(const IRect& rect)
 {
     // todo: we should work out the x/y offset
-    return GetGameWindowLayout(rect.width(), rect.height());
+    return GetGameWindowLayout(rect.GetWidth(), rect.GetHeight());
 }
 
 class GameWidget::State
@@ -248,7 +245,7 @@ public:
     // render target where the painting should occur.
     // No scissor is set by default instead the state should set the
     // scissor as needed once the final transformation is done.
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const = 0;
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const = 0;
 
     // map keyboard input to an action.
     virtual Action mapAction(const QKeyEvent* press) const = 0;
@@ -288,13 +285,13 @@ public:
     // render target where the painting should occur. 
     // No scissor is set by default instead the animatiojn should
     // set the scissor as needed once the final transformation is done.
-    virtual void paint(gfx::Painter& painter, const QRect& rect) = 0;
+    virtual void paint(gfx::Painter& painter, const IRect& rect) = 0;
 
     // Get the bounds of the animation object with respect to the 
     // given window rect.
-    virtual QRectF getBounds(const QRect& rect) const
+    virtual FRect getBounds(const IRect& rect) const
     {
-        return QRectF{};
+        return FRect();
     }
     enum class ColliderType {
         None,
@@ -328,17 +325,17 @@ public:
         mY = math::wrap(-0.2f, 1.0f, mY + d.y);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         const auto& size = getTextureSize(mTexture);
         const char* name = getTextureName(mTexture);
 
         // the asteroids are just in their own space which we simply map
         // to the whole of the given rectangle
-        const auto width  = rect.width();
-        const auto height = rect.height();
-        const auto xpos = rect.x();
-        const auto ypos = rect.y();
+        const auto width  = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        const auto xpos = rect.GetX();
+        const auto ypos = rect.GetY();
 
         gfx::Transform t;
         t.Resize(size * mScale);
@@ -346,18 +343,18 @@ public:
         painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
     }
 
-    virtual QRectF getBounds(const QRect& rect) const override
+    virtual FRect getBounds(const IRect& rect) const override
     {
         const auto& size = getTextureSize(mTexture);
 
-        const auto width  = rect.width();
-        const auto height = rect.height();
-        const auto xpos = rect.x();
-        const auto ypos = rect.y();
+        const auto width  = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        const auto xpos = rect.GetX();
+        const auto ypos = rect.GetY();
 
-        QRectF bounds;
-        bounds.setSize(size * mScale);
-        bounds.moveTo(width * mX + xpos, height * mY + ypos);
+        FRect bounds;
+        bounds.Resize(size * mScale);
+        bounds.Move(width * mX + xpos, height * mY + ypos);
         return bounds;
     }
     virtual ColliderType getColliderType() const override
@@ -372,12 +369,12 @@ private:
         };
         return textures[index];
     }
-    static QSize getTextureSize(unsigned index)
+    static gfx::FSize getTextureSize(unsigned index)
     {
-        static QSize sizes[] = {
-            QSize(78, 74),
-            QSize(74, 63),
-            QSize(72, 58)
+        static gfx::FSize sizes[] = {
+            gfx::FSize(78, 74),
+            gfx::FSize(74, 63),
+            gfx::FSize(72, 58)
         };
         return sizes[index];
     }
@@ -431,7 +428,7 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -441,12 +438,12 @@ public:
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
         const auto position  = layout.MapPoint(mPosition);
-        const auto scaledWidth = unitScale.x() * mScale;
-        const auto scaledHeight = unitScale.x() * mScale; // * aspect;
+        const auto scaledWidth = unitScale.GetX() * mScale;
+        const auto scaledHeight = unitScale.GetX() * mScale; // * aspect;
 
         gfx::Transform t;
         t.Resize(scaledWidth, scaledHeight);
-        t.MoveTo(position - QPointF(scaledWidth / 2.0, scaledHeight / 2.0));
+        t.MoveTo(position - FPoint(scaledWidth / 2.0, scaledHeight / 2.0));
         painter.Draw(gfx::Rectangle(), t, mSprite);
     }
 
@@ -503,15 +500,15 @@ public:
         mParticles->Update(dt / 1000.0f);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto pos = layout.MapPoint(mPosition);
-        const auto x = pos.x();
-        const auto y = pos.y();
+        const auto x = pos.GetX();
+        const auto y = pos.GetY();
 
         gfx::Transform t;
         t.Resize(500, 500);
@@ -562,7 +559,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -574,13 +571,13 @@ public:
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
-        const auto pxw = unitScale.x() * mScale;
-        const auto pxh = unitScale.x() * mScale;
+        const auto pxw = unitScale.GetX() * mScale;
+        const auto pxh = unitScale.GetY() * mScale;
         const auto pos = layout.MapPoint(mPosition);
 
         gfx::Transform t;
         t.Resize(pxw, pxh);        
-        t.MoveTo(pos - QPointF(pxw/2.0f, pxh/2.0f));
+        t.MoveTo(pos - FPoint(pxw/2.0f, pxh/2.0f));
         painter.Draw(gfx::Rectangle(), t, mSprite);
 
     }
@@ -662,7 +659,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -771,25 +768,25 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         const auto& layout = GetGameWindowLayout(rect);
 
         // offset the texture to be centered around the position
         const auto unitScale   = layout.GetCellDimensions();
-        const auto spriteScale = layout.GetCellDimensions() * getScale();
+        const auto spriteScale = layout.GetCellDimensions();
         const auto position    = layout.MapPoint(mPosition);
 
         const float shipWidth  = mShipWidth; 
         const float shipHeight = mShipHeight; 
         const float shipAspect = shipHeight / shipWidth;
-        const float shipScaledWidth  = spriteScale.x();
+        const float shipScaledWidth  = spriteScale.GetX() * getScale();
         const float shipScaledHeight = shipScaledWidth * shipAspect;
 
         const float jetWidth  = mJetWidth; 
         const float jetHeight = mJetHeight; 
         const float jetAspect = jetHeight / jetWidth;
-        const float jetScaledWidth  = spriteScale.x();
+        const float jetScaledWidth  = spriteScale.GetX() * getScale();
         const float jetScaledHeight = jetScaledWidth * jetAspect;
 
         if (!mParticles)
@@ -817,7 +814,7 @@ public:
         // the ship's x,y coordinate is offset so that the center of the 
         // sprite is where the ship's game space coordinate maps to.
         const auto shipTopLeft = position - 
-            QPointF(shipScaledWidth / 2.0f, shipScaledHeight / 2.0f);
+            FPoint(shipScaledWidth / 2.0f, shipScaledHeight / 2.0f);
         
         // have to do a little fudge here since the scarab ship has
         // a contour such that positioning the particle engine just behind
@@ -846,7 +843,7 @@ public:
             gfx::TextureMap(getShipTextureIdentifier(mShipType))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
 
-        const auto fontsize = unitScale.y() / 1.75;
+        const auto fontsize = unitScale.GetY() / 1.75;
         gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
         text.AddText(base::ToUtf8(mText),"fonts/SourceHanSerifTC-SemiBold.otf", fontsize)
             .SetAlign(gfx::TextBuffer::HorizontalAlignment::AlignLeft)
@@ -859,21 +856,17 @@ public:
 
         if (mShieldIsOn)
         {
-            QRectF rect;
+            FRect rect;
             // we don't bother to calculate the size for the shield properly
             // in order to cover the whole ship. instead we use a little fudge
             // factor to expand the shield.
             const auto fudge = 1.25f;
             const auto width = shipScaledWidth;
-            rect.setHeight(width * fudge);
-            rect.setWidth(width * fudge);
-            rect.moveTo(shipTopLeft);
-            rect.translate((rect.width()-shipScaledWidth) / -2.0f,
-                (rect.height()-shipScaledHeight) / -2.0f);
-
             gfx::Transform t;
-            t.Resize(rect);
-            t.MoveTo(rect);
+            t.Resize(width * fudge, width * fudge);
+            t.MoveTo(shipTopLeft);
+            t.Translate((width - shipScaledWidth) * -0.5, 
+                        (width - shipScaledWidth) * -0.5);
             painter.Draw(gfx::Rectangle(), t, 
                 gfx::TextureMap("textures/spr_shield.png")
                     .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
@@ -992,23 +985,23 @@ public:
         mPosition += p;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect)  override
+    virtual void paint(gfx::Painter& painter, const IRect& rect)  override
     {
         const auto& layout = GetGameWindowLayout(rect);
         const auto dim = layout.GetCellDimensions();
         const auto pos = layout.MapPoint(mPosition);
-        const auto font_size = dim.y() / 2;
+        const auto font_size = dim.GetY() / 2;
 
         // todo: we used QFontMetrics before to estimate the size
         // of the bounding box for the text.
         const auto w = 100.0f;
         const auto h = font_size * 2;
-        const auto p = pos - QPointF(w*0.5, h*0.5);
+        const auto p = pos - FPoint(w*0.5, h*0.5);
 
         gfx::DrawTextRect(painter, 
             base::ToUtf8(mText),
             "fonts/ARCADE.TTF", font_size, 
-            gfx::FRect(p.x(), p.y(), w, h), 
+            gfx::FRect(p, w, h), 
             gfx::Color::DarkGray);
     }
 
@@ -1062,42 +1055,42 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        const auto width  = rect.width();
-        const auto height = rect.height();
-        const auto xpos   = rect.x();
-        const auto ypos   = rect.y();
+        const auto width  = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        const auto xpos   = rect.GetX();
+        const auto ypos   = rect.GetY();
 
         const auto sec = mRuntime / 1000.0f;
-        const auto pos = QPointF(mPosition.x * width + xpos,
-                                 mPosition.y * height + ypos);
+        const auto pos = FPoint(mPosition.x * width + xpos,
+                                mPosition.y * height + ypos);
 
         mSprite.SetAppRuntime(sec);
 
         gfx::Transform rings;
         rings.Resize(200, 200);
-        rings.MoveTo(pos - QPoint(100, 100));
+        rings.MoveTo(pos - FPoint(100.0f, 100.0f));
         painter.Draw(gfx::Rectangle(), rings, gfx::ConcentricRingsEffect(sec));
 
         gfx::Transform ufo;
         ufo.Resize(40, 40);
-        ufo.MoveTo(pos - QPoint(20, 20));
+        ufo.MoveTo(pos - FPoint(20.0f, 20.0f));
         painter.Draw(gfx::Rectangle(), ufo, mSprite);
     }
 
-    virtual QRectF getBounds(const QRect& rect) const override
+    virtual FRect getBounds(const IRect& rect) const override
     {
-        const auto width  = rect.width();
-        const auto height = rect.height();
-        const auto xpos = rect.x();
-        const auto ypos = rect.y();
+        const auto width  = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        const auto xpos = rect.GetX();
+        const auto ypos = rect.GetY();
 
-        const auto pos = QPointF(mPosition.x * width + xpos,
-                                 mPosition.y * height + ypos);
-        QRectF bounds;
-        bounds.moveTo(pos - QPoint(20, 20));
-        bounds.setSize(QSize(40, 40));
+        const auto pos = FPoint(mPosition.x * width + xpos,
+                                mPosition.y * height + ypos);
+        FRect bounds;
+        bounds.Move(pos - FPoint(20.0f, 20.0f));
+        bounds.Resize(40.0f, 40.0f);
         return bounds;
     }
 
@@ -1150,7 +1143,7 @@ public:
             return false;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         mSprite.SetAppRuntime(mRunTime / 1000.0f);
 
@@ -1192,7 +1185,7 @@ public:
         return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -1202,12 +1195,12 @@ public:
         const auto dim = layout.GetCellDimensions();
         const auto top = layout.MapPoint(mPosition);
         
-        const auto font_size = dim.y() / 2;
+        const auto font_size = dim.GetY() / 2;
 
         gfx::DrawTextRect(painter, 
             base::FormatString("%1", mScore),
             "fonts/ARCADE.TTF", font_size, 
-            gfx::FRect(top.x(), top.y(), dim.x() * 2, dim.y()),
+            gfx::FRect(top, dim.GetX() * 2.0f, dim.GetY()*1.0f),
             gfx::Color::DarkYellow, 
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
@@ -1244,11 +1237,11 @@ public:
         params.direction_sector_size = 0.0f;
         mStars = std::make_unique<ParticleEngine>(params);
     }
-    void paint(gfx::Painter& painter, const QRectF& rect)
+    void paint(gfx::Painter& painter, const IRect& rect)
     {
         gfx::Transform t;
         t.MoveTo(0, 0);
-        t.Resize(rect.width(), rect.height());
+        t.Resize(rect.GetWidth(), rect.GetHeight());
 
     #ifdef WINDOWS_OS
         // have a problem on windows that the background texture looks very dark
@@ -1296,7 +1289,7 @@ public:
         mText.append("\nPress any key to continue");
     }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1334,7 +1327,7 @@ public:
     virtual void update(float dt) override
     { mTotalTimeRun += dt; }
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         const auto cols = 7;
         const auto rows = 6;
@@ -1353,31 +1346,31 @@ public:
             "F3 - Credits\n\n"
             "Difficulty",
             "fonts/ARCADE.TTF", font_size_l,
-            layout.MapGfxRect(QPoint(0, 0), QPoint(cols, 3)),            
+            layout.MapGfxRect(IPoint(0, 0), IPoint(cols, 3)),            
             gfx::Color::DarkGray, 
             gfx::AlignHCenter | gfx::AlignVCenter);
         
         // draw the difficulty settings
         {
-            const GridLayout temp(layout.MapRect(QPoint(2, 3), QPoint(5, 4)), 3, 1);
+            const GridLayout temp(layout.MapRect(IPoint(2, 3), IPoint(5, 4)), 3, 1);
             gfx::DrawTextRect(painter,
                 "Easy", 
                 "fonts/ARCADE.TTF", font_size_s,
-                temp.MapGfxRect(QPoint(0, 0), QPoint(1, 1)),
+                temp.MapGfxRect(IPoint(0, 0), IPoint(1, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 0 ?  gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignRight,
                 mCurrentProfileIndex == 0 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Normal", 
                 "fonts/ARCADE.TTF", font_size_s,
-                temp.MapGfxRect(QPoint(1, 0), QPoint(2, 1)),
+                temp.MapGfxRect(IPoint(1, 0), IPoint(2, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignHCenter,
                 mCurrentProfileIndex == 1 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Chinese", 
                 "fonts/ARCADE.TTF", font_size_s,
-                temp.MapGfxRect(QPoint(2, 0), QPoint(3, 1)),
+                temp.MapGfxRect(IPoint(2, 0), IPoint(3, 1)),
                 mCurrentRowIndex == 0 && mCurrentProfileIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
                 gfx::AlignTop | gfx::AlignLeft,
                 mCurrentProfileIndex == 2 ? gfx::TextProp::Underline : 0);
@@ -1386,16 +1379,16 @@ public:
         // Draw the levesl
         const auto prev_level_index = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevels.size() - 1;
         const auto next_level_index = (mCurrentLevelIndex + 1) % mLevels.size();
-        drawLevel(painter, layout.MapGfxRect(QPoint(1, 4), QPoint(2, 5)),
+        drawLevel(painter, layout.MapGfxRect(IPoint(1, 4), IPoint(2, 5)),
             prev_level_index, font_size_s, false);
-        drawLevel(painter, layout.MapGfxRect(QPoint(3, 4), QPoint(4, 5)),
+        drawLevel(painter, layout.MapGfxRect(IPoint(3, 4), IPoint(4, 5)),
             mCurrentLevelIndex, font_size_s, mCurrentRowIndex == 1);
-        drawLevel(painter, layout.MapGfxRect(QPoint(5, 4), QPoint(6, 5)),
+        drawLevel(painter, layout.MapGfxRect(IPoint(5, 4), IPoint(6, 5)),
             next_level_index, font_size_s, false);
 
         // Draw a little glint effect on top of the middle rectangle 
         gfx::DrawRectOutline(painter, 
-            layout.MapGfxRect(QPoint(3, 4), QPoint(4, 5)),
+            layout.MapGfxRect(IPoint(3, 4), IPoint(4, 5)),
             gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f), 1);
 
         const auto& play_or_not = mInfos[mCurrentLevelIndex].locked ?
@@ -1403,7 +1396,7 @@ public:
         gfx::DrawTextRect(painter, 
             play_or_not, 
             "fonts/ARCADE.TTF", font_size_l, 
-            layout.MapGfxRect(QPoint(0, rows-1), QPoint(cols, rows)),
+            layout.MapGfxRect(IPoint(0, rows-1), IPoint(cols, rows)),
             gfx::Color::DarkGray,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             gfx::TextProp::Blinking);
@@ -1549,7 +1542,7 @@ public:
     virtual void keyPress(const QKeyEvent* event) override
     {}
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1586,7 +1579,7 @@ public:
       , mFullscreen(fullscreen)
     {}
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         const GridLayout layout(rect, 1, 7);
 
@@ -1595,36 +1588,36 @@ public:
         gfx::DrawTextRect(painter, 
             "Press space to toggle a setting.", 
             "fonts/ARCADE.TTF", font_size, 
-            layout.MapGfxRect(QPoint(0, 1), QPoint(1, 2)),
+            layout.MapGfxRect(IPoint(0, 1), IPoint(1, 2)),
             gfx::Color::DarkGray);
 #ifdef GAME_ENABLE_AUDIO 
         gfx::DrawTextRect(painter,
             base::FormatString("Sounds Effects: %1", mPlaySounds ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size, 
-            layout.MapGfxRect(QPoint(0, 2), QPoint(1, 3)), 
+            layout.MapGfxRect(IPoint(0, 2), IPoint(1, 3)), 
             mSettingIndex == 0 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
         gfx::DrawTextRect(painter, 
             base::FormatString("Awesome Music: %1", mPlayMusic ? "On" : "Off"), 
             "fonts/ARCADE.TTF", font_size,
-            layout.MapGfxRect(QPoint(0, 3), QPoint(1, 4)), 
+            layout.MapGfxRect(IPoint(0, 3), IPoint(1, 4)), 
             mSettingIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
 #else
         gfx::DrawTextRect(painter, 
             "Audio is not supported on this platform."
             "fonts/ARCADE.TTF", font_size, 
-            layout.MapGfxRect(QPoint(0, 2), QPoint(1, 4)),
+            layout.MapGfxRect(IPoint(0, 2), IPoint(1, 4)),
             gfx::Color::DarkGray);
 #endif
         gfx::DrawTextRect(painter,
             base::FormatString("Fullscreen: %1", mFullscreen ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
-            layout.MapGfxRect(QPoint(0, 4), QPoint(1, 5)),
+            layout.MapGfxRect(IPoint(0, 4), IPoint(1, 5)),
             mSettingIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
 
         gfx::DrawTextRect(painter,
             "Press Esc to exit",
             "fonts/ARCADE.TTF", font_size,
-            layout.MapGfxRect(QPoint(0, 5), QPoint(1, 6)),
+            layout.MapGfxRect(IPoint(0, 5), IPoint(1, 6)),
             gfx::Color::DarkGray);
 
     }
@@ -1678,7 +1671,7 @@ private:
 class GameWidget::About : public State
 {
 public:
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         const GridLayout layout(rect, 1, 20);
 
@@ -1717,7 +1710,7 @@ public:
     PlayGame(const Game::Setup& setup, Level& level, Game& game) : mSetup(setup), mLevel(level), mGame(game)
     {}
 
-    virtual void paint(gfx::Painter& painter, const QRect& rect) const override
+    virtual void paint(gfx::Painter& painter, const IRect& rect) const override
     {
         switch (mState)
         {
@@ -1812,7 +1805,7 @@ public:
     }
 
 private:
-    void paintFleet(gfx::Painter& painter, const QRect& rect) const
+    void paintFleet(gfx::Painter& painter, const IRect& rect) const
     {
         const auto& enemies = mLevel.GetEnemies();
         const auto cols = 3;
@@ -1821,8 +1814,8 @@ private:
 
         const auto font_size_s = layout.GetFontSize() * 0.15;
         const auto font_size_l = layout.GetFontSize() * 0.2;
-        const auto header = layout.MapGfxRect(QPoint(0, 0), QPoint(cols, 1));
-        const auto footer = layout.MapGfxRect(QPoint(0, rows-1), QPoint(cols, rows));
+        const auto header = layout.MapGfxRect(IPoint(0, 0), IPoint(cols, 1));
+        const auto footer = layout.MapGfxRect(IPoint(0, rows-1), IPoint(cols, rows));
 
         gfx::DrawTextRect(painter, 
             "Kill the following enemies\n", 
@@ -1842,7 +1835,7 @@ private:
             const auto& e = enemies[i];
             const auto col = i % cols;
             const auto row = i / cols;
-            const auto& rect = layout.MapGfxRect(QPoint(col, row + 1), QPoint(col + 1, row + 2));
+            const auto& rect = layout.MapGfxRect(IPoint(col, row + 1), IPoint(col + 1, row + 2));
             gfx::DrawTextRect(painter, 
                 base::FormatString("%1 %2", e.viewstring, e.killstring),
                 "fonts/SourceHanSerifTC-SemiBold.otf", font_size_l, 
@@ -1858,7 +1851,7 @@ private:
         }
     }
 
-    void paintHUD(gfx::Painter& painter, const QRect& rect) const
+    void paintHUD(gfx::Painter& painter, const IRect& rect) const
     {
         const auto& score  = mGame.GetScore();
         const auto& result = score.maxpoints ?
@@ -1873,12 +1866,12 @@ private:
             base::FormatString("Score %1 (%2%) / Enemies x %3 / Bombs x %4 / Warps x %5 (F1 for Help)",
                 score.points, (int)result, score.pending, bombs, warps),
             "fonts/ARCADE.TTF", font_size, 
-            layout.MapGfxRect(QPoint(0, -1), QPoint(GameCols, 0)), 
+            layout.MapGfxRect(IPoint(0, -1), IPoint(GameCols, 0)), 
             gfx::Color::Gray);
         gfx::DrawTextRect(painter,
             mCurrentText.empty() ? "Type the correct pinyin to kill the enemies!" : base::ToUtf8(mCurrentText),
             "fonts/ARCADE.TTF", font_size,
-            layout.MapGfxRect(QPoint(0, GameRows), QPoint(GameCols, GameRows+1)),
+            layout.MapGfxRect(IPoint(0, GameRows), IPoint(GameCols, GameRows+1)),
             gfx::Color::DarkGray, 
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             mCurrentText.empty() ? gfx::TextProp::Blinking : 0);
@@ -1932,7 +1925,7 @@ GameWidget::GameWidget()
         explosion->setScale(invader->getScale() * 1.5);
         smoke->setScale(invader->getScale() * 2.5);
         sparks->setColor(gfx::Color4f(255, 255, 68, 180));
-        debris->setTextureScaleFromWidth(scale.x());
+        debris->setTextureScaleFromWidth(scale.GetX());
 
         mAnimations.push_back(std::move(invader));
         mAnimations.push_back(std::move(missile));
@@ -2275,12 +2268,14 @@ void GameWidget::updateGame(float dt)
 
     // do some simple collision resolution.
     using CollisionType = base::bitflag<Animation::ColliderType>;
-
     static const CollisionType Asteroid_UFO_Collision =
         { Animation::ColliderType::UFO, Animation::ColliderType::Asteroid };
-
     static const CollisionType UFO_UFO_Collision =
         { Animation::ColliderType::UFO, Animation::ColliderType::UFO };
+
+    const auto w = width();
+    const auto h = height();
+    const IRect rect(0, 0, w , h);
 
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
     {
@@ -2302,9 +2297,10 @@ void GameWidget::updateGame(float dt)
                 const auto collision = CollisionType {lhsColliderType, type };
                 if (collision == Asteroid_UFO_Collision || collision == UFO_UFO_Collision)
                 {
-                    const auto& lhsBounds = lhsAnim->getBounds(rect());
-                    const auto& rhsBounds = animation->getBounds(rect());
-                    if (lhsBounds.intersects(rhsBounds) || rhsBounds.intersects(lhsBounds))
+                    const auto& lhsBounds = lhsAnim->getBounds(rect);
+                    const auto& rhsBounds = animation->getBounds(rect);
+                    const auto& intersect = Intersect(lhsBounds, rhsBounds);
+                    if (!intersect.IsEmpty())
                         return true;
                 }
                 return false;
@@ -2419,17 +2415,20 @@ void GameWidget::paintGL()
 {
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
+    const auto w = width();
+    const auto h = height();
+    const IRect rect(0, 0, w , h);
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
 
     // paint the background
-    mBackground->paint(*mCustomGraphicsPainter, rect());
+    mBackground->paint(*mCustomGraphicsPainter, rect);
 
     // then paint the animations on top of the background
     for (auto& anim : mAnimations)
     {
-        anim->paint(*mCustomGraphicsPainter, rect());
+        anim->paint(*mCustomGraphicsPainter, rect);
     }
 
     const bool bIsGameRunning = mStates.top()->isGameRunning();
@@ -2442,12 +2441,12 @@ void GameWidget::paintGL()
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->paint(*mCustomGraphicsPainter, rect());
+            invader->paint(*mCustomGraphicsPainter, rect);
         }
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(*mCustomGraphicsPainter, rect());
+    mStates.top()->paint(*mCustomGraphicsPainter, rect);
 
     if (mShowFps)
     {

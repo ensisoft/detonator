@@ -56,7 +56,7 @@ namespace gfx
         template<typename T>
         void Translate(const T& t)
         {
-            Translate(t.x(), t.y());
+            Translate(t.GetX(), t.GetY());
         }
 
         // Set absolute resize. This will override any previously
@@ -82,7 +82,7 @@ namespace gfx
         template<typename T>
         void Scale(const T& t)
         {
-            Scale(t.width(), t.height());
+            Scale(t.GetWidth(), t.GetHeight());
         }
 
         // Accumulate rotation to the current transformation
@@ -97,7 +97,7 @@ namespace gfx
         template<typename T>
         void MoveTo(const T& t)
         {
-            MoveTo(t.x(),t.y());
+            MoveTo(t.GetX(),t.GetY());
         }
 
         // Set absolute resize. This will override any previously
@@ -106,7 +106,7 @@ namespace gfx
         template<typename T>
         void Resize(const T& t)
         {
-            Resize(t.width(), t.height());
+            Resize(t.GetWidth(), t.GetHeight());
         }
 
         // Reset any transformation to identity, i.e. no transformation.

@@ -45,6 +45,37 @@ namespace gfx
     };
 
     template<typename T>
+    class Size
+    {
+    public:
+        Size() = default;
+        Size(T width, T height)
+          : mWidth(width)
+          , mHeight(height)
+        {}
+        template<typename F> explicit
+        Size(const Size<F>& other)
+          : mWidth(other.GetWidth())
+          , mHeight(other.GetHeight())
+        {}
+        T GetWidth() const { return mWidth; }
+        T GetHeight() const { return mHeight; }
+    private:
+        T mWidth  = T();
+        T mHeight = T();
+    };
+    template<typename T> inline
+    Size<T> operator*(const Size<T>& size, T scale)
+    {
+        return Size<T>(size.GetWidth() * scale, 
+                       size.GetHeight() * scale);
+    }
+
+    using USize = Size<unsigned>;
+    using FSize = Size<float>;
+    using ISize = Size<int>;
+
+    template<typename T>
     class Point
     {
     public:
@@ -66,6 +97,19 @@ namespace gfx
         T mY = T();
     };
 
+    template<typename T> inline
+    Point<T> operator-(const Point<T>& lhs, const Point<T>& rhs)
+    {
+        return Point<T>(lhs.GetX() - rhs.GetX(), 
+                        lhs.GetY() - rhs.GetY());
+    }
+    template<typename T> inline
+    Point<T> operator+(const Point<T>& lhs, const Point<T>& rhs)
+    {
+        return Point<T>(lhs.GetX() + rhs.GetX(), 
+                        lhs.GetY() + rhs.GetY());
+    }
+
     using UPoint = Point<unsigned>;
     using FPoint = Point<float>;
     using IPoint = Point<int>;
@@ -76,11 +120,11 @@ namespace gfx
     {
     public:
         Rect() {}
-        Rect(T x, T y, T w, T h)
+        Rect(T x, T y, T width, T height)
           : mX(x)
           , mY(y)
-          , mWidth(w)
-          , mHeight(h)
+          , mWidth(width)
+          , mHeight(height)
         {}
         template<typename F> explicit 
         Rect(const Rect<F>& other)
@@ -89,6 +133,20 @@ namespace gfx
             mY = other.GetY();
             mWidth = other.GetWidth();
             mHeight = other.GetHeight();
+        }
+        Rect(const Point<T>& pos, T width, T height)
+        {
+            mX = pos.GetX();
+            mY = pos.GetY();
+            mWidth = width;
+            mHeight = height;
+        }
+        Rect(const Point<T>& pos, const Size<T>& size)
+        {
+            mX = pos.GetX();
+            mY = pos.GetY();
+            mWidth  = size.GetWidth();
+            mHeight = size.GetHeight();
         }
 
         T GetHeight() const
@@ -99,15 +157,24 @@ namespace gfx
         { return mX; }
         T GetY() const
         { return mY; }
-        T Resize(T width, T height)
+        void Resize(T width, T height)
         {
             mWidth = width;
             mHeight = height;
         }
-        T Move(T x, T y)
+        void Resize(const Size<T>& size)
+        {
+            Resize(size.GetWidth(), size.GetHeight());
+        }
+        void Move(T x, T y)
         {
             mX = x;
             mY = y;
+        }
+        void Move(const Point<T>& pos)
+        {
+            mX = pos.GetX();
+            mY = pos.GetY();
         }
         bool IsEmpty() const 
         { 
