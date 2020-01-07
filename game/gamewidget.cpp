@@ -849,9 +849,9 @@ public:
 
         // draw the particles first
         painter.Draw(*mParticles, t,
-            gfx::TextureMap("textures/RoundParticle.png")
-            .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-            .SetBaseColor(getJetStreamColor(mShipType)));
+            gfx::TextureMap("textures/BlackSmoke.png")
+            .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
+            .SetBaseColor(getJetStreamColor(mShipType) * 0.6));
 
         t.Reset();
         t.Resize(shipScaledWidth, shipScaledHeight);
