@@ -24,9 +24,6 @@
 
 #include "config.h"
 
-#include "base/assert.h"
-#include "types.h"
-
 #include <limits>
 #include <vector>
 #include <cassert>
@@ -36,6 +33,13 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+
+#include "base/assert.h"
+#include "color4f.h"
+#include "types.h"
+
+// macro poisoning
+#undef RGB
 
 namespace gfx
 {

@@ -26,24 +26,10 @@
 
 #include <algorithm> // for min, max
 
-#undef RGB
-
 // simple type definitions
 
 namespace gfx
 {
-    // Predefined color enum.
-    enum class Color {
-        Black,   White,
-        Red,     DarkRed,
-        Green,   DarkGreen,
-        Blue,    DarkBlue,
-        Cyan,    DarkCyan,
-        Magenta, DarkMagenta,
-        Yellow,  DarkYellow,
-        Gray,    DarkGray, LightGray
-    };
-
     template<typename T>
     class Size
     {

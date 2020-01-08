@@ -25,10 +25,22 @@
 #include "config.h"
 
 #include "base/math.h"
-#include "types.h"
 
 namespace gfx
 {
+    // Predefined color enum.
+    enum class Color {
+        Black,   White,
+        Red,     DarkRed,
+        Green,   DarkGreen,
+        Blue,    DarkBlue,
+        Cyan,    DarkCyan,
+        Magenta, DarkMagenta,
+        Yellow,  DarkYellow,
+        Gray,    DarkGray, LightGray
+    };
+
+
     // Linear floating point color represenation.
     // All values are clamped to 0-1 range.
     class Color4f

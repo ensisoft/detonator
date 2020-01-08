@@ -24,9 +24,9 @@
 
 #include <cmath>
 
-#include "base/test_minimal.h"
+#include "base/test_minimal.h" 
+#include "../color4f.h"
 #include "../bitmap.h"
-
 
 int test_main(int argc, char* argv[])
 {
