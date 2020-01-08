@@ -2,8 +2,8 @@
 
 precision mediump float;
 
-uniform float uRuntime;
-uniform vec4 kBaseColor;
+uniform float kRuntime;
+uniform vec4 kColorA;
 varying vec2 vTexCoord;
 
 float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_origin)
@@ -17,7 +17,7 @@ float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_o
 void main()
 {
     float time = 1.4;
-    float s = mod(uRuntime / time, time) / time;
+    float s = mod(kRuntime / time, time) / time;
 
     float rings[4];
     rings[0] = 0.0 + s;
@@ -36,5 +36,5 @@ void main()
     float any_ring_alpha = ring_alpha0 + ring_alpha1 + ring_alpha2 + ring_alpha3;
 
     float distance_alpha = 1.0 - dist/ 0.5 * 1.0;
-    gl_FragColor = kBaseColor * vec4(1.0, 1.0, 1.0, distance_alpha * any_ring_alpha);
+    gl_FragColor = kColorA * vec4(1.0, 1.0, 1.0, distance_alpha * any_ring_alpha);
 }

@@ -30,6 +30,7 @@ namespace gfx
 {
     class Shader;
     class Texture;
+    class Color4f;
 
     // Program object interface. Program objects are device
     // specific graphics programs that are built from shaders
@@ -64,7 +65,8 @@ namespace gfx
         virtual void SetUniform(const char* name, float x, float y, float z) = 0;
         // Set vec4 uniform.
         virtual void SetUniform(const char* name, float x, float y, float z, float w) = 0;
-        
+        // set Color uniform
+        virtual void SetUniform(const char* name, const Color4f& color) = 0;
         // Matrix memory layout is as follows:
         // {xx xy xz}
         // {yx yy yz}

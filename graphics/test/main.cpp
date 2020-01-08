@@ -170,18 +170,18 @@ public:
 
         painter.Draw(*mSmoke, t, 
             gfx::TextureMap("textures/BlackSmoke.png")
-                .SetBaseColor(gfx::Color4f(35, 35, 35, 20))
+                .SetColorA(gfx::Color4f(35, 35, 35, 20))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));                
 
         painter.Draw(*mFire, t, 
             gfx::TextureMap("textures/BlackSmoke.png")
-                .SetBaseColor(gfx::Color4f(0x71, 0x38, 0x0, 0xff))
+                .SetColorA(gfx::Color4f(0x71, 0x38, 0x0, 0xff))
                 .SetSurfaceType(gfx::Material::SurfaceType::Emissive));
 
         t.Translate(500, 0);
         painter.Draw(*mBlood, t, 
             gfx::TextureMap("textures/RoundParticle.png")
-                .SetBaseColor(gfx::Color4f(234, 5, 3, 255))
+                .SetColorA(gfx::Color4f(234, 5, 3, 255))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));                
         
         t.Reset();
@@ -189,7 +189,7 @@ public:
         t.MoveTo(-100, 100);
         painter.Draw(*mClouds, t, 
             gfx::TextureMap("textures/WhiteCloud.png")
-                .SetBaseColor(gfx::Color4f(224, 224, 224, 255))
+                .SetColorA(gfx::Color4f(224, 224, 224, 255))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
 
     }
@@ -283,7 +283,7 @@ public:
             gfx::TextBuffer buff(300, 200);
             buff.AddText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);            
             painter.Draw(gfx::Rectangle(), transform, 
-                gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
+                gfx::BitmapText(buff).SetColorA(gfx::Color::DarkGray));
         }
 
         // modulate text color based on time

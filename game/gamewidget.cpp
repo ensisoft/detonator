@@ -397,10 +397,9 @@ public:
       : mPosition(position)
       , mStartTime(start)
       , mLifeTime(lifetime)
+      , mSprite(gfx::SpriteMap())
     {
-        mSprite.SetTexture("textures/ExplosionMap.png");
         mSprite.SetFps(80.0 / (lifetime/1000.0f));
-
         // each explosion frame is 100x100 px
         // and there are 80 frames total.
         for (unsigned i=0; i<80; ++i)
@@ -409,12 +408,9 @@ public:
             const auto col = i % 10;
             const auto w = 100;
             const auto h = 100;
-            gfx::SpriteMap::Frame frame;
-            frame.x = col * w;
-            frame.y = row * h;
-            frame.w = w;
-            frame.h = h;
-            mSprite.AddFrame(frame);
+            const gfx::URect frame(col * w, row * h, w, h);
+            mSprite.AddTexture("textures/ExplosionMap.png");
+            mSprite.SetTextureRect(i, frame);
         }
     }
 
@@ -435,7 +431,7 @@ public:
         if (mTime < mStartTime)
             return;
 
-        mSprite.SetAppRuntime((mTime - mStartTime) / 1000.0f);
+        mSprite.SetRuntime((mTime - mStartTime) / 1000.0f);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
@@ -462,7 +458,7 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    gfx::SpriteMap mSprite;
+    gfx::Material mSprite;
 };
 
 
@@ -519,7 +515,7 @@ public:
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/RoundParticle.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
-            .SetBaseColor(mColor * 0.8));
+            .SetColorA(mColor * 0.8));
     }
 
     void setColor(const gfx::Color4f& color)
@@ -541,6 +537,7 @@ public:
         : mPosition(position)
         , mStartTime(start)
         , mLifeTime(lifetime)
+        , mSprite(gfx::SpriteSet())
     {
         mSprite.SetFps(10);
         for (int i=0; i<=24; ++i)
@@ -548,6 +545,8 @@ public:
             const auto& name = base::FormatString("textures/smoke/blackSmoke%1.png",  i);
             mSprite.AddTexture(name);
         }
+        mSprite.SetColorA(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
+        mSprite.SetColorB(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
     }
 
     virtual bool update(float dt) override
@@ -568,8 +567,8 @@ public:
 
         const auto time  = mTime - mStartTime;
         const auto alpha = 0.4 - 0.4 * (time / mLifeTime);
-        mSprite.SetAppRuntime(time / 1000.0f);
-        mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
+        mSprite.SetRuntime(time / 1000.0f);
+        mSprite.SetColorA(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
@@ -594,7 +593,7 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    gfx::SpriteSet mSprite;
+    gfx::Material mSprite;
 };
 
 
@@ -688,8 +687,8 @@ public:
             painter.Draw(gfx::Rectangle(), rotation, 
                 gfx::TextureMap(mTexture)
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-                .SetRect(p.rc)
-                .SetOpacity(p.alpha));
+                .SetTextureRect(0, p.rc)
+                .SetColorA(gfx::Color4f(gfx::Color::White, p.alpha)));
         }
     }
 
@@ -833,7 +832,7 @@ public:
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/BlackSmoke.png")
             .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
-            .SetBaseColor(getJetStreamColor(mShipType) * 0.6));
+            .SetColorA(getJetStreamColor(mShipType) * 0.6));
 
         t.Reset();
         t.Resize(shipScaledWidth, shipScaledHeight);
@@ -854,7 +853,7 @@ public:
         t.Translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
 
         painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text)
-            .SetBaseColor(gfx::Color::DarkYellow));
+            .SetColorA(gfx::Color::DarkYellow));
 
         if (mShieldIsOn)
         {
@@ -1018,7 +1017,7 @@ private:
 class GameWidget::UFO : public GameWidget::Animation
 {
 public:
-    UFO()
+    UFO() : mSprite(gfx::SpriteSet())
     {
         mPosition.x = math::rand(0.0, 1.0);
         mPosition.y = math::rand(0.0, 1.0);
@@ -1068,7 +1067,7 @@ public:
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
 
-        mSprite.SetAppRuntime(sec);
+        mSprite.SetRuntime(sec);
 
         gfx::Transform rings;
         rings.Resize(200, 200);
@@ -1121,14 +1120,14 @@ private:
     glm::vec2 mDirection;
     glm::vec2 mPosition;
 private:
-    gfx::SpriteSet mSprite;
+    gfx::Material mSprite;
 };
 
 
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(float lifetime) : mLifeTime(lifetime)
+    BigExplosion(float lifetime) : mLifeTime(lifetime), mSprite(gfx::SpriteSet())
     {
         for (int i=1; i<=90; ++i)
         {
@@ -1147,7 +1146,7 @@ public:
     }
     virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        mSprite.SetAppRuntime(mRunTime / 1000.0f);
+        mSprite.SetRuntime(mRunTime / 1000.0f);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto ExplosionWidth = layout.GetGridWidth() * 2.0f;
@@ -1166,7 +1165,7 @@ private:
     const float mLifeTime = 0.0f;
     float mRunTime = 0.0f;
 private:
-    gfx::SpriteSet mSprite;
+    gfx::Material mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation

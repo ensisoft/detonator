@@ -33,6 +33,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <functional>
 
 #include "base/assert.h"
 #include "color4f.h"
@@ -251,7 +252,8 @@ namespace gfx
         // bbbb  becomes  bbbb
         // cccc           aaaa        
         virtual void FlipHorizontally() = 0;
-
+        // Get unique hash value based on the contents of the bitmap.
+        virtual std::size_t GetHash() const = 0;
         // Here we could have methods for dynamically getting
         // And setting pixels. I.e. there'd be a method for set/get
         // for each type of pixel and when the format would not match
@@ -433,6 +435,18 @@ namespace gfx
                     std::swap(src[x], dst[x]);
                 }
             }
+        }
+        virtual std::size_t GetHash() const override
+        {
+            std::size_t hash_value = 0;
+            if (mPixels.empty())
+                return hash_value;
+
+            const auto ptr = (const uint8_t*)&mPixels[0];
+            const auto len  = mPixels.size() * sizeof(Pixel);
+            for (size_t i=0; i<len; ++i)
+                hash_value ^= std::hash<std::uint8_t>()(ptr[i]);
+            return hash_value;
         }
 
         // Get a pixel from within the bitmap.

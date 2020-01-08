@@ -568,6 +568,7 @@ private:
             GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
             mWidth  = xres;
             mHeight = yres;
+            mFormat = format;
         }
         virtual void SetFilter(MinFilter filter) override
         {
@@ -596,6 +597,9 @@ private:
 
         virtual unsigned GetHeight() const override
         { return mHeight; }
+        virtual Format GetFormat() const override
+        { return mFormat; }
+
         virtual void EnableGarbageCollection(bool gc) override
         { mEnableGC = gc; }
 
@@ -653,6 +657,7 @@ private:
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
+        Texture::Format mFormat = Texture::Format::Grayscale;
         std::size_t mFrameNumber = 0;
         bool mEnableGC = false;
     };
@@ -810,6 +815,14 @@ private:
                 return;
             GL_CALL(glUseProgram(mProgram));                
             GL_CALL(glUniform4f(ret, x, y, z, w));
+        }
+        virtual void SetUniform(const char* name, const Color4f& color) override
+        {
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glUniform4f(ret, color.Red(), color.Green(), color.Blue(), color.Alpha()));
         }
         virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
         {

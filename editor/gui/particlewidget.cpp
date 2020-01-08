@@ -373,19 +373,19 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     {
         painter.Draw(*mEngine, tr, 
             gfx::TextureMap(app::strToEngine(texture))
-            .SetBaseColor(gfx::Color4f(r, g, b, a))
+            .SetColorA(gfx::Color4f(r, g, b, a))
             .SetSurfaceType(surface));
     }
     else
     {
-        gfx::SpriteSet sprite;
+        auto sprite = gfx::SpriteSet();
         for (const auto& s : mTextures) 
         {
             sprite.AddTexture(app::strToEngine(s));
         }
         sprite.SetFps(10)
-            .SetAppRuntime(mTime)
-            .SetBaseColor(gfx::Color4f(r, g, b, a))
+            .SetRuntime(mTime)
+            .SetColorA(gfx::Color4f(r, g, b, a))
             .SetSurfaceType(surface);
         painter.Draw(*mEngine, tr, sprite);
     }

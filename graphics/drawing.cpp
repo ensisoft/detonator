@@ -23,7 +23,8 @@
 #include "config.h"
 
 #include "base/assert.h"
-
+#include "base/utility.h"
+#include "bitmap.h"
 #include "drawing.h"
 #include "painter.h"
 #include "material.h"
@@ -66,11 +67,27 @@ void DrawTextRect(Painter& painter,
     buff.AddText(text, font, font_size_px)
         .SetAlign(va).SetAlign(ha).SetUnderline(underline);
 
+    auto material = BitmapText(buff);
+    material.SetColorA(color);
+    material.SetColorB(Color4f(Color::White, 0.0f)); // fully trans
+    if (blinking)
+    {
+        // create 1x1 transparent texture and 
+        // set the material frame rate so that it animates between these 
+        // two.
+        static Bitmap<Grayscale> nada(1, 1);
+        nada.SetPixel(0, 0, 0);
+        material.AddTexture(nada);
+        material.SetTextureGc(1, false);
+        material.SetFps(1.5f);
+        material.SetRuntime(base::GetRuntimeSec());
+        material.SetTextureBlendWeight(0.0f); // sharp cut off i.e. no blending betwen textures.
+    }
+
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());    
     t.MoveTo(rect.GetX(), rect.GetY());
-    painter.Draw(Rectangle(), t, 
-        gfx::BitmapText(buff).SetBaseColor(color).SetBlinkText(blinking));
+    painter.Draw(Rectangle(), t, material);
 }
 
 void DrawRectOutline(Painter& painter,

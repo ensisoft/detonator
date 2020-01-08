@@ -80,28 +80,20 @@ public:
         const auto& kViewMatrix = transform.GetAsMatrix();
 
         const auto draw_type = geom->GetDrawType();
+        
+        Material::RasterState raster;
         Material::Environment env;
-        env.render_points = draw_type == Geometry::DrawType::Points,
-
+        env.render_points = draw_type == Geometry::DrawType::Points;
+        
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
-        mat.Apply(env, *mDevice, *prog);
-
-        const auto draw = geom->GetDrawType();
+        mat.Apply(env, *mDevice, *prog, raster);
 
         Device::State state;
-        state.viewport = IRect(mViewX, mViewY, mViewW, mViewH);
-        switch (mat.GetSurfaceType()) {
-            case Material::SurfaceType::Opaque:
-                state.blending = Device::State::BlendOp::None;
-                break;
-            case Material::SurfaceType::Transparent:
-                state.blending = Device::State::BlendOp::Transparent;
-                break;
-            case Material::SurfaceType::Emissive:
-                state.blending = Device::State::BlendOp::Additive;
-                break;
-        }
+        state.viewport     = IRect(mViewX, mViewY, mViewW, mViewH);
+        state.bWriteColor  = true;
+        state.stencil_func = Device::State::StencilFunc::Disabled;
+        state.blending     = raster.blending;
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -110,10 +102,13 @@ public:
                             const Material& material) override
     {
 
+        // todo: clean this up and split into render passes
+        // i.e. masking pass and then drawing pass.
+
         mDevice->ClearStencil(1);
 
         Geometry* maskGeom = maskShape.Upload(*mDevice);
-        Program* maskProg = GetProgram(maskShape, SolidColor());
+        Program* maskProg = GetProgram(maskShape, SolidColor(gfx::Color::White));
         if (!maskProg)
             return;
 
@@ -133,38 +128,29 @@ public:
         maskProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         maskProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixMaskShape));
 
+        Material::RasterState raster;
         Material::Environment env;
         env.render_points = maskGeom->GetDrawType() == Geometry::DrawType::Points;
 
-        material.Apply(env, *mDevice, *maskProg);
+        material.Apply(env, *mDevice, *maskProg, raster);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
         Geometry* drawGeom = drawShape.Upload(*mDevice);
         Program* drawProg = GetProgram(drawShape, material);
         if (!drawProg)
             return;
-
-        state.stencil_func       = Device::State::StencilFunc::RefIsEqual;
-        state.stencil_dpass      = Device::State::StencilOp::WriteRef;
-        state.stencil_ref        = 1;
-        state.bWriteColor        = true;
-        switch (material.GetSurfaceType()) {
-            case Material::SurfaceType::Opaque:
-                state.blending = Device::State::BlendOp::None;
-                break;
-            case Material::SurfaceType::Transparent:
-                state.blending = Device::State::BlendOp::Transparent;
-                break;
-            case Material::SurfaceType::Emissive:
-                state.blending = Device::State::BlendOp::Additive;
-                break;
-        }
         
         env.render_points = drawGeom->GetDrawType() == Geometry::DrawType::Points;
 
         drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));        
-        material.Apply(env, *mDevice, *drawProg);
+        material.Apply(env, *mDevice, *drawProg, raster);
+
+        state.stencil_func       = Device::State::StencilFunc::RefIsEqual;
+        state.stencil_dpass      = Device::State::StencilOp::WriteRef;
+        state.stencil_ref        = 1;
+        state.bWriteColor        = true;
+        state.blending           = raster.blending;
         mDevice->Draw(*drawProg, *drawGeom, state);
     }
 
@@ -172,7 +158,7 @@ private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
         const std::string& name = typeid(drawable).name() + std::string("/") +
-            typeid(material).name();
+            material.GetName();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {
