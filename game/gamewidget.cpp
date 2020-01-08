@@ -23,15 +23,11 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QApplication>
-#  include <QtGui/QKeyEvent>
-#  include <QtGui/QOpenGLContext>
+#  include <glm/vec2.hpp>
 #include "warnpop.h"
 
 #include <cmath>
 #include <ctime>
-
-#include <glm/vec2.hpp>
 
 #include "audio/sample.h"
 #include "audio/player.h"
@@ -49,6 +45,12 @@
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
+#include "wdk/opengl/config.h"
+#include "wdk/opengl/context.h"
+#include "wdk/opengl/surface.h"
+#include "wdk/window.h"
+#include "wdk/events.h"
+#include "wdk/system.h"
 #include "gamewidget.h"
 #include "game.h"
 #include "level.h"
@@ -248,14 +250,14 @@ public:
     virtual void paint(gfx::Painter& painter, const IRect& rect) const = 0;
 
     // map keyboard input to an action.
-    virtual Action mapAction(const QKeyEvent* press) const = 0;
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const = 0;
 
     // update the state.. umh.. state from the delta time
     virtual void update(float dt)
     {}
 
     // handle the raw unmapped keyboard event
-    virtual void keyPress(const QKeyEvent* press)
+    virtual void keyPress(const wdk::WindowEventKeydown& key)
     {}
 
     // returns true if state represents the running game.
@@ -898,7 +900,7 @@ public:
     glm::vec2 getPosition() const
     { return mPosition; }
 
-    void setMaxLifetime(quint64 ms)
+    void setMaxLifetime(float ms)
     { mMaxLifeTime = ms; }
 
     void setViewString(const std::wstring& str)
@@ -968,7 +970,7 @@ public:
     Missile(const glm::vec2& position, 
             const glm::vec2& direction, 
             const std::wstring& str,
-            quint64 lifetime) 
+            float lifetime) 
         : mDirection(direction)
         , mText(str)
         , mLifetime(lifetime)
@@ -1303,7 +1305,7 @@ public:
             gfx::Color::DarkGray);
     }
     
-    virtual Action mapAction(const QKeyEvent* press) const override
+    virtual Action mapAction(const wdk::WindowEventKeydown&) const override
     {
         return Action::CloseState;
     }
@@ -1402,19 +1404,19 @@ public:
             gfx::TextProp::Blinking);
     }
 
-    virtual Action mapAction(const QKeyEvent* event) const
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const
     {
-        switch (event->key())
+        switch (key.symbol)
         {
-            case Qt::Key_F1:
+            case wdk::Keysym::F1:
                 return Action::OpenHelp;
-            case Qt::Key_F2:
+            case wdk::Keysym::F2:
                 return Action::OpenSettings;
-            case Qt::Key_F3:
+            case wdk::Keysym::F3:
                 return Action::OpenAbout;
-            case Qt::Key_Escape:
+            case wdk::Keysym::Escape:
                 return Action::QuitApp;
-            case Qt::Key_Space:
+            case wdk::Keysym::Space:
                 {
                     if (!mInfos[mCurrentLevelIndex].locked || mMasterUnlock)
                     {
@@ -1426,7 +1428,7 @@ public:
         return Action::None;
     }
 
-    virtual void keyPress(const QKeyEvent* press) override
+    virtual void keyPress(const wdk::WindowEventKeydown& key) override
     {
         const int numLevelsMin = 0;
         const int numLevelsMax = mLevels.size() - 1;
@@ -1435,8 +1437,8 @@ public:
 
         bool bPlaySound = false;
 
-        const auto key = press->key();
-        if (key == Qt::Key_Left)
+        const auto sym = key.symbol;
+        if (sym == wdk::Keysym::ArrowLeft)
         {
             if (mCurrentRowIndex == 0)
             {
@@ -1448,7 +1450,7 @@ public:
             }
             bPlaySound = true;
         }
-        else if (key == Qt::Key_Right)
+        else if (sym == wdk::Keysym::ArrowRight)
         {
             if (mCurrentRowIndex == 0)
             {
@@ -1460,11 +1462,11 @@ public:
             }
             bPlaySound = true;
         }
-        else if (key == Qt::Key_Up)
+        else if (sym == wdk::Keysym::ArrowUp)
         {
             mCurrentRowIndex = math::wrap(0, 1, mCurrentRowIndex - 1);
         }
-        else if (key == Qt::Key_Down)
+        else if (sym == wdk::Keysym::ArrowDown)
         {
             mCurrentRowIndex = math::wrap(0, 1, mCurrentRowIndex + 1);
         }
@@ -1533,13 +1535,13 @@ public:
     virtual void update(float dt)
     {}
 
-    virtual Action mapAction(const QKeyEvent* event) const override
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
     {
-        if (event->key() == Qt::Key_Escape)
+        if (key.symbol == wdk::Keysym::Escape)
             return Action::CloseState;
         return Action::None;
     }
-    virtual void keyPress(const QKeyEvent* event) override
+    virtual void keyPress(const wdk::WindowEventKeydown&) override
     {}
 
     virtual void paint(gfx::Painter& painter, const IRect& rect) const override
@@ -1622,17 +1624,17 @@ public:
 
     }
 
-    virtual Action mapAction(const QKeyEvent* press) const override
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
     {
-        if (press->key() == Qt::Key_Escape)
+        if (key.symbol == wdk::Keysym::Escape)
             return Action::CloseState;
         return Action::None;
     }
 
-    virtual void keyPress(const QKeyEvent* keyPress) override
+    virtual void keyPress(const wdk::WindowEventKeydown& key) override
     {
-        const auto key = keyPress->key();
-        if (key == Qt::Key_Space)
+        const auto sym = key.symbol;
+        if (sym == wdk::Keysym::Space)
         {
             if (mSettingIndex == 0)
             {
@@ -1650,12 +1652,12 @@ public:
                 onToggleFullscreen(mFullscreen);
             }
         }
-        else if (key == Qt::Key_Up)
+        else if (sym == wdk::Keysym::ArrowUp)
         {
             if (--mSettingIndex < 0)
                 mSettingIndex = 2;
         }
-        else if (key == Qt::Key_Down)
+        else if (sym == wdk::Keysym::ArrowDown)
         {
             mSettingIndex = (mSettingIndex + 1) % 3;
         }
@@ -1695,9 +1697,9 @@ public:
             layout.GetGfxRect(),             
             gfx::Color::DarkGray);
     }
-    virtual Action mapAction(const QKeyEvent* press) const override
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
     {
-        if (press->key() == Qt::Key_Escape)
+        if (key.symbol == wdk::Keysym::Escape)
             return Action::CloseState;
         return Action::None;
     }
@@ -1723,10 +1725,10 @@ public:
         }
     }
 
-    virtual Action mapAction(const QKeyEvent* press) const override
+    virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
     {
-        const auto key = press->key();
-        if (key == Qt::Key_Escape)
+        const auto sym = key.symbol;
+        if (sym == wdk::Keysym::Escape)
             return Action::CloseState;
 
         switch (mState)
@@ -1735,21 +1737,21 @@ public:
                 break;
 
             case GameState::Playing:
-                if (key == Qt::Key_F1)
+                if (sym == wdk::Keysym::F1)
                     return Action::OpenHelp;
-                else if (key == Qt::Key_F2)
+                else if (sym == wdk::Keysym::F2)
                     return Action::OpenSettings;
                 break;
         }
         return Action::None;
     }
-    virtual void keyPress(const QKeyEvent* press) override
+    virtual void keyPress(const wdk::WindowEventKeydown& key) override
     {
-        const auto key = press->key();
+        const auto sym = key.symbol;
 
         if (mState == GameState::Prepare)
         {
-            if (key == Qt::Key_Space)
+            if (sym == wdk::Keysym::Space)
             {
                 std::srand(0x7f6a4b);
                 mLevel.Reset();
@@ -1759,18 +1761,18 @@ public:
         }
         else if (mState == GameState::Playing)
         {
-            if (key == Qt::Key_Backspace)
+            if (sym == wdk::Keysym::Backspace)
             {
                 if (!mCurrentText.empty())
                     mCurrentText.pop_back();
             }
-            else if (key == Qt::Key_Space)
+            else if (sym == wdk::Keysym::Space)
             {
                 mCurrentText.clear();
             }
-            else if (key >= 0x41 && key <= 0x5a)
+            else if (sym >= wdk::Keysym::KeyA && sym <= wdk::Keysym::KeyZ) // todo: should use character event
             {
-                mCurrentText.push_back(key);
+                mCurrentText.append(base::Widen(wdk::ToString(sym)));
                 if (mCurrentText == L"BOMB")
                 {
                     Game::Bomb bomb;
@@ -1892,16 +1894,14 @@ private:
 
 GameWidget::GameWidget()
 {
-
-
     mGame.reset(new Game(GameCols, GameRows));
 
     mGame->onMissileKill = [&](const Game::Invader& i, const Game::Missile& m, unsigned killScore)
     {
         auto it = mInvaders.find(i.identity);
-
-        //GridLayout state(rect(), ViewCols, ViewRows);
-        const auto layout = GetGameWindowLayout(width(), height());
+        const auto w = mWindow->GetSurfaceWidth();
+        const auto h = mWindow->GetSurfaceHeight();
+        const auto layout = GetGameWindowLayout(w, h);
         const auto scale = layout.GetCellDimensions();
 
         std::unique_ptr<Invader> invader(it->second.release());
@@ -2129,18 +2129,6 @@ GameWidget::GameWidget()
     // initialize the input/state stack with the main menu.
     auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, true);
     mStates.push(std::move(menu));
-
-    // enable keyboard events
-    setFocusPolicy(Qt::StrongFocus);
-
-    // indicates that the widget has no background and
-    // the system doesn't automatically paint the background.
-    // this is fine for us since we draw everything everytime anyway.
-    setAttribute(Qt::WA_NoSystemBackground);
-
-    // indicates that the widget draws all its pixels every time,
-    // thus there's no need to erase widget before painting.
-    setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
 GameWidget::~GameWidget() = default;
@@ -2273,8 +2261,8 @@ void GameWidget::updateGame(float dt)
     static const CollisionType UFO_UFO_Collision =
         { Animation::ColliderType::UFO, Animation::ColliderType::UFO };
 
-    const auto w = width();
-    const auto h = height();
+    const auto w = mWindow->GetSurfaceWidth();
+    const auto h = mWindow->GetSurfaceHeight();
     const IRect rect(0, 0, w , h);
 
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
@@ -2357,15 +2345,128 @@ void GameWidget::updateGame(float dt)
     }
 }
 
-void GameWidget::renderGame()
-{
-    repaint();
-}
 
 void GameWidget::setPlaySounds(bool onOff)
 {
     mPlaySounds = onOff;
     mStates.top()->setPlaySounds(onOff);
+}
+
+
+void GameWidget::initializeGL(unsigned prev_surface_width, 
+    unsigned prev_surface_height)
+{
+    DEBUG("Initialize OpenGL");
+
+    // context integration glue code that puts together
+    // wdk::Context and gfx::Device
+    class WindowContext : public gfx::Device::Context 
+    {
+    public: 
+        WindowContext() 
+        {
+            wdk::Config::Attributes attrs;
+            attrs.red_size  = 8;
+            attrs.green_size = 8;            
+            attrs.blue_size = 8;
+            attrs.alpha_size = 8;
+            attrs.stencil_size = 8;
+            attrs.surfaces.window = true;
+            attrs.double_buffer = true;
+            attrs.sampling = wdk::Config::Multisampling::MSAA4;
+            attrs.srgb_buffer = true;
+            
+            mConfig   = std::make_unique<wdk::Config>(attrs);
+            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
+                wdk::Context::Type::OpenGL_ES);
+            mVisualID = mConfig->GetVisualID();
+        }
+        virtual void Display() override
+        {
+            mContext->SwapBuffers();
+        }
+        virtual void* Resolve(const char* name) override
+        {
+            return mContext->Resolve(name);
+        }
+        virtual void MakeCurrent() override
+        {
+            mContext->MakeCurrent(mSurface.get());
+        }
+        wdk::uint_t GetVisualID() const 
+        { return mVisualID; }
+
+        void SetWindowSurface(wdk::Window& window)
+        {
+            mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
+            mContext->MakeCurrent(mSurface.get());
+            mConfig.release();
+        }
+        void Dispose()
+        {
+            mContext->MakeCurrent(nullptr);
+            mSurface->Dispose();
+            mSurface.reset();
+            mConfig.reset();
+        }
+    private:
+        std::unique_ptr<wdk::Context> mContext;
+        std::unique_ptr<wdk::Surface> mSurface;
+        std::unique_ptr<wdk::Config>  mConfig;
+        wdk::uint_t mVisualID = 0;
+    };
+
+    // Create context
+    auto context = std::make_shared<WindowContext>();
+
+    const auto aspect = (float)GameRows / (float)GameCols;
+    const auto surface_width = prev_surface_width != 0 
+        ? prev_surface_width 
+        : GameCols * 20;
+    const auto surface_height = prev_surface_height != 0
+        ? prev_surface_height
+        : surface_width * aspect;
+
+    mWindow = std::make_unique<wdk::Window>();
+    mWindow->Create(GAME_TITLE " " GAME_VERSION, surface_width, surface_height, context->GetVisualID());
+    mWindow->on_keydown = std::bind(&GameWidget::onKeyDown, this,
+        std::placeholders::_1);
+    mWindow->on_want_close = [&](const wdk::WindowEventWantClose&) {
+        mRunning = false;
+    };
+
+    context->SetWindowSurface(*mWindow);
+
+    // create custom painter for fancier shader based effects.
+    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
+}
+
+void GameWidget::setFullscreen(bool value)
+{
+    mWindow->SetFullscreen(value);
+}
+
+bool GameWidget::isFullscreen() const 
+{
+    return mWindow->IsFullscreen();
+}
+
+void GameWidget::close()
+{
+    mCustomGraphicsPainter.reset();
+    mCustomGraphicsDevice.reset();
+    mWindow->Destroy();
+    mWindow.reset();
+}
+
+void GameWidget::pumpMessages()
+{
+    wdk::native_event_t event;
+    while (wdk::PeekEvent(event))
+    {
+        mWindow->ProcessEvent(event);
+    }
 }
 
 void GameWidget::setMasterUnlock(bool onOff)
@@ -2374,53 +2475,26 @@ void GameWidget::setMasterUnlock(bool onOff)
     mStates.top()->setMasterUnlock(onOff);
 }
 
-void GameWidget::initializeGL()
+unsigned GameWidget::getSurfaceWidth() const
 {
-    DEBUG("Initialize OpenGL");
-
-    // Context implementation based on widget/context provided by Qt.
-    class WidgetContext : public gfx::Device::Context 
-    {
-    public: 
-        WidgetContext(QOpenGLWidget* widget) : mWidget(widget)
-        {}
-        virtual void Display() override
-        {
-            // No need to implement this, Qt will take care of this
-        }
-        virtual void MakeCurrent() override
-        {
-            // No need to implement this, Qt will take care of this.
-        }
-        virtual void* Resolve(const char* name) override
-        {
-            return (void*)mWidget->context()->getProcAddress(name);             
-        }
-    private:
-        QOpenGLWidget* mWidget = nullptr;
-    };
-
-    // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<WidgetContext>(this));
-    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
+    return mWindow->GetSurfaceWidth();
 }
 
-void GameWidget::closeEvent(QCloseEvent* close)
+unsigned GameWidget::getSurfaceHeight() const 
 {
-    mRunning = false;
+    return mWindow->GetSurfaceHeight();
 }
 
-void GameWidget::paintGL()
+void GameWidget::renderGame()
 {
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
-    const auto w = width();
-    const auto h = height();
+    const auto w = mWindow->GetSurfaceWidth();
+    const auto h = mWindow->GetSurfaceHeight();
     const IRect rect(0, 0, w , h);
 
     mCustomGraphicsDevice->BeginFrame();
-    mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+    mCustomGraphicsPainter->SetViewport(0, 0, w, h);
 
     // paint the background
     mBackground->paint(*mCustomGraphicsPainter, rect);
@@ -2462,18 +2536,18 @@ void GameWidget::paintGL()
     mCustomGraphicsDevice->CleanGarbage(30);
 }
 
-void GameWidget::keyPressEvent(QKeyEvent* press)
+void GameWidget::onKeyDown(const wdk::WindowEventKeydown& key)
 {
-    const auto key = press->key();
-    const auto mod = press->modifiers();
-    if (key == Qt::Key_R && mod == Qt::ShiftModifier)
+    const auto sym = key.symbol;
+    const auto mod = key.modifiers;
+    if (sym == wdk::Keysym::KeyR && mod.test(wdk::Keymod::Shift))
     {
         DEBUG("Recompile shaders");
         mCustomGraphicsDevice->DeleteShaders();
         mCustomGraphicsDevice->DeletePrograms();
         return;
     }
-    else if (key == Qt::Key_N && mod == Qt::ShiftModifier)
+    else if (sym == wdk::Keysym::KeyN && mod.test(wdk::Keymod::Shift))
     {
         DEBUG("Next music track");
         if (mPlayMusic)
@@ -2485,31 +2559,24 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             playMusic();
         #endif
         }
+        return;
     }
 
-    const auto action = mStates.top()->mapAction(press);
+    const auto action = mStates.top()->mapAction(key);
     switch (action)
     {
         case State::Action::None:
-            mStates.top()->keyPress(press);
+            mStates.top()->keyPress(key);
             break;
         case State::Action::OpenHelp:
             mStates.push(std::make_unique<GameHelp>());
             break;
         case State::Action::OpenSettings:
             {
-                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds, isFullScreen());
+                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds, 
+                    mWindow->IsFullscreen());
                 settings->onToggleFullscreen = [this](bool fullscreen) {
-                    if (fullscreen)
-                    {
-                        showFullScreen();
-                        QApplication::setOverrideCursor(Qt::BlankCursor);
-                    }
-                    else
-                    {
-                        showNormal();
-                        QApplication::restoreOverrideCursor();
-                    }
+                    mWindow->SetFullscreen(fullscreen);
                 };
                 settings->onTogglePlayMusic = [this](bool play) {
                     mPlayMusic = play;
@@ -2525,7 +2592,7 @@ void GameWidget::keyPressEvent(QKeyEvent* press)
             mStates.push(std::make_unique<About>());
             break;
         case State::Action::QuitApp:
-            close();
+            mRunning = false;
             break;
         case State::Action::NewGame:
             {

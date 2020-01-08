@@ -23,16 +23,12 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QCoreApplication>
-#  include <QApplication>
 #  include <QStringList>
 #  include <QSettings>
-#  include <QElapsedTimer>
-#  include <QtGui/QScreen>
-#  include <QtGui/QSurfaceFormat>
 #include "warnpop.h"
 
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <thread>
@@ -73,27 +69,8 @@ void loadProfile(invaders::GameWidget::Profile profile,
     DEBUG("Enemy Count %1", profile.numEnemies);
 }
 
-float computeDefaultTimeStep()
-{
-    const QScreen* screen = QGuiApplication::primaryScreen();
-    const auto refresh_rate = screen->refreshRate();
-    const auto time_step = 1000.0f / refresh_rate;
-    DEBUG("Screen Hz %1", refresh_rate);
-    DEBUG("Time Step %1", time_step);
-    return time_step;
-}
-
 int game_main(int argc, char* argv[])
 {
-    base::CursesLogger logger;
-    base::SetGlobalLog(&logger);
-
-    DEBUG("It's alive!");
-    INFO("%1 %2", GAME_TITLE, GAME_VERSION);
-    INFO("Copyright (c) 2010-2018 Sami Vaisanen");
-    INFO("http://www.ensisoft.com");
-    INFO("http://github.com/ensisoft/pinyin-invaders");
-
     bool masterUnlock = false;
     bool unlimitedWarps = false;
     bool unlimitedBombs = false;
@@ -103,26 +80,9 @@ int game_main(int argc, char* argv[])
 #else
     bool debugLog = false;
 #endif
-    // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
-    // turns out this attribute is needed in order to make Qt
-    // create a GLES2 context.
-    // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
-    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-
-    QApplication app(argc, argv);
-    app.setApplicationName("Pinyin-Invaders");
-
-    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    format.setVersion(2, 0);
-    format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setStencilBufferSize(8);
-    format.setSamples(4);
-    format.setColorSpace(QSurfaceFormat::sRGBColorSpace);
-    QSurfaceFormat::setDefaultFormat(format);
-
-    const auto& args = app.arguments();
-    for (const auto& a : args)
+    for (int i=1; i<argc; ++i)
     {
+        const std::string a(argv[i]);
         if (a == "--unlock-all")
             masterUnlock = true;
         else if (a == "--unlimited-warps")
@@ -135,7 +95,16 @@ int game_main(int argc, char* argv[])
             debugLog = true;
     }
 
+    base::CursesLogger logger;
+    base::SetGlobalLog(&logger);
     base::EnableDebugLog(debugLog);
+
+    DEBUG("It's alive!");
+    INFO("%1 %2", GAME_TITLE, GAME_VERSION);
+    INFO("Copyright (c) 2010-2018 Sami Vaisanen");
+    INFO("http://www.ensisoft.com");
+    INFO("http://github.com/ensisoft/pinyin-invaders");
+    
 
     audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
@@ -149,46 +118,31 @@ int game_main(int argc, char* argv[])
     DEBUG("Enabled floating point exceptions");
 #endif
 
-
-
+    QSettings settings("Ensisoft", "Invaders");
+    const auto width      = settings.value("window/width", 1200).toInt();
+    const auto height     = settings.value("window/height", 700).toInt();
+    const auto fullscreen = settings.value("window/fullscreen", false).toBool();
+    const auto playSound  = settings.value("audio/sound", true).toBool();
+    const auto playMusic  = settings.value("audio/music", true).toBool();
+    const auto& levels    = settings.value("game/levels").toStringList();
+    
     invaders::GameWidget window;
-
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
     window.setUnlimitedBombs(unlimitedBombs);
     window.setShowFps(showFps);
-
-    QSettings settings("Ensisoft", "Invaders");
-    const auto width  = settings.value("window/width", 1200).toInt();
-    const auto height = settings.value("window/height", 700).toInt();
-    const auto xpos = settings.value("window/xpos", window.x()).toInt();
-    const auto ypos = settings.value("window/ypos", window.y()).toInt();
-    const auto fullscreen = settings.value("window/fullscreen", false).toBool();
-    const auto playSound = settings.value("audio/sound", true).toBool();
-    const auto playMusic = settings.value("audio/music", true).toBool();
-    if (!fullscreen)
-    {
-        window.resize(width, height);
-        window.move(xpos, ypos);
-    }
-    else
-    {
-        window.resize(1200, 700);
-    }
     window.setPlayMusic(playMusic);
     window.setPlaySounds(playSound);
+    window.loadLevels(L"data/levels.txt");
 
-    const auto& levels_txt = QApplication::applicationDirPath() + "/data/levels.txt";
-    window.loadLevels(levels_txt.toStdWString());
-
-    QStringList levels = settings.value("game/levels").toStringList();
+    // set the saved level data 
     for (int i=0; i<levels.size(); ++i)
     {
         const auto name = levels[i];
         invaders::GameWidget::LevelInfo info;
-        info.name = name.toStdWString();
+        info.name      = name.toStdWString();
         info.highScore = settings.value(name + "/highscore").toUInt();
-        info.locked = settings.value(name + "/locked").toBool();
+        info.locked    = settings.value(name + "/locked").toBool();
         window.setLevelInfo(info);
     }
 
@@ -200,55 +154,60 @@ int game_main(int argc, char* argv[])
     loadProfile(MEDIUM, window, settings);
     loadProfile(CHINESE, window, settings);
 
-    window.show();
+    window.initializeGL(width, height);
+    window.setFullscreen(fullscreen);
     window.launchGame();
 
-    const float TimeStep = computeDefaultTimeStep();
+    using clock = std::chrono::high_resolution_clock;
 
-    unsigned frames = 0;
-
-    QElapsedTimer timer;
-    timer.start();
-
+    auto start = clock::now();
+    
     while (window.isRunning())
     {
-        app.processEvents();
+        const auto end  = clock::now();
+        const auto gone = end - start;
+        const auto ms   = std::chrono::duration_cast<std::chrono::milliseconds>(gone).count();
 
-        window.updateGame(TimeStep);
+        window.updateGame(ms);
         window.renderGame();
-        frames++;
-
-        const auto ms = timer.elapsed();
-
-        if (ms >= 1000)
+    
+        if (showFps)
         {
-            const float fps = frames / (ms / 1000.0f);
-            frames    = 0;
-            timer.restart();
-            window.setFps(fps);
+            static unsigned frames  = 0;
+            static unsigned runtime = 0;
+            frames++;
+            runtime += ms;
+            if (runtime >= 1000)
+            {
+                const float fps = frames / (runtime / 1000.0f);
+                window.setFps(fps);
+                runtime = 0;
+                frames  = 0;
+            }
         }
+        window.pumpMessages();
+        start = end;
     }
 
+    settings.setValue("window/width",  window.getSurfaceWidth());
+    settings.setValue("window/height", window.getSurfaceHeight());
+    settings.setValue("window/fullscreen", window.isFullscreen());
+
+    // tear down.
     window.close();
 
-    settings.setValue("window/width",  window.width());
-    settings.setValue("window/height", window.height());
-    settings.setValue("window/fullscreen", window.isFullScreen());
-    settings.setValue("window/xpos", window.x());
-    settings.setValue("window/ypos", window.y());
-
-    levels.clear();
+    QStringList level_names;
     for (unsigned i=0; ; ++i)
     {
         invaders::GameWidget::LevelInfo info;
         if (!window.getLevelInfo(info, i))
             break;
 
-        levels << QString::fromStdWString(info.name);
+        level_names << QString::fromStdWString(info.name);
         settings.setValue(QString::fromStdWString(info.name + L"/highscore"), info.highScore);
         settings.setValue(QString::fromStdWString(info.name + L"/locked"), info.locked);
     }
-    settings.setValue("game/levels", levels);
+    settings.setValue("game/levels", level_names);
     settings.setValue("audio/sound", window.getPlaySounds());
     settings.setValue("audio/music", window.getPlayMusic());
     settings.sync();

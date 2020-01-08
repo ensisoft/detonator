@@ -23,15 +23,10 @@
 #pragma once
 
 #include "config.h"
-#include "warnpush.h"
-#  include <QOpenGLWidget>
-#  include <QObject>
-#include "warnpop.h"
 
 #include <list>
 #include <map>
 #include <memory>
-#include <chrono>
 #include <stack>
 #include <string>
 
@@ -39,20 +34,21 @@ namespace gfx {
     class Painter;
     class Device;
 } // namespace
-
+namespace wdk {
+    class Window;
+    class WindowEventKeydown;
+} // namespace wdk
 namespace audio {
     class AudioSample;
-}
+} // namespace audio
 
 namespace invaders
 {
     class Game;
     class Level;
 
-    class GameWidget : public QOpenGLWidget
+    class GameWidget
     {
-        Q_OBJECT
-
     public:
         // Level info for persisting level data
         struct LevelInfo {
@@ -98,8 +94,31 @@ namespace invaders
         // render current game state.
         void renderGame();
 
+        // initialize the OpenGL rendering surface (window)
+        // based on the previous size (if any). 
+        void initializeGL(unsigned prev_surface_width, 
+            unsigned prev_surface_height);
+
+        // Set window to fullscreen if value is true.
+        void setFullscreen(bool value);
+
+        // Returns true if in fullscreen mode, otherwise false.
+        bool isFullscreen() const;
+
+        // close the window and dispose of the rendering context.
+        void close();
+
+        // pump window messages.
+        void pumpMessages();
+
         // set to true to unlock all levels.
         void setMasterUnlock(bool onOff);
+
+        // get current rendering surface (window) width.
+        unsigned getSurfaceWidth() const;
+
+        // get current rendering surface (window) height.
+        unsigned getSurfaceHeight() const;
 
         // set to true to have unlimited time warps
         void setUnlimitedWarps(bool onOff)
@@ -134,14 +153,10 @@ namespace invaders
 
         bool isRunning() const
         { return mRunning; }
-
-    private:
-        virtual void initializeGL() override;
-        virtual void paintGL() override;
-        virtual void closeEvent(QCloseEvent* close) override;
-        virtual void keyPressEvent(QKeyEvent* press) override;
+    
     private:
         void playMusic();
+        void onKeyDown(const wdk::WindowEventKeydown& key);
 
     private:
         class State;
@@ -199,6 +214,7 @@ namespace invaders
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
+        std::unique_ptr<wdk::Window> mWindow;  
     };
 
 } // invaders

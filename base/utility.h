@@ -88,4 +88,15 @@ std::wstring ToLower(const std::wstring& str)
     return ret;
 }
 
+// convert std::string to wide string representation
+// without any regard to encoding. 
+inline
+std::wstring Widen(const std::string& str)
+{
+    std::wstring ret;
+    for (auto c : str) 
+        ret.push_back(c);
+    return ret;
+}
+
 } // base
