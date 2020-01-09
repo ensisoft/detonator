@@ -2532,7 +2532,7 @@ void GameWidget::renderGame()
     }
 
     mCustomGraphicsDevice->EndFrame();
-    mCustomGraphicsDevice->CleanGarbage(30);
+    mCustomGraphicsDevice->CleanGarbage(120);
 }
 
 void GameWidget::onKeyDown(const wdk::WindowEventKeydown& key)

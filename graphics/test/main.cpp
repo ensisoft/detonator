@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
         tests[test_index]->Render(*painter);
         
         device->EndFrame(true /*display*/);
-        device->CleanGarbage(30);
+        device->CleanGarbage(120);
 
         // process incoming (window) events
         wdk::native_event_t event;
