@@ -508,7 +508,7 @@ private:
     }
 
 private:
-    class TextureImpl : public Texture,  protected OpenGLFunctions
+    class TextureImpl : public Texture
     {
     public:
         TextureImpl(const OpenGLFunctions& funcs) : mGL(funcs)
@@ -662,7 +662,7 @@ private:
         bool mEnableGC = false;
     };
 
-    class GeomImpl : public Geometry, protected OpenGLFunctions
+    class GeomImpl : public Geometry
     {
     public:
         GeomImpl(const OpenGLFunctions& funcs) : mGL(funcs)
@@ -725,7 +725,7 @@ private:
         DrawType mDrawType = DrawType::Triangles;
     };
 
-    class ProgImpl : public Program, protected OpenGLFunctions
+    class ProgImpl : public Program
     {
     public:
         ProgImpl(const OpenGLFunctions& funcs) : mGL(funcs)
@@ -927,7 +927,7 @@ private:
         std::size_t mFrameNumber = 0;
     };
 
-    class ShaderImpl : public Shader, protected OpenGLFunctions
+    class ShaderImpl : public Shader
     {
     public:
         ShaderImpl(const OpenGLFunctions& funcs) : mGL(funcs)
