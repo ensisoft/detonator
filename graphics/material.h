@@ -148,6 +148,9 @@ namespace gfx
             Emissive
         };
 
+        using MinTextureFilter = Texture::MinFilter;
+        using MagTextureFilter = Texture::MagFilter;
+
         // constructor. 
         Material(const std::string& shader) : mShader(shader)
         {}
@@ -244,6 +247,9 @@ namespace gfx
                     prog.SetTexture(kTexture.c_str(), i, *texture);
                     prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
                     prog.SetUniform(kIsAlphaMask.c_str(), alpha);
+
+                    texture->SetFilter(mMinFilter);
+                    texture->SetFilter(mMagFilter);
                 }
                 if (frame_count >= 2)
                 {
@@ -369,6 +375,16 @@ namespace gfx
             mTextures[index].enable_gc = on_off;
             return *this;
         }
+        Material& SetTextureMinFilter(MinTextureFilter filter)
+        {
+            mMinFilter = filter;
+            return *this;
+        }
+        Material& SetTextureMagFilter(MagTextureFilter filter)
+        {
+            mMagFilter = filter;
+            return *this;
+        }
     private:
         const std::string mShader;
         Color4f mColorA = gfx::Color::White;
@@ -385,6 +401,8 @@ namespace gfx
             std::shared_ptr<TextureSource> source;
         };
         std::vector<TextureSampler> mTextures;
+        MinTextureFilter mMinFilter = MinTextureFilter::Bilinear;
+        MagTextureFilter mMagFilter = MagTextureFilter::Linear;
     };
 
     // This material will fill the drawn shape with solid color value.

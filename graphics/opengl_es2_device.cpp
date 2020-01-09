@@ -566,6 +566,9 @@ private:
                 GL_UNSIGNED_BYTE,
                 bytes));
             GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+            // set the default filters
+            SetFilter(MinFilter::Bilinear);
+            SetFilter(MagFilter::Linear);
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
@@ -614,13 +617,17 @@ private:
             switch (mMinFilter)
             {
                 case Texture::MinFilter::Nearest:
-                return GL_NEAREST;
+                    return GL_NEAREST;
                 case Texture::MinFilter::Linear:
-                return GL_LINEAR;
+                    return GL_LINEAR;
                 case Texture::MinFilter::Mipmap:
-                return GL_LINEAR_MIPMAP_LINEAR;
+                    return GL_LINEAR_MIPMAP_LINEAR;
+                case Texture::MinFilter::Bilinear:
+                    return GL_LINEAR_MIPMAP_NEAREST;
+                case Texture::MinFilter::Trilinear:
+                    return GL_LINEAR_MIPMAP_LINEAR;
             }
-            assert(!"Incorrect texture minifying filter.");
+            ASSERT(!"Incorrect texture minifying filter.");
             return GL_NONE;
         }
 
@@ -629,11 +636,11 @@ private:
             switch (mMagFilter)
             {
                 case Texture::MagFilter::Nearest:
-                return GL_NEAREST;
+                    return GL_NEAREST;
                 case Texture::MagFilter::Linear:
-                return GL_LINEAR;
+                    return GL_LINEAR;
             }
-            assert(!"Incorrect texture magnifying filter setting.");
+            ASSERT(!"Incorrect texture magnifying filter setting.");
             return GL_NONE;
         }
 

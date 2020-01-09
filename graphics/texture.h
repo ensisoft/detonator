@@ -36,11 +36,40 @@ namespace gfx
         enum class Format {
             RGB, RGBA, Grayscale
         };
+        // Texture minifying filter is used whenever the 
+        // pixel being textured maps to an area greater than
+        // one texture element. 
         enum class MinFilter {
-            Nearest, Linear, Mipmap
+            // Use the texture element nearest to the 
+            // center of the pixel (Manhattan distance)
+            Nearest,
+            // Use the weighted average of the four texture
+            // elements that are closest to the pixel.
+            Linear, 
+            // Use mips (precomputed) minified textures.
+            // Use the nearest texture element from the nearest 
+            // mipmap level
+            Mipmap,
+            // Use mips (precomputed) minified textures.
+            // Use the weighted average of the four texture
+            // elements that are sampled from the closest mipmap level.
+            Bilinear, 
+            // Use mips (precomputd minified textures.
+            // Use the weigted average of the four texture
+            // elements that are sampled from the two nearest mipmap levels.
+            Trilinear
         };
+        
+        // Texture magnifying filter is used whenver the 
+        // pixel being textured maps to to an area less than 
+        // one texture element.
         enum class MagFilter {
-            Nearest, Linear
+            // Use the texture element nearest to the center
+            // of the pixel. (Manhattan distance).
+            Nearest, 
+            // Use the weighted average of the four texture
+            // elements that are closest to the pixel.
+            Linear
         };
 
         // Identify texture format based on the bit depth
@@ -59,8 +88,9 @@ namespace gfx
             ASSERT(!"Unexpected bit depth detected.");
         }
 
-        // default filtering.
+        // Set texture minification filter.
         virtual void SetFilter(MinFilter filter) = 0;
+        // Set texture magnification filter.
         virtual void SetFilter(MagFilter filter) = 0;
 
         virtual MinFilter GetMinFilter() const = 0;
