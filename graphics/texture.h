@@ -101,27 +101,34 @@ namespace gfx
         virtual void SetFilter(MinFilter filter) = 0;
         // Set texture magnification filter.
         virtual void SetFilter(MagFilter filter) = 0;
-
+        // Get current texture minification filter.
         virtual MinFilter GetMinFilter() const = 0;
+        // Get current texture magnification filter.
         virtual MagFilter GetMagFilter() const = 0;
-
+        // Set texture coordinate wrapping behaviour on X axis.
         virtual void SetWrapX(Wrapping w) = 0;
+        // Set texture coordinate wrapping behaviour on Y axis.
         virtual void SetWrapY(Wrapping w) = 0;
-
-        // upload the texture contents from the given buffer.
-        virtual void Upload(const void* bytes,
-            unsigned xres, unsigned yres, Format format) = 0;
-
+        // Get current texture coordinate wrapping behaviour on X axis.
+        virtual Wrapping GetWrapX() const = 0;
+        // Get current texture coordinate wrapping behaviour on Y axis.
+        virtual Wrapping GetWrapY() const = 0;
+        // Upload the texture contents from the given buffer.
+        // Will overwrite any previous contents and reshape the texture dimensions.
+        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) = 0;
+        // Get the texture width. Initially 0 until Upload is called
+        // and new texture contents are uploaded.
         virtual unsigned GetWidth() const = 0;
+        // Get the texture height. Initially 0 until Upload is called
+        // and texture contents are uploaded.
         virtual unsigned GetHeight() const = 0;
+        // Get the texture format. 
         virtual Format GetFormat() const = 0;
-
         // Enable or disable this texture from being garbage collected.
         // When this is enabled the texture may be deleted if it goes
         // unused long enough.
         // The default state is false. I.e. no garbage collection.
         virtual void EnableGarbageCollection(bool gc) = 0;
-
     protected:
     private:
     };

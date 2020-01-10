@@ -515,13 +515,6 @@ private:
         {
             GL_CALL(glGenTextures(1, &mName));
             DEBUG("New texture object %1 name = %2", (void*)this, mName);
-
-            mMinFilter = MinFilter::Mipmap;
-            mMagFilter = MagFilter::Linear;
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         }
         ~TextureImpl()
         {
@@ -555,6 +548,17 @@ private:
 
             GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
             GL_CALL(glActiveTexture(GL_TEXTURE0));
+
+            // In order to upload the texture data we must bind the texture
+            // to a texture unit. we must make sure not to overwrite any other
+            // texture objects that might be bound to the unit. for example
+            // if the rendering code is running a loop where it's first creating
+            // texture objects if they don't exist and then setting them to a 
+            // sampler (which will do a bind). Then going another iteration of this
+            // loop would overwrite the texture from before. Oooops!
+            GLint current_texture = 0;
+            GL_CALL(glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture));
+            // bind our texture here.
             GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
             GL_CALL(glTexImage2D(GL_TEXTURE_2D,
                 0, // mip level
@@ -566,105 +570,53 @@ private:
                 GL_UNSIGNED_BYTE,
                 bytes));
             GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
-            // set the default filters
-            SetFilter(MinFilter::Bilinear);
-            SetFilter(MagFilter::Linear);
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
+
+            // restore previous texture.
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, current_texture));
         }
+
+        // refer actual state setting to the point when
+        // when the texture is actually used in a program's 
+        // sampler
         virtual void SetFilter(MinFilter filter) override
-        {
-            mMinFilter = filter;
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getMinFilterAsGLEnum()));
-        }
-
+        { mMinFilter = filter; }
         virtual void SetFilter(MagFilter filter) override
-        {
-            mMagFilter = filter;
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getMagFilterAsGLEnum()));
-        }
+        { mMagFilter = filter; }
         virtual void SetWrapX(Wrapping w) override
-        {
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 
-                w == Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-        }
+        { mWrapX = w; }
         virtual void SetWrapY(Wrapping w) override
-        {
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 
-                w == Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-        } 
+        { mWrapY = w; }
 
-        Texture::MinFilter GetMinFilter() const override
+        virtual Texture::MinFilter GetMinFilter() const override
         { return mMinFilter; }
-
-        Texture::MagFilter GetMagFilter() const override
+        virtual Texture::MagFilter GetMagFilter() const override
         { return mMagFilter; }
-
+        virtual Texture::Wrapping GetWrapX() const override
+        { return mWrapX; }
+        virtual Texture::Wrapping GetWrapY() const override
+        { return mWrapY; }
         virtual unsigned GetWidth() const override
         { return mWidth; }
-
         virtual unsigned GetHeight() const override
         { return mHeight; }
-        virtual Format GetFormat() const override
+        virtual Texture::Format GetFormat() const override
         { return mFormat; }
-
         virtual void EnableGarbageCollection(bool gc) override
         { mEnableGC = gc; }
 
-        void bind(GLuint unit)
-        {
-            //GL_CALL(glBindTextureUnit(unit, m_name));
-            //DEBUG("Texture %1 bound to unit %2", m_name, unit);
-        }
-
-        GLenum getMinFilterAsGLEnum() const
-        {
-            switch (mMinFilter)
-            {
-                case Texture::MinFilter::Nearest:
-                    return GL_NEAREST;
-                case Texture::MinFilter::Linear:
-                    return GL_LINEAR;
-                case Texture::MinFilter::Mipmap:
-                    return GL_LINEAR_MIPMAP_LINEAR;
-                case Texture::MinFilter::Bilinear:
-                    return GL_LINEAR_MIPMAP_NEAREST;
-                case Texture::MinFilter::Trilinear:
-                    return GL_LINEAR_MIPMAP_LINEAR;
-            }
-            ASSERT(!"Incorrect texture minifying filter.");
-            return GL_NONE;
-        }
-
-        GLenum getMagFilterAsGLEnum() const
-        {
-            switch (mMagFilter)
-            {
-                case Texture::MagFilter::Nearest:
-                    return GL_NEAREST;
-                case Texture::MagFilter::Linear:
-                    return GL_LINEAR;
-            }
-            ASSERT(!"Incorrect texture magnifying filter setting.");
-            return GL_NONE;
-        }
-
+        // internal
         GLuint GetName() const
         { return mName; }
 
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }
+
         size_t GetLastUsedFrameNumber() const 
         { return mFrameNumber; }
+
         bool IsEligibleForGarbageCollection() const 
         { return mEnableGC; }
 
@@ -675,10 +627,12 @@ private:
     private:
         MinFilter mMinFilter = MinFilter::Nearest;
         MagFilter mMagFilter = MagFilter::Nearest;
+        Wrapping mWrapX = Wrapping::Repeat;
+        Wrapping mWrapY = Wrapping::Repeat;
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
-        Texture::Format mFormat = Texture::Format::Grayscale;
+        Format mFormat = Texture::Format::Grayscale;
         std::size_t mFrameNumber = 0;
         bool mEnableGC = false;
     };
@@ -872,15 +826,59 @@ private:
 
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
         {
-            const auto& texture_impl = dynamic_cast<const TextureImpl&>(texture);
-            const auto  texture_name = texture_impl.GetName();
-
             auto ret =  mGL.glGetUniformLocation(mProgram, sampler);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
+
+            const auto& impl = dynamic_cast<const TextureImpl&>(texture);
+            
+            GLuint texture_name = impl.GetName();
+            GLenum texture_min_filter = GL_NONE;
+            GLenum texture_mag_filter = GL_NONE;
+            switch (impl.GetMinFilter())
+            {
+                case Texture::MinFilter::Nearest:
+                    texture_min_filter = GL_NEAREST;
+                    break;
+                case Texture::MinFilter::Linear:
+                    texture_min_filter = GL_LINEAR;
+                    break;
+                case Texture::MinFilter::Mipmap:
+                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                    break;
+                case Texture::MinFilter::Bilinear:
+                    texture_min_filter = GL_LINEAR_MIPMAP_NEAREST;
+                    break;
+                case Texture::MinFilter::Trilinear:
+                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                    break;
+            }
+            switch (impl.GetMagFilter())
+            {
+               case Texture::MagFilter::Nearest:
+                    texture_mag_filter = GL_NEAREST;
+                    break;
+                case Texture::MagFilter::Linear:
+                    texture_mag_filter = GL_LINEAR;
+                    break;
+            }
+
+            // set all this fucking state here, so we can easily track/understand
+            // which unit the texture is bound to.
+            
+            // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
+            // bind the 2D texture. 
             GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+            // set texture parameters, wrapping and min/mag filters.
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 
+                impl.GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));                
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 
+                impl.GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));            
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+            // set the teture unit to the sampler
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniform1i(ret, unit));
 
             // in OpenGL the expected memory layout of texture data that
@@ -913,7 +911,7 @@ private:
             // keep track of textures being used so that if/when this
             // program is actually used to draw stuff we can realize
             // which textures have actually been used to draw.
-            mFrameTextures.push_back(const_cast<TextureImpl*>(&texture_impl));
+            mFrameTextures.push_back(const_cast<TextureImpl*>(&impl));
         }
 
         void SetState() //const
