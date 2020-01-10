@@ -72,6 +72,15 @@ namespace gfx
             Linear
         };
 
+        // Texture wrapping options for how to deal with 
+        // texture coords outside of [0,1] range,
+        enum class Wrapping {
+            // Clamp the texture coordinate to the boundary.
+            Clamp,
+            // Wrap the coordinate by ignoring the integer part.
+            Repeat
+        };
+
         // Identify texture format based on the bit depth
         static Format DepthToFormat(unsigned bit_depth)
         {
@@ -95,6 +104,9 @@ namespace gfx
 
         virtual MinFilter GetMinFilter() const = 0;
         virtual MagFilter GetMagFilter() const = 0;
+
+        virtual void SetWrapX(Wrapping w) = 0;
+        virtual void SetWrapY(Wrapping w) = 0;
 
         // upload the texture contents from the given buffer.
         virtual void Upload(const void* bytes,

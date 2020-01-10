@@ -588,6 +588,20 @@ private:
             GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getMagFilterAsGLEnum()));
         }
+        virtual void SetWrapX(Wrapping w) override
+        {
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 
+                w == Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+        }
+        virtual void SetWrapY(Wrapping w) override
+        {
+            GL_CALL(glActiveTexture(GL_TEXTURE0));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 
+                w == Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+        } 
 
         Texture::MinFilter GetMinFilter() const override
         { return mMinFilter; }

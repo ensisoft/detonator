@@ -150,7 +150,7 @@ namespace gfx
 
         using MinTextureFilter = Texture::MinFilter;
         using MagTextureFilter = Texture::MagFilter;
-
+        using TextureWrapping  = Texture::Wrapping;
         // constructor. 
         Material(const std::string& shader) : mShader(shader)
         {}
@@ -250,6 +250,8 @@ namespace gfx
 
                     texture->SetFilter(mMinFilter);
                     texture->SetFilter(mMagFilter);
+                    texture->SetWrapX(mWrapX);
+                    texture->SetWrapY(mWrapY);                    
                 }
                 if (frame_count >= 2)
                 {
@@ -270,6 +272,7 @@ namespace gfx
             prog.SetUniform("kGamma", mGamma);
             prog.SetUniform("kRuntime", mRuntime);
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
+            prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);            
         }
 
         std::string GetName() const
@@ -385,6 +388,27 @@ namespace gfx
             mMagFilter = filter;
             return *this;
         }
+        Material& SetTextureScaleX(float x)
+        {
+            mTextureScaleX = x;
+            return *this;
+        }
+        Material& SetTextureScaleY(float y)
+        {
+            mTextureScaleY = y;
+            return *this;
+        }
+        Material& SetTextureWrapX(TextureWrapping wrap)
+        {
+            mWrapX = wrap;
+            return *this;
+        }
+        Material& SetTextureWrapY(TextureWrapping wrap)
+        {
+            mWrapY = wrap;
+            return *this;
+        }
+
     private:
         const std::string mShader;
         Color4f mColorA = gfx::Color::White;
@@ -403,6 +427,10 @@ namespace gfx
         std::vector<TextureSampler> mTextures;
         MinTextureFilter mMinFilter = MinTextureFilter::Bilinear;
         MagTextureFilter mMagFilter = MagTextureFilter::Linear;
+        TextureWrapping mWrapX = TextureWrapping::Repeat;
+        TextureWrapping mWrapY = TextureWrapping::Repeat;
+        float mTextureScaleX = 1.0f;
+        float mTextureScaleY = 1.0f;
     };
 
     // This material will fill the drawn shape with solid color value.

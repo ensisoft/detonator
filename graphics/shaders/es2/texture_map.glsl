@@ -33,6 +33,8 @@ uniform float kBlendCoeff;
 // which gets modulated by the alpha value from the texture.
 uniform float kIsAlphaMask0;
 uniform float kIsAlphaMask1;
+// texture coordinate scaling coefficients
+uniform vec2 kTextureScale;
 
 uniform vec4 kTextureBox0;
 uniform vec4 kTextureBox1;
@@ -48,6 +50,7 @@ void main()
     // rasterized as points.
     // we set kRenderPoints to 1.0f when rendering points.
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    coords = coords * kTextureScale;
 
     // apply texture box translation.
     vec2 c1 = vec2(kTextureBox0.x + coords.x * kTextureBox0.z,
