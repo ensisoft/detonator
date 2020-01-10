@@ -194,9 +194,11 @@ namespace gfx
             else if (mSurfaceType == SurfaceType::Emissive)
                 state.blending = RasterState::Blending::Additive;
 
-            const auto frame_interval = mFps > 0.0f ? 1.0f / mFps : 1.0f;
-            const auto frame_fraction = std::fmod(mRuntime, frame_interval);
-            const auto frame_blend_coeff = (frame_fraction / frame_interval) * mTextureBlendWeight;
+            const auto animating = mFps > 0.0f;
+            const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
+            const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
+            const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f; 
+            const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
 
             // currently we only bind two textures and set a blend
             // coefficient from the run time for the shader to do
@@ -212,8 +214,8 @@ namespace gfx
             {
                 const auto frame_count = (unsigned)mTextures.size();
                 const unsigned frame_index[2] = {
-                    (unsigned(mRuntime / frame_interval) + 0) % frame_count,
-                    (unsigned(mRuntime / frame_interval) + 1) % frame_count
+                    (first_frame_index + 0) % frame_count,
+                    (first_frame_index + 1) % frame_count
                 };
 
                 for (unsigned i=0; i<std::min(frame_count, 2u); ++i)
@@ -256,24 +258,12 @@ namespace gfx
                     texture->SetWrapX(mWrapX);
                     texture->SetWrapY(mWrapY);
                 }
-                if (frame_count >= 2)
-                {
-                    prog.SetUniform("kBlendCoeff", frame_blend_coeff);
-                }
-                else
-                {
-                    prog.SetUniform("kBlendCoeff", 0.0f);
-                }
             }
-            else
-            {
-                prog.SetUniform("kBlendCoeff", frame_blend_coeff);
-            }
+            const Color4f colors[2] = {mColorA, mColorB};            
             const auto color_count = 2;
-            const Color4f colors[2] = {mColorA, mColorB};
             const unsigned color_index[2] = {
-                (unsigned(mRuntime / frame_interval) + 0) % color_count,
-                (unsigned(mRuntime / frame_interval) + 1) % color_count
+                (first_frame_index + 0) % color_count,
+                (first_frame_index + 1) % color_count
             };
             prog.SetUniform("kColorA", colors[color_index[0]]);
             prog.SetUniform("kColorB", colors[color_index[1]]);
@@ -281,6 +271,7 @@ namespace gfx
             prog.SetUniform("kRuntime", mRuntime);
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
+            prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);            
         }
 
         std::string GetName() const

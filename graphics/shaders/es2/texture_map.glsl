@@ -68,16 +68,18 @@ void main()
     // only the alpha channel later.
     vec4 tex0 = texture2D(kTexture0, c1); 
     vec4 tex1 = texture2D(kTexture1, c2); 
+    vec4 tex  = mix(tex0, tex1, kBlendCoeff);
+    
+    // mix mask values. (makes sense?)
+    float mask = mix(kIsAlphaMask0, kIsAlphaMask1, kBlendCoeff);
+
+    // mix between the modulating colors.
+    vec4 modk = mix(kColorA, kColorB, kBlendCoeff);
 
     // either modulate/mask texture color with base color 
-    // or module base color with texture's alpha value if 
+    // or modulate base color with texture's alpha value if 
     // texture is an alpha mask
-    vec4 col0 = mix(tex0 * kColorA, kColorA * tex0.a, kIsAlphaMask0);
-    vec4 col1 = mix(tex1 * kColorB, kColorB * tex1.a, kIsAlphaMask1);
-
-    // mix final blend between 2 textures based on the blend
-    // weight betwen the two.
-    vec4 col  = mix(col0, col1, kBlendCoeff);
+    vec4 col = mix(tex * modk, modk * tex.a, mask);
 
     // apply gamma (in)correction.
     gl_FragColor = pow(col, vec4(kGamma));
