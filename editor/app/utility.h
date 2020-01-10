@@ -26,9 +26,12 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QColor>
 #include "warnpop.h"
 
 #include "base/assert.h"
+
+#include "graphics/color4f.h"
 
 #include <string>
 #include <fstream>
@@ -83,5 +86,15 @@ bool readAsBinary(const QString& file, std::vector<T>& data)
     in.read((char*)&data[0], size);
     return true;
 }
+
+inline gfx::Color4f toGfx(const QColor& color)
+{
+    const float a  = color.alphaF();
+    const float r  = color.redF();
+    const float g  = color.greenF();
+    const float b  = color.blueF();      
+    return gfx::Color4f(r, g, b, a);
+}
+
 
 } // namespace

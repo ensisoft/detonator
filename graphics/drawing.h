@@ -66,6 +66,17 @@ void DrawTextRect(Painter& painter,
     unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
     unsigned properties = 0x0);
 
+// Draw a retangle filled with the desired color.
+void FillRect(Painter& painter, 
+    const FRect& rect, 
+    const Color4f& color, 
+    float rotation = 0.0f);
+// Draw a rectangle filled with the given material.
+void FillRect(Painter& painter, 
+    const FRect& rect, 
+    const Material& material,
+    float rotation = 0.0f);
+
 // Draw the outline of a rectangle. the rectangle is defined in pixels
 // and positioned relative to the top left corer of the render target/surface.
 // If rotation is non-zero the rect is first rotated *then* translated.

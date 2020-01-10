@@ -39,12 +39,13 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "app/eventlog.h"
-#include "app/utility.h"
-#include "settings.h"
-#include "eventwidget.h"
-#include "particlewidget.h"
-#include "mainwindow.h"
+#include "editor/app/eventlog.h"
+#include "editor/app/utility.h"
+#include "editor/gui/settings.h"
+#include "editor/gui/eventwidget.h"
+#include "editor/gui/particlewidget.h"
+#include "editor/gui/materialwidget.h"
+#include "editor/gui/mainwindow.h"
 
 void copyright()
 {
@@ -122,6 +123,9 @@ int main(int argc, char* argv[])
         // main widgets.
         gui::MainWindow window(settings);
     
+        gui::MaterialWidget material;
+        window.attachPermanentWidget(&material);
+
         // only one editor window for particles for now.
         gui::ParticleEditorWidget particles;
         window.attachPermanentWidget(&particles);

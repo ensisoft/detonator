@@ -90,6 +90,42 @@ void DrawTextRect(Painter& painter,
     painter.Draw(Rectangle(), t, material);
 }
 
+void FillRect(Painter& painter, 
+    const FRect& rect, 
+    const Color4f& color, 
+    float rotation) 
+{
+    const float alpha = color.Alpha();
+
+    FillRect(painter, rect, 
+        SolidColor(color).SetSurfaceType(alpha == 1.0f
+            ? Material::SurfaceType::Opaque
+            : Material::SurfaceType::Transparent), 
+        rotation);
+}
+
+void FillRect(Painter& painter, 
+    const FRect& rect, 
+    const Material& material, 
+    float rotation)
+{
+    const auto width  = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    const auto x = rect.GetX();
+    const auto y = rect.GetY();
+
+    Transform trans;
+    trans.Resize(width, height);
+    if (rotation > 0.0f)
+    {
+        trans.Translate(-width*0.5, -height*0.5);
+        trans.Rotate(rotation);
+        trans.Translate(width*0.5, height*0.5);
+    }
+    trans.Translate(x, y);
+    painter.Draw(Rectangle(), trans, material);
+}
+
 void DrawRectOutline(Painter& painter,
     const FRect& rect,
     const Color4f& color,
