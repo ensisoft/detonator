@@ -25,9 +25,12 @@
 precision mediump float;
 
 uniform vec4 kColorA;
+uniform vec4 kColorB;
+uniform float kBlendCoeff;
 uniform float kGamma;
 
 void main()
 {
-  gl_FragColor = pow(kColorA, vec4(kGamma));
+  vec4 color = mix(kColorA, kColorB, kBlendCoeff);
+  gl_FragColor = pow(color, vec4(kGamma));
 }

@@ -69,7 +69,7 @@ void DrawTextRect(Painter& painter,
 
     auto material = BitmapText(buff);
     material.SetColorA(color);
-    material.SetColorB(Color4f(Color::White, 0.0f)); // fully trans
+    material.SetColorB(color);
     if (blinking)
     {
         // create 1x1 transparent texture and 

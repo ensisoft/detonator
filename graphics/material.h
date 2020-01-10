@@ -49,12 +49,12 @@ namespace gfx
     // Abstract interface for acquiring the actual texture data.
     class TextureSource
     {
-    public: 
+    public:
         virtual ~TextureSource() = default;
         // Get the name for the texture. This is expected to be unique
         // and is used to map the source to a device texture resource.
         virtual std::string GetName() const = 0;
-        // Generate or load the data as a bitmap. 
+        // Generate or load the data as a bitmap.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
     private:
     };
@@ -63,7 +63,7 @@ namespace gfx
         // Source texture data from an image file.
         class TextureFileSource : public TextureSource
         {
-        public: 
+        public:
             TextureFileSource(const std::string& filename)
               : mFilename(filename)
             {}
@@ -78,26 +78,26 @@ namespace gfx
                     return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
                 else if (file.GetDepthBits() == 32)
                     return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
-                else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits())); 
+                else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits()));
                 return nullptr;
             }
         private:
             const std::string mFilename;
         };
 
-        // Source texture data from a bitmap 
+        // Source texture data from a bitmap
         template<typename T>
         class TextureBitmapSource : public TextureSource
         {
         public:
-            TextureBitmapSource(const Bitmap<T>& bmp) 
+            TextureBitmapSource(const Bitmap<T>& bmp)
               : mBitmap(new Bitmap<T>(bmp))
             {}
-            TextureBitmapSource(Bitmap<T>&& bmp) 
+            TextureBitmapSource(Bitmap<T>&& bmp)
               : mBitmap(new Bitmap<T>(std::move(bmp)))
             {}
             virtual std::string GetName() const override
-            { 
+            {
                 size_t hash = mBitmap->GetHash();
                 hash ^= std::hash<std::uint32_t>()(mBitmap->GetWidth());
                 hash ^= std::hash<std::uint32_t>()(mBitmap->GetHeight());
@@ -151,7 +151,7 @@ namespace gfx
         using MinTextureFilter = Texture::MinFilter;
         using MagTextureFilter = Texture::MagFilter;
         using TextureWrapping  = Texture::Wrapping;
-        // constructor. 
+        // constructor.
         Material(const std::string& shader) : mShader(shader)
         {}
 
@@ -194,6 +194,10 @@ namespace gfx
             else if (mSurfaceType == SurfaceType::Emissive)
                 state.blending = RasterState::Blending::Additive;
 
+            const auto frame_interval = mFps > 0.0f ? 1.0f / mFps : 1.0f;
+            const auto frame_fraction = std::fmod(mRuntime, frame_interval);
+            const auto frame_blend_coeff = (frame_fraction / frame_interval) * mTextureBlendWeight;
+
             // currently we only bind two textures and set a blend
             // coefficient from the run time for the shader to do
             // blending between two animation frames.
@@ -201,13 +205,12 @@ namespace gfx
             // object on the device. That means that if material m0 uses
             // textures t0 and t1 to render and material m1 *want's to use*
             // texture t2 and t3 to render but *forgets* to set them
-            // then the rendering will use textures t0 and t1 
+            // then the rendering will use textures t0 and t1
             // or whichever textures happen to be bound to the texture units
             // since last rendering.
             if (!mTextures.empty())
             {
                 const auto frame_count = (unsigned)mTextures.size();
-                const auto frame_interval = mFps > 0.0f ? 1.0f / mFps : 1.0f;
                 const unsigned frame_index[2] = {
                     (unsigned(mRuntime / frame_interval) + 0) % frame_count,
                     (unsigned(mRuntime / frame_interval) + 1) % frame_count
@@ -236,12 +239,12 @@ namespace gfx
                     const float x = normalized_box ? box.GetX() : box.GetX() / w;
                     const float y = normalized_box ? 1.0f - box.GetY() : 1.0f - ((box.GetY() + box.GetHeight()) / h);
                     const float sx = normalized_box ? box.GetWidth() : box.GetWidth() / w;
-                    const float sy = normalized_box ? box.GetHeight() : box.GetHeight() / h;                
+                    const float sy = normalized_box ? box.GetHeight() : box.GetHeight() / h;
 
                     const auto& kTexture = "kTexture" + std::to_string(i);
                     const auto& kTextureBox = "kTextureBox" + std::to_string(i);
                     const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);
-                    const auto alpha = texture->GetFormat() == Texture::Format::Grayscale 
+                    const auto alpha = texture->GetFormat() == Texture::Format::Grayscale
                         ? 1.0 : 0.0f;
 
                     prog.SetTexture(kTexture.c_str(), i, *texture);
@@ -251,12 +254,11 @@ namespace gfx
                     texture->SetFilter(mMinFilter);
                     texture->SetFilter(mMagFilter);
                     texture->SetWrapX(mWrapX);
-                    texture->SetWrapY(mWrapY);                    
+                    texture->SetWrapY(mWrapY);
                 }
                 if (frame_count >= 2)
                 {
-                    const auto coeff = std::fmod(mRuntime, frame_interval) / frame_interval;
-                    prog.SetUniform("kBlendCoeff", coeff * mTextureBlendWeight);
+                    prog.SetUniform("kBlendCoeff", frame_blend_coeff);
                 }
                 else
                 {
@@ -265,14 +267,20 @@ namespace gfx
             }
             else
             {
-                prog.SetUniform("kBlendCoeff", 0.0f);
+                prog.SetUniform("kBlendCoeff", frame_blend_coeff);
             }
-            prog.SetUniform("kColorA", mColorA);
-            prog.SetUniform("kColorB", mColorB);
+            const auto color_count = 2;
+            const Color4f colors[2] = {mColorA, mColorB};
+            const unsigned color_index[2] = {
+                (unsigned(mRuntime / frame_interval) + 0) % color_count,
+                (unsigned(mRuntime / frame_interval) + 1) % color_count
+            };
+            prog.SetUniform("kColorA", colors[color_index[0]]);
+            prog.SetUniform("kColorB", colors[color_index[1]]);
             prog.SetUniform("kGamma", mGamma);
             prog.SetUniform("kRuntime", mRuntime);
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
-            prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);            
+            prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
         }
 
         std::string GetName() const
@@ -287,7 +295,7 @@ namespace gfx
         // Set the gamma (in)correction value.
         // Values below 1.0f will result in the rendered image
         // being "brighter" and above 1.0f will make it "darker".
-        // The default is 1.0f        
+        // The default is 1.0f
         Material& SetGamma(float gamma)
         {
             mGamma = gamma;
@@ -435,10 +443,10 @@ namespace gfx
 
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
-    { 
+    {
         return Material("solid_color.glsl").SetColorA(color);
     }
- 
+
 
     // This material will map the given texture onto the drawn shape.
     // The object being drawn must provide texture coordinates.
