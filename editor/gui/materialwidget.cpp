@@ -89,6 +89,19 @@ bool MaterialWidget::saveState(Settings& settings) const
     return true;
 }
 
+void MaterialWidget::zoomIn() 
+{
+    const auto value = mUI.zoom->value();
+    mUI.zoom->setValue(value + 0.1);    
+}
+
+void MaterialWidget::zoomOut()
+{
+    const auto value = mUI.zoom->value();
+    if (value > 0.1)
+        mUI.zoom->setValue(value - 0.1);
+}
+
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;
@@ -348,7 +361,15 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
         }        
     }
 
-    gfx::FillRect(painter, gfx::FRect(0, 0, width, height), material);
+    const auto zoom = mUI.zoom->value();
+    const auto content_width  = width * zoom;
+    const auto content_height = width * zoom;
+    const auto xpos = (width - content_width) * 0.5;
+    const auto ypos = (height - content_height) * 0.5;
+
+    gfx::FillRect(painter, 
+        gfx::FRect(xpos, ypos, content_width, content_height), 
+        material);
 
     if (mState == PlayState::Playing)
     {
