@@ -28,6 +28,7 @@
 #  include <QDesktopWidget>
 #  include <QMessageBox>
 #  include <QFileInfo>
+#  include <QWheelEvent>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -92,6 +93,10 @@ void MainWindow::attachPermanentWidget(MainWidget* widget)
     mWidgets.push_back(widget);
     mActions.push_back(action);
     widget->setProperty("permanent", true);
+
+    // We need to install this event filter so that we can universally grab 
+    // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
+    widget->installEventFilter(this);
 }
 
 void MainWindow::attachSessionWidget(std::unique_ptr<MainWidget> widget)
@@ -365,6 +370,19 @@ void MainWindow::on_actionWindowPrev_triggered()
     mUI.mainTab->setCurrentIndex(prev);
 }
 
+void MainWindow::on_actionZoomIn_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+    mCurrentWidget->zoomIn();
+}
+void MainWindow::on_actionZoomOut_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+    mCurrentWidget->zoomOut();
+}
+
 void MainWindow::actionWindowToggleView_triggered()
 {
     // the signal comes from the action object in
@@ -465,6 +483,40 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 
     event->accept();
+}
+
+bool MainWindow::eventFilter(QObject* destination, QEvent* event)
+{
+    if (destination != mCurrentWidget)
+        return QObject::eventFilter(destination, event);
+
+    if (event->type() != QEvent::Wheel) 
+        return QObject::eventFilter(destination, event);
+
+    const auto* wheel = static_cast<QWheelEvent*>(event);
+    const auto mods = wheel->modifiers();
+    if (mods != Qt::ControlModifier)
+        return QObject::eventFilter(destination, event);
+    
+    const QPoint& num_degrees = wheel->angleDelta() / 8;
+    const QPoint& num_steps = num_degrees / 15;
+    // only consider the wheel scroll steps on the vertical
+    // axis for zooming. 
+    // if steps are positive the wheel is scrolled away from the user
+    // and if steps are negative the wheel is scrolled towards the user.
+    const int num_zoom_steps = num_steps.y();
+
+    //DEBUG("Zoom steps: %1", num_zoom_steps);
+
+    for (int i=0; i<std::abs(num_zoom_steps); ++i)
+    {
+        if (num_zoom_steps > 0)
+            mCurrentWidget->zoomIn();
+        else if (num_zoom_steps < 0) 
+            mCurrentWidget->zoomOut();
+    }
+
+    return true;
 }
 
 bool MainWindow::saveState()

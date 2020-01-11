@@ -107,6 +107,8 @@ namespace gui
         void on_actionWindowClose_triggered();
         void on_actionWindowNext_triggered();
         void on_actionWindowPrev_triggered();        
+        void on_actionZoomIn_triggered();
+        void on_actionZoomOut_triggered();
         void actionWindowToggleView_triggered();
         void actionWindowFocus_triggered();        
         void refreshUI();
@@ -123,6 +125,7 @@ namespace gui
 
     private:
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
+        bool eventFilter(QObject* destination, QEvent* event) override;
 
     private:
         Ui::MainWindow mUI;

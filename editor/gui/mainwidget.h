@@ -61,6 +61,9 @@ namespace gui
 
         // Called when the application is starting up. 
         virtual void startup() {}
+
+        virtual void zoomIn() {};
+        virtual void zoomOut() {}
     private:
     };
 
