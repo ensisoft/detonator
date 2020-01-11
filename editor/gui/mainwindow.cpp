@@ -383,6 +383,13 @@ void MainWindow::on_actionZoomOut_triggered()
     mCurrentWidget->zoomOut();
 }
 
+void MainWindow::on_actionReloadShaders_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+    mCurrentWidget->reloadShaders();
+}
+
 void MainWindow::actionWindowToggleView_triggered()
 {
     // the signal comes from the action object in

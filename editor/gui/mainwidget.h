@@ -64,6 +64,8 @@ namespace gui
 
         virtual void zoomIn() {};
         virtual void zoomOut() {}
+
+        virtual void reloadShaders() {};
     private:
     };
 

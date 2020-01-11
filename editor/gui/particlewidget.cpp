@@ -163,6 +163,11 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
     return true;
 }
 
+void ParticleEditorWidget::reloadShaders()
+{
+    mUI.widget->reloadShaders();
+}
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;

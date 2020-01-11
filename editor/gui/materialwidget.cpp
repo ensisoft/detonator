@@ -102,6 +102,11 @@ void MaterialWidget::zoomOut()
         mUI.zoom->setValue(value - 0.1);
 }
 
+void MaterialWidget::reloadShaders()
+{
+    mUI.widget->reloadShaders();
+}
+
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;

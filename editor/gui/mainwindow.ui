@@ -68,6 +68,7 @@
     <addaction name="actionZoomIn"/>
     <addaction name="actionZoomOut"/>
     <addaction name="separator"/>
+    <addaction name="actionReloadShaders"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -185,6 +186,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionReloadShaders">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Shaders</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

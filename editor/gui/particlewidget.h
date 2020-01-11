@@ -48,6 +48,7 @@ namespace gui
         virtual void addActions(QMenu& menu) override;       
         virtual bool saveState(Settings& settings) const;
         virtual bool loadState(const Settings& settings);
+        virtual void reloadShaders() override;
 
     private slots:
         void on_actionPlay_triggered();

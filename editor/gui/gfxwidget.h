@@ -63,6 +63,15 @@ namespace gui
             mTimer.start(ms, this);
         }
 
+        void reloadShaders()
+        {
+            // we simply just delete all program objects
+            // which will trigger the rebuild of the needed
+            // programs which will ultimately need to (re)load
+            // and compile the shaders as well.
+            mCustomGraphicsDevice->DeletePrograms();
+        }
+
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;

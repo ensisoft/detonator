@@ -109,6 +109,7 @@ namespace gui
         void on_actionWindowPrev_triggered();        
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
+        void on_actionReloadShaders_triggered();
         void actionWindowToggleView_triggered();
         void actionWindowFocus_triggered();        
         void refreshUI();

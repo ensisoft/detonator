@@ -52,6 +52,7 @@ namespace gui
         virtual bool loadState(const Settings& settings);
         virtual void zoomIn() override;
         virtual void zoomOut() override;
+        virtual void reloadShaders() override;
 
     private slots:
         void on_actionPlay_triggered();
