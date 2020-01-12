@@ -250,24 +250,25 @@ namespace gfx
         // Transforms the bitmap as follows:
         // aaaa           cccc
         // bbbb  becomes  bbbb
-        // cccc           aaaa        
+        // cccc           aaaa
         virtual void FlipHorizontally() = 0;
         // Get unique hash value based on the contents of the bitmap.
         virtual std::size_t GetHash() const = 0;
         // Here we could have methods for dynamically getting
         // And setting pixels. I.e. there'd be a method for set/get
         // for each type of pixel and when the format would not match
-        // there'd be a conversion. 
+        // there'd be a conversion.
         // This is potentially doing something unexpected and there's
         // no current use case for this API so this is omitted
-        // and instead one must use the statically typed methods 
+        // and instead one must use the statically typed methods
         // provided by the actual implementation (Bitmap template)
-                
-        // No dynamic copying or assignment
-        IBitmap(const IBitmap&) = delete;
-        IBitmap& operator=(const IBitmap&) = delete;
     protected:
+        // No public dynamic copying or assignment
         IBitmap() = default;
+        IBitmap(const IBitmap&) = default;
+        IBitmap(IBitmap&&) = default;
+        IBitmap& operator=(const IBitmap&) = default;
+        IBitmap& operator=(IBitmap&&) = default;
     private:
     };
 
@@ -326,10 +327,7 @@ namespace gfx
         // Create an empty bitmap. This is mostly useful for
         // default constructing and object which can later be
         // assigned to.
-        Bitmap()
-          : mWidth(0)
-          , mHeight(0)
-        {}
+        Bitmap() = default;
 
         // Create a bitmap with the given dimensions.
         // all the pixels are initialized to zero.
@@ -340,8 +338,20 @@ namespace gfx
             mPixels.resize(width * height);
         }
 
+        // Create a bitmap from a vector of pixel data. The product of
+        // width and height should match the number of pixels in the vector.
         Bitmap(const std::vector<Pixel>& data, unsigned width, unsigned height)
             : mPixels(data)
+            , mWidth(width)
+            , mHeight(height)
+        {
+            ASSERT(data.size() == width * height);
+        }
+
+        // Create a bitmap from a vector of pixel data. The product of
+        // width and height should match the number of pixels in the vector.
+        Bitmap(std::vector<Pixel>&& data, unsigned width, unsigned height)
+            : mPixels(std::move(data))
             , mWidth(width)
             , mHeight(height)
         {
@@ -351,7 +361,7 @@ namespace gfx
         // create a bitmap from the given data.
         // stride is the number of *bytes* per scanline.
         // if stride is 0 it will default to width * sizeof(Pixel)
-        Bitmap(const Pixel* data, unsigned width, unsigned height, unsigned stride = 0)
+        Bitmap(const Pixel* data, unsigned width, unsigned height, unsigned stride_in_bytes = 0)
             : mWidth(width)
             , mHeight(height)
         {
@@ -361,38 +371,24 @@ namespace gfx
             if (mPixels.empty())
                 return;
 
-            if (!stride)
-                stride = sizeof(Pixel) * width;
-
-            if (stride == sizeof(Pixel) * width)
+            const auto num_rows_to_copy = stride_in_bytes ? height : 1;
+            const auto num_bytes_per_row = stride_in_bytes ? stride_in_bytes : sizeof(Pixel) * width * height;
+            const auto ptr = (const u8*)data;
+            for (std::size_t y=0; y<num_rows_to_copy; ++y)
             {
-                const auto bytes = width * height * sizeof(Pixel);
-                std::memcpy(&mPixels[0], data, bytes);
-            }
-            else
-            {
-                const auto ptr = (const u8*)data;
-                // do a strided copy
-                for (std::size_t y=0; y<height; ++y)
-                {
-                    const auto src = y * stride;
-                    const auto dst = y * width;
-                    const auto len = width * sizeof(Pixel);
-                    std::memcpy(&mPixels[dst], &ptr[src], len);
-                }
+                const auto src = y * stride_in_bytes;
+                const auto dst = y * width;
+                std::memcpy(&mPixels[dst], &ptr[src], num_bytes_per_row);
             }
         }
 
-        Bitmap(const Bitmap& other)
-            : mPixels(other.mPixels)
-            , mWidth(other.mWidth)
-            , mHeight(other.mHeight)
-        {}
-        Bitmap(Bitmap&& other)
+        // conversion constructor allows a bitmap to be created
+        // from another bitmap with different type.
+        template<typename T> explicit
+        Bitmap(const Bitmap<T>& other)
         {
-            mPixels = std::move(other.mPixels);
-            mWidth  = other.mWidth;
-            mHeight = other.mHeight;
+            Resize(other.GetWidth(), other.GetHeight());
+            Copy(0, 0, other);
         }
 
         // IBitmap interface implementation
@@ -458,7 +454,7 @@ namespace gfx
             const auto src = row * mWidth + col;
             return mPixels[src];
         }
-        Pixel GetPixel(const UPoint& p) const 
+        Pixel GetPixel(const UPoint& p) const
         {
             return GetPixel(p.GetY(), p.GetX());
         }
@@ -572,7 +568,7 @@ namespace gfx
             const auto& src = IRect(x, y, width, height);
             const auto& own = IRect(GetRect());
             const auto& dst = Intersect(own, src);
-            
+
             for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
                 for (unsigned x=0; x<dst.GetWidth(); ++x)
@@ -598,7 +594,7 @@ namespace gfx
             const auto& src = IRect(x, y, w, h);
             const auto& own = IRect(GetRect());
             const auto& dst = Intersect(own, src);
-            
+
             for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
                 for (unsigned x=0; x<dst.GetWidth(); ++x)
@@ -614,17 +610,7 @@ namespace gfx
         const Pixel* GetData() const
         { return mPixels.empty() ? nullptr : &mPixels[0]; }
 
-        Bitmap& operator=(Bitmap&& other)
-        {
-            if (this == &other)
-                return *this;
-            mPixels = std::move(other.mPixels);
-            mWidth  = other.mWidth;
-            mHeight = other.mHeight;
-            return *this;
-        }
-
-        URect GetRect() const 
+        URect GetRect() const
         { return URect(0u, 0u, mWidth, mHeight); }
 
     private:
