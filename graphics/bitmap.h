@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <functional>
 
+#include <stb/stb_image_write.h>
+
 #include "base/assert.h"
 #include "color4f.h"
 #include "types.h"
@@ -737,6 +739,20 @@ namespace gfx
     void WritePPM(const Bitmap<RGB>& bmp, const char* filename)
     {
         WritePPM(bmp, std::string(filename));
+    }
+
+    template<typename T> inline
+    void WritePNG(const Bitmap<T>& bmp, const char* filename)
+    {
+        const auto w = bmp.GetWidth();
+        const auto h = bmp.GetHeight();
+        if (!stbi_write_png(filename, w, h, sizeof(T), bmp.GetDataPtr(), sizeof(T) * w))
+            throw std::runtime_error(std::string("failed to write png: ") + filename);
+    }
+    template<typename T> inline
+    void WritePNG(const Bitmap<T>& bmp, const std::string& filename)
+    {
+        return WritePNG(bmp, filename.c_str());
     }
 
 } // namespace

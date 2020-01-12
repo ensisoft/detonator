@@ -262,6 +262,7 @@ add_executable(graphics_test
     graphics/text.cpp
     graphics/test/main.cpp
     third_party/stb/stb_image.c
+    third_party/stb/stb_image_write.c
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
 target_link_libraries(graphics_test freetype_custom_build)
@@ -292,6 +293,7 @@ add_executable(invaders
     graphics/painter.cpp
     graphics/text.cpp
     third_party/stb/stb_image.c
+    third_party/stb/stb_image_write.c
 )
 target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game")
 target_link_libraries(invaders Qt5::Widgets)
