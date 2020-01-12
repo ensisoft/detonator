@@ -382,14 +382,16 @@ int main(int argc, char* argv[])
     };
 
     auto context = std::make_shared<WindowContext>();
+    auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+    auto painter = gfx::Painter::Create(device);    
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
 
-
-    wdk::Window window;
+    wdk::Window window; 
+    window.Create("Demo", 1024, 768, context->GetVisualID());
     window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
         if (key.symbol == wdk::Keysym::Escape)
             window.Destroy();
@@ -397,15 +399,23 @@ int main(int argc, char* argv[])
             test_index = test_index ? test_index - 1 : tests.size() - 1;
         else if (key.symbol == wdk::Keysym::ArrowRight)
             test_index = (test_index + 1) % tests.size();
+        else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
+        {
+            static unsigned screenshot_number = 0;
+            const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(), 
+                window.GetSurfaceHeight());
+
+            gfx::Bitmap<gfx::RGB> tmp;
+
+            const auto& name = "demo_" + std::to_string(screenshot_number) + ".png";
+            gfx::WritePNG(gfx::Bitmap<gfx::RGB>(rgba), name);
+            INFO("Wrote screen capture '%1'", name);
+            screenshot_number++;
+        }
     };
-    
 
-    window.Create("Demo", 1024, 768, context->GetVisualID());
-
+    // render in the window
     context->SetWindowSurface(window);
-
-    auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
-    auto painter = gfx::Painter::Create(device);
 
     using clock = std::chrono::high_resolution_clock;
 

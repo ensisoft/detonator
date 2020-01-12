@@ -180,6 +180,7 @@ struct OpenGLFunctions
     PFNGLENABLEPROC                  glEnable;
     PFNGLDISABLEPROC                 glDisable;
     PFNGLGETINTEGERVPROC             glGetIntegerv;
+    PFNGLREADPIXELSPROC              glReadPixels;
 };
 
 //
@@ -246,6 +247,7 @@ public:
         RESOLVE(glEnable);
         RESOLVE(glDisable);
         RESOLVE(glGetIntegerv);
+        RESOLVE(glReadPixels);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -414,6 +416,18 @@ public:
         mFrameNumber++; 
         if (display)
             mContext->Display();
+    }
+
+    virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
+    {
+        Bitmap<RGBA> bmp(width, height);
+
+        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, 
+            (void*)bmp.GetDataPtr()));
+        // by default the scan row order is reversed to what we expect.
+        bmp.FlipHorizontally();
+        return bmp;
     }
 
 private:

@@ -28,7 +28,8 @@
 #include <cstdint>
 #include <string>
 
-#include "types.h"
+#include "graphics/types.h"
+#include "graphics/bitmap.h"
 
 namespace gfx
 {
@@ -151,6 +152,13 @@ namespace gfx
         // planning to do further rendering/drawing in the same render
         // surface then you should probably pass false for display.
         virtual void EndFrame(bool display = true) = 0;
+
+        // Read the contents of the current render target's color
+        // buffer into a bitmap.
+        // Width and heigth specify the dimensions of the data to read.
+        // If the dimensions exceed the dimensions of the current render
+        // target's color surface then those pixels contents are undefined.
+        virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const = 0;
 
         // Create a rendering device of the requested type. 
         // Context should be a valid non null context object with the
