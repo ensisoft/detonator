@@ -674,7 +674,7 @@ namespace gfx
     {
         if (lhs.GetHeight() != rhs.GetHeight())
             return false;
-        if (lhs.GetWidth != rhs.GetWidth())
+        if (lhs.GetWidth() != rhs.GetWidth())
             return false;
         const URect rc (0, 0, lhs.GetWidth(), lhs.GetHeight());
 
