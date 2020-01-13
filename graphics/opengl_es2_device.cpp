@@ -101,9 +101,9 @@ const To* SafeCast(const From* from)
 namespace gfx
 {
 
-// This struct holds the OpenGL ES 2.0 entry points that 
-// we need in this device implementation. 
-// 
+// This struct holds the OpenGL ES 2.0 entry points that
+// we need in this device implementation.
+//
 // Few notes about this particular implementation:
 //
 // 1. The pointers are members of an object instead of global
@@ -113,20 +113,20 @@ namespace gfx
 // context. (For example GDI pixel format on windows).
 // So obviously one set of global function pointers would not then
 // work for multiple devices should the function addresses change.
-// 
+//
 // 2. We're not using something like GLEW here because GLEW has a
 // problem in that it doesn't use runtime "get proc" type of function
 // resolution for *all* functions. I.e. it leaves the old functions
 // (back from the OpenGL 1, fixed pipeline age) unresolved and expects
 // them to be exported by the GL library and that the user also then
 // links against -lGL.
-// This however is incorrect in cases where the OpenGL context is 
+// This however is incorrect in cases where the OpenGL context is
 // provided by some "virtual context system", e.e libANGLE or Qt's
 // QOpenGLWidget.We do not know the underlying OpenGL implementation
 // and should not know any such details that GLEW would expect us to
 // know. Rather a better way to deal with the problem is to resolve all
 // functions in the same manner.
-struct OpenGLFunctions 
+struct OpenGLFunctions
 {
     PFNGLCREATEPROGRAMPROC           glCreateProgram;
     PFNGLCREATESHADERPROC            glCreateShader;
@@ -167,7 +167,7 @@ struct OpenGLFunctions
     PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv;
     PFNGLGETPROGRAMIVPROC            glGetProgramiv;
     PFNGLGETSHADERIVPROC             glGetShaderiv;
-    PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog;    
+    PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog;
     PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog;
     PFNGLDELETETEXTURESPROC          glDeleteTextures;
     PFNGLGENTEXTURESPROC             glGenTextures;
@@ -266,9 +266,9 @@ public:
         GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
 
         INFO("OpenGLESGraphicsDevice");
-        INFO("GL %1 Vendor: %2, %3", 
+        INFO("GL %1 Vendor: %2, %3",
             mGL.glGetString(GL_VERSION),
-            mGL.glGetString(GL_VENDOR), 
+            mGL.glGetString(GL_VENDOR),
             mGL.glGetString(GL_RENDERER));
         INFO("Stencil bits: %1", stencil_bits);
         INFO("Red bits: %1", red_bits);
@@ -354,13 +354,21 @@ public:
         return ret;
     }
 
-    virtual void DeleteShaders()
+    virtual void DeleteShaders() override
     {
         mShaders.clear();
     }
-    virtual void DeletePrograms()
+    virtual void DeletePrograms() override
     {
         mPrograms.clear();
+    }
+    virtual void DeleteGeometries() override
+    {
+        mGeoms.clear();
+    }
+    virtual void DeleteTextures() override
+    {
+        mTextures.clear();
     }
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
@@ -377,7 +385,7 @@ public:
 
     virtual Type GetDeviceType() const override
     { return Type::OpenGL_ES2; }
-    
+
     virtual void CleanGarbage(size_t max_num_idle_frames) override
     {
         /* not needed atm.
@@ -412,8 +420,8 @@ public:
         }
     }
     virtual void EndFrame(bool display) override
-    { 
-        mFrameNumber++; 
+    {
+        mFrameNumber++;
         if (display)
             mContext->Display();
     }
@@ -423,7 +431,7 @@ public:
         Bitmap<RGBA> bmp(width, height);
 
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, 
+        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
             (void*)bmp.GetDataPtr()));
         // by default the scan row order is reversed to what we expect.
         bmp.FlipHorizontally();
@@ -567,7 +575,7 @@ private:
             // to a texture unit. we must make sure not to overwrite any other
             // texture objects that might be bound to the unit. for example
             // if the rendering code is running a loop where it's first creating
-            // texture objects if they don't exist and then setting them to a 
+            // texture objects if they don't exist and then setting them to a
             // sampler (which will do a bind). Then going another iteration of this
             // loop would overwrite the texture from before. Oooops!
             GLint current_texture = 0;
@@ -593,7 +601,7 @@ private:
         }
 
         // refer actual state setting to the point when
-        // when the texture is actually used in a program's 
+        // when the texture is actually used in a program's
         // sampler
         virtual void SetFilter(MinFilter filter) override
         { mMinFilter = filter; }
@@ -628,10 +636,10 @@ private:
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }
 
-        size_t GetLastUsedFrameNumber() const 
+        size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
 
-        bool IsEligibleForGarbageCollection() const 
+        bool IsEligibleForGarbageCollection() const
         { return mEnableGC; }
 
     private:
@@ -680,7 +688,7 @@ private:
         {
             mData = std::move(verts);
         }
-        
+
         void Draw(GLuint program)
         {
             GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
@@ -705,7 +713,7 @@ private:
                 GL_CALL(glDrawArrays(GL_POINTS, 0, mData.size()));
         }
         void SetLastUseFrameNumber(size_t frame_number)
-        { mFrameNumber = frame_number; }        
+        { mFrameNumber = frame_number; }
     private:
         const OpenGLFunctions& mGL;
     private:
@@ -734,6 +742,7 @@ private:
 
             for (const auto* shader : shaders)
             {
+                ASSERT(shader->IsValid());
                 GL_CALL(glAttachShader(prog,
                     static_cast<const ShaderImpl*>(shader)->GetName()));
             }
@@ -794,7 +803,7 @@ private:
             auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniform3f(ret, x, y, z));
         }
         virtual void SetUniform(const char* name, float x, float y, float z, float w) override
@@ -802,7 +811,7 @@ private:
             auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniform4f(ret, x, y, z, w));
         }
         virtual void SetUniform(const char* name, const Color4f& color) override
@@ -818,7 +827,7 @@ private:
             auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniformMatrix2fv(ret, 1, GL_FALSE /* transpose */, (const float*)&matrix));
         }
         virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
@@ -826,7 +835,7 @@ private:
             auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniformMatrix3fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
         }
         virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
@@ -834,7 +843,7 @@ private:
             auto ret = mGL.glGetUniformLocation(mProgram, name);
             if (ret == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));                
+            GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniformMatrix4fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
         }
 
@@ -845,7 +854,7 @@ private:
                 return;
 
             const auto& impl = dynamic_cast<const TextureImpl&>(texture);
-            
+
             GLuint texture_name = impl.GetName();
             GLenum texture_min_filter = GL_NONE;
             GLenum texture_mag_filter = GL_NONE;
@@ -879,16 +888,16 @@ private:
 
             // set all this fucking state here, so we can easily track/understand
             // which unit the texture is bound to.
-            
+
             // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
-            // bind the 2D texture. 
+            // bind the 2D texture.
             GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
             // set texture parameters, wrapping and min/mag filters.
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 
-                impl.GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));                
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 
-                impl.GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));            
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                impl.GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                impl.GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
             GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
             // set the teture unit to the sampler
@@ -903,15 +912,15 @@ private:
             // There are two ways to deal with this dilemma:
             // - flip all images on the horizontal axis before calling glTexImage2D.
             // - use a matrix to transform the texture coordinates to counter this.
-            // 
-            // If the program being used to render stuff is using a texture 
+            //
+            // If the program being used to render stuff is using a texture
             // we helpfully setup here a "device texture matrix" that will be provided
             // for the program and should be used to transform the texture coordinates
             // before sampling textures.
             // This will avoid having to do any image flips which is especilly
-            // handy when dealing with data that gets re-uploaded often 
+            // handy when dealing with data that gets re-uploaded often
             // I.e. dynamically changing/procedural texture data.
-            // 
+            //
             // It should also be possible to use the device texture matrix for example
             // in cases where the device would bake some often used textures into an atlas
             // and implicitly alter the texture coordinates.
@@ -936,8 +945,8 @@ private:
         { return mProgram; }
 
         void SetLastUseFrameNumber(size_t frame_number)
-        { 
-            mFrameNumber = frame_number; 
+        {
+            mFrameNumber = frame_number;
             for (auto* texture : mFrameTextures)
             {
                 texture->SetLastUseFrameNumber(frame_number);
@@ -947,7 +956,7 @@ private:
         {
             mFrameTextures.clear();
         }
-        size_t GetLastUsedFrameNumber() const 
+        size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
 
     private:
@@ -997,7 +1006,11 @@ private:
                 else if (line.find("gl_FragColor") != std::string::npos)
                     type = GL_FRAGMENT_SHADER;
             }
-            ASSERT(type != GL_NONE);
+            if (type == GL_NONE)
+            {
+                ERROR("Failed to identify shader type.");
+                return false;
+            }
 
             GLint status = 0;
             GLint shader = mGL.glCreateShader(type);
@@ -1059,7 +1072,7 @@ private:
 };
 
 // static
-std::shared_ptr<Device> Device::Create(Type type, 
+std::shared_ptr<Device> Device::Create(Type type,
     std::shared_ptr<Device::Context> context)
 {
     return std::make_shared<OpenGLES2GraphicsDevice>(context);

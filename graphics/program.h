@@ -34,18 +34,19 @@ namespace gfx
 
     // Program object interface. Program objects are device
     // specific graphics programs that are built from shaders
-    // and then uploaded and executed on the device. 
+    // and then uploaded and executed on the device.
     class Program
     {
     public:
         virtual ~Program() = default;
 
-        // Build the program from the given list of shaders. 
-        // Returns true if the build was succesful. 
+        // Build the program from the given list of shaders.
+        // Returns true if the build was succesful.
         // Failed build will leave the program object in the previous state.
+        // Trying to build from shaders that are not valid is considered a bug.
         virtual bool Build(const std::vector<const Shader*>& shaders) = 0;
 
-        // Returns true if the program is valid or not I.e. it has been 
+        // Returns true if the program is valid or not I.e. it has been
         // succesfully build and can be used for drawing.
         virtual bool IsValid() const = 0;
 
@@ -53,7 +54,7 @@ namespace gfx
         // Uniforms are normally set before using the program to perform
         // any drawing/rendering operations.
         // Each uniform is identified by it's name in the shader sources.
-        // If the uniform doesn't actually exist in the shader 
+        // If the uniform doesn't actually exist in the shader
         // (for example because of dead code elimination) or by user's modification
         // of the shader the call is silently ignored.
 
@@ -86,8 +87,8 @@ namespace gfx
         // Set 4x4 matrix uniform.
         virtual void SetUniform(const char* name, const Matrix4x4& matrix) = 0;
 
-        // Set a texture sampler. 
-        // Sampler is the name of the texture sampler in the shader. 
+        // Set a texture sampler.
+        // Sampler is the name of the texture sampler in the shader.
         // It's possible to sample multiple textures in the program by setting each
         // texture to a different texture unit.
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) = 0;

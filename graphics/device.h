@@ -86,30 +86,30 @@ namespace gfx
 
         // OpenGL graphics context. The context is the interface for the device
         // to resolve the (possibly context specific) OpenGL entry points.
-        // This abstraction allows the device to remain agnostic as to 
+        // This abstraction allows the device to remain agnostic as to
         // what kind of windowing system/graphics subsystem is creating the context
         // and what is the ultimate rendering target (pbuffer, fbo, pixmap or window)
-        class Context 
+        class Context
         {
-        public: 
+        public:
             virtual ~Context() = default;
             // Display the current contents of the rendering target.
             virtual void Display() = 0;
             // Make this context as the current context for the
-            // calling thread. 
+            // calling thread.
             // Note: In OpenGL all the API functions assume
             // an "implicit" context for the calling thread to be a global
             // object that is set through the window system integration layer
             // i.e. through calling some method on  WGL, GLX, EGL or AGL.
             // So if an application is creating multiple contexts in some thread
-            // before starting to use any particular context it has to be 
-            // made the "current contet". The context contains all the 
-            // OpenGL API state. 
+            // before starting to use any particular context it has to be
+            // made the "current contet". The context contains all the
+            // OpenGL API state.
             virtual void MakeCurrent() = 0;
-            // Resolve an OpenGL API function to a function pointer. 
+            // Resolve an OpenGL API function to a function pointer.
             // Note: The function pointers can indeed be different for
             // different contexts depending on their specific configuration.
-            // Returns a valid pointer or nullptr if there's no such 
+            // Returns a valid pointer or nullptr if there's no such
             // function. (For example an extension function is not available).
             virtual void* Resolve(const char* name) = 0;
         private:
@@ -129,9 +129,11 @@ namespace gfx
         virtual Geometry* MakeGeometry(const std::string& name) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
-
+        // Resource deletion APIs
         virtual void DeleteShaders() = 0;
         virtual void DeletePrograms() = 0;
+        virtual void DeleteGeometries() = 0;
+        virtual void DeleteTextures() = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
@@ -160,7 +162,7 @@ namespace gfx
         // target's color surface then those pixels contents are undefined.
         virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const = 0;
 
-        // Create a rendering device of the requested type. 
+        // Create a rendering device of the requested type.
         // Context should be a valid non null context object with the
         // right version.
         // Type = OpenGL_ES2, Context 2.0

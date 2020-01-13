@@ -140,7 +140,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Editor application.
-add_executable(Editor 
+add_executable(Editor
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
@@ -170,7 +170,7 @@ add_executable(Editor
     editor/gui/materialwidget.cpp
     editor/gui/materialwidget.ui
     editor/resource/resource.qrc
-    third_party/stb/stb_image.c    
+    third_party/stb/stb_image.c
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
     third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
     third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
@@ -209,7 +209,7 @@ add_executable(Editor
     third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
     third_party/Qt-Color-Widgets/include/gradient_slider.hpp
     third_party/Qt-Color-Widgets/include/hue_slider.hpp
-    third_party/Qt-Color-Widgets/include/swatch.hpp    
+    third_party/Qt-Color-Widgets/include/swatch.hpp
 )
 target_compile_definitions(Editor PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
@@ -223,12 +223,12 @@ if (UNIX)
     target_link_libraries(Editor ncurses)
 endif()
 install(TARGETS Editor DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders" 
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 
 # audio test application. Simple console application that plays
-# OGG and WAV files in several different formats. 
+# OGG and WAV files in several different formats.
 add_executable(audio_test
     audio/pulseaudio.cpp
     audio/waveout.cpp
@@ -269,7 +269,7 @@ target_link_libraries(graphics_test freetype_custom_build)
 target_link_libraries(graphics_test harfbuzz_custom_build)
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
 install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders" 
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 if (UNIX)
     target_link_libraries(graphics_test ncurses)
@@ -310,7 +310,7 @@ elseif (UNIX)
   target_link_libraries(invaders pthread)
 endif()
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders" 
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/game/dist")
 
 
@@ -319,9 +319,19 @@ enable_testing()
 add_executable(unit_test_bitmap graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
 add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp base/assert.cpp third_party/stb/stb_image.c)
 add_executable(unit_test        graphics/unit_test/unit_test.cpp)
+add_executable(unit_test_device graphics/unit_test/unit_test_device.cpp
+    base/assert.cpp
+    graphics/opengl_es2_device.cpp
+    third_party/stb/stb_image_write.c)
+
+target_link_libraries(unit_test_device
+    wdk_system
+    wdk_desktop_gl
+    freetype_custom_build
+    harfbuzz_custom_build)
 target_include_directories(unit_test_bitmap PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_image  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-
+target_include_directories(unit_test_device PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 
 
