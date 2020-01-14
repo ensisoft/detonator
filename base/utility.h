@@ -32,18 +32,18 @@
 namespace base
 {
 
-inline double GetRuntimeSec() 
+inline double GetRuntimeSec()
 {
     using steady_clock = std::chrono::steady_clock;
     static const auto start = steady_clock::now();
     const auto now = steady_clock::now();
     const auto gone = now - start;
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(gone);
-    return ms.count() / 1000.0; 
+    return ms.count() / 1000.0;
 }
 
 template<typename T, typename Deleter>
-std::unique_ptr<T, Deleter> make_unique_ptr(T* ptr, Deleter del)
+std::unique_ptr<T, Deleter> MakeUniqueHandle(T* ptr, Deleter del)
 {
     return std::unique_ptr<T, Deleter>(ptr, del);
 }
@@ -54,18 +54,18 @@ std::string ToUtf8(const std::wstring& str)
     // this way of converting is depcreated since c++17 but
     // this works good enough for now so we'll go with it.
     using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;            
+    std::wstring_convert<convert_type, wchar_t> converter;
     std::string converted_str = converter.to_bytes(str);
-    return converted_str;    
+    return converted_str;
 }
 
-inline 
+inline
 std::wstring FromUtf8(const std::string& str)
 {
     // this way of converting is deprecated since c++17 but
     // this works good enough for now so we'll go with it.
     using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;                
+    std::wstring_convert<convert_type, wchar_t> converter;
     std::wstring converted_str = converter.from_bytes(str);
     return converted_str;
 }
@@ -89,12 +89,12 @@ std::wstring ToLower(const std::wstring& str)
 }
 
 // convert std::string to wide string representation
-// without any regard to encoding. 
+// without any regard to encoding.
 inline
 std::wstring Widen(const std::string& str)
 {
     std::wstring ret;
-    for (auto c : str) 
+    for (auto c : str)
         ret.push_back(c);
     return ret;
 }

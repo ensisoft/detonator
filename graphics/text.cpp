@@ -39,16 +39,16 @@
 #include "base/utility.h"
 #include "text.h"
 
-// some good information here about text rendering 
+// some good information here about text rendering
 // https://gankra.github.io/blah/text-hates-you/
 
 /*
 Scalar:     A Unicode Scalar, the "smallest unit" unicode describes (AKA a code point).
-Character:  A Unicode Extended Grapheme Cluster (EGC), the "biggest unit" unicode describes 
+Character:  A Unicode Extended Grapheme Cluster (EGC), the "biggest unit" unicode describes
             (potentially composed of multiple scalars).
 Glyph:      An atomic unit of rendering yielded by the font. Generally this will have a unique ID in the font.
 Ligature:   A glyph that is made up of several scalars, and potentially even several characters
-            (native speakers may or may not think of a ligature as multiple "characters", but to the font it's 
+            (native speakers may or may not think of a ligature as multiple "characters", but to the font it's
             just one "character").
 Emoji:      A "full color" glyph. 🙈🙉🙊
 Font:       A document that maps characters to glyphs.
@@ -59,7 +59,7 @@ Style:      Bold and Italics modifiers for fonts (hinting, aliasing, and other s
             crammed in here in practical implementations).
 */
 
-namespace gfx 
+namespace gfx
 {
 
 // RAII type for initializing and freeing the Freetype library
@@ -81,27 +81,27 @@ struct TextBuffer::FontLibrary {
 };
 std::weak_ptr<TextBuffer::FontLibrary> TextBuffer::Freetype;
 
-std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const 
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
 {
-    // the repeated allocation bitmaps for rasterizing content is 
+    // the repeated allocation bitmaps for rasterizing content is
     // actually more expensive than the actual rasterization.
     // we can keep a small cache of frequently used bitmap sizes.
-    static std::map<std::uint64_t, 
+    static std::map<std::uint64_t,
         std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
 
     std::shared_ptr<Bitmap<Grayscale>> out;
 
     const std::uint64_t key = ((uint64_t)mWidth << 32) | mHeight;
     auto it = cache.find(key);
-    if (it == std::end(cache)) 
+    if (it == std::end(cache))
     {
         out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
         cache[key] = out;
-    } 
-    else 
-    { 
+    }
+    else
+    {
         out = it->second;
-        out->Fill(Grayscale(0));                
+        out->Fill(Grayscale(0));
     }
 
     for (const auto& text : mText)
@@ -122,7 +122,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             const bool was_empty = line.empty();
             if (line.empty())
                 line = "k";
-            
+
             auto bmp = Rasterize(line, text.font, text.style);
             if (was_empty)
                 bmp->Fill(Grayscale{0});
@@ -137,8 +137,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             ypos = ((int)mHeight - total_height) / 2;
         else if (text.style.mVAlignment == VerticalAlignment::AlignBottom)
             ypos = mHeight - total_height;
-        
-        for (const auto& bmp : line_bitmaps) 
+
+        for (const auto& bmp : line_bitmaps)
         {
             int xpos = 0;
             if (text.style.mHAlignment == HorizontalAlignment::AlignLeft)
@@ -147,7 +147,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
                 xpos = ((int)mWidth - (int)bmp->GetWidth()) / 2;
             else if (text.style.mHAlignment == HorizontalAlignment::AlignRight)
                 xpos = mWidth - bmp->GetWidth();
-            
+
             out->Copy(xpos, ypos, *bmp);
             ypos += bmp->GetHeight();
         }
@@ -159,7 +159,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     tmp.Copy(0, 0, mBitmap);
     WritePPM(tmp, "/tmp/text-buffer.ppm");
     DEBUG("Wrote rasterized text buffer in '%1'", "/tmp/text-buffer.ppm");
-#endif  
+#endif
 
     return out;
 }
@@ -175,26 +175,26 @@ TextBuffer::TextStyle& TextBuffer::AddText(const std::string& text, const std::s
     return mText.back().style;
 }
 
-std::size_t TextBuffer::GetHash() const 
+std::size_t TextBuffer::GetHash() const
 {
     boost::hash<std::string> string_hash;
 
     std::size_t hash = 0;
-    for (const auto& t : mText) 
+    for (const auto& t : mText)
     {
         hash ^= string_hash(t.text);
         // have the style properties also contribute to the hash so that
         // text buffer with similar text content but different properties
         // generates a different hash.
-        hash ^= (int)t.style.mLineHeight + (int)t.style.mFontsize + 
-                (int)t.style.mHAlignment + (int)t.style.mVAlignment + 
+        hash ^= (int)t.style.mLineHeight + (int)t.style.mFontsize +
+                (int)t.style.mHAlignment + (int)t.style.mVAlignment +
                 (int)t.style.mUnderline;
     }
     return hash;
 }
 
-std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text, 
-    const std::string& font, const TextStyle& style) const 
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text,
+    const std::string& font, const TextStyle& style) const
 {
     // FreeType 2 uses size objects to model all information related to a given character
     // size for a given face. For example, a size object holds the value of certain metrics
@@ -204,7 +204,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     const auto FUCKING_MAGIC_SCALE = 64;
 
     mFreetype = Freetype.lock();
-    if (!mFreetype) 
+    if (!mFreetype)
     {
         mFreetype = std::make_shared<TextBuffer::FontLibrary>();
         Freetype  = mFreetype;
@@ -213,21 +213,21 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
 
     if (FT_New_Face(mFreetype->library, font.c_str(), 0, &face))
         throw std::runtime_error("Failed to load font file: " + font);
-    auto face_raii = base::make_unique_ptr(face, FT_Done_Face);
+    auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
         throw std::runtime_error("Font doesn't support Unicode");
 
     if (FT_Set_Pixel_Sizes(face, 0, style.mFontsize))
-        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(style.mFontsize));    
+        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(style.mFontsize));
     //if (FT_Set_Char_Size(face, font_size * FUCKING_MAGIC_SCALE, font_size * FUCKING_MAGIC_SCALE, 0, 0))
     //    throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));
 
     // simple example for harfbuzz is here
     // https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
-    hb_font_t* hb_font = hb_ft_font_create(face, nullptr);    
+    hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
     hb_buffer_t* hb_buff = hb_buffer_create();
-    hb_buffer_add_utf8(hb_buff, text.c_str(), 
+    hb_buffer_add_utf8(hb_buff, text.c_str(),
         -1,  // NUL terminated string
          0, // offset of the first character to add to the buffer
         -1 // number of characters to add to the buffer or -1 for "until the end of text"
@@ -235,7 +235,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     hb_buffer_set_direction(hb_buff, HB_DIRECTION_LTR);
     hb_buffer_set_script(hb_buff, HB_SCRIPT_LATIN);
     hb_buffer_set_language(hb_buff, hb_language_from_string("en", -1));
-    hb_shape(hb_font, hb_buff, nullptr, 0);    
+    hb_shape(hb_font, hb_buff, nullptr, 0);
 
     struct GlyphRasterInfo {
         unsigned width  = 0;
@@ -244,7 +244,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         int bearing_y = 0;
         Bitmap<Grayscale> bitmap;
     };
-        
+
     std::map<unsigned, GlyphRasterInfo> glyph_raster_info;
 
     // rasterize the required glyphs
@@ -255,7 +255,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     // orientation with the Y axis upwards.
     int ascent = 0.0f;
     // the distance from the baseline to the lowest grid coordinate to used to
-    // place an outline point. It's a negative value due to the grid's 
+    // place an outline point. It's a negative value due to the grid's
     // orientation with the Y axis upwards.
     int descent = 0.0f;
 
@@ -270,21 +270,21 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     const auto glyph_count = hb_buffer_get_length(hb_buff);
     hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buff, nullptr);
     hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(hb_buff, nullptr);
-    for (unsigned i=0; i<glyph_count; ++i) 
+    for (unsigned i=0; i<glyph_count; ++i)
     {
         const auto codepoint = glyph_info[i].codepoint;
         auto it = glyph_raster_info.find(codepoint);
         if (it == std::end(glyph_raster_info))
         {
-            // load/rasterize the glyph we don't already have 
+            // load/rasterize the glyph we don't already have
             FT_Load_Glyph(face, codepoint, FT_LOAD_DEFAULT);
             FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
             FT_GlyphSlot slot = face->glyph;
 
             // copy into our buffer
-            Bitmap<Grayscale> bmp(reinterpret_cast<const Grayscale*>(slot->bitmap.buffer), 
+            Bitmap<Grayscale> bmp(reinterpret_cast<const Grayscale*>(slot->bitmap.buffer),
                 slot->bitmap.width,
-                slot->bitmap.rows, 
+                slot->bitmap.rows,
                 slot->bitmap.pitch);
 
             GlyphRasterInfo info;
@@ -293,7 +293,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
             // bearing X (left side bearing) is the horizontal distance from the current pen position
             // to the glyph's left edge (the left edge of its bounding box)
             info.bearing_x = slot->bitmap_left;
-            // bearing Y (top side bearing) is the vertical distance from the baseline to the top of glyph 
+            // bearing Y (top side bearing) is the vertical distance from the baseline to the top of glyph
             // (to the top of its bounding box)
             info.bearing_y = slot->bitmap_top;
             info.bitmap    = std::move(bmp);
@@ -301,21 +301,21 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         }
         const auto& info = it->second;
 
-        // compute the extents of the text i.e. the required height and width 
+        // compute the extents of the text i.e. the required height and width
         // of the bitmap into which to composit the glyphs
 
         const int xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
-        const int ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;        
+        const int ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;
         // the x and y offsets from harfbuzz seem to be just for modifying
         // the x and y offsets (bearings) from freetype
-        const int xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;        
-        const int yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;        
-        
+        const int xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;
+        const int yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;
+
         // this is the glyph top left corner relative to the imaginery baseline
         // where the baseline is at y=0 and y grows up
         const int x = pen_x + info.bearing_x + xo;
         const int y = pen_y + info.bearing_y + yo;
-        
+
         const int glyph_top = y;
         const int glyph_bot = y - info.height;
 
@@ -327,8 +327,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
 
         pen_x += xa;
         pen_y += ya;
-    }    
-    
+    }
+
     // offset to the baseline. if negative then it's below the baseline
     // if positive it's above the baseline.
     const auto underline_position  = face->underline_position / FUCKING_MAGIC_SCALE;
@@ -339,25 +339,25 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
 
     height += margin;
 
-    // the repeated allocation bitmaps for rasterizing content is 
+    // the repeated allocation bitmaps for rasterizing content is
     // actually more expensive than the actual rasterization.
     // we can keep a small cache of frequently used bitmap sizes.
-    static std::map<std::uint64_t, 
+    static std::map<std::uint64_t,
         std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
 
     std::shared_ptr<Bitmap<Grayscale>> bmp;
 
     const std::uint64_t key = ((uint64_t)width << 32) | height;
     auto it = cache.find(key);
-    if (it == std::end(cache)) 
+    if (it == std::end(cache))
     {
         bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
         cache[key] = bmp;
-    } 
-    else 
-    { 
+    }
+    else
+    {
         bmp = it->second;
-        bmp->Fill(Grayscale(0));                
+        bmp->Fill(Grayscale(0));
     }
 
     // the bitmap has 0,0 at top left and y grows down.
@@ -373,7 +373,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     pen_x = 0;
     pen_y = 0;
 
-    for (unsigned i=0; i<glyph_count; ++i) 
+    for (unsigned i=0; i<glyph_count; ++i)
     {
         const auto codepoint = glyph_info[i].codepoint;
         const auto& info = glyph_raster_info[codepoint];
@@ -392,13 +392,13 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         bmp->Copy(x, baseline - y, info.bitmap);
 
         pen_x += xa;
-        pen_y += ya; 
+        pen_y += ya;
     }
 
     if (style.mUnderline)
     {
         const auto width = bmp->GetWidth();
-        const URect underline(0, baseline + underline_position, 
+        const URect underline(0, baseline + underline_position,
             width, underline_thickness);
         bmp->Fill(underline, gfx::Grayscale(0xff));
     }
