@@ -184,7 +184,7 @@ void MaterialWidget::on_textureDel_clicked()
     if (mUI.textures->count() == 0)
         mUI.textureDel->setEnabled(false);
 
-    mUI.imgRect->setEnabled(false);
+    mUI.texRect->setEnabled(false);
     mUI.rectX->setValue(0.0f);
     mUI.rectY->setValue(0.0f);
     mUI.rectW->setValue(1.0f);
@@ -193,7 +193,7 @@ void MaterialWidget::on_textureDel_clicked()
 
 void MaterialWidget::on_textures_currentRowChanged(int index)
 {
-    mUI.imgRect->setEnabled(false);
+    mUI.texRect->setEnabled(false);
     mUI.rectX->setValue(0.0f);
     mUI.rectY->setValue(0.0f);
     mUI.rectW->setValue(1.0f);
@@ -234,18 +234,48 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     mUI.texturePreview->setEnabled(true);
     mUI.texturePreview->setPixmap(img.scaledToHeight(128));
 
-    mUI.imgRect->setEnabled(data.rect_enabled);
+    mUI.texRect->setEnabled(data.rect_enabled);
     mUI.rectX->setValue(data.rectx);
     mUI.rectY->setValue(data.recty);
     mUI.rectW->setValue(data.rectw);
     mUI.rectH->setValue(data.recth);
 
     mUI.texProps->setEnabled(true);
-    mUI.imgRect->setEnabled(true);
+    mUI.texRect->setEnabled(true);
 
 }
 
-void MaterialWidget::on_imgRect_clicked(bool checked)
+void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
+{
+    mUI.texturing->setEnabled(false);
+    mUI.animation->setEnabled(false);
+    mUI.customMaterial->setEnabled(false);
+    mUI.texMaps->setEnabled(false);
+    mUI.texProps->setEnabled(false);
+    mUI.texRect->setEnabled(false);
+
+    if (text == "Color")
+    {
+        mUI.baseProperties->setEnabled(true);
+    }
+    else if (text == "Texture")
+    {
+        mUI.texturing->setEnabled(true);
+        mUI.texMaps->setEnabled(true);
+        mUI.texProps->setEnabled(true);
+        mUI.texRect->setEnabled(true);
+    }
+    else if (text == "Sprite")
+    {
+        mUI.texturing->setEnabled(true);
+        mUI.texMaps->setEnabled(true);
+        mUI.texProps->setEnabled(true);
+        mUI.texRect->setEnabled(true);
+        mUI.animation->setEnabled(true);
+    }
+}
+
+void MaterialWidget::on_texRect_clicked(bool checked)
 {
     mTextures[getCurrentTextureKey()].rect_enabled = checked;
 }
@@ -282,7 +312,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto& wrapy = mUI.wrapY->currentText();
     const auto& color = mUI.baseColor->color();
     const auto textures = mUI.textures->count();
-    const auto fps = mUI.fps->value();
+    const auto fps   = type == "Sprite" ? mUI.fps->value() : 0.0f;
     const auto blend = mUI.blend->isChecked();
 
     // todo: fix this
@@ -291,6 +321,9 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
         shader = "solid_color.glsl";
     else if (type == "Texture")
         shader = "texture_map.glsl";
+    else if (type == "Sprite")
+        shader = "texture_map.glsl";
+
 
     const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
     const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);

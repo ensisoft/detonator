@@ -27,7 +27,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="baseProperties">
           <property name="title">
            <string>Base properties</string>
           </property>
@@ -117,6 +117,11 @@
                  <string>Texture</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Sprite</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item row="4" column="1">
@@ -135,7 +140,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_5">
+         <widget class="QGroupBox" name="texturing">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Texturing</string>
           </property>
@@ -231,6 +239,9 @@
         </item>
         <item>
          <widget class="QGroupBox" name="animation">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Sprite animation</string>
           </property>
@@ -272,7 +283,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="effect">
+         <widget class="QGroupBox" name="customMaterial">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -402,7 +413,10 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="texMaps">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Texture map(s)</string>
           </property>
@@ -608,7 +622,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="imgRect">
+         <widget class="QGroupBox" name="texRect">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Texture rect</string>
           </property>
@@ -831,7 +848,7 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
-  <tabstop>imgRect</tabstop>
+  <tabstop>texRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>

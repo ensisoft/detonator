@@ -61,7 +61,8 @@ namespace gui
         void on_textureAdd_clicked();
         void on_textureDel_clicked();
         void on_textures_currentRowChanged(int row);
-        void on_imgRect_clicked(bool checked);
+        void on_materialType_currentIndexChanged(const QString& text);
+        void on_texRect_clicked(bool checked);
         void on_rectX_valueChanged(double value);
         void on_rectY_valueChanged(double value);
         void on_rectW_valueChanged(double value);
