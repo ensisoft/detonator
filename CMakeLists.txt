@@ -112,7 +112,7 @@ link_directories("${Boost_LIBRARY_DIRS}")
 
 # see this bug report about C++14 and Qt
 # https://bugreports.qt.io/browse/QTBUG-53002
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # we also need Qt for the time being
 if (WIN32)
