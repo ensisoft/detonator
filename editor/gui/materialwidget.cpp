@@ -54,7 +54,7 @@ MaterialWidget::MaterialWidget()
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
-    mUI.actionStop->setEnabled(false);    
+    mUI.actionStop->setEnabled(false);
 }
 
 MaterialWidget::~MaterialWidget()
@@ -89,10 +89,10 @@ bool MaterialWidget::saveState(Settings& settings) const
     return true;
 }
 
-void MaterialWidget::zoomIn() 
+void MaterialWidget::zoomIn()
 {
     const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);    
+    mUI.zoom->setValue(value + 0.1);
 }
 
 void MaterialWidget::zoomOut()
@@ -142,9 +142,17 @@ void MaterialWidget::on_textureAdd_clicked()
     {
         QFileInfo info(file);
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+        // generate random key for the file.
+        const QString& key = app::randomString();
+
         item->setText(info.fileName());
-        item->setData(Qt::UserRole, file);
+        item->setData(Qt::UserRole, key);
         mUI.textures->addItem(item);
+
+        // store the texture details in a map by the unique key
+        mTextures[key].file = file;
+        mTextures[key].rectw = 1.0f;
+        mTextures[key].recth = 1.0f;
     }
     const auto count = mUI.textures->count();
     const auto index = mUI.textures->currentRow();
@@ -160,8 +168,8 @@ void MaterialWidget::on_textureDel_clicked()
 
     for (int i=0; i<items.count(); ++i)
     {
-        const QString& file = items[i]->data(Qt::UserRole).toString();
-        mTextureRects.remove(file);
+        const QString& key = items[i]->data(Qt::UserRole).toString();
+        mTextures.remove(key);
     }
 
     qDeleteAll(items);
@@ -173,34 +181,36 @@ void MaterialWidget::on_textureDel_clicked()
     mUI.rectX->setValue(0.0f);
     mUI.rectY->setValue(0.0f);
     mUI.rectW->setValue(1.0f);
-    mUI.rectH->setValue(1.0f);        
+    mUI.rectH->setValue(1.0f);
 }
 
 void MaterialWidget::on_textures_currentRowChanged(int index)
-{   
+{
     mUI.imgRect->setEnabled(false);
     mUI.rectX->setValue(0.0f);
     mUI.rectY->setValue(0.0f);
     mUI.rectW->setValue(1.0f);
     mUI.rectH->setValue(1.0f);
-    
+
     mUI.texProps->setEnabled(false);
     mUI.textureWidth->setText("");
     mUI.textureHeight->setText("");
     mUI.textureDepth->setText("");
     mUI.textureFile->setText("");
-    
-    const auto& file = getCurrentTextureFilename();
-    if (file.isEmpty())
+
+    const auto& key = getCurrentTextureKey();
+    if (key.isEmpty())
         return;
 
-    mUI.textureFile->setText(file);
+    const auto& data = mTextures[key];
+
+    mUI.textureFile->setText(data.file);
     mUI.textureFile->setCursorPosition(0);
 
-    const QPixmap img(file);
+    const QPixmap img(data.file);
     if (img.isNull())
     {
-        ERROR("Could not load image '%1'", file);
+        ERROR("Could not load image '%1'", data.file);
         mUI.textureWidth->setText("Error");
         mUI.textureHeight->setText("Error");
         mUI.textureDepth->setText("Error");
@@ -217,15 +227,12 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     mUI.texturePreview->setEnabled(true);
     mUI.texturePreview->setPixmap(img.scaledToHeight(128));
 
-    if (mTextureRects.contains(file))
-    {
-        const auto& rect = mTextureRects.value(file);
-        mUI.imgRect->setEnabled(rect.enabled);
-        mUI.rectX->setValue(rect.x);
-        mUI.rectY->setValue(rect.y);
-        mUI.rectW->setValue(rect.w);
-        mUI.rectH->setValue(rect.h);
-    }
+    mUI.imgRect->setEnabled(data.rect_enabled);
+    mUI.rectX->setValue(data.rectx);
+    mUI.rectY->setValue(data.recty);
+    mUI.rectW->setValue(data.rectw);
+    mUI.rectH->setValue(data.recth);
+
     mUI.texProps->setEnabled(true);
     mUI.imgRect->setEnabled(true);
 
@@ -233,37 +240,24 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
 
 void MaterialWidget::on_imgRect_clicked(bool checked)
 {
-    const auto& file = getCurrentTextureFilename();
-
-    if (!mTextureRects.contains(file))
-    {
-        TextureRect rect;
-        rect.enabled = checked;
-        rect.x = 0.0f;
-        rect.y = 0.0f;
-        rect.w = 1.0f;
-        rect.h = 1.0f;
-        mTextureRects.insert(file, rect);
-    }
-
-    mTextureRects[file].enabled = checked;
+    mTextures[getCurrentTextureKey()].rect_enabled = checked;
 }
 
 void MaterialWidget::on_rectX_valueChanged(double value)
 {
-    mTextureRects[getCurrentTextureFilename()].x = value;
+    mTextures[getCurrentTextureKey()].rectx = value;
 }
 void MaterialWidget::on_rectY_valueChanged(double value)
 {
-    mTextureRects[getCurrentTextureFilename()].y = value;
+    mTextures[getCurrentTextureKey()].recty = value;
 }
 void MaterialWidget::on_rectW_valueChanged(double value)
 {
-    mTextureRects[getCurrentTextureFilename()].w = value;
+    mTextures[getCurrentTextureKey()].rectw = value;
 }
 void MaterialWidget::on_rectH_valueChanged(double value)
 {
-    mTextureRects[getCurrentTextureFilename()].h = value;
+    mTextures[getCurrentTextureKey()].recth = value;
 }
 
 void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
@@ -353,17 +347,19 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
         for (int i=0; i<texture_count; ++i)
         {
             const auto* item = mUI.textures->item(texture_start + i);
-            const auto& file = item->data(Qt::UserRole).toString();
-            material.AddTexture(app::strToEngine(file));
-            if (!mTextureRects.contains(file))
+            const auto& key  = item->data(Qt::UserRole).toString();
+            const auto& data = mTextures[key];
+            material.AddTexture(app::strToEngine(data.file));
+            material.SetTextureRect(i, gfx::FRect(0, 0, 1.0f, 1.0f));
+
+            if (!data.rect_enabled)
                 continue;
-            
-            const auto& rect = mTextureRects.value(file);
-            if (!rect.enabled)
-                continue;
-            
-            material.SetTextureRect(i, gfx::FRect(rect.x, rect.y, rect.w, rect.h));
-        }        
+            const gfx::FRect rect(data.rectx,
+                data.recty,
+                data.rectw,
+                data.recth);
+            material.SetTextureRect(i, rect);
+        }
     }
 
     const auto zoom = mUI.zoom->value();
@@ -372,19 +368,19 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto xpos = (width - content_width) * 0.5;
     const auto ypos = (height - content_height) * 0.5;
 
-    gfx::FillRect(painter, 
-        gfx::FRect(xpos, ypos, content_width, content_height), 
+    gfx::FillRect(painter,
+        gfx::FRect(xpos, ypos, content_width, content_height),
         material);
 
     if (mState == PlayState::Playing)
     {
-        const unsigned wtf = secs * 1000;        
+        const unsigned wtf = secs * 1000;
         mTime += (wtf / 1000.0f);
     }
     mUI.time->setText(QString::number(mTime));
 }
 
-QString MaterialWidget::getCurrentTextureFilename() const 
+QString MaterialWidget::getCurrentTextureKey() const
 {
     const auto row = mUI.textures->currentRow();
     if (row == -1)

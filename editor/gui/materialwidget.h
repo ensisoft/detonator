@@ -26,9 +26,9 @@
 
 #include "warnpush.h"
 #  include "ui_materialwidget.h"
+#  include <QMap>
+#  include <QString>
 #include "warnpop.h"
-
-#include <QMap>
 
 #include "editor/gui/mainwidget.h"
 #include "graphics/types.h"
@@ -47,7 +47,7 @@ namespace gui
         MaterialWidget();
        ~MaterialWidget();
         virtual void addActions(QToolBar& bar) override;
-        virtual void addActions(QMenu& menu) override;              
+        virtual void addActions(QMenu& menu) override;
         virtual bool saveState(Settings& settings) const;
         virtual bool loadState(const Settings& settings);
         virtual void zoomIn() override;
@@ -56,8 +56,8 @@ namespace gui
 
     private slots:
         void on_actionPlay_triggered();
-        void on_actionPause_triggered();      
-        void on_actionStop_triggered();  
+        void on_actionPause_triggered();
+        void on_actionStop_triggered();
         void on_textureAdd_clicked();
         void on_textureDel_clicked();
         void on_textures_currentRowChanged(int row);
@@ -69,23 +69,24 @@ namespace gui
 
     private:
         void paintScene(gfx::Painter& painter, double sec);
-        QString getCurrentTextureFilename() const;
+        QString getCurrentTextureKey() const;
     private:
         Ui::MaterialWidget mUI;
     private:
-        struct TextureRect {
-            bool enabled = false;
-            float x = 0.0f;
-            float y = 0.0f;
-            float w = 0.0f;
-            float h = 0.0f;
+        struct TextureData {
+            QString file;
+            bool  rect_enabled = false;
+            float rectx = 0.0f;
+            float recty = 0.0f;
+            float rectw = 0.0f;
+            float recth = 0.0f;
         };
-        QMap<QString, TextureRect> mTextureRects;
+        QMap<QString, TextureData> mTextures;
         enum PlayState {
             Playing, Paused, Stopped
         };
         PlayState mState = PlayState::Stopped;
 
-        float mTime = 0.0f;        
+        float mTime = 0.0f;
     };
 } // namespace

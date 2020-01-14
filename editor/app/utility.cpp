@@ -25,6 +25,7 @@
 #include "warnpush.h"
 #  include <QDir>
 #  include <QByteArray>
+#  include <QtGlobal>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -99,7 +100,7 @@ std::string toUtf8(const QString& str)
 std::string toLatin(const QString& str)
 {
     const auto& bytes = str.toLatin1();
-    return std::string(bytes.data(), bytes.size());    
+    return std::string(bytes.data(), bytes.size());
 }
 
 std::string narrow(const QString& str)
@@ -168,6 +169,21 @@ bool writeAsBinary(const QString& file, const void* data, std::size_t bytes)
 
     out.write(static_cast<const char*>(data), bytes);
     return true;
+}
+
+QString randomString()
+{
+   const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+   const int randomStringLength = 12; // assuming you want random strings of 12 characters
+
+   QString randomString;
+   for(int i=0; i<randomStringLength; ++i)
+   {
+       int index = qrand() % possibleCharacters.length();
+       QChar nextChar = possibleCharacters.at(index);
+       randomString.append(nextChar);
+   }
+   return randomString;
 }
 
 } // namespace

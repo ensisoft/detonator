@@ -92,9 +92,10 @@ inline gfx::Color4f toGfx(const QColor& color)
     const float a  = color.alphaF();
     const float r  = color.redF();
     const float g  = color.greenF();
-    const float b  = color.blueF();      
+    const float b  = color.blueF();
     return gfx::Color4f(r, g, b, a);
 }
 
+QString randomString();
 
 } // namespace
