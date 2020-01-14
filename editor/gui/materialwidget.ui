@@ -118,23 +118,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QComboBox" name="surfaceType">
-             <item>
-              <property name="text">
-               <string>Opaque</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Transparent</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Emissive</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="surfaceType"/>
            </item>
            <item row="6" column="1">
             <widget class="QDoubleSpinBox" name="scaleX">
@@ -257,33 +241,8 @@
               <item row="0" column="1">
                <widget class="QComboBox" name="minFilter">
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>-1</number>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>Nearest</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Linear</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Mipmap</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Bilinear</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Trilinear</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item row="1" column="0">
@@ -296,18 +255,8 @@
               <item row="1" column="1">
                <widget class="QComboBox" name="magFilter">
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>-1</number>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>Nearest</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Linear</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item row="2" column="0">
@@ -318,18 +267,7 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QComboBox" name="wrapX">
-                <item>
-                 <property name="text">
-                  <string>Repeat</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Clamp</string>
-                 </property>
-                </item>
-               </widget>
+               <widget class="QComboBox" name="wrapX"/>
               </item>
               <item row="3" column="0">
                <widget class="QLabel" name="labelyy">
@@ -339,18 +277,7 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="QComboBox" name="wrapY">
-                <item>
-                 <property name="text">
-                  <string>Repeat</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Clamp</string>
-                 </property>
-                </item>
-               </widget>
+               <widget class="QComboBox" name="wrapY"/>
               </item>
              </layout>
             </item>

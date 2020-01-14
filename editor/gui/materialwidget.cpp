@@ -39,6 +39,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/utility.h"
 #include "materialwidget.h"
 
 namespace gui
@@ -55,6 +56,12 @@ MaterialWidget::MaterialWidget()
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
+
+    PopulateFromEnum<gfx::Material::MinTextureFilter>(mUI.minFilter);
+    PopulateFromEnum<gfx::Material::MagTextureFilter>(mUI.magFilter);
+    PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapX);
+    PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapY);
+    PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
 }
 
 MaterialWidget::~MaterialWidget()
@@ -287,42 +294,11 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     else if (type == "Texture")
         shader = "texture_map.glsl";
 
-    gfx::Material::SurfaceType surface;
-    if (surf == "Opaque")
-        surface = gfx::Material::SurfaceType::Opaque;
-    else if (surf == "Transparent")
-        surface = gfx::Material::SurfaceType::Transparent;
-    else if (surf == "Emissive")
-        surface = gfx::Material::SurfaceType::Emissive;
-
-    gfx::Material::MinTextureFilter min_filter;
-    gfx::Material::MagTextureFilter mag_filter;
-    if (min == "Nearest")
-        min_filter = gfx::Material::MinTextureFilter::Nearest;
-    else if (min == "Linear")
-        min_filter = gfx::Material::MinTextureFilter::Linear;
-    else if (min == "Mipmap")
-        min_filter = gfx::Material::MinTextureFilter::Mipmap;
-    else if (min == "Bilinear")
-        min_filter = gfx::Material::MinTextureFilter::Bilinear;
-    else if (min == "Trilinear")
-        min_filter = gfx::Material::MinTextureFilter::Trilinear;
-
-    if (mag == "Nearest")
-        mag_filter = gfx::Material::MagTextureFilter::Nearest;
-    else if (mag == "Linear")
-        mag_filter = gfx::Material::MagTextureFilter::Linear;
-
-    gfx::Material::TextureWrapping tex_wrap_x;
-    gfx::Material::TextureWrapping tex_wrap_y;
-    if (wrapx == "Clamp")
-        tex_wrap_x = gfx::Material::TextureWrapping::Clamp;
-    else if (wrapx == "Repeat")
-        tex_wrap_x = gfx::Material::TextureWrapping::Repeat;
-    if (wrapy == "Clamp")
-        tex_wrap_y = gfx::Material::TextureWrapping::Clamp;
-    else if (wrapy == "Repeat")
-        tex_wrap_y = gfx::Material::TextureWrapping::Repeat;
+    const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
+    const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);
+    const auto mag_filter = EnumFromCombo<gfx::Material::MagTextureFilter>(mUI.magFilter);
+    const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
+    const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
 
     gfx::Material material(shader);
     material.SetColorA(app::toGfx(colorA));
@@ -359,6 +335,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
                 data.rectw,
                 data.recth);
             material.SetTextureRect(i, rect);
+
         }
     }
 
