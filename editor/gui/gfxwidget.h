@@ -40,7 +40,7 @@
 
 namespace gui
 {
-    // Integrate QOpenGLWidget and custom graphics device and painter 
+    // Integrate QOpenGLWidget and custom graphics device and painter
     // implementations from gfx into a reusable widget class.
     class GfxWidget : public QOpenGLWidget
     {
@@ -52,7 +52,7 @@ namespace gui
             setFramerate(60);
         }
 
-        void dispose() 
+        void dispose()
         {
             mCustomGraphicsDevice.reset();
             mCustomGraphicsPainter.reset();
@@ -70,6 +70,7 @@ namespace gui
             // programs which will ultimately need to (re)load
             // and compile the shaders as well.
             mCustomGraphicsDevice->DeletePrograms();
+            mCustomGraphicsDevice->DeleteShaders();
         }
 
         // callback to invoke when paint must be done.
@@ -84,9 +85,9 @@ namespace gui
         virtual void initializeGL() override
         {
             // Context implementation based on widget/context provided by Qt.
-            class WidgetContext : public gfx::Device::Context 
+            class WidgetContext : public gfx::Device::Context
             {
-            public: 
+            public:
                 WidgetContext(QOpenGLWidget* widget) : mWidget(widget)
                 {}
                 virtual void Display() override
@@ -99,7 +100,7 @@ namespace gui
                 }
                 virtual void* Resolve(const char* name) override
                 {
-                    return (void*)mWidget->context()->getProcAddress(name);             
+                    return (void*)mWidget->context()->getProcAddress(name);
                 }
             private:
                 QOpenGLWidget* mWidget = nullptr;
@@ -108,7 +109,7 @@ namespace gui
             // create custom painter for fancier shader based effects.
             mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
                 std::make_shared<WidgetContext>(this));
-            mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);            
+            mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
         }
         virtual void paintGL() override
         {
@@ -122,26 +123,26 @@ namespace gui
             mCustomGraphicsDevice->EndFrame(true /*display*/);
         }
         virtual void timerEvent(QTimerEvent*) override
-        { 
+        {
             // There's the problem that it seems a bit tricky to get the
-            // OpenGLWidget's size (framebuffer size) properly when 
+            // OpenGLWidget's size (framebuffer size) properly when
             // starting things up. When the widget is loaded  there are
             // multiple invokations of resizeGL where the first call(s)
             // don't report the final size that the widget will eventually
-            // have. I suspect this happens because there is some layout 
+            // have. I suspect this happens because there is some layout
             // engine adjusting the widget sizes. However this is a problem
             // if we want to for example have a user modifyable viewport
             // default to the initial size of the widget.
             // Doing a little hack here and hoping that when the first timer
             // event fires we'd have the final size correctly.
-            if (!mInitialized && onInitScene) 
+            if (!mInitialized && onInitScene)
             {
                 const auto w = width();
                 const auto h = height();
                 onInitScene(w, h);
                 mInitialized = true;
             }
-            repaint(); 
+            repaint();
         }
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
@@ -150,7 +151,7 @@ namespace gui
         QBasicTimer mTimer;
         QElapsedTimer mClock;
         bool mInitialized = false;
-        
+
     };
 
 } // namespace
