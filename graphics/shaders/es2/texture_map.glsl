@@ -38,8 +38,7 @@ uniform vec2 kTextureScale;
 
 uniform vec4 kTextureBox0;
 uniform vec4 kTextureBox1;
-uniform vec4 kColorA;
-uniform vec4 kColorB;
+uniform vec4 kBaseColor;
 uniform mat3 kDeviceTextureMatrix;
 varying vec2 vTexCoord;
 
@@ -76,13 +75,10 @@ void main()
     // mix mask values. (makes sense?)
     float mask = mix(kIsAlphaMask0, kIsAlphaMask1, kBlendCoeff);
 
-    // mix between the modulating colors.
-    vec4 modk = mix(kColorA, kColorB, kBlendCoeff);
-
     // either modulate/mask texture color with base color
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
-    vec4 col = mix(tex * modk, modk * tex.a, mask);
+    vec4 col = mix(tex * kBaseColor, kBaseColor * tex.a, mask);
 
     // apply gamma (in)correction.
     gl_FragColor = pow(col, vec4(kGamma));

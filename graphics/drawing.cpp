@@ -35,12 +35,12 @@
 namespace gfx
 {
 
-void DrawTextRect(Painter& painter, 
-    const std::string& text, 
+void DrawTextRect(Painter& painter,
+    const std::string& text,
     const std::string& font, unsigned font_size_px,
-    const FRect& rect,  
+    const FRect& rect,
     const Color4f& color,
-    unsigned alignment, 
+    unsigned alignment,
     unsigned properties)
 {
     TextBuffer buff(rect.GetWidth(), rect.GetHeight());
@@ -68,12 +68,11 @@ void DrawTextRect(Painter& painter,
         .SetAlign(va).SetAlign(ha).SetUnderline(underline);
 
     auto material = BitmapText(buff);
-    material.SetColorA(color);
-    material.SetColorB(color);
+    material.SetBaseColor(color);
     if (blinking)
     {
-        // create 1x1 transparent texture and 
-        // set the material frame rate so that it animates between these 
+        // create 1x1 transparent texture and
+        // set the material frame rate so that it animates between these
         // two.
         static Bitmap<Grayscale> nada(1, 1);
         nada.SetPixel(0, 0, 0);
@@ -85,28 +84,28 @@ void DrawTextRect(Painter& painter,
     }
 
     Transform t;
-    t.Resize(rect.GetWidth(), rect.GetHeight());    
+    t.Resize(rect.GetWidth(), rect.GetHeight());
     t.MoveTo(rect.GetX(), rect.GetY());
     painter.Draw(Rectangle(), t, material);
 }
 
-void FillRect(Painter& painter, 
-    const FRect& rect, 
-    const Color4f& color, 
-    float rotation) 
+void FillRect(Painter& painter,
+    const FRect& rect,
+    const Color4f& color,
+    float rotation)
 {
     const float alpha = color.Alpha();
 
-    FillRect(painter, rect, 
+    FillRect(painter, rect,
         SolidColor(color).SetSurfaceType(alpha == 1.0f
             ? Material::SurfaceType::Opaque
-            : Material::SurfaceType::Transparent), 
+            : Material::SurfaceType::Transparent),
         rotation);
 }
 
-void FillRect(Painter& painter, 
-    const FRect& rect, 
-    const Material& material, 
+void FillRect(Painter& painter,
+    const FRect& rect,
+    const Material& material,
     float rotation)
 {
     const auto width  = rect.GetWidth();
@@ -134,17 +133,17 @@ void DrawRectOutline(Painter& painter,
 {
     const float alpha = color.Alpha();
 
-    DrawRectOutline(painter, rect, 
-        SolidColor(color).SetSurfaceType(alpha == 1.0f 
-            ? Material::SurfaceType::Opaque 
+    DrawRectOutline(painter, rect,
+        SolidColor(color).SetSurfaceType(alpha == 1.0f
+            ? Material::SurfaceType::Opaque
             : Material::SurfaceType::Transparent),
         line_width, rotation);
 }
 
-void DrawRectOutline(Painter& painter, 
-    const FRect& rect, 
+void DrawRectOutline(Painter& painter,
+    const FRect& rect,
     const Material& material,
-    float line_width, 
+    float line_width,
     float rotation)
 {
     const auto width  = rect.GetWidth();
@@ -176,19 +175,19 @@ void DrawRectOutline(Painter& painter,
 
     mask_transform.Translate(x + line_width, y + line_width);
 
-    // todo: if the stencil buffer is not multisampled this 
+    // todo: if the stencil buffer is not multisampled this
     // could produce some aliasing artifacts if there's a rotational
-    // component in the transformation. Not sure if a better way to 
-    // draw the outline then would be to just draw lines. 
+    // component in the transformation. Not sure if a better way to
+    // draw the outline then would be to just draw lines.
     // However the line rasterization leaves the gaps at the end where
-    // the lines meet which becomes clearly visible at higher 
-    // line widths. One possible solution could be to use 
+    // the lines meet which becomes clearly visible at higher
+    // line widths. One possible solution could be to use
     // NV_path_rendering (when available) or then manually fill
     // the line gaps with quads.
 
     painter.DrawMasked(
         Rectangle(), outline_transform,
-        Rectangle(), mask_transform, 
+        Rectangle(), mask_transform,
         material);
 }
 } // namespace

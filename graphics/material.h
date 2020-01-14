@@ -194,12 +194,6 @@ namespace gfx
             else if (mSurfaceType == SurfaceType::Emissive)
                 state.blending = RasterState::Blending::Additive;
 
-            const auto animating = mFps > 0.0f;
-            const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
-            const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
-            const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
-            const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
-
             // currently we only bind two textures and set a blend
             // coefficient from the run time for the shader to do
             // blending between two animation frames.
@@ -212,6 +206,12 @@ namespace gfx
             // since last rendering.
             if (!mTextures.empty())
             {
+                const auto animating         = mFps > 0.0f;
+                const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
+                const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
+                const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
+                const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
+
                 const auto frame_count = (unsigned)mTextures.size();
                 const unsigned frame_index[2] = {
                     (first_frame_index + 0) % frame_count,
@@ -254,6 +254,7 @@ namespace gfx
                     prog.SetTexture(kTexture.c_str(), i, *texture);
                     prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
                     prog.SetUniform(kIsAlphaMask.c_str(), alpha);
+                    prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);
 
                     texture->SetFilter(mMinFilter);
                     texture->SetFilter(mMagFilter);
@@ -261,19 +262,11 @@ namespace gfx
                     texture->SetWrapY(mWrapY);
                 }
             }
-            const Color4f colors[2] = {mColorA, mColorB};
-            const auto color_count = 2;
-            const unsigned color_index[2] = {
-                (first_frame_index + 0) % color_count,
-                (first_frame_index + 1) % color_count
-            };
-            prog.SetUniform("kColorA", colors[color_index[0]]);
-            prog.SetUniform("kColorB", colors[color_index[1]]);
+            prog.SetUniform("kBaseColor", mBaseColor);
             prog.SetUniform("kGamma", mGamma);
             prog.SetUniform("kRuntime", mRuntime);
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
-            prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);
         }
 
         std::string GetName() const
@@ -306,15 +299,9 @@ namespace gfx
         }
 
         // Set the first material color.
-        Material& SetColorA(const Color4f& color)
+        Material& SetBaseColor(const Color4f& color)
         {
-            mColorA = color;
-            return *this;
-        }
-        // Set the second material color.
-        Material& SetColorB(const Color4f& color)
-        {
-            mColorB = color;
+            mBaseColor = color;
             return *this;
         }
         // Set the surface type.
@@ -412,8 +399,7 @@ namespace gfx
 
     private:
         const std::string mShader;
-        Color4f mColorA = gfx::Color::White;
-        Color4f mColorB = gfx::Color::White;
+        Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         float mGamma   = 1.0f;
         float mRuntime = 0.0f;
@@ -437,7 +423,7 @@ namespace gfx
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
     {
-        return Material("solid_color.glsl").SetColorA(color);
+        return Material("solid_color.glsl").SetBaseColor(color);
     }
 
 

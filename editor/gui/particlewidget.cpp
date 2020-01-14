@@ -49,7 +49,7 @@ ParticleEditorWidget::ParticleEditorWidget()
 
     mUI.setupUi(this);
     mUI.widget->setFramerate(60);
-    mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene, 
+    mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
     // Set default transform state here. if there's a previous user setting
@@ -112,7 +112,7 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.minVelocity);
     settings.saveWidget("Particle", mUI.maxVelocity);
     settings.saveWidget("Particle", mUI.minLifetime);
-    settings.saveWidget("Particle", mUI.maxLifetime);    
+    settings.saveWidget("Particle", mUI.maxLifetime);
     settings.saveWidget("Particle", mUI.minPointsize);
     settings.saveWidget("Particle", mUI.maxPointsize);
     settings.saveWidget("Particle", mUI.growth);
@@ -154,12 +154,12 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.minVelocity);
     settings.loadWidget("Particle", mUI.maxVelocity);
     settings.loadWidget("Particle", mUI.minLifetime);
-    settings.loadWidget("Particle", mUI.maxLifetime);    
+    settings.loadWidget("Particle", mUI.maxLifetime);
     settings.loadWidget("Particle", mUI.minPointsize);
     settings.loadWidget("Particle", mUI.maxPointsize);
     settings.loadWidget("Particle", mUI.growth);
     settings.loadWidget("Particle", mUI.timeDerivative);
-    settings.loadWidget("Particle", mUI.distDerivative);    
+    settings.loadWidget("Particle", mUI.distDerivative);
     return true;
 }
 
@@ -220,9 +220,9 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         p.direction_sector_size        = qDegreesToRadians(mUI.dirSizeAngle->value());
     }
     else
-    {   
+    {
         p.direction_sector_start_angle = 0.0f;
-        p.direction_sector_size        = qDegreesToRadians(360.0f);        
+        p.direction_sector_size        = qDegreesToRadians(360.0f);
     }
 
 
@@ -232,7 +232,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         p.mode = gfx::KinematicsParticleEngine::SpawnPolicy::Maintain;
     else if (when == "Continuous")
         p.mode = gfx::KinematicsParticleEngine::SpawnPolicy::Continuous;
-    
+
     mEngine.reset(new gfx::KinematicsParticleEngine(p));
     if (motion == "Linear")
         mEngine->SetMotion(gfx::DefaultKinematicsParticleUpdatePolicy::Motion::Linear);
@@ -270,7 +270,7 @@ void ParticleEditorWidget::on_actionStop_triggered()
 
 void ParticleEditorWidget::on_browseTexture_clicked()
 {
-    const auto& list = QFileDialog::getOpenFileNames(this, 
+    const auto& list = QFileDialog::getOpenFileNames(this,
         tr("Select Image File"), "", tr("Images (*.png *.jpeg *.jpg)"));
     if (list.isEmpty())
         return;
@@ -305,7 +305,7 @@ void ParticleEditorWidget::on_minus90_clicked()
 void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();    
+    const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
     gfx::Transform tr;
@@ -320,7 +320,7 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         tr.Translate(-sx * 0.5, -sy * 0.5);
         tr.Rotate(angle);
         tr.Translate(sx * 0.5 + tx, sy * 0.5 + ty);
-        gfx::DrawRectOutline(painter, gfx::FRect(tx, ty, sx, sy), 
+        gfx::DrawRectOutline(painter, gfx::FRect(tx, ty, sx, sy),
             gfx::Color::DarkGreen, 3, angle);
     }
     else
@@ -332,7 +332,7 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     if (!mEngine)
         return;
 
-    if (!mPaused) 
+    if (!mPaused)
     {
         mEngine->Update(secs);
         mTime += secs;
@@ -353,13 +353,13 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 
     const auto& type    = mUI.surfaceType->currentText();
-    const auto& texture = mUI.filename->text(); 
+    const auto& texture = mUI.filename->text();
     const auto& color = mUI.color->color();
     const float a  = color.alphaF();
     const float r  = color.redF();
     const float g  = color.greenF();
-    const float b  = color.blueF();      
-    
+    const float b  = color.blueF();
+
     gfx::Material::SurfaceType surface;
     if (type == "Opaque")
         surface = gfx::Material::SurfaceType::Opaque;
@@ -370,27 +370,27 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
 
     if (mTextures.count() == 0)
     {
-        painter.Draw(*mEngine, tr,  
+        painter.Draw(*mEngine, tr,
             gfx::SolidColor(gfx::Color4f(r, g, b, a)).SetSurfaceType(surface));
-            
+
     }
     else if (mTextures.count() == 1)
     {
-        painter.Draw(*mEngine, tr, 
+        painter.Draw(*mEngine, tr,
             gfx::TextureMap(app::strToEngine(texture))
-            .SetColorA(gfx::Color4f(r, g, b, a))
+            .SetBaseColor(gfx::Color4f(r, g, b, a))
             .SetSurfaceType(surface));
     }
     else
     {
         auto sprite = gfx::SpriteSet();
-        for (const auto& s : mTextures) 
+        for (const auto& s : mTextures)
         {
             sprite.AddTexture(app::strToEngine(s));
         }
         sprite.SetFps(10)
             .SetRuntime(mTime)
-            .SetColorA(gfx::Color4f(r, g, b, a))
+            .SetBaseColor(gfx::Color4f(r, g, b, a))
             .SetSurfaceType(surface);
         painter.Draw(*mEngine, tr, sprite);
     }

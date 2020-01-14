@@ -42,7 +42,7 @@
 #include "wdk/events.h"
 #include "wdk/system.h"
 
-class GraphicsTest 
+class GraphicsTest
 {
 public:
     virtual ~GraphicsTest() = default;
@@ -108,7 +108,7 @@ public:
             mSmoke->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
             mSmoke->SetGrowthWithRespectToDistance(-4.0f);
             mSmoke->SetGrowthWithRespectToTime(-8.0f);
-        }        
+        }
 
         {
             ParticleEngine::Params p;
@@ -156,7 +156,7 @@ public:
             p.max_point_size = 150;
             mClouds.reset(new ParticleEngine(p));
             mClouds->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
-        }        
+        }
 
     }
 
@@ -168,28 +168,28 @@ public:
         t.Rotate(math::Pi);
         t.Translate(150 + 100, 150 + 300);
 
-        painter.Draw(*mSmoke, t, 
+        painter.Draw(*mSmoke, t,
             gfx::TextureMap("textures/BlackSmoke.png")
-                .SetColorA(gfx::Color4f(35, 35, 35, 20))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));                
+                .SetBaseColor(gfx::Color4f(35, 35, 35, 20))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
 
-        painter.Draw(*mFire, t, 
+        painter.Draw(*mFire, t,
             gfx::TextureMap("textures/BlackSmoke.png")
-                .SetColorA(gfx::Color4f(0x71, 0x38, 0x0, 0xff))
+                .SetBaseColor(gfx::Color4f(0x71, 0x38, 0x0, 0xff))
                 .SetSurfaceType(gfx::Material::SurfaceType::Emissive));
 
         t.Translate(500, 0);
-        painter.Draw(*mBlood, t, 
+        painter.Draw(*mBlood, t,
             gfx::TextureMap("textures/RoundParticle.png")
-                .SetColorA(gfx::Color4f(234, 5, 3, 255))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));                
-        
+                .SetBaseColor(gfx::Color4f(234, 5, 3, 255))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+
         t.Reset();
         t.Resize(2000, 200);
         t.MoveTo(-100, 100);
-        painter.Draw(*mClouds, t, 
+        painter.Draw(*mClouds, t,
             gfx::TextureMap("textures/WhiteCloud.png")
-                .SetColorA(gfx::Color4f(224, 224, 224, 255))
+                .SetBaseColor(gfx::Color4f(224, 224, 224, 255))
                 .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
 
     }
@@ -216,63 +216,63 @@ class RenderTextTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::DrawTextRect(painter, 
+        gfx::DrawTextRect(painter,
             "AtariFontFullVersion.ttf, 20px\n"
             "Hello World!\n"
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
             "fonts/AtariFontFullVersion.ttf", 20,
-            gfx::FRect(0, 0, 1024, 100), 
+            gfx::FRect(0, 0, 1024, 100),
             gfx::Color::DarkGray);
-            
-        gfx::DrawTextRect(painter, 
+
+        gfx::DrawTextRect(painter,
             "Cousine-Regular.ttf, 20px\n"
             "Hello World!\n"
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
-            "fonts/Cousine-Regular.ttf", 20,            
+            "fonts/Cousine-Regular.ttf", 20,
             gfx::FRect(0, 100, 1024, 100),
             gfx::Color::DarkGray);
 
-        gfx::DrawTextRect(painter, 
+        gfx::DrawTextRect(painter,
             "Cousine-Bold.ttf, 16px\n"
             "Hello World!\n"
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
-            "fonts/Cousine-Bold.ttf", 16,            
+            "fonts/Cousine-Bold.ttf", 16,
             gfx::FRect(0, 200, 1024, 100),
-            gfx::Color::DarkGray);            
+            gfx::Color::DarkGray);
 
-        gfx::DrawTextRect(painter, 
+        gfx::DrawTextRect(painter,
             "Cousine-Italic.ttf, 16px\n"
             "Hello World!\n"
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
-            "fonts/Cousine-Italic.ttf", 16,            
+            "fonts/Cousine-Italic.ttf", 16,
             gfx::FRect(0, 300, 1024, 100),
-            gfx::Color::DarkGray);                        
+            gfx::Color::DarkGray);
 
-        gfx::DrawTextRect(painter, 
-            "Underlined text", 
+        gfx::DrawTextRect(painter,
+            "Underlined text",
             "fonts/AtariFontFullVersion.ttf", 18,
-            gfx::FRect(0, 0, 300, 100), 
-            gfx::Color::DarkGray, 
-            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 
+            gfx::FRect(0, 0, 300, 100),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             gfx::TextProp::Underline);
 
-        gfx::DrawTextRect(painter, 
-            "Blinking text", 
+        gfx::DrawTextRect(painter,
+            "Blinking text",
             "fonts/AtariFontFullVersion.ttf", 18,
-            gfx::FRect(0, 100, 300, 100), 
-            gfx::Color::DarkGray, 
-            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 
-            gfx::TextProp::Blinking);            
+            gfx::FRect(0, 100, 300, 100),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
+            gfx::TextProp::Blinking);
 
-        
+
         const auto circle = 2.0 * math::Pi;
-        const auto angle  = circle * mTime * 0.3;        
+        const auto angle  = circle * mTime * 0.3;
 
-        // use the more complicated API with a transform object        
+        // use the more complicated API with a transform object
         {
             gfx::Transform transform;
             transform.Resize(300, 200);
@@ -281,9 +281,9 @@ public:
             transform.Translate(150, 300);
 
             gfx::TextBuffer buff(300, 200);
-            buff.AddText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);            
-            painter.Draw(gfx::Rectangle(), transform, 
-                gfx::BitmapText(buff).SetColorA(gfx::Color::DarkGray));
+            buff.AddText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);
+            painter.Draw(gfx::Rectangle(), transform,
+                gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
         }
 
         // modulate text color based on time
@@ -292,9 +292,9 @@ public:
             const float g = (std::cos(angle + 0.2*circle) + 1.0) * 0.5;
             const float b = (std::sin(angle + 0.3*circle) + 1.0) * 0.5;
 
-            gfx::DrawTextRect(painter, 
+            gfx::DrawTextRect(painter,
                 "Very colorful text",
-                "fonts/AtariFontFullVersion.ttf", 20, 
+                "fonts/AtariFontFullVersion.ttf", 20,
                 gfx::FRect(0, 500, 1024, 100),
                 gfx::Color4f(r, g, b, 1.0f));
         }
@@ -325,14 +325,14 @@ int main(int argc, char* argv[])
 
     // context integration glue code that puts together
     // wdk::Context and gfx::Device
-    class WindowContext : public gfx::Device::Context 
+    class WindowContext : public gfx::Device::Context
     {
-    public: 
-        WindowContext() 
+    public:
+        WindowContext()
         {
             wdk::Config::Attributes attrs;
             attrs.red_size  = 8;
-            attrs.green_size = 8;            
+            attrs.green_size = 8;
             attrs.blue_size = 8;
             attrs.alpha_size = 8;
             attrs.stencil_size = 8;
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
             attrs.double_buffer = true;
             attrs.sampling = wdk::Config::Multisampling::MSAA4;
             attrs.srgb_buffer = true;
-            
+
             mConfig   = std::make_unique<wdk::Config>(attrs);
             mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
                 wdk::Context::Type::OpenGL_ES);
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
         {
             mContext->MakeCurrent(mSurface.get());
         }
-        wdk::uint_t GetVisualID() const 
+        wdk::uint_t GetVisualID() const
         { return mVisualID; }
 
         void SetWindowSurface(wdk::Window& window)
@@ -383,14 +383,14 @@ int main(int argc, char* argv[])
 
     auto context = std::make_shared<WindowContext>();
     auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
-    auto painter = gfx::Painter::Create(device);    
+    auto painter = gfx::Painter::Create(device);
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
 
-    wdk::Window window; 
+    wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());
     window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
         if (key.symbol == wdk::Keysym::Escape)
@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
         {
             static unsigned screenshot_number = 0;
-            const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(), 
+            const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(),
                 window.GetSurfaceHeight());
 
             gfx::Bitmap<gfx::RGB> tmp;
@@ -427,7 +427,7 @@ int main(int argc, char* argv[])
         const auto gone = end - start;
         const auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(gone).count() / 1000.0;
 
-        for (auto& test : tests) 
+        for (auto& test : tests)
             test->Update(secs);
 
         device->BeginFrame();
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
 
         // render the current test
         tests[test_index]->Render(*painter);
-        
+
         device->EndFrame(true /*display*/);
         device->CleanGarbage(120);
 

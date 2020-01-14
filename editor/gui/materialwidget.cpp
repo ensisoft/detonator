@@ -280,9 +280,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto& mag  = mUI.magFilter->currentText();
     const auto& wrapx = mUI.wrapX->currentText();
     const auto& wrapy = mUI.wrapY->currentText();
-
-    const auto& colorA = mUI.colorA->color();
-    const auto& colorB = mUI.colorB->color();
+    const auto& color = mUI.baseColor->color();
     const auto textures = mUI.textures->count();
     const auto fps = mUI.fps->value();
     const auto blend = mUI.blend->isChecked();
@@ -301,8 +299,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
 
     gfx::Material material(shader);
-    material.SetColorA(app::toGfx(colorA));
-    material.SetColorB(app::toGfx(colorB));
+    material.SetBaseColor(app::toGfx(color));
     material.SetGamma(mUI.gamma->value());
     material.SetSurfaceType(surface);
     material.SetRuntime(mTime);
