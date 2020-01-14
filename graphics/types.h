@@ -53,7 +53,7 @@ namespace gfx
     template<typename T> inline
     Size<T> operator*(const Size<T>& size, T scale)
     {
-        return Size<T>(size.GetWidth() * scale, 
+        return Size<T>(size.GetWidth() * scale,
                        size.GetHeight() * scale);
     }
 
@@ -86,13 +86,13 @@ namespace gfx
     template<typename T> inline
     Point<T> operator-(const Point<T>& lhs, const Point<T>& rhs)
     {
-        return Point<T>(lhs.GetX() - rhs.GetX(), 
+        return Point<T>(lhs.GetX() - rhs.GetX(),
                         lhs.GetY() - rhs.GetY());
     }
     template<typename T> inline
     Point<T> operator+(const Point<T>& lhs, const Point<T>& rhs)
     {
-        return Point<T>(lhs.GetX() + rhs.GetX(), 
+        return Point<T>(lhs.GetX() + rhs.GetX(),
                         lhs.GetY() + rhs.GetY());
     }
 
@@ -112,7 +112,7 @@ namespace gfx
           , mWidth(width)
           , mHeight(height)
         {}
-        template<typename F> explicit 
+        template<typename F> explicit
         Rect(const Rect<F>& other)
         {
             mX = other.GetX();
@@ -162,8 +162,8 @@ namespace gfx
             mX = pos.GetX();
             mY = pos.GetY();
         }
-        bool IsEmpty() const 
-        { 
+        bool IsEmpty() const
+        {
             const bool has_width  = mWidth != T();
             const bool has_height = mHeight != T();
             return !has_width || !has_height;
@@ -172,12 +172,12 @@ namespace gfx
         // Map a local point relative to the rect origin
         // into a global point relative to the origin of the
         // coordinate system.
-        Point<T> MapToGlobal(T x, T y) const 
+        Point<T> MapToGlobal(T x, T y) const
         {
             return Point<T>(mX + x, mY + y);
         }
 
-        // Map a local point relative to the rect origin 
+        // Map a local point relative to the rect origin
         // into a global point relative to the origin of the
         // coordinate system
         Point<T> MapToGlobal(const Point<T>& p) const
@@ -188,16 +188,27 @@ namespace gfx
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
-        Point<T> MapToLocal(T x, T y) const 
+        Point<T> MapToLocal(T x, T y) const
         {
             return Point<T>(x - mX, y - mY);
         }
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
-        Point<T> MapToLocal(const Point<T>& p) const 
+        Point<T> MapToLocal(const Point<T>& p) const
         {
             return Point<T>(p.GetX() - mX, p.GetY() - mY);
+        }
+
+        // Normalize the rectangle with respect to the given
+        // dimensions.
+        Rect<float> Normalize(const Size<float>& space) const
+        {
+            const float x = mX / space.GetWidth();
+            const float y = mY / space.GetHeight();
+            const float w = mWidth / space.GetWidth();
+            const float h = mHeight / space.GetHeight();
+            return Rect<float>(x, y, w, h);
         }
 
     private:

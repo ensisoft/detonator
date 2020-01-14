@@ -197,7 +197,7 @@ namespace gfx
             const auto animating = mFps > 0.0f;
             const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
             const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
-            const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f; 
+            const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
             const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
 
             // currently we only bind two textures and set a blend
@@ -234,14 +234,16 @@ namespace gfx
                         texture->Upload(bitmap->GetDataPtr(), width, height, format);
                         texture->EnableGarbageCollection(sampler.enable_gc);
                     }
-                    const bool normalized_box = sampler.box_is_normalized;
-                    const auto& box = sampler.box;
                     const float w = texture->GetWidth();
                     const float h = texture->GetHeight();
-                    const float x = normalized_box ? box.GetX() : box.GetX() / w;
-                    const float y = normalized_box ? 1.0f - box.GetY() : 1.0f - ((box.GetY() + box.GetHeight()) / h);
-                    const float sx = normalized_box ? box.GetWidth() : box.GetWidth() / w;
-                    const float sy = normalized_box ? box.GetHeight() : box.GetHeight() / h;
+                    const bool normalized_box = sampler.box_is_normalized;
+                    const auto& box = sampler.box_is_normalized
+                        ? sampler.box : sampler.box.Normalize(FSize(w, h));
+
+                    const float x = box.GetX();
+                    const float y = 1.0 - box.GetY() - box.GetHeight();
+                    const float sx = box.GetWidth();
+                    const float sy = box.GetHeight();
 
                     const auto& kTexture = "kTexture" + std::to_string(i);
                     const auto& kTextureBox = "kTextureBox" + std::to_string(i);
@@ -259,7 +261,7 @@ namespace gfx
                     texture->SetWrapY(mWrapY);
                 }
             }
-            const Color4f colors[2] = {mColorA, mColorB};            
+            const Color4f colors[2] = {mColorA, mColorB};
             const auto color_count = 2;
             const unsigned color_index[2] = {
                 (first_frame_index + 0) % color_count,
@@ -271,7 +273,7 @@ namespace gfx
             prog.SetUniform("kRuntime", mRuntime);
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
-            prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);            
+            prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);
         }
 
         std::string GetName() const

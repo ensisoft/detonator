@@ -29,7 +29,7 @@ uniform sampler2D kTexture1;
 uniform float kRenderPoints;
 uniform float kGamma;
 uniform float kBlendCoeff;
-// if the textures are alpha masks we sample white 
+// if the textures are alpha masks we sample white
 // which gets modulated by the alpha value from the texture.
 uniform float kIsAlphaMask0;
 uniform float kIsAlphaMask1;
@@ -52,12 +52,15 @@ void main()
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = coords * kTextureScale;
 
-    // apply texture box translation.
-    vec2 c1 = vec2(kTextureBox0.x + coords.x * kTextureBox0.z,
-                   kTextureBox0.y + coords.y * kTextureBox0.w);
-    vec2 c2 = vec2(kTextureBox1.x + coords.x * kTextureBox1.z,
-                   kTextureBox1.y + coords.y * kTextureBox1.w);
-    
+    // apply texture box transformation.
+    vec2 scale_tex0 = kTextureBox0.zw;
+    vec2 scale_tex1 = kTextureBox1.zw;
+    vec2 trans_tex0 = kTextureBox0.xy;
+    vec2 trans_tex1 = kTextureBox1.xy;
+
+    vec2 c1 = coords * scale_tex0 + trans_tex0;
+    vec2 c2 = coords * scale_tex1 + trans_tex1;
+
     // apply device specific texture transformation.
     vec3 c1_transformed = kDeviceTextureMatrix * vec3(c1.xy, 1.0);
     vec3 c2_transformed = kDeviceTextureMatrix * vec3(c2.xy, 1.0);
@@ -66,18 +69,18 @@ void main()
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
-    vec4 tex0 = texture2D(kTexture0, c1); 
-    vec4 tex1 = texture2D(kTexture1, c2); 
+    vec4 tex0 = texture2D(kTexture0, c1);
+    vec4 tex1 = texture2D(kTexture1, c2);
     vec4 tex  = mix(tex0, tex1, kBlendCoeff);
-    
+
     // mix mask values. (makes sense?)
     float mask = mix(kIsAlphaMask0, kIsAlphaMask1, kBlendCoeff);
 
     // mix between the modulating colors.
     vec4 modk = mix(kColorA, kColorB, kBlendCoeff);
 
-    // either modulate/mask texture color with base color 
-    // or modulate base color with texture's alpha value if 
+    // either modulate/mask texture color with base color
+    // or modulate base color with texture's alpha value if
     // texture is an alpha mask
     vec4 col = mix(tex * modk, modk * tex.a, mask);
 
