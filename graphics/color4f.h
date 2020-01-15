@@ -24,7 +24,12 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include "base/math.h"
+#include "base/utility.h"
 
 namespace gfx
 {
@@ -46,7 +51,7 @@ namespace gfx
     class Color4f
     {
     public:
-        Color4f() {}
+        Color4f() = default;
         // construct a Color4f object from floating point
         // channel values in the range of [0.0f, 1.0f]
         Color4f(float red, float green, float blue, float alpha)
@@ -164,6 +169,39 @@ namespace gfx
         { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
         void SetAlpha(int alpha)
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
+
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json = {
+                {"r", mRed},
+                {"g", mGreen},
+                {"b", mBlue},
+                {"a", mAlpha}
+            };
+            return json;
+        }
+        static Color4f FromJson(const nlohmann::json& object)
+        {
+            const float r = object["r"];
+            const float g = object["g"];
+            const float b = object["b"];
+            const float a = object["a"];
+            return Color4f(r, g, b, a);
+        }
+        static Color4f FromJson(const nlohmann::json& object, bool* success)
+        {
+            float r, g, b, a;
+            if (!base::JsonReadSafe(object, "r", &r) ||
+                !base::JsonReadSafe(object, "g", &g) ||
+                !base::JsonReadSafe(object, "b", &b) ||
+                !base::JsonReadSafe(object, "a", &a))
+            {
+                *success = false;
+                return Color4f();
+            }
+            *success = true;
+            return Color4f(r, g, b, a);
+        }
 
     private:
         float mRed   = 1.0f;

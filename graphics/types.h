@@ -24,8 +24,13 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include <algorithm> // for min, max
 
+#include "base/utility.h"
 // simple type definitions
 
 namespace gfx
@@ -46,6 +51,33 @@ namespace gfx
         {}
         T GetWidth() const { return mWidth; }
         T GetHeight() const { return mHeight; }
+
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json = {
+                {"w", mWidth},
+                {"h", mHeight}
+            };
+            return json;
+        }
+        static Size<T> FromJson(const nlohmann::json& object)
+        {
+            const T w = object["w"];
+            const T h = object["h"];
+            return Size<T>(w, h);
+        }
+        static Size<T> FromJson(const nlohmann::json& object, bool* success)
+        {
+            T w, h;
+            if (!base::JsonReadSafe(object, "w", &w) ||
+                !base::JsonReadSafe(object, "h", &h))
+            {
+                *success = false;
+                return Size<T>();
+            }
+            *success = true;
+            return Size<T>(w, h);
+        }
     private:
         T mWidth  = T();
         T mHeight = T();
@@ -78,6 +110,34 @@ namespace gfx
 
         T GetX() const { return mX; }
         T GetY() const { return mY; }
+
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json = {
+                {"x", mX},
+                {"y", mY}
+            };
+            return json;
+        }
+        static Point<T> FromJson(const nlohmann::json& object)
+        {
+            const T x = object["x"];
+            const T y = object["y"];
+            return Point<T>(x, y);
+        }
+        static Point<T> FromJson(const nlohmann::json& object, bool* success)
+        {
+            T x, y;
+            if (!base::JsonReadSafe(object, "x", &x) ||
+                !base::JsonReadSafe(object, "y", &y))
+            {
+                *success = false;
+                return Point<T>();
+            }
+            *success = true;
+            return Point<T>(x, y);
+        }
+
     private:
         T mX = T();
         T mY = T();
@@ -105,7 +165,7 @@ namespace gfx
     class Rect
     {
     public:
-        Rect() {}
+        Rect() = default;
         Rect(T x, T y, T width, T height)
           : mX(x)
           , mY(y)
@@ -209,6 +269,44 @@ namespace gfx
             const float w = mWidth / space.GetWidth();
             const float h = mHeight / space.GetHeight();
             return Rect<float>(x, y, w, h);
+        }
+
+        // Serialize into JSON
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json = {
+                {"x", mX},
+                {"y", mY},
+                {"w", mWidth},
+                {"h", mHeight}
+            };
+            return json;
+        }
+
+        // Create Rect from JSON without any error checking.
+        static Rect<T> FromJson(const nlohmann::json& object)
+        {
+            const T x = object["x"];
+            const T y = object["y"];
+            const T w = object["w"];
+            const T h = object["h"];
+            return Rect<T>(x, y, w, h);
+        }
+
+        // Create Rect from JSON and indicate through success whether
+        // the JSON contains all the required data or not.
+        static Rect<T> FromJson(const nlohmann::json& object, bool* success)
+        {
+            T x, y, w, h;
+            if (!base::JsonReadSafe(object, "x", &x) ||
+                !base::JsonReadSafe(object, "y", &y) ||
+                !base::JsonReadSafe(object, "w", &w) ||
+                !base::JsonReadSafe(object, "h", &h))
+            {
+                *success = false;
+                return Rect<T>();
+            }
+            return Rect<T>(x, y, w, h);
         }
 
     private:

@@ -24,7 +24,16 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
-#include "../types.h"
+#include "graphics/types.h"
+#include "graphics/color4f.h"
+
+bool operator==(const gfx::Color4f& lhs, const gfx::Color4f& rhs)
+{
+    return real::equals(lhs.Red(), rhs.Red()) &&
+           real::equals(lhs.Green(), rhs.Green()) &&
+           real::equals(lhs.Blue(), rhs.Blue()) &&
+           real::equals(lhs.Alpha(), rhs.Alpha());
+}
 
 bool operator==(const gfx::Rect<float>& lhs,
                 const gfx::Rect<float>& rhs)
@@ -36,7 +45,7 @@ bool operator==(const gfx::Rect<float>& lhs,
 }
 
 template<typename T>
-bool operator==(const gfx::Rect<T>& lhs, 
+bool operator==(const gfx::Rect<T>& lhs,
                 const gfx::Rect<T>& rhs)
 {
     return lhs.GetX() == rhs.GetX() &&
@@ -46,12 +55,12 @@ bool operator==(const gfx::Rect<T>& lhs,
 }
 
 template<typename T>
-void TestRect()
+void unit_test_rect_intersect()
 {
     using R = gfx::Rect<T>;
 
     struct TestCase {
-        R lhs; 
+        R lhs;
         R rhs;
         R expected_result;
     } cases[] = {
@@ -69,7 +78,7 @@ void TestRect()
         },
 
         // no overlap on x axis
-        { R(0, 0, 10, 10), 
+        { R(0, 0, 10, 10),
           R(10, 0, 10, 10),
           R()
         },
@@ -132,11 +141,57 @@ void TestRect()
     }
 }
 
+template<typename T>
+void unit_test_rect_serialize()
+{
+    const T test_values[] = {
+        T(0), T(1.5), T(100), T(-40), T(125.0)
+    };
+    for (const auto& val : test_values)
+    {
+        const gfx::Rect<T> src(val, val, val, val);
+        const gfx::Rect<T> dst(gfx::Rect<T>::FromJson(src.ToJson()));
+        TEST_REQUIRE(src == dst);
+    }
+}
+
+void unit_test_color_serialize()
+{
+    const float test_values[] = {
+        0.0f, 0.2f, 0.5f, 1.0f
+    };
+    for (const float val : test_values)
+    {
+        {
+            const gfx::Color4f src(val, val, val, val);
+            const gfx::Color4f dst(gfx::Color4f::FromJson(src.ToJson()));
+            TEST_REQUIRE(src == dst);
+        }
+        {
+            bool success = false;
+            const gfx::Color4f src(val, val, val, val);
+            const gfx::Color4f dst(gfx::Color4f::FromJson(src.ToJson(), &success));
+            TEST_REQUIRE(src == dst);
+            TEST_REQUIRE(success == true);
+        }
+        {
+            bool success = true;
+            const auto& json = nlohmann::json::parse(
+                R"({"r":0.0, "g":"basa", "b":0.0, "a":0.0})");
+
+            const gfx::Color4f dst(gfx::Color4f::FromJson(json, &success));
+            TEST_REQUIRE(success == false);
+        }
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
-    TestRect<float>();
-    TestRect<int>();
-    
+    unit_test_rect_intersect<float>();
+    unit_test_rect_intersect<int>();
+    unit_test_rect_serialize<int>();
+    unit_test_rect_serialize<float>();
+    unit_test_color_serialize();
 
     return 0;
 }

@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include "config.h"
+
 #include <chrono>
 #include <memory> // for unique_ptr
 #include <string>
@@ -97,6 +99,71 @@ std::wstring Widen(const std::string& str)
     for (auto c : str)
         ret.push_back(c);
     return ret;
+}
+
+// works with nlohmann::json
+// using a template here simply to avoid having to specify a type
+// that would require dependency to a library in this header.
+template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, float* out)
+{
+    if (!object.contains(name) || !object[name].is_number_float())
+        return false;
+    *out = object[name];
+    return true;
+}
+template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, int* out)
+{
+    if (!object.contains(name) || !object[name].is_number_integer())
+        return false;
+    *out = object[name];
+    return true;
+}
+template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, unsigned* out)
+{
+    if (!object.contains(name) || !object[name].is_number_unsigned())
+        return false;
+    *out = object[name];
+    return true;
+}
+template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, std::string* out)
+{
+    if  (!object.contains(name) || !object[name].is_string())
+        return false;
+    *out = object[name];
+    return true;
+}
+
+template<typename JsonObject, typename ValueT> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
+{
+    // this is a bit ugly but I'd really like to keep the code
+    // here free of any 3rd party depedencies.
+    // so if the client code has a dep to magic_enum then we can
+    // have this
+#if defined(NEARGYE_MAGIC_ENUM_HPP)
+    if (std::is_enum<ValueT>::value)
+    {
+        std::string str;
+        if (!object.contains(name) || !object.is_string())
+            return false;
+
+        str = object[name];
+        const auto& enum_val = magic_enum::enum_cast<ValueT>(str);
+        if (!enum_val.has_value())
+            return false;
+
+        *out = enum_val.value();
+        return true;
+    }
+#endif
+    if (!object.contains(name))
+        return false;
+    *out = object[name];
+    return true;
 }
 
 } // base
