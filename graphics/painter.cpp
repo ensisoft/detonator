@@ -74,17 +74,17 @@ public:
         if (!prog)
             return;
 
-        // create simple orthographic projection matrix. 
+        // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
         const auto& kViewMatrix = transform.GetAsMatrix();
 
         const auto draw_type = geom->GetDrawType();
-        
+
         Material::RasterState raster;
         Material::Environment env;
         env.render_points = draw_type == Geometry::DrawType::Points;
-        
+
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
         mat.Apply(env, *mDevice, *prog, raster);
@@ -112,7 +112,7 @@ public:
         if (!maskProg)
             return;
 
-        // create simple orthographic projection matrix. 
+        // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
         const auto& kViewMatrixDrawShape = drawTransform.GetAsMatrix();
@@ -139,11 +139,11 @@ public:
         Program* drawProg = GetProgram(drawShape, material);
         if (!drawProg)
             return;
-        
+
         env.render_points = drawGeom->GetDrawType() == Geometry::DrawType::Points;
 
         drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
-        drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));        
+        drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));
         material.Apply(env, *mDevice, *drawProg, raster);
 
         state.stencil_func       = Device::State::StencilFunc::RefIsEqual;
@@ -158,7 +158,7 @@ private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
         const std::string& name = typeid(drawable).name() + std::string("/") +
-            material.GetName();
+            material.GetShader();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {

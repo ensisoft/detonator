@@ -24,6 +24,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <neargye/magic_enum.hpp>
+#include "warnpop.h"
+
 #include <chrono>
 #include <memory> // for unique_ptr
 #include <string>
@@ -140,15 +144,10 @@ bool JsonReadSafe(const JsonObject& object, const char* name, std::string* out)
 template<typename JsonObject, typename ValueT> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
 {
-    // this is a bit ugly but I'd really like to keep the code
-    // here free of any 3rd party depedencies.
-    // so if the client code has a dep to magic_enum then we can
-    // have this
-#if defined(NEARGYE_MAGIC_ENUM_HPP)
-    if (std::is_enum<ValueT>::value)
+    if constexpr (std::is_enum<ValueT>::value)
     {
         std::string str;
-        if (!object.contains(name) || !object.is_string())
+        if (!object.contains(name) || !object[name].is_string())
             return false;
 
         str = object[name];
@@ -159,7 +158,7 @@ bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
         *out = enum_val.value();
         return true;
     }
-#endif
+
     if (!object.contains(name))
         return false;
     *out = object[name];

@@ -24,6 +24,12 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <neargye/magic_enum.hpp>
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
+#include <map>
 #include <vector>
 #include <string>
 #include <chrono>
@@ -56,8 +62,20 @@ namespace gfx
         virtual std::string GetName() const = 0;
         // Generate or load the data as a bitmap.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
+        // Returns whether texture source can serialize into JSON or not.
+        virtual bool CanSerialize() const
+        { return false; }
+        // Serialize into JSON object.
+        virtual nlohmann::json ToJson() const
+        { return nlohmann::json{}; }
+        // Load state from JSON object. Returns true if succesful
+        // otherwise false.
+        virtual bool FromJson(const nlohmann::json& object)
+        { return false; }
     private:
     };
+
+
 
     namespace detail {
         // Source texture data from an image file.
@@ -67,6 +85,7 @@ namespace gfx
             TextureFileSource(const std::string& filename)
               : mFilename(filename)
             {}
+            TextureFileSource() = default;
             virtual std::string GetName() const override
             { return mFilename; }
             virtual std::shared_ptr<IBitmap> GetData() const override
@@ -81,8 +100,21 @@ namespace gfx
                 else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits()));
                 return nullptr;
             }
+            virtual bool CanSerialize() const override
+            { return true; }
+            virtual nlohmann::json ToJson() const override
+            {
+                nlohmann::json json = {
+                    {"filename", mFilename}
+                };
+                return json;
+            }
+            virtual bool FromJson(const nlohmann::json& object) override
+            {
+                return base::JsonReadSafe(object, "filename", &mFilename);
+            }
         private:
-            const std::string mFilename;
+            std::string mFilename;
         };
 
         // Source texture data from a bitmap
@@ -131,6 +163,53 @@ namespace gfx
             const TextBuffer& mTextBuffer;
         };
 
+        // this is super ugly but there needs to be some kind of abstraction
+        // for loading materials from JSON and coming up with the correct
+        // texture source object. This will get the job done by allowing
+        // the client code to register a custom class type in the factory
+        class TextureSourceFactory
+        {
+        public:
+            static std::shared_ptr<TextureSource> Create(const std::string& class_)
+            {
+                return GetFactory().mFactories[class_]->Create();
+            }
+            template<typename T>
+            void RegisterTextureSourceType()
+            {
+                GetFactory().mFactories[typeid(T).name()] = std::make_unique<TypedFactory<T>>();
+            }
+
+        private:
+            static TextureSourceFactory& GetFactory()
+            {
+                static TextureSourceFactory almost_like_java;
+                return almost_like_java;
+            }
+            TextureSourceFactory()
+            {
+                mFactories[typeid(TextureFileSource).name()] = std::make_unique<TypedFactory<TextureFileSource>>();
+            }
+
+        private:
+            class AbstractFactory
+            {
+            public:
+                virtual std::shared_ptr<TextureSource> Create() const = 0;
+            private:
+            };
+            template<typename T>
+            class TypedFactory :public AbstractFactory
+            {
+            public:
+                virtual std::shared_ptr<TextureSource> Create() const override
+                { return std::make_shared<T>(); }
+            private:
+            };
+        private:
+            std::map<std::string, std::unique_ptr<AbstractFactory>> mFactories;
+        };
+
     } // detail
 
     // Material objects hold the material parameters per material instance
@@ -152,8 +231,11 @@ namespace gfx
         using MagTextureFilter = Texture::MagFilter;
         using TextureWrapping  = Texture::Wrapping;
         // constructor.
-        Material(const std::string& shader) : mShader(shader)
+        Material(const std::string& shader, const std::string& name)
+            : mShader(shader)
+            , mName(name)
         {}
+
 
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
@@ -269,9 +351,17 @@ namespace gfx
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
         }
 
+        // Object properties.
+        void SetName(const std::string& name)
+        { mName = name; }
+        void SetShader(const std::string& shader_file)
+        { mShader = shader_file; }
         std::string GetName() const
+        { return mName; }
+        std::string GetShader() const
         { return mShader; }
 
+        // Material properties.
         Material& SetTextureBlendWeight(float weight)
         {
             mTextureBlendWeight = math::clamp(0.0f, 1.0f, weight);
@@ -397,8 +487,95 @@ namespace gfx
             return *this;
         }
 
+        nlohmann::json ToJson() const
+        {
+            const std::string surface(magic_enum::enum_name(mSurfaceType));
+            const std::string minfilter(magic_enum::enum_name(mMinFilter));
+            const std::string magfilter(magic_enum::enum_name(mMagFilter));
+            const std::string wrapx(magic_enum::enum_name(mWrapX));
+            const std::string wrapy(magic_enum::enum_name(mWrapY));
+            nlohmann::json json = {
+                {"shader", mShader},
+                {"name",   mName},
+                {"color",  mBaseColor.ToJson()},
+                {"surface",surface},
+                {"gamma",  mGamma},
+                {"fps",    mFps},
+                {"blend_weight", mTextureBlendWeight},
+                {"texture_min_filter", minfilter},
+                {"texture_mag_filter", magfilter},
+                {"texture_wrap_x", wrapx},
+                {"texture_wrap_y", wrapy},
+                {"texture_scale_x", mTextureScaleX},
+                {"texture_scale_y", mTextureScaleY}
+            };
+            for (const auto& sampler : mTextures)
+            {
+                if (!sampler.source->CanSerialize())
+                    continue;
+                nlohmann::json js;
+                js["box"] = sampler.box.ToJson();
+                js["box_is_normalized"] = sampler.box_is_normalized;
+                js["enable_gc"] = sampler.enable_gc;
+                js["class"] = typeid(*sampler.source).name();
+                js["source"] = sampler.source->ToJson();
+                json["samplers"].push_back(js);
+            }
+            return json;
+        }
+        static Material FromJson(const nlohmann::json& object, bool* success = nullptr)
+        {
+            Material mat;
+
+            mat.mBaseColor = Color4f::FromJson(object["color"], success);
+            if (!success)
+                return mat;
+
+            if (!base::JsonReadSafe(object, "shader", &mat.mShader) ||
+                !base::JsonReadSafe(object, "name", &mat.mName) ||
+                !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
+                !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
+                !base::JsonReadSafe(object, "fps", &mat.mFps) ||
+                !base::JsonReadSafe(object, "blend_weight", &mat.mTextureBlendWeight) ||
+                !base::JsonReadSafe(object, "texture_min_filter", &mat.mMinFilter) ||
+                !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
+                !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
+                !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
+                !base::JsonReadSafe(object, "texture_scale_x", &mat.mTextureScaleX) ||
+                !base::JsonReadSafe(object, "texture_scale_y", &mat.mTextureScaleY))
+            {
+                *success = false;
+                return mat;
+            }
+            if (!object.contains("samplers"))
+            {
+                *success = true;
+                return mat;
+            }
+            for (const auto& json_sampler : object["samplers"].items())
+            {
+                const auto& obj = json_sampler.value();
+                const std::string& class_ = obj["class"];
+                auto source = detail::TextureSourceFactory::Create(class_);
+                if (!source->FromJson(obj["source"]))
+                    return mat;
+                TextureSampler s;
+                s.box = FRect::FromJson(obj["box"]);
+                s.box_is_normalized = obj["box_is_normalized"];
+                s.enable_gc         = obj["enable_gc"];
+                s.source            = std::move(source);
+                mat.mTextures.push_back(std::move(s));
+            }
+            *success = true;
+            return mat;
+        }
     private:
-        const std::string mShader;
+        // allow private construction with "invalid/incomplete" state.
+        Material() = default;
+
+    private:
+        std::string mShader;
+        std::string mName;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         float mGamma   = 1.0f;
@@ -423,7 +600,7 @@ namespace gfx
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
     {
-        return Material("solid_color.glsl").SetBaseColor(color);
+        return Material("solid_color.glsl", "Color Fill").SetBaseColor(color);
     }
 
 
@@ -431,7 +608,7 @@ namespace gfx
     // The object being drawn must provide texture coordinates.
     inline Material TextureMap(const std::string& texture)
     {
-        return Material("texture_map.glsl")
+        return Material("texture_map.glsl", "Static Texture")
             .AddTexture(texture)
             .SetSurfaceType(Material::SurfaceType::Opaque);
     }
@@ -444,7 +621,7 @@ namespace gfx
     // the current time value needs to be set.
     inline Material SpriteSet()
     {
-        return Material("texture_map.glsl")
+        return Material("texture_map.glsl", "Sprite Animation")
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteSet(const std::initializer_list<std::string>& textures)
@@ -469,7 +646,7 @@ namespace gfx
     // renders a coherent animation.
     inline Material SpriteMap()
     {
-        return Material("texture_map.glsl")
+        return Material("texture_map.glsl", "Sprite Animation")
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteMap(const std::string& texture, const std::vector<URect>& frames)
@@ -491,7 +668,7 @@ namespace gfx
     // The drawable shape must provide texture coordinates.
     inline Material BitmapText(const TextBuffer& text)
     {
-        return Material("texture_map.glsl")
+        return Material("texture_map.glsl", "Bitmap Text")
             .AddTexture(text)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
@@ -499,14 +676,14 @@ namespace gfx
     // todo: refactor away
     inline Material SlidingGlintEffect(float secs)
     {
-        return Material("sliding_glint_effect.glsl")
+        return Material("sliding_glint_effect.glsl", "Sliding Glint Effect")
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }
     // todo: refactor away
     inline Material ConcentricRingsEffect(float secs)
     {
-        return Material("concentric_rings_effect.glsl")
+        return Material("concentric_rings_effect.glsl", "Concentric Rings Effect")
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }

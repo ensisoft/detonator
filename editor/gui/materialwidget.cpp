@@ -331,7 +331,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
     const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
 
-    gfx::Material material(shader);
+    gfx::Material material(shader, "temp");
     material.SetBaseColor(app::toGfx(color));
     material.SetGamma(mUI.gamma->value());
     material.SetSurfaceType(surface);
