@@ -254,7 +254,7 @@ void MainWindow::startup()
     {
         widget->setWorkspace(&mWorkspace);
     }
-
+    mUI.workspace->setModel(mWorkspace.GetResourceModel());
 }
 
 void MainWindow::showWindow()

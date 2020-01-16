@@ -23,8 +23,10 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QAbstractTableModel>
 #  include <QString>
 #  include <QMap>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -32,14 +34,23 @@
 
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "utility.h"
 
 namespace app
 {
-    class Workspace
+    class Workspace : public QAbstractTableModel
     {
     public:
         Workspace();
        ~Workspace();
+
+        // QAbstractTableModel implementation
+        virtual QVariant data(const QModelIndex& index, int role) const override;
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        virtual int rowCount(const QModelIndex&) const override
+        { return static_cast<int>(mResources.size()); }
+        virtual int columnCount(const QModelIndex&) const override
+        { return 2; }
 
         // Load the contents of the workspace from the given JSON file.
         bool LoadWorkspace(const QString& file);
@@ -63,9 +74,49 @@ namespace app
         QString GetCurrentFilename() const
         { return mFilename; }
 
+        QAbstractTableModel* GetResourceModel()
+        { return this; }
+
     private:
-        std::vector<std::unique_ptr<gfx::Drawable>> mDrawables;
-        std::vector<gfx::Material> mMaterials;
+        class Resource
+        {
+        public:
+            enum class Type {
+                Material,
+                Drawable,
+                Animation,
+                Scene,
+                AudioTrack
+            };
+            virtual ~Resource() = default;
+            virtual QString GetName() const = 0;
+            virtual Type GetType() const = 0;
+            virtual void Serialize(nlohmann::json& json) const =0;
+        private:
+        };
+        class MaterialResource : public Resource
+        {
+        public:
+            MaterialResource(const gfx::Material& material)
+              : mMaterial(material)
+            {}
+            MaterialResource(gfx::Material&& material)
+              : mMaterial(std::move(material))
+            {}
+            virtual QString GetName() const override
+            { return app::fromUtf8(mMaterial.GetName()); }
+            virtual Type GetType() const override
+            { return Type::Material; }
+            virtual void Serialize(nlohmann::json& json) const override
+            {
+                  json["materials"].push_back(mMaterial.ToJson());
+            }
+        private:
+            const gfx::Material mMaterial;
+        };
+    private:
+        std::vector<std::unique_ptr<Resource>> mResources;
+    private:
         QString mFilename;
     };
 

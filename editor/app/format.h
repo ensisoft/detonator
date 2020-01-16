@@ -28,9 +28,11 @@
 #  include <QString>
 #  include <QByteArray>
 #  include <QDir>
+#  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
 #include <cstring>
+#include <type_traits>
 
 #include "utility.h"
 
@@ -45,17 +47,27 @@ namespace app
     inline QString toString(bool value)
     { return (value ? "True" : "False"); }
 
-    // generic format method, supports whatever Qt QString::arg supports
     template<typename T>
-    QString toString(const T& value)
+    QString toString(const T& val)
     {
-        return QString("%1").arg(value);
+        if constexpr (std::is_enum<T>::value)
+        {
+            const std::string_view& str(magic_enum::enum_name(val));
+            return QString::fromLocal8Bit(str.data(), str.size());
+        }
+        else
+        {
+            return QString("%1").arg(val);
+        }
     }
+
     template<typename T, typename... Args>
     QString toString(QString fmt, const T& value, const Args&... args)
     {
         fmt = fmt.arg(toString(value));
         return toString(fmt, args...);
     }
+
+
 
 } // app

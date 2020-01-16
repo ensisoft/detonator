@@ -28,11 +28,13 @@
 #  include <nlohmann/json.hpp>
 #  include <QByteArray>
 #  include <QFile>
+#  include <QIcon>
 #include "warnpop.h"
 
 #include "eventlog.h"
 #include "workspace.h"
 #include "utility.h"
+#include "format.h"
 
 namespace app
 {
@@ -45,6 +47,47 @@ Workspace::Workspace()
 Workspace::~Workspace()
 {
     DEBUG("Destroy workspace");
+}
+
+QVariant Workspace::data(const QModelIndex& index, int role) const
+{
+    const auto& res = mResources[index.row()];
+
+    if (role == Qt::SizeHintRole)
+        return QSize(0, 16);
+    else if (role == Qt::DisplayRole)
+    {
+        switch (index.column())
+        {
+            case 0: return toString(res->GetType());
+            case 1: return res->GetName();
+        }
+    }
+    else if (role == Qt::DecorationRole && index.column() == 0)
+    {
+        switch (res->GetType())
+        {
+            case Resource::Type::Material:
+                return QIcon("icons:material.png");
+            case Resource::Type::Drawable:
+                return QIcon("icons:material.png");
+            default: break;
+        }
+    }
+    return QVariant();
+}
+
+QVariant Workspace::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:  return "Type";
+            case 1:  return "Name";
+        }
+    }
+    return QVariant();
 }
 
 bool Workspace::LoadWorkspace(const QString& filename)
@@ -67,7 +110,7 @@ bool Workspace::LoadWorkspace(const QString& filename)
     // todo: this can throw, use the nothrow and log error
     const auto& json = nlohmann::json::parse(beg, end);
 
-    std::vector<gfx::Material> materials;
+    std::vector<std::unique_ptr<Resource>> resources;
 
     if (json.contains("materials"))
     {
@@ -81,10 +124,10 @@ bool Workspace::LoadWorkspace(const QString& filename)
                 continue;
             }
             DEBUG("Loaded material: '%1'", material.GetName());
-            materials.push_back(std::move(material));
+            resources.push_back(std::make_unique<MaterialResource>(material));
         }
     }
-    mMaterials = std::move(materials);
+    mResources = std::move(resources);
     mFilename = filename;
     return true;
 }
@@ -99,9 +142,9 @@ bool Workspace::SaveWorkspace(const QString& filename)
     }
 
     nlohmann::json json;
-    for (const auto& material : mMaterials)
+    for (const auto& resource : mResources)
     {
-        json["materials"].push_back(material.ToJson());
+        resource->Serialize(json);
     }
 
     if (json.is_null())
@@ -125,9 +168,10 @@ bool Workspace::SaveWorkspace(const QString& filename)
 QStringList Workspace::ListMaterials() const
 {
     QStringList list;
-    for (const auto& mat : mMaterials)
+    for (const auto& res : mResources)
     {
-        list.append(app::fromUtf8(mat.GetName()));
+        if (res->GetType() == Resource::Type::Material)
+            list.append(res->GetName());
     }
     return list;
 }
@@ -135,27 +179,43 @@ QStringList Workspace::ListMaterials() const
 QStringList Workspace::ListDrawables() const
 {
     QStringList list;
+    for (const auto& res : mResources)
+    {
+        if (res->GetType() == Resource::Type::Drawable)
+            list.append(res->GetName());
+    }
     return list;
 }
 
 void Workspace::SaveMaterial(const gfx::Material& material)
 {
-    for (auto& mat : mMaterials)
+    // check if we already have on by this name.
+    // the caller is expected to have confirmed the user if overwriting
+    // is OK or not.
+    const auto& name = app::fromUtf8(material.GetName());
+
+    for (size_t i=0; i<mResources.size(); ++i)
     {
-        if (mat.GetName() == material.GetName())
+        const auto& res = mResources[i];
+        if (res->GetType() == Resource::Type::Material &&
+            res->GetName() == name)
         {
-            mat = material;
+            mResources[i] = std::make_unique<MaterialResource>(material);
             return;
         }
     }
-    mMaterials.push_back(material);
+    beginInsertRows(QModelIndex(), mResources.size() + 1,
+        mResources.size() + 1);
+    mResources.push_back(std::make_unique<MaterialResource>(material));
+    endInsertRows();
 }
 
 bool Workspace::HasMaterial(const QString& name) const
 {
-    for (const auto& mat : mMaterials)
+    for (const auto& res : mResources)
     {
-        if (app::fromUtf8(mat.GetName()) == name)
+        if (res->GetType() == Resource::Type::Material &&
+            res->GetName() == name)
             return true;
     }
     return false;
