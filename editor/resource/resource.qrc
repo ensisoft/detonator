@@ -5,15 +5,17 @@
     <file>16x16_ico_png/log_error.png</file>
     <file>16x16_ico_png/log_info.png</file>
 
-    <file>16x16_ico_png/app_exit.png</file>    
-    <file>16x16_ico_png/app_next_window.png</file>    
-    <file>16x16_ico_png/app_prev_window.png</file>    
-    <file>16x16_ico_png/app_close_window.png</file>        
+    <file>16x16_ico_png/app_exit.png</file>
+    <file>16x16_ico_png/app_next_window.png</file>
+    <file>16x16_ico_png/app_prev_window.png</file>
+    <file>16x16_ico_png/app_close_window.png</file>
     <file>16x16_ico_png/material.png</file>
     <file>16x16_ico_png/zoom_in.png</file>
     <file>16x16_ico_png/zoom_out.png</file>
     <file>16x16_ico_png/refresh.png</file>
 
+
+    <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
     <file>32x32_ico_png/stop.png</file>
     <file>32x32_ico_png/pause.png</file>

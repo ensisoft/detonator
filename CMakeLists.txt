@@ -154,6 +154,8 @@ add_executable(Editor
     editor/app/format.h
     editor/app/utility.h
     editor/app/utility.cpp
+    editor/app/workspace.h
+    editor/app/workspace.cpp
     editor/gui/gfxwidget.h
     editor/gui/mainwidget.h
     editor/gui/mainwindow.h

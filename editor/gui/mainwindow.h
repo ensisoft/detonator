@@ -18,7 +18,7 @@
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.        
+//  THE SOFTWARE.
 
 #pragma once
 
@@ -33,6 +33,8 @@
 #include <vector>
 #include <memory>
 
+#include "editor/app/workspace.h"
+
 namespace gui
 {
     class MainWidget;
@@ -40,7 +42,7 @@ namespace gui
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
-    // interact with. 
+    // interact with.
     class MainWindow : public QMainWindow
     {
         Q_OBJECT
@@ -52,19 +54,19 @@ namespace gui
 
         // Attach a new permanent MainWidget to the window and display it.
         // The ownership of the widget remains with the caller.
-        // Permanent widgets get an entry in the view menu and can be 
+        // Permanent widgets get an entry in the view menu and can be
         // toggled on/off but are never deleted by MainWindow.
-        void attachPermanentWidget(MainWidget* widget);        
+        void attachPermanentWidget(MainWidget* widget);
 
         // Attach a temporary session widget. Session widgets
         // are spawned dynamically during the lifetime of the application
-        // and there can several widgets of the same type. 
+        // and there can several widgets of the same type.
         // When the user diposes of them they're deleted by the MainWindow.
         void attachSessionWidget(std::unique_ptr<MainWidget> widget);
 
         // Detach all current widgets both temporary and permanent.
         // You should call this before the application ends to make
-        // sure that the any widgets that should not get deleted 
+        // sure that the any widgets that should not get deleted
         // get deleted by Qt's object hierachy system.
         void detachAllWidgets();
 
@@ -76,7 +78,7 @@ namespace gui
         // Move focus of the application to this widget if the widget
         // is currently being shown. If the widget is not being shown
         // then does nothing.
-        void focusWidget(const MainWidget* widget);        
+        void focusWidget(const MainWidget* widget);
 
         // Load the MainWindow and all MainWidget states.
         void loadState();
@@ -106,12 +108,12 @@ namespace gui
         void on_actionExit_triggered();
         void on_actionWindowClose_triggered();
         void on_actionWindowNext_triggered();
-        void on_actionWindowPrev_triggered();        
+        void on_actionWindowPrev_triggered();
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();
         void actionWindowToggleView_triggered();
-        void actionWindowFocus_triggered();        
+        void actionWindowFocus_triggered();
         void refreshUI();
         void showNote(const app::Event& event);
 
@@ -122,7 +124,7 @@ namespace gui
         void hideWidget(MainWidget* widget);
         void hideWidget(std::size_t index);
         bool saveState();
-        
+
 
     private:
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
@@ -139,6 +141,8 @@ namespace gui
         std::vector<MainWidget*> mWidgets;
         std::vector<QAction*>    mActions;
         MainWidget* mCurrentWidget = nullptr;
+    private:
+        app::Workspace mWorkspace;
     };
 
 } // namespace

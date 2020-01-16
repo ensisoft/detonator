@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QMessageBox>
 #  include <QFileDialog>
 #  include <QFileInfo>
 #  include <QPixmap>
@@ -38,6 +39,7 @@
 
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
+#include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
 #include "materialwidget.h"
@@ -56,6 +58,7 @@ MaterialWidget::MaterialWidget()
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
+    mUI.materialName->setText("My Material");
 
     PopulateFromEnum<gfx::Material::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::Material::MagTextureFilter>(mUI.magFilter);
@@ -77,6 +80,8 @@ void MaterialWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionPause);
     bar.addSeparator();
     bar.addAction(mUI.actionStop);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSave);
 }
 void MaterialWidget::addActions(QMenu& menu)
 {
@@ -84,6 +89,8 @@ void MaterialWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionPause);
     menu.addSeparator();
     menu.addAction(mUI.actionStop);
+    menu.addSeparator();
+    menu.addAction(mUI.actionSave);
 }
 
 bool MaterialWidget::loadState(const Settings& settings)
@@ -114,6 +121,11 @@ void MaterialWidget::reloadShaders()
     mUI.widget->reloadShaders();
 }
 
+void MaterialWidget::setWorkspace(app::Workspace* workspace)
+{
+    mWorkspace = workspace;
+}
+
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;
@@ -137,6 +149,32 @@ void MaterialWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mTime = 0.0f;
+}
+
+void MaterialWidget::on_actionSave_triggered()
+{
+    const auto& name = mUI.materialName->text();
+    if (name.isEmpty())
+    {
+        mUI.materialName->setFocus();
+        return;
+    }
+    if (mWorkspace->HasMaterial(name))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
+    gfx::Material material("", "");
+    fillMaterial(material);
+
+    mWorkspace->SaveMaterial(material);
+
+    NOTE("Saved material %1", name);
 }
 
 void MaterialWidget::on_textureAdd_clicked()
@@ -297,23 +335,23 @@ void MaterialWidget::on_rectH_valueChanged(double value)
     mTextures[getCurrentTextureKey()].recth = value;
 }
 
-void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
+void MaterialWidget::fillMaterial(gfx::Material& material) const
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-
-    painter.SetViewport(0, 0, width, height);
-
-    const auto& type = mUI.materialType->currentText();
-    const auto& surf = mUI.surfaceType->currentText();
-    const auto& min  = mUI.minFilter->currentText();
-    const auto& mag  = mUI.magFilter->currentText();
-    const auto& wrapx = mUI.wrapX->currentText();
-    const auto& wrapy = mUI.wrapY->currentText();
-    const auto& color = mUI.baseColor->color();
-    const auto textures = mUI.textures->count();
-    const auto fps   = type == "Sprite" ? mUI.fps->value() : 0.0f;
-    const auto blend = mUI.blend->isChecked();
+    const auto& type      = mUI.materialType->currentText();
+    const auto& name      = mUI.materialName->text();
+    const auto& surf      = mUI.surfaceType->currentText();
+    const auto& min       = mUI.minFilter->currentText();
+    const auto& mag       = mUI.magFilter->currentText();
+    const auto& wrapx     = mUI.wrapX->currentText();
+    const auto& wrapy     = mUI.wrapY->currentText();
+    const auto& color     = mUI.baseColor->color();
+    const auto blend      = mUI.blend->isChecked();
+    const auto fps        = type == "Sprite" ? mUI.fps->value() : 0.0f;
+    const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
+    const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);
+    const auto mag_filter = EnumFromCombo<gfx::Material::MagTextureFilter>(mUI.magFilter);
+    const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
+    const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
 
     // todo: fix this
     std::string shader;
@@ -324,14 +362,8 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     else if (type == "Sprite")
         shader = "texture_map.glsl";
 
-
-    const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
-    const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);
-    const auto mag_filter = EnumFromCombo<gfx::Material::MagTextureFilter>(mUI.magFilter);
-    const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
-    const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
-
-    gfx::Material material(shader, "temp");
+    material.SetName(app::toUtf8(name));
+    material.SetShader(shader);
     material.SetBaseColor(app::toGfx(color));
     material.SetGamma(mUI.gamma->value());
     material.SetSurfaceType(surface);
@@ -345,29 +377,40 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     material.SetTextureWrapX(tex_wrap_x);
     material.SetTextureWrapY(tex_wrap_y);
 
-    const bool stopped = mState == PlayState::Stopped;
-    const auto texture_start = stopped ? mUI.textures->currentRow() : 0;
-    const auto texture_count = stopped ? 1 : textures;
-    if (texture_start != -1)
+    int num_textures_add = 0;
+
+    if (type == "Sprite")
+        num_textures_add = mUI.textures->count();
+    else if (type == "Texture")
+        num_textures_add = std::min(1, mUI.textures->count());
+
+    for (int i=0; i<num_textures_add; ++i)
     {
-        for (int i=0; i<texture_count; ++i)
-        {
-            const auto* item = mUI.textures->item(texture_start + i);
-            const auto& key  = item->data(Qt::UserRole).toString();
-            const auto& data = mTextures[key];
-            material.AddTexture(app::strToEngine(data.file));
-            material.SetTextureRect(i, gfx::FRect(0, 0, 1.0f, 1.0f));
+        const auto* item = mUI.textures->item(i);
+        const auto& key  = item->data(Qt::UserRole).toString();
+        const auto& data = mTextures[key];
 
-            if (!data.rect_enabled)
-                continue;
-            const gfx::FRect rect(data.rectx,
-                data.recty,
-                data.rectw,
-                data.recth);
-            material.SetTextureRect(i, rect);
+        material.AddTexture(app::strToEngine(data.file));
+        material.SetTextureRect(i, gfx::FRect(0, 0, 1.0f, 1.0f));
 
-        }
+        if (!data.rect_enabled)
+            continue;
+        const gfx::FRect rect(data.rectx,
+            data.recty,
+            data.rectw,
+            data.recth);
+        material.SetTextureRect(i, rect);
     }
+}
+
+void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
+{
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    painter.SetViewport(0, 0, width, height);
+
+    gfx::Material material("", "");
+    fillMaterial(material);
 
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;

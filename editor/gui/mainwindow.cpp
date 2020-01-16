@@ -29,6 +29,7 @@
 #  include <QMessageBox>
 #  include <QFileInfo>
 #  include <QWheelEvent>
+#  include <QFileInfo>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -94,7 +95,7 @@ void MainWindow::attachPermanentWidget(MainWidget* widget)
     mActions.push_back(action);
     widget->setProperty("permanent", true);
 
-    // We need to install this event filter so that we can universally grab 
+    // We need to install this event filter so that we can universally grab
     // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
     widget->installEventFilter(this);
 }
@@ -124,7 +125,7 @@ void MainWindow::detachAllWidgets()
     {
         widget->setParent(nullptr);
         const auto permanent = widget->property("permanent").toBool();
-        if (!permanent) 
+        if (!permanent)
             delete widget;
     }
     mWidgets.clear();
@@ -180,7 +181,7 @@ void MainWindow::loadState()
         DEBUG("Loading widget '%1'", text);
         success |= mWidgets[i]->loadState(mSettings);
     }
-    
+
     if (!success)
     {
         QMessageBox msg(this);
@@ -198,12 +199,12 @@ void MainWindow::focusWidget(const MainWidget* widget)
     const auto index = mUI.mainTab->indexOf(const_cast<MainWidget*>(widget));
     if (index == -1)
         return;
-    mUI.mainTab->setCurrentIndex(index);    
+    mUI.mainTab->setCurrentIndex(index);
 }
 
 void MainWindow::prepareFileMenu()
 {
-    
+
 }
 
 void MainWindow::prepareWindowMenu()
@@ -235,7 +236,7 @@ void MainWindow::prepareWindowMenu()
 
 void MainWindow::prepareMainTab()
 {
-    mUI.mainTab->setCurrentIndex(0);    
+    mUI.mainTab->setCurrentIndex(0);
 }
 
 void MainWindow::startup()
@@ -244,11 +245,21 @@ void MainWindow::startup()
     {
         widget->startup();
     }
+
+    const QFileInfo info("workspace.json");
+    if (info.exists())
+        mWorkspace.LoadWorkspace("workspace.json");
+
+    for (auto* widget : mWidgets)
+    {
+        widget->setWorkspace(&mWorkspace);
+    }
+
 }
 
 void MainWindow::showWindow()
 {
-    show();   
+    show();
 }
 
 
@@ -267,7 +278,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         widget->activate();
         widget->addActions(*mUI.mainToolBar);
         widget->addActions(*mUI.menuTemp);
- 
+
         auto title = widget->windowTitle();
         auto space = title.indexOf(" ");
         if (space != -1)
@@ -418,7 +429,7 @@ void MainWindow::actionWindowToggleView_triggered()
         view_menu_action->setChecked(false);
         mUI.mainTab->removeTab(widget_tab_index);
     }
-    prepareWindowMenu();    
+    prepareWindowMenu();
 }
 
 void MainWindow::actionWindowFocus_triggered()
@@ -497,18 +508,18 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
     if (destination != mCurrentWidget)
         return QObject::eventFilter(destination, event);
 
-    if (event->type() != QEvent::Wheel) 
+    if (event->type() != QEvent::Wheel)
         return QObject::eventFilter(destination, event);
 
     const auto* wheel = static_cast<QWheelEvent*>(event);
     const auto mods = wheel->modifiers();
     if (mods != Qt::ControlModifier)
         return QObject::eventFilter(destination, event);
-    
+
     const QPoint& num_degrees = wheel->angleDelta() / 8;
     const QPoint& num_steps = num_degrees / 15;
     // only consider the wheel scroll steps on the vertical
-    // axis for zooming. 
+    // axis for zooming.
     // if steps are positive the wheel is scrolled away from the user
     // and if steps are negative the wheel is scrolled towards the user.
     const int num_zoom_steps = num_steps.y();
@@ -519,7 +530,7 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
     {
         if (num_zoom_steps > 0)
             mCurrentWidget->zoomIn();
-        else if (num_zoom_steps < 0) 
+        else if (num_zoom_steps < 0)
             mCurrentWidget->zoomOut();
     }
 
@@ -528,28 +539,31 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
 
 bool MainWindow::saveState()
 {
-    bool success = true;
+    if (!mWorkspace.SaveWorkspace("workspace.json"))
+        return false;
 
     mSettings.setValue("MainWindow", "width", width());
     mSettings.setValue("MainWindow", "height", height());
     mSettings.setValue("MainWindow", "xpos", x());
     mSettings.setValue("MainWindow", "ypos", y());
     mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
-    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());    
- 
+    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+
+    bool success = true;
+
     // actions only goes as count as permanent widgets go.
     for (size_t i=0; i<mActions.size(); ++i)
     {
         const bool visible   = mActions[i]->isChecked();
         const bool permanent = mWidgets[i]->property("permanent").toBool();
-        if (permanent) 
+        if (permanent)
         {
             DEBUG("Saving widget '%1'", mWidgets[i]->windowTitle());
             mSettings.setValue("VisibleTabs", mWidgets[i]->objectName(), visible);
             success |= mWidgets[i]->saveState(mSettings);
             continue;
         }
-        // todo: 
+        // todo:
         // for transient widgets generate a unique state file where
         // they can persist their state and then load on next run.
     }

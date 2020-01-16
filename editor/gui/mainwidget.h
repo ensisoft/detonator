@@ -7,11 +7,15 @@
 #  include <QtWidgets>
 #include "warnpop.h"
 
+namespace app {
+    class Workspace;
+} // namespace app
+
 namespace gui
 {
     class Settings;
 
-    // MainWidget interfact is an abstraction for extending the 
+    // MainWidget interfact is an abstraction for extending the
     // application functionality vertically starting from
     // a visible user interface. The MainWidget's plug into
     // MainWindow and are then subsequently managed by the MainWindow
@@ -29,7 +33,7 @@ namespace gui
         virtual bool loadState(const Settings& settings)
         { return true; }
 
-        // Save the widget user interface state. 
+        // Save the widget user interface state.
         virtual bool saveState(Settings& settings) const
         { return true; }
 
@@ -44,7 +48,7 @@ namespace gui
         // Refresh the widget contents.
         // the MainWindow will call this periodically so the widget
         // can do whatever latency insensitive state updates.
-        virtual void refresh() 
+        virtual void refresh()
         {}
 
         // Called whenever the widget is getting activated i.e. displayed
@@ -59,13 +63,18 @@ namespace gui
         // The widget should release it's resources at this point.
         virtual void shutdown() {}
 
-        // Called when the application is starting up. 
+        // Called when the application is starting up.
         virtual void startup() {}
 
         virtual void zoomIn() {};
         virtual void zoomOut() {}
 
         virtual void reloadShaders() {};
+
+        // Notify the widget that a workspace has been opened.
+        // The workspace object will remain valid as long as until
+        // another workspace object or nullptr object is given.
+        virtual void setWorkspace(app::Workspace* workspace) {}
     private:
     };
 

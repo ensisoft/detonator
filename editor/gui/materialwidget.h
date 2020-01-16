@@ -53,11 +53,13 @@ namespace gui
         virtual void zoomIn() override;
         virtual void zoomOut() override;
         virtual void reloadShaders() override;
+        virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
+        void on_actionSave_triggered();
         void on_textureAdd_clicked();
         void on_textureDel_clicked();
         void on_textures_currentRowChanged(int row);
@@ -69,6 +71,7 @@ namespace gui
         void on_rectH_valueChanged(double value);
 
     private:
+        void fillMaterial(gfx::Material& material) const;
         void paintScene(gfx::Painter& painter, double sec);
         QString getCurrentTextureKey() const;
     private:
@@ -87,7 +90,7 @@ namespace gui
             Playing, Paused, Stopped
         };
         PlayState mState = PlayState::Stopped;
-
         float mTime = 0.0f;
+        app::Workspace* mWorkspace = nullptr;
     };
 } // namespace
