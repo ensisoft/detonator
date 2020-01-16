@@ -35,13 +35,14 @@
 #include <algorithm>
 
 #include "base/assert.h"
-
-#include "app/format.h"
-#include "app/utility.h"
-#include "app/eventlog.h"
-#include "mainwindow.h"
-#include "mainwidget.h"
-#include "settings.h"
+#include "editor/app/format.h"
+#include "editor/app/utility.h"
+#include "editor/app/eventlog.h"
+#include "editor/gui/mainwindow.h"
+#include "editor/gui/mainwidget.h"
+#include "editor/gui/settings.h"
+#include "editor/gui/particlewidget.h"
+#include "editor/gui/materialwidget.h"
 
 namespace gui
 {
@@ -66,77 +67,18 @@ MainWindow::MainWindow(Settings& settings) : mSettings(settings)
     auto& events = app::EventLog::get();
     QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
         this, SLOT(showNote(const app::Event&)));
+    mUI.eventlist->setModel(&events);
 }
 
 MainWindow::~MainWindow()
 {}
-
-
-void MainWindow::attachPermanentWidget(MainWidget* widget)
-{
-    Q_ASSERT(!widget->parent());
-
-    const int index  = mWidgets.size();
-    const auto& text = widget->windowTitle();
-    const auto& icon = widget->windowIcon();
-
-    // Each permanent widget gets a view action.
-    // Permanent widgets are those that instead of being closed
-    // are just hidden and toggled in the View menu.
-    QAction* action = mUI.menuView->addAction(text);
-    action->setCheckable(true);
-    action->setChecked(true);
-    action->setProperty("index", index);
-
-    QObject::connect(action, SIGNAL(triggered()), this,
-        SLOT(actionWindowToggleView_triggered()));
-
-    mWidgets.push_back(widget);
-    mActions.push_back(action);
-    widget->setProperty("permanent", true);
-
-    // We need to install this event filter so that we can universally grab
-    // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
-    widget->installEventFilter(this);
-}
-
-void MainWindow::attachSessionWidget(std::unique_ptr<MainWidget> widget)
-{
-    Q_ASSERT(!widget->parent());
-
-    widget->setProperty("permanent", false);
-
-    mWidgets.push_back(widget.get());
-
-    const auto& text = widget->windowTitle();
-    const auto& icon = widget->windowIcon();
-
-    const auto count = mUI.mainTab->count();
-    mUI.mainTab->addTab(widget.get(), icon, text);
-    mUI.mainTab->setCurrentIndex(count);
-    widget.release();
-}
-
-void MainWindow::detachAllWidgets()
-{
-    mUI.mainTab->clear();
-
-    for (auto* widget : mWidgets)
-    {
-        widget->setParent(nullptr);
-        const auto permanent = widget->property("permanent").toBool();
-        if (!permanent)
-            delete widget;
-    }
-    mWidgets.clear();
-}
 
 void MainWindow::closeWidget(MainWidget* widget)
 {
     const auto index = mUI.mainTab->indexOf(widget);
     if (index == -1)
         return;
-    on_mainTab_tabCloseRequested(index);
+    mUI.mainTab->removeTab(index);
 }
 
 void MainWindow::loadState()
@@ -155,33 +97,26 @@ void MainWindow::loadState()
 
     const auto show_statbar = mSettings.getValue("MainWindow", "show_statusbar", true);
     const auto show_toolbar = mSettings.getValue("MainWindow", "show_toolbar", true);
+    const auto show_eventlog = mSettings.getValue("MainWindow", "show_event_log", true);
+    const auto show_workspace = mSettings.getValue("MainWindow", "show_workspace", true);
     mUI.mainToolBar->setVisible(show_toolbar);
     mUI.statusbar->setVisible(show_statbar);
+    mUI.eventlogDock->setVisible(show_eventlog);
+    mUI.workspaceDock->setVisible(show_workspace);
     mUI.actionViewToolbar->setChecked(show_toolbar);
     mUI.actionViewStatusbar->setChecked(show_statbar);
+    mUI.actionViewEventlog->setChecked(show_eventlog);
+    mUI.actionViewWorkspace->setChecked(show_workspace);
 
-    bool success = true;
+    // todo: load the previously open tabs from temporary state files.
 
-    // load the currently attached widgets. These should all be
-    // Permanent widgets, i.e. added in the main function and live
-    // on the stack.
-    for (std::size_t i=0; i<mWidgets.size(); ++i)
+
+    if (show_eventlog)
     {
-        const auto text = mWidgets[i]->objectName();
-        const auto icon = mWidgets[i]->windowIcon();
-        const auto show = mSettings.getValue("VisibleTabs", text, true);
-        if (show)
-        {
-            const auto title = mWidgets[i]->windowTitle();
-            mUI.mainTab->insertTab(i, mWidgets[i], icon, title);
-        }
-        if (i < mActions.size())
-            mActions[i]->setChecked(show);
 
-        DEBUG("Loading widget '%1'", text);
-        success |= mWidgets[i]->loadState(mSettings);
     }
 
+    bool success = true;
     if (!success)
     {
         QMessageBox msg(this);
@@ -241,17 +176,18 @@ void MainWindow::prepareMainTab()
 
 void MainWindow::startup()
 {
-    for (auto* widget : mWidgets)
-    {
-        widget->startup();
-    }
-
     const QFileInfo info("workspace.json");
     if (info.exists())
         mWorkspace.LoadWorkspace("workspace.json");
 
-    for (auto* widget : mWidgets)
+    attachWidget(new MaterialWidget);
+    attachWidget(new ParticleEditorWidget);
+
+    const auto num_widgets = mUI.mainTab->count();
+    for (int i=0; i<num_widgets; ++i)
     {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->startup();
         widget->setWorkspace(&mWorkspace);
     }
     mUI.workspace->setModel(mWorkspace.GetResourceModel());
@@ -262,12 +198,12 @@ void MainWindow::showWindow()
     show();
 }
 
-
 void MainWindow::on_mainTab_currentChanged(int index)
 {
     if (mCurrentWidget)
         mCurrentWidget->deactivate();
 
+    mCurrentWidget = nullptr;
     mUI.mainToolBar->clear();
     mUI.menuTemp->clear();
 
@@ -297,48 +233,20 @@ void MainWindow::on_mainTab_currentChanged(int index)
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
-    const auto* widget   = static_cast<MainWidget*>(mUI.mainTab->widget(index));
-    const auto parent    = widget->property("parent-object");
-    const auto permanent = widget->property("permanent").toBool();
-
+    auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
     if (widget == mCurrentWidget)
         mCurrentWidget = nullptr;
 
+    // does not delete the widget.
     mUI.mainTab->removeTab(index);
 
-    // find in the array
-    const auto it = std::find(std::begin(mWidgets), std::end(mWidgets), widget);
+    widget->shutdown();
+    widget->setParent(nullptr);
+    delete widget;
 
-    ASSERT(it != std::end(mWidgets));
-    ASSERT(*it == widget);
-
-    if (permanent)
-    {
-        const auto index = std::distance(std::begin(mWidgets), it);
-        //BOUNDSCHECK(mActions, index);
-
-        auto* action = mActions[index];
-        action->setChecked(false);
-    }
-    else
-    {
-        delete widget;
-        mWidgets.erase(it);
-    }
+    // rebuild window menu.
     prepareWindowMenu();
 
-    // see if we have a parent
-    if (parent.isValid())
-    {
-        auto* p = parent.value<QObject*>();
-
-        auto it = std::find_if(std::begin(mWidgets), std::end(mWidgets),
-            [&](MainWidget* w) {
-                return static_cast<QObject*>(w) == p;
-            });
-        if (it != std::end(mWidgets))
-            focusWidget(*it);
-    }
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -401,36 +309,6 @@ void MainWindow::on_actionReloadShaders_triggered()
     mCurrentWidget->reloadShaders();
 }
 
-void MainWindow::actionWindowToggleView_triggered()
-{
-    // the signal comes from the action object in
-    // the view menu. the index is the index to the widgets array
-
-    const auto* action = static_cast<QAction*>(sender());
-    const auto index   = action->property("index").toInt();
-    const bool visible = action->isChecked();
-
-    ASSERT(index < mWidgets.size());
-    ASSERT(index < mActions.size());
-
-    auto* widget = mWidgets[index];
-    auto* view_menu_action = mActions[index];
-
-    if (visible)
-    {
-        view_menu_action->setChecked(true);
-        const auto& icon = widget->windowIcon();
-        const auto& text = widget->windowTitle();
-        mUI.mainTab->insertTab(index, widget, icon, text);
-    }
-    else
-    {
-        const auto widget_tab_index = mUI.mainTab->indexOf(widget);
-        view_menu_action->setChecked(false);
-        mUI.mainTab->removeTab(widget_tab_index);
-    }
-    prepareWindowMenu();
-}
 
 void MainWindow::actionWindowFocus_triggered()
 {
@@ -449,21 +327,16 @@ void MainWindow::actionWindowFocus_triggered()
 
 void MainWindow::refreshUI()
 {
-    // refresh the UI state.
+    const auto num_widgets = mUI.mainTab->count();
 
-    for (auto* w : mWidgets)
+    // refresh the UI state, and update the tab widget icon/text
+    // if needed.
+    for (int i=0; i<num_widgets; ++i)
     {
-        w->refresh();
-    }
-
-    // update the maintab
-    const auto numVisibleTabs = mUI.mainTab->count();
-
-    for (int i=0; i<numVisibleTabs; ++i)
-    {
-        const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        const auto& icon   = widget->windowIcon();
-        const auto& text   = widget->windowTitle();
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->refresh();
+        const auto& icon = widget->windowIcon();
+        const auto& text = widget->windowTitle();
         mUI.mainTab->setTabText(i, text);
         mUI.mainTab->setTabIcon(i, icon);
     }
@@ -495,10 +368,16 @@ void MainWindow::closeEvent(QCloseEvent* event)
             return;
     }
 
-    for (auto* widget : mWidgets)
+    while (mUI.mainTab->count())
     {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
         widget->shutdown();
+        widget->setParent(nullptr);
+        // cleverly enough this will remove the tab. so the loop
+        // here must be carefully done to access the tab at index 0
+        delete widget;
     }
+    mUI.mainTab->clear();
 
     event->accept();
 }
@@ -548,28 +427,32 @@ bool MainWindow::saveState()
     mSettings.setValue("MainWindow", "ypos", y());
     mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
     mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+    mSettings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
+    mSettings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
 
     bool success = true;
 
-    // actions only goes as count as permanent widgets go.
-    for (size_t i=0; i<mActions.size(); ++i)
-    {
-        const bool visible   = mActions[i]->isChecked();
-        const bool permanent = mWidgets[i]->property("permanent").toBool();
-        if (permanent)
-        {
-            DEBUG("Saving widget '%1'", mWidgets[i]->windowTitle());
-            mSettings.setValue("VisibleTabs", mWidgets[i]->objectName(), visible);
-            success |= mWidgets[i]->saveState(mSettings);
-            continue;
-        }
-        // todo:
-        // for transient widgets generate a unique state file where
-        // they can persist their state and then load on next run.
-    }
+    // todo: for open tabs generate a temporary session file where the state goes.
+
     return success;
 }
 
+void MainWindow::attachWidget(MainWidget* widget)
+{
+    Q_ASSERT(!widget->parent());
+    const auto& text = widget->windowTitle();
+    const auto& icon = widget->windowIcon();
 
+    const auto count = mUI.mainTab->count();
+    mUI.mainTab->addTab(widget, icon, text);
+    mUI.mainTab->setCurrentIndex(count);
+
+    // We need to install this event filter so that we can universally grab
+    // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
+    widget->installEventFilter(this);
+
+    // rebuild window menu and shortcuts
+    prepareWindowMenu();
+}
 
 } // namespace

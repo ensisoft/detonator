@@ -52,27 +52,7 @@ namespace gui
         MainWindow(Settings& settings);
        ~MainWindow();
 
-        // Attach a new permanent MainWidget to the window and display it.
-        // The ownership of the widget remains with the caller.
-        // Permanent widgets get an entry in the view menu and can be
-        // toggled on/off but are never deleted by MainWindow.
-        void attachPermanentWidget(MainWidget* widget);
-
-        // Attach a temporary session widget. Session widgets
-        // are spawned dynamically during the lifetime of the application
-        // and there can several widgets of the same type.
-        // When the user diposes of them they're deleted by the MainWindow.
-        void attachSessionWidget(std::unique_ptr<MainWidget> widget);
-
-        // Detach all current widgets both temporary and permanent.
-        // You should call this before the application ends to make
-        // sure that the any widgets that should not get deleted
-        // get deleted by Qt's object hierachy system.
-        void detachAllWidgets();
-
-        // Close the widget object. If the widget is permanent
-        // it's hidden and the view menu item is toggled. Otherwise
-        // it's deleted.
+        // Close the widget object and delete it.
         void closeWidget(MainWidget* widget);
 
         // Move focus of the application to this widget if the widget
@@ -112,7 +92,6 @@ namespace gui
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();
-        void actionWindowToggleView_triggered();
         void actionWindowFocus_triggered();
         void refreshUI();
         void showNote(const app::Event& event);
@@ -124,7 +103,7 @@ namespace gui
         void hideWidget(MainWidget* widget);
         void hideWidget(std::size_t index);
         bool saveState();
-
+        void attachWidget(MainWidget* widget);
 
     private:
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
@@ -138,8 +117,6 @@ namespace gui
         Settings& mSettings;
 
     private:
-        std::vector<MainWidget*> mWidgets;
-        std::vector<QAction*>    mActions;
         MainWidget* mCurrentWidget = nullptr;
     private:
         app::Workspace mWorkspace;

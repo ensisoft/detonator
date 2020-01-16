@@ -162,9 +162,6 @@ add_executable(Editor
     editor/gui/mainwindow.cpp
     editor/gui/mainwindow.ui
     editor/gui/main.cpp
-    editor/gui/eventwidget.h
-    editor/gui/eventwidget.cpp
-    editor/gui/eventwidget.ui
     editor/gui/particlewidget.h
     editor/gui/particlewidget.cpp
     editor/gui/particlewidget.ui

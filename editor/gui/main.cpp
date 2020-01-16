@@ -42,9 +42,6 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/settings.h"
-#include "editor/gui/eventwidget.h"
-#include "editor/gui/particlewidget.h"
-#include "editor/gui/materialwidget.h"
 #include "editor/gui/mainwindow.h"
 
 void copyright()
@@ -52,36 +49,36 @@ void copyright()
     const auto boost_major    = BOOST_VERSION / 100000;
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
-    
+
     INFO("http://www.ensisoft.com");
     INFO("https://www.github.com/ensisoft/pinyin-invaders");
-    INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);    
-    INFO("Compiled: " __DATE__ ", " __TIME__);    
-    INFO("Copyright (c) Sami Väisänen 2020");    
-    INFO(APP_TITLE " " APP_VERSION);    
-        
+    INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
+    INFO("Compiled: " __DATE__ ", " __TIME__);
+    INFO("Copyright (c) Sami Väisänen 2020");
+    INFO(APP_TITLE " " APP_VERSION);
+
     INFO("http://www.boost.org");
-    INFO("Boost software library %1.%2.%3", boost_major, boost_minor, boost_revision);    
-    
+    INFO("Boost software library %1.%2.%3", boost_major, boost_minor, boost_revision);
+
     INFO("http://www.small-icons.com/stock-icons/16x16-free-application-icons.htm");
     INFO("http://www.aha-soft.com");
-    INFO("Copyright (c) 2009 Aha-Soft");    
-    INFO("16x16 Free Application Icons");    
+    INFO("Copyright (c) 2009 Aha-Soft");
+    INFO("16x16 Free Application Icons");
 
     INFO("http://www.famfamfam.com/lab/icons/silk/");
-    INFO("Silk Icon Set 1.3 Copyright (c) Mark James");    
-    
+    INFO("Silk Icon Set 1.3 Copyright (c) Mark James");
+
     INFO("http://qt.nokia.com");
-    INFO("Qt cross-platform application and UI framework %1", QT_VERSION_STR);        
-    
+    INFO("Qt cross-platform application and UI framework %1", QT_VERSION_STR);
+
     INFO("Copyright (C) 2013-2017 Mattia Basaglia <mattia.basaglia@gmail.com>");
     INFO("https://github.com/mbasaglia/Qt-Color-Widgets");
-    INFO("Qt Color Widgets");            
+    INFO("Qt Color Widgets");
 }
 
 int main(int argc, char* argv[])
 {
-    // set the logger object for the subsystem to use, we'll 
+    // set the logger object for the subsystem to use, we'll
     // direct all this to the terminal for now.
     base::CursesLogger logger;
     base::SetGlobalLog(&logger);
@@ -95,7 +92,7 @@ int main(int argc, char* argv[])
         // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
         // turns out this attribute is needed in order to make Qt
         // create a GLES2 context.
-        // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html        
+        // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
         QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
         QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
@@ -122,34 +119,16 @@ int main(int argc, char* argv[])
         // Create the application main window into which we add
         // main widgets.
         gui::MainWindow window(settings);
-    
-        gui::MaterialWidget material;
-        window.attachPermanentWidget(&material);
-
-        // only one editor window for particles for now.
-        gui::ParticleEditorWidget particles;
-        window.attachPermanentWidget(&particles);
-
-        // Event widget
-        gui::EventWidget events;
-        window.attachPermanentWidget(&events);
 
         window.loadState();
         window.prepareFileMenu();
         window.prepareWindowMenu();
         window.prepareMainTab();
         window.startup();
-        window.showWindow();        
+        window.showWindow();
 
         // run the mainloop
         app.exec();
-
-        // its important to keep in mind that the modules and widgets
-        // are created simply on the stack here and what is the actual
-        // destruction order. our mainwindow outlives the widgets and modules
-        // so before we start destructing those objects its better to make clean
-        // all the references to those in the mainwindow.        
-        window.detachAllWidgets();
     }
     catch (const std::exception& e)
     {
