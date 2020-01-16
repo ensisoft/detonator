@@ -75,7 +75,7 @@ void EventWidget::newEvent(const app::Event& event)
     if (event.type == app::Event::Type::Error)
     {
         mNumErrors++;
-        setWindowIcon(QIcon("icons:log_event_error.png"));
+        setWindowIcon(QIcon("icons:log_error.png"));
         setWindowTitle(QString("Log (%1)").arg(mNumErrors));
         return;
     }
@@ -86,7 +86,7 @@ void EventWidget::newEvent(const app::Event& event)
     if (event.type == app::Event::Type::Warning)
     {
         mNumWarnings++;
-        setWindowIcon(QIcon("icons:log_event_warning.png"));
+        setWindowIcon(QIcon("icons:log_warning.png"));
         setWindowTitle(QString("Log (%1)").arg(mNumWarnings));
     }
 }
