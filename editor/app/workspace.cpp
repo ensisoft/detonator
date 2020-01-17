@@ -69,8 +69,8 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
         {
             case Resource::Type::Material:
                 return QIcon("icons:material.png");
-            case Resource::Type::Drawable:
-                return QIcon("icons:material.png");
+            case Resource::Type::ParticleSystem:
+                return QIcon("icons:particle.png");
             default: break;
         }
     }
@@ -181,7 +181,7 @@ QStringList Workspace::ListDrawables() const
     QStringList list;
     for (const auto& res : mResources)
     {
-        if (res->GetType() == Resource::Type::Drawable)
+        if (res->GetType() == Resource::Type::ParticleSystem)
             list.append(res->GetName());
     }
     return list;

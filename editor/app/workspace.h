@@ -26,7 +26,6 @@
 #  include <QAbstractTableModel>
 #  include <QString>
 #  include <QMap>
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -34,6 +33,7 @@
 
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "resource.h"
 #include "utility.h"
 
 namespace app
@@ -77,43 +77,6 @@ namespace app
         QAbstractTableModel* GetResourceModel()
         { return this; }
 
-    private:
-        class Resource
-        {
-        public:
-            enum class Type {
-                Material,
-                Drawable,
-                Animation,
-                Scene,
-                AudioTrack
-            };
-            virtual ~Resource() = default;
-            virtual QString GetName() const = 0;
-            virtual Type GetType() const = 0;
-            virtual void Serialize(nlohmann::json& json) const =0;
-        private:
-        };
-        class MaterialResource : public Resource
-        {
-        public:
-            MaterialResource(const gfx::Material& material)
-              : mMaterial(material)
-            {}
-            MaterialResource(gfx::Material&& material)
-              : mMaterial(std::move(material))
-            {}
-            virtual QString GetName() const override
-            { return app::fromUtf8(mMaterial.GetName()); }
-            virtual Type GetType() const override
-            { return Type::Material; }
-            virtual void Serialize(nlohmann::json& json) const override
-            {
-                  json["materials"].push_back(mMaterial.ToJson());
-            }
-        private:
-            const gfx::Material mMaterial;
-        };
     private:
         std::vector<std::unique_ptr<Resource>> mResources;
     private:
