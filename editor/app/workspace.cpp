@@ -26,6 +26,8 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <QJsonDocument>
+#  include <QJsonArray>
 #  include <QByteArray>
 #  include <QFile>
 #  include <QIcon>
@@ -90,7 +92,7 @@ QVariant Workspace::headerData(int section, Qt::Orientation orientation, int rol
     return QVariant();
 }
 
-bool Workspace::LoadWorkspace(const QString& filename)
+bool Workspace::LoadContent(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
@@ -128,11 +130,12 @@ bool Workspace::LoadWorkspace(const QString& filename)
         }
     }
     mResources = std::move(resources);
-    mFilename = filename;
+    mContentFile = filename;
+    INFO("Loaded content file '%1'", filename);
     return true;
 }
 
-bool Workspace::SaveWorkspace(const QString& filename)
+bool Workspace::SaveContent(const QString& filename) const
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
@@ -161,7 +164,61 @@ bool Workspace::SaveWorkspace(const QString& filename)
     }
     file.flush();
     file.close();
-    mFilename = filename;
+    mContentFile = filename;
+    INFO("Saved workspace content in '%'", filename);
+    NOTE("Workspace content saved.");
+    return true;
+}
+
+bool Workspace::SaveWorkspace(const QString& filename) const
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        ERROR("Failed to open file: '%1'", filename);
+        return false;
+    }
+
+    // our JSON root object
+    QJsonObject json;
+
+    for (const auto& resource : mResources)
+    {
+        resource->Serialize(json);
+    }
+    // set the root object to the json document then serialize
+    QJsonDocument docu(json);
+    file.write(docu.toJson());
+    file.close();
+
+    INFO("Saved workspace data in '%1'", filename);
+    NOTE("Workspace data saved.");
+    mWorkspaceFile = filename;
+    return true;
+}
+
+bool Workspace::LoadWorkspace(const QString& filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        ERROR("Failed to open file: '%1'", filename);
+        return false;
+    }
+
+    const auto& buff = file.readAll(); // QByteArray
+
+    QJsonDocument docu(QJsonDocument::fromJson(buff));
+
+    // so we expect that the content has been loaded first.
+    // and then ask each resource object to load its additional
+    // properties from the workspace file.
+    for (auto& resource : mResources)
+    {
+        resource->LoadProperties(docu.object());
+    }
+    INFO("Loaded workspace file '%1'", filename);
+    mWorkspaceFile = filename;
     return true;
 }
 

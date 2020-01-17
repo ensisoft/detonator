@@ -176,8 +176,9 @@ void MainWindow::prepareMainTab()
 
 void MainWindow::startup()
 {
-    const QFileInfo info("workspace.json");
-    if (info.exists())
+    if (QFileInfo("content.json").exists())
+        mWorkspace.LoadContent("content.json");
+    if (QFileInfo("workspace.json").exists())
         mWorkspace.LoadWorkspace("workspace.json");
 
     attachWidget(new MaterialWidget);
@@ -418,6 +419,8 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
 
 bool MainWindow::saveState()
 {
+    if (!mWorkspace.SaveContent("content.json"))
+        return false;
     if (!mWorkspace.SaveWorkspace("workspace.json"))
         return false;
 

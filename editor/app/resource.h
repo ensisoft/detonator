@@ -26,6 +26,8 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QVariant>
+#  include <QJsonObject>
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
@@ -56,11 +58,36 @@ namespace app
         virtual QString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
-        // Serialize into JSON
+        // Serialize the content into JSON
         virtual void Serialize(nlohmann::json& json) const =0;
+        // Serialize additional non-content properties into JSON
+        virtual void Serialize(QJsonObject& json) const = 0;
+        // Returns true if resource has a property by the given name.
+        virtual bool HasProperty(const QString& name) const = 0;
+        // Set a property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        virtual void SetProperty(const QString& name, const QVariant& value) = 0;
+        // Return the value of the property identied by name.
+        // If the property doesn't exist returns default value.
+        virtual QVariant GetProperty(const QString& name, const QVariant& def) const = 0;
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        virtual QVariant GetProperty(const QString& name) const = 0;
+        // Load the additional properies from the json object.
+        virtual void LoadProperties(const QJsonObject& json) = 0;
+
         // helpers
         inline bool IsMaterial() const
         { return GetType() == Type::Material; }
+
+        template<typename T>
+        T GetProperty(const QString& name, const T& def) const
+        {
+            if (!HasProperty(name))
+                return def;
+            const auto& ret = GetProperty(name);
+            return qvariant_cast<T>(ret);
+        }
 
         template<typename Content>
         bool GetContent(Content** content)
@@ -74,10 +101,12 @@ namespace app
             *content = static_cast<const Content*>(GetIf(typeid(Content)));
             return *content != nullptr;
         }
+
     protected:
         virtual void* GetIf(const std::type_info& expected_type) = 0;
         virtual const void* GetIf(const std::type_info& expected_type) const = 0;
     private:
+
     };
 
     template<typename Content, Resource::Type type>
@@ -102,11 +131,43 @@ namespace app
         {
             if constexpr (type == Resource::Type::Material)
                 json["materials"].push_back(mContent.ToJson());
-            else if constexpr (type == Resource::Type::ParticleSystem)
+            else if (type == Resource::Type::ParticleSystem)
                 json["particles"].push_back(mContent.ToJson());
-            else if constexpr (type == Resource::Type::Animation)
+            else if (type == Resource::Type::Animation)
                 json["animations"].push_back(mContent.ToJson());
         }
+        virtual void Serialize(QJsonObject& json) const override
+        {
+            if constexpr (type == Resource::Type::Material)
+                json["material_" + GetName()]  = QJsonObject::fromVariantMap(mProps);
+            else if (type == Resource::Type::ParticleSystem)
+                json["particle_" + GetName()] = QJsonObject::fromVariantMap(mProps);
+            else if (type == Resource::Type::Animation)
+                json["animation_" + GetName()] = QJsonObject::fromVariantMap(mProps);
+        }
+        virtual bool HasProperty(const QString& name) const override
+        { return mProps.contains(name); }
+        virtual void SetProperty(const QString& name, const QVariant& value) override
+        { mProps[name] = value; }
+        virtual QVariant GetProperty(const QString& name, const QVariant& def) const override
+        {
+            QVariant ret = mProps[name];
+            if (ret.isNull())
+                return def;
+            return ret;
+        }
+        virtual QVariant GetProperty(const QString& name) const override
+        { return mProps[name]; }
+        virtual void LoadProperties(const QJsonObject& object) override
+        {
+            if constexpr (type == Resource::Type::Material)
+                mProps = object["material_" + GetName()].toObject().toVariantMap();
+            else if (type == Resource::Type::ParticleSystem)
+                mProps = object["material_" + GetName()].toObject().toVariantMap();
+            else if (type == Resource::Type::Animation)
+                mProps = object["material_" + GetName()].toObject().toVariantMap();
+        }
+
     protected:
         virtual void* GetIf(const std::type_info& expected_type) override
         {
@@ -122,6 +183,7 @@ namespace app
         }
     private:
         Content mContent;
+        QVariantMap mProps;
     };
 
     using MaterialResource = GraphicsResource<gfx::Material, Resource::Type::Material>;

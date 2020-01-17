@@ -53,10 +53,14 @@ namespace app
         { return 2; }
 
         // Load the contents of the workspace from the given JSON file.
+        bool LoadContent(const QString& file);
+        // Load workspace data from the workspace JSON file.
         bool LoadWorkspace(const QString& file);
 
         // Save the contents of the workspace in the given JSON file.
-        bool SaveWorkspace(const QString& file);
+        bool SaveContent(const QString& file) const;
+        // Save the workspace data to the workspace JSON file.
+        bool SaveWorkspace(const QString& file) const;
 
         // Get a list of material names in the workspace.
         QStringList ListMaterials() const;
@@ -71,16 +75,14 @@ namespace app
         // Returns whether a material by this name already exists or not.
         bool HasMaterial(const QString& name) const;
 
-        QString GetCurrentFilename() const
-        { return mFilename; }
-
         QAbstractTableModel* GetResourceModel()
         { return this; }
 
     private:
         std::vector<std::unique_ptr<Resource>> mResources;
     private:
-        QString mFilename;
+        mutable QString mContentFile;
+        mutable QString mWorkspaceFile;
     };
 
 } // namespace
