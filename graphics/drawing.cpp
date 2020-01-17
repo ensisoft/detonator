@@ -80,7 +80,8 @@ void DrawTextRect(Painter& painter,
         material.SetTextureGc(1, false);
         material.SetFps(1.5f);
         material.SetRuntime(base::GetRuntimeSec());
-        material.SetTextureBlendWeight(0.0f); // sharp cut off i.e. no blending betwen textures.
+        material.SetBlendFrames(false); // sharp cut off i.e. no blending between textures.
+        material.SetType(Material::Type::Sprite); // animate between text and nada
     }
 
     Transform t;

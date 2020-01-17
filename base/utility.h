@@ -140,7 +140,14 @@ bool JsonReadSafe(const JsonObject& object, const char* name, std::string* out)
     *out = object[name];
     return true;
 }
-
+template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, bool* out)
+{
+    if (!object.contains(name) || !object[name].is_boolean())
+        return false;
+    *out = object[name];
+    return true;
+}
 template<typename JsonObject, typename ValueT> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
 {

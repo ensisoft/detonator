@@ -65,6 +65,7 @@ MaterialWidget::MaterialWidget()
     PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapX);
     PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapY);
     PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
+    PopulateFromEnum<gfx::Material::Type>(mUI.materialType);
 }
 
 MaterialWidget::~MaterialWidget()
@@ -169,7 +170,7 @@ void MaterialWidget::on_actionSave_triggered()
             return;
     }
 
-    gfx::Material material("", "");
+    gfx::Material material("", "", gfx::Material::Type::Color);
     fillMaterial(material);
 
     mWorkspace->SaveMaterial(material);
@@ -292,18 +293,22 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
     mUI.texProps->setEnabled(false);
     mUI.texRect->setEnabled(false);
 
-    if (text == "Color")
+    // enable/disable UI properties based on the
+    // material type.
+    const auto type = EnumFromCombo<gfx::Material::Type>(mUI.materialType);
+
+    if (type == gfx::Material::Type::Color)
     {
         mUI.baseProperties->setEnabled(true);
     }
-    else if (text == "Texture")
+    else if (type == gfx::Material::Type::Texture)
     {
         mUI.texturing->setEnabled(true);
         mUI.texMaps->setEnabled(true);
         mUI.texProps->setEnabled(true);
         mUI.texRect->setEnabled(true);
     }
-    else if (text == "Sprite")
+    else if (type == gfx::Material::Type::Sprite)
     {
         mUI.texturing->setEnabled(true);
         mUI.texMaps->setEnabled(true);
@@ -337,31 +342,27 @@ void MaterialWidget::on_rectH_valueChanged(double value)
 
 void MaterialWidget::fillMaterial(gfx::Material& material) const
 {
-    const auto& type      = mUI.materialType->currentText();
     const auto& name      = mUI.materialName->text();
-    const auto& surf      = mUI.surfaceType->currentText();
-    const auto& min       = mUI.minFilter->currentText();
-    const auto& mag       = mUI.magFilter->currentText();
-    const auto& wrapx     = mUI.wrapX->currentText();
-    const auto& wrapy     = mUI.wrapY->currentText();
     const auto& color     = mUI.baseColor->color();
     const auto blend      = mUI.blend->isChecked();
-    const auto fps        = type == "Sprite" ? mUI.fps->value() : 0.0f;
+    const auto fps        = mUI.fps->value();
+    const auto type       = EnumFromCombo<gfx::Material::Type>(mUI.materialType);
     const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
     const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);
     const auto mag_filter = EnumFromCombo<gfx::Material::MagTextureFilter>(mUI.magFilter);
     const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
     const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
 
-    // todo: fix this
+    // todo: allow for a custom shader to be used.
     std::string shader;
-    if (type == "Color")
+    if (type == gfx::Material::Type::Color)
         shader = "solid_color.glsl";
-    else if (type == "Texture")
+    else if (type == gfx::Material::Type::Texture)
         shader = "texture_map.glsl";
-    else if (type == "Sprite")
+    else if (type == gfx::Material::Type::Sprite)
         shader = "texture_map.glsl";
 
+    material.SetType(type);
     material.SetName(app::toUtf8(name));
     material.SetShader(shader);
     material.SetBaseColor(app::toGfx(color));
@@ -369,7 +370,7 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
     material.SetSurfaceType(surface);
     material.SetRuntime(mTime);
     material.SetFps(fps);
-    material.SetTextureBlendWeight(blend ? 1.0f : 0.0f);
+    material.SetBlendFrames(blend);
     material.SetTextureMinFilter(min_filter);
     material.SetTextureMagFilter(mag_filter);
     material.SetTextureScaleX(mUI.scaleX->value());
@@ -377,13 +378,9 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
     material.SetTextureWrapX(tex_wrap_x);
     material.SetTextureWrapY(tex_wrap_y);
 
-    int num_textures_add = 0;
 
-    if (type == "Sprite")
-        num_textures_add = mUI.textures->count();
-    else if (type == "Texture")
-        num_textures_add = std::min(1, mUI.textures->count());
-
+    // add textures that we have
+    const int num_textures_add = mUI.textures->count();
     for (int i=0; i<num_textures_add; ++i)
     {
         const auto* item = mUI.textures->item(i);
@@ -405,12 +402,14 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
 
 void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
 {
+
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Material material("", "");
+    gfx::Material material("", "", gfx::Material::Type::Color);
     fillMaterial(material);
+
 
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;

@@ -106,23 +106,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QComboBox" name="materialType">
-               <item>
-                <property name="text">
-                 <string>Color</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Texture</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Sprite</string>
-                </property>
-               </item>
-              </widget>
+              <widget class="QComboBox" name="materialType"/>
              </item>
              <item row="4" column="1">
               <widget class="QDoubleSpinBox" name="gamma">

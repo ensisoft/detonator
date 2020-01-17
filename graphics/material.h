@@ -227,13 +227,29 @@ namespace gfx
             Emissive
         };
 
+        // The functional type of the material. The functional
+        // type groups similar materials into categories with common
+        // set of properties. Then the each specific shader will provide
+        // the actual implementation using those properties.
+        enum class Type {
+            // Material is using color(s) only.
+            Color,
+            // Material uses a static texture only.
+            Texture,
+            // Material uses a series of textures to create
+            // a sprite animation.
+            Sprite,
+        };
+
         using MinTextureFilter = Texture::MinFilter;
         using MagTextureFilter = Texture::MagFilter;
         using TextureWrapping  = Texture::Wrapping;
+
         // constructor.
-        Material(const std::string& shader, const std::string& name)
+        Material(const std::string& shader, const std::string& name, Type type)
             : mShader(shader)
             , mName(name)
+            , mType(type)
         {}
 
 
@@ -286,15 +302,16 @@ namespace gfx
             // then the rendering will use textures t0 and t1
             // or whichever textures happen to be bound to the texture units
             // since last rendering.
-            if (!mTextures.empty())
+            if ((mType == Type::Texture || mType == Type::Sprite) && !mTextures.empty())
             {
-                const auto animating         = mFps > 0.0f;
+                // if we're a sprite then we should probably animate if we have an FPS setting.
+                const auto animating         = mType == Type::Sprite && mFps > 0.0f;
                 const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
                 const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
                 const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
                 const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
 
-                const auto frame_count = (unsigned)mTextures.size();
+                const auto frame_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
                 const unsigned frame_index[2] = {
                     (first_frame_index + 0) % frame_count,
                     (first_frame_index + 1) % frame_count
@@ -336,7 +353,7 @@ namespace gfx
                     prog.SetTexture(kTexture.c_str(), i, *texture);
                     prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
                     prog.SetUniform(kIsAlphaMask.c_str(), alpha);
-                    prog.SetUniform("kBlendCoeff", frame_blend_coeff * mTextureBlendWeight);
+                    prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
 
                     texture->SetFilter(mMinFilter);
                     texture->SetFilter(mMagFilter);
@@ -351,20 +368,74 @@ namespace gfx
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
         }
 
-        // Object properties.
+        // Object property setters.
+
+        // Set the material name. The name can be used to
+        // identify the material among other materials.
         void SetName(const std::string& name)
         { mName = name; }
-        void SetShader(const std::string& shader_file)
-        { mShader = shader_file; }
+
+        // Get the current material name.
         std::string GetName() const
         { return mName; }
+
+        // Material properties getters.
+
         std::string GetShader() const
         { return mShader; }
+        bool GetBlendFrames() const
+        { return mBlendFrames; }
+        float GetTextureScaleX() const
+        { return mTextureScaleX; }
+        float GetTextureScaleY() const
+        { return mTextureScaleY; }
+        float GetGamma() const
+        { return mGamma; }
+        float GetFps() const
+        { return mFps; }
+        MinTextureFilter GetMinTextureFilter() const
+        { return mMinFilter; }
+        MagTextureFilter GetMagTextureFilter() const
+        { return mMagFilter; }
+        TextureWrapping GetTextureWrapX() const
+        { return mWrapX; }
+        TextureWrapping GetTextureWrapY() const
+        { return mWrapY; }
+        const Color4f& GetBaseColor() const
+        { return mBaseColor; }
+        SurfaceType GetSurfaceType() const
+        { return mSurfaceType; }
+        Type GetType() const
+        { return mType; }
 
-        // Material properties.
-        Material& SetTextureBlendWeight(float weight)
+        // Material properties setters.
+
+        // Set the material to use a specific shader.
+        // If the shader's type is set to Custom this should be
+        // a complete path (either relative or absolute) to the
+        // shader file in question. Otherwise the shader is looked
+        // for under the engines shaders/es2/ folder.
+        Material& SetShader(const std::string& shader_file)
         {
-            mTextureBlendWeight = math::clamp(0.0f, 1.0f, weight);
+            mShader = shader_file;
+            return *this;
+        }
+
+        // Set the functional material type that describes approximately
+        // how the material should behave. The final output depends
+        // on the actual shader being used.
+        Material& SetType(Type type)
+        {
+            mType = type;
+            return *this;
+        }
+
+        // Set whether to cut sharply between animation frames or
+        // whether to smooth the transition by blending adjacent frames
+        // together when in-between frames.
+        Material& SetBlendFrames(bool on_off)
+        {
+            mBlendFrames = on_off;
             return *this;
         }
 
@@ -494,14 +565,16 @@ namespace gfx
             const std::string magfilter(magic_enum::enum_name(mMagFilter));
             const std::string wrapx(magic_enum::enum_name(mWrapX));
             const std::string wrapy(magic_enum::enum_name(mWrapY));
+            const std::string type(magic_enum::enum_name(mType));
             nlohmann::json json = {
                 {"shader", mShader},
                 {"name",   mName},
+                {"type",   type},
                 {"color",  mBaseColor.ToJson()},
                 {"surface",surface},
                 {"gamma",  mGamma},
                 {"fps",    mFps},
-                {"blend_weight", mTextureBlendWeight},
+                {"blending", mBlendFrames},
                 {"texture_min_filter", minfilter},
                 {"texture_mag_filter", magfilter},
                 {"texture_wrap_x", wrapx},
@@ -533,10 +606,11 @@ namespace gfx
 
             if (!base::JsonReadSafe(object, "shader", &mat.mShader) ||
                 !base::JsonReadSafe(object, "name", &mat.mName) ||
+                !base::JsonReadSafe(object, "type", &mat.mType) ||
                 !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
                 !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
                 !base::JsonReadSafe(object, "fps", &mat.mFps) ||
-                !base::JsonReadSafe(object, "blend_weight", &mat.mTextureBlendWeight) ||
+                !base::JsonReadSafe(object, "blending", &mat.mBlendFrames) ||
                 !base::JsonReadSafe(object, "texture_min_filter", &mat.mMinFilter) ||
                 !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
                 !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
@@ -578,10 +652,11 @@ namespace gfx
         std::string mName;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
+        Type mType = Type::Color;
         float mGamma   = 1.0f;
         float mRuntime = 0.0f;
         float mFps     = 0.0f;
-        float mTextureBlendWeight = 1.0f;
+        bool  mBlendFrames = true;
         struct TextureSampler {
             FRect box = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             bool box_is_normalized = true;
@@ -600,15 +675,15 @@ namespace gfx
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
     {
-        return Material("solid_color.glsl", "Color Fill").SetBaseColor(color);
+        return Material("solid_color.glsl", "Color Fill", Material::Type::Color)
+            .SetBaseColor(color);
     }
-
 
     // This material will map the given texture onto the drawn shape.
     // The object being drawn must provide texture coordinates.
     inline Material TextureMap(const std::string& texture)
     {
-        return Material("texture_map.glsl", "Static Texture")
+        return Material("texture_map.glsl", "Static Texture", Material::Type::Texture)
             .AddTexture(texture)
             .SetSurfaceType(Material::SurfaceType::Opaque);
     }
@@ -621,7 +696,7 @@ namespace gfx
     // the current time value needs to be set.
     inline Material SpriteSet()
     {
-        return Material("texture_map.glsl", "Sprite Animation")
+        return Material("texture_map.glsl", "Sprite Animation", Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteSet(const std::initializer_list<std::string>& textures)
@@ -646,7 +721,7 @@ namespace gfx
     // renders a coherent animation.
     inline Material SpriteMap()
     {
-        return Material("texture_map.glsl", "Sprite Animation")
+        return Material("texture_map.glsl", "Sprite Animation", Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteMap(const std::string& texture, const std::vector<URect>& frames)
@@ -668,7 +743,7 @@ namespace gfx
     // The drawable shape must provide texture coordinates.
     inline Material BitmapText(const TextBuffer& text)
     {
-        return Material("texture_map.glsl", "Bitmap Text")
+        return Material("texture_map.glsl", "Bitmap Text", Material::Type::Texture)
             .AddTexture(text)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
@@ -676,14 +751,14 @@ namespace gfx
     // todo: refactor away
     inline Material SlidingGlintEffect(float secs)
     {
-        return Material("sliding_glint_effect.glsl", "Sliding Glint Effect")
+        return Material("sliding_glint_effect.glsl", "Sliding Glint Effect", Material::Type::Color)
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }
     // todo: refactor away
     inline Material ConcentricRingsEffect(float secs)
     {
-        return Material("concentric_rings_effect.glsl", "Concentric Rings Effect")
+        return Material("concentric_rings_effect.glsl", "Concentric Rings Effect", Material::Type::Color)
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }
