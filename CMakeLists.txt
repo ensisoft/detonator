@@ -168,6 +168,8 @@ add_executable(Editor
     editor/gui/materialwidget.h
     editor/gui/materialwidget.cpp
     editor/gui/materialwidget.ui
+    editor/gui/settings.h
+    editor/gui/settings.cpp
     editor/resource/resource.qrc
     third_party/stb/stb_image.c
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp

@@ -30,9 +30,10 @@
 #  include <QString>
 #  include <QtWidgets>
 #  include <QSignalBlocker>
-
-#  include <color_selector.hpp> // from Qt color widgets 
+#  include <color_selector.hpp> // from Qt color widgets
 #include "warnpop.h"
+
+#include <memory>
 
 namespace gui
 {
@@ -40,29 +41,53 @@ namespace gui
     class Settings
     {
     public:
+        // Construct a new settings object for reading the
+        // application "master" settings.
         Settings(const QString& organization,
                  const QString& application)
-            : mSettings(organization, application)
+            : mSettings(new AppSettingsStorage(organization, application))
         {}
 
-        // Get a value from the settings object under the specific key 
+        // Construct a new settings object for reading the
+        // settings from a specific file. The contents are in JSON.
+        Settings(const QString& filename)
+            : mSettings(new JsonFileSettingsStorage(filename))
+        {}
+
+        // Load the settings from the backign store.
+        // Returns true if succesful, otherwise false and the
+        // error is logged.
+        bool Load()
+        {
+            return mSettings->Load();
+        }
+
+        // Save the settings to the backing store.
+        // Returns true if succesful, otherwise false and the
+        // error is logged.
+        bool Save()
+        {
+            return mSettings->Save();
+        }
+
+        // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
         // then the default value is returned.
         template<typename T>
         T getValue(const QString& module, const QString& key, const T& defaultValue) const
         {
-            const auto& value = mSettings.value(module + "/" + key);
+            const auto& value = mSettings->GetValue(module + "/" + key);
             if (!value.isValid())
                 return defaultValue;
             return qvariant_cast<T>(value);
         }
 
         // Set a value in the settings object under the specific key
-        // under a specific module. 
+        // under a specific module.
         template<typename T>
         void setValue(const QString& module, const QString& key, const T& value)
         {
-            mSettings.setValue(module + "/" + key, value);
+            mSettings->SetValue(module + "/" + key, value);
         }
 
         // Save the UI state of a widget.
@@ -99,7 +124,7 @@ namespace gui
         {
             setValue(module, line->objectName(), line->text());
         }
-        void saveWidget(const QString& module, const QSpinBox* spin) 
+        void saveWidget(const QString& module, const QSpinBox* spin)
         {
             setValue(module, spin->objectName(), spin->value());
         }
@@ -108,7 +133,7 @@ namespace gui
             setValue(module, spin->objectName(), spin->value());
         }
         void saveWidget(const QString& module, const QGroupBox* grp)
-        {   
+        {
             setValue(module, grp->objectName(), grp->isChecked());
         }
         // Save the UI state of a widget.
@@ -152,9 +177,9 @@ namespace gui
             }
         }
         // Load the UI state of a widget.
-        void loadWidget(const QString& module, QComboBox* cmb) const 
-        {   
-            const auto& text = getValue(module, cmb->objectName(), 
+        void loadWidget(const QString& module, QComboBox* cmb) const
+        {
+            const auto& text = getValue(module, cmb->objectName(),
                 cmb->currentText());
             const auto index = cmb->findText(text);
             if (index != -1)
@@ -162,47 +187,97 @@ namespace gui
         }
         void loadWidget(const QString& module, QCheckBox* chk) const
         {
-            const bool value = getValue<bool>(module, chk->objectName(), 
+            const bool value = getValue<bool>(module, chk->objectName(),
                 chk->isChecked());
             QSignalBlocker s(chk);
             chk->setChecked(value);
         }
-        void loadWidget(const QString& module, QGroupBox* grp) const 
+        void loadWidget(const QString& module, QGroupBox* grp) const
         {
-            const bool value = getValue<bool>(module, grp->objectName(), 
+            const bool value = getValue<bool>(module, grp->objectName(),
                 grp->isChecked());
             QSignalBlocker s(grp);
             grp->setChecked(value);
         }
-        void loadWidget(const QString& module, QDoubleSpinBox* spin) const 
+        void loadWidget(const QString& module, QDoubleSpinBox* spin) const
         {
-            const double value = getValue<double>(module, spin->objectName(), 
+            const double value = getValue<double>(module, spin->objectName(),
                 spin->value());
             QSignalBlocker s(spin);
             spin->setValue(value);
         }
-        void loadWidget(const QString& module, QSpinBox* spin) const 
+        void loadWidget(const QString& module, QSpinBox* spin) const
         {
-            const int value = getValue<int>(module, spin->objectName(), 
+            const int value = getValue<int>(module, spin->objectName(),
                 spin->value());
             QSignalBlocker s(spin);
             spin->setValue(value);
         }
-        void loadWidget(const QString& module, QLineEdit* line) const 
+        void loadWidget(const QString& module, QLineEdit* line) const
         {
-            const auto& str = getValue<QString>(module, line->objectName(), 
+            const auto& str = getValue<QString>(module, line->objectName(),
                 line->text());
             QSignalBlocker s(line);
             line->setText(str);
         }
-        void loadWidget(const QString& module, color_widgets::ColorSelector* selector) const 
+        void loadWidget(const QString& module, color_widgets::ColorSelector* selector) const
         {
-            const auto& color = getValue<QColor>(module, selector->objectName(), 
+            const auto& color = getValue<QColor>(module, selector->objectName(),
                 selector->color());
             QSignalBlocker s(selector);
             selector->setColor(color);
         }
     private:
-        QSettings mSettings;
+        class StorageImpl
+        {
+        public:
+            virtual ~StorageImpl() = default;
+            virtual QVariant GetValue(const QString& key) const = 0;
+            virtual void SetValue(const QString& key, const QVariant& value) = 0;
+            virtual bool Load() = 0;
+            virtual bool Save() = 0;
+        private:
+        };
+        // Settings storage implementation fro accessing the
+        // application settings through QSettings.
+        class AppSettingsStorage : public StorageImpl
+        {
+        public:
+            AppSettingsStorage(const QString& orgnization,
+                const QString& application) : mSettings(orgnization, application)
+            {}
+            virtual QVariant GetValue(const QString& key) const override
+            { return mSettings.value(key); }
+            virtual void SetValue(const QString& key, const QVariant& value) override
+            { mSettings.setValue(key, value); }
+            virtual bool Load() override
+            { return true; }
+            virtual bool Save() override
+            {
+                mSettings.sync();
+                return true;
+            }
+        private:
+            QSettings mSettings;
+        };
+        // custom settings object that stores in JSON and can
+        // be given a specific file.
+        class JsonFileSettingsStorage : public StorageImpl
+        {
+        public:
+            JsonFileSettingsStorage(const QString& file) : mFilename(file)
+            {}
+            virtual QVariant GetValue(const QString& key) const override
+            { return mValues[key]; }
+            virtual void SetValue(const QString& key, const QVariant& value) override
+            { mValues[key] = value; }
+            virtual bool Load() override;
+            virtual bool Save() override;
+        private:
+            const QString mFilename;
+            QVariantMap mValues;
+        };
+
+        std::unique_ptr<StorageImpl> mSettings;
     };
 } // namespace
