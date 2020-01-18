@@ -25,7 +25,8 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QDesktopWidget>
+#  include <QGuiApplication>
+#  include <QScreen>
 #  include <QMessageBox>
 #  include <QFileInfo>
 #  include <QWheelEvent>
@@ -88,9 +89,12 @@ void MainWindow::loadState()
     const auto xpos = mSettings.getValue("MainWindow", "xpos", x());
     const auto ypos = mSettings.getValue("MainWindow", "ypos", y());
 
-    QDesktopWidget desktop;
-    const auto screen = desktop.availableGeometry();
-    if (xpos < screen.width() -50 && ypos < screen.height() - 50)
+    const QList<QScreen*>& screens = QGuiApplication::screens();
+    const QScreen* screen0 = screens[0];
+    const QSize& size = screen0->availableVirtualSize();
+    // try not to reposition the application to an offset that is not
+    // within the current visible area
+    if (xpos < size.width() && ypos < size.height())
         move(xpos, ypos);
 
     resize(xdim, ydim);
