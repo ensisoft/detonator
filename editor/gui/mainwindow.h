@@ -92,6 +92,11 @@ namespace gui
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();
+        void on_actionNewMaterial_triggered();
+        void on_actionNewParticleSystem_triggered();
+        void on_actionEditResource_triggered();
+        void on_workspace_customContextMenuRequested(QPoint);
+
         void actionWindowFocus_triggered();
         void refreshUI();
         void showNote(const app::Event& event);

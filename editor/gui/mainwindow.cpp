@@ -181,9 +181,6 @@ void MainWindow::startup()
     if (QFileInfo("workspace.json").exists())
         mWorkspace.LoadWorkspace("workspace.json");
 
-    attachWidget(new MaterialWidget);
-    attachWidget(new ParticleEditorWidget);
-
     const auto num_widgets = mUI.mainTab->count();
     for (int i=0; i<num_widgets; ++i)
     {
@@ -310,6 +307,30 @@ void MainWindow::on_actionReloadShaders_triggered()
     mCurrentWidget->reloadShaders();
 }
 
+void MainWindow::on_actionNewMaterial_triggered()
+{
+    attachWidget(new MaterialWidget);
+}
+
+void MainWindow::on_actionNewParticleSystem_triggered()
+{
+    attachWidget(new ParticleEditorWidget);
+}
+
+void MainWindow::on_actionEditResource_triggered()
+{
+    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    for (int i=0; i<indices.size(); ++i)
+    {
+        const auto& res = mWorkspace.GetResource(indices[i].row());
+        switch (res.GetType())
+        {
+            case app::Resource::Type::Material:
+                attachWidget(new MaterialWidget(res));
+                break;
+        }
+    }
+}
 
 void MainWindow::actionWindowFocus_triggered()
 {
@@ -324,6 +345,18 @@ void MainWindow::actionWindowFocus_triggered()
     action->setChecked(true);
 
     mUI.mainTab->setCurrentIndex(tab_index);
+}
+
+void MainWindow::on_workspace_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionNewMaterial);
+    menu.addAction(mUI.actionNewParticleSystem);
+    menu.addSeparator();
+    menu.addAction(mUI.actionEditResource);
+    menu.addSeparator();
+    menu.addAction(mUI.actionDeleteResource);
+    menu.exec(QCursor::pos());
 }
 
 void MainWindow::refreshUI()
@@ -453,6 +486,9 @@ void MainWindow::attachWidget(MainWidget* widget)
     // We need to install this event filter so that we can universally grab
     // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
     widget->installEventFilter(this);
+
+    // set the currently opened workspace.
+    widget->setWorkspace(&mWorkspace);
 
     // rebuild window menu and shortcuts
     prepareWindowMenu();

@@ -244,12 +244,12 @@ QStringList Workspace::ListDrawables() const
     return list;
 }
 
-void Workspace::SaveMaterial(const gfx::Material& material)
+void Workspace::SaveMaterial(const MaterialResource& material)
 {
     // check if we already have on by this name.
     // the caller is expected to have confirmed the user if overwriting
     // is OK or not.
-    const auto& name = app::fromUtf8(material.GetName());
+    const auto& name = material.GetName();
 
     for (size_t i=0; i<mResources.size(); ++i)
     {

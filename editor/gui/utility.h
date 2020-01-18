@@ -26,14 +26,18 @@
 
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
-#  include <QComboBox>
+#  include <QtWidgets>
 #  include <QString>
+#  include <QSignalBlocker>
 #include "warnpop.h"
 
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "base/assert.h"
+#include "editor/app/utility.h"
+#include "editor/app/format.h"
 
 namespace gui
 {
@@ -59,5 +63,121 @@ EnumT EnumFromCombo(const QComboBox* combo)
     ASSERT(val.has_value());
     return val.value();
 }
+
+template<typename T>
+void SetValue(QComboBox* combo, T value)
+{
+    if constexpr (std::is_enum<T>::value)
+    {
+        const std::string name(magic_enum::enum_name(value));
+        const auto index = combo->findText(QString::fromStdString(name));
+        ASSERT(index != -1);
+        QSignalBlocker s(combo);
+        combo->setCurrentIndex(index);
+    }
+    else
+    {
+        const QString& str = app::toString(value);
+        const auto index = combo->findText(str);
+        ASSERT(index != -1);
+        QSignalBlocker s(combo);
+        combo->setCurrentIndex(index);
+    }
+}
+
+inline void SetValue(QLineEdit* line, const std::string& val)
+{
+    QSignalBlocker s(line);
+    line->setText(QString::fromStdString(val));
+}
+
+inline void SetValue(QDoubleSpinBox* spin, float val)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(val);
+}
+
+inline void SetValue(color_widgets::ColorSelector* color, const gfx::Color4f& col)
+{
+    QSignalBlocker s(color);
+    color->setColor(app::fromGfx(col));
+}
+
+inline void SetValue(QCheckBox* check, bool val)
+{
+    QSignalBlocker s(check);
+    check->setChecked(val);
+}
+
+struct ComboBoxValueGetter
+{
+    template<typename T>
+    operator T () const
+    {
+        if constexpr (std::is_enum<T>::value)
+        {
+            return EnumFromCombo<T>(cmb);
+        }
+        else
+        {
+            // arbitrary conversion from QSTring to T
+            ASSERT(!"not implemented");
+        }
+    }
+    operator QString() const
+    {
+        return cmb->currentText();
+    }
+    const QComboBox* cmb = nullptr;
+};
+
+struct LineEditValueGetter
+{
+    operator QString() const
+    {
+        return edit->text();
+    }
+    operator std::string() const
+    {
+        return app::toUtf8(edit->text());
+    }
+    const QLineEdit* edit = nullptr;
+};
+
+struct SpinBoxValueGetter
+{
+    operator float() const
+    { return spin->value(); }
+    operator double() const
+    { return spin->value(); }
+    const QDoubleSpinBox* spin = nullptr;
+};
+
+struct ColorGetter
+{
+    operator gfx::Color4f() const
+    { return app::toGfx(selector->color()); }
+    operator QColor() const
+    { return selector->color(); }
+    const color_widgets::ColorSelector* selector = nullptr;
+};
+
+struct CheckboxGetter
+{
+    operator bool() const
+    { return check->isChecked(); }
+    const QCheckBox* check = nullptr;
+};
+
+inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
+{ return ComboBoxValueGetter {cmb}; }
+inline LineEditValueGetter GetValue(const QLineEdit* edit)
+{ return LineEditValueGetter { edit }; }
+inline SpinBoxValueGetter GetValue(const QDoubleSpinBox* spin)
+{ return SpinBoxValueGetter { spin }; }
+inline ColorGetter GetValue(color_widgets::ColorSelector* selector)
+{ return ColorGetter { selector }; }
+inline CheckboxGetter GetValue(const QCheckBox* check)
+{ return CheckboxGetter { check }; }
 
 } // namespace

@@ -36,7 +36,11 @@
 namespace gfx {
     class Material;
     class Painter;
-} // material
+} // gfx
+
+namespace app {
+    class Resource;
+} // app
 
 namespace gui
 {
@@ -45,6 +49,7 @@ namespace gui
         Q_OBJECT
     public:
         MaterialWidget();
+        MaterialWidget(const app::Resource& resource);
        ~MaterialWidget();
         virtual void addActions(QToolBar& bar) override;
         virtual void addActions(QMenu& menu) override;
@@ -92,5 +97,6 @@ namespace gui
         PlayState mState = PlayState::Stopped;
         float mTime = 0.0f;
         app::Workspace* mWorkspace = nullptr;
+        bool mCanOverwrite = false;
     };
 } // namespace

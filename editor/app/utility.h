@@ -96,6 +96,11 @@ inline gfx::Color4f toGfx(const QColor& color)
     return gfx::Color4f(r, g, b, a);
 }
 
+inline QColor fromGfx(const gfx::Color4f& color)
+{
+    return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
+}
+
 QString randomString();
 
 } // namespace

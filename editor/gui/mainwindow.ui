@@ -100,6 +100,9 @@
    </attribute>
   </widget>
   <widget class="QDockWidget" name="eventlogDock">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFeatureMask</set>
+   </property>
    <property name="windowTitle">
     <string>Event log</string>
    </property>
@@ -131,6 +134,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QTableView" name="workspace">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="selectionBehavior">
         <enum>QAbstractItemView::SelectRows</enum>
        </property>
@@ -280,6 +286,51 @@
    </property>
    <property name="text">
     <string>Workspace</string>
+   </property>
+  </action>
+  <action name="actionDeleteResource">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete resource object</string>
+   </property>
+  </action>
+  <action name="actionNewMaterial">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Material</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new material</string>
+   </property>
+  </action>
+  <action name="actionNewParticleSystem">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Particle System</string>
+   </property>
+  </action>
+  <action name="actionEditResource">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Resource</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Resource</string>
    </property>
   </action>
  </widget>

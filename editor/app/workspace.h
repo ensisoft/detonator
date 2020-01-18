@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+#include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "resource.h"
@@ -70,13 +71,25 @@ namespace app
 
         // Set material properties for the material by the given name.
         // If no such material is yet set in the workspace it will be added.
-        void SaveMaterial(const gfx::Material& material);
+        void SaveMaterial(const MaterialResource& material);
 
         // Returns whether a material by this name already exists or not.
         bool HasMaterial(const QString& name) const;
 
         QAbstractTableModel* GetResourceModel()
         { return this; }
+
+        Resource& GetResource(size_t i)
+        {
+            ASSERT(i < mResources.size());
+            return *mResources[i];
+        }
+
+        const Resource& GetResource(size_t i) const
+        {
+            ASSERT(i < mResources.size());
+            return *mResources[i];
+        }
 
     private:
         std::vector<std::unique_ptr<Resource>> mResources;

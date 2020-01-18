@@ -29,15 +29,17 @@
 #  include <QFileDialog>
 #  include <QFileInfo>
 #  include <QPixmap>
+#  include <QTextStream>
 #include "warnpop.h"
 
+#include "base/assert.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-
 #include "editor/app/eventlog.h"
+#include "editor/app/resource.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
@@ -59,6 +61,7 @@ MaterialWidget::MaterialWidget()
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
     mUI.materialName->setText("My Material");
+    setWindowTitle("My Material");
 
     PopulateFromEnum<gfx::Material::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::Material::MagTextureFilter>(mUI.magFilter);
@@ -66,6 +69,78 @@ MaterialWidget::MaterialWidget()
     PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapY);
     PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::Material::Type>(mUI.materialType);
+}
+
+MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
+{
+    DEBUG("Editing material: '%1'", resource.GetName());
+
+    const gfx::Material* material;
+    ASSERT(resource.GetContent(&material));
+
+    SetValue(mUI.materialType, material->GetType());
+    SetValue(mUI.materialName, material->GetName());
+    SetValue(mUI.surfaceType,  material->GetSurfaceType());
+    SetValue(mUI.minFilter,    material->GetMinTextureFilter());
+    SetValue(mUI.magFilter,    material->GetMagTextureFilter());
+    SetValue(mUI.wrapX,        material->GetTextureWrapX());
+    SetValue(mUI.wrapY,        material->GetTextureWrapY());
+    SetValue(mUI.baseColor,    material->GetBaseColor());
+    SetValue(mUI.scaleX,       material->GetTextureScaleX());
+    SetValue(mUI.scaleY,       material->GetTextureScaleY());
+    SetValue(mUI.fps,          material->GetFps());
+    SetValue(mUI.blend,        material->GetBlendFrames());
+
+    const auto num_textures = resource.GetProperty("num_textures", 0);
+    for (int i=0; i<num_textures; ++i)
+    {
+        const auto& file = resource.GetProperty(QString("texture_file_%1").arg(i), QString(""));
+        const QFileInfo info(file);
+        if (!info.exists())
+        {
+            WARN("File '%1' could no longer be found.", file);
+            continue;
+        }
+
+        TextureData data;
+        data.file = file;
+
+        QString rect = resource.GetProperty(QString("texture_rect_%1").arg(i), QString(""));
+        if (!rect.isEmpty())
+        {
+            QTextStream ss(&rect);
+            float x, y, h, w;
+            ss >> x >> y >> h >> w;
+            data.rect_enabled = true;
+            data.rectx = x;
+            data.recty = y;
+            data.rectw = w;
+            data.recth = h;
+        }
+
+        const auto& key = app::randomString();
+        QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+        item->setText(info.fileName());
+        item->setData(Qt::UserRole, key);
+        mUI.textures->addItem(item);
+
+        // store meta data.
+        mTextures[key] = data;
+    }
+    if (num_textures)
+    {
+        mUI.texProps->setEnabled(true);
+        mUI.textureDel->setEnabled(true);
+        mUI.textures->setCurrentRow(0);
+        if (mTextures[getCurrentTextureKey()].rect_enabled)
+        {
+            mUI.texRect->setEnabled(true);
+        }
+    }
+    setWindowTitle(resource.GetName());
+
+    // enable/disable UI elements based on the material type
+    on_materialType_currentIndexChanged("");
 }
 
 MaterialWidget::~MaterialWidget()
@@ -160,7 +235,7 @@ void MaterialWidget::on_actionSave_triggered()
         mUI.materialName->setFocus();
         return;
     }
-    if (mWorkspace->HasMaterial(name))
+    if (!mCanOverwrite && mWorkspace->HasMaterial(name))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
@@ -168,14 +243,48 @@ void MaterialWidget::on_actionSave_triggered()
         msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
         if (msg.exec() == QMessageBox::No)
             return;
+        // don't ask again.
+        mCanOverwrite = true;
     }
 
     gfx::Material material("", "", gfx::Material::Type::Color);
     fillMaterial(material);
 
-    mWorkspace->SaveMaterial(material);
+    app::MaterialResource resource(std::move(material));
 
-    NOTE("Saved material %1", name);
+    // careful here!
+    // the order in which we add our textures is important,
+    // mTextures map is mapping an arbitary key to a texture data
+    // object but it doesn't have the exact order of textures
+    // we need to use the UI object for this.
+    const int num_textures = mUI.textures->count();
+    resource.SetProperty("num_textures", mTextures.size());
+
+    for (int i=0; i<num_textures; ++i)
+    {
+        const auto* item = mUI.textures->item(i);
+        const auto& key  = item->data(Qt::UserRole).toString();
+        const auto& data = mTextures[key];
+
+        resource.SetProperty(QString("texture_file_%1").arg(i), data.file);
+
+        // we might lose some UI data here if we skip writing
+        // the texture rect when it's not enabled, but ..meh ok
+        if (!data.rect_enabled)
+            continue;
+
+        // note that using something like QRectF won't work ! (JSON will be null)
+        const auto& rect = QString("%1 %2 %3 %3")
+            .arg(data.rectx).arg(data.recty)
+            .arg(data.rectw).arg(data.rectw);
+        resource.SetProperty(QString("texture_rect_%1").arg(i), rect);
+    }
+
+    mWorkspace->SaveMaterial(resource);
+
+    setWindowTitle(name);
+
+    NOTE("Saved material '%1'", name);
 }
 
 void MaterialWidget::on_textureAdd_clicked()
@@ -200,12 +309,10 @@ void MaterialWidget::on_textureAdd_clicked()
         mTextures[key].rectw = 1.0f;
         mTextures[key].recth = 1.0f;
     }
-    const auto count = mUI.textures->count();
     const auto index = mUI.textures->currentRow();
     mUI.texProps->setEnabled(true);
     mUI.textureDel->setEnabled(true);
-    if (index == -1)
-        mUI.textures->setCurrentRow(0);
+    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
 }
 
 void MaterialWidget::on_textureDel_clicked()
@@ -295,7 +402,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
 
     // enable/disable UI properties based on the
     // material type.
-    const auto type = EnumFromCombo<gfx::Material::Type>(mUI.materialType);
+    const gfx::Material::Type type = GetValue(mUI.materialType);
 
     if (type == gfx::Material::Type::Color)
     {
@@ -342,16 +449,7 @@ void MaterialWidget::on_rectH_valueChanged(double value)
 
 void MaterialWidget::fillMaterial(gfx::Material& material) const
 {
-    const auto& name      = mUI.materialName->text();
-    const auto& color     = mUI.baseColor->color();
-    const auto blend      = mUI.blend->isChecked();
-    const auto fps        = mUI.fps->value();
-    const auto type       = EnumFromCombo<gfx::Material::Type>(mUI.materialType);
-    const auto surface    = EnumFromCombo<gfx::Material::SurfaceType>(mUI.surfaceType);
-    const auto min_filter = EnumFromCombo<gfx::Material::MinTextureFilter>(mUI.minFilter);
-    const auto mag_filter = EnumFromCombo<gfx::Material::MagTextureFilter>(mUI.magFilter);
-    const auto tex_wrap_x = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapX);
-    const auto tex_wrap_y = EnumFromCombo<gfx::Material::TextureWrapping>(mUI.wrapY);
+    const gfx::Material::Type type = GetValue(mUI.materialType);
 
     // todo: allow for a custom shader to be used.
     std::string shader;
@@ -362,22 +460,21 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
     else if (type == gfx::Material::Type::Sprite)
         shader = "texture_map.glsl";
 
-    material.SetType(type);
-    material.SetName(app::toUtf8(name));
+    material.SetType(GetValue(mUI.materialType));
+    material.SetName(GetValue(mUI.materialName));
     material.SetShader(shader);
-    material.SetBaseColor(app::toGfx(color));
-    material.SetGamma(mUI.gamma->value());
-    material.SetSurfaceType(surface);
+    material.SetBaseColor(GetValue(mUI.baseColor));
+    material.SetGamma(GetValue(mUI.gamma));
+    material.SetSurfaceType(GetValue(mUI.surfaceType));
     material.SetRuntime(mTime);
-    material.SetFps(fps);
-    material.SetBlendFrames(blend);
-    material.SetTextureMinFilter(min_filter);
-    material.SetTextureMagFilter(mag_filter);
-    material.SetTextureScaleX(mUI.scaleX->value());
-    material.SetTextureScaleY(mUI.scaleY->value());
-    material.SetTextureWrapX(tex_wrap_x);
-    material.SetTextureWrapY(tex_wrap_y);
-
+    material.SetFps(GetValue(mUI.fps));
+    material.SetBlendFrames(GetValue(mUI.blend));
+    material.SetTextureMinFilter(GetValue(mUI.minFilter));
+    material.SetTextureMagFilter(GetValue(mUI.magFilter));
+    material.SetTextureScaleX(GetValue(mUI.scaleX));
+    material.SetTextureScaleY(GetValue(mUI.scaleY));
+    material.SetTextureWrapX(GetValue(mUI.wrapX));
+    material.SetTextureWrapY(GetValue(mUI.wrapY));
 
     // add textures that we have
     const int num_textures_add = mUI.textures->count();
