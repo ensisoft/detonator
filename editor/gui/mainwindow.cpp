@@ -112,15 +112,38 @@ void MainWindow::loadState()
     mUI.actionViewEventlog->setChecked(show_eventlog);
     mUI.actionViewWorkspace->setChecked(show_workspace);
 
-    // todo: load the previously open tabs from temporary state files.
+    bool success = true;
 
-
-    if (show_eventlog)
+    const auto& temp_file_list = mSettings.getValue("MainWindow", "temp_file_list", QStringList());
+    for (const auto& file : temp_file_list)
     {
+        Settings settings(file);
+        if (!settings.Load())
+        {
+            success = false;
+            continue;
+        }
+        const auto& class_name = settings.getValue("MainWindow", "class_name",
+            QString(""));
+        MainWidget* widget = nullptr;
+        if (class_name == MaterialWidget::staticMetaObject.className())
+            widget = new MaterialWidget;
+        else if (class_name == ParticleEditorWidget::staticMetaObject.className())
+            widget = new ParticleEditorWidget;
 
+        // bug, probably forgot to modify the if/else crap above.
+        ASSERT(widget);
+
+        if (!widget->loadState(settings))
+        {
+            WARN("Widget '%1 failed to load state.", widget->windowTitle());
+        }
+        attachWidget(widget);
+        // remove the file, no longer needed.
+        QFile::remove(file);
+        DEBUG("Loaded widget '%1'", widget->windowTitle());
     }
 
-    bool success = true;
     if (!success)
     {
         QMessageBox msg(this);
@@ -472,7 +495,41 @@ bool MainWindow::saveState()
 
     bool success = true;
 
-    // todo: for open tabs generate a temporary session file where the state goes.
+    QStringList temp_file_list;
+
+    const auto tabs = mUI.mainTab->count();
+    for (int i=0; i<tabs; ++i)
+    {
+        const auto& temp = app::randomString();
+        const auto& path = app::GetAppFilePath("temp");
+        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        QDir dir;
+        if (!dir.mkpath(path))
+        {
+            ERROR("Failed to create folder: '%1'", path);
+            success = false;
+            continue;
+        }
+        const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+
+        Settings settings(file);
+        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
+        if (!widget->saveState(settings))
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+            continue;
+        }
+        if (!settings.Save())
+        {
+            ERROR("Failed to save widget '%1' settings.",  widget->windowTitle());
+            success = false;
+            continue;
+        }
+        temp_file_list << file;
+        DEBUG("Saved widget '%1'", widget->windowTitle());
+    }
+    mSettings.setValue("MainWindow", "temp_file_list", temp_file_list);
 
     return success;
 }
