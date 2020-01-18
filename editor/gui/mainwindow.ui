@@ -101,7 +101,7 @@
   </widget>
   <widget class="QDockWidget" name="eventlogDock">
    <property name="features">
-    <set>QDockWidget::DockWidgetFeatureMask</set>
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetVerticalTitleBar</set>
    </property>
    <property name="windowTitle">
     <string>Event log</string>
@@ -122,7 +122,7 @@
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFeatureMask</set>
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetVerticalTitleBar</set>
    </property>
    <property name="windowTitle">
     <string>Workspace resources</string>
@@ -383,38 +383,6 @@
     <hint type="destinationlabel">
      <x>533</x>
      <y>715</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>eventlogDock</sender>
-   <signal>visibilityChanged(bool)</signal>
-   <receiver>actionViewEventlog</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>533</x>
-     <y>715</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>workspaceDock</sender>
-   <signal>visibilityChanged(bool)</signal>
-   <receiver>actionViewWorkspace</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>128</x>
-     <y>346</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
     </hint>
    </hints>
   </connection>
