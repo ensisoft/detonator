@@ -78,17 +78,21 @@ void copyright()
 
 int main(int argc, char* argv[])
 {
-    // set the logger object for the subsystem to use, we'll
-    // direct all this to the terminal for now.
-    base::CursesLogger logger;
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-    DEBUG("It's alive!");
-
-    copyright();
-
     try
     {
+        // prefix with a . to make this a "hidden" dir
+        // which is the convention on Linux
+        app::InitializeAppHome("." APP_TITLE);
+
+        // set the logger object for the subsystem to use, we'll
+        // direct all this to the terminal for now.
+        base::CursesLogger logger;
+        base::SetGlobalLog(&logger);
+        base::EnableDebugLog(true);
+        DEBUG("It's alive!");
+
+        copyright();
+
         // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
         // turns out this attribute is needed in order to make Qt
         // create a GLES2 context.
@@ -129,13 +133,16 @@ int main(int argc, char* argv[])
 
         // run the mainloop
         app.exec();
+
+        DEBUG("Exiting...");
     }
     catch (const std::exception& e)
     {
         std::cerr << "Oops... something went wrong.";
         std::cerr << std::endl;
     }
-    DEBUG("Exiting...");
+    std::cout << "Have a good day.\n";
+    std::cout << std::endl;
     return 0;
 }
 

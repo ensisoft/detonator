@@ -186,4 +186,26 @@ QString randomString()
    return randomString;
 }
 
+static QString gAppHome;
+
+void InitializeAppHome(const QString& appname)
+{
+    const auto& home = QDir::homePath();
+    const auto& appdir = home + "/" + appname;
+
+    // if we cannot create the directory we're fucked so then throw.
+    QDir dir;
+    if (!dir.mkpath(appdir))
+        throw std::runtime_error(narrow(QString("failed to create %1").arg(appdir)));
+
+    gAppHome = QDir::cleanPath(appdir);
+}
+
+QString GetAppFilePath(const QString& name)
+{
+    // pathstr is an absolute path so then this is also
+    // an absolute path.
+    return QDir::toNativeSeparators(gAppHome + "/" + name);
+}
+
 } // namespace

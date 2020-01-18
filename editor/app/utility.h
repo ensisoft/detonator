@@ -103,4 +103,12 @@ inline QColor fromGfx(const gfx::Color4f& color)
 
 QString randomString();
 
+// Initialize the home directory for the application
+// in the user's home directory.
+void InitializeAppHome(const QString& appname);
+
+// Get an absolute path to a file/folder in the application
+// home directory.
+QString GetAppFilePath(const QString& name);
+
 } // namespace
