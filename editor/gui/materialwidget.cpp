@@ -127,16 +127,9 @@ MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
         // store meta data.
         mTextures[key] = data;
     }
-    if (num_textures)
-    {
-        mUI.texProps->setEnabled(true);
-        mUI.textureDel->setEnabled(true);
-        mUI.textures->setCurrentRow(0);
-        if (mTextures[getCurrentTextureKey()].rect_enabled)
-        {
-            mUI.texRect->setEnabled(true);
-        }
-    }
+
+
+    mUI.textures->setCurrentRow(0);
     setWindowTitle(resource.GetName());
 
     // enable/disable UI elements based on the material type
@@ -171,11 +164,93 @@ void MaterialWidget::addActions(QMenu& menu)
 
 bool MaterialWidget::loadState(const Settings& settings)
 {
+    settings.loadWidget("Material", mUI.materialName);
+    settings.loadWidget("Material", mUI.materialType);
+    settings.loadWidget("Material", mUI.surfaceType);
+    settings.loadWidget("Material", mUI.baseColor);
+    settings.loadWidget("Material", mUI.gamma);
+    settings.loadWidget("Material", mUI.scaleX);
+    settings.loadWidget("Material", mUI.scaleY);
+    settings.loadWidget("Material", mUI.minFilter);
+    settings.loadWidget("Material", mUI.magFilter);
+    settings.loadWidget("Material", mUI.wrapX);
+    settings.loadWidget("Material", mUI.wrapY);
+    settings.loadWidget("Material", mUI.fps);
+    settings.loadWidget("Material", mUI.blend);
+    settings.loadWidget("Material", mUI.shader);
+    settings.loadWidget("Material", mUI.zoom);
+
+    const int textures = settings.getValue("Material", "textures", 0);
+    for (int i=0; i<textures; ++i)
+    {
+        const auto& name = QString("Texture%1").arg(i);
+
+        TextureData data;
+        data.file = settings.getValue(name, "file", QString());
+        data.rect_enabled = settings.getValue(name, "rect", false);
+        data.rectx = settings.getValue(name, "rect_x", 0.0f);
+        data.recty = settings.getValue(name, "rect_y", 0.0f);
+        data.rectw = settings.getValue(name, "rect_w", 1.0f);
+        data.recth = settings.getValue(name, "rect_h", 1.0f);
+
+        const QFileInfo info(data.file);
+        if (!info.exists())
+        {
+            WARN("File '%1' could no longer be found.", data.file);
+            continue;
+        }
+
+        const auto& key = app::RandomString();
+        auto* item = new QListWidgetItem(mUI.textures);
+        item->setText(info.fileName());
+        item->setData(Qt::UserRole, key);
+        mUI.textures->addItem(item);
+
+        // store meta data.
+        mTextures[key] = data;
+    }
+    // select first texture if any
+    mUI.textures->setCurrentRow(0);
+
+    // enable/disable UI elements based on the material type
+    on_materialType_currentIndexChanged("");
+
+    setWindowTitle(mUI.materialName->text());
     return true;
 }
 
 bool MaterialWidget::saveState(Settings& settings) const
 {
+    settings.saveWidget("Material", mUI.materialName);
+    settings.saveWidget("Material", mUI.materialType);
+    settings.saveWidget("Material", mUI.surfaceType);
+    settings.saveWidget("Material", mUI.baseColor);
+    settings.saveWidget("Material", mUI.gamma);
+    settings.saveWidget("Material", mUI.scaleX);
+    settings.saveWidget("Material", mUI.scaleY);
+    settings.saveWidget("Material", mUI.minFilter);
+    settings.saveWidget("Material", mUI.magFilter);
+    settings.saveWidget("Material", mUI.wrapX);
+    settings.saveWidget("Material", mUI.wrapY);
+    settings.saveWidget("Material", mUI.fps);
+    settings.saveWidget("Material", mUI.blend);
+    settings.saveWidget("Material", mUI.shader);
+    settings.saveWidget("Material", mUI.zoom);
+    settings.setValue("Material", "textures", mUI.textures->count());
+
+    for (int i=0; i<mUI.textures->count(); ++i)
+    {
+        const auto* item = mUI.textures->item(i);
+        const auto& key  = item->data(Qt::UserRole).toString();
+        const auto& data = mTextures[key];
+        const auto& name = QString("Texture%1").arg(i);
+        settings.setValue(name, "file", data.file);
+        settings.setValue(name, "rect", data.rect_enabled);
+        settings.setValue(name, "rect_x", data.rectx);
+        settings.setValue(name, "rect_y", data.recty);
+        settings.setValue(name, "rect_w", data.rectw);
+        settings.setValue(name, "rect_h", data.recth);
+    }
     return true;
 }
 
@@ -295,19 +370,26 @@ void MaterialWidget::on_textureAdd_clicked()
         return;
     for (const auto& file : list)
     {
-        QFileInfo info(file);
-        QListWidgetItem* item = new QListWidgetItem(mUI.textures);
-        // generate random key for the file.
-        const QString& key = app::RandomString();
+        const QFileInfo info(file);
 
+        // generate random key for the file that maps
+        // the list widget item to texture meta data.
+        const auto& key = app::RandomString();
+
+        auto* item = new QListWidgetItem(mUI.textures);
         item->setText(info.fileName());
         item->setData(Qt::UserRole, key);
         mUI.textures->addItem(item);
 
         // store the texture details in a map by the unique key
-        mTextures[key].file = file;
-        mTextures[key].rectw = 1.0f;
-        mTextures[key].recth = 1.0f;
+        TextureData data;
+        data.file = file;
+        data.rect_enabled = false;
+        data.rectx = 0.0f;
+        data.recty = 0.0f;
+        data.rectw = 1.0f;
+        data.recth = 1.0f;
+        mTextures[key] = data;
     }
     const auto index = mUI.textures->currentRow();
     mUI.texProps->setEnabled(true);
@@ -380,7 +462,7 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     mUI.texturePreview->setEnabled(true);
     mUI.texturePreview->setPixmap(img.scaledToHeight(128));
 
-    mUI.texRect->setEnabled(data.rect_enabled);
+    mUI.texRect->setChecked(data.rect_enabled);
     mUI.rectX->setValue(data.rectx);
     mUI.rectY->setValue(data.recty);
     mUI.rectW->setValue(data.rectw);
