@@ -72,14 +72,14 @@ namespace app
     };
 
 // we want every log event to be tracable back to where it came from
-// so thus every module should define it's own LOGTAG 
+// so thus every module should define it's own LOGTAG
 #ifndef LOGTAG
 #  if !defined(Q_MOC_OUTPUT_REVISION)
 #    warning every module importing eventlog needs to define LOGTAG
 #  endif
 #endif
 
-// Careful with the macros here. base/logging.h has macros by the same name. 
+// Careful with the macros here. base/logging.h has macros by the same name.
 // we're going to hijack the names here and change the definition to better
 // suit the application.
 
@@ -89,18 +89,18 @@ namespace app
 
 #undef ERROR
 #define ERROR(msg, ...) \
-    app::EventLog::get().write(app::Event::Type::Error, app::toString(msg, ## __VA_ARGS__), LOGTAG)    
+    app::EventLog::get().write(app::Event::Type::Error, app::toString(msg, ## __VA_ARGS__), LOGTAG)
 
 #undef INFO
 #define INFO(msg, ...) \
-    app::EventLog::get().write(app::Event::Type::Info, app::toString(msg, ## __VA_ARGS__), LOGTAG)    
+    app::EventLog::get().write(app::Event::Type::Info, app::toString(msg, ## __VA_ARGS__), LOGTAG)
 
 #undef NOTE
 #define NOTE(msg, ...) \
-    app::EventLog::get().write(app::Event::Type::Note, app::toString(msg, ## __VA_ARGS__), LOGTAG)    
+    app::EventLog::get().write(app::Event::Type::Note, app::toString(msg, ## __VA_ARGS__), LOGTAG)
 
 #undef DEBUG
 #define DEBUG(msg, ...) \
-    base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::toUtf8(app::toString(msg, ## __VA_ARGS__)))
+    base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(app::toString(msg, ## __VA_ARGS__)))
 
 } // namespace

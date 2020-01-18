@@ -28,6 +28,7 @@
 #  include <neargye/magic_enum.hpp>
 #  include <QtWidgets>
 #  include <QString>
+#  include <QColor>
 #  include <QSignalBlocker>
 #include "warnpop.h"
 
@@ -36,11 +37,29 @@
 #include <type_traits>
 
 #include "base/assert.h"
+#include "graphics/color4f.h"
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 
+// general dumping ground for utility type of functionality
+// related to the GUI and GUI types.
+
 namespace gui
 {
+
+inline gfx::Color4f ToGfx(const QColor& color)
+{
+    const float a  = color.alphaF();
+    const float r  = color.redF();
+    const float g  = color.greenF();
+    const float b  = color.blueF();
+    return gfx::Color4f(r, g, b, a);
+}
+
+inline QColor FromGfx(const gfx::Color4f& color)
+{
+    return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
+}
 
 template<typename EnumT>
 void PopulateFromEnum(QComboBox* combo)
@@ -100,7 +119,7 @@ inline void SetValue(QDoubleSpinBox* spin, float val)
 inline void SetValue(color_widgets::ColorSelector* color, const gfx::Color4f& col)
 {
     QSignalBlocker s(color);
-    color->setColor(app::fromGfx(col));
+    color->setColor(FromGfx(col));
 }
 
 inline void SetValue(QCheckBox* check, bool val)
@@ -139,7 +158,7 @@ struct LineEditValueGetter
     }
     operator std::string() const
     {
-        return app::toUtf8(edit->text());
+        return app::ToUtf8(edit->text());
     }
     const QLineEdit* edit = nullptr;
 };
@@ -156,7 +175,7 @@ struct SpinBoxValueGetter
 struct ColorGetter
 {
     operator gfx::Color4f() const
-    { return app::toGfx(selector->color()); }
+    { return ToGfx(selector->color()); }
     operator QColor() const
     { return selector->color(); }
     const color_widgets::ColorSelector* selector = nullptr;

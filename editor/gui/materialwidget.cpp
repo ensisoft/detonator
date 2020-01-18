@@ -118,7 +118,7 @@ MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
             data.recth = h;
         }
 
-        const auto& key = app::randomString();
+        const auto& key = app::RandomString();
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
         item->setText(info.fileName());
         item->setData(Qt::UserRole, key);
@@ -298,7 +298,7 @@ void MaterialWidget::on_textureAdd_clicked()
         QFileInfo info(file);
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
         // generate random key for the file.
-        const QString& key = app::randomString();
+        const QString& key = app::RandomString();
 
         item->setText(info.fileName());
         item->setData(Qt::UserRole, key);
@@ -484,7 +484,7 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
         const auto& key  = item->data(Qt::UserRole).toString();
         const auto& data = mTextures[key];
 
-        material.AddTexture(app::strToEngine(data.file));
+        material.AddTexture(app::ToUtf8(data.file));
         material.SetTextureRect(i, gfx::FRect(0, 0, 1.0f, 1.0f));
 
         if (!data.rect_enabled)

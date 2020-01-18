@@ -39,93 +39,66 @@
 namespace app
 {
 
-QString joinPath(const QString& lhs, const QString& rhs)
+QString JoinPath(const QString& lhs, const QString& rhs)
 {
     const auto p = lhs + "/" + rhs;
     return QDir::toNativeSeparators(QDir::cleanPath(p));
 }
 
-QString cleanPath(const QString& path)
+QString CleanPath(const QString& path)
 {
     return QDir::toNativeSeparators(QDir::cleanPath(path));
 }
 
-bool makePath(const QString& path)
+bool MakePath(const QString& path)
 {
     QDir dir(path);
     return dir.mkpath(path);
 }
 
-
-QString strFromEngine(const std::string& str)
+QString FromUtf8(const std::string& str)
 {
     return QString::fromUtf8(str.c_str());
 }
 
-QString fromUtf8(const std::string& str)
-{
-    return QString::fromUtf8(str.c_str());
-}
-
-QString fromLatin1(const std::string& str)
+QString FromLatin(const std::string& str)
 {
     return QString::fromLatin1(str.c_str());
 }
 
-QString widen(const std::string& s)
+QString FromLocal8Bit(const std::string& s)
 {
 #if defined(WINDOWS_OS)
     return QString::fromUtf8(s.c_str());
 #elif defined(LINUX_OS)
     const char* codeset = nl_langinfo(CODESET);
     if (!std::strcmp(codeset, "UTF-8"))
-        return fromUtf8(s);
+        return FromUtf8(s);
 
     return QString::fromLocal8Bit(s.c_str());
 #endif
 }
 
-std::string strToEngine(const QString& str)
+std::string ToUtf8(const QString& str)
 {
     const auto& bytes = str.toUtf8();
     return std::string(bytes.data(), bytes.size());
 }
 
-std::string toUtf8(const QString& str)
-{
-    const auto& bytes = str.toUtf8();
-    return std::string(bytes.data(), bytes.size());
-}
-
-std::string toLatin(const QString& str)
+std::string ToLatin(const QString& str)
 {
     const auto& bytes = str.toLatin1();
     return std::string(bytes.data(), bytes.size());
 }
 
-std::string narrow(const QString& str)
+std::string ToLocal8Bit(const QString& str)
 {
 #if defined(WINDOWS_OS)
-    return toUtf8(str);
+    return ToUtf8(str);
 #elif defined(LINUX_OS)
     const char* codeset = nl_langinfo(CODESET);
     if (!std::strcmp(codeset, "UTF-8"))
-        return toUtf8(str);
-
-    const auto& bytes = str.toLocal8Bit();
-    return std::string(bytes.data(),
-        bytes.size());
-#endif
-}
-
-std::string toLocal8Bit(const QString& str)
-{
-#if defined(WINDOWS_OS)
-    return toUtf8(str);
-#elif defined(LINUX_OS)
-    const char* codeset = nl_langinfo(CODESET);
-    if (!std::strcmp(codeset, "UTF-8"))
-        return toUtf8(str);
+        return ToUtf8(str);
 
     const auto& bytes = str.toLocal8Bit();
     return std::string(bytes.data(),
@@ -136,24 +109,24 @@ std::string toLocal8Bit(const QString& str)
 #endif
 }
 
-std::ofstream openBinaryOStream(const QString& file)
+std::ofstream OpenBinaryOStream(const QString& file)
 {
 #if defined(WINDOWS_OS)
     std::ofstream out(file.toStdWString(), std::ios::out | std::ios::binary | std::ios::trunc);
 #elif defined(LINUX_OS)
-    std::ofstream out(toLocal8Bit(file), std::ios::out | std::ios::binary | std::ios::trunc);
+    std::ofstream out(ToLocal8Bit(file), std::ios::out | std::ios::binary | std::ios::trunc);
 #else
 #  error Unimplemented function
 #endif
     return out;
 }
 
-std::ifstream openBinaryIStream(const QString& file)
+std::ifstream OpenBinaryIStream(const QString& file)
 {
 #if defined(WINDOWS_OS)
     std::ifstream in(file.toStdWString(), std::ios::in | std::ios::binary);
 #elif defined(LINUX_OS)
-    std::ifstream in(toLocal8Bit(file), std::ios::in | std::ios::binary);
+    std::ifstream in(ToLocal8Bit(file), std::ios::in | std::ios::binary);
 #else
     error unimplemented function
 #endif
@@ -161,9 +134,9 @@ std::ifstream openBinaryIStream(const QString& file)
 
 }
 
-bool writeAsBinary(const QString& file, const void* data, std::size_t bytes)
+bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes)
 {
-    std::ofstream out = openBinaryOStream(file);
+    std::ofstream out = OpenBinaryOStream(file);
     if (!out.is_open())
         return false;
 
@@ -171,7 +144,7 @@ bool writeAsBinary(const QString& file, const void* data, std::size_t bytes)
     return true;
 }
 
-QString randomString()
+QString RandomString()
 {
    const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
    const int randomStringLength = 12; // assuming you want random strings of 12 characters
@@ -196,7 +169,7 @@ void InitializeAppHome(const QString& appname)
     // if we cannot create the directory we're fucked so then throw.
     QDir dir;
     if (!dir.mkpath(appdir))
-        throw std::runtime_error(narrow(QString("failed to create %1").arg(appdir)));
+        throw std::runtime_error(ToUtf8(QString("failed to create %1").arg(appdir)));
 
     gAppHome = QDir::cleanPath(appdir);
 }

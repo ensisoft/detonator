@@ -26,52 +26,74 @@
 
 #include "warnpush.h"
 #  include <QString>
-#  include <QColor>
 #include "warnpop.h"
-
-#include "base/assert.h"
-
-#include "graphics/color4f.h"
 
 #include <string>
 #include <fstream>
 #include <vector>
 
+// general dumping ground for utility type of functionality
+// preferably not specific to any GUI or application.
+// inherited from previous projects.
+
 namespace app
 {
 
-QString joinPath(const QString& lhs, const QString& rhs);
-QString cleanPath(const QString& path);
-bool    makePath(const QString& path);
+// Concatenate two strings as file system path.
+// Returns the path formatted with native separators.
+QString JoinPath(const QString& lhs, const QString& rhs);
 
-QString strFromEngine(const std::string& str);
-QString fromUtf8(const std::string& str);
-QString fromLatin1(const std::string& str);
-QString widen(const std::string& str);
+// Clean the path string. Returns with native separators.
+QString CleanPath(const QString& path);
 
-std::string narrow(const QString& str);
-std::string strToEngine(const QString& str);
-std::string toUtf8(const QString& str);
-std::string toLatin(const QString& str);
+// Make path. returns true if succesful, otherwise false.
+bool MakePath(const QString& path);
 
-std::string toLocal8Bit(const QString& str);
+// Convert the UTF-8 encoded string to a QString.
+QString FromUtf8(const std::string& str);
+// Convert the ASCII encoded string to a QString.
+QString FromLatin(const std::string& str);
+// Convert the 8-bit encoded string to a QString.
+QString FromLocal8Bit(const std::string& str);
 
-std::ofstream openBinaryOStream(const QString& file);
-std::ifstream openBinaryIStream(const QString& file);
+// Convert and encode the QString into UTF-8 encoded std::string.
+std::string ToUtf8(const QString& str);
 
-bool writeAsBinary(const QString& file, const void* data, std::size_t bytes);
+// Convert the QString into ASCII only std::string.
+// This conversion may result in loss of data if the
+// string contains characters that are not representable
+// in ASCII.
+// Useful for converting strings that are not natural language/text.
+std::string ToLatin(const QString& str);
 
+// Convert QString to a narrow std::string in
+// local (computer specific) encoding.
+// The output is either UTF-8 OR some local 8-bit encoding.
+std::string ToLocal8Bit(const QString& str);
+
+// Open a binary std::ofstream for writing to a file.
+std::ofstream OpenBinaryOStream(const QString& file);
+// Open a binary std::ifstream for read from file.
+std::ifstream OpenBinaryIStream(const QString& file);
+
+// Simple helper function to quickly dump binary data to a file.
+// Returns true if succesful, otherwise false.
+bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes);
+
+// Simple helper function to write the contents of vector<T>
+// in binary to a file.
 template<typename T>
-bool writeAsBinary(const QString& file, const std::vector<T>& data)
+bool WriteAsBinary(const QString& file, const std::vector<T>& data)
 {
-    return writeAsBinary(file, (const void*)data.data(),
+    return WriteAsBinary(file, (const void*)data.data(),
         sizeof(T) * data.size());
 }
 
+// Read the contents of a file into a vector of some generic type T
 template<typename T>
-bool readAsBinary(const QString& file, std::vector<T>& data)
+bool ReadAsBinary(const QString& file, std::vector<T>& data)
 {
-    std::ifstream in = openBinaryIStream(file);
+    std::ifstream in = OpenBinaryIStream(file);
     if (!in.is_open())
         return false;
 
@@ -87,21 +109,8 @@ bool readAsBinary(const QString& file, std::vector<T>& data)
     return true;
 }
 
-inline gfx::Color4f toGfx(const QColor& color)
-{
-    const float a  = color.alphaF();
-    const float r  = color.redF();
-    const float g  = color.greenF();
-    const float b  = color.blueF();
-    return gfx::Color4f(r, g, b, a);
-}
-
-inline QColor fromGfx(const gfx::Color4f& color)
-{
-    return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
-}
-
-QString randomString();
+// Generate a random string.
+QString RandomString();
 
 // Initialize the home directory for the application
 // in the user's home directory.

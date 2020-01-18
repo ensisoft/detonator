@@ -39,9 +39,9 @@
 namespace app
 {
     inline QString toString(const std::string& s)
-    { return widen(s); }
+    { return FromUtf8(s); }
     inline QString toString(const char* str)
-    { return str; }
+    { return FromUtf8(str); }
     inline QString toString(const QString& str)
     { return str; }
     inline QString toString(bool value)

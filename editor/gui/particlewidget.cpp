@@ -377,7 +377,7 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     else if (mTextures.count() == 1)
     {
         painter.Draw(*mEngine, tr,
-            gfx::TextureMap(app::strToEngine(texture))
+            gfx::TextureMap(app::ToUtf8(texture))
             .SetBaseColor(gfx::Color4f(r, g, b, a))
             .SetSurfaceType(surface));
     }
@@ -386,7 +386,7 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         auto sprite = gfx::SpriteSet();
         for (const auto& s : mTextures)
         {
-            sprite.AddTexture(app::strToEngine(s));
+            sprite.AddTexture(app::ToUtf8(s));
         }
         sprite.SetFps(10)
             .SetRuntime(mTime)

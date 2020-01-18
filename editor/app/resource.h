@@ -121,7 +121,7 @@ namespace app
         {}
         virtual QString GetName() const override
         {
-            return app::fromUtf8(mContent.GetName());
+            return app::FromUtf8(mContent.GetName());
         }
         virtual Type GetType() const override
         {

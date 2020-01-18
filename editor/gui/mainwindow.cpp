@@ -500,7 +500,7 @@ bool MainWindow::saveState()
     const auto tabs = mUI.mainTab->count();
     for (int i=0; i<tabs; ++i)
     {
-        const auto& temp = app::randomString();
+        const auto& temp = app::RandomString();
         const auto& path = app::GetAppFilePath("temp");
         const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
         QDir dir;
