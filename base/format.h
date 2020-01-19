@@ -29,12 +29,14 @@
 #  if defined(BASE_FORMAT_SUPPORT_GLM)
 #    include <glm/glm.hpp>
 #  endif
+#  include <neargye/magic_enum.hpp> // todo: put ifndef ?
 #include "warnpop.h"
 
 #include <sstream>
 #include <string>
 #include <locale>
 #include <codecvt>
+#include <type_traits>
 
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
@@ -68,15 +70,22 @@ namespace base
         template<typename T> inline
         std::string ToString(const T& value)
         {
-            std::stringstream ss;
-            ss << value;
-            return ss.str();
+            if constexpr (std::is_enum<T>::value)
+            {
+                return std::string(magic_enum::enum_name(value));
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << value;
+                return ss.str();
+            }
         }
         inline std::string ToString(const std::wstring& s)
-        { 
+        {
             //setup converter
             using convert_type = std::codecvt_utf8<wchar_t>;
-            std::wstring_convert<convert_type, wchar_t> converter;            
+            std::wstring_convert<convert_type, wchar_t> converter;
             std::string converted_str = converter.to_bytes(s);
             return converted_str;
         }
@@ -150,4 +159,5 @@ namespace base
         return fmt;
     }
 
+    using detail::ToString;
 } // base
