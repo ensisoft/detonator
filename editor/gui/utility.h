@@ -30,6 +30,7 @@
 #  include <QString>
 #  include <QColor>
 #  include <QSignalBlocker>
+#  include <color_selector.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -163,7 +164,7 @@ struct LineEditValueGetter
     const QLineEdit* edit = nullptr;
 };
 
-struct SpinBoxValueGetter
+struct DoubleSpinBoxValueGetter
 {
     operator float() const
     { return spin->value(); }
@@ -188,15 +189,25 @@ struct CheckboxGetter
     const QCheckBox* check = nullptr;
 };
 
+struct SpinBoxValueGetter
+{
+    operator int() const
+    { return spin->value(); }
+    const QSpinBox* spin = nullptr;
+};
+
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
-inline SpinBoxValueGetter GetValue(const QDoubleSpinBox* spin)
-{ return SpinBoxValueGetter { spin }; }
+inline DoubleSpinBoxValueGetter GetValue(const QDoubleSpinBox* spin)
+{ return DoubleSpinBoxValueGetter { spin }; }
 inline ColorGetter GetValue(color_widgets::ColorSelector* selector)
 { return ColorGetter { selector }; }
 inline CheckboxGetter GetValue(const QCheckBox* check)
 { return CheckboxGetter { check }; }
+inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
+{ return SpinBoxValueGetter { spin }; }
+
 
 } // namespace

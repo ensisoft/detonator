@@ -35,10 +35,11 @@
 #include "graphics/drawing.h"
 #include "graphics/types.h"
 
-#include "app/eventlog.h"
-#include "app/utility.h"
+#include "editor/app/eventlog.h"
+#include "editor/app/utility.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/settings.h"
 #include "particlewidget.h"
-#include "settings.h"
 
 namespace gui
 {
@@ -59,6 +60,10 @@ ParticleEditorWidget::ParticleEditorWidget()
     mUI.scaleY->setValue(500);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
+
+    PopulateFromEnum<gfx::KinematicsParticleEngine::Motion>(mUI.motion);
+    PopulateFromEnum<gfx::KinematicsParticleEngine::BoundaryPolicy>(mUI.boundary);
+    PopulateFromEnum<gfx::KinematicsParticleEngine::SpawnPolicy>(mUI.when);
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
@@ -184,28 +189,27 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         return;
     }
 
-    const auto& motion = mUI.motion->currentText();
-    const auto& boundary = mUI.boundary->currentText();
-    const auto& when = mUI.when->currentText();
-
     gfx::KinematicsParticleEngine::Params p;
-    p.num_particles  = mUI.numParticles->value();
-    p.max_xpos       = mUI.simWidth->value();
-    p.max_ypos       = mUI.simHeight->value();
-    p.num_particles  = mUI.numParticles->value();
-    p.min_lifetime   = mUI.minLifetime->value();
-    p.max_lifetime   = mUI.maxLifetime->value();
-    p.min_point_size = mUI.minPointsize->value();
-    p.max_point_size = mUI.maxPointsize->value();
-    p.min_velocity   = mUI.minVelocity->value();
-    p.max_velocity   = mUI.maxVelocity->value();
+    p.motion         = GetValue(mUI.motion);
+    p.mode           = GetValue(mUI.when);
+    p.boundary       = GetValue(mUI.boundary);
+    p.num_particles  = GetValue(mUI.numParticles);
+    p.max_xpos       = GetValue(mUI.simWidth);
+    p.max_ypos       = GetValue(mUI.simHeight);
+    p.num_particles  = GetValue(mUI.numParticles);
+    p.min_lifetime   = GetValue(mUI.minLifetime);
+    p.max_lifetime   = GetValue(mUI.maxLifetime);
+    p.min_point_size = GetValue(mUI.minPointsize);
+    p.max_point_size = GetValue(mUI.maxPointsize);
+    p.min_velocity   = GetValue(mUI.minVelocity);
+    p.max_velocity   = GetValue(mUI.maxVelocity);
 
     if (mUI.initRect->isChecked())
     {
-        p.init_rect_xpos = mUI.initX->value();
-        p.init_rect_ypos = mUI.initY->value();
-        p.init_rect_width = mUI.initWidth->value();
-        p.init_rect_height = mUI.initHeight->value();
+        p.init_rect_xpos   = GetValue(mUI.initX);
+        p.init_rect_ypos   = GetValue(mUI.initY);
+        p.init_rect_width  = GetValue(mUI.initWidth);
+        p.init_rect_height = GetValue(mUI.initHeight);
     }
     else
     {
@@ -224,32 +228,18 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         p.direction_sector_start_angle = 0.0f;
         p.direction_sector_size        = qDegreesToRadians(360.0f);
     }
-
-
-    if (when == "Once")
-        p.mode = gfx::KinematicsParticleEngine::SpawnPolicy::Once;
-    else if (when == "Maintain")
-        p.mode = gfx::KinematicsParticleEngine::SpawnPolicy::Maintain;
-    else if (when == "Continuous")
-        p.mode = gfx::KinematicsParticleEngine::SpawnPolicy::Continuous;
-
-    mEngine.reset(new gfx::KinematicsParticleEngine(p));
-    if (motion == "Linear")
-        mEngine->SetMotion(gfx::DefaultKinematicsParticleUpdatePolicy::Motion::Linear);
-    if (boundary == "Clamp")
-        mEngine->SetBoundaryPolicy(gfx::DefaultKinematicsParticleUpdatePolicy::BoundaryPolicy::Clamp);
-    else if (boundary == "Wrap")
-        mEngine->SetBoundaryPolicy(gfx::DefaultKinematicsParticleUpdatePolicy::BoundaryPolicy::Wrap);
-    else if (boundary == "Kill")
-        mEngine->SetBoundaryPolicy(gfx::DefaultKinematicsParticleUpdatePolicy::BoundaryPolicy::Kill);
-
     if (mUI.growth->isChecked())
     {
-        const auto dSdT = mUI.timeDerivative->value();
-        const auto dSdD = mUI.distDerivative->value();
-        mEngine->SetGrowthWithRespectToTime(dSdT);
-        mEngine->SetGrowthWithRespectToDistance(dSdD);
+        p.rate_of_change_in_size_wrt_time = GetValue(mUI.timeDerivative);
+        p.rate_of_change_in_size_wrt_dist = GetValue(mUI.distDerivative);
     }
+    else
+    {
+        p.rate_of_change_in_size_wrt_time = 0.0f;
+        p.rate_of_change_in_size_wrt_dist = 0.0f;
+    }
+
+    mEngine.reset(new gfx::KinematicsParticleEngine(p));
 
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);

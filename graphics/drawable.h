@@ -124,11 +124,11 @@ namespace gfx
     };
 
     // Particle engine interface. Particle engines implement some kind of
-    // "particle" / n-body simulation where a variable number of small objects 
+    // "particle" / n-body simulation where a variable number of small objects
     // are simulated or animated in some particular way.
-    class ParticleEngine 
+    class ParticleEngine
     {
-    public: 
+    public:
         // Destructor
         virtual ~ParticleEngine() = default;
         // Update the particle simulation by one step with the current
@@ -138,124 +138,22 @@ namespace gfx
         virtual bool IsAlive() const = 0;
         // Restart the simulation if no longer alive.
         virtual void Restart() = 0;
-        // todo: add more methods as needed. 
+        // todo: add more methods as needed.
     private:
-    };
-
-    // Runtime configurable kinematic particle engine
-    // update policy class for updating the particles
-    // based on the configured parameters of the policy.
-    class DefaultKinematicsParticleUpdatePolicy
-    {
-    public: 
-        // Define the motion of the particle.
-        enum class Motion {
-            // Follow a linear path. 
-            Linear
-        };
-            // Control what happens to the particle when it reaches
-        // the boundary of the simulation.
-        enum class BoundaryPolicy {
-            // Clamp boundary to the boundary value. 
-            // Use case example: Bursts of particles that blow up
-            // and then remain stationary once they land. 
-            Clamp, 
-            // Wraps around the boundary. 
-            // Use case example: never ending star field animation 
-            Wrap, 
-            // Kill the particle at the boundary.
-            Kill
-        };
-
-        inline void BeginIteration(float dt, float time) const
-        { /* intentionally empty */ }
-        inline void EndIteration() const 
-        { /* intentionally empty */ }
-
-        // If the particle is still considered to be alive then
-        // update the properties of the particle and return false.
-        // Otherwise return false to indicate that the particle has
-        // expired and should be expunged.
-        template<typename Particle> inline
-        bool Update(Particle& p, float dt, float time, const glm::vec2& bounds) const 
-        {
-            const auto p0 = p.position;
-            
-            // update change in position
-            if (mMotion == Motion::Linear) 
-                p.position += (p.direction * dt);
-
-            const auto& p1 = p.position;
-            const auto& dp = p1 - p0;
-            const auto  dd = glm::length(dp);
-
-            // update change in size with respect to time.
-            p.pointsize += (dt * dSdT);
-            // update change in size with respect to distance 
-            p.pointsize += (dd * dSdD);
-            if (p.pointsize <= 0.0f)
-                return false;
-            // accumulate distance approximation
-            p.distance += dd;
-
-            // boundary conditions.
-            if (mBoundaryPolicy == BoundaryPolicy::Wrap) 
-            {
-                p.position.x = math::wrap(0.0f, bounds.x, p.position.x);
-                p.position.y = math::wrap(0.0f, bounds.y, p.position.y);
-            }
-            else if (mBoundaryPolicy == BoundaryPolicy::Clamp)
-            {
-                p.position.x = math::clamp(0.0f, bounds.x, p.position.x);
-                p.position.y = math::clamp(0.0f, bounds.y, p.position.y);
-            }
-            else if (mBoundaryPolicy == BoundaryPolicy::Kill)
-            {
-                if (p.position.x < 0.0f || p.position.x > bounds.x)
-                    return false;
-                else if (p.position.y < 0.0f || p.position.y > bounds.y)
-                    return false;
-            }
-            return true;
-        }
-        
-        void SetGrowthWithRespectToTime(float rate)
-        { dSdT = rate; }
-        void SetGrowthWithRespectToDistance(float rate)
-        { dSdD = rate; }
-
-        void SetMotion(Motion m) 
-        { mMotion = m; }
-        void SetBoundaryPolicy(BoundaryPolicy p)
-        { mBoundaryPolicy = p; }
-
-    protected:
-        // no virtual destruction dynamically through this type
-        ~DefaultKinematicsParticleUpdatePolicy() {}
-    private:
-        Motion mMotion = Motion::Linear;
-        BoundaryPolicy mBoundaryPolicy = BoundaryPolicy::Wrap;
-        // rate of change with respect to unit of time.
-        float dSdT = 0.0f;
-        // rate of change with respect to unit of distance 
-        // travelled.
-        float dSdD = 0.0f;
     };
 
     // KinematicsParticleEngine implements particle simulation
     // based on pure motion without reference to the forces
     // or the masses acting upon the particles.
-    template<typename ParticleUpdatePolicy = DefaultKinematicsParticleUpdatePolicy>
-    class TKinematicsParticleEngine : public Drawable,
-                                      public ParticleEngine,
-                                      public ParticleUpdatePolicy
+    class KinematicsParticleEngine : public Drawable,
+                                     public ParticleEngine
     {
     public:
         struct Particle {
             // The current particle position in simulation space.
             glm::vec2 position;
             // The current direction of travel in simulation space
-            // times velocity. 
+            // times velocity.
             glm::vec2 direction;
             // The current particle point size.
             float pointsize = 1.0f;
@@ -265,6 +163,26 @@ namespace gfx
             float distance  = 0.0f;
         };
 
+        // Define the motion of the particle.
+        enum class Motion {
+            // Follow a linear path.
+            Linear
+        };
+            // Control what happens to the particle when it reaches
+        // the boundary of the simulation.
+        enum class BoundaryPolicy {
+            // Clamp boundary to the boundary value.
+            // Use case example: Bursts of particles that blow up
+            // and then remain stationary once they land.
+            Clamp,
+            // Wraps around the boundary.
+            // Use case example: never ending star field animation
+            Wrap,
+            // Kill the particle at the boundary.
+            Kill
+        };
+
+
         // Control when to spawn particles.
         enum SpawnPolicy {
             // Spawn only once the initial number of particles
@@ -272,16 +190,21 @@ namespace gfx
             Once,
             // Maintain a fixed number of particles in the
             // simulation spawning new particles as old ones die.
-            Maintain, 
+            Maintain,
             // Continuously spawn new particles on every update
-            // of the simulation. num particles is the number of 
+            // of the simulation. num particles is the number of
             // particles to spawn per second.
             Continuous
         };
 
         // initial engine configuration params
         struct Params {
+            // type of motion for the particles
+            Motion motion = Motion::Linear;
+            // when to spawn particles.
             SpawnPolicy mode = SpawnPolicy::Maintain;
+            // What happens to a particle at the simulation boundary
+            BoundaryPolicy boundary = BoundaryPolicy::Clamp;
             // the number of particles this engine shall create
             // the behaviour of this parameter depends on the spawn mode.
             float num_particles = 100;
@@ -309,9 +232,14 @@ namespace gfx
             // min max points sizes.
             float min_point_size = 1.0f;
             float max_point_size = 1.0f;
+            // rate of change with respect to unit of time.
+            float rate_of_change_in_size_wrt_time = 0.0f;
+            // rate of change with respect to unit of distance
+            // travelled.
+            float rate_of_change_in_size_wrt_dist = 0.0f;
         };
 
-        TKinematicsParticleEngine(const Params& init) : mParams(init)
+        KinematicsParticleEngine(const Params& init) : mParams(init)
         {
             InitParticles(mParams.num_particles);
         }
@@ -360,18 +288,10 @@ namespace gfx
         {
             mTime += dt;
 
-            const glm::vec2 bounds(mParams.max_xpos, mParams.max_ypos);
-            
-            ParticleUpdatePolicy::BeginIteration(dt, mTime);
-
             // update each particle
             for (size_t i=0; i<mParticles.size();)
             {
-                // countdown to end of lifetime
-                mParticles[i].lifetime -= dt;
-
-                if (mParticles[i].lifetime > 0.0f &&
-                    ParticleUpdatePolicy::Update(mParticles[i], dt, mTime, bounds))
+                if (UpdateParticle(i, dt))
                 {
                     ++i;
                     continue;
@@ -379,29 +299,27 @@ namespace gfx
                 KillParticle(i);
             }
 
-            ParticleUpdatePolicy::EndIteration();
-
             // Spawn new particles if needed.
             if (mParams.mode == SpawnPolicy::Maintain)
                 InitParticles(mParams.num_particles - mParticles.size());
-            else if (mParams.mode == SpawnPolicy::Continuous) 
+            else if (mParams.mode == SpawnPolicy::Continuous)
             {
                 // the number of particles is taken as the rate of particles per
-                // second. fractionally cumulate partciles and then 
+                // second. fractionally cumulate partciles and then
                 // spawn when we have some number non-fractional particles.
-                mNumParticlesHatching += mParams.num_particles * dt; 
+                mNumParticlesHatching += mParams.num_particles * dt;
                 const auto num = size_t(mNumParticlesHatching);
                 InitParticles(num);
                 mNumParticlesHatching -= num;
             }
         }
 
-        // ParticleEngine implementation. 
+        // ParticleEngine implementation.
         virtual bool IsAlive() const override
-        { 
+        {
             if (mParams.mode == SpawnPolicy::Continuous)
                 return true;
-            return !mParticles.empty(); 
+            return !mParticles.empty();
         }
 
         // ParticleEngine implementation. Restart the simulation
@@ -416,7 +334,7 @@ namespace gfx
             mTime = 0.0f;
             mNumParticlesHatching = 0;
         }
-        size_t GetNumParticlesAlive() const 
+        size_t GetNumParticlesAlive() const
         { return mParticles.size(); }
 
     private:
@@ -434,7 +352,7 @@ namespace gfx
                 p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
                 p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
                 p.position  = glm::vec2(mParams.init_rect_xpos + initx, mParams.init_rect_ypos + inity);
-                // note that the velocity vector is baked into the 
+                // note that the velocity vector is baked into the
                 // direction vector in order to save space.
                 p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
                 mParticles.push_back(p);
@@ -444,15 +362,63 @@ namespace gfx
         {
             const auto last = mParticles.size() - 1;
             std::swap(mParticles[i], mParticles[last]);
-            mParticles.pop_back();            
+            mParticles.pop_back();
         }
+
+        bool UpdateParticle(size_t i, float dt)
+        {
+            auto& p = mParticles[i];
+
+            // countdown to end of lifetime
+            p.lifetime -= dt;
+            if (p.lifetime <= 0.0f)
+                return false;
+
+            const auto p0 = p.position;
+
+            // update change in position
+            if (mParams.motion == Motion::Linear)
+                p.position += (p.direction * dt);
+
+            const auto& p1 = p.position;
+            const auto& dp = p1 - p0;
+            const auto  dd = glm::length(dp);
+
+            // update change in size with respect to time.
+            p.pointsize += (dt * mParams.rate_of_change_in_size_wrt_time);
+            // update change in size with respect to distance
+            p.pointsize += (dd * mParams.rate_of_change_in_size_wrt_dist);
+            if (p.pointsize <= 0.0f)
+                return false;
+            // accumulate distance approximation
+            p.distance += dd;
+
+            // boundary conditions.
+            if (mParams.boundary == BoundaryPolicy::Wrap)
+            {
+                p.position.x = math::wrap(0.0f, mParams.max_xpos, p.position.x);
+                p.position.y = math::wrap(0.0f, mParams.max_ypos, p.position.y);
+            }
+            else if (mParams.boundary == BoundaryPolicy::Clamp)
+            {
+                p.position.x = math::clamp(0.0f, mParams.max_xpos, p.position.x);
+                p.position.y = math::clamp(0.0f, mParams.max_ypos, p.position.y);
+            }
+            else if (mParams.boundary == BoundaryPolicy::Kill)
+            {
+                if (p.position.x < 0.0f || p.position.x > mParams.max_xpos)
+                    return false;
+                else if (p.position.y < 0.0f || p.position.y > mParams.max_ypos)
+                    return false;
+            }
+            return true;
+        }
+
     private:
         const Params mParams;
         float mNumParticlesHatching = 0.0f;
         float mTime = 0.0f;
         std::vector<Particle> mParticles;
     };
-
-    using KinematicsParticleEngine = TKinematicsParticleEngine<>;
 
 } // namespace

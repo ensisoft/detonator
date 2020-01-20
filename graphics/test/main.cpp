@@ -61,6 +61,7 @@ public:
         {
             ParticleEngine::Params p;
             p.mode = ParticleEngine::SpawnPolicy::Continuous;
+            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -78,15 +79,15 @@ public:
             p.max_lifetime = 2.0f;
             p.min_point_size = 20;
             p.max_point_size = 60;
+            p.rate_of_change_in_size_wrt_dist = -2.0f;
+            p.rate_of_change_in_size_wrt_time = -2.0f;
             mFire.reset(new ParticleEngine(p));
-            mFire->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
-            mFire->SetGrowthWithRespectToDistance(-2.0f);
-            mFire->SetGrowthWithRespectToTime(-2.0f);
         }
 
         {
             ParticleEngine::Params p;
             p.mode = ParticleEngine::SpawnPolicy::Continuous;
+            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -104,15 +105,15 @@ public:
             p.max_lifetime = 25.0f;
             p.min_point_size = 20;
             p.max_point_size = 60;
+            p.rate_of_change_in_size_wrt_dist = -4.0f;
+            p.rate_of_change_in_size_wrt_time = -8.0f;
             mSmoke.reset(new ParticleEngine(p));
-            mSmoke->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
-            mSmoke->SetGrowthWithRespectToDistance(-4.0f);
-            mSmoke->SetGrowthWithRespectToTime(-8.0f);
         }
 
         {
             ParticleEngine::Params p;
             p.mode = ParticleEngine::SpawnPolicy::Continuous;
+            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
             p.num_particles = 1000;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -128,15 +129,15 @@ public:
             p.max_lifetime = 2.0f;
             p.min_point_size = 20;
             p.max_point_size = 40;
+            p.rate_of_change_in_size_wrt_time = -2.0f;
+            p.rate_of_change_in_size_wrt_dist = -2.0f;
             mBlood.reset(new ParticleEngine(p));
-            mBlood->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
-            mBlood->SetGrowthWithRespectToDistance(-2.0f);
-            mBlood->SetGrowthWithRespectToTime(-2.0f);
         }
 
         {
             ParticleEngine::Params p;
             p.mode = ParticleEngine::SpawnPolicy::Continuous;
+            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
             p.num_particles = 0.45;
             p.min_lifetime = 20.0f;
             p.max_lifetime = 20.0f;
@@ -155,7 +156,6 @@ public:
             p.min_point_size = 100;
             p.max_point_size = 150;
             mClouds.reset(new ParticleEngine(p));
-            mClouds->SetBoundaryPolicy(ParticleEngine::BoundaryPolicy::Kill);
         }
 
     }

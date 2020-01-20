@@ -803,9 +803,9 @@ public:
             params.max_point_size = 30.0f;
             params.direction_sector_start_angle = 0.0f;
             params.direction_sector_size = 0.0f;
+            params.rate_of_change_in_size_wrt_time = -20.0f;
             params.mode = ParticleEngine::SpawnPolicy::Continuous;
             mParticles = std::make_unique<ParticleEngine>(params);
-            mParticles->SetGrowthWithRespectToTime(-20.0f);
         }
         // set the target rectangle with the dimensions of the
         // sprite we want to draw.
@@ -1224,6 +1224,9 @@ public:
     Background(const glm::vec2& direction)
     {
         ParticleEngine::Params params;
+        params.motion = ParticleEngine::Motion::Linear;
+        params.mode = ParticleEngine::SpawnPolicy::Once;
+        params.boundary = ParticleEngine::BoundaryPolicy::Wrap;
         params.init_rect_width  = 1024;
         params.init_rect_height = 1024;
         params.max_xpos = 1024;
@@ -1235,6 +1238,8 @@ public:
         params.max_point_size = 8.0f;
         params.direction_sector_start_angle = std::acos(direction.x);
         params.direction_sector_size = 0.0f;
+        params.rate_of_change_in_size_wrt_dist = 0.0f;
+        params.rate_of_change_in_size_wrt_time = 0.0f;
         mStars = std::make_unique<ParticleEngine>(params);
     }
     void paint(gfx::Painter& painter, const IRect& rect)

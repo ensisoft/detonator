@@ -347,23 +347,7 @@
             </widget>
            </item>
            <item row="3" column="1" colspan="2">
-            <widget class="QComboBox" name="boundary">
-             <item>
-              <property name="text">
-               <string>Clamp</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Wrap</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Kill</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="boundary"/>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_12">
@@ -373,13 +357,7 @@
             </widget>
            </item>
            <item row="2" column="1" colspan="2">
-            <widget class="QComboBox" name="motion">
-             <item>
-              <property name="text">
-               <string>Linear</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="motion"/>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_7">
@@ -427,23 +405,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="when">
-               <item>
-                <property name="text">
-                 <string>Once</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Maintain</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Continuous</string>
-                </property>
-               </item>
-              </widget>
+              <widget class="QComboBox" name="when"/>
              </item>
              <item>
               <widget class="QLabel" name="label_8">
