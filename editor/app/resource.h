@@ -31,8 +31,10 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "utility.h"
 
 namespace app
 {
@@ -113,15 +115,17 @@ namespace app
     class GraphicsResource : public Resource
     {
     public:
-        GraphicsResource(const Content& content)
+        GraphicsResource(const Content& content, const QString& name)
             : mContent(content)
+            , mName(name)
         {}
-        GraphicsResource(Content&& content)
+        GraphicsResource(Content&& content, const QString& name)
             : mContent(std::move(content))
+            , mName(name)
         {}
         virtual QString GetName() const override
         {
-            return app::FromUtf8(mContent.GetName());
+            return mName;
         }
         virtual Type GetType() const override
         {
@@ -129,21 +133,31 @@ namespace app
         }
         virtual void Serialize(nlohmann::json& json) const override
         {
+            nlohmann::json content_json = mContent.ToJson();
+            // tag some additional data with the content's JSON
+            // in this case just the name so that we can map the object
+            // to its additional properties.
+            // note that we could basically put all the properties here as well
+            // but then we'd have to serialize everything in QVariant manually.
+            // and there could be possibilities for name conflicts
+            ASSERT(content_json.contains("resource_name") == false);
+            content_json["resource_name"] = app::ToUtf8(mName);
+
             if constexpr (type == Resource::Type::Material)
-                json["materials"].push_back(mContent.ToJson());
+                json["materials"].push_back(content_json);
             else if (type == Resource::Type::ParticleSystem)
-                json["particles"].push_back(mContent.ToJson());
+                json["particles"].push_back(content_json);
             else if (type == Resource::Type::Animation)
-                json["animations"].push_back(mContent.ToJson());
+                json["animations"].push_back(content_json);
         }
         virtual void Serialize(QJsonObject& json) const override
         {
             if constexpr (type == Resource::Type::Material)
-                json["material_" + GetName()]  = QJsonObject::fromVariantMap(mProps);
+                json["material_" + mName]  = QJsonObject::fromVariantMap(mProps);
             else if (type == Resource::Type::ParticleSystem)
-                json["particle_" + GetName()] = QJsonObject::fromVariantMap(mProps);
+                json["particle_" + mName] = QJsonObject::fromVariantMap(mProps);
             else if (type == Resource::Type::Animation)
-                json["animation_" + GetName()] = QJsonObject::fromVariantMap(mProps);
+                json["animation_" + mName] = QJsonObject::fromVariantMap(mProps);
         }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
@@ -161,11 +175,11 @@ namespace app
         virtual void LoadProperties(const QJsonObject& object) override
         {
             if constexpr (type == Resource::Type::Material)
-                mProps = object["material_" + GetName()].toObject().toVariantMap();
+                mProps = object["material_" + mName].toObject().toVariantMap();
             else if (type == Resource::Type::ParticleSystem)
-                mProps = object["material_" + GetName()].toObject().toVariantMap();
+                mProps = object["material_" + mName].toObject().toVariantMap();
             else if (type == Resource::Type::Animation)
-                mProps = object["material_" + GetName()].toObject().toVariantMap();
+                mProps = object["material_" + mName].toObject().toVariantMap();
         }
 
     protected:
@@ -183,6 +197,7 @@ namespace app
         }
     private:
         Content mContent;
+        QString mName;
         QVariantMap mProps;
     };
 

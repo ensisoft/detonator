@@ -79,7 +79,6 @@ MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
     ASSERT(resource.GetContent(&material));
 
     SetValue(mUI.materialType, material->GetType());
-    SetValue(mUI.materialName, material->GetName());
     SetValue(mUI.surfaceType,  material->GetSurfaceType());
     SetValue(mUI.minFilter,    material->GetMinTextureFilter());
     SetValue(mUI.magFilter,    material->GetMagTextureFilter());
@@ -130,6 +129,7 @@ MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
 
 
     mUI.textures->setCurrentRow(0);
+    mUI.materialName->setText(resource.GetName());
     setWindowTitle(resource.GetName());
 
     // enable/disable UI elements based on the material type
@@ -322,10 +322,11 @@ void MaterialWidget::on_actionSave_triggered()
         mCanOverwrite = true;
     }
 
-    gfx::Material material("", "", gfx::Material::Type::Color);
+    gfx::Material material("", gfx::Material::Type::Color);
     fillMaterial(material);
 
-    app::MaterialResource resource(std::move(material));
+    app::MaterialResource resource(std::move(material), name);
+
 
     // careful here!
     // the order in which we add our textures is important,
@@ -543,7 +544,6 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
         shader = "texture_map.glsl";
 
     material.SetType(GetValue(mUI.materialType));
-    material.SetName(GetValue(mUI.materialName));
     material.SetShader(shader);
     material.SetBaseColor(GetValue(mUI.baseColor));
     material.SetGamma(GetValue(mUI.gamma));
@@ -586,7 +586,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Material material("", "", gfx::Material::Type::Color);
+    gfx::Material material("", gfx::Material::Type::Color);
     fillMaterial(material);
 
 

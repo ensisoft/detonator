@@ -247,9 +247,8 @@ namespace gfx
         using TextureWrapping  = Texture::Wrapping;
 
         // constructor.
-        Material(const std::string& shader, const std::string& name, Type type)
+        Material(const std::string& shader, Type type)
             : mShader(shader)
-            , mName(name)
             , mType(type)
         {}
 
@@ -368,18 +367,6 @@ namespace gfx
             prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
             prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
         }
-
-        // Object property setters.
-
-        // Set the material name. The name can be used to
-        // identify the material among other materials.
-        void SetName(const std::string& name)
-        { mName = name; }
-
-        // Get the current material name.
-        std::string GetName() const
-        { return mName; }
-
         // Material properties getters.
 
         std::string GetShader() const
@@ -563,7 +550,6 @@ namespace gfx
         {
             nlohmann::json json;
             base::JsonWrite(json, "shader", mShader);
-            base::JsonWrite(json, "name", mName);
             base::JsonWrite(json, "type", mType);
             base::JsonWrite(json, "color", mBaseColor);
             base::JsonWrite(json, "surface", mSurfaceType);
@@ -596,7 +582,6 @@ namespace gfx
             Material mat;
 
             if (!base::JsonReadSafe(object, "shader", &mat.mShader) ||
-                !base::JsonReadSafe(object, "name", &mat.mName) ||
                 !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
                 !base::JsonReadSafe(object, "type", &mat.mType) ||
                 !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
@@ -638,7 +623,6 @@ namespace gfx
 
     private:
         std::string mShader;
-        std::string mName;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         Type mType = Type::Color;
@@ -664,7 +648,7 @@ namespace gfx
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
     {
-        return Material("solid_color.glsl", "Color Fill", Material::Type::Color)
+        return Material("solid_color.glsl", Material::Type::Color)
             .SetBaseColor(color);
     }
 
@@ -672,7 +656,7 @@ namespace gfx
     // The object being drawn must provide texture coordinates.
     inline Material TextureMap(const std::string& texture)
     {
-        return Material("texture_map.glsl", "Static Texture", Material::Type::Texture)
+        return Material("texture_map.glsl", Material::Type::Texture)
             .AddTexture(texture)
             .SetSurfaceType(Material::SurfaceType::Opaque);
     }
@@ -685,7 +669,7 @@ namespace gfx
     // the current time value needs to be set.
     inline Material SpriteSet()
     {
-        return Material("texture_map.glsl", "Sprite Animation", Material::Type::Sprite)
+        return Material("texture_map.glsl", Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteSet(const std::initializer_list<std::string>& textures)
@@ -710,7 +694,7 @@ namespace gfx
     // renders a coherent animation.
     inline Material SpriteMap()
     {
-        return Material("texture_map.glsl", "Sprite Animation", Material::Type::Sprite)
+        return Material("texture_map.glsl", Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteMap(const std::string& texture, const std::vector<URect>& frames)
@@ -732,7 +716,7 @@ namespace gfx
     // The drawable shape must provide texture coordinates.
     inline Material BitmapText(const TextBuffer& text)
     {
-        return Material("texture_map.glsl", "Bitmap Text", Material::Type::Texture)
+        return Material("texture_map.glsl", Material::Type::Texture)
             .AddTexture(text)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
@@ -740,14 +724,14 @@ namespace gfx
     // todo: refactor away
     inline Material SlidingGlintEffect(float secs)
     {
-        return Material("sliding_glint_effect.glsl", "Sliding Glint Effect", Material::Type::Color)
+        return Material("sliding_glint_effect.glsl", Material::Type::Color)
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }
     // todo: refactor away
     inline Material ConcentricRingsEffect(float secs)
     {
-        return Material("concentric_rings_effect.glsl", "Concentric Rings Effect", Material::Type::Color)
+        return Material("concentric_rings_effect.glsl", Material::Type::Color)
             .SetSurfaceType(Material::SurfaceType::Transparent)
             .SetRuntime(secs);
     }
