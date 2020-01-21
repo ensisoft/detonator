@@ -118,15 +118,15 @@ bool Workspace::LoadContent(const QString& filename)
     {
         for (const auto& json_mat : json["materials"].items())
         {
-            bool success  = false;
-            auto material = gfx::Material::FromJson(json_mat.value(), &success);
-            if (!success)
+            std::optional<gfx::Material> ret = gfx::Material::FromJson(json_mat.value());
+            if (!ret.has_value())
             {
                 ERROR("Failed to load material properties.");
                 continue;
             }
+            auto material = ret.value();
             DEBUG("Loaded material: '%1'", material.GetName());
-            resources.push_back(std::make_unique<MaterialResource>(material));
+            resources.push_back(std::make_unique<MaterialResource>(std::move(material)));
         }
     }
     mResources = std::move(resources);

@@ -150,8 +150,9 @@ void unit_test_rect_serialize()
     for (const auto& val : test_values)
     {
         const gfx::Rect<T> src(val, val, val, val);
-        const gfx::Rect<T> dst(gfx::Rect<T>::FromJson(src.ToJson()));
-        TEST_REQUIRE(src == dst);
+        const auto& value = gfx::Rect<T>::FromJson(src.ToJson());
+        TEST_REQUIRE(value.has_value());
+        TEST_REQUIRE(value.value() == src);
     }
 }
 
@@ -164,23 +165,17 @@ void unit_test_color_serialize()
     {
         {
             const gfx::Color4f src(val, val, val, val);
-            const gfx::Color4f dst(gfx::Color4f::FromJson(src.ToJson()));
-            TEST_REQUIRE(src == dst);
-        }
-        {
-            bool success = false;
-            const gfx::Color4f src(val, val, val, val);
-            const gfx::Color4f dst(gfx::Color4f::FromJson(src.ToJson(), &success));
-            TEST_REQUIRE(src == dst);
-            TEST_REQUIRE(success == true);
+            const auto& value = gfx::Color4f::FromJson(src.ToJson());
+            TEST_REQUIRE(value.has_value());
+            TEST_REQUIRE(value.value() == src);
         }
         {
             bool success = true;
             const auto& json = nlohmann::json::parse(
                 R"({"r":0.0, "g":"basa", "b":0.0, "a":0.0})");
 
-            const gfx::Color4f dst(gfx::Color4f::FromJson(json, &success));
-            TEST_REQUIRE(success == false);
+            const auto& value = gfx::Color4f::FromJson(json);
+            TEST_REQUIRE(value.has_value() == false);
         }
     }
 }

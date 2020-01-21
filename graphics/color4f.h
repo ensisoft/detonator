@@ -28,6 +28,8 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <optional>
+
 #include "base/math.h"
 #include "base/utility.h"
 
@@ -180,27 +182,15 @@ namespace gfx
             };
             return json;
         }
-        static Color4f FromJson(const nlohmann::json& object)
+        static std::optional<Color4f> FromJson(const nlohmann::json& object)
         {
-            const float r = object["r"];
-            const float g = object["g"];
-            const float b = object["b"];
-            const float a = object["a"];
-            return Color4f(r, g, b, a);
-        }
-        static Color4f FromJson(const nlohmann::json& object, bool* success)
-        {
-            float r, g, b, a;
-            if (!base::JsonReadSafe(object, "r", &r) ||
-                !base::JsonReadSafe(object, "g", &g) ||
-                !base::JsonReadSafe(object, "b", &b) ||
-                !base::JsonReadSafe(object, "a", &a))
-            {
-                *success = false;
-                return Color4f();
-            }
-            *success = true;
-            return Color4f(r, g, b, a);
+            Color4f ret;
+            if (!base::JsonReadSafe(object, "r", &ret.mRed) ||
+                !base::JsonReadSafe(object, "g", &ret.mGreen) ||
+                !base::JsonReadSafe(object, "b", &ret.mBlue) ||
+                !base::JsonReadSafe(object, "a", &ret.mAlpha))
+                return std::nullopt;
+            return ret;
         }
 
     private:

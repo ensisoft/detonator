@@ -148,28 +148,90 @@ bool JsonReadSafe(const JsonObject& object, const char* name, bool* out)
     *out = object[name];
     return true;
 }
+
+template<typename JsonObject, typename EnumT> inline
+bool JsonReadSafeEnum(const JsonObject& object, const char* name, EnumT* out)
+{
+    std::string str;
+    if (!object.contains(name) || !object[name].is_string())
+        return false;
+
+    str = object[name];
+    const auto& enum_val = magic_enum::enum_cast<EnumT>(str);
+    if (!enum_val.has_value())
+        return false;
+
+    *out = enum_val.value();
+    return true;
+}
+
+template<typename JsonObject, typename T> inline
+bool JsonReadObject(const JsonObject& object, const char* name, T* out)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const std::optional<T>& ret = T::FromJson(object[name]);
+    if (!ret.has_value())
+        return false;
+    *out = ret.value();
+    return true;
+}
+
 template<typename JsonObject, typename ValueT> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
 {
     if constexpr (std::is_enum<ValueT>::value)
-    {
-        std::string str;
-        if (!object.contains(name) || !object[name].is_string())
-            return false;
+        return JsonReadSafeEnum(object, name, out);
+    else return JsonReadObject(object, name, out);
 
-        str = object[name];
-        const auto& enum_val = magic_enum::enum_cast<ValueT>(str);
-        if (!enum_val.has_value())
-            return false;
+    return false;
+}
 
-        *out = enum_val.value();
-        return true;
-    }
+template<typename JsonObject, typename EnumT> inline
+void JsonWriteEnum(JsonObject& object, const char* name, EnumT value)
+{
+    const std::string str(magic_enum::enum_name(value));
+    object[name] = str;
+}
+template<typename JsonObject, typename T> inline
+void JsonWriteObject(JsonObject& object, const char* name, const T& value)
+{
+    object[name] = value.ToJson();
+}
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, int value)
+{ object[name] = value; }
 
-    if (!object.contains(name))
-        return false;
-    *out = object[name];
-    return true;
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, unsigned value)
+{ object[name] = value; }
+
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, double value)
+{ object[name] = value; }
+
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, float value)
+{ object[name] = value; }
+
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, const std::string& value)
+{ object[name] = value; }
+
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, bool value)
+{ object[name] = value; }
+
+template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, const char* str)
+{ object[name] = str; }
+
+template<typename JsonObject, typename ValueT> inline
+void JsonWrite(JsonObject& object, const char* name, const ValueT& value)
+{
+    if constexpr (std::is_enum<ValueT>::value)
+        JsonWriteEnum(object, name, value);
+    else JsonWriteObject(object, name, value);
 }
 
 } // base

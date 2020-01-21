@@ -38,6 +38,7 @@
 #include <functional> // for hash
 #include <cmath>
 #include <cassert>
+#include <optional>
 
 #include "base/utility.h"
 #include "bitmap.h"
@@ -560,52 +561,43 @@ namespace gfx
 
         nlohmann::json ToJson() const
         {
-            const std::string surface(magic_enum::enum_name(mSurfaceType));
-            const std::string minfilter(magic_enum::enum_name(mMinFilter));
-            const std::string magfilter(magic_enum::enum_name(mMagFilter));
-            const std::string wrapx(magic_enum::enum_name(mWrapX));
-            const std::string wrapy(magic_enum::enum_name(mWrapY));
-            const std::string type(magic_enum::enum_name(mType));
-            nlohmann::json json = {
-                {"shader", mShader},
-                {"name",   mName},
-                {"type",   type},
-                {"color",  mBaseColor.ToJson()},
-                {"surface",surface},
-                {"gamma",  mGamma},
-                {"fps",    mFps},
-                {"blending", mBlendFrames},
-                {"texture_min_filter", minfilter},
-                {"texture_mag_filter", magfilter},
-                {"texture_wrap_x", wrapx},
-                {"texture_wrap_y", wrapy},
-                {"texture_scale_x", mTextureScaleX},
-                {"texture_scale_y", mTextureScaleY}
-            };
+            nlohmann::json json;
+            base::JsonWrite(json, "shader", mShader);
+            base::JsonWrite(json, "name", mName);
+            base::JsonWrite(json, "type", mType);
+            base::JsonWrite(json, "color", mBaseColor);
+            base::JsonWrite(json, "surface", mSurfaceType);
+            base::JsonWrite(json, "gamma", mGamma);
+            base::JsonWrite(json, "fps", mFps);
+            base::JsonWrite(json, "blending", mBlendFrames);
+            base::JsonWrite(json, "texture_min_filter", mMinFilter);
+            base::JsonWrite(json, "texture_mag_filter", mMagFilter);
+            base::JsonWrite(json, "texture_wrap_x", mWrapX);
+            base::JsonWrite(json, "texture_wrap_y", mWrapY);
+            base::JsonWrite(json, "texture_scale_x", mTextureScaleX);
+            base::JsonWrite(json, "texture_scale_y", mTextureScaleY);
+
             for (const auto& sampler : mTextures)
             {
                 if (!sampler.source->CanSerialize())
                     continue;
                 nlohmann::json js;
-                js["box"] = sampler.box.ToJson();
-                js["box_is_normalized"] = sampler.box_is_normalized;
-                js["enable_gc"] = sampler.enable_gc;
-                js["class"] = typeid(*sampler.source).name();
-                js["source"] = sampler.source->ToJson();
+                base::JsonWrite(js, "box", sampler.box);
+                base::JsonWrite(js, "box_is_normalized", sampler.box_is_normalized);
+                base::JsonWrite(js, "class", typeid(*sampler.source).name());
+                base::JsonWrite(js, "source", *sampler.source);
+                base::JsonWrite(js, "enable_gc", sampler.enable_gc);
                 json["samplers"].push_back(js);
             }
             return json;
         }
-        static Material FromJson(const nlohmann::json& object, bool* success = nullptr)
+        static std::optional<Material> FromJson(const nlohmann::json& object)
         {
             Material mat;
 
-            mat.mBaseColor = Color4f::FromJson(object["color"], success);
-            if (!success)
-                return mat;
-
             if (!base::JsonReadSafe(object, "shader", &mat.mShader) ||
                 !base::JsonReadSafe(object, "name", &mat.mName) ||
+                !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
                 !base::JsonReadSafe(object, "type", &mat.mType) ||
                 !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
                 !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
@@ -617,30 +609,27 @@ namespace gfx
                 !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
                 !base::JsonReadSafe(object, "texture_scale_x", &mat.mTextureScaleX) ||
                 !base::JsonReadSafe(object, "texture_scale_y", &mat.mTextureScaleY))
-            {
-                *success = false;
-                return mat;
-            }
+                return std::nullopt;
+
             if (!object.contains("samplers"))
-            {
-                *success = true;
                 return mat;
-            }
+
             for (const auto& json_sampler : object["samplers"].items())
             {
                 const auto& obj = json_sampler.value();
                 const std::string& class_ = obj["class"];
                 auto source = detail::TextureSourceFactory::Create(class_);
                 if (!source->FromJson(obj["source"]))
-                    return mat;
+                    return std::nullopt;
                 TextureSampler s;
-                s.box = FRect::FromJson(obj["box"]);
-                s.box_is_normalized = obj["box_is_normalized"];
-                s.enable_gc         = obj["enable_gc"];
-                s.source            = std::move(source);
+                if (!base::JsonReadSafe(obj, "box", &s.box) ||
+                    !base::JsonReadSafe(obj, "box_is_normalized", &s.box_is_normalized) ||
+                    !base::JsonReadSafe(obj, "enable_gc", &s.enable_gc))
+                    return std::nullopt;
+
+                s.source = std::move(source);
                 mat.mTextures.push_back(std::move(s));
             }
-            *success = true;
             return mat;
         }
     private:
