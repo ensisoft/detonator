@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1318</width>
-    <height>840</height>
+    <width>1338</width>
+    <height>815</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,6 +46,12 @@
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_24">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Base Color</string>
                </property>
@@ -76,6 +82,12 @@
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_23">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Name</string>
                </property>
@@ -83,6 +95,12 @@
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_27">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Material type</string>
                </property>
@@ -93,6 +111,12 @@
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_25">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Surface type</string>
                </property>
@@ -100,6 +124,12 @@
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_26">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Gamma</string>
                </property>
@@ -397,7 +427,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QGroupBox" name="texMaps">
+         <widget class="QGroupBox" name="textureMaps">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -482,7 +512,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="texProps">
+         <widget class="QGroupBox" name="textureProp">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -606,7 +636,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="texRect">
+         <widget class="QGroupBox" name="textureRect">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -614,7 +644,7 @@
            <string>Texture rect</string>
           </property>
           <property name="checkable">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="checked">
            <bool>false</bool>
@@ -847,7 +877,7 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
-  <tabstop>texRect</tabstop>
+  <tabstop>textureRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>

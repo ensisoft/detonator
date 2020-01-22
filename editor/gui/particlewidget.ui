@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1094</width>
+    <width>1464</width>
     <height>842</height>
    </rect>
   </property>
@@ -27,6 +27,38 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Base properties</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QLabel" name="label_28">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="name">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
            <string>Material</string>
@@ -34,6 +66,12 @@
           <layout class="QGridLayout" name="gridLayout_6">
            <item row="0" column="0">
             <widget class="QLabel" name="label_23">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Texture</string>
              </property>
@@ -48,6 +86,12 @@
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="browseTexture">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Browse ...</string>
              </property>
@@ -67,23 +111,7 @@
             <widget class="color_widgets::ColorSelector" name="color"/>
            </item>
            <item row="2" column="1">
-            <widget class="QComboBox" name="surfaceType">
-             <item>
-              <property name="text">
-               <string>Opaque</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Transparent</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Emissive</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="surfaceType"/>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_25">
@@ -107,8 +135,21 @@
            <bool>true</bool>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>X pos</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="translateX">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimum">
               <double>-1000.000000000000000</double>
              </property>
@@ -127,8 +168,17 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="scaleX">
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="translateY">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimum">
+              <double>-1000.000000000000000</double>
+             </property>
              <property name="maximum">
               <double>1000.000000000000000</double>
              </property>
@@ -137,23 +187,23 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_18">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_20">
              <property name="text">
-              <string>X pos</string>
+              <string>Width</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
-            <widget class="QDoubleSpinBox" name="rotation">
-             <property name="wrapping">
-              <bool>true</bool>
-             </property>
-             <property name="minimum">
-              <double>-180.000000000000000</double>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="scaleX">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="maximum">
-              <double>180.000000000000000</double>
+              <double>1000.000000000000000</double>
              </property>
              <property name="stepType">
               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -177,34 +227,30 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_20">
-             <property name="text">
-              <string>Width</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_22">
              <property name="text">
               <string>Rotation</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="translateY">
+           <item row="4" column="1">
+            <widget class="QDoubleSpinBox" name="rotation">
+             <property name="wrapping">
+              <bool>true</bool>
+             </property>
              <property name="minimum">
-              <double>-1000.000000000000000</double>
+              <double>-180.000000000000000</double>
              </property>
              <property name="maximum">
-              <double>1000.000000000000000</double>
+              <double>180.000000000000000</double>
              </property>
              <property name="stepType">
               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
+           <item row="5" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <widget class="QPushButton" name="plus90">
@@ -774,6 +820,18 @@
     <string>Pause</string>
    </property>
   </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/save.png</normaloff>:/32x32_ico_png/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -794,6 +852,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>name</tabstop>
   <tabstop>filename</tabstop>
   <tabstop>browseTexture</tabstop>
   <tabstop>surfaceType</tabstop>
@@ -829,8 +888,8 @@
   <tabstop>growth</tabstop>
   <tabstop>timeDerivative</tabstop>
   <tabstop>distDerivative</tabstop>
-  <tabstop>curTime</tabstop>
   <tabstop>curNumParticles</tabstop>
+  <tabstop>curTime</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

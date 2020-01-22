@@ -41,6 +41,7 @@
 #include "graphics/color4f.h"
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
+#include "editor/app/resource.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -128,6 +129,11 @@ inline void SetValue(QCheckBox* check, bool val)
     QSignalBlocker s(check);
     check->setChecked(val);
 }
+inline void SetValue(QSpinBox* spin, int value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(value);
+}
 
 struct ComboBoxValueGetter
 {
@@ -209,5 +215,101 @@ inline CheckboxGetter GetValue(const QCheckBox* check)
 inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
 { return SpinBoxValueGetter { spin }; }
 
+inline void SetProperty(app::Resource& res, const QString& name, const QVariant& prop)
+{
+    res.SetProperty(name, prop);
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QComboBox* cmb)
+{
+    res.SetProperty(name, cmb->currentText());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QLineEdit* edit)
+{
+    res.SetProperty(name, edit->text());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QDoubleSpinBox* spin)
+{
+    res.SetProperty(name, spin->value());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QSpinBox* spin)
+{
+    res.SetProperty(name, spin->value());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QCheckBox* chk)
+{
+    res.SetProperty(name, chk->isChecked());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const QGroupBox* chk)
+{
+    res.SetProperty(name, chk->isChecked());
+}
+inline void SetProperty(app::Resource& res, const QString& name, const color_widgets::ColorSelector* color)
+{
+    res.SetProperty(name, color->color());
+}
+
+template<typename T> inline
+void GetProperty(const app::Resource& res, const QString& name, T* out)
+{
+    res.GetProperty(name, out);
+}
+
+inline void GetProperty(const app::Resource& res, const QString& name, QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+
+    QString text;
+    if (res.GetProperty(name, &text))
+        cmb->setCurrentIndex(cmb->findText(text));
+}
+inline void GetProperty(const app::Resource& res, const QString& name, QLineEdit* edit)
+{
+    QSignalBlocker s(edit);
+
+    QString text;
+    if (res.GetProperty(name, &text))
+        edit->setText(text);
+}
+inline void GetProperty(const app::Resource& res, const QString& name, QDoubleSpinBox* spin)
+{
+    QSignalBlocker s(spin);
+
+    double value = 0.0f;
+    if (res.GetProperty(name, &value))
+        spin->setValue(value);
+
+}
+inline void GetProperty(const app::Resource& res, const QString& name, QSpinBox* spin)
+{
+    QSignalBlocker s(spin);
+
+    int value = 0;
+    if (res.GetProperty(name, &value))
+        spin->setValue(value);
+}
+inline void GetProperty(const app::Resource& res, const QString& name, QCheckBox* chk)
+{
+    QSignalBlocker s(chk);
+
+    bool value = false;
+    if (res.GetProperty(name, &value))
+        chk->setChecked(value);
+}
+inline void GetProperty(const app::Resource& res, const QString& name, QGroupBox* chk)
+{
+    QSignalBlocker s(chk);
+
+    bool value = false;
+    if (res.GetProperty(name, &value))
+        chk->setChecked(value);
+}
+inline void GetProperty(const app::Resource& res, const QString& name, color_widgets::ColorSelector* color)
+{
+    QSignalBlocker s(color);
+
+    QColor value;
+    if (res.GetProperty(name, &value))
+        color->setColor(value);
+}
 
 } // namespace

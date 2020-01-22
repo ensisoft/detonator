@@ -139,6 +139,7 @@ int main(int argc, char* argv[])
     catch (const std::exception& e)
     {
         std::cerr << "Oops... something went wrong.";
+        std::cerr << e.what();
         std::cerr << std::endl;
     }
     std::cout << "Have a good day.\n";

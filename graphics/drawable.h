@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -35,6 +36,7 @@
 #include <cmath>
 
 #include "base/math.h"
+#include "base/utility.h"
 #include "device.h"
 #include "shader.h"
 #include "geometry.h"
@@ -336,6 +338,60 @@ namespace gfx
         }
         size_t GetNumParticlesAlive() const
         { return mParticles.size(); }
+        const Params& GetParams() const
+        { return mParams; }
+
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json;
+            base::JsonWrite(json, "motion", mParams.motion);
+            base::JsonWrite(json, "mode", mParams.mode);
+            base::JsonWrite(json, "boundary", mParams.boundary);
+            base::JsonWrite(json, "num_particles", mParams.num_particles);
+            base::JsonWrite(json, "min_lifetime", mParams.min_lifetime);
+            base::JsonWrite(json, "max_lifetime", mParams.max_lifetime);
+            base::JsonWrite(json, "max_xpos", mParams.max_xpos);
+            base::JsonWrite(json, "max_ypos", mParams.max_ypos);
+            base::JsonWrite(json, "init_rect_xpos", mParams.init_rect_xpos);
+            base::JsonWrite(json, "init_rect_ypos", mParams.init_rect_ypos);
+            base::JsonWrite(json, "init_rect_width", mParams.init_rect_width);
+            base::JsonWrite(json, "init_rect_height", mParams.init_rect_height);
+            base::JsonWrite(json, "min_velocity", mParams.min_velocity);
+            base::JsonWrite(json, "max_velocity", mParams.max_velocity);
+            base::JsonWrite(json, "direction_sector_start_angle", mParams.direction_sector_start_angle);
+            base::JsonWrite(json, "direction_sector_size", mParams.direction_sector_size);
+            base::JsonWrite(json, "min_point_size", mParams.min_point_size);
+            base::JsonWrite(json, "max_point_size", mParams.max_point_size);
+            base::JsonWrite(json, "growth_over_time", mParams.rate_of_change_in_size_wrt_time);
+            base::JsonWrite(json, "growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
+            return json;
+        }
+        static std::optional<KinematicsParticleEngine> FromJson(const nlohmann::json& object)
+        {
+            Params params;
+            if (!base::JsonReadSafe(object, "motion", &params.motion) ||
+                !base::JsonReadSafe(object, "mode", &params.mode) ||
+                !base::JsonReadSafe(object, "boundary", &params.boundary) ||
+                !base::JsonReadSafe(object, "num_particles", &params.num_particles) ||
+                !base::JsonReadSafe(object, "min_lifetime", &params.min_lifetime) ||
+                !base::JsonReadSafe(object, "max_lifetime", &params.max_lifetime) ||
+                !base::JsonReadSafe(object, "max_xpos", &params.max_xpos) ||
+                !base::JsonReadSafe(object, "max_ypos", &params.max_ypos) ||
+                !base::JsonReadSafe(object, "init_rect_xpos", &params.init_rect_xpos) ||
+                !base::JsonReadSafe(object, "init_rect_ypos", &params.init_rect_ypos) ||
+                !base::JsonReadSafe(object, "init_rect_width", &params.init_rect_width) ||
+                !base::JsonReadSafe(object, "init_rect_height", &params.init_rect_height) ||
+                !base::JsonReadSafe(object, "min_velocity", &params.min_velocity) ||
+                !base::JsonReadSafe(object, "max_velocity", &params.max_velocity) ||
+                !base::JsonReadSafe(object, "direction_sector_start_angle", &params.direction_sector_start_angle) ||
+                !base::JsonReadSafe(object, "direction_sector_size", &params.direction_sector_size) ||
+                !base::JsonReadSafe(object, "min_point_size", &params.min_point_size) ||
+                !base::JsonReadSafe(object, "max_point_size", &params.max_point_size) ||
+                !base::JsonReadSafe(object, "growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
+                !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist))
+                    return std::nullopt;
+            return KinematicsParticleEngine(params);
+        }
 
     private:
         void InitParticles(size_t num)

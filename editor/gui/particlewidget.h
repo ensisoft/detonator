@@ -30,44 +30,63 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <vector>
 
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "mainwidget.h"
 
-namespace gui 
+namespace app {
+    class Resource;
+} // app
+
+namespace gui
 {
     class ParticleEditorWidget : public MainWidget
     {
         Q_OBJECT
     public:
         ParticleEditorWidget();
+        ParticleEditorWidget(const app::Resource& resource, app::Workspace* workspace);
        ~ParticleEditorWidget();
 
         virtual void addActions(QToolBar& bar) override;
-        virtual void addActions(QMenu& menu) override;       
+        virtual void addActions(QMenu& menu) override;
         virtual bool saveState(Settings& settings) const;
         virtual bool loadState(const Settings& settings);
         virtual void reloadShaders() override;
+        virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
         void on_actionPlay_triggered();
         void on_actionStop_triggered();
         void on_actionPause_triggered();
+        void on_actionSave_triggered();
         void on_browseTexture_clicked();
         void on_resetTransform_clicked();
         void on_plus90_clicked();
         void on_minus90_clicked();
         void paintScene(gfx::Painter& painter, double secs);
-        
+
+    private:
+        void fillParams(gfx::KinematicsParticleEngine::Params& params) const;
+
     private:
         Ui::ParticleWidget mUI;
     private:
+        app::Workspace* mWorkspace = nullptr;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
         bool mPaused = false;
         float mTime  = 0.0f;
     private:
-        QStringList mTextures;
+        struct TextureRect {
+            QString file;
+            float x = 0.0f;
+            float y = 0.0f;
+            float w = 1.0f;
+            float h = 1.0f;
+        };
+        std::vector<TextureRect> mTextures;
     };
 
 } // namespace

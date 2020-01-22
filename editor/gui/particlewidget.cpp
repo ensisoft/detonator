@@ -27,6 +27,8 @@
 #include "warnpush.h"
 #  include <QtMath>
 #  include <QFileDialog>
+#  include <QMessageBox>
+#  include <QTextStream>
 #include "warnpop.h"
 
 #include "graphics/painter.h"
@@ -36,10 +38,13 @@
 #include "graphics/types.h"
 
 #include "editor/app/eventlog.h"
+#include "editor/app/resource.h"
 #include "editor/app/utility.h"
+#include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "particlewidget.h"
+#include "utility.h"
 
 namespace gui
 {
@@ -60,10 +65,103 @@ ParticleEditorWidget::ParticleEditorWidget()
     mUI.scaleY->setValue(500);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
+    mUI.name->setText("My Particle System");
+    setWindowTitle("My Particle System");
 
     PopulateFromEnum<gfx::KinematicsParticleEngine::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngine::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngine::SpawnPolicy>(mUI.when);
+    PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
+}
+
+ParticleEditorWidget::ParticleEditorWidget(const app::Resource& resource, app::Workspace* workspace) : ParticleEditorWidget()
+{
+    mWorkspace = workspace;
+
+    const auto& name = resource.GetName();
+    DEBUG("Editing particle system: '%1'", name);
+
+    QStringList texture_files;
+    QStringList texture_rects;
+    if (mWorkspace->HasMaterial(name))
+    {
+        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
+        GetProperty(material_resource, "texture_files", &texture_files);
+        GetProperty(material_resource, "texture_rects", &texture_rects);
+        GetProperty(material_resource, "color", mUI.color);
+        GetProperty(material_resource, "surface", mUI.surfaceType);
+    }
+    else
+    {
+        WARN("Could not find matching material for particle system '%1. Has it been deleted?", name);
+        GetProperty(resource, "texture_files", &texture_files);
+        GetProperty(resource, "texture_rects", &texture_rects);
+        GetProperty(resource, "color", mUI.color);
+        GetProperty(resource, "surface", mUI.surfaceType);
+    }
+    ASSERT(texture_files.size() == texture_rects.size());
+    for (int i=0; i<texture_files.size(); ++i)
+    {
+        const auto& file = texture_files[i];
+        const auto& rect = texture_rects[i];
+        if (!QFileInfo(file).exists())
+        {
+            WARN("Texture '%1' could no longer be found. Skipped.");
+            continue;
+        }
+        QString stupid(rect);
+        QTextStream ss(&stupid);
+        float x, y, w, h;
+        ss >> x >> y >> w >> h;
+
+        TextureRect texture;
+        texture.file = file;
+        texture.x = x;
+        texture.y = y;
+        texture.w = w;
+        texture.h = h;
+        mTextures.push_back(texture);
+    }
+    if (mTextures.size() == 1)
+        mUI.filename->setText(mTextures[0].file);
+    else if (mTextures.size() > 1)
+        mUI.filename->setText("Multiple files ...");
+
+    GetProperty(resource, "transform_enabled", mUI.transform);
+    GetProperty(resource, "transform_xpos", mUI.translateX);
+    GetProperty(resource, "transform_ypos", mUI.translateY);
+    GetProperty(resource, "transform_width", mUI.scaleX);
+    GetProperty(resource, "transform_height", mUI.scaleY);
+    GetProperty(resource, "transform_rotation", mUI.rotation);
+    GetProperty(resource, "use_init_rect", mUI.initRect);
+    GetProperty(resource, "use_direction_sector", mUI.dirSector);
+    GetProperty(resource, "use_growth", mUI.growth);
+
+    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngine>();
+    const auto& params = engine->GetParams();
+    SetValue(mUI.motion, params.motion);
+    SetValue(mUI.when,   params.mode);
+    SetValue(mUI.boundary, params.boundary);
+    SetValue(mUI.numParticles, params.num_particles);
+    SetValue(mUI.simWidth, params.max_xpos);
+    SetValue(mUI.simHeight, params.max_ypos);
+    SetValue(mUI.minLifetime, params.min_lifetime);
+    SetValue(mUI.maxLifetime, params.max_lifetime);
+    SetValue(mUI.minPointsize, params.min_point_size);
+    SetValue(mUI.maxPointsize, params.max_point_size);
+    SetValue(mUI.minVelocity, params.min_velocity);
+    SetValue(mUI.maxVelocity, params.max_velocity);
+    SetValue(mUI.initX, params.init_rect_xpos);
+    SetValue(mUI.initY, params.init_rect_ypos);
+    SetValue(mUI.initWidth, params.init_rect_width);
+    SetValue(mUI.initHeight, params.init_rect_height);
+    SetValue(mUI.dirStartAngle, qRadiansToDegrees(params.direction_sector_start_angle));
+    SetValue(mUI.dirSizeAngle, qRadiansToDegrees(params.direction_sector_size));
+    SetValue(mUI.timeDerivative, params.rate_of_change_in_size_wrt_time);
+    SetValue(mUI.distDerivative, params.rate_of_change_in_size_wrt_dist);
+
+    mUI.name->setText(name);
+    setWindowTitle(name);
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
@@ -79,6 +177,8 @@ void ParticleEditorWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionPause);
     bar.addSeparator();
     bar.addAction(mUI.actionStop);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSave);
 }
 
 void ParticleEditorWidget::addActions(QMenu& menu)
@@ -87,11 +187,24 @@ void ParticleEditorWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionPause);
     menu.addSeparator();
     menu.addAction(mUI.actionStop);
+    menu.addSeparator();
+    menu.addAction(mUI.actionSave);
 }
 
 bool ParticleEditorWidget::saveState(Settings& settings) const
 {
-    settings.setValue("Particle", "textures", mTextures);
+    QStringList texture_files;
+    QStringList texture_rects;
+    for (const auto& texture : mTextures)
+    {
+        texture_files << texture.file;
+        texture_rects << QString("%1 %2 %3 %4")
+            .arg(texture.x).arg(texture.y)
+            .arg(texture.w).arg(texture.h);
+    }
+    settings.setValue("Particle", "texture_files", texture_files);
+    settings.setValue("Particle", "texture_rects", texture_rects);
+    settings.saveWidget("Particle", mUI.name);
     settings.saveWidget("Particle", mUI.color);
     settings.saveWidget("Particle", mUI.surfaceType);
     settings.saveWidget("Particle", mUI.transform);
@@ -128,12 +241,35 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
 
 bool ParticleEditorWidget::loadState(const Settings& settings)
 {
-    mTextures = settings.getValue("Particle", "textures", mTextures);
-    if (mTextures.count() == 1)
-        mUI.filename->setText(mTextures[0]);
-    else if (mTextures.count() > 1)
+    const auto& texture_files = settings.getValue("Particle", "texture_files", QStringList());
+    const auto& texture_rects = settings.getValue("Particle", "texture_rects", QStringList());
+    ASSERT(texture_files.size() == texture_rects.size());
+    for (int i=0; i<texture_files.size(); ++i)
+    {
+        if (!QFileInfo(texture_files[i]).exists())
+        {
+            WARN("Texture '%1' no longer exists. Skipped.");
+            continue;
+        }
+        QString stupid(texture_rects[i]);
+        QTextStream ss(&stupid);
+        float x, y, w, h;
+        ss >> x >> y >> w >> h;
+
+        TextureRect texture;
+        texture.file = texture_files[i];
+        texture.x = x;
+        texture.y = y;
+        texture.w = w;
+        texture.h = h;
+        mTextures.push_back(texture);
+    }
+    if (mTextures.size() == 1)
+        mUI.filename->setText(mTextures[0].file);
+    else if (mTextures.size() > 1)
         mUI.filename->setText("Multiple files ...");
 
+    settings.loadWidget("Particle", mUI.name);
     settings.loadWidget("Particle", mUI.color);
     settings.loadWidget("Particle", mUI.surfaceType);
     settings.loadWidget("Particle", mUI.transform);
@@ -173,11 +309,173 @@ void ParticleEditorWidget::reloadShaders()
     mUI.widget->reloadShaders();
 }
 
+void ParticleEditorWidget::setWorkspace(app::Workspace* workspace)
+{
+    mWorkspace = workspace;
+}
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
+}
+
+void ParticleEditorWidget::on_actionSave_triggered()
+{
+    const auto& name = mUI.name->text();
+    if (name.isEmpty())
+    {
+        mUI.name->setFocus();
+        return;
+    }
+
+    if (mWorkspace->HasParticleSystem(name))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText("Workspace already contains particle system by this name. Overwrite?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
+    // serialize texture files and rectangles into string lists.
+    QStringList texture_files;
+    QStringList texture_rects;
+    for (const auto& texture : mTextures)
+    {
+        texture_files << texture.file;
+        texture_rects << QString("%1 %2 %3 %4")
+            .arg(texture.x).arg(texture.y)
+            .arg(texture.w).arg(texture.h);
+    }
+
+    gfx::KinematicsParticleEngine::Params params;
+    fillParams(params);
+    gfx::KinematicsParticleEngine engine(params);
+    app::ParticleSystemResource particle_resource(std::move(engine), name);
+
+    SetProperty(particle_resource, "texture_files", texture_files);
+    SetProperty(particle_resource, "texture_rects", texture_rects);
+    SetProperty(particle_resource, "color", mUI.color);
+    SetProperty(particle_resource, "surface", mUI.surfaceType);
+    SetProperty(particle_resource, "transform_enabled", mUI.transform);
+    SetProperty(particle_resource, "transform_xpos", mUI.translateX);
+    SetProperty(particle_resource, "transform_ypos", mUI.translateY);
+    SetProperty(particle_resource, "transform_width", mUI.scaleX);
+    SetProperty(particle_resource, "transform_height", mUI.scaleY);
+    SetProperty(particle_resource, "transform_rotation", mUI.rotation);
+    SetProperty(particle_resource, "use_init_rect", mUI.initRect);
+    SetProperty(particle_resource, "use_direction_sector", mUI.dirSector);
+    SetProperty(particle_resource, "use_growth", mUI.growth);
+    mWorkspace->SaveParticleSystem(particle_resource);
+    INFO("Saved particle system '%1'", name);
+    NOTE("Saved particle system '%1'", name);
+
+    gfx::Material::Type type;
+    if (mTextures.size() == 0)
+        type = gfx::Material::Type::Color;
+    else if (mTextures.size() == 1)
+        type = gfx::Material::Type::Texture;
+    else if (mTextures.size() > 1)
+        type = gfx::Material::Type::Sprite;
+
+    auto material = gfx::Material::MakeMaterial(type);
+    // if the material exists, copy the existing parameters
+    // then overwrite only those that have been changed through this UI.
+    if (mWorkspace->HasMaterial(name))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
+        if (msg.exec() == QMessageBox::No)
+            return;
+
+        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
+        const gfx::Material* content = nullptr;
+        material_resource.GetContent(&content);
+        material = *content;
+    }
+    else
+    {
+        material.SetFps(mTextures.size());
+    }
+
+    // set the parameters from the UI, so that the material gets updated
+    // if the UI values have been changed.
+    material.SetType(type);
+    material.SetBaseColor(GetValue(mUI.color));
+    material.SetSurfaceType(GetValue(mUI.surfaceType));
+    for (size_t i=0; i<mTextures.size(); ++i)
+    {
+        const auto& texture = mTextures[i];
+        material.AddTexture(app::ToUtf8(texture.file));
+        material.SetTextureRect(i, gfx::FRect(texture.x, texture.y, texture.w, texture.h));
+    }
+
+    app::MaterialResource material_resource(std::move(material), name);
+    SetProperty(material_resource, "texture_files", texture_files);
+    SetProperty(material_resource, "texture_rects", texture_rects);
+    SetProperty(material_resource, "color", mUI.color);
+    SetProperty(material_resource, "surface", mUI.surfaceType);
+    mWorkspace->SaveMaterial(material_resource);
+    INFO("Saved material '%1'", name);
+    NOTE("Saved material '%1'", name);
+
+    setWindowTitle(name);
+}
+
+void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngine::Params& params) const
+{
+    params.motion         = GetValue(mUI.motion);
+    params.mode           = GetValue(mUI.when);
+    params.boundary       = GetValue(mUI.boundary);
+    params.num_particles  = GetValue(mUI.numParticles);
+    params.max_xpos       = GetValue(mUI.simWidth);
+    params.max_ypos       = GetValue(mUI.simHeight);
+    params.min_lifetime   = GetValue(mUI.minLifetime);
+    params.max_lifetime   = GetValue(mUI.maxLifetime);
+    params.min_point_size = GetValue(mUI.minPointsize);
+    params.max_point_size = GetValue(mUI.maxPointsize);
+    params.min_velocity   = GetValue(mUI.minVelocity);
+    params.max_velocity   = GetValue(mUI.maxVelocity);
+
+    if (mUI.initRect->isChecked())
+    {
+        params.init_rect_xpos   = GetValue(mUI.initX);
+        params.init_rect_ypos   = GetValue(mUI.initY);
+        params.init_rect_width  = GetValue(mUI.initWidth);
+        params.init_rect_height = GetValue(mUI.initHeight);
+    }
+    else
+    {
+        params.init_rect_xpos = 0.0f;
+        params.init_rect_ypos = 0.0f;
+        params.init_rect_width = params.max_xpos;
+        params.init_rect_height = params.max_ypos;
+    }
+    if (mUI.dirSector->isChecked())
+    {
+        params.direction_sector_start_angle = qDegreesToRadians(mUI.dirStartAngle->value());
+        params.direction_sector_size        = qDegreesToRadians(mUI.dirSizeAngle->value());
+    }
+    else
+    {
+        params.direction_sector_start_angle = 0.0f;
+        params.direction_sector_size        = qDegreesToRadians(360.0f);
+    }
+    if (mUI.growth->isChecked())
+    {
+        params.rate_of_change_in_size_wrt_time = GetValue(mUI.timeDerivative);
+        params.rate_of_change_in_size_wrt_dist = GetValue(mUI.distDerivative);
+    }
+    else
+    {
+        params.rate_of_change_in_size_wrt_time = 0.0f;
+        params.rate_of_change_in_size_wrt_dist = 0.0f;
+    }
 }
 
 void ParticleEditorWidget::on_actionPlay_triggered()
@@ -190,55 +488,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     }
 
     gfx::KinematicsParticleEngine::Params p;
-    p.motion         = GetValue(mUI.motion);
-    p.mode           = GetValue(mUI.when);
-    p.boundary       = GetValue(mUI.boundary);
-    p.num_particles  = GetValue(mUI.numParticles);
-    p.max_xpos       = GetValue(mUI.simWidth);
-    p.max_ypos       = GetValue(mUI.simHeight);
-    p.num_particles  = GetValue(mUI.numParticles);
-    p.min_lifetime   = GetValue(mUI.minLifetime);
-    p.max_lifetime   = GetValue(mUI.maxLifetime);
-    p.min_point_size = GetValue(mUI.minPointsize);
-    p.max_point_size = GetValue(mUI.maxPointsize);
-    p.min_velocity   = GetValue(mUI.minVelocity);
-    p.max_velocity   = GetValue(mUI.maxVelocity);
-
-    if (mUI.initRect->isChecked())
-    {
-        p.init_rect_xpos   = GetValue(mUI.initX);
-        p.init_rect_ypos   = GetValue(mUI.initY);
-        p.init_rect_width  = GetValue(mUI.initWidth);
-        p.init_rect_height = GetValue(mUI.initHeight);
-    }
-    else
-    {
-        p.init_rect_xpos = 0.0f;
-        p.init_rect_ypos = 0.0f;
-        p.init_rect_width = p.max_xpos;
-        p.init_rect_height = p.max_ypos;
-    }
-    if (mUI.dirSector->isChecked())
-    {
-        p.direction_sector_start_angle = qDegreesToRadians(mUI.dirStartAngle->value());
-        p.direction_sector_size        = qDegreesToRadians(mUI.dirSizeAngle->value());
-    }
-    else
-    {
-        p.direction_sector_start_angle = 0.0f;
-        p.direction_sector_size        = qDegreesToRadians(360.0f);
-    }
-    if (mUI.growth->isChecked())
-    {
-        p.rate_of_change_in_size_wrt_time = GetValue(mUI.timeDerivative);
-        p.rate_of_change_in_size_wrt_dist = GetValue(mUI.distDerivative);
-    }
-    else
-    {
-        p.rate_of_change_in_size_wrt_time = 0.0f;
-        p.rate_of_change_in_size_wrt_dist = 0.0f;
-    }
-
+    fillParams(p);
     mEngine.reset(new gfx::KinematicsParticleEngine(p));
 
     mUI.actionPause->setEnabled(true);
@@ -264,10 +514,23 @@ void ParticleEditorWidget::on_browseTexture_clicked()
         tr("Select Image File"), "", tr("Images (*.png *.jpeg *.jpg)"));
     if (list.isEmpty())
         return;
+
+    // this selection will overwrite the current textures.
+    mTextures.clear();
+
+    for (const auto& file : list)
+    {
+        TextureRect texture;
+        texture.file = file;
+        texture.x = 0.0f;
+        texture.y = 0.0f;
+        texture.w = 1.0f;
+        texture.h = 1.0f;
+        mTextures.push_back(texture);
+    }
     if (list.count() > 1)
         mUI.filename->setText("Multiple files ... ");
     else mUI.filename->setText(list[0]);
-    mTextures = list;
 }
 
 void ParticleEditorWidget::on_resetTransform_clicked()
@@ -294,6 +557,25 @@ void ParticleEditorWidget::on_minus90_clicked()
 
 void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
 {
+    if (!mEngine)
+        return;
+
+    if (!mPaused)
+    {
+        mEngine->Update(secs);
+        mTime += secs;
+    }
+    if (!mEngine->IsAlive())
+    {
+        DEBUG("Particle simulation finished");
+        mUI.actionStop->setEnabled(false);
+        mUI.actionPause->setEnabled(false);
+        mUI.actionPlay->setEnabled(true);
+        mUI.curNumParticles->setText("0");
+        mEngine.reset();
+        return;
+    }
+
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
@@ -318,72 +600,51 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         tr.Resize(width, height);
         tr.MoveTo(0, 0);
     }
+    const auto& name = mUI.name->text();
 
-    if (!mEngine)
-        return;
+    gfx::Material::Type type;
+    if (mTextures.size() == 0)
+        type = gfx::Material::Type::Color;
+    else if (mTextures.size() == 1)
+        type = gfx::Material::Type::Texture;
+    else if (mTextures.size() > 1)
+        type = gfx::Material::Type::Sprite;
 
-    if (!mPaused)
+    auto material = gfx::Material::MakeMaterial(type);
+
+    // if this material exists load the properties.
+    // then potentially change some properties through our UI.
+    if (mWorkspace->HasMaterial(name))
     {
-        mEngine->Update(secs);
-        mTime += secs;
-    }
-
-    if (!mEngine->IsAlive())
-    {
-        DEBUG("Particle simulation finished");
-        mUI.actionStop->setEnabled(false);
-        mUI.actionPause->setEnabled(false);
-        mUI.actionPlay->setEnabled(true);
-        mUI.curNumParticles->setText("0");
-        mEngine.reset();
-        return;
-    }
-
-    mUI.curTime->setText(QString("%1s").arg(mTime));
-    mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
-
-    const auto& type    = mUI.surfaceType->currentText();
-    const auto& texture = mUI.filename->text();
-    const auto& color = mUI.color->color();
-    const float a  = color.alphaF();
-    const float r  = color.redF();
-    const float g  = color.greenF();
-    const float b  = color.blueF();
-
-    gfx::Material::SurfaceType surface;
-    if (type == "Opaque")
-        surface = gfx::Material::SurfaceType::Opaque;
-    else if (type == "Transparent")
-        surface = gfx::Material::SurfaceType::Transparent;
-    else if (type == "Emissive")
-        surface = gfx::Material::SurfaceType::Emissive;
-
-    if (mTextures.count() == 0)
-    {
-        painter.Draw(*mEngine, tr,
-            gfx::SolidColor(gfx::Color4f(r, g, b, a)).SetSurfaceType(surface));
-
-    }
-    else if (mTextures.count() == 1)
-    {
-        painter.Draw(*mEngine, tr,
-            gfx::TextureMap(app::ToUtf8(texture))
-            .SetBaseColor(gfx::Color4f(r, g, b, a))
-            .SetSurfaceType(surface));
+        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
+        const gfx::Material* content = nullptr;
+        material_resource.GetContent(&content);
+        // copy material parameters
+        material = *content;
     }
     else
     {
-        auto sprite = gfx::SpriteSet();
-        for (const auto& s : mTextures)
-        {
-            sprite.AddTexture(app::ToUtf8(s));
-        }
-        sprite.SetFps(10)
-            .SetRuntime(mTime)
-            .SetBaseColor(gfx::Color4f(r, g, b, a))
-            .SetSurfaceType(surface);
-        painter.Draw(*mEngine, tr, sprite);
+        material.SetFps(mTextures.size());
     }
+    // the rendering must reflect what is the particle widget UI.
+    // so if the material editor has been used to change some parameters
+    // they are initially loaded to the UI (when editing) and
+    // then if the user changes the parameters in the UI we'll apply those.
+    material.SetType(type);
+    material.SetBaseColor(GetValue(mUI.color));
+    material.SetSurfaceType(GetValue(mUI.surfaceType));
+    material.SetRuntime(mTime);
+    for (size_t i=0; i<mTextures.size(); ++i)
+    {
+        const auto& texture = mTextures[i];
+        material.AddTexture(app::ToUtf8(texture.file));
+        material.SetTextureRect(i, gfx::FRect(texture.x, texture.y, texture.w, texture.h));
+    }
+
+    painter.Draw(*mEngine, tr, material);
+
+    mUI.curTime->setText(QString("%1s").arg(mTime));
+    mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
 } // namespace

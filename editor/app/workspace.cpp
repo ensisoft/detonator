@@ -131,6 +131,23 @@ bool Workspace::LoadContent(const QString& filename)
             resources.push_back(std::make_unique<MaterialResource>(std::move(material), name));
         }
     }
+    if (json.contains("particles"))
+    {
+        for (const auto& json_p : json["particles"].items())
+        {
+            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
+            std::optional<gfx::KinematicsParticleEngine> ret = gfx::KinematicsParticleEngine::FromJson(json_p.value());
+            if (!ret.has_value())
+            {
+                ERROR("Failed to load particle system '%1' properties.", name);
+                continue;
+            }
+            auto& particle = ret.value();
+            DEBUG("Loaded particle system: '%1'", name);
+            resources.push_back(std::make_unique<ParticleSystemResource>(std::move(particle), name));
+        }
+    }
+
     mResources = std::move(resources);
     mContentFile = filename;
     INFO("Loaded content file '%1'", filename);
@@ -269,15 +286,63 @@ void Workspace::SaveMaterial(const MaterialResource& material)
     endInsertRows();
 }
 
+void Workspace::SaveParticleSystem(const ParticleSystemResource& resource)
+{
+    const auto& name = resource.GetName();
+    for (size_t i=0; i<mResources.size(); ++i)
+    {
+        const auto& res = mResources[i];
+        if (res->GetType() == Resource::Type::ParticleSystem &&
+            res->GetName() == name)
+        {
+            mResources[i] = std::make_unique<ParticleSystemResource>(std::move(resource));
+            return;
+        }
+    }
+    beginInsertRows(QModelIndex(), mResources.size() + 1,
+        mResources.size() + 1);
+    mResources.push_back(std::make_unique<ParticleSystemResource>(std::move(resource)));
+    endInsertRows();
+}
+
 bool Workspace::HasMaterial(const QString& name) const
+{
+    return HasResource(name, Resource::Type::Material);
+}
+
+bool Workspace::HasParticleSystem(const QString& name) const
+{
+    return HasResource(name, Resource::Type::ParticleSystem);
+}
+
+bool Workspace::HasResource(const QString& name, Resource::Type type) const
 {
     for (const auto& res : mResources)
     {
-        if (res->GetType() == Resource::Type::Material &&
-            res->GetName() == name)
+        if (res->GetType() == type && res->GetName() == name)
             return true;
     }
     return false;
+}
+
+Resource& Workspace::GetResource(const QString& name, Resource::Type type)
+{
+    for (auto& res : mResources)
+    {
+        if (res->GetType() == type && res->GetName() == name)
+            return *res;
+    }
+    ASSERT(!"no such resource");
+}
+
+const Resource& Workspace::GetResource(const QString& name, Resource::Type type) const
+{
+    for (const auto& res : mResources)
+    {
+        if (res->GetType() == type && res->GetName() == name)
+            return *res;
+    }
+    ASSERT(!"no such resource");
 }
 
 } // namespace

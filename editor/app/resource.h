@@ -90,6 +90,15 @@ namespace app
             const auto& ret = GetProperty(name);
             return qvariant_cast<T>(ret);
         }
+        template<typename T>
+        bool GetProperty(const QString& name, T* out) const
+        {
+            if (!HasProperty(name))
+                return false;
+            const auto& ret = GetProperty(name);
+            *out = qvariant_cast<T>(ret);
+            return true;
+        }
 
         template<typename Content>
         bool GetContent(Content** content)
@@ -102,6 +111,22 @@ namespace app
         {
             *content = static_cast<const Content*>(GetIf(typeid(Content)));
             return *content != nullptr;
+        }
+        template<typename Content>
+        Content* GetContent()
+        {
+            Content* ptr = nullptr;
+            if (GetContent(&ptr))
+                return ptr;
+            return nullptr;
+        }
+        template<typename Content>
+        const Content* GetContent() const
+        {
+            const Content* ptr = nullptr;
+            if (GetContent(&ptr))
+                return ptr;
+            return nullptr;
         }
 
     protected:
@@ -125,7 +150,7 @@ namespace app
         {}
         virtual QString GetName() const override
         {
-            return mName;
+           return mName;
         }
         virtual Type GetType() const override
         {
@@ -202,5 +227,7 @@ namespace app
     };
 
     using MaterialResource = GraphicsResource<gfx::Material, Resource::Type::Material>;
+    using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine,
+        Resource::Type::ParticleSystem>;
 
 } // namespace

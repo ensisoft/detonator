@@ -69,7 +69,6 @@ namespace gui
         void on_textureDel_clicked();
         void on_textures_currentRowChanged(int row);
         void on_materialType_currentIndexChanged(const QString& text);
-        void on_texRect_clicked(bool checked);
         void on_rectX_valueChanged(double value);
         void on_rectY_valueChanged(double value);
         void on_rectW_valueChanged(double value);
@@ -84,7 +83,6 @@ namespace gui
     private:
         struct TextureData {
             QString file;
-            bool  rect_enabled = false;
             float rectx = 0.0f;
             float recty = 0.0f;
             float rectw = 0.0f;
@@ -97,6 +95,5 @@ namespace gui
         PlayState mState = PlayState::Stopped;
         float mTime = 0.0f;
         app::Workspace* mWorkspace = nullptr;
-        bool mCanOverwrite = false;
     };
 } // namespace

@@ -355,6 +355,9 @@ void MainWindow::on_actionEditResource_triggered()
             case app::Resource::Type::Material:
                 attachWidget(new MaterialWidget(res));
                 break;
+            case app::Resource::Type::ParticleSystem:
+                attachWidget(new ParticleEditorWidget(res, &mWorkspace));
+                break;
         }
     }
 }

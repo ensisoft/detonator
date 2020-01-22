@@ -89,33 +89,36 @@ MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
     SetValue(mUI.scaleY,       material->GetTextureScaleY());
     SetValue(mUI.fps,          material->GetFps());
     SetValue(mUI.blend,        material->GetBlendFrames());
+    SetValue(mUI.gamma,        material->GetGamma());
 
-    const auto num_textures = resource.GetProperty("num_textures", 0);
-    for (int i=0; i<num_textures; ++i)
+    QStringList texture_files;
+    QStringList texture_rects;
+
+    resource.GetProperty("texture_files", &texture_files);
+    resource.GetProperty("texture_rects", &texture_rects);
+    ASSERT(texture_files.count() == texture_rects.count());
+
+    for (int i=0; i<texture_files.count(); ++i)
     {
-        const auto& file = resource.GetProperty(QString("texture_file_%1").arg(i), QString(""));
+        const auto& rect = texture_rects[i];
+        const auto& file = texture_files[i];
         const QFileInfo info(file);
         if (!info.exists())
         {
-            WARN("File '%1' could no longer be found.", file);
+            WARN("Texture '%1' could no longer be found.", file);
             continue;
         }
+        QString stupid(rect);
+        QTextStream ss(&stupid);
+        float x, y, w, h;
+        ss >> x >> y >> w >> h;
 
         TextureData data;
         data.file = file;
-
-        QString rect = resource.GetProperty(QString("texture_rect_%1").arg(i), QString(""));
-        if (!rect.isEmpty())
-        {
-            QTextStream ss(&rect);
-            float x, y, h, w;
-            ss >> x >> y >> h >> w;
-            data.rect_enabled = true;
-            data.rectx = x;
-            data.recty = y;
-            data.rectw = w;
-            data.recth = h;
-        }
+        data.rectx = x;
+        data.recty = y;
+        data.rectw = w;
+        data.recth = h;
 
         const auto& key = app::RandomString();
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
@@ -180,25 +183,31 @@ bool MaterialWidget::loadState(const Settings& settings)
     settings.loadWidget("Material", mUI.shader);
     settings.loadWidget("Material", mUI.zoom);
 
-    const int textures = settings.getValue("Material", "textures", 0);
-    for (int i=0; i<textures; ++i)
+    const auto& texture_files = settings.getValue("Material", "texture_files", QStringList());
+    const auto& texture_rects = settings.getValue("Material", "texture_rects", QStringList());
+    ASSERT(texture_files.size() == texture_rects.size());
+
+    for (int i=0; i<texture_files.size(); ++i)
     {
-        const auto& name = QString("Texture%1").arg(i);
-
-        TextureData data;
-        data.file = settings.getValue(name, "file", QString());
-        data.rect_enabled = settings.getValue(name, "rect", false);
-        data.rectx = settings.getValue(name, "rect_x", 0.0f);
-        data.recty = settings.getValue(name, "rect_y", 0.0f);
-        data.rectw = settings.getValue(name, "rect_w", 1.0f);
-        data.recth = settings.getValue(name, "rect_h", 1.0f);
-
-        const QFileInfo info(data.file);
+        const auto& rect = texture_rects[i];
+        const auto& file = texture_files[i];
+        const QFileInfo info(file);
         if (!info.exists())
         {
-            WARN("File '%1' could no longer be found.", data.file);
+            WARN("Texture '%1' could no longer be found.", file);
             continue;
         }
+        QString stupid(rect);
+        QTextStream ss(&stupid);
+        float x, y, w, h;
+        ss >> x >> y >> w >> h;
+
+        TextureData data;
+        data.file = file;
+        data.rectx = x;
+        data.recty = y;
+        data.rectw = w;
+        data.recth = h;
 
         const auto& key = app::RandomString();
         auto* item = new QListWidgetItem(mUI.textures);
@@ -221,6 +230,21 @@ bool MaterialWidget::loadState(const Settings& settings)
 
 bool MaterialWidget::saveState(Settings& settings) const
 {
+    // serialize texture files and rectangles.
+    QStringList texture_files;
+    QStringList texture_rects;
+    for (int i=0; i<mUI.textures->count(); ++i)
+    {
+        const auto* item = mUI.textures->item(i);
+        const auto& key  = item->data(Qt::UserRole).toString();
+        const auto& data = mTextures[key];
+        texture_files << data.file;
+        texture_rects << QString("%1 %2 %3 %4")
+            .arg(data.rectx).arg(data.recty)
+            .arg(data.rectw).arg(data.recth);
+    }
+    settings.setValue("Material", "texture_files", texture_files);
+    settings.setValue("Material", "texture_rects", texture_rects);
     settings.saveWidget("Material", mUI.materialName);
     settings.saveWidget("Material", mUI.materialType);
     settings.saveWidget("Material", mUI.surfaceType);
@@ -236,21 +260,6 @@ bool MaterialWidget::saveState(Settings& settings) const
     settings.saveWidget("Material", mUI.blend);
     settings.saveWidget("Material", mUI.shader);
     settings.saveWidget("Material", mUI.zoom);
-    settings.setValue("Material", "textures", mUI.textures->count());
-
-    for (int i=0; i<mUI.textures->count(); ++i)
-    {
-        const auto* item = mUI.textures->item(i);
-        const auto& key  = item->data(Qt::UserRole).toString();
-        const auto& data = mTextures[key];
-        const auto& name = QString("Texture%1").arg(i);
-        settings.setValue(name, "file", data.file);
-        settings.setValue(name, "rect", data.rect_enabled);
-        settings.setValue(name, "rect_x", data.rectx);
-        settings.setValue(name, "rect_y", data.recty);
-        settings.setValue(name, "rect_w", data.rectw);
-        settings.setValue(name, "rect_h", data.recth);
-    }
     return true;
 }
 
@@ -310,7 +319,7 @@ void MaterialWidget::on_actionSave_triggered()
         mUI.materialName->setFocus();
         return;
     }
-    if (!mCanOverwrite && mWorkspace->HasMaterial(name))
+    if (mWorkspace->HasMaterial(name))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
@@ -318,44 +327,35 @@ void MaterialWidget::on_actionSave_triggered()
         msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
         if (msg.exec() == QMessageBox::No)
             return;
-        // don't ask again.
-        mCanOverwrite = true;
     }
-
-    gfx::Material material("", gfx::Material::Type::Color);
-    fillMaterial(material);
-
-    app::MaterialResource resource(std::move(material), name);
-
 
     // careful here!
     // the order in which we add our textures is important,
     // mTextures map is mapping an arbitary key to a texture data
     // object but it doesn't have the exact order of textures
     // we need to use the UI object for this.
-    const int num_textures = mUI.textures->count();
-    resource.SetProperty("num_textures", mTextures.size());
-
-    for (int i=0; i<num_textures; ++i)
+    QStringList texture_files;
+    QStringList texture_rects;
+    for (int i=0; i<mUI.textures->count(); ++i)
     {
         const auto* item = mUI.textures->item(i);
         const auto& key  = item->data(Qt::UserRole).toString();
         const auto& data = mTextures[key];
-
-        resource.SetProperty(QString("texture_file_%1").arg(i), data.file);
-
-        // we might lose some UI data here if we skip writing
-        // the texture rect when it's not enabled, but ..meh ok
-        if (!data.rect_enabled)
-            continue;
-
-        // note that using something like QRectF won't work ! (JSON will be null)
-        const auto& rect = QString("%1 %2 %3 %3")
+        texture_files << data.file;
+        texture_rects << QString("%1 %2 %3 %4")
             .arg(data.rectx).arg(data.recty)
             .arg(data.rectw).arg(data.rectw);
-        resource.SetProperty(QString("texture_rect_%1").arg(i), rect);
     }
 
+    auto material = gfx::Material::MakeMaterial(GetValue(mUI.materialType));
+    fillMaterial(material);
+
+    app::MaterialResource resource(std::move(material), name);
+    // set the properties, note that these are also shared by the particle widget
+    resource.SetProperty("texture_files", texture_files);
+    resource.SetProperty("texture_rects", texture_rects);
+    resource.SetProperty("color", mUI.baseColor->color());
+    resource.SetProperty("surface", mUI.surfaceType->currentText());
     mWorkspace->SaveMaterial(resource);
 
     setWindowTitle(name);
@@ -385,7 +385,6 @@ void MaterialWidget::on_textureAdd_clicked()
         // store the texture details in a map by the unique key
         TextureData data;
         data.file = file;
-        data.rect_enabled = false;
         data.rectx = 0.0f;
         data.recty = 0.0f;
         data.rectw = 1.0f;
@@ -393,8 +392,6 @@ void MaterialWidget::on_textureAdd_clicked()
         mTextures[key] = data;
     }
     const auto index = mUI.textures->currentRow();
-    mUI.texProps->setEnabled(true);
-    mUI.textureDel->setEnabled(true);
     mUI.textures->setCurrentRow(index == -1 ? 0 : index);
 }
 
@@ -410,40 +407,29 @@ void MaterialWidget::on_textureDel_clicked()
 
     qDeleteAll(items);
 
-    if (mUI.textures->count() == 0)
-        mUI.textureDel->setEnabled(false);
-
-    mUI.texRect->setEnabled(false);
-    mUI.rectX->setValue(0.0f);
-    mUI.rectY->setValue(0.0f);
-    mUI.rectW->setValue(1.0f);
-    mUI.rectH->setValue(1.0f);
+    mUI.textureDel->setEnabled(false);
+    mUI.textureRect->setEnabled(false);
+    mUI.textureProp->setEnabled(false);
 }
 
 void MaterialWidget::on_textures_currentRowChanged(int index)
 {
-    mUI.texRect->setEnabled(false);
-    mUI.rectX->setValue(0.0f);
-    mUI.rectY->setValue(0.0f);
-    mUI.rectW->setValue(1.0f);
-    mUI.rectH->setValue(1.0f);
-
-    mUI.texProps->setEnabled(false);
+    mUI.textureRect->setEnabled(false);
+    mUI.textureProp->setEnabled(false);
     mUI.textureWidth->setText("");
     mUI.textureHeight->setText("");
     mUI.textureDepth->setText("");
     mUI.textureFile->setText("");
+    mUI.textureDel->setEnabled(false);
 
     const auto& key = getCurrentTextureKey();
     if (key.isEmpty())
         return;
 
     const auto& data = mTextures[key];
-
+    const auto& img  = QPixmap(data.file);
     mUI.textureFile->setText(data.file);
     mUI.textureFile->setCursorPosition(0);
-
-    const QPixmap img(data.file);
     if (img.isNull())
     {
         ERROR("Could not load image '%1'", data.file);
@@ -462,16 +448,13 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     mUI.textureDepth->setText(QString::number(d));
     mUI.texturePreview->setEnabled(true);
     mUI.texturePreview->setPixmap(img.scaledToHeight(128));
-
-    mUI.texRect->setChecked(data.rect_enabled);
     mUI.rectX->setValue(data.rectx);
     mUI.rectY->setValue(data.recty);
     mUI.rectW->setValue(data.rectw);
     mUI.rectH->setValue(data.recth);
-
-    mUI.texProps->setEnabled(true);
-    mUI.texRect->setEnabled(true);
-
+    mUI.textureProp->setEnabled(true);
+    mUI.textureRect->setEnabled(true);
+    mUI.textureDel->setEnabled(true);
 }
 
 void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
@@ -479,9 +462,9 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
     mUI.texturing->setEnabled(false);
     mUI.animation->setEnabled(false);
     mUI.customMaterial->setEnabled(false);
-    mUI.texMaps->setEnabled(false);
-    mUI.texProps->setEnabled(false);
-    mUI.texRect->setEnabled(false);
+    mUI.textureMaps->setEnabled(false);
+    mUI.textureProp->setEnabled(false);
+    mUI.textureRect->setEnabled(false);
 
     // enable/disable UI properties based on the
     // material type.
@@ -494,23 +477,18 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
     else if (type == gfx::Material::Type::Texture)
     {
         mUI.texturing->setEnabled(true);
-        mUI.texMaps->setEnabled(true);
-        mUI.texProps->setEnabled(true);
-        mUI.texRect->setEnabled(true);
+        mUI.textureMaps->setEnabled(true);
+        mUI.textureProp->setEnabled(true);
+        mUI.textureRect->setEnabled(true);
     }
     else if (type == gfx::Material::Type::Sprite)
     {
         mUI.texturing->setEnabled(true);
-        mUI.texMaps->setEnabled(true);
-        mUI.texProps->setEnabled(true);
-        mUI.texRect->setEnabled(true);
+        mUI.textureMaps->setEnabled(true);
+        mUI.textureProp->setEnabled(true);
+        mUI.textureRect->setEnabled(true);
         mUI.animation->setEnabled(true);
     }
-}
-
-void MaterialWidget::on_texRect_clicked(bool checked)
-{
-    mTextures[getCurrentTextureKey()].rect_enabled = checked;
 }
 
 void MaterialWidget::on_rectX_valueChanged(double value)
@@ -532,19 +510,7 @@ void MaterialWidget::on_rectH_valueChanged(double value)
 
 void MaterialWidget::fillMaterial(gfx::Material& material) const
 {
-    const gfx::Material::Type type = GetValue(mUI.materialType);
-
     // todo: allow for a custom shader to be used.
-    std::string shader;
-    if (type == gfx::Material::Type::Color)
-        shader = "solid_color.glsl";
-    else if (type == gfx::Material::Type::Texture)
-        shader = "texture_map.glsl";
-    else if (type == gfx::Material::Type::Sprite)
-        shader = "texture_map.glsl";
-
-    material.SetType(GetValue(mUI.materialType));
-    material.SetShader(shader);
     material.SetBaseColor(GetValue(mUI.baseColor));
     material.SetGamma(GetValue(mUI.gamma));
     material.SetSurfaceType(GetValue(mUI.surfaceType));
@@ -565,30 +531,19 @@ void MaterialWidget::fillMaterial(gfx::Material& material) const
         const auto* item = mUI.textures->item(i);
         const auto& key  = item->data(Qt::UserRole).toString();
         const auto& data = mTextures[key];
-
         material.AddTexture(app::ToUtf8(data.file));
-        material.SetTextureRect(i, gfx::FRect(0, 0, 1.0f, 1.0f));
-
-        if (!data.rect_enabled)
-            continue;
-        const gfx::FRect rect(data.rectx,
-            data.recty,
-            data.rectw,
-            data.recth);
-        material.SetTextureRect(i, rect);
+        material.SetTextureRect(i, gfx::FRect(data.rectx, data.recty, data.rectw, data.recth));
     }
 }
 
 void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
 {
-
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Material material("", gfx::Material::Type::Color);
+    auto material = gfx::Material::MakeMaterial(GetValue(mUI.materialType));
     fillMaterial(material);
-
 
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;

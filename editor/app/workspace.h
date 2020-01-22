@@ -73,23 +73,40 @@ namespace app
         // If no such material is yet set in the workspace it will be added.
         void SaveMaterial(const MaterialResource& material);
 
+        void SaveParticleSystem(const ParticleSystemResource& resource);
+
         // Returns whether a material by this name already exists or not.
         bool HasMaterial(const QString& name) const;
+        // Returns whether a particle system by this name already exists or not.
+        bool HasParticleSystem(const QString& name) const;
+
+        // Returns whether some particular resource exists or not.
+        bool HasResource(const QString& name, Resource::Type type) const;
 
         QAbstractTableModel* GetResourceModel()
         { return this; }
 
+        // Get resource at a specific index in the list of all resources.
         Resource& GetResource(size_t i)
         {
             ASSERT(i < mResources.size());
             return *mResources[i];
         }
 
+        // Get resource at a specific index in the list of all resources.
         const Resource& GetResource(size_t i) const
         {
             ASSERT(i < mResources.size());
             return *mResources[i];
         }
+
+        // Get a resource identified by name and type.
+        // The resource must exist.
+        Resource& GetResource(const QString& name, Resource::Type type);
+        // Get a resource identified by name and type.
+        // The resource must exist.
+        const Resource& GetResource(const QString& name, Resource::Type type) const;
+
 
     private:
         std::vector<std::unique_ptr<Resource>> mResources;

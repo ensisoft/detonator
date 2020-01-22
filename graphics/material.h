@@ -617,6 +617,22 @@ namespace gfx
             }
             return mat;
         }
+
+        static Material MakeMaterial(Type type)
+        {
+            switch (type)
+            {
+                case Type::Color:
+                    return Material("solid_color.glsl", type);
+                case Type::Sprite:
+                    return Material("texture_map.glsl", type);
+                case Type::Texture:
+                    return Material("texture_map.glsl", type);
+            }
+            ASSERT(!"no such material type");
+            return Material("", type);
+        }
+
     private:
         // allow private construction with "invalid/incomplete" state.
         Material() = default;
