@@ -31,6 +31,8 @@
 #  include <QStringList>
 #  include <QFileInfo>
 #  include <QDir>
+#  include <QFile>
+#  include <QTextStream>
 #  include <boost/version.hpp>
 #include "warnpop.h"
 
@@ -74,12 +76,23 @@ void copyright()
     INFO("Copyright (C) 2013-2017 Mattia Basaglia <mattia.basaglia@gmail.com>");
     INFO("https://github.com/mbasaglia/Qt-Color-Widgets");
     INFO("Qt Color Widgets");
+
+    INFO("Copyright (c) 2013-2019 Colin Duquesnoy");
+    INFO("https://github.com/ColinDuquesnoy/QDarkStyleSheet");
+    INFO("QDarkStyleSheet Dark Qt style 2.8");
 }
 
 int main(int argc, char* argv[])
 {
     try
     {
+        bool use_dark_style = true;
+        for (int i=1; i<argc; ++i)
+        {
+            if (!std::strcmp("--no-dark-style", argv[i]))
+                use_dark_style = false;
+        }
+
         // prefix with a . to make this a "hidden" dir
         // which is the convention on Linux
         app::InitializeAppHome("." APP_TITLE);
@@ -116,6 +129,21 @@ int main(int argc, char* argv[])
         QSurfaceFormat::setDefaultFormat(format);
 
         QApplication app(argc, argv);
+
+        if (use_dark_style)
+        {
+            QFile style(":qdarkstyle/style.qss");
+            if (style.open(QIODevice::ReadOnly))
+            {
+                QTextStream stream(&style);
+                app.setStyleSheet(stream.readAll());
+                INFO("Loaded qdarkstyle. Start with --no-dark-style to disable.");
+            }
+            else
+            {
+                ERROR("Failed to load qdarkstyle.");
+            }
+        }
 
         // Load master settings.
         gui::Settings settings("Ensisoft", APP_TITLE);

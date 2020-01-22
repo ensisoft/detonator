@@ -171,6 +171,7 @@ add_executable(Editor
     editor/gui/settings.h
     editor/gui/settings.cpp
     editor/resource/resource.qrc
+    editor/resource/qdarkstyle/style.qrc
     third_party/stb/stb_image.c
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
     third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
