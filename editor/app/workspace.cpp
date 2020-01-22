@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <QtAlgorithms>
 #  include <QJsonDocument>
 #  include <QJsonArray>
 #  include <QByteArray>
@@ -343,6 +344,26 @@ const Resource& Workspace::GetResource(const QString& name, Resource::Type type)
             return *res;
     }
     ASSERT(!"no such resource");
+}
+
+void Workspace::DeleteResources(QModelIndexList& list)
+{
+    qSort(list);
+
+    int removed = 0;
+
+    for (int i=0; i<list.size(); ++i)
+    {
+        const auto row = list[i].row() - removed;
+        beginRemoveRows(QModelIndex(), row, row);
+
+        auto it = std::begin(mResources);
+        std::advance(it, row);
+        mResources.erase(it);
+
+        endRemoveRows();
+        ++removed;
+    }
 }
 
 } // namespace

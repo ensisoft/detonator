@@ -240,11 +240,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         widget->addActions(*mUI.mainToolBar);
         widget->addActions(*mUI.menuTemp);
 
-        auto title = widget->windowTitle();
-        auto space = title.indexOf(" ");
-        if (space != -1)
-            title.resize(space);
-
+        const auto& title = widget->windowTitle();
         mUI.menuTemp->setTitle(title);
         mCurrentWidget = widget;
     }
@@ -362,6 +358,34 @@ void MainWindow::on_actionEditResource_triggered()
     }
 }
 
+void MainWindow::on_actionDeleteResource_triggered()
+{
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Question);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setText(tr("Are you sure you want to delete the selected resources ?"));
+    if (msg.exec() == QMessageBox::No)
+        return;
+    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    mWorkspace.DeleteResources(selected);
+}
+
+void MainWindow::on_actionSaveWorkspace_triggered()
+{
+    if (!mWorkspace.SaveContent("content.json"))
+    {
+        ERROR("Failed to save workspace content in: '%1'", "content.json");
+        return;
+    }
+
+    if (!mWorkspace.SaveWorkspace("workspace.json"))
+    {
+        ERROR("Failed to save workspace in '%1'", "workspace.json");
+        return;
+    }
+    NOTE("Workspace saved in '%1 and '%2'", "content.json", "workspace.json");
+}
+
 void MainWindow::actionWindowFocus_triggered()
 {
     // this signal comes from an action in the
@@ -379,6 +403,10 @@ void MainWindow::actionWindowFocus_triggered()
 
 void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 {
+    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
+    mUI.actionEditResource->setEnabled(!indices.isEmpty());
+
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
     menu.addAction(mUI.actionNewParticleSystem);
@@ -387,6 +415,11 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.exec(QCursor::pos());
+}
+
+void MainWindow::on_workspace_doubleClicked()
+{
+    on_actionEditResource_triggered();
 }
 
 void MainWindow::refreshUI()

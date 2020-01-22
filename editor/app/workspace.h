@@ -107,6 +107,7 @@ namespace app
         // The resource must exist.
         const Resource& GetResource(const QString& name, Resource::Type type) const;
 
+        void DeleteResources(QModelIndexList& list);
 
     private:
         std::vector<std::unique_ptr<Resource>> mResources;

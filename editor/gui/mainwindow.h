@@ -95,7 +95,10 @@ namespace gui
         void on_actionNewMaterial_triggered();
         void on_actionNewParticleSystem_triggered();
         void on_actionEditResource_triggered();
+        void on_actionDeleteResource_triggered();
+        void on_actionSaveWorkspace_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
+        void on_workspace_doubleClicked();
 
         void actionWindowFocus_triggered();
         void refreshUI();
