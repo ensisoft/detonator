@@ -181,7 +181,9 @@ namespace gfx
             // Use case example: never ending star field animation
             Wrap,
             // Kill the particle at the boundary.
-            Kill
+            Kill,
+            // Reflect the particle at the boundary
+            Reflect
         };
 
 
@@ -466,6 +468,25 @@ namespace gfx
                     return false;
                 else if (p.position.y < 0.0f || p.position.y > mParams.max_ypos)
                     return false;
+            }
+            else if (mParams.boundary == BoundaryPolicy::Reflect)
+            {
+                glm::vec2 n;
+                if (p.position.x <= 0.0f)
+                    n = glm::vec2(1.0f, 0.0f);
+                else if (p.position.x >= mParams.max_xpos)
+                    n = glm::vec2(-1.0f, 0.0f);
+                else if (p.position.y <= 0.0f)
+                    n = glm::vec2(0, 1.0f);
+                else if (p.position.y >= mParams.max_ypos)
+                    n = glm::vec2(0, -1.0f);
+                else return true;
+                // compute new direction vector given the normal vector of the boundary
+                // and then bake the velocity in the new direction
+                const auto& d = glm::normalize(p.direction);
+                const float v = glm::length(p.direction);
+                p.direction = (d - 2 * glm::dot(d, n) * n) * v;
+
             }
             return true;
         }
