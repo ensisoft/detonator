@@ -3,12 +3,12 @@
 precision mediump float;
 
 uniform float kRuntime;
-uniform vec4 kColorA;
+uniform vec4 kBaseColor;
 varying vec2 vTexCoord;
 
 float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_origin)
 {
-    float ring_width = 0.005;    
+    float ring_width = 0.005;
     float rd = ring_distance_from_origin;
     float fd = fragment_distance_from_origin;
     return smoothstep(rd - ring_width, rd, fd) - smoothstep(rd, rd + ring_width, fd);
@@ -36,5 +36,5 @@ void main()
     float any_ring_alpha = ring_alpha0 + ring_alpha1 + ring_alpha2 + ring_alpha3;
 
     float distance_alpha = 1.0 - dist/ 0.5 * 1.0;
-    gl_FragColor = kColorA * vec4(1.0, 1.0, 1.0, distance_alpha * any_ring_alpha);
+    gl_FragColor = kBaseColor * vec4(1.0, 1.0, 1.0, distance_alpha * any_ring_alpha);
 }
