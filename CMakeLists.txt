@@ -157,6 +157,7 @@ add_executable(Editor
     editor/app/workspace.h
     editor/app/workspace.cpp
     editor/gui/gfxwidget.h
+    editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h
     editor/gui/mainwindow.h
     editor/gui/mainwindow.cpp
