@@ -148,6 +148,7 @@ add_executable(Editor
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
+    scene/animation.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -156,6 +157,9 @@ add_executable(Editor
     editor/app/utility.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
+    editor/gui/animationwidget.h
+    editor/gui/animationwidget.ui
+    editor/gui/animationwidget.cpp
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h

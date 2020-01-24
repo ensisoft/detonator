@@ -44,6 +44,7 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
+#include "editor/gui/animationwidget.h"
 
 namespace gui
 {
@@ -130,6 +131,8 @@ void MainWindow::loadState()
             widget = new MaterialWidget;
         else if (class_name == ParticleEditorWidget::staticMetaObject.className())
             widget = new ParticleEditorWidget;
+        else if (class_name == AnimationWidget::staticMetaObject.className())
+            widget = new AnimationWidget;
 
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
@@ -340,6 +343,11 @@ void MainWindow::on_actionNewParticleSystem_triggered()
     attachWidget(new ParticleEditorWidget);
 }
 
+void MainWindow::on_actionNewAnimation_triggered()
+{
+    attachWidget(new AnimationWidget);
+}
+
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
@@ -353,6 +361,9 @@ void MainWindow::on_actionEditResource_triggered()
                 break;
             case app::Resource::Type::ParticleSystem:
                 attachWidget(new ParticleEditorWidget(res, &mWorkspace));
+                break;
+            case app::Resource::Type::Animation:
+                attachWidget(new AnimationWidget(res, &mWorkspace));
                 break;
         }
     }
@@ -410,6 +421,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
     menu.addAction(mUI.actionNewParticleSystem);
+    menu.addAction(mUI.actionNewAnimation);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addSeparator();

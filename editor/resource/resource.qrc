@@ -17,6 +17,7 @@
     <file>16x16_ico_png/particle.png</file>
     <file>16x16_ico_png/add.png</file>
     <file>16x16_ico_png/edit.png</file>
+    <file>16x16_ico_png/animation.png</file>
 
 
     <file>32x32_ico_png/save.png</file>
@@ -28,6 +29,7 @@
     <file>32x32_ico_png/tool_move.png</file>
     <file>32x32_ico_png/tool_scale.png</file>
     <file>32x32_ico_png/tool_rotate.png</file>
+    <file>32x32_ico_png/rectangle.png</file>
 
     <file>texture.png</file>
   </qresource>

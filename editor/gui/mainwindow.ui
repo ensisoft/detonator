@@ -78,6 +78,7 @@
     </property>
     <addaction name="actionNewMaterial"/>
     <addaction name="actionNewParticleSystem"/>
+    <addaction name="actionNewAnimation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWorkspace"/>
@@ -348,6 +349,18 @@
    </property>
    <property name="text">
     <string>Save Workspace</string>
+   </property>
+  </action>
+  <action name="actionNewAnimation">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Animation</string>
+   </property>
+   <property name="toolTip">
+    <string>New animation</string>
    </property>
   </action>
  </widget>

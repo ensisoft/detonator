@@ -34,12 +34,14 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "scene/gfxfactory.h"
 #include "resource.h"
 #include "utility.h"
 
 namespace app
 {
-    class Workspace : public QAbstractTableModel
+    class Workspace : public QAbstractTableModel,
+                      public scene::GfxFactory
     {
     public:
         Workspace();
@@ -52,6 +54,10 @@ namespace app
         { return static_cast<int>(mResources.size()); }
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
+
+        // gfxfactory implementation
+        virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
+        virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
         // Load the contents of the workspace from the given JSON file.
         bool LoadContent(const QString& file);
