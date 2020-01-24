@@ -44,15 +44,28 @@
 
 namespace gfx
 {
+    // Drawable interface represents some kind of drawable
+    // object or shape such as quad/rectangle/mesh/particle engine.
     class Drawable
     {
     public:
         virtual ~Drawable() = default;
+        // Get the device specific shader object.
+        // If the shader does not yet exist on the device it's created
+        // and compiled.  On any errors nullptr should be returned.
         virtual Shader* GetShader(Device& device) const = 0;
+        // Get the device specific geometry object. If the geometry
+        // does not yet exist on the device it's created and the
+        // contents from this drawable object are uploaded in some
+        // device specific data format.
         virtual Geometry* Upload(Device& device) const = 0;
+        // Update the state of the drawable object. dt is the
+        // elapsed (delta) time in seconds.
+        virtual void Update(float dt) {}
     private:
     };
 
+    // 2D rectangle.
     class Rectangle : public Drawable
     {
     public:
@@ -133,9 +146,6 @@ namespace gfx
     public:
         // Destructor
         virtual ~ParticleEngine() = default;
-        // Update the particle simulation by one step with the current
-        // delta timestep in seconds.
-        virtual void Update(float dt) = 0;
         // Returns true if the simulation has particles and is still running.
         virtual bool IsAlive() const = 0;
         // Restart the simulation if no longer alive.
@@ -287,7 +297,7 @@ namespace gfx
             return geom;
         }
 
-        // ParticleEngine implementation. Update the particle simulation.
+        // Update the particle simulation.
         virtual void Update(float dt) override
         {
             mTime += dt;
