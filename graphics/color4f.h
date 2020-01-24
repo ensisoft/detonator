@@ -44,7 +44,8 @@ namespace gfx
         Cyan,    DarkCyan,
         Magenta, DarkMagenta,
         Yellow,  DarkYellow,
-        Gray,    DarkGray, LightGray
+        Gray,    DarkGray, LightGray,
+        HotPink
     };
 
 
@@ -136,6 +137,11 @@ namespace gfx
                     break;
                 case Color::LightGray:
                     mRed = mGreen = mBlue = 0.75;
+                    break;
+                case Color::HotPink:
+                    mRed   = 1.0f;
+                    mGreen = 0.4117;
+                    mBlue  = 0.705;
                     break;
             }
         }

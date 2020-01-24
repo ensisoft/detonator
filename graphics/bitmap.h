@@ -121,6 +121,11 @@ namespace gfx
                 case Color::LightGray:
                    r = g = b = 192;
                    break;
+                case Color::HotPink:
+                    r = 255;
+                    g = 105;
+                    b = 180;
+                    break;
             }
         } // ctor
         RGB(const Grayscale& grayscale)
