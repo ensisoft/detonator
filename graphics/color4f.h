@@ -130,18 +130,18 @@ namespace gfx
                     mRed = mGreen = 0.5f;
                     break;
                 case Color::Gray:
-                    mRed = mGreen = mBlue = 0.62;
+                    mRed = mGreen = mBlue = 0.62f;
                     break;
                 case Color::DarkGray:
-                    mRed = mGreen = mBlue = 0.5;
+                    mRed = mGreen = mBlue = 0.5f;
                     break;
                 case Color::LightGray:
-                    mRed = mGreen = mBlue = 0.75;
+                    mRed = mGreen = mBlue = 0.75f;
                     break;
                 case Color::HotPink:
                     mRed   = 1.0f;
-                    mGreen = 0.4117;
-                    mBlue  = 0.705;
+                    mGreen = 0.4117f;
+                    mBlue  = 0.705f;
                     break;
             }
         }

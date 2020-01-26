@@ -35,6 +35,11 @@
 #include <codecvt>
 #include <cwctype>
 
+#if defined(__MSVC__)
+#  pragma warning(push)
+#  pragma warning(disable: 4996) // deprecated use of wstring_convert
+#endif
+
 namespace base
 {
 
@@ -235,3 +240,8 @@ void JsonWrite(JsonObject& object, const char* name, const ValueT& value)
 }
 
 } // base
+
+
+#if defined(__MSVC__)
+#  pragma warning(pop) // deprecated use of wstring_convert
+#endif

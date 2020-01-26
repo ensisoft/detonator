@@ -712,15 +712,15 @@ private:
                 GL_CALL(glEnableVertexAttribArray(aTexCoord));
             }
             if (mDrawType == DrawType::Triangles)
-                GL_CALL(glDrawArrays(GL_TRIANGLES, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mData.size()));
             else if (mDrawType == DrawType::Points)
-                GL_CALL(glDrawArrays(GL_POINTS, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_POINTS, 0, (GLsizei)mData.size()));
             else if (mDrawType == DrawType::TriangleFan)
-                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei)mData.size()));
             else if (mDrawType == DrawType::Lines)
             {
                 GL_CALL(glLineWidth(mLineWidth));
-                GL_CALL(glDrawArrays(GL_LINES, 0, mData.size()));
+                GL_CALL(glDrawArrays(GL_LINES, 0, (GLsizei)mData.size()));
             }
         }
         void SetLastUseFrameNumber(size_t frame_number)

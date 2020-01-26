@@ -102,14 +102,14 @@ namespace gfx
                 float angle = 0.0f;
                 for (unsigned i=0; i<=slices; ++i)
                 {
-                    const auto x = std::cos(angle) * 0.5;
-                    const auto y = std::sin(angle) * 0.5;
+                    const auto x = std::cos(angle) * 0.5f;
+                    const auto y = std::sin(angle) * 0.5f;
                     angle += angle_increment;
                     Vertex v;
-                    v.aPosition.x = x + 0.5;
-                    v.aPosition.y = y - 0.5;
-                    v.aTexCoord.x = x + 0.5;
-                    v.aTexCoord.y = y + 0.5;
+                    v.aPosition.x = x + 0.5f;
+                    v.aPosition.y = y - 0.5f;
+                    v.aTexCoord.x = x + 0.5f;
+                    v.aTexCoord.y = y + 0.5f;
                     vs.push_back(v);
                 }
                 geom = device.MakeGeometry("circle_" + std::to_string(slices));
@@ -298,7 +298,7 @@ namespace gfx
             // defined by start angle and the size of the sectore
             // expressed by angle
             float direction_sector_start_angle = 0.0f;
-            float direction_sector_size = math::Pi * 2;
+            float direction_sector_size = math::Pi * 2.0f;
             // min max points sizes.
             float min_point_size = 1.0f;
             float max_point_size = 1.0f;
@@ -311,7 +311,7 @@ namespace gfx
 
         KinematicsParticleEngine(const Params& init) : mParams(init)
         {
-            InitParticles(mParams.num_particles);
+            InitParticles(size_t(mParams.num_particles));
         }
 
         // Drawable implementation. Compile the shader.
@@ -343,7 +343,7 @@ namespace gfx
                 // lower right quadrant coordinates.
                 Vertex v;
                 v.aPosition.x = p.position.x / mParams.max_xpos;
-                v.aPosition.y = p.position.y / mParams.max_ypos * -1.0;
+                v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
                 v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize : 0.0f;
                 verts.push_back(v);
             }
@@ -371,7 +371,12 @@ namespace gfx
 
             // Spawn new particles if needed.
             if (mParams.mode == SpawnPolicy::Maintain)
-                InitParticles(mParams.num_particles - mParticles.size());
+            {
+                const auto num_particles_always = size_t(mParams.num_particles);
+                const auto num_particles_now = mParticles.size();
+                const auto num_particles_needed = num_particles_always - num_particles_now;
+                InitParticles(num_particles_needed);
+            }
             else if (mParams.mode == SpawnPolicy::Continuous)
             {
                 // the number of particles is taken as the rate of particles per
@@ -400,7 +405,7 @@ namespace gfx
                 return;
             if (mParams.mode != SpawnPolicy::Once)
                 return;
-            InitParticles(mParams.num_particles);
+            InitParticles(size_t(mParams.num_particles));
             mTime = 0.0f;
             mNumParticlesHatching = 0;
         }

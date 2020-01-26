@@ -36,7 +36,7 @@ namespace gfx {
 } // namespace
 namespace wdk {
     class Window;
-    class WindowEventKeydown;
+    struct WindowEventKeydown;
 } // namespace wdk
 namespace audio {
     class AudioSample;

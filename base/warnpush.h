@@ -59,4 +59,5 @@
 #  pragma warning(disable: 4275) // Qt, no dll-interface class std::exception used as baseclass for QException
 #  pragma warning(disable: 4003) // protobuf, not enough actual parameters
 #  pragma warning(disable: 4267) // protobuf, conversion from size_t to int
+#  pragma warning(disable: 4244) // Qt warning about conversion from int to float
 #endif

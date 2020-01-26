@@ -61,7 +61,7 @@ namespace math
 
         const auto range = max - min;
         const auto value = (double)generator() / (double)generator.max();
-        return min + (range * value);
+        return static_cast<T>(min + (range * value));
     }
 
 } // namespace

@@ -110,7 +110,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
         std::string line;
         std::vector<std::shared_ptr<Bitmap<Grayscale>>> line_bitmaps;
 
-        int total_height = 0.0f;
+        int total_height = 0;
 
         // rasterize each line
         while (std::getline(ss, line))
@@ -253,19 +253,19 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     // the distance from the baseline to the highest or upper grid coordinate
     // used to place an outline point. It's a positive value due to the grid's
     // orientation with the Y axis upwards.
-    int ascent = 0.0f;
+    int ascent = 0;
     // the distance from the baseline to the lowest grid coordinate to used to
     // place an outline point. It's a negative value due to the grid's
     // orientation with the Y axis upwards.
-    int descent = 0.0f;
+    int descent = 0;
 
     // pen position
-    int pen_x = 0.0f;
-    int pen_y = 0.0f;
+    int pen_x = 0;
+    int pen_y = 0;
 
     // the extents of the text block when rasterized
-    unsigned height = 0.0f;
-    unsigned width  = 0.0f;
+    unsigned height = 0;
+    unsigned width  = 0;
 
     const auto glyph_count = hb_buffer_get_length(hb_buff);
     hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(hb_buff, nullptr);

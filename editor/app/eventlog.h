@@ -79,6 +79,11 @@ namespace app
 #  endif
 #endif
 
+#undef WARN
+#undef ERROR
+#undef INFO
+#undef DEBUG
+
 // Careful with the macros here. base/logging.h has macros by the same name.
 // we're going to hijack the names here and change the definition to better
 // suit the application.

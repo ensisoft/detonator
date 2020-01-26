@@ -114,6 +114,16 @@ link_directories("${Boost_LIBRARY_DIRS}")
 # https://bugreports.qt.io/browse/QTBUG-53002
 set(CMAKE_CXX_STANDARD 17)
 
+if (MSVC)
+    # /wd4251 Qt dll interface crap 
+    # /wd4275 Qt dll interface crap again
+    # /wd4018 signed/unsigned mismatch
+    # /wd4244 conversion from double to float
+    # /wd4305 truncation from double to float
+    # /wd4267 conversion from size_t to int (Qt uses ints extensively)
+    add_definitions("/wd4251 /wd4275 /wd4018 /wd4244 /wd4305 /wd4267")
+endif()
+
 # we also need Qt for the time being
 if (WIN32)
     set(CMAKE_PREFIX_PATH "C:/Qt/5.12.6/msvc2017_64")

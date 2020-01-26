@@ -548,8 +548,8 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;
     const auto content_height = width * zoom;
-    const auto xpos = (width - content_width) * 0.5;
-    const auto ypos = (height - content_height) * 0.5;
+    const auto xpos = (width - content_width) * 0.5f;
+    const auto ypos = (height - content_height) * 0.5f;
 
     gfx::FillRect(painter,
         gfx::FRect(xpos, ypos, content_width, content_height),

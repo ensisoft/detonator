@@ -339,14 +339,14 @@ namespace gfx
                         texture->Upload(bitmap->GetDataPtr(), width, height, format);
                         texture->EnableGarbageCollection(sampler.enable_gc);
                     }
-                    const float w = texture->GetWidth();
-                    const float h = texture->GetHeight();
+                    const auto w = (float)texture->GetWidth();
+                    const auto h = (float)texture->GetHeight();
                     const bool normalized_box = sampler.box_is_normalized;
                     const auto& box = sampler.box_is_normalized
                         ? sampler.box : sampler.box.Normalize(FSize(w, h));
 
                     const float x = box.GetX();
-                    const float y = 1.0 - box.GetY() - box.GetHeight();
+                    const float y = 1.0f - box.GetY() - box.GetHeight();
                     const float sx = box.GetWidth();
                     const float sy = box.GetHeight();
 
@@ -354,7 +354,7 @@ namespace gfx
                     const auto& kTextureBox = "kTextureBox" + std::to_string(i);
                     const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);
                     const auto alpha = texture->GetFormat() == Texture::Format::Grayscale
-                        ? 1.0 : 0.0f;
+                        ? 1.0f : 0.0f;
 
                     prog.SetTexture(kTexture.c_str(), i, *texture);
                     prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);

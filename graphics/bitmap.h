@@ -191,9 +191,9 @@ namespace gfx
     {
         const float a = rgba.a / 255.0f;
         // bake the alpha in the color channels
-        r = rgba.r * a;
-        g = rgba.g * a;
-        b = rgba.b * a;
+        r = u8(rgba.r * a);
+        g = u8(rgba.g * a);
+        b = u8(rgba.b * a);
     }
 
     // Grayscale methods that depend on RGB/A come here.
@@ -205,8 +205,8 @@ namespace gfx
         const float y =
             0.2126f * rgb.r +
             0.7252f * rgb.g +
-            0.0722  * rgb.b;
-        r = y / 255.0f;
+            0.0722f * rgb.b;
+        r = u8(y / 255.0f);
     }
     inline Grayscale::Grayscale(const RGBA& rgba)
     {
@@ -217,8 +217,8 @@ namespace gfx
         const float y =
             0.2126f * rgba.r +
             0.7252f * rgba.g +
-            0.0722  * rgba.b;
-        r = (y * a) / 255.0f;
+            0.0722f * rgba.b;
+        r = u8((y * a) / 255.0f);
     }
 
     static_assert(sizeof(Grayscale) == 1,

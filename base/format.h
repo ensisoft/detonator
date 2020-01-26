@@ -38,6 +38,11 @@
 #include <codecvt>
 #include <type_traits>
 
+#if defined(__MSVC__)
+#  pragma warning(push)
+#  pragma warning(disable: 4996) // deprecated use of wstring_convert
+#endif
+
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
 // template arguments converted into strings.
@@ -161,3 +166,7 @@ namespace base
 
     using detail::ToString;
 } // base
+
+#if defined(__MSVC__)
+#  pragma warning(pop) // deprecated use of wstring_convert
+#endif

@@ -156,10 +156,10 @@ namespace gfx
         template<typename F> explicit
         Rect(const Rect<F>& other)
         {
-            mX = other.GetX();
-            mY = other.GetY();
-            mWidth = other.GetWidth();
-            mHeight = other.GetHeight();
+            mX = static_cast<T>(other.GetX());
+            mY = static_cast<T>(other.GetY());
+            mWidth = static_cast<T>(other.GetWidth());
+            mHeight = static_cast<T>(other.GetHeight());
         }
         Rect(const Point<T>& pos, T width, T height)
         {
