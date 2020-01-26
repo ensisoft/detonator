@@ -70,9 +70,9 @@ Building from source for Linux
 Building from source for Windows
 ---------------------------------
 
-These build instructions are for MSVS 2015 Community Edition and for 64bit build.
+These build instructions are for MSVS 2019 Community Edition and for 64bit build.
 
-1. Install Microsoft Visual Studio 2015 Community
+1. Install Microsoft Visual Studio 2019 Community
 https://www.visualstudio.com/downloads/
 
 2. Install prebuilt Qt 5.12.6 
@@ -80,16 +80,16 @@ https://www.visualstudio.com/downloads/
 http://download.qt.io/official_releases/qt/5.12/5.12.6/qt-opensource-windows-x86-5.12.6.exe
 
 
-3. Install prebuilt Boost
-https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-64.exe/download
+3. Install prebuilt Boost 1.72
+https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
 
-4. Open "VS2015 x64 Native Tools" command prompt
+4. Open "Developer Command Prompt for VS 2019"
 ```
   $ git clone https://github.com/ensisoft/pinyin-invaders
   $ git submodule update --init --recursive
   $ cd pinyin-invaders
   $ mkdir dist
-  $ cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Release ..
+  $ cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release ..
   $ msbuild invaders.vcxproj /property:Configuration=Release /property:Platform=x64
   $ msbuild INSTALL.vcxproj
   $ cd ..\game\dist

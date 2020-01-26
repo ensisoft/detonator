@@ -39,7 +39,7 @@ set(Boost_USE_STATIC_LIBS ON)
 if(WIN32)
     set(BOOST_ROOT $ENV{BOOST_ROOT})
     if (NOT BOOST_ROOT)
-        set(BOOST_ROOT "c:/local/boost_1_61_0")
+        set(BOOST_ROOT "c:/local/boost_1_72_0")
         message("
 Bollocks. BOOST_ROOT was not set. Defaulting to ${BOOST_ROOT}
 TL;DR BOOST_ROOT is a variable that points to your Boost installation
@@ -116,7 +116,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # we also need Qt for the time being
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.6/msvc2015_64")
+    set(CMAKE_PREFIX_PATH "C:/Qt/5.12.6/msvc2017_64")
 endif()
 
 find_package(Qt5Widgets)
