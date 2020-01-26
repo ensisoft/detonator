@@ -24,6 +24,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 
 #if defined(_MSC_VER)
 #  include <Windows.h> // for DebugBreak
@@ -80,9 +81,17 @@ int test_main(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
-    test_main(argc, argv);
-    std::printf("\nSuccess!\n");
-
+    try
+    {
+        test_main(argc, argv);
+        std::printf("\nSuccess!\n");
+    }
+    catch (const std::exception & e)
+    {
+        std::printf("Tests didn't run to completion because an exception occurred!\n\n");
+        std::printf("%s\n", e.what());
+        return 1;
+    }
     return 0;
 }
 
