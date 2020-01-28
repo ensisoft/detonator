@@ -708,6 +708,8 @@ private:
             GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
             GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
 
+            if (mData.empty())
+                return;
             uint8_t* base = reinterpret_cast<uint8_t*>(&mData[0]);
             if (aPosition != -1)
             {
