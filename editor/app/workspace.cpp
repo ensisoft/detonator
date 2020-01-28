@@ -336,8 +336,7 @@ void Workspace::SaveMaterial(const MaterialResource& material)
             return;
         }
     }
-    beginInsertRows(QModelIndex(), mResources.size() + 1,
-        mResources.size() + 1);
+    beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
     mResources.push_back(std::make_unique<MaterialResource>(material));
     endInsertRows();
 }
@@ -355,8 +354,7 @@ void Workspace::SaveParticleSystem(const ParticleSystemResource& resource)
             return;
         }
     }
-    beginInsertRows(QModelIndex(), mResources.size() + 1,
-        mResources.size() + 1);
+    beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
     mResources.push_back(std::make_unique<ParticleSystemResource>(std::move(resource)));
     endInsertRows();
 }
