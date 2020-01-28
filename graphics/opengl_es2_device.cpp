@@ -280,6 +280,16 @@ public:
         INFO("Depth bits: %1", depth_bits);
         INFO("Point size: %1-%2", point_size[0], point_size[1]);
     }
+   ~OpenGLES2GraphicsDevice()
+    {
+       // make sure our cleanup order is specific so that the
+       // resources are deleted before the context is deleted.
+       mTextures.clear();
+       mShaders.clear();
+       mPrograms.clear();
+       mGeoms.clear();
+       mContext.reset();
+    }
 
     virtual void ClearColor(const Color4f& color) override
     {
