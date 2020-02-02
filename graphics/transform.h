@@ -30,27 +30,40 @@
 #  include <glm/mat4x4.hpp>
 #include "warnpop.h"
 
+#include <vector>
+
+#include "base/assert.h"
+
 namespace gfx
 {
     // Express a series of graphics operations such as 
     // translation, scaling and rotation as a simple 
-    // transform object.
+    // transform object. Some good resources about using matrices
+    // and transformations:
+    // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
+    // https://stackoverflow.com/questions/21923482/rotate-and-translate-object-in-local-and-global-orientation-using-glm
     class Transform
     {
     public:
+        Transform()
+        {
+            Reset();
+        }
         // Set absolute position. This will override any previously
         // accumulated translation. 
         void MoveTo(float x, float y)
         {
-            mTransform[3] = glm::vec4(x, y, 0.0f, 1.0f);
+            mTransform.back()[3] = glm::vec4(x, y, 0.0f, 1.0f);
         }
 
         // Accumulate a translation to the current transform, i.e.
-        // the the movement is relative to the current position.
+        // the movement is relative to the current position.
         void Translate(float x, float y)
         {
-            mTransform = glm::translate(glm::mat4(1.0f), 
-                glm::vec3(x, y, 0.0f)) * mTransform;
+            // note that since we're using identity matrix here as the basis transformation
+            // the translation is always relative to the untransformed basis, i.e.
+            // the global cooridinate system.
+            mTransform.back() = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f)) * mTransform.back();
         }
 
         template<typename T>
@@ -58,25 +71,30 @@ namespace gfx
         {
             Translate(t.GetX(), t.GetY());
         }
+        void Translate(const glm::vec2& offset)
+        {
+            Translate(offset.x, offset.y);
+        }
 
         // Set absolute resize. This will override any previously
         // accumulated scaling. 
         void Resize(float sx, float sy)
         {
-            mTransform = glm::scale(glm::mat4(1.0f), 
-                glm::vec3(1.0f/mScale.x, 1.0f/mScale.y, 1.0f)) * mTransform;
-            mTransform = glm::scale(glm::mat4(1.0f), 
-                glm::vec3(sx, sy, 1.0f)) * mTransform;
-            mScale = glm::vec2(sx, sy);
+            const auto& x = glm::normalize(mTransform.back()[0]);
+            const auto& y = glm::normalize(mTransform.back()[1]);
+            const auto& z = glm::normalize(mTransform.back()[2]);
+            const auto& t = mTransform.back()[3];
+            mTransform.back()[0] = x * sx;
+            mTransform.back()[1] = y * sy;
+            mTransform.back()[2] = z;
+            mTransform.back()[3] = t;
         }
 
         // Accumulate a scaling operation to the current transform, i.e.
         // the scaling is relative to the current transform.
         void Scale(float sx, float sy)
         {
-            mTransform = glm::scale(glm::mat4(1.0f), 
-                glm::vec3(sx, sy, 1.0f)) * mTransform;
-            mScale *= glm::vec2(sx, sy);
+            mTransform.back() = glm::scale(glm::mat4(1.0f),  glm::vec3(sx, sy, 1.0f)) * mTransform.back();
         }
 
         template<typename T>
@@ -88,7 +106,7 @@ namespace gfx
         // Accumulate rotation to the current transformation
         void Rotate(float radians)
         {
-            mTransform = glm::eulerAngleZ(radians) * mTransform;
+            mTransform.back() = glm::eulerAngleZ(radians) * mTransform.back();
         }
 
         // Set absolute position. This will override any previously
@@ -112,17 +130,41 @@ namespace gfx
         // Reset any transformation to identity, i.e. no transformation.
         void Reset()
         {
-            mTransform = glm::mat4(1.0f);
-            mScale = glm::vec2(1.0f, 1.0f);
+            mTransform.clear();
+            mTransform.resize(1); 
+            mTransform[0] = glm::mat4(1.0f);
         }
 
         // Get the transformation expressed as a matrix.
-        const glm::mat4& GetAsMatrix() const 
-        { return mTransform; }
+        glm::mat4 GetAsMatrix() const 
+        { 
+            glm::mat4 ret(1.0f); 
+            for (auto it = mTransform.rbegin(); it != mTransform.rend(); ++it)
+            {
+                // what we want is the following.
+                // ret = mTransform[0] * mTransform[1] ... * mTransform[n]
+                ret = *it * ret;
+            }
+            return ret; // mTransform;
+        }
+        
+        // Begin a new scope for the next transformation.
+        // Pushing and popping transformations allows transformations
+        // to be "stacked" i.e. become relative to each other. 
+        void Push()
+        {
+            mTransform.push_back(glm::mat4(1.0f));
+        }
+        // Pop the latest transform off of the transform stack.
+        void Pop()
+        {
+            // we always have the base level at 0 index.
+            ASSERT(mTransform.size() > 1);
+            mTransform.pop_back();
+        }
 
     private:
-        glm::mat4 mTransform = glm::mat4(1.0f);
-        glm::vec2 mScale = glm::vec2(1.0f, 1.0f);
+        std::vector<glm::mat4> mTransform;
     };
 
 } // namespace

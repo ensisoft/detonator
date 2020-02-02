@@ -52,6 +52,161 @@ public:
 private:
 };
 
+class TransformTest : public GraphicsTest
+{
+public:
+    TransformTest()
+    {
+        mRobot.reset(new BodyPart("Robot"));
+        mRobot->SetPosition(100, 100);
+        mRobot->SetScale(30.0f, 30.0f);
+
+        mRobot->AddPart("Robot/Torso")
+            .SetPosition(1.0f, 2.0f).SetSize(3, 5).SetColor(gfx::Color::DarkBlue);
+
+        mRobot->AddPart("Robot/Head")
+            .SetPosition(2.0f, 0.0f).SetSize(1.3f, 1.3f).SetColor(gfx::Color::Green);
+        mRobot->AddPart("Robot/LeftArm")
+            .SetPosition(1.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Gray)
+            .SetVelocity(8).SetRotation(math::Pi * 0.8)
+            .AddPart("Forearm")
+            .SetPosition(0.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Yellow)
+            .SetVelocity(10.0f);
+        mRobot->AddPart("Robot/RightArm")
+            .SetPosition(4.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Gray)
+            .SetVelocity(-9).SetRotation(math::Pi * -0.9)
+            .AddPart("Forearm")
+            .SetPosition(0.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Yellow)
+            .SetVelocity(-11.0f);
+        mRobot->AddPart("Robot/LeftLeg")
+            .SetPosition(1.0f, 7.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Red)
+            .AddPart("Shin")
+            .SetPosition(0.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Yellow);
+        mRobot->AddPart("Robot/RightLeg")
+            .SetPosition(3.0f, 7.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Red)
+            .AddPart("Shin")
+            .SetPosition(0.0f, 2.0f).SetSize(1.0f, 2.0f).SetColor(gfx::Color::Yellow);
+
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const float velocity = 0.3;
+        const float angle = mTime* velocity;
+        
+        gfx::Transform trans;
+        mRobot->Render(painter, trans);
+
+        gfx::Transform tr;
+        tr.Translate(400, 400);
+
+        tr.Push();
+        tr.Translate(-50.0f, -50.0f);
+        tr.Rotate(math::Pi * 2.0f * angle);
+        tr.Translate(40.0f, 40.0f);
+        painter.Draw(gfx::Rectangle("foo", 100.0f, 100.0f), tr, gfx::SolidColor(gfx::Color::Cyan));
+
+        tr.Push();
+        tr.Translate(30.0f, 30.0f);
+        tr.Rotate(math::Pi * 2.0f * angle);
+        painter.Draw(gfx::Rectangle("bar", 20.0f, 20.0f), tr, gfx::SolidColor(gfx::Color::Yellow));
+        tr.Pop();
+        tr.Pop();
+    }
+    virtual void Update(float dt) override
+    {
+        mRobot->Update(dt);
+        mTime += dt;
+    }
+private:
+    class BodyPart
+    {
+    public:
+        BodyPart(const std::string& name) : mName(name)
+        {}
+        void SetScale(float sx, float sy)
+        {
+            mSx = sx;
+            mSy = sy;
+        }
+        BodyPart& SetPosition(float x, float y)
+        {
+            mX = x;
+            mY = y;
+            return *this;
+        }
+        BodyPart& SetSize(float width, float height)
+        {
+            mWidth  = width;
+            mHeight = height;
+            return *this;
+        }
+        BodyPart& SetColor(gfx::Color color)
+        {
+            mColor = color;
+            return *this;
+        }
+        BodyPart& SetVelocity(float velo)
+        {
+            mVelocity = velo;
+            return *this;
+        }
+        BodyPart& SetRotation(float value)
+        {
+            mRotation = value;
+            return *this;
+        }
+        void Render(gfx::Painter& painter, gfx::Transform& trans) const
+        {
+            const float angle = std::sin(mTime * mVelocity);
+            const float ROM = math::Pi * 0.3f; 
+
+            trans.Push();
+            trans.Scale(mSx, mSy);
+            trans.Rotate(mRotation + ROM * angle);
+            trans.Translate(mX, mY);
+
+            painter.Draw(gfx::Rectangle(mName, mWidth, mHeight),
+                trans, gfx::SolidColor(mColor));
+
+            for (const auto& bp : mBodyparts)
+            {
+                bp.Render(painter, trans);
+            }
+            trans.Pop();
+        }
+        void Update(float dt)
+        {
+            mTime += dt;
+            for (auto& part : mBodyparts)
+                part.Update(dt);
+        }
+        BodyPart& AddPart(const std::string& name)
+        {
+            mBodyparts.push_back(BodyPart(name));
+            return mBodyparts.back();
+        }
+            
+    private:
+        const std::string mName;
+        std::vector<BodyPart> mBodyparts;
+        float mSx = 1.0f;
+        float mSy = 1.0f;
+        float mWidth = 0.0f;
+        float mHeight = 0.0f;
+        float mX = 0.0f;
+        float mY = 0.0f;
+        float mTime = 0.0f;
+        float mVelocity = 0.0f;
+        float mRotation = 0.0f;
+        gfx::Color mColor;
+    };
+    std::unique_ptr<BodyPart> mRobot;
+
+private:
+    float mTime = 0.0f;
+};
+
 // render some different simple shapes.
 class ShapesTest : public GraphicsTest
 {
@@ -450,9 +605,11 @@ int main(int argc, char* argv[])
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;
+    tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
+
 
     wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());
