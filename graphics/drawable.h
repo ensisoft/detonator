@@ -68,6 +68,12 @@ namespace gfx
     class Circle : public Drawable
     {
     public:
+        Circle() = default; 
+        Circle(const std::string& name, float radius)
+            : mName(name)
+            , mRadius(radius)
+        {}
+
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
@@ -87,12 +93,12 @@ namespace gfx
             // some kind of "LOD" value for figuring out how many slices we should have.
             const auto slices = 100;
 
-            Geometry* geom = device.FindGeometry("circle_" + std::to_string(slices));
+            Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
                 Vertex c;
-                c.aPosition.x =  0.5;
-                c.aPosition.y = -0.5;
+                c.aPosition.x =  0.5 * mRadius;
+                c.aPosition.y = -0.5 * mRadius;
                 c.aTexCoord.x = 0.5;
                 c.aTexCoord.y = 0.5;
                 std::vector<Vertex> vs;
@@ -102,29 +108,37 @@ namespace gfx
                 float angle = 0.0f;
                 for (unsigned i=0; i<=slices; ++i)
                 {
-                    const auto x = std::cos(angle) * 0.5f;
-                    const auto y = std::sin(angle) * 0.5f;
+                    const auto x = std::cos(angle) * 0.5f * mRadius;
+                    const auto y = std::sin(angle) * 0.5f * mRadius;
                     angle += angle_increment;
                     Vertex v;
-                    v.aPosition.x = x + 0.5f;
-                    v.aPosition.y = y - 0.5f;
+                    v.aPosition.x = x + 0.5f * mRadius;
+                    v.aPosition.y = y - 0.5f * mRadius;
                     v.aTexCoord.x = x + 0.5f;
                     v.aTexCoord.y = y + 0.5f;
                     vs.push_back(v);
                 }
-                geom = device.MakeGeometry("circle_" + std::to_string(slices));
+                geom = device.MakeGeometry(mName);
                 geom->Update(&vs[0], vs.size());
                 geom->SetDrawType(Geometry::DrawType::TriangleFan);
             }
             return geom;
         }
     private:
+        const std::string mName = "Unit_Circle";
+        const float mRadius = 1.0f;
     };
 
 
     class Rectangle : public Drawable
     {
     public:
+        Rectangle() = default;
+        Rectangle(const std::string& name, float width, float height)
+            : mName(name)
+            , mWidth(width)
+            , mHeight(height)
+        {}
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
@@ -140,29 +154,38 @@ namespace gfx
 
         virtual Geometry* Upload(Device& device) const override
         {
-            Geometry* geom = device.FindGeometry("rect");
+            Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
                 const Vertex verts[6] = {
-                    { {0,  0}, {0, 1} },
-                    { {0, -1}, {0, 0} },
-                    { {1, -1}, {1, 0} },
+                    { {0.0f*mWidth,  0.0f*mHeight}, {0.0f, 1.0f} },
+                    { {0.0f*mWidth, -1.0f*mHeight}, {0.0f, 0.0f} },
+                    { {1.0f*mWidth, -1.0f*mHeight}, {1.0f, 0.0f} },
 
-                    { {0,  0}, {0, 1} },
-                    { {1, -1}, {1, 0} },
-                    { {1,  0}, {1, 1} }
+                    { {0.0f*mWidth,  0.0f*mHeight}, {0.0f, 1.0f} },
+                    { {1.0f*mWidth, -1.0f*mHeight}, {1.0f, 0.0f} },
+                    { {1.0f*mWidth,  0.0f*mHeight}, {1.0f, 1.0f} }
                 };
-                geom = device.MakeGeometry("rect");
+                geom = device.MakeGeometry(mName);
                 geom->Update(verts, 6);
             }
             return geom;
         }
     private:
+        const std::string mName = "Unit_Rect";
+        const float mWidth = 1.0f;
+        const float mHeight = 1.0f;
     };
 
     class Triangle : public Drawable
     {
     public:
+        Triangle() = default;
+        Triangle(const std::string& name, float width, float height)
+            : mName(name)
+            , mWidth(width)
+            , mHeight(height)
+        {}
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
@@ -178,20 +201,23 @@ namespace gfx
 
         virtual Geometry* Upload(Device& device) const override
         {
-            Geometry* geom = device.FindGeometry("triangle");
+            Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
-                const Vertex verts[6] = {
-                    { {0.5,  0.0}, {0.5, 1.0} },
-                    { {0.0, -1.0}, {0.0, 0.0} },
-                    { {1.0, -1.0}, {1.0, 0.0} }
+                const Vertex verts[3] = {
+                    { {0.5f*mWidth,  0.0f*mHeight}, {0.5f, 1.0f} },
+                    { {0.0f*mWidth, -1.0f*mHeight}, {0.0f, 0.0f} },
+                    { {1.0f*mWidth, -1.0f*mHeight}, {1.0f, 0.0f} }
                 };
-                geom = device.MakeGeometry("triangle");
+                geom = device.MakeGeometry(mName);
                 geom->Update(verts, 3);
             }
             return geom;
         }
     private:
+        const std::string mName = "Unit_Triangle";
+        const float mWidth  = 1.0f;
+        const float mHeight = 1.0f;
     };
 
     // Particle engine interface. Particle engines implement some kind of
