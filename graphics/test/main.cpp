@@ -58,36 +58,60 @@ class ShapesTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Transform transform;
-        transform.Resize(100, 100);
-        transform.MoveTo(10, 10);
-
         gfx::Material materials[3];
         materials[0] = gfx::SolidColor(gfx::Color::Red);
         materials[1] = gfx::TextureMap("textures/Checkerboard.png");
         materials[2] = gfx::SolidColor(gfx::Color::HotPink);
 
-        for (int i=0; i<3; ++i)
         {
-            painter.Draw(gfx::Rectangle(), transform, materials[i]);
-            transform.Scale(1.5, 1.5);
-            transform.Translate(100 * std::pow(1.5, i), 0.0f);
+            gfx::Transform transform;
+            transform.Scale(100.0f, 100.0f);
+            transform.Translate(10.0f, 10.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[2]);
         }
 
-        transform.Reset();
-        transform.Resize(100, 100);
-        transform.MoveTo(10, 200);
-        for (int i=0; i<3; ++i)
         {
-            painter.Draw(gfx::Circle(), transform, materials[i]);
-            transform.Scale(1.5, 1.5);
-            transform.Translate(100 * std::pow(1.5, i), 0.0f);
+            gfx::Transform transform;
+            transform.Scale(300.0f, 300.0f);
+            transform.Translate(10.0f, 310.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(), transform, materials[2]);
         }
     }
     virtual void Update(float dts)
     {}
 private:
-
 };
 
 class RenderParticleTest : public GraphicsTest
