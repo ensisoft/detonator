@@ -65,6 +65,58 @@ namespace gfx
     private:
     };
 
+    class Arrow : public Drawable
+    {
+    public:
+        Arrow() = default;
+        virtual Shader* GetShader(Device& device) const override
+        {
+            Shader* s = device.FindShader("vertex_array.glsl");
+            if (s == nullptr || !s->IsValid())
+            {
+                if (s == nullptr)
+                    s = device.MakeShader("vertex_array.glsl");
+                if (!s->CompileFile("vertex_array.glsl"))
+                    return nullptr;
+            }
+            return s;
+        }
+        virtual Geometry* Upload(Device& device) const override
+        {
+            Geometry* geom = device.FindGeometry(mName);
+            if (!geom)
+            {
+                const Vertex verts[] = {
+                    // body
+                    {{0.0f * mWidth, -0.25f * mHeight}, {0.0f, 0.75f}},
+                    {{0.0f * mWidth, -0.75f * mHeight}, {0.0f, 0.25f}},
+                    {{0.7f * mWidth, -0.25f * mHeight}, {0.7f, 0.75f}},
+                    // body 
+                    {{0.7f * mWidth, -0.25f * mHeight}, {0.7f, 0.75f}},
+                    {{0.0f * mWidth, -0.75f * mHeight}, {0.0f, 0.25f}},
+                    {{0.7f * mWidth, -0.75f * mHeight}, {0.7f, 0.25f}},
+
+                    // arrow head
+                    {{0.7f * mWidth, -0.0f * mHeight}, {0.7f, 1.0f}},
+                    {{0.7f * mWidth, -0.5f * mHeight}, {0.7f, 0.5f}},
+                    {{1.0f * mWidth, -0.5f * mHeight}, {1.0f, 0.5f}},
+                    // arrow head
+                    {{0.7f * mWidth, -0.5f * mHeight}, {0.7f, 0.5f}},
+                    {{0.7f * mWidth, -1.0f * mHeight}, {0.7f, 0.0f}},
+                    {{1.0f * mWidth, -0.5f * mHeight}, {1.0f, 0.5f}}
+                };
+                geom = device.MakeGeometry(mName);
+                geom->Update(verts, 12);
+                geom->SetDrawType(Geometry::DrawType::Triangles);
+            }
+            return geom;
+        }
+    private:
+        const std::string mName = "Unit_Arrow";
+        const float mWidth = 1.0f;
+        const float mHeight = 1.0f;
+    };
+
     class Circle : public Drawable
     {
     public:

@@ -241,6 +241,16 @@ public:
             painter.Draw(gfx::Triangle(), transform, materials[2]);
         }
 
+        // arrows
+        {
+            gfx::Transform transform;
+            transform.Scale(100.0f, 50.0f);
+            transform.Translate(10.0f, 150.0f);
+            painter.Draw(gfx::Arrow(), transform, materials[0]);
+            transform.Translate(100.0f, 0.0f);
+            painter.Draw(gfx::Arrow(), transform, materials[1]);
+        }
+
         {
             gfx::Transform transform;
             transform.Scale(300.0f, 300.0f);

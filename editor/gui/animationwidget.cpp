@@ -282,11 +282,30 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
+    gfx::Transform view;
+    view.Translate(-mCameraOffsetX, -mCameraOffsetY);
+    view.Push();
+
     mAnimation.Update(secs);
     mAnimation.Draw(painter);
 
     if (mCurrentTool)
         mCurrentTool->Render(painter);
+
+    // right arrow
+    view.Push();
+    view.Scale(100.0f, 5.0f);
+    view.Translate(0.0f, -2.5f);
+    painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
+    view.Pop();
+
+    view.Push();
+    view.Scale(100.0f, 5.0f);
+    view.Translate(-50.0f, -2.5f);
+    view.Rotate(math::Pi * 0.5f);
+    view.Translate(0.0f, 50.0f);
+    painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+    view.Pop();
 }
 
 } // namespace

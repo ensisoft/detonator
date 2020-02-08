@@ -74,6 +74,8 @@ namespace gui
         std::unique_ptr<ComponentModel> mModel;
     private:
         scene::Animation mAnimation;
+        float mCameraOffsetX = 0.0f;
+        float mCameraOffsetY = 0.0f;
 
     };
 } // namespace
