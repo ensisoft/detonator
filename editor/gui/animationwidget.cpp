@@ -183,6 +183,57 @@ private:
     bool mEngaged = false;
 };
 
+class AnimationWidget::CameraTool : public AnimationWidget::Tool
+{
+public:
+    CameraTool(float& camera_offset_x, float& camera_offset_y) 
+        : mCameraOffsetX(camera_offset_x)
+        , mCameraOffsetY(camera_offset_y)
+    {}
+    virtual void Render(gfx::Painter& painter) const override
+    {}
+    virtual void MouseMove(QMouseEvent* mickey) override
+    {
+        if (mEngaged)
+        {
+            const auto& pos = mickey->pos();
+            const auto& delta = pos - mMousePos;
+            const float x = delta.x();
+            const float y = delta.y();
+            mCameraOffsetX -= x;
+            mCameraOffsetY -= y;
+            DEBUG("Camera offset %1, %2", mCameraOffsetX, mCameraOffsetY);
+            mMousePos = pos;
+        }
+    }
+    virtual void MousePress(QMouseEvent* mickey) override
+    {
+        const auto button = mickey->button();
+        if (button == Qt::LeftButton)
+        {
+            mMousePos = mickey->pos();
+            mEngaged = true;
+        }
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey) override
+    {
+        const auto button = mickey->button();
+        if (button == Qt::LeftButton)
+        {
+            mEngaged = false;
+            return false;
+        }
+        return true;
+    }
+private:
+    float& mCameraOffsetX;
+    float& mCameraOffsetY;
+private:
+    QPoint mMousePos;
+    bool mEngaged = false;
+
+};
+
 AnimationWidget::AnimationWidget()
 {
     DEBUG("Create AnimationWidget");
@@ -199,8 +250,11 @@ AnimationWidget::AnimationWidget()
             mCurrentTool->MouseMove(mickey);
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
-        if (mCurrentTool)
-            mCurrentTool->MousePress(mickey);
+
+        if (!mCurrentTool)
+            mCurrentTool.reset(new CameraTool(mCameraOffsetX, mCameraOffsetY));
+
+        mCurrentTool->MousePress(mickey);
     };
     mUI.widget->onMouseRelease = [&](QMouseEvent* mickey) {
         if (!mCurrentTool)

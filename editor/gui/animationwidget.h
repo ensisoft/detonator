@@ -64,7 +64,7 @@ namespace gui
         class ComponentModel;
         class Tool;
         class PlaceTool;
-        class Fuck;
+        class CameraTool;
 
     private:
         Ui::AnimationWidget mUI;
