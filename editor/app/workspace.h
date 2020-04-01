@@ -80,18 +80,34 @@ namespace app
         // the workspace.
         template<typename ResourceType>
         void SaveResource(const ResourceType& resource)
-        {
+        {                  
+            const typename ResourceType::GfxType* src = nullptr;
+            ASSERT(resource.GetContent(&src));
+
             const auto& name = resource.GetName();
             const auto  type = resource.GetType();
             for (size_t i=0; i<mResources.size(); ++i)
             {
-                const auto& res = mResources[i];
+                auto& res = mResources[i];
                 if (res->GetName() != name || res->GetType() != type)
                     continue;
 
                 // overwrite the existing resource type. the caller
                 // is expected to have confirmed with the user that this is OK
-                mResources[i] = std::make_unique<ResourceType>(resource);
+                typename ResourceType::GfxType* dst = nullptr;
+                ASSERT(res->GetContent(&dst));
+                // we can either assign to the content object in the existing
+                // resource object or create a new resource object
+                *dst = *src;
+                //mResources[i] = std::make_unique<ResourceType>(resource);
+
+                // see if there are instances of this resource in use that we
+                // also want to update with the latest changes.
+                // note that there can be multiple handles here!
+                for (auto& handle : mPrivateInstances)
+                {
+                    handle->UpdateInstance(name, type, (const void*)src);
+                }
                 return;
             }
             beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
@@ -133,8 +149,21 @@ namespace app
 
         void DeleteResources(QModelIndexList& list);
 
+        void Tick();
+
     private:
+        // this is the list of resources that we save/load
+        // from the workspace data files. these are created
+        // and edited by the user through the editor.
         std::vector<std::unique_ptr<Resource>> mResources;
+        // we keep track of private instances of resource objects
+        // through non-owning pointer.
+        // such instances came into life when resources of other
+        // types use other resources, for example when an animation
+        // uses a material but the reason why we track them here
+        // is that we can reflect the changes done to the resources
+        // in the system that uses it!
+        mutable std::vector<std::unique_ptr<ResourceHandle>> mPrivateInstances;
     private:
         mutable QString mContentFile;
         mutable QString mWorkspaceFile;

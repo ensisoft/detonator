@@ -91,7 +91,7 @@ namespace gfx
                     {{0.0f * mWidth, -0.25f * mHeight}, {0.0f, 0.75f}},
                     {{0.0f * mWidth, -0.75f * mHeight}, {0.0f, 0.25f}},
                     {{0.7f * mWidth, -0.25f * mHeight}, {0.7f, 0.75f}},
-                    // body 
+                    // body
                     {{0.7f * mWidth, -0.25f * mHeight}, {0.7f, 0.75f}},
                     {{0.0f * mWidth, -0.75f * mHeight}, {0.0f, 0.25f}},
                     {{0.7f * mWidth, -0.75f * mHeight}, {0.7f, 0.25f}},
@@ -120,7 +120,7 @@ namespace gfx
     class Circle : public Drawable
     {
     public:
-        Circle() = default; 
+        Circle() = default;
         Circle(const std::string& name, float radius)
             : mName(name)
             , mRadius(radius)
@@ -641,7 +641,7 @@ namespace gfx
         }
 
     private:
-        const Params mParams;
+        /* const */ Params mParams;
         float mNumParticlesHatching = 0.0f;
         float mTime = 0.0f;
         std::vector<Particle> mParticles;

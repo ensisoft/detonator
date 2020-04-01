@@ -110,7 +110,15 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
     const gfx::Material* content = nullptr;
     resource.GetContent(&content);
-    return std::make_shared<gfx::Material>(*content);
+    auto ret = std::make_shared<gfx::Material>(*content);
+
+    // add a copy in the collection of private instances so that
+    // if/when the resource is modified the object using the resource
+    // will also reflect those changes.
+    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Material, Resource::Type::Material>>(FromUtf8(name), ret);
+    mPrivateInstances.push_back(std::move(handle));
+
+    return ret;
 }
 std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
 {
@@ -120,7 +128,15 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
         const gfx::KinematicsParticleEngine* engine = nullptr;
         resource.GetContent(&engine);
-        return std::make_shared<gfx::KinematicsParticleEngine>(*engine);
+        auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
+
+        // add a copy in the collection of private instances so that
+        // if/when the resource is modified the object using the resource
+        // will also reflect those changes.
+        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine, Resource::Type::ParticleSystem>>(FromUtf8(name), ret);
+        mPrivateInstances.push_back(std::move(handle));
+
+        return ret;
     }
 
     ERROR("Request for a drawable that doesn't exist: '%1'", name);
@@ -358,6 +374,28 @@ void Workspace::DeleteResources(QModelIndexList& list)
 
         endRemoveRows();
         ++removed;
+    }
+}
+
+void Workspace::Tick()
+{
+    // cleanup expired handles that point to stale objects that
+    // are no longer actually referenced.
+    for (size_t i=0; i<mPrivateInstances.size(); )
+    {
+        if (mPrivateInstances[i]->IsExpired())
+        {
+            const auto name = mPrivateInstances[i]->GetName();
+            const auto last = mPrivateInstances.size() - 1;
+            std::swap(mPrivateInstances[i], mPrivateInstances[last]);
+            mPrivateInstances.pop_back();
+            DEBUG("Deleted resource tracking handle %1", name);
+        }
+        else
+        {
+            ++i;
+        }
+
     }
 }
 

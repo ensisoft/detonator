@@ -140,6 +140,8 @@ namespace app
     class GraphicsResource : public Resource
     {
     public:
+        using GfxType = Content;
+
         GraphicsResource(const Content& content, const QString& name)
             : mContent(content)
             , mName(name)
@@ -225,6 +227,51 @@ namespace app
         QString mName;
         QVariantMap mProps;
     };
+
+    // Resource handle wraps a gfx resource object
+    // and provides some additional functionality that pertains
+    // only to the *instance*. Not the resource type per se.
+    class ResourceHandle
+    {
+    public:
+        virtual ~ResourceHandle() = default;
+        // Update the instance data, for example material parameters from a gfx::Material object.
+        virtual void UpdateInstance(const QString& name, Resource::Type type, const void* gfx_content_source) = 0;
+        // Checks if the handle has expired.
+        virtual bool IsExpired() const = 0;
+        // Return the name of the resource that this instance represents..
+        virtual QString GetName() const = 0;
+    };
+
+    template<typename Content, Resource::Type type>
+    class WeakGraphicsResourceHandle : public ResourceHandle
+    {
+    public:
+        WeakGraphicsResourceHandle(const QString& name, std::shared_ptr<Content> handle)
+            : mName(name)
+            , mHandle(handle)
+        {}
+        virtual void UpdateInstance(const QString& name, Resource::Type source_type, const void* gfx_content_source) override
+        {
+            if (type != source_type)
+                return;
+            else if (mName != name)
+                return;
+            auto ptr = mHandle.lock();
+            if (!ptr)
+                return;
+            *ptr = *static_cast<const Content*>(gfx_content_source);
+        }
+        virtual bool IsExpired() const override
+        { return mHandle.expired(); }
+        virtual QString GetName() const override
+        { return mName; }
+
+    private:
+        const QString mName;
+        std::weak_ptr<Content> mHandle;
+    };
+
 
     using MaterialResource = GraphicsResource<gfx::Material, Resource::Type::Material>;
     using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine,

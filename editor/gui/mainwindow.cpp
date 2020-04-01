@@ -449,6 +449,8 @@ void MainWindow::refreshUI()
         mUI.mainTab->setTabText(i, text);
         mUI.mainTab->setTabIcon(i, icon);
     }
+
+    mWorkspace.Tick();
 }
 
 void MainWindow::showNote(const app::Event& event)
