@@ -160,8 +160,8 @@ public:
         auto material = mState.workspace->MakeMaterial("Checkerboard");
 
         scene::Animation::Component component;
-        component.SetMaterial("Rectangle", material);
-        component.SetDrawable("Checkerboard", drawable);
+        component.SetMaterial("Checkerboard", material);
+        component.SetDrawable("Rectangle", drawable);
         component.SetName(name);
         component.SetTranslation(glm::vec2(xpos, ypos));
         component.SetScale(glm::vec2(1.0f, 1.0f));

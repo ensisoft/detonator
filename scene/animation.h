@@ -83,7 +83,7 @@ namespace scene
             void SetDrawable(const std::string& name, std::shared_ptr<gfx::Drawable> drawable)
             {
                 mDrawable = std::move(drawable);
-                mMaterialName = name;
+                mDrawableName = name;
             }
             // Set the material object for this component.
             // The name identifies the runtime material resource in the gfx resource loader.
