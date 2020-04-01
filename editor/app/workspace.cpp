@@ -319,46 +319,6 @@ QStringList Workspace::ListDrawables() const
     return list;
 }
 
-void Workspace::SaveMaterial(const MaterialResource& material)
-{
-    // check if we already have on by this name.
-    // the caller is expected to have confirmed the user if overwriting
-    // is OK or not.
-    const auto& name = material.GetName();
-
-    for (size_t i=0; i<mResources.size(); ++i)
-    {
-        const auto& res = mResources[i];
-        if (res->GetType() == Resource::Type::Material &&
-            res->GetName() == name)
-        {
-            mResources[i] = std::make_unique<MaterialResource>(material);
-            return;
-        }
-    }
-    beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
-    mResources.push_back(std::make_unique<MaterialResource>(material));
-    endInsertRows();
-}
-
-void Workspace::SaveParticleSystem(const ParticleSystemResource& resource)
-{
-    const auto& name = resource.GetName();
-    for (size_t i=0; i<mResources.size(); ++i)
-    {
-        const auto& res = mResources[i];
-        if (res->GetType() == Resource::Type::ParticleSystem &&
-            res->GetName() == name)
-        {
-            mResources[i] = std::make_unique<ParticleSystemResource>(std::move(resource));
-            return;
-        }
-    }
-    beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
-    mResources.push_back(std::make_unique<ParticleSystemResource>(std::move(resource)));
-    endInsertRows();
-}
-
 bool Workspace::HasMaterial(const QString& name) const
 {
     return HasResource(name, Resource::Type::Material);

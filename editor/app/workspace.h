@@ -75,11 +75,29 @@ namespace app
         // Get a list of drawable names in the workspace.
         QStringList ListDrawables() const;
 
-        // Set material properties for the material by the given name.
-        // If no such material is yet set in the workspace it will be added.
-        void SaveMaterial(const MaterialResource& material);
+        // Save a new resource in the workspace. If the resource by the same type
+        // and name exists it's overwritten, otherwise a new resource is added to
+        // the workspace.
+        template<typename ResourceType>
+        void SaveResource(const ResourceType& resource)
+        {
+            const auto& name = resource.GetName();
+            const auto  type = resource.GetType();
+            for (size_t i=0; i<mResources.size(); ++i)
+            {
+                const auto& res = mResources[i];
+                if (res->GetName() != name || res->GetType() != type)
+                    continue;
 
-        void SaveParticleSystem(const ParticleSystemResource& resource);
+                // overwrite the existing resource type. the caller
+                // is expected to have confirmed with the user that this is OK
+                mResources[i] = std::make_unique<ResourceType>(resource);
+                return;
+            }
+            beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
+            mResources.push_back(std::make_unique<ResourceType>(std::move(resource)));
+            endInsertRows();
+        }
 
         // Returns whether a material by this name already exists or not.
         bool HasMaterial(const QString& name) const;

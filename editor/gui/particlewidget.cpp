@@ -369,7 +369,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_init_rect", mUI.initRect);
     SetProperty(particle_resource, "use_direction_sector", mUI.dirSector);
     SetProperty(particle_resource, "use_growth", mUI.growth);
-    mWorkspace->SaveParticleSystem(particle_resource);
+    mWorkspace->SaveResource(particle_resource);
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);
 
@@ -420,7 +420,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(material_resource, "texture_rects", texture_rects);
     SetProperty(material_resource, "color", mUI.color);
     SetProperty(material_resource, "surface", mUI.surfaceType);
-    mWorkspace->SaveMaterial(material_resource);
+    mWorkspace->SaveResource(material_resource);
     INFO("Saved material '%1'", name);
     NOTE("Saved material '%1'", name);
 

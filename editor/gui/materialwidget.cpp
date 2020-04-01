@@ -356,7 +356,7 @@ void MaterialWidget::on_actionSave_triggered()
     resource.SetProperty("texture_rects", texture_rects);
     resource.SetProperty("color", mUI.baseColor->color());
     resource.SetProperty("surface", mUI.surfaceType->currentText());
-    mWorkspace->SaveMaterial(resource);
+    mWorkspace->SaveResource(resource);
 
     setWindowTitle(name);
 
