@@ -202,9 +202,9 @@ namespace app
             if constexpr (type == Resource::Type::Material)
                 mProps = object["material_" + mName].toObject().toVariantMap();
             else if (type == Resource::Type::ParticleSystem)
-                mProps = object["material_" + mName].toObject().toVariantMap();
+                mProps = object["particle_" + mName].toObject().toVariantMap();
             else if (type == Resource::Type::Animation)
-                mProps = object["material_" + mName].toObject().toVariantMap();
+                mProps = object["animation_" + mName].toObject().toVariantMap();
         }
 
     protected:
