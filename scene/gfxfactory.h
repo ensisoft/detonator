@@ -35,13 +35,33 @@ namespace gfx {
 
 namespace scene
 {
-    // Procuder/loader of GFX resources, i.e. materials and drawables.
+    // Producer/loader of GFX resources, i.e. materials and drawables.
+    // Used to load/create GFX resource instances of types created
+    // by the user in the editor such as particle engines or materials.
+    // Simple shapes such as "rectangle" or "circle" should be created
+    // through some other method.
     class GfxFactory
     {
     public:
         virtual ~GfxFactory() = default;
+        //
+        // == About sharing/not-sharing gfx resources ==
+        //
+        // The objects can either be private (and unique) or shared.
+        // A unique object means that for example each animation would have it's own
+        // instance of some material 'foo' and is responsible for updating the material
+        // to update a sprite animation for example. This means that multiple such instances
+        // of 'foo' material will consume space multiple times (i.e. the material parameters will
+        // be duplicated, but the immutable GPU resources are always shared)
+        // and each such instance will have it's own animation state. In other words they can
+        // be at different phases of animation.
+        // Sharing an instance however reduces the memory consumption but such objects need to be
+        // updated only once and will render the same outcome when used by multiple shapes.
 
+        // Create an instance of a material identified by the material name.
+        // todo: share/nonshare flag
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const = 0;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const = 0;
+    private:
     };
 } // namespace

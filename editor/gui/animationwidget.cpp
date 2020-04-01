@@ -315,7 +315,6 @@ void AnimationWidget::addActions(QMenu& menu)
 void AnimationWidget::setWorkspace(app::Workspace* workspace)
 {
     mState.workspace = workspace;
-    mUI.materials->addItem("Checkerboard"); // this is the default, todo: maybe ask from workspace
     mUI.materials->addItems(workspace->ListMaterials());
 }
 

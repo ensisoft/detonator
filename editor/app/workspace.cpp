@@ -101,13 +101,6 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
         return std::make_shared<gfx::Material>(gfx::TextureMap("textures/Checkerboard.png"));
     }
 
-    constexpr auto colors = magic_enum::enum_values<gfx::Color>();
-    for (const auto& color : colors)
-    {
-        if (name == magic_enum::enum_name(color))
-            return std::make_shared<gfx::Material>(gfx::SolidColor(color));
-    }
-
     if (!HasResource(FromUtf8(name), Resource::Type::Material))
     {
         WARN("No such material '%1' (Replaced with pink)", name);
@@ -121,23 +114,10 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
 }
 std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
 {
-    // provide some primitives
-    // todo: fix the stub types.
-    if (name == "Rectangle")
-        return std::make_shared<gfx::Rectangle>();
-    else if (name == "Circle")
-        return std::make_shared<gfx::Circle>();
-    else if (name == "Triangle")
-        return std::make_shared<gfx::Triangle>();
-    else if (name == "Curve")
-        return std::make_shared<gfx::Rectangle>();
-    else if (name == "Line")
-        return std::make_shared<gfx::Rectangle>();
-
-    if (!HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
+    // we have only particle engines right now as drawables
+    if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
-        const Resource& resource = GetResource(FromUtf8(name),
-            Resource::Type::ParticleSystem);
+        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
         const gfx::KinematicsParticleEngine* engine = nullptr;
         resource.GetContent(&engine);
         return std::make_shared<gfx::KinematicsParticleEngine>(*engine);
@@ -300,6 +280,8 @@ bool Workspace::LoadWorkspace(const QString& filename)
 QStringList Workspace::ListMaterials() const
 {
     QStringList list;
+    list << "Checkerboard";
+
     for (const auto& res : mResources)
     {
         if (res->GetType() == Resource::Type::Material)
