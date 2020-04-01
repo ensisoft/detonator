@@ -35,18 +35,15 @@
 namespace scene
 {
 
-void Animation::Component::Draw(const gfx::Transform& parent, gfx::Painter& painter) const
+void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
     if (!mDrawable || !mMaterial)
         return;
 
     mMaterial->SetRuntime(mTime - mStartTime);
 
-    gfx::Transform transform(parent);
-    //transform.Scale(100, 100);
-    //transform.Resize(100, 100);
-    //transform.MoveTo(100, 100);
-    //transform.Translate
+
+    transform.Translate(mPosition);
 
     painter.Draw(*mDrawable, transform, *mMaterial);
 
@@ -66,26 +63,19 @@ bool Animation::Component::Update(float dt)
     return true;
 }
 
-bool Animation::Component::Prepare(const GfxFactory& factory)
+void Animation::Component::Reset()
 {
-    if (!mMaterial)
-        mMaterial = factory.MakeMaterial(mMaterialName);
-    if (!mDrawable)
-        mDrawable = factory.MakeDrawable(mDrawableName);
-    if (!mMaterial || !mDrawable)
-        return false;
-    return true;
+    mTime = 0.0f;
+
 }
 
-void Animation::Draw(gfx::Painter& painter) const
+void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
-    gfx::Transform transform;
-    transform.Resize(100, 100);
-    transform.MoveTo(100, 100);
     for (const auto& component : mComponents)
     {
-        component.Draw(transform, painter);
-        transform.Translate(100, 100);
+        transform.Push();
+        component.Draw(painter, transform);
+        transform.Pop();
     }
 }
 
@@ -106,21 +96,12 @@ bool Animation::IsExpired() const
     return false;
 }
 
-bool Animation::Prepare(const GfxFactory& factory)
+void Animation::Reset()
 {
-    bool success = true;
     for (auto& component : mComponents)
     {
-        if (!component.Prepare(factory))
-        {
-            ERROR("Component %1 failed to prepare. ", component.GetName());
-            success = false;
-            continue;
-        }
-        DEBUG("Component %1 prepared.", component.GetName());
+        component.Reset();
     }
-    return success;
 }
-
 
 } // namespace

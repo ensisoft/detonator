@@ -54,28 +54,52 @@ namespace gui
         virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
+        void on_actionPlay_triggered();
+        void on_actionPause_triggered();
+        void on_actionStop_triggered();
         void on_actionNewRect_triggered();
         void on_actionDeleteComponent_triggered();
         void on_components_customContextMenuRequested(QPoint);
+        void on_plus90_clicked();
+        void on_minus90_clicked();
+        void on_resetTransform_clicked();
+        void on_materials_currentIndexChanged(const QString& name);
+        void on_renderPass_currentIndexChanged(const QString& name);
+        void on_layer_valueChanged(int layer);
+
+        void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
+        scene::Animation::Component* GetCurrentComponent();
     private:
         class ComponentModel;
         class Tool;
-        class PlaceTool;
+        class PlaceRectTool;
         class CameraTool;
 
     private:
         Ui::AnimationWidget mUI;
     private:
-        app::Workspace* mWorkspace = nullptr;
+        // current tool (if any, can be nullptr when no tool is selected).
         std::unique_ptr<Tool> mCurrentTool;
-        std::unique_ptr<ComponentModel> mModel;
     private:
-        scene::Animation mAnimation;
-        float mCameraOffsetX = 0.0f;
-        float mCameraOffsetY = 0.0f;
-
+        // state shared with the tools is packed inside a single
+        // struct type for convenience
+        struct State {
+            scene::Animation animation;
+            float camera_offset_x = 0.0f;
+            float camera_offset_y = 0.0f;
+            std::unique_ptr<ComponentModel> model;
+            app::Workspace* workspace = nullptr;
+        } mState;
+        // current time of the animation. accumulates when running.
+        float mTime = 0.0f;
+        // possible states of the animation playback.
+        enum PlayState {
+            Playing, Paused, Stopped
+        };
+        // current animation playback state.
+        PlayState mPlayState = PlayState::Stopped;
     };
 } // namespace

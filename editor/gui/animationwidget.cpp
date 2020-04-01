@@ -43,6 +43,7 @@
 #include "graphics/drawing.h"
 #include "graphics/types.h"
 #include "animationwidget.h"
+#include "utility.h"
 
 namespace gui
 {
@@ -98,13 +99,10 @@ public:
 private:
 };
 
-class AnimationWidget::PlaceTool : public AnimationWidget::Tool
+class AnimationWidget::PlaceRectTool : public AnimationWidget::Tool
 {
 public:
-    PlaceTool(const std::string& type, scene::Animation& animation,  ComponentModel& model)
-      : mType(type)
-      , mModel(model)
-      , mAnimation(animation)
+    PlaceRectTool(AnimationWidget::State& state) : mState(state)
     {}
     virtual void Render(gfx::Painter& painter) const
     {
@@ -116,8 +114,7 @@ public:
         const float y = mStart.y();
         const float w = diff.x();
         const float h = diff.y();
-        gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h),
-            gfx::Color::Green, 2, 0.0f);
+        gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h), gfx::Color::Green, 2, 0.0f);
     }
     virtual void MouseMove(QMouseEvent* mickey)
     {
@@ -153,20 +150,30 @@ public:
             if (CheckNameAvailability(name))
                 break;
         }
+        // todo: the width and height need to account the zoom level.
+        const auto& diff = mCurrent - mStart;
+        const float xpos = mStart.x() + mState.camera_offset_x;
+        const float ypos = mStart.y() + mState.camera_offset_y;
+        const float width  = diff.x();
+        const float height = diff.y();
+        auto drawable = std::make_shared<gfx::Rectangle>(name + "/Rect", width, height);
+        auto material = mState.workspace->MakeMaterial("Checkerboard");
 
         scene::Animation::Component component;
-        component.SetDrawable(mType);
-        component.SetMaterial("Checkerboard");
+        component.SetMaterial("Rectangle", material);
+        component.SetDrawable("Checkerboard", drawable);
         component.SetName(name);
-        mModel.AddComponent(std::move(component));
-        DEBUG("Added new component (%1) '%2'", mType, name);
+        component.SetTranslation(glm::vec2(xpos, ypos));
+        component.SetScale(glm::vec2(1.0f, 1.0f));
+        mState.model->AddComponent(std::move(component));
+        DEBUG("Added new rectangle '%1'", name);
         return true;
     }
     bool CheckNameAvailability(const std::string& name) const
     {
-        for (size_t i=0; i<mAnimation.GetNumComponents(); ++i)
+        for (size_t i=0; i<mState.animation.GetNumComponents(); ++i)
         {
-            const auto& component = mAnimation.GetComponent(i);
+            const auto& component = mState.animation.GetComponent(i);
             if (component.GetName() == name)
                 return false;
         }
@@ -175,9 +182,7 @@ public:
 
 
 private:
-    const std::string mType;
-    scene::Animation& mAnimation;
-    ComponentModel& mModel;
+    AnimationWidget::State& mState;
     QPoint mStart;
     QPoint mCurrent;
     bool mEngaged = false;
@@ -186,9 +191,7 @@ private:
 class AnimationWidget::CameraTool : public AnimationWidget::Tool
 {
 public:
-    CameraTool(float& camera_offset_x, float& camera_offset_y) 
-        : mCameraOffsetX(camera_offset_x)
-        , mCameraOffsetY(camera_offset_y)
+    CameraTool(State& state) : mState(state)
     {}
     virtual void Render(gfx::Painter& painter) const override
     {}
@@ -200,9 +203,9 @@ public:
             const auto& delta = pos - mMousePos;
             const float x = delta.x();
             const float y = delta.y();
-            mCameraOffsetX -= x;
-            mCameraOffsetY -= y;
-            DEBUG("Camera offset %1, %2", mCameraOffsetX, mCameraOffsetY);
+            mState.camera_offset_x -= x;
+            mState.camera_offset_y -= y;
+            //DEBUG("Camera offset %1, %2", mState.camera_offset_x, mState.camera_offset_y);
             mMousePos = pos;
         }
     }
@@ -226,8 +229,7 @@ public:
         return true;
     }
 private:
-    float& mCameraOffsetX;
-    float& mCameraOffsetY;
+    AnimationWidget::State& mState;
 private:
     QPoint mMousePos;
     bool mEngaged = false;
@@ -238,11 +240,16 @@ AnimationWidget::AnimationWidget()
 {
     DEBUG("Create AnimationWidget");
 
-    mModel.reset(new ComponentModel(mAnimation));
+    mState.model.reset(new ComponentModel(mState.animation));
 
     mUI.setupUi(this);
-    mUI.components->setModel(mModel.get());
+    mUI.components->setModel(mState.model.get());
     mUI.widget->setFramerate(60);
+    mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
+        // offset the viewport so that the origin of the 2d space is in the middle of the viewport
+        mState.camera_offset_x = width / -2.0f;
+        mState.camera_offset_y = height / -2.0f;
+    };
     mUI.widget->onPaintScene = std::bind(&AnimationWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
@@ -252,7 +259,7 @@ AnimationWidget::AnimationWidget()
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
         if (!mCurrentTool)
-            mCurrentTool.reset(new CameraTool(mCameraOffsetX, mCameraOffsetY));
+            mCurrentTool.reset(new CameraTool(mState));
 
         mCurrentTool->MousePress(mickey);
     };
@@ -260,16 +267,19 @@ AnimationWidget::AnimationWidget()
         if (!mCurrentTool)
             return;
 
-        if (mCurrentTool->MouseRelease(mickey))
-        {
-            mAnimation.Prepare(*mWorkspace);
-        }
+        mCurrentTool->MouseRelease(mickey);
 
         mCurrentTool.release();
         mUI.actionNewRect->setChecked(false);
     };
 
     setWindowTitle("My Animation");
+
+    PopulateFromEnum<scene::Animation::RenderPass>(mUI.renderPass);
+
+    auto* model = mUI.components->selectionModel();
+    connect(model, &QItemSelectionModel::currentRowChanged,
+            this,  &AnimationWidget::currentComponentRowChanged);
 }
 
 AnimationWidget::AnimationWidget(const app::Resource& resource, app::Workspace* workspace)
@@ -285,21 +295,61 @@ AnimationWidget::~AnimationWidget()
 
 void AnimationWidget::addActions(QToolBar& bar)
 {
+    bar.addAction(mUI.actionPlay);
+    bar.addAction(mUI.actionPause);
+    bar.addSeparator();
+    bar.addAction(mUI.actionStop);
+    bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
 }
 void AnimationWidget::addActions(QMenu& menu)
 {
+    menu.addAction(mUI.actionPlay);
+    menu.addAction(mUI.actionPause);
+    menu.addSeparator();
+    menu.addAction(mUI.actionStop);
+    menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
 }
 
 void AnimationWidget::setWorkspace(app::Workspace* workspace)
 {
-    mWorkspace = workspace;
+    mState.workspace = workspace;
+    mUI.materials->addItem("Checkerboard"); // this is the default, todo: maybe ask from workspace
+    mUI.materials->addItems(workspace->ListMaterials());
 }
+
+void AnimationWidget::on_actionPlay_triggered()
+{
+    mPlayState = PlayState::Playing;
+    mUI.actionPlay->setEnabled(false);
+    mUI.actionPause->setEnabled(true);
+    mUI.actionStop->setEnabled(true);
+}
+
+void AnimationWidget::on_actionPause_triggered()
+{
+    mPlayState = PlayState::Paused;
+    mUI.actionPlay->setEnabled(true);
+    mUI.actionPause->setEnabled(false);
+    mUI.actionStop->setEnabled(true);
+}
+
+void AnimationWidget::on_actionStop_triggered()
+{
+    mPlayState = PlayState::Stopped;
+    mUI.actionPlay->setEnabled(true);
+    mUI.actionPause->setEnabled(false);
+    mUI.actionStop->setEnabled(false);
+    mTime = 0.0f;
+
+    mState.animation.Reset();
+}
+
 
 void AnimationWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceTool("Rectangle", mAnimation, *mModel));
+    mCurrentTool.reset(new PlaceRectTool(mState));
     mUI.actionNewRect->setChecked(true);
 }
 
@@ -318,7 +368,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
         const auto& index = items[i];
         const auto row = index.row() - removed;
         const auto component_index = static_cast<size_t>(row);
-        mModel->DelComponent(component_index);
+        mState.model->DelComponent(component_index);
         ++removed;
     }
 }
@@ -330,18 +380,103 @@ void AnimationWidget::on_components_customContextMenuRequested(QPoint)
     menu.exec(QCursor::pos());
 }
 
+void AnimationWidget::on_plus90_clicked()
+{
+    const auto value = mUI.rotation->value();
+    mUI.rotation->setValue(value + 90.0f);
+}
+
+void AnimationWidget::on_minus90_clicked()
+{
+    const auto value = mUI.rotation->value();
+    mUI.rotation->setValue(value - 90.0f);
+}
+
+void AnimationWidget::on_resetTransform_clicked()
+{
+    mUI.translateX->setValue(0);
+    mUI.translateY->setValue(0);
+    mUI.scaleX->setValue(1.0f);
+    mUI.scaleY->setValue(1.0f);
+    mUI.rotation->setValue(0);
+}
+
+void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        const auto& material_name = app::ToUtf8(name);
+        component->SetMaterial(material_name, mState.workspace->MakeMaterial(material_name));
+    }
+}
+
+void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        const scene::Animation::RenderPass pass = GetValue(mUI.renderPass);
+        component->SetRenderPass(pass);
+    }
+}
+
+void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    const auto row = current.row();
+    if (row == -1)
+    {
+        mUI.componentProperties->setEnabled(false);
+    }
+    else
+    {
+        const auto& component = mState.animation.GetComponent(row);
+        SetValue(mUI.renderPass, component.GetRenderPass());
+        SetValue(mUI.layer, component.GetLayer());
+        SetValue(mUI.materials, component.GetMaterialName());
+        mUI.componentProperties->setEnabled(true);
+    }
+}
+void AnimationWidget::on_layer_valueChanged(int layer)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        component->SetLayer(layer);
+    }
+}
+
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Transform view;
-    view.Translate(-mCameraOffsetX, -mCameraOffsetY);
-    view.Push();
+    // update the animation if we're currently playing
+    if (mPlayState == PlayState::Playing)
+    {
+        mState.animation.Update(secs);
+        mTime += secs;
+    }
 
-    mAnimation.Update(secs);
-    mAnimation.Draw(painter);
+    const float angle = qDegreesToRadians(mUI.rotation->value());
+    const bool has_view_transform = mUI.transform->isChecked();
+
+    gfx::Transform view;
+    view.Translate(-mState.camera_offset_x, -mState.camera_offset_y);
+
+    // apply the view transformation. The view transformation is not part of the
+    // animation per-se but it's the transformation that transforms the animation
+    // and its components from the space of the animation to the global space.
+    view.Push();
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Rotate(angle);
+    view.Translate(GetValue(mUI.translateX), GetValue(mUI.translateY));
+
+    // begin the animation transformation space
+    view.Push();
+    mState.animation.Draw(painter, view);
+    view.Pop();
+
+    // pop view transformation
+    view.Pop();
 
     if (mCurrentTool)
         mCurrentTool->Render(painter);
@@ -360,6 +495,19 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     view.Translate(0.0f, 50.0f);
     painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
     view.Pop();
+
+    mUI.time->setText(QString::number(mTime));
+}
+
+scene::Animation::Component* AnimationWidget::GetCurrentComponent()
+{
+    const auto& indices = mUI.components->selectionModel()->selectedRows();
+    if (indices.isEmpty())
+        return nullptr;
+
+    const auto component_index = indices[0].row();
+    auto& component = mState.animation.GetComponent(component_index);
+    return &component;
 }
 
 } // namespace
