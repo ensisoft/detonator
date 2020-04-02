@@ -26,6 +26,7 @@
 #  include <QAbstractTableModel>
 #  include <QString>
 #  include <QMap>
+#  include <QVariant>
 #include "warnpop.h"
 
 #include <memory>
@@ -40,6 +41,15 @@
 
 namespace app
 {
+    // Workspace groups together a collection of resources
+    // that user can edit and work with such as materials,
+    // animations and particle engines. Each resource has
+    // capability to store additional properties that are
+    // only available in the editor program but are not part
+    // of the gfx content's parameters. These properties are
+    // persisted as part of the workspace data.
+    // The workspace itself can also contain arbitrary properties
+    // that can useful for various purposes.
     class Workspace : public QAbstractTableModel,
                       public scene::GfxFactory
     {
@@ -80,7 +90,7 @@ namespace app
         // the workspace.
         template<typename ResourceType>
         void SaveResource(const ResourceType& resource)
-        {                  
+        {
             const typename ResourceType::GfxType* src = nullptr;
             ASSERT(resource.GetContent(&src));
 
@@ -123,6 +133,8 @@ namespace app
         // Returns whether some particular resource exists or not.
         bool HasResource(const QString& name, Resource::Type type) const;
 
+        // Get the Qt data model implementation for displaying the
+        // workspace resources in a Qt widget (table widget)
         QAbstractTableModel* GetResourceModel()
         { return this; }
 
@@ -147,9 +159,61 @@ namespace app
         // The resource must exist.
         const Resource& GetResource(const QString& name, Resource::Type type) const;
 
+        // Delete the resources identified by the selection list.
+        // The list can contain multiple items and can be discontinuous
+        // and unsorted. Afterwards it will be sorted (ascending) based
+        // on the item row numbers.
         void DeleteResources(QModelIndexList& list);
 
+        // Perform periodic workspace tick for cleaning up resources
+        // that are no longer used/referenced.
         void Tick();
+
+        // == Workspace properties ==
+
+        // Returns true if workspace has a property by the given name.
+        bool HasProperty(const QString& name) const
+        { return mProperties.contains(name); }
+        // Set a property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        void SetProperty(const QString& name, const QVariant& value)
+        { mProperties[name] = value; }
+        // Return the value of the property identied by name.
+        // If the property doesn't exist returns default value.
+        QVariant GetProperty(const QString& name, const QVariant& def) const
+        {
+            QVariant ret = mProperties[name];
+            if (ret.isNull())
+                return def;
+            return ret;
+        }
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        QVariant GetProperty(const QString& name) const
+        { return mProperties[name]; }
+
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns the default value.
+        template<typename T>
+        T GetProperty(const QString& name, const T& def) const
+        {
+            if (!HasProperty(name))
+                return def;
+            const auto& ret = GetProperty(name);
+            return qvariant_cast<T>(ret);
+        }
+        // Get the value of a property.
+        // If the property exists returns true and stores the value in the T pointer
+        // otherwise return false and T* is left unmodified.
+        template<typename T>
+        bool GetProperty(const QString& name, T* out) const
+        {
+            if (!HasProperty(name))
+                return false;
+            const auto& ret = GetProperty(name);
+            *out = qvariant_cast<T>(ret);
+            return true;
+        }
 
     private:
         // this is the list of resources that we save/load
@@ -167,6 +231,8 @@ namespace app
     private:
         mutable QString mContentFile;
         mutable QString mWorkspaceFile;
+        // workspace specific properties
+        QVariantMap mProperties;
     };
 
 } // namespace

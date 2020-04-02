@@ -253,6 +253,11 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     // our JSON root object
     QJsonObject json;
 
+    // serialize the workspace properties into JSON
+    json["workspace"] = QJsonObject::fromVariantMap(mProperties);
+
+    // serialize the properties stored in each and every
+    // resource object.
     for (const auto& resource : mResources)
     {
         resource->Serialize(json);
@@ -280,6 +285,9 @@ bool Workspace::LoadWorkspace(const QString& filename)
     const auto& buff = file.readAll(); // QByteArray
 
     QJsonDocument docu(QJsonDocument::fromJson(buff));
+
+    // load the workspace properties.
+    mProperties = docu["workspace"].toObject().toVariantMap();
 
     // so we expect that the content has been loaded first.
     // and then ask each resource object to load its additional
