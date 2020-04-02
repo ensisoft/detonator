@@ -39,6 +39,7 @@ namespace gui
 {
     class MainWidget;
     class Settings;
+    class ChildWindow;
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
@@ -96,6 +97,7 @@ namespace gui
         void on_actionNewParticleSystem_triggered();
         void on_actionNewAnimation_triggered();
         void on_actionEditResource_triggered();
+        void on_actionEditResourceNewWindow_triggered();
         void on_actionDeleteResource_triggered();
         void on_actionSaveWorkspace_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
@@ -106,13 +108,9 @@ namespace gui
         void showNote(const app::Event& event);
 
     private:
-        void showWidget(const QString& name);
-        void showWidget(MainWidget* widget);
-        void showWidget(std::size_t index);
-        void hideWidget(MainWidget* widget);
-        void hideWidget(std::size_t index);
         bool saveState();
-        void attachWidget(MainWidget* widget);
+        ChildWindow* showWidget(MainWidget* widget, bool new_window);
+        void editResources(bool open_new_window);
 
     private:
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
@@ -129,6 +127,11 @@ namespace gui
         MainWidget* mCurrentWidget = nullptr;
     private:
         app::Workspace mWorkspace;
+        // the list of child windows that are opened to show mainwidgets.
+        // it's possible to open some resource in a separate window
+        // in which case a new ChildWindow is opened to display/contain the MainWidget.
+        // instead of the tab in this window.
+        std::vector<ChildWindow*> mChildWindows;
     };
 
 } // namespace

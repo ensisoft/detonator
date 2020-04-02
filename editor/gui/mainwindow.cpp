@@ -41,6 +41,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/childwindow.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
@@ -141,7 +142,23 @@ void MainWindow::loadState()
         {
             WARN("Widget '%1 failed to load state.", widget->windowTitle());
         }
-        attachWidget(widget);
+        const bool has_own_window = settings.getValue("MainWindow", "has_own_window", false);
+        if (has_own_window)
+        {
+            ChildWindow* window = showWidget(widget, true);
+            const auto xpos  = settings.getValue("MainWindow", "window_xpos", window->x());
+            const auto ypos  = settings.getValue("MainWindow", "window_ypos", window->y());
+            const auto width = settings.getValue("MainWindow", "window_width", window->width());
+            const auto height = settings.getValue("MainWindow", "window_height", window->height());
+            if (xpos < size.width() && ypos < size.height())
+                window->move(xpos, ypos);
+
+            window->resize(width, height);
+        }
+        else
+        {
+            showWidget(widget, false);
+        }
         // remove the file, no longer needed.
         QFile::remove(file);
         DEBUG("Loaded widget '%1'", widget->windowTitle());
@@ -218,6 +235,15 @@ void MainWindow::startup()
         widget->startup();
         widget->setWorkspace(&mWorkspace);
     }
+
+    // start the child windows that were recovered from last session.
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        widget->startup();
+        widget->setWorkspace(&mWorkspace);
+    }
+
     mUI.workspace->setModel(mWorkspace.GetResourceModel());
 }
 
@@ -243,8 +269,10 @@ void MainWindow::on_mainTab_currentChanged(int index)
         widget->addActions(*mUI.mainToolBar);
         widget->addActions(*mUI.menuTemp);
 
-        const auto& title = widget->windowTitle();
-        mUI.menuTemp->setTitle(title);
+        QString name = widget->metaObject()->className();
+        name.remove("gui::");
+        name.remove("Widget");
+        mUI.menuTemp->setTitle(name);
         mCurrentWidget = widget;
     }
 
@@ -335,39 +363,33 @@ void MainWindow::on_actionReloadShaders_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    attachWidget(new MaterialWidget);
+    showWidget(new MaterialWidget, false);
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    attachWidget(new ParticleEditorWidget);
+    showWidget(new ParticleEditorWidget, false);
 }
 
 void MainWindow::on_actionNewAnimation_triggered()
 {
-    attachWidget(new AnimationWidget);
+    showWidget(new AnimationWidget, false);
 }
 
 void MainWindow::on_actionEditResource_triggered()
 {
-    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
-    for (int i=0; i<indices.size(); ++i)
-    {
-        const auto& res = mWorkspace.GetResource(indices[i].row());
-        switch (res.GetType())
-        {
-            case app::Resource::Type::Material:
-                attachWidget(new MaterialWidget(res));
-                break;
-            case app::Resource::Type::ParticleSystem:
-                attachWidget(new ParticleEditorWidget(res, &mWorkspace));
-                break;
-            case app::Resource::Type::Animation:
-                attachWidget(new AnimationWidget(res, &mWorkspace));
-                break;
-        }
-    }
+    const auto open_new_window = false;
+
+    editResources(open_new_window);
 }
+
+void MainWindow::on_actionEditResourceNewWindow_triggered()
+{
+    const auto open_new_window = true;
+
+    editResources(open_new_window);
+}
+
 
 void MainWindow::on_actionDeleteResource_triggered()
 {
@@ -417,6 +439,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
+    mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
 
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
@@ -424,6 +447,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewAnimation);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
+    menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.exec(QCursor::pos());
@@ -436,8 +460,7 @@ void MainWindow::on_workspace_doubleClicked()
 
 void MainWindow::refreshUI()
 {
-    const auto num_widgets = mUI.mainTab->count();
-
+    const auto num_widgets  = mUI.mainTab->count();
     // refresh the UI state, and update the tab widget icon/text
     // if needed.
     for (int i=0; i<num_widgets; ++i)
@@ -450,6 +473,31 @@ void MainWindow::refreshUI()
         mUI.mainTab->setTabIcon(i, icon);
     }
 
+    // cull child windows that have been closed.
+    // note that we do it this way to avoid having problems with callbacks and recursions.
+    for (size_t i=0; i<mChildWindows.size(); )
+    {
+        ChildWindow* child = mChildWindows[i];
+        if (child->IsClosed())
+        {
+            const auto last = mChildWindows.size() - 1;
+            std::swap(mChildWindows[i], mChildWindows[last]);
+            mChildWindows.pop_back();
+            delete child;
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+
+    // refresh the child windows
+    for (auto* child : mChildWindows)
+    {
+        child->RefreshUI();
+    }
+
     mWorkspace.Tick();
 }
 
@@ -460,8 +508,6 @@ void MainWindow::showNote(const app::Event& event)
         mUI.statusbar->showMessage(event.message, 5000);
     }
 }
-
-
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
@@ -478,7 +524,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         if (msg.exec() == QMessageBox::No)
             return;
     }
-
+    // delete widget objects in the main tab.
     while (mUI.mainTab->count())
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
@@ -489,6 +535,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
         delete widget;
     }
     mUI.mainTab->clear();
+
+    // delete child windows 
+    for (auto* child : mChildWindows)
+    {
+        // when the child window is deleted it will do
+        // widget shutdown.
+        // todo: maybe this should be explicit rather than implicit via dtor ?
+        child->close();
+        delete child;
+    }
+    mChildWindows.clear();
 
     event->accept();
 }
@@ -534,6 +591,7 @@ bool MainWindow::saveState()
     if (!mWorkspace.SaveWorkspace("workspace.json"))
         return false;
 
+    // persist the properties of the mainwindow itself.
     mSettings.setValue("MainWindow", "width", width());
     mSettings.setValue("MainWindow", "height", height());
     mSettings.setValue("MainWindow", "xpos", x());
@@ -547,6 +605,10 @@ bool MainWindow::saveState()
 
     QStringList temp_file_list;
 
+    // for each widget that is currently open in the maintab
+    // we generate a temporary json file in which we save the UI state
+    // of that widget. When the application is relaunched we use the
+    // data in the JSON file to recover the widget and it's contents.
     const auto tabs = mUI.mainTab->count();
     for (int i=0; i<tabs; ++i)
     {
@@ -579,30 +641,105 @@ bool MainWindow::saveState()
         temp_file_list << file;
         DEBUG("Saved widget '%1'", widget->windowTitle());
     }
-    mSettings.setValue("MainWindow", "temp_file_list", temp_file_list);
 
+    // for each widget that is contained inside a window (instead of being in the main tab)
+    // we (also) generate a temporary JSON file in which we save the widget's UI state.
+    // When the application is relaunched we use the data in the JSON to recover
+    // the widget and it's contents and also to recreate a new containing ChildWindow
+    // with same dimensions and desktop position.
+    for (const auto* child : mChildWindows)
+    {
+        const auto& temp = app::RandomString();
+        const auto& path = app::GetAppFilePath("temp");
+        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        QDir dir;
+        if (!dir.mkpath(path))
+        {
+            ERROR("Failed to create folder: '%1'", path);
+            success = false;
+            continue;
+        }
+        const MainWidget* widget = child->GetWidget();
+
+        Settings settings(file);
+        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.setValue("MainWindow", "has_own_window", true);
+        settings.setValue("MainWindow", "window_xpos", child->x());
+        settings.setValue("MainWindow", "window_ypos", child->y());
+        settings.setValue("MainWindow", "window_width", child->width());
+        settings.setValue("MainWindow", "window_height", child->height());
+        if (!widget->saveState(settings))
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+            continue;
+        }
+        if (!settings.Save())
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+        }
+        temp_file_list << file;
+        DEBUG("Saved widget '%1'", widget->windowTitle());
+    }
+
+    mSettings.setValue("MainWindow", "temp_file_list", temp_file_list);
     return success;
 }
 
-void MainWindow::attachWidget(MainWidget* widget)
+ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 {
     Q_ASSERT(!widget->parent());
+
+    // set the currently opened workspace.
+    widget->setWorkspace(&mWorkspace);
+
+    if (new_window)
+    {
+        // create a new child window that will hold the widget.
+        ChildWindow* child = new ChildWindow(widget);
+        child->show();
+        mChildWindows.push_back(child);
+        return child;
+    }
+
+    // show the widget in the main tab of widgets.
     const auto& text = widget->windowTitle();
     const auto& icon = widget->windowIcon();
-
     const auto count = mUI.mainTab->count();
     mUI.mainTab->addTab(widget, icon, text);
     mUI.mainTab->setCurrentIndex(count);
+
+    // rebuild window menu and shortcuts
+    prepareWindowMenu();
 
     // We need to install this event filter so that we can universally grab
     // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
     widget->installEventFilter(this);
 
-    // set the currently opened workspace.
-    widget->setWorkspace(&mWorkspace);
+    // no child window
+    return nullptr;
+}
 
-    // rebuild window menu and shortcuts
-    prepareWindowMenu();
+void MainWindow::editResources(bool open_new_window)
+{
+    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    for (int i=0; i<indices.size(); ++i)
+    {
+        const auto& res = mWorkspace.GetResource(indices[i].row());
+        switch (res.GetType())
+        {
+            case app::Resource::Type::Material:
+                showWidget(new MaterialWidget(res), open_new_window);
+                break;
+            case app::Resource::Type::ParticleSystem:
+                showWidget(new ParticleEditorWidget(res, &mWorkspace), open_new_window);
+                break;
+            case app::Resource::Type::Animation:
+                showWidget(new AnimationWidget(res, &mWorkspace), open_new_window);
+                break;
+        }
+    }
 }
 
 } // namespace

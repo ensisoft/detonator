@@ -115,7 +115,7 @@ link_directories("${Boost_LIBRARY_DIRS}")
 set(CMAKE_CXX_STANDARD 17)
 
 if (MSVC)
-    # /wd4251 Qt dll interface crap 
+    # /wd4251 Qt dll interface crap
     # /wd4275 Qt dll interface crap again
     # /wd4018 signed/unsigned mismatch
     # /wd4244 conversion from double to float
@@ -170,6 +170,9 @@ add_executable(Editor
     editor/gui/animationwidget.h
     editor/gui/animationwidget.ui
     editor/gui/animationwidget.cpp
+    editor/gui/childwindow.h
+    editor/gui/childwindow.cpp
+    editor/gui/childwindow.ui
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h
