@@ -86,25 +86,25 @@ void MainWindow::closeWidget(MainWidget* widget)
 
 void MainWindow::loadState()
 {
-    const auto xdim = mSettings.getValue("MainWindow", "width",  width());
-    const auto ydim = mSettings.getValue("MainWindow", "height", height());
-    const auto xpos = mSettings.getValue("MainWindow", "xpos", x());
-    const auto ypos = mSettings.getValue("MainWindow", "ypos", y());
+    const auto window_xdim = mSettings.getValue("MainWindow", "width",  width());
+    const auto window_ydim = mSettings.getValue("MainWindow", "height", height());
+    const auto window_xpos = mSettings.getValue("MainWindow", "xpos", x());
+    const auto window_ypos = mSettings.getValue("MainWindow", "ypos", y());
+    const auto show_statbar = mSettings.getValue("MainWindow", "show_statusbar", true);
+    const auto show_toolbar = mSettings.getValue("MainWindow", "show_toolbar", true);
+    const auto show_eventlog = mSettings.getValue("MainWindow", "show_event_log", true);
+    const auto show_workspace = mSettings.getValue("MainWindow", "show_workspace", true);
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
     const QSize& size = screen0->availableVirtualSize();
     // try not to reposition the application to an offset that is not
     // within the current visible area
-    if (xpos < size.width() && ypos < size.height())
-        move(xpos, ypos);
+    if (window_xpos < size.width() && window_ypos < size.height())
+        move(window_xpos, window_ypos);
 
-    resize(xdim, ydim);
+    resize(window_xdim, window_ydim);
 
-    const auto show_statbar = mSettings.getValue("MainWindow", "show_statusbar", true);
-    const auto show_toolbar = mSettings.getValue("MainWindow", "show_toolbar", true);
-    const auto show_eventlog = mSettings.getValue("MainWindow", "show_event_log", true);
-    const auto show_workspace = mSettings.getValue("MainWindow", "show_workspace", true);
     mUI.mainToolBar->setVisible(show_toolbar);
     mUI.statusbar->setVisible(show_statbar);
     mUI.eventlogDock->setVisible(show_eventlog);
@@ -114,57 +114,7 @@ void MainWindow::loadState()
     mUI.actionViewEventlog->setChecked(show_eventlog);
     mUI.actionViewWorkspace->setChecked(show_workspace);
 
-    bool success = true;
-
-    const auto& temp_file_list = mSettings.getValue("MainWindow", "temp_file_list", QStringList());
-    for (const auto& file : temp_file_list)
-    {
-        Settings settings(file);
-        if (!settings.Load())
-        {
-            success = false;
-            continue;
-        }
-        const auto& class_name = settings.getValue("MainWindow", "class_name",
-            QString(""));
-        MainWidget* widget = nullptr;
-        if (class_name == MaterialWidget::staticMetaObject.className())
-            widget = new MaterialWidget;
-        else if (class_name == ParticleEditorWidget::staticMetaObject.className())
-            widget = new ParticleEditorWidget;
-        else if (class_name == AnimationWidget::staticMetaObject.className())
-            widget = new AnimationWidget;
-
-        // bug, probably forgot to modify the if/else crap above.
-        ASSERT(widget);
-
-        if (!widget->loadState(settings))
-        {
-            WARN("Widget '%1 failed to load state.", widget->windowTitle());
-        }
-        const bool has_own_window = settings.getValue("MainWindow", "has_own_window", false);
-        if (has_own_window)
-        {
-            ChildWindow* window = showWidget(widget, true);
-            const auto xpos  = settings.getValue("MainWindow", "window_xpos", window->x());
-            const auto ypos  = settings.getValue("MainWindow", "window_ypos", window->y());
-            const auto width = settings.getValue("MainWindow", "window_width", window->width());
-            const auto height = settings.getValue("MainWindow", "window_height", window->height());
-            if (xpos < size.width() && ypos < size.height())
-                window->move(xpos, ypos);
-
-            window->resize(width, height);
-        }
-        else
-        {
-            showWidget(widget, false);
-        }
-        // remove the file, no longer needed.
-        QFile::remove(file);
-        DEBUG("Loaded widget '%1'", widget->windowTitle());
-    }
-
-    if (!success)
+    if (!loadWorkspace())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
@@ -221,12 +171,69 @@ void MainWindow::prepareMainTab()
     mUI.mainTab->setCurrentIndex(0);
 }
 
-void MainWindow::startup()
+bool MainWindow::loadWorkspace()
 {
     if (QFileInfo("content.json").exists())
         mWorkspace.LoadContent("content.json");
     if (QFileInfo("workspace.json").exists())
         mWorkspace.LoadWorkspace("workspace.json");
+
+    // desktop dimensions
+    const QList<QScreen*>& screens = QGuiApplication::screens();
+    const QScreen* screen0 = screens[0];
+    const QSize& size = screen0->availableVirtualSize();
+
+    // Load workspace windows and their content.
+    bool success = true;
+
+    const auto& session_files = mWorkspace.GetProperty("session_files", QStringList());
+    for (const auto& file : session_files)
+    {
+        Settings settings(file);
+        if (!settings.Load())
+        {
+            WARN("Failed to load session settings file '%1'.", file);
+            success = false;
+            continue;
+        }
+        const auto& klass = settings.getValue("MainWindow", "class_name", QString(""));
+        MainWidget* widget = nullptr;
+        if (klass == MaterialWidget::staticMetaObject.className())
+            widget = new MaterialWidget;
+        else if (klass == ParticleEditorWidget::staticMetaObject.className())
+            widget = new ParticleEditorWidget;
+        else if (klass == AnimationWidget::staticMetaObject.className())
+            widget = new AnimationWidget;
+
+        // bug, probably forgot to modify the if/else crap above.
+        ASSERT(widget);
+
+        if (!widget->loadState(settings))
+        {
+            WARN("Widget '%1 failed to load state.", widget->windowTitle());
+            success = false;
+        }
+        const bool has_own_window = settings.getValue("MainWindow", "has_own_window", false);
+        if (has_own_window)
+        {
+            ChildWindow* window = showWidget(widget, true);
+            const auto xpos  = settings.getValue("MainWindow", "window_xpos", window->x());
+            const auto ypos  = settings.getValue("MainWindow", "window_ypos", window->y());
+            const auto width = settings.getValue("MainWindow", "window_width", window->width());
+            const auto height = settings.getValue("MainWindow", "window_height", window->height());
+            if (xpos < size.width() && ypos < size.height())
+                window->move(xpos, ypos);
+
+            window->resize(width, height);
+        }
+        else
+        {
+            showWidget(widget, false);
+        }
+        // remove the file, no longer needed.
+        QFile::remove(file);
+        DEBUG("Loaded widget '%1'", widget->windowTitle());
+    }
 
     const auto num_widgets = mUI.mainTab->count();
     for (int i=0; i<num_widgets; ++i)
@@ -245,6 +252,7 @@ void MainWindow::startup()
     }
 
     mUI.workspace->setModel(mWorkspace.GetResourceModel());
+    return success;
 }
 
 void MainWindow::showWindow()
@@ -536,7 +544,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
     mUI.mainTab->clear();
 
-    // delete child windows 
+    // delete child windows
     for (auto* child : mChildWindows)
     {
         // when the child window is deleted it will do
@@ -586,24 +594,11 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
 
 bool MainWindow::saveState()
 {
-    if (!mWorkspace.SaveContent("content.json"))
-        return false;
-    if (!mWorkspace.SaveWorkspace("workspace.json"))
-        return false;
-
-    // persist the properties of the mainwindow itself.
-    mSettings.setValue("MainWindow", "width", width());
-    mSettings.setValue("MainWindow", "height", height());
-    mSettings.setValue("MainWindow", "xpos", x());
-    mSettings.setValue("MainWindow", "ypos", y());
-    mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
-    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
-    mSettings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
-    mSettings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
-
     bool success = true;
 
-    QStringList temp_file_list;
+    // session files list, stores the list of temp files
+    // generated for each currently open widget
+    QStringList session_file_list;
 
     // for each widget that is currently open in the maintab
     // we generate a temporary json file in which we save the UI state
@@ -638,7 +633,7 @@ bool MainWindow::saveState()
             success = false;
             continue;
         }
-        temp_file_list << file;
+        session_file_list << file;
         DEBUG("Saved widget '%1'", widget->windowTitle());
     }
 
@@ -679,11 +674,28 @@ bool MainWindow::saveState()
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
             success = false;
         }
-        temp_file_list << file;
+        session_file_list << file;
         DEBUG("Saved widget '%1'", widget->windowTitle());
     }
+    // save the list of temp windows for session widgets in
+    // the current workspace
+    mWorkspace.SetProperty("session_files", session_file_list);
 
-    mSettings.setValue("MainWindow", "temp_file_list", temp_file_list);
+
+    if (!mWorkspace.SaveContent("content.json"))
+        return false;
+    if (!mWorkspace.SaveWorkspace("workspace.json"))
+        return false;
+
+    // persist the properties of the mainwindow itself.
+    mSettings.setValue("MainWindow", "width", width());
+    mSettings.setValue("MainWindow", "height", height());
+    mSettings.setValue("MainWindow", "xpos", x());
+    mSettings.setValue("MainWindow", "ypos", y());
+    mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
+    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+    mSettings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
+    mSettings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
     return success;
 }
 

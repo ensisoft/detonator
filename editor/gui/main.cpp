@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
         // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
         QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
-        // set the aliases for icon search paths		
+        // set the aliases for icon search paths
         QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
         QDir::setSearchPaths("level", QStringList(":/32x32_ico_png"));
 
@@ -131,8 +131,8 @@ int main(int argc, char* argv[])
 
         QApplication app(argc, argv);
 
-        // Add a path for Qt to look for the plugins at runtime	
-        // note that this needs to be called *after* the QApplication object has been created.		
+        // Add a path for Qt to look for the plugins at runtime
+        // note that this needs to be called *after* the QApplication object has been created.
         QCoreApplication::addLibraryPath(app::JoinPath(QCoreApplication::applicationDirPath(), "plugins"));
 
         if (use_dark_style)
@@ -161,7 +161,6 @@ int main(int argc, char* argv[])
         window.prepareFileMenu();
         window.prepareWindowMenu();
         window.prepareMainTab();
-        window.startup();
         window.showWindow();
 
         // run the mainloop

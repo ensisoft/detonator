@@ -75,11 +75,6 @@ namespace gui
         // Prepare the main tab for first display.
         void prepareMainTab();
 
-        // Startup the mainwindow and all the MainWidges. Should be called
-        // as the last step of the application startup process  after all
-        // the state has been loaded and application activities can start.
-        void startup();
-
         // Show the application window.
         void showWindow();
 
@@ -109,6 +104,7 @@ namespace gui
 
     private:
         bool saveState();
+        bool loadWorkspace();
         ChildWindow* showWidget(MainWidget* widget, bool new_window);
         void editResources(bool open_new_window);
 
