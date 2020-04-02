@@ -492,7 +492,7 @@ private:
             case Op::Increment:  return GL_INCR;
             case Op::Decrement:  return GL_DECR;
         }
-        ASSERT("???");
+        ASSERT(!"???");
         return GL_NONE;
     }
 
