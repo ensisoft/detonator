@@ -40,6 +40,7 @@ namespace gfx {
 
 namespace app {
     class Resource;
+    class Workspace;
 } // app
 
 namespace gui
@@ -48,8 +49,8 @@ namespace gui
     {
         Q_OBJECT
     public:
-        MaterialWidget();
-        MaterialWidget(const app::Resource& resource);
+        MaterialWidget(app::Workspace* workspace);
+        MaterialWidget(app::Workspace* workspace, const app::Resource& resource);
        ~MaterialWidget();
         virtual void addActions(QToolBar& bar) override;
         virtual void addActions(QMenu& menu) override;
@@ -58,7 +59,6 @@ namespace gui
         virtual void zoomIn() override;
         virtual void zoomOut() override;
         virtual void reloadShaders() override;
-        virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
         void on_actionPlay_triggered();

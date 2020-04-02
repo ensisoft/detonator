@@ -236,13 +236,19 @@ private:
 
 };
 
-AnimationWidget::AnimationWidget()
+AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
 
     mState.model.reset(new ComponentModel(mState.animation));
+    mState.workspace = workspace;
 
     mUI.setupUi(this);
+    // this fucking cunt whore will already emit selection changed signal
+    mUI.materials->blockSignals(true);
+    mUI.materials->addItems(workspace->ListMaterials());
+    mUI.materials->blockSignals(false);
+
     mUI.components->setModel(mState.model.get());
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
@@ -282,10 +288,10 @@ AnimationWidget::AnimationWidget()
             this,  &AnimationWidget::currentComponentRowChanged);
 }
 
-AnimationWidget::AnimationWidget(const app::Resource& resource, app::Workspace* workspace)
-  : AnimationWidget()
+AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
+  : AnimationWidget(workspace)
 {
-
+    // todo:
 }
 
 AnimationWidget::~AnimationWidget()
@@ -310,12 +316,6 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
-}
-
-void AnimationWidget::setWorkspace(app::Workspace* workspace)
-{
-    mState.workspace = workspace;
-    mUI.materials->addItems(workspace->ListMaterials());
 }
 
 void AnimationWidget::on_actionPlay_triggered()

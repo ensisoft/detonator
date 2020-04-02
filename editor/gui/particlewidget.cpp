@@ -49,8 +49,10 @@
 namespace gui
 {
 
-ParticleEditorWidget::ParticleEditorWidget()
+ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 {
+    mWorkspace = workspace;
+
     DEBUG("Create ParticleEditorWidget");
 
     mUI.setupUi(this);
@@ -74,10 +76,8 @@ ParticleEditorWidget::ParticleEditorWidget()
     PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
 }
 
-ParticleEditorWidget::ParticleEditorWidget(const app::Resource& resource, app::Workspace* workspace) : ParticleEditorWidget()
+ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
 {
-    mWorkspace = workspace;
-
     const auto& name = resource.GetName();
     DEBUG("Editing particle system: '%1'", name);
 
@@ -307,11 +307,6 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
 void ParticleEditorWidget::reloadShaders()
 {
     mUI.widget->reloadShaders();
-}
-
-void ParticleEditorWidget::setWorkspace(app::Workspace* workspace)
-{
-    mWorkspace = workspace;
 }
 
 void ParticleEditorWidget::on_actionPause_triggered()

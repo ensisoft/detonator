@@ -49,8 +49,10 @@
 namespace gui
 {
 
-MaterialWidget::MaterialWidget()
+MaterialWidget::MaterialWidget(app::Workspace* workspace)
 {
+    mWorkspace = workspace;
+
     DEBUG("Create MaterialWidget");
 
     mUI.setupUi(this);
@@ -71,7 +73,7 @@ MaterialWidget::MaterialWidget()
     PopulateFromEnum<gfx::Material::Type>(mUI.materialType);
 }
 
-MaterialWidget::MaterialWidget(const app::Resource& resource) : MaterialWidget()
+MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
 {
     DEBUG("Editing material: '%1'", resource.GetName());
 
@@ -279,11 +281,6 @@ void MaterialWidget::zoomOut()
 void MaterialWidget::reloadShaders()
 {
     mUI.widget->reloadShaders();
-}
-
-void MaterialWidget::setWorkspace(app::Workspace* workspace)
-{
-    mWorkspace = workspace;
 }
 
 void MaterialWidget::on_actionPlay_triggered()

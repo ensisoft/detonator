@@ -199,11 +199,11 @@ bool MainWindow::loadWorkspace()
         const auto& klass = settings.getValue("MainWindow", "class_name", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
-            widget = new MaterialWidget;
+            widget = new MaterialWidget(&mWorkspace);
         else if (klass == ParticleEditorWidget::staticMetaObject.className())
-            widget = new ParticleEditorWidget;
+            widget = new ParticleEditorWidget(&mWorkspace);
         else if (klass == AnimationWidget::staticMetaObject.className())
-            widget = new AnimationWidget;
+            widget = new AnimationWidget(&mWorkspace);
 
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
@@ -233,22 +233,6 @@ bool MainWindow::loadWorkspace()
         // remove the file, no longer needed.
         QFile::remove(file);
         DEBUG("Loaded widget '%1'", widget->windowTitle());
-    }
-
-    const auto num_widgets = mUI.mainTab->count();
-    for (int i=0; i<num_widgets; ++i)
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->startup();
-        widget->setWorkspace(&mWorkspace);
-    }
-
-    // start the child windows that were recovered from last session.
-    for (auto* child : mChildWindows)
-    {
-        auto* widget = child->GetWidget();
-        widget->startup();
-        widget->setWorkspace(&mWorkspace);
     }
 
     mUI.workspace->setModel(mWorkspace.GetResourceModel());
@@ -371,17 +355,17 @@ void MainWindow::on_actionReloadShaders_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    showWidget(new MaterialWidget, false);
+    showWidget(new MaterialWidget(&mWorkspace), false);
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    showWidget(new ParticleEditorWidget, false);
+    showWidget(new ParticleEditorWidget(&mWorkspace), false);
 }
 
 void MainWindow::on_actionNewAnimation_triggered()
 {
-    showWidget(new AnimationWidget, false);
+    showWidget(new AnimationWidget(&mWorkspace), false);
 }
 
 void MainWindow::on_actionEditResource_triggered()
@@ -703,9 +687,6 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 {
     Q_ASSERT(!widget->parent());
 
-    // set the currently opened workspace.
-    widget->setWorkspace(&mWorkspace);
-
     if (new_window)
     {
         // create a new child window that will hold the widget.
@@ -742,13 +723,13 @@ void MainWindow::editResources(bool open_new_window)
         switch (res.GetType())
         {
             case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(res), open_new_window);
+                showWidget(new MaterialWidget(&mWorkspace, res), open_new_window);
                 break;
             case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(res, &mWorkspace), open_new_window);
+                showWidget(new ParticleEditorWidget(&mWorkspace, res), open_new_window);
                 break;
             case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(res, &mWorkspace), open_new_window);
+                showWidget(new AnimationWidget(&mWorkspace, res), open_new_window);
                 break;
         }
     }

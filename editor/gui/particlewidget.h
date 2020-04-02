@@ -38,6 +38,7 @@
 
 namespace app {
     class Resource;
+    class Workspace;
 } // app
 
 namespace gui
@@ -46,8 +47,8 @@ namespace gui
     {
         Q_OBJECT
     public:
-        ParticleEditorWidget();
-        ParticleEditorWidget(const app::Resource& resource, app::Workspace* workspace);
+        ParticleEditorWidget(app::Workspace* workspace);
+        ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ParticleEditorWidget();
 
         virtual void addActions(QToolBar& bar) override;
@@ -55,7 +56,6 @@ namespace gui
         virtual bool saveState(Settings& settings) const;
         virtual bool loadState(const Settings& settings);
         virtual void reloadShaders() override;
-        virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
         void on_actionPlay_triggered();

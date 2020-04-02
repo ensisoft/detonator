@@ -7,10 +7,6 @@
 #  include <QtWidgets>
 #include "warnpop.h"
 
-namespace app {
-    class Workspace;
-} // namespace app
-
 namespace gui
 {
     class Settings;
@@ -63,18 +59,10 @@ namespace gui
         // The widget should release it's resources at this point.
         virtual void shutdown() {}
 
-        // Called when the application is starting up.
-        virtual void startup() {}
-
         virtual void zoomIn() {};
         virtual void zoomOut() {}
 
         virtual void reloadShaders() {};
-
-        // Notify the widget that a workspace has been opened.
-        // The workspace object will remain valid as long as until
-        // another workspace object or nullptr object is given.
-        virtual void setWorkspace(app::Workspace* workspace) {}
     private:
     };
 

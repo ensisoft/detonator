@@ -37,6 +37,7 @@ namespace gfx {
 
 namespace app {
     class Resource;
+    class Workspace;
 } // app
 
 namespace gui
@@ -45,13 +46,12 @@ namespace gui
     {
         Q_OBJECT
     public:
-        AnimationWidget();
-        AnimationWidget(const app::Resource& resource, app::Workspace* workspace);
+        AnimationWidget(app::Workspace* workspace);
+        AnimationWidget(app::Workspace* workspace, const app::Resource& resource);
        ~AnimationWidget();
 
         virtual void addActions(QToolBar& bar) override;
         virtual void addActions(QMenu& menu) override;
-        virtual void setWorkspace(app::Workspace* workspace) override;
 
     private slots:
         void on_actionPlay_triggered();
@@ -91,6 +91,7 @@ namespace gui
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
             std::unique_ptr<ComponentModel> model;
+            // current workspace we're editing.
             app::Workspace* workspace = nullptr;
         } mState;
         // current time of the animation. accumulates when running.
