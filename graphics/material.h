@@ -133,8 +133,8 @@ namespace gfx
             virtual std::string GetName() const override
             {
                 size_t hash = mBitmap->GetHash();
-                hash ^= std::hash<std::uint32_t>()(mBitmap->GetWidth());
-                hash ^= std::hash<std::uint32_t>()(mBitmap->GetHeight());
+                hash = base::hash_combine(hash, mBitmap->GetWidth());
+                hash = base::hash_combine(hash, mBitmap->GetHeight());
                 return std::to_string(hash);
             }
             virtual std::shared_ptr<IBitmap> GetData() const override
@@ -153,8 +153,8 @@ namespace gfx
             virtual std::string GetName() const override
             {
                 size_t hash = mTextBuffer.GetHash();
-                hash ^= std::hash<std::uint32_t>()(mTextBuffer.GetWidth());
-                hash ^= std::hash<std::uint32_t>()(mTextBuffer.GetHeight());
+                hash = base::hash_combine(hash, mTextBuffer.GetWidth());
+                hash = base::hash_combine(hash, mTextBuffer.GetHeight());
                 return std::to_string(hash);
             }
             virtual std::shared_ptr<IBitmap> GetData() const override
