@@ -636,6 +636,11 @@ namespace gfx
                 const float v = glm::length(p.direction);
                 p.direction = (d - 2 * glm::dot(d, n) * n) * v;
 
+                // clamp the position in order to eliminate the situation
+                // where the object has moved beyond the boundaries of the simulation
+                // and is stuck there alternating it's direction vector
+                p.position.x = math::clamp(0.0f, mParams.max_xpos, p.position.x);
+                p.position.y = math::clamp(0.0f, mParams.max_ypos, p.position.y);
             }
             return true;
         }
