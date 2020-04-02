@@ -28,6 +28,7 @@
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
+#include <functional> // for hash
 #include <chrono>
 #include <memory> // for unique_ptr
 #include <string>
@@ -42,6 +43,15 @@
 
 namespace base
 {
+
+template<typename S, typename T> inline
+S hash_combine(S seed, T value)
+{
+    const auto hash = std::hash<T>()(value);
+    seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
+}
+
 
 inline double GetRuntimeSec()
 {

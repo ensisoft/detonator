@@ -30,6 +30,7 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <functional> // for hash
 #include <string>
 #include <vector>
 #include <limits>
@@ -69,6 +70,9 @@ namespace gfx
     {
     public:
         Arrow() = default;
+        Arrow(float width, float height) : mWidth(width), mHeight(height)
+        {}
+
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* s = device.FindShader("vertex_array.glsl");
@@ -83,6 +87,14 @@ namespace gfx
         }
         virtual Geometry* Upload(Device& device) const override
         {
+            if (mName.empty())
+            {
+                std::uint32_t hash = 0;
+                hash = base::hash_combine(hash, mWidth);
+                hash = base::hash_combine(hash, mHeight);
+                mName = "Arrow:" + std::to_string(hash);
+            }
+
             Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
@@ -112,18 +124,16 @@ namespace gfx
             return geom;
         }
     private:
-        const std::string mName = "Unit_Arrow";
         const float mWidth = 1.0f;
         const float mHeight = 1.0f;
+        mutable std::string mName;
     };
 
     class Circle : public Drawable
     {
     public:
         Circle() = default;
-        Circle(const std::string& name, float radius)
-            : mName(name)
-            , mRadius(radius)
+        Circle(float radius) :  mRadius(radius)
         {}
 
         virtual Shader* GetShader(Device& device) const override
@@ -145,7 +155,12 @@ namespace gfx
             // some kind of "LOD" value for figuring out how many slices we should have.
             const auto slices = 100;
 
-            Geometry* geom = device.FindGeometry(mName);
+            std::uint32_t hash = 0;
+            hash = base::hash_combine(hash, slices);
+            hash = base::hash_combine(hash, mRadius);
+            const auto& name = "Circle:" + std::to_string(hash);
+
+            Geometry* geom = device.FindGeometry(name);
             if (!geom)
             {
                 Vertex c;
@@ -170,14 +185,13 @@ namespace gfx
                     v.aTexCoord.y = y + 0.5f;
                     vs.push_back(v);
                 }
-                geom = device.MakeGeometry(mName);
+                geom = device.MakeGeometry(name);
                 geom->Update(&vs[0], vs.size());
                 geom->SetDrawType(Geometry::DrawType::TriangleFan);
             }
             return geom;
         }
     private:
-        const std::string mName = "Unit_Circle";
         const float mRadius = 1.0f;
     };
 
@@ -186,9 +200,8 @@ namespace gfx
     {
     public:
         Rectangle() = default;
-        Rectangle(const std::string& name, float width, float height)
-            : mName(name)
-            , mWidth(width)
+        Rectangle(float width, float height)
+            : mWidth(width)
             , mHeight(height)
         {}
         virtual Shader* GetShader(Device& device) const override
@@ -206,6 +219,14 @@ namespace gfx
 
         virtual Geometry* Upload(Device& device) const override
         {
+            if (mName.empty())
+            {
+                uint32_t hash = 0;
+                hash = base::hash_combine(hash, mWidth);
+                hash = base::hash_combine(hash, mHeight);
+                mName = "Rect:" + std::to_string(hash);
+            }
+
             Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
@@ -224,18 +245,17 @@ namespace gfx
             return geom;
         }
     private:
-        const std::string mName = "Unit_Rect";
         const float mWidth = 1.0f;
         const float mHeight = 1.0f;
+        mutable std::string mName;
     };
 
     class Triangle : public Drawable
     {
     public:
         Triangle() = default;
-        Triangle(const std::string& name, float width, float height)
-            : mName(name)
-            , mWidth(width)
+        Triangle(float width, float height)
+            : mWidth(width)
             , mHeight(height)
         {}
         virtual Shader* GetShader(Device& device) const override
@@ -253,6 +273,14 @@ namespace gfx
 
         virtual Geometry* Upload(Device& device) const override
         {
+            if (mName.empty())
+            {
+                uint32_t hash = 0;
+                hash = base::hash_combine(hash, mWidth);
+                hash = base::hash_combine(hash, mHeight);
+                mName = "Triangle:" + std::to_string(hash);
+            }
+
             Geometry* geom = device.FindGeometry(mName);
             if (!geom)
             {
@@ -267,9 +295,9 @@ namespace gfx
             return geom;
         }
     private:
-        const std::string mName = "Unit_Triangle";
         const float mWidth  = 1.0f;
         const float mHeight = 1.0f;
+        mutable std::string mName;
     };
 
     // Particle engine interface. Particle engines implement some kind of

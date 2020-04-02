@@ -156,7 +156,7 @@ public:
         const float ypos = mStart.y() + mState.camera_offset_y;
         const float width  = diff.x();
         const float height = diff.y();
-        auto drawable = std::make_shared<gfx::Rectangle>(name + "/Rect", width, height);
+        auto drawable = std::make_shared<gfx::Rectangle>(width, height);
         auto material = mState.workspace->MakeMaterial("Checkerboard");
 
         scene::Animation::Component component;

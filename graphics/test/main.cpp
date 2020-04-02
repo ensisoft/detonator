@@ -93,7 +93,7 @@ public:
     {
         const float velocity = 0.3;
         const float angle = mTime* velocity;
-        
+
         gfx::Transform trans;
         mRobot->Render(painter, trans);
 
@@ -104,12 +104,12 @@ public:
         tr.Translate(-50.0f, -50.0f);
         tr.Rotate(math::Pi * 2.0f * angle);
         tr.Translate(40.0f, 40.0f);
-        painter.Draw(gfx::Rectangle("foo", 100.0f, 100.0f), tr, gfx::SolidColor(gfx::Color::Cyan));
+        painter.Draw(gfx::Rectangle(100.0f, 100.0f), tr, gfx::SolidColor(gfx::Color::Cyan));
 
         tr.Push();
         tr.Translate(30.0f, 30.0f);
         tr.Rotate(math::Pi * 2.0f * angle);
-        painter.Draw(gfx::Rectangle("bar", 20.0f, 20.0f), tr, gfx::SolidColor(gfx::Color::Yellow));
+        painter.Draw(gfx::Rectangle(20.0f, 20.0f), tr, gfx::SolidColor(gfx::Color::Yellow));
         tr.Pop();
         tr.Pop();
     }
@@ -159,14 +159,14 @@ private:
         void Render(gfx::Painter& painter, gfx::Transform& trans) const
         {
             const float angle = std::sin(mTime * mVelocity);
-            const float ROM = math::Pi * 0.3f; 
+            const float ROM = math::Pi * 0.3f;
 
             trans.Push();
             trans.Scale(mSx, mSy);
             trans.Rotate(mRotation + ROM * angle);
             trans.Translate(mX, mY);
 
-            painter.Draw(gfx::Rectangle(mName, mWidth, mHeight),
+            painter.Draw(gfx::Rectangle(mWidth, mHeight),
                 trans, gfx::SolidColor(mColor));
 
             for (const auto& bp : mBodyparts)
@@ -186,7 +186,7 @@ private:
             mBodyparts.push_back(BodyPart(name));
             return mBodyparts.back();
         }
-            
+
     private:
         const std::string mName;
         std::vector<BodyPart> mBodyparts;
