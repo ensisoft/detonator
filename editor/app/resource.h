@@ -38,7 +38,17 @@
 
 namespace app
 {
-    // Editor app resource object.
+    // Editor app resource object. These are objects that the user
+    // manipulates and manages through the Editor application's UI.
+    // Each resource contains the actual underlying resource object
+    // that is for example a gfx::Material or scene::Animation.
+    // Normally these types are not related in any hierarchy yet in
+    // the editor we want to manage/view/list/edit/delete generic
+    // "resources" that the user has created/imported. This interface
+    // creates that base root resource hierarchy that is only available
+    // in the editor application.
+    // Additionally it's possible to associate some arbitrary properties
+    // with each resource object to support Editor functionality.
     class Resource
     {
     public:
@@ -136,11 +146,29 @@ namespace app
 
     };
 
-    template<typename Content, Resource::Type type>
+    namespace detail {
+        // use template specialization to map a gfx type
+        // to a Resource::Type enum value.
+        template<typename T>
+        struct ResourceTypeTraits;
+
+        template<>
+        struct ResourceTypeTraits<gfx::KinematicsParticleEngine> {
+            static constexpr auto Type = app::Resource::Type::ParticleSystem;
+        };
+        template<>
+        struct ResourceTypeTraits<gfx::Material> {
+            static constexpr auto Type = app::Resource::Type::Material;
+        };
+    } // detail
+
+
+    template<typename Content>
     class GraphicsResource : public Resource
     {
     public:
         using GfxType = Content;
+        static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
 
         GraphicsResource(const Content& content, const QString& name)
             : mContent(content)
@@ -156,7 +184,7 @@ namespace app
         }
         virtual Type GetType() const override
         {
-            return type;
+            return TypeValue;
         }
         virtual void Serialize(nlohmann::json& json) const override
         {
@@ -170,20 +198,20 @@ namespace app
             ASSERT(content_json.contains("resource_name") == false);
             content_json["resource_name"] = app::ToUtf8(mName);
 
-            if constexpr (type == Resource::Type::Material)
+            if constexpr (TypeValue == Resource::Type::Material)
                 json["materials"].push_back(content_json);
-            else if (type == Resource::Type::ParticleSystem)
+            else if (TypeValue == Resource::Type::ParticleSystem)
                 json["particles"].push_back(content_json);
-            else if (type == Resource::Type::Animation)
+            else if (TypeValue == Resource::Type::Animation)
                 json["animations"].push_back(content_json);
         }
         virtual void Serialize(QJsonObject& json) const override
         {
-            if constexpr (type == Resource::Type::Material)
+            if constexpr (TypeValue == Resource::Type::Material)
                 json["material_" + mName]  = QJsonObject::fromVariantMap(mProps);
-            else if (type == Resource::Type::ParticleSystem)
+            else if (TypeValue == Resource::Type::ParticleSystem)
                 json["particle_" + mName] = QJsonObject::fromVariantMap(mProps);
-            else if (type == Resource::Type::Animation)
+            else if (TypeValue == Resource::Type::Animation)
                 json["animation_" + mName] = QJsonObject::fromVariantMap(mProps);
         }
         virtual bool HasProperty(const QString& name) const override
@@ -201,11 +229,11 @@ namespace app
         { return mProps[name]; }
         virtual void LoadProperties(const QJsonObject& object) override
         {
-            if constexpr (type == Resource::Type::Material)
+            if constexpr (TypeValue == Resource::Type::Material)
                 mProps = object["material_" + mName].toObject().toVariantMap();
-            else if (type == Resource::Type::ParticleSystem)
+            else if (TypeValue == Resource::Type::ParticleSystem)
                 mProps = object["particle_" + mName].toObject().toVariantMap();
-            else if (type == Resource::Type::Animation)
+            else if (TypeValue == Resource::Type::Animation)
                 mProps = object["animation_" + mName].toObject().toVariantMap();
         }
 
@@ -243,17 +271,19 @@ namespace app
         virtual QString GetName() const = 0;
     };
 
-    template<typename Content, Resource::Type type>
+    template<typename Content>
     class WeakGraphicsResourceHandle : public ResourceHandle
     {
     public:
+        static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
+
         WeakGraphicsResourceHandle(const QString& name, std::shared_ptr<Content> handle)
             : mName(name)
             , mHandle(handle)
         {}
         virtual void UpdateInstance(const QString& name, Resource::Type source_type, const void* gfx_content_source) override
         {
-            if (type != source_type)
+            if (TypeValue != source_type)
                 return;
             else if (mName != name)
                 return;
@@ -273,8 +303,7 @@ namespace app
     };
 
 
-    using MaterialResource = GraphicsResource<gfx::Material, Resource::Type::Material>;
-    using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine,
-        Resource::Type::ParticleSystem>;
+    using MaterialResource = GraphicsResource<gfx::Material>;
+    using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine>;
 
 } // namespace

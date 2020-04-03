@@ -115,7 +115,7 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
     // add a copy in the collection of private instances so that
     // if/when the resource is modified the object using the resource
     // will also reflect those changes.
-    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Material, Resource::Type::Material>>(FromUtf8(name), ret);
+    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Material>>(FromUtf8(name), ret);
     mPrivateInstances.push_back(std::move(handle));
 
     return ret;
@@ -133,7 +133,7 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         // add a copy in the collection of private instances so that
         // if/when the resource is modified the object using the resource
         // will also reflect those changes.
-        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine, Resource::Type::ParticleSystem>>(FromUtf8(name), ret);
+        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
         mPrivateInstances.push_back(std::move(handle));
 
         return ret;
