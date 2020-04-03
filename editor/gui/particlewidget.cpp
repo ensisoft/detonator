@@ -54,11 +54,13 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mWorkspace = workspace;
 
     DEBUG("Create ParticleEditorWidget");
-
     mUI.setupUi(this);
     mUI.widget->setFramerate(60);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+
+    // get the current list of materials from the workspace
+    mUI.materials->addItems(workspace->ListMaterials());
 
     // Set default transform state here. if there's a previous user setting
     // they'll get loaded in loadState and will override these values.
@@ -73,7 +75,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::KinematicsParticleEngine::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngine::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngine::SpawnPolicy>(mUI.when);
-    PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
@@ -81,52 +82,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     const auto& name = resource.GetName();
     DEBUG("Editing particle system: '%1'", name);
 
-    QStringList texture_files;
-    QStringList texture_rects;
-    if (mWorkspace->HasMaterial(name))
-    {
-        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
-        GetProperty(material_resource, "texture_files", &texture_files);
-        GetProperty(material_resource, "texture_rects", &texture_rects);
-        GetProperty(material_resource, "color", mUI.color);
-        GetProperty(material_resource, "surface", mUI.surfaceType);
-    }
-    else
-    {
-        WARN("Could not find matching material for particle system '%1. Has it been deleted?", name);
-        GetProperty(resource, "texture_files", &texture_files);
-        GetProperty(resource, "texture_rects", &texture_rects);
-        GetProperty(resource, "color", mUI.color);
-        GetProperty(resource, "surface", mUI.surfaceType);
-    }
-    ASSERT(texture_files.size() == texture_rects.size());
-    for (int i=0; i<texture_files.size(); ++i)
-    {
-        const auto& file = texture_files[i];
-        const auto& rect = texture_rects[i];
-        if (!QFileInfo(file).exists())
-        {
-            WARN("Texture '%1' could no longer be found. Skipped.");
-            continue;
-        }
-        QString stupid(rect);
-        QTextStream ss(&stupid);
-        float x, y, w, h;
-        ss >> x >> y >> w >> h;
+    mUI.name->setText(name);
 
-        TextureRect texture;
-        texture.file = file;
-        texture.x = x;
-        texture.y = y;
-        texture.w = w;
-        texture.h = h;
-        mTextures.push_back(texture);
-    }
-    if (mTextures.size() == 1)
-        mUI.filename->setText(mTextures[0].file);
-    else if (mTextures.size() > 1)
-        mUI.filename->setText("Multiple files ...");
-
+    GetProperty(resource, "material", mUI.materials);
     GetProperty(resource, "transform_enabled", mUI.transform);
     GetProperty(resource, "transform_xpos", mUI.translateX);
     GetProperty(resource, "transform_ypos", mUI.translateY);
@@ -160,7 +118,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.timeDerivative, params.rate_of_change_in_size_wrt_time);
     SetValue(mUI.distDerivative, params.rate_of_change_in_size_wrt_dist);
 
-    mUI.name->setText(name);
     setWindowTitle(name);
 }
 
@@ -193,20 +150,8 @@ void ParticleEditorWidget::addActions(QMenu& menu)
 
 bool ParticleEditorWidget::saveState(Settings& settings) const
 {
-    QStringList texture_files;
-    QStringList texture_rects;
-    for (const auto& texture : mTextures)
-    {
-        texture_files << texture.file;
-        texture_rects << QString("%1 %2 %3 %4")
-            .arg(texture.x).arg(texture.y)
-            .arg(texture.w).arg(texture.h);
-    }
-    settings.setValue("Particle", "texture_files", texture_files);
-    settings.setValue("Particle", "texture_rects", texture_rects);
     settings.saveWidget("Particle", mUI.name);
-    settings.saveWidget("Particle", mUI.color);
-    settings.saveWidget("Particle", mUI.surfaceType);
+    settings.saveWidget("Particle", mUI.materials);
     settings.saveWidget("Particle", mUI.transform);
     settings.saveWidget("Particle", mUI.translateX);
     settings.saveWidget("Particle", mUI.translateY);
@@ -241,37 +186,8 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
 
 bool ParticleEditorWidget::loadState(const Settings& settings)
 {
-    const auto& texture_files = settings.getValue("Particle", "texture_files", QStringList());
-    const auto& texture_rects = settings.getValue("Particle", "texture_rects", QStringList());
-    ASSERT(texture_files.size() == texture_rects.size());
-    for (int i=0; i<texture_files.size(); ++i)
-    {
-        if (!QFileInfo(texture_files[i]).exists())
-        {
-            WARN("Texture '%1' no longer exists. Skipped.");
-            continue;
-        }
-        QString stupid(texture_rects[i]);
-        QTextStream ss(&stupid);
-        float x, y, w, h;
-        ss >> x >> y >> w >> h;
-
-        TextureRect texture;
-        texture.file = texture_files[i];
-        texture.x = x;
-        texture.y = y;
-        texture.w = w;
-        texture.h = h;
-        mTextures.push_back(texture);
-    }
-    if (mTextures.size() == 1)
-        mUI.filename->setText(mTextures[0].file);
-    else if (mTextures.size() > 1)
-        mUI.filename->setText("Multiple files ...");
-
     settings.loadWidget("Particle", mUI.name);
-    settings.loadWidget("Particle", mUI.color);
-    settings.loadWidget("Particle", mUI.surfaceType);
+    settings.loadWidget("Particle", mUI.materials);
     settings.loadWidget("Particle", mUI.transform);
     settings.loadWidget("Particle", mUI.translateX);
     settings.loadWidget("Particle", mUI.translateY);
@@ -335,26 +251,12 @@ void ParticleEditorWidget::on_actionSave_triggered()
             return;
     }
 
-    // serialize texture files and rectangles into string lists.
-    QStringList texture_files;
-    QStringList texture_rects;
-    for (const auto& texture : mTextures)
-    {
-        texture_files << texture.file;
-        texture_rects << QString("%1 %2 %3 %4")
-            .arg(texture.x).arg(texture.y)
-            .arg(texture.w).arg(texture.h);
-    }
-
     gfx::KinematicsParticleEngine::Params params;
     fillParams(params);
     gfx::KinematicsParticleEngine engine(params);
     app::ParticleSystemResource particle_resource(std::move(engine), name);
 
-    SetProperty(particle_resource, "texture_files", texture_files);
-    SetProperty(particle_resource, "texture_rects", texture_rects);
-    SetProperty(particle_resource, "color", mUI.color);
-    SetProperty(particle_resource, "surface", mUI.surfaceType);
+    SetProperty(particle_resource, "material", mUI.materials);
     SetProperty(particle_resource, "transform_enabled", mUI.transform);
     SetProperty(particle_resource, "transform_xpos", mUI.translateX);
     SetProperty(particle_resource, "transform_ypos", mUI.translateY);
@@ -367,57 +269,6 @@ void ParticleEditorWidget::on_actionSave_triggered()
     mWorkspace->SaveResource(particle_resource);
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);
-
-    gfx::Material::Type type;
-    if (mTextures.size() == 0)
-        type = gfx::Material::Type::Color;
-    else if (mTextures.size() == 1)
-        type = gfx::Material::Type::Texture;
-    else if (mTextures.size() > 1)
-        type = gfx::Material::Type::Sprite;
-
-    auto material = gfx::Material::MakeMaterial(type);
-    // if the material exists, copy the existing parameters
-    // then overwrite only those that have been changed through this UI.
-    if (mWorkspace->HasMaterial(name))
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
-        if (msg.exec() == QMessageBox::No)
-            return;
-
-        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
-        const gfx::Material* content = nullptr;
-        material_resource.GetContent(&content);
-        material = *content;
-    }
-    else
-    {
-        material.SetFps(mTextures.size());
-    }
-
-    // set the parameters from the UI, so that the material gets updated
-    // if the UI values have been changed.
-    material.SetType(type);
-    material.SetBaseColor(GetValue(mUI.color));
-    material.SetSurfaceType(GetValue(mUI.surfaceType));
-    for (size_t i=0; i<mTextures.size(); ++i)
-    {
-        const auto& texture = mTextures[i];
-        material.AddTexture(app::ToUtf8(texture.file));
-        material.SetTextureRect(i, gfx::FRect(texture.x, texture.y, texture.w, texture.h));
-    }
-
-    app::MaterialResource material_resource(std::move(material), name);
-    SetProperty(material_resource, "texture_files", texture_files);
-    SetProperty(material_resource, "texture_rects", texture_rects);
-    SetProperty(material_resource, "color", mUI.color);
-    SetProperty(material_resource, "surface", mUI.surfaceType);
-    mWorkspace->SaveResource(material_resource);
-    INFO("Saved material '%1'", name);
-    NOTE("Saved material '%1'", name);
 
     setWindowTitle(name);
 }
@@ -503,31 +354,6 @@ void ParticleEditorWidget::on_actionStop_triggered()
     mPaused = false;
 }
 
-void ParticleEditorWidget::on_browseTexture_clicked()
-{
-    const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Image File"), "", tr("Images (*.png *.jpeg *.jpg)"));
-    if (list.isEmpty())
-        return;
-
-    // this selection will overwrite the current textures.
-    mTextures.clear();
-
-    for (const auto& file : list)
-    {
-        TextureRect texture;
-        texture.file = file;
-        texture.x = 0.0f;
-        texture.y = 0.0f;
-        texture.w = 1.0f;
-        texture.h = 1.0f;
-        mTextures.push_back(texture);
-    }
-    if (list.count() > 1)
-        mUI.filename->setText("Multiple files ... ");
-    else mUI.filename->setText(list[0]);
-}
-
 void ParticleEditorWidget::on_resetTransform_clicked()
 {
     const auto width  = mUI.widget->width();
@@ -595,48 +421,19 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         tr.Resize(width, height);
         tr.MoveTo(0, 0);
     }
-    const auto& name = mUI.name->text();
 
-    gfx::Material::Type type;
-    if (mTextures.size() == 0)
-        type = gfx::Material::Type::Color;
-    else if (mTextures.size() == 1)
-        type = gfx::Material::Type::Texture;
-    else if (mTextures.size() > 1)
-        type = gfx::Material::Type::Sprite;
-
-    auto material = gfx::Material::MakeMaterial(type);
-
-    // if this material exists load the properties.
-    // then potentially change some properties through our UI.
-    if (mWorkspace->HasMaterial(name))
+    // get the material based on the selection in the materials combobox
+    const auto& material_name = mUI.materials->currentText();
+    if (mMaterialName != material_name)
     {
-        const app::Resource& material_resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
-        const gfx::Material* content = nullptr;
-        material_resource.GetContent(&content);
-        // copy material parameters
-        material = *content;
-    }
-    else
-    {
-        material.SetFps(mTextures.size());
-    }
-    // the rendering must reflect what is the particle widget UI.
-    // so if the material editor has been used to change some parameters
-    // they are initially loaded to the UI (when editing) and
-    // then if the user changes the parameters in the UI we'll apply those.
-    material.SetType(type);
-    material.SetBaseColor(GetValue(mUI.color));
-    material.SetSurfaceType(GetValue(mUI.surfaceType));
-    material.SetRuntime(mTime);
-    for (size_t i=0; i<mTextures.size(); ++i)
-    {
-        const auto& texture = mTextures[i];
-        material.AddTexture(app::ToUtf8(texture.file));
-        material.SetTextureRect(i, gfx::FRect(texture.x, texture.y, texture.w, texture.h));
+        mMaterial = mWorkspace->MakeMaterial(material_name);
+        mMaterialName = material_name;
     }
 
-    painter.Draw(*mEngine, tr, material);
+    mMaterial->SetRuntime(mTime);
+
+    // render the particle engine
+    painter.Draw(*mEngine, tr, *mMaterial);
 
     mUI.curTime->setText(QString("%1s").arg(mTime));
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));

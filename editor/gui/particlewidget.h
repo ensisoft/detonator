@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include "ui_particlewidget.h"
 #  include <QStringList>
+#  include <QString>
 #include "warnpop.h"
 
 #include <memory>
@@ -34,6 +35,7 @@
 
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
+#include "graphics/material.h"
 #include "mainwidget.h"
 
 namespace app {
@@ -62,7 +64,6 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionPause_triggered();
         void on_actionSave_triggered();
-        void on_browseTexture_clicked();
         void on_resetTransform_clicked();
         void on_plus90_clicked();
         void on_minus90_clicked();
@@ -76,17 +77,14 @@ namespace gui
     private:
         app::Workspace* mWorkspace = nullptr;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
+        std::shared_ptr<gfx::Material> mMaterial;
         bool mPaused = false;
         float mTime  = 0.0f;
     private:
-        struct TextureRect {
-            QString file;
-            float x = 0.0f;
-            float y = 0.0f;
-            float w = 1.0f;
-            float h = 1.0f;
-        };
-        std::vector<TextureRect> mTextures;
+        // cache the name of the current material so that we can 
+        // compare and detect if the user has selected different material
+        // from the material combo and then recreate the material instance.
+        QString mMaterialName;
     };
 
 } // namespace

@@ -65,6 +65,11 @@ namespace app
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
 
+        std::shared_ptr<gfx::Material> MakeMaterial(const QString& name)
+        { return MakeMaterial(ToUtf8(name)); }
+        std::shared_ptr<gfx::Drawable> MakeDrawable(const QString& name)
+        { return MakeDrawable(ToUtf8(name)); }
+
         // gfxfactory implementation
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
