@@ -93,12 +93,9 @@ namespace app
         // Save a new resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to
         // the workspace.
-        template<typename ResourceType>
-        void SaveResource(const ResourceType& resource)
+        template<typename T>
+        void SaveResource(const GraphicsResource<T>& resource)
         {
-            const typename ResourceType::GfxType* src = nullptr;
-            ASSERT(resource.GetContent(&src));
-
             const auto& name = resource.GetName();
             const auto  type = resource.GetType();
             for (size_t i=0; i<mResources.size(); ++i)
@@ -109,24 +106,28 @@ namespace app
 
                 // overwrite the existing resource type. the caller
                 // is expected to have confirmed with the user that this is OK
-                typename ResourceType::GfxType* dst = nullptr;
-                ASSERT(res->GetContent(&dst));
-                // we can either assign to the content object in the existing
-                // resource object or create a new resource object
-                *dst = *src;
-                //mResources[i] = std::make_unique<ResourceType>(resource);
+                // note that we must make sure to not only update the
+                // contained resource parameters but also the application level
+                // resource object and since that is a polymorphic type
+                // we must allocate new resource object.
+                mResources[i] = std::make_unique<GraphicsResource<T>>(resource);
 
                 // see if there are instances of this resource in use that we
                 // also want to update with the latest changes.
                 // note that there can be multiple handles here!
+                // here we're only interested in updating the gfx object content (parameters)
+                const auto* source = resource.GetContent();
+
                 for (auto& handle : mPrivateInstances)
                 {
-                    handle->UpdateInstance(name, type, (const void*)src);
+                    handle->UpdateInstance(name, type, (const void*)source);
                 }
                 return;
             }
+            // if we're here no such resource exists yet.
+            // Create a new resource and add it to the list of resources.
             beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
-            mResources.push_back(std::make_unique<ResourceType>(std::move(resource)));
+            mResources.push_back(std::make_unique<GraphicsResource<T>>(resource));
             endInsertRows();
         }
 

@@ -236,6 +236,10 @@ namespace app
             else if (TypeValue == Resource::Type::Animation)
                 mProps = object["animation_" + mName].toObject().toVariantMap();
         }
+        Content* GetContent()
+        { return &mContent; }
+        const Content* GetContent() const
+        { return &mContent; }
 
     protected:
         virtual void* GetIf(const std::type_info& expected_type) override
