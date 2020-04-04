@@ -566,6 +566,51 @@
     <string>Pause</string>
    </property>
   </action>
+  <action name="actionNewCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/circle.png</normaloff>:/32x32_ico_png/circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Circle</string>
+   </property>
+   <property name="toolTip">
+    <string>New Circle</string>
+   </property>
+  </action>
+  <action name="actionNewTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/triangle.png</normaloff>:/32x32_ico_png/triangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Triangle</string>
+   </property>
+   <property name="toolTip">
+    <string>New Triangle</string>
+   </property>
+  </action>
+  <action name="actionNewArrow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/arrow.png</normaloff>:/32x32_ico_png/arrow.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Arrow</string>
+   </property>
+   <property name="toolTip">
+    <string>New Arrow</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

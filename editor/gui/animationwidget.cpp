@@ -99,10 +99,12 @@ public:
 private:
 };
 
-class AnimationWidget::PlaceRectTool : public AnimationWidget::Tool
+class AnimationWidget::PlaceTool : public AnimationWidget::Tool
 {
 public:
-    PlaceRectTool(AnimationWidget::State& state) : mState(state)
+    PlaceTool(AnimationWidget::State& state, std::shared_ptr<gfx::Drawable> shape)
+        : mState(state)
+        , mShape(shape)
     {}
     virtual void Render(gfx::Painter& painter) const
     {
@@ -114,6 +116,12 @@ public:
         const float y = mStart.y();
         const float w = diff.x();
         const float h = diff.y();
+        gfx::Transform t;
+        t.Resize(w, h);
+        t.Translate(x, y);
+        auto material = mState.workspace->MakeMaterial("Checkerboard");
+        painter.Draw(*mShape, t, *material);
+
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h), gfx::Color::Green, 2, 0.0f);
     }
     virtual void MouseMove(QMouseEvent* mickey)
@@ -156,18 +164,18 @@ public:
         const float ypos = mStart.y() + mState.camera_offset_y;
         const float width  = diff.x();
         const float height = diff.y();
-        auto drawable = std::make_shared<gfx::Rectangle>();
+        auto drawable = mShape;
         auto material = mState.workspace->MakeMaterial("Checkerboard");
 
         scene::Animation::Component component;
         component.SetMaterial("Checkerboard", material);
-        component.SetDrawable("Rectangle", drawable);
+        component.SetDrawable("", drawable);
         component.SetName(name);
         component.SetTranslation(glm::vec2(xpos, ypos));
         component.SetSize(glm::vec2(width, height));
         component.SetScale(glm::vec2(1.0f, 1.0f));
         mState.model->AddComponent(std::move(component));
-        DEBUG("Added new rectangle '%1'", name);
+        DEBUG("Added new shape '%1'", name);
         return true;
     }
     bool CheckNameAvailability(const std::string& name) const
@@ -183,6 +191,7 @@ public:
 
 
 private:
+    std::shared_ptr<gfx::Drawable> mShape;
     AnimationWidget::State& mState;
     QPoint mStart;
     QPoint mCurrent;
@@ -278,6 +287,9 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
         mCurrentTool.release();
         mUI.actionNewRect->setChecked(false);
+        mUI.actionNewCircle->setChecked(false);
+        mUI.actionNewTriangle->setChecked(false);
+        mUI.actionNewArrow->setChecked(false);
     };
 
     setWindowTitle("My Animation");
@@ -308,6 +320,9 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
+    bar.addAction(mUI.actionNewCircle);
+    bar.addAction(mUI.actionNewTriangle);
+    bar.addAction(mUI.actionNewArrow);
 }
 void AnimationWidget::addActions(QMenu& menu)
 {
@@ -317,6 +332,9 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
+    menu.addAction(mUI.actionNewCircle);
+    menu.addAction(mUI.actionNewTriangle);
+    menu.addAction(mUI.actionNewArrow);
 }
 
 void AnimationWidget::on_actionPlay_triggered()
@@ -349,8 +367,42 @@ void AnimationWidget::on_actionStop_triggered()
 
 void AnimationWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceRectTool(mState));
+    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Rectangle>()));
+
     mUI.actionNewRect->setChecked(true);
+    mUI.actionNewCircle->setChecked(false);
+    mUI.actionNewTriangle->setChecked(false);
+    mUI.actionNewArrow->setChecked(false);
+}
+
+void AnimationWidget::on_actionNewCircle_triggered()
+{
+    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Circle>()));
+
+    mUI.actionNewRect->setChecked(false);
+    mUI.actionNewCircle->setChecked(true);
+    mUI.actionNewTriangle->setChecked(false);
+    mUI.actionNewArrow->setChecked(false);
+}
+
+void AnimationWidget::on_actionNewTriangle_triggered()
+{
+    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Triangle>()));
+
+    mUI.actionNewRect->setChecked(false);
+    mUI.actionNewCircle->setChecked(false);
+    mUI.actionNewTriangle->setChecked(true);
+    mUI.actionNewArrow->setChecked(false);
+}
+
+void AnimationWidget::on_actionNewArrow_triggered()
+{
+    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Arrow>()));
+
+    mUI.actionNewRect->setChecked(false);
+    mUI.actionNewCircle->setChecked(false);
+    mUI.actionNewTriangle->setChecked(false);
+    mUI.actionNewArrow->setChecked(true);
 }
 
 void AnimationWidget::on_actionDeleteComponent_triggered()

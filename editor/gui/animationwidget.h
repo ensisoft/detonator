@@ -58,6 +58,9 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionNewRect_triggered();
+        void on_actionNewCircle_triggered();
+        void on_actionNewTriangle_triggered();
+        void on_actionNewArrow_triggered();
         void on_actionDeleteComponent_triggered();
         void on_components_customContextMenuRequested(QPoint);
         void on_plus90_clicked();
@@ -75,7 +78,7 @@ namespace gui
     private:
         class ComponentModel;
         class Tool;
-        class PlaceRectTool;
+        class PlaceTool;
         class CameraTool;
 
     private:
