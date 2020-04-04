@@ -36,8 +36,8 @@
 
 namespace gfx
 {
-    // Express a series of graphics operations such as 
-    // translation, scaling and rotation as a simple 
+    // Express a series of graphics operations such as
+    // translation, scaling and rotation as a simple
     // transform object. Some good resources about using matrices
     // and transformations:
     // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
@@ -50,7 +50,7 @@ namespace gfx
             Reset();
         }
         // Set absolute position. This will override any previously
-        // accumulated translation. 
+        // accumulated translation.
         void MoveTo(float x, float y)
         {
             mTransform.back()[3] = glm::vec4(x, y, 0.0f, 1.0f);
@@ -77,7 +77,7 @@ namespace gfx
         }
 
         // Set absolute resize. This will override any previously
-        // accumulated scaling. 
+        // accumulated scaling.
         void Resize(float sx, float sy)
         {
             const auto& x = glm::normalize(mTransform.back()[0]);
@@ -95,6 +95,10 @@ namespace gfx
         void Scale(float sx, float sy)
         {
             mTransform.back() = glm::scale(glm::mat4(1.0f),  glm::vec3(sx, sy, 1.0f)) * mTransform.back();
+        }
+        void Scale(const glm::vec2& scale)
+        {
+            Scale(scale.x, scale.y);
         }
 
         template<typename T>
@@ -131,14 +135,14 @@ namespace gfx
         void Reset()
         {
             mTransform.clear();
-            mTransform.resize(1); 
+            mTransform.resize(1);
             mTransform[0] = glm::mat4(1.0f);
         }
 
         // Get the transformation expressed as a matrix.
-        glm::mat4 GetAsMatrix() const 
-        { 
-            glm::mat4 ret(1.0f); 
+        glm::mat4 GetAsMatrix() const
+        {
+            glm::mat4 ret(1.0f);
             for (auto it = mTransform.rbegin(); it != mTransform.rend(); ++it)
             {
                 // what we want is the following.
@@ -147,10 +151,10 @@ namespace gfx
             }
             return ret; // mTransform;
         }
-        
+
         // Begin a new scope for the next transformation.
         // Pushing and popping transformations allows transformations
-        // to be "stacked" i.e. become relative to each other. 
+        // to be "stacked" i.e. become relative to each other.
         void Push()
         {
             mTransform.push_back(glm::mat4(1.0f));

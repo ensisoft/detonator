@@ -156,7 +156,7 @@ public:
         const float ypos = mStart.y() + mState.camera_offset_y;
         const float width  = diff.x();
         const float height = diff.y();
-        auto drawable = std::make_shared<gfx::Rectangle>(width, height);
+        auto drawable = std::make_shared<gfx::Rectangle>();
         auto material = mState.workspace->MakeMaterial("Checkerboard");
 
         scene::Animation::Component component;
@@ -164,6 +164,7 @@ public:
         component.SetDrawable("Rectangle", drawable);
         component.SetName(name);
         component.SetTranslation(glm::vec2(xpos, ypos));
+        component.SetSize(glm::vec2(width, height));
         component.SetScale(glm::vec2(1.0f, 1.0f));
         mState.model->AddComponent(std::move(component));
         DEBUG("Added new rectangle '%1'", name);

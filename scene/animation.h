@@ -98,6 +98,8 @@ namespace scene
             { mName = name;}
             void SetScale(const glm::vec2& scale)
             { mScale = scale; }
+            void SetSize(const glm::vec2& size)
+            { mSize = size; }
             void SetLayer(int layer)
             { mLayer = layer; }
             void SetRenderPass(RenderPass pass)
@@ -141,6 +143,7 @@ namespace scene
             float mTime      = 0.0f;
             // translation offset relative to the animation.
             glm::vec2 mPosition;
+            glm::vec2 mSize = {1.0f, 1.0f};
             glm::vec2 mScale = {1.0f, 1.0f};
             int mLayer = 0;
             RenderPass mRenderPass = RenderPass::Draw;

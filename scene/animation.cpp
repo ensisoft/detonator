@@ -42,11 +42,21 @@ void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform
 
     mMaterial->SetRuntime(mTime - mStartTime);
 
-
+    // begin the transformation scope for this animation component.
+    transform.Push();
+    transform.Scale(mSize);
     transform.Translate(mPosition);
 
+    // if we had recusive structure i.e. component could contain
+    // components we'd need to deal with the resizing so that it'd
+    // only apply to this component and then possibly have a
+    // scaling factor that would apply to the whole subtree
+    // staring from this node.
     painter.Draw(*mDrawable, transform, *mMaterial);
 
+
+    // pop our scope.
+    transform.Pop();
 }
 
 bool Animation::Component::Update(float dt)
@@ -71,12 +81,20 @@ void Animation::Component::Reset()
 
 void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
+    // here we could apply operations that would apply to the whole
+    // animation but currently we don't need such things.
+    // if we did we could begin new transformation scope for this
+    // by pushing a new scope in the transformation stack.
+    // transfrom.Push();
+
+    // Ask each component to draw.
     for (const auto& component : mComponents)
     {
-        transform.Push();
         component.Draw(painter, transform);
-        transform.Pop();
     }
+
+    // if we used a new trańsformation scope pop it here.
+    //transform.Pop();
 }
 
 bool Animation::Update(float dt)

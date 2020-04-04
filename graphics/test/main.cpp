@@ -100,17 +100,43 @@ public:
         gfx::Transform tr;
         tr.Translate(400, 400);
 
+        // these two rectangles are in a parent-child relationship.
+        // the child rectangle is transformed relative to the parent
+        // which is transformed relative to the top level "view"
+        // transform.
+        // A call to push begins a new "scope" for a transformations
+        // and subsequent operations combine into a single transformation
+        // matrix.
+        // the way you need to read these scopes is from the innermost
+        // scope towards outermost.
+        // individual operations happen in the order they're written.
         tr.Push();
-        tr.Translate(-50.0f, -50.0f);
-        tr.Rotate(math::Pi * 2.0f * angle);
-        tr.Translate(40.0f, 40.0f);
-        painter.Draw(gfx::Rectangle(100.0f, 100.0f), tr, gfx::SolidColor(gfx::Color::Cyan));
+            // in this scope first translate then rotate.
+            // this transformation applies to rectangle A and B
+            tr.Translate(-50.0f, -50.0f);
+            tr.Rotate(math::Pi * 2.0f * angle);
 
-        tr.Push();
-        tr.Translate(30.0f, 30.0f);
-        tr.Rotate(math::Pi * 2.0f * angle);
-        painter.Draw(gfx::Rectangle(20.0f, 20.0f), tr, gfx::SolidColor(gfx::Color::Yellow));
-        tr.Pop();
+            // begin transformation scope for rectangle A
+            tr.Push();
+                // scale only applies to this rectangle since the
+                // transformation stack is popped below.
+                // the scale could be removed and baked into rectangle.
+                // having I for scale with Rectangle(100.0f, 100.0f)
+                // yields the same result.
+                tr.Scale(100.0f, 100.0f);
+                painter.Draw(gfx::Rectangle(), tr, gfx::SolidColor(gfx::Color::Cyan));
+            tr.Pop();
+
+            // begin transformation scope for rectangle B.
+            tr.Push();
+                // first translate then rotate
+                tr.Translate(30.0f, 30.0f);
+                tr.Rotate(math::Pi * 2.0f * angle);
+                tr.Push();
+                    tr.Scale(20.0f, 20.0f);
+                    painter.Draw(gfx::Rectangle(), tr, gfx::SolidColor(gfx::Color::Yellow));
+                tr.Pop();
+            tr.Pop();
         tr.Pop();
     }
     virtual void Update(float dt) override
@@ -166,8 +192,10 @@ private:
             trans.Rotate(mRotation + ROM * angle);
             trans.Translate(mX, mY);
 
-            painter.Draw(gfx::Rectangle(mWidth, mHeight),
-                trans, gfx::SolidColor(mColor));
+            trans.Push();
+                trans.Scale(mWidth, mHeight);
+                painter.Draw(gfx::Rectangle(), trans, gfx::SolidColor(mColor));
+            trans.Pop();
 
             for (const auto& bp : mBodyparts)
             {
