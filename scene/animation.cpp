@@ -61,11 +61,15 @@ void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform
 
 bool Animation::Component::Update(float dt)
 {
+    // disable this for now, need to figure out the time/timeline
+    // related functionality.
+    /*
     mTime += dt;
     if (mTime < mStartTime)
         return true;
     if (mTime - mStartTime > mLifetime)
         return false;
+    */
 
     if (mDrawable)
         mDrawable->Update(dt);

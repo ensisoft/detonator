@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include "ui_animationwidget.h"
+#  include <QMenu>
 #include "warnpop.h"
 
 #include "editor/gui/mainwidget.h"
@@ -71,6 +72,7 @@ namespace gui
         void on_layer_valueChanged(int layer);
 
         void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+        void placeNewParticleSystem();
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
@@ -83,6 +85,9 @@ namespace gui
 
     private:
         Ui::AnimationWidget mUI;
+        // there doesn't seem to be a way to do this in the designer
+        // so we create our menu for user defined drawables
+        QMenu* mDrawableMenu = nullptr;
     private:
         // current tool (if any, can be nullptr when no tool is selected).
         std::unique_ptr<Tool> mCurrentTool;

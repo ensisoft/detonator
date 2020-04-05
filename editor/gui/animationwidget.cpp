@@ -105,6 +105,13 @@ public:
     PlaceTool(AnimationWidget::State& state, std::shared_ptr<gfx::Drawable> shape)
         : mState(state)
         , mShape(shape)
+        , mMaterial("Checkerboard")
+    {}
+    PlaceTool(AnimationWidget::State& state, std::shared_ptr<gfx::Drawable> shape,
+                const QString& material)
+        : mState(state)
+        , mShape(shape)
+        , mMaterial(material)
     {}
     virtual void Render(gfx::Painter& painter) const
     {
@@ -119,7 +126,7 @@ public:
         gfx::Transform t;
         t.Resize(w, h);
         t.Translate(x, y);
-        auto material = mState.workspace->MakeMaterial("Checkerboard");
+        auto material = mState.workspace->MakeMaterial(mMaterial);
         painter.Draw(*mShape, t, *material);
 
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h), gfx::Color::Green, 2, 0.0f);
@@ -165,10 +172,10 @@ public:
         const float width  = diff.x();
         const float height = diff.y();
         auto drawable = mShape;
-        auto material = mState.workspace->MakeMaterial("Checkerboard");
+        auto material = mState.workspace->MakeMaterial(mMaterial);
 
         scene::Animation::Component component;
-        component.SetMaterial("Checkerboard", material);
+        component.SetMaterial(app::ToUtf8(mMaterial), material);
         component.SetDrawable("", drawable);
         component.SetName(name);
         component.SetTranslation(glm::vec2(xpos, ypos));
@@ -196,6 +203,7 @@ private:
     QPoint mStart;
     QPoint mCurrent;
     bool mEngaged = false;
+    QString mMaterial;
 };
 
 class AnimationWidget::CameraTool : public AnimationWidget::Tool
@@ -292,6 +300,26 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewArrow->setChecked(false);
     };
 
+    // create the memu for creating instances of user defined drawables
+    // since there doesn't seem to be a way to do this in the designer.
+    mDrawableMenu = new QMenu(this);
+    mDrawableMenu->menuAction()->setIcon(QIcon("icons:particle.png"));
+    mDrawableMenu->menuAction()->setText("New...");
+
+    // update the drawable menu with drawable items.
+    for (size_t i=0; i<workspace->GetNumResources(); ++i)
+    {
+        const auto& resource = workspace->GetResource(i);
+        const auto& name = resource.GetName();
+        if (resource.GetType() == app::Resource::Type::ParticleSystem)
+        {
+            QAction* action = mDrawableMenu->addAction(name);
+            connect(action, &QAction::triggered,
+                    this,   &AnimationWidget::placeNewParticleSystem);
+        }
+    }
+
+
     setWindowTitle("My Animation");
 
     PopulateFromEnum<scene::Animation::RenderPass>(mUI.renderPass);
@@ -323,6 +351,10 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionNewCircle);
     bar.addAction(mUI.actionNewTriangle);
     bar.addAction(mUI.actionNewArrow);
+
+    bar.addSeparator();
+    bar.addAction(mDrawableMenu->menuAction());
+
 }
 void AnimationWidget::addActions(QMenu& menu)
 {
@@ -335,6 +367,9 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionNewCircle);
     menu.addAction(mUI.actionNewTriangle);
     menu.addAction(mUI.actionNewArrow);
+
+    menu.addSeparator();
+    menu.addAction(mDrawableMenu->menuAction());
 }
 
 void AnimationWidget::on_actionPlay_triggered()
@@ -487,6 +522,21 @@ void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, con
         mUI.componentProperties->setEnabled(true);
     }
 }
+
+void AnimationWidget::placeNewParticleSystem()
+{
+    const auto* action = qobject_cast<QAction*>(sender());
+    // using the text in the action as the name of the drawable.
+    const auto name = action->text();
+    const auto drawable  = mState.workspace->MakeDrawable(name);
+    // check the resource for the default material name set in the
+    // particle editor.
+    const auto& resource = mState.workspace->GetResource(name, app::Resource::Type::ParticleSystem);
+    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+
+    mCurrentTool.reset(new PlaceTool(mState, drawable, material));
+}
+
 void AnimationWidget::on_layer_valueChanged(int layer)
 {
     if (auto* component = GetCurrentComponent())
