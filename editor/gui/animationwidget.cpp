@@ -327,6 +327,12 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     auto* model = mUI.components->selectionModel();
     connect(model, &QItemSelectionModel::currentRowChanged,
             this,  &AnimationWidget::currentComponentRowChanged);
+
+    // connect workspace signals for resource management
+    connect(workspace, &app::Workspace::NewResourceAvailable,
+            this,      &AnimationWidget::newResourceAvailable);
+    connect(workspace, &app::Workspace::ResourceToBeDeleted,
+            this,      &AnimationWidget::resourceToBeDeleted);
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -535,6 +541,72 @@ void AnimationWidget::placeNewParticleSystem()
     const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
 
     mCurrentTool.reset(new PlaceTool(mState, drawable, material));
+}
+
+void AnimationWidget::newResourceAvailable(const app::Resource* resource)
+{
+    // this is simple, just add new resources in the appropriate UI objects.
+    if (resource->GetType() == app::Resource::Type::Material)
+    {
+        mUI.materials->addItem(resource->GetName());
+    }
+    else if (resource->GetType() == app::Resource::Type::ParticleSystem)
+    {
+        QAction* action = mDrawableMenu->addAction(resource->GetName());
+        connect(action, &QAction::triggered, this, &AnimationWidget::placeNewParticleSystem);
+    }
+}
+
+void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
+{
+    if (resource->GetType() == app::Resource::Type::Material)
+    {
+        const auto index = mUI.materials->findText(resource->GetName());
+        mUI.materials->blockSignals(true);
+        mUI.materials->removeItem(index);
+        for (size_t i=0; i<mState.animation.GetNumComponents(); ++i)
+        {
+            auto& component = mState.animation.GetComponent(i);
+            const auto& material = app::FromUtf8(component.GetMaterialName());
+            if (material == resource->GetName())
+            {
+                WARN("Component '%1' uses a material '%2' that is deleted.",
+                    component.GetName(), resource->GetName());
+                component.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
+            }
+        }
+        if (auto* comp = GetCurrentComponent())
+        {
+            // either this material still exists or the component's material
+            // was changed in the loop above.
+            // in either case the material name should be found in the current
+            // list of material names in the UI combobox.
+            const auto& material = app::FromUtf8(comp->GetMaterialName());
+            const auto index = mUI.materials->findText(material);
+            ASSERT(index != -1);
+            mUI.materials->setCurrentIndex(index);
+        }
+
+        mUI.materials->blockSignals(false);
+    }
+    else if (resource->GetType() == app::Resource::Type::ParticleSystem)
+    {
+        // todo: what do do with drawables that are no longer available ?
+
+        mDrawableMenu->clear();
+        // update the drawable menu with drawable items.
+        for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
+        {
+            const auto& resource = mState.workspace->GetResource(i);
+            const auto& name = resource.GetName();
+            if (resource.GetType() == app::Resource::Type::ParticleSystem)
+            {
+                QAction* action = mDrawableMenu->addAction(name);
+                connect(action, &QAction::triggered,
+                        this,   &AnimationWidget::placeNewParticleSystem);
+            }
+        }
+    }
 }
 
 void AnimationWidget::on_layer_valueChanged(int layer)

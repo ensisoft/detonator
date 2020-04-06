@@ -20,12 +20,15 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+#pragma once
+
 #include "config.h"
 
 #include "warnpush.h"
 #  include <QAbstractTableModel>
 #  include <QString>
 #  include <QMap>
+#  include <QObject>
 #  include <QVariant>
 #include "warnpop.h"
 
@@ -53,6 +56,8 @@ namespace app
     class Workspace : public QAbstractTableModel,
                       public scene::GfxFactory
     {
+        Q_OBJECT
+
     public:
         Workspace();
        ~Workspace();
@@ -129,6 +134,9 @@ namespace app
             beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
             mResources.push_back(std::make_unique<GraphicsResource<T>>(resource));
             endInsertRows();
+
+            auto& back = mResources.back();
+            emit NewResourceAvailable(back.get());
         }
 
         // Returns whether a material by this name already exists or not.
@@ -143,6 +151,10 @@ namespace app
         // workspace resources in a Qt widget (table widget)
         QAbstractTableModel* GetResourceModel()
         { return this; }
+
+        // Get the number of resources.
+        size_t GetNumResources() const
+        { return mResources.size(); }
 
         // Get resource at a specific index in the list of all resources.
         Resource& GetResource(size_t i)
@@ -220,6 +232,19 @@ namespace app
             *out = qvariant_cast<T>(ret);
             return true;
         }
+    signals:
+        // this signal is emitted *after* a new resource has been
+        // added to the list of resources.
+        void NewResourceAvailable(const Resource* resource);
+
+        // This signal is emitted after a resource object has been
+        // removed from the list of resources but before it is's
+        // deleted. The pointer to the resource is provided for
+        // convenience for accessing any wanted properties as
+        // long as you don't hold on to the object. After your
+        // signal handler returns the pointer is no longer valid!
+        void ResourceToBeDeleted(const Resource* resource);
+
 
     private:
         // this is the list of resources that we save/load

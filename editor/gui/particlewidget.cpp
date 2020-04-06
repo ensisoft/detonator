@@ -75,6 +75,12 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::KinematicsParticleEngine::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngine::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngine::SpawnPolicy>(mUI.when);
+
+    // connect workspace signals for resource management
+    connect(mWorkspace, &app::Workspace::NewResourceAvailable,
+            this,       &ParticleEditorWidget::newResourceAvailable);
+    connect(mWorkspace, &app::Workspace::ResourceToBeDeleted,
+            this,       &ParticleEditorWidget::resourceToBeDeleted);
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
@@ -437,6 +443,35 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
 
     mUI.curTime->setText(QString("%1s").arg(mTime));
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
+}
+
+void ParticleEditorWidget::newResourceAvailable(const app::Resource* resource)
+{
+    // this is simple, just add new resources in the appropriate UI objects.
+    if (resource->GetType() == app::Resource::Type::Material)
+    {
+        mUI.materials->addItem(resource->GetName());
+    }
+}
+
+void ParticleEditorWidget::resourceToBeDeleted(const app::Resource* resource)
+{
+    if (resource->GetType() == app::Resource::Type::Material)
+    {
+        const auto& current_material_name = mUI.materials->currentText();
+        const auto carcass_index = mUI.materials->findText(resource->GetName());
+        const auto current_index = mUI.materials->findText(current_material_name);
+        mUI.materials->blockSignals(true);
+        mUI.materials->removeItem(carcass_index);
+        if (current_index == carcass_index)
+        {
+            const auto checkerboard = mUI.materials->findText("Checkerboard");
+            mUI.materials->setCurrentIndex(checkerboard);
+            WARN("Particle system '%1' uses material '%2' that is deleted.",
+                mUI.name->text(), current_material_name);
+        }
+        mUI.materials->blockSignals(false);
+    }
 }
 
 } // namespace

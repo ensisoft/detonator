@@ -95,17 +95,13 @@ QVariant Workspace::headerData(int section, Qt::Orientation orientation, int rol
 
 std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) const
 {
-    // provide some primitives.
+    // Checkerboard is a special material that is always available.
+    // It is used as the initial material when user hasn't selected
+    // anything or when the material referenced by some object is deleted
+    // the material reference can be updated to Checkerboard.
     if (name == "Checkerboard")
-    {
         return std::make_shared<gfx::Material>(gfx::TextureMap("textures/Checkerboard.png"));
-    }
 
-    if (!HasResource(FromUtf8(name), Resource::Type::Material))
-    {
-        WARN("No such material '%1' (Replaced with pink)", name);
-        return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::HotPink));
-    }
 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
     const gfx::Material* content = nullptr;
@@ -117,7 +113,6 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
     // will also reflect those changes.
     auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Material>>(FromUtf8(name), ret);
     mPrivateInstances.push_back(std::move(handle));
-
     return ret;
 }
 std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
@@ -327,6 +322,8 @@ QStringList Workspace::ListDrawables() const
 
 bool Workspace::HasMaterial(const QString& name) const
 {
+    if (name == "Checkerboard")
+        return true;
     return HasResource(name, Resource::Type::Material);
 }
 
@@ -371,6 +368,17 @@ void Workspace::DeleteResources(QModelIndexList& list)
 
     int removed = 0;
 
+    // because the high probability of unwanted recursion
+    // fucking this iteration up (for example by something
+    // calling back to this workspace from Resource
+    // deletion signal handler and adding a new resource) we 
+    // must take some special care here.
+    // So therefore first put the resources to be deleted into
+    // a separate container while iterating and removing from the 
+    // removing from the primary list and only then invoke the signal
+    // for each resource.
+    std::vector<std::unique_ptr<Resource>> graveyard;
+
     for (int i=0; i<list.size(); ++i)
     {
         const auto row = list[i].row() - removed;
@@ -378,10 +386,18 @@ void Workspace::DeleteResources(QModelIndexList& list)
 
         auto it = std::begin(mResources);
         std::advance(it, row);
+        graveyard.push_back(std::move(*it));
         mResources.erase(it);
 
         endRemoveRows();
         ++removed;
+    }
+
+    // invoke a resource deletion signal for each resource now
+    // by iterating over the separate container. (avoids broken iteration)
+    for (const auto& carcass : graveyard)
+    {
+        emit ResourceToBeDeleted(carcass.get());
     }
 }
 

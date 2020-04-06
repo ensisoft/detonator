@@ -68,6 +68,8 @@ namespace gui
         void on_plus90_clicked();
         void on_minus90_clicked();
         void paintScene(gfx::Painter& painter, double secs);
+        void newResourceAvailable(const app::Resource* resource);
+        void resourceToBeDeleted(const app::Resource* resource);
 
     private:
         void fillParams(gfx::KinematicsParticleEngine::Params& params) const;
@@ -81,7 +83,7 @@ namespace gui
         bool mPaused = false;
         float mTime  = 0.0f;
     private:
-        // cache the name of the current material so that we can 
+        // cache the name of the current material so that we can
         // compare and detect if the user has selected different material
         // from the material combo and then recreate the material instance.
         QString mMaterialName;

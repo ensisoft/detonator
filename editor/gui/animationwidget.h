@@ -73,6 +73,8 @@ namespace gui
 
         void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
         void placeNewParticleSystem();
+        void newResourceAvailable(const app::Resource* resource);
+        void resourceToBeDeleted(const app::Resource* resource);
 
     private:
         void paintScene(gfx::Painter& painter, double secs);

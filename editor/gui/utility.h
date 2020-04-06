@@ -258,9 +258,19 @@ inline void GetProperty(const app::Resource& res, const QString& name, QComboBox
 {
     QSignalBlocker s(cmb);
 
+    // default to this in case either the property
+    // doesn't exist or the value the property had before
+    // is no longer available. (For example the combobox contains
+    // resource names and the resource has been deleted)
+    cmb->setCurrentIndex(0);
+
     QString text;
     if (res.GetProperty(name, &text))
-        cmb->setCurrentIndex(cmb->findText(text));
+    {
+        const auto index = cmb->findText(text);
+        if (index != -1)
+            cmb->setCurrentIndex(index);
+    }
 }
 inline void GetProperty(const app::Resource& res, const QString& name, QLineEdit* edit)
 {
