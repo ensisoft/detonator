@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+#include <map>
+
 #include "base/logging.h"
 #include "base/assert.h"
 #include "graphics/drawable.h"
@@ -94,10 +96,20 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
     // by pushing a new scope in the transformation stack.
     // transfrom.Push();
 
+    // implement "layers" by drawing in a sorted order as determined
+    // by the layer value.
+    std::multimap<int, const Component*> layer_map;
+
     // Ask each component to draw.
     for (const auto& component : mComponents)
     {
-        component.Draw(painter, transform);
+        layer_map.insert(std::make_pair(component.GetLayer(), &component));
+    }
+
+    for (auto pair : layer_map)
+    {
+        const auto* component = pair.second;
+        component->Draw(painter, transform);
     }
 
     // if we used a new trańsformation scope pop it here.
