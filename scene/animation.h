@@ -104,18 +104,25 @@ namespace scene
             { mLayer = layer; }
             void SetRenderPass(RenderPass pass)
             { mRenderPass = pass; }
+            void SetRotation(float value)
+            { mRotation = value; }
+
             RenderPass GetRenderPass() const
             { return mRenderPass; }
-
             int GetLayer() const
             { return mLayer; }
-
             std::string GetName() const
             { return mName; }
             std::string GetMaterialName() const
             { return mMaterialName; }
             std::string GetDrawableName() const
             { return mDrawableName; }
+            glm::vec2 GetTranslation() const
+            { return mPosition; }
+            glm::vec2 GetSize() const
+            { return mSize; }
+            float GetRotation() const
+            { return mRotation; }
 
             bool Update(float dt);
 
@@ -133,18 +140,29 @@ namespace scene
             }
 
         private:
+            // generic properties.
             std::string mName;
+            // visual properties. we keep the material/drawable names
+            // around so that we we know which resources to load at runtime.
             std::string mMaterialName;
             std::string mDrawableName;
             std::shared_ptr<gfx::Material> mMaterial;
             std::shared_ptr<gfx::Drawable> mDrawable;
+            // timewise properties.
             float mLifetime  = 0.0f;
             float mStartTime = 0.0f;
             float mTime      = 0.0f;
+            // transformation properties.
             // translation offset relative to the animation.
             glm::vec2 mPosition;
+            // size is the size of this object in some units
+            // (for example pixels)
             glm::vec2 mSize = {1.0f, 1.0f};
+            // scale applies an additional scale to this hiearchy.
             glm::vec2 mScale = {1.0f, 1.0f};
+            // rotation around z axis positive rotation is CW
+            float mRotation = 0.0f;
+            // rendering properties. which layer and wich pass.
             int mLayer = 0;
             RenderPass mRenderPass = RenderPass::Draw;
         };

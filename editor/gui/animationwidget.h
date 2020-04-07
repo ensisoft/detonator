@@ -67,9 +67,16 @@ namespace gui
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_resetTransform_clicked();
+        void on_cPlus90_clicked();
+        void on_cMinus90_clicked();
         void on_materials_currentIndexChanged(const QString& name);
         void on_renderPass_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
+        void on_cSizeX_valueChanged(double value);
+        void on_cSizeY_valueChanged(double value);
+        void on_cTranslateX_valueChanged(double value);
+        void on_cTranslateY_valueChanged(double value);
+        void on_cRotation_valueChanged(double value);
 
         void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
         void placeNewParticleSystem();

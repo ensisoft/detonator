@@ -45,6 +45,9 @@ void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform
     // begin the transformation scope for this animation component.
     transform.Push();
     transform.Scale(mSize);
+    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    transform.Rotate(mRotation);
+    transform.Translate(mSize.x * 0.5f, mSize.y * 0.5f);
     transform.Translate(mPosition);
 
     // if we had recusive structure i.e. component could contain

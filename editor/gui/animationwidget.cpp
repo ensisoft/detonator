@@ -485,6 +485,17 @@ void AnimationWidget::on_minus90_clicked()
     mUI.rotation->setValue(value - 90.0f);
 }
 
+void AnimationWidget::on_cPlus90_clicked()
+{
+    const auto value = mUI.cRotation->value();
+    mUI.cRotation->setValue(value + 90.0f);
+}
+void AnimationWidget::on_cMinus90_clicked()
+{
+    const auto value = mUI.cRotation->value();
+    mUI.cRotation->setValue(value - 90.0f);
+}
+
 void AnimationWidget::on_resetTransform_clicked()
 {
     mUI.translateX->setValue(0);
@@ -517,15 +528,24 @@ void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, con
     const auto row = current.row();
     if (row == -1)
     {
-        mUI.componentProperties->setEnabled(false);
+        mUI.cProperties->setEnabled(false);
+        mUI.cTransform->setEnabled(false);
     }
     else
     {
         const auto& component = mState.animation.GetComponent(row);
+        const auto& translate = component.GetTranslation();
+        const auto& size = component.GetSize();
         SetValue(mUI.renderPass, component.GetRenderPass());
         SetValue(mUI.layer, component.GetLayer());
         SetValue(mUI.materials, component.GetMaterialName());
-        mUI.componentProperties->setEnabled(true);
+        SetValue(mUI.cTranslateX, translate.x);
+        SetValue(mUI.cTranslateY, translate.y);
+        SetValue(mUI.cSizeX, size.x);
+        SetValue(mUI.cSizeY, size.y);
+        SetValue(mUI.cRotation, qRadiansToDegrees(component.GetRotation()));
+        mUI.cProperties->setEnabled(true);
+        mUI.cTransform->setEnabled(true);
     }
 }
 
@@ -614,6 +634,50 @@ void AnimationWidget::on_layer_valueChanged(int layer)
     if (auto* component = GetCurrentComponent())
     {
         component->SetLayer(layer);
+    }
+}
+
+void AnimationWidget::on_cSizeX_valueChanged(double value)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        auto size = component->GetSize();
+        size.x = value;
+        component->SetSize(size);
+    }
+}
+void AnimationWidget::on_cSizeY_valueChanged(double value)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        auto size = component->GetSize();
+        size.y = value;
+        component->SetSize(size);
+    }
+}
+void AnimationWidget::on_cTranslateX_valueChanged(double value)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        auto translate = component->GetTranslation();
+        translate.x = value;
+        component->SetTranslation(translate);
+    }
+}
+void AnimationWidget::on_cTranslateY_valueChanged(double value)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        auto translate = component->GetTranslation();
+        translate.y = value;
+        component->SetTranslation(translate);
+    }
+}
+void AnimationWidget::on_cRotation_valueChanged(double value)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        component->SetRotation(qDegreesToRadians(value));
     }
 }
 
