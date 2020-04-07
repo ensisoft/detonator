@@ -536,6 +536,7 @@ void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, con
         const auto& component = mState.animation.GetComponent(row);
         const auto& translate = component.GetTranslation();
         const auto& size = component.GetSize();
+        SetValue(mUI.cName, component.GetName());
         SetValue(mUI.renderPass, component.GetRenderPass());
         SetValue(mUI.layer, component.GetLayer());
         SetValue(mUI.materials, component.GetMaterialName());
@@ -678,6 +679,14 @@ void AnimationWidget::on_cRotation_valueChanged(double value)
     if (auto* component = GetCurrentComponent())
     {
         component->SetRotation(qDegreesToRadians(value));
+    }
+}
+
+void AnimationWidget::on_cName_textChanged(const QString& text)
+{
+    if (auto* component = GetCurrentComponent())
+    {
+        component->SetName(app::ToUtf8(text));
     }
 }
 

@@ -109,7 +109,7 @@ void SetValue(QComboBox* combo, T value)
 inline void SetValue(QLineEdit* line, const std::string& val)
 {
     QSignalBlocker s(line);
-    line->setText(QString::fromStdString(val));
+    line->setText(app::FromUtf8(val));
 }
 
 inline void SetValue(QDoubleSpinBox* spin, float val)

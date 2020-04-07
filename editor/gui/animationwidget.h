@@ -77,6 +77,7 @@ namespace gui
         void on_cTranslateX_valueChanged(double value);
         void on_cTranslateY_valueChanged(double value);
         void on_cRotation_valueChanged(double value);
+        void on_cName_textChanged(const QString& text);
 
         void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
         void placeNewParticleSystem();
