@@ -53,11 +53,14 @@ namespace gui
 
         virtual void addActions(QToolBar& bar) override;
         virtual void addActions(QMenu& menu) override;
+        virtual bool saveState(Settings& settings) const override;
+        virtual bool loadState(const Settings& settings) override;
 
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
+        void on_actionSave_triggered();
         void on_actionNewRect_triggered();
         void on_actionNewCircle_triggered();
         void on_actionNewTriangle_triggered();

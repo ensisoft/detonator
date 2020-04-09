@@ -191,6 +191,7 @@ add_executable(Editor
     editor/resource/resource.qrc
     editor/resource/qdarkstyle/style.qrc
     third_party/stb/stb_image.c
+    third_party/base64/base64.cpp
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
     third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
     third_party/Qt-Color-Widgets/src/color_2d_slider.cpp

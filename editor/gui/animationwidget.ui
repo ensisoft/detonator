@@ -734,6 +734,21 @@
     <string>New Arrow</string>
    </property>
   </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/save.png</normaloff>:/32x32_ico_png/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save animation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

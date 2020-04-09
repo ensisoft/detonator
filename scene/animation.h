@@ -128,17 +128,20 @@ namespace scene
 
             void Reset();
 
-            nlohmann::json ToJson() const
-            {
-                nlohmann::json json;
-                base::JsonWrite(json, "name", mName);
-                base::JsonWrite(json, "lifetime", mLifetime);
-                base::JsonWrite(json, "starttime", mStartTime);
-                base::JsonWrite(json, "material", mMaterialName);
-                base::JsonWrite(json, "drawable", mDrawableName);
-                return json;
-            }
+            // Prepare this animation component for rendering
+            // by loading all the needed runtime resources.
+            // Returns true if succesful false if some resource
+            // was not available.
+            bool Prepare(const GfxFactory& loader);
 
+            // serialize the component properties into JSON.
+            nlohmann::json ToJson() const;
+
+            // Load a component and it's properties from a JSON object.
+            // Note that this does not yet create/load any runtime objects
+            // such as materials or such but they are loaded later when the
+            // component is prepared.
+            static std::optional<Component> FromJson(const nlohmann::json& object);
         private:
             // generic properties.
             std::string mName;
@@ -212,16 +215,30 @@ namespace scene
             return json;
         }
 
+        static std::optional<Animation> FromJson(const nlohmann::json& object)
+        {
+            Animation ret;
+
+            for (const auto& json : object["components"].items())
+            {
+                std::optional<Component> comp = Component::FromJson(json.value());
+                if (!comp.has_value())
+                    return std::nullopt;
+                ret.mComponents.push_back(std::move(comp.value()));
+            }
+            return ret;
+        }
+
         void Reset();
+
+        // Prepare and load the runtime resources if not yet loaded.
+        void Prepare(const GfxFactory& loader);
 
     private:
         // The list of components that are to be drawn as part
         // of the animation. Each component has a unique transform
         // relative to the animation.
         std::vector<Component> mComponents;
-        // Current animation runtime (seconds).
-        float mTime = 0.0f;
-        // Expected animation duration (seconds).
-        float mDuration = 0.0f;
+
     };
 } // namespace

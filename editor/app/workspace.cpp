@@ -74,6 +74,8 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
                 return QIcon("icons:material.png");
             case Resource::Type::ParticleSystem:
                 return QIcon("icons:particle.png");
+            case Resource::Type::Animation:
+                return QIcon("icons:animation.png");
             default: break;
         }
     }
@@ -117,6 +119,44 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
 }
 std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
 {
+    //            == About resource loading ==
+    // User defined resources have a combination of type and name
+    // where type is the underlying class type and name identifies
+    // the set of resources that the user edits that instances of that
+    // said type then use.
+    // Primitive / (non user defined resources) don't need a name
+    // since the name is irrelevant since the objects are stateless
+    // in this sense and don't have properties that would change between instances.
+    // For example with drawable rectangles (gfx::Rectangle) all rectangles
+    // that we might want to draw are basically the same. We don't need to
+    // configure each rectangle object with properties that would distinguish
+    // it from other rectangles.
+    // In fact there's basically even no need to create more than 1 instance
+    // of such resource and then share it between all users.
+    //
+    // User defined resources on the other hand *can be* unique.
+    // For example particle engines, the underlying object type is same for
+    // particle engine A and B, but their defining properties are completely
+    // different. To distinguish the set of properties the user gives each
+    // particle engine a "name". Then when loading such objects we must
+    // load them by name. Additionally the resources may or may not be
+    // shared. For example when a fleet of alien spaceships are rendered
+    // each spaceship might have their own particle engine (own simulation state)
+    // thus producing a unique rendering for each spaceship. However the problem
+    // is that this might be computationally heavy. For N ships we'd need to do
+    // N particle engine simulations.
+    // However it's also possible that the particle engines are shared and each
+    // ship (of the same type) just refers to the same particle engine. Then
+    // each ship will render the same particle stream.
+    if (name == "__Primitive_Rectangle")
+        return std::make_shared<gfx::Rectangle>();
+    else if (name == "__Primitive_Triangle")
+        return std::make_shared<gfx::Triangle>();
+    else if (name == "__Primitive_Circle")
+        return std::make_shared<gfx::Circle>();
+    else if (name == "__Primitive_Arrow")
+        return std::make_shared<gfx::Arrow>();
+
     // we have only particle engines right now as drawables
     if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
@@ -130,7 +170,6 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         // will also reflect those changes.
         auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
         mPrivateInstances.push_back(std::move(handle));
-
         return ret;
     }
 
@@ -192,6 +231,22 @@ bool Workspace::LoadContent(const QString& filename)
             auto& particle = ret.value();
             DEBUG("Loaded particle system: '%1'", name);
             resources.push_back(std::make_unique<ParticleSystemResource>(std::move(particle), name));
+        }
+    }
+    if (json.contains("animations"))
+    {
+        for (const auto& json_p : json["animations"].items())
+        {
+            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
+            std::optional<scene::Animation> ret = scene::Animation::FromJson(json_p.value());
+            if (!ret.has_value())
+            {
+                ERROR("Failed to load animation '%1' properties.", name);
+                continue;
+            }
+            auto& animation = ret.value();
+            DEBUG("Loaded animation: '%1'", name);
+            resources.push_back(std::make_unique<AnimationResource>(std::move(animation), name));
         }
     }
 
@@ -371,10 +426,10 @@ void Workspace::DeleteResources(QModelIndexList& list)
     // because the high probability of unwanted recursion
     // fucking this iteration up (for example by something
     // calling back to this workspace from Resource
-    // deletion signal handler and adding a new resource) we 
+    // deletion signal handler and adding a new resource) we
     // must take some special care here.
     // So therefore first put the resources to be deleted into
-    // a separate container while iterating and removing from the 
+    // a separate container while iterating and removing from the
     // removing from the primary list and only then invoke the signal
     // for each resource.
     std::vector<std::unique_ptr<Resource>> graveyard;

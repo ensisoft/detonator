@@ -34,6 +34,9 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <string>
+
+#include "editor/app/utility.h"
 
 namespace gui
 {
@@ -82,12 +85,23 @@ namespace gui
             return qvariant_cast<T>(value);
         }
 
+        std::string getValue(const QString& module, const QString& key, const std::string& defaultValue) const
+        {
+            const QString& temp = getValue(module, key, app::FromUtf8(defaultValue));
+            return app::ToUtf8(temp);
+        }
+
         // Set a value in the settings object under the specific key
         // under a specific module.
         template<typename T>
         void setValue(const QString& module, const QString& key, const T& value)
         {
             mSettings->SetValue(module + "/" + key, value);
+        }
+
+        void setValue(const QString& module, const QString& key, const std::string& value)
+        {
+            setValue(module, key, app::FromUtf8(value));
         }
 
         // Save the UI state of a widget.

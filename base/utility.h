@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
+#  include <glm/vec2.hpp>
 #include "warnpop.h"
 
 #include <functional> // for hash
@@ -202,6 +203,21 @@ bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
     return false;
 }
 
+template<typename JsonObject>
+bool JsonReadSafe(const JsonObject& object, const char* name, glm::vec2* out)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const auto& vector = object[name];
+    if (!vector.contains("x") || !vector["x"].is_number_float())
+        return false;
+    if (!vector.contains("y") || !vector["y"].is_number_float())
+        return false;
+    out->x = vector["x"];
+    out->y = vector["y"];
+    return true;
+}
+
 template<typename JsonObject, typename EnumT> inline
 void JsonWriteEnum(JsonObject& object, const char* name, EnumT value)
 {
@@ -247,6 +263,15 @@ void JsonWrite(JsonObject& object, const char* name, const ValueT& value)
     if constexpr (std::is_enum<ValueT>::value)
         JsonWriteEnum(object, name, value);
     else JsonWriteObject(object, name, value);
+}
+
+template<typename JsonObject>
+void JsonWrite(JsonObject& object, const char* name, const glm::vec2& vec)
+{
+    object[name] = JsonObject {
+        {"x", vec.x },
+        {"y", vec.y }
+    };
 }
 
 } // base

@@ -29,6 +29,8 @@
 #  include <QMouseEvent>
 #  include <QAbstractTableModel>
 #  include <QAbstractListModel>
+#  include <QMessageBox>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -102,17 +104,14 @@ private:
 class AnimationWidget::PlaceTool : public AnimationWidget::Tool
 {
 public:
-    PlaceTool(AnimationWidget::State& state, std::shared_ptr<gfx::Drawable> shape)
+    PlaceTool(AnimationWidget::State& state, const QString& material, const QString& drawable)
         : mState(state)
-        , mShape(shape)
-        , mMaterial("Checkerboard")
-    {}
-    PlaceTool(AnimationWidget::State& state, std::shared_ptr<gfx::Drawable> shape,
-                const QString& material)
-        : mState(state)
-        , mShape(shape)
-        , mMaterial(material)
-    {}
+        , mMaterialName(material)
+        , mDrawableName(drawable)
+    {
+        mDrawable = mState.workspace->MakeDrawable(mDrawableName);
+        mMaterial = mState.workspace->MakeMaterial(mMaterialName);
+    }
     virtual void Render(gfx::Painter& painter) const
     {
         const auto& diff = mCurrent - mStart;
@@ -126,8 +125,7 @@ public:
         gfx::Transform t;
         t.Resize(w, h);
         t.Translate(x, y);
-        auto material = mState.workspace->MakeMaterial(mMaterial);
-        painter.Draw(*mShape, t, *material);
+        painter.Draw(*mDrawable, t, *mMaterial);
 
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h), gfx::Color::Green, 2, 0.0f);
     }
@@ -171,12 +169,10 @@ public:
         const float ypos = mStart.y() + mState.camera_offset_y;
         const float width  = diff.x();
         const float height = diff.y();
-        auto drawable = mShape;
-        auto material = mState.workspace->MakeMaterial(mMaterial);
 
         scene::Animation::Component component;
-        component.SetMaterial(app::ToUtf8(mMaterial), material);
-        component.SetDrawable("", drawable);
+        component.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
+        component.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
         component.SetName(name);
         component.SetTranslation(glm::vec2(xpos, ypos));
         component.SetSize(glm::vec2(width, height));
@@ -198,12 +194,15 @@ public:
 
 
 private:
-    std::shared_ptr<gfx::Drawable> mShape;
     AnimationWidget::State& mState;
     QPoint mStart;
     QPoint mCurrent;
     bool mEngaged = false;
-    QString mMaterial;
+private:
+    QString mMaterialName;
+    QString mDrawableName;
+    std::shared_ptr<gfx::Drawable> mDrawable;
+    std::shared_ptr<gfx::Material> mMaterial;
 };
 
 class AnimationWidget::CameraTool : public AnimationWidget::Tool
@@ -267,6 +266,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.materials->addItems(workspace->ListMaterials());
     mUI.materials->blockSignals(false);
 
+    mUI.name->setText("My Animation");
     mUI.components->setModel(mState.model.get());
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
@@ -338,7 +338,17 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
   : AnimationWidget(workspace)
 {
-    // todo:
+    DEBUG("Editing animation '%1'", resource.GetName());
+    mUI.name->setText(resource.GetName());
+    GetProperty(resource, "xpos", mUI.translateX);
+    GetProperty(resource, "ypos", mUI.translateY);
+    GetProperty(resource, "xscale", mUI.scaleX);
+    GetProperty(resource, "yscale", mUI.scaleY);
+    GetProperty(resource, "rotation", mUI.rotation);
+    setWindowTitle(resource.GetName());
+
+    mState.animation = *resource.GetContent<scene::Animation>();
+    mState.animation.Prepare(*workspace);
 }
 
 AnimationWidget::~AnimationWidget()
@@ -353,14 +363,14 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
+    bar.addAction(mUI.actionSave);
+    bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewCircle);
     bar.addAction(mUI.actionNewTriangle);
     bar.addAction(mUI.actionNewArrow);
-
     bar.addSeparator();
     bar.addAction(mDrawableMenu->menuAction());
-
 }
 void AnimationWidget::addActions(QMenu& menu)
 {
@@ -369,13 +379,59 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
+    menu.addAction(mUI.actionSave);
+    menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
     menu.addAction(mUI.actionNewCircle);
     menu.addAction(mUI.actionNewTriangle);
     menu.addAction(mUI.actionNewArrow);
-
     menu.addSeparator();
     menu.addAction(mDrawableMenu->menuAction());
+}
+
+bool AnimationWidget::saveState(Settings& settings) const
+{
+    settings.saveWidget("Animation", mUI.name);
+    settings.saveWidget("Animation", mUI.translateX);
+    settings.saveWidget("Animation", mUI.translateY);
+    settings.saveWidget("Animation", mUI.scaleX);
+    settings.saveWidget("Animation", mUI.scaleY);
+    settings.saveWidget("Animation", mUI.rotation);
+
+    // the animation can already serialize into JSON.
+    // so let's use the JSON serialization in the animation
+    // and then convert that into base64 string which we can
+    // stick in the settings data stream.
+    const auto& json = mState.animation.ToJson();
+    const auto& base64 = base64::Encode(json.dump(2));
+    settings.setValue("Animation", "content", base64);
+    return true;
+}
+bool AnimationWidget::loadState(const Settings& settings)
+{
+    ASSERT(mState.workspace);
+
+    settings.loadWidget("Animation", mUI.name);
+    settings.loadWidget("Animation", mUI.translateX);
+    settings.loadWidget("Animation", mUI.translateY);
+    settings.loadWidget("Animation", mUI.scaleX);
+    settings.loadWidget("Animation", mUI.scaleY);
+    settings.loadWidget("Animation", mUI.rotation);
+
+    const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
+    if (base64.empty())
+        return true;
+
+    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    auto ret  = scene::Animation::FromJson(json);
+    if (!ret.has_value())
+    {
+        WARN("Failed to load animation widget state.");
+        return false;
+    }
+    mState.animation = std::move(ret.value());
+    mState.animation.Prepare(*mState.workspace);
+    return true;
 }
 
 void AnimationWidget::on_actionPlay_triggered()
@@ -405,10 +461,41 @@ void AnimationWidget::on_actionStop_triggered()
     mState.animation.Reset();
 }
 
+void AnimationWidget::on_actionSave_triggered()
+{
+    const auto& name = mUI.name->text();
+    if (name.isEmpty())
+    {
+        mUI.name->setFocus();
+        return;
+    }
+    if (mState.workspace->HasResource(name, app::Resource::Type::Animation))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText("Workspace already contains animation by this name. Overwrite?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
+    app::AnimationResource resource(mState.animation, name);
+
+    SetProperty(resource, "xpos", mUI.translateX);
+    SetProperty(resource, "ypos", mUI.translateY);
+    SetProperty(resource, "xscale", mUI.scaleX);
+    SetProperty(resource, "yscale", mUI.scaleY);
+    SetProperty(resource, "rotation", mUI.rotation);
+    mState.workspace->SaveResource(resource);
+    INFO("Saved animation '%1'", name);
+    NOTE("Saved animation '%1'", name);
+
+    setWindowTitle(name);
+}
 
 void AnimationWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Rectangle>()));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Rectangle"));
 
     mUI.actionNewRect->setChecked(true);
     mUI.actionNewCircle->setChecked(false);
@@ -418,7 +505,7 @@ void AnimationWidget::on_actionNewRect_triggered()
 
 void AnimationWidget::on_actionNewCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Circle>()));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Circle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(true);
@@ -428,7 +515,7 @@ void AnimationWidget::on_actionNewCircle_triggered()
 
 void AnimationWidget::on_actionNewTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Triangle>()));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Triangle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -438,7 +525,7 @@ void AnimationWidget::on_actionNewTriangle_triggered()
 
 void AnimationWidget::on_actionNewArrow_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, std::make_shared<gfx::Arrow>()));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Arrow"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -554,14 +641,13 @@ void AnimationWidget::placeNewParticleSystem()
 {
     const auto* action = qobject_cast<QAction*>(sender());
     // using the text in the action as the name of the drawable.
-    const auto name = action->text();
-    const auto drawable  = mState.workspace->MakeDrawable(name);
-    // check the resource for the default material name set in the
-    // particle editor.
-    const auto& resource = mState.workspace->GetResource(name, app::Resource::Type::ParticleSystem);
-    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+    const auto drawable = action->text();
 
-    mCurrentTool.reset(new PlaceTool(mState, drawable, material));
+    // check the resource in order to get the default material name set in the
+    // particle editor.
+    const auto& resource = mState.workspace->GetResource(drawable, app::Resource::Type::ParticleSystem);
+    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+    mCurrentTool.reset(new PlaceTool(mState, material, drawable));
 }
 
 void AnimationWidget::newResourceAvailable(const app::Resource* resource)

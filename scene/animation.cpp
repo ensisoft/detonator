@@ -85,8 +85,77 @@ bool Animation::Component::Update(float dt)
 void Animation::Component::Reset()
 {
     mTime = 0.0f;
-
 }
+
+bool Animation::Component::Prepare(const GfxFactory& loader)
+{
+    //            == About resource loading ==
+    // User defined resources have a combination of type and name
+    // where type is the underlying class type and name identifies
+    // the set of resources that the user edits that instances of that
+    // said type then use.
+    // Primitive / (non user defined resources) don't need a name
+    // since the name is irrelevant since the objects are stateless
+    // in this sense and don't have properties that would change between instances.
+    // For example with drawable rectangles (gfx::Rectangle) all rectangles
+    // that we might want to draw are basically the same. We don't need to
+    // configure each rectangle object with properties that would distinguish
+    // it from other rectangles.
+    // In fact there's basically even no need to create more than 1 instance
+    // of such resource and then share it between all users.
+    //
+    // User defined resources on the other hand *can be* unique.
+    // For example particle engines, the underlying object type is same for
+    // particle engine A and B, but their defining properties are completely
+    // different. To distinguish the set of properties the user gives each
+    // particle engine a "name". Then when loading such objects we must
+    // load them by name. Additionally the resources may or may not be
+    // shared. For example when a fleet of alien spaceships are rendered
+    // each spaceship might have their own particle engine (own simulation state)
+    // thus producing a unique rendering for each spaceship. However the problem
+    // is that this might be computationally heavy. For N ships we'd need to do
+    // N particle engine simulations.
+    // However it's also possible that the particle engines are shared and each
+    // ship (of the same type) just refers to the same particle engine. Then
+    // each ship will render the same particle stream.
+    mDrawable = loader.MakeDrawable(mDrawableName);
+    mMaterial = loader.MakeMaterial(mMaterialName);
+    return mDrawable && mMaterial;
+}
+
+nlohmann::json Animation::Component::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "name", mName);
+    base::JsonWrite(json, "material", mMaterialName);
+    base::JsonWrite(json, "drawable", mDrawableName);
+    base::JsonWrite(json, "position", mPosition);
+    base::JsonWrite(json, "size", mSize);
+    base::JsonWrite(json, "scale", mScale);
+    base::JsonWrite(json, "rotation", mRotation);
+    base::JsonWrite(json, "layer", mLayer);
+    base::JsonWrite(json, "render_pass", mRenderPass);
+    return json;
+}
+
+// static
+std::optional<Animation::Component> Animation::Component::FromJson(const nlohmann::json& object)
+{
+    Component ret;
+    if (!base::JsonReadSafe(object, "name", &ret.mName) ||
+        !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
+        !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
+        !base::JsonReadSafe(object, "position", &ret.mPosition) ||
+        !base::JsonReadSafe(object, "size", &ret.mSize) ||
+        !base::JsonReadSafe(object, "scale", &ret.mScale) ||
+        !base::JsonReadSafe(object, "rotation", &ret.mRotation) ||
+        !base::JsonReadSafe(object, "layer", &ret.mLayer) ||
+        !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass))
+        return std::nullopt;
+    return ret;
+}
+
+
 
 void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
@@ -140,5 +209,17 @@ void Animation::Reset()
         component.Reset();
     }
 }
+
+void Animation::Prepare(const GfxFactory& loader)
+{
+    for (auto& component : mComponents)
+    {
+        if (!component.Prepare(loader))
+        {
+            WARN("Component '%1' failed to prepare.", component.GetName());
+        }
+    }
+}
+
 
 } // namespace
