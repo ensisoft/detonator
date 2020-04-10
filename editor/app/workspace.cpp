@@ -286,7 +286,7 @@ bool Workspace::SaveContent(const QString& filename) const
     file.flush();
     file.close();
     mContentFile = filename;
-    INFO("Saved workspace content in '%'", filename);
+    INFO("Saved workspace content in '%1'", filename);
     NOTE("Workspace content saved.");
     return true;
 }
