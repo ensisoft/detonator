@@ -382,6 +382,13 @@ void MainWindow::on_actionEditResourceNewWindow_triggered()
     editResources(open_new_window);
 }
 
+void MainWindow::on_actionEditResourceNewTab_triggered()
+{
+    const auto open_new_window = false;
+
+    editResources(open_new_window);
+}
+
 
 void MainWindow::on_actionDeleteResource_triggered()
 {
@@ -432,6 +439,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
+    mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
 
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
@@ -440,6 +448,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
+    menu.addAction(mUI.actionEditResourceNewTab);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.exec(QCursor::pos());

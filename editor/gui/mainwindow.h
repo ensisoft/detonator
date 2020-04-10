@@ -93,6 +93,7 @@ namespace gui
         void on_actionNewAnimation_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
+        void on_actionEditResourceNewTab_triggered();
         void on_actionDeleteResource_triggered();
         void on_actionSaveWorkspace_triggered();
         void on_workspace_customContextMenuRequested(QPoint);

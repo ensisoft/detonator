@@ -369,7 +369,19 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Resource in New Window</string>
+    <string>Edit Resource in New Win</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Resource</string>
+   </property>
+  </action>
+  <action name="actionEditResourceNewTab">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Resource in New Tab</string>
    </property>
    <property name="toolTip">
     <string>Edit Resource</string>
