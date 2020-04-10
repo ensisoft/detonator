@@ -32,6 +32,7 @@
 #include "warnpop.h"
 
 #include "editor/app/eventlog.h"
+#include "graphics/drawing.h"
 #include "utility.h"
 #include "gfxwidget.h"
 
@@ -77,6 +78,25 @@ void GfxWidget::paintGL()
     if (onPaintScene)
         onPaintScene(*mCustomGraphicsPainter, ms/1000.0);
 
+    if (mShowFps)
+    {
+        mNumFrames++;
+        mFrameTime += ms;
+        if (mFrameTime >= 1000)
+        {
+            // how many frames did get to display in the last period
+            const auto secs = mFrameTime / 1000.0;
+            mCurrentFps = mNumFrames / secs;
+            mNumFrames  = 0;
+            mFrameTime  = 0;
+        }
+        gfx::DrawTextRect(*mCustomGraphicsPainter,
+            base::FormatString("%1 FPS", (unsigned)mCurrentFps),
+            "fonts/ARCADE.TTF", 28,
+            gfx::FRect(10, 20, 150, 100),
+            gfx::Color::HotPink,
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
+    }
     mCustomGraphicsDevice->EndFrame(true /*display*/);
 }
 void GfxWidget::timerEvent(QTimerEvent*)
@@ -106,9 +126,12 @@ void GfxWidget::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
     QAction* color = menu.addAction("Background Color");
-
     connect(color, &QAction::triggered,
             this,  &GfxWidget::changeColor_triggered);
+    QAction* fps = menu.addAction("Show Fps");
+    fps->setCheckable(true);
+    fps->setChecked(mShowFps);
+    connect(fps, &QAction::triggered, this, &GfxWidget::toggleShowFps);
     menu.exec(QCursor::pos());
 }
 
@@ -143,6 +166,12 @@ void GfxWidget::changeColor_triggered()
         return;
     }
     mClearColor = ToGfx(dlg.color());
+}
+
+void GfxWidget::toggleShowFps()
+{
+    mShowFps = !mShowFps;
+    mFrameTime = 0;
 }
 
 void GfxWidget::clearColorChanged(QColor color)

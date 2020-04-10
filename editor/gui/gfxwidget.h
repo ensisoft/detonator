@@ -89,6 +89,7 @@ namespace gui
     private slots:
         void changeColor_triggered();
         void clearColorChanged(QColor color);
+        void toggleShowFps();
 
     private:
         virtual void initializeGL() override;
@@ -107,7 +108,11 @@ namespace gui
         QBasicTimer mTimer;
         QElapsedTimer mClock;
         bool mInitialized = false;
-
+    private:
+        quint64 mFrameTime = 0;
+        quint64 mNumFrames = 0;
+        bool mShowFps = false;
+        float mCurrentFps = 0.0f;
     };
 
 } // namespace
