@@ -85,6 +85,21 @@ To* CollisionCast(const std::unique_ptr<From>& lhs,
     return CollisionCast<To>(lhs.get(), rhs.get());
 }
 
+
+inline gfx::Material SlidingGlintEffect(float secs)
+{
+    return gfx::Material("sliding_glint_effect.glsl", gfx::Material::Type::Color)
+        .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
+        .SetRuntime(secs);
+}
+
+inline gfx::Material ConcentricRingsEffect(float secs)
+{
+    return gfx::Material("concentric_rings_effect.glsl", gfx::Material::Type::Color)
+        .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
+        .SetRuntime(secs);
+}
+
 //
 // GridLayout divides the given area (rectangle) in whatever units (pixels really)
 // into a grid of rows and columns.
@@ -1071,7 +1086,7 @@ public:
         gfx::Transform rings;
         rings.Resize(200, 200);
         rings.MoveTo(pos - FPoint(100.0f, 100.0f));
-        painter.Draw(gfx::Rectangle(), rings, gfx::ConcentricRingsEffect(sec));
+        painter.Draw(gfx::Rectangle(), rings, ConcentricRingsEffect(sec));
 
         gfx::Transform ufo;
         ufo.Resize(40, 40);
@@ -1394,7 +1409,7 @@ public:
         // Draw a little glint effect on top of the middle rectangle
         gfx::DrawRectOutline(painter,
             layout.MapGfxRect(IPoint(3, 4), IPoint(4, 5)),
-            gfx::SlidingGlintEffect(mTotalTimeRun/1000.0f), 1);
+            SlidingGlintEffect(mTotalTimeRun/1000.0f), 1);
 
         const auto& play_or_not = mInfos[mCurrentLevelIndex].locked ?
             "This level is locked!" : "Press Space to play!";

@@ -726,7 +726,6 @@ namespace gfx
         return material;
     }
 
-
     // This material will use the given text buffer object to
     // display text by rasterizing the text and creating a new
     // texture object of it. The resulting texture object is then
@@ -737,21 +736,6 @@ namespace gfx
         return Material("texture_map.glsl", Material::Type::Texture)
             .AddTexture(text)
             .SetSurfaceType(Material::SurfaceType::Transparent);
-    }
-
-    // todo: refactor away
-    inline Material SlidingGlintEffect(float secs)
-    {
-        return Material("sliding_glint_effect.glsl", Material::Type::Color)
-            .SetSurfaceType(Material::SurfaceType::Transparent)
-            .SetRuntime(secs);
-    }
-    // todo: refactor away
-    inline Material ConcentricRingsEffect(float secs)
-    {
-        return Material("concentric_rings_effect.glsl", Material::Type::Color)
-            .SetSurfaceType(Material::SurfaceType::Transparent)
-            .SetRuntime(secs);
     }
 
 } // namespace
