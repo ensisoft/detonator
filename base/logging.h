@@ -85,7 +85,12 @@ namespace base
     public:
         virtual ~Logger() = default;
 
-        // Write the event.
+        // Write a performatted log message to the log.
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const = 0;
+
+        // Write a preformatted log event to the log.
+        // The log message has information such as the source file/line
+        // baked in.
         virtual void Write(LogEvent type, const char* msg) const = 0;
         // Flush the log.
         virtual void Flush() = 0;
@@ -99,6 +104,8 @@ namespace base
     public:
         OStreamLogger(std::ostream& out);
 
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        { /* not supported */ }
         virtual void Write(LogEvent type, const char* msg) const override;
         virtual void Flush() override;
     private:
@@ -113,9 +120,11 @@ namespace base
         CursesLogger();
        ~CursesLogger();
 
-       virtual void Write(LogEvent type, const char* msg) const override;
-       virtual void Flush() override
-       { /* no op */ }
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        { /* not supported */ }
+        virtual void Write(LogEvent type, const char* msg) const override;
+        virtual void Flush() override
+        { /* no op */ }
     private:
     };
 
@@ -156,7 +165,7 @@ namespace base
     // Check if the global (pertains to all threads) setting for runtime
     // debug logging is on or off
     bool IsDebugLogEnabled();
-    
+
     // Toggle the global (pertains to all threads) setting for runtime
     // debug logging on or off
     void EnableDebugLog(bool on_off);
@@ -166,7 +175,7 @@ namespace base
     template<typename... Args>
     void WriteLog(LogEvent type, const char* file, int line, const std::string& fmt, const Args&... args)
     {
-        if (type == LogEvent::Debug) 
+        if (type == LogEvent::Debug)
         {
             if (!IsDebugLogEnabled())
                 return;
@@ -193,6 +202,7 @@ namespace base
         auto* thread_log = GetThreadLog();
         if (thread_log)
         {
+            thread_log->Write(type, file, line, msg.c_str());
             thread_log->Write(type, formatted_log_message);
             return;
         }
@@ -202,6 +212,7 @@ namespace base
         if (!access.logger)
             return;
 
+        access.logger->Write(type, file, line, msg.c_str());
         access.logger->Write(type, formatted_log_message);
 
     }

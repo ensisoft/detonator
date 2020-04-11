@@ -267,18 +267,30 @@ public:
         GL_CALL(glGetIntegerv(GL_DEPTH_BITS, &depth_bits));
         GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
 
-        INFO("OpenGLESGraphicsDevice");
-        INFO("GL %1 Vendor: %2, %3",
+        DEBUG("OpenGLESGraphicsDevice");
+        DEBUG("GL %1 Vendor: %2, %3",
             mGL.glGetString(GL_VERSION),
             mGL.glGetString(GL_VENDOR),
             mGL.glGetString(GL_RENDERER));
-        INFO("Stencil bits: %1", stencil_bits);
-        INFO("Red bits: %1", red_bits);
-        INFO("Blue bits: %1", blue_bits);
-        INFO("Green bits: %1", green_bits);
-        INFO("Alpha bits: %1", alpha_bits);
-        INFO("Depth bits: %1", depth_bits);
-        INFO("Point size: %1-%2", point_size[0], point_size[1]);
+
+        // a little hack to provide the INFO level graphics device
+        // information only once.
+        static bool have_printed_info = false;
+        if (!have_printed_info)
+        {
+            INFO("GL %1 Vendor: %2, %3",
+                mGL.glGetString(GL_VERSION),
+                mGL.glGetString(GL_VENDOR),
+                mGL.glGetString(GL_RENDERER));
+            have_printed_info = true;
+        }
+        DEBUG("Stencil bits: %1", stencil_bits);
+        DEBUG("Red bits: %1", red_bits);
+        DEBUG("Blue bits: %1", blue_bits);
+        DEBUG("Green bits: %1", green_bits);
+        DEBUG("Alpha bits: %1", alpha_bits);
+        DEBUG("Depth bits: %1", depth_bits);
+        DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
     }
    ~OpenGLES2GraphicsDevice()
     {
@@ -1061,7 +1073,8 @@ private:
             else
             {
                 DEBUG("Shader was built succesfully!");
-                DEBUG("Shader info: %1", compile_info);
+                if (!compile_info.empty())
+                    INFO("Shader info: %1", compile_info);
             }
 
             if (mShader)

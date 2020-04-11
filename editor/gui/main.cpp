@@ -82,6 +82,33 @@ void copyright()
     INFO("QDarkStyleSheet Dark Qt style 2.8");
 }
 
+class ForwardingLogger : public base::Logger
+{
+public:
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) const override
+    {
+        // forward Error and warnings to the application log too.
+        if (type == base::LogEvent::Error)
+            ERROR(msg);
+        else if (type == base::LogEvent::Warning)
+            WARN(msg);
+        else if (type == base::LogEvent::Info)
+            INFO(msg);
+        mLogger.Write(type, file, line, msg);
+    }
+
+    virtual void Write(base::LogEvent type, const char* msg) const override
+    {
+        mLogger.Write(type, msg);
+    }
+    virtual void Flush() override
+    {
+        mLogger.Flush();
+    }
+private:
+    base::CursesLogger mLogger;
+};
+
 int main(int argc, char* argv[])
 {
     try
@@ -99,7 +126,8 @@ int main(int argc, char* argv[])
 
         // set the logger object for the subsystem to use, we'll
         // direct all this to the terminal for now.
-        base::CursesLogger logger;
+        //base::CursesLogger logger;
+        ForwardingLogger logger;
         base::SetGlobalLog(&logger);
         base::EnableDebugLog(true);
         DEBUG("It's alive!");
