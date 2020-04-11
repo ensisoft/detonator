@@ -31,6 +31,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cstdint>
 
 // general dumping ground for utility type of functionality
 // preferably not specific to any GUI or application.
@@ -38,6 +39,10 @@
 
 namespace app
 {
+
+// Compute a file hash based on the contents of the file.
+// Simply returns 0 if the file could not be read.
+std::uint64_t GetFileHash(const QString& file);
 
 // Concatenate two strings as file system path.
 // Returns the path formatted with native separators.

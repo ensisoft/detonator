@@ -26,18 +26,35 @@
 #  include <QDir>
 #  include <QByteArray>
 #  include <QtGlobal>
+#  include <QFile>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
 #  include <langinfo.h>
 #endif
 
+#include <functional>
+#include <string_view>
 #include <cstring>
 
+#include "base/utility.h"
 #include "utility.h"
 
 namespace app
 {
+
+std::uint64_t GetFileHash(const QString& file)
+{
+    QFile stream(file);
+    if (!stream.open(QFile::ReadOnly))
+        return 0;
+    const QByteArray& array = stream.readAll();
+    if (array.isEmpty())
+        return 0;
+
+    const std::string_view view(array.data(), array.size());
+    return std::hash<std::string_view>()(view);
+}
 
 QString JoinPath(const QString& lhs, const QString& rhs)
 {
