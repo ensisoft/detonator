@@ -344,7 +344,7 @@ void MaterialWidget::on_actionSave_triggered()
             .arg(data.rectw).arg(data.rectw);
     }
 
-    auto material = gfx::Material::MakeMaterial(GetValue(mUI.materialType));
+    gfx::Material material((gfx::Material::Type)GetValue(mUI.materialType));
     fillMaterial(material);
 
     app::MaterialResource resource(std::move(material), name);
@@ -539,7 +539,7 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    auto material = gfx::Material::MakeMaterial(GetValue(mUI.materialType));
+    gfx::Material material((gfx::Material::Type)GetValue(mUI.materialType));
     fillMaterial(material);
 
     const auto zoom = mUI.zoom->value();

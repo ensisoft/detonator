@@ -248,9 +248,7 @@ namespace gfx
         using TextureWrapping  = Texture::Wrapping;
 
         // constructor.
-        Material(const std::string& shader, Type type)
-            : mShader(shader)
-            , mType(type)
+        Material(Type type) : mType(type)
         {}
         // allow "invalid" material to be constructed.
         Material() = default;
@@ -260,12 +258,18 @@ namespace gfx
         // failed to compile.
         Shader* GetShader(Device& device) const
         {
-            Shader* shader = device.FindShader(mShader);
+            const std::string& name = GetShaderName();
+
+            // The default constructed material cannot be used to render.
+            ASSERT(!name.empty() &&
+                "No material shader resource is set. Did you forget to call SetShader ?");
+
+            Shader* shader = device.FindShader(name);
             if (shader == nullptr || !shader->IsValid())
             {
                 if (shader == nullptr)
-                    shader = device.MakeShader(mShader);
-                if (!shader->CompileFile(mShader))
+                    shader = device.MakeShader(name);
+                if (!shader->CompileFile(name))
                     return nullptr;
             }
             return shader;
@@ -286,10 +290,6 @@ namespace gfx
         // and set the rasterizer state.
         void Apply(const Environment& env, Device& device, Program& prog, RasterState& state) const
         {
-            // The default constructed material cannot be used to render.
-            ASSERT(!mShader.empty() &&
-                "No material shader resource is set. Did you forget to call SetShader ?");
-
             // set rasterizer state.
             if (mSurfaceType == SurfaceType::Opaque)
                 state.blending = RasterState::Blending::None;
@@ -375,8 +375,22 @@ namespace gfx
         }
         // Material properties getters.
 
-        std::string GetShader() const
-        { return mShader; }
+        std::string GetShaderName() const
+        {
+            // check if have a user defined specific shader or not.
+            if (!mShader.empty())
+                return mShader;
+
+            if (mType == Type::Color)
+                return "solid_color.glsl";
+            else if (mType == Type::Texture)
+                return "texture_map.glsl";
+            else if (mType == Type::Sprite)
+                return "texture_map.glsl";
+            ASSERT(!"???");
+            return "";
+        }
+
         bool GetBlendFrames() const
         { return mBlendFrames; }
         float GetTextureScaleX() const
@@ -409,7 +423,7 @@ namespace gfx
         // a complete path (either relative or absolute) to the
         // shader file in question. Otherwise the shader is looked
         // for under the engines shaders/es2/ folder.
-        Material& SetShader(const std::string& shader_file)
+        Material& SetShaderName(const std::string& shader_file)
         {
             mShader = shader_file;
             return *this;
@@ -623,22 +637,6 @@ namespace gfx
             }
             return mat;
         }
-
-        static Material MakeMaterial(Type type)
-        {
-            switch (type)
-            {
-                case Type::Color:
-                    return Material("solid_color.glsl", type);
-                case Type::Sprite:
-                    return Material("texture_map.glsl", type);
-                case Type::Texture:
-                    return Material("texture_map.glsl", type);
-            }
-            ASSERT(!"no such material type");
-            return Material("", type);
-        }
-
     private:
         std::string mShader;
         Color4f mBaseColor = gfx::Color::White;
@@ -666,7 +664,7 @@ namespace gfx
     // This material will fill the drawn shape with solid color value.
     inline Material SolidColor(const Color4f& color)
     {
-        return Material("solid_color.glsl", Material::Type::Color)
+        return Material(Material::Type::Color)
             .SetBaseColor(color);
     }
 
@@ -674,7 +672,7 @@ namespace gfx
     // The object being drawn must provide texture coordinates.
     inline Material TextureMap(const std::string& texture)
     {
-        return Material("texture_map.glsl", Material::Type::Texture)
+        return Material(Material::Type::Texture)
             .AddTexture(texture)
             .SetSurfaceType(Material::SurfaceType::Opaque);
     }
@@ -687,7 +685,7 @@ namespace gfx
     // the current time value needs to be set.
     inline Material SpriteSet()
     {
-        return Material("texture_map.glsl", Material::Type::Sprite)
+        return Material(Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteSet(const std::initializer_list<std::string>& textures)
@@ -712,7 +710,7 @@ namespace gfx
     // renders a coherent animation.
     inline Material SpriteMap()
     {
-        return Material("texture_map.glsl", Material::Type::Sprite)
+        return Material(Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
     inline Material SpriteMap(const std::string& texture, const std::vector<URect>& frames)
@@ -733,7 +731,7 @@ namespace gfx
     // The drawable shape must provide texture coordinates.
     inline Material BitmapText(const TextBuffer& text)
     {
-        return Material("texture_map.glsl", Material::Type::Texture)
+        return Material(Material::Type::Texture)
             .AddTexture(text)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }

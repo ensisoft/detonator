@@ -158,7 +158,7 @@ private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
         const std::string& name = typeid(drawable).name() + std::string("/") +
-            material.GetShader();
+            material.GetShaderName();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {

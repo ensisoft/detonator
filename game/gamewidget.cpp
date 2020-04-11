@@ -88,14 +88,16 @@ To* CollisionCast(const std::unique_ptr<From>& lhs,
 
 inline gfx::Material SlidingGlintEffect(float secs)
 {
-    return gfx::Material("sliding_glint_effect.glsl", gfx::Material::Type::Color)
+    return gfx::Material(gfx::Material::Type::Color)
+        .SetShaderName("sliding_glint_effect.glsl")
         .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
         .SetRuntime(secs);
 }
 
 inline gfx::Material ConcentricRingsEffect(float secs)
 {
-    return gfx::Material("concentric_rings_effect.glsl", gfx::Material::Type::Color)
+    return gfx::Material(gfx::Material::Type::Color)
+        .SetShaderName("concentric_rings_effect.glsl")
         .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
         .SetRuntime(secs);
 }
