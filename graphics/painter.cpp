@@ -163,10 +163,10 @@ private:
         if (!prog)
         {
             Shader* drawable_shader = drawable.GetShader(*mDevice);
-            if (!drawable_shader)
+            if (!drawable_shader || !drawable_shader->IsValid())
                 return nullptr;
             Shader* material_shader = material.GetShader(*mDevice);
-            if (!material_shader)
+            if (!material_shader || !material_shader->IsValid())
                 return nullptr;
 
             std::vector<const Shader*> shaders;

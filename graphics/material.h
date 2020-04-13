@@ -265,12 +265,10 @@ namespace gfx
             ASSERT(!file.empty());
 
             Shader* shader = device.FindShader(name);
-            if (shader == nullptr || !shader->IsValid())
+            if (shader == nullptr)
             {
-                if (shader == nullptr)
-                    shader = device.MakeShader(name);
-                if (!shader->CompileFile(file))
-                    return nullptr;
+                shader = device.MakeShader(name);
+                shader->CompileFile(file);
             }
             return shader;
         }

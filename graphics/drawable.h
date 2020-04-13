@@ -71,15 +71,13 @@ namespace gfx
     public:
         virtual Shader* GetShader(Device& device) const override
         {
-            Shader* s = device.FindShader("vertex_array.glsl");
-            if (s == nullptr || !s->IsValid())
+            Shader* shader = device.FindShader("vertex_array.glsl");
+            if (shader == nullptr)
             {
-                if (s == nullptr)
-                    s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-                    return nullptr;
+                shader = device.MakeShader("vertex_array.glsl");
+                shader->CompileFile("shaders/es2/vertex_array.glsl");
             }
-            return s;
+            return shader;
         }
         virtual Geometry* Upload(Device& device) const override
         {
@@ -119,15 +117,13 @@ namespace gfx
     public:
         virtual Shader* GetShader(Device& device) const override
         {
-            Shader* s = device.FindShader("vertex_array.glsl");
-            if (s == nullptr || !s->IsValid())
+            Shader* shader = device.FindShader("vertex_array.glsl");
+            if (shader == nullptr)
             {
-                if (s == nullptr)
-                    s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-                    return nullptr;
+                shader = device.MakeShader("vertex_array.glsl");
+                shader->CompileFile("shaders/es2/vertex_array.glsl");
             }
-            return s;
+            return shader;
         }
         virtual Geometry* Upload(Device& device) const override
         {
@@ -176,15 +172,13 @@ namespace gfx
     public:
         virtual Shader* GetShader(Device& device) const override
         {
-            Shader* s = device.FindShader("vertex_array.glsl");
-            if (s == nullptr || !s->IsValid())
+            Shader* shader = device.FindShader("vertex_array.glsl");
+            if (shader == nullptr)
             {
-                if (s == nullptr)
-                    s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-                    return nullptr;
+                shader = device.MakeShader("vertex_array.glsl");
+                shader->CompileFile("shaders/es2/vertex_array.glsl");
             }
-            return s;
+            return shader;
         }
 
         virtual Geometry* Upload(Device& device) const override
@@ -367,15 +361,12 @@ namespace gfx
         virtual Shader* GetShader(Device& device) const override
         {
             Shader* shader = device.FindShader("vertex_array.glsl");
-            if (shader == nullptr || !shader->IsValid())
+            if (shader == nullptr)
             {
-                if (shader == nullptr)
-                    shader = device.MakeShader("vertex_array.glsl");
-                if (!shader->CompileFile("shaders/es2/vertex_array.glsl"))
-                    return nullptr;
+                shader = device.MakeShader("vertex_array.glsl");
+                shader->CompileFile("shaders/es2/vertex_array.glsl");
             }
             return shader;
-
         }
         // Drawable implementation. Upload particles to the device.
         virtual Geometry* Upload(Device& device) const override
