@@ -42,13 +42,22 @@ uniform vec4 kBaseColor;
 uniform mat3 kDeviceTextureMatrix;
 varying vec2 vTexCoord;
 
+vec2 SamplePointCoord()
+{
+    // "However, the gl_PointCoord fragment shader input defines
+    // a per-fragment coordinate space (s, t) where s varies from
+    // 0 to 1 across the point horizontally left-to-right, and t
+    // ranges from 0 to 1 across the point vertically top-to-bottom."
+    return vec2(gl_PointCoord.x, 1.0-gl_PointCoord.y);
+}
+
 void main()
 {
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
     // rasterized as points.
     // we set kRenderPoints to 1.0f when rendering points.
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    vec2 coords = mix(vTexCoord, SamplePointCoord(), kRenderPoints);
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
