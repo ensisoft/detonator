@@ -240,7 +240,7 @@ namespace gfx
             Texture,
             // Material uses a series of textures to create
             // a sprite animation.
-            Sprite,
+            Sprite
         };
 
         using MinTextureFilter = Texture::MinFilter;
@@ -259,17 +259,17 @@ namespace gfx
         Shader* GetShader(Device& device) const
         {
             const std::string& name = GetShaderName();
+            const std::string& file = GetShaderFile();
 
-            // The default constructed material cannot be used to render.
-            ASSERT(!name.empty() &&
-                "No material shader resource is set. Did you forget to call SetShader ?");
+            ASSERT(!name.empty());
+            ASSERT(!file.empty());
 
             Shader* shader = device.FindShader(name);
             if (shader == nullptr || !shader->IsValid())
             {
                 if (shader == nullptr)
                     shader = device.MakeShader(name);
-                if (!shader->CompileFile(name))
+                if (!shader->CompileFile(file))
                     return nullptr;
             }
             return shader;
@@ -377,16 +377,22 @@ namespace gfx
 
         std::string GetShaderName() const
         {
+            const std::size_t hash = std::hash<std::string>()(GetShaderFile());
+            return std::to_string(hash);
+        }
+
+        std::string GetShaderFile() const
+        {
             // check if have a user defined specific shader or not.
-            if (!mShader.empty())
-                return mShader;
+            if (!mShaderFile.empty())
+                return mShaderFile;
 
             if (mType == Type::Color)
-                return "solid_color.glsl";
+                return "shaders/es2/solid_color.glsl";
             else if (mType == Type::Texture)
-                return "texture_map.glsl";
+                return "shaders/es2/texture_map.glsl";
             else if (mType == Type::Sprite)
-                return "texture_map.glsl";
+                return "shaders/es2/texture_map.glsl";
             ASSERT(!"???");
             return "";
         }
@@ -419,13 +425,9 @@ namespace gfx
         // Material properties setters.
 
         // Set the material to use a specific shader.
-        // If the shader's type is set to Custom this should be
-        // a complete path (either relative or absolute) to the
-        // shader file in question. Otherwise the shader is looked
-        // for under the engines shaders/es2/ folder.
-        Material& SetShaderName(const std::string& shader_file)
+        Material& SetShaderFile(const std::string& shader_file)
         {
-            mShader = shader_file;
+            mShaderFile = shader_file;
             return *this;
         }
 
@@ -569,7 +571,7 @@ namespace gfx
         nlohmann::json ToJson() const
         {
             nlohmann::json json;
-            base::JsonWrite(json, "shader", mShader);
+            base::JsonWrite(json, "shader_file", mShaderFile);
             base::JsonWrite(json, "type", mType);
             base::JsonWrite(json, "color", mBaseColor);
             base::JsonWrite(json, "surface", mSurfaceType);
@@ -601,7 +603,7 @@ namespace gfx
         {
             Material mat;
 
-            if (!base::JsonReadSafe(object, "shader", &mat.mShader) ||
+            if (!base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
                 !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
                 !base::JsonReadSafe(object, "type", &mat.mType) ||
                 !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
@@ -638,7 +640,7 @@ namespace gfx
             return mat;
         }
     private:
-        std::string mShader;
+        std::string mShaderFile;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         Type mType = Type::Color;

@@ -76,7 +76,7 @@ namespace gfx
             {
                 if (s == nullptr)
                     s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("vertex_array.glsl"))
+                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
                     return nullptr;
             }
             return s;
@@ -124,7 +124,7 @@ namespace gfx
             {
                 if (s == nullptr)
                     s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("vertex_array.glsl"))
+                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
                     return nullptr;
             }
             return s;
@@ -181,7 +181,7 @@ namespace gfx
             {
                 if (s == nullptr)
                     s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("vertex_array.glsl"))
+                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
                     return nullptr;
             }
             return s;
@@ -219,7 +219,7 @@ namespace gfx
             {
                 if (s == nullptr)
                     s = device.MakeShader("vertex_array.glsl");
-                if (!s->CompileFile("vertex_array.glsl"))
+                if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
                     return nullptr;
             }
             return s;
@@ -371,7 +371,7 @@ namespace gfx
             {
                 if (shader == nullptr)
                     shader = device.MakeShader("vertex_array.glsl");
-                if (!shader->CompileFile("vertex_array.glsl"))
+                if (!shader->CompileFile("shaders/es2/vertex_array.glsl"))
                     return nullptr;
             }
             return shader;

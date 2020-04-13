@@ -154,6 +154,44 @@
          </widget>
         </item>
         <item>
+         <widget class="QGroupBox" name="customShader">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Custom shader</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QLineEdit" name="shaderFile">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="browseShader">
+             <property name="text">
+              <string>Browse ...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="texturing">
           <property name="enabled">
            <bool>false</bool>
@@ -290,42 +328,6 @@
             <widget class="QCheckBox" name="blend">
              <property name="text">
               <string>Smooth</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="customMaterial">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="title">
-           <string>Custom material</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="label_39">
-             <property name="text">
-              <string>Shader</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="shader">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="browseShader">
-             <property name="text">
-              <string>Browse ...</string>
              </property>
             </widget>
            </item>
@@ -861,15 +863,17 @@
   <tabstop>materialType</tabstop>
   <tabstop>surfaceType</tabstop>
   <tabstop>gamma</tabstop>
-  <tabstop>fps</tabstop>
+  <tabstop>customShader</tabstop>
+  <tabstop>shaderFile</tabstop>
+  <tabstop>browseShader</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
   <tabstop>wrapX</tabstop>
   <tabstop>wrapY</tabstop>
-  <tabstop>shader</tabstop>
-  <tabstop>browseShader</tabstop>
+  <tabstop>fps</tabstop>
+  <tabstop>blend</tabstop>
   <tabstop>textures</tabstop>
   <tabstop>textureDel</tabstop>
   <tabstop>textureAdd</tabstop>
@@ -877,7 +881,6 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
-  <tabstop>textureRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>

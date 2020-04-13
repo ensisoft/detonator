@@ -93,9 +93,22 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.blend,        material->GetBlendFrames());
     SetValue(mUI.gamma,        material->GetGamma());
 
+    QString shader_file;
+    bool use_shader_file = false;
+    resource.GetProperty("use_shader_file", &use_shader_file);
+    resource.GetProperty("shader_file", &shader_file);
+    mUI.customShader->setChecked(use_shader_file);
+    mUI.shaderFile->setText(shader_file);
+    if (!shader_file.isEmpty())
+    {
+        if (!QFileInfo(shader_file).exists())
+        {
+            WARN("Shader file '%1' could no longer be found.", shader_file);
+        }
+    }
+
     QStringList texture_files;
     QStringList texture_rects;
-
     resource.GetProperty("texture_files", &texture_files);
     resource.GetProperty("texture_rects", &texture_rects);
     ASSERT(texture_files.count() == texture_rects.count());
@@ -182,8 +195,18 @@ bool MaterialWidget::loadState(const Settings& settings)
     settings.loadWidget("Material", mUI.wrapY);
     settings.loadWidget("Material", mUI.fps);
     settings.loadWidget("Material", mUI.blend);
-    settings.loadWidget("Material", mUI.shader);
+    settings.loadWidget("Material", mUI.customShader);
+    settings.loadWidget("Material", mUI.shaderFile);
     settings.loadWidget("Material", mUI.zoom);
+
+    const QString& shader = mUI.shaderFile->text();
+    if (!shader.isEmpty())
+    {
+        if (!QFileInfo(shader).exists())
+        {
+            WARN("Shader file '%1' could no longer be found.", shader);
+        }
+    }
 
     const auto& texture_files = settings.getValue("Material", "texture_files", QStringList());
     const auto& texture_rects = settings.getValue("Material", "texture_rects", QStringList());
@@ -260,7 +283,8 @@ bool MaterialWidget::saveState(Settings& settings) const
     settings.saveWidget("Material", mUI.wrapY);
     settings.saveWidget("Material", mUI.fps);
     settings.saveWidget("Material", mUI.blend);
-    settings.saveWidget("Material", mUI.shader);
+    settings.saveWidget("Material", mUI.customShader);
+    settings.saveWidget("Material", mUI.shaderFile);
     settings.saveWidget("Material", mUI.zoom);
     return true;
 }
@@ -353,6 +377,8 @@ void MaterialWidget::on_actionSave_triggered()
     resource.SetProperty("texture_rects", texture_rects);
     resource.SetProperty("color", mUI.baseColor->color());
     resource.SetProperty("surface", mUI.surfaceType->currentText());
+    resource.SetProperty("shader_file", mUI.shaderFile->text());
+    resource.SetProperty("use_shader_file", mUI.customShader->isChecked());
     mWorkspace->SaveResource(resource);
 
     setWindowTitle(name);
@@ -409,6 +435,17 @@ void MaterialWidget::on_textureDel_clicked()
     mUI.textureProp->setEnabled(false);
 }
 
+void MaterialWidget::on_browseShader_clicked()
+{
+    const auto& list = QFileDialog::getOpenFileNames(this,
+        tr("Select Shader File"), "", tr("GLSL files (*.glsl)"));
+    if (list.isEmpty())
+        return;
+
+    mUI.shaderFile->setText(list[0]);
+    mUI.shaderFile->setCursorPosition(0);
+}
+
 void MaterialWidget::on_textures_currentRowChanged(int index)
 {
     mUI.textureRect->setEnabled(false);
@@ -458,7 +495,6 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
 {
     mUI.texturing->setEnabled(false);
     mUI.animation->setEnabled(false);
-    mUI.customMaterial->setEnabled(false);
     mUI.textureMaps->setEnabled(false);
     mUI.textureProp->setEnabled(false);
     mUI.textureRect->setEnabled(false);
@@ -507,7 +543,12 @@ void MaterialWidget::on_rectH_valueChanged(double value)
 
 void MaterialWidget::fillMaterial(gfx::Material& material) const
 {
-    // todo: allow for a custom shader to be used.
+    if (mUI.customShader->isChecked())
+    {
+        const QString& file = mUI.shaderFile->text();
+        material.SetShaderFile(app::ToUtf8(file));
+    }
+
     material.SetBaseColor(GetValue(mUI.baseColor));
     material.SetGamma(GetValue(mUI.gamma));
     material.SetSurfaceType(GetValue(mUI.surfaceType));
