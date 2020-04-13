@@ -75,6 +75,7 @@ bool Animation::Component::Update(float dt)
     if (mTime - mStartTime > mLifetime)
         return false;
     */
+    mTime += dt;
 
     if (mDrawable)
         mDrawable->Update(dt);
