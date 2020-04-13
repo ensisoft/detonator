@@ -38,6 +38,8 @@
     <property name="title">
      <string>Window</string>
     </property>
+    <addaction name="actionReloadShaders"/>
+    <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
    <addaction name="menuWindow"/>
@@ -64,6 +66,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionReloadShaders">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Shaders</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

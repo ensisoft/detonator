@@ -351,6 +351,7 @@ void MainWindow::on_actionReloadShaders_triggered()
     if (!mCurrentWidget)
         return;
     mCurrentWidget->reloadShaders();
+    INFO("'%1' shaders reloaded.", mCurrentWidget->windowTitle());
 }
 
 void MainWindow::on_actionNewMaterial_triggered()

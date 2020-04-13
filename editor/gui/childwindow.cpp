@@ -91,6 +91,11 @@ void ChildWindow::on_actionClose_triggered()
     close();
 }
 
+void ChildWindow::on_actionReloadShaders_triggered()
+{
+    mWidget->reloadShaders();
+    INFO("'%1' shaders reloaded.", mWidget->windowTitle());
+}
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {

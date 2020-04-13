@@ -64,6 +64,7 @@ namespace gui
 
     private slots:
         void on_actionClose_triggered();
+        void on_actionReloadShaders_triggered();
 
     private:
         virtual void closeEvent(QCloseEvent* event) override;
