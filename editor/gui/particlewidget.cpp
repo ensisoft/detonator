@@ -100,6 +100,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "use_init_rect", mUI.initRect);
     GetProperty(resource, "use_direction_sector", mUI.dirSector);
     GetProperty(resource, "use_growth", mUI.growth);
+    GetProperty(resource, "use_lifetime", mUI.canExpire);
 
     const auto* engine = resource.GetContent<gfx::KinematicsParticleEngine>();
     const auto& params = engine->GetParams();
@@ -184,6 +185,7 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.maxLifetime);
     settings.saveWidget("Particle", mUI.minPointsize);
     settings.saveWidget("Particle", mUI.maxPointsize);
+    settings.saveWidget("Particle", mUI.canExpire);
     settings.saveWidget("Particle", mUI.growth);
     settings.saveWidget("Particle", mUI.timeDerivative);
     settings.saveWidget("Particle", mUI.distDerivative);
@@ -220,6 +222,7 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.maxLifetime);
     settings.loadWidget("Particle", mUI.minPointsize);
     settings.loadWidget("Particle", mUI.maxPointsize);
+    settings.loadWidget("Particle", mUI.canExpire);
     settings.loadWidget("Particle", mUI.growth);
     settings.loadWidget("Particle", mUI.timeDerivative);
     settings.loadWidget("Particle", mUI.distDerivative);
@@ -272,6 +275,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_init_rect", mUI.initRect);
     SetProperty(particle_resource, "use_direction_sector", mUI.dirSector);
     SetProperty(particle_resource, "use_growth", mUI.growth);
+    SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     mWorkspace->SaveResource(particle_resource);
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);
@@ -287,8 +291,8 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngine::Params& par
     params.num_particles  = GetValue(mUI.numParticles);
     params.max_xpos       = GetValue(mUI.simWidth);
     params.max_ypos       = GetValue(mUI.simHeight);
-    params.min_lifetime   = GetValue(mUI.minLifetime);
-    params.max_lifetime   = GetValue(mUI.maxLifetime);
+    //params.min_lifetime   = GetValue(mUI.minLifetime);
+    //params.max_lifetime   = GetValue(mUI.maxLifetime);
     params.min_point_size = GetValue(mUI.minPointsize);
     params.max_point_size = GetValue(mUI.maxPointsize);
     params.min_velocity   = GetValue(mUI.minVelocity);
@@ -318,6 +322,17 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngine::Params& par
         params.direction_sector_start_angle = 0.0f;
         params.direction_sector_size        = qDegreesToRadians(360.0f);
     }
+    if (mUI.canExpire->isChecked())
+    {
+        params.min_lifetime   = GetValue(mUI.minLifetime);
+        params.max_lifetime   = GetValue(mUI.maxLifetime);
+    }
+    else
+    {
+        params.min_lifetime   = std::numeric_limits<float>::max();
+        params.max_lifetime   = std::numeric_limits<float>::max();
+    }
+
     if (mUI.growth->isChecked())
     {
         params.rate_of_change_in_size_wrt_time = GetValue(mUI.timeDerivative);

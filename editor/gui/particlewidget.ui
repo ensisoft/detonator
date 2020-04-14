@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1464</width>
-    <height>842</height>
+    <height>871</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -587,21 +587,21 @@
              <item row="0" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Velocity</string>
+                <string>Velocity (u/s)</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_4">
                <property name="text">
-                <string>Lifetime</string>
+                <string>Lifetime (s)</string>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Pointsize</string>
+                <string>Pointsize (px)</string>
                </property>
               </widget>
              </item>
@@ -644,7 +644,7 @@
              <item row="1" column="2">
               <widget class="QDoubleSpinBox" name="maxLifetime">
                <property name="maximum">
-                <double>1000.000000000000000</double>
+                <double>10000.000000000000000</double>
                </property>
                <property name="stepType">
                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -665,6 +665,16 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="canExpire">
+             <property name="text">
+              <string>Can expire</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -790,6 +800,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>name</tabstop>
+  <tabstop>materials</tabstop>
   <tabstop>transform</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
@@ -819,14 +830,48 @@
   <tabstop>maxLifetime</tabstop>
   <tabstop>minPointsize</tabstop>
   <tabstop>maxPointsize</tabstop>
+  <tabstop>canExpire</tabstop>
   <tabstop>growth</tabstop>
   <tabstop>timeDerivative</tabstop>
   <tabstop>distDerivative</tabstop>
-  <tabstop>curNumParticles</tabstop>
   <tabstop>curTime</tabstop>
+  <tabstop>curNumParticles</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>canExpire</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minLifetime</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1294</x>
+     <y>711</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1294</x>
+     <y>647</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>canExpire</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxLifetime</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1294</x>
+     <y>711</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1384</x>
+     <y>647</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
