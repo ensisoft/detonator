@@ -808,9 +808,6 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     mState.animation.Draw(painter, view);
     view.Pop();
 
-    // pop view transformation
-    view.Pop();
-
     if (mCurrentTool)
         mCurrentTool->Render(painter);
 
@@ -827,6 +824,9 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     view.Rotate(math::Pi * 0.5f);
     view.Translate(0.0f, 50.0f);
     painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+    view.Pop();
+
+    // pop view transformation
     view.Pop();
 
     mUI.time->setText(QString::number(mTime));

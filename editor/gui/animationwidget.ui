@@ -475,6 +475,9 @@
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="1" column="0">
               <widget class="QLabel" name="label_23">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 200, 0)</string>
+               </property>
                <property name="text">
                 <string>X pos</string>
                </property>
@@ -562,6 +565,9 @@
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_26">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,0, 0)</string>
+               </property>
                <property name="text">
                 <string>Y pos</string>
                </property>
@@ -569,6 +575,9 @@
              </item>
              <item row="1" column="2">
               <widget class="QLabel" name="label_24">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 200, 0)</string>
+               </property>
                <property name="text">
                 <string>Width</string>
                </property>
@@ -583,6 +592,9 @@
              </item>
              <item row="3" column="2">
               <widget class="QLabel" name="label_2">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,0, 0)</string>
+               </property>
                <property name="text">
                 <string>Height</string>
                </property>
