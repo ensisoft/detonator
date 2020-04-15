@@ -89,7 +89,7 @@ namespace gui
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
-        scene::Animation::Component* GetCurrentComponent();
+        scene::AnimationNode* GetCurrentComponent();
     private:
         class ComponentModel;
         class Tool;

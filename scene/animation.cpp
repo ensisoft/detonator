@@ -37,7 +37,7 @@
 namespace scene
 {
 
-void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform) const
+void AnimationNode::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
     if (!mDrawable || !mMaterial)
         return;
@@ -64,7 +64,7 @@ void Animation::Component::Draw(gfx::Painter& painter, gfx::Transform& transform
     transform.Pop();
 }
 
-bool Animation::Component::Update(float dt)
+bool AnimationNode::Update(float dt)
 {
     // disable this for now, need to figure out the time/timeline
     // related functionality.
@@ -83,12 +83,12 @@ bool Animation::Component::Update(float dt)
     return true;
 }
 
-void Animation::Component::Reset()
+void AnimationNode::Reset()
 {
     mTime = 0.0f;
 }
 
-bool Animation::Component::Prepare(const GfxFactory& loader)
+bool AnimationNode::Prepare(const GfxFactory& loader)
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -124,7 +124,7 @@ bool Animation::Component::Prepare(const GfxFactory& loader)
     return mDrawable && mMaterial;
 }
 
-nlohmann::json Animation::Component::ToJson() const
+nlohmann::json AnimationNode::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "name", mName);
@@ -140,9 +140,9 @@ nlohmann::json Animation::Component::ToJson() const
 }
 
 // static
-std::optional<Animation::Component> Animation::Component::FromJson(const nlohmann::json& object)
+std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& object)
 {
-    Component ret;
+    AnimationNode ret;
     if (!base::JsonReadSafe(object, "name", &ret.mName) ||
         !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
         !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
@@ -168,10 +168,10 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 
     // implement "layers" by drawing in a sorted order as determined
     // by the layer value.
-    std::multimap<int, const Component*> layer_map;
+    std::multimap<int, const AnimationNode*> layer_map;
 
     // Ask each component to draw.
-    for (const auto& component : mComponents)
+    for (const auto& component : mNodes)
     {
         layer_map.insert(std::make_pair(component.GetLayer(), &component));
     }
@@ -190,7 +190,7 @@ bool Animation::Update(float dt)
 {
     bool alive = false;
 
-    for (auto& component : mComponents)
+    for (auto& component : mNodes)
     {
         if (component.Update(dt))
             alive = true;
@@ -205,7 +205,7 @@ bool Animation::IsExpired() const
 
 void Animation::Reset()
 {
-    for (auto& component : mComponents)
+    for (auto& component : mNodes)
     {
         component.Reset();
     }
@@ -213,7 +213,7 @@ void Animation::Reset()
 
 void Animation::Prepare(const GfxFactory& loader)
 {
-    for (auto& component : mComponents)
+    for (auto& component : mNodes)
     {
         if (!component.Prepare(loader))
         {

@@ -58,12 +58,12 @@ public:
 
     virtual int rowCount(const QModelIndex&) const override
     {
-        return static_cast<int>(mAnimation.GetNumComponents());
+        return static_cast<int>(mAnimation.GetNumNodes());
     }
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
         const auto  i = static_cast<size_t>(index.row());
-        const auto& c = mAnimation.GetComponent(i);
+        const auto& c = mAnimation.GetNode(i);
 
         if (role == Qt::SizeHintRole)
             return QSize(0, 16);
@@ -71,18 +71,18 @@ public:
             return app::FromUtf8(c.GetName());
         return QVariant();
     }
-    void AddComponent(scene::Animation::Component&& component)
+    void AddNode(scene::AnimationNode&& component)
     {
-        const auto row = static_cast<int>(mAnimation.GetNumComponents());
+        const auto row = static_cast<int>(mAnimation.GetNumNodes());
         beginInsertRows(QModelIndex(), row, row);
-        mAnimation.AddComponent(std::move(component));
+        mAnimation.AddNode(std::move(component));
         endInsertRows();
     }
-    void DelComponent(size_t index)
+    void DelNode(size_t index)
     {
         const auto row = static_cast<int>(index);
         beginRemoveRows(QModelIndex(), row, row);
-        mAnimation.DelComponent(index);
+        mAnimation.DelNode(index);
         endRemoveRows();
     }
 
@@ -170,23 +170,23 @@ public:
         const float width  = diff.x();
         const float height = diff.y();
 
-        scene::Animation::Component component;
-        component.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
-        component.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
-        component.SetName(name);
-        component.SetTranslation(glm::vec2(xpos, ypos));
-        component.SetSize(glm::vec2(width, height));
-        component.SetScale(glm::vec2(1.0f, 1.0f));
-        mState.model->AddComponent(std::move(component));
+        scene::AnimationNode node;
+        node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
+        node.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
+        node.SetName(name);
+        node.SetTranslation(glm::vec2(xpos, ypos));
+        node.SetSize(glm::vec2(width, height));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        mState.model->AddNode(std::move(node));
         DEBUG("Added new shape '%1'", name);
         return true;
     }
     bool CheckNameAvailability(const std::string& name) const
     {
-        for (size_t i=0; i<mState.animation.GetNumComponents(); ++i)
+        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
         {
-            const auto& component = mState.animation.GetComponent(i);
-            if (component.GetName() == name)
+            const auto& node = mState.animation.GetNode(i);
+            if (node.GetName() == name)
                 return false;
         }
         return true;
@@ -322,7 +322,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     setWindowTitle("My Animation");
 
-    PopulateFromEnum<scene::Animation::RenderPass>(mUI.renderPass);
+    PopulateFromEnum<scene::AnimationNode::RenderPass>(mUI.renderPass);
 
     auto* model = mUI.components->selectionModel();
     connect(model, &QItemSelectionModel::currentRowChanged,
@@ -548,7 +548,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
         const auto& index = items[i];
         const auto row = index.row() - removed;
         const auto component_index = static_cast<size_t>(row);
-        mState.model->DelComponent(component_index);
+        mState.model->DelNode(component_index);
         ++removed;
     }
 }
@@ -605,7 +605,7 @@ void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
 {
     if (auto* component = GetCurrentComponent())
     {
-        const scene::Animation::RenderPass pass = GetValue(mUI.renderPass);
+        const scene::AnimationNode::RenderPass pass = GetValue(mUI.renderPass);
         component->SetRenderPass(pass);
     }
 }
@@ -620,7 +620,7 @@ void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, con
     }
     else
     {
-        const auto& component = mState.animation.GetComponent(row);
+        const auto& component = mState.animation.GetNode(row);
         const auto& translate = component.GetTranslation();
         const auto& size = component.GetSize();
         SetValue(mUI.cName, component.GetName());
@@ -671,9 +671,9 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
         const auto index = mUI.materials->findText(resource->GetName());
         mUI.materials->blockSignals(true);
         mUI.materials->removeItem(index);
-        for (size_t i=0; i<mState.animation.GetNumComponents(); ++i)
+        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
         {
-            auto& component = mState.animation.GetComponent(i);
+            auto& component = mState.animation.GetNode(i);
             const auto& material = app::FromUtf8(component.GetMaterialName());
             if (material == resource->GetName())
             {
@@ -832,14 +832,14 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
-scene::Animation::Component* AnimationWidget::GetCurrentComponent()
+scene::AnimationNode* AnimationWidget::GetCurrentComponent()
 {
     const auto& indices = mUI.components->selectionModel()->selectedRows();
     if (indices.isEmpty())
         return nullptr;
 
     const auto component_index = indices[0].row();
-    auto& component = mState.animation.GetComponent(component_index);
+    auto& component = mState.animation.GetNode(component_index);
     return &component;
 }
 
