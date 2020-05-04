@@ -36,6 +36,11 @@
 #include <locale>
 #include <codecvt>
 #include <cwctype>
+#include <cstring>
+#include <random>
+
+#include "math.h"
+#include "assert.h"
 
 #if defined(__MSVC__)
 #  pragma warning(push)
@@ -44,6 +49,25 @@
 
 namespace base
 {
+
+inline std::string RandomString(size_t len)
+{
+    static const char* alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUWXYZ"
+        "abdefghijlkmnopqrstuvwxyz"
+        "1234567890";
+    static unsigned max_len = std::strlen(alphabet) - 1;
+    static std::random_device rd;
+    std::uniform_int_distribution<unsigned> dist(0, max_len);
+
+    std::string ret;
+    for (size_t i=0; i<len; ++i)
+    {
+        const auto letter = dist(rd);
+        ret.push_back(alphabet[letter]);
+    }
+    return ret;
+}
 
 template<typename S, typename T> inline
 S hash_combine(S seed, T value)

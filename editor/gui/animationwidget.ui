@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1392</width>
-    <height>893</height>
+    <width>1376</width>
+    <height>938</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -338,22 +338,38 @@
            </sizepolicy>
           </property>
           <property name="title">
-           <string>Components</string>
+           <string>Render tree</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QListView" name="components">
+            <widget class="gui::TreeWidget" name="tree" native="true">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>200</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="contextMenuPolicy">
               <enum>Qt::CustomContextMenu</enum>
              </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectRows</enum>
+             <property name="styleSheet">
+              <string notr="true">QFrame:hover {
+  border: 1px solid #148CD2;
+  color: #F0F0F0;
+}
+</string>
              </property>
             </widget>
            </item>
@@ -767,6 +783,12 @@
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::TreeWidget</class>
+   <extends>QWidget</extends>
+   <header>treewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

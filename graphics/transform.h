@@ -49,6 +49,17 @@ namespace gfx
         {
             Reset();
         }
+
+        Transform(const glm::mat4& mat)
+        {
+            mTransform.resize(1);
+            mTransform[0] = mat;
+        }
+        Transform(glm::mat4&& mat)
+        {
+            mTransform.resize(1);
+            mTransform[0] = std::move(mat);
+        }
         // Set absolute position. This will override any previously
         // accumulated translation.
         void MoveTo(float x, float y)
@@ -159,6 +170,15 @@ namespace gfx
         {
             mTransform.push_back(glm::mat4(1.0f));
         }
+        void Push(const glm::mat4& mat)
+        {
+            mTransform.push_back(mat);
+        }
+        void Push(glm::mat4&& mat)
+        {
+            mTransform.push_back(std::move(mat));
+        }
+
         // Pop the latest transform off of the transform stack.
         void Pop()
         {

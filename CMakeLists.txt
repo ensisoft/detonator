@@ -188,6 +188,8 @@ add_executable(Editor
     editor/gui/materialwidget.ui
     editor/gui/settings.h
     editor/gui/settings.cpp
+    editor/gui/treewidget.h
+    editor/gui/treewidget.cpp
     editor/resource/resource.qrc
     editor/resource/qdarkstyle/style.qrc
     third_party/stb/stb_image.c
@@ -344,6 +346,9 @@ add_executable(unit_test_device graphics/unit_test/unit_test_device.cpp
     base/assert.cpp
     graphics/opengl_es2_device.cpp
     third_party/stb/stb_image_write.c)
+add_executable(unit_test_tree
+    base/assert.cpp
+    scene/unit_test/unit_test_tree.cpp )
 
 target_link_libraries(unit_test_device
     wdk_system
@@ -355,4 +360,6 @@ target_include_directories(unit_test_image  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/g
 target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 
+
+target_include_directories(unit_test_tree PRIVATE "${CMAKE_CURRENT_LIST_DIR}/scene/unit_test")
 

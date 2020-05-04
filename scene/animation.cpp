@@ -37,31 +37,9 @@
 namespace scene
 {
 
-void AnimationNode::Draw(gfx::Painter& painter, gfx::Transform& transform) const
+AnimationNode::AnimationNode()
 {
-    if (!mDrawable || !mMaterial)
-        return;
-
-    mMaterial->SetRuntime(mTime - mStartTime);
-
-    // begin the transformation scope for this animation component.
-    transform.Push();
-    transform.Scale(mSize);
-    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
-    transform.Rotate(mRotation);
-    transform.Translate(mSize.x * 0.5f, mSize.y * 0.5f);
-    transform.Translate(mPosition);
-
-    // if we had recusive structure i.e. component could contain
-    // components we'd need to deal with the resizing so that it'd
-    // only apply to this component and then possibly have a
-    // scaling factor that would apply to the whole subtree
-    // staring from this node.
-    painter.Draw(*mDrawable, transform, *mMaterial);
-
-
-    // pop our scope.
-    transform.Pop();
+    mId = base::RandomString(10);
 }
 
 bool AnimationNode::Update(float dt)
@@ -80,12 +58,34 @@ bool AnimationNode::Update(float dt)
     if (mDrawable)
         mDrawable->Update(dt);
 
+    if (mMaterial)
+        mMaterial->SetRuntime(mTime - mStartTime);
+
     return true;
 }
 
 void AnimationNode::Reset()
 {
     mTime = 0.0f;
+}
+
+glm::mat4 AnimationNode::GetNodeTransform() const
+{
+    // transformation order is the order they're
+    // written here.
+    gfx::Transform transform;
+    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    transform.Rotate(mRotation);
+    transform.Translate(mSize.x * 0.5f, mSize.y * 0.5f);
+    transform.Translate(mPosition);
+    return transform.GetAsMatrix();
+}
+
+glm::mat4 AnimationNode::GetModelTransform() const
+{
+    gfx::Transform transform;
+    transform.Scale(mSize);
+    return transform.GetAsMatrix();
 }
 
 bool AnimationNode::Prepare(const GfxFactory& loader)
@@ -127,6 +127,7 @@ bool AnimationNode::Prepare(const GfxFactory& loader)
 nlohmann::json AnimationNode::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "material", mMaterialName);
     base::JsonWrite(json, "drawable", mDrawableName);
@@ -143,7 +144,8 @@ nlohmann::json AnimationNode::ToJson() const
 std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& object)
 {
     AnimationNode ret;
-    if (!base::JsonReadSafe(object, "name", &ret.mName) ||
+    if (!base::JsonReadSafe(object, "id", &ret.mId) ||
+        !base::JsonReadSafe(object, "name", &ret.mName) ||
         !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
         !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
         !base::JsonReadSafe(object, "position", &ret.mPosition) ||
@@ -156,7 +158,20 @@ std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& objec
     return ret;
 }
 
+Animation::Animation(const Animation& other)
+{
+    // make a deep copy of the nodes.
+    for (const auto& node : other.mNodes)
+    {
+        mNodes.push_back(std::make_unique<AnimationNode>(*node));
+    }
 
+    // use the json serialization setup the copy of the
+    // render tree.
+    nlohmann::json json = other.mRenderTree.ToJson(other);
+    // build our render tree.
+    mRenderTree = RenderTree::FromJson(json, *this).value();
+}
 
 void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
 {
@@ -165,21 +180,61 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
     // if we did we could begin new transformation scope for this
     // by pushing a new scope in the transformation stack.
     // transfrom.Push();
+    std::vector<DrawPacket> packets;
+
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform)
+            : mPackets(packets)
+            , mTransform(transform)
+        {}
+        virtual void EnterNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Push(node->GetNodeTransform());
+            mTransform.Push(node->GetModelTransform());
+
+            DrawPacket packet;
+            packet.node      = node;
+            packet.material  = node->GetMaterial();
+            packet.drawable  = node->GetDrawable();
+            packet.layer     = node->GetLayer();
+            packet.transform = mTransform.GetAsMatrix();
+            mPackets.push_back(packet);
+
+            // pop the model transform
+            mTransform.Pop();
+        }
+        virtual void LeaveNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Pop();
+        }
+    private:
+        std::vector<DrawPacket>& mPackets;
+        gfx::Transform& mTransform;
+    };
+
+    Visitor visitor(packets, transform);
+    mRenderTree.PreOrderTraverse(visitor);
 
     // implement "layers" by drawing in a sorted order as determined
-    // by the layer value.
-    std::multimap<int, const AnimationNode*> layer_map;
+    // by node's layer value.
+    std::sort(packets.begin(), packets.end(), [](const auto& a, const auto& b) {
+            return a.layer < b.layer;
+        });
 
-    // Ask each component to draw.
-    for (const auto& component : mNodes)
+    for (const auto& packet : packets)
     {
-        layer_map.insert(std::make_pair(component.GetLayer(), &component));
-    }
+        if (!packet.material || !packet.drawable)
+            continue;
 
-    for (auto pair : layer_map)
-    {
-        const auto* component = pair.second;
-        component->Draw(painter, transform);
+        painter.Draw(*packet.drawable, gfx::Transform(packet.transform), *packet.material);
     }
 
     // if we used a new trańsformation scope pop it here.
@@ -190,9 +245,9 @@ bool Animation::Update(float dt)
 {
     bool alive = false;
 
-    for (auto& component : mNodes)
+    for (auto& node : mNodes)
     {
-        if (component.Update(dt))
+        if (node->Update(dt))
             alive = true;
     }
     return alive;
@@ -203,24 +258,153 @@ bool Animation::IsExpired() const
     return false;
 }
 
+AnimationNode* Animation::AddNode(AnimationNode&& node)
+{
+#if true
+    for (const auto& old : mNodes)
+    {
+        ASSERT(old->GetId() != node.GetId());
+    }
+#endif
+
+    mNodes.push_back(std::make_unique<AnimationNode>(std::move(node)));
+    return mNodes.back().get();
+}
+// Add a new animation node. Returns a pointer to the node
+// that was added to the anímation.
+AnimationNode* Animation::AddNode(const AnimationNode& node)
+{
+#if true
+    for (const auto& old : mNodes)
+    {
+        ASSERT(old->GetId() != node.GetId());
+    }
+#endif
+
+    mNodes.push_back(std::make_unique<AnimationNode>(node));
+    return mNodes.back().get();
+}
+
+void Animation::DeleteNodeByIndex(size_t i)
+{
+    ASSERT(i < mNodes.size());
+    auto it = std::begin(mNodes);
+    std::advance(it, i);
+    mNodes.erase(it);
+}
+// Delete a node by the given id.
+void Animation::DeleteNodeById(const std::string& id)
+{
+    for (auto it = mNodes.begin(); it != mNodes.end(); ++it)
+    {
+        if ((*it)->GetId() == id)
+        {
+            mNodes.erase(it);
+            return;
+        }
+    }
+    ASSERT(!"No such node found.");
+}
+
+
+nlohmann::json Animation::ToJson() const
+{
+    nlohmann::json json;
+    for (const auto& node : mNodes)
+    {
+        json["nodes"].push_back(node->ToJson());
+    }
+
+    using Serializer = Animation;
+
+    json["render_tree"] = mRenderTree.ToJson<Serializer>();
+    return json;
+}
+
+AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
+{
+    if (!json.contains("id")) // root node has no id
+        return nullptr;
+
+    const std::string& id = json["id"];
+    for (auto& it : mNodes)
+        if (it->GetId() == id) return it.get();
+
+    ASSERT(!"no such node found.");
+    return nullptr;
+}
+
+
+// static
+std::optional<Animation> Animation::FromJson(const nlohmann::json& object)
+{
+    Animation ret;
+
+    if (object.contains("nodes"))
+    {
+        for (const auto& json : object["nodes"].items())
+        {
+            std::optional<AnimationNode> comp = AnimationNode::FromJson(json.value());
+            if (!comp.has_value())
+                return std::nullopt;
+            auto node = std::make_unique<AnimationNode>(std::move(comp.value()));
+            ret.mNodes.push_back(std::move(node));
+        }
+    }
+
+    auto& serializer = ret;
+
+    auto render_tree = RenderTree::FromJson(object["render_tree"], serializer);
+    if (!render_tree.has_value())
+        return std::nullopt;
+    ret.mRenderTree = std::move(render_tree.value());
+    return ret;
+}
+
+// static
+nlohmann::json Animation::TreeNodeToJson(const AnimationNode* node)
+{
+    // do only shallow serialization of the animation node,
+    // i.e. only record the id so that we can restore the node
+    // later on load based on the ID.
+    nlohmann::json ret;
+    if (node)
+        ret["id"] = node->GetId();
+    return ret;
+}
+
+
 void Animation::Reset()
 {
-    for (auto& component : mNodes)
+    for (auto& node : mNodes)
     {
-        component.Reset();
+        node->Reset();
     }
 }
 
 void Animation::Prepare(const GfxFactory& loader)
 {
-    for (auto& component : mNodes)
+    for (auto& node : mNodes)
     {
-        if (!component.Prepare(loader))
+        if (!node->Prepare(loader))
         {
-            WARN("Component '%1' failed to prepare.", component.GetName());
+            WARN("Node '%1' failed to prepare.", node->GetName());
         }
     }
 }
 
+Animation& Animation::operator=(const Animation& other)
+{
+    if (this == &other)
+        return *this;
+
+    Animation copy(other);
+
+    for (auto& node : copy.mNodes)
+        mNodes.push_back(std::move(node));
+
+    mRenderTree = copy.mRenderTree;
+    return *this;
+}
 
 } // namespace

@@ -27,8 +27,6 @@
 #include "warnpush.h"
 #  include <QPoint>
 #  include <QMouseEvent>
-#  include <QAbstractTableModel>
-#  include <QAbstractListModel>
 #  include <QMessageBox>
 #  include <base64/base64.h>
 #include "warnpop.h"
@@ -39,6 +37,7 @@
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
+#include "base/assert.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -46,49 +45,53 @@
 #include "graphics/types.h"
 #include "animationwidget.h"
 #include "utility.h"
+#include "treewidget.h"
 
 namespace gui
 {
 
-class AnimationWidget::ComponentModel : public QAbstractListModel
+class AnimationWidget::TreeModel : public TreeWidget::TreeModel
 {
 public:
-    ComponentModel(scene::Animation& anim) : mAnimation(anim)
+    TreeModel(scene::Animation& anim)  : mAnimation(anim)
     {}
 
-    virtual int rowCount(const QModelIndex&) const override
+    virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
     {
-        return static_cast<int>(mAnimation.GetNumNodes());
-    }
-    virtual QVariant data(const QModelIndex& index, int role) const override
-    {
-        const auto  i = static_cast<size_t>(index.row());
-        const auto& c = mAnimation.GetNode(i);
+        auto& root = mAnimation.GetRenderTree();
 
-        if (role == Qt::SizeHintRole)
-            return QSize(0, 16);
-        if (role == Qt::DisplayRole)
-            return app::FromUtf8(c.GetName());
-        return QVariant();
-    }
-    void AddNode(scene::AnimationNode&& component)
-    {
-        const auto row = static_cast<int>(mAnimation.GetNumNodes());
-        beginInsertRows(QModelIndex(), row, row);
-        mAnimation.AddNode(std::move(component));
-        endInsertRows();
-    }
-    void DelNode(size_t index)
-    {
-        const auto row = static_cast<int>(index);
-        beginRemoveRows(QModelIndex(), row, row);
-        mAnimation.DelNode(index);
-        endRemoveRows();
-    }
+        class Visitor : public scene::Animation::RenderTree::Visitor
+        {
+        public:
+            Visitor(std::vector<TreeWidget::TreeItem>& list)
+                : mList(list)
+            {}
+            virtual void EnterNode(scene::AnimationNode* node)
+            {
+                TreeWidget::TreeItem item;
+                item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
+                item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
+                item.SetUserData(node);
+                item.SetLevel(mLevel);
+                mList.push_back(item);
+                mLevel++;
+            }
+            virtual void LeaveNode(scene::AnimationNode* node)
+            {
+                mLevel--;
+            }
 
+        private:
+            unsigned mLevel = 0;
+            std::vector<TreeWidget::TreeItem>& mList;
+        };
+        Visitor visitor(list);
+        root.PreOrderTraverse(visitor);
+    }
 private:
     scene::Animation& mAnimation;
 };
+
 
 class AnimationWidget::Tool
 {
@@ -159,7 +162,7 @@ public:
         std::string name;
         for (size_t i=0; i<666666; ++i)
         {
-            name = "Component_" + std::to_string(i);
+            name = "Node " + std::to_string(i);
             if (CheckNameAvailability(name))
                 break;
         }
@@ -177,7 +180,12 @@ public:
         node.SetTranslation(glm::vec2(xpos, ypos));
         node.SetSize(glm::vec2(width, height));
         node.SetScale(glm::vec2(1.0f, 1.0f));
-        mState.model->AddNode(std::move(node));
+
+        // by default we're appending to the root item.
+        auto& root  = mState.animation.GetRenderTree();
+        auto* child = mState.animation.AddNode(std::move(node));
+        root.AppendChild(child);
+
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -257,7 +265,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
 
-    mState.model.reset(new ComponentModel(mState.animation));
+    mState.scenegraph.reset(new TreeModel(mState.animation));
     mState.workspace = workspace;
 
     mUI.setupUi(this);
@@ -267,7 +275,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.materials->blockSignals(false);
 
     mUI.name->setText("My Animation");
-    mUI.components->setModel(mState.model.get());
+
+    mUI.tree->SetModel(mState.scenegraph.get());
+    mUI.tree->Rebuild();
+
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         // offset the viewport so that the origin of the 2d space is in the middle of the viewport
@@ -298,6 +309,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewCircle->setChecked(false);
         mUI.actionNewTriangle->setChecked(false);
         mUI.actionNewArrow->setChecked(false);
+
+        mUI.tree->Rebuild();
     };
 
     // create the memu for creating instances of user defined drawables
@@ -324,9 +337,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     PopulateFromEnum<scene::AnimationNode::RenderPass>(mUI.renderPass);
 
-    auto* model = mUI.components->selectionModel();
-    connect(model, &QItemSelectionModel::currentRowChanged,
-            this,  &AnimationWidget::currentComponentRowChanged);
+    connect(mUI.tree, &TreeWidget::currentRowChanged,
+            this, &AnimationWidget::currentComponentRowChanged);
+    connect(mUI.tree, &TreeWidget::dragEvent,
+            this, &AnimationWidget::treeDragEvent);
 
     // connect workspace signals for resource management
     connect(workspace, &app::Workspace::NewResourceAvailable,
@@ -349,6 +363,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
 
     mState.animation = *resource.GetContent<scene::Animation>();
     mState.animation.Prepare(*workspace);
+
+    mUI.tree->Rebuild();
 }
 
 AnimationWidget::~AnimationWidget()
@@ -431,6 +447,8 @@ bool AnimationWidget::loadState(const Settings& settings)
     }
     mState.animation = std::move(ret.value());
     mState.animation.Prepare(*mState.workspace);
+
+    mUI.tree->Rebuild();
     return true;
 }
 
@@ -535,25 +553,45 @@ void AnimationWidget::on_actionNewArrow_triggered()
 
 void AnimationWidget::on_actionDeleteComponent_triggered()
 {
-    QModelIndexList items = mUI.components->selectionModel()->selectedRows();
-    if (items.isEmpty())
+    const scene::AnimationNode* item = GetCurrentNode();
+    if (item == nullptr)
         return;
 
-    std::sort(items.begin(), items.end());
+    auto& tree = mState.animation.GetRenderTree();
 
-    int removed = 0;
+    // find the scene graph node that contains this AnimationNode.
+    auto* node = tree.FindNodeByValue(item);
 
-    for (int i=0; i<items.size(); ++i)
+    // traverse the tree starting from the node to be deleted
+    // and capture the ids of the animation nodes that are part
+    // of this hiearchy.
+    struct Carcass {
+        std::string id;
+        std::string name;
+    };
+    std::vector<Carcass> graveyard;
+    node->PreOrderTraverseForEach([&](scene::AnimationNode* value) {
+        Carcass carcass;
+        carcass.id   = value->GetId();
+        carcass.name = value->GetName();
+        graveyard.push_back(carcass);
+    });
+
+    for (auto& carcass : graveyard)
     {
-        const auto& index = items[i];
-        const auto row = index.row() - removed;
-        const auto component_index = static_cast<size_t>(row);
-        mState.model->DelNode(component_index);
-        ++removed;
+        DEBUG("Deleting child '%1', %2", carcass.name, carcass.id);
+        mState.animation.DeleteNodeById(carcass.id);
     }
+
+    // find the parent node
+    auto* parent = tree.FindParent(node);
+
+    parent->DeleteChild(node);
+
+    mUI.tree->Rebuild();
 }
 
-void AnimationWidget::on_components_customContextMenuRequested(QPoint)
+void AnimationWidget::on_tree_customContextMenuRequested(QPoint)
 {
     QMenu menu(this);
     menu.addAction(mUI.actionDeleteComponent);
@@ -594,44 +632,43 @@ void AnimationWidget::on_resetTransform_clicked()
 
 void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
         const auto& material_name = app::ToUtf8(name);
-        component->SetMaterial(material_name, mState.workspace->MakeMaterial(material_name));
+        node->SetMaterial(material_name, mState.workspace->MakeMaterial(material_name));
     }
 }
 
 void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
         const scene::AnimationNode::RenderPass pass = GetValue(mUI.renderPass);
-        component->SetRenderPass(pass);
+        node->SetRenderPass(pass);
     }
 }
 
-void AnimationWidget::currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+void AnimationWidget::currentComponentRowChanged()
 {
-    const auto row = current.row();
-    if (row == -1)
+    const scene::AnimationNode* node = GetCurrentNode();
+    if (node == nullptr)
     {
         mUI.cProperties->setEnabled(false);
         mUI.cTransform->setEnabled(false);
     }
     else
     {
-        const auto& component = mState.animation.GetNode(row);
-        const auto& translate = component.GetTranslation();
-        const auto& size = component.GetSize();
-        SetValue(mUI.cName, component.GetName());
-        SetValue(mUI.renderPass, component.GetRenderPass());
-        SetValue(mUI.layer, component.GetLayer());
-        SetValue(mUI.materials, component.GetMaterialName());
+        const auto& translate = node->GetTranslation();
+        const auto& size = node->GetSize();
+        SetValue(mUI.cName, node->GetName());
+        SetValue(mUI.renderPass, node->GetRenderPass());
+        SetValue(mUI.layer, node->GetLayer());
+        SetValue(mUI.materials, node->GetMaterialName());
         SetValue(mUI.cTranslateX, translate.x);
         SetValue(mUI.cTranslateY, translate.y);
         SetValue(mUI.cSizeX, size.x);
         SetValue(mUI.cSizeY, size.y);
-        SetValue(mUI.cRotation, qRadiansToDegrees(component.GetRotation()));
+        SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
     }
@@ -682,7 +719,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
                 component.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
             }
         }
-        if (auto* comp = GetCurrentComponent())
+        if (auto* comp = GetCurrentNode())
         {
             // either this material still exists or the component's material
             // was changed in the loop above.
@@ -716,64 +753,93 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
     }
 }
 
+void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
+{
+    auto& tree = mState.animation.GetRenderTree();
+    auto* src_value = static_cast<scene::AnimationNode*>(item->GetUserData());
+    auto* dst_value = static_cast<scene::AnimationNode*>(target->GetUserData());
+
+    // find the scene graph node that contains this AnimationNode.
+    auto* src_node   = tree.FindNodeByValue(src_value);
+    auto* src_parent = tree.FindParent(src_node);
+
+    // check if we're trying to drag a parent onto its own child
+    if (src_node->FindNodeByValue(dst_value))
+        return;
+
+    scene::Animation::RenderTreeNode branch = *src_node;
+    src_parent->DeleteChild(src_node);
+
+    auto* dst_node  = tree.FindNodeByValue(dst_value);
+    dst_node->AppendChild(std::move(branch));
+
+}
+
 void AnimationWidget::on_layer_valueChanged(int layer)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        component->SetLayer(layer);
+        node->SetLayer(layer);
     }
 }
 
 void AnimationWidget::on_cSizeX_valueChanged(double value)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        auto size = component->GetSize();
+        auto size = node->GetSize();
         size.x = value;
-        component->SetSize(size);
+        node->SetSize(size);
     }
 }
 void AnimationWidget::on_cSizeY_valueChanged(double value)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        auto size = component->GetSize();
+        auto size = node->GetSize();
         size.y = value;
-        component->SetSize(size);
+        node->SetSize(size);
     }
 }
 void AnimationWidget::on_cTranslateX_valueChanged(double value)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        auto translate = component->GetTranslation();
+        auto translate = node->GetTranslation();
         translate.x = value;
-        component->SetTranslation(translate);
+        node->SetTranslation(translate);
     }
 }
 void AnimationWidget::on_cTranslateY_valueChanged(double value)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        auto translate = component->GetTranslation();
+        auto translate = node->GetTranslation();
         translate.y = value;
-        component->SetTranslation(translate);
+        node->SetTranslation(translate);
     }
 }
 void AnimationWidget::on_cRotation_valueChanged(double value)
 {
-    if (auto* component = GetCurrentComponent())
+    if (auto* node = GetCurrentNode())
     {
-        component->SetRotation(qDegreesToRadians(value));
+        node->SetRotation(qDegreesToRadians(value));
     }
 }
 
 void AnimationWidget::on_cName_textChanged(const QString& text)
 {
-    if (auto* component = GetCurrentComponent())
-    {
-        component->SetName(app::ToUtf8(text));
-    }
+    TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
+    if (item == nullptr)
+        return;
+    if (!item->GetUserData())
+        return;
+    auto* node = static_cast<scene::AnimationNode*>(item->GetUserData());
+
+    node->SetName(app::ToUtf8(text));
+    item->SetText(text);
+
+    mUI.tree->Update();
 }
 
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
@@ -832,15 +898,14 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
-scene::AnimationNode* AnimationWidget::GetCurrentComponent()
+scene::AnimationNode* AnimationWidget::GetCurrentNode()
 {
-    const auto& indices = mUI.components->selectionModel()->selectedRows();
-    if (indices.isEmpty())
+    TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
+    if (item == nullptr)
         return nullptr;
-
-    const auto component_index = indices[0].row();
-    auto& component = mState.animation.GetNode(component_index);
-    return &component;
+    if (!item->GetUserData())
+        return nullptr;
+    return static_cast<scene::AnimationNode*>(item->GetUserData());
 }
 
 } // namespace

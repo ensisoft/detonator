@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
 #  include <nlohmann/json.hpp>
@@ -39,6 +40,7 @@
 #include "base/utility.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
+#include "tree.h"
 
 namespace gfx {
     class Drawable;
@@ -58,21 +60,10 @@ namespace scene
             Draw,
             Mask
         };
-        AnimationNode() = default;
-        AnimationNode(const std::string& name,
-                    const std::string& material_name,
-                    const std::string& drawable_name,
-                    std::shared_ptr<gfx::Drawable> drawable,
-                    std::shared_ptr<gfx::Material> material)
-            : mName(name)
-            , mMaterialName(material_name)
-            , mDrawableName(drawable_name)
-            , mMaterial(material)
-            , mDrawable(drawable)
-        {}
-
-        // Draw this component relative to the given parent transformation.
-        void Draw(gfx::Painter& painter, gfx::Transform& transform) const;
+        // This will construct an "empty" node that cannot be
+        // drawn yet. You'll need to se the various properties
+        // for drawable/material etc.
+        AnimationNode();
 
         // Set the drawable object (shape) for this component.
         // The name identifies the resource in the gfx resource loader.
@@ -107,10 +98,20 @@ namespace scene
         { return mRenderPass; }
         int GetLayer() const
         { return mLayer; }
+        std::string GetId() const
+        { return mId; }
         std::string GetName() const
         { return mName; }
+        std::shared_ptr<gfx::Material> GetMaterial()
+        { return mMaterial; }
+        std::shared_ptr<const gfx::Material> GetMaterial() const
+        { return mMaterial; }
         std::string GetMaterialName() const
         { return mMaterialName; }
+        std::shared_ptr<gfx::Drawable> GetDrawable()
+        { return mDrawable; }
+        std::shared_ptr<const gfx::Drawable> GetDrawable() const
+        { return mDrawable; }
         std::string GetDrawableName() const
         { return mDrawableName; }
         glm::vec2 GetTranslation() const
@@ -123,6 +124,14 @@ namespace scene
         bool Update(float dt);
 
         void Reset();
+
+        // Get this node's transformation that applies
+        // to the hieararchy of nodes.
+        glm::mat4 GetNodeTransform() const;
+
+        // Get this node's transformation that applies to this
+        // nodes' drawable object(s).
+        glm::mat4 GetModelTransform() const;
 
         // Prepare this animation component for rendering
         // by loading all the needed runtime resources.
@@ -140,6 +149,9 @@ namespace scene
         static std::optional<AnimationNode> FromJson(const nlohmann::json& object);
     private:
         // generic properties.
+        std::string mId;
+        // this is the human readable name and can be used when for example
+        // programmatically looking up an animation node.
         std::string mName;
         // visual properties. we keep the material/drawable names
         // around so that we we know which resources to load at runtime.
@@ -170,75 +182,98 @@ namespace scene
     class Animation
     {
     public:
+        using RenderTree = TreeNode<AnimationNode>;
+        using RenderTreeNode = TreeNode<AnimationNode>;
+
+        Animation() = default;
+        Animation(const Animation& other);
+
+        struct DrawPacket {
+            const AnimationNode* node = nullptr;
+            // shortcut to the node's material.
+            std::shared_ptr<const gfx::Material> material;
+            // shortcut to the node's drawable.
+            std::shared_ptr<const gfx::Drawable> drawable;
+            glm::mat4 transform;
+            int layer = 0;
+        };
+
         // Draw the animation and its components.
         // Each component is transformed relative to the parent transformation "trans".
         void Draw(gfx::Painter& painter, gfx::Transform& trans) const;
 
+        // Update the animation and it's nodes.
+        // Triggers the actions and events specified on the timeline.
         bool Update(float dt);
 
         bool IsExpired() const;
 
-        // Add a new component
-        void AddNode(AnimationNode&& component)
-        { mNodes.push_back(std::move(component)); }
+        // Add a new animation node. Returns pointer to the node
+        // that was added to the animation.
+        AnimationNode* AddNode(AnimationNode&& node);
 
-        // Delete a component by the given index.
-        void DelNode(size_t i)
-        {
-            ASSERT(i < mNodes.size());
-            auto it = std::begin(mNodes);
-            std::advance(it, i);
-            mNodes.erase(it);
-        }
+        // Add a new animation node. Returns a pointer to the node
+        // that was added to the anímation.
+        AnimationNode* AddNode(const AnimationNode& node);
+
+        // Delete a node by the given index.
+        void DeleteNodeByIndex(size_t i);
+
+        // Delete a node by the given id. THe node is expected to exist.
+        void DeleteNodeById(const std::string& id);
 
         AnimationNode& GetNode(size_t i)
         {
             ASSERT(i < mNodes.size());
-            return mNodes[i];
+            return *mNodes[i];
         }
         const AnimationNode& GetNode(size_t i) const
         {
             ASSERT(i < mNodes.size());
-            return mNodes[i];
+            return *mNodes[i];
         }
-
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
+        RenderTree& GetRenderTree()
+        { return mRenderTree; }
+        const RenderTree& GetRenderTree() const
+        { return mRenderTree; }
 
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            for (const auto& component : mNodes)
-            {
-                json["nodes"].push_back(component.ToJson());
-            }
-            return json;
-        }
-
-        static std::optional<Animation> FromJson(const nlohmann::json& object)
-        {
-            Animation ret;
-
-            for (const auto& json : object["nodes"].items())
-            {
-                std::optional<AnimationNode> comp = AnimationNode::FromJson(json.value());
-                if (!comp.has_value())
-                    return std::nullopt;
-                ret.mNodes.push_back(std::move(comp.value()));
-            }
-            return ret;
-        }
-
+        // Reset the state of the animation to initial state.
         void Reset();
 
         // Prepare and load the runtime resources if not yet loaded.
         void Prepare(const GfxFactory& loader);
 
+        // Serialize the animation into JSON.
+        nlohmann::json ToJson() const;
+
+        // Lookup a AnimationNode based on the serialized ID in the JSON.
+        AnimationNode* TreeNodeFromJson(const nlohmann::json& json);
+
+        // Create an animation object based on the JSON. Returns nullopt if
+        // deserialization failed.
+        static std::optional<Animation> FromJson(const nlohmann::json& object);
+
+        // Serialize an animation node contained in the RenderTree to JSON by doing
+        // a shallow (id only) based serialization.
+        // Later in TreeNodeFromJson when reading back the render tree we simply
+        // look up the node based on the ID.
+        static nlohmann::json TreeNodeToJson(const AnimationNode* node);
+
+        Animation& operator=(const Animation& other);
+
     private:
         // The list of components that are to be drawn as part
         // of the animation. Each component has a unique transform
         // relative to the animation.
-        std::vector<AnimationNode> mNodes;
-
+        // we're allocating the AnimationNods on the free store
+        // so that the pointers remain valid even if the vector is resized
+        std::vector<std::unique_ptr<AnimationNode>> mNodes;
+        // scenegraph / render tree for hierarchical
+        // traversal and transformation of the animation nodes.
+        // i.e. the tree defines the parent-child transformation
+        // hiearchy.
+        RenderTree mRenderTree;
     };
 } // namespace

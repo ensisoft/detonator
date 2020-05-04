@@ -66,7 +66,7 @@ namespace gui
         void on_actionNewTriangle_triggered();
         void on_actionNewArrow_triggered();
         void on_actionDeleteComponent_triggered();
-        void on_components_customContextMenuRequested(QPoint);
+        void on_tree_customContextMenuRequested(QPoint);
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_resetTransform_clicked();
@@ -82,16 +82,17 @@ namespace gui
         void on_cRotation_valueChanged(double value);
         void on_cName_textChanged(const QString& text);
 
-        void currentComponentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+        void currentComponentRowChanged();
         void placeNewParticleSystem();
         void newResourceAvailable(const app::Resource* resource);
         void resourceToBeDeleted(const app::Resource* resource);
+        void treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
-        scene::AnimationNode* GetCurrentComponent();
+        scene::AnimationNode* GetCurrentNode();
     private:
-        class ComponentModel;
+        class TreeModel;
         class Tool;
         class PlaceTool;
         class CameraTool;
@@ -111,7 +112,7 @@ namespace gui
             scene::Animation animation;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
-            std::unique_ptr<ComponentModel> model;
+            std::unique_ptr<TreeModel> scenegraph;
             // current workspace we're editing.
             app::Workspace* workspace = nullptr;
         } mState;
