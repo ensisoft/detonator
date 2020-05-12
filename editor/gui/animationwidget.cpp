@@ -889,9 +889,34 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     view.Rotate(angle);
     view.Translate(GetValue(mUI.translateX), GetValue(mUI.translateY));
 
+    class DrawHook : public scene::Animation::DrawHook
+    {
+    public:
+        DrawHook(scene::AnimationNode* selected)
+          : mSelected(selected)
+        {}
+        virtual void AppendPackets(const scene::AnimationNode* node, const scene::Animation::DrawPacket& packet,
+            std::vector<scene::Animation::DrawPacket>& packets) override
+        {
+            if (node != mSelected)
+                return;
+
+            scene::Animation::DrawPacket selection;
+            selection.transform = packet.transform;
+            selection.material  = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
+            selection.drawable  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Wireframe);
+            selection.layer     = packet.layer;
+            packets.push_back(selection);
+        }
+    private:
+        scene::AnimationNode* mSelected = nullptr;
+    };
+
+    DrawHook hook(GetCurrentNode());
+
     // begin the animation transformation space
     view.Push();
-    mState.animation.Draw(painter, view);
+    mState.animation.Draw(painter, view, &hook);
     view.Pop();
 
     if (mCurrentTool)

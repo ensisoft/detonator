@@ -183,7 +183,7 @@ Animation::Animation(const Animation& other)
     mRenderTree = RenderTree::FromJson(json, *this).value();
 }
 
-void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
+void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
 {
     // here we could apply operations that would apply to the whole
     // animation but currently we don't need such things.
@@ -195,9 +195,10 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
     class Visitor : public RenderTree::ConstVisitor
     {
     public:
-        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform)
+        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook)
             : mPackets(packets)
             , mTransform(transform)
+            , mHook(hook)
         {}
         virtual void EnterNode(const AnimationNode* node) override
         {
@@ -208,12 +209,22 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
             mTransform.Push(node->GetModelTransform());
 
             DrawPacket packet;
-            packet.node      = node;
             packet.material  = node->GetMaterial();
             packet.drawable  = node->GetDrawable();
             packet.layer     = node->GetLayer();
             packet.transform = mTransform.GetAsMatrix();
-            mPackets.push_back(packet);
+
+            if (mHook && mHook->InspectPacket(node, packet))
+                mPackets.push_back(packet);
+            else mPackets.push_back(packet);
+
+            if (mHook)
+            {
+                std::vector<DrawPacket> packets;
+                mHook->AppendPackets(node, packet, packets);
+                for (auto& p : packets)
+                    mPackets.push_back(std::move(p));
+            }
 
             // pop the model transform
             mTransform.Pop();
@@ -228,9 +239,10 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform) const
     private:
         std::vector<DrawPacket>& mPackets;
         gfx::Transform& mTransform;
+        DrawHook* mHook = nullptr;
     };
 
-    Visitor visitor(packets, transform);
+    Visitor visitor(packets, transform, hook);
     mRenderTree.PreOrderTraverse(visitor);
 
     // implement "layers" by drawing in a sorted order as determined

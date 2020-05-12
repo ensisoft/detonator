@@ -215,7 +215,6 @@ namespace scene
         Animation(const Animation& other);
 
         struct DrawPacket {
-            const AnimationNode* node = nullptr;
             // shortcut to the node's material.
             std::shared_ptr<const gfx::Material> material;
             // shortcut to the node's drawable.
@@ -224,9 +223,26 @@ namespace scene
             int layer = 0;
         };
 
+        class DrawHook
+        {
+        public:
+            virtual ~DrawHook() = default;
+            // This is a hook function to inspect and  modify the the draw packet produced by the
+            // given animation node. The return value can be used to indicate filtering.
+            // If the function returns false thepacket is dropped. Otherwise it's added to the
+            // current drawlist with any possible modifications.
+            virtual bool InspectPacket(const AnimationNode* node, DrawPacket& packet) { return true; }
+            // This is a hook function to append extra draw packets to the current drawlist
+            // based on the node and and it's current draw packet.
+            virtual void AppendPackets(const AnimationNode* node, const DrawPacket& packet, std::vector<DrawPacket>& packets) {}
+        protected:
+        };
+
         // Draw the animation and its components.
         // Each component is transformed relative to the parent transformation "trans".
-        void Draw(gfx::Painter& painter, gfx::Transform& trans) const;
+        // Optional draw hook can be used to modify the draw packets before submission to the
+        // paint device.
+        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
 
         // Update the animation and it's nodes.
         // Triggers the actions and events specified on the timeline.
