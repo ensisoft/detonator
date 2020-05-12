@@ -32,6 +32,7 @@
 #include "warnpop.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
@@ -123,8 +124,9 @@ public:
 
         const float x = mStart.x();
         const float y = mStart.y();
-        const float w = diff.x();
-        const float h = diff.y();
+        const float d = std::sqrt(diff.x()*diff.x() + diff.y()*diff.y());
+        const float w = mAlwaysSquare ? d : diff.x();
+        const float h = mAlwaysSquare ? d : diff.y();
         gfx::Transform t;
         t.Resize(w, h);
         t.Translate(x, y);
@@ -137,6 +139,7 @@ public:
         if (mEngaged)
         {
             mCurrent = mickey->pos();
+            mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
         }
     }
     virtual void MousePress(QMouseEvent* mickey) override
@@ -170,8 +173,9 @@ public:
         const auto& diff = mCurrent - mStart;
         const float xpos = mStart.x() + mState.camera_offset_x;
         const float ypos = mStart.y() + mState.camera_offset_y;
-        const float width  = diff.x();
-        const float height = diff.y();
+        const float hypo = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
+        const float width  = mAlwaysSquare ? hypo : diff.x();
+        const float height = mAlwaysSquare ? hypo : diff.y();
 
         scene::AnimationNode node;
         node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
@@ -206,6 +210,7 @@ private:
     QPoint mStart;
     QPoint mCurrent;
     bool mEngaged = false;
+    bool mAlwaysSquare = false;
 private:
     QString mMaterialName;
     QString mDrawableName;
