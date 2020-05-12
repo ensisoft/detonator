@@ -320,10 +320,13 @@ void TreeWidget::mousePressEvent(QMouseEvent* mickey)
     }
     else
     {
-        mSelected  = &mItems[index];
-        mDragging  = true;
-        mDragStart = mickey->pos();
-        mDragPoint = mickey->pos();
+        mSelected = &mItems[index];
+        if (mickey->button() == Qt::LeftButton)
+        {
+            mDragging  = true;
+            mDragStart = mickey->pos();
+            mDragPoint = mickey->pos();
+        }
     }
 
     // trigger paint
