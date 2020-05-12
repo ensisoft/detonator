@@ -391,23 +391,6 @@
            <string>Visual properties</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Pass </string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="materials">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_6">
              <property name="sizePolicy">
@@ -421,10 +404,10 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_27">
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>Layer</string>
+              <string>Style</string>
              </property>
             </widget>
            </item>
@@ -435,6 +418,30 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="cName">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Pass </string>
              </property>
             </widget>
            </item>
@@ -452,20 +459,37 @@
              </item>
             </layout>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </widget>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="renderStyle"/>
            </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="cName">
+           <item row="1" column="1">
+            <widget class="QComboBox" name="materials">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>Layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Line width</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDoubleSpinBox" name="lineWidth">
+             <property name="minimum">
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>

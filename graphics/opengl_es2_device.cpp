@@ -746,6 +746,11 @@ private:
                 GL_CALL(glLineWidth(mLineWidth));
                 GL_CALL(glDrawArrays(GL_LINES, 0, (GLsizei)mData.size()));
             }
+            else if (mDrawType == DrawType::LineLoop)
+            {
+                GL_CALL(glLineWidth(mLineWidth));
+                GL_CALL(glDrawArrays(GL_LINE_LOOP, 0, (GLsizei)mData.size()));
+            }
         }
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }

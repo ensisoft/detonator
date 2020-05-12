@@ -121,6 +121,12 @@ bool AnimationNode::Prepare(const GfxFactory& loader)
     // each ship will render the same particle stream.
     mDrawable = loader.MakeDrawable(mDrawableName);
     mMaterial = loader.MakeMaterial(mMaterialName);
+
+    if (mDrawable)
+    {
+        mDrawable->SetStyle(mRenderStyle);
+        mDrawable->SetLineWidth(mLineWidth);
+    }
     return mDrawable && mMaterial;
 }
 
@@ -137,6 +143,8 @@ nlohmann::json AnimationNode::ToJson() const
     base::JsonWrite(json, "rotation", mRotation);
     base::JsonWrite(json, "layer", mLayer);
     base::JsonWrite(json, "render_pass", mRenderPass);
+    base::JsonWrite(json, "render_style", mRenderStyle);
+    base::JsonWrite(json, "linewidth", mLineWidth);
     return json;
 }
 
@@ -155,6 +163,8 @@ std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& objec
         !base::JsonReadSafe(object, "layer", &ret.mLayer) ||
         !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass))
         return std::nullopt;
+    base::JsonReadSafe(object, "render_style", &ret.mRenderStyle);
+    base::JsonReadSafe(object, "linewidth", &ret.mLineWidth);
     return ret;
 }
 

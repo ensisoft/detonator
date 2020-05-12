@@ -241,65 +241,43 @@ class ShapesTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Material materials[3];
+        gfx::Material materials[4];
         materials[0] = gfx::SolidColor(gfx::Color::Red);
-        materials[1] = gfx::TextureMap("textures/Checkerboard.png");
+        materials[1] = gfx::TextureMap("textures/uv_test_512.png");
         materials[2] = gfx::SolidColor(gfx::Color::HotPink);
+        materials[3] = gfx::TextureMap("textures/Checkerboard.png");
 
         {
             gfx::Transform transform;
             transform.Scale(100.0f, 100.0f);
             transform.Translate(10.0f, 10.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[2]);
-        }
 
-        // arrows
-        {
-            gfx::Transform transform;
-            transform.Scale(100.0f, 50.0f);
-            transform.Translate(10.0f, 150.0f);
-            painter.Draw(gfx::Arrow(), transform, materials[0]);
-            transform.Translate(100.0f, 0.0f);
-            painter.Draw(gfx::Arrow(), transform, materials[1]);
-        }
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), transform, materials[2]);
 
-        {
-            gfx::Transform transform;
-            transform.Scale(300.0f, 300.0f);
-            transform.Translate(10.0f, 310.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[0]);
+            transform.Translate(-220.0f, 150.0f);
+            painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[1]);
+            painter.Draw(gfx::Circle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(), transform, materials[2]);
+            painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline), transform, materials[2]);
+
+            transform.Translate(-220.0f, 150.0f);
+            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[0]);
+            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[1]);
+            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Outline), transform, materials[2]);
+
+            transform.Translate(-220.0f, 150.0f);
+            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(), transform, materials[2]);
+            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(), transform, materials[2]);
+            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline), transform, materials[2]);
         }
     }
     virtual void Update(float dts)

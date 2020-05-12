@@ -50,7 +50,7 @@ namespace gfx
             // Draw the given vertices as triangles, i.e.
             // each 3 vertices make a single triangle.
             Triangles,
-            // Draw each given vertex as a point
+            // Draw each given vertex as a separate point
             Points,
             // Draw a series of triangles all connected to the
             // first vertex
@@ -59,7 +59,10 @@ namespace gfx
             // where each pair of adjacent vertices are connected
             // by a line.
             // In this draw the line width setting applies.
-            Lines
+            Lines,
+            // Draw a line between the given vertices looping back
+            // from the last vertex to the first.
+            LineLoop
         };
 
         virtual ~Geometry() = default;
@@ -72,7 +75,7 @@ namespace gfx
         virtual void SetLineWidth(float width) = 0;
         // Update the geometry object's data buffer contents.
         virtual void Update(const Vertex* verts, std::size_t count) = 0;
-        // Update the geometry objects' data buffer contents 
+        // Update the geometry objects' data buffer contents
         // with the given vector of data.
         virtual void Update(const std::vector<Vertex>& verts) = 0;
         // Update the geoemtry object's data buffer contents

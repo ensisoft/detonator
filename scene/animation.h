@@ -60,6 +60,8 @@ namespace scene
             Draw,
             Mask
         };
+        using RenderStyle = gfx::Drawable::Style;
+
         // This will construct an "empty" node that cannot be
         // drawn yet. You'll need to se the various properties
         // for drawable/material etc.
@@ -71,6 +73,11 @@ namespace scene
         {
             mDrawable = std::move(drawable);
             mDrawableName = name;
+            if (mDrawable)
+            {
+                mDrawable->SetLineWidth(mLineWidth);
+                mDrawable->SetStyle(mRenderStyle);
+            }
         }
         // Set the material object for this component.
         // The name identifies the runtime material resource in the gfx resource loader.
@@ -93,9 +100,23 @@ namespace scene
         { mRenderPass = pass; }
         void SetRotation(float value)
         { mRotation = value; }
+        void SetRenderStyle(RenderStyle style)
+        {
+            mRenderStyle = style;
+            if (mDrawable)
+                mDrawable->SetStyle(mRenderStyle);
+        }
+        void SetLineWidth(float value)
+        {
+            mLineWidth = value;
+            if (mDrawable)
+                mDrawable->SetLineWidth(mLineWidth);
+        }
 
         RenderPass GetRenderPass() const
         { return mRenderPass; }
+        RenderStyle GetRenderStyle() const
+        { return mRenderStyle; }
         int GetLayer() const
         { return mLayer; }
         std::string GetId() const
@@ -120,6 +141,8 @@ namespace scene
         { return mSize; }
         float GetRotation() const
         { return mRotation; }
+        float GetLineWidth() const
+        { return mLineWidth; }
 
         bool Update(float dt);
 
@@ -176,6 +199,9 @@ namespace scene
         // rendering properties. which layer and wich pass.
         int mLayer = 0;
         RenderPass mRenderPass = RenderPass::Draw;
+        RenderStyle mRenderStyle = RenderStyle::Solid;
+        // applies only when RenderStyle is either Outline or Wireframe
+        float mLineWidth = 1.0f;
     };
 
 

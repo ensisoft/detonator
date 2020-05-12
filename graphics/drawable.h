@@ -47,6 +47,20 @@ namespace gfx
     class Drawable
     {
     public:
+        // Style of the drawable's geometry determines how the geometry
+        // is to be rasterized.
+        enum class Style {
+            // Rasterize the outline of the shape as lines.
+            // Only the fragments that are within the line are shaded.
+            // Line width setting is applied to determine the width
+            // of the lins.
+            Outline,
+            // Rasterize the individual triangles as lines.
+            Wireframe,
+            // Rasterize the interior of the drawable. This is the default
+            Solid
+        };
+
         virtual ~Drawable() = default;
         // Get the device specific shader object.
         // If the shader does not yet exist on the device it's created
@@ -60,40 +74,83 @@ namespace gfx
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(float dt) {}
+        // Request a particular line width to be used when style
+        // is either Outline or Wireframe.
+        virtual void SetLineWidth(float width) {}
+        // Set the style to be used for rasterizing the drawable
+        // shapes's fragments.
+        // Not all drawables support all Styles.
+        virtual void SetStyle(Style style) {}
     private:
     };
 
     class Arrow : public Drawable
     {
     public:
+        Arrow() = default;
+        Arrow(Style style) : mStyle(style)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
     private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
     };
 
     class Circle : public Drawable
     {
     public:
+        Circle() = default;
+        Circle(Style style) : mStyle(style)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
     private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
     };
 
 
     class Rectangle : public Drawable
     {
     public:
+        Rectangle() = default;
+        Rectangle(Style style) : mStyle(style)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style; }
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
     private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
     };
 
     class Triangle : public Drawable
     {
     public:
+        Triangle() = default;
+        Triangle(Style style) : mStyle(style)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
     private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
     };
 
     // Particle engine interface. Particle engines implement some kind of

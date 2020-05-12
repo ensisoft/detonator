@@ -74,7 +74,9 @@ namespace gui
         void on_cMinus90_clicked();
         void on_materials_currentIndexChanged(const QString& name);
         void on_renderPass_currentIndexChanged(const QString& name);
+        void on_renderStyle_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
+        void on_lineWidth_valueChanged(double value);
         void on_cSizeX_valueChanged(double value);
         void on_cSizeY_valueChanged(double value);
         void on_cTranslateX_valueChanged(double value);

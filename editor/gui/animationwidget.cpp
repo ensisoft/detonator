@@ -336,6 +336,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     setWindowTitle("My Animation");
 
     PopulateFromEnum<scene::AnimationNode::RenderPass>(mUI.renderPass);
+    PopulateFromEnum<scene::AnimationNode::RenderStyle>(mUI.renderStyle);
 
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
@@ -648,6 +649,15 @@ void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
     }
 }
 
+void AnimationWidget::on_renderStyle_currentIndexChanged(const QString& name)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const scene::AnimationNode::RenderStyle style = GetValue(mUI.renderStyle);
+        node->SetRenderStyle(style);
+    }
+}
+
 void AnimationWidget::currentComponentRowChanged()
 {
     const scene::AnimationNode* node = GetCurrentNode();
@@ -662,6 +672,7 @@ void AnimationWidget::currentComponentRowChanged()
         const auto& size = node->GetSize();
         SetValue(mUI.cName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
+        SetValue(mUI.renderStyle, node->GetRenderStyle());
         SetValue(mUI.layer, node->GetLayer());
         SetValue(mUI.materials, node->GetMaterialName());
         SetValue(mUI.cTranslateX, translate.x);
@@ -669,6 +680,7 @@ void AnimationWidget::currentComponentRowChanged()
         SetValue(mUI.cSizeX, size.x);
         SetValue(mUI.cSizeY, size.y);
         SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
+        SetValue(mUI.lineWidth, node->GetLineWidth());
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
     }
@@ -780,6 +792,14 @@ void AnimationWidget::on_layer_valueChanged(int layer)
     if (auto* node = GetCurrentNode())
     {
         node->SetLayer(layer);
+    }
+}
+
+void AnimationWidget::on_lineWidth_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetLineWidth(value);
     }
 }
 

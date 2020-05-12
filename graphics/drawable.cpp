@@ -47,32 +47,83 @@ Shader* Arrow::GetShader(Device& device) const
 }
 Geometry* Arrow::Upload(Device& device) const
 {
-    Geometry* geom = device.FindGeometry("Arrow");
+    const auto* name = mStyle == Style::Outline   ? "ArrowOutline" :
+                      (mStyle == Style::Wireframe ? "ArrowWireframe" : "Arrow");
+    Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        const Vertex verts[] = {
-            // body
-            {{0.0f, -0.25f}, {0.0f, 0.75f}},
-            {{0.0f, -0.75f}, {0.0f, 0.25f}},
-            {{0.7f, -0.25f}, {0.7f, 0.75f}},
-            // body
-            {{0.7f, -0.25f}, {0.7f, 0.75f}},
-            {{0.0f, -0.75f}, {0.0f, 0.25f}},
-            {{0.7f, -0.75f}, {0.7f, 0.25f}},
+        if (mStyle == Style::Outline)
+        {
+            const Vertex verts[] = {
+                {{0.0f, -0.25f}, {0.0f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.7f, -0.75f}, {0.7f, 0.25f}},
+                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{1.0f, -0.5f}, {1.0f, 0.5f}},
+                {{0.7f, -0.0f}, {0.7f, 1.0f}},
+                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+            };
+            geom = device.MakeGeometry(name);
+            geom->Update(verts, 7);
+        }
+        else if (mStyle == Style::Solid)
+        {
+            const Vertex verts[] = {
+                // body
+                {{0.0f, -0.25f}, {0.0f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                // body
+                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.7f, -0.75f}, {0.7f, 0.25f}},
 
-            // arrow head
-            {{0.7f, -0.0f}, {0.7f, 1.0f}},
-            {{0.7f, -0.5f}, {0.7f, 0.5f}},
-            {{1.0f, -0.5f}, {1.0f, 0.5f}},
-            // arrow head
-            {{0.7f, -0.5f}, {0.7f, 0.5f}},
-            {{0.7f, -1.0f}, {0.7f, 0.0f}},
-            {{1.0f, -0.5f}, {1.0f, 0.5f}}
-        };
-        geom = device.MakeGeometry("Arrow");
-        geom->Update(verts, 12);
-        geom->SetDrawType(Geometry::DrawType::Triangles);
+                // arrow head
+                {{0.7f, -0.0f}, {0.7f, 1.0f}},
+                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{1.0f, -0.5f}, {1.0f, 0.5f}},
+            };
+            geom = device.MakeGeometry(name);
+            geom->Update(verts, 9);
+        }
+        else if (mStyle == Style::Wireframe)
+        {
+            const Vertex verts[] = {
+                // body
+                {{0.0f, -0.25f}, {0.0f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                {{0.0f, -0.25f}, {0.0f, 0.75f}},
+
+                // body
+                {{0.0f, -0.75f}, {0.0f, 0.25f}},
+                {{0.7f, -0.75f}, {0.7f, 0.25f}},
+                {{0.7f, -0.75f}, {0.7f, 0.25f}},
+                {{0.7f, -0.25f}, {0.0f, 0.75f}},
+
+                // arrow head
+                {{0.7f, -0.0f}, {0.7f, 1.0f}},
+                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{1.0f, -0.5f}, {1.0f, 0.5f}},
+                {{1.0f, -0.5f}, {1.0f, 0.5f}},
+                {{0.7f, -0.0f}, {0.7f, 1.0f}},
+            };
+            geom = device.MakeGeometry(name);
+            geom->Update(verts, 16);
+
+        }
     }
+    if (mStyle == Style::Solid)
+        geom->SetDrawType(Geometry::DrawType::Triangles);
+    else if (mStyle == Style::Wireframe)
+        geom->SetDrawType(Geometry::DrawType::Lines);
+    else if (mStyle == Style::Outline)
+        geom->SetDrawType(Geometry::DrawType::LineLoop);
+
+    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
@@ -92,20 +143,28 @@ Geometry* Circle::Upload(Device& device) const
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 100;
+    const auto* name = mStyle == Style::Outline   ? "RectOutline" :
+                      (mStyle == Style::Wireframe ? "RectWireframe" : "Rect");
 
-    Geometry* geom = device.FindGeometry("Circle");
+    Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        Vertex c;
-        c.aPosition.x =  0.5;
-        c.aPosition.y = -0.5;
-        c.aTexCoord.x = 0.5;
-        c.aTexCoord.y = 0.5;
         std::vector<Vertex> vs;
-        vs.push_back(c);
+
+        // center point for triangle fan.
+        Vertex center;
+        center.aPosition.x =  0.5;
+        center.aPosition.y = -0.5;
+        center.aTexCoord.x = 0.5;
+        center.aTexCoord.y = 0.5;
+        if (mStyle == Style::Solid)
+        {
+            vs.push_back(center);
+        }
 
         const float angle_increment = (float)(math::Pi * 2.0f) / slices;
         float angle = 0.0f;
+
         for (unsigned i=0; i<=slices; ++i)
         {
             const auto x = std::cos(angle) * 0.5f;
@@ -117,11 +176,31 @@ Geometry* Circle::Upload(Device& device) const
             v.aTexCoord.x = x + 0.5f;
             v.aTexCoord.y = y + 0.5f;
             vs.push_back(v);
+
+            if (mStyle == Style::Wireframe)
+            {
+                const auto x = std::cos(angle) * 0.5f;
+                const auto y = std::sin(angle) * 0.5f;
+                Vertex v;
+                v.aPosition.x = x + 0.5f;
+                v.aPosition.y = y - 0.5f;
+                v.aTexCoord.x = x + 0.5f;
+                v.aTexCoord.y = y + 0.5f;
+                vs.push_back(v);
+                vs.push_back(center);
+            }
         }
-        geom = device.MakeGeometry("Circle");
+        geom = device.MakeGeometry(name);
         geom->Update(&vs[0], vs.size());
-        geom->SetDrawType(Geometry::DrawType::TriangleFan);
+
     }
+    if (mStyle == Style::Solid)
+        geom->SetDrawType(Geometry::DrawType::TriangleFan);
+    else if (mStyle == Style::Outline)
+        geom->SetDrawType(Geometry::DrawType::LineLoop);
+    else if (mStyle == Style::Wireframe)
+        geom->SetDrawType(Geometry::DrawType::LineLoop);
+    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
@@ -138,21 +217,42 @@ Shader* Rectangle::GetShader(Device& device) const
 
 Geometry* Rectangle::Upload(Device& device) const
 {
-    Geometry* geom = device.FindGeometry("Rectangle");
+    Geometry* geom = device.FindGeometry(mStyle == Style::Outline ? "RectangleOutline" : "Rectangle");
     if (!geom)
     {
-        const Vertex verts[6] = {
-            { {0.0f,  0.0f}, {0.0f, 1.0f} },
-            { {0.0f, -1.0f}, {0.0f, 0.0f} },
-            { {1.0f, -1.0f}, {1.0f, 0.0f} },
+        if (mStyle == Style::Outline)
+        {
+            const Vertex verts[6] = {
+                { {0.0f,  0.0f}, {0.0f, 1.0f} },
+                { {0.0f, -1.0f}, {0.0f, 0.0f} },
+                { {1.0f, -1.0f}, {1.0f, 0.0f} },
+                { {1.0f,  0.0f}, {1.0f, 1.0f} }
+            };
+            geom = device.MakeGeometry("RectangleOutline");
+            geom->Update(verts, 4);
+        }
+        else
+        {
+            const Vertex verts[6] = {
+                { {0.0f,  0.0f}, {0.0f, 1.0f} },
+                { {0.0f, -1.0f}, {0.0f, 0.0f} },
+                { {1.0f, -1.0f}, {1.0f, 0.0f} },
 
-            { {0.0f,  0.0f}, {0.0f, 1.0f} },
-            { {1.0f, -1.0f}, {1.0f, 0.0f} },
-            { {1.0f,  0.0f}, {1.0f, 1.0f} }
-        };
-        geom = device.MakeGeometry("Rectangle");
-        geom->Update(verts, 6);
+                { {0.0f,  0.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 0.0f} },
+                { {1.0f,  0.0f}, {1.0f, 1.0f} }
+            };
+            geom = device.MakeGeometry("Rectangle");
+            geom->Update(verts, 6);
+        }
     }
+    geom->SetLineWidth(mLineWidth);
+    if (mStyle == Style::Solid)
+        geom->SetDrawType(Geometry::DrawType::Triangles);
+    else if (mStyle == Style::Wireframe)
+        geom->SetDrawType(Geometry::DrawType::LineLoop);
+    else if (mStyle== Style::Outline)
+        geom->SetDrawType(Geometry::DrawType::LineLoop);
     return geom;
 }
 
@@ -182,6 +282,13 @@ Geometry* Triangle::Upload(Device& device) const
         geom = device.MakeGeometry("Triangle");
         geom->Update(verts, 3);
     }
+    geom->SetLineWidth(mLineWidth);
+    if (mStyle == Style::Solid)
+        geom->SetDrawType(Geometry::DrawType::Triangles);
+    else if (mStyle == Style::Outline)
+        geom->SetDrawType(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (mStyle == Style::Wireframe)
+        geom->SetDrawType(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
 }
 
