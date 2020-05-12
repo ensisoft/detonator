@@ -64,4 +64,110 @@ namespace math
         return static_cast<T>(min + (range * value));
     }
 
+
+    enum class TriangleWindingOrder {
+        Undetermined,
+        Clockwise,
+        CounterClockwise,
+
+    };
+
+    // Given 3 vertices find the polygon winding order.
+    template<typename Vec2> inline
+    TriangleWindingOrder FindTriangleWindingOrder(const Vec2& a, const Vec2& b, const Vec2& c)
+    {
+        // https://stackoverflow.com/questions/9120032/determine-winding-of-a-2d-triangles-after-triangulation
+        // https://www.element84.com/blog/determining-the-winding-of-a-polygon-given-as-a-set-of-ordered-points
+
+        // positive area indicates clockwise winding.
+        // negative area indicates counter clockwise winding.n
+        // zero area is degerate case and the vertices are collinear (not linearly independent)
+        const float ret = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+        if (ret > 0.0f)
+            return TriangleWindingOrder::Clockwise;
+        else if (ret < 0.0f)
+            return TriangleWindingOrder::CounterClockwise;
+        return TriangleWindingOrder::Undetermined;
+    }
+
+    template<typename Vertex>
+    std::vector<Vertex> FindConvexHull(const Vertex* verts, size_t num_verts)
+    {
+        // this is the so called "Jarvis March."
+
+        std::vector<Vertex> hull;
+
+        if (num_verts < 3)
+            return hull;
+
+        // find the leftmost point index.
+        auto leftmost = 0;
+        for (size_t i=1; i<num_verts; ++i)
+        {
+            const auto& a = GetPosition(verts[i]);
+            const auto& b = GetPosition(verts[leftmost]);
+            if (a.x < b.x)
+                leftmost = i;
+        }
+
+        auto current = leftmost;
+        do
+        {
+            // add the most recently found point to the hull
+            hull.push_back(verts[current]);
+
+            // take a guess at choosing the next vertex.
+            auto next = (current + 1) % num_verts;
+
+            // we can imagine there to be a line from the current vertex to the
+            // next vertex. then we look for vertices that are to the left of this line.
+            // any such vertex will become the next new guess and then we repeat.
+            // so this will always choose the "leftmost" vertex with respect to the
+            // current line segment between current and next.
+            //
+            //
+            //         x
+            //
+            //   a---------->b
+            //
+            //         y
+            //
+            //
+            // when looking from A to B X is to the left and Y is to the right.
+            // we can test for this by checking the polygon winding order.
+            // triangle (a, b, x) will have counter clockwise winding order while
+            // triangle (a, b, y) will have clockwise winding order.
+            //
+            // note that for this algorithm it doesn't matter if we choose left or right since
+            // either selection will result in the same convex hull except that in different
+            // order of vertices.
+
+            // look for a vertex that is to the left of the current line segment between a and b.
+            // i.e. current and next.
+            for (size_t i=0; i<num_verts; ++i)
+            {
+                if (i == next)
+                    continue;
+
+                const auto& a = GetPosition(verts[current]);
+                const auto& b = GetPosition(verts[next]);
+                const auto& c = GetPosition(verts[i]);
+                if (FindTriangleWindingOrder(a, b, c) == TriangleWindingOrder::CounterClockwise)
+                    next = i;
+            }
+            current = next;
+        }
+        while (current != leftmost);
+
+        return hull;
+    }
+
+    template<typename Vertex> inline
+    std::vector<Vertex> FindConvexHull(const std::vector<Vertex>& verts)
+    {
+        if (verts.empty())
+            return {};
+        return FindConvexHull(&verts[0], verts.size());
+    }
+
 } // namespace

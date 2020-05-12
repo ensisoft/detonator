@@ -353,6 +353,9 @@ add_executable(unit_test_tree
     base/assert.cpp
     scene/unit_test/unit_test_tree.cpp )
 
+add_executable(unit_test_math
+    base/unit_test/unit_test_math.cpp)
+
 target_link_libraries(unit_test_device
     wdk_system
     wdk_desktop_gl
@@ -363,6 +366,6 @@ target_include_directories(unit_test_image  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/g
 target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 
-
 target_include_directories(unit_test_tree PRIVATE "${CMAKE_CURRENT_LIST_DIR}/scene/unit_test")
 
+target_include_directories(unit_test_math PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
