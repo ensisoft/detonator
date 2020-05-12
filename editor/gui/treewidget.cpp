@@ -314,13 +314,17 @@ void TreeWidget::mousePressEvent(QMouseEvent* mickey)
     // so to determine the row that is clicked is easy
     const auto index = mouse_y / mItemHeight;
     if (index >= mItems.size())
-        return;
-
-    mSelected  = &mItems[index];
-
-    mDragging  = true;
-    mDragStart = mickey->pos();
-    mDragPoint = mickey->pos();
+    {
+        // select nada.
+        mSelected = nullptr;
+    }
+    else
+    {
+        mSelected  = &mItems[index];
+        mDragging  = true;
+        mDragStart = mickey->pos();
+        mDragPoint = mickey->pos();
+    }
 
     // trigger paint
     viewport()->update();
