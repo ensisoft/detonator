@@ -278,6 +278,13 @@ public:
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline), transform, materials[2]);
+
+            transform.Translate(-220.0f, 150.0f);
+            painter.Draw(gfx::Grid(5, 5), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Grid(5, 5), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Grid(5, 5), transform, materials[2]);
         }
     }
     virtual void Update(float dts)

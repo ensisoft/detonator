@@ -153,6 +153,37 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
+    // render a series of intersecting horizontal and vertical lines
+    // at some particular interval (gap distance)
+    class Grid : public Drawable
+    {
+    public:
+        // the num vertical and horizontal lines is the number of lines
+        // *inside* the grid. I.e. not including the enclosing border lines
+        Grid(unsigned num_vertical_lines, unsigned num_horizontal_lines, bool border_lines = true)
+            : mNumVerticalLines(num_vertical_lines)
+            , mNumHorizontalLines(num_horizontal_lines)
+            , mBorderLines(border_lines)
+        {}
+        Grid() = default;
+
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+
+        void SetNumVerticalLines(unsigned lines)
+        { mNumVerticalLines = lines; }
+        void SetNumHorizontalLines(unsigned lines)
+        { mNumHorizontalLines = lines; }
+    private:
+        unsigned mNumVerticalLines = 1;
+        unsigned mNumHorizontalLines = 1;
+        float mLineWidth = 1.0f;
+        bool mBorderLines = false;
+    };
+
+
     // Particle engine interface. Particle engines implement some kind of
     // "particle" / n-body simulation where a variable number of small objects
     // are simulated or animated in some particular way.

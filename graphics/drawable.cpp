@@ -292,6 +292,81 @@ Geometry* Triangle::Upload(Device& device) const
     return geom;
 }
 
+Shader* Grid::GetShader(Device& device) const
+{
+    Shader* shader = device.FindShader("vertex_array.glsl");
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader("vertex_array.glsl");
+        shader->CompileFile("shaders/es2/vertex_array.glsl");
+    }
+    return shader;
+}
+
+Geometry* Grid::Upload(Device& device) const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mNumVerticalLines);
+    hash = base::hash_combine(hash, mNumHorizontalLines);
+    const auto& name = std::to_string(hash);
+
+    Geometry* geom = device.FindGeometry(name);
+    if (!geom)
+    {
+        std::vector<Vertex> verts;
+
+        const float yadvance = 1.0f / (mNumHorizontalLines + 1);
+        const float xadvance = 1.0f / (mNumVerticalLines + 1);
+        for (unsigned i=1; i<=mNumVerticalLines; ++i)
+        {
+            const float x = i * xadvance;
+            const Vertex line[2] = {
+                {{x,  0.0f}, {x, 1.0f}},
+                {{x, -1.0f}, {x, 0.0f}}
+            };
+            verts.push_back(line[0]);
+            verts.push_back(line[1]);
+        }
+        for (unsigned i=1; i<=mNumHorizontalLines; ++i)
+        {
+            const float y = i * yadvance * -1.0f;
+            const Vertex line[2] = {
+                {{0.0f, y}, {0.0f, 1.0f + y}},
+                {{1.0f, y}, {1.0f, 1.0f + y}},
+            };
+            verts.push_back(line[0]);
+            verts.push_back(line[1]);
+        }
+        if (mBorderLines)
+        {
+            const Vertex corners[4] = {
+                // top left
+                {{0.0f, 0.0f}, {0.0f, 1.0f}},
+                // top right
+                {{1.0f, 0.0f}, {1.0f, 1.0f}},
+
+                // bottom left
+                {{0.0f, -1.0f}, {0.0f, 0.0f}},
+                // bottom right
+                {{1.0f, -1.0f}, {1.0f, 0.0f}}
+            };
+            verts.push_back(corners[0]);
+            verts.push_back(corners[1]);
+            verts.push_back(corners[2]);
+            verts.push_back(corners[3]);
+            verts.push_back(corners[0]);
+            verts.push_back(corners[2]);
+            verts.push_back(corners[1]);
+            verts.push_back(corners[3]);
+        }
+        geom = device.MakeGeometry(name);
+        geom->Update(std::move(verts));
+        geom->SetDrawType(Geometry::DrawType::Lines);
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
 
 Shader* KinematicsParticleEngine::GetShader(Device& device) const
 {
