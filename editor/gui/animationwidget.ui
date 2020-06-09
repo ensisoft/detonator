@@ -71,7 +71,7 @@
         <item>
          <widget class="QGroupBox" name="transform">
           <property name="title">
-           <string>Transform</string>
+           <string>View Transform</string>
           </property>
           <property name="checkable">
            <bool>false</bool>

@@ -288,14 +288,26 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         // offset the viewport so that the origin of the 2d space is in the middle of the viewport
-        mState.camera_offset_x = width / 2.0f;
-        mState.camera_offset_y = height / 2.0f;
+        const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
+        const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
+        mUI.translateX->setValue(dist_x);
+        mUI.translateY->setValue(dist_y);
     };
     mUI.widget->onPaintScene = std::bind(&AnimationWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+
     mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
         if (mCurrentTool)
             mCurrentTool->MouseMove(mickey);
+
+        const auto width  = mUI.widget->width();
+        const auto height = mUI.widget->height();
+
+        // update the distance to center.
+        const auto dist_x = mState.camera_offset_x - (width / 2.0f);
+        const auto dist_y = mState.camera_offset_y - (height / 2.0f);
+        mUI.translateX->setValue(dist_x);
+        mUI.translateY->setValue(dist_y);
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
@@ -361,8 +373,9 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
 {
     DEBUG("Editing animation '%1'", resource.GetName());
     mUI.name->setText(resource.GetName());
-    GetProperty(resource, "xpos", mUI.translateX);
-    GetProperty(resource, "ypos", mUI.translateY);
+
+    GetProperty(resource, "camera_offset_x", &mState.camera_offset_x);
+    GetProperty(resource, "camera_offset_y", &mState.camera_offset_y);
     GetProperty(resource, "xscale", mUI.scaleX);
     GetProperty(resource, "yscale", mUI.scaleY);
     GetProperty(resource, "rotation", mUI.rotation);
@@ -415,12 +428,13 @@ void AnimationWidget::addActions(QMenu& menu)
 bool AnimationWidget::saveState(Settings& settings) const
 {
     settings.saveWidget("Animation", mUI.name);
-    settings.saveWidget("Animation", mUI.translateX);
-    settings.saveWidget("Animation", mUI.translateY);
     settings.saveWidget("Animation", mUI.scaleX);
     settings.saveWidget("Animation", mUI.scaleY);
     settings.saveWidget("Animation", mUI.rotation);
     settings.saveWidget("Animation", mUI.showGrid);
+
+    settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
+    settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
 
     // the animation can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -436,12 +450,13 @@ bool AnimationWidget::loadState(const Settings& settings)
     ASSERT(mState.workspace);
 
     settings.loadWidget("Animation", mUI.name);
-    settings.loadWidget("Animation", mUI.translateX);
-    settings.loadWidget("Animation", mUI.translateY);
     settings.loadWidget("Animation", mUI.scaleX);
     settings.loadWidget("Animation", mUI.scaleY);
     settings.loadWidget("Animation", mUI.rotation);
     settings.loadWidget("Animation", mUI.showGrid);
+
+    mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
+    mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
     if (base64.empty())
@@ -508,8 +523,8 @@ void AnimationWidget::on_actionSave_triggered()
 
     app::AnimationResource resource(mState.animation, name);
 
-    SetProperty(resource, "xpos", mUI.translateX);
-    SetProperty(resource, "ypos", mUI.translateY);
+    SetProperty(resource, "camera_offset_x", mState.camera_offset_x);
+    SetProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetProperty(resource, "xscale", mUI.scaleX);
     SetProperty(resource, "yscale", mUI.scaleY);
     SetProperty(resource, "rotation", mUI.rotation);
@@ -632,6 +647,12 @@ void AnimationWidget::on_cMinus90_clicked()
 
 void AnimationWidget::on_resetTransform_clicked()
 {
+    const auto width = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    mState.camera_offset_x = width * 0.5f;
+    mState.camera_offset_y = height * 0.5f;
+
+    // this is camera offset to the center of the widget.
     mUI.translateX->setValue(0);
     mUI.translateY->setValue(0);
     mUI.scaleX->setValue(1.0f);
@@ -887,15 +908,14 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     const bool has_view_transform = mUI.transform->isChecked();
 
     gfx::Transform view;
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
     // and its components from the space of the animation to the global space.
     view.Push();
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Rotate(angle);
-    view.Translate(GetValue(mUI.translateX), GetValue(mUI.translateY));
+    // camera offset should be reflected in the translateX/Y UI components as well.
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     class DrawHook : public scene::Animation::DrawHook
     {
