@@ -323,6 +323,16 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QCheckBox" name="showGrid">
+            <property name="text">
+             <string>Show grid</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>

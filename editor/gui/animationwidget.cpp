@@ -29,6 +29,7 @@
 #  include <QMouseEvent>
 #  include <QMessageBox>
 #  include <base64/base64.h>
+#  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -171,8 +172,8 @@ public:
         }
         // todo: the width and height need to account the zoom level.
         const auto& diff = mCurrent - mStart;
-        const float xpos = mStart.x() + mState.camera_offset_x;
-        const float ypos = mStart.y() + mState.camera_offset_y;
+        const float xpos = mStart.x() - mState.camera_offset_x;
+        const float ypos = mStart.y() - mState.camera_offset_y;
         const float hypo = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
         const float width  = mAlwaysSquare ? hypo : diff.x();
         const float height = mAlwaysSquare ? hypo : diff.y();
@@ -233,8 +234,8 @@ public:
             const auto& delta = pos - mMousePos;
             const float x = delta.x();
             const float y = delta.y();
-            mState.camera_offset_x -= x;
-            mState.camera_offset_y -= y;
+            mState.camera_offset_x += x;
+            mState.camera_offset_y += y;
             //DEBUG("Camera offset %1, %2", mState.camera_offset_x, mState.camera_offset_y);
             mMousePos = pos;
         }
@@ -287,8 +288,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         // offset the viewport so that the origin of the 2d space is in the middle of the viewport
-        mState.camera_offset_x = width / -2.0f;
-        mState.camera_offset_y = height / -2.0f;
+        mState.camera_offset_x = width / 2.0f;
+        mState.camera_offset_y = height / 2.0f;
     };
     mUI.widget->onPaintScene = std::bind(&AnimationWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -419,6 +420,7 @@ bool AnimationWidget::saveState(Settings& settings) const
     settings.saveWidget("Animation", mUI.scaleX);
     settings.saveWidget("Animation", mUI.scaleY);
     settings.saveWidget("Animation", mUI.rotation);
+    settings.saveWidget("Animation", mUI.showGrid);
 
     // the animation can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -439,6 +441,7 @@ bool AnimationWidget::loadState(const Settings& settings)
     settings.loadWidget("Animation", mUI.scaleX);
     settings.loadWidget("Animation", mUI.scaleY);
     settings.loadWidget("Animation", mUI.rotation);
+    settings.loadWidget("Animation", mUI.showGrid);
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
     if (base64.empty())
@@ -884,7 +887,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     const bool has_view_transform = mUI.transform->isChecked();
 
     gfx::Transform view;
-    view.Translate(-mState.camera_offset_x, -mState.camera_offset_y);
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
@@ -919,9 +922,62 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
     DrawHook hook(GetCurrentNode());
 
+    // render endless background grid.
+    if (mUI.showGrid->isChecked())
+    {
+        view.Push();
+
+        const auto grid_size = std::max(width, height);
+        // work out the scale factor for the grid. we want some convenient scale so that
+        // each grid cell maps to some convenient number of units (a multiple of 10)
+        const auto cell_size_units  = 50;
+        const auto num_grid_lines = (grid_size / cell_size_units) - 1;
+        const auto num_cells = num_grid_lines + 1;
+        const auto cell_size_normalized = 1.0f / (num_grid_lines + 1);
+        const auto cell_scale_factor = cell_size_units / cell_size_normalized;
+
+        // figure out what is the current coordinate of the center of the window/viewport in
+        // as expressed in the view transformation's coordinate space. (In other words
+        // figure out which combination of view basis axis puts me in the middle of the window
+        // in window space.)
+        auto world_to_model = glm::inverse(view.GetAsMatrix());
+        auto world_origin_in_model = world_to_model * glm::vec4(width / 2.0f, height / 2.0, 1.0f, 1.0f);
+
+        view.Scale(cell_scale_factor, cell_scale_factor);
+
+        // to make the grid cover the whole viewport we can easily do it by rendering
+        // the grid in each quadrant of the coordinate space aligned around the center
+        // point of the viewport. Then it doesn't matter if the view transformation
+        // includes rotation or not.
+        const auto grid_origin_x = (int)world_origin_in_model.x / cell_size_units * cell_size_units;
+        const auto grid_origin_y = (int)world_origin_in_model.y / cell_size_units * cell_size_units;
+        const auto grid_width = cell_size_units * num_cells;
+        const auto grid_height = cell_size_units * num_cells;
+
+        view.Translate(grid_origin_x, grid_origin_y);
+        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
+            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        view.Translate(-grid_width, 0);
+        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
+            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        view.Translate(0, -grid_height);
+        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
+            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        view.Translate(grid_width, 0);
+        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
+            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
+                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+
+        view.Pop();
+    }
+
+
     // begin the animation transformation space
     view.Push();
-    mState.animation.Draw(painter, view, &hook);
+        mState.animation.Draw(painter, view, &hook);
     view.Pop();
 
     if (mCurrentTool)
@@ -929,17 +985,17 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
     // right arrow
     view.Push();
-    view.Scale(100.0f, 5.0f);
-    view.Translate(0.0f, -2.5f);
-    painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
+        view.Scale(100.0f, 5.0f);
+        view.Translate(0.0f, -2.5f);
+        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
     view.Pop();
 
     view.Push();
-    view.Scale(100.0f, 5.0f);
-    view.Translate(-50.0f, -2.5f);
-    view.Rotate(math::Pi * 0.5f);
-    view.Translate(0.0f, 50.0f);
-    painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+        view.Scale(100.0f, 5.0f);
+        view.Translate(-50.0f, -2.5f);
+        view.Rotate(math::Pi * 0.5f);
+        view.Translate(0.0f, 50.0f);
+        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
     view.Pop();
 
     // pop view transformation
