@@ -99,10 +99,10 @@ class AnimationWidget::Tool
 {
 public:
     virtual ~Tool() = default;
-    virtual void Render(gfx::Painter& painter) const = 0;
-    virtual void MouseMove(QMouseEvent* mickey) = 0;
-    virtual void MousePress(QMouseEvent* mickey) = 0;
-    virtual bool MouseRelease(QMouseEvent* mickey) = 0;
+    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const = 0;
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) = 0;
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) = 0;
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) = 0;
 private:
 };
 
@@ -117,51 +117,65 @@ public:
         mDrawable = mState.workspace->MakeDrawable(mDrawableName);
         mMaterial = mState.workspace->MakeMaterial(mMaterialName);
     }
-    virtual void Render(gfx::Painter& painter) const
+    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const
     {
-        const auto& diff = mCurrent - mStart;
-        if (diff.x() <= 0.0f || diff.y() <= 0.0f)
+        if (!mEngaged)
             return;
 
-        const float x = mStart.x();
-        const float y = mStart.y();
-        const float d = std::sqrt(diff.x()*diff.x() + diff.y()*diff.y());
-        const float w = mAlwaysSquare ? d : diff.x();
-        const float h = mAlwaysSquare ? d : diff.y();
-        gfx::Transform t;
-        t.Resize(w, h);
-        t.Translate(x, y);
-        painter.Draw(*mDrawable, t, *mMaterial);
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return;
 
-        gfx::DrawRectOutline(painter, gfx::FRect(x, y, w, h), gfx::Color::Green, 2, 0.0f);
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width  = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
+
+        view.Push();
+            view.Scale(width, height);
+            view.Translate(xpos, ypos);
+            painter.Draw(*mDrawable, view, *mMaterial);
+
+            // draw a selection rect around it.
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline),
+                view, gfx::SolidColor(gfx::Color::Green));
+        view.Pop();
     }
-    virtual void MouseMove(QMouseEvent* mickey)
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view)
     {
-        if (mEngaged)
-        {
-            mCurrent = mickey->pos();
-            mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
-        }
+        if (!mEngaged)
+            return;
+
+        const auto& view_to_model = glm::inverse(view.GetAsMatrix());
+        const auto& p = mickey->pos();
+        mCurrent = view_to_model * glm::vec4(p.x(), p.y(), 1.0f, 1.0f);
+        mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
-    virtual void MousePress(QMouseEvent* mickey) override
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
         {
-            mStart = mickey->pos();
+            const auto& view_to_model = glm::inverse(view.GetAsMatrix());
+            const auto& p = mickey->pos();
+            mStart = view_to_model * glm::vec4(p.x(), p.y(), 1.0f, 1.0f);
+            mCurrent = mStart;
             mEngaged = true;
         }
     }
-    virtual bool MouseRelease(QMouseEvent* mickey)
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view)
     {
         const auto button = mickey->button();
-        if (button == Qt::LeftButton)
-        {
-            mEngaged = false;
-            const auto& diff = mCurrent - mStart;
-            if (diff.x() <= 0.0f || diff.y() <= 0.0f)
-                return false;
-        }
+        if (button != Qt::LeftButton)
+            return false;
+
+        ASSERT(mEngaged);
+
+        mEngaged = false;
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return false;
 
         std::string name;
         for (size_t i=0; i<666666; ++i)
@@ -170,13 +184,12 @@ public:
             if (CheckNameAvailability(name))
                 break;
         }
-        // todo: the width and height need to account the zoom level.
-        const auto& diff = mCurrent - mStart;
-        const float xpos = mStart.x() - mState.camera_offset_x;
-        const float ypos = mStart.y() - mState.camera_offset_y;
-        const float hypo = std::sqrt(diff.x() * diff.x() + diff.y() * diff.y());
-        const float width  = mAlwaysSquare ? hypo : diff.x();
-        const float height = mAlwaysSquare ? hypo : diff.y();
+
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
         scene::AnimationNode node;
         node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
@@ -208,8 +221,13 @@ public:
 
 private:
     AnimationWidget::State& mState;
-    QPoint mStart;
-    QPoint mCurrent;
+    // the starting object position in model coordinates of the placement
+    // based on the mouse position at the time.
+    glm::vec4 mStart;
+    // the current object ending position in model coordinates.
+    // the object occupies the rectangular space between the start
+    // and current positions on the X and Y axis.
+    glm::vec4 mCurrent;
     bool mEngaged = false;
     bool mAlwaysSquare = false;
 private:
@@ -224,9 +242,9 @@ class AnimationWidget::CameraTool : public AnimationWidget::Tool
 public:
     CameraTool(State& state) : mState(state)
     {}
-    virtual void Render(gfx::Painter& painter) const override
+    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
     {}
-    virtual void MouseMove(QMouseEvent* mickey) override
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
     {
         if (mEngaged)
         {
@@ -240,7 +258,7 @@ public:
             mMousePos = pos;
         }
     }
-    virtual void MousePress(QMouseEvent* mickey) override
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
@@ -249,7 +267,7 @@ public:
             mEngaged = true;
         }
     }
-    virtual bool MouseRelease(QMouseEvent* mickey) override
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
@@ -297,8 +315,13 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         this, std::placeholders::_1, std::placeholders::_2);
 
     mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
-        if (mCurrentTool)
-            mCurrentTool->MouseMove(mickey);
+        if (mCurrentTool) {
+            gfx::Transform view;
+            view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+            view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+            view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+            mCurrentTool->MouseMove(mickey, view);
+        }
 
         const auto width  = mUI.widget->width();
         const auto height = mUI.widget->height();
@@ -314,13 +337,23 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         if (!mCurrentTool)
             mCurrentTool.reset(new CameraTool(mState));
 
-        mCurrentTool->MousePress(mickey);
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+        mCurrentTool->MousePress(mickey, view);
     };
     mUI.widget->onMouseRelease = [&](QMouseEvent* mickey) {
         if (!mCurrentTool)
             return;
 
-        mCurrentTool->MouseRelease(mickey);
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+        mCurrentTool->MouseRelease(mickey, view);
 
         mCurrentTool.release();
         mUI.actionNewRect->setChecked(false);
@@ -904,16 +937,13 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         mTime += secs;
     }
 
-    const float angle = qDegreesToRadians(mUI.rotation->value());
-    const bool has_view_transform = mUI.transform->isChecked();
-
     gfx::Transform view;
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
     // and its components from the space of the animation to the global space.
     view.Push();
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Rotate(angle);
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
@@ -1001,7 +1031,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     view.Pop();
 
     if (mCurrentTool)
-        mCurrentTool->Render(painter);
+        mCurrentTool->Render(painter, view);
 
     // right arrow
     view.Push();
