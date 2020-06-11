@@ -204,6 +204,9 @@ public:
         auto* child = mState.animation.AddNode(std::move(node));
         root.AppendChild(child);
 
+        mState.scenegraph_tree_view->Rebuild();
+        mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(child->GetId()));
+
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -289,10 +292,14 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
 
-    mState.scenegraph.reset(new TreeModel(mState.animation));
+    mUI.setupUi(this);
+
+    mTreeModel.reset(new TreeModel(mState.animation));
+
+    mState.scenegraph_tree_model = mTreeModel.get();
+    mState.scenegraph_tree_view  = mUI.tree;
     mState.workspace = workspace;
 
-    mUI.setupUi(this);
     // this fucking cunt whore will already emit selection changed signal
     mUI.materials->blockSignals(true);
     mUI.materials->addItems(workspace->ListMaterials());
@@ -300,7 +307,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     mUI.name->setText("My Animation");
 
-    mUI.tree->SetModel(mState.scenegraph.get());
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
     mUI.widget->setFramerate(60);
@@ -360,8 +367,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewCircle->setChecked(false);
         mUI.actionNewTriangle->setChecked(false);
         mUI.actionNewArrow->setChecked(false);
-
-        mUI.tree->Rebuild();
     };
 
     // create the memu for creating instances of user defined drawables

@@ -132,6 +132,8 @@ namespace gui
         void SetModel(TreeModel* model)
         { mModel = model; }
 
+        void SelectItemById(const QString& id);
+
         // QWidget
         virtual QSize sizeHint() const override
         { return QSize(200, 200); }

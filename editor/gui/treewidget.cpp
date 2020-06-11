@@ -155,6 +155,18 @@ void TreeWidget::Update()
     viewport()->update();
 }
 
+void TreeWidget::SelectItemById(const QString& id)
+{
+    for (auto& item : mItems)
+    {
+        if (item.GetId() == id)
+        {
+            mSelected = &item;
+            break;
+        }
+    }
+}
+
 void TreeWidget::paintEvent(QPaintEvent* event)
 {
     const QPalette& palette = this->palette();

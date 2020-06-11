@@ -43,6 +43,8 @@ namespace app {
 
 namespace gui
 {
+    class TreeWidget;
+
     class AnimationWidget : public MainWidget
     {
         Q_OBJECT
@@ -114,10 +116,19 @@ namespace gui
             scene::Animation animation;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
-            std::unique_ptr<TreeModel> scenegraph;
+
             // current workspace we're editing.
             app::Workspace* workspace = nullptr;
+            //
+            gui::TreeWidget* scenegraph_tree_view = nullptr;
+
+            TreeModel* scenegraph_tree_model = nullptr;
         } mState;
+
+        // tree model for accessing the animations' render tree
+        // data from the tree widget.
+        std::unique_ptr<TreeModel> mTreeModel;
+
         // current time of the animation. accumulates when running.
         float mTime = 0.0f;
         // possible states of the animation playback.
