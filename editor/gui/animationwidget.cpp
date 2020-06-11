@@ -312,6 +312,11 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     mUI.widget->setFramerate(60);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
+        if (!mCameraWasLoaded) {
+            mState.camera_offset_x = width * 0.5;
+            mState.camera_offset_y = height * 0.5;
+        }
+
         // offset the viewport so that the origin of the 2d space is in the middle of the viewport
         const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
         const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
@@ -494,6 +499,8 @@ bool AnimationWidget::loadState(const Settings& settings)
 
     mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
+    // set a flag to *not* adjust the camere on gfx widget init to the middle the of widget.
+    mCameraWasLoaded = true;
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
     if (base64.empty())

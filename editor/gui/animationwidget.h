@@ -139,5 +139,7 @@ namespace gui
         };
         // current animation playback state.
         PlayState mPlayState = PlayState::Stopped;
+
+        bool mCameraWasLoaded = false;
     };
 } // namespace
