@@ -411,12 +411,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
 {
     DEBUG("Editing animation '%1'", resource.GetName());
     mUI.name->setText(resource.GetName());
-
-    GetProperty(resource, "camera_offset_x", &mState.camera_offset_x);
-    GetProperty(resource, "camera_offset_y", &mState.camera_offset_y);
-    GetProperty(resource, "xscale", mUI.scaleX);
-    GetProperty(resource, "yscale", mUI.scaleY);
-    GetProperty(resource, "rotation", mUI.rotation);
     setWindowTitle(resource.GetName());
 
     mState.animation = *resource.GetContent<scene::Animation>();
@@ -561,11 +555,6 @@ void AnimationWidget::on_actionSave_triggered()
 
     app::AnimationResource resource(mState.animation, name);
 
-    SetProperty(resource, "camera_offset_x", mState.camera_offset_x);
-    SetProperty(resource, "camera_offset_y", mState.camera_offset_y);
-    SetProperty(resource, "xscale", mUI.scaleX);
-    SetProperty(resource, "yscale", mUI.scaleY);
-    SetProperty(resource, "rotation", mUI.rotation);
     mState.workspace->SaveResource(resource);
     INFO("Saved animation '%1'", name);
     NOTE("Saved animation '%1'", name);
