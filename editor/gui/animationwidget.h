@@ -57,6 +57,8 @@ namespace gui
         virtual void addActions(QMenu& menu) override;
         virtual bool saveState(Settings& settings) const override;
         virtual bool loadState(const Settings& settings) override;
+        virtual void zoomIn() override;
+        virtual void zoomOut() override;
 
     private slots:
         void on_actionPlay_triggered();

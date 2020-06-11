@@ -325,6 +325,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         if (mCurrentTool) {
             gfx::Transform view;
             view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+            view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
             view.Rotate(qDegreesToRadians(mUI.rotation->value()));
             view.Translate(mState.camera_offset_x, mState.camera_offset_y);
             mCurrentTool->MouseMove(mickey, view);
@@ -346,6 +347,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
         view.Rotate(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
@@ -357,6 +359,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
         view.Rotate(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
@@ -464,6 +467,7 @@ bool AnimationWidget::saveState(Settings& settings) const
     settings.saveWidget("Animation", mUI.scaleY);
     settings.saveWidget("Animation", mUI.rotation);
     settings.saveWidget("Animation", mUI.showGrid);
+    settings.saveWidget("Animation", mUI.zoom);
 
     settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
@@ -486,6 +490,7 @@ bool AnimationWidget::loadState(const Settings& settings)
     settings.loadWidget("Animation", mUI.scaleY);
     settings.loadWidget("Animation", mUI.rotation);
     settings.loadWidget("Animation", mUI.showGrid);
+    settings.loadWidget("Animation", mUI.zoom);
 
     mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
@@ -506,6 +511,19 @@ bool AnimationWidget::loadState(const Settings& settings)
 
     mUI.tree->Rebuild();
     return true;
+}
+
+void AnimationWidget::zoomIn()
+{
+    const auto value = mUI.zoom->value();
+    mUI.zoom->setValue(value + 0.1);
+}
+
+void AnimationWidget::zoomOut()
+{
+    const auto value = mUI.zoom->value();
+    if (value > 0.1)
+        mUI.zoom->setValue(value - 0.1);
 }
 
 void AnimationWidget::on_actionPlay_triggered()
@@ -554,7 +572,6 @@ void AnimationWidget::on_actionSave_triggered()
     }
 
     app::AnimationResource resource(mState.animation, name);
-
     mState.workspace->SaveResource(resource);
     INFO("Saved animation '%1'", name);
     NOTE("Saved animation '%1'", name);
@@ -937,6 +954,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     // and its components from the space of the animation to the global space.
     view.Push();
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
     view.Rotate(qDegreesToRadians(mUI.rotation->value()));
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
