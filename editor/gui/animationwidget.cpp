@@ -996,7 +996,10 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     {
         view.Push();
 
-        const auto grid_size = std::max(width, height);
+        const float zoom = GetValue(mUI.zoom);
+        const float xs = GetValue(mUI.scaleX);
+        const float ys = GetValue(mUI.scaleY);
+        const int grid_size = std::max(width / xs, height / ys) / zoom;
         // work out the scale factor for the grid. we want some convenient scale so that
         // each grid cell maps to some convenient number of units (a multiple of 10)
         const auto cell_size_units  = 50;

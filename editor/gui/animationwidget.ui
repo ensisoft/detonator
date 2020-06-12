@@ -123,8 +123,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
                <property name="maximum">
-                <double>1000.000000000000000</double>
+                <double>100.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>0.100000000000000</double>
@@ -172,8 +175,11 @@
              </item>
              <item row="2" column="3">
               <widget class="QDoubleSpinBox" name="scaleY">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
                <property name="maximum">
-                <double>1000.000000000000000</double>
+                <double>100.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>0.100000000000000</double>
