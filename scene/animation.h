@@ -283,6 +283,22 @@ namespace scene
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
 
+        // Perform coarse hit test to see if the given x,y point
+        // intersects with any node in the animation. The testing
+        // is coarse in the sense that it's done against the node's
+        // size box (the box that contains the node's drawable object)
+        // only instead of actually checking against the drawable shape.
+        // Returns nullptr if nothing was intersected otherwise returns
+        // the object with greatest layer value. (Topmost). The order
+        // in case of multiple objects with equal layer value is unspecified.
+        AnimationNode* CoarseHitTest(float x, float y);
+
+        const AnimationNode* CoarseHitTest(float x, float y) const
+        {
+            return const_cast<Animation*>(this)->CoarseHitTest(x, y);
+        }
+
+
         // Reset the state of the animation to initial state.
         void Reset();
 

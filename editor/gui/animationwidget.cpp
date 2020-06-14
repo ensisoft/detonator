@@ -347,16 +347,53 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
-        if (!mCurrentTool)
-            mCurrentTool.reset(new CameraTool(mState));
-
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
         view.Rotate(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-        mCurrentTool->MousePress(mickey, view);
+        if (!mCurrentTool)
+        {
+            // On a mouse press start we want to select the tool based on where the pointer
+            // is and which object it interects with in the scene when the press starts.
+            //
+            // If the mouse pointer doesn't intersect with an object we create a new
+            // camera tool for moving the viewport and object selection gets cleared.
+            //
+            // If the mouse pointer intersecs with an object that is the same object
+            // that was already selected:
+            // Check if the pointer intersects with one of the resizing boxes inside
+            // the object's selection box. If it does then we create a new resizing tool
+            // otherwise we create a new move tool instance for moving the object.
+            //
+            // If the mouse pointer intersects with an object that is not the same object
+            // that was previously selected:
+            // Select the object.
+            //
+
+            // take the widget space mouse coordinate and transform into view/camera space.
+            const auto mouse_window_position_x = mickey->pos().x();
+            const auto mouse_window_position_y = mickey->pos().y();
+
+            const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
+            const auto& mouse_position_in_view_space = widget_to_view * glm::vec4(mouse_window_position_x, mouse_window_position_y,
+                1.0f, 1.0f);
+
+            const scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_position_in_view_space.x,
+                mouse_position_in_view_space.y);
+            if (hit == nullptr)
+            {
+                mUI.tree->ClearSelection();
+                mCurrentTool.reset(new CameraTool(mState));
+            }
+            else
+            {
+                mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
+            }
+        }
+        if (mCurrentTool)
+            mCurrentTool->MousePress(mickey, view);
     };
     mUI.widget->onMouseRelease = [&](QMouseEvent* mickey) {
         if (!mCurrentTool)

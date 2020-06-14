@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/glm.hpp> // for glm::inverse
+#include "warnpop.h"
+
 #include <map>
 
 #include "base/logging.h"
@@ -407,6 +411,67 @@ void Animation::Reset()
     {
         node->Reset();
     }
+}
+
+AnimationNode* Animation::CoarseHitTest(float x, float y)
+{
+    class Visitor : public RenderTree::Visitor
+    {
+    public:
+        Visitor(const glm::vec4& point) : mHitPoint(point)
+        {}
+
+        virtual void EnterNode(AnimationNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Push(node->GetNodeTransform());
+
+            const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+            const auto& hitpoint_in_node = animation_to_node * mHitPoint;
+            const auto& size = node->GetSize();
+            if (hitpoint_in_node.x >= 0.0f &&
+                hitpoint_in_node.x < size.x &&
+                hitpoint_in_node.y >= 0.0f &&
+                hitpoint_in_node.y < size.y)
+            {
+                mIntersectingNodes.push_back(node);
+            }
+
+        }
+        virtual void LeaveNode(AnimationNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Pop();
+        }
+
+        AnimationNode* GetBestMatch()
+        {
+            if (mIntersectingNodes.empty())
+                return nullptr;
+
+            auto* match = mIntersectingNodes[0];
+            for (size_t i=1; i<mIntersectingNodes.size(); ++i)
+            {
+                if (mIntersectingNodes[i]->GetLayer() > match->GetLayer())
+                    match = mIntersectingNodes[i];
+            }
+            return match;
+        }
+
+    private:
+        const glm::vec4 mHitPoint;
+        gfx::Transform mTransform;
+        std::vector<AnimationNode*> mIntersectingNodes;
+    };
+
+    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f));
+    mRenderTree.PreOrderTraverse(visitor);
+
+    return visitor.GetBestMatch();
 }
 
 void Animation::Prepare(const GfxFactory& loader)

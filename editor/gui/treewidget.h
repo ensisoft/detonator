@@ -134,6 +134,8 @@ namespace gui
 
         void SelectItemById(const QString& id);
 
+        void ClearSelection();
+
         // QWidget
         virtual QSize sizeHint() const override
         { return QSize(200, 200); }

@@ -167,6 +167,15 @@ void TreeWidget::SelectItemById(const QString& id)
     }
 }
 
+void TreeWidget::ClearSelection()
+{
+    mSelected = nullptr;
+
+    viewport()->update();
+
+    emit currentRowChanged();
+}
+
 void TreeWidget::paintEvent(QPaintEvent* event)
 {
     const QPalette& palette = this->palette();
