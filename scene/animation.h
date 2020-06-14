@@ -233,8 +233,10 @@ namespace scene
             // current drawlist with any possible modifications.
             virtual bool InspectPacket(const AnimationNode* node, DrawPacket& packet) { return true; }
             // This is a hook function to append extra draw packets to the current drawlist
-            // based on the node and and it's current draw packet.
-            virtual void AppendPackets(const AnimationNode* node, const DrawPacket& packet, std::vector<DrawPacket>& packets) {}
+            // based on the node.
+            // Transform is the combined transformation hierarchy containing the transformations
+            // from this current node to "view".
+            virtual void AppendPackets(const AnimationNode* node, gfx::Transform& trans, std::vector<DrawPacket>& packets) {}
         protected:
         };
 

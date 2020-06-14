@@ -187,6 +187,12 @@ namespace gfx
             mTransform.pop_back();
         }
 
+        // Get the number of individual transformation scopes.
+        size_t GetNumTransforms()
+        {
+            return mTransform.size();
+        }
+
     private:
         std::vector<glm::mat4> mTransform;
     };

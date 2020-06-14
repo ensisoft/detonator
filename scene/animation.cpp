@@ -217,16 +217,22 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
             if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
                 mPackets.push_back(packet);
 
-            if (mHook)
-            {
-                std::vector<DrawPacket> packets;
-                mHook->AppendPackets(node, packet, packets);
-                for (auto& p : packets)
-                    mPackets.push_back(std::move(p));
-            }
-
             // pop the model transform
             mTransform.Pop();
+
+            // append any extra packets if needed.
+            if (mHook)
+            {
+                const auto num_transforms = mTransform.GetNumTransforms();
+
+                std::vector<DrawPacket> packets;
+                mHook->AppendPackets(node, mTransform, packets);
+                for (auto& p : packets)
+                    mPackets.push_back(std::move(p));
+
+                // make sure the stack is popped properly.
+                ASSERT(mTransform.GetNumTransforms() == num_transforms);
+            }
         }
         virtual void LeaveNode(const AnimationNode* node) override
         {

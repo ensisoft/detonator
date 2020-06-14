@@ -972,18 +972,50 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         DrawHook(scene::AnimationNode* selected)
           : mSelected(selected)
         {}
-        virtual void AppendPackets(const scene::AnimationNode* node, const scene::Animation::DrawPacket& packet,
-            std::vector<scene::Animation::DrawPacket>& packets) override
+        virtual void AppendPackets(const scene::AnimationNode* node, gfx::Transform& trans, std::vector<scene::Animation::DrawPacket>& packets) override
         {
             if (node != mSelected)
                 return;
 
-            scene::Animation::DrawPacket selection;
-            selection.transform = packet.transform;
-            selection.material  = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
-            selection.drawable  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Wireframe);
-            selection.layer     = packet.layer;
-            packets.push_back(selection);
+            static const auto green = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
+            static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Wireframe);
+
+            const auto& size = node->GetSize();
+
+            // draw the selection rectangle.
+            trans.Push(node->GetModelTransform());
+                scene::Animation::DrawPacket selection;
+                selection.transform = trans.GetAsMatrix();
+                selection.material  = green;
+                selection.drawable  = rect;
+                selection.layer     = node->GetLayer();
+                packets.push_back(selection);
+            trans.Pop();
+
+            // draw the sizing boxes in the corners of the selection rectangle.
+            struct BoxOffsets {
+                float x = 0.0f;
+                float y = 0.0f;
+            } offsets[] = {
+                {0.0f, 0.0f},
+                {size.x - 10.0f, 0.0f},
+                {0.0f, size.y-10.0f},
+                {-size.x + 10.0f, 0.0f}
+            };
+
+            trans.Push();
+                trans.Scale(10, 10);
+                for (const auto& box : offsets)
+                {
+                    trans.Translate(box.x, box.y);
+                    scene::Animation::DrawPacket sizing_box;
+                    sizing_box.transform = trans.GetAsMatrix();
+                    sizing_box.material  = green;
+                    sizing_box.drawable  = rect;
+                    sizing_box.layer     = node->GetLayer();
+                    packets.push_back(sizing_box);
+                }
+            trans.Pop();
         }
     private:
         scene::AnimationNode* mSelected = nullptr;
