@@ -333,6 +333,52 @@ private:
 
 };
 
+class AnimationWidget::ResizeTool : public AnimationWidget::Tool
+{
+public:
+    ResizeTool(State& state, scene::AnimationNode* node)
+      : mState(state)
+      , mNode(node)
+    {}
+    virtual void Render(gfx::Painter&, gfx::Transform&) const override
+    {}
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+
+        const auto& mouse_delta = mouse_pos_in_view - mPreviousMousePos;
+        //DEBUG("Mouse delta %1,%2", mouse_delta.x, mouse_delta.y);
+
+        glm::vec2 size = mNode->GetSize();
+        // don't allow negative sizes.
+        size.x = std::clamp(size.x + mouse_delta.x, 0.0f, size.x + mouse_delta.x);
+        size.y = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
+        mNode->SetSize(size);
+
+        mPreviousMousePos = mouse_pos_in_view;
+    }
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        // nothing to be done here.
+        return false;
+    }
+private:
+    scene::AnimationNode* mNode = nullptr;
+    AnimationWidget::State& mState;
+    // previous mouse position, for each mouse move we update the objects'
+    // position by the delta between previous and current mouse pos.
+    glm::vec4 mPreviousMousePos;
+
+};
+
 AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
@@ -423,15 +469,17 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             //
 
             // take the widget space mouse coordinate and transform into view/camera space.
-            const auto mouse_window_position_x = mickey->pos().x();
-            const auto mouse_window_position_y = mickey->pos().y();
+            const auto mouse_widget_position_x = mickey->pos().x();
+            const auto mouse_widget_position_y = mickey->pos().y();
 
             const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
-            const auto& mouse_position_in_view_space = widget_to_view * glm::vec4(mouse_window_position_x, mouse_window_position_y,
-                1.0f, 1.0f);
+            const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
+                mouse_widget_position_y, 1.0f, 1.0f);
 
-            scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_position_in_view_space.x,
-                mouse_position_in_view_space.y);
+            glm::vec2 hitpos;
+            scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_view_position.x,
+                mouse_view_position.y, &hitpos);
+            //DEBUG("hitpos: %1,%2", hitpos.x, hitpos.y);
 
             const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
 
@@ -449,8 +497,15 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                 else
                 {
                     ASSERT(hit == selected->GetUserData());
-                    mCurrentTool.reset(new MoveTool(mState, hit));
 
+                    const auto& size = hit->GetSize();
+                    // bottom right hitbox
+                    const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
+                                                         hitpos.y >= size.y - 10.0f;
+                    if (bottom_right_hitbox_hit)
+                        mCurrentTool.reset(new ResizeTool(mState, hit));
+                    else
+                        mCurrentTool.reset(new MoveTool(mState, hit));
                 }
             }
         }
@@ -1082,10 +1137,15 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 float x = 0.0f;
                 float y = 0.0f;
             } offsets[] = {
+                // todo: support resizing from other corners other than the bottom right
+                // (needs adjustment to the position)
+                {size.x-10.0f, size.y-10.0f}
+                /*
                 {0.0f, 0.0f},
                 {size.x - 10.0f, 0.0f},
                 {0.0f, size.y-10.0f},
                 {-size.x + 10.0f, 0.0f}
+                */
             };
 
             trans.Push();

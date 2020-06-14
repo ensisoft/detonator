@@ -291,11 +291,13 @@ namespace scene
         // Returns nullptr if nothing was intersected otherwise returns
         // the object with greatest layer value. (Topmost). The order
         // in case of multiple objects with equal layer value is unspecified.
-        AnimationNode* CoarseHitTest(float x, float y);
+        // Optionally save the hit coords in node's coordinate space. (i.e. position
+        // within the hit box)
+        AnimationNode* CoarseHitTest(float x, float y, glm::vec2* hitbox_pos = nullptr);
 
-        const AnimationNode* CoarseHitTest(float x, float y) const
+        const AnimationNode* CoarseHitTest(float x, float y, glm::vec2* hitbox_pos = nullptr) const
         {
-            return const_cast<Animation*>(this)->CoarseHitTest(x, y);
+            return const_cast<Animation*>(this)->CoarseHitTest(x, y, hitbox_pos);
         }
 
 

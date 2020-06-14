@@ -413,7 +413,7 @@ void Animation::Reset()
     }
 }
 
-AnimationNode* Animation::CoarseHitTest(float x, float y)
+AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
 {
     class Visitor : public RenderTree::Visitor
     {
@@ -436,9 +436,11 @@ AnimationNode* Animation::CoarseHitTest(float x, float y)
                 hitpoint_in_node.y >= 0.0f &&
                 hitpoint_in_node.y < size.y)
             {
-                mIntersectingNodes.push_back(node);
+                Hit hit;
+                hit.node = node;
+                hit.point = glm::vec2(hitpoint_in_node.x, hitpoint_in_node.y);
+                mHitNodes.push_back(hit);
             }
-
         }
         virtual void LeaveNode(AnimationNode* node) override
         {
@@ -448,30 +450,36 @@ AnimationNode* Animation::CoarseHitTest(float x, float y)
             mTransform.Pop();
         }
 
-        AnimationNode* GetBestMatch()
+        AnimationNode* GetBestMatch(glm::vec2* hitbox_pos)
         {
-            if (mIntersectingNodes.empty())
+            if (mHitNodes.empty())
                 return nullptr;
 
-            auto* match = mIntersectingNodes[0];
-            for (size_t i=1; i<mIntersectingNodes.size(); ++i)
+            auto match = mHitNodes[0];
+            for (size_t i=1; i<mHitNodes.size(); ++i)
             {
-                if (mIntersectingNodes[i]->GetLayer() > match->GetLayer())
-                    match = mIntersectingNodes[i];
+                if (mHitNodes[i].node->GetLayer() > match.node->GetLayer())
+                    match = mHitNodes[i];
             }
-            return match;
+            if (hitbox_pos)
+                *hitbox_pos = match.point;
+            return match.node;
         }
 
     private:
         const glm::vec4 mHitPoint;
         gfx::Transform mTransform;
-        std::vector<AnimationNode*> mIntersectingNodes;
+        struct Hit {
+            AnimationNode* node = nullptr;
+            glm::vec2 point;
+        };
+        std::vector<Hit> mHitNodes;
     };
 
     Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f));
     mRenderTree.PreOrderTraverse(visitor);
 
-    return visitor.GetBestMatch();
+    return visitor.GetBestMatch(hitbox_pos);
 }
 
 void Animation::Prepare(const GfxFactory& loader)
