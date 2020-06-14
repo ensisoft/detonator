@@ -50,6 +50,8 @@ namespace gui
         GfxWidget(QWidget* parent) : QOpenGLWidget(parent)
         {
             setFramerate(60);
+            // need to enable mouse tracking in order to get mouse move events.
+            setMouseTracking(true);
         }
 
         void dispose()
