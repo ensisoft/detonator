@@ -214,9 +214,8 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
             packet.layer     = node->GetLayer();
             packet.transform = mTransform.GetAsMatrix();
 
-            if (mHook && mHook->InspectPacket(node, packet))
+            if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
                 mPackets.push_back(packet);
-            else mPackets.push_back(packet);
 
             if (mHook)
             {
