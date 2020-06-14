@@ -165,6 +165,10 @@ void TreeWidget::SelectItemById(const QString& id)
             break;
         }
     }
+
+    viewport()->update();
+
+    emit currentRowChanged();
 }
 
 void TreeWidget::ClearSelection()
