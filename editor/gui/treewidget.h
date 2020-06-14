@@ -76,6 +76,8 @@ namespace gui
 
             void* GetUserData()
             { return mUser; }
+            const void* GetUserData() const
+            { return mUser; }
             QString GetId() const
             { return mId; }
             QString GetText() const
@@ -124,6 +126,8 @@ namespace gui
 
         // Get the currently selected item if any.
         TreeItem* GetSelectedItem()
+        { return mSelected; }
+        const TreeItem* GetSelectedItem() const
         { return mSelected; }
         // Get the current treewidget's data model.
         TreeModel* GetModel()
