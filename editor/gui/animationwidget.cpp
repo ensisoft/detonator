@@ -288,6 +288,51 @@ private:
 
 };
 
+class AnimationWidget::MoveTool : public AnimationWidget::Tool
+{
+public:
+    MoveTool(State& state, scene::AnimationNode* node)
+      : mState(state)
+      , mNode(node)
+    {}
+    virtual void Render(gfx::Painter&, gfx::Transform&) const override
+    {}
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+
+        const auto& mouse_delta = mouse_pos_in_view - mPreviousMousePos;
+        //DEBUG("Mouse delta %1,%2", mouse_delta.x, mouse_delta.y);
+
+        glm::vec2 position = mNode->GetTranslation();
+        position.x += mouse_delta.x;
+        position.y += mouse_delta.y;
+        mNode->SetTranslation(position);
+
+        mPreviousMousePos = mouse_pos_in_view;
+    }
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        // nothing to be done here.
+        return false;
+    }
+private:
+    scene::AnimationNode* mNode = nullptr;
+    AnimationWidget::State& mState;
+    // previous mouse position, for each mouse move we update the objects'
+    // position by the delta between previous and current mouse pos.
+    glm::vec4 mPreviousMousePos;
+
+};
+
 AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
@@ -339,11 +384,16 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         const auto width  = mUI.widget->width();
         const auto height = mUI.widget->height();
 
+        // update the properties that might have changed as the result of application
+        // of the current tool.
+
         // update the distance to center.
         const auto dist_x = mState.camera_offset_x - (width / 2.0f);
         const auto dist_y = mState.camera_offset_y - (height / 2.0f);
         mUI.translateX->setValue(dist_x);
         mUI.translateY->setValue(dist_y);
+
+        updateCurrentNodeProperties();
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
@@ -380,8 +430,11 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             const auto& mouse_position_in_view_space = widget_to_view * glm::vec4(mouse_window_position_x, mouse_window_position_y,
                 1.0f, 1.0f);
 
-            const scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_position_in_view_space.x,
+            scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_position_in_view_space.x,
                 mouse_position_in_view_space.y);
+
+            const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
+
             if (hit == nullptr)
             {
                 mUI.tree->ClearSelection();
@@ -389,7 +442,16 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             }
             else
             {
-                mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
+                if (selected == nullptr || selected->GetUserData() != hit)
+                {
+                    mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
+                }
+                else
+                {
+                    ASSERT(hit == selected->GetUserData());
+                    mCurrentTool.reset(new MoveTool(mState, hit));
+
+                }
             }
         }
         if (mCurrentTool)
@@ -785,21 +847,7 @@ void AnimationWidget::currentComponentRowChanged()
     }
     else
     {
-        const auto& translate = node->GetTranslation();
-        const auto& size = node->GetSize();
-        SetValue(mUI.cName, node->GetName());
-        SetValue(mUI.renderPass, node->GetRenderPass());
-        SetValue(mUI.renderStyle, node->GetRenderStyle());
-        SetValue(mUI.layer, node->GetLayer());
-        SetValue(mUI.materials, node->GetMaterialName());
-        SetValue(mUI.cTranslateX, translate.x);
-        SetValue(mUI.cTranslateY, translate.y);
-        SetValue(mUI.cSizeX, size.x);
-        SetValue(mUI.cSizeY, size.y);
-        SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
-        SetValue(mUI.lineWidth, node->GetLineWidth());
-        mUI.cProperties->setEnabled(true);
-        mUI.cTransform->setEnabled(true);
+        updateCurrentNodeProperties();
     }
 }
 
@@ -1153,6 +1201,28 @@ scene::AnimationNode* AnimationWidget::GetCurrentNode()
     if (!item->GetUserData())
         return nullptr;
     return static_cast<scene::AnimationNode*>(item->GetUserData());
+}
+
+void AnimationWidget::updateCurrentNodeProperties()
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        const auto& translate = node->GetTranslation();
+        const auto& size = node->GetSize();
+        SetValue(mUI.cName, node->GetName());
+        SetValue(mUI.renderPass, node->GetRenderPass());
+        SetValue(mUI.renderStyle, node->GetRenderStyle());
+        SetValue(mUI.layer, node->GetLayer());
+        SetValue(mUI.materials, node->GetMaterialName());
+        SetValue(mUI.cTranslateX, translate.x);
+        SetValue(mUI.cTranslateY, translate.y);
+        SetValue(mUI.cSizeX, size.x);
+        SetValue(mUI.cSizeY, size.y);
+        SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
+        SetValue(mUI.lineWidth, node->GetLineWidth());
+        mUI.cProperties->setEnabled(true);
+        mUI.cTransform->setEnabled(true);
+    }
 }
 
 } // namespace

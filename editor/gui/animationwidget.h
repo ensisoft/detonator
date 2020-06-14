@@ -97,11 +97,13 @@ namespace gui
     private:
         void paintScene(gfx::Painter& painter, double secs);
         scene::AnimationNode* GetCurrentNode();
+        void updateCurrentNodeProperties();
     private:
         class TreeModel;
         class Tool;
         class PlaceTool;
         class CameraTool;
+        class MoveTool;
 
     private:
         Ui::AnimationWidget mUI;
