@@ -482,6 +482,53 @@ AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
     return visitor.GetBestMatch(hitbox_pos);
 }
 
+glm::vec2 Animation::MapCoordsFromNode(float x, float y, const AnimationNode* node) const
+{
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        Visitor(float x, float y, const AnimationNode* node)
+          : mX(x), mY(y), mNode(node)
+        {}
+        virtual void EnterNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Push(node->GetNodeTransform());
+
+            // if it's the node we're interested in
+            if (node == mNode)
+            {
+                const auto& mat = mTransform.GetAsMatrix();
+                const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
+                mResult = glm::vec2(vec.x, vec.y);
+            }
+        }
+
+        virtual void LeaveNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+
+        glm::vec2 GetResult() const
+        { return mResult; }
+    private:
+        const float mX = 0.0f;
+        const float mY = 0.0f;
+        const AnimationNode* mNode = nullptr;
+        glm::vec2 mResult;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor(x, y, node);
+    mRenderTree.PreOrderTraverse(visitor);
+
+    return visitor.GetResult();
+}
+
 void Animation::Prepare(const GfxFactory& loader)
 {
     for (auto& node : mNodes)

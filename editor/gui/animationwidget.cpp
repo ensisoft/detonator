@@ -40,6 +40,7 @@
 #include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
 #include "base/assert.h"
+#include "base/math.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -391,6 +392,71 @@ private:
 
 };
 
+class AnimationWidget::RotateTool : public AnimationWidget::Tool
+{
+public:
+    RotateTool(State& state, scene::AnimationNode* node)
+      : mState(state)
+      , mNode(node)
+    {}
+    virtual void Render(gfx::Painter&, gfx::Transform&) const override
+    {}
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+
+        const auto& node_size = mNode->GetSize();
+        const auto& node_center_in_view = glm::vec4(mState.animation.MapCoordsFromNode(node_size.x*0.5f, node_size.y*0.5, mNode),
+            1.0f, 1.0f);
+
+        // compute the delta between the current mouse position angle and the previous mouse position angle
+        // wrt the node's center point. Then and add the angle delta increment to the node's rotation angle.
+        const auto previous_angle = GetAngleRadians(mPreviousMousePos - node_center_in_view);
+        const auto current_angle  = GetAngleRadians(mouse_pos_in_view - node_center_in_view);
+        const auto angle_delta = current_angle - previous_angle;
+
+        double angle = mNode->GetRotation();
+        angle += angle_delta;
+        // keep it in the -180 - 180 degrees [-Pi, Pi] range.
+        angle = math::wrap(-math::Pi, math::Pi, angle);
+        mNode->SetRotation(angle);
+
+        //DEBUG("Node angle %1", qRadiansToDegrees(angle));
+
+        mPreviousMousePos = mouse_pos_in_view;
+    }
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        const auto& mouse_pos = mickey->pos();
+        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+    {
+        return false;
+    }
+private:
+    float GetAngleRadians(const glm::vec4& p) const
+    {
+        const auto hypotenuse = std::sqrt(p.x*p.x + p.y*p.y);
+        // acos returns principal angle range which is [0, Pi] radians
+        // but we want to map to a range of [0, 2*Pi] i.e. full circle.
+        // therefore we check the Y position.
+        const auto principal_angle = std::acos(p.x / hypotenuse);
+        if (p.y < 0.0f)
+            return math::Pi * 2.0 - principal_angle;
+        return principal_angle;
+    }
+private:
+    AnimationWidget::State& mState;
+    scene::AnimationNode* mNode = nullptr;
+    // previous mouse position, for each mouse move we update the object's
+    // position by the delta between previous and current mouse pos.
+    glm::vec4 mPreviousMousePos;
+};
+
 AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
@@ -514,8 +580,12 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                     // bottom right hitbox
                     const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
                                                          hitpos.y >= size.y - 10.0f;
+                    const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
+                                                         hitpos.y >= 0 && hitpos.y <= 10.0f;
                     if (bottom_right_hitbox_hit)
                         mCurrentTool.reset(new ResizeTool(mState, hit));
+                    else if (top_left_hitbox_hit)
+                        mCurrentTool.reset(new RotateTool(mState, hit));
                     else
                         mCurrentTool.reset(new MoveTool(mState, hit));
                 }
@@ -1130,7 +1200,8 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 return;
 
             static const auto green = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
-            static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Wireframe);
+            static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
+            static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
 
             const auto& size = node->GetSize();
 
@@ -1144,34 +1215,27 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 packets.push_back(selection);
             trans.Pop();
 
-            // draw the sizing boxes in the corners of the selection rectangle.
-            struct BoxOffsets {
-                float x = 0.0f;
-                float y = 0.0f;
-            } offsets[] = {
-                // todo: support resizing from other corners other than the bottom right
-                // (needs adjustment to the position)
-                {size.x-10.0f, size.y-10.0f}
-                /*
-                {0.0f, 0.0f},
-                {size.x - 10.0f, 0.0f},
-                {0.0f, size.y-10.0f},
-                {-size.x + 10.0f, 0.0f}
-                */
-            };
-
+            // draw the resize indicator. (lower right corner box)
             trans.Push();
-                trans.Scale(10, 10);
-                for (const auto& box : offsets)
-                {
-                    trans.Translate(box.x, box.y);
-                    scene::Animation::DrawPacket sizing_box;
-                    sizing_box.transform = trans.GetAsMatrix();
-                    sizing_box.material  = green;
-                    sizing_box.drawable  = rect;
-                    sizing_box.layer     = node->GetLayer();
-                    packets.push_back(sizing_box);
-                }
+                trans.Scale(10.0f, 10.0f);
+                trans.Translate(size.x-10.0f, size.y-10.0f);
+                scene::Animation::DrawPacket sizing_box;
+                sizing_box.transform = trans.GetAsMatrix();
+                sizing_box.material  = green;
+                sizing_box.drawable  = rect;
+                sizing_box.layer     = node->GetLayer();
+                packets.push_back(sizing_box);
+            trans.Pop();
+
+            // draw the rotation indicator. (upper left corner circle)
+            trans.Push();
+                trans.Scale(10.0f, 10.0f);
+                scene::Animation::DrawPacket rotation_circle;
+                rotation_circle.transform = trans.GetAsMatrix();
+                rotation_circle.material  = green;
+                rotation_circle.drawable  = circle;
+                rotation_circle.layer     = node->GetLayer();
+                packets.push_back(rotation_circle);
             trans.Pop();
         }
     private:

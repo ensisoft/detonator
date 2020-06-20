@@ -105,6 +105,7 @@ namespace gui
         class CameraTool;
         class MoveTool;
         class ResizeTool;
+        class RotateTool;
 
     private:
         Ui::AnimationWidget mUI;

@@ -300,6 +300,7 @@ namespace scene
             return const_cast<Animation*>(this)->CoarseHitTest(x, y, hitbox_pos);
         }
 
+        glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNode* node) const;
 
         // Reset the state of the animation to initial state.
         void Reset();

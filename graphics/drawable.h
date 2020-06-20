@@ -90,6 +90,8 @@ namespace gfx
         Arrow() = default;
         Arrow(Style style) : mStyle(style)
         {}
+        Arrow(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
         virtual void SetStyle(Style style) override
@@ -106,6 +108,8 @@ namespace gfx
     public:
         Circle() = default;
         Circle(Style style) : mStyle(style)
+        {}
+        Circle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
@@ -125,6 +129,8 @@ namespace gfx
         Rectangle() = default;
         Rectangle(Style style) : mStyle(style)
         {}
+        Rectangle(Style style, float linewidth)  : mStyle(style), mLineWidth(linewidth)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
         virtual void SetStyle(Style style) override
@@ -141,6 +147,8 @@ namespace gfx
     public:
         Triangle() = default;
         Triangle(Style style) : mStyle(style)
+        {}
+        Triangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
