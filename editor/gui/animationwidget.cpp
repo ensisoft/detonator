@@ -1343,6 +1343,8 @@ void AnimationWidget::updateCurrentNodeProperties()
 {
     if (const auto* node = GetCurrentNode())
     {
+        QSignalBlocker s(mUI.cTransform);
+
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         SetValue(mUI.cName, node->GetName());
