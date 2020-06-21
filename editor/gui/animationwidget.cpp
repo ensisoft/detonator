@@ -912,24 +912,24 @@ void AnimationWidget::on_tree_customContextMenuRequested(QPoint)
 void AnimationWidget::on_plus90_clicked()
 {
     const auto value = mUI.rotation->value();
-    mUI.rotation->setValue(value + 90.0f);
+    mUI.rotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
 }
 
 void AnimationWidget::on_minus90_clicked()
 {
     const auto value = mUI.rotation->value();
-    mUI.rotation->setValue(value - 90.0f);
+    mUI.rotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
 }
 
 void AnimationWidget::on_cPlus90_clicked()
 {
     const auto value = mUI.cRotation->value();
-    mUI.cRotation->setValue(value + 90.0f);
+    mUI.cRotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
 }
 void AnimationWidget::on_cMinus90_clicked()
 {
     const auto value = mUI.cRotation->value();
-    mUI.cRotation->setValue(value - 90.0f);
+    mUI.cRotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
 }
 
 void AnimationWidget::on_resetTransform_clicked()
