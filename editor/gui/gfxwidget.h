@@ -52,6 +52,9 @@ namespace gui
             setFramerate(60);
             // need to enable mouse tracking in order to get mouse move events.
             setMouseTracking(true);
+
+            // need to enable this in order to get keyboard events.
+            setFocusPolicy(Qt::StrongFocus);
         }
 
         void dispose()
@@ -88,6 +91,7 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseMove;
         std::function<void (QMouseEvent* mickey)> onMousePress;
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
+        std::function<bool (QKeyEvent* key)> onKeyPress;
     private slots:
         void changeColor_triggered();
         void clearColorChanged(QColor color);
@@ -101,6 +105,7 @@ namespace gui
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
+        virtual void keyPressEvent(QKeyEvent* key) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;

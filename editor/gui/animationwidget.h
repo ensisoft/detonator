@@ -98,6 +98,7 @@ namespace gui
         void paintScene(gfx::Painter& painter, double secs);
         scene::AnimationNode* GetCurrentNode();
         void updateCurrentNodeProperties();
+        void updateCurrentNodePosition(float dx, float dy);
     private:
         class TreeModel;
         class Tool;

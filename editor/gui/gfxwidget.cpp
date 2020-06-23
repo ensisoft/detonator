@@ -151,6 +151,17 @@ void GfxWidget::mouseReleaseEvent(QMouseEvent* mickey)
         onMouseRelease(mickey);
 }
 
+void GfxWidget::keyPressEvent(QKeyEvent* key)
+{
+    if (onKeyPress && onKeyPress(key))
+        return;
+
+    // !!
+    // If you reimplement this handler, it is very important that you call
+    // the base class implementation if you do not act upon the key.
+    QOpenGLWidget::keyPressEvent(key);
+}
+
 void GfxWidget::changeColor_triggered()
 {
     const gfx::Color4f current = mClearColor;

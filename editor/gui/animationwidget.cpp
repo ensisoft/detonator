@@ -608,6 +608,42 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewArrow->setChecked(false);
     };
 
+    mUI.widget->onKeyPress = [&](QKeyEvent* key) {
+        switch (key->key()) {
+            case Qt::Key_Delete:
+                on_actionDeleteComponent_triggered();
+                break;
+            case Qt::Key_W:
+                mState.camera_offset_y += 20.0f;
+                break;
+            case Qt::Key_S:
+                mState.camera_offset_y -= 20.0f;
+                break;
+            case Qt::Key_A:
+                mState.camera_offset_x += 20.0f;
+                break;
+            case Qt::Key_D:
+                mState.camera_offset_x -= 20.0f;
+                break;
+            case Qt::Key_Left:
+                updateCurrentNodePosition(-20.0f, 0.0f);
+                break;
+            case Qt::Key_Right:
+                updateCurrentNodePosition(20.0f, 0.0f);
+                break;
+            case Qt::Key_Up:
+                updateCurrentNodePosition(0.0f, -20.0f);
+                break;
+            case Qt::Key_Down:
+                updateCurrentNodePosition(0.0f, 20.0f);
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    };
+
     // create the memu for creating instances of user defined drawables
     // since there doesn't seem to be a way to do this in the designer.
     mDrawableMenu = new QMenu(this);
@@ -1355,6 +1391,17 @@ void AnimationWidget::updateCurrentNodeProperties()
         SetValue(mUI.lineWidth, node->GetLineWidth());
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
+    }
+}
+
+void AnimationWidget::updateCurrentNodePosition(float dx, float dy)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto pos = node->GetTranslation();
+        pos.x += dx;
+        pos.y += dy;
+        node->SetTranslation(pos);
     }
 }
 
