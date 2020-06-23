@@ -570,27 +570,20 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             }
             else
             {
-                if (selected == nullptr || selected->GetUserData() != hit)
-                {
-                    mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
-                }
+                const auto& size = hit->GetSize();
+                // bottom right hitbox
+                const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
+                                                        hitpos.y >= size.y - 10.0f;
+                const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
+                                                        hitpos.y >= 0 && hitpos.y <= 10.0f;
+                if (bottom_right_hitbox_hit)
+                    mCurrentTool.reset(new ResizeTool(mState, hit));
+                else if (top_left_hitbox_hit)
+                    mCurrentTool.reset(new RotateTool(mState, hit));
                 else
-                {
-                    ASSERT(hit == selected->GetUserData());
+                    mCurrentTool.reset(new MoveTool(mState, hit));
 
-                    const auto& size = hit->GetSize();
-                    // bottom right hitbox
-                    const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                         hitpos.y >= size.y - 10.0f;
-                    const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                         hitpos.y >= 0 && hitpos.y <= 10.0f;
-                    if (bottom_right_hitbox_hit)
-                        mCurrentTool.reset(new ResizeTool(mState, hit));
-                    else if (top_left_hitbox_hit)
-                        mCurrentTool.reset(new RotateTool(mState, hit));
-                    else
-                        mCurrentTool.reset(new MoveTool(mState, hit));
-                }
+                mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
             }
         }
         if (mCurrentTool)
