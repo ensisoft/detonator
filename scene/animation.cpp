@@ -78,9 +78,10 @@ glm::mat4 AnimationNode::GetNodeTransform() const
     // transformation order is the order they're
     // written here.
     gfx::Transform transform;
+    // offset the object so that the center of the shape is aligned
+    // with the position parameter.
     transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
     transform.Rotate(mRotation);
-    transform.Translate(mSize.x * 0.5f, mSize.y * 0.5f);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }

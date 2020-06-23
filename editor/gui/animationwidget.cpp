@@ -196,7 +196,8 @@ public:
         node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
         node.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
         node.SetName(name);
-        node.SetTranslation(glm::vec2(xpos, ypos));
+        // the given object position is to be aligned with the center of the shape
+        node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
         node.SetSize(glm::vec2(width, height));
         node.SetScale(glm::vec2(1.0f, 1.0f));
 
@@ -349,8 +350,12 @@ public:
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
-        const auto& mouse_delta = mouse_pos_in_view - mPreviousMousePos;
-        //DEBUG("Mouse delta %1,%2", mouse_delta.x, mouse_delta.y);
+        // double the mouse movement so that the object's size follows the actual mouse movement.
+        // Since the object's position is with respect to the center of the shape
+        // adding some delta d to any extent (width or height i.e dx or dy) will
+        // only grow that dimension by half d on either side of the axis, thus
+        // falling behind the actual mouse movement.
+        const auto& mouse_delta = (mouse_pos_in_view - mPreviousMousePos) * 2.0f;
 
         const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
         if (maintain_aspect_ratio)
