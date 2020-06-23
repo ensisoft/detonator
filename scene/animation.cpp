@@ -530,6 +530,50 @@ glm::vec2 Animation::MapCoordsFromNode(float x, float y, const AnimationNode* no
     return visitor.GetResult();
 }
 
+glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node) const
+{
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        Visitor(float x, float y, const AnimationNode* node)
+          : mCoords(x, y, 1.0f, 1.0f)
+          , mNode(node)
+        {}
+        virtual void EnterNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+
+            if (node == mNode)
+            {
+                const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+                const auto& vec = animation_to_node * mCoords;
+                mResult = glm::vec2(vec.x, vec.y);
+            }
+        }
+        virtual void LeaveNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+        glm::vec2 GetResult() const
+        { return mResult; }
+
+    private:
+        const glm::vec4 mCoords;
+        const AnimationNode* mNode = nullptr;
+        glm::vec2 mResult;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor(x, y, node);
+    mRenderTree.PreOrderTraverse(visitor);
+
+    return visitor.GetResult();
+}
+
 void Animation::Prepare(const GfxFactory& loader)
 {
     for (auto& node : mNodes)

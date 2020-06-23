@@ -302,6 +302,8 @@ namespace scene
 
         glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNode* node) const;
 
+        glm::vec2 MapCoordsToNode(float x, float y, const AnimationNode* node) const;
+
         // Reset the state of the animation to initial state.
         void Reset();
 

@@ -349,13 +349,9 @@ public:
         const auto& mouse_pos = mickey->pos();
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+        const auto& mouse_pos_in_node = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
 
-        // double the mouse movement so that the object's size follows the actual mouse movement.
-        // Since the object's position is with respect to the center of the shape
-        // adding some delta d to any extent (width or height i.e dx or dy) will
-        // only grow that dimension by half d on either side of the axis, thus
-        // falling behind the actual mouse movement.
-        const auto& mouse_delta = (mouse_pos_in_view - mPreviousMousePos) * 2.0f;
+        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
 
         const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
         if (maintain_aspect_ratio)
@@ -375,13 +371,14 @@ public:
             size.y = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
             mNode->SetSize(size);
         }
-        mPreviousMousePos = mouse_pos_in_view;
+        mPreviousMousePos = mouse_pos_in_node;
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
     {
         const auto& mouse_pos = mickey->pos();
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+        mPreviousMousePos = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
     }
     virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
     {
@@ -393,7 +390,7 @@ private:
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
-    glm::vec4 mPreviousMousePos;
+    glm::vec2 mPreviousMousePos;
 
 };
 
