@@ -153,7 +153,7 @@ namespace scene
         glm::mat4 GetNodeTransform() const;
 
         // Get this node's transformation that applies to this
-        // nodes' drawable object(s).
+        // node's drawable object(s).
         glm::mat4 GetModelTransform() const;
 
         // Prepare this animation component for rendering
@@ -284,24 +284,29 @@ namespace scene
         { return mRenderTree; }
 
         // Perform coarse hit test to see if the given x,y point
-        // intersects with any node in the animation. The testing
-        // is coarse in the sense that it's done against the node's
-        // size box (the box that contains the node's drawable object)
-        // only instead of actually checking against the drawable shape.
+        // intersects with any node's drawable in the animation.
+        // The testing is coarse in the sense that it's done against the node's
+        // drawable shapes size box (the box that contains the node's drawable object)
+        // only instead of actually checking against the drawable shape content.
+        // I.e. if clicking on an object that has transparency the transparency is ignored
+        // when doing selection.
         // Returns nullptr if nothing was intersected otherwise returns
         // the object with greatest layer value. (Topmost). The order
         // in case of multiple objects with equal layer value is unspecified.
         // Optionally save the hit coords in node's coordinate space. (i.e. position
-        // within the hit box)
+        // within the hit box). The box coordinates are 0, 0 in the top lef corner
+        // and width, height (size of the drawable) in the bottom right corner.
         AnimationNode* CoarseHitTest(float x, float y, glm::vec2* hitbox_pos = nullptr);
-
+        // See above.
         const AnimationNode* CoarseHitTest(float x, float y, glm::vec2* hitbox_pos = nullptr) const
         {
             return const_cast<Animation*>(this)->CoarseHitTest(x, y, hitbox_pos);
         }
 
+        // Map coordinates in some AnimationNode's (see AnimationNode::GetNodeTransform) space
+        // into animation coordinate space. 
         glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNode* node) const;
-
+        // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const AnimationNode* node) const;
 
         // Reset the state of the animation to initial state.

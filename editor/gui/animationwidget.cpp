@@ -351,7 +351,12 @@ public:
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
         const auto& mouse_pos_in_node = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
 
-        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
+        // double the mouse movement so that the object's size follows the actual mouse movement.
+        // Since the object's position is with respect to the center of the shape
+        // adding some delta d to any extent (width or height i.e dx or dy) will
+        // only grow that dimension by half d on either side of the axis, thus
+        // falling behind the actual mouse movement.
+        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos) * 2.0f;
 
         const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
         if (maintain_aspect_ratio)
@@ -580,8 +585,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                     mCurrentTool.reset(new ResizeTool(mState, hit));
                 else if (top_left_hitbox_hit)
                     mCurrentTool.reset(new RotateTool(mState, hit));
-                else
-                    mCurrentTool.reset(new MoveTool(mState, hit));
+                else mCurrentTool.reset(new MoveTool(mState, hit));
 
                 mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
             }
@@ -1249,7 +1253,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             // draw the resize indicator. (lower right corner box)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
-                trans.Translate(size.x-10.0f, size.y-10.0f);
+                trans.Translate(size.x*0.5f-10.0f, size.y*0.5f-10.0f);
                 scene::Animation::DrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
@@ -1261,6 +1265,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             // draw the rotation indicator. (upper left corner circle)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
+                trans.Translate(-size.x*0.5f, -size.y*0.5f);
                 scene::Animation::DrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;

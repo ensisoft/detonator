@@ -78,9 +78,7 @@ glm::mat4 AnimationNode::GetNodeTransform() const
     // transformation order is the order they're
     // written here.
     gfx::Transform transform;
-    // offset the object so that the center of the shape is aligned
-    // with the position parameter.
-    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    // transform.Scale(mScale); // currently not supported.
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
@@ -90,6 +88,9 @@ glm::mat4 AnimationNode::GetModelTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mSize);
+    // offset the object so that the center of the shape is aligned
+    // with the position parameter.
+    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
     return transform.GetAsMatrix();
 }
 
@@ -428,20 +429,25 @@ AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
                 return;
 
             mTransform.Push(node->GetNodeTransform());
+            // using the model transform will put the coordinates in the drawable coordinate
+            // space, i.e. normalized coordinates.
+            mTransform.Push(node->GetModelTransform());
 
             const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
             const auto& hitpoint_in_node = animation_to_node * mHitPoint;
-            const auto& size = node->GetSize();
+
             if (hitpoint_in_node.x >= 0.0f &&
-                hitpoint_in_node.x < size.x &&
+                hitpoint_in_node.x < 1.0f &&
                 hitpoint_in_node.y >= 0.0f &&
-                hitpoint_in_node.y < size.y)
+                hitpoint_in_node.y < 1.0f)
             {
+                const auto& size = node->GetSize();
                 Hit hit;
                 hit.node = node;
-                hit.point = glm::vec2(hitpoint_in_node.x, hitpoint_in_node.y);
+                hit.point = glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y);
                 mHitNodes.push_back(hit);
             }
+            mTransform.Pop();
         }
         virtual void LeaveNode(AnimationNode* node) override
         {
