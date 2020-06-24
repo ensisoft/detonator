@@ -87,9 +87,9 @@ pinyin-invaders
 Evil chinese characters are invading. Your job is to kill them by shooting
 them down with pinyin missiles and detonating bombs. Learn Mandarin Chinese characters by playing this simple game that asks you to memorize characters.
 
-![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/menu.png "Main menu")
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/invaders-menu.png "Main menu")
 
-![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/invaders.png "pinyin-invaders are attacking!")
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/invaders-game.png "pinyin-invaders are attacking!")
 
 Running on Windows
 -----------------------
