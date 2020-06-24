@@ -13,6 +13,10 @@ Currently supported features.
 * Window integration (https://github.com/ensisoft/wdk)
 * Minimalistic audio engine
 
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/editor-animation.png "Animation editor")
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/editor-material.png "Material editor")
+![Screenshot](https://raw.githubusercontent.com/ensisoft/pinyin-invaders/master/screens/editor-particle.png "Particle editor")
+
 
 Building from source for Linux
 -------------------------------
