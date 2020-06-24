@@ -154,6 +154,17 @@ namespace scene
             }
             return nullptr;
         }
+        const TreeNode* FindNodeByValue(const T* value) const
+        {
+            if (mNodeValue == value)
+                return this;
+            for (const auto& child : mChildren)
+            {
+                if (const TreeNode* ret = child.FindNodeByValue(value))
+                    return ret;
+            }
+            return nullptr;
+        }
 
         TreeNode* FindParent(TreeNode* child)
         {
@@ -165,6 +176,20 @@ namespace scene
             for (auto& maybe : mChildren)
             {
                 if (TreeNode* ret = maybe.FindParent(child))
+                    return ret;
+            }
+            return nullptr;
+        }
+        const TreeNode* FindParent(const TreeNode* child) const
+        {
+            for (const auto& maybe : mChildren)
+            {
+                if (&maybe == child)
+                    return this;
+            }
+            for (const auto&  maybe : mChildren)
+            {
+                if (const TreeNode* ret = maybe.FindParent(child))
                     return ret;
             }
             return nullptr;

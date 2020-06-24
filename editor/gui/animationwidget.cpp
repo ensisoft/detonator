@@ -305,21 +305,57 @@ public:
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
-        const auto& mouse_delta = mouse_pos_in_view - mPreviousMousePos;
-        //DEBUG("Mouse delta %1,%2", mouse_delta.x, mouse_delta.y);
+        const auto& tree = mState.animation.GetRenderTree();
+        const auto& tree_node = tree.FindNodeByValue(mNode);
+        const auto* parent = tree.FindParent(tree_node);
+        // if the object we're moving has a parent we need to map the mouse movement
+        // correctly taking into account that the hierarchy might include several rotations.
+        // simplest thing to do is to map the mouse to the object's parent's coordinate space
+        // and thus express/measure the object's translation delta relative to it's parent
+        // (as it is in the hiearchy).
+        // todo: this could be simplified if we expressed the view transformation in the render tree's
+        // root node. then the below else branch should go away(?)
+        if (parent && parent->GetValue())
+        {
+            const auto& mouse_pos_in_node = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+            const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
-        glm::vec2 position = mNode->GetTranslation();
-        position.x += mouse_delta.x;
-        position.y += mouse_delta.y;
-        mNode->SetTranslation(position);
-
-        mPreviousMousePos = mouse_pos_in_view;
+            glm::vec2 position = mNode->GetTranslation();
+            position.x += mouse_delta.x;
+            position.y += mouse_delta.y;
+            mNode->SetTranslation(position);
+            mPreviousMousePos = mouse_pos_in_node;
+        }
+        else
+        {
+            // object doesn't have a parent, movement can be expressed using the animations
+            // coordinate space.
+            const auto& mouse_delta = mouse_pos_in_view - glm::vec4(mPreviousMousePos, 0.0f, 0.0f);
+            glm::vec2 position = mNode->GetTranslation();
+            position.x += mouse_delta.x;
+            position.y += mouse_delta.y;
+            mNode->SetTranslation(position);
+            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+        }
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
     {
         const auto& mouse_pos = mickey->pos();
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+
+        // see the comments in MouseMove about the branched logic.
+        const auto& tree = mState.animation.GetRenderTree();
+        const auto& tree_node = tree.FindNodeByValue(mNode);
+        const auto* parent = tree.FindParent(tree_node);
+        if (parent && parent->GetValue())
+        {
+            mPreviousMousePos = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+        }
+        else
+        {
+            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+        }
     }
     virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
     {
@@ -331,7 +367,7 @@ private:
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
-    glm::vec4 mPreviousMousePos;
+    glm::vec2 mPreviousMousePos;
 
 };
 
