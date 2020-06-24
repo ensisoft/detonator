@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(PinyinInvaders)
+project(Gamestudio)
 
 message(STATUS "
-          ~~ PinyinInvaders ~~
+          ~~ Ensisoft GameStudio ~~
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
     Copyright (c) 2019 Sami Väisänen
                 Ensisoft
 
-https://github.com/ensisoft/pinyin-invaders
+https://github.com/ensisoft/gamestudio
 
 ")
 
@@ -302,10 +302,10 @@ endif()
 
 # game project
 add_executable(invaders
-    game/level.cpp
-    game/gamewidget.cpp
-    game/game.cpp
-    game/main.cpp
+    pinyin-invaders/level.cpp
+    pinyin-invaders/gamewidget.cpp
+    pinyin-invaders/game.cpp
+    pinyin-invaders/main.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/sample.cpp
@@ -321,7 +321,7 @@ add_executable(invaders
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
-target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game")
+target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders")
 target_link_libraries(invaders Qt5::Widgets)
 target_link_libraries(invaders freetype_custom_build)
 target_link_libraries(invaders harfbuzz_custom_build)
@@ -335,9 +335,9 @@ elseif (UNIX)
   target_link_libraries(invaders sndfile)
   target_link_libraries(invaders pthread)
 endif()
-install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/game/dist")
+install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/game/dist")
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
 
 
 # unit tests
