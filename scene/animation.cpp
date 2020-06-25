@@ -44,6 +44,7 @@ namespace scene
 AnimationNode::AnimationNode()
 {
     mId = base::RandomString(10);
+    mBitFlags.set(Flags::VisibleInEditor, true);
 }
 
 bool AnimationNode::Update(float dt)
@@ -151,6 +152,7 @@ nlohmann::json AnimationNode::ToJson() const
     base::JsonWrite(json, "render_pass", mRenderPass);
     base::JsonWrite(json, "render_style", mRenderStyle);
     base::JsonWrite(json, "linewidth", mLineWidth);
+    base::JsonWrite(json, "bitflags", mBitFlags.value());
     return json;
 }
 
@@ -171,6 +173,15 @@ std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& objec
         return std::nullopt;
     base::JsonReadSafe(object, "render_style", &ret.mRenderStyle);
     base::JsonReadSafe(object, "linewidth", &ret.mLineWidth);
+
+    std::uint32_t bitflags = 0;
+    if (!base::JsonReadSafe(object, "bitflags", &bitflags))
+    {
+        // default flag values be here.
+        ret.mBitFlags.set(Flags::VisibleInEditor, true);
+    }
+    ret.mBitFlags.set_from_value(bitflags);
+
     return ret;
 }
 

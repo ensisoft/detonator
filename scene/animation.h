@@ -37,6 +37,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "base/bitflag.h"
 #include "base/utility.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -61,6 +62,11 @@ namespace scene
             Mask
         };
         using RenderStyle = gfx::Drawable::Style;
+
+        enum class Flags {
+            // Only pertains to editor (todo: maybe this flag should be removed)
+            VisibleInEditor
+        };
 
         // This will construct an "empty" node that cannot be
         // drawn yet. You'll need to se the various properties
@@ -112,6 +118,10 @@ namespace scene
             if (mDrawable)
                 mDrawable->SetLineWidth(mLineWidth);
         }
+        void SetFlag(Flags f, bool on_off)
+        { mBitFlags.set(f, on_off); }
+        bool TestFlag(Flags f) const
+        { return mBitFlags.test(f); }
 
         RenderPass GetRenderPass() const
         { return mRenderPass; }
@@ -143,6 +153,10 @@ namespace scene
         { return mRotation; }
         float GetLineWidth() const
         { return mLineWidth; }
+        const base::bitflag<Flags>& GetFlags() const
+        { return mBitFlags; }
+        base::bitflag<Flags>& GetFlags()
+        { return mBitFlags; }
 
         bool Update(float dt);
 
@@ -202,6 +216,8 @@ namespace scene
         RenderStyle mRenderStyle = RenderStyle::Solid;
         // applies only when RenderStyle is either Outline or Wireframe
         float mLineWidth = 1.0f;
+        // bitflags that apply to node.
+        base::bitflag<Flags> mBitFlags;
     };
 
 
@@ -304,7 +320,7 @@ namespace scene
         }
 
         // Map coordinates in some AnimationNode's (see AnimationNode::GetNodeTransform) space
-        // into animation coordinate space. 
+        // into animation coordinate space.
         glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNode* node) const;
         // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const AnimationNode* node) const;

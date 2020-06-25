@@ -50,9 +50,9 @@ namespace {
 void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, const QPalette& palette, QPainter& painter,
     bool selected, bool hovered)
 {
-    const unsigned kBaseLevel = 1;
-    const unsigned kLevelOffset = 15; // px
-    const auto offset = kLevelOffset + item.GetLevel() * kLevelOffset;
+    const unsigned kBaseLevel = 3;
+    const unsigned kLevelOffset = 16; // px
+    const auto offset = kBaseLevel * kLevelOffset + item.GetLevel() * kLevelOffset;
 
     if (selected)
     {
@@ -77,6 +77,11 @@ void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, con
         painter.setPen(pen);
         painter.fillRect(box, palette.color(QPalette::Base));
         painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
+    }
+    const QIcon& ico = item.GetIcon();
+    if (!ico.isNull())
+    {
+        ico.paint(&painter, box.translated(0, 0), Qt::AlignLeft, item.GetIconMode());
     }
 }
 
@@ -228,12 +233,12 @@ void TreeWidget::paintEvent(QPaintEvent* event)
         QPen line;
         line.setColor(palette.color(QPalette::Shadow));
         painter.setPen(line);
-        painter.drawLine(xpos - 15, ypos + mItemHeight/2,
-                         xpos - 3,  ypos + mItemHeight/2);
+        painter.drawLine(32 + xpos - 15, ypos + mItemHeight/2,
+                         32 + xpos - 3,  ypos + mItemHeight/2);
         if (item.GetLevel() > 0)
         {
-            painter.drawLine(xpos - 15, ypos + mItemHeight/2,
-                             xpos - 15, ypos - 1);
+            painter.drawLine(32 + xpos - 15, ypos + mItemHeight/2,
+                             32 + xpos - 15, ypos - 1);
         }
     }
 
@@ -366,7 +371,18 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent* mickey)
     mDragging = false;
 
     if (!was_dragging)
+    {
+        const auto xpos = mickey->pos().x();
+        const auto ypos = mickey->pos().y();
+        if (xpos >= 16)
+            return;
+
+        const unsigned index = ypos / mItemHeight;
+        if (index >= mItems.size())
+            return;
+        emit clickEvent(&mItems[index]);
         return;
+    }
 
     const auto& drag_offset = mDragPoint - mDragStart;
     if (std::abs(drag_offset.y()) < 1)

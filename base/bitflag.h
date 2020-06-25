@@ -38,7 +38,7 @@ namespace base
         enum {
             BitCount = sizeof(Bits) * 8
         };
-
+        bitflag() = default;
         bitflag(Enum initial)
         {
             set(initial);

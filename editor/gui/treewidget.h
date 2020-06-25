@@ -66,6 +66,8 @@ namespace gui
             // Set the item icon.
             void SetIcon(const QIcon& icon)
             { mIcon = icon; }
+            void SetIconMode(QIcon::Mode mode)
+            { mIconMode = mode; }
             // Set the item user data.
             void SetUserData(void* user)
             { mUser = user;}
@@ -86,11 +88,14 @@ namespace gui
             { return mIcon; }
             unsigned GetLevel() const
             { return mLevel; }
+            QIcon::Mode GetIconMode() const
+            { return mIconMode; }
 
         private:
             QString mId;
             QString mText;
             QIcon   mIcon;
+            QIcon::Mode mIconMode = QIcon::Normal;
             void*   mUser = nullptr;
             unsigned mLevel  = 0;
         };
@@ -149,6 +154,7 @@ namespace gui
     signals:
         void currentRowChanged();
         void dragEvent(TreeItem* item, TreeItem* target);
+        void clickEvent(TreeItem* item);
 
     private:
         virtual void paintEvent(QPaintEvent* event) override;

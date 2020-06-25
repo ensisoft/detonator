@@ -93,6 +93,7 @@ namespace gui
         void newResourceAvailable(const app::Resource* resource);
         void resourceToBeDeleted(const app::Resource* resource);
         void treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
+        void treeClickEvent(TreeWidget::TreeItem* item);
 
     private:
         void paintScene(gfx::Painter& painter, double secs);

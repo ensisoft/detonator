@@ -76,6 +76,13 @@ public:
                 item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
                 item.SetUserData(node);
                 item.SetLevel(mLevel);
+                if (node)
+                {
+                    item.SetIcon(QIcon("icons:eye.png"));
+                    if (!node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor))
+                        item.SetIconMode(QIcon::Disabled);
+                    else item.SetIconMode(QIcon::Normal);
+                }
                 mList.push_back(item);
                 mLevel++;
             }
@@ -711,8 +718,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
-    connect(mUI.tree, &TreeWidget::dragEvent,
-            this, &AnimationWidget::treeDragEvent);
+    connect(mUI.tree, &TreeWidget::dragEvent,  this, &AnimationWidget::treeDragEvent);
+    connect(mUI.tree, &TreeWidget::clickEvent, this, &AnimationWidget::treeClickEvent);
 
     // connect workspace signals for resource management
     connect(workspace, &app::Workspace::NewResourceAvailable,
@@ -1160,6 +1167,18 @@ void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::Tree
 
 }
 
+void AnimationWidget::treeClickEvent(TreeWidget::TreeItem* item)
+{
+    //DEBUG("Tree click event: %1", item->GetId());
+    auto* node = static_cast<scene::AnimationNode*>(item->GetUserData());
+    if (node == nullptr)
+        return;
+
+    const bool visibility = node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor);
+    node->SetFlag(scene::AnimationNode::Flags::VisibleInEditor, !visibility);
+    item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+}
+
 void AnimationWidget::on_layer_valueChanged(int layer)
 {
     if (auto* node = GetCurrentNode())
@@ -1265,6 +1284,12 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         DrawHook(scene::AnimationNode* selected)
           : mSelected(selected)
         {}
+        virtual bool InspectPacket(const scene::AnimationNode* node, scene::Animation::DrawPacket&) override
+        {
+            if (!node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor))
+                return false;
+            return true;
+        }
         virtual void AppendPackets(const scene::AnimationNode* node, gfx::Transform& trans, std::vector<scene::Animation::DrawPacket>& packets) override
         {
             if (node != mSelected)
