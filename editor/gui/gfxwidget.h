@@ -82,7 +82,7 @@ namespace gui
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
 
-        // callback to invoke to initialize scene, i.e. the OpenGL widget
+        // callback to invoke to initialize game, i.e. the OpenGL widget
         // has been initialized.
         // width and height are the width and height of the widget's viewport.
         std::function<void (unsigned width, unsigned height)> onInitScene;

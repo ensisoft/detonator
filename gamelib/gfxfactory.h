@@ -33,7 +33,7 @@ namespace gfx {
     class Drawable;
 }// namespace
 
-namespace scene
+namespace game
 {
     // Producer/loader of GFX resources, i.e. materials and drawables.
     // Used to load/create GFX resource instances of types created

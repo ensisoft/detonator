@@ -38,7 +38,7 @@
 #include "animation.h"
 #include "gfxfactory.h"
 
-namespace scene
+namespace game
 {
 
 AnimationNode::AnimationNode()

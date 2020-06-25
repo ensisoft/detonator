@@ -238,7 +238,7 @@ bool Workspace::LoadContent(const QString& filename)
         for (const auto& json_p : json["animations"].items())
         {
             const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<scene::Animation> ret = scene::Animation::FromJson(json_p.value());
+            std::optional<game::Animation> ret = game::Animation::FromJson(json_p.value());
             if (!ret.has_value())
             {
                 ERROR("Failed to load animation '%1' properties.", name);

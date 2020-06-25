@@ -30,7 +30,7 @@
 #include "warnpop.h"
 
 #include "editor/gui/mainwidget.h"
-#include "scene/animation.h"
+#include "gamelib/animation.h"
 
 namespace gfx {
     class Painter;
@@ -97,7 +97,7 @@ namespace gui
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
-        scene::AnimationNode* GetCurrentNode();
+        game::AnimationNode* GetCurrentNode();
         void updateCurrentNodeProperties();
         void updateCurrentNodePosition(float dx, float dy);
     private:
@@ -121,7 +121,7 @@ namespace gui
         // state shared with the tools is packed inside a single
         // struct type for convenience
         struct State {
-            scene::Animation animation;
+            game::Animation animation;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
 

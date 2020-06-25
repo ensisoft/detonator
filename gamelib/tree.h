@@ -34,7 +34,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 
-namespace scene
+namespace game
 {
     // Non-owning treenode template for tree structure and traversal.
     // Useful for example rendering (scene graph) tree.

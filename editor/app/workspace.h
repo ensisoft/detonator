@@ -38,7 +38,7 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "scene/gfxfactory.h"
+#include "gamelib/gfxfactory.h"
 #include "resource.h"
 #include "utility.h"
 
@@ -54,7 +54,7 @@ namespace app
     // The workspace itself can also contain arbitrary properties
     // that can useful for various purposes.
     class Workspace : public QAbstractTableModel,
-                      public scene::GfxFactory
+                      public game::GfxFactory
     {
         Q_OBJECT
 

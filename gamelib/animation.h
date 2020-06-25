@@ -50,7 +50,7 @@ namespace gfx {
     class Transform;
 } // namespace
 
-namespace scene
+namespace game
 {
     class GfxFactory;
 

@@ -56,20 +56,20 @@ namespace gui
 class AnimationWidget::TreeModel : public TreeWidget::TreeModel
 {
 public:
-    TreeModel(scene::Animation& anim)  : mAnimation(anim)
+    TreeModel(game::Animation& anim)  : mAnimation(anim)
     {}
 
     virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
     {
         auto& root = mAnimation.GetRenderTree();
 
-        class Visitor : public scene::Animation::RenderTree::Visitor
+        class Visitor : public game::Animation::RenderTree::Visitor
         {
         public:
             Visitor(std::vector<TreeWidget::TreeItem>& list)
                 : mList(list)
             {}
-            virtual void EnterNode(scene::AnimationNode* node)
+            virtual void EnterNode(game::AnimationNode* node)
             {
                 TreeWidget::TreeItem item;
                 item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
@@ -79,14 +79,14 @@ public:
                 if (node)
                 {
                     item.SetIcon(QIcon("icons:eye.png"));
-                    if (!node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor))
+                    if (!node->TestFlag(game::AnimationNode::Flags::VisibleInEditor))
                         item.SetIconMode(QIcon::Disabled);
                     else item.SetIconMode(QIcon::Normal);
                 }
                 mList.push_back(item);
                 mLevel++;
             }
-            virtual void LeaveNode(scene::AnimationNode* node)
+            virtual void LeaveNode(game::AnimationNode* node)
             {
                 mLevel--;
             }
@@ -99,7 +99,7 @@ public:
         root.PreOrderTraverse(visitor);
     }
 private:
-    scene::Animation& mAnimation;
+    game::Animation& mAnimation;
 };
 
 
@@ -199,7 +199,7 @@ public:
         const float width = mAlwaysSquare ? hypotenuse : diff.x;
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
-        scene::AnimationNode node;
+        game::AnimationNode node;
         node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
         node.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
         node.SetName(name);
@@ -300,7 +300,7 @@ private:
 class AnimationWidget::MoveTool : public AnimationWidget::Tool
 {
 public:
-    MoveTool(State& state, scene::AnimationNode* node)
+    MoveTool(State& state, game::AnimationNode* node)
       : mState(state)
       , mNode(node)
     {}
@@ -370,7 +370,7 @@ public:
         return false;
     }
 private:
-    scene::AnimationNode* mNode = nullptr;
+    game::AnimationNode* mNode = nullptr;
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
@@ -381,7 +381,7 @@ private:
 class AnimationWidget::ResizeTool : public AnimationWidget::Tool
 {
 public:
-    ResizeTool(State& state, scene::AnimationNode* node)
+    ResizeTool(State& state, game::AnimationNode* node)
       : mState(state)
       , mNode(node)
     {}
@@ -434,7 +434,7 @@ public:
         return false;
     }
 private:
-    scene::AnimationNode* mNode = nullptr;
+    game::AnimationNode* mNode = nullptr;
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
@@ -445,7 +445,7 @@ private:
 class AnimationWidget::RotateTool : public AnimationWidget::Tool
 {
 public:
-    RotateTool(State& state, scene::AnimationNode* node)
+    RotateTool(State& state, game::AnimationNode* node)
       : mState(state)
       , mNode(node)
     {}
@@ -501,7 +501,7 @@ private:
     }
 private:
     AnimationWidget::State& mState;
-    scene::AnimationNode* mNode = nullptr;
+    game::AnimationNode* mNode = nullptr;
     // previous mouse position, for each mouse move we update the object's
     // position by the delta between previous and current mouse pos.
     glm::vec4 mPreviousMousePos;
@@ -580,7 +580,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         if (!mCurrentTool)
         {
             // On a mouse press start we want to select the tool based on where the pointer
-            // is and which object it interects with in the scene when the press starts.
+            // is and which object it interects with in the game when the press starts.
             //
             // If the mouse pointer doesn't intersect with an object we create a new
             // camera tool for moving the viewport and object selection gets cleared.
@@ -605,7 +605,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                 mouse_widget_position_y, 1.0f, 1.0f);
 
             glm::vec2 hitpos;
-            scene::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_view_position.x,
+            game::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_view_position.x,
                 mouse_view_position.y, &hitpos);
             //DEBUG("hitpos: %1,%2", hitpos.x, hitpos.y);
 
@@ -713,8 +713,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     setWindowTitle("My Animation");
 
-    PopulateFromEnum<scene::AnimationNode::RenderPass>(mUI.renderPass);
-    PopulateFromEnum<scene::AnimationNode::RenderStyle>(mUI.renderStyle);
+    PopulateFromEnum<game::AnimationNode::RenderPass>(mUI.renderPass);
+    PopulateFromEnum<game::AnimationNode::RenderStyle>(mUI.renderStyle);
 
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
@@ -735,7 +735,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     mUI.name->setText(resource.GetName());
     setWindowTitle(resource.GetName());
 
-    mState.animation = *resource.GetContent<scene::Animation>();
+    mState.animation = *resource.GetContent<game::Animation>();
     mState.animation.Prepare(*workspace);
 
     mUI.tree->Rebuild();
@@ -821,7 +821,7 @@ bool AnimationWidget::loadState(const Settings& settings)
         return true;
 
     const auto& json = nlohmann::json::parse(base64::Decode(base64));
-    auto ret  = scene::Animation::FromJson(json);
+    auto ret  = game::Animation::FromJson(json);
     if (!ret.has_value())
     {
         WARN("Failed to load animation widget state.");
@@ -942,13 +942,13 @@ void AnimationWidget::on_actionNewArrow_triggered()
 
 void AnimationWidget::on_actionDeleteComponent_triggered()
 {
-    const scene::AnimationNode* item = GetCurrentNode();
+    const game::AnimationNode* item = GetCurrentNode();
     if (item == nullptr)
         return;
 
     auto& tree = mState.animation.GetRenderTree();
 
-    // find the scene graph node that contains this AnimationNode.
+    // find the game graph node that contains this AnimationNode.
     auto* node = tree.FindNodeByValue(item);
 
     // traverse the tree starting from the node to be deleted
@@ -959,7 +959,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
         std::string name;
     };
     std::vector<Carcass> graveyard;
-    node->PreOrderTraverseForEach([&](scene::AnimationNode* value) {
+    node->PreOrderTraverseForEach([&](game::AnimationNode* value) {
         Carcass carcass;
         carcass.id   = value->GetId();
         carcass.name = value->GetName();
@@ -1038,7 +1038,7 @@ void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const scene::AnimationNode::RenderPass pass = GetValue(mUI.renderPass);
+        const game::AnimationNode::RenderPass pass = GetValue(mUI.renderPass);
         node->SetRenderPass(pass);
     }
 }
@@ -1047,14 +1047,14 @@ void AnimationWidget::on_renderStyle_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const scene::AnimationNode::RenderStyle style = GetValue(mUI.renderStyle);
+        const game::AnimationNode::RenderStyle style = GetValue(mUI.renderStyle);
         node->SetRenderStyle(style);
     }
 }
 
 void AnimationWidget::currentComponentRowChanged()
 {
-    const scene::AnimationNode* node = GetCurrentNode();
+    const game::AnimationNode* node = GetCurrentNode();
     if (node == nullptr)
     {
         mUI.cProperties->setEnabled(false);
@@ -1148,10 +1148,10 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
     auto& tree = mState.animation.GetRenderTree();
-    auto* src_value = static_cast<scene::AnimationNode*>(item->GetUserData());
-    auto* dst_value = static_cast<scene::AnimationNode*>(target->GetUserData());
+    auto* src_value = static_cast<game::AnimationNode*>(item->GetUserData());
+    auto* dst_value = static_cast<game::AnimationNode*>(target->GetUserData());
 
-    // find the scene graph node that contains this AnimationNode.
+    // find the game graph node that contains this AnimationNode.
     auto* src_node   = tree.FindNodeByValue(src_value);
     auto* src_parent = tree.FindParent(src_node);
 
@@ -1159,7 +1159,7 @@ void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::Tree
     if (src_node->FindNodeByValue(dst_value))
         return;
 
-    scene::Animation::RenderTreeNode branch = *src_node;
+    game::Animation::RenderTreeNode branch = *src_node;
     src_parent->DeleteChild(src_node);
 
     auto* dst_node  = tree.FindNodeByValue(dst_value);
@@ -1170,12 +1170,12 @@ void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::Tree
 void AnimationWidget::treeClickEvent(TreeWidget::TreeItem* item)
 {
     //DEBUG("Tree click event: %1", item->GetId());
-    auto* node = static_cast<scene::AnimationNode*>(item->GetUserData());
+    auto* node = static_cast<game::AnimationNode*>(item->GetUserData());
     if (node == nullptr)
         return;
 
-    const bool visibility = node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor);
-    node->SetFlag(scene::AnimationNode::Flags::VisibleInEditor, !visibility);
+    const bool visibility = node->TestFlag(game::AnimationNode::Flags::VisibleInEditor);
+    node->SetFlag(game::AnimationNode::Flags::VisibleInEditor, !visibility);
     item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
 }
 
@@ -1246,7 +1246,7 @@ void AnimationWidget::on_cName_textChanged(const QString& text)
         return;
     if (!item->GetUserData())
         return;
-    auto* node = static_cast<scene::AnimationNode*>(item->GetUserData());
+    auto* node = static_cast<game::AnimationNode*>(item->GetUserData());
 
     node->SetName(app::ToUtf8(text));
     item->SetText(text);
@@ -1278,19 +1278,19 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    class DrawHook : public scene::Animation::DrawHook
+    class DrawHook : public game::Animation::DrawHook
     {
     public:
-        DrawHook(scene::AnimationNode* selected)
+        DrawHook(game::AnimationNode* selected)
           : mSelected(selected)
         {}
-        virtual bool InspectPacket(const scene::AnimationNode* node, scene::Animation::DrawPacket&) override
+        virtual bool InspectPacket(const game::AnimationNode* node, game::Animation::DrawPacket&) override
         {
-            if (!node->TestFlag(scene::AnimationNode::Flags::VisibleInEditor))
+            if (!node->TestFlag(game::AnimationNode::Flags::VisibleInEditor))
                 return false;
             return true;
         }
-        virtual void AppendPackets(const scene::AnimationNode* node, gfx::Transform& trans, std::vector<scene::Animation::DrawPacket>& packets) override
+        virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::Animation::DrawPacket>& packets) override
         {
             if (node != mSelected)
                 return;
@@ -1303,7 +1303,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
-                scene::Animation::DrawPacket selection;
+                game::Animation::DrawPacket selection;
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
@@ -1315,7 +1315,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
                 trans.Translate(size.x*0.5f-10.0f, size.y*0.5f-10.0f);
-                scene::Animation::DrawPacket sizing_box;
+                game::Animation::DrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
@@ -1327,7 +1327,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                scene::Animation::DrawPacket rotation_circle;
+                game::Animation::DrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
@@ -1336,7 +1336,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Pop();
         }
     private:
-        scene::AnimationNode* mSelected = nullptr;
+        game::AnimationNode* mSelected = nullptr;
     };
 
     DrawHook hook(GetCurrentNode());
@@ -1426,14 +1426,14 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
-scene::AnimationNode* AnimationWidget::GetCurrentNode()
+game::AnimationNode* AnimationWidget::GetCurrentNode()
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return nullptr;
     if (!item->GetUserData())
         return nullptr;
-    return static_cast<scene::AnimationNode*>(item->GetUserData());
+    return static_cast<game::AnimationNode*>(item->GetUserData());
 }
 
 void AnimationWidget::updateCurrentNodeProperties()

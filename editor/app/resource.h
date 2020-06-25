@@ -34,7 +34,7 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "scene/animation.h"
+#include "gamelib/animation.h"
 #include "utility.h"
 
 namespace app
@@ -163,7 +163,7 @@ namespace app
         };
 
         template<>
-        struct ResourceTypeTraits<scene::Animation> {
+        struct ResourceTypeTraits<game::Animation> {
             static constexpr auto Type = app::Resource::Type::Animation;
         };
     } // detail
@@ -315,6 +315,6 @@ namespace app
 
     using MaterialResource = GraphicsResource<gfx::Material>;
     using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine>;
-    using AnimationResource = GraphicsResource<scene::Animation>;
+    using AnimationResource = GraphicsResource<game::Animation>;
 
 } // namespace

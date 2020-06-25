@@ -31,7 +31,7 @@
 #include <iostream>
 
 #include "base/test_minimal.h"
-#include "scene/tree.h"
+#include "gamelib/tree.h"
 
 struct MyNode {
     std::string s;
@@ -63,7 +63,7 @@ nlohmann::json TreeNodeToJson(const MyNode* node)
 
 int test_main(int argc, char* argv[])
 {
-    using MyTree = scene::TreeNode<MyNode>;
+    using MyTree = game::TreeNode<MyNode>;
 
     {
         MyTree tree;
