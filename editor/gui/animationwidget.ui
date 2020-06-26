@@ -832,6 +832,33 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>name</tabstop>
+  <tabstop>translateX</tabstop>
+  <tabstop>translateY</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>rotation</tabstop>
+  <tabstop>plus90</tabstop>
+  <tabstop>minus90</tabstop>
+  <tabstop>resetTransform</tabstop>
+  <tabstop>cName</tabstop>
+  <tabstop>materials</tabstop>
+  <tabstop>renderPass</tabstop>
+  <tabstop>layer</tabstop>
+  <tabstop>renderStyle</tabstop>
+  <tabstop>lineWidth</tabstop>
+  <tabstop>cTranslateX</tabstop>
+  <tabstop>cTranslateY</tabstop>
+  <tabstop>cSizeX</tabstop>
+  <tabstop>cSizeY</tabstop>
+  <tabstop>cRotation</tabstop>
+  <tabstop>cPlus90</tabstop>
+  <tabstop>cMinus90</tabstop>
+  <tabstop>time</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>showGrid</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
