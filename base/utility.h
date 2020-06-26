@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
+#  include <nlohmann/json.hpp>
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
@@ -38,9 +39,11 @@
 #include <cwctype>
 #include <cstring>
 #include <random>
+#include <filesystem>
 
 #include "math.h"
 #include "assert.h"
+#include "platform.h"
 
 #if defined(__MSVC__)
 #  pragma warning(push)
@@ -156,6 +159,14 @@ bool JsonReadSafe(const JsonObject& object, const char* name, float* out)
     *out = object[name];
     return true;
 }
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, float*out)
+{
+    if (!value.is_number_float())
+        return false;
+    *out = value;
+    return true;
+}
 template<typename JsonObject> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, int* out)
 {
@@ -164,12 +175,28 @@ bool JsonReadSafe(const JsonObject& object, const char* name, int* out)
     *out = object[name];
     return true;
 }
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, int* out)
+{
+    if (!value.is_number_integer())
+        return false;
+    *out = value;
+    return true;
+}
 template<typename JsonObject> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, unsigned* out)
 {
     if (!object.contains(name) || !object[name].is_number_unsigned())
         return false;
     *out = object[name];
+    return true;
+}
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, unsigned* out)
+{
+    if (!value.is_number_unsigned())
+        return false;
+    *out = value;
     return true;
 }
 template<typename JsonObject> inline
@@ -181,6 +208,32 @@ bool JsonReadSafe(const JsonObject& object, const char* name, std::string* out)
     return true;
 }
 template<typename JsonObject> inline
+bool JsonReadSafe(const JsonObject& object, const char* name, std::wstring* out)
+{
+    if (!object.contains(name) || !object[name].is_string())
+        return false;
+    const std::string& str = object[name];
+    *out = base::FromUtf8(str);
+    return true;
+}
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, std::string* out)
+{
+    if (!value.is_string())
+        return false;
+    *out = value;
+    return true;
+}
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, std::wstring* out)
+{
+    if (!value.is_string())
+        return false;
+    const std::string& str = value;
+    *out = base::FromUtf8(str);
+    return true;
+}
+template<typename JsonObject> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, bool* out)
 {
     if (!object.contains(name) || !object[name].is_boolean())
@@ -188,7 +241,14 @@ bool JsonReadSafe(const JsonObject& object, const char* name, bool* out)
     *out = object[name];
     return true;
 }
-
+template<typename JsonValue> inline
+bool JsonReadSafe(const JsonValue& value, bool *out)
+{
+    if (!value.is_boolean())
+        return false;
+    *out = value;
+    return true;
+}
 template<typename JsonObject, typename EnumT> inline
 bool JsonReadSafeEnum(const JsonObject& object, const char* name, EnumT* out)
 {
@@ -197,6 +257,21 @@ bool JsonReadSafeEnum(const JsonObject& object, const char* name, EnumT* out)
         return false;
 
     str = object[name];
+    const auto& enum_val = magic_enum::enum_cast<EnumT>(str);
+    if (!enum_val.has_value())
+        return false;
+
+    *out = enum_val.value();
+    return true;
+}
+
+template<typename JsonValue, typename EnumT> inline
+bool JsonReadSafeEnum(const JsonValue& value, EnumT* out)
+{
+    if (!value.is_string())
+        return false;
+
+    const std::string& str = value;
     const auto& enum_val = magic_enum::enum_cast<EnumT>(str);
     if (!enum_val.has_value())
         return false;
@@ -216,6 +291,17 @@ bool JsonReadObject(const JsonObject& object, const char* name, T* out)
     *out = ret.value();
     return true;
 }
+template<typename JsonValue, typename T> inline
+bool JsonReadObject(const JsonValue& value, T* out)
+{
+    if (!value.is_object())
+        return false;
+    const std::optional<T>& ret = T::FromJson(value);
+    if (!ret.has_value())
+        return false;
+    *out = ret.value();
+    return true;
+}
 
 template<typename JsonObject, typename ValueT> inline
 bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
@@ -224,6 +310,14 @@ bool JsonReadSafe(const JsonObject& object, const char* name, ValueT* out)
         return JsonReadSafeEnum(object, name, out);
     else return JsonReadObject(object, name, out);
 
+    return false;
+}
+template<typename JsonValue, typename ValueT> inline
+bool JsonReadSafe(const JsonValue&  value, ValueT* out)
+{
+     if constexpr (std::is_enum<ValueT>::value)
+        return JsonReadSafeEnum(value,out);
+    else return JsonReadObject(value, out);
     return false;
 }
 
@@ -241,6 +335,81 @@ bool JsonReadSafe(const JsonObject& object, const char* name, glm::vec2* out)
     out->y = vector["y"];
     return true;
 }
+template<typename JsonValue>
+bool JsonReadSafe(const JsonValue& value, glm::vec2* out)
+{
+    if (!value.is_object())
+        return false;
+    if (!value.contains("x") || !value["x"].is_number_float())
+        return false;
+    if (!value.contains("y") || !value["y"].is_number_float())
+        return false;
+    out->x = value["x"];
+    out->y = value["y"];
+    return true;
+}
+
+template<typename JsonValue, typename T> inline
+void JsonAppendObject(JsonValue& json, const T& value)
+{
+    json.push_back(value.ToJson());
+}
+template<typename JsonValue, typename EnumT> inline
+void JsonAppendEnum(JsonValue& json, EnumT value)
+{
+    const std::string str(magic_enum::enum_name(value));
+    json.push_back(str);
+}
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, int value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, unsigned value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, double value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, float value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, const std::string& value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, const std::wstring& value)
+{ json.push_back(base::ToUtf8(value)); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, bool value)
+{ json.push_back(value); }
+
+template<typename JsonValue> inline
+void JsonAppend(JsonValue& json, const char* str)
+{ json.push_back(str); }
+
+template<typename JsonValue, typename ValueT> inline
+void JsonAppend(JsonValue& json, const ValueT& value)
+{
+    if constexpr (std::is_enum<ValueT>::value)
+        JsonAppendEnum(json, value);
+    else JsonAppendObject(json, value);
+}
+
+template<typename JsonValue>
+void JsonAppend(JsonValue& json, const glm::vec2& vec)
+{
+    json.push_back(nlohmann::json {
+            {"x", vec.x },
+            {"y", vec.y }
+        });
+}
+
 
 template<typename JsonObject, typename EnumT> inline
 void JsonWriteEnum(JsonObject& object, const char* name, EnumT value)
@@ -274,6 +443,10 @@ void JsonWrite(JsonObject& object, const char* name, const std::string& value)
 { object[name] = value; }
 
 template<typename JsonObject> inline
+void JsonWrite(JsonObject& object, const char* name, const std::wstring& value)
+{ object[name] = base::ToUtf8(value); }
+
+template<typename JsonObject> inline
 void JsonWrite(JsonObject& object, const char* name, bool value)
 { object[name] = value; }
 
@@ -296,6 +469,17 @@ void JsonWrite(JsonObject& object, const char* name, const glm::vec2& vec)
         {"x", vec.x },
         {"y", vec.y }
     };
+}
+
+inline bool FileExists(const std::string& filename)
+{
+#if defined(WINDOWS_OS)
+    const std::filesystem::path p(base::FromUtf8(filename));
+    return std::filesystem::exists(p);
+#elif defined(POSIX_OS)
+    const std::filesystem::path p(filename);
+    return std::filesystem::exists(p);
+#endif
 }
 
 } // base

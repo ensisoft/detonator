@@ -342,30 +342,27 @@ install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
 
 # unit tests
 enable_testing()
+# graphics unit tests
 add_executable(unit_test_bitmap graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
-add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp base/assert.cpp third_party/stb/stb_image.c)
+add_executable(unit_test_image  graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c)
 add_executable(unit_test        graphics/unit_test/unit_test.cpp)
-add_executable(unit_test_device graphics/unit_test/unit_test_device.cpp
-    base/assert.cpp
-    graphics/opengl_es2_device.cpp
-    third_party/stb/stb_image_write.c)
-add_executable(unit_test_tree
-    base/assert.cpp
-    gamelib/unit_test/unit_test_tree.cpp )
-
-add_executable(unit_test_math
-    base/unit_test/unit_test_math.cpp)
+add_executable(unit_test_device graphics/unit_test/unit_test_device.cpp base/assert.cpp graphics/opengl_es2_device.cpp third_party/stb/stb_image_write.c)
+# gamelib tests
+add_executable(unit_test_tree   gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
+# misc tests
+add_executable(unit_test_settings   misc/unit_test/unit_test_settings.cpp)
+# base tests
+add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
 
 target_link_libraries(unit_test_device
     wdk_system
     wdk_desktop_gl
     freetype_custom_build
     harfbuzz_custom_build)
-target_include_directories(unit_test_bitmap PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test_image  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test_device PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-
-target_include_directories(unit_test_tree PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-
-target_include_directories(unit_test_math PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
+target_include_directories(unit_test_bitmap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/misc/unit_test")
+target_include_directories(unit_test_math     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
