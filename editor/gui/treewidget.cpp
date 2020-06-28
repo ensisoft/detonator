@@ -269,7 +269,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
             {
                 QPen line;
                 line.setWidth(1);
-                line.setColor(QColorConstants::White);
+                line.setColor(QColor(0xff, 0xff, 0xff)); // QColorConstants::White);
 
                 // hightlight the potential new parent
                 const auto& parent = mItems[landing_index];
