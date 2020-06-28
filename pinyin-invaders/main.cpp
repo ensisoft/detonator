@@ -23,8 +23,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QStringList>
-#  include <QSettings>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -32,10 +30,13 @@
 #include <exception>
 #include <iostream>
 #include <thread>
+#include <filesystem>
 
 #include "audio/player.h"
 #include "audio/device.h"
 #include "base/logging.h"
+#include "misc/homedir.h"
+#include "misc/settings.h"
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -52,13 +53,13 @@ namespace invaders {
 
 void loadProfile(invaders::GameWidget::Profile profile,
                  invaders::GameWidget& widget,
-                 const QSettings& settings)
+                 misc::Settings& settings)
 {
-    QString name          = QString::fromStdWString(profile.name);
-    profile.speed         = settings.value(name + "/speed", profile.speed).toFloat();
-    profile.spawnCount    = settings.value(name + "/spawnCount", profile.spawnCount).toUInt();
-    profile.spawnInterval = settings.value(name + "/spawnInterval", profile.spawnInterval).toUInt();
-    profile.numEnemies    = settings.value(name + "/enemyCount", profile.numEnemies).toUInt();
+    const auto& profile_name = base::ToUtf8(profile.name);
+    profile.speed         = settings.GetValue(profile_name, "speed", profile.speed);
+    profile.spawnCount    = settings.GetValue(profile_name, "spawnCount", profile.spawnCount);
+    profile.spawnInterval = settings.GetValue(profile_name, "spawnInterval", profile.spawnInterval);
+    profile.numEnemies    = settings.GetValue(profile_name, "enemyCount", profile.numEnemies);
 
     widget.setProfile(profile);
 
@@ -104,7 +105,7 @@ int game_main(int argc, char* argv[])
     INFO("Copyright (c) 2010-2018 Sami Vaisanen");
     INFO("http://www.ensisoft.com");
     INFO("http://github.com/ensisoft/pinyin-invaders");
-    
+
 
     audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
@@ -118,14 +119,19 @@ int game_main(int argc, char* argv[])
     DEBUG("Enabled floating point exceptions");
 #endif
 
-    QSettings settings("Ensisoft", "Invaders");
-    const auto width      = settings.value("window/width", 1200).toInt();
-    const auto height     = settings.value("window/height", 700).toInt();
-    const auto fullscreen = settings.value("window/fullscreen", false).toBool();
-    const auto playSound  = settings.value("audio/sound", true).toBool();
-    const auto playMusic  = settings.value("audio/music", true).toBool();
-    const auto& levels    = settings.value("game/levels").toStringList();
-    
+    misc::HomeDir::Initialize(".pinyin-invaders");
+    misc::Settings settings;
+
+    if (base::FileExists(misc::HomeDir::MapFile("settings.json")))
+        settings.LoadFromFile(misc::HomeDir::MapFile("settings.json"));
+
+    const auto width      = settings.GetValue("window", "width", 1200);
+    const auto height     = settings.GetValue("window", "height", 700);
+    const auto fullscreen = settings.GetValue("window", "fullscreen", false);
+    const auto playSound  = settings.GetValue("audio", "sound", true);
+    const auto playMusic  = settings.GetValue("audio", "music", true);
+    const auto& levels    = settings.GetValue("game", "levels", std::vector<std::string>());
+
     invaders::GameWidget window;
     window.setMasterUnlock(masterUnlock);
     window.setUnlimitedWarps(unlimitedWarps);
@@ -135,14 +141,14 @@ int game_main(int argc, char* argv[])
     window.setPlaySounds(playSound);
     window.loadLevels(L"data/levels.txt");
 
-    // set the saved level data 
+    // set the saved level data
     for (int i=0; i<levels.size(); ++i)
     {
-        const auto name = levels[i];
+        const auto& level_name = levels[i];
         invaders::GameWidget::LevelInfo info;
-        info.name      = name.toStdWString();
-        info.highScore = settings.value(name + "/highscore").toUInt();
-        info.locked    = settings.value(name + "/locked").toBool();
+        info.name      = base::FromUtf8(level_name);
+        info.highScore = settings.GetValue(level_name, "highscore", 0);
+        info.locked    = settings.GetValue(level_name, "locked", true);
         window.setLevelInfo(info);
     }
 
@@ -161,7 +167,7 @@ int game_main(int argc, char* argv[])
     using clock = std::chrono::high_resolution_clock;
 
     auto start = clock::now();
-    
+
     while (window.isRunning())
     {
         const auto end  = clock::now();
@@ -170,7 +176,7 @@ int game_main(int argc, char* argv[])
 
         window.updateGame(ms);
         window.renderGame();
-    
+
         if (showFps)
         {
             static unsigned frames  = 0;
@@ -189,28 +195,29 @@ int game_main(int argc, char* argv[])
         start = end;
     }
 
-    settings.setValue("window/width",  window.getSurfaceWidth());
-    settings.setValue("window/height", window.getSurfaceHeight());
-    settings.setValue("window/fullscreen", window.isFullscreen());
+    settings.SetValue("window", "width",  window.getSurfaceWidth());
+    settings.SetValue("window", "height", window.getSurfaceHeight());
+    settings.SetValue("window", "fullscreen", window.isFullscreen());
 
     // tear down.
     window.close();
 
-    QStringList level_names;
+    std::vector<std::string> level_names;
     for (unsigned i=0; ; ++i)
     {
         invaders::GameWidget::LevelInfo info;
         if (!window.getLevelInfo(info, i))
             break;
-
-        level_names << QString::fromStdWString(info.name);
-        settings.setValue(QString::fromStdWString(info.name + L"/highscore"), info.highScore);
-        settings.setValue(QString::fromStdWString(info.name + L"/locked"), info.locked);
+        const auto& level_name = base::ToUtf8(info.name);
+        level_names.push_back(level_name);
+        settings.SetValue(level_name, "highscore", info.highScore);
+        settings.SetValue(level_name, "locked", info.locked);
     }
-    settings.setValue("game/levels", level_names);
-    settings.setValue("audio/sound", window.getPlaySounds());
-    settings.setValue("audio/music", window.getPlayMusic());
-    settings.sync();
+    settings.SetValue("game", "levels", level_names);
+    settings.SetValue("audio", "sound", window.getPlaySounds());
+    settings.SetValue("audio", "music", window.getPlayMusic());
+
+    settings.SaveToFile(misc::HomeDir::MapFile("settings.json"));
 
     return 0;
 }

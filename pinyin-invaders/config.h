@@ -39,7 +39,7 @@ const int MINOR_VERSION = 3;
 
 // you can put your definitions that pertain to base here.
 #define BASE_LOGGING_ENABLE_LOG
-#define BASE_FORMAT_SUPPORT_QT
+//#define BASE_FORMAT_SUPPORT_QT
 #ifdef POSIX_OS
   #define BASE_LOGGING_ENABLE_CURSES
 #endif

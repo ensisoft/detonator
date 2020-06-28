@@ -318,11 +318,11 @@ add_executable(invaders
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
+    misc/homedir.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
 target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders")
-target_link_libraries(invaders Qt5::Widgets)
 target_link_libraries(invaders freetype_custom_build)
 target_link_libraries(invaders harfbuzz_custom_build)
 target_link_libraries(invaders wdk_system wdk_desktop_gl)
