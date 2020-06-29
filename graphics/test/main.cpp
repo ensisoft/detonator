@@ -583,10 +583,18 @@ int main(int argc, char* argv[])
     INFO("http://www.ensisoft.com");
     INFO("http://github.com/ensisoft/pinyin-invaders");
 
+    auto sampling = wdk::Config::Multisampling::None;
+
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--debug-log"))
             base::EnableDebugLog(true);
+        else if (!std::strcmp(argv[i], "--msaa4"))
+            sampling = wdk::Config::Multisampling::MSAA4;
+        else if (!std::strcmp(argv[i], "--msaa8"))
+            sampling = wdk::Config::Multisampling::MSAA8;
+        else if (!std::strcmp(argv[i], "--msaa16"))
+            sampling = wdk::Config::Multisampling::MSAA16;
     }
 
     // context integration glue code that puts together
@@ -594,7 +602,7 @@ int main(int argc, char* argv[])
     class WindowContext : public gfx::Device::Context
     {
     public:
-        WindowContext()
+        WindowContext(wdk::Config::Multisampling sampling)
         {
             wdk::Config::Attributes attrs;
             attrs.red_size  = 8;
@@ -604,7 +612,7 @@ int main(int argc, char* argv[])
             attrs.stencil_size = 8;
             attrs.surfaces.window = true;
             attrs.double_buffer = true;
-            attrs.sampling = wdk::Config::Multisampling::MSAA4;
+            attrs.sampling = sampling; //wdk::Config::Multisampling::MSAA4;
             attrs.srgb_buffer = true;
 
             mConfig   = std::make_unique<wdk::Config>(attrs);
@@ -647,7 +655,7 @@ int main(int argc, char* argv[])
         wdk::uint_t mVisualID = 0;
     };
 
-    auto context = std::make_shared<WindowContext>();
+    auto context = std::make_shared<WindowContext>(sampling);
     auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
     auto painter = gfx::Painter::Create(device);
 
