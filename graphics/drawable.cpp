@@ -47,12 +47,12 @@ Shader* Arrow::GetShader(Device& device) const
 }
 Geometry* Arrow::Upload(Device& device) const
 {
-    const auto* name = mStyle == Style::Outline   ? "ArrowOutline" :
-                      (mStyle == Style::Wireframe ? "ArrowWireframe" : "Arrow");
-    Geometry* geom = device.FindGeometry(name);
-    if (!geom)
+    Geometry* geom = nullptr;
+
+    if (mStyle == Style::Outline)
     {
-        if (mStyle == Style::Outline)
+        geom = device.FindGeometry("ArrowOutline");
+        if (!geom)
         {
             const Vertex verts[] = {
                 {{0.0f, -0.25f}, {0.0f, 0.75f}},
@@ -63,10 +63,15 @@ Geometry* Arrow::Upload(Device& device) const
                 {{0.7f, -0.0f}, {0.7f, 1.0f}},
                 {{0.7f, -0.25f}, {0.7f, 0.75f}},
             };
-            geom = device.MakeGeometry(name);
+            geom = device.MakeGeometry("ArrowOutline");
             geom->Update(verts, 7);
+            geom->SetDrawType(Geometry::DrawType::LineLoop);
         }
-        else if (mStyle == Style::Solid)
+    }
+    else if (mStyle == Style::Solid)
+    {
+        geom = device.FindGeometry("Arrow");
+        if (!geom)
         {
             const Vertex verts[] = {
                 // body
@@ -83,10 +88,15 @@ Geometry* Arrow::Upload(Device& device) const
                 {{0.7f, -1.0f}, {0.7f, 0.0f}},
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
             };
-            geom = device.MakeGeometry(name);
+            geom = device.MakeGeometry("Arrow");
             geom->Update(verts, 9);
+            geom->SetDrawType(Geometry::DrawType::Triangles);
         }
-        else if (mStyle == Style::Wireframe)
+    }
+    else if (mStyle == Style::Wireframe)
+    {
+        geom = device.FindGeometry("ArrowWireframe");
+        if (!geom)
         {
             const Vertex verts[] = {
                 // body
@@ -111,18 +121,11 @@ Geometry* Arrow::Upload(Device& device) const
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
                 {{0.7f, -0.0f}, {0.7f, 1.0f}},
             };
-            geom = device.MakeGeometry(name);
+            geom = device.MakeGeometry("ArrowWireframe");
             geom->Update(verts, 16);
-
+            geom->SetDrawType(Geometry::DrawType::Lines);
         }
     }
-    if (mStyle == Style::Solid)
-        geom->SetDrawType(Geometry::DrawType::Triangles);
-    else if (mStyle == Style::Wireframe)
-        geom->SetDrawType(Geometry::DrawType::Lines);
-    else if (mStyle == Style::Outline)
-        geom->SetDrawType(Geometry::DrawType::LineLoop);
-
     geom->SetLineWidth(mLineWidth);
     return geom;
 }
@@ -217,12 +220,14 @@ Shader* Rectangle::GetShader(Device& device) const
 
 Geometry* Rectangle::Upload(Device& device) const
 {
-    Geometry* geom = device.FindGeometry(mStyle == Style::Outline ? "RectangleOutline" : "Rectangle");
-    if (!geom)
+    Geometry* geom = nullptr;
+
+    if (mStyle == Style::Outline)
     {
-        if (mStyle == Style::Outline)
+        geom = device.FindGeometry("RectangleOutline");
+        if (geom == nullptr)
         {
-            const Vertex verts[6] = {
+            const Vertex verts[] = {
                 { {0.0f,  0.0f}, {0.0f, 1.0f} },
                 { {0.0f, -1.0f}, {0.0f, 0.0f} },
                 { {1.0f, -1.0f}, {1.0f, 0.0f} },
@@ -230,8 +235,13 @@ Geometry* Rectangle::Upload(Device& device) const
             };
             geom = device.MakeGeometry("RectangleOutline");
             geom->Update(verts, 4);
+            geom->SetDrawType(Geometry::DrawType::LineLoop);
         }
-        else
+    }
+    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    {
+        geom = device.FindGeometry("Rectangle");
+        if (geom == nullptr)
         {
             const Vertex verts[6] = {
                 { {0.0f,  0.0f}, {0.0f, 1.0f} },
@@ -245,14 +255,12 @@ Geometry* Rectangle::Upload(Device& device) const
             geom = device.MakeGeometry("Rectangle");
             geom->Update(verts, 6);
         }
+        if (mStyle == Style::Solid)
+            geom->SetDrawType(Geometry::DrawType::Triangles);
+        else if (mStyle == Style::Wireframe)
+            geom->SetDrawType(Geometry::DrawType::LineLoop);
     }
     geom->SetLineWidth(mLineWidth);
-    if (mStyle == Style::Solid)
-        geom->SetDrawType(Geometry::DrawType::Triangles);
-    else if (mStyle == Style::Wireframe)
-        geom->SetDrawType(Geometry::DrawType::LineLoop);
-    else if (mStyle== Style::Outline)
-        geom->SetDrawType(Geometry::DrawType::LineLoop);
     return geom;
 }
 
