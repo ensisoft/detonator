@@ -247,6 +247,13 @@ public:
         materials[2] = gfx::SolidColor(gfx::Color::HotPink);
         materials[3] = gfx::TextureMap("textures/Checkerboard.png");
 
+        // in order to validate the texture coordinates let's set
+        // the filtering to nearest and clamp to edge on sampling
+        materials[1].SetTextureMinFilter(gfx::Material::MinTextureFilter::Nearest);
+        materials[1].SetTextureMagFilter(gfx::Material::MagTextureFilter::Nearest);
+        materials[1].SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+        materials[1].SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+
         {
             gfx::Transform transform;
             transform.Scale(100.0f, 100.0f);
@@ -257,34 +264,52 @@ public:
             painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-220.0f, 150.0f);
+            transform.Translate(-450.0f, 150.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-220.0f, 150.0f);
+            transform.Translate(-450.0f, 150.0f);
             painter.Draw(gfx::Triangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Triangle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Triangle(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-220.0f, 150.0f);
+            transform.Translate(-450.0f, 150.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-220.0f, 150.0f);
+            transform.Translate(-450.0f, 150.0f);
             painter.Draw(gfx::Grid(5, 5), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Grid(5, 5), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Grid(5, 5), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Grid(5, 5, 10.0f), transform, materials[1]);
         }
     }
     virtual void Update(float dts)
