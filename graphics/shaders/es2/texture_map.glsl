@@ -42,22 +42,18 @@ uniform vec4 kBaseColor;
 uniform mat3 kDeviceTextureMatrix;
 varying vec2 vTexCoord;
 
-vec2 SamplePointCoord()
-{
-    // "However, the gl_PointCoord fragment shader input defines
-    // a per-fragment coordinate space (s, t) where s varies from
-    // 0 to 1 across the point horizontally left-to-right, and t
-    // ranges from 0 to 1 across the point vertically top-to-bottom."
-    return vec2(gl_PointCoord.x, 1.0-gl_PointCoord.y);
-}
-
 void main()
 {
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
     // rasterized as points.
     // we set kRenderPoints to 1.0f when rendering points.
-    vec2 coords = mix(vTexCoord, SamplePointCoord(), kRenderPoints);
+    // note about gl_PointCoord:
+    // "However, the gl_PointCoord fragment shader input defines
+    // a per-fragment coordinate space (s, t) where s varies from
+    // 0 to 1 across the point horizontally left-to-right, and t
+    // ranges from 0 to 1 across the point vertically top-to-bottom."
+    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
@@ -66,14 +62,10 @@ void main()
     vec2 trans_tex0 = kTextureBox0.xy;
     vec2 trans_tex1 = kTextureBox1.xy;
 
+    // scale and transform based on texture box. (todo: maybe use texture matrix?)
     vec2 c1 = coords * scale_tex0 + trans_tex0;
     vec2 c2 = coords * scale_tex1 + trans_tex1;
 
-    // apply device specific texture transformation.
-    vec3 c1_transformed = kDeviceTextureMatrix * vec3(c1.xy, 1.0);
-    vec3 c2_transformed = kDeviceTextureMatrix * vec3(c2.xy, 1.0);
-    c1 = c1_transformed.xy;
-    c2 = c2_transformed.xy;
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.

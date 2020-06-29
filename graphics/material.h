@@ -344,7 +344,7 @@ namespace gfx
                         ? sampler.box : sampler.box.Normalize(FSize(w, h));
 
                     const float x = box.GetX();
-                    const float y = 1.0f - box.GetY() - box.GetHeight();
+                    const float y = box.GetY();
                     const float sx = box.GetWidth();
                     const float sy = box.GetHeight();
 

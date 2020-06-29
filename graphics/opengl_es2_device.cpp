@@ -949,11 +949,18 @@ private:
             // is given to glTexImage2D doesn't match the "typical" layout
             // that is used by many toolkits/libraries. The order of scan lines
             // is reversed and glTexImage expects the first scanline (in memory)
-            // to be the bottom scanline of the image.
-            // There are two ways to deal with this dilemma:
+            // to be the bottom scanline of the image. 
+            // There are several ways to deal with this dilemma:
             // - flip all images on the horizontal axis before calling glTexImage2D.
             // - use a matrix to transform the texture coordinates to counter this.
+            // - flip texture coordinates and assume that Y=0.0f means the top of 
+            //   the texture (first scan row) and Y=1.0f means the bottom of the
+            //   the texture (last scan row).
             //
+            //
+            // this comment and the below kDeviceTextureMatrix is here only for posterity.
+            // Currently we have flipped the texture coordinates like explained above.
+            // 
             // If the program being used to render stuff is using a texture
             // we helpfully setup here a "device texture matrix" that will be provided
             // for the program and should be used to transform the texture coordinates
@@ -965,12 +972,15 @@ private:
             // It should also be possible to use the device texture matrix for example
             // in cases where the device would bake some often used textures into an atlas
             // and implicitly alter the texture coordinates.
+            //
+            /* no longer used.
             static const float kDeviceTextureMatrix[3][3] = {
                 {1.0f, 0.0f, 0.0f},
                 {0.0f, -1.0f, 0.0f},
                 {0.0f, 1.0f, 0.0f}
             };
             SetUniform("kDeviceTextureMatrix", kDeviceTextureMatrix);
+            */
 
             // keep track of textures being used so that if/when this
             // program is actually used to draw stuff we can realize

@@ -55,13 +55,13 @@ Geometry* Arrow::Upload(Device& device) const
         if (!geom)
         {
             const Vertex verts[] = {
-                {{0.0f, -0.25f}, {0.0f, 0.75f}},
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.7f, -0.75f}, {0.7f, 0.25f}},
-                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{0.0f, -0.25f}, {0.0f, 0.25f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.7f, -0.75f}, {0.7f, 0.75f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
-                {{0.7f, -0.0f}, {0.7f, 1.0f}},
-                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                {{0.7f, -0.0f}, {0.7f, 0.0f}},
+                {{0.7f, -0.25f}, {0.7f, 0.25f}},
             };
             geom = device.MakeGeometry("ArrowOutline");
             geom->Update(verts, 7);
@@ -75,17 +75,17 @@ Geometry* Arrow::Upload(Device& device) const
         {
             const Vertex verts[] = {
                 // body
-                {{0.0f, -0.25f}, {0.0f, 0.75f}},
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.7f, -0.25f}, {0.7f, 0.75f}},
+                {{0.0f, -0.25f}, {0.0f, 0.25f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.7f, -0.25f}, {0.7f, 0.25f}},
                 // body
-                {{0.7f, -0.25f}, {0.7f, 0.75f}},
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.7f, -0.75f}, {0.7f, 0.25f}},
+                {{0.7f, -0.25f}, {0.7f, 0.25f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.7f, -0.75f}, {0.7f, 0.75f}},
 
                 // arrow head
-                {{0.7f, -0.0f}, {0.7f, 1.0f}},
-                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{0.7f, -0.0f}, {0.7f, 0.0f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
             };
             geom = device.MakeGeometry("Arrow");
@@ -100,26 +100,26 @@ Geometry* Arrow::Upload(Device& device) const
         {
             const Vertex verts[] = {
                 // body
-                {{0.0f, -0.25f}, {0.0f, 0.75f}},
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.7f, -0.25f}, {0.7f, 0.75f}},
-                {{0.7f, -0.25f}, {0.7f, 0.75f}},
-                {{0.0f, -0.25f}, {0.0f, 0.75f}},
+                {{0.0f, -0.25f}, {0.0f, 0.25f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.7f, -0.25f}, {0.7f, 0.25f}},
+                {{0.7f, -0.25f}, {0.7f, 0.25f}},
+                {{0.0f, -0.25f}, {0.0f, 0.25f}},
 
                 // body
-                {{0.0f, -0.75f}, {0.0f, 0.25f}},
-                {{0.7f, -0.75f}, {0.7f, 0.25f}},
-                {{0.7f, -0.75f}, {0.7f, 0.25f}},
-                {{0.7f, -0.25f}, {0.0f, 0.75f}},
+                {{0.0f, -0.75f}, {0.0f, 0.75f}},
+                {{0.7f, -0.75f}, {0.7f, 0.75f}},
+                {{0.7f, -0.75f}, {0.7f, 0.75f}},
+                {{0.7f, -0.25f}, {0.0f, 0.25f}},
 
                 // arrow head
-                {{0.7f, -0.0f}, {0.7f, 1.0f}},
-                {{0.7f, -1.0f}, {0.7f, 0.0f}},
-                {{0.7f, -1.0f}, {0.7f, 0.0f}},
+                {{0.7f, -0.0f}, {0.7f, 0.0f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
-                {{0.7f, -0.0f}, {0.7f, 1.0f}},
+                {{0.7f, -0.0f}, {0.7f, 0.0f}},
             };
             geom = device.MakeGeometry("ArrowWireframe");
             geom->Update(verts, 16);
@@ -188,7 +188,7 @@ Geometry* Circle::Upload(Device& device) const
                 v.aPosition.x = x + 0.5f;
                 v.aPosition.y = y - 0.5f;
                 v.aTexCoord.x = x + 0.5f;
-                v.aTexCoord.y = y + 0.5f;
+                v.aTexCoord.y = y - 0.5f;
                 vs.push_back(v);
                 vs.push_back(center);
             }
@@ -228,10 +228,10 @@ Geometry* Rectangle::Upload(Device& device) const
         if (geom == nullptr)
         {
             const Vertex verts[] = {
-                { {0.0f,  0.0f}, {0.0f, 1.0f} },
-                { {0.0f, -1.0f}, {0.0f, 0.0f} },
-                { {1.0f, -1.0f}, {1.0f, 0.0f} },
-                { {1.0f,  0.0f}, {1.0f, 1.0f} }
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
+                { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
             geom = device.MakeGeometry("RectangleOutline");
             geom->Update(verts, 4);
@@ -244,13 +244,13 @@ Geometry* Rectangle::Upload(Device& device) const
         if (geom == nullptr)
         {
             const Vertex verts[6] = {
-                { {0.0f,  0.0f}, {0.0f, 1.0f} },
-                { {0.0f, -1.0f}, {0.0f, 0.0f} },
-                { {1.0f, -1.0f}, {1.0f, 0.0f} },
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
 
-                { {0.0f,  0.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 0.0f} },
-                { {1.0f,  0.0f}, {1.0f, 1.0f} }
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
+                { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
             geom = device.MakeGeometry("Rectangle");
             geom->Update(verts, 6);
@@ -283,9 +283,9 @@ Geometry* Triangle::Upload(Device& device) const
     if (!geom)
     {
         const Vertex verts[3] = {
-            { {0.5f,  0.0f}, {0.5f, 1.0f} },
-            { {0.0f, -1.0f}, {0.0f, 0.0f} },
-            { {1.0f, -1.0f}, {1.0f, 0.0f} }
+            { {0.5f,  0.0f}, {0.5f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} }
         };
         geom = device.MakeGeometry("Triangle");
         geom->Update(verts, 3);
@@ -329,18 +329,18 @@ Geometry* Grid::Upload(Device& device) const
         {
             const float x = i * xadvance;
             const Vertex line[2] = {
-                {{x,  0.0f}, {x, 1.0f}},
-                {{x, -1.0f}, {x, 0.0f}}
+                {{x,  0.0f}, {x, 0.0f}},
+                {{x, -1.0f}, {x, 1.0f}}
             };
             verts.push_back(line[0]);
             verts.push_back(line[1]);
         }
         for (unsigned i=1; i<=mNumHorizontalLines; ++i)
         {
-            const float y = i * yadvance * -1.0f;
+            const float y = i * yadvance;
             const Vertex line[2] = {
-                {{0.0f, y}, {0.0f, 1.0f + y}},
-                {{1.0f, y}, {1.0f, 1.0f + y}},
+                {{0.0f, y*-1.0f}, {0.0f, y}},
+                {{1.0f, y*-1.0f}, {1.0f, y}},
             };
             verts.push_back(line[0]);
             verts.push_back(line[1]);
@@ -349,14 +349,14 @@ Geometry* Grid::Upload(Device& device) const
         {
             const Vertex corners[4] = {
                 // top left
-                {{0.0f, 0.0f}, {0.0f, 1.0f}},
+                {{0.0f, 0.0f}, {0.0f, 0.0f}},
                 // top right
-                {{1.0f, 0.0f}, {1.0f, 1.0f}},
+                {{1.0f, 0.0f}, {1.0f, 0.0f}},
 
                 // bottom left
-                {{0.0f, -1.0f}, {0.0f, 0.0f}},
+                {{0.0f, -1.0f}, {0.0f, 1.0f}},
                 // bottom right
-                {{1.0f, -1.0f}, {1.0f, 0.0f}}
+                {{1.0f, -1.0f}, {1.0f, 1.0f}}
             };
             verts.push_back(corners[0]);
             verts.push_back(corners[1]);
@@ -402,6 +402,8 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
         Vertex v;
         v.aPosition.x = p.position.x / mParams.max_xpos;
         v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
+        // abusing texcoord here to pass per particle point size
+        // to the fragment shader.
         v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize : 0.0f;
         verts.push_back(v);
     }
