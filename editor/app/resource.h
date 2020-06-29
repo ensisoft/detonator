@@ -170,17 +170,17 @@ namespace app
 
 
     template<typename Content>
-    class GraphicsResource : public Resource
+    class GameResource : public Resource
     {
     public:
         using GfxType = Content;
         static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
 
-        GraphicsResource(const Content& content, const QString& name)
+        GameResource(const Content& content, const QString& name)
             : mContent(content)
             , mName(name)
         {}
-        GraphicsResource(Content&& content, const QString& name)
+        GameResource(Content&& content, const QString& name)
             : mContent(std::move(content))
             , mName(name)
         {}
@@ -313,8 +313,8 @@ namespace app
     };
 
 
-    using MaterialResource = GraphicsResource<gfx::Material>;
-    using ParticleSystemResource = GraphicsResource<gfx::KinematicsParticleEngine>;
-    using AnimationResource = GraphicsResource<game::Animation>;
+    using MaterialResource = GameResource<gfx::Material>;
+    using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngine>;
+    using AnimationResource = GameResource<game::Animation>;
 
 } // namespace

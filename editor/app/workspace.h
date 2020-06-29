@@ -99,7 +99,7 @@ namespace app
         // and name exists it's overwritten, otherwise a new resource is added to
         // the workspace.
         template<typename T>
-        void SaveResource(const GraphicsResource<T>& resource)
+        void SaveResource(const GameResource<T>& resource)
         {
             const auto& name = resource.GetName();
             const auto  type = resource.GetType();
@@ -115,7 +115,7 @@ namespace app
                 // contained resource parameters but also the application level
                 // resource object and since that is a polymorphic type
                 // we must allocate new resource object.
-                mResources[i] = std::make_unique<GraphicsResource<T>>(resource);
+                mResources[i] = std::make_unique<GameResource<T>>(resource);
 
                 // see if there are instances of this resource in use that we
                 // also want to update with the latest changes.
@@ -132,7 +132,7 @@ namespace app
             // if we're here no such resource exists yet.
             // Create a new resource and add it to the list of resources.
             beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
-            mResources.push_back(std::make_unique<GraphicsResource<T>>(resource));
+            mResources.push_back(std::make_unique<GameResource<T>>(resource));
             endInsertRows();
 
             auto& back = mResources.back();
