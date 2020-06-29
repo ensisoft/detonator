@@ -143,8 +143,8 @@ Geometry* Circle::Upload(Device& device) const
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 100;
-    const auto* name = mStyle == Style::Outline   ? "RectOutline" :
-                      (mStyle == Style::Wireframe ? "RectWireframe" : "Rect");
+    const auto* name = mStyle == Style::Outline   ? "CircleOutline" :
+                      (mStyle == Style::Wireframe ? "CircleWireframe" : "Circle");
 
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
