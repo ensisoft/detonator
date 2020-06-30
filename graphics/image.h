@@ -24,36 +24,45 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <stb/stb_image.h>
+#include "warnpop.h"
+
 #include <fstream>
 #include <string>
 #include <stdexcept>
 
 #include "base/assert.h"
-#include "third_party/stb/stb_image.h"
+#include "base/platform.h"
+#include "base/utility.h"
 #include "bitmap.h"
 
 namespace gfx
 {
-    // Load images into CPU memory
+    // Load compressed images from files such as .jpg or .png into CPU memory
     class Image
     {
-    public: 
+    public:
         Image() = default;
         Image(const std::string& file)
         {
             Load(file);
         }
         Image(const Image&) = delete;
-       ~Image() 
-        { 
+       ~Image()
+        {
             if (mData)
                 stbi_image_free(mData);
         }
 
         void Load(const std::string& filename)
         {
-            std::ifstream in(filename, std::ios::in | std::ios::binary);
-            if (!in)
+            #if defined(WINDOWS_OS)
+                std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
+            #elif defined(POSIX_OS)
+                std::fstream in(filename, std::ios::in | std::ios::binary);
+            #endif
+            if (!in.is_open())
                 throw std::runtime_error("failed to open file: " + filename);
 
             in.seekg(0, std::ios::end);
@@ -72,7 +81,7 @@ namespace gfx
             auto* bmp = stbi_load_from_memory((const stbi_uc*)data.data(),
                 (int)data.size(), &xres, &yres, &depth, 0);
             if (bmp == nullptr)
-                throw std::runtime_error("failed to decompress texture: " + filename);
+                throw std::runtime_error("failed to decompress image: " + filename);
             if (mData)
                 stbi_image_free(mData);
 
@@ -84,31 +93,31 @@ namespace gfx
         }
 
         template<typename PixelT>
-        Bitmap<PixelT> AsBitmap() const 
-        { 
+        Bitmap<PixelT> AsBitmap() const
+        {
             ASSERT(mData);
             if (mDepth == sizeof(PixelT))
                 return Bitmap<PixelT>(reinterpret_cast<const PixelT*>(mData), mWidth, mHeight);
 
-            Bitmap<PixelT> ret(mWidth, mHeight);        
+            Bitmap<PixelT> ret(mWidth, mHeight);
             if (mDepth == 1)
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const Grayscale*>(mData));
             else if (mDepth == 3)
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGB*>(mData));
             else if (mDepth == 4)
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
-            
+
             return ret;
         }
-        bool IsValid() const 
+        bool IsValid() const
         { return mData != nullptr; }
-        unsigned GetWidth() const 
+        unsigned GetWidth() const
         { return mWidth; }
-        unsigned GetHeight() const 
+        unsigned GetHeight() const
         { return mHeight; }
-        unsigned GetDepthBits() const 
+        unsigned GetDepthBits() const
         { return mDepth * 8; }
-        const void* GetData() const 
+        const void* GetData() const
         { return mData; }
 
         Image& operator=(const Image&) = delete;
