@@ -44,22 +44,33 @@ namespace gfx
     {
     public:
         // Construct the text buffer with given maximum
-        // width and height dimensions. 
+        // width and height dimensions.
         // The dimensions are used when aligning and positioning
         // the rasterized text in the buffer.
-        // the units are pixels. 
+        // the units are pixels.
         TextBuffer(unsigned width, unsigned height)
           : mWidth(width)
           , mHeight(height)
-        {}  
+        {}
+        // Construct an empty text buffer without any dimensions.
+        // The buffer needs to be resized before the content can
+        // be rasterized.
+        TextBuffer() = default;
 
         // get the width (length) of the buffer
-        unsigned GetWidth() const 
+        unsigned GetWidth() const
         { return mWidth; }
 
         // get the height of the buffer.
-        unsigned GetHeight() const 
+        unsigned GetHeight() const
         { return mHeight; }
+
+        // Set the new text buffer size.
+        void SetSize(unsigned width, unsigned height)
+        {
+            mWidth = width;
+            mHeight = height;
+        }
 
         // Rasterize the text buffer contents into a bitmap
         std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
@@ -77,16 +88,16 @@ namespace gfx
 
         // TextStyle object can be used to set some text styling properties
         // such as the line height scaling factor, underline and text
-        // alignment. 
+        // alignment.
         // Some general notes about text styling:
         // Common "styling" options such as Italic and Bold text are normally
         // variations of the "Regular" font. Therefore this API provides no
         // facilities for dealing with "bold" or "italic" text. Simply use
         // the appropriate font file when adding text to the TextBuffer.
         class TextStyle
-        {   
+        {
         public:
-            // Set underlining on/off. 
+            // Set underlining on/off.
             TextStyle& SetUnderline(bool underline)
             {
                 mUnderline = underline;
@@ -127,7 +138,7 @@ namespace gfx
         };
 
         // Add text to the buffer and position automatically wrt TextBuffer bounds.
-        // Returns a TextStyle object which can be used to set individual 
+        // Returns a TextStyle object which can be used to set individual
         // text style properties.
         TextStyle& AddText(const std::string& text, const std::string& font, unsigned font_size_px);
 
@@ -140,19 +151,18 @@ namespace gfx
         static std::weak_ptr<FontLibrary> Freetype;
         struct Text;
         std::shared_ptr<Bitmap<Grayscale>> Rasterize(
-            const std::string& text, 
+            const std::string& text,
             const std::string& font,
             const TextStyle& style) const;
 
     private:
-        const std::string mName;
-        const unsigned mWidth  = 0;
-        const unsigned mHeight = 0;
+        unsigned mWidth  = 0;
+        unsigned mHeight = 0;
 
         struct Text {
             std::string text;
             std::string font;
-            TextStyle style;            
+            TextStyle style;
         };
         std::vector<Text> mText;
     };
