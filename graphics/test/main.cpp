@@ -696,14 +696,24 @@ int main(int argc, char* argv[])
 
     using clock = std::chrono::high_resolution_clock;
 
-    auto start = clock::now();
+    auto stamp = clock::now();
+    float frames  = 0;
+    float seconds = 0.0f;
 
     while (window.DoesExist())
     {
-        const auto end  = clock::now();
-        const auto gone = end - start;
-        const auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(gone).count() / 1000.0;
+        // measure how much time has elapsed since last iteration
+        const auto now  = clock::now();
+        const auto gone = now - stamp;
+        // if sync to vblank is off then we it's possible that we might be
+        // rendering too fast for milliseconds, let's use microsecond
+        // precision for now. otherwise we'd need to accumulate time worth of
+        // several iterations of the loop in order to have an actual time step
+        // for updating the animations.
+        const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
+        stamp = now;
 
+        // jump animations forward by the *previous* timestep
         for (auto& test : tests)
             test->Update(secs);
 
@@ -724,7 +734,15 @@ int main(int argc, char* argv[])
             window.ProcessEvent(event);
         }
 
-        start = end;
+        ++frames;
+        seconds += secs;
+        if (seconds > 1.0f)
+        {
+            const auto fps = frames / seconds;
+            INFO("FPS: %1", fps);
+            frames = 0.0f;
+            seconds = 0.0f;
+        }
     }
 
     context->Dispose();
