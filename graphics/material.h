@@ -58,9 +58,25 @@ namespace gfx
     class TextureSource
     {
     public:
+        // Enum to specify what is the underlying data source for
+        // for the texture data.
+        enum class Source {
+            // Data comes from a file (such as a .png or a .jpg) in the filesystem.
+            Filesystem,
+            // Data comes as an in memory bitmap rasterized by the TextBuffer
+            // based on the text/font content/parameters.
+            TextBuffer,
+            // Data comes as an arbitrary bitmap that the user can manipulate
+            // as per pixel by pixel basis.
+            Bitmap
+        };
+
         virtual ~TextureSource() = default;
+        // Get the type of the source of the texture data.
+        virtual Source GetSourceType() const = 0;
         // Get the name for the texture. This is expected to be unique
         // and is used to map the source to a device texture resource.
+        // Not human readable.
         virtual std::string GetName() const = 0;
         // Generate or load the data as a bitmap.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
@@ -77,8 +93,6 @@ namespace gfx
     private:
     };
 
-
-
     namespace detail {
         // Source texture data from an image file.
         class TextureFileSource : public TextureSource
@@ -88,6 +102,8 @@ namespace gfx
               : mFilename(filename)
             {}
             TextureFileSource() = default;
+            virtual Source GetSourceType() const override
+            { return Source::Filesystem; }
             virtual std::string GetName() const override
             { return mFilename; }
             virtual std::shared_ptr<IBitmap> GetData() const override
@@ -120,16 +136,21 @@ namespace gfx
         };
 
         // Source texture data from a bitmap
-        template<typename T>
         class TextureBitmapSource : public TextureSource
         {
         public:
+            template<typename T>
             TextureBitmapSource(const Bitmap<T>& bmp)
               : mBitmap(new Bitmap<T>(bmp))
             {}
+            template<typename T>
             TextureBitmapSource(Bitmap<T>&& bmp)
               : mBitmap(new Bitmap<T>(std::move(bmp)))
             {}
+            TextureBitmapSource() = default;
+
+            virtual Source GetSourceType() const override
+            { return Source::Bitmap; }
             virtual std::string GetName() const override
             {
                 size_t hash = mBitmap->GetHash();
@@ -140,7 +161,7 @@ namespace gfx
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
         private:
-            std::shared_ptr<Bitmap<T>> mBitmap;
+            std::shared_ptr<IBitmap> mBitmap;
         };
 
         // Rasterize text buffer and provide as a texture source.
@@ -150,6 +171,13 @@ namespace gfx
             TextureTextBufferSource(const TextBuffer& text)
               : mTextBuffer(text)
             {}
+            TextureTextBufferSource(TextBuffer&& text)
+              : mTextBuffer(std::move(text))
+            {}
+            TextureTextBufferSource() = default;
+
+            virtual Source GetSourceType() const override
+            { return Source::TextBuffer; }
             virtual std::string GetName() const override
             {
                 size_t hash = mTextBuffer.GetHash();
@@ -162,54 +190,7 @@ namespace gfx
                 return mTextBuffer.Rasterize();
             }
         private:
-            const TextBuffer& mTextBuffer;
-        };
-
-        // this is super ugly but there needs to be some kind of abstraction
-        // for loading materials from JSON and coming up with the correct
-        // texture source object. This will get the job done by allowing
-        // the client code to register a custom class type in the factory
-        class TextureSourceFactory
-        {
-        public:
-            static std::shared_ptr<TextureSource> Create(const std::string& class_)
-            {
-                return GetFactory().mFactories[class_]->Create();
-            }
-            template<typename T>
-            void RegisterTextureSourceType()
-            {
-                GetFactory().mFactories[typeid(T).name()] = std::make_unique<TypedFactory<T>>();
-            }
-
-        private:
-            static TextureSourceFactory& GetFactory()
-            {
-                static TextureSourceFactory almost_like_java;
-                return almost_like_java;
-            }
-            TextureSourceFactory()
-            {
-                mFactories[typeid(TextureFileSource).name()] = std::make_unique<TypedFactory<TextureFileSource>>();
-            }
-
-        private:
-            class AbstractFactory
-            {
-            public:
-                virtual std::shared_ptr<TextureSource> Create() const = 0;
-            private:
-            };
-            template<typename T>
-            class TypedFactory :public AbstractFactory
-            {
-            public:
-                virtual std::shared_ptr<TextureSource> Create() const override
-                { return std::make_shared<T>(); }
-            private:
-            };
-        private:
-            std::map<std::string, std::unique_ptr<AbstractFactory>> mFactories;
+            TextBuffer mTextBuffer;
         };
 
     } // detail
@@ -493,11 +474,18 @@ namespace gfx
             mTextures.back().enable_gc = true;
             return *this;
         }
+        Material& AddTexture(TextBuffer&& text)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_shared<detail::TextureTextBufferSource>(std::move(text));
+            mTextures.back().enable_gc = true;
+            return *this;
+        }
         template<typename T>
         Material& AddTexture(const Bitmap<T>& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureBitmapSource<T>>(bitmap);
+            mTextures.back().source = std::make_shared<detail::TextureBitmapSource>(bitmap);
             return *this;
         }
 
@@ -505,7 +493,7 @@ namespace gfx
         Material& AddTexture(Bitmap<T>&& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureBitmapSource<T>>(std::move(bitmap));
+            mTextures.back().source = std::make_shared<detail::TextureBitmapSource>(std::move(bitmap));
             return *this;
         }
 
@@ -590,7 +578,7 @@ namespace gfx
                 nlohmann::json js;
                 base::JsonWrite(js, "box", sampler.box);
                 base::JsonWrite(js, "box_is_normalized", sampler.box_is_normalized);
-                base::JsonWrite(js, "class", typeid(*sampler.source).name());
+                base::JsonWrite(js, "type", sampler.source->GetSourceType());
                 base::JsonWrite(js, "source", *sampler.source);
                 base::JsonWrite(js, "enable_gc", sampler.enable_gc);
                 json["samplers"].push_back(js);
@@ -622,10 +610,20 @@ namespace gfx
             for (const auto& json_sampler : object["samplers"].items())
             {
                 const auto& obj = json_sampler.value();
-                const std::string& class_ = obj["class"];
-                auto source = detail::TextureSourceFactory::Create(class_);
+                TextureSource::Source type;
+                if (!base::JsonReadSafe(obj, "type", &type))
+                    return std::nullopt;
+                std::shared_ptr<TextureSource> source;
+                if (type == TextureSource::Source::Filesystem)
+                    source = std::make_shared<detail::TextureFileSource>();
+                else if (type == TextureSource::Source::TextBuffer)
+                    source = std::make_shared<detail::TextureTextBufferSource>();
+                else if (type == TextureSource::Source::Bitmap)
+                    source = std::make_shared<detail::TextureBitmapSource>();
+
                 if (!source->FromJson(obj["source"]))
                     return std::nullopt;
+
                 TextureSampler s;
                 if (!base::JsonReadSafe(obj, "box", &s.box) ||
                     !base::JsonReadSafe(obj, "box_is_normalized", &s.box_is_normalized) ||
