@@ -74,10 +74,14 @@ namespace gfx
         virtual ~TextureSource() = default;
         // Get the type of the source of the texture data.
         virtual Source GetSourceType() const = 0;
-        // Get the name for the texture. This is expected to be unique
-        // and is used to map the source to a device texture resource.
-        // Not human readable.
+        // Get the name for the texture for the device.
+        // This is expected to be unique and is used to map the source to a
+        // device texture resource. Not human readable.
+        virtual std::string GetId() const = 0;
+        // Get the human readable / and settable name.
         virtual std::string GetName() const = 0;
+        // Set the texture source human readable name.
+        virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
         // Returns whether texture source can serialize into JSON or not.
@@ -98,17 +102,23 @@ namespace gfx
         class TextureFileSource : public TextureSource
         {
         public:
-            TextureFileSource(const std::string& filename)
-              : mFilename(filename)
+            TextureFileSource(const std::string& file,
+                              const std::string& name)
+              : mFile(file)
+              , mName(name)
             {}
             TextureFileSource() = default;
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
+            virtual std::string GetId() const override
+            { return mFile; }
             virtual std::string GetName() const override
-            { return mFilename; }
+            { return mName; }
+            virtual void SetName(const std::string& name)
+            { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             {
-                Image file(mFilename);
+                Image file(mFile);
                 if (file.GetDepthBits() == 8)
                     return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
                 else if (file.GetDepthBits() == 24)
@@ -123,16 +133,21 @@ namespace gfx
             virtual nlohmann::json ToJson() const override
             {
                 nlohmann::json json = {
-                    {"filename", mFilename}
+                    {"file", mFile},
+                    {"name", mName}
                 };
                 return json;
             }
             virtual bool FromJson(const nlohmann::json& object) override
             {
-                return base::JsonReadSafe(object, "filename", &mFilename);
+                return base::JsonReadSafe(object, "file", &mFile) &&
+                       base::JsonReadSafe(object, "name", &mName);
             }
+            std::string GetFilename() const
+            { return mFile; }
         private:
-            std::string mFilename;
+            std::string mFile;
+            std::string mName;
         };
 
         // Source texture data from a bitmap
@@ -151,17 +166,22 @@ namespace gfx
 
             virtual Source GetSourceType() const override
             { return Source::Bitmap; }
-            virtual std::string GetName() const override
+            virtual std::string GetId() const override
             {
                 size_t hash = mBitmap->GetHash();
                 hash = base::hash_combine(hash, mBitmap->GetWidth());
                 hash = base::hash_combine(hash, mBitmap->GetHeight());
                 return std::to_string(hash);
             }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
         private:
             std::shared_ptr<IBitmap> mBitmap;
+            std::string mName;
         };
 
         // Rasterize text buffer and provide as a texture source.
@@ -178,19 +198,24 @@ namespace gfx
 
             virtual Source GetSourceType() const override
             { return Source::TextBuffer; }
-            virtual std::string GetName() const override
+            virtual std::string GetId() const override
             {
                 size_t hash = mTextBuffer.GetHash();
                 hash = base::hash_combine(hash, mTextBuffer.GetWidth());
                 hash = base::hash_combine(hash, mTextBuffer.GetHeight());
                 return std::to_string(hash);
             }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             {
                 return mTextBuffer.Rasterize();
             }
         private:
             TextBuffer mTextBuffer;
+            std::string mName;
         };
 
     } // detail
@@ -306,7 +331,7 @@ namespace gfx
                 {
                     const auto& sampler = mTextures[frame_index[i]];
                     const auto& source  = sampler.source;
-                    const auto& name    = source->GetName();
+                    const auto& name    = source->GetId();
                     auto* texture = device.FindTexture(name);
                     if (!texture)
                     {
@@ -461,10 +486,10 @@ namespace gfx
             return *this;
         }
 
-        Material& AddTexture(const std::string& texture)
+        Material& AddTexture(const std::string& file, const std::string& name = "")
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureFileSource>(texture);
+            mTextures.back().source = std::make_shared<detail::TextureFileSource>(file, name);
             return *this;
         }
         Material& AddTexture(const TextBuffer& text)
@@ -523,6 +548,12 @@ namespace gfx
             mTextures[index].enable_gc = on_off;
             return *this;
         }
+        Material& SetTextureSource(std::size_t index, std::shared_ptr<TextureSource> source)
+        {
+            ASSERT(index < mTextures.size());
+            mTextures[index].source = source;
+            return *this;
+        }
         Material& SetTextureMinFilter(MinTextureFilter filter)
         {
             mMinFilter = filter;
@@ -552,6 +583,26 @@ namespace gfx
         {
             mWrapY = wrap;
             return *this;
+        }
+        size_t GetNumTextures()
+        { return mTextures.size(); }
+
+        void DeleteTexture(size_t index)
+        {
+            ASSERT(index < mTextures.size());
+            auto it = std::begin(mTextures);
+            it += index;
+            mTextures.erase(it);
+        }
+        const TextureSource& GetTextureSource(size_t index) const
+        {
+            ASSERT(index < mTextures.size());
+            return *mTextures[index].source;
+        }
+        FRect GetTextureRect(size_t index) const
+        {
+            ASSERT(index < mTextures.size());
+            return mTextures[index].box;
         }
 
         nlohmann::json ToJson() const

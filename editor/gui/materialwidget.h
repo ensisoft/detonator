@@ -32,6 +32,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "graphics/types.h"
+#include "graphics/material.h"
 
 namespace gfx {
     class Material;
@@ -65,8 +66,8 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
-        void on_textureAdd_clicked();
-        void on_textureDel_clicked();
+        void on_btnAddTextureMap_clicked();
+        void on_btnDelTextureMap_clicked();
         void on_browseShader_clicked();
         void on_textures_currentRowChanged(int row);
         void on_materialType_currentIndexChanged(const QString& text);
@@ -76,25 +77,23 @@ namespace gui
         void on_rectH_valueChanged(double value);
 
     private:
-        void fillMaterial(gfx::Material& material) const;
-        void paintScene(gfx::Painter& painter, double sec);
-        QString getCurrentTextureKey() const;
+        void SetMaterialProperties() const;
+        void PaintScene(gfx::Painter& painter, double sec);
+
     private:
         Ui::MaterialWidget mUI;
     private:
-        struct TextureData {
-            QString file;
-            float rectx = 0.0f;
-            float recty = 0.0f;
-            float rectw = 0.0f;
-            float recth = 0.0f;
-        };
-        QMap<QString, TextureData> mTextures;
+        // current workspace object
+        app::Workspace* mWorkspace = nullptr;
+        // the material we're editing
+        mutable gfx::Material mMaterial;
+        // play state
         enum PlayState {
             Playing, Paused, Stopped
         };
         PlayState mState = PlayState::Stopped;
+        // current playback time (if playing)
         float mTime = 0.0f;
-        app::Workspace* mWorkspace = nullptr;
+
     };
 } // namespace

@@ -30,6 +30,7 @@
 #  include <QFileInfo>
 #  include <QPixmap>
 #  include <QTextStream>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
 #include "base/assert.h"
@@ -57,7 +58,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     mUI.setupUi(this);
     mUI.widget->setFramerate(60);
-    mUI.widget->onPaintScene = std::bind(&MaterialWidget::paintScene,
+    mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
@@ -77,74 +78,47 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
 {
     DEBUG("Editing material: '%1'", resource.GetName());
 
-    const gfx::Material* material;
-    ASSERT(resource.GetContent(&material));
+    mMaterial = *resource.GetContent<gfx::Material>();
 
-    SetValue(mUI.materialType, material->GetType());
-    SetValue(mUI.surfaceType,  material->GetSurfaceType());
-    SetValue(mUI.minFilter,    material->GetMinTextureFilter());
-    SetValue(mUI.magFilter,    material->GetMagTextureFilter());
-    SetValue(mUI.wrapX,        material->GetTextureWrapX());
-    SetValue(mUI.wrapY,        material->GetTextureWrapY());
-    SetValue(mUI.baseColor,    material->GetBaseColor());
-    SetValue(mUI.scaleX,       material->GetTextureScaleX());
-    SetValue(mUI.scaleY,       material->GetTextureScaleY());
-    SetValue(mUI.fps,          material->GetFps());
-    SetValue(mUI.blend,        material->GetBlendFrames());
-    SetValue(mUI.gamma,        material->GetGamma());
+    SetValue(mUI.materialType, mMaterial.GetType());
+    SetValue(mUI.surfaceType,  mMaterial.GetSurfaceType());
+    SetValue(mUI.minFilter,    mMaterial.GetMinTextureFilter());
+    SetValue(mUI.magFilter,    mMaterial.GetMagTextureFilter());
+    SetValue(mUI.wrapX,        mMaterial.GetTextureWrapX());
+    SetValue(mUI.wrapY,        mMaterial.GetTextureWrapY());
+    SetValue(mUI.baseColor,    mMaterial.GetBaseColor());
+    SetValue(mUI.scaleX,       mMaterial.GetTextureScaleX());
+    SetValue(mUI.scaleY,       mMaterial.GetTextureScaleY());
+    SetValue(mUI.fps,          mMaterial.GetFps());
+    SetValue(mUI.blend,        mMaterial.GetBlendFrames());
+    SetValue(mUI.gamma,        mMaterial.GetGamma());
 
-    QString shader_file;
-    bool use_shader_file = false;
-    resource.GetProperty("use_shader_file", &use_shader_file);
-    resource.GetProperty("shader_file", &shader_file);
-    mUI.customShader->setChecked(use_shader_file);
-    mUI.shaderFile->setText(shader_file);
-    if (!shader_file.isEmpty())
+    size_t num_textures = mMaterial.GetNumTextures();
+    for (size_t i=0; i<num_textures; ++i)
     {
-        if (!QFileInfo(shader_file).exists())
+        const auto& source = mMaterial.GetTextureSource(i);
+        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
         {
-            WARN("Shader file '%1' could no longer be found.", shader_file);
+            if (MissingFile(ptr->GetFilename()))
+            {
+                WARN("Texture file '%1' could no longer be found.", ptr->GetFilename());
+                // todo: we're skipping adding this item to the list because
+                // the code in gfx::material  will expect the file to be available
+                // or it will throw, perhaps that code should be using logging instead
+                // and we should leave the item in the list widget =
+                continue;
+            }
         }
-    }
-
-    QStringList texture_files;
-    QStringList texture_rects;
-    resource.GetProperty("texture_files", &texture_files);
-    resource.GetProperty("texture_rects", &texture_rects);
-    ASSERT(texture_files.count() == texture_rects.count());
-
-    for (int i=0; i<texture_files.count(); ++i)
-    {
-        const auto& rect = texture_rects[i];
-        const auto& file = texture_files[i];
-        const QFileInfo info(file);
-        if (!info.exists())
-        {
-            WARN("Texture '%1' could no longer be found.", file);
-            continue;
-        }
-        QString stupid(rect);
-        QTextStream ss(&stupid);
-        float x, y, w, h;
-        ss >> x >> y >> w >> h;
-
-        TextureData data;
-        data.file = file;
-        data.rectx = x;
-        data.recty = y;
-        data.rectw = w;
-        data.recth = h;
-
-        const auto& key = app::RandomString();
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
-        item->setText(info.fileName());
-        item->setData(Qt::UserRole, key);
+        item->setText(app::FromUtf8(source.GetName()));
+        item->setData(Qt::UserRole, app::FromUtf8(source.GetId()));
         mUI.textures->addItem(item);
-
-        // store meta data.
-        mTextures[key] = data;
     }
 
+    if (MissingFile(mUI.shaderFile))
+    {
+        WARN("The shader file '%1' could no longer be found.", mUI.shaderFile->text());
+    }
 
     mUI.textures->setCurrentRow(0);
     mUI.materialName->setText(resource.GetName());
@@ -182,72 +156,70 @@ void MaterialWidget::addActions(QMenu& menu)
 
 bool MaterialWidget::loadState(const Settings& settings)
 {
-    settings.loadWidget("Material", mUI.materialName);
-    settings.loadWidget("Material", mUI.materialType);
-    settings.loadWidget("Material", mUI.surfaceType);
-    settings.loadWidget("Material", mUI.baseColor);
-    settings.loadWidget("Material", mUI.gamma);
-    settings.loadWidget("Material", mUI.scaleX);
-    settings.loadWidget("Material", mUI.scaleY);
-    settings.loadWidget("Material", mUI.minFilter);
-    settings.loadWidget("Material", mUI.magFilter);
-    settings.loadWidget("Material", mUI.wrapX);
-    settings.loadWidget("Material", mUI.wrapY);
-    settings.loadWidget("Material", mUI.fps);
-    settings.loadWidget("Material", mUI.blend);
-    settings.loadWidget("Material", mUI.customShader);
-    settings.loadWidget("Material", mUI.shaderFile);
-    settings.loadWidget("Material", mUI.zoom);
+    const std::string& base64 = settings.getValue("Material", "content", std::string(""));
+    if (base64.empty())
+        return true;
 
-    const QString& shader = mUI.shaderFile->text();
-    if (!shader.isEmpty())
+    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    auto ret = gfx::Material::FromJson(json);
+    if (!ret.has_value())
     {
-        if (!QFileInfo(shader).exists())
-        {
-            WARN("Shader file '%1' could no longer be found.", shader);
-        }
+        WARN("Failed to load material widget state.");
+        return false;
     }
+    mMaterial = std::move(ret.value());
 
-    const auto& texture_files = settings.getValue("Material", "texture_files", QStringList());
-    const auto& texture_rects = settings.getValue("Material", "texture_rects", QStringList());
-    ASSERT(texture_files.size() == texture_rects.size());
+    // restore UI from the material values.
+    SetValue(mUI.materialType, mMaterial.GetType());
+    SetValue(mUI.surfaceType,  mMaterial.GetSurfaceType());
+    SetValue(mUI.minFilter,    mMaterial.GetMinTextureFilter());
+    SetValue(mUI.magFilter,    mMaterial.GetMagTextureFilter());
+    SetValue(mUI.wrapX,        mMaterial.GetTextureWrapX());
+    SetValue(mUI.wrapY,        mMaterial.GetTextureWrapY());
+    SetValue(mUI.baseColor,    mMaterial.GetBaseColor());
+    SetValue(mUI.scaleX,       mMaterial.GetTextureScaleX());
+    SetValue(mUI.scaleY,       mMaterial.GetTextureScaleY());
+    SetValue(mUI.fps,          mMaterial.GetFps());
+    SetValue(mUI.blend,        mMaterial.GetBlendFrames());
+    SetValue(mUI.gamma,        mMaterial.GetGamma());
 
-    for (int i=0; i<texture_files.size(); ++i)
+    // restore textures list
+    size_t num_textures = mMaterial.GetNumTextures();
+    for (size_t i=0; i<num_textures; ++i)
     {
-        const auto& rect = texture_rects[i];
-        const auto& file = texture_files[i];
-        const QFileInfo info(file);
-        if (!info.exists())
+        const auto& source = mMaterial.GetTextureSource(i);
+        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
         {
-            WARN("Texture '%1' could no longer be found.", file);
-            continue;
+            if (MissingFile(ptr->GetFilename()))
+            {
+                WARN("Texture file '%1' could no longer be found.", ptr->GetFilename());
+                // todo: we're skipping adding this item to the list because
+                // the code in gfx::material  will expect the file to be available
+                // or it will throw, perhaps that code should be using logging instead
+                // and we should leave the item in the list widget =
+                continue;
+            }
         }
-        QString stupid(rect);
-        QTextStream ss(&stupid);
-        float x, y, w, h;
-        ss >> x >> y >> w >> h;
-
-        TextureData data;
-        data.file = file;
-        data.rectx = x;
-        data.recty = y;
-        data.rectw = w;
-        data.recth = h;
-
-        const auto& key = app::RandomString();
-        auto* item = new QListWidgetItem(mUI.textures);
-        item->setText(info.fileName());
-        item->setData(Qt::UserRole, key);
+        QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+        item->setText(app::FromUtf8(source.GetName()));
+        item->setData(Qt::UserRole, app::FromUtf8(source.GetId()));
         mUI.textures->addItem(item);
-
-        // store meta data.
-        mTextures[key] = data;
     }
+
     // select first texture if any
     mUI.textures->setCurrentRow(0);
-
     // enable/disable UI elements based on the material type
     on_materialType_currentIndexChanged("");
+
+    settings.loadWidget("Material", mUI.materialName);
+    settings.loadWidget("Material", mUI.shaderFile);
+    settings.loadWidget("Material", mUI.customShader);
+    settings.loadWidget("Material", mUI.zoom);
+
+    if (MissingFile(mUI.shaderFile))
+    {
+        WARN("The shader file '%1' could no longer be found.", mUI.shaderFile->text());
+    }
 
     setWindowTitle(mUI.materialName->text());
     return true;
@@ -255,37 +227,18 @@ bool MaterialWidget::loadState(const Settings& settings)
 
 bool MaterialWidget::saveState(Settings& settings) const
 {
-    // serialize texture files and rectangles.
-    QStringList texture_files;
-    QStringList texture_rects;
-    for (int i=0; i<mUI.textures->count(); ++i)
-    {
-        const auto* item = mUI.textures->item(i);
-        const auto& key  = item->data(Qt::UserRole).toString();
-        const auto& data = mTextures[key];
-        texture_files << data.file;
-        texture_rects << QString("%1 %2 %3 %4")
-            .arg(data.rectx).arg(data.recty)
-            .arg(data.rectw).arg(data.recth);
-    }
-    settings.setValue("Material", "texture_files", texture_files);
-    settings.setValue("Material", "texture_rects", texture_rects);
     settings.saveWidget("Material", mUI.materialName);
-    settings.saveWidget("Material", mUI.materialType);
-    settings.saveWidget("Material", mUI.surfaceType);
-    settings.saveWidget("Material", mUI.baseColor);
-    settings.saveWidget("Material", mUI.gamma);
-    settings.saveWidget("Material", mUI.scaleX);
-    settings.saveWidget("Material", mUI.scaleY);
-    settings.saveWidget("Material", mUI.minFilter);
-    settings.saveWidget("Material", mUI.magFilter);
-    settings.saveWidget("Material", mUI.wrapX);
-    settings.saveWidget("Material", mUI.wrapY);
-    settings.saveWidget("Material", mUI.fps);
-    settings.saveWidget("Material", mUI.blend);
-    settings.saveWidget("Material", mUI.customShader);
     settings.saveWidget("Material", mUI.shaderFile);
+    settings.saveWidget("Material", mUI.customShader);
     settings.saveWidget("Material", mUI.zoom);
+
+    SetMaterialProperties();
+
+    // the material can already serialize into JSON.
+    // so let's use the material's JSON serialization here as well.
+    const auto& json = mMaterial.ToJson();
+    const auto& base64 = base64::Encode(json.dump(2));
+    settings.setValue("Material", "content", base64);
     return true;
 }
 
@@ -350,35 +303,12 @@ void MaterialWidget::on_actionSave_triggered()
             return;
     }
 
-    // careful here!
-    // the order in which we add our textures is important,
-    // mTextures map is mapping an arbitary key to a texture data
-    // object but it doesn't have the exact order of textures
-    // we need to use the UI object for this.
-    QStringList texture_files;
-    QStringList texture_rects;
-    for (int i=0; i<mUI.textures->count(); ++i)
-    {
-        const auto* item = mUI.textures->item(i);
-        const auto& key  = item->data(Qt::UserRole).toString();
-        const auto& data = mTextures[key];
-        texture_files << data.file;
-        texture_rects << QString("%1 %2 %3 %4")
-            .arg(data.rectx).arg(data.recty)
-            .arg(data.rectw).arg(data.rectw);
-    }
+    SetMaterialProperties();
 
-    gfx::Material material((gfx::Material::Type)GetValue(mUI.materialType));
-    fillMaterial(material);
-
-    app::MaterialResource resource(std::move(material), name);
-    // set the properties, note that these are also shared by the particle widget
-    resource.SetProperty("texture_files", texture_files);
-    resource.SetProperty("texture_rects", texture_rects);
-    resource.SetProperty("color", mUI.baseColor->color());
-    resource.SetProperty("surface", mUI.surfaceType->currentText());
+    app::MaterialResource resource(mMaterial, name);
     resource.SetProperty("shader_file", mUI.shaderFile->text());
     resource.SetProperty("use_shader_file", mUI.customShader->isChecked());
+
     mWorkspace->SaveResource(resource);
 
     setWindowTitle(name);
@@ -386,53 +316,64 @@ void MaterialWidget::on_actionSave_triggered()
     NOTE("Saved material '%1'", name);
 }
 
-void MaterialWidget::on_textureAdd_clicked()
+void MaterialWidget::on_btnAddTextureMap_clicked()
 {
     const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Image File(s)"), "", tr("Images (*.png *.jpg *.jpg)"));
+        tr("Select Image File(s)"), "", tr("Images (*.png *.jpg *.jpeg)"));
     if (list.isEmpty())
         return;
+
     for (const auto& file : list)
     {
-        const QFileInfo info(file);
+        QFileInfo info(file);
+        const auto& name = info.baseName();
+        const auto& path = info.absoluteFilePath();
 
-        // generate random key for the file that maps
-        // the list widget item to texture meta data.
-        const auto& key = app::RandomString();
+        auto source = std::make_shared<gfx::detail::TextureFileSource>(app::ToUtf8(path), app::ToUtf8(name));
 
-        auto* item = new QListWidgetItem(mUI.textures);
-        item->setText(info.fileName());
-        item->setData(Qt::UserRole, key);
+        QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+        item->setText(name);
+        item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
         mUI.textures->addItem(item);
 
-        // store the texture details in a map by the unique key
-        TextureData data;
-        data.file = file;
-        data.rectx = 0.0f;
-        data.recty = 0.0f;
-        data.rectw = 1.0f;
-        data.recth = 1.0f;
-        mTextures[key] = data;
+        mMaterial.AddTexture(source);
     }
     const auto index = mUI.textures->currentRow();
     mUI.textures->setCurrentRow(index == -1 ? 0 : index);
 }
 
-void MaterialWidget::on_textureDel_clicked()
+void MaterialWidget::on_btnDelTextureMap_clicked()
 {
+    // make sure currentRowChanged is blocked while we're deleting shit.
+    QSignalBlocker cockblocker(mUI.textures);
+
     QList<QListWidgetItem*> items = mUI.textures->selectedItems();
 
+    // a bit ugly but ok.
     for (int i=0; i<items.count(); ++i)
     {
-        const QString& key = items[i]->data(Qt::UserRole).toString();
-        mTextures.remove(key);
+        const QListWidgetItem* item = items[i];
+        const auto& data = item->data(Qt::UserRole).toString();
+        const auto& id   = app::ToUtf8(data);
+        const auto num_textures = mMaterial.GetNumTextures();
+        bool deleted = false;
+        for (size_t i=0; i<num_textures; ++i)
+        {
+            if (mMaterial.GetTextureSource(i).GetId() != id)
+                continue;
+
+            mMaterial.DeleteTexture(i);
+            deleted = true;
+            break;
+        }
+        ASSERT(deleted);
     }
 
     qDeleteAll(items);
 
-    mUI.textureDel->setEnabled(false);
-    mUI.textureRect->setEnabled(false);
-    mUI.textureProp->setEnabled(false);
+    const auto current = mUI.textures->currentRow();
+
+    on_textures_currentRowChanged(current);
 }
 
 void MaterialWidget::on_browseShader_clicked()
@@ -448,47 +389,49 @@ void MaterialWidget::on_browseShader_clicked()
 
 void MaterialWidget::on_textures_currentRowChanged(int index)
 {
-    mUI.textureRect->setEnabled(false);
-    mUI.textureProp->setEnabled(false);
-    mUI.textureWidth->setText("");
-    mUI.textureHeight->setText("");
-    mUI.textureDepth->setText("");
-    mUI.textureFile->setText("");
-    mUI.textureDel->setEnabled(false);
-
-    const auto& key = getCurrentTextureKey();
-    if (key.isEmpty())
-        return;
-
-    const auto& data = mTextures[key];
-    const auto& img  = QPixmap(data.file);
-    mUI.textureFile->setText(data.file);
-    mUI.textureFile->setCursorPosition(0);
-    if (img.isNull())
+    if (index == -1)
     {
-        ERROR("Could not load image '%1'", data.file);
-        mUI.textureWidth->setText("Error");
-        mUI.textureHeight->setText("Error");
-        mUI.textureDepth->setText("Error");
-        mUI.texturePreview->setEnabled(false);
+        mUI.textureRect->setEnabled(false);
+        mUI.textureProp->setEnabled(false);
+        mUI.textureWidth->setText("");
+        mUI.textureHeight->setText("");
+        mUI.textureDepth->setText("");
+        mUI.btnDelTextureMap->setEnabled(false);
+        mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
         return;
     }
 
-    const auto w = img.width();
-    const auto h = img.height();
-    const auto d = img.depth();
-    mUI.textureWidth->setText(QString::number(w));
-    mUI.textureHeight->setText(QString::number(h));
-    mUI.textureDepth->setText(QString::number(d));
-    mUI.texturePreview->setEnabled(true);
-    mUI.texturePreview->setPixmap(img.scaledToHeight(128));
-    mUI.rectX->setValue(data.rectx);
-    mUI.rectY->setValue(data.recty);
-    mUI.rectW->setValue(data.rectw);
-    mUI.rectH->setValue(data.recth);
+    const auto& source = mMaterial.GetTextureSource(index);
+    const auto& rect   = mMaterial.GetTextureRect(index);
+    const auto& bitmap = source.GetData();
+
+    const auto width  = bitmap->GetWidth();
+    const auto height = bitmap->GetHeight();
+    const auto depth  = bitmap->GetDepthBits();
+    QImage img;
+    if (depth == 8)
+        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, height, QImage::Format_Grayscale8);
+    else if (depth == 24)
+        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
+    else if (depth == 32)
+        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+    else throw std::runtime_error("unexpected image depth: " + std::to_string(depth));
+
+    QPixmap pix;
+    pix.convertFromImage(img);
+
+    mUI.textureWidth->setText(QString::number(width));
+    mUI.textureHeight->setText(QString::number(height));
+    mUI.textureDepth->setText(QString::number(depth));
+    mUI.texturePreview->setPixmap(pix.scaledToHeight(128));
+    mUI.rectX->setValue(rect.GetX());
+    mUI.rectY->setValue(rect.GetY());
+    mUI.rectW->setValue(rect.GetWidth());
+    mUI.rectH->setValue(rect.GetHeight());
+
     mUI.textureProp->setEnabled(true);
     mUI.textureRect->setEnabled(true);
-    mUI.textureDel->setEnabled(true);
+    mUI.btnDelTextureMap->setEnabled(true);
 }
 
 void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
@@ -526,62 +469,79 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
 
 void MaterialWidget::on_rectX_valueChanged(double value)
 {
-    mTextures[getCurrentTextureKey()].rectx = value;
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    gfx::FRect rect = mMaterial.GetTextureRect(row);
+    rect.SetX(value);
+    mMaterial.SetTextureRect(row, rect);
 }
 void MaterialWidget::on_rectY_valueChanged(double value)
 {
-    mTextures[getCurrentTextureKey()].recty = value;
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    gfx::FRect rect = mMaterial.GetTextureRect(row);
+    rect.SetY(value);
+    mMaterial.SetTextureRect(row, rect);
 }
 void MaterialWidget::on_rectW_valueChanged(double value)
 {
-    mTextures[getCurrentTextureKey()].rectw = value;
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    gfx::FRect rect = mMaterial.GetTextureRect(row);
+    rect.SetWidth(value);
+    mMaterial.SetTextureRect(row, rect);
 }
 void MaterialWidget::on_rectH_valueChanged(double value)
 {
-    mTextures[getCurrentTextureKey()].recth = value;
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    gfx::FRect rect = mMaterial.GetTextureRect(row);
+    rect.SetHeight(value);
+    mMaterial.SetTextureRect(row, rect);
 }
 
-void MaterialWidget::fillMaterial(gfx::Material& material) const
+void MaterialWidget::SetMaterialProperties() const
 {
     if (mUI.customShader->isChecked())
     {
         const QString& file = mUI.shaderFile->text();
-        material.SetShaderFile(app::ToUtf8(file));
+        mMaterial.SetShaderFile(app::ToUtf8(file));
     }
-
-    material.SetBaseColor(GetValue(mUI.baseColor));
-    material.SetGamma(GetValue(mUI.gamma));
-    material.SetSurfaceType(GetValue(mUI.surfaceType));
-    material.SetRuntime(mTime);
-    material.SetFps(GetValue(mUI.fps));
-    material.SetBlendFrames(GetValue(mUI.blend));
-    material.SetTextureMinFilter(GetValue(mUI.minFilter));
-    material.SetTextureMagFilter(GetValue(mUI.magFilter));
-    material.SetTextureScaleX(GetValue(mUI.scaleX));
-    material.SetTextureScaleY(GetValue(mUI.scaleY));
-    material.SetTextureWrapX(GetValue(mUI.wrapX));
-    material.SetTextureWrapY(GetValue(mUI.wrapY));
-
-    // add textures that we have
-    const int num_textures_add = mUI.textures->count();
-    for (int i=0; i<num_textures_add; ++i)
+    else
     {
-        const auto* item = mUI.textures->item(i);
-        const auto& key  = item->data(Qt::UserRole).toString();
-        const auto& data = mTextures[key];
-        material.AddTexture(app::ToUtf8(data.file));
-        material.SetTextureRect(i, gfx::FRect(data.rectx, data.recty, data.rectw, data.recth));
+        mMaterial.SetShaderFile("");
     }
+
+    mMaterial.SetType(GetValue(mUI.materialType));
+    mMaterial.SetBaseColor(GetValue(mUI.baseColor));
+    mMaterial.SetGamma(GetValue(mUI.gamma));
+    mMaterial.SetSurfaceType(GetValue(mUI.surfaceType));
+    mMaterial.SetRuntime(mTime);
+    mMaterial.SetFps(GetValue(mUI.fps));
+    mMaterial.SetBlendFrames(GetValue(mUI.blend));
+    mMaterial.SetTextureMinFilter(GetValue(mUI.minFilter));
+    mMaterial.SetTextureMagFilter(GetValue(mUI.magFilter));
+    mMaterial.SetTextureScaleX(GetValue(mUI.scaleX));
+    mMaterial.SetTextureScaleY(GetValue(mUI.scaleY));
+    mMaterial.SetTextureWrapX(GetValue(mUI.wrapX));
+    mMaterial.SetTextureWrapY(GetValue(mUI.wrapY));
 }
 
-void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
+void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Material material((gfx::Material::Type)GetValue(mUI.materialType));
-    fillMaterial(material);
+    SetMaterialProperties();
 
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;
@@ -589,9 +549,8 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
     const auto xpos = (width - content_width) * 0.5f;
     const auto ypos = (height - content_height) * 0.5f;
 
-    gfx::FillRect(painter,
-        gfx::FRect(xpos, ypos, content_width, content_height),
-        material);
+    // use the material to fill a rectangle in the middle of the screen.
+    gfx::FillRect(painter, gfx::FRect(xpos, ypos, content_width, content_height), mMaterial);
 
     if (mState == PlayState::Playing)
     {
@@ -599,15 +558,6 @@ void MaterialWidget::paintScene(gfx::Painter& painter, double secs)
         mTime += (wtf / 1000.0f);
     }
     mUI.time->setText(QString::number(mTime));
-}
-
-QString MaterialWidget::getCurrentTextureKey() const
-{
-    const auto row = mUI.textures->currentRow();
-    if (row == -1)
-        return "";
-    const QListWidgetItem* item = mUI.textures->item(row);
-    return item->data(Qt::UserRole).toString();
 }
 
 } // namespace

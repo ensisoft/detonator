@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1338</width>
-    <height>815</height>
+    <height>900</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -456,10 +456,13 @@
                   <bool>false</bool>
                  </property>
                  <property name="dragDropMode">
-                  <enum>QAbstractItemView::InternalMove</enum>
+                  <enum>QAbstractItemView::NoDragDrop</enum>
                  </property>
                  <property name="defaultDropAction">
-                  <enum>Qt::MoveAction</enum>
+                  <enum>Qt::IgnoreAction</enum>
+                 </property>
+                 <property name="alternatingRowColors">
+                  <bool>false</bool>
                  </property>
                  <property name="selectionMode">
                   <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -488,7 +491,7 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="textureDel">
+                  <widget class="QPushButton" name="btnDelTextureMap">
                    <property name="enabled">
                     <bool>false</bool>
                    </property>
@@ -498,7 +501,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="textureAdd">
+                  <widget class="QPushButton" name="btnAddTextureMap">
                    <property name="text">
                     <string>Browse ...</string>
                    </property>
@@ -524,7 +527,73 @@
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="1" column="2" rowspan="4">
+             <item row="1" column="2">
+              <widget class="QLineEdit" name="textureWidth">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Depth</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLineEdit" name="textureDepth">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLineEdit" name="textureHeight">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_37">
+               <property name="text">
+                <string>Height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3" rowspan="4">
               <widget class="QLabel" name="texturePreview">
                <property name="minimumSize">
                 <size>
@@ -543,92 +612,6 @@
                </property>
                <property name="pixmap">
                 <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_34">
-               <property name="text">
-                <string>File</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1" colspan="2">
-              <widget class="QLineEdit" name="textureFile">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_36">
-               <property name="text">
-                <string>Width</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="textureWidth">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_37">
-               <property name="text">
-                <string>Height</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="textureHeight">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_38">
-               <property name="text">
-                <string>Depth</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QLineEdit" name="textureDepth">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -875,9 +858,8 @@
   <tabstop>fps</tabstop>
   <tabstop>blend</tabstop>
   <tabstop>textures</tabstop>
-  <tabstop>textureDel</tabstop>
-  <tabstop>textureAdd</tabstop>
-  <tabstop>textureFile</tabstop>
+  <tabstop>btnDelTextureMap</tabstop>
+  <tabstop>btnAddTextureMap</tabstop>
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>

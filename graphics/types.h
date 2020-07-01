@@ -184,6 +184,14 @@ namespace gfx
         { return mX; }
         T GetY() const
         { return mY; }
+        void SetX(T value)
+        { mX = value; }
+        void SetY(T value)
+        { mY = value; }
+        void SetWidth(T width)
+        { mWidth = width; }
+        void SetHeight(T height)
+        { mHeight = height; }
         void Resize(T width, T height)
         {
             mWidth = width;

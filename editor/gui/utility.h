@@ -30,6 +30,7 @@
 #  include <QString>
 #  include <QColor>
 #  include <QSignalBlocker>
+#  include <QFileInfo>
 #  include <color_selector.hpp>
 #include "warnpop.h"
 
@@ -133,6 +134,24 @@ inline void SetValue(QSpinBox* spin, int value)
 {
     QSignalBlocker s(spin);
     spin->setValue(value);
+}
+
+inline bool MissingFile(const QLineEdit* edit)
+{
+    const QString& text = edit->text();
+    if (text.isEmpty())
+        return false;
+    return !QFileInfo(text).exists();
+}
+
+inline bool MissingFile(const QString& filename)
+{
+    return !QFileInfo(filename).exists();
+}
+
+inline bool MissingFile(const std::string& filename)
+{
+    return MissingFile(app::FromUtf8(filename));
 }
 
 struct ComboBoxValueGetter
