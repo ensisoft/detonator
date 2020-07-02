@@ -77,6 +77,10 @@ namespace gui
             mCustomGraphicsDevice->DeletePrograms();
             mCustomGraphicsDevice->DeleteShaders();
         }
+        void reloadTextures()
+        {
+            mCustomGraphicsDevice->DeleteTextures();
+        }
 
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.

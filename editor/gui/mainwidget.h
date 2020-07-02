@@ -63,6 +63,7 @@ namespace gui
         virtual void zoomOut() {}
 
         virtual void reloadShaders() {};
+        virtual void reloadTextures() {};
     signals:
         void openExternalImage(const QString& file);
 

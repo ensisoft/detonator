@@ -88,6 +88,7 @@ namespace gui
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();
+        void on_actionReloadTextures_triggered();
         void on_actionNewMaterial_triggered();
         void on_actionNewParticleSystem_triggered();
         void on_actionNewAnimation_triggered();

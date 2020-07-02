@@ -60,6 +60,7 @@ namespace gui
         virtual void zoomIn() override;
         virtual void zoomOut() override;
         virtual void reloadShaders() override;
+        virtual void reloadTextures() override;
 
     private slots:
         void on_actionPlay_triggered();

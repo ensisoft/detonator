@@ -369,6 +369,14 @@ void MainWindow::on_actionReloadShaders_triggered()
     INFO("'%1' shaders reloaded.", mCurrentWidget->windowTitle());
 }
 
+void MainWindow::on_actionReloadTextures_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+    mCurrentWidget->reloadTextures();
+    INFO("'%1' textures reloaded.", mCurrentWidget->windowTitle());
+}
+
 void MainWindow::on_actionNewMaterial_triggered()
 {
     showWidget(new MaterialWidget(&mWorkspace), false);

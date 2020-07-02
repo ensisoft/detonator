@@ -259,6 +259,10 @@ void MaterialWidget::reloadShaders()
 {
     mUI.widget->reloadShaders();
 }
+void MaterialWidget::reloadTextures()
+{
+    mUI.widget->reloadTextures();
+}
 
 void MaterialWidget::on_actionPlay_triggered()
 {

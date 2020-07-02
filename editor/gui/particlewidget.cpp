@@ -234,6 +234,12 @@ void ParticleEditorWidget::reloadShaders()
     mUI.widget->reloadShaders();
 }
 
+void ParticleEditorWidget::reloadTextures()
+{
+    mUI.widget->reloadTextures();
+}
+
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;

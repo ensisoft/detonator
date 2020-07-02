@@ -58,6 +58,7 @@ namespace gui
         virtual bool saveState(Settings& settings) const;
         virtual bool loadState(const Settings& settings);
         virtual void reloadShaders() override;
+        virtual void reloadTextures() override;
 
     private slots:
         void on_actionPlay_triggered();

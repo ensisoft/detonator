@@ -847,6 +847,16 @@ void AnimationWidget::zoomOut()
         mUI.zoom->setValue(value - 0.1);
 }
 
+void AnimationWidget::reloadShaders()
+{
+    mUI.widget->reloadShaders();
+}
+
+void AnimationWidget::reloadTextures()
+{
+    mUI.widget->reloadTextures();
+}
+
 void AnimationWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;

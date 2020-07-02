@@ -71,6 +71,7 @@
     <addaction name="actionZoomOut"/>
     <addaction name="separator"/>
     <addaction name="actionReloadShaders"/>
+    <addaction name="actionReloadTextures"/>
    </widget>
    <widget class="QMenu" name="menuWorkspace">
     <property name="title">
@@ -279,7 +280,7 @@
     <string>Reload Shaders</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>Alt+Shift+S</string>
    </property>
   </action>
   <action name="actionViewEventlog">
@@ -401,6 +402,18 @@
    </property>
    <property name="text">
     <string>Settings ...</string>
+   </property>
+  </action>
+  <action name="actionReloadTextures">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Textures</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+T</string>
    </property>
   </action>
  </widget>
