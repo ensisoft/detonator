@@ -456,7 +456,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="dragDropMode">
-                  <enum>QAbstractItemView::NoDragDrop</enum>
+                  <enum>QAbstractItemView::DragOnly</enum>
                  </property>
                  <property name="defaultDropAction">
                   <enum>Qt::IgnoreAction</enum>
@@ -612,6 +612,13 @@
                </property>
                <property name="pixmap">
                 <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QPushButton" name="btnEditTextureMap">
+               <property name="text">
+                <string>Edit Texture</string>
                </property>
               </widget>
              </item>
@@ -863,12 +870,13 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
+  <tabstop>btnEditTextureMap</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
-  <tabstop>zoom</tabstop>
   <tabstop>time</tabstop>
+  <tabstop>zoom</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

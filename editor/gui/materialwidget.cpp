@@ -376,6 +376,19 @@ void MaterialWidget::on_btnDelTextureMap_clicked()
     on_textures_currentRowChanged(current);
 }
 
+void MaterialWidget::on_btnEditTextureMap_clicked()
+{
+    const auto item = mUI.textures->currentRow();
+    if (item == -1)
+        return;
+
+    const auto& source = mMaterial.GetTextureSource(item);
+    if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
+    {
+        emit openExternalImage(app::FromUtf8(ptr->GetFilename()));
+    }
+}
+
 void MaterialWidget::on_browseShader_clicked()
 {
     const auto& list = QFileDialog::getOpenFileNames(this,

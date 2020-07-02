@@ -174,6 +174,9 @@ add_executable(Editor
     editor/gui/childwindow.h
     editor/gui/childwindow.cpp
     editor/gui/childwindow.ui
+    editor/gui/dlgsettings.h
+    editor/gui/dlgsettings.ui
+    editor/gui/dlgsettings.cpp
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h

@@ -34,6 +34,7 @@
 #include <memory>
 
 #include "editor/app/workspace.h"
+#include "editor/gui/appsettings.h"
 
 namespace gui
 {
@@ -49,8 +50,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        // Construct with settings.
-        MainWindow(Settings& settings);
+        MainWindow();
        ~MainWindow();
 
         // Close the widget object and delete it.
@@ -96,12 +96,15 @@ namespace gui
         void on_actionEditResourceNewTab_triggered();
         void on_actionDeleteResource_triggered();
         void on_actionSaveWorkspace_triggered();
+        void on_actionSettings_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
         void on_workspace_doubleClicked();
 
         void actionWindowFocus_triggered();
+
         void refreshUI();
         void showNote(const app::Event& event);
+        void openExternalImage(const QString& file);
 
     private:
         bool saveState();
@@ -117,13 +120,19 @@ namespace gui
         Ui::MainWindow mUI;
 
     private:
+        // the refesh timer to do low frequency UI updates.
         QTimer mTimer;
-        Settings& mSettings;
 
-    private:
+        // current application settings that are not part of any
+        // other state. Loaded on startup and saved on exit.
+        AppSettings mSettings;
+
+        // currently focused (current) widget in the main tab.
         MainWidget* mCurrentWidget = nullptr;
-    private:
+
+        // workspace object.
         app::Workspace mWorkspace;
+
         // the list of child windows that are opened to show mainwidgets.
         // it's possible to open some resource in a separate window
         // in which case a new ChildWindow is opened to display/contain the MainWidget.

@@ -80,10 +80,17 @@
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewAnimation"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWorkspace"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTemp"/>
+   <addaction name="menuTools"/>
    <addaction name="menuView"/>
    <addaction name="menuWindow"/>
   </widget>
@@ -385,6 +392,15 @@
    </property>
    <property name="toolTip">
     <string>Edit Resource</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings ...</string>
    </property>
   </action>
  </widget>

@@ -43,7 +43,6 @@
 #include "base/logging.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
-#include "editor/gui/settings.h"
 #include "editor/gui/mainwindow.h"
 
 void copyright()
@@ -177,13 +176,9 @@ int main(int argc, char* argv[])
                 ERROR("Failed to load qdarkstyle.");
             }
         }
-
-        // Load master settings.
-        gui::Settings settings("Ensisoft", APP_TITLE);
-
         // Create the application main window into which we add
         // main widgets.
-        gui::MainWindow window(settings);
+        gui::MainWindow window;
 
         window.loadState();
         window.prepareFileMenu();

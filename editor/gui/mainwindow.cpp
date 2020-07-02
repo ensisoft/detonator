@@ -31,6 +31,8 @@
 #  include <QFileInfo>
 #  include <QWheelEvent>
 #  include <QFileInfo>
+#  include <QStringList>
+#  include <QProcess>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -46,11 +48,13 @@
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/animationwidget.h"
+#include "editor/gui/dlgsettings.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
 
-MainWindow::MainWindow(Settings& settings) : mSettings(settings)
+MainWindow::MainWindow()
 {
     mUI.setupUi(this);
     mUI.actionExit->setShortcut(QKeySequence::Quit);
@@ -86,14 +90,25 @@ void MainWindow::closeWidget(MainWidget* widget)
 
 void MainWindow::loadState()
 {
-    const auto window_xdim = mSettings.getValue("MainWindow", "width",  width());
-    const auto window_ydim = mSettings.getValue("MainWindow", "height", height());
-    const auto window_xpos = mSettings.getValue("MainWindow", "xpos", x());
-    const auto window_ypos = mSettings.getValue("MainWindow", "ypos", y());
-    const auto show_statbar = mSettings.getValue("MainWindow", "show_statusbar", true);
-    const auto show_toolbar = mSettings.getValue("MainWindow", "show_toolbar", true);
-    const auto show_eventlog = mSettings.getValue("MainWindow", "show_event_log", true);
-    const auto show_workspace = mSettings.getValue("MainWindow", "show_workspace", true);
+    // Load master settings.
+    Settings settings("Ensisoft", APP_TITLE);
+
+    const auto window_xdim    = settings.getValue("MainWindow", "width",  width());
+    const auto window_ydim    = settings.getValue("MainWindow", "height", height());
+    const auto window_xpos    = settings.getValue("MainWindow", "xpos", x());
+    const auto window_ypos    = settings.getValue("MainWindow", "ypos", y());
+    const auto show_statbar   = settings.getValue("MainWindow", "show_statusbar", true);
+    const auto show_toolbar   = settings.getValue("MainWindow", "show_toolbar", true);
+    const auto show_eventlog  = settings.getValue("MainWindow", "show_event_log", true);
+    const auto show_workspace = settings.getValue("MainWindow", "show_workspace", true);
+
+#if defined(POSIX_OS)
+    mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("/usr/bin/gimp"));
+    mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
+#elif defined(WINDOWS_OS)
+    mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("mspaint.exe"));
+    mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
+#endif
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -419,6 +434,12 @@ void MainWindow::on_actionSaveWorkspace_triggered()
     NOTE("Workspace saved in '%1 and '%2'", "content.json", "workspace.json");
 }
 
+void MainWindow::on_actionSettings_triggered()
+{
+    DlgSettings dlg(this, mSettings);
+    dlg.exec();
+}
+
 void MainWindow::actionWindowFocus_triggered()
 {
     // this signal comes from an action in the
@@ -509,6 +530,45 @@ void MainWindow::showNote(const app::Event& event)
     {
         mUI.statusbar->showMessage(event.message, 5000);
     }
+}
+
+void MainWindow::openExternalImage(const QString& file)
+{
+    if (mSettings.image_editor_executable.isEmpty())
+    {
+        QMessageBox msg;
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't configured any external application for opening images.\n"
+                    "Would you like to set one now?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+        DlgSettings dlg(this, mSettings);
+        if (mSettings.image_editor_executable.isEmpty())
+        {
+            ERROR("No image editor has been configured.");
+            return;
+        }
+    }
+    if (MissingFile(file))
+    {
+        WARN("Could not find '%1'", file);
+    }
+
+    QStringList args;
+    QStringList list = mSettings.image_editor_arguments.split(" ", QString::SkipEmptyParts);
+    for (const auto& item : list)
+    {
+        if (item == "${file}")
+            args << QDir::toNativeSeparators(file);
+        else args << item;
+    }
+    if (!QProcess::startDetached(mSettings.image_editor_executable, args))
+    {
+        ERROR("Failed to start application '%1'", mSettings.image_editor_executable);
+
+    }
+    DEBUG("Start application '%1'", mSettings.image_editor_executable);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -682,20 +742,27 @@ bool MainWindow::saveState()
         return false;
 
     // persist the properties of the mainwindow itself.
-    mSettings.setValue("MainWindow", "width", width());
-    mSettings.setValue("MainWindow", "height", height());
-    mSettings.setValue("MainWindow", "xpos", x());
-    mSettings.setValue("MainWindow", "ypos", y());
-    mSettings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
-    mSettings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
-    mSettings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
-    mSettings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    Settings settings("Ensisoft", APP_TITLE);
+    settings.setValue("MainWindow", "width", width());
+    settings.setValue("MainWindow", "height", height());
+    settings.setValue("MainWindow", "xpos", x());
+    settings.setValue("MainWindow", "ypos", y());
+    settings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
+    settings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+    settings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
+    settings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    settings.setValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
+    settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     return success;
 }
 
 ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 {
     Q_ASSERT(!widget->parent());
+
+    // connect the important signals here.
+    connect(widget, &MainWidget::openExternalImage,
+            this,   &MainWindow::openExternalImage);
 
     if (new_window)
     {
