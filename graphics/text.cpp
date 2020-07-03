@@ -31,6 +31,7 @@
 #  include FT_SIZES_H
 #include "warnpop.h"
 
+#include <functional>
 #include <stdexcept>
 #include <sstream>
 #include <map>
@@ -175,20 +176,30 @@ TextBuffer::TextStyle& TextBuffer::AddText(const std::string& text, const std::s
     return mText.back().style;
 }
 
+void TextBuffer::AddText(const std::string& text, const std::string& font, const TextStyle& style)
+{
+    Text t;
+    t.text = text;
+    t.font = font;
+    t.style = style;
+    mText.push_back(t);
+}
+
 std::size_t TextBuffer::GetHash() const
 {
-    boost::hash<std::string> string_hash;
-
     std::size_t hash = 0;
     for (const auto& t : mText)
     {
-        hash ^= string_hash(t.text);
+        hash = base::hash_combine(hash, t.text);
+        hash = base::hash_combine(hash, t.font);
         // have the style properties also contribute to the hash so that
         // text buffer with similar text content but different properties
         // generates a different hash.
-        hash ^= (int)t.style.mLineHeight + (int)t.style.mFontsize +
-                (int)t.style.mHAlignment + (int)t.style.mVAlignment +
-                (int)t.style.mUnderline;
+        hash = base::hash_combine(hash, (unsigned)t.style.mLineHeight);
+        hash = base::hash_combine(hash, (unsigned)t.style.mFontsize);
+        hash = base::hash_combine(hash, (unsigned)t.style.mHAlignment);
+        hash = base::hash_combine(hash, (unsigned)t.style.mVAlignment);
+        hash = base::hash_combine(hash, (unsigned)t.style.mUnderline);
     }
     return hash;
 }

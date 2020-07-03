@@ -28,10 +28,6 @@
 #include <vector>
 #include <memory>
 
-#include "warnpush.h"
-#  include <boost/functional/hash.hpp>
-#include "warnpop.h"
-
 #include "base/assert.h"
 #include "bitmap.h"
 
@@ -141,6 +137,8 @@ namespace gfx
         // Returns a TextStyle object which can be used to set individual
         // text style properties.
         TextStyle& AddText(const std::string& text, const std::string& font, unsigned font_size_px);
+
+        void AddText(const std::string& text, const std::string& font, const TextStyle& style);
 
         // Compute hash of the contents of the string buffer.
         std::size_t GetHash() const;
