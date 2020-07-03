@@ -113,6 +113,17 @@ inline void SetValue(QLineEdit* line, const std::string& val)
     line->setText(app::FromUtf8(val));
 }
 
+inline void SetValue(QPlainTextEdit* edit, const std::string& val)
+{
+    QSignalBlocker s(edit);
+    edit->setPlainText(app::FromUtf8(val));
+}
+inline void SetValue(QPlainTextEdit* edit,const QString& val)
+{
+    QSignalBlocker s(edit);
+    edit->setPlainText(val);
+}
+
 inline void SetValue(QDoubleSpinBox* spin, float val)
 {
     QSignalBlocker s(spin);
@@ -189,6 +200,19 @@ struct LineEditValueGetter
     const QLineEdit* edit = nullptr;
 };
 
+struct PlainTextEditValueGetter
+{
+    operator QString() const
+    {
+        return edit->toPlainText();
+    }
+    operator std::string() const
+    {
+        return app::ToUtf8(edit->toPlainText());
+    }
+    const QPlainTextEdit* edit = nullptr;
+};
+
 struct DoubleSpinBoxValueGetter
 {
     operator float() const
@@ -225,6 +249,8 @@ inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
+inline PlainTextEditValueGetter GetValue(const QPlainTextEdit* edit)
+{ return PlainTextEditValueGetter { edit }; }
 inline DoubleSpinBoxValueGetter GetValue(const QDoubleSpinBox* spin)
 { return DoubleSpinBoxValueGetter { spin }; }
 inline ColorGetter GetValue(color_widgets::ColorSelector* selector)

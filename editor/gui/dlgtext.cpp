@@ -1,0 +1,125 @@
+// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
+//
+// http://www.ensisoft.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+
+#define LOGTAG "gui"
+
+#include "config.h"
+
+#include "warnpush.h"
+#  include <QFileDialog>
+#include "warnpop.h"
+
+#include "editor/gui/utility.h"
+#include "editor/app/utility.h"
+#include "graphics/text.h"
+#include "graphics/drawing.h"
+#include "graphics/material.h"
+#include "dlgtext.h"
+
+namespace gui
+{
+
+DlgText::DlgText(QWidget* parent) : QDialog(parent)
+{
+    mUI.setupUi(this);
+    PopulateFromEnum<gfx::TextBuffer::HorizontalAlignment>(mUI.cmbHAlign);
+    PopulateFromEnum<gfx::TextBuffer::VerticalAlignment>(mUI.cmbVAlign);
+
+    mUI.widget->setFramerate(60);
+    mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
+        this, std::placeholders::_1, std::placeholders::_2);
+}
+
+void DlgText::on_btnAccept_clicked()
+{
+    accept();
+}
+void DlgText::on_btnCancel_clicked()
+{
+    reject();
+}
+void DlgText::on_btnFont_clicked()
+{
+    const auto& list = QFileDialog::getOpenFileNames(this,
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
+    if (list.isEmpty())
+        return;
+
+    mUI.fontFile->setText(list[0]);
+}
+
+void DlgText::PaintScene(gfx::Painter& painter, double secs)
+{
+    const auto widget_width = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    painter.SetViewport(0, 0, widget_width, widget_height);
+
+    const QString& text = GetValue(mUI.text);
+    if (text.isEmpty())
+        return;
+    const QString& font_file = GetValue(mUI.fontFile);
+    if (font_file.isEmpty())
+        return;
+    if (MissingFile(font_file))
+        return;
+
+    const unsigned buffer_width  = GetValue(mUI.bufferWidth);
+    const unsigned buffer_height = GetValue(mUI.bufferHeight);
+    gfx::TextBuffer text_buffer(buffer_width, buffer_height);
+
+    gfx::TextBuffer::TextStyle style;
+    style.SetFontsize(GetValue(mUI.fontSize));
+    style.SetUnderline(GetValue(mUI.underline));
+    style.SetAlign((gfx::TextBuffer::VerticalAlignment)GetValue(mUI.cmbVAlign));
+    style.SetAlign((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
+    style.SetLineHeight(GetValue(mUI.lineHeight));
+
+    text_buffer.AddText(app::ToUtf8(text), app::ToUtf8(font_file), style);
+
+    gfx::Material material;
+    material.SetType(gfx::Material::Type::Texture);
+    material.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
+    material.SetBaseColor(gfx::Color::White);
+    material.AddTexture(std::move(text_buffer));
+
+    if ((bool)GetValue(mUI.chkScale))
+    {
+        const auto scale = std::min((float)widget_width / (float)buffer_width,
+                                    (float)widget_height / (float)buffer_height);
+        const auto render_width = buffer_width * scale;
+        const auto render_height = buffer_height * scale;
+        const auto x = (widget_width - render_width) / 2.0f;
+        const auto y = (widget_height - render_height) / 2.0f;
+        gfx::FillRect(painter, gfx::Rect(x, y, render_width, render_height), material);
+        gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
+            gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
+    }
+    else
+    {
+        const auto x = (widget_width - buffer_width) / 2;
+        const auto y = (widget_height - buffer_height) / 2;
+        gfx::FillRect(painter, gfx::FRect(x, y, buffer_width, buffer_height), material);
+        gfx::DrawRectOutline(painter, gfx::FRect(x, y, buffer_width, buffer_height),
+            gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
+    }
+}
+
+} // namespace
