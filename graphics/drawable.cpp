@@ -172,13 +172,14 @@ Geometry* Circle::Upload(Device& device) const
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
-            angle += angle_increment;
             Vertex v;
             v.aPosition.x = x + 0.5f;
             v.aPosition.y = y - 0.5f;
             v.aTexCoord.x = x + 0.5f;
-            v.aTexCoord.y = y + 0.5f;
+            v.aTexCoord.y = 1.0 - (y + 0.5f);
             vs.push_back(v);
+
+            angle += angle_increment;
 
             if (mStyle == Style::Wireframe)
             {
@@ -188,7 +189,7 @@ Geometry* Circle::Upload(Device& device) const
                 v.aPosition.x = x + 0.5f;
                 v.aPosition.y = y - 0.5f;
                 v.aTexCoord.x = x + 0.5f;
-                v.aTexCoord.y = y - 0.5f;
+                v.aTexCoord.y = 1.0 - (y + 0.5f);
                 vs.push_back(v);
                 vs.push_back(center);
             }
