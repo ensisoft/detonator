@@ -98,6 +98,7 @@ void GfxWidget::paintGL()
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
     mCustomGraphicsDevice->EndFrame(true /*display*/);
+    mCustomGraphicsDevice->CleanGarbage(60);
 }
 void GfxWidget::timerEvent(QTimerEvent*)
 {
