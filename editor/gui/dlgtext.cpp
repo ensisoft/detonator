@@ -37,7 +37,9 @@
 namespace gui
 {
 
-DlgText::DlgText(QWidget* parent) : QDialog(parent)
+DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
+    : QDialog(parent)
+    , mText(text)
 {
     mUI.setupUi(this);
     PopulateFromEnum<gfx::TextBuffer::HorizontalAlignment>(mUI.cmbHAlign);
@@ -46,6 +48,20 @@ DlgText::DlgText(QWidget* parent) : QDialog(parent)
     mUI.widget->setFramerate(60);
     mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+
+    if (!text.IsEmpty())
+    {
+        const auto& text_and_style = text.GetText(0);
+        SetValue(mUI.fontFile, text_and_style.font);
+        SetValue(mUI.fontSize, text_and_style.fontsize);
+        SetValue(mUI.underline, text_and_style.underline);
+        SetValue(mUI.lineHeight, text_and_style.lineheight);
+        SetValue(mUI.cmbVAlign, text_and_style.valign);
+        SetValue(mUI.cmbHAlign, text_and_style.halign);
+        SetValue(mUI.text, text_and_style.text);
+    }
+    SetValue(mUI.bufferWidth, text.GetWidth());
+    SetValue(mUI.bufferHeight, text.GetHeight());
 }
 
 void DlgText::on_btnAccept_clicked()
@@ -83,7 +99,6 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
 
     const unsigned buffer_width  = GetValue(mUI.bufferWidth);
     const unsigned buffer_height = GetValue(mUI.bufferHeight);
-    gfx::TextBuffer text_buffer(buffer_width, buffer_height);
 
     gfx::TextBuffer::Text text_and_style;
     text_and_style.text      = app::ToUtf8(text);
@@ -93,13 +108,16 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     text_and_style.valign    = GetValue(mUI.cmbVAlign);
     text_and_style.halign    = GetValue(mUI.cmbHAlign);
     text_and_style.lineheight = GetValue(mUI.lineHeight);
-    text_buffer.AddText(std::move(text_and_style));
+
+    mText.SetSize(buffer_width, buffer_height);
+    mText.ClearText();
+    mText.AddText(std::move(text_and_style));
 
     gfx::Material material;
     material.SetType(gfx::Material::Type::Texture);
     material.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
     material.SetBaseColor(gfx::Color::White);
-    material.AddTexture(std::move(text_buffer));
+    material.AddTexture(mText);
 
     if ((bool)GetValue(mUI.chkScale))
     {

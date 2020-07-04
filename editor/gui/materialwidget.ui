@@ -491,6 +491,13 @@
                   </spacer>
                  </item>
                  <item>
+                  <widget class="QPushButton" name="btnNewTextTextureMap">
+                   <property name="text">
+                    <string>New Text ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QPushButton" name="btnDelTextureMap">
                    <property name="enabled">
                     <bool>false</bool>

@@ -30,6 +30,7 @@
 
 #include "graphics/text.h"
 #include "graphics/painter.h"
+#include "graphics/text.h"
 
 namespace gui
 {
@@ -37,7 +38,7 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgText(QWidget* parent);
+        DlgText(QWidget* parent, gfx::TextBuffer& text);
 
     private slots:
         void on_btnAccept_clicked();
@@ -48,6 +49,8 @@ namespace gui
         void PaintScene(gfx::Painter& painter, double secs);
     private:
         Ui::DlgText mUI;
+    private:
+        gfx::TextBuffer& mText;
 
     };
 

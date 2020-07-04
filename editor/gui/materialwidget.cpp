@@ -45,6 +45,7 @@
 #include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/dlgtext.h"
 #include "materialwidget.h"
 
 namespace gui
@@ -382,15 +383,58 @@ void MaterialWidget::on_btnDelTextureMap_clicked()
 
 void MaterialWidget::on_btnEditTextureMap_clicked()
 {
-    const auto item = mUI.textures->currentRow();
-    if (item == -1)
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
         return;
 
-    const auto& source = mMaterial.GetTextureSource(item);
+    auto& source = mMaterial.GetTextureSource(row);
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
     {
         emit openExternalImage(app::FromUtf8(ptr->GetFilename()));
     }
+    else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(&source))
+    {
+        // make a copy for editing.
+        gfx::TextBuffer text(ptr->GetTextBuffer());
+        DlgText dlg(this, text);
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        // Update the texture source's TextBuffer
+        ptr->SetTextBuffer(std::move(text));
+
+        // important need to remember to update item id
+        // ín case we want to delete the right texture map later.
+        QListWidgetItem* item = mUI.textures->item(row);
+        item->setData(Qt::UserRole, app::FromUtf8(ptr->GetId()));
+
+        // update the preview.
+        on_textures_currentRowChanged(row);
+    }
+}
+
+void MaterialWidget::on_btnNewTextTextureMap_clicked()
+{
+    // anything set in this text buffer will be default
+    // when the dialog is opened.
+    gfx::TextBuffer text(100, 100);
+
+    DlgText dlg(this, text);
+
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    auto source = std::make_shared<gfx::detail::TextureTextBufferSource>(std::move(text), "TextBuffer");
+
+    QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+    item->setText("TextBuffer");
+    item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
+    mUI.textures->addItem(item);
+
+    mMaterial.AddTexture(source);
+
+    const auto index = mUI.textures->currentRow();
+    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
 }
 
 void MaterialWidget::on_browseShader_clicked()
@@ -427,7 +471,7 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     const auto depth  = bitmap->GetDepthBits();
     QImage img;
     if (depth == 8)
-        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, height, QImage::Format_Grayscale8);
+        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
     else if (depth == 24)
         img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
     else if (depth == 32)

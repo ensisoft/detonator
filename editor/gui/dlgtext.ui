@@ -282,6 +282,7 @@
   <tabstop>fontSize</tabstop>
   <tabstop>btnFont</tabstop>
   <tabstop>cmbVAlign</tabstop>
+  <tabstop>cmbHAlign</tabstop>
   <tabstop>lineHeight</tabstop>
   <tabstop>underline</tabstop>
   <tabstop>text</tabstop>
@@ -290,7 +291,6 @@
   <tabstop>chkScale</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
-  <tabstop>cmbHAlign</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

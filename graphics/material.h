@@ -191,8 +191,16 @@ namespace gfx
             TextureTextBufferSource(const TextBuffer& text)
               : mTextBuffer(text)
             {}
+            TextureTextBufferSource(const TextBuffer& text, const std::string& name)
+              : mTextBuffer(text)
+              , mName(name)
+            {}
             TextureTextBufferSource(TextBuffer&& text)
               : mTextBuffer(std::move(text))
+            {}
+            TextureTextBufferSource(TextBuffer&& text, std::string&& name)
+              : mTextBuffer(std::move(text))
+              , mName(std::move(name))
             {}
             TextureTextBufferSource() = default;
 
@@ -213,6 +221,36 @@ namespace gfx
             {
                 return mTextBuffer.Rasterize();
             }
+            virtual bool CanSerialize() const override
+            { return true; }
+            virtual nlohmann::json ToJson() const override
+            {
+                nlohmann::json json;
+                json["name"] = mName;
+                json["buffer"] = mTextBuffer.ToJson();
+                return json;
+            }
+            virtual bool FromJson(const nlohmann::json& json) override
+            {
+                if (!json.contains("buffer") || !json["buffer"].is_object())
+                    return false;
+                if (!base::JsonReadSafe(json, "name", &mName))
+                    return false;
+                auto ret = TextBuffer::FromJson(json["buffer"]);
+                if (!ret.has_value())
+                    return false;
+                mTextBuffer = std::move(ret.value());
+                return true;
+            }
+            gfx::TextBuffer& GetTextBuffer()
+            { return mTextBuffer; }
+            const gfx::TextBuffer& GetTextBuffer() const
+            { return mTextBuffer; }
+
+            void SetTextBuffer(const TextBuffer& text)
+            { mTextBuffer = text; }
+            void SetTextBuffer(TextBuffer&& text)
+            { mTextBuffer = std::move(text); }
         private:
             TextBuffer mTextBuffer;
             std::string mName;
@@ -595,6 +633,11 @@ namespace gfx
             mTextures.erase(it);
         }
         const TextureSource& GetTextureSource(size_t index) const
+        {
+            ASSERT(index < mTextures.size());
+            return *mTextures[index].source;
+        }
+        TextureSource& GetTextureSource(size_t index)
         {
             ASSERT(index < mTextures.size());
             return *mTextures[index].source;
