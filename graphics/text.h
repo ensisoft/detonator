@@ -24,9 +24,14 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include <string>
 #include <vector>
 #include <memory>
+#include <optional>
 
 #include "base/assert.h"
 #include "bitmap.h"
@@ -82,86 +87,113 @@ namespace gfx
             AlignBottom
         };
 
-        // TextStyle object can be used to set some text styling properties
-        // such as the line height scaling factor, underline and text
-        // alignment.
         // Some general notes about text styling:
         // Common "styling" options such as Italic and Bold text are normally
         // variations of the "Regular" font. Therefore this API provides no
         // facilities for dealing with "bold" or "italic" text. Simply use
         // the appropriate font file when adding text to the TextBuffer.
-        class TextStyle
-        {
-        public:
-            // Set underlining on/off.
-            TextStyle& SetUnderline(bool underline)
-            {
-                mUnderline = underline;
-                return *this;
-            }
-            // Set text horizontal alignment wrt TextBuffer bounds.
-            TextStyle& SetAlign(HorizontalAlignment align)
-            {
-                mHAlignment = align;
-                return *this;
-            }
-            // Set text vertical alignment wrt TextBuffer bounds.
-            TextStyle& SetAlign(VerticalAlignment align)
-            {
-                mVAlignment = align;
-                return *this;
-            }
-            // Set text font size.
-            TextStyle& SetFontsize(unsigned fontsize)
-            {
-                mFontsize = fontsize;
-                return *this;
-            }
-            // Set the line height scaling factor. Default is 1.0
-            // which uses the line height from the font unscaled.
-            TextStyle& SetLineHeight(float height)
-            {
-                mLineHeight = height;
-                return *this;
-            }
-        private:
-            float mLineHeight = 1.0f;
-            bool mUnderline = false;
-            unsigned mFontsize = 0;
-            HorizontalAlignment mHAlignment = HorizontalAlignment::AlignCenter;
-            VerticalAlignment mVAlignment = VerticalAlignment::AlignCenter;
-            friend class TextBuffer;
+        // block of text that is to be rasterized in the buffer.
+
+        // A block of text with some particular formatting and font setting.
+        // Note that the text may contain new lines in which case the content
+        // (the text string) is split to multiple lines.
+        struct Text {
+            // The actual text string. UTF-8 encoded.
+            std::string text;
+
+            // The font that will be used.
+            // This is a filepath to some particular font file.
+            std::string font;
+            // The style options that apply to the text;
+
+            // Font size (in pixels)
+            unsigned fontsize = 0;
+
+            // the lineheight multiplier that is used to compute the
+            // actual text lineheight which is used to advance
+            // from one line to line in the buffer when rasterizing
+            // lines of text
+            float lineheight = 1.0f;
+
+            // Text underline flag.
+            bool underline = false;
+
+            // horizontal text alignment with respect to the rasterized buffer.
+            HorizontalAlignment halign = HorizontalAlignment::AlignCenter;
+
+            // vertical text alignment with respect to the rasterized buffer.
+            VerticalAlignment valign = VerticalAlignment::AlignCenter;
         };
 
-        // Add text to the buffer and position automatically wrt TextBuffer bounds.
-        // Returns a TextStyle object which can be used to set individual
-        // text style properties.
-        TextStyle& AddText(const std::string& text, const std::string& font, unsigned font_size_px);
+        // Add text to the buffer.
+        void AddText(const std::string& text, const std::string& font, unsigned font_size_px)
+        {
+            Text t;
+            t.text = text;
+            t.font = font;
+            t.fontsize = font_size_px;
+            mText.push_back(t);
+        }
 
-        void AddText(const std::string& text, const std::string& font, const TextStyle& style);
+        // Add text to the buffer for rasterization.
+        void AddText(const Text& text)
+        {
+            mText.push_back(text);
+        }
+
+        // add text to the buffer for rasterization.
+        void AddText(Text&& text)
+        {
+            mText.push_back(std::move(text));
+        }
+
+        // Clear all texts from the text buffer.
+        void ClearText()
+        {
+            mText.clear();
+        }
+
+        // Get the number of text objects currently in the text buffer.
+        size_t GetNumTexts()
+        { return mText.size(); }
+
+        // Get the text blob at the given index
+        const Text& GetText(size_t index) const
+        {
+            ASSERT(index < mText.size());
+            return mText[index];
+        }
+        // Get the text blob at the given index.
+        Text& GetText(size_t index)
+        {
+            ASSERT(index < mText.size());
+            return mText[index];
+        }
+        // Returns true if the text buffer contains now text objects
+        // otherwise false.
+        bool IsEmpty() const
+        { return mText.empty(); }
 
         // Compute hash of the contents of the string buffer.
         std::size_t GetHash() const;
+
+        // Serialize the contents into JSON
+        nlohmann::json ToJson() const;
+
+        // Load a TextBuffer from JSON.
+        static std::optional<TextBuffer> FromJson(const nlohmann::json& json);
 
     private:
         struct FontLibrary;
         mutable std::shared_ptr<FontLibrary> mFreetype;
         static std::weak_ptr<FontLibrary> Freetype;
-        struct Text;
-        std::shared_ptr<Bitmap<Grayscale>> Rasterize(
-            const std::string& text,
-            const std::string& font,
-            const TextStyle& style) const;
+
+        std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, const Text& style) const;
 
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
 
-        struct Text {
-            std::string text;
-            std::string font;
-            TextStyle style;
-        };
         std::vector<Text> mText;
     };
 

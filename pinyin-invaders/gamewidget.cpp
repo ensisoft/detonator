@@ -862,9 +862,12 @@ public:
 
         const auto fontsize = unitScale.GetY() / 1.75;
         gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
-        text.AddText(base::ToUtf8(mText),"fonts/SourceHanSerifTC-SemiBold.otf", fontsize)
-            .SetAlign(gfx::TextBuffer::HorizontalAlignment::AlignLeft)
-            .SetAlign(gfx::TextBuffer::VerticalAlignment::AlignCenter);
+        gfx::TextBuffer::Text text_and_style;
+        text_and_style.font = "fonts/SourceHanSerifTC-SemiBold.otf";
+        text_and_style.fontsize = fontsize;
+        text_and_style.halign = gfx::TextBuffer::HorizontalAlignment::AlignLeft;
+        text_and_style.valign = gfx::TextBuffer::VerticalAlignment::AlignCenter;
+        text.AddText(std::move(text_and_style));
 
         t.Translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
 

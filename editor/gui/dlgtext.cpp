@@ -85,14 +85,15 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     const unsigned buffer_height = GetValue(mUI.bufferHeight);
     gfx::TextBuffer text_buffer(buffer_width, buffer_height);
 
-    gfx::TextBuffer::TextStyle style;
-    style.SetFontsize(GetValue(mUI.fontSize));
-    style.SetUnderline(GetValue(mUI.underline));
-    style.SetAlign((gfx::TextBuffer::VerticalAlignment)GetValue(mUI.cmbVAlign));
-    style.SetAlign((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
-    style.SetLineHeight(GetValue(mUI.lineHeight));
-
-    text_buffer.AddText(app::ToUtf8(text), app::ToUtf8(font_file), style);
+    gfx::TextBuffer::Text text_and_style;
+    text_and_style.text      = app::ToUtf8(text);
+    text_and_style.font      = app::ToUtf8(font_file);
+    text_and_style.fontsize  = GetValue(mUI.fontSize);
+    text_and_style.underline = GetValue(mUI.underline);
+    text_and_style.valign    = GetValue(mUI.cmbVAlign);
+    text_and_style.halign    = GetValue(mUI.cmbHAlign);
+    text_and_style.lineheight = GetValue(mUI.lineHeight);
+    text_buffer.AddText(std::move(text_and_style));
 
     gfx::Material material;
     material.SetType(gfx::Material::Type::Texture);

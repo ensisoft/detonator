@@ -64,8 +64,14 @@ void DrawTextRect(Painter& painter,
     const bool underline = properties & TextProp::Underline;
     const bool blinking  = properties & TextProp::Blinking;
 
-    buff.AddText(text, font, font_size_px)
-        .SetAlign(va).SetAlign(ha).SetUnderline(underline);
+    TextBuffer::Text text_and_style;
+    text_and_style.text = text;
+    text_and_style.font = font;
+    text_and_style.fontsize = font_size_px;
+    text_and_style.underline = underline;
+    text_and_style.halign = ha;
+    text_and_style.valign = va;
+    buff.AddText(text_and_style);
 
     auto material = BitmapText(buff);
     material.SetBaseColor(color);

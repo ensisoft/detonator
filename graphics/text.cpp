@@ -124,7 +124,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             if (line.empty())
                 line = "k";
 
-            auto bmp = Rasterize(line, text.font, text.style);
+            auto bmp = Rasterize(line, text);
             if (was_empty)
                 bmp->Fill(Grayscale{0});
 
@@ -132,21 +132,21 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
             line_bitmaps.push_back(std::move(bmp));
         }
         int ypos = 0;
-        if (text.style.mVAlignment == VerticalAlignment::AlignTop)
+        if (text.valign == VerticalAlignment::AlignTop)
             ypos = 0;
-        else if (text.style.mVAlignment == VerticalAlignment::AlignCenter)
+        else if (text.valign == VerticalAlignment::AlignCenter)
             ypos = ((int)mHeight - total_height) / 2;
-        else if (text.style.mVAlignment == VerticalAlignment::AlignBottom)
+        else if (text.valign == VerticalAlignment::AlignBottom)
             ypos = mHeight - total_height;
 
         for (const auto& bmp : line_bitmaps)
         {
             int xpos = 0;
-            if (text.style.mHAlignment == HorizontalAlignment::AlignLeft)
+            if (text.halign == HorizontalAlignment::AlignLeft)
                 xpos = 0;
-            else if (text.style.mHAlignment == HorizontalAlignment::AlignCenter)
+            else if (text.halign == HorizontalAlignment::AlignCenter)
                 xpos = ((int)mWidth - (int)bmp->GetWidth()) / 2;
-            else if (text.style.mHAlignment == HorizontalAlignment::AlignRight)
+            else if (text.halign == HorizontalAlignment::AlignRight)
                 xpos = mWidth - bmp->GetWidth();
 
             out->Copy(xpos, ypos, *bmp);
@@ -165,26 +165,6 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     return out;
 }
 
-TextBuffer::TextStyle& TextBuffer::AddText(const std::string& text, const std::string& font, unsigned font_size_px)
-{
-    Text t;
-    t.text = text;
-    t.font = font;
-    t.style.SetFontsize(font_size_px);
-
-    mText.push_back(t);
-    return mText.back().style;
-}
-
-void TextBuffer::AddText(const std::string& text, const std::string& font, const TextStyle& style)
-{
-    Text t;
-    t.text = text;
-    t.font = font;
-    t.style = style;
-    mText.push_back(t);
-}
-
 std::size_t TextBuffer::GetHash() const
 {
     std::size_t hash = 0;
@@ -195,17 +175,64 @@ std::size_t TextBuffer::GetHash() const
         // have the style properties also contribute to the hash so that
         // text buffer with similar text content but different properties
         // generates a different hash.
-        hash = base::hash_combine(hash, (unsigned)t.style.mLineHeight);
-        hash = base::hash_combine(hash, (unsigned)t.style.mFontsize);
-        hash = base::hash_combine(hash, (unsigned)t.style.mHAlignment);
-        hash = base::hash_combine(hash, (unsigned)t.style.mVAlignment);
-        hash = base::hash_combine(hash, (unsigned)t.style.mUnderline);
+        hash = base::hash_combine(hash, (unsigned)t.lineheight);
+        hash = base::hash_combine(hash, (unsigned)t.fontsize);
+        hash = base::hash_combine(hash, (unsigned)t.halign);
+        hash = base::hash_combine(hash, (unsigned)t.valign);
+        hash = base::hash_combine(hash, (unsigned)t.underline);
     }
     return hash;
 }
 
-std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text,
-    const std::string& font, const TextStyle& style) const
+nlohmann::json TextBuffer::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "width", mWidth);
+    base::JsonWrite(json, "height", mHeight);
+    for (const auto& text : mText)
+    {
+        nlohmann::json js;
+        base::JsonWrite(js, "string", text.text);
+        base::JsonWrite(js, "font_file", text.font);
+        base::JsonWrite(js, "font_size", text.fontsize);
+        base::JsonWrite(js, "line_height", text.lineheight);
+        base::JsonWrite(js, "underline", text.underline);
+        base::JsonWrite(js, "horizontal_alignment", text.halign);
+        base::JsonWrite(js, "vertical_alignment", text.valign);
+        json["texts"].push_back(js);
+    }
+    return json;
+}
+
+// static
+std::optional<TextBuffer> TextBuffer::FromJson(const nlohmann::json& json)
+{
+    TextBuffer buffer;
+    if (!base::JsonReadSafe(json, "width", &buffer.mWidth) ||
+        !base::JsonReadSafe(json, "height", &buffer.mHeight))
+        return std::nullopt;
+
+    if (!json.contains("texts"))
+        return buffer;
+
+    for (const auto& json_text : json["texts"].items())
+    {
+        const auto& js = json_text.value();
+        Text t;
+        if (!base::JsonReadSafe(js, "string", &t.text) ||
+            !base::JsonReadSafe(js, "font_file", &t.font) ||
+            !base::JsonReadSafe(js, "font_size", &t.fontsize) ||
+            !base::JsonReadSafe(js, "line_height", &t.lineheight) |
+            !base::JsonReadSafe(js, "underline", &t.underline) ||
+            !base::JsonReadSafe(js, "horizontal_alignment", &t.halign) ||
+            !base::JsonReadSafe(js, "vertical_alignment", &t.valign))
+            return std::nullopt;
+        buffer.mText.push_back(std::move(t));
+    }
+    return buffer;
+}
+
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line, const Text& text) const
 {
     // FreeType 2 uses size objects to model all information related to a given character
     // size for a given face. For example, a size object holds the value of certain metrics
@@ -222,15 +249,15 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     }
     FT_Face face;
 
-    if (FT_New_Face(mFreetype->library, font.c_str(), 0, &face))
-        throw std::runtime_error("Failed to load font file: " + font);
+    if (FT_New_Face(mFreetype->library, text.font.c_str(), 0, &face))
+        throw std::runtime_error("Failed to load font file: " + text.font);
     auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
         throw std::runtime_error("Font doesn't support Unicode");
 
-    if (FT_Set_Pixel_Sizes(face, 0, style.mFontsize))
-        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(style.mFontsize));
+    if (FT_Set_Pixel_Sizes(face, 0, text.fontsize))
+        throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(text.fontsize));
     //if (FT_Set_Char_Size(face, font_size * FUCKING_MAGIC_SCALE, font_size * FUCKING_MAGIC_SCALE, 0, 0))
     //    throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(font_size));
 
@@ -238,7 +265,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     // https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
     hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
     hb_buffer_t* hb_buff = hb_buffer_create();
-    hb_buffer_add_utf8(hb_buff, text.c_str(),
+    hb_buffer_add_utf8(hb_buff, line.c_str(),
         -1,  // NUL terminated string
          0, // offset of the first character to add to the buffer
         -1 // number of characters to add to the buffer or -1 for "until the end of text"
@@ -345,7 +372,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
     const auto underline_position  = face->underline_position / FUCKING_MAGIC_SCALE;
     // vertical thickness of the underline.. units ??
     const auto underline_thickness = 2; // face->underline_thickness ? face->underline_thickness : 1;
-    const auto line_spacing = (face->size->metrics.height / FUCKING_MAGIC_SCALE) * style.mLineHeight;
+    const auto line_spacing = (face->size->metrics.height / FUCKING_MAGIC_SCALE) * text.lineheight;
     const auto margin = line_spacing > height ? line_spacing - height : 0;
 
     height += margin;
@@ -406,7 +433,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& text
         pen_y += ya;
     }
 
-    if (style.mUnderline)
+    if (text.underline)
     {
         const auto width = bmp->GetWidth();
         const URect underline(0, baseline + underline_position,
