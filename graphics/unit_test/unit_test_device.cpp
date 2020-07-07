@@ -378,13 +378,13 @@ void unit_test_render_with_single_texture()
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
-        { {-1,  1}, {0, 1} },
-        { {-1, -1}, {0, 0} },
-        { { 1, -1}, {1, 0} },
+        { {-1,  1}, {0, 0} },
+        { {-1, -1}, {0, 1} },
+        { { 1, -1}, {1, 1} },
 
-        { {-1,  1}, {0, 1} },
-        { { 1, -1}, {1, 0} },
-        { { 1,  1}, {1, 1} }
+        { {-1,  1}, {0, 0} },
+        { { 1, -1}, {1, 1} },
+        { { 1,  1}, {1, 0} }
     };
     geom->Update(verts, 6);
     geom->SetDrawType(gfx::Geometry::DrawType::Triangles);
@@ -394,10 +394,8 @@ R"(#version 100
 precision mediump float;
 varying vec2 vTexCoord;
 uniform sampler2D kTexture;
-uniform mat3 kDeviceTextureMatrix;
 void main() {
-  vec3 st = kDeviceTextureMatrix * vec3(vTexCoord.xy, 1.0);
-  gl_FragColor = texture2D(kTexture, st.xy);
+  gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })";
 
     const std::string& vssrc =
@@ -460,13 +458,13 @@ void unit_test_render_with_multiple_textures()
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
-        { {-1,  1}, {0, 1} },
-        { {-1, -1}, {0, 0} },
-        { { 1, -1}, {1, 0} },
+        { {-1,  1}, {0, 0} },
+        { {-1, -1}, {0, 1} },
+        { { 1, -1}, {1, 1} },
 
-        { {-1,  1}, {0, 1} },
-        { { 1, -1}, {1, 0} },
-        { { 1,  1}, {1, 1} }
+        { {-1,  1}, {0, 0} },
+        { { 1, -1}, {1, 1} },
+        { { 1,  1}, {1, 0} }
     };
     geom->Update(verts, 6);
     geom->SetDrawType(gfx::Geometry::DrawType::Triangles);
