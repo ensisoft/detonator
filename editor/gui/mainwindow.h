@@ -98,6 +98,7 @@ namespace gui
         void on_actionDeleteResource_triggered();
         void on_actionSaveWorkspace_triggered();
         void on_actionSettings_triggered();
+        void on_actionImagePacker_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
         void on_workspace_doubleClicked();
 

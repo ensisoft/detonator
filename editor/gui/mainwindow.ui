@@ -86,6 +86,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="actionImagePacker"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWorkspace"/>
@@ -414,6 +415,15 @@
    </property>
    <property name="shortcut">
     <string>Alt+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionImagePacker">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
+   </property>
+   <property name="text">
+    <string>Image packer ...</string>
    </property>
   </action>
  </widget>

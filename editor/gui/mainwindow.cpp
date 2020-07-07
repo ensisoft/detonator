@@ -49,6 +49,7 @@
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/animationwidget.h"
 #include "editor/gui/dlgsettings.h"
+#include "editor/gui/dlgimgpack.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -445,6 +446,12 @@ void MainWindow::on_actionSaveWorkspace_triggered()
 void MainWindow::on_actionSettings_triggered()
 {
     DlgSettings dlg(this, mSettings);
+    dlg.exec();
+}
+
+void MainWindow::on_actionImagePacker_triggered()
+{
+    DlgImgPack dlg(this);
     dlg.exec();
 }
 
