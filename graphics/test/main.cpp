@@ -36,6 +36,7 @@
 #include "graphics/drawing.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
+#include "graphics/resourcemap.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -49,6 +50,8 @@ public:
     virtual ~GraphicsTest() = default;
     virtual void Render(gfx::Painter& painter) = 0;
     virtual void Update(float dts) {}
+    virtual void Start() {}
+    virtual void End() {}
 private:
 };
 
@@ -573,6 +576,71 @@ private:
     float mTime = 0.0f;
 };
 
+class MapResourcesTest : public GraphicsTest,
+                         public gfx::ResourceMap
+
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        // we're specifying a texture rectangle which we want to use
+        // so that the actual rendering should use the top right quadrant
+        // of the uv_test_512 texels, i.e. white rectangle.
+        gfx::FillRect(painter,
+            gfx::FRect(100, 100, 400, 400),
+            gfx::TextureMap("textures/uv_test_512.png")
+                .SetTextureRect(0, gfx::FRect(0.5f, 0.5f, 0.5f, 0.5f)));
+    }
+    virtual void Update(float dts) override
+    {}
+    virtual void Start() override
+    {
+        gfx::SetResourceMap(this);
+    }
+    virtual void End() override
+    {
+        gfx::SetResourceMap(nullptr);
+    }
+
+    // Resource map
+    virtual std::string MapFilePath(gfx::ResourceMap::ResourceType type, const std::string& file) const override
+    {
+        if (type != gfx::ResourceMap::ResourceType::Texture)
+            return file;
+
+        ASSERT(file == "textures/uv_test_512.png");
+        return "textures/test_atlas.png";
+    }
+    virtual gfx::FRect MapTextureBox(const std::string& mapped_file,
+                                     const std::string& unique_file,
+                                     const gfx::FRect& box) const override
+    {
+        ASSERT(mapped_file == "textures/test_atlas.png");
+        ASSERT(unique_file == "textures/uv_test_512.png");
+
+        const auto original_image_x = box.GetX();
+        const auto original_image_y = box.GetY();
+        const auto original_image_width  = box.GetWidth();
+        const auto original_image_height = box.GetHeight();
+
+        // we know where we've put the original image in the larger
+        // "packed" image. But in some real circumstances the packed
+        // image would be produced by some tool and we'd read the
+        // descriptor file that would give us the coordinates for each
+        // resource packed into the image (atlas)
+        const auto packed_image_x = 0.5f; // 1024 is the width of the atlas.
+        const auto packed_image_y = 0.5f; // 1024 is the height of the atlas
+        const auto packed_image_width  = 0.5f;
+        const auto packed_image_height = 0.5f;
+
+        // transform original box into an equivalent box in the packed image.
+        return gfx::FRect(packed_image_x + original_image_x * packed_image_width,
+                          packed_image_y + original_image_y * packed_image_height,
+                          packed_image_width * original_image_width,
+                          packed_image_height * original_image_height);
+    }
+private:
+};
 
 int main(int argc, char* argv[])
 {
@@ -665,11 +733,15 @@ int main(int argc, char* argv[])
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
+    tests.emplace_back(new MapResourcesTest);
+
+    tests[test_index]->Start();
 
 
     wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());
     window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
+        const auto current_test_index = test_index;
         if (key.symbol == wdk::Keysym::Escape)
             window.Destroy();
         else if (key.symbol == wdk::Keysym::ArrowLeft)
@@ -688,6 +760,11 @@ int main(int argc, char* argv[])
             gfx::WritePNG(gfx::Bitmap<gfx::RGB>(rgba), name);
             INFO("Wrote screen capture '%1'", name);
             screenshot_number++;
+        }
+        if (test_index != current_test_index)
+        {
+            tests[current_test_index]->End();
+            tests[test_index]->Start();
         }
     };
 

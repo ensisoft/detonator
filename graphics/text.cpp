@@ -38,6 +38,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "resourcemap.h"
 #include "text.h"
 
 // some good information here about text rendering
@@ -249,8 +250,10 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
     }
     FT_Face face;
 
-    if (FT_New_Face(mFreetype->library, text.font.c_str(), 0, &face))
-        throw std::runtime_error("Failed to load font file: " + text.font);
+    const auto& font_file = MapFilePath(ResourceMap::ResourceType::Font, text.font);
+
+    if (FT_New_Face(mFreetype->library, font_file.c_str(), 0, &face))
+        throw std::runtime_error("Failed to load font file: " + font_file);
     auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))

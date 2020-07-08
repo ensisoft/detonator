@@ -36,6 +36,7 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "resourcemap.h"
 #include "shader.h"
 #include "program.h"
 #include "device.h"
@@ -949,18 +950,18 @@ private:
             // is given to glTexImage2D doesn't match the "typical" layout
             // that is used by many toolkits/libraries. The order of scan lines
             // is reversed and glTexImage expects the first scanline (in memory)
-            // to be the bottom scanline of the image. 
+            // to be the bottom scanline of the image.
             // There are several ways to deal with this dilemma:
             // - flip all images on the horizontal axis before calling glTexImage2D.
             // - use a matrix to transform the texture coordinates to counter this.
-            // - flip texture coordinates and assume that Y=0.0f means the top of 
+            // - flip texture coordinates and assume that Y=0.0f means the top of
             //   the texture (first scan row) and Y=1.0f means the bottom of the
             //   the texture (last scan row).
             //
             //
             // this comment and the below kDeviceTextureMatrix is here only for posterity.
             // Currently we have flipped the texture coordinates like explained above.
-            // 
+            //
             // If the program being used to render stuff is using a texture
             // we helpfully setup here a "device texture matrix" that will be provided
             // for the program and should be used to transform the texture coordinates
@@ -1092,11 +1093,13 @@ private:
             // shaders because they're cool to do so and want some special customized
             // shader effect.
             //
+            const auto& mapped_file = MapFilePath(ResourceMap::ResourceType::Shader, file);
+
             std::ifstream stream;
-            stream.open(file);
+            stream.open(mapped_file);
             if (!stream.is_open())
             {
-                ERROR("Failed to open shader file: '%1'", file);
+                ERROR("Failed to open shader file: '%1'", mapped_file);
                 return false;
             }
             const std::string source(std::istreambuf_iterator<char>(stream), {});

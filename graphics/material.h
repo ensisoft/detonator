@@ -42,6 +42,7 @@
 
 #include "base/utility.h"
 #include "base/assert.h"
+#include "resourcemap.h"
 #include "bitmap.h"
 #include "color4f.h"
 #include "device.h"
@@ -94,6 +95,10 @@ namespace gfx
         // otherwise false.
         virtual bool FromJson(const nlohmann::json& object)
         { return false; }
+        // Map the texture box to an texture box within the
+        // texture source.
+        virtual FRect MapTextureBox(const FRect& box) const
+        { return box; }
     private:
     };
 
@@ -111,14 +116,20 @@ namespace gfx
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
             virtual std::string GetId() const override
-            { return mFile; }
+            {
+                // The ID is used to identify the resource on the device
+                // and in this case we're using the filename as the identifier.
+                // however since texture packing can happen we need to use the
+                // mapped filename as the identifier.
+                return MapFilePath(ResourceMap::ResourceType::Texture, mFile);
+            }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name)
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             {
-                Image file(mFile);
+                Image file(MapFilePath(ResourceMap::ResourceType::Texture, mFile));
                 if (file.GetDepthBits() == 8)
                     return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
                 else if (file.GetDepthBits() == 24)
@@ -142,6 +153,14 @@ namespace gfx
             {
                 return base::JsonReadSafe(object, "file", &mFile) &&
                        base::JsonReadSafe(object, "name", &mName);
+            }
+            virtual FRect MapTextureBox(const FRect& box) const override
+            {
+                // Use the original filename as the identifier in the
+                // mapped resource and do the texture box mapping based
+                // on that information.
+                // this mapping is done through the global resource mapper object.
+                return gfx::MapTextureBox(MapFilePath(ResourceMap::ResourceType::Texture, mFile), mFile, box);
             }
             std::string GetFilename() const
             { return mFile; }
@@ -381,10 +400,11 @@ namespace gfx
                         texture->Upload(bitmap->GetDataPtr(), width, height, format);
                         texture->EnableGarbageCollection(sampler.enable_gc);
                     }
-                    const float x = sampler.box.GetX();
-                    const float y = sampler.box.GetY();
-                    const float sx = sampler.box.GetWidth();
-                    const float sy = sampler.box.GetHeight();
+                    const auto& box = source->MapTextureBox(sampler.box);
+                    const float x  = box.GetX();
+                    const float y  = box.GetY();
+                    const float sx = box.GetWidth();
+                    const float sy = box.GetHeight();
                     const auto& kTexture = "kTexture" + std::to_string(i);
                     const auto& kTextureBox = "kTextureBox" + std::to_string(i);
                     const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);

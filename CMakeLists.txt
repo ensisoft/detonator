@@ -160,6 +160,7 @@ add_executable(Editor
     graphics/painter.cpp
     graphics/text.cpp
     graphics/image_packing.cpp
+    graphics/resourcemap.cpp
     gamelib/animation.cpp
     editor/app/event.h
     editor/app/eventlog.h
@@ -295,6 +296,7 @@ add_executable(graphics_test
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
+    graphics/resourcemap.cpp
     graphics/test/main.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -328,6 +330,7 @@ add_executable(invaders
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
+    graphics/resourcemap.cpp
     misc/homedir.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -356,7 +359,10 @@ enable_testing()
 add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
 add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c)
 add_executable(unit_test          graphics/unit_test/unit_test.cpp)
-add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp graphics/opengl_es2_device.cpp third_party/stb/stb_image_write.c)
+add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
+    graphics/opengl_es2_device.cpp
+    graphics/resourcemap.cpp
+    third_party/stb/stb_image_write.c)
 add_executable(unit_test_imgpack  graphics/unit_test/unit_test_image_packing.cpp base/assert.cpp graphics/image_packing.cpp third_party/stb/stb_image_write.c)
 # gamelib tests
 add_executable(unit_test_tree   gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
