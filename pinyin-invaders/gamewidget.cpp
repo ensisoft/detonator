@@ -863,6 +863,7 @@ public:
         const auto fontsize = unitScale.GetY() / 1.75;
         gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
         gfx::TextBuffer::Text text_and_style;
+        text_and_style.text = base::ToUtf8(mText);
         text_and_style.font = "fonts/SourceHanSerifTC-SemiBold.otf";
         text_and_style.fontsize = fontsize;
         text_and_style.halign = gfx::TextBuffer::HorizontalAlignment::AlignLeft;
