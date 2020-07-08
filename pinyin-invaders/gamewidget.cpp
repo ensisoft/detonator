@@ -423,9 +423,9 @@ public:
         {
             const auto row = i / 10;
             const auto col = i % 10;
-            const auto w = 100;
-            const auto h = 100;
-            const gfx::URect frame(col * w, row * h, w, h);
+            const auto w = 100 / 1024.0f; // normalize over width
+            const auto h = 100 / 1024.0f; // normalize over height
+            const gfx::FRect frame(col * w, row * h, w, h);
             mSprite.AddTexture("textures/ExplosionMap.png");
             mSprite.SetTextureRect(i, frame);
         }
@@ -628,9 +628,8 @@ public:
         , mLifeTime(lifetime)
         , mTexture(texture)
     {
-        gfx::Image file(mTexture);
-        const auto particleWidth  = file.GetWidth() / NumParticleCols;
-        const auto particleHeight = file.GetHeight() / NumParticleRows;
+        const auto particleWidth  = 1.0f / NumParticleCols;
+        const auto particleHeight = 1.0f / NumParticleRows;
         const auto numParticles   = NumParticleCols * NumParticleRows;
 
         const auto angle = (M_PI * 2) / numParticles;
@@ -647,7 +646,7 @@ public:
             const auto a = i * angle + angle * r;
 
             particle p;
-            p.rc  = gfx::URect(x, y, particleWidth, particleHeight);
+            p.rc  = gfx::FRect(x, y, particleWidth, particleHeight);
             p.dir.x = std::cos(a);
             p.dir.y = std::sin(a);
             p.dir *= v;
@@ -687,9 +686,12 @@ public:
         for (const auto& p : mParticles)
         {
             const auto pos = layout.MapPoint(p.pos);
-
-            const float width  = p.rc.GetWidth();
-            const float height = p.rc.GetHeight();
+            
+            // todo: should fix the dimensions, i.e. we don't know what size our
+            // debris should have when rendered. Also we don't know the aspect ratio
+            // these should be taken as a parameter. 
+            const float width  = 25; //p.rc.GetWidth();
+            const float height = 50; //p.rc.GetHeight();
             const float aspect = height / width;
             const float scaledWidth  = width * mScale;
             const float scaledHeight = scaledWidth * aspect;
@@ -720,7 +722,7 @@ public:
 
 private:
     struct particle {
-        gfx::URect rc;
+        gfx::FRect rc;
         glm::vec2 dir;
         glm::vec2 pos;
         float angle = 0.0f;

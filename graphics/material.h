@@ -381,17 +381,10 @@ namespace gfx
                         texture->Upload(bitmap->GetDataPtr(), width, height, format);
                         texture->EnableGarbageCollection(sampler.enable_gc);
                     }
-                    const auto w = (float)texture->GetWidth();
-                    const auto h = (float)texture->GetHeight();
-                    const bool normalized_box = sampler.box_is_normalized;
-                    const auto& box = sampler.box_is_normalized
-                        ? sampler.box : sampler.box.Normalize(FSize(w, h));
-
-                    const float x = box.GetX();
-                    const float y = box.GetY();
-                    const float sx = box.GetWidth();
-                    const float sy = box.GetHeight();
-
+                    const float x = sampler.box.GetX();
+                    const float y = sampler.box.GetY();
+                    const float sx = sampler.box.GetWidth();
+                    const float sy = sampler.box.GetHeight();
                     const auto& kTexture = "kTexture" + std::to_string(i);
                     const auto& kTextureBox = "kTextureBox" + std::to_string(i);
                     const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);
@@ -570,14 +563,6 @@ namespace gfx
         {
             ASSERT(index < mTextures.size());
             mTextures[index].box = rect;
-            mTextures[index].box_is_normalized = true;
-            return *this;
-        }
-        Material& SetTextureRect(std::size_t index, const URect& rect)
-        {
-            ASSERT(index < mTextures.size());
-            mTextures[index].box = FRect(rect);
-            mTextures[index].box_is_normalized = false;
             return *this;
         }
         Material& SetTextureGc(std::size_t index, bool on_off)
@@ -671,7 +656,6 @@ namespace gfx
                     continue;
                 nlohmann::json js;
                 base::JsonWrite(js, "box", sampler.box);
-                base::JsonWrite(js, "box_is_normalized", sampler.box_is_normalized);
                 base::JsonWrite(js, "type", sampler.source->GetSourceType());
                 base::JsonWrite(js, "source", *sampler.source);
                 base::JsonWrite(js, "enable_gc", sampler.enable_gc);
@@ -720,7 +704,6 @@ namespace gfx
 
                 TextureSampler s;
                 if (!base::JsonReadSafe(obj, "box", &s.box) ||
-                    !base::JsonReadSafe(obj, "box_is_normalized", &s.box_is_normalized) ||
                     !base::JsonReadSafe(obj, "enable_gc", &s.enable_gc))
                     return std::nullopt;
 
@@ -740,7 +723,6 @@ namespace gfx
         bool  mBlendFrames = true;
         struct TextureSampler {
             FRect box = FRect(0.0f, 0.0f, 1.0f, 1.0f);
-            bool box_is_normalized = true;
             bool enable_gc  = false;
             std::shared_ptr<TextureSource> source;
         };
@@ -805,7 +787,7 @@ namespace gfx
         return Material(Material::Type::Sprite)
             .SetSurfaceType(Material::SurfaceType::Transparent);
     }
-    inline Material SpriteMap(const std::string& texture, const std::vector<URect>& frames)
+    inline Material SpriteMap(const std::string& texture, const std::vector<FRect>& frames)
     {
         auto material = SpriteMap();
         for (size_t i=0; i<frames.size(); ++i)
