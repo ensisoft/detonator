@@ -38,11 +38,21 @@
     <property name="title">
      <string>Window</string>
     </property>
-    <addaction name="actionReloadShaders"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionZoomIn"/>
+    <addaction name="actionZoomOut"/>
+    <addaction name="separator"/>
+    <addaction name="actionReloadShaders"/>
+    <addaction name="actionReloadTextures"/>
+   </widget>
    <addaction name="menuWindow"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuTemp"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
@@ -80,7 +90,43 @@
     <string>Reload Shaders</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>Alt+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionReloadTextures">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Textures</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/zoom_in.png</normaloff>:/16x16_ico_png/zoom_in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/zoom_out.png</normaloff>:/16x16_ico_png/zoom_out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
    </property>
   </action>
  </widget>

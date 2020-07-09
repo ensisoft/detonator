@@ -97,6 +97,21 @@ void ChildWindow::on_actionReloadShaders_triggered()
     INFO("'%1' shaders reloaded.", mWidget->windowTitle());
 }
 
+void ChildWindow::on_actionReloadTextures_triggered()
+{
+    mWidget->reloadTextures();
+    INFO("'%1' textures reloaded.", mWidget->windowTitle());
+}
+
+void ChildWindow::on_actionZoomIn_triggered()
+{
+    mWidget->zoomIn();
+}
+void ChildWindow::on_actionZoomOut_triggered()
+{
+    mWidget->zoomOut();
+}
+
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
     // for now just accept, later on we could ask the user when there
