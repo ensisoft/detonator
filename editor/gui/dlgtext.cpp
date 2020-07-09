@@ -24,7 +24,9 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QFileDialog>
+#  include <QFileInfo>
 #include "warnpop.h"
 
 #include "editor/gui/utility.h"
@@ -49,10 +51,24 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
+    QStringList filters;
+    filters << "*.ttf" << "*.otf";
+    const auto& appdir  = QCoreApplication::applicationDirPath();
+    const auto& fontdir = app::JoinPath(appdir, "fonts");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& files = dir.entryList();
+    for (const auto& file : files) {
+        const QFileInfo info(file);
+        mUI.cmbFont->addItem("app://fonts/" + info.fileName());
+    }
+
     if (!text.IsEmpty())
     {
         const auto& text_and_style = text.GetText(0);
-        SetValue(mUI.fontFile, text_and_style.font);
+        //SetValue(mUI.cmbFont, text_and_style.font);
+        mUI.cmbFont->setCurrentText(app::FromUtf8(text_and_style.font));
         SetValue(mUI.fontSize, text_and_style.fontsize);
         SetValue(mUI.underline, text_and_style.underline);
         SetValue(mUI.lineHeight, text_and_style.lineheight);
@@ -79,7 +95,7 @@ void DlgText::on_btnFont_clicked()
     if (list.isEmpty())
         return;
 
-    mUI.fontFile->setText(list[0]);
+    mUI.cmbFont->setCurrentText(list[0]);
 }
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)
@@ -89,22 +105,20 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     painter.SetViewport(0, 0, widget_width, widget_height);
 
     const QString& text = GetValue(mUI.text);
-    if (text.isEmpty())
-        return;
-    const QString& font_file = GetValue(mUI.fontFile);
-    if (font_file.isEmpty())
+    const QString& font = GetValue(mUI.cmbFont);
+    if (text.isEmpty() || font.isEmpty())
         return;
 
     const unsigned buffer_width  = GetValue(mUI.bufferWidth);
     const unsigned buffer_height = GetValue(mUI.bufferHeight);
 
     gfx::TextBuffer::Text text_and_style;
-    text_and_style.text      = app::ToUtf8(text);
-    text_and_style.font      = app::ToUtf8(font_file);
-    text_and_style.fontsize  = GetValue(mUI.fontSize);
-    text_and_style.underline = GetValue(mUI.underline);
-    text_and_style.valign    = GetValue(mUI.cmbVAlign);
-    text_and_style.halign    = GetValue(mUI.cmbHAlign);
+    text_and_style.text       = app::ToUtf8(text);
+    text_and_style.font       = app::ToUtf8(font);
+    text_and_style.fontsize   = GetValue(mUI.fontSize);
+    text_and_style.underline  = GetValue(mUI.underline);
+    text_and_style.valign     = GetValue(mUI.cmbVAlign);
+    text_and_style.halign     = GetValue(mUI.cmbHAlign);
     text_and_style.lineheight = GetValue(mUI.lineHeight);
 
     mText.SetSize(buffer_width, buffer_height);

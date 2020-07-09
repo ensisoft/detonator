@@ -33,9 +33,15 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QLineEdit" name="fontFile">
-             <property name="text">
-              <string>app://fonts/ARCADE.TTF</string>
+            <widget class="QComboBox" name="cmbFont">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="editable">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -278,7 +284,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>fontFile</tabstop>
+  <tabstop>cmbFont</tabstop>
   <tabstop>fontSize</tabstop>
   <tabstop>btnFont</tabstop>
   <tabstop>cmbVAlign</tabstop>
