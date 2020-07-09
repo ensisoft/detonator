@@ -22,7 +22,9 @@
     <file>16x16_ico_png/settings.png</file>
     <file>16x16_ico_png/text.png</file>
     <file>16x16_ico_png/package.png</file>
-
+    <file>16x16_ico_png/workspace_open.png</file>
+    <file>16x16_ico_png/workspace_save.png</file>
+    <file>16x16_ico_png/workspace_new.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>

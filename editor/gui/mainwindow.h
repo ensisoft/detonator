@@ -97,6 +97,9 @@ namespace gui
         void on_actionEditResourceNewTab_triggered();
         void on_actionDeleteResource_triggered();
         void on_actionSaveWorkspace_triggered();
+        void on_actionLoadWorkspace_triggered();
+        void on_actionNewWorkspace_triggered();
+        void on_actionCloseWorkspace_triggered();
         void on_actionSettings_triggered();
         void on_actionImagePacker_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
@@ -110,7 +113,9 @@ namespace gui
 
     private:
         bool saveState();
-        bool loadWorkspace();
+        bool loadWorkspace(const QString& dir);
+        bool saveWorkspace();
+        void closeWorkspace();
         ChildWindow* showWidget(MainWidget* widget, bool new_window);
         void editResources(bool open_new_window);
 
@@ -133,7 +138,7 @@ namespace gui
         MainWidget* mCurrentWidget = nullptr;
 
         // workspace object.
-        app::Workspace mWorkspace;
+        std::unique_ptr<app::Workspace> mWorkspace;
 
         // the list of child windows that are opened to show mainwidgets.
         // it's possible to open some resource in a separate window

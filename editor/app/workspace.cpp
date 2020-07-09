@@ -178,6 +178,45 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     return ret;
 }
 
+bool Workspace::Load(const QString& dir)
+{
+    ASSERT(mWorkspaceDir.isEmpty());
+
+    if (!LoadContent(JoinPath(dir, "content.json")) ||
+        !LoadWorkspace(JoinPath(dir, "workspace.json")))
+        return false;
+
+    INFO("Loaded workspace '%1'", dir);
+    mWorkspaceDir = dir;
+    return true;
+}
+
+bool Workspace::OpenNew(const QString& dir)
+{
+    // this is where we could initialize the workspace with some resources
+    // or whatnot.
+    mWorkspaceDir = dir;
+
+    return true;
+}
+
+bool Workspace::Save()
+{
+    ASSERT(!mWorkspaceDir.isEmpty());
+
+    if (!SaveContent(JoinPath(mWorkspaceDir, "content.json")) ||
+        !SaveWorkspace(JoinPath(mWorkspaceDir, "workspace.json")))
+        return false;
+
+    INFO("Saved workspace '%1'", mWorkspaceDir);
+    return true;
+}
+
+QString Workspace::GetName() const
+{
+    return mWorkspaceDir;
+}
+
 bool Workspace::LoadContent(const QString& filename)
 {
     QFile file(filename);
@@ -189,8 +228,8 @@ bool Workspace::LoadContent(const QString& filename)
     const auto& buff = file.readAll(); // QByteArray
     if (buff.isEmpty())
     {
-        WARN("No workspace content found in file: '%1'", filename);
-        return false;
+        INFO("No workspace content found in file: '%1'", filename);
+        return true;
     }
 
     const auto* beg = buff.data();
@@ -251,7 +290,6 @@ bool Workspace::LoadContent(const QString& filename)
     }
 
     mResources = std::move(resources);
-    mContentFile = filename;
     INFO("Loaded content file '%1'", filename);
     return true;
 }
@@ -285,9 +323,8 @@ bool Workspace::SaveContent(const QString& filename) const
     }
     file.flush();
     file.close();
-    mContentFile = filename;
+
     INFO("Saved workspace content in '%1'", filename);
-    NOTE("Workspace content saved.");
     return true;
 }
 
@@ -318,8 +355,6 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     file.close();
 
     INFO("Saved workspace data in '%1'", filename);
-    NOTE("Workspace data saved.");
-    mWorkspaceFile = filename;
     return true;
 }
 
@@ -346,8 +381,8 @@ bool Workspace::LoadWorkspace(const QString& filename)
     {
         resource->LoadProperties(docu.object());
     }
+
     INFO("Loaded workspace file '%1'", filename);
-    mWorkspaceFile = filename;
     return true;
 }
 

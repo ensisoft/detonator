@@ -39,11 +39,19 @@
     </property>
     <addaction name="separator"/>
     <addaction name="separator"/>
+    <addaction name="actionNewWorkspace"/>
+    <addaction name="actionLoadWorkspace"/>
+    <addaction name="separator"/>
+    <addaction name="actionCloseWorkspace"/>
+    <addaction name="separator"/>
     <addaction name="actionSaveWorkspace"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Window</string>
     </property>
@@ -59,11 +67,17 @@
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuTemp">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Temp</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
@@ -74,6 +88,9 @@
     <addaction name="actionReloadTextures"/>
    </widget>
    <widget class="QMenu" name="menuWorkspace">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Workspace</string>
     </property>
@@ -319,6 +336,9 @@
    </property>
   </action>
   <action name="actionNewMaterial">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
@@ -352,12 +372,18 @@
    </property>
   </action>
   <action name="actionSaveWorkspace">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/save.png</normaloff>:/32x32_ico_png/save.png</iconset>
+     <normaloff>:/16x16_ico_png/workspace_save.png</normaloff>:/16x16_ico_png/workspace_save.png</iconset>
    </property>
    <property name="text">
     <string>Save Workspace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
   <action name="actionNewAnimation">
@@ -397,6 +423,9 @@
    </property>
   </action>
   <action name="actionSettings">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
@@ -424,6 +453,29 @@
    </property>
    <property name="text">
     <string>Image packer ...</string>
+   </property>
+  </action>
+  <action name="actionLoadWorkspace">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/workspace_open.png</normaloff>:/16x16_ico_png/workspace_open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Workspace ...</string>
+   </property>
+  </action>
+  <action name="actionNewWorkspace">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/workspace_new.png</normaloff>:/16x16_ico_png/workspace_new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Workspace ...</string>
+   </property>
+  </action>
+  <action name="actionCloseWorkspace">
+   <property name="text">
+    <string>Close Workspace</string>
    </property>
   </action>
  </widget>

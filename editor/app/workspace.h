@@ -79,15 +79,22 @@ namespace app
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
-        // Load the contents of the workspace from the given JSON file.
-        bool LoadContent(const QString& file);
-        // Load workspace data from the workspace JSON file.
-        bool LoadWorkspace(const QString& file);
+        // Try to load the content of the workspace from the files in the given
+        // directory.
+        bool Load(const QString& dir);
 
-        // Save the contents of the workspace in the given JSON file.
-        bool SaveContent(const QString& file) const;
-        // Save the workspace data to the workspace JSON file.
-        bool SaveWorkspace(const QString& file) const;
+        // Open new workspace in the given directory.
+        bool OpenNew(const QString& dir);
+
+        // Try to save the contents of the workspace in the previously opened
+        // directory.
+        bool Save();
+
+        // Get human readable name for the workspace.
+        QString GetName() const;
+        // Get current workspace directory
+        QString GetDir() const
+        { return mWorkspaceDir; }
 
         // Get a list of material names in the workspace.
         QStringList ListMaterials() const;
@@ -245,6 +252,11 @@ namespace app
         // signal handler returns the pointer is no longer valid!
         void ResourceToBeDeleted(const Resource* resource);
 
+    private:
+        bool LoadContent(const QString& file);
+        bool LoadWorkspace(const QString& file);
+        bool SaveContent(const QString& file) const;
+        bool SaveWorkspace(const QString& file) const;
 
     private:
         // this is the list of resources that we save/load
@@ -260,8 +272,7 @@ namespace app
         // in the system that uses it!
         mutable std::vector<std::unique_ptr<ResourceHandle>> mPrivateInstances;
     private:
-        mutable QString mContentFile;
-        mutable QString mWorkspaceFile;
+        QString mWorkspaceDir;
         // workspace specific properties
         QVariantMap mProperties;
     };

@@ -76,6 +76,8 @@ MainWindow::MainWindow()
     QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
         this, SLOT(showNote(const app::Event&)));
     mUI.eventlist->setModel(&events);
+
+    setWindowTitle(QString("%1").arg(APP_TITLE));
 }
 
 MainWindow::~MainWindow()
@@ -130,14 +132,19 @@ void MainWindow::loadState()
     mUI.actionViewEventlog->setChecked(show_eventlog);
     mUI.actionViewWorkspace->setChecked(show_workspace);
 
-    if (!loadWorkspace())
+    // load previous workspace if any
+    const auto& workspace = settings.getValue("MainWindow", "current_workspace", QString(""));
+    if (workspace.isEmpty())
+        return;
+
+    if (!loadWorkspace(workspace))
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("There was a problem restoring the application state.\r\n"
-            "Some state might be inconsistent. Sorry about that.\r\n"
-            "See the application log for more details."));
+        msg.setText(tr("There was a problem loading the previous workspace."
+                                        "\n'%1'\n"
+                        "See the application log for more details.").arg(workspace));
         msg.exec();
     }
 }
@@ -180,19 +187,22 @@ void MainWindow::prepareWindowMenu()
     mUI.menuWindow->addAction(mUI.actionWindowClose);
     mUI.menuWindow->addAction(mUI.actionWindowNext);
     mUI.menuWindow->addAction(mUI.actionWindowPrev);
+    mUI.menuWindow->setEnabled(count != 0);
 }
 
 void MainWindow::prepareMainTab()
 {
-    mUI.mainTab->setCurrentIndex(0);
+
 }
 
-bool MainWindow::loadWorkspace()
+bool MainWindow::loadWorkspace(const QString& dir)
 {
-    if (QFileInfo("content.json").exists())
-        mWorkspace.LoadContent("content.json");
-    if (QFileInfo("workspace.json").exists())
-        mWorkspace.LoadWorkspace("workspace.json");
+    auto workspace = std::make_unique<app::Workspace>();
+
+    if (!workspace->Load(dir))
+    {
+        return false;
+    }
 
     // desktop dimensions
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -202,7 +212,7 @@ bool MainWindow::loadWorkspace()
     // Load workspace windows and their content.
     bool success = true;
 
-    const auto& session_files = mWorkspace.GetProperty("session_files", QStringList());
+    const auto& session_files = workspace->GetProperty("session_files", QStringList());
     for (const auto& file : session_files)
     {
         Settings settings(file);
@@ -215,11 +225,11 @@ bool MainWindow::loadWorkspace()
         const auto& klass = settings.getValue("MainWindow", "class_name", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
-            widget = new MaterialWidget(&mWorkspace);
+            widget = new MaterialWidget(workspace.get());
         else if (klass == ParticleEditorWidget::staticMetaObject.className())
-            widget = new ParticleEditorWidget(&mWorkspace);
+            widget = new ParticleEditorWidget(workspace.get());
         else if (klass == AnimationWidget::staticMetaObject.className())
-            widget = new AnimationWidget(&mWorkspace);
+            widget = new AnimationWidget(workspace.get());
 
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
@@ -251,8 +261,175 @@ bool MainWindow::loadWorkspace()
         DEBUG("Loaded widget '%1'", widget->windowTitle());
     }
 
-    mUI.workspace->setModel(mWorkspace.GetResourceModel());
+    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
+
+    mUI.mainTab->setCurrentIndex(workspace->GetProperty("focused_widget_index", 0));
+    mUI.workspace->setModel(workspace->GetResourceModel());
+    mUI.actionSaveWorkspace->setEnabled(true);
+    mUI.actionCloseWorkspace->setEnabled(true);
+    mUI.menuWorkspace->setEnabled(true);
+    mWorkspace = std::move(workspace);
     return success;
+}
+
+bool MainWindow::saveWorkspace()
+{
+    // if no workspace, the nothing to do.
+    if (!mWorkspace)
+        return true;
+
+    bool success = true;
+
+    // session files list, stores the list of temp files
+    // generated for each currently open widget
+    QStringList session_file_list;
+
+    // for each widget that is currently open in the maintab
+    // we generate a temporary json file in which we save the UI state
+    // of that widget. When the application is relaunched we use the
+    // data in the JSON file to recover the widget and it's contents.
+    const auto tabs = mUI.mainTab->count();
+    for (int i=0; i<tabs; ++i)
+    {
+        const auto& temp = app::RandomString();
+        const auto& path = app::GetAppFilePath("temp");
+        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        QDir dir;
+        if (!dir.mkpath(path))
+        {
+            ERROR("Failed to create folder: '%1'", path);
+            success = false;
+            continue;
+        }
+        const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+
+        Settings settings(file);
+        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
+        if (!widget->saveState(settings))
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+            continue;
+        }
+        if (!settings.Save())
+        {
+            ERROR("Failed to save widget '%1' settings.",  widget->windowTitle());
+            success = false;
+            continue;
+        }
+        session_file_list << file;
+        DEBUG("Saved widget '%1'", widget->windowTitle());
+    }
+
+    // for each widget that is contained inside a window (instead of being in the main tab)
+    // we (also) generate a temporary JSON file in which we save the widget's UI state.
+    // When the application is relaunched we use the data in the JSON to recover
+    // the widget and it's contents and also to recreate a new containing ChildWindow
+    // with same dimensions and desktop position.
+    for (const auto* child : mChildWindows)
+    {
+        const auto& temp = app::RandomString();
+        const auto& path = app::GetAppFilePath("temp");
+        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        QDir dir;
+        if (!dir.mkpath(path))
+        {
+            ERROR("Failed to create folder: '%1'", path);
+            success = false;
+            continue;
+        }
+        const MainWidget* widget = child->GetWidget();
+
+        Settings settings(file);
+        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.setValue("MainWindow", "has_own_window", true);
+        settings.setValue("MainWindow", "window_xpos", child->x());
+        settings.setValue("MainWindow", "window_ypos", child->y());
+        settings.setValue("MainWindow", "window_width", child->width());
+        settings.setValue("MainWindow", "window_height", child->height());
+        if (!widget->saveState(settings))
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+            continue;
+        }
+        if (!settings.Save())
+        {
+            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            success = false;
+        }
+        session_file_list << file;
+        DEBUG("Saved widget '%1'", widget->windowTitle());
+    }
+    // save the list of temp windows for session widgets in
+    // the current workspace
+    mWorkspace->SetProperty("session_files", session_file_list);
+    if (mCurrentWidget)
+    {
+        const auto index_of = mUI.mainTab->indexOf(mCurrentWidget);
+        mWorkspace->SetProperty("focused_widget_index", index_of);
+    }
+
+    if (!mWorkspace->Save())
+        return false;
+
+    return true;
+}
+
+void MainWindow::closeWorkspace()
+{
+    if (!mWorkspace)
+    {
+        ASSERT(mChildWindows.empty());
+        ASSERT(mUI.mainTab->count() == 0);
+        return;
+    }
+
+    // note that here we don't care about saving any state.
+    // this is only for closing everything, closing the tabs
+    // and the child windows if any are open.
+
+    // make sure we're not getting nasty unwanted recursion
+    QSignalBlocker cockblocker(mUI.mainTab);
+
+    // delete widget objects in the main tab.
+    while (mUI.mainTab->count())
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
+        widget->shutdown();
+        widget->setParent(nullptr);
+        // cleverly enough this will remove the tab. so the loop
+        // here must be carefully done to access the tab at index 0
+        delete widget;
+    }
+    mUI.mainTab->clear();
+
+    // delete child windows
+    for (auto* child : mChildWindows)
+    {
+        // when the child window is deleted it will do
+        // widget shutdown.
+        // todo: maybe this should be explicit rather than implicit via dtor ?
+        child->close();
+        delete child;
+    }
+    mChildWindows.clear();
+
+    mCurrentWidget = nullptr;
+
+    // update window menu.
+    prepareWindowMenu();
+
+    mUI.actionSaveWorkspace->setEnabled(false);
+    mUI.actionCloseWorkspace->setEnabled(false);
+    mUI.menuWorkspace->setEnabled(false);
+    mUI.menuEdit->setEnabled(false);
+    mUI.menuTemp->setEnabled(false);
+    mUI.workspace->setModel(nullptr);
+
+    setWindowTitle(QString("%1").arg(APP_TITLE));
+
+    mWorkspace.reset();
 }
 
 void MainWindow::showWindow()
@@ -280,8 +457,17 @@ void MainWindow::on_mainTab_currentChanged(int index)
         QString name = widget->metaObject()->className();
         name.remove("gui::");
         name.remove("Widget");
+        mUI.menuEdit->setEnabled(true);
+        //mUI.menuTemp->setVisible(true);
+        mUI.menuTemp->setEnabled(true);
         mUI.menuTemp->setTitle(name);
         mCurrentWidget = widget;
+    }
+    else
+    {
+        //mUI.menuTemp->setVisible(false);
+        mUI.menuTemp->setEnabled(false);
+        mUI.menuEdit->setEnabled(false);
     }
 
     // add the stuff that is always in the edit menu
@@ -380,17 +566,17 @@ void MainWindow::on_actionReloadTextures_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    showWidget(new MaterialWidget(&mWorkspace), false);
+    showWidget(new MaterialWidget(mWorkspace.get()), false);
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    showWidget(new ParticleEditorWidget(&mWorkspace), false);
+    showWidget(new ParticleEditorWidget(mWorkspace.get()), false);
 }
 
 void MainWindow::on_actionNewAnimation_triggered()
 {
-    showWidget(new AnimationWidget(&mWorkspace), false);
+    showWidget(new AnimationWidget(mWorkspace.get()), false);
 }
 
 void MainWindow::on_actionEditResource_triggered()
@@ -424,23 +610,161 @@ void MainWindow::on_actionDeleteResource_triggered()
     if (msg.exec() == QMessageBox::No)
         return;
     QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
-    mWorkspace.DeleteResources(selected);
+    mWorkspace->DeleteResources(selected);
 }
 
 void MainWindow::on_actionSaveWorkspace_triggered()
 {
-    if (!mWorkspace.SaveContent("content.json"))
+    if (!mWorkspace->Save())
     {
-        ERROR("Failed to save workspace content in: '%1'", "content.json");
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Workspace saving failed. See the log for more information."));
+        msg.exec();
+        return;
+    }
+    NOTE("Workspace saved.");
+}
+
+void MainWindow::on_actionLoadWorkspace_triggered()
+{
+    const auto& dir = QFileDialog::getExistingDirectory(this,
+        tr("Select Workspace Directory"));
+    if (dir.isEmpty())
+        return;
+
+    // check here whether the files actually exist.
+    // todo: maybe move into workspace to validate folder
+    if (MissingFile(app::JoinPath(dir, "content.json")) ||
+        MissingFile(app::JoinPath(dir, "workspace.json")))
+    {
+        // todo: could ask if the user would like to create a new workspace instead.
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr(            "The folder"
+                                 "\n\n'%1'\n\n"
+                       "doesn't seem contain workspace files.\n").arg(dir));
+        msg.exec();
         return;
     }
 
-    if (!mWorkspace.SaveWorkspace("workspace.json"))
+    // todo: should/could ask about saving. the current workspace if we have any.
+
+    if (!saveWorkspace())
     {
-        ERROR("Failed to save workspace in '%1'", "workspace.json");
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText("There was a problem saving the current workspace.\n"
+            "Do you still want to continue ?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    // close existing workspace if any.
+    closeWorkspace();
+
+    // load new workspace.
+    if (!loadWorkspace(dir))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to open workspace\n"
+                    "\n\n'%1'\n\n"
+                    "See the application log for more information.").arg(dir));
+        msg.exec();
         return;
     }
-    NOTE("Workspace saved in '%1 and '%2'", "content.json", "workspace.json");
+
+    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
+
+    NOTE("Loaded workspace.");
+}
+
+void MainWindow::on_actionNewWorkspace_triggered()
+{
+    // Note: it might be tempting in terms of UX to just let the
+    // user create a new workspace object and start working adding
+    // content, however this has the problem that since we don't know
+    // where the workspace would end up being saved we don't know how
+    // to map content paths (relative to the workspace without location).
+    // (Also it could be that at some point some of the content is
+    // copied to some workspace folders.)
+    // Therefore we need this clunkier UX where the user must first be
+    // prompted for the location of the workspace before it can be
+    // used to create content.
+
+    // todo: might want to improve the dialog here to be a custom dialog
+    // with an option to create some directory for the new workspace
+    const auto& dir = QFileDialog::getExistingDirectory(this,
+        tr("Select New Workspace Directory"));
+    if (dir.isEmpty())
+        return;
+
+    // todo: should/could ask about saving. the current workspace if we have any.
+    if (!saveWorkspace())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText("There was a problem saving the current workspace.\n"
+            "Do you still want to continue ?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    // close existing workspace if any.
+    closeWorkspace();
+
+    if (!MissingFile(app::JoinPath(dir, "content.json")) ||
+        !MissingFile(app::JoinPath(dir, "workspace.json")))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr("The selected folder seems to already contain a workspace.\n"
+            "Are you sure you want to overwrite this ?"));
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
+    auto workspace = std::make_unique<app::Workspace>();
+    if (!workspace->OpenNew(dir))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("There was a problem creating the new workspace.\n"
+            "Please see the log for details."));
+        msg.exec();
+        return;
+    }
+
+    mUI.workspace->setModel(workspace.get());
+    mUI.actionSaveWorkspace->setEnabled(true);
+    mUI.actionCloseWorkspace->setEnabled(true);
+    mUI.menuWorkspace->setEnabled(true);
+    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
+    mWorkspace = std::move(workspace);
+    NOTE("New workspace created.");
+}
+
+void MainWindow::on_actionCloseWorkspace_triggered()
+{
+    // todo: should/could ask about saving. the current workspace if we have any.
+    if (!saveWorkspace())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText("There was a problem saving the current workspace.\n"
+            "Do you still want to continue ?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    // close existing workspace if any.
+    closeWorkspace();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -536,7 +860,8 @@ void MainWindow::refreshUI()
         child->RefreshUI();
     }
 
-    mWorkspace.Tick();
+    if (mWorkspace)
+        mWorkspace->Tick();
 }
 
 void MainWindow::showNote(const app::Event& event)
@@ -591,7 +916,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->ignore();
 
     // try to perform an orderly shutdown.
-    if (!saveState())
+    // first save everything and only if that is succesful
+    // (or the user don't care) we then close the workspace
+    // and exit the application.
+    if (!saveWorkspace() || !saveState())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -601,29 +929,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
         if (msg.exec() == QMessageBox::No)
             return;
     }
-    // delete widget objects in the main tab.
-    while (mUI.mainTab->count())
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
-        widget->shutdown();
-        widget->setParent(nullptr);
-        // cleverly enough this will remove the tab. so the loop
-        // here must be carefully done to access the tab at index 0
-        delete widget;
-    }
-    mUI.mainTab->clear();
 
-    // delete child windows
-    for (auto* child : mChildWindows)
-    {
-        // when the child window is deleted it will do
-        // widget shutdown.
-        // todo: maybe this should be explicit rather than implicit via dtor ?
-        child->close();
-        delete child;
-    }
-    mChildWindows.clear();
+    // close workspace (if any is open)
+    closeWorkspace();
 
+    // accept the event, will quit the application
     event->accept();
 }
 
@@ -663,99 +973,6 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
 
 bool MainWindow::saveState()
 {
-    bool success = true;
-
-    // session files list, stores the list of temp files
-    // generated for each currently open widget
-    QStringList session_file_list;
-
-    // for each widget that is currently open in the maintab
-    // we generate a temporary json file in which we save the UI state
-    // of that widget. When the application is relaunched we use the
-    // data in the JSON file to recover the widget and it's contents.
-    const auto tabs = mUI.mainTab->count();
-    for (int i=0; i<tabs; ++i)
-    {
-        const auto& temp = app::RandomString();
-        const auto& path = app::GetAppFilePath("temp");
-        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
-        QDir dir;
-        if (!dir.mkpath(path))
-        {
-            ERROR("Failed to create folder: '%1'", path);
-            success = false;
-            continue;
-        }
-        const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-
-        Settings settings(file);
-        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
-        if (!widget->saveState(settings))
-        {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
-            success = false;
-            continue;
-        }
-        if (!settings.Save())
-        {
-            ERROR("Failed to save widget '%1' settings.",  widget->windowTitle());
-            success = false;
-            continue;
-        }
-        session_file_list << file;
-        DEBUG("Saved widget '%1'", widget->windowTitle());
-    }
-
-    // for each widget that is contained inside a window (instead of being in the main tab)
-    // we (also) generate a temporary JSON file in which we save the widget's UI state.
-    // When the application is relaunched we use the data in the JSON to recover
-    // the widget and it's contents and also to recreate a new containing ChildWindow
-    // with same dimensions and desktop position.
-    for (const auto* child : mChildWindows)
-    {
-        const auto& temp = app::RandomString();
-        const auto& path = app::GetAppFilePath("temp");
-        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
-        QDir dir;
-        if (!dir.mkpath(path))
-        {
-            ERROR("Failed to create folder: '%1'", path);
-            success = false;
-            continue;
-        }
-        const MainWidget* widget = child->GetWidget();
-
-        Settings settings(file);
-        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
-        settings.setValue("MainWindow", "has_own_window", true);
-        settings.setValue("MainWindow", "window_xpos", child->x());
-        settings.setValue("MainWindow", "window_ypos", child->y());
-        settings.setValue("MainWindow", "window_width", child->width());
-        settings.setValue("MainWindow", "window_height", child->height());
-        if (!widget->saveState(settings))
-        {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
-            success = false;
-            continue;
-        }
-        if (!settings.Save())
-        {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
-            success = false;
-        }
-        session_file_list << file;
-        DEBUG("Saved widget '%1'", widget->windowTitle());
-    }
-    // save the list of temp windows for session widgets in
-    // the current workspace
-    mWorkspace.SetProperty("session_files", session_file_list);
-
-
-    if (!mWorkspace.SaveContent("content.json"))
-        return false;
-    if (!mWorkspace.SaveWorkspace("workspace.json"))
-        return false;
-
     // persist the properties of the mainwindow itself.
     Settings settings("Ensisoft", APP_TITLE);
     settings.setValue("MainWindow", "width", width());
@@ -768,12 +985,14 @@ bool MainWindow::saveState()
     settings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
     settings.setValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
-    return success;
+    settings.setValue("MainWindow", "current_workspace",
+        (mWorkspace ? mWorkspace->GetDir() : ""));
+    return settings.Save();
 }
 
 ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 {
-    Q_ASSERT(!widget->parent());
+    ASSERT(widget->parent() == nullptr);
 
     // connect the important signals here.
     connect(widget, &MainWidget::openExternalImage,
@@ -811,17 +1030,17 @@ void MainWindow::editResources(bool open_new_window)
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     for (int i=0; i<indices.size(); ++i)
     {
-        const auto& res = mWorkspace.GetResource(indices[i].row());
+        const auto& res = mWorkspace->GetResource(indices[i].row());
         switch (res.GetType())
         {
             case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(&mWorkspace, res), open_new_window);
+                showWidget(new MaterialWidget(mWorkspace.get(), res), open_new_window);
                 break;
             case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(&mWorkspace, res), open_new_window);
+                showWidget(new ParticleEditorWidget(mWorkspace.get(), res), open_new_window);
                 break;
             case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(&mWorkspace, res), open_new_window);
+                showWidget(new AnimationWidget(mWorkspace.get(), res), open_new_window);
                 break;
         }
     }
