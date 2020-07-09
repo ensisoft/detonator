@@ -26,11 +26,14 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <private/qfsfileengine_p.h> // private in Qt5
+#  include <QCoreApplication>
 #  include <QtAlgorithms>
 #  include <QJsonDocument>
 #  include <QJsonArray>
 #  include <QByteArray>
 #  include <QFile>
+#  include <QFileInfo>
 #  include <QIcon>
 #include "warnpop.h"
 
@@ -38,6 +41,15 @@
 #include "workspace.h"
 #include "utility.h"
 #include "format.h"
+
+namespace {
+
+    QString GetAppDir()
+    {
+        static const auto& dir = QCoreApplication::applicationDirPath() + "/";
+        return dir;
+    }
+} // namespace
 
 namespace app
 {
@@ -95,6 +107,26 @@ QVariant Workspace::headerData(int section, Qt::Orientation orientation, int rol
     return QVariant();
 }
 
+QAbstractFileEngine* Workspace::create(const QString& file) const
+{
+    // CAREFUL ABOUT RECURSION HERE.
+    // DO NOT CALL QFile, QFileInfo or QDir !
+
+    // only handle our special cases.
+    QString ret = file;
+    if (ret.startsWith("ws://"))
+        ret.replace("ws://", mWorkspaceDir);
+    else if (file.startsWith("app://"))
+        ret.replace("app://", GetAppDir());
+    else if (file.startsWith("fs://"))
+        ret.remove(0, 5);
+    else return nullptr;
+
+    DEBUG("Mapping Qt file '%1' => '%2'", file, ret);
+
+    return new QFSFileEngine(ret);
+}
+
 std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) const
 {
     // Checkerboard is a special material that is always available.
@@ -102,7 +134,7 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
     if (name == "Checkerboard")
-        return std::make_shared<gfx::Material>(gfx::TextureMap("textures/Checkerboard.png"));
+        return std::make_shared<gfx::Material>(gfx::TextureMap("app://textures/Checkerboard.png"));
 
 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
@@ -178,6 +210,37 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     return ret;
 }
 
+std::string Workspace::MapFilePath(gfx::ResourceMap::ResourceType type, const std::string& file) const
+{
+    // see comments in AddFile about resource path mapping.
+    // this method is only called by the graphics/ subsystem
+
+    QString ret = FromUtf8(file);
+    if (ret.startsWith("ws://"))
+        ret.replace("ws://", mWorkspaceDir);
+    else if (ret.startsWith("app://"))
+        ret.replace("app://", GetAppDir());
+    else if (ret.startsWith("fs://"))
+        ret.remove(0, 5);
+
+    // special case for resources that are hard coded in the engine without
+    // any resource location identifier. (such as shaders)
+    // if it's just relative we expect it's relative to the application's
+    // installation folder.
+    const QFileInfo info(ret);
+    if (info.isRelative())
+    {
+        // assuming it's a resource deployed as part of this application.
+        // so we resolve the path based on the applications's
+        // installation location. (for example a shader file)
+        ret = JoinPath(GetAppDir(), ret);
+    }
+
+    DEBUG("Mapping gfx resource '%1' => '%2'", file, ret);
+
+    return ToUtf8(ret);
+}
+
 bool Workspace::Load(const QString& dir)
 {
     ASSERT(mWorkspaceDir.isEmpty());
@@ -188,6 +251,8 @@ bool Workspace::Load(const QString& dir)
 
     INFO("Loaded workspace '%1'", dir);
     mWorkspaceDir = dir;
+    if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
+        mWorkspaceDir.append("/");
     return true;
 }
 
@@ -196,6 +261,8 @@ bool Workspace::OpenNew(const QString& dir)
     // this is where we could initialize the workspace with some resources
     // or whatnot.
     mWorkspaceDir = dir;
+    if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
+        mWorkspaceDir.append("/");
 
     return true;
 }
@@ -215,6 +282,83 @@ bool Workspace::Save()
 QString Workspace::GetName() const
 {
     return mWorkspaceDir;
+}
+
+QString Workspace::AddFileToWorkspace(const QString& file)
+{
+    // don't remap already mapped files.
+    if (file.startsWith("app://") ||
+        file.startsWith("fs://") ||
+        file.startsWith("ws://"))
+        return file;
+
+    // when the user is adding resource files to this project (workspace) there's the problem
+    // of making the workspace "portable".
+    // Portable here means two things:
+    // * portable from one operating system to another (from Windows to Linux or vice versa)
+    // * portable from one user's enviroment to another user's environment even when on
+    //   the same operating system (i.e. from Windows to Windows or Linux to Linux)
+    //
+    // Using relative file paths (as opposed to absolute file paths) solves the problem
+    // but then the problem is that the relative paths need to be resolved at runtime
+    // and also some kind of "landmark" is needed in order to make the files
+    // relative something to.
+    //
+    // The expectation is that during content creation most of the game resources
+    // would be placed in a place relative to the workspace. In this case the
+    // runtime path resolution would use paths relative to the current workspace.
+    // However there's also some content (such as the pre-built shaders) that
+    // is bundled with the Editor application and might be used from that location
+    // as a game resource.
+
+    // We could always copy the files into some location under the workspace to
+    // solve this problem but currently this is not yet done.
+
+    // if the file is in the current workspace path or in the path of the current executable
+    // we can then express this path as a relative path.
+    static const auto& appdir = QCoreApplication::applicationDirPath();
+
+    if (file.startsWith(mWorkspaceDir))
+    {
+        QString ret = file;
+        ret.remove(0, mWorkspaceDir.count());
+        if (ret.startsWith("/") || ret.startsWith("\\"))
+            ret.remove(0, 1);
+
+        return QString("ws://%1").arg(ret);
+    }
+    else if (file.startsWith(appdir))
+    {
+        QString ret = file;
+        ret.remove(0, appdir.count());
+        if (ret.startsWith("/") || ret.startsWith("\\"))
+            ret.remove(0, 1);
+
+        return QString("app://%1").arg(ret);
+    }
+    // mapping other paths to identity. will not be portable to another
+    // user's computer to another system, unless it's accessible on every
+    // machine using the same path (for example a shared file system mount)
+    return QString("fs://%1").arg(file);
+}
+
+QString Workspace::MapFileToFilesystem(const QString& file) const
+{
+    // see comments in AddFileToWorkspace.
+    // this is basically the same as MapFilePath except this API
+    // is internal to only this application whereas MapFilePath is part of the
+    // API exposed to the graphics/ subsystem.
+
+    QString ret = file;
+    if (ret.startsWith("ws://"))
+        ret.replace("ws://", mWorkspaceDir);
+    else if (file.startsWith("app://"))
+        ret.replace("app://", GetAppDir());
+    else if (file.startsWith("fs://"))
+        ret.remove(0, 5);
+
+    // return as is
+    return ret;
 }
 
 bool Workspace::LoadContent(const QString& filename)

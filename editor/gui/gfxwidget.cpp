@@ -92,7 +92,7 @@ void GfxWidget::paintGL()
         }
         gfx::DrawTextRect(*mCustomGraphicsPainter,
             base::FormatString("%1 FPS", (unsigned)mCurrentFps),
-            "fonts/ARCADE.TTF", 28,
+            "app://fonts/ARCADE.TTF", 28,
             gfx::FRect(10, 20, 150, 100),
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);

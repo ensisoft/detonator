@@ -116,6 +116,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
         mUI.textures->addItem(item);
     }
 
+    GetProperty(resource, "shader_file", mUI.shaderFile);
+    GetProperty(resource,  "use_shader_file", mUI.customShader);
     if (MissingFile(mUI.shaderFile))
     {
         WARN("The shader file '%1' could no longer be found.", mUI.shaderFile->text());
@@ -332,7 +334,7 @@ void MaterialWidget::on_btnAddTextureMap_clicked()
     {
         QFileInfo info(file);
         const auto& name = info.baseName();
-        const auto& path = info.absoluteFilePath();
+        const auto& path = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
 
         auto source = std::make_shared<gfx::detail::TextureFileSource>(app::ToUtf8(path), app::ToUtf8(name));
 
@@ -400,6 +402,13 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
         if (dlg.exec() == QDialog::Rejected)
             return;
 
+        // map the font files.
+        for (size_t i=0; i<text.GetNumTexts(); ++i)
+        {
+            auto& style_and_text = text.GetText(i);
+            style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
+        }
+
         // Update the texture source's TextBuffer
         ptr->SetTextBuffer(std::move(text));
 
@@ -424,6 +433,13 @@ void MaterialWidget::on_btnNewTextTextureMap_clicked()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
+    // map the font files.
+    for (size_t i=0; i<text.GetNumTexts(); ++i)
+    {
+        auto& style_and_text = text.GetText(i);
+        style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
+    }
+
     auto source = std::make_shared<gfx::detail::TextureTextBufferSource>(std::move(text), "TextBuffer");
 
     QListWidgetItem* item = new QListWidgetItem(mUI.textures);
@@ -443,8 +459,8 @@ void MaterialWidget::on_browseShader_clicked()
         tr("Select Shader File"), "", tr("GLSL files (*.glsl)"));
     if (list.isEmpty())
         return;
-
-    mUI.shaderFile->setText(list[0]);
+    const auto& file = mWorkspace->AddFileToWorkspace(list[0]);
+    mUI.shaderFile->setText(file);
     mUI.shaderFile->setCursorPosition(0);
 }
 

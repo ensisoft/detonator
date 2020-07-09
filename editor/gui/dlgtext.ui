@@ -35,7 +35,7 @@
            <item>
             <widget class="QLineEdit" name="fontFile">
              <property name="text">
-              <string>fonts/ARCADE.TTF</string>
+              <string>app://fonts/ARCADE.TTF</string>
              </property>
             </widget>
            </item>

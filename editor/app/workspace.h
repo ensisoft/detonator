@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QAbstractTableModel>
+#  include <private/qabstractfileengine_p.h> // private (deprecated) in Qt5
 #  include <QString>
 #  include <QMap>
 #  include <QObject>
@@ -38,6 +39,7 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/resourcemap.h"
 #include "gamelib/gfxfactory.h"
 #include "resource.h"
 #include "utility.h"
@@ -54,7 +56,9 @@ namespace app
     // The workspace itself can also contain arbitrary properties
     // that can useful for various purposes.
     class Workspace : public QAbstractTableModel,
-                      public game::GfxFactory
+                      public QAbstractFileEngineHandler,
+                      public game::GfxFactory,
+                      public gfx::ResourceMap
     {
         Q_OBJECT
 
@@ -70,6 +74,9 @@ namespace app
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
 
+        // QAbstractFileEngineHandler implementation
+        virtual QAbstractFileEngine* create(const QString& file) const override;
+
         std::shared_ptr<gfx::Material> MakeMaterial(const QString& name)
         { return MakeMaterial(ToUtf8(name)); }
         std::shared_ptr<gfx::Drawable> MakeDrawable(const QString& name)
@@ -79,9 +86,31 @@ namespace app
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
+        // gfx::ResourceMap implementation
+        virtual std::string MapFilePath(gfx::ResourceMap::ResourceType type, const std::string& file) const override;
+        virtual gfx::FRect MapTextureBox(const std::string&, const std::string&, const gfx::FRect& box) const override
+        {
+            // return the texture box unmodified since we're not doing any
+            // funky texture lookups here.
+            return box;
+        }
+
         // Try to load the content of the workspace from the files in the given
         // directory.
         bool Load(const QString& dir);
+
+        // Add a file to the workspace and return a path to the file encoded in
+        // "workspace file" notation.
+        QString AddFileToWorkspace(const QString& file);
+
+        // convenience wrapper
+        std::string AddFileToWorkspace(const std::string& file)
+        {
+            return ToUtf8(AddFileToWorkspace(FromUtf8(file)));
+        }
+
+        // Map a "workspace file" to a file path in the file system.
+        QString MapFileToFilesystem(const QString& file) const;
 
         // Open new workspace in the given directory.
         bool OpenNew(const QString& dir);

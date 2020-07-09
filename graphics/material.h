@@ -117,11 +117,13 @@ namespace gfx
             { return Source::Filesystem; }
             virtual std::string GetId() const override
             {
+                if (mMappedFileName.empty())
+                    mMappedFileName = MapFilePath(ResourceMap::ResourceType::Texture, mFile);
                 // The ID is used to identify the resource on the device
                 // and in this case we're using the filename as the identifier.
                 // however since texture packing can happen we need to use the
                 // mapped filename as the identifier.
-                return MapFilePath(ResourceMap::ResourceType::Texture, mFile);
+                return mMappedFileName;
             }
             virtual std::string GetName() const override
             { return mName; }
@@ -156,17 +158,22 @@ namespace gfx
             }
             virtual FRect MapTextureBox(const FRect& box) const override
             {
+                if (mMappedFileName.empty())
+                    mMappedFileName = MapFilePath(ResourceMap::ResourceType::Texture, mFile);
                 // Use the original filename as the identifier in the
                 // mapped resource and do the texture box mapping based
                 // on that information.
                 // this mapping is done through the global resource mapper object.
-                return gfx::MapTextureBox(MapFilePath(ResourceMap::ResourceType::Texture, mFile), mFile, box);
+                return gfx::MapTextureBox(mMappedFileName, mFile, box);
             }
             std::string GetFilename() const
             { return mFile; }
         private:
             std::string mFile;
             std::string mName;
+        private:
+            // cached state. reduce continuous lookups
+            mutable std::string mMappedFileName;
         };
 
         // Source texture data from a bitmap

@@ -94,8 +94,6 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     const QString& font_file = GetValue(mUI.fontFile);
     if (font_file.isEmpty())
         return;
-    if (MissingFile(font_file))
-        return;
 
     const unsigned buffer_width  = GetValue(mUI.bufferWidth);
     const unsigned buffer_height = GetValue(mUI.bufferHeight);

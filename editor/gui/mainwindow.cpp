@@ -38,6 +38,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "graphics/resourcemap.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
@@ -198,6 +199,8 @@ void MainWindow::prepareMainTab()
 bool MainWindow::loadWorkspace(const QString& dir)
 {
     auto workspace = std::make_unique<app::Workspace>();
+
+    gfx::SetResourceMap(workspace.get());
 
     if (!workspace->Load(dir))
     {
@@ -900,7 +903,7 @@ void MainWindow::openExternalImage(const QString& file)
     for (const auto& item : list)
     {
         if (item == "${file}")
-            args << QDir::toNativeSeparators(file);
+            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
         else args << item;
     }
     if (!QProcess::startDetached(mSettings.image_editor_executable, args))

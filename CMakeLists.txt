@@ -251,7 +251,7 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core)
+target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate)
 target_link_libraries(Editor freetype_custom_build)
 target_link_libraries(Editor harfbuzz_custom_build)
 if (UNIX)
