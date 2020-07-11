@@ -136,7 +136,11 @@ void DlgImgPack::on_btnSaveAs_clicked()
     if (mJson.empty())
         return;
 
-    mJson["image_file"] = app::ToUtf8(filename);
+    const QFileInfo info(filename);
+    mJson["image_file"] = app::ToUtf8(info.fileName());
+    mJson["json_version"]  = 1;
+    mJson["made_with_app"] = APP_TITLE;
+    mJson["made_with_ver"] = APP_VERSION;
 
     // todo: should we ask for the JSON filename too?
     // seems a bit excessive, but this could overwrite a file unexpectedly
@@ -223,7 +227,7 @@ void DlgImgPack::repack()
         gfx::pack::NamedImage img;
         img.width  = pix.width();
         img.height = pix.height();
-        img.cuser  = (const void*)item;
+        img.name   = i; // index to the source list.
         images.push_back(img);
     }
 
@@ -255,9 +259,13 @@ void DlgImgPack::repack()
 
     mJson.clear();
 
-    for (const auto& img : images)
+    // keep in mind that order of the images in the vector is no
+    // longer the same as the input order (obviously).
+    for (size_t i=0; i<images.size(); ++i)
     {
-        const auto* item = (const QListWidgetItem*)img.cuser;
+        const auto& img     = images[i];
+        const auto index    = img.name;
+        const auto* item    = mUI.listWidget->item(index);
         const QString& file = item->text();
         const QRectF dst(img.xpos, img.ypos, img.width, img.height);
         const QRectF src(0, 0, img.width, img.height);
@@ -267,12 +275,15 @@ void DlgImgPack::repack()
         if (mUI.chkJson->isChecked())
         {
             const QFileInfo info(file);
-            mJson[app::ToUtf8(info.fileName())] = {
+            const nlohmann::json image_obj = {
+                {"name",   app::ToUtf8(info.fileName()) },
                 {"width",  img.width},
                 {"height", img.height},
                 {"xpos",   img.xpos},
-                {"ypos",   img.ypos}
+                {"ypos",   img.ypos},
+                {"index",  index}
             };
+            mJson["images"].push_back(image_obj);
         }
     }
 
