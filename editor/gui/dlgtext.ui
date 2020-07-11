@@ -50,6 +50,9 @@
              <property name="minimum">
               <number>6</number>
              </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
              <property name="value">
               <number>22</number>
              </property>
