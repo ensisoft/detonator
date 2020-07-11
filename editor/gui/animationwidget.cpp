@@ -530,6 +530,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.tree->Rebuild();
 
     mUI.widget->setFramerate(60);
+    mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         if (!mCameraWasLoaded) {
             mState.camera_offset_x = width * 0.5;
@@ -855,6 +857,11 @@ void AnimationWidget::reloadShaders()
 void AnimationWidget::reloadTextures()
 {
     mUI.widget->reloadTextures();
+}
+
+void AnimationWidget::shutdown()
+{
+    mUI.widget->dispose();
 }
 
 void AnimationWidget::on_actionPlay_triggered()

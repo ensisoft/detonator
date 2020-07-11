@@ -131,8 +131,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
 ParticleEditorWidget::~ParticleEditorWidget()
 {
     DEBUG("Destroy ParticleEdtiorWidget");
-
-    mUI.widget->dispose();
 }
 
 void ParticleEditorWidget::addActions(QToolBar& bar)
@@ -239,6 +237,10 @@ void ParticleEditorWidget::reloadTextures()
     mUI.widget->reloadTextures();
 }
 
+void ParticleEditorWidget::shutdown()
+{
+    mUI.widget->dispose();
+}
 
 void ParticleEditorWidget::on_actionPause_triggered()
 {

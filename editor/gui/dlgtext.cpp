@@ -30,7 +30,6 @@
 #include "warnpop.h"
 
 #include "editor/gui/utility.h"
-#include "editor/app/utility.h"
 #include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
@@ -78,6 +77,11 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     }
     SetValue(mUI.bufferWidth, text.GetWidth());
     SetValue(mUI.bufferHeight, text.GetHeight());
+
+    // do the graphics dispose in finished handler which is triggered
+    // regardless whether we do accept/reject or the user clicks the X
+    // or presses Esc.
+    connect(this, &QDialog::finished, this, &DlgText::finished);
 }
 
 void DlgText::on_btnAccept_clicked()
@@ -96,6 +100,11 @@ void DlgText::on_btnFont_clicked()
         return;
 
     mUI.cmbFont->setCurrentText(list[0]);
+}
+
+void DlgText::finished()
+{
+    mUI.widget->dispose();
 }
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)

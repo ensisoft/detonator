@@ -69,8 +69,6 @@ ChildWindow::~ChildWindow()
     DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
 
     mUI.verticalLayout->removeWidget(mWidget);
-
-    mWidget->shutdown();
     mWidget->setParent(nullptr);
     delete mWidget;
 }
@@ -117,6 +115,15 @@ void ChildWindow::closeEvent(QCloseEvent* event)
     // for now just accept, later on we could ask the user when there
     // are pending changes whether he'd like to save his shit
     event->accept();
+
+    // make sure we cleanup properly while all the resources
+    // such as the OpenGL contexts (and the window) are still
+    // valid.
+    mWidget->shutdown();
+
+    const auto& text  = mWidget->windowTitle();
+    const auto& klass = mWidget->metaObject()->className();
+    DEBUG("Close child window (widget=%1) '%2'", klass, text);
 
     // we could emit an event here to indicate that the window
     // is getting closed but that's a sure-fire way of getting

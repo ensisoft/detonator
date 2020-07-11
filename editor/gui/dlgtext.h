@@ -44,7 +44,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnFont_clicked();
-
+        void finished();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
     private:

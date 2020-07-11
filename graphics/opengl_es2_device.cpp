@@ -44,18 +44,16 @@
 #include "texture.h"
 #include "color4f.h"
 
-#define GL_CALL(x) \
-    do {                                                                        \
-        mGL.x;                                                           \
-        {                                                                       \
-            const auto err = mGL.glGetError();                           \
-            if (err != GL_NO_ERROR) {                                           \
-                std::printf("GL Error 0x%04x '%s' @ %s,%d\n", err, GLEnumToStr(err),  \
-                    __FILE__, __LINE__);                                        \
-                std::abort();                                                   \
-            }                                                                   \
-        }                                                                       \
-    } while(0)
+#define GL_CALL(x)                                      \
+do {                                                    \
+    mGL.x;                                              \
+    const auto err = mGL.glGetError();                  \
+    if (err != GL_NO_ERROR) {                           \
+        std::printf("GL Error %1 @ %2,%3",              \
+            GLEnumToStr(err), __FILE__, __LINE__);      \
+        std::abort();                                   \
+    }                                                   \
+} while(0)
 
 
 namespace
@@ -295,6 +293,7 @@ public:
     }
    ~OpenGLES2GraphicsDevice()
     {
+        DEBUG("~OpenGLES2GraphicsDevice");
        // make sure our cleanup order is specific so that the
        // resources are deleted before the context is deleted.
        mTextures.clear();

@@ -61,6 +61,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.widget->setFramerate(60);
     mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn = std::bind(&MaterialWidget::zoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&MaterialWidget::zoomOut, this);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
@@ -134,8 +136,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
 MaterialWidget::~MaterialWidget()
 {
     DEBUG("Destroy MaterialWidget");
-
-    mUI.widget->dispose();
 }
 
 void MaterialWidget::addActions(QToolBar& bar)
@@ -265,6 +265,11 @@ void MaterialWidget::reloadShaders()
 void MaterialWidget::reloadTextures()
 {
     mUI.widget->reloadTextures();
+}
+
+void MaterialWidget::shutdown()
+{
+    mUI.widget->dispose();
 }
 
 void MaterialWidget::on_actionPlay_triggered()

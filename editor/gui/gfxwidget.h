@@ -27,13 +27,16 @@
 #include "warnpush.h"
 #  include <QOpenGLWidget>
 #  include <QOpenGLContext>
-#  include <QBasicTimer>
+#  include <QOpenGLWindow>
+#  include <QKeyEvent>
 #  include <QElapsedTimer>
+#  include <QPalette>
 #include "warnpop.h"
 
 #include <memory>
 #include <functional>
 
+#include "base/assert.h"
 #include "graphics/painter.h"
 #include "graphics/device.h"
 #include "graphics/color4f.h"
@@ -42,31 +45,18 @@ namespace gui
 {
     // Integrate QOpenGLWidget and custom graphics device and painter
     // implementations from gfx into a reusable widget class.
-    class GfxWidget : public QOpenGLWidget
+    class GfxWindow : public QOpenGLWindow
     {
         Q_OBJECT
 
     public:
-        GfxWidget(QWidget* parent) : QOpenGLWidget(parent)
-        {
-            setFramerate(60);
-            // need to enable mouse tracking in order to get mouse move events.
-            setMouseTracking(true);
+        GfxWindow();
+       ~GfxWindow();
 
-            // need to enable this in order to get keyboard events.
-            setFocusPolicy(Qt::StrongFocus);
-        }
-
-        void dispose()
-        {
-            mCustomGraphicsDevice.reset();
-            mCustomGraphicsPainter.reset();
-        }
-        void setFramerate(unsigned target)
-        {
-            const unsigned ms = 1000 / target;
-            mTimer.start(ms, this);
-        }
+        // Important to call dispose to cleanly dispose of all the graphics
+        // resources while the Qt's OpenGL context is still valid, 
+        // I.e the window still exists and hasn't been closed or anything.
+        void dispose();
 
         void reloadShaders()
         {
@@ -82,6 +72,12 @@ namespace gui
             mCustomGraphicsDevice->DeleteTextures();
         }
 
+        gfx::Color4f getClearColor() const
+        { return mClearColor; }
+
+        void setClearColor(const gfx::Color4f& color)
+        { mClearColor = color; }
+
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
@@ -95,35 +91,97 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseMove;
         std::function<void (QMouseEvent* mickey)> onMousePress;
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
-        std::function<bool (QKeyEvent* key)> onKeyPress;
-    private slots:
-        void changeColor_triggered();
+        std::function<void (QWheelEvent* wheel)>  onMouseWheel;
+        // keyboard callbacks
+        std::function<bool (QKeyEvent* key)>      onKeyPress;
+
+
+    public slots:
         void clearColorChanged(QColor color);
         void toggleShowFps();
+    private slots:
+        void frameSwapped();
+        void doInit();
 
     private:
         virtual void initializeGL() override;
         virtual void paintGL() override;
-        virtual void timerEvent(QTimerEvent*) override;
-        virtual void contextMenuEvent(QContextMenuEvent* event) override;
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
+        virtual void wheelEvent(QWheelEvent* wheel) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
         gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
     private:
-        QBasicTimer mTimer;
         QElapsedTimer mClock;
         bool mInitialized = false;
     private:
         quint64 mFrameTime = 0;
         quint64 mNumFrames = 0;
-        bool mShowFps = false;
-        float mCurrentFps = 0.0f;
+        bool  mShowFps     = false;
+        float mCurrentFps  = 0.0f;
+    };
+
+    // This is now a "widget shim" that internally creates a QOpenGLWindow
+    // and places it in a window container. This is done because of
+    // using QOpenGLWindow provides slightly better performance
+    // than QOpenGLWidget.
+    class GfxWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        GfxWidget(QWidget* parent);
+       ~GfxWidget();
+
+        void dispose();
+
+        void setFramerate(unsigned target)
+        {
+            // no longer used.
+            //mWindow->setFramerate(target);
+        }
+        void reloadShaders()
+        {
+            mWindow->reloadShaders();
+        }
+        void reloadTextures()
+        {
+            mWindow->reloadTextures();
+        }
+
+        // callback to invoke when paint must be done.
+        // secs is the seconds elapsed since last paint.
+        std::function<void (gfx::Painter&, double secs)> onPaintScene;
+
+        // callback to invoke to initialize game, i.e. the OpenGL widget
+        // has been initialized.
+        // width and height are the width and height of the widget's viewport.
+        std::function<void (unsigned width, unsigned height)> onInitScene;
+
+        // mouse callbacks
+        std::function<void (QMouseEvent* mickey)> onMouseMove;
+        std::function<void (QMouseEvent* mickey)> onMousePress;
+        std::function<void (QMouseEvent* mickey)> onMouseRelease;
+        // keyboard callbacks.
+        std::function<bool (QKeyEvent* key)>      onKeyPress;
+
+        // zoom in/out callbacks
+        std::function<void ()> onZoomIn;
+        std::function<void ()> onZoomOut;
+    private:
+        void showColorDialog();
+        void translateZoomInOut(QWheelEvent* event);
+
+    private:
+        virtual void resizeEvent(QResizeEvent* event) override;
+    private:
+        GfxWindow* mWindow = nullptr;
+        QWidget* mContainer = nullptr;
     };
 
 } // namespace

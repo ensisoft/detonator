@@ -154,6 +154,7 @@ int main(int argc, char* argv[])
         format.setBlueBufferSize(8);
         format.setStencilBufferSize(8);
         format.setSamples(4);
+        format.setSwapInterval(1);
         QSurfaceFormat::setDefaultFormat(format);
 
         QApplication app(argc, argv);
