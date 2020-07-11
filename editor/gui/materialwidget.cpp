@@ -33,7 +33,10 @@
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include <algorithm>
+
 #include "base/assert.h"
+#include "base/utility.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -47,6 +50,80 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
 #include "materialwidget.h"
+
+namespace {
+
+struct TexturePackImage {
+    QString name;
+    unsigned width  = 0;
+    unsigned height = 0;
+    unsigned xpos   = 0;
+    unsigned ypos   = 0;
+    unsigned index  = 0;
+};
+
+bool ReadTexturePack(const QString& json_file, std::vector<TexturePackImage>* out)
+{
+    QFile file(json_file);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        ERROR("Failed to open '%1' for reading. (%2)", json_file, file.error());
+        return false;
+    }
+    const auto& buff = file.readAll();
+    if (buff.isEmpty())
+    {
+        ERROR("JSON file '%1' contains no content.", json_file);
+        return false;
+    }
+    const auto* beg  = buff.data();
+    const auto* end  = buff.data() + buff.size();
+    const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
+    if (json.is_discarded())
+    {
+        ERROR("JSON file '%1' could not be parsed.", json_file);
+        return false;
+    }
+    if (!json.contains("images") || !json["images"].is_array())
+    {
+        ERROR("JSON file '%1' doesn't contain images array.");
+        return false;
+    }
+    for (const auto& img_json : json["images"].items())
+    {
+        const auto& obj = img_json.value();
+        std::string name;
+        unsigned w, h, x, y, index;
+        if (!base::JsonReadSafe(obj, "width", &w) ||
+            !base::JsonReadSafe(obj, "height", &h) ||
+            !base::JsonReadSafe(obj, "xpos", &x) ||
+            !base::JsonReadSafe(obj, "ypos", &y) ||
+            !base::JsonReadSafe(obj, "name", &name) ||
+            !base::JsonReadSafe(obj, "index", &index))
+        {
+            ERROR("Failed to read JSON image box data.");
+            continue;
+        }
+        TexturePackImage tpi;
+        tpi.name   = app::FromUtf8(name);
+        tpi.width  = w;
+        tpi.height = h;
+        tpi.xpos   = x;
+        tpi.ypos   = y;
+        tpi.index  = index;
+        out->push_back(std::move(tpi));
+    }
+
+    // finally sort based on the image index.
+    std::sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
+        return a.index < b.index;
+    });
+
+    INFO("Succesfully parsed '%1'. %2 images found.", json_file, out->size());
+    return true;
+}
+
+} // namespace
 
 namespace gui
 {
@@ -335,20 +412,66 @@ void MaterialWidget::on_btnAddTextureMap_clicked()
     if (list.isEmpty())
         return;
 
-    for (const auto& file : list)
+    for (const auto& item : list)
     {
-        QFileInfo info(file);
+        const QFileInfo info(item);
         const auto& name = info.baseName();
-        const auto& path = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
+        const auto& file = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
 
-        auto source = std::make_shared<gfx::detail::TextureFileSource>(app::ToUtf8(path), app::ToUtf8(name));
+        std::vector<TexturePackImage> images;
 
-        QListWidgetItem* item = new QListWidgetItem(mUI.textures);
-        item->setText(name);
-        item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
-        mUI.textures->addItem(item);
+        if (FileExists(file + ".json"))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText(tr("Looks like this file '%1' has an associated JSON file."
+                "Would you like me to try to read it?").arg(name));
+            if (msg.exec() == QMessageBox::Yes)
+            {
+                ReadTexturePack(file + ".json", &images);
+            }
+        }
+        const QPixmap pix(file);
+        if (pix.isNull())
+        {
+            ERROR("Failed to read image '%1'", file);
+            continue;
+        }
 
-        mMaterial.AddTexture(source);
+        // if no JSON file was read (or failed to read) then we create one
+        // texture pack image which covers the whole image.
+        if (images.empty())
+        {
+            TexturePackImage whole_image;
+            whole_image.width  = pix.width();
+            whole_image.height = pix.height();
+            whole_image.xpos   = 0;
+            whole_image.ypos   = 0;
+            whole_image.name   = name;
+            images.push_back(std::move(whole_image));
+        }
+
+        const float texture_width  = pix.width();
+        const float texture_height = pix.height();
+        // add all the images in the material and in the UI's list widget
+        for (const auto& img : images)
+        {
+            auto source = std::make_shared<gfx::detail::TextureFileSource>(app::ToUtf8(file), app::ToUtf8(img.name));
+            QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+            item->setText(img.name);
+            item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
+            mUI.textures->addItem(item);
+
+            // normalize the texture coords.
+            gfx::FRect texture_box;
+            texture_box.SetX(img.xpos / texture_width);
+            texture_box.SetY(img.ypos / texture_height);
+            texture_box.SetWidth(img.width / texture_width);
+            texture_box.SetHeight(img.height / texture_height);
+            // add texture source with texture source box.
+            mMaterial.AddTexture(source, texture_box);
+        }
     }
     const auto index = mUI.textures->currentRow();
     mUI.textures->setCurrentRow(index == -1 ? 0 : index);

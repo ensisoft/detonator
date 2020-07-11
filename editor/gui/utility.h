@@ -165,6 +165,19 @@ inline bool MissingFile(const std::string& filename)
     return MissingFile(app::FromUtf8(filename));
 }
 
+inline bool FileExists(const std::string& filename)
+{
+    return !MissingFile(filename);
+}
+inline bool FileExists(const QString& filename)
+{
+    return !MissingFile(filename);
+}
+inline bool FileExists(const QLineEdit* edit)
+{
+    return !MissingFile(edit);
+}
+
 struct ComboBoxValueGetter
 {
     template<typename T>

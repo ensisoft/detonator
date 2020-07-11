@@ -28,6 +28,7 @@
 #  include <QString>
 #  include <QByteArray>
 #  include <QDir>
+#  include <QFile>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -38,6 +39,8 @@
 
 namespace app
 {
+    QString toString(QFile::FileError error);
+
     inline QString toString(const std::string& s)
     { return FromUtf8(s); }
     inline QString toString(const char* str)

@@ -586,6 +586,14 @@ namespace gfx
             mTextures.back().source = source;
             return *this;
         }
+        Material& AddTexture(std::shared_ptr<TextureSource> source, const FRect& rect)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = source;
+            mTextures.back().box    = rect;
+            return *this;
+        }
+
         Material& SetTextureRect(std::size_t index, const FRect& rect)
         {
             ASSERT(index < mTextures.size());

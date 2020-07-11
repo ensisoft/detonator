@@ -166,6 +166,7 @@ add_executable(Editor
     editor/app/eventlog.h
     editor/app/eventlog.cpp
     editor/app/format.h
+    editor/app/format.cpp
     editor/app/utility.h
     editor/app/utility.cpp
     editor/app/workspace.h
