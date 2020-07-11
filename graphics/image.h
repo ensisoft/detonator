@@ -58,7 +58,7 @@ namespace gfx
         void Load(const std::string& filename)
         {
             #if defined(WINDOWS_OS)
-                std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
+                std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
             #elif defined(POSIX_OS)
                 std::fstream in(filename, std::ios::in | std::ios::binary);
             #endif
