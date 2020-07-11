@@ -159,7 +159,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     DEBUG("Editing material: '%1'", resource.GetName());
 
     mMaterial = *resource.GetContent<gfx::Material>();
-
     SetValue(mUI.materialType, mMaterial.GetType());
     SetValue(mUI.surfaceType,  mMaterial.GetSurfaceType());
     SetValue(mUI.minFilter,    mMaterial.GetMinTextureFilter());
@@ -172,34 +171,18 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    GetProperty(resource, "shader_file", mUI.shaderFile);
+    GetProperty(resource, "use_shader_file", mUI.customShader);
 
+    // add the textures to the UI
     size_t num_textures = mMaterial.GetNumTextures();
     for (size_t i=0; i<num_textures; ++i)
     {
         const auto& source = mMaterial.GetTextureSource(i);
-        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
-        {
-            if (MissingFile(ptr->GetFilename()))
-            {
-                WARN("Texture file '%1' could no longer be found.", ptr->GetFilename());
-                // todo: we're skipping adding this item to the list because
-                // the code in gfx::material  will expect the file to be available
-                // or it will throw, perhaps that code should be using logging instead
-                // and we should leave the item in the list widget =
-                continue;
-            }
-        }
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
         item->setText(app::FromUtf8(source.GetName()));
         item->setData(Qt::UserRole, app::FromUtf8(source.GetId()));
         mUI.textures->addItem(item);
-    }
-
-    GetProperty(resource, "shader_file", mUI.shaderFile);
-    GetProperty(resource,  "use_shader_file", mUI.customShader);
-    if (MissingFile(mUI.shaderFile))
-    {
-        WARN("The shader file '%1' could no longer be found.", mUI.shaderFile->text());
     }
 
     mUI.textures->setCurrentRow(0);
@@ -262,24 +245,16 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    settings.loadWidget("Material", mUI.materialName);
+    settings.loadWidget("Material", mUI.shaderFile);
+    settings.loadWidget("Material", mUI.customShader);
+    settings.loadWidget("Material", mUI.zoom);
 
     // restore textures list
     size_t num_textures = mMaterial.GetNumTextures();
     for (size_t i=0; i<num_textures; ++i)
     {
         const auto& source = mMaterial.GetTextureSource(i);
-        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
-        {
-            if (MissingFile(ptr->GetFilename()))
-            {
-                WARN("Texture file '%1' could no longer be found.", ptr->GetFilename());
-                // todo: we're skipping adding this item to the list because
-                // the code in gfx::material  will expect the file to be available
-                // or it will throw, perhaps that code should be using logging instead
-                // and we should leave the item in the list widget =
-                continue;
-            }
-        }
         QListWidgetItem* item = new QListWidgetItem(mUI.textures);
         item->setText(app::FromUtf8(source.GetName()));
         item->setData(Qt::UserRole, app::FromUtf8(source.GetId()));
@@ -290,16 +265,6 @@ bool MaterialWidget::loadState(const Settings& settings)
     mUI.textures->setCurrentRow(0);
     // enable/disable UI elements based on the material type
     on_materialType_currentIndexChanged("");
-
-    settings.loadWidget("Material", mUI.materialName);
-    settings.loadWidget("Material", mUI.shaderFile);
-    settings.loadWidget("Material", mUI.customShader);
-    settings.loadWidget("Material", mUI.zoom);
-
-    if (MissingFile(mUI.shaderFile))
-    {
-        WARN("The shader file '%1' could no longer be found.", mUI.shaderFile->text());
-    }
 
     setWindowTitle(mUI.materialName->text());
     return true;
@@ -387,7 +352,7 @@ void MaterialWidget::on_actionSave_triggered()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr("Workspace already contains a material by this name. Overwrite ?"));
+        msg.setText(tr("Workspace already contains a material by this name. Overwrite?"));
         if (msg.exec() == QMessageBox::No)
             return;
     }
@@ -608,27 +573,32 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
 
     const auto& source = mMaterial.GetTextureSource(index);
     const auto& rect   = mMaterial.GetTextureRect(index);
-    const auto& bitmap = source.GetData();
+    const auto& bitmap = source.GetData(); // returns nullptr if fails to source the data.
+    if (bitmap != nullptr)
+    {
+        const auto width  = bitmap->GetWidth();
+        const auto height = bitmap->GetHeight();
+        const auto depth  = bitmap->GetDepthBits();
+        QImage img;
+        if (depth == 8)
+            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
+        else if (depth == 24)
+            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
+        else if (depth == 32)
+            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+        else ERROR("Unexpected image bit depth: %1", depth);
 
-    const auto width  = bitmap->GetWidth();
-    const auto height = bitmap->GetHeight();
-    const auto depth  = bitmap->GetDepthBits();
-    QImage img;
-    if (depth == 8)
-        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
-    else if (depth == 24)
-        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
-    else if (depth == 32)
-        img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
-    else throw std::runtime_error("unexpected image depth: " + std::to_string(depth));
-
-    QPixmap pix;
-    pix.convertFromImage(img);
-
-    mUI.textureWidth->setText(QString::number(width));
-    mUI.textureHeight->setText(QString::number(height));
-    mUI.textureDepth->setText(QString::number(depth));
-    mUI.texturePreview->setPixmap(pix.scaledToHeight(128));
+        QPixmap pix;
+        pix.convertFromImage(img);
+        mUI.textureWidth->setText(QString::number(width));
+        mUI.textureHeight->setText(QString::number(height));
+        mUI.textureDepth->setText(QString::number(depth));
+        mUI.texturePreview->setPixmap(pix.scaledToHeight(128));
+    }
+    else
+    {
+        mUI.texturePreview->setPixmap(QPixmap("texture.png"));
+    }
     mUI.rectX->setValue(rect.GetX());
     mUI.rectY->setValue(rect.GetY());
     mUI.rectW->setValue(rect.GetWidth());

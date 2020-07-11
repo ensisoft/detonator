@@ -156,6 +156,8 @@ add_executable(Editor
     base/logging.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
+    graphics/material.h
+    graphics/material.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -292,6 +294,7 @@ add_executable(graphics_test
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
+    graphics/material.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
     graphics/opengl_es2_device.cpp
@@ -326,6 +329,7 @@ add_executable(invaders
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
+    graphics/material.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
     graphics/opengl_es2_device.cpp

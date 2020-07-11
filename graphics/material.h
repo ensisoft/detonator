@@ -83,7 +83,8 @@ namespace gfx
         virtual std::string GetName() const = 0;
         // Set the texture source human readable name.
         virtual void SetName(const std::string& name) = 0;
-        // Generate or load the data as a bitmap.
+        // Generate or load the data as a bitmap. If there's a content
+        // error this function should return empty shared pointer.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
         // Returns whether texture source can serialize into JSON or not.
         virtual bool CanSerialize() const
@@ -129,18 +130,9 @@ namespace gfx
             { return mName; }
             virtual void SetName(const std::string& name)
             { mName = name; }
-            virtual std::shared_ptr<IBitmap> GetData() const override
-            {
-                Image file(MapFilePath(ResourceMap::ResourceType::Texture, mFile));
-                if (file.GetDepthBits() == 8)
-                    return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
-                else if (file.GetDepthBits() == 24)
-                    return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
-                else if (file.GetDepthBits() == 32)
-                    return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
-                else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits()));
-                return nullptr;
-            }
+
+            virtual std::shared_ptr<IBitmap> GetData() const override;
+
             virtual bool CanSerialize() const override
             { return true; }
             virtual nlohmann::json ToJson() const override
@@ -243,10 +235,8 @@ namespace gfx
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
-            virtual std::shared_ptr<IBitmap> GetData() const override
-            {
-                return mTextBuffer.Rasterize();
-            }
+            virtual std::shared_ptr<IBitmap> GetData() const override;
+
             virtual bool CanSerialize() const override
             { return true; }
             virtual nlohmann::json ToJson() const override
@@ -401,6 +391,8 @@ namespace gfx
                     {
                         texture = device.MakeTexture(name);
                         auto bitmap = source->GetData();
+                        if (!bitmap)
+                            continue;
                         const auto width  = bitmap->GetWidth();
                         const auto height = bitmap->GetHeight();
                         const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
