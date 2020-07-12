@@ -154,7 +154,7 @@ namespace gfx
         }
 
         // Get the number of text objects currently in the text buffer.
-        size_t GetNumTexts()
+        size_t GetNumTexts() const
         { return mText.size(); }
 
         // Get the text blob at the given index
