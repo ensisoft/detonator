@@ -85,7 +85,11 @@ namespace gfx
         virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
+        // The returned bitmap can be potentially shared but in an immutable
+        // fashion.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
+        // Clone this texture source.
+        virtual std::unique_ptr<TextureSource> Clone() const = 0;
         // Returns whether texture source can serialize into JSON or not.
         virtual bool CanSerialize() const
         { return false; }
@@ -132,6 +136,9 @@ namespace gfx
             { mName = name; }
 
             virtual std::shared_ptr<IBitmap> GetData() const override;
+
+            virtual std::unique_ptr<TextureSource> Clone() const override
+            { return std::make_unique<TextureFileSource>(*this); }
 
             virtual bool CanSerialize() const override
             { return true; }
@@ -181,6 +188,12 @@ namespace gfx
               : mBitmap(new Bitmap<T>(std::move(bmp)))
             {}
             TextureBitmapSource() = default;
+            TextureBitmapSource(const TextureBitmapSource& other)
+            {
+                mName = other.mName;
+                if (other.mBitmap)
+                    mBitmap = other.mBitmap->Clone();
+            }
 
             virtual Source GetSourceType() const override
             { return Source::Bitmap; }
@@ -197,6 +210,8 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
+            virtual std::unique_ptr<TextureSource> Clone() const override
+            { return std::make_unique<TextureBitmapSource>(*this); }
         private:
             std::shared_ptr<IBitmap> mBitmap;
             std::string mName;
@@ -236,6 +251,9 @@ namespace gfx
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
+
+            virtual std::unique_ptr<TextureSource> Clone() const override
+            { return std::make_unique<TextureTextBufferSource>(*this); }
 
             virtual bool CanSerialize() const override
             { return true; }
@@ -312,6 +330,9 @@ namespace gfx
         {}
         // allow "invalid" material to be constructed.
         Material() = default;
+
+        // Make a deep copy of the material. 
+        Material(const Material& other);
 
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
@@ -539,20 +560,20 @@ namespace gfx
         Material& AddTexture(const std::string& file, const std::string& name = "")
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureFileSource>(file, name);
+            mTextures.back().source = std::make_unique<detail::TextureFileSource>(file, name);
             return *this;
         }
         Material& AddTexture(const TextBuffer& text)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureTextBufferSource>(text);
+            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
             mTextures.back().enable_gc = true;
             return *this;
         }
         Material& AddTexture(TextBuffer&& text)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureTextBufferSource>(std::move(text));
+            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
             mTextures.back().enable_gc = true;
             return *this;
         }
@@ -560,7 +581,7 @@ namespace gfx
         Material& AddTexture(const Bitmap<T>& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureBitmapSource>(bitmap);
+            mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(bitmap);
             return *this;
         }
 
@@ -568,20 +589,20 @@ namespace gfx
         Material& AddTexture(Bitmap<T>&& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_shared<detail::TextureBitmapSource>(std::move(bitmap));
+            mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(std::move(bitmap));
             return *this;
         }
 
-        Material& AddTexture(std::shared_ptr<TextureSource> source)
+        Material& AddTexture(std::unique_ptr<TextureSource> source)
         {
             mTextures.emplace_back();
-            mTextures.back().source = source;
+            mTextures.back().source = std::move(source);
             return *this;
         }
-        Material& AddTexture(std::shared_ptr<TextureSource> source, const FRect& rect)
+        Material& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
         {
             mTextures.emplace_back();
-            mTextures.back().source = source;
+            mTextures.back().source = std::move(source);
             mTextures.back().box    = rect;
             return *this;
         }
@@ -598,10 +619,10 @@ namespace gfx
             mTextures[index].enable_gc = on_off;
             return *this;
         }
-        Material& SetTextureSource(std::size_t index, std::shared_ptr<TextureSource> source)
+        Material& SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
         {
             ASSERT(index < mTextures.size());
-            mTextures[index].source = source;
+            mTextures[index].source = std::move(source);
             return *this;
         }
         Material& SetTextureMinFilter(MinTextureFilter filter)
@@ -739,7 +760,13 @@ namespace gfx
             }
             return mat;
         }
+
+        // Deep copy of the material. Can be a bit expensive.
+        Material& operator=(const Material& other);
+
     private:
+        // warning: remember to edit the copy constructor
+        // and the assignment operator if members are added.
         std::string mShaderFile;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
@@ -751,6 +778,7 @@ namespace gfx
         struct TextureSampler {
             FRect box = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             bool enable_gc  = false;
+            // todo: change to unique_ptr
             std::shared_ptr<TextureSource> source;
         };
         std::vector<TextureSampler> mTextures;

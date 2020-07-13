@@ -422,7 +422,7 @@ void MaterialWidget::on_btnAddTextureMap_clicked()
         // add all the images in the material and in the UI's list widget
         for (const auto& img : images)
         {
-            auto source = std::make_shared<gfx::detail::TextureFileSource>(app::ToUtf8(file), app::ToUtf8(img.name));
+            auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file), app::ToUtf8(img.name));
             QListWidgetItem* item = new QListWidgetItem(mUI.textures);
             item->setText(img.name);
             item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
@@ -435,7 +435,7 @@ void MaterialWidget::on_btnAddTextureMap_clicked()
             texture_box.SetWidth(img.width / texture_width);
             texture_box.SetHeight(img.height / texture_height);
             // add texture source with texture source box.
-            mMaterial.AddTexture(source, texture_box);
+            mMaterial.AddTexture(std::move(source), texture_box);
         }
     }
     const auto index = mUI.textures->currentRow();
@@ -533,14 +533,14 @@ void MaterialWidget::on_btnNewTextTextureMap_clicked()
         style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
     }
 
-    auto source = std::make_shared<gfx::detail::TextureTextBufferSource>(std::move(text), "TextBuffer");
+    auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text), "TextBuffer");
 
     QListWidgetItem* item = new QListWidgetItem(mUI.textures);
     item->setText("TextBuffer");
     item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
     mUI.textures->addItem(item);
 
-    mMaterial.AddTexture(source);
+    mMaterial.AddTexture(std::move(source));
 
     const auto index = mUI.textures->currentRow();
     mUI.textures->setCurrentRow(index == -1 ? 0 : index);

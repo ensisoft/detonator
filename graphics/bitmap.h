@@ -261,6 +261,8 @@ namespace gfx
         virtual void FlipHorizontally() = 0;
         // Get unique hash value based on the contents of the bitmap.
         virtual std::size_t GetHash() const = 0;
+        // Make a clone of this bitmap.
+        virtual std::unique_ptr<IBitmap> Clone() const = 0;
         // Here we could have methods for dynamically getting
         // And setting pixels. I.e. there'd be a method for set/get
         // for each type of pixel and when the format would not match
@@ -450,6 +452,11 @@ namespace gfx
             for (size_t i=0; i<len; ++i)
                 hash_value ^= std::hash<std::uint8_t>()(ptr[i]);
             return hash_value;
+        }
+
+        virtual std::unique_ptr<IBitmap> Clone() const override
+        {
+            return std::make_unique<Bitmap>(*this);
         }
 
         // Get a pixel from within the bitmap.

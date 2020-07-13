@@ -69,4 +69,56 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     return nullptr;
 }
 
+Material::Material(const Material& other)
+{
+    mShaderFile  = other.mShaderFile;
+    mBaseColor   = other.mBaseColor;
+    mSurfaceType = other.mSurfaceType;
+    mType        = other.mType;
+    mGamma       = other.mGamma;
+    mRuntime     = other.mRuntime;
+    mFps         = other.mFps;
+    mBlendFrames = other.mBlendFrames;
+    mMinFilter   = other.mMinFilter;
+    mMagFilter   = other.mMagFilter;
+    mWrapX       = other.mWrapX;
+    mWrapY       = other.mWrapY;
+    mTextureScaleX = other.mTextureScaleX;
+    mTextureScaleY = other.mTextureScaleY;
+
+    // copy texture samplers.
+    for (const auto& sampler : other.mTextures)
+    {
+        TextureSampler copy;
+        copy.box = sampler.box;
+        copy.enable_gc = sampler.enable_gc;
+        copy.source = sampler.source->Clone();
+        mTextures.push_back(std::move(copy));
+    }
+}
+
+Material& Material::operator=(const Material& other)
+{
+    if (this == &other)
+        return *this;
+
+    Material tmp(other);
+    std::swap(mShaderFile, tmp.mShaderFile);
+    std::swap(mBaseColor, tmp.mBaseColor);
+    std::swap(mSurfaceType, tmp.mSurfaceType);
+    std::swap(mType, tmp.mType);
+    std::swap(mGamma, tmp.mGamma);
+    std::swap(mRuntime, tmp.mRuntime);
+    std::swap(mBlendFrames, tmp.mBlendFrames);
+    std::swap(mMinFilter, tmp.mMinFilter);
+    std::swap(mMagFilter, tmp.mMagFilter);
+    std::swap(mWrapX, tmp.mWrapX);
+    std::swap(mWrapY, tmp.mWrapY);
+    std::swap(mTextureScaleX, tmp.mTextureScaleX);
+    std::swap(mTextureScaleY, tmp.mTextureScaleY);
+    std::swap(mTextures, tmp.mTextures);
+    return *this;
+}
+
+
 } // namespace
