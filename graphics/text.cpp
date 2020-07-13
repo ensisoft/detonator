@@ -100,10 +100,29 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
         out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
         cache[key] = out;
     }
+    else if (it->second.use_count() == 1)
+    {
+        // the cached bitmap can only be shared when there's nobody
+        // else using it at the moment. in other words the only shared_ptr
+        // pointing to it is the shared_ptr in the cache.
+        // note that the use_count is *NOT* thread safe or correct in
+        // multi-threaded application. However in this particular case
+        // that should not be a problem per-se since the whole cache itself
+        // is not MT safe atm.
+        out = it->second;
+        // clear it so it's ready for re-use
+        out->Fill(Grayscale(0));
+    }
     else
     {
-        out = it->second;
-        out->Fill(Grayscale(0));
+        // make a private copy. this cannot be added to the
+        // cache since there already exists a bitmap with the
+        // same key. would require having multiple items
+        // with same key and more complicated caching.
+        // the expectation currently is that the text raster buffers
+        // are used to upload to the GPU and then discarded and not
+        // being held onto.
+        out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
     }
 
     for (const auto& text : mText)
