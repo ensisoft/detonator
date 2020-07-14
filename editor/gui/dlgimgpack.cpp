@@ -40,7 +40,7 @@
 #include <vector>
 
 #include "editor/app/eventlog.h"
-#include "graphics/image_packing.h"
+#include "editor/app/packing.h"
 #include "base/assert.h"
 #include "dlgimgpack.h"
 
@@ -203,7 +203,7 @@ void DlgImgPack::on_colorChanged()
 
 void DlgImgPack::repack()
 {
-    std::vector<gfx::pack::NamedImage> images;
+    std::vector<app::PackingRectangle> images;
 
     // take the files and build a list of "named images" for the algorithm
     // to work on.
@@ -224,10 +224,10 @@ void DlgImgPack::repack()
             msg.exec();
             continue;
         }
-        gfx::pack::NamedImage img;
+        app::PackingRectangle img;
         img.width  = pix.width();
         img.height = pix.height();
-        img.name   = i; // index to the source list.
+        img.index  = i; // index to the source list.
         images.push_back(img);
     }
 
@@ -240,7 +240,7 @@ void DlgImgPack::repack()
         return;
     }
 
-    const auto ret = gfx::pack::PackImages(images);
+    const auto ret = app::PackRectangles(images);
     DEBUG("Packaged image size %1x%2 pixels", ret.width, ret.height);
     if (ret.width == 0 || ret.height == 0)
         return;
@@ -264,7 +264,7 @@ void DlgImgPack::repack()
     for (size_t i=0; i<images.size(); ++i)
     {
         const auto& img     = images[i];
-        const auto index    = img.name;
+        const auto index    = img.index;
         const auto* item    = mUI.listWidget->item(index);
         const QString& file = item->text();
         const QRectF dst(img.xpos, img.ypos, img.width, img.height);

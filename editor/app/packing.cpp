@@ -26,10 +26,10 @@
 #include <memory>
 
 #include "base/assert.h"
-#include "image_packing.h"
+#include "packing.h"
 
-namespace gfx {
-namespace pack {
+namespace app
+{
 
 class Rectangle
 {
@@ -41,7 +41,7 @@ public:
       , mHeight(height)
     {}
 
-    bool Pack(NamedImage& img)
+    bool Pack(PackingRectangle& img)
     {
         const auto w = img.width;
         const auto h = img.height;
@@ -114,7 +114,7 @@ private:
     unsigned mYPos = 0;
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
-    NamedImage* mImage = nullptr;
+    PackingRectangle* mImage = nullptr;
     bool mUsed = false;
 
     std::unique_ptr<Rectangle> mRight;
@@ -124,22 +124,22 @@ private:
 // Binary tree bin packing algorithm
 // https://codeincomplete.com/posts/bin-packing/
 
-Container PackImages(std::vector<NamedImage>& images)
+RectanglePackSize PackRectangles(std::vector<PackingRectangle>& images)
 {
-    Container out;
+    RectanglePackSize ret;
     if (images.size() == 0)
-        return out;
+        return ret;
     else if (images.size() == 1)
     {
-        out.height = images[0].height;
-        out.width  = images[0].width;
+        ret.height = images[0].height;
+        ret.width  = images[0].width;
         images[0].xpos = 0;
         images[0].ypos = 0;
-        return out;
+        return ret;
     }
 
     std::sort(std::begin(images), std::end(images),
-        [](const NamedImage& first, const NamedImage& second) {
+        [](const PackingRectangle& first, const PackingRectangle& second) {
             const auto max0 = std::max(first.width, first.height);
             const auto max1 = std::max(second.width, second.height);
             return max0 < max1;
@@ -199,10 +199,9 @@ Container PackImages(std::vector<NamedImage>& images)
         root->Pack(img);
     }
     root->Finalize();
-    out.height = root->GetHeight();
-    out.width  = root->GetWidth();
-    return out;
+    ret.height = root->GetHeight();
+    ret.width  = root->GetWidth();
+    return ret;
 }
 
-} // namespace
 } // namespace

@@ -25,19 +25,19 @@
 #include "base/test_minimal.h"
 #include "base/math.h"
 
+#include "editor/app/packing.h"
 #include "graphics/bitmap.h"
 #include "graphics/types.h"
-#include "graphics/image_packing.h"
 
 int test_main(int argc, char* argv[])
 {
 
     // single image
     {
-        std::vector<gfx::pack::NamedImage> images;
+        std::vector<app::PackingRectangle> images;
         images.push_back({1, 1, 64, 64, 0});
 
-        const auto ret = gfx::pack::PackImages(images);
+        const auto ret = app::PackRectangles(images);
         TEST_REQUIRE(ret.height == 64);
         TEST_REQUIRE(ret.width == 64);
         TEST_REQUIRE(images[0].xpos == 0);
@@ -50,16 +50,16 @@ int test_main(int argc, char* argv[])
     // finally scan the resulting image to make sure that for each
     // rectangle we find the expected number of pixels with that color.
     {
-        std::vector<gfx::pack::NamedImage> images;
+        std::vector<app::PackingRectangle> images;
         for (int i=1; i<=static_cast<int>(gfx::Color::LightGray); ++i)
         {
-            gfx::pack::NamedImage img;
+            app::PackingRectangle img;
             img.width  = math::rand(10, 150);
             img.height = math::rand(10, 150);
-            img.name   = i;
+            img.index   = i;
             images.push_back(img);
         }
-        const auto ret = gfx::pack::PackImages(images);
+        const auto ret = app::PackRectangles(images);
         gfx::Bitmap<gfx::RGB> bmp(ret.width, ret.height);
         bmp.Fill(gfx::Color::Black);
         for (size_t i=0; i<images.size(); ++i)
@@ -70,7 +70,7 @@ int test_main(int argc, char* argv[])
             // nothing has been placed there yet.
             const auto is_non_occupied = bmp.Compare(rc, gfx::Color::Black);
             TEST_REQUIRE(is_non_occupied);
-            bmp.Fill(rc, static_cast<gfx::Color>(img.name));
+            bmp.Fill(rc, static_cast<gfx::Color>(img.index));
         }
 
         WritePNG(bmp, "packed_image_test.png");
@@ -84,7 +84,7 @@ int test_main(int argc, char* argv[])
                 for (size_t x=0; x<bmp.GetWidth(); ++x)
                 {
                     const auto& p = bmp.GetPixel(y, x);
-                    if (p == static_cast<gfx::Color>(img.name))
+                    if (p == static_cast<gfx::Color>(img.index))
                         ++matching_pixels;
                 }
             }

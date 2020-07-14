@@ -25,12 +25,13 @@
 #include "config.h"
 
 #include <vector>
+#include <string>
 
-namespace gfx {
-namespace pack {
+namespace app
+{
     // Abstract 2D object with a width and height and a name association
     // in order to establish a mapping to some other object.
-    struct NamedImage {
+    struct PackingRectangle {
         // x position of the named image in the container when packing is complete.
         unsigned xpos   = 0;
         // y position of the named image in the container when packing is complete
@@ -39,24 +40,27 @@ namespace pack {
         unsigned width  = 0;
         // the height of the image
         unsigned height = 0;
-        // arbitrary name of the image object / or user defined ptr
+        // user defined pointer to arbitrary data.
         union {
-            unsigned name = 0;
-            const void* cuser;
+            const void* const_user;
             void* user;
         };
+        // user defined integer data.
+        std::size_t index = 0;
+        // user defined string data.
+        std::string cookie;
     };
 
-    struct Container {
+    struct RectanglePackSize {
         unsigned width  = 0;
         unsigned height = 0;
     };
 
-    // Arrange the list of given images so that they can all be laid out within
+    // Arrange the list of given rectangles so that they can all be laid out within
     // the 2 dimensional container.
     // the input list is mutated to so that each image is given the position
     // with the container by setting the x/ypos members.
-    Container PackImages(std::vector<NamedImage>& images);
+    RectanglePackSize PackRectangles(std::vector<PackingRectangle>& list);
 } // namespce
-} // namespace
+
 

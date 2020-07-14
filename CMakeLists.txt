@@ -161,7 +161,6 @@ add_executable(Editor
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
-    graphics/image_packing.cpp
     graphics/resourcemap.cpp
     gamelib/animation.cpp
     editor/app/event.h
@@ -169,6 +168,8 @@ add_executable(Editor
     editor/app/eventlog.cpp
     editor/app/format.h
     editor/app/format.cpp
+    editor/app/packing.h
+    editor/app/packing.cpp
     editor/app/utility.h
     editor/app/utility.cpp
     editor/app/workspace.h
@@ -368,7 +369,11 @@ add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/a
     graphics/opengl_es2_device.cpp
     graphics/resourcemap.cpp
     third_party/stb/stb_image_write.c)
-add_executable(unit_test_imgpack  graphics/unit_test/unit_test_image_packing.cpp base/assert.cpp graphics/image_packing.cpp third_party/stb/stb_image_write.c)
+#editor unit tests
+add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.cpp
+                                  editor/app/packing.cpp
+                                  base/assert.cpp
+                                  third_party/stb/stb_image_write.c)
 # gamelib tests
 add_executable(unit_test_tree   gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
 # misc tests
@@ -386,7 +391,7 @@ target_include_directories(unit_test_bitmap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/misc/unit_test")
 target_include_directories(unit_test_math     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
+target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
