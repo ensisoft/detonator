@@ -61,9 +61,9 @@
               <widget class="color_widgets::ColorSelector" name="baseColor">
                <property name="color">
                 <color>
-                 <red>238</red>
-                 <green>118</green>
-                 <blue>13</blue>
+                 <red>255</red>
+                 <green>255</green>
+                 <blue>255</blue>
                 </color>
                </property>
                <property name="display_mode" stdset="0">
