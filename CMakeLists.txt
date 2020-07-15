@@ -196,6 +196,8 @@ add_executable(Editor
     editor/gui/dlgopen.h
     editor/gui/dlgopen.ui
     editor/gui/dlgopen.cpp
+    editor/gui/dlgnew.h
+    editor/gui/dlgnew.ui
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h

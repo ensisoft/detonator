@@ -106,6 +106,7 @@ namespace gui
         void on_workspace_doubleClicked();
         void on_actionPackageResources_triggered();
         void on_actionSelectResourceForEditing_triggered();
+        void on_actionNewResource_triggered();
 
         void actionWindowFocus_triggered();
 

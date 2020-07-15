@@ -97,6 +97,7 @@
     <addaction name="actionNewMaterial"/>
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewAnimation"/>
+    <addaction name="actionNewResource"/>
     <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
@@ -501,6 +502,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNewResource">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>
