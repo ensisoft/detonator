@@ -45,7 +45,11 @@ namespace gfx
         Magenta, DarkMagenta,
         Yellow,  DarkYellow,
         Gray,    DarkGray, LightGray,
-        HotPink
+        // some special colors
+        HotPink,
+        Gold,
+        Silver,
+        Bronze
     };
 
 
@@ -142,6 +146,21 @@ namespace gfx
                     mRed   = 1.0f;
                     mGreen = 0.4117f;
                     mBlue  = 0.705f;
+                    break;
+                case Color::Gold:
+                    mRed = 1.0f;
+                    mGreen = 0.84313f;
+                    mBlue  = 0.0f;
+                    break;
+                case Color::Silver:
+                    mRed = 0.752941;
+                    mGreen = 0.752941;
+                    mBlue = 0.752941;
+                    break;
+                case Color::Bronze:
+                    mRed = 0.804;
+                    mGreen = 0.498;
+                    mBlue = 0.196;
                     break;
             }
         }

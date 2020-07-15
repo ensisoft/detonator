@@ -126,6 +126,21 @@ namespace gfx
                     g = 105;
                     b = 180;
                     break;
+                case Color::Gold:
+                    r = 255;
+                    g = 215;
+                    b = 0;
+                    break;
+                case Color::Silver:
+                    r = 192;
+                    g = 192;
+                    b = 192;
+                    break;
+                case Color::Bronze:
+                    r = 205;
+                    g = 127;
+                    b = 50;
+                    break;
             }
         } // ctor
         RGB(const Grayscale& grayscale)
