@@ -444,31 +444,13 @@
                <item>
                 <widget class="QListWidget" name="textures">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="editTriggers">
-                  <set>QAbstractItemView::NoEditTriggers</set>
-                 </property>
-                 <property name="dragEnabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="dragDropMode">
-                  <enum>QAbstractItemView::DragOnly</enum>
-                 </property>
-                 <property name="defaultDropAction">
-                  <enum>Qt::IgnoreAction</enum>
-                 </property>
-                 <property name="alternatingRowColors">
-                  <bool>false</bool>
-                 </property>
                  <property name="selectionMode">
                   <enum>QAbstractItemView::ExtendedSelection</enum>
-                 </property>
-                 <property name="movement">
-                  <enum>QListView::Free</enum>
                  </property>
                 </widget>
                </item>
@@ -872,6 +854,7 @@
   <tabstop>fps</tabstop>
   <tabstop>blend</tabstop>
   <tabstop>textures</tabstop>
+  <tabstop>btnNewTextTextureMap</tabstop>
   <tabstop>btnDelTextureMap</tabstop>
   <tabstop>btnAddTextureMap</tabstop>
   <tabstop>textureWidth</tabstop>
@@ -882,8 +865,8 @@
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
-  <tabstop>time</tabstop>
   <tabstop>zoom</tabstop>
+  <tabstop>time</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
