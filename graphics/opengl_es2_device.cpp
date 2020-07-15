@@ -36,7 +36,7 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
-#include "resourcemap.h"
+#include "resource.h"
 #include "shader.h"
 #include "program.h"
 #include "device.h"
@@ -1092,7 +1092,7 @@ private:
             // shaders because they're cool to do so and want some special customized
             // shader effect.
             //
-            const auto& mapped_file = MapFilePath(ResourceMap::ResourceType::Shader, file);
+            const auto& mapped_file = ResolveFile(ResourceLoader::ResourceType::Shader, file);
 
             std::ifstream stream;
             stream.open(mapped_file);

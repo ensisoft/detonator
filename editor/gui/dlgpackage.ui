@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DlgPackage</class>
+ <widget class="QDialog" name="DlgPackage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>791</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Package Resources</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Package workspace resources</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="btnSelectAll">
+          <property name="text">
+           <string>Select All</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSelectNone">
+          <property name="text">
+           <string>Select None</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QListWidget" name="listWidget"/>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Texture packing</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Height</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="cmbMaxTexHeight">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="currentIndex">
+              <number>4</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>64</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>128</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>256</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>512</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1024</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2048</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>4096</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>8192</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>16384</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Width</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="cmbMaxTexWidth">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="currentIndex">
+              <number>4</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>64</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>128</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>256</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>512</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1024</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2048</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>4096</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>8192</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>16384</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QCheckBox" name="chkCombineTextures">
+             <property name="text">
+              <string>Combine textures</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkResizeTextures">
+             <property name="text">
+              <string>Resize large textures</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>409</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Output</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Directory</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="editOutDir"/>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="btnBrowse">
+           <property name="text">
+            <string>Browse ...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Pck name</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="editPckName">
+           <property name="text">
+            <string>content</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnStart">
+       <property name="text">
+        <string>Start </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>btnSelectAll</tabstop>
+  <tabstop>btnSelectNone</tabstop>
+  <tabstop>listWidget</tabstop>
+  <tabstop>cmbMaxTexHeight</tabstop>
+  <tabstop>cmbMaxTexWidth</tabstop>
+  <tabstop>chkCombineTextures</tabstop>
+  <tabstop>chkResizeTextures</tabstop>
+  <tabstop>editOutDir</tabstop>
+  <tabstop>btnBrowse</tabstop>
+  <tabstop>editPckName</tabstop>
+  <tabstop>btnStart</tabstop>
+  <tabstop>btnClose</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

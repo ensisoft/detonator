@@ -24,6 +24,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <QString>
+#include "warnpop.h"
+
 #include <vector>
 #include <string>
 
@@ -41,6 +45,7 @@ namespace app
         // the height of the image
         unsigned height = 0;
         // user defined pointer to arbitrary data.
+        bool success    = false;
         union {
             const void* const_user;
             void* user;
@@ -61,6 +66,40 @@ namespace app
     // the input list is mutated to so that each image is given the position
     // with the container by setting the x/ypos members.
     RectanglePackSize PackRectangles(std::vector<PackingRectangle>& list);
+
+    bool PackRectangles(const RectanglePackSize& max, std::vector<PackingRectangle>& list,
+        RectanglePackSize* ret_pack_size = nullptr);
+
+
+    struct ContentPackingOptions {
+        // the output directory into which place the packed content.
+        QString directory;
+        // the sub directory (package) name that will be created
+        // in the output dir.
+        QString package_name;
+        // Combine small textures into texture atlas files.
+        bool combine_textures = true;
+        // Resize large (oversized) textures to fit in the
+        // specified min/maxtexture dimensions.
+        bool resize_textures = true;
+        // Max texture height. Textures larger than this will be downsized.
+        unsigned max_texture_height = 1024;
+        // Max texture width, Textures larger than this will be downsized.
+        unsigned max_texture_width  = 1024;
+    };
+
+    class Resource;
+
+    // Pack the selected resources into a deployable "package".
+    // This includes copying the resource files such as fonts, textures and shaders
+    // and also building content packages such as texture atlas(ses).
+    // The directory in which the output is to be placed will have it's
+    // previous contents DELETED.
+    // Returns true if everything went smoothly, otherwise false
+    // and the package process might have failed in some way.
+    // Errors/warnings encountered during the process will be logged.
+    bool PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
+
 } // namespce
 
 

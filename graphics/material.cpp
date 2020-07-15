@@ -37,7 +37,7 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
         // Todo: image class should probably provide a non-throw load
         // but then it also needs some mechanism for getting the error
         // message why it failed.
-        Image file(MapFilePath(ResourceMap::ResourceType::Texture, mFile));
+        Image file(ResolveFile(ResourceLoader::ResourceType::Texture, mFile));
         if (file.GetDepthBits() == 8)
             return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
         else if (file.GetDepthBits() == 24)

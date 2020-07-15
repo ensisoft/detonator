@@ -29,13 +29,12 @@
 #include "graphics/bitmap.h"
 #include "graphics/types.h"
 
-int test_main(int argc, char* argv[])
+void unit_test_unbounded()
 {
-
     // single image
     {
         std::vector<app::PackingRectangle> images;
-        images.push_back({1, 1, 64, 64, 0});
+        images.push_back({1, 1, 64, 64});
 
         const auto ret = app::PackRectangles(images);
         TEST_REQUIRE(ret.height == 64);
@@ -91,5 +90,74 @@ int test_main(int argc, char* argv[])
             TEST_REQUIRE(matching_pixels == expected_pixels);
         }
     }
+}
+
+void unit_test_bounded()
+{
+    // single image
+    {
+        std::vector<app::PackingRectangle> list;
+        list.push_back({1, 1, 64, 64});
+
+        TEST_REQUIRE(app::PackRectangles(app::RectanglePackSize{10, 10}, list) == false);
+        TEST_REQUIRE(app::PackRectangles(app::RectanglePackSize{64, 64}, list) == true);
+        TEST_REQUIRE(list[0].success);
+        TEST_REQUIRE(list[0].xpos == 0);
+        TEST_REQUIRE(list[1].ypos == 0);
+    }
+
+    {
+        std::vector<app::PackingRectangle> list;
+        list.push_back({0, 0, 64, 64});
+        list.push_back({0, 0, 32, 32});
+        list.push_back({0, 0, 16, 16});
+        list[0].cookie = "64";
+        list[1].cookie = "32";
+        list[2].cookie = "16";
+        TEST_REQUIRE(app::PackRectangles({96, 96}, list) == true);
+        TEST_REQUIRE(list[0].cookie == "64");
+        TEST_REQUIRE(list[0].xpos == 0);
+        TEST_REQUIRE(list[0].ypos == 0);
+        TEST_REQUIRE(list[1].cookie == "32");
+        TEST_REQUIRE(list[1].xpos == 64);
+        TEST_REQUIRE(list[1].ypos == 0);
+        TEST_REQUIRE(list[2].cookie == "16");
+        TEST_REQUIRE(list[2].xpos == 64);
+        TEST_REQUIRE(list[2].ypos == 32);
+    }
+
+    {
+        std::vector<app::PackingRectangle> list;
+        list.push_back({0, 0, 64, 64});
+        list.push_back({0, 0, 32, 32});
+        list.push_back({0, 0, 32, 32});
+        list.push_back({0, 0, 96, 32});
+        list[0].cookie = "64";
+        list[1].cookie = "32_1";
+        list[2].cookie = "32_2";
+        list[3].cookie = "96";
+        TEST_REQUIRE(app::PackRectangles({96, 96}, list) == true);
+    }
+
+    {
+        std::vector<app::PackingRectangle> list;
+        list.push_back({0, 0, 64, 64});
+        list.push_back({0, 0, 32, 32});
+        list.push_back({0, 0, 32, 32});
+        list.push_back({0, 0, 96, 32});
+        list.push_back({0, 0, 16, 16});
+        list[0].cookie = "64";
+        list[1].cookie = "32_1";
+        list[2].cookie = "32_2";
+        list[3].cookie = "96";
+        list[4].cookie = "16";
+        TEST_REQUIRE(app::PackRectangles({96, 96}, list) == false);
+    }
+}
+
+int test_main(int argc, char* argv[])
+{
+    unit_test_unbounded();
+    unit_test_bounded();
     return 0;
 }

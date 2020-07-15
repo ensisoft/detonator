@@ -38,7 +38,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
-#include "graphics/resourcemap.h"
+#include "graphics/resource.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
@@ -51,6 +51,7 @@
 #include "editor/gui/animationwidget.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
+#include "editor/gui/dlgpackage.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -200,7 +201,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
 {
     auto workspace = std::make_unique<app::Workspace>();
 
-    gfx::SetResourceMap(workspace.get());
+    gfx::SetResourceLoader(workspace.get());
 
     if (!workspace->Load(dir))
     {
@@ -821,6 +822,12 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 void MainWindow::on_workspace_doubleClicked()
 {
     on_actionEditResource_triggered();
+}
+
+void MainWindow::on_actionPackageResources_triggered()
+{
+    DlgPackage dlg(this, *mWorkspace);
+    dlg.exec();
 }
 
 void MainWindow::refreshUI()

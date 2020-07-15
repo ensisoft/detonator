@@ -39,7 +39,7 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "graphics/resourcemap.h"
+#include "graphics/resource.h"
 #include "gamelib/gfxfactory.h"
 #include "resource.h"
 #include "utility.h"
@@ -58,7 +58,7 @@ namespace app
     class Workspace : public QAbstractTableModel,
                       public QAbstractFileEngineHandler,
                       public game::GfxFactory,
-                      public gfx::ResourceMap
+                      public gfx::ResourceLoader
     {
         Q_OBJECT
 
@@ -86,14 +86,8 @@ namespace app
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
-        // gfx::ResourceMap implementation
-        virtual std::string MapFilePath(gfx::ResourceMap::ResourceType type, const std::string& file) const override;
-        virtual gfx::FRect MapTextureBox(const std::string&, const std::string&, const gfx::FRect& box) const override
-        {
-            // return the texture box unmodified since we're not doing any
-            // funky texture lookups here.
-            return box;
-        }
+        // gfx::ResourceLoader implementation
+        virtual std::string ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const override;
 
         // Try to load the content of the workspace from the files in the given
         // directory.

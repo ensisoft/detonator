@@ -197,6 +197,16 @@ struct ComboBoxValueGetter
     {
         return cmb->currentText();
     }
+    operator int() const
+    {
+        const auto& str = cmb->currentText();
+        return str.toInt();
+    }
+    operator uint() const
+    {
+        const auto& str = cmb->currentText();
+        return str.toUInt();
+    }
     const QComboBox* cmb = nullptr;
 };
 
@@ -273,46 +283,55 @@ inline CheckboxGetter GetValue(const QCheckBox* check)
 inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
 { return SpinBoxValueGetter { spin }; }
 
-inline void SetProperty(app::Resource& res, const QString& name, const QVariant& prop)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QVariant& prop)
 {
     res.SetProperty(name, prop);
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QComboBox* cmb)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QComboBox* cmb)
 {
     res.SetProperty(name, cmb->currentText());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QLineEdit* edit)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QLineEdit* edit)
 {
     res.SetProperty(name, edit->text());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QDoubleSpinBox* spin)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QDoubleSpinBox* spin)
 {
     res.SetProperty(name, spin->value());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QSpinBox* spin)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QSpinBox* spin)
 {
     res.SetProperty(name, spin->value());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QCheckBox* chk)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QCheckBox* chk)
 {
     res.SetProperty(name, chk->isChecked());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const QGroupBox* chk)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const QGroupBox* chk)
 {
     res.SetProperty(name, chk->isChecked());
 }
-inline void SetProperty(app::Resource& res, const QString& name, const color_widgets::ColorSelector* color)
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const color_widgets::ColorSelector* color)
 {
     res.SetProperty(name, color->color());
 }
 
-template<typename T> inline
-void GetProperty(const app::Resource& res, const QString& name, T* out)
+template<typename Resource, typename T> inline
+void GetProperty(const Resource& res, const QString& name, T* out)
 {
     res.GetProperty(name, out);
 }
 
-inline void GetProperty(const app::Resource& res, const QString& name, QComboBox* cmb)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
 
@@ -320,7 +339,7 @@ inline void GetProperty(const app::Resource& res, const QString& name, QComboBox
     // doesn't exist or the value the property had before
     // is no longer available. (For example the combobox contains
     // resource names and the resource has been deleted)
-    cmb->setCurrentIndex(0);
+    //cmb->setCurrentIndex(0);
 
     QString text;
     if (res.GetProperty(name, &text))
@@ -330,7 +349,8 @@ inline void GetProperty(const app::Resource& res, const QString& name, QComboBox
             cmb->setCurrentIndex(index);
     }
 }
-inline void GetProperty(const app::Resource& res, const QString& name, QLineEdit* edit)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QLineEdit* edit)
 {
     QSignalBlocker s(edit);
 
@@ -338,7 +358,8 @@ inline void GetProperty(const app::Resource& res, const QString& name, QLineEdit
     if (res.GetProperty(name, &text))
         edit->setText(text);
 }
-inline void GetProperty(const app::Resource& res, const QString& name, QDoubleSpinBox* spin)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QDoubleSpinBox* spin)
 {
     QSignalBlocker s(spin);
 
@@ -347,7 +368,8 @@ inline void GetProperty(const app::Resource& res, const QString& name, QDoubleSp
         spin->setValue(value);
 
 }
-inline void GetProperty(const app::Resource& res, const QString& name, QSpinBox* spin)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QSpinBox* spin)
 {
     QSignalBlocker s(spin);
 
@@ -355,7 +377,8 @@ inline void GetProperty(const app::Resource& res, const QString& name, QSpinBox*
     if (res.GetProperty(name, &value))
         spin->setValue(value);
 }
-inline void GetProperty(const app::Resource& res, const QString& name, QCheckBox* chk)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QCheckBox* chk)
 {
     QSignalBlocker s(chk);
 
@@ -363,7 +386,8 @@ inline void GetProperty(const app::Resource& res, const QString& name, QCheckBox
     if (res.GetProperty(name, &value))
         chk->setChecked(value);
 }
-inline void GetProperty(const app::Resource& res, const QString& name, QGroupBox* chk)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, QGroupBox* chk)
 {
     QSignalBlocker s(chk);
 
@@ -371,13 +395,48 @@ inline void GetProperty(const app::Resource& res, const QString& name, QGroupBox
     if (res.GetProperty(name, &value))
         chk->setChecked(value);
 }
-inline void GetProperty(const app::Resource& res, const QString& name, color_widgets::ColorSelector* color)
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, color_widgets::ColorSelector* color)
 {
     QSignalBlocker s(color);
 
     QColor value;
     if (res.GetProperty(name, &value))
         color->setColor(value);
+}
+
+inline int GetCount(QListWidget* widget)
+{
+    return widget->count();
+}
+
+inline bool MustHaveInput(QLineEdit* line)
+{
+    const auto& str = line->text();
+    if (str.isEmpty())
+    {
+        line->setFocus();
+        return false;
+    }
+    return true;
+}
+inline bool MustHaveNumber(QComboBox* box)
+{
+    const auto& str = box->currentText();
+    if (str.isEmpty())
+    {
+        box->setFocus();
+        return false;
+    }
+    bool ok = false;
+    str.toInt(&ok);
+    return ok;
+}
+
+inline QString GetTrimmed(const QLineEdit* line)
+{
+    const auto& str = line->text();
+    return str.trimmed();
 }
 
 } // namespace

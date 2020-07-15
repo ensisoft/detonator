@@ -40,6 +40,7 @@
 #include <cstring>
 #include <random>
 #include <filesystem>
+#include <fstream>
 
 #include "math.h"
 #include "assert.h"
@@ -480,6 +481,18 @@ inline bool FileExists(const std::string& filename)
     const std::filesystem::path p(filename);
     return std::filesystem::exists(p);
 #endif
+}
+
+inline std::ifstream OpenBinaryInputStream(const std::string& filename)
+{
+#if defined(WINDOWS_OS)
+    std::ifstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
+#elif defined(POSIX_OS)
+    std::ifstream in(filename, std::ios::in | std::ios::binary);
+#else
+#  error unimplemented function
+#endif
+    return in;
 }
 
 } // base

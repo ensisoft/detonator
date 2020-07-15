@@ -28,8 +28,11 @@
 #  include <QString>
 #  include <QVariant>
 #  include <QJsonObject>
+#  include <QIcon>
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
+
+#include <memory>
 
 #include "base/assert.h"
 #include "graphics/drawable.h"
@@ -88,6 +91,23 @@ namespace app
         virtual QVariant GetProperty(const QString& name) const = 0;
         // Load the additional properies from the json object.
         virtual void LoadProperties(const QJsonObject& json) = 0;
+        // Make a duplicate of the current resource.
+        virtual std::unique_ptr<Resource> Clone() const = 0;
+
+        // helper to map the type to an icon in the application.
+        QIcon GetIcon() const
+        {
+            switch (GetType()) {
+                case Resource::Type::Material:
+                    return QIcon("icons:material.png");
+                case Resource::Type::ParticleSystem:
+                    return QIcon("icons:particle.png");
+                case Resource::Type::Animation:
+                    return QIcon("icons:animation.png");
+                default: break;
+            }
+            return QIcon();
+        }
 
         // helpers
         inline bool IsMaterial() const
@@ -242,6 +262,8 @@ namespace app
             else if (TypeValue == Resource::Type::Animation)
                 mProps = object["animation_" + mName].toObject().toVariantMap();
         }
+        virtual std::unique_ptr<Resource> Clone() const override
+        { return std::make_unique<GameResource>(*this); }
         Content* GetContent()
         { return &mContent; }
         const Content* GetContent() const

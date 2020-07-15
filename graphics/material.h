@@ -42,7 +42,7 @@
 
 #include "base/utility.h"
 #include "base/assert.h"
-#include "resourcemap.h"
+#include "resource.h"
 #include "bitmap.h"
 #include "color4f.h"
 #include "device.h"
@@ -100,10 +100,13 @@ namespace gfx
         // otherwise false.
         virtual bool FromJson(const nlohmann::json& object)
         { return false; }
-        // Map the texture box to an texture box within the
-        // texture source.
-        virtual FRect MapTextureBox(const FRect& box) const
-        { return box; }
+        // Begin packing the texture source into the packer.
+        virtual void BeginPacking(ResourcePacker* packer) const
+        {}
+        // Finish packing the texture source into the packer.
+        // Update the state with the details from the packer.
+        virtual void FinishPacking(const ResourcePacker* packer)
+        {}
     private:
     };
 
@@ -121,15 +124,7 @@ namespace gfx
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
             virtual std::string GetId() const override
-            {
-                if (mMappedFileName.empty())
-                    mMappedFileName = MapFilePath(ResourceMap::ResourceType::Texture, mFile);
-                // The ID is used to identify the resource on the device
-                // and in this case we're using the filename as the identifier.
-                // however since texture packing can happen we need to use the
-                // mapped filename as the identifier.
-                return mMappedFileName;
-            }
+            { return mFile; }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name)
@@ -155,24 +150,21 @@ namespace gfx
                 return base::JsonReadSafe(object, "file", &mFile) &&
                        base::JsonReadSafe(object, "name", &mName);
             }
-            virtual FRect MapTextureBox(const FRect& box) const override
+            virtual void BeginPacking(ResourcePacker* packer) const override
             {
-                if (mMappedFileName.empty())
-                    mMappedFileName = MapFilePath(ResourceMap::ResourceType::Texture, mFile);
-                // Use the original filename as the identifier in the
-                // mapped resource and do the texture box mapping based
-                // on that information.
-                // this mapping is done through the global resource mapper object.
-                return gfx::MapTextureBox(mMappedFileName, mFile, box);
+                packer->PackTexture(this, mFile);
             }
-            std::string GetFilename() const
+            virtual void FinishPacking(const ResourcePacker* packer) override
+            {
+                mFile = packer->GetPackedTextureId(this);
+            }
+
+            const std::string& GetFilename() const
             { return mFile; }
         private:
             std::string mFile;
             std::string mName;
         private:
-            // cached state. reduce continuous lookups
-            mutable std::string mMappedFileName;
         };
 
         // Source texture data from a bitmap
@@ -276,6 +268,25 @@ namespace gfx
                 mTextBuffer = std::move(ret.value());
                 return true;
             }
+            virtual void BeginPacking(ResourcePacker* packer) const override
+            {
+                const size_t num_texts = mTextBuffer.GetNumTexts();
+                for (size_t i=0; i<num_texts; ++i)
+                {
+                    const auto& text = mTextBuffer.GetText(i);
+                    packer->PackFont(&text, text.font);
+                }
+            }
+            virtual void FinishPacking(const ResourcePacker* packer) override
+            {
+                const size_t num_texts = mTextBuffer.GetNumTexts();
+                for (size_t i=0; i<num_texts; ++i)
+                {
+                    auto& text = mTextBuffer.GetText(i);
+                    text.font  = packer->GetPackedFontId(&text);
+                }
+            }
+
             gfx::TextBuffer& GetTextBuffer()
             { return mTextBuffer; }
             const gfx::TextBuffer& GetTextBuffer() const
@@ -331,7 +342,7 @@ namespace gfx
         // allow "invalid" material to be constructed.
         Material() = default;
 
-        // Make a deep copy of the material. 
+        // Make a deep copy of the material.
         Material(const Material& other);
 
         // Create the shader for this material on the given device.
@@ -420,7 +431,7 @@ namespace gfx
                         texture->Upload(bitmap->GetDataPtr(), width, height, format);
                         texture->EnableGarbageCollection(sampler.enable_gc);
                     }
-                    const auto& box = source->MapTextureBox(sampler.box);
+                    const auto& box = sampler.box;
                     const float x  = box.GetX();
                     const float y  = box.GetY();
                     const float sx = box.GetWidth();
@@ -759,6 +770,33 @@ namespace gfx
                 mat.mTextures.push_back(std::move(s));
             }
             return mat;
+        }
+
+        void BeginPacking(ResourcePacker* packer) const
+        {
+            packer->PackShader(this, GetShaderFile());
+            for (const auto& sampler : mTextures)
+            {
+                sampler.source->BeginPacking(packer);
+            }
+            for (const auto& sampler : mTextures)
+            {
+                const ResourcePacker::ObjectHandle handle = sampler.source.get();
+                packer->SetTextureBox(handle, sampler.box);
+            }
+        }
+        void FinishPacking(const ResourcePacker* packer)
+        {
+            mShaderFile = packer->GetPackedShaderId(this);
+            for (auto& sampler : mTextures)
+            {
+                sampler.source->FinishPacking(packer);
+            }
+            for (auto& sampler : mTextures)
+            {
+                const ResourcePacker::ObjectHandle handle = sampler.source.get();
+                sampler.box = packer->GetPackedTextureBox(handle);
+            }
         }
 
         // Deep copy of the material. Can be a bit expensive.

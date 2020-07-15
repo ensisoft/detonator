@@ -80,16 +80,7 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
     }
     else if (role == Qt::DecorationRole && index.column() == 0)
     {
-        switch (res->GetType())
-        {
-            case Resource::Type::Material:
-                return QIcon("icons:material.png");
-            case Resource::Type::ParticleSystem:
-                return QIcon("icons:particle.png");
-            case Resource::Type::Animation:
-                return QIcon("icons:animation.png");
-            default: break;
-        }
+        return res->GetIcon();
     }
     return QVariant();
 }
@@ -210,7 +201,7 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     return ret;
 }
 
-std::string Workspace::MapFilePath(gfx::ResourceMap::ResourceType type, const std::string& file) const
+std::string Workspace::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
 {
     // see comments in AddFile about resource path mapping.
     // this method is only called by the graphics/ subsystem

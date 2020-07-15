@@ -104,6 +104,7 @@ namespace gui
         void on_actionImagePacker_triggered();
         void on_workspace_customContextMenuRequested(QPoint);
         void on_workspace_doubleClicked();
+        void on_actionPackageResources_triggered();
 
         void actionWindowFocus_triggered();
 
