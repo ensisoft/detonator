@@ -63,6 +63,12 @@ bool AnimationNode::Update(float dt)
     if (mDrawable)
         mDrawable->Update(dt);
 
+    if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
+    {
+        if (!p->IsAlive())
+            p->Restart();
+    }
+
     if (mMaterial)
         mMaterial->SetRuntime(mTime - mStartTime);
 
@@ -72,6 +78,10 @@ bool AnimationNode::Update(float dt)
 void AnimationNode::Reset()
 {
     mTime = 0.0f;
+    if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
+    {
+        p->Restart();
+    }
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const
