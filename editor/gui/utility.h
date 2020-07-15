@@ -195,7 +195,7 @@ struct ComboBoxValueGetter
     }
     operator QString() const
     {
-        return cmb->currentText();
+        return cmb->currentText().trimmed();
     }
     operator int() const
     {
@@ -214,11 +214,11 @@ struct LineEditValueGetter
 {
     operator QString() const
     {
-        return edit->text();
+        return edit->text().trimmed();
     }
     operator std::string() const
     {
-        return app::ToUtf8(edit->text());
+        return app::ToUtf8(edit->text().trimmed());
     }
     const QLineEdit* edit = nullptr;
 };
@@ -431,12 +431,6 @@ inline bool MustHaveNumber(QComboBox* box)
     bool ok = false;
     str.toInt(&ok);
     return ok;
-}
-
-inline QString GetTrimmed(const QLineEdit* line)
-{
-    const auto& str = line->text();
-    return str.trimmed();
 }
 
 } // namespace

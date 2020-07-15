@@ -341,12 +341,11 @@ void MaterialWidget::on_actionStop_triggered()
 
 void MaterialWidget::on_actionSave_triggered()
 {
-    const auto& name = mUI.materialName->text();
-    if (name.isEmpty())
-    {
-        mUI.materialName->setFocus();
+    if (!MustHaveInput(mUI.materialName))
         return;
-    }
+
+    const QString& name = GetValue(mUI.materialName);
+
     if (mWorkspace->HasMaterial(name))
     {
         QMessageBox msg(this);

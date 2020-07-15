@@ -106,8 +106,8 @@ void DlgPackage::on_btnStart_clicked()
     else if (!MustHaveNumber(mUI.cmbMaxTexWidth))
         return;
 
-    const auto& dir  = GetTrimmed(mUI.editOutDir);
-    const auto& name = GetTrimmed(mUI.editPckName);
+    const QString& dir  = GetValue(mUI.editOutDir);
+    const QString& name = GetValue(mUI.editPckName);
     const auto& out  = app::JoinPath(dir, name);
     if (!QDir(out).isEmpty())
     {

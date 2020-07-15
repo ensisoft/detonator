@@ -251,12 +251,10 @@ void ParticleEditorWidget::on_actionPause_triggered()
 
 void ParticleEditorWidget::on_actionSave_triggered()
 {
-    const auto& name = mUI.name->text();
-    if (name.isEmpty())
-    {
-        mUI.name->setFocus();
+    if  (!MustHaveInput(mUI.name))
         return;
-    }
+
+    const QString& name = GetValue(mUI.name);
 
     if (mWorkspace->HasParticleSystem(name))
     {

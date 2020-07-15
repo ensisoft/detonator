@@ -893,12 +893,10 @@ void AnimationWidget::on_actionStop_triggered()
 
 void AnimationWidget::on_actionSave_triggered()
 {
-    const auto& name = mUI.name->text();
-    if (name.isEmpty())
-    {
-        mUI.name->setFocus();
+    if (!MustHaveInput(mUI.name))
         return;
-    }
+    const QString& name = GetValue(mUI.name);
+
     if (mState.workspace->HasResource(name, app::Resource::Type::Animation))
     {
         QMessageBox msg(this);
