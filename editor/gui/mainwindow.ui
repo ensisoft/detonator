@@ -98,6 +98,8 @@
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewAnimation"/>
     <addaction name="separator"/>
+    <addaction name="actionSelectResourceForEditing"/>
+    <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -487,6 +489,18 @@
    </property>
    <property name="text">
     <string>Package Resources ...</string>
+   </property>
+  </action>
+  <action name="actionSelectResourceForEditing">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Resource ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>

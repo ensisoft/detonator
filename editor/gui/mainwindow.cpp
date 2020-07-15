@@ -52,6 +52,7 @@
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
 #include "editor/gui/dlgpackage.h"
+#include "editor/gui/dlgopen.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -828,6 +829,29 @@ void MainWindow::on_actionPackageResources_triggered()
 {
     DlgPackage dlg(this, *mWorkspace);
     dlg.exec();
+}
+
+void MainWindow::on_actionSelectResourceForEditing_triggered()
+{
+    DlgOpen dlg(this, *mWorkspace);
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        app::Resource* res = dlg.GetSelected();
+        if (res == nullptr)
+            return;
+        switch (res->GetType())
+        {
+            case app::Resource::Type::Material:
+                showWidget(new MaterialWidget(mWorkspace.get(), *res), false);
+                break;
+            case app::Resource::Type::ParticleSystem:
+                showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), false);
+                break;
+            case app::Resource::Type::Animation:
+                showWidget(new AnimationWidget(mWorkspace.get(), *res), false);
+                break;
+        }
+    }
 }
 
 void MainWindow::refreshUI()
