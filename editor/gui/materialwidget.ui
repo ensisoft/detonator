@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1338</width>
-    <height>900</height>
+    <width>1302</width>
+    <height>932</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -516,50 +516,21 @@
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="1" column="2">
-              <widget class="QLineEdit" name="textureWidth">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
+             <item row="5" column="2">
+              <widget class="QPushButton" name="btnEditTextureMap">
+               <property name="text">
+                <string>Edit Texture</string>
                </property>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_38">
+              <widget class="QLabel" name="label_37">
                <property name="text">
-                <string>Depth</string>
+                <string>Height</string>
                </property>
               </widget>
              </item>
              <item row="3" column="2">
-              <widget class="QLineEdit" name="textureDepth">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_36">
-               <property name="text">
-                <string>Width</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
               <widget class="QLineEdit" name="textureHeight">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -575,14 +546,20 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_37">
-               <property name="text">
-                <string>Height</string>
+             <item row="2" column="2">
+              <widget class="QLineEdit" name="textureWidth">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="1" column="3" rowspan="4">
+             <item row="2" column="3" rowspan="4">
               <widget class="QLabel" name="texturePreview">
                <property name="minimumSize">
                 <size>
@@ -604,10 +581,53 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="2">
-              <widget class="QPushButton" name="btnEditTextureMap">
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_38">
                <property name="text">
-                <string>Edit Texture</string>
+                <string>Depth</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QLineEdit" name="textureDepth">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2" colspan="2">
+              <widget class="QLineEdit" name="textureHandle">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>ID</string>
                </property>
               </widget>
              </item>
@@ -630,11 +650,11 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <layout class="QGridLayout" name="gridLayout_4">
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_19">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_18">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -642,7 +662,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Height</string>
+                <string>X pos</string>
                </property>
               </widget>
              </item>
@@ -659,8 +679,11 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QDoubleSpinBox" name="rectH">
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="rectY">
+               <property name="minimum">
+                <double>-100.000000000000000</double>
+               </property>
                <property name="maximum">
                 <double>100.000000000000000</double>
                </property>
@@ -669,9 +692,6 @@
                </property>
                <property name="stepType">
                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-               <property name="value">
-                <double>1.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -704,11 +724,8 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="rectY">
-               <property name="minimum">
-                <double>-100.000000000000000</double>
-               </property>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="rectH">
                <property name="maximum">
                 <double>100.000000000000000</double>
                </property>
@@ -717,6 +734,22 @@
                </property>
                <property name="stepType">
                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_19">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Height</string>
                </property>
               </widget>
              </item>
@@ -736,16 +769,10 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+             <item row="4" column="1">
+              <widget class="QPushButton" name="btnResetTextureRect">
                <property name="text">
-                <string>X pos</string>
+                <string>Reset</string>
                </property>
               </widget>
              </item>
@@ -857,6 +884,7 @@
   <tabstop>btnNewTextTextureMap</tabstop>
   <tabstop>btnDelTextureMap</tabstop>
   <tabstop>btnAddTextureMap</tabstop>
+  <tabstop>textureHandle</tabstop>
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
@@ -865,6 +893,7 @@
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
+  <tabstop>btnResetTextureRect</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>time</tabstop>
  </tabstops>

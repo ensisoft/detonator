@@ -514,6 +514,18 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
     }
 }
 
+void MaterialWidget::on_btnResetTextureRect_clicked()
+{
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    const gfx::FRect rect(0.0f, 0.0f, 1.0f, 1.0f);
+    mMaterial.SetTextureRect(row, rect);
+
+    on_textures_currentRowChanged(row);
+}
+
 void MaterialWidget::on_btnNewTextTextureMap_clicked()
 {
     // anything set in this text buffer will be default
@@ -567,6 +579,7 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
         mUI.textureDepth->setText("");
         mUI.btnDelTextureMap->setEnabled(false);
         mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
+        mUI.textureHandle->setText("");
         return;
     }
 
@@ -602,6 +615,7 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     mUI.rectY->setValue(rect.GetY());
     mUI.rectW->setValue(rect.GetWidth());
     mUI.rectH->setValue(rect.GetHeight());
+    mUI.textureHandle->setText(app::FromUtf8(source.GetId()));
 
     mUI.textureProp->setEnabled(true);
     mUI.textureRect->setEnabled(true);
