@@ -108,7 +108,7 @@ void MainWindow::loadState()
     const auto show_toolbar   = settings.getValue("MainWindow", "show_toolbar", true);
     const auto show_eventlog  = settings.getValue("MainWindow", "show_event_log", true);
     const auto show_workspace = settings.getValue("MainWindow", "show_workspace", true);
-
+    const auto& dock_state    = settings.getValue("MainWindow", "toolbar_and_dock_state", QByteArray());
 #if defined(POSIX_OS)
     mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("/usr/bin/gimp"));
     mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
@@ -151,6 +151,9 @@ void MainWindow::loadState()
                         "See the application log for more details.").arg(workspace));
         msg.exec();
     }
+
+    if (!dock_state.isEmpty())
+        QMainWindow::restoreState(dock_state);
 }
 
 void MainWindow::focusWidget(const MainWidget* widget)
@@ -1042,6 +1045,10 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
+
+    // QMainWindow::saveState saves the current state of the mainwindow toolbars
+    // and dockwidgets.
+    settings.setValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     return settings.Save();
 }
 
