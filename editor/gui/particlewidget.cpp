@@ -61,6 +61,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 
     // get the current list of materials from the workspace
     mUI.materials->addItems(workspace->ListMaterials());
+    mUI.materials->setCurrentIndex(mUI.materials->findText("White"));
 
     // Set default transform state here. if there's a previous user setting
     // they'll get loaded in loadState and will override these values.
@@ -486,8 +487,8 @@ void ParticleEditorWidget::resourceToBeDeleted(const app::Resource* resource)
         mUI.materials->removeItem(carcass_index);
         if (current_index == carcass_index)
         {
-            const auto checkerboard = mUI.materials->findText("Checkerboard");
-            mUI.materials->setCurrentIndex(checkerboard);
+            const auto index = mUI.materials->findText("White");
+            mUI.materials->setCurrentIndex(index);
             WARN("Particle system '%1' uses material '%2' that is deleted.",
                 mUI.name->text(), current_material_name);
         }
