@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1376</width>
-    <height>938</height>
+    <width>1406</width>
+    <height>1205</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,6 +84,9 @@
             <layout class="QGridLayout" name="gridLayout_4">
              <item row="0" column="0">
               <widget class="QLabel" name="label_18">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 200, 0)</string>
+               </property>
                <property name="text">
                 <string>X pos</string>
                </property>
@@ -110,6 +113,9 @@
              </item>
              <item row="0" column="2">
               <widget class="QLabel" name="label_20">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 200, 0)</string>
+               </property>
                <property name="text">
                 <string>X Scale</string>
                </property>
@@ -142,6 +148,9 @@
              </item>
              <item row="1" column="0" rowspan="2">
               <widget class="QLabel" name="label_21">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,0, 0)</string>
+               </property>
                <property name="text">
                 <string>Y pos</string>
                </property>
@@ -168,6 +177,9 @@
              </item>
              <item row="2" column="2">
               <widget class="QLabel" name="label_19">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,0, 0)</string>
+               </property>
                <property name="text">
                 <string>Y Scale</string>
                </property>
@@ -403,67 +415,93 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="title">
            <string>Visual properties</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2">
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Material</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Style</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="renderPass">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="cName">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Pass </string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="cName">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Drawable</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="drawables"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Material</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="materials">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Pass </string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="renderPass">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_27">
+               <property name="text">
+                <string>Layer</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
               <widget class="QSpinBox" name="layer">
                <property name="minimum">
                 <number>-100</number>
@@ -473,39 +511,50 @@
                </property>
               </widget>
              </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Style</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="renderStyle"/>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Line width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QDoubleSpinBox" name="lineWidth">
+               <property name="minimum">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
-           <item row="4" column="1">
-            <widget class="QComboBox" name="renderStyle"/>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="materials">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_27">
+           <item>
+            <widget class="QCheckBox" name="chkUpdateDrawable">
              <property name="text">
-              <string>Layer</string>
+              <string>Update drawable</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_5">
+           <item>
+            <widget class="QCheckBox" name="chkUpdateMaterial">
              <property name="text">
-              <string>Line width</string>
+              <string>Update material</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
-            <widget class="QDoubleSpinBox" name="lineWidth">
-             <property name="minimum">
-              <double>1.000000000000000</double>
+           <item>
+            <widget class="QCheckBox" name="chkDoesRender">
+             <property name="text">
+              <string>Generate draw packets</string>
              </property>
             </widget>
            </item>
@@ -843,11 +892,13 @@
   <tabstop>minus90</tabstop>
   <tabstop>resetTransform</tabstop>
   <tabstop>cName</tabstop>
+  <tabstop>drawables</tabstop>
   <tabstop>materials</tabstop>
   <tabstop>renderPass</tabstop>
   <tabstop>layer</tabstop>
   <tabstop>renderStyle</tabstop>
   <tabstop>lineWidth</tabstop>
+  <tabstop>chkDoesRender</tabstop>
   <tabstop>cTranslateX</tabstop>
   <tabstop>cTranslateY</tabstop>
   <tabstop>cSizeX</tabstop>
@@ -855,9 +906,9 @@
   <tabstop>cRotation</tabstop>
   <tabstop>cPlus90</tabstop>
   <tabstop>cMinus90</tabstop>
-  <tabstop>time</tabstop>
-  <tabstop>zoom</tabstop>
   <tabstop>showGrid</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>time</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

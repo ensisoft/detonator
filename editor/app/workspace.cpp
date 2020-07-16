@@ -537,6 +537,10 @@ QStringList Workspace::ListMaterials() const
 QStringList Workspace::ListDrawables() const
 {
     QStringList list;
+    list << "__Primitive_Rectangle";
+    list << "__Primitive_Triangle";
+    list << "__Primitive_Circle";
+    list << "__Primitive_Arrow";
     for (const auto& res : mResources)
     {
         if (res->GetType() == Resource::Type::ParticleSystem)

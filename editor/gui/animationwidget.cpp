@@ -524,6 +524,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.materials->addItems(workspace->ListMaterials());
     mUI.materials->blockSignals(false);
 
+    mUI.drawables->blockSignals(true);
+    mUI.drawables->addItems(workspace->ListDrawables());
+    mUI.drawables->blockSignals(false);
+
     mUI.name->setText("My Animation");
 
     mUI.tree->SetModel(mTreeModel.get());
@@ -1071,6 +1075,15 @@ void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
     }
 }
 
+void AnimationWidget::on_drawables_currentIndexChanged(const QString& name)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& drawable_name = app::ToUtf8(name);
+        node->SetDrawable(drawable_name, mState.workspace->MakeDrawable(drawable_name));
+    }
+}
+
 void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
@@ -1127,6 +1140,8 @@ void AnimationWidget::newResourceAvailable(const app::Resource* resource)
     {
         QAction* action = mDrawableMenu->addAction(resource->GetName());
         connect(action, &QAction::triggered, this, &AnimationWidget::placeNewParticleSystem);
+
+        mUI.drawables->addItem(resource->GetName());
     }
 }
 
@@ -1143,7 +1158,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
             const auto& material = app::FromUtf8(component.GetMaterialName());
             if (material == resource->GetName())
             {
-                WARN("Component '%1' uses a material '%2' that is deleted.",
+                WARN("Animation node '%1' uses a material '%2' that is deleted.",
                     component.GetName(), resource->GetName());
                 component.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
             }
@@ -1165,9 +1180,35 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
     else if (resource->GetType() == app::Resource::Type::ParticleSystem)
     {
         // todo: what do do with drawables that are no longer available ?
+        const auto index = mUI.drawables->findText(resource->GetName());
+        mUI.drawables->blockSignals(true);
+        mUI.drawables->removeItem(index);
+        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+        {
+            auto& node = mState.animation.GetNode(i);
+            const auto& drawable = app::FromUtf8(node.GetDrawableName());
+            if (drawable == resource->GetName())
+            {
+                WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
+                    node.GetName(), resource->GetName());
+                node.SetDrawable("__Primitive_Rectangle", mState.workspace->MakeDrawable("__Primitive_Rectangle"));
+            }
+        }
+        if (auto* node = GetCurrentNode())
+        {
+            // either this material still exists or the component's material
+            // was changed in the loop above.
+            // in either case the material name should be found in the current
+            // list of material names in the UI combobox.
+            const auto& material = app::FromUtf8(node->GetDrawableName());
+            const auto index = mUI.drawables->findText(material);
+            ASSERT(index != -1);
+            mUI.drawables->setCurrentIndex(index);
+        }
+        mUI.drawables->blockSignals(false);
 
+        // rebuild the drawable menu
         mDrawableMenu->clear();
-        // update the drawable menu with drawable items.
         for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
         {
             const auto& resource = mState.workspace->GetResource(i);
@@ -1289,6 +1330,28 @@ void AnimationWidget::on_cName_textChanged(const QString& text)
     item->SetText(text);
 
     mUI.tree->Update();
+}
+
+void AnimationWidget::on_chkUpdateMaterial_stateChanged(int state)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNode::Flags::UpdateMaterial, state);
+    }
+}
+void AnimationWidget::on_chkUpdateDrawable_stateChanged(int state)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNode::Flags::UpdateDrawable, state);
+    }
+}
+void AnimationWidget::on_chkDoesRender_stateChanged(int state)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNode::Flags::DoesRender, state);
+    }
 }
 
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
@@ -1486,12 +1549,16 @@ void AnimationWidget::updateCurrentNodeProperties()
         SetValue(mUI.renderStyle, node->GetRenderStyle());
         SetValue(mUI.layer, node->GetLayer());
         SetValue(mUI.materials, node->GetMaterialName());
+        SetValue(mUI.drawables, node->GetDrawableName());
         SetValue(mUI.cTranslateX, translate.x);
         SetValue(mUI.cTranslateY, translate.y);
         SetValue(mUI.cSizeX, size.x);
         SetValue(mUI.cSizeY, size.y);
         SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
         SetValue(mUI.lineWidth, node->GetLineWidth());
+        SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNode::Flags::UpdateMaterial));
+        SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNode::Flags::UpdateDrawable));
+        SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNode::Flags::DoesRender));
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
     }

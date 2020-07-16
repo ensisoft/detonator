@@ -80,6 +80,7 @@ namespace gui
         void on_cPlus90_clicked();
         void on_cMinus90_clicked();
         void on_materials_currentIndexChanged(const QString& name);
+        void on_drawables_currentIndexChanged(const QString& name);
         void on_renderPass_currentIndexChanged(const QString& name);
         void on_renderStyle_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
@@ -90,6 +91,9 @@ namespace gui
         void on_cTranslateY_valueChanged(double value);
         void on_cRotation_valueChanged(double value);
         void on_cName_textChanged(const QString& text);
+        void on_chkUpdateMaterial_stateChanged(int);
+        void on_chkUpdateDrawable_stateChanged(int);
+        void on_chkDoesRender_stateChanged(int);
 
         void currentComponentRowChanged();
         void placeNewParticleSystem();
