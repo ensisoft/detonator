@@ -45,22 +45,16 @@ AnimationNode::AnimationNode()
 {
     mId = base::RandomString(10);
     mBitFlags.set(Flags::VisibleInEditor, true);
+    mBitFlags.set(Flags::DoesRender, true);
+    mBitFlags.set(Flags::UpdateMaterial, true);
+    mBitFlags.set(Flags::UpdateDrawable, true);
 }
 
-bool AnimationNode::Update(float dt)
+void AnimationNode::Update(float dt)
 {
-    // disable this for now, need to figure out the time/timeline
-    // related functionality.
-    /*
-    mTime += dt;
-    if (mTime < mStartTime)
-        return true;
-    if (mTime - mStartTime > mLifetime)
-        return false;
-    */
     mTime += dt;
 
-    if (mDrawable)
+    if (TestFlag(Flags::UpdateDrawable) && mDrawable)
         mDrawable->Update(dt);
 
     if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
@@ -69,13 +63,11 @@ bool AnimationNode::Update(float dt)
             p->Restart();
     }
 
-    if (mMaterial)
+    if (TestFlag(Flags::UpdateMaterial) && mMaterial)
         mMaterial->SetRuntime(mTime - mStartTime);
-
-    return true;
 }
 
-void AnimationNode::Reset()
+void AnimationNode::ResetTime()
 {
     mTime = 0.0f;
     if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
@@ -232,20 +224,25 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
             if (!node)
                 return;
 
+            // always push the node's transform, it might have children that
+            // do render.
             mTransform.Push(node->GetNodeTransform());
-            mTransform.Push(node->GetModelTransform());
+            // if it doesn't render then no draw packets are generated
+            if (node->TestFlag(AnimationNode::Flags::DoesRender))
+            {
+                mTransform.Push(node->GetModelTransform());
 
-            DrawPacket packet;
-            packet.material  = node->GetMaterial();
-            packet.drawable  = node->GetDrawable();
-            packet.layer     = node->GetLayer();
-            packet.transform = mTransform.GetAsMatrix();
+                DrawPacket packet;
+                packet.material  = node->GetMaterial();
+                packet.drawable  = node->GetDrawable();
+                packet.layer     = node->GetLayer();
+                packet.transform = mTransform.GetAsMatrix();
+                if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
+                    mPackets.push_back(packet);
 
-            if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                mPackets.push_back(packet);
-
-            // pop the model transform
-            mTransform.Pop();
+                // pop the model transform
+                mTransform.Pop();
+            }
 
             // append any extra packets if needed.
             if (mHook)
@@ -295,21 +292,12 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
     //transform.Pop();
 }
 
-bool Animation::Update(float dt)
+void Animation::Update(float dt)
 {
-    bool alive = false;
-
     for (auto& node : mNodes)
     {
-        if (node->Update(dt))
-            alive = true;
+        node->Update(dt);
     }
-    return alive;
-}
-
-bool Animation::IsExpired() const
-{
-    return false;
 }
 
 AnimationNode* Animation::AddNode(AnimationNode&& node)
@@ -432,7 +420,7 @@ void Animation::Reset()
 {
     for (auto& node : mNodes)
     {
-        node->Reset();
+        node->ResetTime();
     }
 }
 
@@ -593,15 +581,18 @@ glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node
     return visitor.GetResult();
 }
 
-void Animation::Prepare(const GfxFactory& loader)
+bool Animation::Prepare(const GfxFactory& loader)
 {
+    bool all_ok = true;
     for (auto& node : mNodes)
     {
         if (!node->Prepare(loader))
         {
             WARN("Node '%1' failed to prepare.", node->GetName());
+            all_ok = false;
         }
     }
+    return all_ok;
 }
 
 Animation& Animation::operator=(const Animation& other)

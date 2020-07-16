@@ -65,7 +65,13 @@ namespace game
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
-            VisibleInEditor
+            VisibleInEditor,
+            // Whether the node should generate render packets or not.
+            DoesRender,
+            // Whether the node should update material or not
+            UpdateMaterial,
+            // Whether the node should update drawable or not
+            UpdateDrawable,
         };
 
         // This will construct an "empty" node that cannot be
@@ -158,9 +164,12 @@ namespace game
         base::bitflag<Flags>& GetFlags()
         { return mBitFlags; }
 
-        bool Update(float dt);
+        // Update node, i.e. its material and drawable if the relevant
+        // update flags are set.
+        void Update(float dt);
 
-        void Reset();
+        // Reset node's accumulated time to 0.
+        void ResetTime();
 
         // Get this node's transformation that applies
         // to the hieararchy of nodes.
@@ -264,9 +273,7 @@ namespace game
 
         // Update the animation and it's nodes.
         // Triggers the actions and events specified on the timeline.
-        bool Update(float dt);
-
-        bool IsExpired() const;
+        void Update(float dt);
 
         // Add a new animation node. Returns pointer to the node
         // that was added to the animation.
@@ -320,7 +327,7 @@ namespace game
         void Reset();
 
         // Prepare and load the runtime resources if not yet loaded.
-        void Prepare(const GfxFactory& loader);
+        bool Prepare(const GfxFactory& loader);
 
         // Serialize the animation into JSON.
         nlohmann::json ToJson() const;
