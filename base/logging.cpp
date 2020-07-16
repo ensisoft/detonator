@@ -86,9 +86,9 @@ CursesLogger::CursesLogger()
     scrollok(stdscr, TRUE);
 
     // init some colors
-    init_pair(1+(short)LogEvent::Debug, COLOR_YELLOW, -1);
-    init_pair(1+(short)LogEvent::Info,  COLOR_GREEN, -1);
-    init_pair(1+(short)LogEvent::Warning, COLOR_CYAN, -1);
+    init_pair(1+(short)LogEvent::Debug, COLOR_CYAN, -1);
+    init_pair(1+(short)LogEvent::Info,  COLOR_WHITE, -1);
+    init_pair(1+(short)LogEvent::Warning, COLOR_YELLOW, -1);
     init_pair(1+(short)LogEvent::Error, COLOR_RED, -1);
 #endif
 }
