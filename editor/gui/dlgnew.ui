@@ -7,17 +7,27 @@
     <x>0</x>
     <y>0</y>
     <width>708</width>
-    <height>279</height>
+    <height>264</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Create New</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/16x16_ico_png/wand.png</normaloff>:/16x16_ico_png/wand.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Create new ...</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
