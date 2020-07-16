@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <neargye/magic_enum.hpp>
 #  include <private/qfsfileengine_p.h> // private in Qt5
 #  include <QCoreApplication>
 #  include <QtAlgorithms>
@@ -127,6 +128,14 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
     if (name == "Checkerboard")
         return std::make_shared<gfx::Material>(gfx::TextureMap("app://textures/Checkerboard.png"));
 
+    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
+    for (const auto& val : values)
+    {
+        const std::string enum_name(magic_enum::enum_name(val));
+        if (enum_name == name)
+            return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color4f(val)));
+    }
+
 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
     const gfx::Material* content = nullptr;
@@ -171,13 +180,13 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     // However it's also possible that the particle engines are shared and each
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
-    if (name == "__Primitive_Rectangle")
+    if (name == "Rectangle")
         return std::make_shared<gfx::Rectangle>();
-    else if (name == "__Primitive_Triangle")
+    else if (name == "Triangle")
         return std::make_shared<gfx::Triangle>();
-    else if (name == "__Primitive_Circle")
+    else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
-    else if (name == "__Primitive_Arrow")
+    else if (name == "Arrow")
         return std::make_shared<gfx::Arrow>();
 
     // we have only particle engines right now as drawables
@@ -526,6 +535,16 @@ QStringList Workspace::ListMaterials() const
     QStringList list;
     list << "Checkerboard";
 
+    QStringList colors;
+    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
+    for (const auto& val : values)
+    {
+        const std::string name(magic_enum::enum_name(val));
+        colors << FromUtf8(name);
+    }
+    colors.sort();
+    list << colors;
+
     for (const auto& res : mResources)
     {
         if (res->GetType() == Resource::Type::Material)
@@ -537,10 +556,11 @@ QStringList Workspace::ListMaterials() const
 QStringList Workspace::ListDrawables() const
 {
     QStringList list;
-    list << "__Primitive_Rectangle";
-    list << "__Primitive_Triangle";
-    list << "__Primitive_Circle";
-    list << "__Primitive_Arrow";
+    list << "Arrow";
+    list << "Circle";
+    list << "Rectangle";
+    list << "Triangle";
+
     for (const auto& res : mResources)
     {
         if (res->GetType() == Resource::Type::ParticleSystem)
@@ -551,8 +571,6 @@ QStringList Workspace::ListDrawables() const
 
 bool Workspace::HasMaterial(const QString& name) const
 {
-    if (name == "Checkerboard")
-        return true;
     return HasResource(name, Resource::Type::Material);
 }
 

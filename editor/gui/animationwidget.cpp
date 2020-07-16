@@ -943,7 +943,7 @@ void AnimationWidget::on_actionSave_triggered()
 
 void AnimationWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Rectangle"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Rectangle"));
 
     mUI.actionNewRect->setChecked(true);
     mUI.actionNewCircle->setChecked(false);
@@ -953,7 +953,7 @@ void AnimationWidget::on_actionNewRect_triggered()
 
 void AnimationWidget::on_actionNewCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Circle"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Circle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(true);
@@ -963,7 +963,7 @@ void AnimationWidget::on_actionNewCircle_triggered()
 
 void AnimationWidget::on_actionNewTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Triangle"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Triangle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -973,7 +973,7 @@ void AnimationWidget::on_actionNewTriangle_triggered()
 
 void AnimationWidget::on_actionNewArrow_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "__Primitive_Arrow"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Arrow"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -1191,7 +1191,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
             {
                 WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
                     node.GetName(), resource->GetName());
-                node.SetDrawable("__Primitive_Rectangle", mState.workspace->MakeDrawable("__Primitive_Rectangle"));
+                node.SetDrawable("Rectangle", mState.workspace->MakeDrawable("Rectangle"));
             }
         }
         if (auto* node = GetCurrentNode())
