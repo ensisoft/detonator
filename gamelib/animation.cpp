@@ -436,12 +436,16 @@ void Animation::Reset()
     }
 }
 
-AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
+void Animation::CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,
+    std::vector<glm::vec2>* hitbox_positions)
 {
     class Visitor : public RenderTree::Visitor
     {
     public:
-        Visitor(const glm::vec4& point) : mHitPoint(point)
+        Visitor(const glm::vec4& point, std::vector<AnimationNode*>* hits, std::vector<glm::vec2>* boxes)
+            : mHitPoint(point)
+            , mHits(hits)
+            , mBoxes(boxes)
         {}
 
         virtual void EnterNode(AnimationNode* node) override
@@ -462,11 +466,12 @@ AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
                 hitpoint_in_node.y >= 0.0f &&
                 hitpoint_in_node.y < 1.0f)
             {
-                const auto& size = node->GetSize();
-                Hit hit;
-                hit.node = node;
-                hit.point = glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y);
-                mHitNodes.push_back(hit);
+                mHits->push_back(node);
+                if (mBoxes)
+                {
+                    const auto& size = node->GetSize();
+                    mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
+                }
             }
             mTransform.Pop();
         }
@@ -477,37 +482,24 @@ AnimationNode* Animation::CoarseHitTest(float x, float y, glm::vec2* hitbox_pos)
 
             mTransform.Pop();
         }
-
-        AnimationNode* GetBestMatch(glm::vec2* hitbox_pos)
-        {
-            if (mHitNodes.empty())
-                return nullptr;
-
-            auto match = mHitNodes[0];
-            for (size_t i=1; i<mHitNodes.size(); ++i)
-            {
-                if (mHitNodes[i].node->GetLayer() > match.node->GetLayer())
-                    match = mHitNodes[i];
-            }
-            if (hitbox_pos)
-                *hitbox_pos = match.point;
-            return match.node;
-        }
-
     private:
         const glm::vec4 mHitPoint;
         gfx::Transform mTransform;
-        struct Hit {
-            AnimationNode* node = nullptr;
-            glm::vec2 point;
-        };
-        std::vector<Hit> mHitNodes;
+        std::vector<AnimationNode*>* mHits = nullptr;
+        std::vector<glm::vec2>* mBoxes = nullptr;
     };
 
-    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f));
+    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
     mRenderTree.PreOrderTraverse(visitor);
+}
 
-    return visitor.GetBestMatch(hitbox_pos);
+void Animation::CoarseHitTest(float x, float y, std::vector<const AnimationNode*>* hits,
+    std::vector<glm::vec2>* hitbox_positions) const
+{
+    std::vector<AnimationNode*> nodes;
+    const_cast<Animation*>(this)->CoarseHitTest(x, y, &nodes, hitbox_positions);
+    for (auto* node : nodes)
+        hits->push_back(node);
 }
 
 glm::vec2 Animation::MapCoordsFromNode(float x, float y, const AnimationNode* node) const

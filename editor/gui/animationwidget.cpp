@@ -606,26 +606,45 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
                 mouse_widget_position_y, 1.0f, 1.0f);
 
-            glm::vec2 hitpos;
-            game::AnimationNode* hit = mState.animation.CoarseHitTest(mouse_view_position.x,
-                mouse_view_position.y, &hitpos);
-            //DEBUG("hitpos: %1,%2", hitpos.x, hitpos.y);
+            std::vector<game::AnimationNode*> nodes_hit;
+            std::vector<glm::vec2> hitbox_coords;
+            mState.animation.CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
+                &nodes_hit, &hitbox_coords);
 
-            const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
-
-            if (hit == nullptr)
+            // if nothing was hit clear the selection.
+            if (nodes_hit.empty())
             {
                 mUI.tree->ClearSelection();
                 mCurrentTool.reset(new CameraTool(mState));
             }
             else
             {
+                const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
+                const game::AnimationNode* previous  = selected
+                    ? static_cast<const game::AnimationNode*>(selected->GetUserData())
+                    : nullptr;
+
+                // if the currently selected node is among the ones being hit
+                // then retain that selection.
+                // otherwise select the last one of the list. (the rightmost child)
+                game::AnimationNode* hit = nodes_hit.back();
+                glm::vec2 hitpos = hitbox_coords.back();
+                for (size_t i=0; i<nodes_hit.size(); ++i)
+                {
+                    if (nodes_hit[i] == previous)
+                    {
+                        hit = nodes_hit[i];
+                        hitpos = hitbox_coords[i];
+                        break;
+                    }
+                }
+
                 const auto& size = hit->GetSize();
-                // bottom right hitbox
+                // check if any particular special area of interest is being hit
                 const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                        hitpos.y >= size.y - 10.0f;
+                                                     hitpos.y >= size.y - 10.0f;
                 const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                        hitpos.y >= 0 && hitpos.y <= 10.0f;
+                                                     hitpos.y >= 0 && hitpos.y <= 10.0f;
                 if (bottom_right_hitbox_hit)
                     mCurrentTool.reset(new ResizeTool(mState, hit));
                 else if (top_left_hitbox_hit)
