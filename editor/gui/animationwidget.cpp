@@ -705,6 +705,9 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             case Qt::Key_Down:
                 updateCurrentNodePosition(0.0f, 20.0f);
                 break;
+            case Qt::Key_Escape:
+                mUI.tree->ClearSelection();
+                break;
 
             default:
                 return false;
