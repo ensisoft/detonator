@@ -168,6 +168,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.baseColor,    mMaterial.GetBaseColor());
     SetValue(mUI.scaleX,       mMaterial.GetTextureScaleX());
     SetValue(mUI.scaleY,       mMaterial.GetTextureScaleY());
+    SetValue(mUI.velocityX,    mMaterial.GetTextureVelocityX());
+    SetValue(mUI.velocityY,    mMaterial.GetTextureVelocityY());
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
@@ -242,6 +244,8 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.baseColor,    mMaterial.GetBaseColor());
     SetValue(mUI.scaleX,       mMaterial.GetTextureScaleX());
     SetValue(mUI.scaleY,       mMaterial.GetTextureScaleY());
+    SetValue(mUI.velocityX,    mMaterial.GetTextureVelocityX());
+    SetValue(mUI.velocityY,    mMaterial.GetTextureVelocityY());
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
@@ -721,6 +725,8 @@ void MaterialWidget::SetMaterialProperties() const
     mMaterial.SetTextureScaleY(GetValue(mUI.scaleY));
     mMaterial.SetTextureWrapX(GetValue(mUI.wrapX));
     mMaterial.SetTextureWrapY(GetValue(mUI.wrapY));
+    mMaterial.SetTextureVelocityX(GetValue(mUI.velocityX));
+    mMaterial.SetTextureVelocityY(GetValue(mUI.velocityY));
 }
 
 void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)

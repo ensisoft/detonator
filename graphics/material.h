@@ -393,9 +393,13 @@ namespace gfx
         bool GetBlendFrames() const
         { return mBlendFrames; }
         float GetTextureScaleX() const
-        { return mTextureScaleX; }
+        { return mTextureScale.x; }
         float GetTextureScaleY() const
-        { return mTextureScaleY; }
+        { return mTextureScale.y; }
+        float GetTextureVelocityX() const
+        { return mTextureVelocity.x; }
+        float GetTextureVelocityY() const
+        { return mTextureVelocity.y; }
         float GetGamma() const
         { return mGamma; }
         float GetFps() const
@@ -555,12 +559,22 @@ namespace gfx
         }
         Material& SetTextureScaleX(float x)
         {
-            mTextureScaleX = x;
+            mTextureScale.x = x;
             return *this;
         }
         Material& SetTextureScaleY(float y)
         {
-            mTextureScaleY = y;
+            mTextureScale.y = y;
+            return *this;
+        }
+        Material& SetTextureVelocityX(float x)
+        {
+            mTextureVelocity.x = x;
+            return *this;
+        }
+        Material& SetTextureVelocityY(float y)
+        {
+            mTextureVelocity.y = y;
             return *this;
         }
         Material& SetTextureWrapX(TextureWrapping wrap)
@@ -655,8 +669,8 @@ namespace gfx
         MagTextureFilter mMagFilter = MagTextureFilter::Linear;
         TextureWrapping mWrapX = TextureWrapping::Repeat;
         TextureWrapping mWrapY = TextureWrapping::Repeat;
-        float mTextureScaleX = 1.0f;
-        float mTextureScaleY = 1.0f;
+        glm::vec2 mTextureScale = glm::vec2(1.0f, 1.0f);
+        glm::vec2 mTextureVelocity = glm::vec2(0.0f, 0.0f);
     };
 
     // This material will fill the drawn shape with solid color value.

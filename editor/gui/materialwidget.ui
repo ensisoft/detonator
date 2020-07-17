@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1302</width>
-    <height>932</height>
+    <width>1363</width>
+    <height>890</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -154,37 +154,76 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="customShader">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
+         <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
-           <string>Custom shader</string>
+           <string>Material coordinates</string>
           </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_10">
-           <item>
-            <widget class="QLineEdit" name="shaderFile">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>X Scale</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="browseShader">
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="scaleX">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Browse ...</string>
+              <string>X velocity</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QDoubleSpinBox" name="velocityX">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>Y Scale</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="scaleY">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Y velocity</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QDoubleSpinBox" name="velocityY">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
              </property>
             </widget>
            </item>
@@ -197,90 +236,56 @@
            <bool>false</bool>
           </property>
           <property name="title">
-           <string>Texturing</string>
+           <string>Texture filtering</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="5" column="1">
-              <widget class="QComboBox" name="wrapY"/>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_28">
-               <property name="text">
-                <string>Scale X</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="scaleX">
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="value">
-                <double>1.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QComboBox" name="wrapX"/>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="minFilter">
-               <property name="currentIndex">
-                <number>-1</number>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_31">
-               <property name="text">
-                <string>Mag filter</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="labelyy">
-               <property name="text">
-                <string>Wrap Y</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_30">
-               <property name="text">
-                <string>Min Filter</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
               <widget class="QLabel" name="label_xx">
                <property name="text">
-                <string>Wrap X</string>
+                <string>X Wrap</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="1" column="1">
               <widget class="QComboBox" name="magFilter">
                <property name="currentIndex">
                 <number>-1</number>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_29">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_30">
                <property name="text">
-                <string>Scale Y</string>
+                <string>Min Filter</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="scaleY">
-               <property name="singleStep">
-                <double>0.100000000000000</double>
+             <item row="3" column="0">
+              <widget class="QLabel" name="labelyy">
+               <property name="text">
+                <string>Y Wrap</string>
                </property>
-               <property name="value">
-                <double>1.000000000000000</double>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="wrapY"/>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="wrapX"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="minFilter">
+               <property name="currentIndex">
+                <number>-1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>Mag filter</string>
                </property>
               </widget>
              </item>
@@ -328,6 +333,44 @@
             <widget class="QCheckBox" name="blend">
              <property name="text">
               <string>Smooth</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="customShader">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Custom shader</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QLineEdit" name="shaderFile">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="browseShader">
+             <property name="text">
+              <string>Browse ...</string>
              </property>
             </widget>
            </item>
@@ -650,11 +693,11 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
             <layout class="QGridLayout" name="gridLayout_4">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_18">
+             <item row="1" column="2">
+              <widget class="QLabel" name="label_19">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -662,7 +705,39 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>X pos</string>
+                <string>Height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="rectX">
+               <property name="minimum">
+                <double>-100.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QDoubleSpinBox" name="rectW">
+               <property name="maximum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -695,23 +770,20 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="rectW">
-               <property name="maximum">
-                <double>100.000000000000000</double>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-               <property name="value">
-                <double>1.000000000000000</double>
+               <property name="text">
+                <string>X pos</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="0" column="2">
               <widget class="QLabel" name="label_20">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -724,7 +796,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="1" column="3">
               <widget class="QDoubleSpinBox" name="rectH">
                <property name="maximum">
                 <double>100.000000000000000</double>
@@ -740,37 +812,34 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_19">
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnResetTextureRect">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>Height</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="rectX">
-               <property name="minimum">
-                <double>-100.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>100.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QPushButton" name="btnResetTextureRect">
                <property name="text">
                 <string>Reset</string>
                </property>
@@ -869,17 +938,19 @@
   <tabstop>materialType</tabstop>
   <tabstop>surfaceType</tabstop>
   <tabstop>gamma</tabstop>
-  <tabstop>customShader</tabstop>
-  <tabstop>shaderFile</tabstop>
-  <tabstop>browseShader</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
+  <tabstop>velocityX</tabstop>
+  <tabstop>velocityY</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
   <tabstop>wrapX</tabstop>
   <tabstop>wrapY</tabstop>
   <tabstop>fps</tabstop>
   <tabstop>blend</tabstop>
+  <tabstop>customShader</tabstop>
+  <tabstop>shaderFile</tabstop>
+  <tabstop>browseShader</tabstop>
   <tabstop>textures</tabstop>
   <tabstop>btnNewTextTextureMap</tabstop>
   <tabstop>btnDelTextureMap</tabstop>

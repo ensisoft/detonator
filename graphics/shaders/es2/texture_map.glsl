@@ -22,12 +22,14 @@
 
 #version 100
 
-precision mediump float;
+precision highp float;
 
 uniform sampler2D kTexture0;
 uniform sampler2D kTexture1;
+// todo: maybe pack some of these ?
 uniform float kRenderPoints;
 uniform float kGamma;
+uniform float kRuntime;
 uniform float kBlendCoeff;
 // if the textures are alpha masks we sample white
 // which gets modulated by the alpha value from the texture.
@@ -35,11 +37,12 @@ uniform float kIsAlphaMask0;
 uniform float kIsAlphaMask1;
 // texture coordinate scaling coefficients
 uniform vec2 kTextureScale;
+// the speed at which S/T coords are transformed.
+uniform vec2 kTextureVelocity;
 
 uniform vec4 kTextureBox0;
 uniform vec4 kTextureBox1;
 uniform vec4 kBaseColor;
-uniform mat3 kDeviceTextureMatrix;
 varying vec2 vTexCoord;
 
 void main()
@@ -54,6 +57,7 @@ void main()
     // 0 to 1 across the point horizontally left-to-right, and t
     // ranges from 0 to 1 across the point vertically top-to-bottom."
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    coords += kTextureVelocity * kRuntime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.

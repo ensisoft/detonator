@@ -87,8 +87,8 @@ Material::Material(const Material& other)
     mMagFilter   = other.mMagFilter;
     mWrapX       = other.mWrapX;
     mWrapY       = other.mWrapY;
-    mTextureScaleX = other.mTextureScaleX;
-    mTextureScaleY = other.mTextureScaleY;
+    mTextureScale = other.mTextureScale;
+    mTextureVelocity = other.mTextureVelocity;
 
     // copy texture samplers.
     for (const auto& sampler : other.mTextures)
@@ -197,7 +197,8 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     prog.SetUniform("kGamma", mGamma);
     prog.SetUniform("kRuntime", mRuntime);
     prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
-    prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
+    prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
+    prog.SetUniform("kTextureVelocity", mTextureVelocity.x, mTextureVelocity.y);
 }
 
 nlohmann::json Material::ToJson() const
@@ -214,8 +215,8 @@ nlohmann::json Material::ToJson() const
     base::JsonWrite(json, "texture_mag_filter", mMagFilter);
     base::JsonWrite(json, "texture_wrap_x", mWrapX);
     base::JsonWrite(json, "texture_wrap_y", mWrapY);
-    base::JsonWrite(json, "texture_scale_x", mTextureScaleX);
-    base::JsonWrite(json, "texture_scale_y", mTextureScaleY);
+    base::JsonWrite(json, "texture_scale", mTextureScale);
+    base::JsonWrite(json, "texture_velocity", mTextureVelocity);
 
     for (const auto& sampler : mTextures)
     {
@@ -246,8 +247,8 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
         !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
         !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
         !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
-        !base::JsonReadSafe(object, "texture_scale_x", &mat.mTextureScaleX) ||
-        !base::JsonReadSafe(object, "texture_scale_y", &mat.mTextureScaleY))
+        !base::JsonReadSafe(object, "texture_scale", &mat.mTextureScale) ||
+        !base::JsonReadSafe(object, "texture_velocity", &mat.mTextureVelocity))
         return std::nullopt;
 
     if (!object.contains("samplers"))
@@ -299,8 +300,8 @@ Material& Material::operator=(const Material& other)
     std::swap(mMagFilter, tmp.mMagFilter);
     std::swap(mWrapX, tmp.mWrapX);
     std::swap(mWrapY, tmp.mWrapY);
-    std::swap(mTextureScaleX, tmp.mTextureScaleX);
-    std::swap(mTextureScaleY, tmp.mTextureScaleY);
+    std::swap(mTextureScale, tmp.mTextureScale);
+    std::swap(mTextureVelocity, tmp.mTextureVelocity);
     std::swap(mTextures, tmp.mTextures);
     return *this;
 }
