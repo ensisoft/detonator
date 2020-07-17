@@ -24,6 +24,10 @@
 
 #include "base/logging.h"
 #include "graphics/material.h"
+#include "graphics/device.h"
+#include "graphics/shader.h"
+#include "graphics/texture.h"
+#include "graphics/program.h"
 
 namespace gfx
 {
@@ -96,6 +100,187 @@ Material::Material(const Material& other)
         mTextures.push_back(std::move(copy));
     }
 }
+
+Shader* Material::GetShader(Device& device) const
+{
+    const std::string& name = GetShaderName();
+    const std::string& file = GetShaderFile();
+
+    ASSERT(!name.empty());
+    ASSERT(!file.empty());
+
+    Shader* shader = device.FindShader(name);
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader(name);
+        shader->CompileFile(file);
+    }
+    return shader;
+}
+
+void Material::Apply(const Environment& env, Device& device, Program& prog, RasterState& state) const
+{
+    // set rasterizer state.
+    if (mSurfaceType == SurfaceType::Opaque)
+        state.blending = RasterState::Blending::None;
+    else if (mSurfaceType == SurfaceType::Transparent)
+        state.blending = RasterState::Blending::Transparent;
+    else if (mSurfaceType == SurfaceType::Emissive)
+        state.blending = RasterState::Blending::Additive;
+
+    // currently we only bind two textures and set a blend
+    // coefficient from the run time for the shader to do
+    // blending between two animation frames.
+    // Note different material instances map to the same program
+    // object on the device. That means that if material m0 uses
+    // textures t0 and t1 to render and material m1 *want's to use*
+    // texture t2 and t3 to render but *forgets* to set them
+    // then the rendering will use textures t0 and t1
+    // or whichever textures happen to be bound to the texture units
+    // since last rendering.
+    if ((mType == Type::Texture || mType == Type::Sprite) && !mTextures.empty())
+    {
+        // if we're a sprite then we should probably animate if we have an FPS setting.
+        const auto animating         = mType == Type::Sprite && mFps > 0.0f;
+        const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
+        const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
+        const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
+        const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
+
+        const auto frame_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
+        const unsigned frame_index[2] = {
+            (first_frame_index + 0) % frame_count,
+            (first_frame_index + 1) % frame_count
+        };
+
+        for (unsigned i=0; i<std::min(frame_count, 2u); ++i)
+        {
+            const auto& sampler = mTextures[frame_index[i]];
+            const auto& source  = sampler.source;
+            const auto& name    = source->GetId();
+            auto* texture = device.FindTexture(name);
+            if (!texture)
+            {
+                texture = device.MakeTexture(name);
+                auto bitmap = source->GetData();
+                if (!bitmap)
+                    continue;
+                const auto width  = bitmap->GetWidth();
+                const auto height = bitmap->GetHeight();
+                const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
+                texture->Upload(bitmap->GetDataPtr(), width, height, format);
+                texture->EnableGarbageCollection(sampler.enable_gc);
+            }
+            const auto& box = sampler.box;
+            const float x  = box.GetX();
+            const float y  = box.GetY();
+            const float sx = box.GetWidth();
+            const float sy = box.GetHeight();
+            const auto& kTexture = "kTexture" + std::to_string(i);
+            const auto& kTextureBox = "kTextureBox" + std::to_string(i);
+            const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);
+            const auto alpha = texture->GetFormat() == Texture::Format::Grayscale
+                ? 1.0f : 0.0f;
+
+            prog.SetTexture(kTexture.c_str(), i, *texture);
+            prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
+            prog.SetUniform(kIsAlphaMask.c_str(), alpha);
+            prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
+
+            texture->SetFilter(mMinFilter);
+            texture->SetFilter(mMagFilter);
+            texture->SetWrapX(mWrapX);
+            texture->SetWrapY(mWrapY);
+        }
+    }
+    prog.SetUniform("kBaseColor", mBaseColor);
+    prog.SetUniform("kGamma", mGamma);
+    prog.SetUniform("kRuntime", mRuntime);
+    prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
+    prog.SetUniform("kTextureScale", mTextureScaleX, mTextureScaleY);
+}
+
+nlohmann::json Material::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "shader_file", mShaderFile);
+    base::JsonWrite(json, "type", mType);
+    base::JsonWrite(json, "color", mBaseColor);
+    base::JsonWrite(json, "surface", mSurfaceType);
+    base::JsonWrite(json, "gamma", mGamma);
+    base::JsonWrite(json, "fps", mFps);
+    base::JsonWrite(json, "blending", mBlendFrames);
+    base::JsonWrite(json, "texture_min_filter", mMinFilter);
+    base::JsonWrite(json, "texture_mag_filter", mMagFilter);
+    base::JsonWrite(json, "texture_wrap_x", mWrapX);
+    base::JsonWrite(json, "texture_wrap_y", mWrapY);
+    base::JsonWrite(json, "texture_scale_x", mTextureScaleX);
+    base::JsonWrite(json, "texture_scale_y", mTextureScaleY);
+
+    for (const auto& sampler : mTextures)
+    {
+        if (!sampler.source->CanSerialize())
+            continue;
+        nlohmann::json js;
+        base::JsonWrite(js, "box", sampler.box);
+        base::JsonWrite(js, "type", sampler.source->GetSourceType());
+        base::JsonWrite(js, "source", *sampler.source);
+        base::JsonWrite(js, "enable_gc", sampler.enable_gc);
+        json["samplers"].push_back(js);
+    }
+    return json;
+}
+// static
+std::optional<Material> Material::FromJson(const nlohmann::json& object)
+{
+    Material mat;
+
+    if (!base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
+        !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
+        !base::JsonReadSafe(object, "type", &mat.mType) ||
+        !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
+        !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
+        !base::JsonReadSafe(object, "fps", &mat.mFps) ||
+        !base::JsonReadSafe(object, "blending", &mat.mBlendFrames) ||
+        !base::JsonReadSafe(object, "texture_min_filter", &mat.mMinFilter) ||
+        !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
+        !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
+        !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
+        !base::JsonReadSafe(object, "texture_scale_x", &mat.mTextureScaleX) ||
+        !base::JsonReadSafe(object, "texture_scale_y", &mat.mTextureScaleY))
+        return std::nullopt;
+
+    if (!object.contains("samplers"))
+        return mat;
+
+    for (const auto& json_sampler : object["samplers"].items())
+    {
+        const auto& obj = json_sampler.value();
+        TextureSource::Source type;
+        if (!base::JsonReadSafe(obj, "type", &type))
+            return std::nullopt;
+        std::shared_ptr<TextureSource> source;
+        if (type == TextureSource::Source::Filesystem)
+            source = std::make_shared<detail::TextureFileSource>();
+        else if (type == TextureSource::Source::TextBuffer)
+            source = std::make_shared<detail::TextureTextBufferSource>();
+        else if (type == TextureSource::Source::Bitmap)
+            source = std::make_shared<detail::TextureBitmapSource>();
+
+        if (!source->FromJson(obj["source"]))
+            return std::nullopt;
+
+        TextureSampler s;
+        if (!base::JsonReadSafe(obj, "box", &s.box) ||
+            !base::JsonReadSafe(obj, "enable_gc", &s.enable_gc))
+            return std::nullopt;
+
+        s.source = std::move(source);
+        mat.mTextures.push_back(std::move(s));
+    }
+    return mat;
+}
+
 
 Material& Material::operator=(const Material& other)
 {
