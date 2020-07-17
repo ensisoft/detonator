@@ -83,6 +83,11 @@ void ChildWindow::RefreshUI()
     setWindowIcon(icon);
 }
 
+void ChildWindow::Animate(double secs)
+{
+    mWidget->animate(secs);
+}
+
 void ChildWindow::on_actionClose_triggered()
 {
     // this will create close event

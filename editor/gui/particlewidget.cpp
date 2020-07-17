@@ -243,6 +243,33 @@ void ParticleEditorWidget::shutdown()
     mUI.widget->dispose();
 }
 
+void ParticleEditorWidget::animate(double secs)
+{
+    if (!mEngine)
+        return;
+
+    if (!mPaused)
+    {
+        mEngine->Update(secs);
+
+        mTime += secs;
+        mMaterial->SetRuntime(mTime);
+    }
+
+    if (!mEngine->IsAlive())
+    {
+        DEBUG("Particle simulation finished");
+        mUI.actionStop->setEnabled(false);
+        mUI.actionPause->setEnabled(false);
+        mUI.actionPlay->setEnabled(true);
+        mUI.curNumParticles->setText("0");
+        mEngine.reset();
+        return;
+    }
+    mUI.curTime->setText(QString("%1s").arg(mTime));
+    mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
+}
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;
@@ -409,22 +436,6 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     if (!mEngine)
         return;
 
-    if (!mPaused)
-    {
-        mEngine->Update(secs);
-        mTime += secs;
-    }
-    if (!mEngine->IsAlive())
-    {
-        DEBUG("Particle simulation finished");
-        mUI.actionStop->setEnabled(false);
-        mUI.actionPause->setEnabled(false);
-        mUI.actionPlay->setEnabled(true);
-        mUI.curNumParticles->setText("0");
-        mEngine.reset();
-        return;
-    }
-
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
@@ -458,13 +469,8 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         mMaterialName = material_name;
     }
 
-    mMaterial->SetRuntime(mTime);
-
     // render the particle engine
     painter.Draw(*mEngine, tr, *mMaterial);
-
-    mUI.curTime->setText(QString("%1s").arg(mTime));
-    mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
 void ParticleEditorWidget::newResourceAvailable(const app::Resource* resource)

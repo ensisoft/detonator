@@ -890,6 +890,17 @@ void AnimationWidget::shutdown()
     mUI.widget->dispose();
 }
 
+void AnimationWidget::animate(double secs)
+{
+    // update the animation if we're currently playing
+    if (mPlayState == PlayState::Playing)
+    {
+        mState.animation.Update(secs);
+        mTime += secs;
+        mUI.time->setText(QString::number(mTime));
+    }
+}
+
 void AnimationWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1360,12 +1371,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    // update the animation if we're currently playing
-    if (mPlayState == PlayState::Playing)
-    {
-        mState.animation.Update(secs);
-        mTime += secs;
-    }
+
 
     gfx::Transform view;
     // apply the view transformation. The view transformation is not part of the
@@ -1523,7 +1529,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     // pop view transformation
     view.Pop();
 
-    mUI.time->setText(QString::number(mTime));
+
 }
 
 game::AnimationNode* AnimationWidget::GetCurrentNode()

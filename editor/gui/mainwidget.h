@@ -47,6 +47,11 @@ namespace gui
         virtual void refresh()
         {}
 
+        // High frequency callback for doing animation etc simulation
+        // updates.
+        virtual void animate(double secs)
+        {}
+
         // Called whenever the widget is getting activated i.e. displayed
         // in the MainWindow.
         virtual void activate() {}

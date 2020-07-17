@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include <QtWidgets>
 #  include <QTimer>
+#  include <QElapsedTimer>
 #  include "ui_mainwindow.h"
 #include "warnpop.h"
 
@@ -110,7 +111,8 @@ namespace gui
 
         void actionWindowFocus_triggered();
 
-        void refreshUI();
+        void timerLoRes();
+        void timerHiRes();
         void showNote(const app::Event& event);
         void openExternalImage(const QString& file);
 
@@ -131,7 +133,10 @@ namespace gui
 
     private:
         // the refesh timer to do low frequency UI updates.
-        QTimer mTimer;
+        QTimer mTimerLoRes;
+        // the high frequency time to run widget animations
+        QTimer mTimerHiRes;
+        QElapsedTimer mHiResInterval;
 
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.

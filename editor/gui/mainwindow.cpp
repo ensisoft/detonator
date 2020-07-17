@@ -71,10 +71,17 @@ MainWindow::MainWindow()
     mUI.actionViewToolbar->setChecked(true);
     mUI.actionViewStatusbar->setChecked(true);
 
-    // start periodic refresh timer
-    QObject::connect(&mTimer, SIGNAL(timeout()), this, SLOT(refreshUI()));
-    mTimer.setInterval(500);
-    mTimer.start();
+    // start periodic refresh timer. this is low frequency timer that is used
+    // to update the widget UI if needed, such as change the icon/window title
+    // and tick the workspace for periodic cleanup and stuff.
+    QObject::connect(&mTimerLoRes, &QTimer::timeout, this, &MainWindow::timerLoRes);
+    // This is the high frequency timer that is used to update animations and etc.
+    // simulations.
+    QObject::connect(&mTimerHiRes, &QTimer::timeout, this, &MainWindow::timerHiRes);
+    mTimerLoRes.setInterval(500);
+    mTimerLoRes.start();
+    mTimerHiRes.setInterval(1000.0/60);
+    mTimerHiRes.start();
 
     auto& events = app::EventLog::get();
     QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
@@ -878,7 +885,7 @@ void MainWindow::on_actionNewResource_triggered()
     }
 }
 
-void MainWindow::refreshUI()
+void MainWindow::timerLoRes()
 {
     const auto num_widgets  = mUI.mainTab->count();
     // refresh the UI state, and update the tab widget icon/text
@@ -911,7 +918,6 @@ void MainWindow::refreshUI()
         }
     }
 
-
     // refresh the child windows
     for (auto* child : mChildWindows)
     {
@@ -920,6 +926,21 @@ void MainWindow::refreshUI()
 
     if (mWorkspace)
         mWorkspace->Tick();
+}
+
+void MainWindow::timerHiRes()
+{
+    const quint64 ms = mHiResInterval.restart();
+
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->animate(ms / 1000.0);
+    }
+    for (auto* child : mChildWindows)
+    {
+        child->Animate(ms / 1000.0);
+    }
 }
 
 void MainWindow::showNote(const app::Event& event)

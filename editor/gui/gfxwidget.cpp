@@ -120,6 +120,12 @@ void GfxWindow::paintGL()
 
     // Qt should have made this window's context current
 
+    // Note that this clock measures the time between rendering calls.
+    // so when the window isn't active paintGL isn't called and then
+    // after the window becomes active again this time step will be
+    // large. Therefore it's better not to use this for animation
+    // or such purposes since the simulations might not be stable
+    // with such arbitrary time steps.
     const quint64 ms = mClock.restart();
 
     mCustomGraphicsDevice->BeginFrame();

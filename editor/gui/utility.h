@@ -405,7 +405,8 @@ inline void GetProperty(const Resource& res, const QString& name, color_widgets:
         color->setColor(value);
 }
 
-inline int GetCount(QListWidget* widget)
+template<typename Widget>
+inline int GetCount(Widget* widget)
 {
     return widget->count();
 }
