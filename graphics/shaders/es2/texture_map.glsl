@@ -45,8 +45,23 @@ uniform vec4 kTextureBox1;
 uniform vec4 kBaseColor;
 varying vec2 vTexCoord;
 
+uniform vec4 kColor0;
+uniform vec4 kColor1;
+uniform vec4 kColor2;
+uniform vec4 kColor3;
+
+vec4 MixGradient(vec2 coords)
+{
+  vec4 top = mix(kColor0, kColor1, coords.x);
+  vec4 bot = mix(kColor2, kColor3, coords.x);
+  vec4 color = mix(top, bot, coords.y) * kBaseColor;
+  color = pow(color, vec4(2.2));
+  return color;
+}
+
 void main()
 {
+
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
     // rasterized as points.
@@ -57,6 +72,9 @@ void main()
     // 0 to 1 across the point horizontally left-to-right, and t
     // ranges from 0 to 1 across the point vertically top-to-bottom."
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+
+    vec4 gradient = MixGradient(coords);
+
     coords += kTextureVelocity * kRuntime;
     coords = coords * kTextureScale;
 
@@ -80,10 +98,11 @@ void main()
     // mix mask values. (makes sense?)
     float mask = mix(kIsAlphaMask0, kIsAlphaMask1, kBlendCoeff);
 
+    vec4 mix_base_gradient = kBaseColor * gradient;
     // either modulate/mask texture color with base color
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
-    vec4 col = mix(tex * kBaseColor, kBaseColor * tex.a, mask);
+    vec4 col = mix(tex * mix_base_gradient, mix_base_gradient * tex.a, mask);
 
     // apply gamma (in)correction.
     gl_FragColor = pow(col, vec4(kGamma));

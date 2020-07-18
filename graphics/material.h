@@ -326,6 +326,8 @@ namespace gfx
         enum class Type {
             // Material is using color(s) only.
             Color,
+            // Material is using color(s) only.
+            Gradient,
             // Material uses a static texture only.
             Texture,
             // Material uses a series of textures to create
@@ -382,6 +384,8 @@ namespace gfx
 
             if (mType == Type::Color)
                 return "shaders/es2/solid_color.glsl";
+            else if (mType == Type::Gradient)
+                return "shaders/es2/gradient.glsl";
             else if (mType == Type::Texture)
                 return "shaders/es2/texture_map.glsl";
             else if (mType == Type::Sprite)
@@ -472,6 +476,39 @@ namespace gfx
             mBaseColor = color;
             return *this;
         }
+
+        enum class ColorIndex {
+            TopLeft, TopRight,
+            BottomLeft, BottomRight
+        };
+
+        Material& SetColorMapColor(const Color4f& color, ColorIndex index)
+        {
+            if (index == ColorIndex::TopLeft)
+                mColorMap[0] = color;
+            else if (index == ColorIndex::TopRight)
+                mColorMap[1] = color;
+            else if (index == ColorIndex::BottomLeft)
+                mColorMap[2] = color;
+            else if (index == ColorIndex::BottomRight)
+                mColorMap[3] = color;
+            else ASSERT("incorrect color index");
+            return *this;
+        }
+        Color4f GetColorMapColor(ColorIndex index) const
+        {
+            if (index == ColorIndex::TopLeft)
+                return mColorMap[0];
+            else if (index == ColorIndex::TopRight)
+                return mColorMap[1];
+            else if (index == ColorIndex::BottomLeft)
+                return mColorMap[2];
+            else if (index == ColorIndex::BottomRight)
+                return mColorMap[3];
+            else ASSERT("incorrect color index");
+            return Color4f();
+        }
+
         // Set the surface type.
         Material& SetSurfaceType(SurfaceType type)
         {
@@ -671,6 +708,8 @@ namespace gfx
         TextureWrapping mWrapY = TextureWrapping::Repeat;
         glm::vec2 mTextureScale = glm::vec2(1.0f, 1.0f);
         glm::vec2 mTextureVelocity = glm::vec2(0.0f, 0.0f);
+        Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
+            gfx::Color::White, gfx::Color::White};
     };
 
     // This material will fill the drawn shape with solid color value.

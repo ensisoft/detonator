@@ -173,6 +173,10 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
+    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomRight));
     GetProperty(resource, "shader_file", mUI.shaderFile);
     GetProperty(resource, "use_shader_file", mUI.customShader);
 
@@ -249,6 +253,10 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
+    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomRight));
     settings.loadWidget("Material", mUI.materialName);
     settings.loadWidget("Material", mUI.shaderFile);
     settings.loadWidget("Material", mUI.customShader);
@@ -341,6 +349,7 @@ void MaterialWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mTime = 0.0f;
+    mUI.time->clear();
 }
 
 void MaterialWidget::on_actionSave_triggered()
@@ -633,6 +642,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
     mUI.textureMaps->setEnabled(false);
     mUI.textureProp->setEnabled(false);
     mUI.textureRect->setEnabled(false);
+    //mUI.colorMap->setEnabled(false);
 
     // enable/disable UI properties based on the
     // material type.
@@ -641,6 +651,10 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
     if (type == gfx::Material::Type::Color)
     {
         mUI.baseProperties->setEnabled(true);
+    }
+    else if (type == gfx::Material::Type::Gradient)
+    {
+        //mUI.colorMap->setEnabled(true);
     }
     else if (type == gfx::Material::Type::Texture)
     {
@@ -714,6 +728,10 @@ void MaterialWidget::SetMaterialProperties() const
 
     mMaterial.SetType(GetValue(mUI.materialType));
     mMaterial.SetBaseColor(GetValue(mUI.baseColor));
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap0), gfx::Material::ColorIndex::TopLeft);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap1), gfx::Material::ColorIndex::TopRight);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap2), gfx::Material::ColorIndex::BottomLeft);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap3), gfx::Material::ColorIndex::BottomRight);
     mMaterial.SetGamma(GetValue(mUI.gamma));
     mMaterial.SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial.SetRuntime(mTime);

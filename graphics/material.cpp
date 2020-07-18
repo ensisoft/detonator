@@ -89,6 +89,10 @@ Material::Material(const Material& other)
     mWrapY       = other.mWrapY;
     mTextureScale = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
+    mColorMap[0] = other.mColorMap[0];
+    mColorMap[1] = other.mColorMap[1];
+    mColorMap[2] = other.mColorMap[2];
+    mColorMap[3] = other.mColorMap[3];
 
     // copy texture samplers.
     for (const auto& sampler : other.mTextures)
@@ -199,6 +203,10 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
     prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocity", mTextureVelocity.x, mTextureVelocity.y);
+    prog.SetUniform("kColor0", mColorMap[0]);
+    prog.SetUniform("kColor1", mColorMap[1]);
+    prog.SetUniform("kColor2", mColorMap[2]);
+    prog.SetUniform("kColor3", mColorMap[3]);
 }
 
 nlohmann::json Material::ToJson() const
@@ -217,6 +225,10 @@ nlohmann::json Material::ToJson() const
     base::JsonWrite(json, "texture_wrap_y", mWrapY);
     base::JsonWrite(json, "texture_scale", mTextureScale);
     base::JsonWrite(json, "texture_velocity", mTextureVelocity);
+    base::JsonWrite(json, "color_map0", mColorMap[0]);
+    base::JsonWrite(json, "color_map1", mColorMap[1]);
+    base::JsonWrite(json, "color_map2", mColorMap[2]);
+    base::JsonWrite(json, "color_map3", mColorMap[3]);
 
     for (const auto& sampler : mTextures)
     {
@@ -248,7 +260,11 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
         !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
         !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
         !base::JsonReadSafe(object, "texture_scale", &mat.mTextureScale) ||
-        !base::JsonReadSafe(object, "texture_velocity", &mat.mTextureVelocity))
+        !base::JsonReadSafe(object, "texture_velocity", &mat.mTextureVelocity) ||
+        !base::JsonReadSafe(object, "color_map0", &mat.mColorMap[0]) ||
+        !base::JsonReadSafe(object, "color_map1", &mat.mColorMap[1]) ||
+        !base::JsonReadSafe(object, "color_map2", &mat.mColorMap[2]) ||
+        !base::JsonReadSafe(object, "color_map3", &mat.mColorMap[3]))
         return std::nullopt;
 
     if (!object.contains("samplers"))
@@ -303,6 +319,7 @@ Material& Material::operator=(const Material& other)
     std::swap(mTextureScale, tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
     std::swap(mTextures, tmp.mTextures);
+    std::swap(mColorMap, tmp.mColorMap);
     return *this;
 }
 
