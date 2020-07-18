@@ -382,10 +382,16 @@ private:
 private:
     void CopyFileBuffer(const QString& src, const QString& dst)
     {
+        // if src equals dst then we can actually skip the copy, no?
+        if (src == dst)
+        {
+            DEBUG("Skipping copy of '%1' to '%2'", src, dst);
+            return;
+        }
+
         // we're doing this silly copying here since Qt doesn't
         // have a copy operation that's without race condition,
         // i.e. QFile::copy won't overwrite.
-
         QFile src_io(src);
         QFile dst_io(dst);
         if (!src_io.open(QIODevice::ReadOnly))
