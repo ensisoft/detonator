@@ -74,6 +74,8 @@ void AnimationNode::ResetTime()
     {
         p->Restart();
     }
+    if (mMaterial)
+        mMaterial->SetRuntime(0);
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const

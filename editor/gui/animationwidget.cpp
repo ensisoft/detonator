@@ -924,7 +924,7 @@ void AnimationWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mTime = 0.0f;
-
+    mUI.time->clear();
     mState.animation.Reset();
 }
 
