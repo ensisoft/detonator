@@ -24,6 +24,7 @@
 
 #include "warnpush.h"
 #  include <QIcon>
+#  include <QFontMetrics>
 #include "warnpop.h"
 
 #include "base/logging.h"
@@ -81,10 +82,26 @@ QVariant EventLog::data(const QModelIndex& index, int role) const
     const auto row = index.row();
     const auto& ev = mEvents[row];
 
-    if (role == Qt::SizeHintRole)
-        return QSize(0, 16);
-
-    if (role == Qt::DecorationRole)
+    const QString text = QString("[%1] [%2] %3")
+            .arg(ev.time.toString("hh:mm:ss:zzz"))
+            .arg(ev.logtag)
+            .arg(ev.message);
+    if (role == Qt::DisplayRole)
+        return text;
+    else if (role == Qt::SizeHintRole)
+    {
+        // The QListView in mainwindow doesn't display the horizontal
+        // scroll bar properly without the size hint being implemented.
+        // Howoever the question here is.. how to figure out the horizontal
+        // size we should return ??
+        // grabbing some default font and coming up with text with
+        // through font metrics.
+        QFont dunno_about_this_font;
+        QFontMetrics fm(dunno_about_this_font);
+        const auto text_width = fm.horizontalAdvance(text);
+        return QSize(text_width, 16);
+    }
+    else if (role == Qt::DecorationRole)
     {
         using type = Event::Type;
         switch (ev.type)
@@ -94,14 +111,6 @@ QVariant EventLog::data(const QModelIndex& index, int role) const
             case type::Error:   return QIcon("icons:log_error.png");
             case type::Note:    return QIcon("icons:log_note.png");
         }
-    }
-
-    if (role == Qt::DisplayRole)
-    {
-        return QString("[%1] [%2] %3")
-            .arg(ev.time.toString("hh:mm:ss:zzz"))
-            .arg(ev.logtag)
-            .arg(ev.message);
     }
     return {};
 }
