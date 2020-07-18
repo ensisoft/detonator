@@ -152,7 +152,11 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QListView" name="eventlist"/>
+      <widget class="QListView" name="eventlist">
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -490,6 +494,9 @@
    </property>
    <property name="text">
     <string>Package Resources ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
    </property>
   </action>
   <action name="actionSelectResourceForEditing">
