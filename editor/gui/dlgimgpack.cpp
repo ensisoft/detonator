@@ -287,7 +287,9 @@ void DlgImgPack::repack()
         }
     }
 
-    const auto height = mUI.lblPackagedImage->height();
+    // if the image is scaled to height of the QLabel the label grows a little
+    // since apparently it wants to reverse some space for some border or something.
+    const auto height = mUI.lblPackagedImage->height() * 0.98;
     mUI.lblPackagedImage->setPixmap(mPackedImage.scaledToHeight(height));
     mUI.grpPackagedImage->setTitle(tr("Packed image %1x%2").arg(ret.width).arg(ret.height));
     mUI.grpPackagedImage->setEnabled(true);

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Image Packer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <widget class="QGroupBox" name="groupBox_4">
@@ -206,6 +210,12 @@
            </item>
            <item>
             <widget class="color_widgets::ColorSelector" name="bgColor">
+             <property name="minimumSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
              <property name="color">
               <color alpha="0">
                <red>0</red>
@@ -247,11 +257,8 @@
            <property name="text">
             <string/>
            </property>
-           <property name="pixmap">
-            <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
-           </property>
            <property name="scaledContents">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
