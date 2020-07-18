@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Package Resources</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QGroupBox" name="groupBox">
@@ -321,6 +325,8 @@
   <tabstop>btnStart</tabstop>
   <tabstop>btnClose</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../resource/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
