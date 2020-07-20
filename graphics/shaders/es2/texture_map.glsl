@@ -54,7 +54,7 @@ vec4 MixGradient(vec2 coords)
 {
   vec4 top = mix(kColor0, kColor1, coords.x);
   vec4 bot = mix(kColor2, kColor3, coords.x);
-  vec4 color = mix(top, bot, coords.y) * kBaseColor;
+  vec4 color = mix(top, bot, coords.y);
   color = pow(color, vec4(2.2));
   return color;
 }
