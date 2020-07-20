@@ -71,7 +71,7 @@ public:
     {
         Geometry* geom = shape.Upload(*mDevice);
         Program* prog = GetProgram(shape, mat);
-        if (!prog)
+        if (!prog || !geom)
             return;
 
         // create simple orthographic projection matrix.
@@ -79,11 +79,11 @@ public:
         const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
         const auto& kViewMatrix = transform.GetAsMatrix();
 
-        const auto draw_type = geom->GetDrawType();
+        const auto style = shape.GetStyle();
 
         Material::RasterState raster;
         Material::Environment env;
-        env.render_points = draw_type == Geometry::DrawType::Points;
+        env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
@@ -108,8 +108,12 @@ public:
         mDevice->ClearStencil(1);
 
         Geometry* maskGeom = maskShape.Upload(*mDevice);
+        Geometry* drawGeom = drawShape.Upload(*mDevice);
+        if (!maskGeom || !drawGeom)
+            return;
         Program* maskProg = GetProgram(maskShape, SolidColor(gfx::Color::White));
-        if (!maskProg)
+        Program* drawProg = GetProgram(drawShape, material);
+        if (!maskProg || !drawProg)
             return;
 
         // create simple orthographic projection matrix.
@@ -130,17 +134,12 @@ public:
 
         Material::RasterState raster;
         Material::Environment env;
-        env.render_points = maskGeom->GetDrawType() == Geometry::DrawType::Points;
+        env.render_points = maskShape.GetStyle() == Drawable::Style::Points;
 
         material.Apply(env, *mDevice, *maskProg, raster);
         mDevice->Draw(*maskProg, *maskGeom, state);
 
-        Geometry* drawGeom = drawShape.Upload(*mDevice);
-        Program* drawProg = GetProgram(drawShape, material);
-        if (!drawProg)
-            return;
-
-        env.render_points = drawGeom->GetDrawType() == Geometry::DrawType::Points;
+        env.render_points = drawShape.GetStyle() == Drawable::Style::Points;
 
         drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));

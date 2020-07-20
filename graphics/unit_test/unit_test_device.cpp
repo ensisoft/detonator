@@ -310,7 +310,7 @@ void unit_test_render_color_only()
         { { 1,  1}, {1, 1} }
     };
     geom->Update(verts, 6);
-    geom->SetDrawType(gfx::Geometry::DrawType::Triangles);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
 R"(#version 100
@@ -387,7 +387,7 @@ void unit_test_render_with_single_texture()
         { { 1,  1}, {1, 0} }
     };
     geom->Update(verts, 6);
-    geom->SetDrawType(gfx::Geometry::DrawType::Triangles);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
 R"(#version 100
@@ -467,7 +467,7 @@ void unit_test_render_with_multiple_textures()
         { { 1,  1}, {1, 0} }
     };
     geom->Update(verts, 6);
-    geom->SetDrawType(gfx::Geometry::DrawType::Triangles);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
 R"(#version 100

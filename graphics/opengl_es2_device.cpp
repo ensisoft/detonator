@@ -688,12 +688,28 @@ private:
     public:
         GeomImpl(const OpenGLFunctions& funcs) : mGL(funcs)
         {}
+        virtual void ClearDraws() override
+        {
+            mDrawCommands.clear();
+        }
+        virtual void AddDrawCmd(DrawType type) override
+        {
+            DrawCommand cmd;
+            cmd.type = type;
+            cmd.offset = 0;
+            cmd.count  = std::numeric_limits<size_t>::max();
+            mDrawCommands.push_back(cmd);
+        }
 
-        virtual void SetDrawType(DrawType type) override
-        { mDrawType = type; }
+        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
+        {
+            DrawCommand cmd;
+            cmd.type   = type;
+            cmd.offset = offset;
+            cmd.count  = count;
+            mDrawCommands.push_back(cmd);
+        }
 
-        virtual DrawType GetDrawType() const override
-        { return mDrawType; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
 
@@ -703,7 +719,7 @@ private:
             mData.resize(count);
             for (size_t i=0; i<count; ++i)
             {
-                mData[i] = verts[i];
+               mData[i] = verts[i];
             }
         }
         virtual void Update(const std::vector<Vertex>& verts) override
@@ -719,10 +735,7 @@ private:
         {
             GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
             GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
-
-            if (mData.empty())
-                return;
-            uint8_t* base = reinterpret_cast<uint8_t*>(&mData[0]);
+            const uint8_t* base = reinterpret_cast<const uint8_t*>(&mData[0]);
             if (aPosition != -1)
             {
                 GL_CALL(glVertexAttribPointer(aPosition, 2, GL_FLOAT, GL_FALSE,
@@ -735,31 +748,45 @@ private:
                     sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
                 GL_CALL(glEnableVertexAttribArray(aTexCoord));
             }
-            if (mDrawType == DrawType::Triangles)
-                GL_CALL(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mData.size()));
-            else if (mDrawType == DrawType::Points)
-                GL_CALL(glDrawArrays(GL_POINTS, 0, (GLsizei)mData.size()));
-            else if (mDrawType == DrawType::TriangleFan)
-                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei)mData.size()));
-            else if (mDrawType == DrawType::Lines)
+
+            for (const auto& draw : mDrawCommands)
             {
-                GL_CALL(glLineWidth(mLineWidth));
-                GL_CALL(glDrawArrays(GL_LINES, 0, (GLsizei)mData.size()));
-            }
-            else if (mDrawType == DrawType::LineLoop)
-            {
-                GL_CALL(glLineWidth(mLineWidth));
-                GL_CALL(glDrawArrays(GL_LINE_LOOP, 0, (GLsizei)mData.size()));
+                const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? mData.size() : draw.count;
+                const auto type   = draw.type;
+                const auto offset = (GLsizei)draw.offset;
+
+                if (type == DrawType::Triangles)
+                    GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
+                else if (type == DrawType::Points)
+                    GL_CALL(glDrawArrays(GL_POINTS, offset, count));
+                else if (type == DrawType::TriangleFan)
+                    GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
+                else if (type == DrawType::Lines)
+                {
+                    GL_CALL(glLineWidth(mLineWidth));
+                    GL_CALL(glDrawArrays(GL_LINES, offset, count));
+                }
+                else if (type == DrawType::LineLoop)
+                {
+                    GL_CALL(glLineWidth(mLineWidth));
+                    GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
+                }
             }
         }
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }
+
+    private:
+        struct DrawCommand {
+            DrawType type = DrawType::Triangles;
+            size_t count  = 0;
+            size_t offset = 0;
+        };
     private:
         const OpenGLFunctions& mGL;
-    private:
         std::size_t mFrameNumber = 0;
+        std::vector<DrawCommand> mDrawCommands;
         std::vector<Vertex> mData;
-        DrawType mDrawType = DrawType::Triangles;
         float mLineWidth = 1.0f;
     };
 

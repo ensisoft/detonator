@@ -66,10 +66,14 @@ namespace gfx
         };
 
         virtual ~Geometry() = default;
-        // Get the current draw type
-        virtual DrawType GetDrawType() const = 0;
-        // Set the expected type for the geometry when drawn.
-        virtual void SetDrawType(DrawType type) = 0;
+        // Clear previous draw commands.
+        virtual void ClearDraws() = 0;
+        // Add a draw command that starts at offset 0 and covers the whole
+        // current vertex buffer (i.e. count = num of vertices)
+        virtual void AddDrawCmd(DrawType type) = 0;
+        // Add a draw command for some particular set of vertices within
+        // the current vertex buffer.
+        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) = 0;
         // Set (request) the line width to be using when rasterizing
         // the geometry as a series of lines.
         virtual void SetLineWidth(float width) = 0;

@@ -58,7 +58,9 @@ namespace gfx
             // Rasterize the individual triangles as lines.
             Wireframe,
             // Rasterize the interior of the drawable. This is the default
-            Solid
+            Solid,
+            // Rasterizez the shape's vertices as individual points.
+            Points
         };
 
         virtual ~Drawable() = default;
@@ -81,6 +83,8 @@ namespace gfx
         // shapes's fragments.
         // Not all drawables support all Styles.
         virtual void SetStyle(Style style) {}
+        // Get the current style.
+        virtual Style GetStyle() const = 0;
     private:
     };
 
@@ -98,6 +102,8 @@ namespace gfx
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -117,6 +123,8 @@ namespace gfx
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -137,6 +145,8 @@ namespace gfx
         { mStyle = style; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -156,6 +166,8 @@ namespace gfx
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -179,6 +191,8 @@ namespace gfx
         virtual Geometry* Upload(Device& device) const override;
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return Style::Outline; }
 
         void SetNumVerticalLines(unsigned lines)
         { mNumVerticalLines = lines; }
@@ -316,6 +330,8 @@ namespace gfx
         virtual Shader* GetShader(Device& device) const override;
         // Drawable implementation. Upload particles to the device.
         virtual Geometry* Upload(Device& device) const override;
+        virtual Style GetStyle() const override
+        { return Style::Points; }
 
         // Update the particle simulation.
         virtual void Update(float dt) override;

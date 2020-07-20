@@ -47,7 +47,10 @@ Shader* Arrow::GetShader(Device& device) const
 }
 Geometry* Arrow::Upload(Device& device) const
 {
-    Geometry* geom = nullptr;
+    if (mStyle == Style::Points)
+        return nullptr;
+
+   Geometry* geom = nullptr;
 
     if (mStyle == Style::Outline)
     {
@@ -65,7 +68,7 @@ Geometry* Arrow::Upload(Device& device) const
             };
             geom = device.MakeGeometry("ArrowOutline");
             geom->Update(verts, 7);
-            geom->SetDrawType(Geometry::DrawType::LineLoop);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
     else if (mStyle == Style::Solid)
@@ -90,7 +93,7 @@ Geometry* Arrow::Upload(Device& device) const
             };
             geom = device.MakeGeometry("Arrow");
             geom->Update(verts, 9);
-            geom->SetDrawType(Geometry::DrawType::Triangles);
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
         }
     }
     else if (mStyle == Style::Wireframe)
@@ -123,7 +126,7 @@ Geometry* Arrow::Upload(Device& device) const
             };
             geom = device.MakeGeometry("ArrowWireframe");
             geom->Update(verts, 16);
-            geom->SetDrawType(Geometry::DrawType::Lines);
+            geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
     geom->SetLineWidth(mLineWidth);
@@ -142,6 +145,9 @@ Shader* Circle::GetShader(Device& device) const
 }
 Geometry* Circle::Upload(Device& device) const
 {
+    if (mStyle == Style::Points)
+        return nullptr;
+
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
@@ -198,12 +204,14 @@ Geometry* Circle::Upload(Device& device) const
         geom->Update(&vs[0], vs.size());
 
     }
+    geom->ClearDraws();
+
     if (mStyle == Style::Solid)
-        geom->SetDrawType(Geometry::DrawType::TriangleFan);
+        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (mStyle == Style::Outline)
-        geom->SetDrawType(Geometry::DrawType::LineLoop);
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     else if (mStyle == Style::Wireframe)
-        geom->SetDrawType(Geometry::DrawType::LineLoop);
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     geom->SetLineWidth(mLineWidth);
     return geom;
 }
@@ -221,6 +229,9 @@ Shader* Rectangle::GetShader(Device& device) const
 
 Geometry* Rectangle::Upload(Device& device) const
 {
+    if (mStyle == Style::Points)
+        return nullptr;
+
     Geometry* geom = nullptr;
 
     if (mStyle == Style::Outline)
@@ -236,7 +247,7 @@ Geometry* Rectangle::Upload(Device& device) const
             };
             geom = device.MakeGeometry("RectangleOutline");
             geom->Update(verts, 4);
-            geom->SetDrawType(Geometry::DrawType::LineLoop);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
     else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
@@ -256,10 +267,11 @@ Geometry* Rectangle::Upload(Device& device) const
             geom = device.MakeGeometry("Rectangle");
             geom->Update(verts, 6);
         }
+        geom->ClearDraws();
         if (mStyle == Style::Solid)
-            geom->SetDrawType(Geometry::DrawType::Triangles);
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
         else if (mStyle == Style::Wireframe)
-            geom->SetDrawType(Geometry::DrawType::LineLoop);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     }
     geom->SetLineWidth(mLineWidth);
     return geom;
@@ -280,6 +292,9 @@ Shader* Triangle::GetShader(Device& device) const
 
 Geometry* Triangle::Upload(Device& device) const
 {
+    if (mStyle == Style::Points)
+        return nullptr;
+
     Geometry* geom = device.FindGeometry("Triangle");
     if (!geom)
     {
@@ -292,12 +307,13 @@ Geometry* Triangle::Upload(Device& device) const
         geom->Update(verts, 3);
     }
     geom->SetLineWidth(mLineWidth);
+    geom->ClearDraws();
     if (mStyle == Style::Solid)
-        geom->SetDrawType(Geometry::DrawType::Triangles);
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
     else if (mStyle == Style::Outline)
-        geom->SetDrawType(Geometry::DrawType::LineLoop); // this is not a mistake.
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     else if (mStyle == Style::Wireframe)
-        geom->SetDrawType(Geometry::DrawType::LineLoop); // this is not a mistake.
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
 }
 
@@ -370,7 +386,7 @@ Geometry* Grid::Upload(Device& device) const
         }
         geom = device.MakeGeometry(name);
         geom->Update(std::move(verts));
-        geom->SetDrawType(Geometry::DrawType::Lines);
+        geom->AddDrawCmd(Geometry::DrawType::Lines);
     }
     geom->SetLineWidth(mLineWidth);
     return geom;
@@ -410,7 +426,8 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
     }
 
     geom->Update(std::move(verts));
-    geom->SetDrawType(Geometry::DrawType::Points);
+    geom->ClearDraws();
+    geom->AddDrawCmd(Geometry::DrawType::Points);
     return geom;
 }
 
