@@ -555,6 +555,25 @@ public:
                 gfx::BitmapText(buff).SetBaseColor(gfx::Color::DarkGray));
         }
 
+        // text color with gradient
+        {
+            gfx::Transform transform;
+            transform.Resize(300, 200);
+            transform.Translate(-150, -100);
+            transform.Translate(150, 450);
+
+            gfx::TextBuffer buff(300, 200);
+            buff.AddText("Gradient text", "fonts/AtariFontFullVersion.ttf", 20);
+            painter.Draw(gfx::Rectangle(), transform,
+                gfx::BitmapText(buff)
+                    .SetBaseColor(gfx::Color::White)
+                    .SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft)
+                    .SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::TopRight)
+                    .SetColorMapColor(gfx::Color::Yellow, gfx::Material::ColorIndex::BottomLeft)
+                    .SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomRight));
+
+        }
+
         // modulate text color based on time
         {
             const float r = (std::sin(angle + 0.1*circle) + 1.0) * 0.5;
