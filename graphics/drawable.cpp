@@ -277,6 +277,198 @@ Geometry* Rectangle::Upload(Device& device) const
     return geom;
 }
 
+Shader* RoundRectangle::GetShader(Device& device) const
+{
+    Shader* shader = device.FindShader("vertex_array.glsl");
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader("vertex_array.glsl");
+        shader->CompileFile("shaders/es2/vertex_array.glsl");
+    }
+    return shader;
+}
+
+Geometry* RoundRectangle::Upload(Device& device) const
+{
+    if (mStyle == Style::Points)
+        return nullptr;
+
+    const auto r = mRadius;
+    const auto slices    = 20;
+    const auto increment = (float)(math::Pi * 0.5  / slices); // each corner is a quarter circle, i.e. half pi rad
+
+    Geometry* geom = nullptr;
+
+    // each corner contains one quadrant of a circle with radius r
+    struct CornerOrigin {
+        // x, y pos of the origin
+        float x, y;
+    } corners[4] = {
+        {1.0f-r,      -r}, // top right
+        {     r,      -r}, // top left
+        {     r, -1.0f+r}, // bottom left
+        {1.0f-r, -1.0f+r}, // bottom right
+    };
+
+    if (mStyle == Style::Outline)
+    {
+        geom = device.FindGeometry("RoundRectOutline");
+        if (geom == nullptr)
+        {
+            // outline of the box body
+            std::vector<Vertex> vs = {
+                // left box
+                {{0.0f,      -r}, {0.0f,      r}},
+                {{0.0f, -1.0f+r}, {0.0f, 1.0f-r}},
+                // center box
+                {{r,       0.0f}, {r,      0.0f}},
+                {{1.0f-r,  0.0f}, {1.0f-r, 0.0f}},
+                {{r,      -1.0f}, {r,      1.0f}},
+                {{1.0f-r, -1.0f}, {r,      1.0f}},
+                // right box
+                {{1.0f,      -r}, {1.0f,        r}},
+                {{1.0f, -1.0f+r}, {1.0f,   1.0f-r}},
+            };
+
+            // generate corners
+            for (int i=0; i<4; ++i)
+            {
+                float angle = math::Pi * 0.5 * i;
+                for (unsigned s = 0; s<=slices; ++s)
+                {
+                    const auto x0 = std::cos(angle) * mRadius;
+                    const auto y0 = std::sin(angle) * mRadius;
+                    Vertex v0, v1;
+                    v0.aPosition.x = corners[i].x + x0;
+                    v0.aPosition.y = corners[i].y + y0;
+                    v0.aTexCoord.x = corners[i].x + x0;
+                    v0.aTexCoord.y = (corners[i].y + y0) * -1.0f;
+
+                    angle += increment;
+
+                    const auto x1 = std::cos(angle) * mRadius;
+                    const auto y1 = std::sin(angle) * mRadius;
+                    v1.aPosition.x = corners[i].x + x1;
+                    v1.aPosition.y = corners[i].y + y1;
+                    v1.aTexCoord.x = corners[i].x + x1;
+                    v1.aTexCoord.y = (corners[i].y + y1) * -1.0f;
+
+                    vs.push_back(v0);
+                    vs.push_back(v1);
+                }
+            }
+            geom = device.MakeGeometry("RoundRectOutline");
+            geom->Update(std::move(vs));
+            geom->AddDrawCmd(Geometry::DrawType::Lines);
+        }
+    }
+    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    {
+        geom = device.FindGeometry(mStyle == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+        if (geom == nullptr)
+        {
+            geom = device.MakeGeometry(mStyle == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+
+            // center body
+            std::vector<Vertex> vs = {
+                // left box
+                {{0.0f,      -r}, {0.0f,      r}},
+                {{0.0f, -1.0f+r}, {0.0f, 1.0f-r}},
+                {{r,    -1.0f+r}, {r,    1.0f-r}},
+                {{r,    -1.0f+r}, {r,    1.0f-r}},
+                {{r,         -r}, {r,         r}},
+                {{0.0f,      -r}, {0.0f,      r}},
+
+                // center box
+                {{r,       0.0f}, {r,      0.0f}},
+                {{r,      -1.0f}, {r,      1.0f}},
+                {{1.0f-r, -1.0f}, {1.0f-r, 1.0f}},
+                {{1.0f-r, -1.0f}, {1.0f-r, 1.0f}},
+                {{1.0f-r,  0.0f}, {1.0f-r, 0.0f}},
+                {{r,       0.0f}, {r,      0.0f}},
+
+                // right box.
+                {{1.0f-r,       -r}, {1.0f-r,      r}},
+                {{1.0f-r,  -1.0f+r}, {1.0f-r, 1.0f-r}},
+                {{1.0f,    -1.0f+r}, {1.0f,   1.0f-r}},
+                {{1.0f,    -1.0f+r}, {1.0f,   1.0f-r}},
+                {{1.0f,         -r}, {1.0f,        r}},
+                {{1.0f-r,       -r}, {1.0f-r,      r}},
+            };
+
+            if (mStyle == Style::Solid)
+            {
+                geom->AddDrawCmd(Geometry::DrawType::Triangles, 0, 18);
+            }
+            else
+            {
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 12, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 15, 3);
+            }
+
+            // generate corners
+            for (int i=0; i<4; ++i)
+            {
+                const auto offset = vs.size();
+
+                Vertex center;
+                center.aPosition.x = corners[i].x;
+                center.aPosition.y = corners[i].y;
+                center.aTexCoord.x = corners[i].x;
+                center.aTexCoord.y = corners[i].y * -1.0f;
+
+                if (mStyle == Style::Solid)
+                {
+                    // triangle fan center point
+                    vs.push_back(center);
+                }
+
+                float angle = math::Pi * 0.5 * i;
+                for (unsigned s = 0; s<=slices; ++s)
+                {
+                    const auto x = std::cos(angle) * mRadius;
+                    const auto y = std::sin(angle) * mRadius;
+                    Vertex v;
+                    v.aPosition.x = corners[i].x + x;
+                    v.aPosition.y = corners[i].y + y;
+                    v.aTexCoord.x = corners[i].x + x;
+                    v.aTexCoord.y = (corners[i].y + y) * -1.0f;
+                    vs.push_back(v);
+
+                    angle += increment;
+                    if (mStyle == Style::Wireframe)
+                    {
+                        const auto x = std::cos(angle) * mRadius;
+                        const auto y = std::sin(angle) * mRadius;
+                        Vertex v;
+                        v.aPosition.x = corners[i].x + x;
+                        v.aPosition.y = corners[i].y + y;
+                        v.aTexCoord.x = corners[i].x + x;
+                        v.aTexCoord.y = (corners[i].y + y)  * -1.0f;
+                        vs.push_back(v);
+                        vs.push_back(center);
+                    }
+                }
+                if (mStyle == Style::Solid)
+                {
+                    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset);
+                }
+                else if (mStyle == Style::Wireframe)
+                {
+                    geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
+                }
+            }
+            geom->Update(std::move(vs));
+        }
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
 Shader* Triangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");

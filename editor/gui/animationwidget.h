@@ -73,6 +73,7 @@ namespace gui
         void on_actionNewCircle_triggered();
         void on_actionNewTriangle_triggered();
         void on_actionNewArrow_triggered();
+        void on_actionNewRoundRect_triggered();
         void on_actionDeleteComponent_triggered();
         void on_tree_customContextMenuRequested(QPoint);
         void on_plus90_clicked();

@@ -152,6 +152,34 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
+    // Rectangle with rounded corners
+    class RoundRectangle : public Drawable
+    {
+    public:
+        RoundRectangle() = default;
+        RoundRectangle(Style style) : mStyle(style)
+        {}
+        RoundRectangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style; }
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+
+        float GetRadius() const
+        { return mRadius; }
+        void SetRadius(float radius)
+        { mRadius = radius;}
+    private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
+        float mRadius = 0.05;
+    };
+
     class Triangle : public Drawable
     {
     public:

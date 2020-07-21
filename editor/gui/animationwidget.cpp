@@ -678,6 +678,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewCircle->setChecked(false);
         mUI.actionNewTriangle->setChecked(false);
         mUI.actionNewArrow->setChecked(false);
+        mUI.actionNewRoundRect->setChecked(false);
     };
 
     mUI.widget->onKeyPress = [&](QKeyEvent* key) {
@@ -784,6 +785,7 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
+    bar.addAction(mUI.actionNewRoundRect);
     bar.addAction(mUI.actionNewCircle);
     bar.addAction(mUI.actionNewTriangle);
     bar.addAction(mUI.actionNewArrow);
@@ -800,6 +802,7 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
+    menu.addAction(mUI.actionNewRoundRect);
     menu.addAction(mUI.actionNewCircle);
     menu.addAction(mUI.actionNewTriangle);
     menu.addAction(mUI.actionNewArrow);
@@ -960,6 +963,7 @@ void AnimationWidget::on_actionNewRect_triggered()
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(false);
     mUI.actionNewArrow->setChecked(false);
+    mUI.actionNewRoundRect->setChecked(false);
 }
 
 void AnimationWidget::on_actionNewCircle_triggered()
@@ -970,6 +974,7 @@ void AnimationWidget::on_actionNewCircle_triggered()
     mUI.actionNewCircle->setChecked(true);
     mUI.actionNewTriangle->setChecked(false);
     mUI.actionNewArrow->setChecked(false);
+    mUI.actionNewRoundRect->setChecked(false);
 }
 
 void AnimationWidget::on_actionNewTriangle_triggered()
@@ -980,6 +985,7 @@ void AnimationWidget::on_actionNewTriangle_triggered()
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(true);
     mUI.actionNewArrow->setChecked(false);
+    mUI.actionNewRoundRect->setChecked(false);
 }
 
 void AnimationWidget::on_actionNewArrow_triggered()
@@ -990,6 +996,18 @@ void AnimationWidget::on_actionNewArrow_triggered()
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(false);
     mUI.actionNewArrow->setChecked(true);
+    mUI.actionNewRoundRect->setChecked(false);
+}
+
+void AnimationWidget::on_actionNewRoundRect_triggered()
+{
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "RoundRect"));
+
+    mUI.actionNewRect->setChecked(false);
+    mUI.actionNewCircle->setChecked(false);
+    mUI.actionNewTriangle->setChecked(false);
+    mUI.actionNewArrow->setChecked(true);
+    mUI.actionNewRoundRect->setChecked(false);
 }
 
 void AnimationWidget::on_actionDeleteComponent_triggered()

@@ -313,6 +313,15 @@ public:
             painter.Draw(gfx::Grid(5, 5), transform, materials[2]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Grid(5, 5, 10.0f), transform, materials[1]);
+
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Solid), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Outline), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Wireframe), transform, materials[1]);
         }
     }
     virtual void Update(float dts)

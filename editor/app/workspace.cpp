@@ -188,6 +188,8 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         return std::make_shared<gfx::Circle>();
     else if (name == "Arrow")
         return std::make_shared<gfx::Arrow>();
+    else if (name == "RoundRect")
+        return std::make_shared<gfx::RoundRectangle>();
 
     // we have only particle engines right now as drawables
     if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
@@ -559,6 +561,7 @@ QStringList Workspace::ListDrawables() const
     list << "Arrow";
     list << "Circle";
     list << "Rectangle";
+    list << "RoundRect";
     list << "Triangle";
 
     for (const auto& res : mResources)

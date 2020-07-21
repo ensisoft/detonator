@@ -866,6 +866,18 @@
     <string>Ctrl+S</string>
    </property>
   </action>
+  <action name="actionNewRoundRect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/round_rect.png</normaloff>:/32x32_ico_png/round_rect.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Round Rect</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
