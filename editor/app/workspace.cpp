@@ -251,6 +251,13 @@ bool Workspace::Load(const QString& dir)
         !LoadWorkspace(JoinPath(dir, "workspace.json")))
         return false;
 
+    // we don't really care if this fails or not. nothing permanently
+    // important should be stored in this file. I.e deleting it
+    // will just make the application forget some data that isn't
+    // crucial for the operation of the application or for the
+    // integrity of the workspace and its content.
+    LoadUserSettings(JoinPath(dir, ".workspace_private.json"));
+
     INFO("Loaded workspace '%1'", dir);
     mWorkspaceDir = dir;
     if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
@@ -276,6 +283,9 @@ bool Workspace::Save()
     if (!SaveContent(JoinPath(mWorkspaceDir, "content.json")) ||
         !SaveWorkspace(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
+
+    // should we notify the user if this fails or do we care?
+    SaveUserSettings(JoinPath(mWorkspaceDir, ".workspace_private.json"));
 
     INFO("Saved workspace '%1'", mWorkspaceDir);
     return true;
@@ -504,6 +514,22 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     return true;
 }
 
+void Workspace::SaveUserSettings(const QString& filename) const
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        ERROR("Failed to open file: '%1' for writing. (%2)", filename, file.error());
+        return;
+    }
+    QJsonObject json;
+    json["user"] = QJsonObject::fromVariantMap(mUserProperties);
+    QJsonDocument docu(json);
+    file.write(docu.toJson());
+    file.close();
+    INFO("Saved private workspace data in '%1'", filename);
+}
+
 bool Workspace::LoadWorkspace(const QString& filename)
 {
     QFile file(filename);
@@ -530,6 +556,20 @@ bool Workspace::LoadWorkspace(const QString& filename)
 
     INFO("Loaded workspace file '%1'", filename);
     return true;
+}
+
+void Workspace::LoadUserSettings(const QString& filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        WARN("Failed to open: '%1' (%2)", filename, file.error());
+        return;
+    }
+    const auto& buff = file.readAll(); // QByteArray
+    const QJsonDocument docu(QJsonDocument::fromJson(buff));
+    mUserProperties = docu["user"].toObject().toVariantMap();
+    INFO("Loaded private workspace data: '%1'", filename);
 }
 
 QStringList Workspace::ListMaterials() const

@@ -262,6 +262,51 @@ namespace app
             *out = qvariant_cast<T>(ret);
             return true;
         }
+
+        // User specific workspace properties.
+        bool HasUserProperty(const QString& name) const
+        { return mUserProperties.contains(name); }
+        // Set a property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        void SetUserProperty(const QString& name, const QVariant& value)
+        { mUserProperties[name] = value; }
+        // Return the value of the property identied by name.
+        // If the property doesn't exist returns default value.
+        QVariant GetUserProperty(const QString& name, const QVariant& def) const
+        {
+            QVariant ret = mUserProperties[name];
+            if (ret.isNull())
+                return def;
+            return ret;
+        }
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        QVariant GetUserProperty(const QString& name) const
+        { return mUserProperties[name]; }
+
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns the default value.
+        template<typename T>
+        T GetUserProperty(const QString& name, const T& def) const
+        {
+            if (!HasUserProperty(name))
+                return def;
+            const auto& ret = GetUserProperty(name);
+            return qvariant_cast<T>(ret);
+        }
+        // Get the value of a property.
+        // If the property exists returns true and stores the value in the T pointer
+        // otherwise return false and T* is left unmodified.
+        template<typename T>
+        bool GetUserProperty(const QString& name, T* out) const
+        {
+            if (!HasUserProperty(name))
+                return false;
+            const auto& ret = GetUserProperty(name);
+            *out = qvariant_cast<T>(ret);
+            return true;
+        }
+
     signals:
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.
@@ -278,8 +323,10 @@ namespace app
     private:
         bool LoadContent(const QString& file);
         bool LoadWorkspace(const QString& file);
+        void LoadUserSettings(const QString& file);
         bool SaveContent(const QString& file) const;
         bool SaveWorkspace(const QString& file) const;
+        void SaveUserSettings(const QString& file) const;
 
     private:
         // this is the list of resources that we save/load
@@ -298,6 +345,8 @@ namespace app
         QString mWorkspaceDir;
         // workspace specific properties
         QVariantMap mProperties;
+        // user specific workspace properties.
+        QVariantMap mUserProperties;
     };
 
 } // namespace
