@@ -253,6 +253,13 @@ void ParticleEditorWidget::animate(double secs)
         mEngine->Update(secs);
 
         mTime += secs;
+
+        const auto& material_name = mUI.materials->currentText();
+        if (mMaterialName != material_name)
+        {
+            mMaterial = mWorkspace->MakeMaterial(material_name);
+            mMaterialName = material_name;
+        }
         mMaterial->SetRuntime(mTime);
     }
 
