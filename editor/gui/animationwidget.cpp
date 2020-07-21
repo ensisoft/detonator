@@ -765,8 +765,29 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     setWindowTitle(resource.GetName());
 
     mState.animation = *resource.GetContent<game::Animation>();
-    mState.animation.Prepare(*workspace);
 
+    // if some resource has been deleted we need to replace it.
+    for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+    {
+        auto& node = mState.animation.GetNode(i);
+        const auto& material = app::FromUtf8(node.GetMaterialName());
+        const auto& drawable = app::FromUtf8(node.GetDrawableName());
+        if (!workspace->IsValidMaterial(material))
+        {
+            WARN("Animation node '%1' uses material '%2' that is deleted.",
+                node.GetName(), material);
+            node.SetMaterial("Checkerboard", workspace->MakeMaterial("Checkerboard"));
+        }
+        if (!workspace->IsValidDrawable(drawable))
+        {
+            WARN("Animation node '%1' uses drawable '%2' that is deleted.",
+                node.GetName(), drawable);
+            node.SetMaterial("Checkerboard", workspace->MakeMaterial("Checkerboard"));
+            node.SetDrawable("Rectangle", workspace->MakeDrawable("Rectangle"));
+        }
+    }
+
+    mState.animation.Prepare(*workspace);
     mUI.tree->Rebuild();
 }
 
@@ -859,6 +880,28 @@ bool AnimationWidget::loadState(const Settings& settings)
         return false;
     }
     mState.animation = std::move(ret.value());
+
+    // if some resource has been deleted we need to replace it.
+    for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+    {
+        auto& node = mState.animation.GetNode(i);
+        const auto& material = app::FromUtf8(node.GetMaterialName());
+        const auto& drawable = app::FromUtf8(node.GetDrawableName());
+        if (!mState.workspace->IsValidMaterial(material))
+        {
+            WARN("Animation node '%1' uses material '%2' that is deleted.",
+                node.GetName(), material);
+            node.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
+        }
+        if (!mState.workspace->IsValidDrawable(drawable))
+        {
+            WARN("Animation node '%1' uses drawable '%2' that is deleted.",
+                node.GetName(), drawable);
+            node.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
+            node.SetDrawable("Rectangle", mState.workspace->MakeDrawable("Rectangle"));
+        }
+    }
+
     mState.animation.Prepare(*mState.workspace);
 
     mUI.tree->Rebuild();

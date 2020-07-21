@@ -170,11 +170,26 @@ namespace app
         }
 
         // Returns whether a material by this name already exists or not.
+        // Only checks for the materials that the user has defined and
+        // added to the workspace. Primitives are not included. For
+        // validation use IsValidMaterial.
         bool HasMaterial(const QString& name) const;
+        // Returns whether a drawable by this name already exists or not.
+        // Only checks for the user defined drawables. Primitives are not included.
+        // For validation use IsValidDrawable.
+        bool HasDrawable(const QString& name) const;
         // Returns whether a particle system by this name already exists or not.
         bool HasParticleSystem(const QString& name) const;
 
+        // Checks whether the material name is a valid material name.
+        // Includes primitives and user defined materials.
+        bool IsValidMaterial(const QString& name) const;
+        // Checks whether the drawable name is a valid drawable naem.
+        // Includes primitives and user defined drawable shapes.
+        bool IsValidDrawable(const QString& name) const;
+
         // Returns whether some particular resource exists or not.
+        // Only checks for a user defined resource not for primitives.
         bool HasResource(const QString& name, Resource::Type type) const;
 
         // Get the Qt data model implementation for displaying the

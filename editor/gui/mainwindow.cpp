@@ -228,7 +228,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
     // Load workspace windows and their content.
     bool success = true;
 
-    const auto& session_files = workspace->GetProperty("session_files", QStringList());
+    const auto& session_files = workspace->GetUserProperty("session_files", QStringList());
     for (const auto& file : session_files)
     {
         Settings settings(file);
@@ -279,7 +279,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
 
-    mUI.mainTab->setCurrentIndex(workspace->GetProperty("focused_widget_index", 0));
+    mUI.mainTab->setCurrentIndex(workspace->GetUserProperty("focused_widget_index", 0));
     mUI.workspace->setModel(workspace->GetResourceModel());
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
@@ -379,11 +379,11 @@ bool MainWindow::saveWorkspace()
     }
     // save the list of temp windows for session widgets in
     // the current workspace
-    mWorkspace->SetProperty("session_files", session_file_list);
+    mWorkspace->SetUserProperty("session_files", session_file_list);
     if (mCurrentWidget)
     {
         const auto index_of = mUI.mainTab->indexOf(mCurrentWidget);
-        mWorkspace->SetProperty("focused_widget_index", index_of);
+        mWorkspace->SetUserProperty("focused_widget_index", index_of);
     }
 
     if (!mWorkspace->Save())

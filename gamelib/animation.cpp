@@ -54,7 +54,7 @@ void AnimationNode::Update(float dt)
 {
     mTime += dt;
 
-    if (TestFlag(Flags::UpdateDrawable) && mDrawable)
+    if (TestFlag(Flags::UpdateDrawable))
         mDrawable->Update(dt);
 
     if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
@@ -63,7 +63,7 @@ void AnimationNode::Update(float dt)
             p->Restart();
     }
 
-    if (TestFlag(Flags::UpdateMaterial) && mMaterial)
+    if (TestFlag(Flags::UpdateMaterial))
         mMaterial->SetRuntime(mTime - mStartTime);
 }
 
@@ -74,8 +74,8 @@ void AnimationNode::ResetTime()
     {
         p->Restart();
     }
-    if (mMaterial)
-        mMaterial->SetRuntime(0);
+
+    mMaterial->SetRuntime(0);
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const
@@ -99,7 +99,7 @@ glm::mat4 AnimationNode::GetModelTransform() const
     return transform.GetAsMatrix();
 }
 
-bool AnimationNode::Prepare(const GfxFactory& loader)
+void AnimationNode::Prepare(const GfxFactory& loader)
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -133,12 +133,8 @@ bool AnimationNode::Prepare(const GfxFactory& loader)
     mDrawable = loader.MakeDrawable(mDrawableName);
     mMaterial = loader.MakeMaterial(mMaterialName);
 
-    if (mDrawable)
-    {
-        mDrawable->SetStyle(mRenderStyle);
-        mDrawable->SetLineWidth(mLineWidth);
-    }
-    return mDrawable && mMaterial;
+    mDrawable->SetStyle(mRenderStyle);
+    mDrawable->SetLineWidth(mLineWidth);
 }
 
 nlohmann::json AnimationNode::ToJson() const
@@ -284,9 +280,6 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
 
     for (const auto& packet : packets)
     {
-        if (!packet.material || !packet.drawable)
-            continue;
-
         painter.Draw(*packet.drawable, gfx::Transform(packet.transform), *packet.material);
     }
 
@@ -583,18 +576,12 @@ glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node
     return visitor.GetResult();
 }
 
-bool Animation::Prepare(const GfxFactory& loader)
+void Animation::Prepare(const GfxFactory& loader)
 {
-    bool all_ok = true;
     for (auto& node : mNodes)
     {
-        if (!node->Prepare(loader))
-        {
-            WARN("Node '%1' failed to prepare.", node->GetName());
-            all_ok = false;
-        }
+        node->Prepare(loader);
     }
-    return all_ok;
 }
 
 Animation& Animation::operator=(const Animation& other)

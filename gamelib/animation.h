@@ -181,9 +181,7 @@ namespace game
 
         // Prepare this animation component for rendering
         // by loading all the needed runtime resources.
-        // Returns true if succesful false if some resource
-        // was not available.
-        bool Prepare(const GfxFactory& loader);
+        void Prepare(const GfxFactory& loader);
 
         // serialize the component properties into JSON.
         nlohmann::json ToJson() const;
@@ -327,7 +325,7 @@ namespace game
         void Reset();
 
         // Prepare and load the runtime resources if not yet loaded.
-        bool Prepare(const GfxFactory& loader);
+        void Prepare(const GfxFactory& loader);
 
         // Serialize the animation into JSON.
         nlohmann::json ToJson() const;

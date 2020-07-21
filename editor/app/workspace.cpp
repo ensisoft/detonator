@@ -135,7 +135,11 @@ std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) 
         if (enum_name == name)
             return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color4f(val)));
     }
-
+    if (!HasMaterial(FromUtf8(name)))
+    {
+        ERROR("Request for a material that doesn't exist: '%1'", name);
+        return std::make_shared<gfx::Material>(gfx::TextureMap("app://textures/Checkerboard.png"));
+    }
 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
     const gfx::Material* content = nullptr;
@@ -191,24 +195,23 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
 
-    // we have only particle engines right now as drawables
-    if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
+    if (!HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
-        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
-        const gfx::KinematicsParticleEngine* engine = nullptr;
-        resource.GetContent(&engine);
-        auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
-
-        // add a copy in the collection of private instances so that
-        // if/when the resource is modified the object using the resource
-        // will also reflect those changes.
-        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
-        mPrivateInstances.push_back(std::move(handle));
-        return ret;
+        ERROR("Request for a drawable that doesn't exist: '%1'", name);
+        return std::make_shared<gfx::Rectangle>();
     }
 
-    ERROR("Request for a drawable that doesn't exist: '%1'", name);
-    std::shared_ptr<gfx::Drawable> ret;
+    // we have only particle engines right now as drawables
+    const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
+    const gfx::KinematicsParticleEngine* engine = nullptr;
+    resource.GetContent(&engine);
+    auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
+
+    // add a copy in the collection of private instances so that
+    // if/when the resource is modified the object using the resource
+    // will also reflect those changes.
+    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
+    mPrivateInstances.push_back(std::move(handle));
     return ret;
 }
 
@@ -616,6 +619,12 @@ bool Workspace::HasMaterial(const QString& name) const
 {
     return HasResource(name, Resource::Type::Material);
 }
+bool Workspace::HasDrawable(const QString& name) const
+{
+    // only have particle systems now as an alternative drawable
+    // in addition to primitives.
+    return HasResource(name, Resource::Type::ParticleSystem);
+}
 
 bool Workspace::HasParticleSystem(const QString& name) const
 {
@@ -629,6 +638,22 @@ bool Workspace::HasResource(const QString& name, Resource::Type type) const
         if (res->GetType() == type && res->GetName() == name)
             return true;
     }
+    return false;
+}
+
+bool Workspace::IsValidMaterial(const QString& name) const
+{
+    const QStringList& names = ListMaterials();
+    if (names.contains(name))
+        return true;
+    return false;
+}
+
+bool Workspace::IsValidDrawable(const QString& name) const
+{
+    const QStringList& names = ListDrawables();
+    if (names.contains(name))
+        return true;
     return false;
 }
 
