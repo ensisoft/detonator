@@ -25,9 +25,8 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QOpenGLWidget>
+#  include <QWindow>
 #  include <QOpenGLContext>
-#  include <QOpenGLWindow>
 #  include <QKeyEvent>
 #  include <QElapsedTimer>
 #  include <QPalette>
@@ -45,7 +44,7 @@ namespace gui
 {
     // Integrate QOpenGLWidget and custom graphics device and painter
     // implementations from gfx into a reusable widget class.
-    class GfxWindow : public QOpenGLWindow
+    class GfxWindow : public QWindow
     {
         Q_OBJECT
 
@@ -54,7 +53,7 @@ namespace gui
        ~GfxWindow();
 
         // Important to call dispose to cleanly dispose of all the graphics
-        // resources while the Qt's OpenGL context is still valid, 
+        // resources while the Qt's OpenGL context is still valid,
         // I.e the window still exists and hasn't been closed or anything.
         void dispose();
 
@@ -100,17 +99,17 @@ namespace gui
         void clearColorChanged(QColor color);
         void toggleShowFps();
     private slots:
-        void frameSwapped();
         void doInit();
 
     private:
-        virtual void initializeGL() override;
-        virtual void paintGL() override;
+        void initializeGL();
+        void paintGL();
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
+        virtual bool event(QEvent* event) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
@@ -124,6 +123,8 @@ namespace gui
         quint64 mNumFrames = 0;
         bool  mShowFps     = false;
         float mCurrentFps  = 0.0f;
+    private:
+        QOpenGLContext mContext;
     };
 
     // This is now a "widget shim" that internally creates a QOpenGLWindow

@@ -49,10 +49,23 @@ GfxWindow::~GfxWindow()
 
 GfxWindow::GfxWindow()
 {
-    // weird but not able to connect frameSwapped directly to update.
-    // (compiler error)
-    connect(this, &QOpenGLWindow::frameSwapped,
-            this, &GfxWindow::frameSwapped);
+    setSurfaceType(QWindow::OpenGLSurface);
+
+    QSurfaceFormat format;
+    format.setVersion(2, 0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setDepthBufferSize(0); // currently we don't care
+    format.setAlphaBufferSize(8);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setStencilBufferSize(8);
+    format.setSamples(4);
+    format.setSwapInterval(1);
+
+    mContext.setFormat(format);
+    mContext.create();
 
     // There's the problem that it seems a bit tricky to get the
     // OpenGLWidget's size (framebuffer size) properly when
@@ -76,7 +89,7 @@ void GfxWindow::dispose()
     // for example texture 0, however if the wrong context is current
     // then the device will end deleting resources that actually belong
     // to a different device! *OOPS*
-    makeCurrent();
+    mContext.makeCurrent(this);
 
     mCustomGraphicsDevice.reset();
     mCustomGraphicsPainter.reset();
@@ -85,31 +98,28 @@ void GfxWindow::dispose()
 
 void GfxWindow::initializeGL()
 {
-    // Context implementation based on widget/context provided by Qt.
-    class WidgetContext : public gfx::Device::Context
+    class WindowContext : public gfx::Device::Context
     {
     public:
-        WidgetContext(QOpenGLWindow* window) : mWindow(window)
+        WindowContext(QOpenGLContext* context) : mContext(context)
         {}
         virtual void Display() override
-        {
-            // No need to implement this, Qt will take care of this
-        }
+        {}
         virtual void MakeCurrent() override
-        {
-            mWindow->makeCurrent();
-        }
+        {}
         virtual void* Resolve(const char* name) override
         {
-            return (void*)mWindow->context()->getProcAddress(name);
+            return (void*)mContext->getProcAddress(name);
         }
     private:
-        QOpenGLWindow* mWindow = nullptr;
+        QOpenGLContext* mContext = nullptr;
     };
+
+    mContext.makeCurrent(this);
 
     // create custom painter for fancier shader based effects.
     mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<WidgetContext>(this));
+        std::make_shared<WindowContext>(&mContext));
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 
@@ -118,7 +128,7 @@ void GfxWindow::paintGL()
     if (!mCustomGraphicsDevice)
         return;
 
-    // Qt should have made this window's context current
+    mContext.makeCurrent(this);
 
     // Note that this clock measures the time between rendering calls.
     // so when the window isn't active paintGL isn't called and then
@@ -154,12 +164,23 @@ void GfxWindow::paintGL()
     }
     mCustomGraphicsDevice->EndFrame(true /*display*/);
     mCustomGraphicsDevice->CleanGarbage(60);
+
+    mContext.swapBuffers(this);
+
+    // animate continuously: schedule an update
+    QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+
 }
 void GfxWindow::doInit()
 {
+    initializeGL();
+
     const auto w = width();
     const auto h = height();
     onInitScene(w, h);
+
+    // animate continuously: schedule an update
+    QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
  }
 
 void GfxWindow::mouseMoveEvent(QMouseEvent* mickey)
@@ -185,16 +206,21 @@ void GfxWindow::wheelEvent(QWheelEvent* wheel)
     onMouseWheel(wheel);
 }
 
+bool GfxWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::UpdateRequest)
+    {
+        paintGL();
+        return true;
+    }
+    return QWindow::event(event);
+}
+
 void GfxWindow::toggleShowFps()
 {
     mShowFps = !mShowFps;
     mFrameTime = 0;
     mNumFrames = 0;
-}
-
-void GfxWindow::frameSwapped()
-{
-    update();
 }
 
 void GfxWindow::clearColorChanged(QColor color)
