@@ -242,8 +242,12 @@ namespace game
             std::shared_ptr<const gfx::Material> material;
             // shortcut to the node's drawable.
             std::shared_ptr<const gfx::Drawable> drawable;
+            // transform that pertains to the draw.
             glm::mat4 transform;
+            // the animation layer this draw belongs to.
             int layer = 0;
+            // the render pass this draw belongs to.
+            AnimationNode::RenderPass pass = AnimationNode::RenderPass::Draw;
         };
 
         class DrawHook

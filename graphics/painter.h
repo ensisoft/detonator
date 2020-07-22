@@ -24,7 +24,13 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/glm.hpp>
+#  include <glm/mat4x4.hpp>
+#include "warnpop.h"
+
 #include <memory>
+#include <vector>
 
 namespace gfx
 {
@@ -64,6 +70,19 @@ namespace gfx
         virtual void DrawMasked(const Drawable& drawShape, const Transform& drawTransform,
                                 const Drawable& maskShape, const Transform& maskTransform,
                                 const Material& material) = 0;
+
+        struct MaskShape {
+            const glm::mat4* transform = nullptr;
+            const Drawable*  drawable  = nullptr;
+        };
+        struct DrawShape {
+            const glm::mat4* transform = nullptr;
+            const Drawable* drawable   = nullptr;
+            const Material* material   = nullptr;
+        };
+        // Draw the shapes in the draw list after combining all the shapes in the mast list
+        // into a single mask that covers some areas of the render buffer.
+        virtual void DrawMasked(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);

@@ -1448,8 +1448,9 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     class DrawHook : public game::Animation::DrawHook
     {
     public:
-        DrawHook(game::AnimationNode* selected)
+        DrawHook(game::AnimationNode* selected, PlayState playstate)
           : mSelected(selected)
+          , mPlayState(playstate)
         {}
         virtual bool InspectPacket(const game::AnimationNode* node, game::Animation::DrawPacket&) override
         {
@@ -1459,14 +1460,34 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         }
         virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::Animation::DrawPacket>& packets) override
         {
-            if (node != mSelected)
+            const auto is_mask     = node->GetRenderPass() == game::AnimationNode::RenderPass::Mask;
+            const auto is_selected = node == mSelected;
+            const auto is_playing  = mPlayState == PlayState::Playing;
+
+            if (is_mask && !is_selected && !is_playing)
+            {
+                static const auto yellow = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::DarkYellow));
+                static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
+                // visualize it.
+                trans.Push(node->GetModelTransform());
+                    game::Animation::DrawPacket box;
+                    box.transform = trans.GetAsMatrix();
+                    box.material  = yellow;
+                    box.drawable  = rect; //node->GetDrawable();
+                    box.layer     = node->GetLayer() + 1;
+                    box.pass      = game::AnimationNode::RenderPass::Draw;
+                    packets.push_back(box);
+                trans.Pop();
+            }
+
+            if (!is_selected)
                 return;
 
             static const auto green = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
             static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
             static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
-
             const auto& size = node->GetSize();
+            const auto layer = is_mask ? node->GetLayer() + 1 : node->GetLayer();
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
@@ -1474,7 +1495,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
-                selection.layer     = node->GetLayer();
+                selection.layer     = layer;
                 packets.push_back(selection);
             trans.Pop();
 
@@ -1486,7 +1507,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
-                sizing_box.layer     = node->GetLayer();
+                sizing_box.layer     = layer;
                 packets.push_back(sizing_box);
             trans.Pop();
 
@@ -1498,15 +1519,16 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
-                rotation_circle.layer     = node->GetLayer();
+                rotation_circle.layer     = layer;
                 packets.push_back(rotation_circle);
             trans.Pop();
         }
     private:
-        game::AnimationNode* mSelected = nullptr;
+        const game::AnimationNode* mSelected = nullptr;
+        const PlayState mPlayState = PlayState::Playing;
     };
 
-    DrawHook hook(GetCurrentNode());
+    DrawHook hook(GetCurrentNode(), mPlayState);
 
     // render endless background grid.
     if (mUI.showGrid->isChecked())

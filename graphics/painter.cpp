@@ -153,6 +153,69 @@ public:
         mDevice->Draw(*drawProg, *drawGeom, state);
     }
 
+    virtual void DrawMasked(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) override
+    {
+        mDevice->ClearStencil(1);
+
+        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+
+        Device::State state;
+        state.viewport = IRect(mViewX, mViewY, mViewW, mViewH);
+        state.stencil_func  = Device::State::StencilFunc::PassAlways;
+        state.stencil_dpass = Device::State::StencilOp::WriteRef;
+        state.stencil_ref   = 0;
+        state.bWriteColor   = false;
+        state.blending      = Device::State::BlendOp::None;
+
+        Material mask_material = SolidColor(gfx::Color::White);
+        // do the masking pass
+        for (const auto& mask : mask_list)
+        {
+            Geometry* geom = mask.drawable->Upload(*mDevice);
+            if (geom == nullptr)
+                continue;
+            Program* prog = GetProgram(*mask.drawable, mask_material);
+            if (prog == nullptr)
+                continue;
+
+            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*mask.transform));
+
+            Material::RasterState raster;
+            Material::Environment env;
+            env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
+
+            mask_material.Apply(env, *mDevice, *prog, raster);
+            mDevice->Draw(*prog, *geom, state);
+        }
+
+        state.stencil_func  = Device::State::StencilFunc::RefIsEqual;
+        state.stencil_dpass = Device::State::StencilOp::WriteRef;
+        state.stencil_ref   = 1;
+        state.bWriteColor   = true;
+
+        // do the render pass.
+        for (const auto& draw : draw_list)
+        {
+            Geometry* geom = draw.drawable->Upload(*mDevice);
+            if (geom == nullptr)
+                continue;
+            Program* prog = GetProgram(*draw.drawable, *draw.material);
+            if (prog == nullptr)
+                continue;
+
+            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*draw.transform));
+            Material::RasterState raster;
+            Material::Environment env;
+            env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+
+            draw.material->Apply(env, *mDevice, *prog, raster);
+            state.blending = raster.blending;
+            mDevice->Draw(*prog, *geom, state);
+        }
+    }
+
 private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {

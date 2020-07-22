@@ -234,9 +234,10 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
                 packet.material  = node->GetMaterial();
                 packet.drawable  = node->GetDrawable();
                 packet.layer     = node->GetLayer();
+                packet.pass      = node->GetRenderPass();
                 packet.transform = mTransform.GetAsMatrix();
                 if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                    mPackets.push_back(packet);
+                    mPackets.push_back(std::move(packet));
 
                 // pop the model transform
                 mTransform.Pop();
@@ -272,17 +273,52 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
     Visitor visitor(packets, transform, hook);
     mRenderTree.PreOrderTraverse(visitor);
 
-    // implement "layers" by drawing in a sorted order as determined
-    // by node's layer value.
-    std::sort(packets.begin(), packets.end(), [](const auto& a, const auto& b) {
-            return a.layer < b.layer;
-        });
-
-    for (const auto& packet : packets)
+    // the layer value is negative but for the indexing below
+    // we must have postive values only.
+    int first_layer_index = 0;
+    for (auto& packet : packets)
     {
-        painter.Draw(*packet.drawable, gfx::Transform(packet.transform), *packet.material);
+        first_layer_index = std::min(first_layer_index, packet.layer);
+    }
+    // offset the layers.
+    for (auto& packet : packets)
+    {
+        packet.layer += std::abs(first_layer_index);
     }
 
+    struct Layer {
+        std::vector<gfx::Painter::DrawShape> draw_list;
+        std::vector<gfx::Painter::MaskShape> mask_list;
+    };
+    std::vector<Layer> layers;
+
+    for (auto& packet : packets)
+    {
+        const auto layer_index = packet.layer;
+        if (layer_index >= layers.size())
+            layers.resize(layer_index + 1);
+
+        Layer& layer = layers[layer_index];
+        if (packet.pass == AnimationNode::RenderPass::Draw)
+        {
+            gfx::Painter::DrawShape shape;
+            shape.transform = &packet.transform;
+            shape.drawable  = packet.drawable.get();
+            shape.material  = packet.material.get();
+            layer.draw_list.push_back(shape);
+        }
+        else if (packet.pass == AnimationNode::RenderPass::Mask)
+        {
+            gfx::Painter::MaskShape shape;
+            shape.transform = &packet.transform;
+            shape.drawable  = packet.drawable.get();
+            layer.mask_list.push_back(shape);
+        }
+    }
+    for (const auto& layer : layers)
+    {
+        painter.DrawMasked(layer.draw_list, layer.mask_list);
+    }
     // if we used a new trańsformation scope pop it here.
     //transform.Pop();
 }
