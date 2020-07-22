@@ -25,9 +25,12 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <boost/random/mersenne_twister.hpp>
 #include "warnpop.h"
+
+#include <type_traits>
+#include <random>
 #include <cmath>
+#include <ctime>
 
 namespace math
 {
@@ -54,16 +57,42 @@ namespace math
     }
 
     // generate a random number in the range of min max (inclusive)
+    // the random number generator is automatically seeded.
     template<typename T>
     T rand(T min, T max)
     {
-        static boost::random::mt19937 generator;
-
-        const auto range = max - min;
-        const auto value = (double)generator() / (double)generator.max();
-        return static_cast<T>(min + (range * value));
+        // if we enable this flag we always give out a deterministic
+        // sequence by initializing the engine with a predeterminted seed.
+        // this is convenient for example testing purposes, enable this
+        // flag and always get the same sequence without having to change
+        // the calling code that doesn't really care.
+    #if defined(MATH_FORCE_DETERMINISTIC_RANDOM)
+        static std::default_random_engine engine(0xdeadbeef);
+    #else
+        static std::default_random_engine engine(std::time(nullptr));
+    #endif
+        if constexpr (std::is_floating_point<T>::value) {
+            std::uniform_real_distribution<T> dist(min, max);
+            return dist(engine);
+        } else {
+            std::uniform_int_distribution<T> dist(min, max);
+            return dist(engine);
+        }
     }
 
+    // Generate pseudo random numbers based on the given seed.
+    template<typename T, size_t Seed>
+    T rand(T min, T max)
+    {
+        static std::default_random_engine engine(Seed);
+        if constexpr (std::is_floating_point<T>::value) {
+            std::uniform_real_distribution<T> dist(min, max);
+            return dist(engine);
+        } else {
+            std::uniform_int_distribution<T> dist(min, max);
+            return dist(engine);
+        }
+    }
 
     enum class TriangleWindingOrder {
         Undetermined,
