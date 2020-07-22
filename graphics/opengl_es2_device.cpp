@@ -1130,7 +1130,12 @@ private:
             }
             const std::string source(std::istreambuf_iterator<char>(stream), {});
 
-            return CompileSource(source);
+            if (!CompileSource(source))
+            {
+                ERROR("Failed to compile shader source file: '%1'", mapped_file);
+                return false;
+            }
+            return true;
         }
 
         virtual bool CompileSource(const std::string& source) override
