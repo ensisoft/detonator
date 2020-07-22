@@ -509,11 +509,22 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="browseShader">
-             <property name="text">
-              <string>Browse ...</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QPushButton" name="btnEditShader">
+               <property name="text">
+                <string>Edit ...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="browseShader">
+               <property name="text">
+                <string>Browse ...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -1091,6 +1102,7 @@
   <tabstop>blend</tabstop>
   <tabstop>customShader</tabstop>
   <tabstop>shaderFile</tabstop>
+  <tabstop>btnEditShader</tabstop>
   <tabstop>browseShader</tabstop>
   <tabstop>textures</tabstop>
   <tabstop>btnNewTextTextureMap</tabstop>

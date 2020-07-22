@@ -31,7 +31,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Image editor</string>
+          <string>Image editor (.png, .jpeg, .bmp etc. files)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
@@ -60,6 +60,46 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="edtImageEditorArguments">
+            <property name="text">
+             <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Shader editor (.glsl files)</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Executable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="edtShaderEditorExecutable"/>
+          </item>
+          <item row="0" column="2" colspan="2">
+           <widget class="QPushButton" name="btnSelectShaderEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Arguments</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="edtShaderEditorArguments">
             <property name="text">
              <string>${file}</string>
             </property>
@@ -123,6 +163,9 @@
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>
   <tabstop>edtImageEditorArguments</tabstop>
+  <tabstop>edtShaderEditorExecutable</tabstop>
+  <tabstop>btnSelectShaderEditor</tabstop>
+  <tabstop>edtShaderEditorArguments</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

@@ -527,6 +527,11 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
     }
 }
 
+void MaterialWidget::on_btnEditShader_clicked()
+{
+    emit openExternalShader(mUI.shaderFile->text());
+}
+
 void MaterialWidget::on_btnResetTextureRect_clicked()
 {
     const auto row = mUI.textures->currentRow();

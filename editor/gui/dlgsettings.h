@@ -43,6 +43,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnSelectImageEditor_clicked();
+        void on_btnSelectShaderEditor_clicked();
 
     private:
         Ui::DlgSettings mUI;

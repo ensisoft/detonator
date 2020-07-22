@@ -119,9 +119,13 @@ void MainWindow::loadState()
 #if defined(POSIX_OS)
     mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("/usr/bin/gimp"));
     mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
+    mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("/usr/bin/gedit"));
+    mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #elif defined(WINDOWS_OS)
     mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("mspaint.exe"));
     mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
+    mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("notepad.exe"));
+    mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #endif
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -990,6 +994,45 @@ void MainWindow::openExternalImage(const QString& file)
     DEBUG("Start application '%1'", mSettings.image_editor_executable);
 }
 
+void MainWindow::openExternalShader(const QString& file)
+{
+    if (mSettings.shader_editor_executable.isEmpty())
+    {
+        QMessageBox msg;
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't configured any external application for shader files.\n"
+                    "Would you like to set one now?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+        DlgSettings dlg(this, mSettings);
+        if (mSettings.shader_editor_executable.isEmpty())
+        {
+            ERROR("No shader editor has been configured.");
+            return;
+        }
+    }
+    if (MissingFile(file))
+    {
+        WARN("Could not find '%1'", file);
+    }
+
+    QStringList args;
+    QStringList list = mSettings.shader_editor_arguments.split(" ", QString::SkipEmptyParts);
+    for (const auto& item : list)
+    {
+        if (item == "${file}")
+            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+        else args << item;
+    }
+    if (!QProcess::startDetached(mSettings.shader_editor_executable, args))
+    {
+        ERROR("Failed to start application '%1'", mSettings.shader_editor_executable);
+
+    }
+    DEBUG("Start application '%1'", mSettings.shader_editor_executable);
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     event->ignore();
@@ -1064,6 +1107,8 @@ bool MainWindow::saveState()
     settings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
     settings.setValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
+    settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
+    settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
 
@@ -1080,6 +1125,8 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     // connect the important signals here.
     connect(widget, &MainWidget::openExternalImage,
             this,   &MainWindow::openExternalImage);
+    connect(widget, &MainWidget::openExternalShader,
+            this,   &MainWindow::openExternalShader);
 
     if (new_window)
     {

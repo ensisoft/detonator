@@ -71,6 +71,7 @@ namespace gui
         virtual void reloadTextures() {};
     signals:
         void openExternalImage(const QString& file);
+        void openExternalShader(const QString& file);
 
     private:
     };

@@ -115,6 +115,7 @@ namespace gui
         void timerHiRes();
         void showNote(const app::Event& event);
         void openExternalImage(const QString& file);
+        void openExternalShader(const QString& file);
 
     private:
         bool saveState();

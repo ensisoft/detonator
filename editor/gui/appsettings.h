@@ -39,6 +39,13 @@ namespace gui
         // is expanded to contain the full native absolute path to the
         // file that user waats to work with.
         QString image_editor_arguments;
+        // the path to the currently set external editor for shader (.glsl) files.
+        // for example /usr/bin/gedit
+        QString shader_editor_executable;
+        // the arguments for the shader editor. The special argument ${file}
+        // is expanded to contain the full native absolute path to the
+        // file that the user wants to open.
+        QString shader_editor_arguments;
     };
 
 } // namespace
