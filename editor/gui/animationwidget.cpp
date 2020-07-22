@@ -1049,8 +1049,8 @@ void AnimationWidget::on_actionNewRoundRect_triggered()
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(false);
-    mUI.actionNewArrow->setChecked(true);
-    mUI.actionNewRoundRect->setChecked(false);
+    mUI.actionNewArrow->setChecked(false);
+    mUI.actionNewRoundRect->setChecked(true);
 }
 
 void AnimationWidget::on_actionDeleteComponent_triggered()
