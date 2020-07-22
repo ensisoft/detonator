@@ -4,6 +4,7 @@ precision highp float;
 
 uniform float kRuntime;
 uniform vec4 kBaseColor;
+uniform float kRenderPoints;
 varying vec2 vTexCoord;
 
 float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_origin)
@@ -25,7 +26,7 @@ void main()
     rings[2] = 0.16 + s;
     rings[3] = 0.24 + s;
 
-    vec2 pos   = vTexCoord - vec2(0.5, 0.5);
+    vec2 pos   = mix(vTexCoord, gl_PointCoord, kRenderPoints) - vec2(0.5, 0.5);
     vec2 ori   = vec2(0.0, 0.0);
     float dist = length(pos - ori);
 
