@@ -27,8 +27,11 @@
 #include <cstring>
 #include <chrono>
 #include <cmath>
+#include <iostream>
 
 #include "base/logging.h"
+#include "base/format.h"
+#include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
@@ -52,6 +55,7 @@ public:
     virtual void Update(float dts) {}
     virtual void Start() {}
     virtual void End() {}
+    virtual std::string GetName() const = 0;
 private:
 };
 
@@ -147,6 +151,8 @@ public:
         mRobot->Update(dt);
         mTime += dt;
     }
+    virtual std::string GetName() const override
+    { return "TransformTest"; }
 private:
     class BodyPart
     {
@@ -326,6 +332,8 @@ public:
     }
     virtual void Update(float dts)
     {}
+    virtual std::string GetName() const override
+    { return "ShapesTest"; }
 private:
 };
 
@@ -478,6 +486,8 @@ public:
         mBlood->Update(dts);
         mClouds->Update(dts);
     }
+    virtual std::string GetName() const override
+    { return "ParticleTest"; }
 private:
     std::unique_ptr<ParticleEngine> mFire;
     std::unique_ptr<ParticleEngine> mSmoke;
@@ -600,13 +610,15 @@ public:
     {
         mTime += dts;
     }
+    virtual std::string GetName() const override
+    { return "TextTest"; }
 private:
     float mTime = 0.0f;
 };
 
 int main(int argc, char* argv[])
 {
-    base::CursesLogger logger;
+    base::OStreamLogger logger(std::cout);
     base::SetGlobalLog(&logger);
     DEBUG("It's alive!");
     INFO("Copyright (c) 2010-2019 Sami Vaisanen");
@@ -614,6 +626,7 @@ int main(int argc, char* argv[])
     INFO("http://github.com/ensisoft/pinyin-invaders");
 
     auto sampling = wdk::Config::Multisampling::None;
+    bool testing  = false;
 
     for (int i=1; i<argc; ++i)
     {
@@ -625,6 +638,8 @@ int main(int argc, char* argv[])
             sampling = wdk::Config::Multisampling::MSAA8;
         else if (!std::strcmp(argv[i], "--msaa16"))
             sampling = wdk::Config::Multisampling::MSAA16;
+        else if (!std::strcmp(argv[i], "--test"))
+            testing = true;
     }
 
     // context integration glue code that puts together
@@ -695,8 +710,8 @@ int main(int argc, char* argv[])
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
-    tests[test_index]->Start();
 
+    bool stop_for_input = false;
 
     wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());
@@ -726,59 +741,172 @@ int main(int argc, char* argv[])
             tests[current_test_index]->End();
             tests[test_index]->Start();
         }
+        stop_for_input = false;
     };
 
     // render in the window
     context->SetWindowSurface(window);
 
-    using clock = std::chrono::high_resolution_clock;
-
-    auto stamp = clock::now();
-    float frames  = 0;
-    float seconds = 0.0f;
-
-    while (window.DoesExist())
+    if (testing)
     {
-        // measure how much time has elapsed since last iteration
-        const auto now  = clock::now();
-        const auto gone = now - stamp;
-        // if sync to vblank is off then we it's possible that we might be
-        // rendering too fast for milliseconds, let's use microsecond
-        // precision for now. otherwise we'd need to accumulate time worth of
-        // several iterations of the loop in order to have an actual time step
-        // for updating the animations.
-        const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
-        stamp = now;
+        const float dt = 1.0f/60.0f;
 
-        // jump animations forward by the *previous* timestep
         for (auto& test : tests)
-            test->Update(secs);
-
-        device->BeginFrame();
-        device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
-        painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
-
-        // render the current test
-        tests[test_index]->Render(*painter);
-
-        device->EndFrame(true /*display*/);
-        device->CleanGarbage(120);
-
-        // process incoming (window) events
-        wdk::native_event_t event;
-        while (wdk::PeekEvent(event))
         {
-            window.ProcessEvent(event);
+            INFO("Running test case: '%1'", test->GetName());
+            test->Start();
+
+            for (int i=0; i<3; ++i)
+            {
+                // update test in small time steps trying to avoid
+                // any simulation from becoming unstable.
+                for (int step=0; step<534; ++step)
+                    test->Update(dt);
+
+                device->BeginFrame();
+                device->ClearColor(gfx::Color::Black);
+                painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
+                // render the test.
+                test->Render(*painter);
+
+                const gfx::Bitmap<gfx::RGBA>& result = device->ReadColorBuffer(window.GetSurfaceWidth(),
+                    window.GetSurfaceHeight());
+
+                const auto& resultfile = base::FormatString("Result_%1_%2_%3_.png", test->GetName(), i, sampling);
+                const auto& goldfile   = base::FormatString("Gold_%1_%2_%3_.png", test->GetName(), i, sampling);
+                const auto& deltafile  = base::FormatString("Delta_%1_%2_%3_.png", test->GetName(), i, sampling);
+                if (!base::FileExists(goldfile))
+                {
+                    device->EndFrame(true /*display*/);
+                    device->CleanGarbage(120);
+                    // the result is the new gold image. should be eye balled and verified.
+                    gfx::WritePNG(result, goldfile);
+                    INFO("Wrote new gold file. '%1'", goldfile);
+                    continue;
+                }
+
+                stop_for_input = true;
+
+                gfx::Bitmap<gfx::RGBA>::MSE mse;
+                mse.SetErrorTreshold(5.0);
+
+                // load gold image
+                gfx::Image img(goldfile);
+                const gfx::Bitmap<gfx::RGBA>& gold = img.AsBitmap<gfx::RGBA>();
+                if (!gfx::Compare(gold, result, mse))
+                {
+                    ERROR("'%1' vs '%2' FAILED.", goldfile, resultfile);
+                    if (gold.GetWidth() != result.GetWidth() || gold.GetHeight() != result.GetHeight())
+                    {
+                        ERROR("Image dimensions mismatch: Gold = %1x%1 vs. Result = %2x%3",
+                            gold.GetWidth(), gold.GetHeight(),
+                            result.GetWidth(), result.GetHeight());
+                    }
+                    else
+                    {
+                        // generate difference visualization file.
+                        gfx::Bitmap<gfx::RGBA> diff;
+                        diff.Resize(gold.GetWidth(), gold.GetHeight());
+                        diff.Fill(gfx::Color::White);
+                        for (size_t y=0; y<gold.GetHeight(); ++y)
+                        {
+                            for (size_t x=0; x<gold.GetWidth(); ++x)
+                            {
+                                const auto& src = gold.GetPixel(y, x);
+                                const auto& ret = result.GetPixel(y, x);
+                                if (src != ret)
+                                {
+                                    diff.SetPixel(y, x, gfx::Color::Black);
+                                }
+                            }
+                        }
+                        gfx::WritePNG(diff, deltafile);
+                    }
+                    gfx::WritePNG(result, resultfile);
+                }
+                else
+                {
+                    INFO("'%1' vs '%2' OK.", goldfile, resultfile);
+                    stop_for_input = false;
+                }
+
+                device->EndFrame(true /* display */);
+                device->CleanGarbage(120);
+
+                if (stop_for_input)
+                {
+                    while (stop_for_input)
+                    {
+                        wdk::native_event_t event;
+                        wdk::WaitEvent(event);
+                        window.ProcessEvent(event);
+                    }
+                }
+                else
+                {
+                    wdk::native_event_t event;
+                    while (wdk::PeekEvent(event))
+                        window.ProcessEvent(event);
+                }
+                stop_for_input = false;
+            }
+            test->End();
         }
+    }
+    else
+    {
 
-        ++frames;
-        seconds += secs;
-        if (seconds > 1.0f)
+        tests[test_index]->Start();
+
+        using clock = std::chrono::high_resolution_clock;
+
+        auto stamp = clock::now();
+        float frames  = 0;
+        float seconds = 0.0f;
+
+        while (window.DoesExist())
         {
-            const auto fps = frames / seconds;
-            INFO("FPS: %1", fps);
-            frames = 0.0f;
-            seconds = 0.0f;
+            // measure how much time has elapsed since last iteration
+            const auto now  = clock::now();
+            const auto gone = now - stamp;
+            // if sync to vblank is off then we it's possible that we might be
+            // rendering too fast for milliseconds, let's use microsecond
+            // precision for now. otherwise we'd need to accumulate time worth of
+            // several iterations of the loop in order to have an actual time step
+            // for updating the animations.
+            const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
+            stamp = now;
+
+            // jump animations forward by the *previous* timestep
+            for (auto& test : tests)
+                test->Update(secs);
+
+            device->BeginFrame();
+            device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
+            painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
+
+            // render the current test
+            tests[test_index]->Render(*painter);
+
+            device->EndFrame(true /*display*/);
+            device->CleanGarbage(120);
+
+            // process incoming (window) events
+            wdk::native_event_t event;
+            while (wdk::PeekEvent(event))
+            {
+                window.ProcessEvent(event);
+            }
+
+            ++frames;
+            seconds += secs;
+            if (seconds > 1.0f)
+            {
+                const auto fps = frames / seconds;
+                INFO("FPS: %1", fps);
+                frames = 0.0f;
+                seconds = 0.0f;
+            }
         }
     }
 
