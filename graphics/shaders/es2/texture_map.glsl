@@ -50,6 +50,10 @@ uniform vec4 kColor1;
 uniform vec4 kColor2;
 uniform vec4 kColor3;
 
+// 0 disabled, 1 clamp, 2 wrap
+uniform int kTextureWrapX;
+uniform int kTextureWrapY;
+
 vec4 MixGradient(vec2 coords)
 {
   vec4 top = mix(kColor0, kColor1, coords.x);
@@ -57,6 +61,31 @@ vec4 MixGradient(vec2 coords)
   vec4 color = mix(top, bot, coords.y);
   color = pow(color, vec4(2.2));
   return color;
+}
+
+// Support texture coordinate wrapping (clamp or repeat)
+// for cases when hardware texture sampler setting is
+// insufficient, i.e. when sampling from a sub rectangle
+// in a packed texture. (or whenever we're using texture rects)
+// This however can introduce some sampling artifacts depending
+// on fhe filter.
+// TODO: any way to fix those artifacs ?
+vec2 WrapTextureCoords(vec2 coords, vec2 box)
+{
+  float x = coords.x;
+  float y = coords.y;
+
+  if (kTextureWrapX == 1)
+    x = clamp(x, 0.0, box.x);
+  else if (kTextureWrapX == 2)
+    x = fract(x / box.x) * box.x;
+
+  if (kTextureWrapY == 1)
+    y = clamp(y, 0.0, box.y);
+  else if (kTextureWrapY == 2)
+    y = fract(y / box.y) * box.y;
+
+  return vec2(x, y);
 }
 
 void main()
@@ -85,8 +114,8 @@ void main()
     vec2 trans_tex1 = kTextureBox1.xy;
 
     // scale and transform based on texture box. (todo: maybe use texture matrix?)
-    vec2 c1 = coords * scale_tex0 + trans_tex0;
-    vec2 c2 = coords * scale_tex1 + trans_tex1;
+    vec2 c1 = WrapTextureCoords(coords * scale_tex0, scale_tex0) + trans_tex0;
+    vec2 c2 = WrapTextureCoords(coords * scale_tex1, scale_tex1) + trans_tex1;
 
 
     // sample textures, if texture is a just an alpha mask we use

@@ -311,6 +311,7 @@ add_executable(graphics_test
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
+    graphics/material.cpp
     graphics/test/main.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -385,9 +386,15 @@ add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.c
                                   editor/app/utility.cpp
                                   editor/app/eventlog.cpp
                                   editor/app/format.cpp
+                                  graphics/material.cpp
+                                  graphics/text.cpp
+                                  graphics/resource.cpp
                                   base/assert.cpp
                                   base/logging.cpp
+                                  third_party/stb/stb_image.c
                                   third_party/stb/stb_image_write.c)
+target_link_libraries(unit_test_imgpack freetype_custom_build harfbuzz_custom_build)
+
 # gamelib tests
 add_executable(unit_test_tree   gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
 # misc tests

@@ -850,6 +850,15 @@ private:
         virtual bool IsValid() const override
         { return mProgram != 0; }
 
+        virtual void SetUniform(const char* name, int x) override
+        {
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glUniform1i(ret, x));
+        }
+
         virtual void SetUniform(const char* name, float x) override
         {
             auto ret = mGL.glGetUniformLocation(mProgram, name);

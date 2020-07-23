@@ -93,6 +93,14 @@ namespace gfx
         // subrectangle within the texture object.
         virtual void PackTexture(ObjectHandle instance, const std::string& file) = 0;
         virtual void SetTextureBox(ObjectHandle instance, const gfx::FRect& box) = 0;
+
+        enum class TextureFlags {
+            // texture can be combined with other textures into a larger
+            // texture file (atlas)
+            CanCombine
+        };
+        // Set the texture flags that impact how the texture can be packed
+        virtual void SetTextureFlag(ObjectHandle instance, TextureFlags flag, bool on_off) = 0;
         // Pack the font resource identified by file.
         virtual void PackFont(ObjectHandle instance, const std::string& file) = 0;
 

@@ -31,6 +31,7 @@
 #include <random>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 
 namespace math
 {
@@ -54,6 +55,16 @@ namespace math
         if (val > max)
             return max;
         return val;
+    }
+
+    // epsilon based check for float equality
+    template<typename RealT> inline
+    bool equals(RealT goal, RealT value, RealT epsilon = 0.0001)
+    {
+        // maybe the default epsilon needs to be reconsidered ?
+        // FYI: powers of 2 can be presented exactly, i.e. 2.0, 4.0, 8.0
+        // and also 1.0, 0.5, 0.25 etc.
+        return std::abs(goal - value) <= epsilon;
     }
 
     // generate a random number in the range of min max (inclusive)

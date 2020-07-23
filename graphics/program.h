@@ -59,6 +59,9 @@ namespace gfx
         // of the shader the call is silently ignored.
 
         // Set scalar uniform.
+        virtual void SetUniform(const char* name, int x) = 0;
+
+        // Set scalar uniform.
         virtual void SetUniform(const char* name, float x) = 0;
         // Set vec2 uniform.
         virtual void SetUniform(const char* name, float x, float y) = 0;

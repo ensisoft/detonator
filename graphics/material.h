@@ -654,32 +654,8 @@ namespace gfx
 
         static std::optional<Material> FromJson(const nlohmann::json& object);
 
-        void BeginPacking(ResourcePacker* packer) const
-        {
-            packer->PackShader(this, GetShaderFile());
-            for (const auto& sampler : mTextures)
-            {
-                sampler.source->BeginPacking(packer);
-            }
-            for (const auto& sampler : mTextures)
-            {
-                const ResourcePacker::ObjectHandle handle = sampler.source.get();
-                packer->SetTextureBox(handle, sampler.box);
-            }
-        }
-        void FinishPacking(const ResourcePacker* packer)
-        {
-            mShaderFile = packer->GetPackedShaderId(this);
-            for (auto& sampler : mTextures)
-            {
-                sampler.source->FinishPacking(packer);
-            }
-            for (auto& sampler : mTextures)
-            {
-                const ResourcePacker::ObjectHandle handle = sampler.source.get();
-                sampler.box = packer->GetPackedTextureBox(handle);
-            }
-        }
+        void BeginPacking(ResourcePacker* packer) const;
+        void FinishPacking(const ResourcePacker* packer);
 
         // Deep copy of the material. Can be a bit expensive.
         Material& operator=(const Material& other);
@@ -704,8 +680,8 @@ namespace gfx
         std::vector<TextureSampler> mTextures;
         MinTextureFilter mMinFilter = MinTextureFilter::Bilinear;
         MagTextureFilter mMagFilter = MagTextureFilter::Linear;
-        TextureWrapping mWrapX = TextureWrapping::Repeat;
-        TextureWrapping mWrapY = TextureWrapping::Repeat;
+        TextureWrapping mWrapX = TextureWrapping::Clamp;
+        TextureWrapping mWrapY = TextureWrapping::Clamp;
         glm::vec2 mTextureScale = glm::vec2(1.0f, 1.0f);
         glm::vec2 mTextureVelocity = glm::vec2(0.0f, 0.0f);
         Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,

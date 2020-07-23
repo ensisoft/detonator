@@ -73,6 +73,11 @@ public:
     {
         mTextureMap[instance].rect = box;
     }
+    virtual void SetTextureFlag(ObjectHandle instance, gfx::ResourcePacker::TextureFlags flags, bool on_off) override
+    {
+        ASSERT(flags == gfx::ResourcePacker::TextureFlags::CanCombine);
+        mTextureMap[instance].can_be_combined = on_off;
+    }
     virtual void PackFont(ObjectHandle instance, const std::string& file) override
     {
         mFontMap[instance] = CopyFile(file, "fonts");
@@ -176,8 +181,9 @@ public:
                 self.texture_file   = app::FromUtf8(CopyFile(tex.file, "textures"));
                 relocation_map[tex.file] = std::move(self);
             }
-            else if (!kPackSmallTextures)
+            else if (!kPackSmallTextures || !tex.can_be_combined)
             {
+                // add as an identity texture relocation entry.
                 GeneratedTextureEntry self;
                 self.width  = 1.0f;
                 self.height = 1.0f;
@@ -188,6 +194,7 @@ public:
             }
             else
             {
+                // add as a source for texture packing
                 app::PackingRectangle rc;
                 rc.width  = pix.width();
                 rc.height = pix.height();
@@ -433,6 +440,7 @@ private:
     struct TextureSource {
         std::string file;
         gfx::FRect  rect;
+        bool can_be_combined = true;
     };
     std::unordered_map<ObjectHandle, TextureSource> mTextureMap;
 

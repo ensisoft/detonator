@@ -157,6 +157,8 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
             (first_frame_index + 1) % frame_count
         };
 
+        bool need_software_wrap = true;
+
         for (unsigned i=0; i<std::min(frame_count, 2u); ++i)
         {
             const auto& sampler = mTextures[frame_index[i]];
@@ -186,15 +188,35 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
             const auto alpha = texture->GetFormat() == Texture::Format::Grayscale
                 ? 1.0f : 0.0f;
 
-            prog.SetTexture(kTexture.c_str(), i, *texture);
-            prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
-            prog.SetUniform(kIsAlphaMask.c_str(), alpha);
-            prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
+            // if a sub-rectangle is defined we need to use software (shader)
+            // based wrapping/clamping in order to wrap/clamp properly within
+            // the bounds of the sub rect.
+            // we do this check here rather than introduce a specific flag for this purpose.
+            const float eps = 0.001;
+            if (math::equals(0.0f, x, eps) &&
+                math::equals(0.0f, y, eps) &&
+                math::equals(1.0f, sx, eps) &&
+                math::equals(1.0f, sy, eps))
+                need_software_wrap = false;
 
+            // set texture properties *before* setting it to the program.
             texture->SetFilter(mMinFilter);
             texture->SetFilter(mMagFilter);
             texture->SetWrapX(mWrapX);
             texture->SetWrapY(mWrapY);
+
+            prog.SetTexture(kTexture.c_str(), i, *texture);
+            prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
+            prog.SetUniform(kIsAlphaMask.c_str(), alpha);
+            prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
+        }
+        // set software wrap/clamp. 0 = disabled.
+        if (need_software_wrap)
+        {
+            const auto wrap_x = mWrapX == TextureWrapping::Clamp ? 1 : 2;
+            const auto wrap_y = mWrapY == TextureWrapping::Clamp ? 1 : 2;
+            prog.SetUniform("kTextureWrapX", wrap_x);
+            prog.SetUniform("kTextureWrapY", wrap_y);
         }
     }
     prog.SetUniform("kBaseColor", mBaseColor);
@@ -298,6 +320,80 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
     return mat;
 }
 
+void Material::BeginPacking(ResourcePacker* packer) const
+{
+    packer->PackShader(this, GetShaderFile());
+    for (const auto& sampler : mTextures)
+    {
+        sampler.source->BeginPacking(packer);
+    }
+    for (const auto& sampler : mTextures)
+    {
+        const ResourcePacker::ObjectHandle handle = sampler.source.get();
+        packer->SetTextureBox(handle, sampler.box);
+
+        // when texture rects are used to address a sub rect within the
+        // texture wrapping on texture coordinates must be done "manually"
+        // since the HW sampler coords are outside the sub rectangle coords.
+        // for example if the wrapping is set to wrap on x and our box is
+        // 0.25 units the HW sampler would not help us here to wrap when the
+        // X coordinate is 0.26. Instead we need to do the wrap manually.
+        // However this can cause rendering artifacts when texture sampling
+        // is done depending on the current filter being used.
+        bool can_combine = true;
+
+        const auto& box = sampler.box;
+        const auto x = box.GetX();
+        const auto y = box.GetY();
+        const auto w = box.GetWidth();
+        const auto h = box.GetHeight();
+        const float eps = 0.001;
+        // if the texture uses sub rect then we still have this problem and packing
+        // won't make it any worse. in other words if the box is the normal 0.f - 1.0f
+        // box then combining can make it worse and should be disabled.
+        if (math::equals(0.0f, x, eps) &&
+            math::equals(0.0f, y, eps) &&
+            math::equals(1.0f, w, eps) &&
+            math::equals(1.0f, h, eps))
+        {
+            // is it possible for a texture to go beyond its range ?
+            // the only case we know here is when texture velocity is non-zero
+            // or texture scaling is used.
+            // note that it's still possible for the game to programmatically
+            // change the coordinates but that's their problem then.
+
+            // velocity check
+            const bool has_x_velocity = !math::equals(0.0f, mTextureVelocity.x, eps);
+            const bool has_y_velocity = !math::equals(0.0f, mTextureVelocity.y, eps);
+            if (has_x_velocity && mWrapX == TextureWrapping::Repeat)
+                can_combine = false;
+            else if (has_y_velocity && mWrapY == TextureWrapping::Repeat)
+                can_combine = false;
+
+            // scale check
+            if (mTextureScale.x > 1.0f && mWrapX == TextureWrapping::Repeat)
+                can_combine = false;
+            else if (mTextureScale.y > 1.0f && mWrapY == TextureWrapping::Repeat)
+                can_combine = false;
+        }
+
+        packer->SetTextureFlag(handle, ResourcePacker::TextureFlags::CanCombine, can_combine);
+    }
+}
+
+void Material::FinishPacking(const ResourcePacker* packer)
+{
+    mShaderFile = packer->GetPackedShaderId(this);
+    for (auto& sampler : mTextures)
+    {
+        sampler.source->FinishPacking(packer);
+    }
+    for (auto& sampler : mTextures)
+    {
+        const ResourcePacker::ObjectHandle handle = sampler.source.get();
+        sampler.box = packer->GetPackedTextureBox(handle);
+    }
+}
 
 Material& Material::operator=(const Material& other)
 {

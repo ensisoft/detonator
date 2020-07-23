@@ -59,6 +59,141 @@ public:
 private:
 };
 
+class TextureTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        // whole texture (box = 1.0f)
+        {
+            gfx::Material material(gfx::Material::Type::Texture);
+            material.AddTexture("textures/uv_test_512.png");
+            material.SetTextureRect(0, gfx::Rect(0.0f, 0.0f, 1.0f, 1.0f));
+            gfx::FillRect(painter, gfx::FRect(0, 0, 128, 128), material);
+
+            material.SetTextureScaleX(2.0);
+            material.SetTextureScaleY(2.0);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(150, 0, 128, 128), material);
+
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 0, 128, 128), material);
+
+            material.SetTextureScaleX(-2.0);
+            material.SetTextureScaleY(-2.0);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(450, 0, 128, 128), material);
+        }
+
+        // texture box > 1.0
+        // todo: maybe just limit the box to 0.0, 1.0 range and dismiss this case ?
+        {
+            // clamp
+            gfx::Material material(gfx::Material::Type::Texture);
+            material.AddTexture("textures/uv_test_512.png");
+            material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 1.0));
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(0, 150, 128, 128), material);
+
+            material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 2.0));
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(150, 150, 128, 128), material);
+
+            material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 2.0));
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 150, 128, 128), material);
+
+        }
+
+        // texture box < 1.0
+        {
+            // basic case. sampling within the box.
+
+            gfx::Material material(gfx::Material::Type::Texture);
+            material.AddTexture("textures/uv_test_512.png");
+            material.SetTextureRect(0, gfx::FRect(0.5, 0.5, 0.5, 0.5));
+            gfx::FillRect(painter, gfx::FRect(0, 300, 128, 128), material);
+
+            // clamping with texture boxing.
+            material.SetTextureMinFilter(gfx::Material::MinTextureFilter::Linear);
+            material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 0.5, 0.5));
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureScaleX(2.0);
+            material.SetTextureScaleY(2.0);
+            gfx::FillRect(painter, gfx::FRect(150, 300, 128, 128), material);
+
+            // should be 4 squares each brick color (the top left quadrant of the source texture)
+            material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 0.5, 0.5));
+            material.SetTextureScaleX(2.0);
+            material.SetTextureScaleY(2.0);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 300, 128, 128), material);
+
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            material.SetTextureScaleX(1.0f);
+            material.SetTextureScaleY(1.0f);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            gfx::FillRect(painter, gfx::FRect(450, 300, 128, 128), material);
+
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            material.SetTextureScaleX(2.0f);
+            material.SetTextureScaleY(2.0f);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            gfx::FillRect(painter, gfx::FRect(600, 300, 128, 128), material);
+
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            material.SetTextureScaleX(2.0f);
+            material.SetTextureScaleY(2.0f);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            gfx::FillRect(painter, gfx::FRect(750, 300, 128, 128), material);
+        }
+
+        // texture velocity
+        {
+            gfx::Material material(gfx::Material::Type::Texture);
+            material.AddTexture("textures/uv_test_512.png");
+            material.SetRuntime(mTime);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+
+            material.SetTextureVelocityX(0.2);
+            gfx::FillRect(painter, gfx::FRect(0, 450, 128, 128), material);
+
+            material.SetTextureVelocityX(0.0);
+            material.SetTextureVelocityY(0.2);
+            gfx::FillRect(painter, gfx::FRect(150, 450, 128, 128), material);
+
+            material.SetTextureVelocityX(0.25);
+            material.SetTextureVelocityY(0.2);
+            material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), material);
+        }
+    }
+    virtual void Update(float dt)
+    {
+        mTime += dt;
+    }
+
+    virtual std::string GetName() const override
+    { return "TextureTest"; }
+private:
+    float mTime = 0.0f;
+};
+
 class TransformTest : public GraphicsTest
 {
 public:
@@ -710,6 +845,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
+    tests.emplace_back(new TextureTest);
 
     bool stop_for_input = false;
 
