@@ -59,6 +59,23 @@ public:
 private:
 };
 
+class GradientTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Material material(gfx::Material::Type::Gradient);
+        material.SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft);
+        material.SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomLeft);
+        material.SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::BottomRight);
+        material.SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::TopRight);
+        gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), material);
+    }
+    virtual std::string GetName() const override
+    { return "GradientTest"; }
+private:
+};
+
 class TextureTest : public GraphicsTest
 {
 public:
@@ -846,6 +863,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
     tests.emplace_back(new TextureTest);
+    tests.emplace_back(new GradientTest);
 
     bool stop_for_input = false;
 
