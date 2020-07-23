@@ -349,6 +349,7 @@ add_executable(invaders
     graphics/resource.cpp
     misc/homedir.cpp
     gamelib/animation.cpp
+    gamelib/loader.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
@@ -366,8 +367,6 @@ elseif (UNIX)
   target_link_libraries(invaders pthread)
 endif()
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
 
 
 # unit tests

@@ -45,6 +45,8 @@
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
+#include "gamelib/loader.h"
+#include "gamelib/animation.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -65,6 +67,7 @@ using FPoint = gfx::FPoint;
 using IPoint = gfx::IPoint;
 
 extern audio::AudioPlayer* g_audio;
+extern game::ResourceLoader* g_loader;
 
 const auto LevelUnlockCriteria = 0.85;
 const auto GameCols = 40;
@@ -686,10 +689,10 @@ public:
         for (const auto& p : mParticles)
         {
             const auto pos = layout.MapPoint(p.pos);
-            
+
             // todo: should fix the dimensions, i.e. we don't know what size our
             // debris should have when rendered. Also we don't know the aspect ratio
-            // these should be taken as a parameter. 
+            // these should be taken as a parameter.
             const float width  = 25; //p.rc.GetWidth();
             const float height = 50; //p.rc.GetHeight();
             const float aspect = height / width;
@@ -1025,7 +1028,7 @@ public:
             base::ToUtf8(mText),
             "fonts/ARCADE.TTF", font_size,
             gfx::FRect(p, w, h),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
     }
 
 private:
@@ -1238,66 +1241,6 @@ private:
 private:
 };
 
-
-
-// game space background rendering
-class GameWidget::Background
-{
-public:
-    Background(const glm::vec2& direction)
-    {
-        ParticleEngine::Params params;
-        params.motion = ParticleEngine::Motion::Linear;
-        params.mode = ParticleEngine::SpawnPolicy::Once;
-        params.boundary = ParticleEngine::BoundaryPolicy::Wrap;
-        params.init_rect_width  = 1024;
-        params.init_rect_height = 1024;
-        params.max_xpos = 1024;
-        params.max_ypos = 1024;
-        params.num_particles = 800;
-        params.min_velocity = 5.0f;
-        params.max_velocity = 100.0f;
-        params.min_point_size = 1.0f;
-        params.max_point_size = 8.0f;
-        params.direction_sector_start_angle = std::acos(direction.x);
-        params.direction_sector_size = 0.0f;
-        params.rate_of_change_in_size_wrt_dist = 0.0f;
-        params.rate_of_change_in_size_wrt_time = 0.0f;
-        mStars = std::make_unique<ParticleEngine>(params);
-    }
-    void paint(gfx::Painter& painter, const IRect& rect)
-    {
-        gfx::Transform t;
-        t.MoveTo(0, 0);
-        t.Resize(rect.GetWidth(), rect.GetHeight());
-
-    #ifdef WINDOWS_OS
-        // have a problem on windows that the background texture looks very dark
-        // so we add little gamma hack here.
-        const float gamma = 1.0f/1.4f;
-    #else
-        const float gamma = 1.0f;
-    #endif
-
-        // first draw the static background image.
-        painter.Draw(gfx::Rectangle(), t,
-            gfx::TextureMap("textures/SpaceBackground.png")
-            .SetGamma(gamma));
-
-        // then draw the particle engine
-        painter.Draw(*mStars, t,
-            gfx::TextureMap("textures/RoundParticle.png")
-            .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
-    }
-
-    void update(float dt)
-    {
-        mStars->Update(dt/1000.0f);
-    }
-private:
-    std::unique_ptr<ParticleEngine> mStars;
-};
-
 class GameWidget::Scoreboard : public GameWidget::State
 {
 public:
@@ -1328,7 +1271,7 @@ public:
             mText,
             "fonts/ARCADE.TTF", layout.GetFontSize(),
             gfx::FRect(0, 0, width, height),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
     }
 
     virtual Action mapAction(const wdk::WindowEventKeydown&) const override
@@ -1375,7 +1318,7 @@ public:
             "Difficulty",
             "fonts/ARCADE.TTF", font_size_l,
             layout.MapGfxRect(IPoint(0, 0), IPoint(cols, 3)),
-            gfx::Color::DarkGray,
+            gfx::Color::White,
             gfx::AlignHCenter | gfx::AlignVCenter);
 
         // draw the difficulty settings
@@ -1385,21 +1328,21 @@ public:
                 "Easy",
                 "fonts/ARCADE.TTF", font_size_s,
                 temp.MapGfxRect(IPoint(0, 0), IPoint(1, 1)),
-                mCurrentRowIndex == 0 && mCurrentProfileIndex == 0 ?  gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 0 ?  gfx::Color::Gold : gfx::Color::White,
                 gfx::AlignTop | gfx::AlignRight,
                 mCurrentProfileIndex == 0 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Normal",
                 "fonts/ARCADE.TTF", font_size_s,
                 temp.MapGfxRect(IPoint(1, 0), IPoint(2, 1)),
-                mCurrentRowIndex == 0 && mCurrentProfileIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 1 ? gfx::Color::Gold : gfx::Color::White,
                 gfx::AlignTop | gfx::AlignHCenter,
                 mCurrentProfileIndex == 1 ? gfx::TextProp::Underline : 0);
             gfx::DrawTextRect(painter,
                 "Chinese",
                 "fonts/ARCADE.TTF", font_size_s,
                 temp.MapGfxRect(IPoint(2, 0), IPoint(3, 1)),
-                mCurrentRowIndex == 0 && mCurrentProfileIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray,
+                mCurrentRowIndex == 0 && mCurrentProfileIndex == 2 ? gfx::Color::Gold : gfx::Color::White,
                 gfx::AlignTop | gfx::AlignLeft,
                 mCurrentProfileIndex == 2 ? gfx::TextProp::Underline : 0);
         }
@@ -1425,7 +1368,7 @@ public:
             play_or_not,
             "fonts/ARCADE.TTF", font_size_l,
             layout.MapGfxRect(IPoint(0, rows-1), IPoint(cols, rows)),
-            gfx::Color::DarkGray,
+            gfx::Color::White,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             gfx::TextProp::Blinking);
     }
@@ -1532,7 +1475,7 @@ private:
             std::string("Play");
         const auto outline_width = 2;
         const auto outline_color = hilite ?
-            (info.locked ? gfx::Color::DarkRed : gfx::Color::DarkGreen) : gfx::Color::DarkGray;
+            (info.locked ? gfx::Color::Red : gfx::Color::Green) : gfx::Color::DarkGray;
 
         gfx::DrawRectOutline(painter, rect, gfx::Color4f(outline_color, 0.7f), 4);
         gfx::DrawTextRect(painter,
@@ -1589,7 +1532,7 @@ public:
                 "Press Esc to exit\n", (int)(LevelUnlockCriteria * 100)),
             "fonts/ARCADE.TTF", layout.GetFontSize(),
             layout.GetGfxRect(),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
     }
 private:
 };
@@ -1617,18 +1560,18 @@ public:
             "Press space to toggle a setting.",
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 1), IPoint(1, 2)),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
 #ifdef GAME_ENABLE_AUDIO
         gfx::DrawTextRect(painter,
             base::FormatString("Sounds Effects: %1", mPlaySounds ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 2), IPoint(1, 3)),
-            mSettingIndex == 0 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
+            mSettingIndex == 0 ? gfx::Color::Green : gfx::Color::White);
         gfx::DrawTextRect(painter,
             base::FormatString("Awesome Music: %1", mPlayMusic ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 3), IPoint(1, 4)),
-            mSettingIndex == 1 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
+            mSettingIndex == 1 ? gfx::Color::Green : gfx::Color::White);
 #else
         gfx::DrawTextRect(painter,
             "Audio is not supported on this platform."
@@ -1640,13 +1583,13 @@ public:
             base::FormatString("Fullscreen: %1", mFullscreen ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 4), IPoint(1, 5)),
-            mSettingIndex == 2 ? gfx::Color::DarkGreen : gfx::Color::DarkGray);
+            mSettingIndex == 2 ? gfx::Color::Green : gfx::Color::White);
 
         gfx::DrawTextRect(painter,
             "Press Esc to exit",
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 5), IPoint(1, 6)),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
 
     }
 
@@ -1721,7 +1664,7 @@ public:
                 "Press Esc to exit", MAJOR_VERSION, MINOR_VERSION),
             "fonts/ARCADE.TTF", layout.GetFontSize(),
             layout.GetGfxRect(),
-            gfx::Color::DarkGray);
+            gfx::Color::White);
     }
     virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
     {
@@ -1849,12 +1792,12 @@ private:
             "Kill the following enemies\n",
             "fonts/ARCADE.TTF", font_size_l,
             header,
-            gfx::Color::DarkGray);
+            gfx::Color::White);
         gfx::DrawTextRect(painter,
             "Press Space to play!",
             "fonts/ARCADE.TTF", font_size_l,
             footer,
-            gfx::Color::DarkGray,
+            gfx::Color::White,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             gfx::TextProp::Blinking);
 
@@ -1868,13 +1811,13 @@ private:
                 base::FormatString("%1 %2", e.viewstring, e.killstring),
                 "fonts/SourceHanSerifTC-SemiBold.otf", font_size_l,
                 rect,
-                gfx::Color::DarkGray,
+                gfx::Color::White,
                 gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop);
             gfx::DrawTextRect(painter,
                 base::ToUtf8(e.help),
                 "fonts/ARCADE.TTF", font_size_s,
                 rect,
-                gfx::Color::DarkGray,
+                gfx::Color::White,
                 gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
         }
     }
@@ -1895,12 +1838,12 @@ private:
                 score.points, (int)result, score.pending, bombs, warps),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, -1), IPoint(GameCols, 0)),
-            gfx::Color::Gray);
+            gfx::Color::White);
         gfx::DrawTextRect(painter,
             mCurrentText.empty() ? "Type the correct pinyin to kill the enemies!" : base::ToUtf8(mCurrentText),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, GameRows), IPoint(GameCols, GameRows+1)),
-            gfx::Color::DarkGray,
+            gfx::Color::White,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
             mCurrentText.empty() ? gfx::TextProp::Blinking : 0);
     }
@@ -2142,13 +2085,10 @@ GameWidget::GameWidget()
     };
 
     // in this space all the background objects travel to the same direction
-    const glm::vec2 spaceJunkDirection(4, 3);
-
-    // create the background object.
-    mBackground.reset(new Background(glm::normalize(spaceJunkDirection)));
 
     for (size_t i=0; i<20; ++i)
     {
+        const glm::vec2 spaceJunkDirection(-1, 0);
         mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection)));
     }
 
@@ -2244,7 +2184,8 @@ void GameWidget::updateGame(float dt)
         mAnimations.emplace_back(new UFO);
     }
 
-    mBackground->update(time);
+    auto* background = g_loader->FindAnimation("Space");
+    background->Update(time/1000.0f);
 
     mStates.top()->update(time);
 
@@ -2521,9 +2462,19 @@ void GameWidget::renderGame()
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsPainter->SetViewport(0, 0, w, h);
+    mCustomGraphicsDevice->ClearColor(gfx::Color::Black);
 
     // paint the background
-    mBackground->paint(*mCustomGraphicsPainter, rect);
+    {
+        // todo: provide an animation API for figuring out the axis aligned
+        // extents of the animation in current time
+        // for now we just "know" that the dimensions are fixed at some certain size.
+        gfx::Transform view;
+        view.Scale(w / 1200.0f, h / 900.0f);
+
+        const auto* background = g_loader->FindAnimation("Space");
+        background->Draw(*mCustomGraphicsPainter, view);
+    }
 
     // then paint the animations on top of the background
     for (auto& anim : mAnimations)

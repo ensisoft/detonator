@@ -60,7 +60,7 @@ namespace invaders
         // game profile settings, for example "easy", "medium" etc.
         struct Profile {
             std::wstring name;
-            float speed = 0.0f; 
+            float speed = 0.0f;
             unsigned spawnCount = 0;
             unsigned spawnInterval = 0;
             unsigned numEnemies = 0;
@@ -95,8 +95,8 @@ namespace invaders
         void renderGame();
 
         // initialize the OpenGL rendering surface (window)
-        // based on the previous size (if any). 
-        void initializeGL(unsigned prev_surface_width, 
+        // based on the previous size (if any).
+        void initializeGL(unsigned prev_surface_width,
             unsigned prev_surface_height);
 
         // Set window to fullscreen if value is true.
@@ -153,7 +153,7 @@ namespace invaders
 
         bool isRunning() const
         { return mRunning; }
-    
+
     private:
         void playMusic();
         void onKeyDown(const wdk::WindowEventKeydown& key);
@@ -178,10 +178,8 @@ namespace invaders
         class Invader;
         class Missile;
         class UFO;
-        class Background;
 
     private:
-        std::unique_ptr<Background> mBackground;
         std::stack<std::unique_ptr<State>> mStates;
 
         std::map<unsigned, std::unique_ptr<Invader>> mInvaders;
@@ -214,7 +212,7 @@ namespace invaders
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
-        std::unique_ptr<wdk::Window> mWindow;  
+        std::unique_ptr<wdk::Window> mWindow;
     };
 
 } // invaders

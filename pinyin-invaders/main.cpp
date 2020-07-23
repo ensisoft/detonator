@@ -32,6 +32,7 @@
 #include <thread>
 #include <filesystem>
 
+#include "gamelib/loader.h"
 #include "audio/player.h"
 #include "audio/device.h"
 #include "base/logging.h"
@@ -46,6 +47,7 @@
 namespace invaders {
 
     audio::AudioPlayer* g_audio;
+    game::ResourceLoader* g_loader;
 
 } // invaders
 
@@ -106,7 +108,13 @@ int game_main(int argc, char* argv[])
     INFO("http://www.ensisoft.com");
     INFO("http://github.com/ensisoft/pinyin-invaders");
 
+    game::ResourceLoader loader;
+    invaders::g_loader = &loader;
 
+    // todo: resolve the directory where the executable is.
+    // currently expects the current working directory to contain the content.json file
+    invaders::g_loader->LoadResources(".", "content.json");
+    gfx::SetResourceLoader(invaders::g_loader);
     audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 

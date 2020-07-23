@@ -1,0 +1,70 @@
+{
+    "animation_Space": {
+        "checked_for_packing": true
+    },
+    "material_Asteroid": {
+        "checked_for_packing": true
+    },
+    "material_Nebula1": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Star": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "particle_Asteroid field": {
+        "checked_for_packing": true
+    },
+    "particle_Starfield layer 0": {
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_direction_sector": true,
+        "use_growth": false,
+        "use_init_rect": true,
+        "use_lifetime": true
+    },
+    "particle_Starfield layer 1": {
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_direction_sector": true,
+        "use_growth": false,
+        "use_init_rect": true,
+        "use_lifetime": true
+    },
+    "particle_Starfield layer 2": {
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_direction_sector": true,
+        "use_growth": false,
+        "use_init_rect": true,
+        "use_lifetime": true
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_pack_name": "dist/",
+        "packing_param_resize_large_textures": true
+    }
+}
