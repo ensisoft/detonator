@@ -211,6 +211,48 @@ private:
     float mTime = 0.0f;
 };
 
+class SpriteTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        {
+            gfx::Material material(gfx::Material::Type::Sprite);
+            material.AddTexture("textures/red_64x64.png");
+            material.AddTexture("textures/green_64x64.png");
+            material.SetTextureMinFilter(gfx::Material::MinTextureFilter::Linear);
+            material.SetFps(0.5); // two seconds to a frame
+            material.SetRuntime(mTime);
+            material.SetBlendFrames(false);
+            gfx::FillRect(painter, gfx::FRect(20, 20, 200, 200), material);
+        }
+
+        {
+            gfx::Material material(gfx::Material::Type::Sprite);
+            material.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
+            material.AddTexture("textures/bird/frame-1.png");
+            material.AddTexture("textures/bird/frame-2.png");
+            material.AddTexture("textures/bird/frame-3.png");
+            material.AddTexture("textures/bird/frame-4.png");
+            material.AddTexture("textures/bird/frame-5.png");
+            material.AddTexture("textures/bird/frame-6.png");
+            material.AddTexture("textures/bird/frame-7.png");
+            material.AddTexture("textures/bird/frame-8.png");
+            material.SetFps(10.0f);
+            material.SetRuntime(mTime);
+            material.SetBlendFrames(true);
+            gfx::FillRect(painter, gfx::FRect(250, 250, 300, 300), material);
+        }
+    }
+
+    virtual void Update(float dt) override
+    { mTime += dt; }
+    virtual std::string GetName() const override
+    { return "SpriteTest"; }
+private:
+    float mTime = 0.0f;
+};
+
 class TransformTest : public GraphicsTest
 {
 public:
@@ -864,6 +906,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ShapesTest);
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new GradientTest);
+    tests.emplace_back(new SpriteTest);
 
     bool stop_for_input = false;
 
