@@ -147,6 +147,26 @@ void MainWindow::loadState()
     mUI.actionViewEventlog->setChecked(show_eventlog);
     mUI.actionViewWorkspace->setChecked(show_workspace);
 
+    if (!dock_state.isEmpty())
+        QMainWindow::restoreState(dock_state);
+
+    mUI.actionSaveWorkspace->setEnabled(false);
+    mUI.actionCloseWorkspace->setEnabled(false);
+    mUI.menuWorkspace->setEnabled(false);
+    mUI.menuEdit->setEnabled(false);
+    mUI.menuTemp->setEnabled(false);
+    mUI.workspace->setModel(nullptr);
+
+    // check if we have a flag to disable workspace loading.
+    // useful for development purposes when you know the workspace
+    // might not load properly.
+    const QStringList& args = QCoreApplication::arguments();
+    for (const QString& arg : args)
+    {
+        if (arg == "--no-workspace")
+            return;
+    }
+
     // load previous workspace if any
     const auto& workspace = settings.getValue("MainWindow", "current_workspace", QString(""));
     if (workspace.isEmpty())
@@ -162,9 +182,6 @@ void MainWindow::loadState()
                         "See the application log for more details.").arg(workspace));
         msg.exec();
     }
-
-    if (!dock_state.isEmpty())
-        QMainWindow::restoreState(dock_state);
 }
 
 void MainWindow::focusWidget(const MainWidget* widget)
