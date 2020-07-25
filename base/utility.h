@@ -28,6 +28,8 @@
 #  include <neargye/magic_enum.hpp>
 #  include <nlohmann/json.hpp>
 #  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
 #include "warnpop.h"
 
 #include <functional> // for hash
@@ -336,6 +338,45 @@ bool JsonReadSafe(const JsonObject& object, const char* name, glm::vec2* out)
     out->y = vector["y"];
     return true;
 }
+
+template<typename JsonObject>
+bool JsonReadSafe(const JsonObject& object, const char* name, glm::vec3* out)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const auto& vector = object[name];
+    if (!vector.contains("x") || !vector["x"].is_number_float())
+        return false;
+    if (!vector.contains("y") || !vector["y"].is_number_float())
+        return false;
+    if (!vector.contains("z") || !vector["z"].is_number_float())
+        return false;
+    out->x = vector["x"];
+    out->y = vector["y"];
+    out->z = vector["z"];
+    return true;
+}
+template<typename JsonObject>
+bool JsonReadSafe(const JsonObject& object, const char* name, glm::vec4* out)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const auto& vector = object[name];
+    if (!vector.contains("x") || !vector["x"].is_number_float())
+        return false;
+    if (!vector.contains("y") || !vector["y"].is_number_float())
+        return false;
+    if (!vector.contains("z") || !vector["z"].is_number_float())
+        return false;
+    if (!vector.contains("w") || !vector["w"].is_number_float())
+        return false;
+    out->x = vector["x"];
+    out->y = vector["y"];
+    out->z = vector["z"];
+    out->w = vector["w"];
+    return true;
+}
+
 template<typename JsonValue>
 bool JsonReadSafe(const JsonValue& value, glm::vec2* out)
 {
@@ -347,6 +388,41 @@ bool JsonReadSafe(const JsonValue& value, glm::vec2* out)
         return false;
     out->x = value["x"];
     out->y = value["y"];
+    return true;
+}
+template<typename JsonValue>
+bool JsonReadSafe(const JsonValue& value, glm::vec3* out)
+{
+    if (!value.is_object())
+        return false;
+    if (!value.contains("x") || !value["x"].is_number_float())
+        return false;
+    if (!value.contains("y") || !value["y"].is_number_float())
+        return false;
+    if (!value.contains("z") || !value["z"].is_number_float())
+        return false;
+    out->x = value["x"];
+    out->y = value["y"];
+    out->z = value["z"];
+    return true;
+}
+template<typename JsonValue>
+bool JsonReadSafe(const JsonValue& value, glm::vec4* out)
+{
+    if (!value.is_object())
+        return false;
+    if (!value.contains("x") || !value["x"].is_number_float())
+        return false;
+    if (!value.contains("y") || !value["y"].is_number_float())
+        return false;
+    if (!value.contains("z") || !value["z"].is_number_float())
+        return false;
+    if (!value.contains("w") || !value["w"].is_number_float())
+        return false;
+    out->x = value["x"];
+    out->y = value["y"];
+    out->z = value["z"];
+    out->w = value["w"];
     return true;
 }
 
@@ -410,6 +486,25 @@ void JsonAppend(JsonValue& json, const glm::vec2& vec)
             {"y", vec.y }
         });
 }
+template<typename JsonValue>
+void JsonAppend(JsonValue& json, const glm::vec3& vec)
+{
+    json.push_back(nlohmann::json {
+            {"x", vec.x },
+            {"y", vec.y },
+            {"z", vec.z }
+        });
+}
+template<typename JsonValue>
+void JsonAppend(JsonValue& json, const glm::vec4& vec)
+{
+    json.push_back(nlohmann::json {
+            {"x", vec.x },
+            {"y", vec.y },
+            {"z", vec.z },
+            {"w", vec.w }
+        });
+}
 
 
 template<typename JsonObject, typename EnumT> inline
@@ -469,6 +564,25 @@ void JsonWrite(JsonObject& object, const char* name, const glm::vec2& vec)
     object[name] = JsonObject {
         {"x", vec.x },
         {"y", vec.y }
+    };
+}
+template<typename JsonObject>
+void JsonWrite(JsonObject& object, const char* name, const glm::vec3& vec)
+{
+    object[name] = JsonObject {
+        {"x", vec.x },
+        {"y", vec.y },
+        {"z", vec.z }
+    };
+}
+template<typename JsonObject>
+void JsonWrite(JsonObject& object, const char* name, const glm::vec4& vec)
+{
+    object[name] = JsonObject {
+        {"x", vec.x },
+        {"y", vec.y },
+        {"z", vec.z },
+        {"w", vec.w }
     };
 }
 
