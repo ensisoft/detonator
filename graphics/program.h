@@ -60,6 +60,8 @@ namespace gfx
 
         // Set scalar uniform.
         virtual void SetUniform(const char* name, int x) = 0;
+        // Set scalar uniform.
+        virtual void SetUniform(const char* name, int x, int y) = 0;
 
         // Set scalar uniform.
         virtual void SetUniform(const char* name, float x) = 0;

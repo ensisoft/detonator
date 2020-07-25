@@ -33,26 +33,28 @@ uniform float kRuntime;
 uniform float kBlendCoeff;
 // if the textures are alpha masks we sample white
 // which gets modulated by the alpha value from the texture.
-uniform float kIsAlphaMask0;
-uniform float kIsAlphaMask1;
+// x = texture0, y = texture1
+uniform vec2 kIsAlphaMask;
 // texture coordinate scaling coefficients
 uniform vec2 kTextureScale;
 // the speed at which S/T coords are transformed.
 uniform vec2 kTextureVelocity;
-
+// 0 disabled, 1 clamp, 2 wrap
+uniform ivec2 kTextureWrap;
+// texture boxes
 uniform vec4 kTextureBox0;
 uniform vec4 kTextureBox1;
-uniform vec4 kBaseColor;
-varying vec2 vTexCoord;
 
+// base color modulated with gradient mix and texture samples (if any)
+uniform vec4 kBaseColor;
+// gradient base colors.
 uniform vec4 kColor0;
 uniform vec4 kColor1;
 uniform vec4 kColor2;
 uniform vec4 kColor3;
 
-// 0 disabled, 1 clamp, 2 wrap
-uniform int kTextureWrapX;
-uniform int kTextureWrapY;
+// the texture coords from vertex shader.
+varying vec2 vTexCoord;
 
 vec4 MixGradient(vec2 coords)
 {
@@ -75,14 +77,14 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
   float x = coords.x;
   float y = coords.y;
 
-  if (kTextureWrapX == 1)
+  if (kTextureWrap.x == 1)
     x = clamp(x, 0.0, box.x);
-  else if (kTextureWrapX == 2)
+  else if (kTextureWrap.x == 2)
     x = fract(x / box.x) * box.x;
 
-  if (kTextureWrapY == 1)
+  if (kTextureWrap.y == 1)
     y = clamp(y, 0.0, box.y);
-  else if (kTextureWrapY == 2)
+  else if (kTextureWrap.y == 2)
     y = fract(y / box.y) * box.y;
 
   return vec2(x, y);
@@ -125,7 +127,7 @@ void main()
     vec4 tex  = mix(tex0, tex1, kBlendCoeff);
 
     // mix mask values. (makes sense?)
-    float mask = mix(kIsAlphaMask0, kIsAlphaMask1, kBlendCoeff);
+    float mask = mix(kIsAlphaMask.x, kIsAlphaMask.y, kBlendCoeff);
 
     vec4 mix_base_gradient = kBaseColor * gradient;
     // either modulate/mask texture color with base color

@@ -155,6 +155,7 @@ struct OpenGLFunctions
     PFNGLGETSTRINGPROC               glGetString;
     PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
     PFNGLUNIFORM1IPROC               glUniform1i;
+    PFNGLUNIFORM2IPROC               glUniform2i;
     PFNGLUNIFORM1FPROC               glUniform1f;
     PFNGLUNIFORM2FPROC               glUniform2f;
     PFNGLUNIFORM3FPROC               glUniform3f;
@@ -223,6 +224,7 @@ public:
         RESOLVE(glGetString);
         RESOLVE(glGetUniformLocation);
         RESOLVE(glUniform1i);
+        RESOLVE(glUniform2i);
         RESOLVE(glUniform1f);
         RESOLVE(glUniform2f);
         RESOLVE(glUniform3f);
@@ -858,6 +860,14 @@ private:
                 return;
             GL_CALL(glUseProgram(mProgram));
             GL_CALL(glUniform1i(ret, x));
+        }
+        virtual void SetUniform(const char* name, int x, int y) override
+        {
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            if (ret == -1)
+                return;
+            GL_CALL(glUseProgram(mProgram));
+            GL_CALL(glUniform2i(ret, x, y));
         }
 
         virtual void SetUniform(const char* name, float x) override

@@ -131,6 +131,9 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
         state.blending = RasterState::Blending::Transparent;
     else if (mSurfaceType == SurfaceType::Emissive)
         state.blending = RasterState::Blending::Additive;
+    
+    // mark whether textures are considered alpha masks. 1.0f = is alpha mask, 0.0f = not alpha mask
+    float alpha_masks[2] = {0.0f, 0.0f};
 
     // currently we only bind two textures and set a blend
     // coefficient from the run time for the shader to do
@@ -184,9 +187,8 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
             const float sy = box.GetHeight();
             const auto& kTexture = "kTexture" + std::to_string(i);
             const auto& kTextureBox = "kTextureBox" + std::to_string(i);
-            const auto& kIsAlphaMask = "kIsAlphaMask" + std::to_string(i);
-            const auto alpha = texture->GetFormat() == Texture::Format::Grayscale
-                ? 1.0f : 0.0f;
+            if (texture->GetFormat() == Texture::Format::Grayscale)
+                alpha_masks[i] = 1.0f;
 
             // if a sub-rectangle is defined we need to use software (shader)
             // based wrapping/clamping in order to wrap/clamp properly within
@@ -207,7 +209,6 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
 
             prog.SetTexture(kTexture.c_str(), i, *texture);
             prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
-            prog.SetUniform(kIsAlphaMask.c_str(), alpha);
             prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
         }
         // set software wrap/clamp. 0 = disabled.
@@ -215,10 +216,10 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
         {
             const auto wrap_x = mWrapX == TextureWrapping::Clamp ? 1 : 2;
             const auto wrap_y = mWrapY == TextureWrapping::Clamp ? 1 : 2;
-            prog.SetUniform("kTextureWrapX", wrap_x);
-            prog.SetUniform("kTextureWrapY", wrap_y);
+            prog.SetUniform("kTextureWrap", wrap_x, wrap_y);
         }
     }
+    prog.SetUniform("kIsAlphaMask", alpha_masks[0], alpha_masks[1]);
     prog.SetUniform("kBaseColor", mBaseColor);
     prog.SetUniform("kGamma", mGamma);
     prog.SetUniform("kRuntime", mRuntime);
