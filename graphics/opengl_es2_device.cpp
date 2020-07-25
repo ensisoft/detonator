@@ -49,8 +49,9 @@ do {                                                    \
     mGL.x;                                              \
     const auto err = mGL.glGetError();                  \
     if (err != GL_NO_ERROR) {                           \
-        std::printf("GL Error %s @ %s,%d",              \
+        std::printf("GL Error %s @ %s,%d\n",            \
             GLEnumToStr(err), __FILE__, __LINE__);      \
+        std::fflush(stdout);                            \
         std::abort();                                   \
     }                                                   \
 } while(0)

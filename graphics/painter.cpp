@@ -235,10 +235,11 @@ private:
             shaders.push_back(drawable_shader);
             shaders.push_back(material_shader);
             prog = mDevice->MakeProgram(name);
-            if (!prog->Build(shaders))
-                return nullptr;
+            prog->Build(shaders);
         }
-        return prog;
+        if (prog->IsValid())
+            return prog;
+        return nullptr;
     }
 
 private:
