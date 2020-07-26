@@ -821,6 +821,8 @@ int main(int argc, char* argv[])
 
     auto sampling = wdk::Config::Multisampling::None;
     bool testing  = false;
+    bool issue_gold = false;
+    std::string casename;
 
     for (int i=1; i<argc; ++i)
     {
@@ -834,6 +836,10 @@ int main(int argc, char* argv[])
             sampling = wdk::Config::Multisampling::MSAA16;
         else if (!std::strcmp(argv[i], "--test"))
             testing = true;
+        else if (!std::strcmp(argv[i], "--case"))
+            casename = argv[++i];
+        else if (!std::strcmp(argv[i], "--issue-gold"))
+            issue_gold = true;
     }
 
     // context integration glue code that puts together
@@ -950,6 +956,11 @@ int main(int argc, char* argv[])
 
         for (auto& test : tests)
         {
+            if (!casename.empty())
+            {
+                if (casename != test->GetName())
+                    continue;
+            }
             INFO("Running test case: '%1'", test->GetName());
             test->Start();
 
@@ -972,7 +983,7 @@ int main(int argc, char* argv[])
                 const auto& resultfile = base::FormatString("Result_%1_%2_%3_.png", test->GetName(), i, sampling);
                 const auto& goldfile   = base::FormatString("Gold_%1_%2_%3_.png", test->GetName(), i, sampling);
                 const auto& deltafile  = base::FormatString("Delta_%1_%2_%3_.png", test->GetName(), i, sampling);
-                if (!base::FileExists(goldfile))
+                if (!base::FileExists(goldfile) || issue_gold)
                 {
                     device->EndFrame(true /*display*/);
                     device->CleanGarbage(120);

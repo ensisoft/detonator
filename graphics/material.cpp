@@ -131,7 +131,7 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
         state.blending = RasterState::Blending::Transparent;
     else if (mSurfaceType == SurfaceType::Emissive)
         state.blending = RasterState::Blending::Additive;
-    
+
     // mark whether textures are considered alpha masks. 1.0f = is alpha mask, 0.0f = not alpha mask
     float alpha_masks[2] = {0.0f, 0.0f};
 
@@ -217,6 +217,10 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
             const auto wrap_x = mWrapX == TextureWrapping::Clamp ? 1 : 2;
             const auto wrap_y = mWrapY == TextureWrapping::Clamp ? 1 : 2;
             prog.SetUniform("kTextureWrap", wrap_x, wrap_y);
+        }
+        else
+        {
+            prog.SetUniform("kTextureWrap", 0, 0);
         }
     }
     prog.SetUniform("kIsAlphaMask", alpha_masks[0], alpha_masks[1]);
