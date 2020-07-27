@@ -55,7 +55,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 
     DEBUG("Create ParticleEditorWidget");
     mUI.setupUi(this);
-    mUI.widget->setFramerate(60);
+    mUI.widget->setFramerate(120);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
@@ -261,6 +261,7 @@ void ParticleEditorWidget::animate(double secs)
             mMaterialName = material_name;
         }
         mMaterial->SetRuntime(mTime);
+        mUI.curTime->setText(QString("%1s").arg(mTime));
     }
 
     if (!mEngine->IsAlive())
@@ -273,7 +274,7 @@ void ParticleEditorWidget::animate(double secs)
         mEngine.reset();
         return;
     }
-    mUI.curTime->setText(QString("%1s").arg(mTime));
+
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 

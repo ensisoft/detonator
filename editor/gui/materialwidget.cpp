@@ -135,7 +135,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     DEBUG("Create MaterialWidget");
 
     mUI.setupUi(this);
-    mUI.widget->setFramerate(60);
+    mUI.widget->setFramerate(120);
     mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onZoomIn = std::bind(&MaterialWidget::zoomIn, this);
@@ -329,6 +329,15 @@ void MaterialWidget::reloadTextures()
 void MaterialWidget::shutdown()
 {
     mUI.widget->dispose();
+}
+
+void MaterialWidget::animate(double secs)
+{
+    if (mState == PlayState::Playing)
+    {
+        mTime += secs;
+    }
+    mUI.time->setText(QString::number(mTime));
 }
 
 void MaterialWidget::on_actionPlay_triggered()
@@ -775,13 +784,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // use the material to fill a rectangle in the middle of the screen.
     gfx::FillRect(painter, gfx::FRect(xpos, ypos, content_width, content_height), mMaterial);
-
-    if (mState == PlayState::Playing)
-    {
-        const unsigned wtf = secs * 1000;
-        mTime += (wtf / 1000.0f);
-    }
-    mUI.time->setText(QString::number(mTime));
 }
 
 } // namespace

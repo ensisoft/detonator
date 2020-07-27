@@ -533,7 +533,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
-    mUI.widget->setFramerate(60);
+    mUI.widget->setFramerate(120);
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {

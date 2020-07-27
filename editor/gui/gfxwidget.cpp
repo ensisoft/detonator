@@ -51,21 +51,9 @@ GfxWindow::GfxWindow()
 {
     setSurfaceType(QWindow::OpenGLSurface);
 
-    QSurfaceFormat format;
-    format.setVersion(2, 0);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setDepthBufferSize(0); // currently we don't care
-    format.setAlphaBufferSize(8);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setStencilBufferSize(8);
-    format.setSamples(4);
-    format.setSwapInterval(1);
-
-    mContext.setFormat(format);
+    // the default configuration has been set in main
     mContext.create();
+    mContext.makeCurrent(this);
 
     // There's the problem that it seems a bit tricky to get the
     // OpenGLWidget's size (framebuffer size) properly when
@@ -79,6 +67,9 @@ GfxWindow::GfxWindow()
     // Doing a little hack here and hoping that when the first timer
     // event fires we'd have the final size correctly.
     QTimer::singleShot(10, this, &GfxWindow::doInit);
+
+    // use this timer to throttle the fps
+    setFramerate(120);
 }
 
 void GfxWindow::dispose()
@@ -165,12 +156,18 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->EndFrame(true /*display*/);
     mCustomGraphicsDevice->CleanGarbage(60);
 
-    mContext.swapBuffers(this);
+    if (isExposed())
+    {
+        mContext.swapBuffers(this);
+    }
 
     // animate continuously: schedule an update
-    QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
-
+    // Doing this with the vsync disabled is likely going to be
+    // "running too fast" as the workloads are tiny for a modern
+    // GPU and thus this loops basically becomes a busy loop
+    //QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
 }
+
 void GfxWindow::doInit()
 {
     initializeGL();
@@ -180,7 +177,7 @@ void GfxWindow::doInit()
     onInitScene(w, h);
 
     // animate continuously: schedule an update
-    QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+    //QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
  }
 
 void GfxWindow::mouseMoveEvent(QMouseEvent* mickey)
@@ -214,6 +211,11 @@ bool GfxWindow::event(QEvent* event)
         return true;
     }
     return QWindow::event(event);
+}
+
+void GfxWindow::timerEvent(QTimerEvent* event)
+{
+    paintGL();
 }
 
 void GfxWindow::toggleShowFps()

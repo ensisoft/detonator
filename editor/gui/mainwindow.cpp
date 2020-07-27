@@ -951,16 +951,17 @@ void MainWindow::timerLoRes()
 
 void MainWindow::timerHiRes()
 {
-    const quint64 ms = mHiResInterval.restart();
+    //const quint64 ms = mHiResInterval.restart();
+    const float time_step = 1.0f / 60.0f;
 
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->animate(ms / 1000.0);
+        widget->animate(time_step);
     }
     for (auto* child : mChildWindows)
     {
-        child->Animate(ms / 1000.0);
+        child->Animate(time_step);
     }
 }
 
