@@ -300,10 +300,33 @@
            <string>Material coordinates</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_28">
-             <property name="text">
-              <string>X Scale</string>
+           <item row="0" column="3">
+            <widget class="QDoubleSpinBox" name="velocityX">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QDoubleSpinBox" name="velocityY">
+             <property name="minimum">
+              <double>-99.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="scaleY">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -324,13 +347,17 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QDoubleSpinBox" name="velocityX">
-             <property name="minimum">
-              <double>-99.000000000000000</double>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Y velocity</string>
              </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>X Scale</string>
              </property>
             </widget>
            </item>
@@ -341,30 +368,26 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="scaleY">
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Y velocity</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QDoubleSpinBox" name="velocityY">
+           <item row="2" column="3">
+            <widget class="QDoubleSpinBox" name="velocityZ">
              <property name="minimum">
-              <double>-99.000000000000000</double>
+              <double>-100.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>100.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.100000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Z velocity</string>
              </property>
             </widget>
            </item>
@@ -1094,6 +1117,7 @@
   <tabstop>scaleY</tabstop>
   <tabstop>velocityX</tabstop>
   <tabstop>velocityY</tabstop>
+  <tabstop>velocityZ</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
   <tabstop>wrapX</tabstop>

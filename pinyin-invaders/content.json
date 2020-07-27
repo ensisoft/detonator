@@ -142,8 +142,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 1200.0,
-            "y": 900.0
+            "x": 1336.0,
+            "y": 930.0
           }
         }
       ],
@@ -249,7 +249,8 @@
       },
       "texture_velocity": {
         "x": 0.0,
-        "y": 0.0
+        "y": 0.0,
+        "z": 3.140000104904175
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
@@ -316,7 +317,8 @@
       },
       "texture_velocity": {
         "x": 0.009999999776482582,
-        "y": 0.0
+        "y": 0.0,
+        "z": 0.0
       },
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Clamp",
@@ -383,7 +385,8 @@
       },
       "texture_velocity": {
         "x": 0.0,
-        "y": 0.0
+        "y": 0.0,
+        "z": 0.0
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
@@ -471,12 +474,12 @@
       "init_rect_xpos": 0.0,
       "init_rect_ypos": 0.0,
       "max_lifetime": 3.4028234663852886e+38,
-      "max_point_size": 20.0,
+      "max_point_size": 40.0,
       "max_velocity": 0.20000000298023224,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_lifetime": 3.4028234663852886e+38,
-      "min_point_size": 20.0,
+      "min_point_size": 30.0,
       "min_velocity": 0.20000000298023224,
       "mode": "Once",
       "motion": "Linear",

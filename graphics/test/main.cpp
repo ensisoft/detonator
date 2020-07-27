@@ -198,6 +198,22 @@ public:
             material.SetTextureVelocityY(0.2);
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), material);
+
+            material.SetTextureVelocityX(0.0f);
+            material.SetTextureVelocityY(0.0f);
+            material.SetTextureVelocityZ(3.134);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            gfx::FillRect(painter, gfx::FRect(450, 450, 128, 128), material);
+
+            material.SetTextureVelocityX(0.0f);
+            material.SetTextureVelocityY(0.0f);
+            material.SetTextureVelocityZ(-3.134);
+            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), material);
         }
     }
     virtual void Update(float dt)

@@ -404,6 +404,8 @@ namespace gfx
         { return mTextureVelocity.x; }
         float GetTextureVelocityY() const
         { return mTextureVelocity.y; }
+        float GetTextureVelocityZ() const
+        { return mTextureVelocity.z; }
         float GetGamma() const
         { return mGamma; }
         float GetFps() const
@@ -614,6 +616,11 @@ namespace gfx
             mTextureVelocity.y = y;
             return *this;
         }
+        Material& SetTextureVelocityZ(float angle_radians)
+        {
+            mTextureVelocity.z = angle_radians;
+            return *this;
+        }
         Material& SetTextureWrapX(TextureWrapping wrap)
         {
             mWrapX = wrap;
@@ -683,7 +690,7 @@ namespace gfx
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         glm::vec2 mTextureScale = glm::vec2(1.0f, 1.0f);
-        glm::vec2 mTextureVelocity = glm::vec2(0.0f, 0.0f);
+        glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
         Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
             gfx::Color::White, gfx::Color::White};
     };

@@ -229,7 +229,8 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     prog.SetUniform("kRuntime", mRuntime);
     prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
     prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
-    prog.SetUniform("kTextureVelocity", mTextureVelocity.x, mTextureVelocity.y);
+    prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
+    prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
     prog.SetUniform("kColor0", mColorMap[0]);
     prog.SetUniform("kColor1", mColorMap[1]);
     prog.SetUniform("kColor2", mColorMap[2]);

@@ -3,7 +3,9 @@
         "checked_for_packing": true
     },
     "material_Asteroid": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
     },
     "material_Nebula1": {
         "checked_for_packing": true,
@@ -16,7 +18,18 @@
         "use_shader_file": false
     },
     "particle_Asteroid field": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "material": "Asteroid",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_direction_sector": true,
+        "use_growth": false,
+        "use_init_rect": true,
+        "use_lifetime": false
     },
     "particle_Starfield layer 0": {
         "checked_for_packing": true,

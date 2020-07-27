@@ -38,7 +38,8 @@ uniform vec2 kIsAlphaMask;
 // texture coordinate scaling coefficients
 uniform vec2 kTextureScale;
 // the speed at which S/T coords are transformed.
-uniform vec2 kTextureVelocity;
+uniform vec2 kTextureVelocityXY;
+uniform float kTextureVelocityZ;
 // 0 disabled, 1 clamp, 2 wrap
 uniform ivec2 kTextureWrap;
 // texture boxes
@@ -90,9 +91,18 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
   return vec2(x, y);
 }
 
+vec2 RotateCoords(vec2 coords)
+{
+    float angle = kTextureVelocityZ * kRuntime;
+    coords = coords - vec2(0.5, 0.5);
+    coords = mat2(cos(angle), -sin(angle),
+                  sin(angle),  cos(angle)) * coords;
+    coords += vec2(0.5, 0.5);
+    return coords;
+}
+
 void main()
 {
-
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
     // rasterized as points.
@@ -103,10 +113,10 @@ void main()
     // 0 to 1 across the point horizontally left-to-right, and t
     // ranges from 0 to 1 across the point vertically top-to-bottom."
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-
     vec4 gradient = MixGradient(coords);
+    coords = RotateCoords(coords);
 
-    coords += kTextureVelocity * kRuntime;
+    coords += kTextureVelocityXY * kRuntime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
