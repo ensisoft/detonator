@@ -41,6 +41,7 @@ namespace gfx
     class Device;
     class Shader;
     class Geometry;
+    class ResourcePacker;
 
     // Drawable interface represents some kind of drawable
     // object or shape such as quad/rectangle/mesh/particle engine.
@@ -85,6 +86,8 @@ namespace gfx
         virtual void SetStyle(Style style) {}
         // Get the current style.
         virtual Style GetStyle() const = 0;
+        // Pack the drawable resources.
+        virtual void Pack(ResourcePacker* packer) const = 0;
     private:
     };
 
@@ -104,6 +107,7 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -125,6 +129,7 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -147,6 +152,7 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -174,6 +180,7 @@ namespace gfx
         { return mRadius; }
         void SetRadius(float radius)
         { mRadius = radius;}
+        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -196,6 +203,7 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -221,6 +229,7 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
+        virtual void Pack(ResourcePacker* packer) const override;
 
         void SetNumVerticalLines(unsigned lines)
         { mNumVerticalLines = lines; }
@@ -360,6 +369,7 @@ namespace gfx
         virtual Geometry* Upload(Device& device) const override;
         virtual Style GetStyle() const override
         { return Style::Points; }
+        virtual void Pack(ResourcePacker* packer) const override;
 
         // Update the particle simulation.
         virtual void Update(float dt) override;

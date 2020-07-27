@@ -30,7 +30,7 @@
 #include "device.h"
 #include "shader.h"
 #include "geometry.h"
-#include "text.h"
+#include "resource.h"
 
 namespace gfx
 {
@@ -133,6 +133,11 @@ Geometry* Arrow::Upload(Device& device) const
     return geom;
 }
 
+void Arrow::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
 Shader* Circle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -216,6 +221,11 @@ Geometry* Circle::Upload(Device& device) const
     return geom;
 }
 
+void Circle::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
 Shader* Rectangle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -275,6 +285,11 @@ Geometry* Rectangle::Upload(Device& device) const
     }
     geom->SetLineWidth(mLineWidth);
     return geom;
+}
+
+void Rectangle::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 Shader* RoundRectangle::GetShader(Device& device) const
@@ -469,6 +484,11 @@ Geometry* RoundRectangle::Upload(Device& device) const
     return geom;
 }
 
+void RoundRectangle::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
 Shader* Triangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
@@ -507,6 +527,11 @@ Geometry* Triangle::Upload(Device& device) const
     else if (mStyle == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
+}
+
+void Triangle::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 Shader* Grid::GetShader(Device& device) const
@@ -584,6 +609,10 @@ Geometry* Grid::Upload(Device& device) const
     return geom;
 }
 
+void Grid::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
 
 Shader* KinematicsParticleEngine::GetShader(Device& device) const
 {
@@ -621,6 +650,11 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Points);
     return geom;
+}
+
+void KinematicsParticleEngine::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 // Update the particle simulation.

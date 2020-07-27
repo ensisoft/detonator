@@ -43,6 +43,8 @@
 #include "editor/app/utility.h"
 #include "editor/app/packing.h"
 #include "graphics/resource.h"
+#include "graphics/material.h"
+#include "graphics/drawable.h"
 #include "base/assert.h"
 
 namespace {
@@ -713,6 +715,12 @@ bool PackContent(const std::vector<const Resource*>& resources, const ContentPac
             const gfx::Material* material = nullptr;
             resource->GetContent(&material);
             material->BeginPacking(&packer);
+        }
+        else if (resource->IsParticleEngine())
+        {
+            const gfx::KinematicsParticleEngine* engine = nullptr;
+            resource->GetContent(&engine);
+            engine->Pack(&packer);
         }
     }
 

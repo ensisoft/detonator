@@ -112,6 +112,8 @@ namespace app
         // helpers
         inline bool IsMaterial() const
         { return GetType() == Type::Material; }
+        inline bool IsParticleEngine() const
+        { return GetType() == Type::ParticleSystem; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const

@@ -386,6 +386,7 @@ add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.c
                                   editor/app/eventlog.cpp
                                   editor/app/format.cpp
                                   graphics/material.cpp
+                                  graphics/drawable.cpp
                                   graphics/text.cpp
                                   graphics/resource.cpp
                                   base/assert.cpp
