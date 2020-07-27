@@ -222,6 +222,7 @@
       },
       "fps": 0.0,
       "gamma": 1.0,
+      "particle_action": "Rotate",
       "resource_name": "Asteroid",
       "samplers": [
         {
@@ -290,6 +291,7 @@
       },
       "fps": 0.0,
       "gamma": 1.0,
+      "particle_action": "None",
       "resource_name": "Nebula1",
       "samplers": [
         {
@@ -358,6 +360,7 @@
       },
       "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "particle_action": "None",
       "resource_name": "Star",
       "samplers": [
         {

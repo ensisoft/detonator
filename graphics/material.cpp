@@ -93,6 +93,7 @@ Material::Material(const Material& other)
     mColorMap[1] = other.mColorMap[1];
     mColorMap[2] = other.mColorMap[2];
     mColorMap[3] = other.mColorMap[3];
+    mParticleAction = other.mParticleAction;
 
     // copy texture samplers.
     for (const auto& sampler : other.mTextures)
@@ -223,6 +224,8 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
             prog.SetUniform("kTextureWrap", 0, 0);
         }
     }
+    prog.SetUniform("kApplyRandomParticleRotation",
+        env.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
     prog.SetUniform("kIsAlphaMask", alpha_masks[0], alpha_masks[1]);
     prog.SetUniform("kBaseColor", mBaseColor);
     prog.SetUniform("kGamma", mGamma);
@@ -257,6 +260,7 @@ nlohmann::json Material::ToJson() const
     base::JsonWrite(json, "color_map1", mColorMap[1]);
     base::JsonWrite(json, "color_map2", mColorMap[2]);
     base::JsonWrite(json, "color_map3", mColorMap[3]);
+    base::JsonWrite(json, "particle_action", mParticleAction);
 
     for (const auto& sampler : mTextures)
     {
@@ -292,7 +296,8 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
         !base::JsonReadSafe(object, "color_map0", &mat.mColorMap[0]) ||
         !base::JsonReadSafe(object, "color_map1", &mat.mColorMap[1]) ||
         !base::JsonReadSafe(object, "color_map2", &mat.mColorMap[2]) ||
-        !base::JsonReadSafe(object, "color_map3", &mat.mColorMap[3]))
+        !base::JsonReadSafe(object, "color_map3", &mat.mColorMap[3]) ||
+        !base::JsonReadSafe(object, "particle_action", &mat.mParticleAction))
         return std::nullopt;
 
     if (!object.contains("samplers"))
@@ -422,6 +427,7 @@ Material& Material::operator=(const Material& other)
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
     std::swap(mTextures, tmp.mTextures);
     std::swap(mColorMap, tmp.mColorMap);
+    std::swap(mParticleAction, tmp.mParticleAction);
     return *this;
 }
 

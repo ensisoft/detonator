@@ -335,6 +335,14 @@ namespace gfx
             Sprite
         };
 
+        // Action to take on per particle random value.
+        enum class ParticleAction {
+            // Do nothing
+            None,
+            // Rotate the texture coordinates
+            Rotate
+        };
+
         using MinTextureFilter = Texture::MinFilter;
         using MagTextureFilter = Texture::MagFilter;
         using TextureWrapping  = Texture::Wrapping;
@@ -424,6 +432,8 @@ namespace gfx
         { return mSurfaceType; }
         Type GetType() const
         { return mType; }
+        ParticleAction GetParticleAction() const
+        { return mParticleAction; }
 
         // Material properties setters.
 
@@ -515,6 +525,12 @@ namespace gfx
         Material& SetSurfaceType(SurfaceType type)
         {
             mSurfaceType = type;
+            return *this;
+        }
+
+        Material& SetParticleAction(ParticleAction action)
+        {
+            mParticleAction = action;
             return *this;
         }
 
@@ -693,6 +709,7 @@ namespace gfx
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
         Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
             gfx::Color::White, gfx::Color::White};
+        ParticleAction mParticleAction = ParticleAction::None;
     };
 
     // This material will fill the drawn shape with solid color value.

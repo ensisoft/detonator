@@ -31,6 +31,7 @@ uniform float kRenderPoints;
 uniform float kGamma;
 uniform float kRuntime;
 uniform float kBlendCoeff;
+uniform float kApplyRandomParticleRotation;
 // if the textures are alpha masks we sample white
 // which gets modulated by the alpha value from the texture.
 // x = texture0, y = texture1
@@ -56,6 +57,8 @@ uniform vec4 kColor3;
 
 // the texture coords from vertex shader.
 varying vec2 vTexCoord;
+// random per particle value.
+varying float vRandomValue;
 
 vec4 MixGradient(vec2 coords)
 {
@@ -93,7 +96,8 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 
 vec2 RotateCoords(vec2 coords)
 {
-    float angle = kTextureVelocityZ * kRuntime;
+    float random_angle = mix(0.0, vRandomValue, kApplyRandomParticleRotation);
+    float angle = kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;

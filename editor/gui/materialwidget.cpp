@@ -152,6 +152,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapY);
     PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::Material::Type>(mUI.materialType);
+    PopulateFromEnum<gfx::Material::ParticleAction>(mUI.particleAction);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -171,6 +172,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.velocityX,    mMaterial.GetTextureVelocityX());
     SetValue(mUI.velocityY,    mMaterial.GetTextureVelocityY());
     SetValue(mUI.velocityZ,    mMaterial.GetTextureVelocityZ());
+    SetValue(mUI.particleAction, mMaterial.GetParticleAction());
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
@@ -252,6 +254,7 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.velocityX,    mMaterial.GetTextureVelocityX());
     SetValue(mUI.velocityY,    mMaterial.GetTextureVelocityY());
     SetValue(mUI.velocityZ,    mMaterial.GetTextureVelocityZ());
+    SetValue(mUI.particleAction, mMaterial.GetParticleAction());
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
@@ -741,6 +744,7 @@ void MaterialWidget::SetMaterialProperties() const
     mMaterial.SetColorMapColor(GetValue(mUI.colorMap3), gfx::Material::ColorIndex::BottomRight);
     mMaterial.SetGamma(GetValue(mUI.gamma));
     mMaterial.SetSurfaceType(GetValue(mUI.surfaceType));
+    mMaterial.SetParticleAction(GetValue(mUI.particleAction));
     mMaterial.SetRuntime(mTime);
     mMaterial.SetFps(GetValue(mUI.fps));
     mMaterial.SetBlendFrames(GetValue(mUI.blend));
