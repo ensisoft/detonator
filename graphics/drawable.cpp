@@ -616,11 +616,11 @@ void Grid::Pack(ResourcePacker* packer) const
 
 Shader* KinematicsParticleEngine::GetShader(Device& device) const
 {
-    Shader* shader = device.FindShader("vertex_array.glsl");
+    Shader* shader = device.FindShader("particles.glsl");
     if (shader == nullptr)
     {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
+        shader = device.MakeShader("particles.glsl");
+        shader->CompileFile("shaders/es2/particles.glsl");
     }
     return shader;
 }
@@ -643,6 +643,10 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
         // abusing texcoord here to pass per particle point size
         // to the fragment shader.
         v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize : 0.0f;
+        // abusing texcoord here to provide per particle random value.
+        // we can use this to simulate particle rotation for example
+        // (if the material supports it)
+        v.aTexCoord.y = p.randomizer;
         verts.push_back(v);
     }
 
@@ -654,7 +658,7 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
 
 void KinematicsParticleEngine::Pack(ResourcePacker* packer) const
 {
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+    packer->PackShader(this, "shaders/es2/particles.glsl");
 }
 
 // Update the particle simulation.
@@ -785,6 +789,7 @@ void KinematicsParticleEngine::InitParticles(size_t num)
         // note that the velocity vector is baked into the
         // direction vector in order to save space.
         p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
+        p.randomizer = math::rand(0.0f, 1.0f);
         mParticles.push_back(p);
     }
 }

@@ -278,6 +278,8 @@ namespace gfx
             float lifetime  = 0.0f;
             // The current distance travelled in simulation units.
             float distance  = 0.0f;
+            // random float value between 0.0f and 1.0f
+            float randomizer = 0.0f;
         };
 
         // Define the motion of the particle.
