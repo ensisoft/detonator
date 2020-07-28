@@ -88,6 +88,11 @@ void ChildWindow::Animate(double secs)
     mWidget->animate(secs);
 }
 
+void ChildWindow::SetTargetFps(unsigned fps)
+{
+    mWidget->setTargetFps(fps);
+}
+
 void ChildWindow::on_actionClose_triggered()
 {
     // this will create close event

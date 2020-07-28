@@ -33,6 +33,7 @@
 
 #include "editor/app/eventlog.h"
 #include "dlgsettings.h"
+#include "utility.h"
 
 namespace gui
 {
@@ -46,14 +47,24 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     mUI.edtImageEditorArguments->setText(settings.image_editor_arguments);
     mUI.edtShaderEditorExecutable->setText(settings.shader_editor_executable);
     mUI.edtShaderEditorArguments->setText(settings.shader_editor_arguments);
+
+    SetValue(mUI.cmbTargetFps, settings.target_fps);
+    SetValue(mUI.cmbMSAA, settings.msaa_sample_count);
+    SetValue(mUI.chkVSync, settings.sync_to_vblank);
 }
 
 void DlgSettings::on_btnAccept_clicked()
 {
+     if (!MustHaveNumber(mUI.cmbTargetFps))
+        return;
+
     mSettings.image_editor_executable = mUI.edtImageEditorExecutable->text();
     mSettings.image_editor_arguments  = mUI.edtImageEditorArguments->text();
     mSettings.shader_editor_executable = mUI.edtShaderEditorExecutable->text();
     mSettings.shader_editor_arguments  = mUI.edtShaderEditorArguments->text();
+    mSettings.target_fps = GetValue(mUI.cmbTargetFps);
+    mSettings.msaa_sample_count = GetValue(mUI.cmbMSAA);
+    mSettings.sync_to_vblank = GetValue(mUI.chkVSync);
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()

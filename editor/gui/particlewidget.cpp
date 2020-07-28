@@ -278,6 +278,11 @@ void ParticleEditorWidget::animate(double secs)
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
+void ParticleEditorWidget::setTargetFps(unsigned fps)
+{
+    mUI.widget->setFramerate(fps);
+}
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;

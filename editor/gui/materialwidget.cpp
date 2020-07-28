@@ -340,6 +340,11 @@ void MaterialWidget::animate(double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
+void MaterialWidget::setTargetFps(unsigned fps)
+{
+    mUI.widget->setFramerate(fps);
+}
+
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;

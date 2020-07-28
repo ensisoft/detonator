@@ -947,6 +947,11 @@ void AnimationWidget::animate(double secs)
     }
 }
 
+void AnimationWidget::setTargetFps(unsigned fps)
+{
+    mUI.widget->setFramerate(fps);
+}
+
 void AnimationWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;

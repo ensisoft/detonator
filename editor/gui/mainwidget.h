@@ -52,6 +52,9 @@ namespace gui
         virtual void animate(double secs)
         {}
 
+        virtual void setTargetFps(unsigned fps)
+        {}
+
         // Called whenever the widget is getting activated i.e. displayed
         // in the MainWindow.
         virtual void activate() {}

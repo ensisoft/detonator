@@ -33,6 +33,7 @@
 #  include <QFileInfo>
 #  include <QStringList>
 #  include <QProcess>
+#  include <QSurfaceFormat>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -127,6 +128,23 @@ void MainWindow::loadState()
     mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("notepad.exe"));
     mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #endif
+    mSettings.msaa_sample_count = settings.getValue("Settings", "msaa_sample_count", 4);
+    mSettings.target_fps        = settings.getValue("Settings", "target_fps", 120);
+    mSettings.sync_to_vblank    = settings.getValue("Settings", "sync_to_vblank", false);
+
+    QSurfaceFormat format;
+    format.setVersion(2, 0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setDepthBufferSize(0); // currently we don't care
+    format.setAlphaBufferSize(8);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setStencilBufferSize(8);
+    format.setSamples(mSettings.msaa_sample_count);
+    format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
+    QSurfaceFormat::setDefaultFormat(format);
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -807,7 +825,36 @@ void MainWindow::on_actionCloseWorkspace_triggered()
 void MainWindow::on_actionSettings_triggered()
 {
     DlgSettings dlg(this, mSettings);
-    dlg.exec();
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        // adjust the default surface format.
+        QSurfaceFormat format;
+        format.setVersion(2, 0);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+        format.setRenderableType(QSurfaceFormat::OpenGLES);
+        format.setDepthBufferSize(0); // currently we don't care
+        format.setAlphaBufferSize(8);
+        format.setRedBufferSize(8);
+        format.setGreenBufferSize(8);
+        format.setBlueBufferSize(8);
+        format.setStencilBufferSize(8);
+        format.setSamples(mSettings.msaa_sample_count);
+        format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
+        QSurfaceFormat::setDefaultFormat(format);
+
+        DEBUG("New MSAA setting: %1, Sync to VBlank: %2, Target fps: %3", mSettings.msaa_sample_count,
+            mSettings.sync_to_vblank, mSettings.target_fps);
+
+        for (int i=0; i<GetCount(mUI.mainTab); ++i)
+        {
+            auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+            widget->setTargetFps(mSettings.target_fps);
+        }
+        for (auto* child : mChildWindows)
+        {
+            child->SetTargetFps(mSettings.target_fps);
+        }
+    }
 }
 
 void MainWindow::on_actionImagePacker_triggered()
@@ -984,7 +1031,7 @@ void MainWindow::openExternalImage(const QString& file)
                     "Would you like to set one now?");
         if (msg.exec() == QMessageBox::No)
             return;
-        DlgSettings dlg(this, mSettings);
+        on_actionSettings_triggered();
         if (mSettings.image_editor_executable.isEmpty())
         {
             ERROR("No image editor has been configured.");
@@ -1023,7 +1070,7 @@ void MainWindow::openExternalShader(const QString& file)
                     "Would you like to set one now?");
         if (msg.exec() == QMessageBox::No)
             return;
-        DlgSettings dlg(this, mSettings);
+        on_actionSettings_triggered();
         if (mSettings.shader_editor_executable.isEmpty())
         {
             ERROR("No shader editor has been configured.");
@@ -1127,6 +1174,9 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
     settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
+    settings.setValue("Settings", "msaa_sample_count", mSettings.msaa_sample_count);
+    settings.setValue("Settings", "target_fps", mSettings.target_fps);
+    settings.setValue("Settings", "sync_to_vblank", mSettings.sync_to_vblank);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
 
@@ -1145,6 +1195,8 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
             this,   &MainWindow::openExternalImage);
     connect(widget, &MainWidget::openExternalShader,
             this,   &MainWindow::openExternalShader);
+
+    widget->setTargetFps(mSettings.target_fps);
 
     if (new_window)
     {

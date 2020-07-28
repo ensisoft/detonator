@@ -65,6 +65,8 @@ namespace gui
         // if any.
         void Animate(double secs);
 
+        void SetTargetFps(unsigned target);
+
     private slots:
         void on_actionClose_triggered();
         void on_actionReloadShaders_triggered();

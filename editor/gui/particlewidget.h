@@ -61,6 +61,7 @@ namespace gui
         virtual void reloadTextures() override;
         virtual void shutdown() override;
         virtual void animate(double secs) override;
+        virtual void setTargetFps(unsigned fps) override;
 
     private slots:
         void on_actionPlay_triggered();
