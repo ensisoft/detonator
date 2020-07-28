@@ -772,6 +772,19 @@ std::optional<KinematicsParticleEngine> KinematicsParticleEngine::FromJson(const
     return KinematicsParticleEngine(params);
 }
 
+std::size_t KinematicsParticleEngine::GetHash() const
+{
+    static_assert(std::is_trivially_copyable<Params>::value);
+    size_t hash = 0;
+
+    const auto* ptr = reinterpret_cast<const unsigned char*>(&mParams);
+    const auto  len = sizeof(mParams);
+    for (size_t i=0; i<len; ++i)
+        hash ^= std::hash<unsigned char>()(ptr[i]);
+
+    return hash;
+}
+
 void KinematicsParticleEngine::InitParticles(size_t num)
 {
     for (size_t i=0; i<num; ++i)

@@ -535,6 +535,9 @@ void MainWindow::on_mainTab_currentChanged(int index)
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
     auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
+    if (!widget->confirmClose())
+        return;
+
     if (widget == mCurrentWidget)
         mCurrentWidget = nullptr;
 

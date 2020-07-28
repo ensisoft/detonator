@@ -164,6 +164,8 @@ namespace game
         base::bitflag<Flags>& GetFlags()
         { return mBitFlags; }
 
+        std::size_t GetHash() const;
+
         // Update node, i.e. its material and drawable if the relevant
         // update flags are set.
         void Update(float dt);
@@ -307,6 +309,11 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+
+        // Get the hash value based on the current properties of the animation
+        // i.e. include each node and their drawables and materials but don't
+        // include transient state such as current runtime.
+        std::size_t GetHash() const;
 
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's drawable in the animation.

@@ -69,6 +69,14 @@ namespace gfx
                 return std::nullopt;
             return ret;
         }
+
+        std::size_t GetHash() const
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mWidth);
+            hash = base::hash_combine(hash, mHeight);
+            return hash;
+        }
     private:
         T mWidth  = T();
         T mHeight = T();
@@ -119,6 +127,13 @@ namespace gfx
             return ret;
         }
 
+        std::size_t GetHash() const
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mX);
+            hash = base::hash_combine(hash, mY);
+            return hash;
+        }
     private:
         T mX = T();
         T mY = T();
@@ -284,6 +299,16 @@ namespace gfx
                 return std::nullopt;
 
             return ret;
+        }
+
+        std::size_t GetHash() const
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mX);
+            hash = base::hash_combine(hash, mY);
+            hash = base::hash_combine(hash, mWidth);
+            hash = base::hash_combine(hash, mHeight);
+            return hash;
         }
 
     private:

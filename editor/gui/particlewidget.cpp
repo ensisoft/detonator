@@ -126,6 +126,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.timeDerivative, params.rate_of_change_in_size_wrt_time);
     SetValue(mUI.distDerivative, params.rate_of_change_in_size_wrt_dist);
 
+    mOriginalHash = engine->GetHash();
+
     setWindowTitle(name);
 }
 
@@ -283,6 +285,31 @@ void ParticleEditorWidget::setTargetFps(unsigned fps)
     mUI.widget->setFramerate(fps);
 }
 
+bool ParticleEditorWidget::confirmClose()
+{
+    gfx::KinematicsParticleEngine::Params params;
+    gfx::KinematicsParticleEngine engine;
+    fillParams(params);
+    engine.Configure(params);
+
+    const auto hash = engine.GetHash();
+    if (hash == mOriginalHash)
+        return true;
+
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    msg.setIcon(QMessageBox::Question);
+    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+    const auto ret = msg.exec();
+    if (ret == QMessageBox::Cancel)
+        return false;
+    else if (ret == QMessageBox::No)
+        return true;
+
+    on_actionSave_triggered();
+    return true;
+}
+
 void ParticleEditorWidget::on_actionPause_triggered()
 {
     mPaused = true;
@@ -292,26 +319,40 @@ void ParticleEditorWidget::on_actionPause_triggered()
 
 void ParticleEditorWidget::on_actionSave_triggered()
 {
-    if  (!MustHaveInput(mUI.name))
+    if (!MustHaveInput(mUI.name))
         return;
 
     const QString& name = GetValue(mUI.name);
 
+    gfx::KinematicsParticleEngine::Params params;
+    gfx::KinematicsParticleEngine engine;
+    fillParams(params);
+    engine.Configure(params);
+
+    // what's the new hash
+    const auto hash = engine.GetHash();
+
     if (mWorkspace->HasParticleSystem(name))
     {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText("Workspace already contains particle system by this name. Overwrite?");
-        if (msg.exec() == QMessageBox::No)
-            return;
+        const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::ParticleSystem);
+        const gfx::KinematicsParticleEngine* engine = nullptr;
+        resource.GetContent(&engine);
+        if (engine->GetHash() != mOriginalHash)
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText("Workspace already contains particle system by this name. Overwrite?");
+            if (msg.exec() == QMessageBox::No)
+                return;
+        }
     }
 
-    gfx::KinematicsParticleEngine::Params params;
-    fillParams(params);
-    gfx::KinematicsParticleEngine engine(params);
-    app::ParticleSystemResource particle_resource(std::move(engine), name);
+    // update the hash to the new value.
+    mOriginalHash = hash;
 
+    // setup the resource with the current auxiliary params
+    app::ParticleSystemResource particle_resource(std::move(engine), name);
     SetProperty(particle_resource, "material", mUI.materials);
     SetProperty(particle_resource, "transform_enabled", mUI.transform);
     SetProperty(particle_resource, "transform_xpos", mUI.translateX);
@@ -324,9 +365,9 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_growth", mUI.growth);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     mWorkspace->SaveResource(particle_resource);
+
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);
-
     setWindowTitle(name);
 }
 

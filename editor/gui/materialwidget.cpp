@@ -198,6 +198,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     mUI.materialName->setText(resource.GetName());
     setWindowTitle(resource.GetName());
 
+    mOriginalHash = mMaterial.GetHash();
+
     // enable/disable UI elements based on the material type
     on_materialType_currentIndexChanged("");
 }
@@ -284,6 +286,8 @@ bool MaterialWidget::loadState(const Settings& settings)
     on_materialType_currentIndexChanged("");
 
     setWindowTitle(mUI.materialName->text());
+
+    mOriginalHash = mMaterial.GetHash();
     return true;
 }
 
@@ -340,6 +344,27 @@ void MaterialWidget::animate(double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
+bool MaterialWidget::confirmClose()
+{
+    // any unsaved changes ?
+    const auto hash = mMaterial.GetHash();
+    if (hash == mOriginalHash)
+        return true;
+
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    msg.setIcon(QMessageBox::Question);
+    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+    const auto ret = msg.exec();
+    if (ret == QMessageBox::Cancel)
+        return false;
+    else if (ret == QMessageBox::No)
+        return true;
+
+    on_actionSave_triggered();
+    return true;
+}
+
 void MaterialWidget::setTargetFps(unsigned fps)
 {
     mUI.widget->setFramerate(fps);
@@ -376,29 +401,36 @@ void MaterialWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.materialName))
         return;
 
+    SetMaterialProperties();
+
     const QString& name = GetValue(mUI.materialName);
 
     if (mWorkspace->HasMaterial(name))
     {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr("Workspace already contains a material by this name. Overwrite?"));
-        if (msg.exec() == QMessageBox::No)
-            return;
+        const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
+        const gfx::Material* material = nullptr;
+        resource.GetContent(&material);
+        if (material->GetHash() != mOriginalHash)
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText(tr("Workspace already contains a material by this name. Overwrite?"));
+            if (msg.exec() == QMessageBox::No)
+                return;
+        }
     }
-
-    SetMaterialProperties();
 
     app::MaterialResource resource(mMaterial, name);
     resource.SetProperty("shader_file", mUI.shaderFile->text());
     resource.SetProperty("use_shader_file", mUI.customShader->isChecked());
-
     mWorkspace->SaveResource(resource);
 
-    setWindowTitle(name);
+    mOriginalHash = mMaterial.GetHash();
 
     NOTE("Saved material '%1'", name);
+    INFO("Saved material '%1'", name);
+    setWindowTitle(name);
 }
 
 void MaterialWidget::on_btnAddTextureMap_clicked()

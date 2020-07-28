@@ -765,6 +765,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     setWindowTitle(resource.GetName());
 
     mState.animation = *resource.GetContent<game::Animation>();
+    mOriginalHash = mState.animation.GetHash();
 
     // if some resource has been deleted we need to replace it.
     for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
@@ -952,6 +953,26 @@ void AnimationWidget::setTargetFps(unsigned fps)
     mUI.widget->setFramerate(fps);
 }
 
+bool AnimationWidget::confirmClose()
+{
+    const auto hash = mState.animation.GetHash();
+    if (hash == mOriginalHash)
+        return true;
+
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    msg.setIcon(QMessageBox::Question);
+    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+    const auto ret = msg.exec();
+    if (ret == QMessageBox::Cancel)
+        return false;
+    else if (ret == QMessageBox::No)
+        return true;
+
+    on_actionSave_triggered();
+    return true;
+}
+
 void AnimationWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -983,23 +1004,31 @@ void AnimationWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.name))
         return;
-    const QString& name = GetValue(mUI.name);
 
+    const QString& name = GetValue(mUI.name);
     if (mState.workspace->HasResource(name, app::Resource::Type::Animation))
     {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText("Workspace already contains animation by this name. Overwrite?");
-        if (msg.exec() == QMessageBox::No)
-            return;
+        const auto& resource = mState.workspace->GetResource(name, app::Resource::Type::Animation);
+        const game::Animation* animation = nullptr;
+        resource.GetContent(&animation);
+        if (animation->GetHash() != mOriginalHash)
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText("Workspace already contains animation by this name. Overwrite?");
+            if (msg.exec() == QMessageBox::No)
+                return;
+        }
     }
+
+    mOriginalHash = mState.animation.GetHash();
 
     app::AnimationResource resource(mState.animation, name);
     mState.workspace->SaveResource(resource);
+
     INFO("Saved animation '%1'", name);
     NOTE("Saved animation '%1'", name);
-
     setWindowTitle(name);
 }
 

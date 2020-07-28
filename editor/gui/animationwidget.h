@@ -64,6 +64,7 @@ namespace gui
         virtual void shutdown() override;
         virtual void animate(double secs) override;
         virtual void setTargetFps(unsigned fps) override;
+        virtual bool confirmClose() override;
 
     private slots:
         void on_actionPlay_triggered();
@@ -146,7 +147,9 @@ namespace gui
         // tree model for accessing the animations' render tree
         // data from the tree widget.
         std::unique_ptr<TreeModel> mTreeModel;
-
+        // the original hash value that is used to
+        // check against if there are unsaved changes.
+        std::size_t mOriginalHash = 0;
         // current time of the animation. accumulates when running.
         float mTime = 0.0f;
         // possible states of the animation playback.

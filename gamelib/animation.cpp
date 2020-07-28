@@ -30,6 +30,7 @@
 
 #include "base/logging.h"
 #include "base/assert.h"
+#include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/drawing.h"
@@ -48,6 +49,25 @@ AnimationNode::AnimationNode()
     mBitFlags.set(Flags::DoesRender, true);
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::UpdateDrawable, true);
+}
+
+std::size_t AnimationNode::GetHash() const
+{
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mMaterialName);
+    hash = base::hash_combine(hash, mDrawableName);
+    hash = base::hash_combine(hash, mPosition);
+    hash = base::hash_combine(hash, mSize);
+    hash = base::hash_combine(hash, mScale);
+    hash = base::hash_combine(hash, mRotation);
+    hash = base::hash_combine(hash, mLayer);
+    hash = base::hash_combine(hash, mRenderPass);
+    hash = base::hash_combine(hash, mRenderStyle);
+    hash = base::hash_combine(hash, mLineWidth);
+    hash = base::hash_combine(hash, mBitFlags.value());
+    return hash;
 }
 
 void AnimationNode::Update(float dt)
@@ -453,6 +473,14 @@ void Animation::Reset()
     {
         node->ResetTime();
     }
+}
+
+std::size_t Animation::GetHash() const
+{
+    std::size_t hash = 0;
+    for (const auto& node : mNodes)
+        hash = base::hash_combine(hash, node->GetHash());
+    return hash;
 }
 
 void Animation::CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,

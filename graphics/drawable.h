@@ -364,6 +364,7 @@ namespace gfx
         {
             InitParticles(size_t(mParams.num_particles));
         }
+        KinematicsParticleEngine() = default;
 
         // Drawable implementation. Compile the shader.
         virtual Shader* GetShader(Device& device) const override;
@@ -386,10 +387,17 @@ namespace gfx
         const Params& GetParams() const
         { return mParams; }
 
+        void Configure(const Params& p)
+        { mParams = p;}
+
         // Serialize into JSON.
         nlohmann::json ToJson() const;
         // Load from JSON
         static std::optional<KinematicsParticleEngine> FromJson(const nlohmann::json& object);
+
+        // Get a hash value based on the engine parameters
+        // and excluding any runtime data.
+        std::size_t GetHash() const;
 
     private:
         void InitParticles(size_t num);

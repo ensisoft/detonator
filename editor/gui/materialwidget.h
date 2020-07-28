@@ -64,6 +64,7 @@ namespace gui
         virtual void shutdown() override;
         virtual void animate(double secs) override;
         virtual void setTargetFps(unsigned fps) override;
+        virtual bool confirmClose() override;
 
     private slots:
         void on_actionPlay_triggered();
@@ -102,6 +103,9 @@ namespace gui
         PlayState mState = PlayState::Stopped;
         // current playback time (if playing)
         float mTime = 0.0f;
+        // the original material hash that is used to
+        // check against if there are unsaved changes.
+        std::size_t mOriginalHash = 0;
 
     };
 } // namespace

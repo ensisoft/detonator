@@ -673,6 +673,10 @@ namespace gfx
             return mTextures[index].box;
         }
 
+        // Get the hash value of the material based on the current material
+        // properties excluding the transident state i.e. runtime.
+        size_t GetHash() const;
+
         nlohmann::json ToJson() const;
 
         static std::optional<Material> FromJson(const nlohmann::json& object);

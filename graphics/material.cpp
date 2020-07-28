@@ -240,6 +240,36 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     prog.SetUniform("kColor3", mColorMap[3]);
 }
 
+size_t Material::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mShaderFile);
+    hash = base::hash_combine(hash, mBaseColor.GetHash());
+    hash = base::hash_combine(hash, mSurfaceType);
+    hash = base::hash_combine(hash, mType);
+    hash = base::hash_combine(hash, mGamma);
+    hash = base::hash_combine(hash, mFps);
+    hash = base::hash_combine(hash, mBlendFrames);
+    hash = base::hash_combine(hash, mMinFilter);
+    hash = base::hash_combine(hash, mMagFilter);
+    hash = base::hash_combine(hash, mWrapX);
+    hash = base::hash_combine(hash, mWrapY);
+    hash = base::hash_combine(hash, mTextureScale);
+    hash = base::hash_combine(hash, mTextureVelocity);
+    hash = base::hash_combine(hash, mColorMap[0].GetHash());
+    hash = base::hash_combine(hash, mColorMap[1].GetHash());
+    hash = base::hash_combine(hash, mColorMap[2].GetHash());
+    hash = base::hash_combine(hash, mColorMap[3].GetHash());
+    hash = base::hash_combine(hash, mParticleAction);
+    for (const auto& sampler : mTextures)
+    {
+        hash = base::hash_combine(hash, sampler.source->GetId());
+        hash = base::hash_combine(hash, sampler.enable_gc);
+        hash = base::hash_combine(hash, sampler.box.GetHash());
+    }
+    return hash;
+}
+
 nlohmann::json Material::ToJson() const
 {
     nlohmann::json json;

@@ -218,6 +218,16 @@ namespace gfx
             return ret;
         }
 
+        size_t GetHash() const
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mRed);
+            hash = base::hash_combine(hash, mGreen);
+            hash = base::hash_combine(hash, mBlue);
+            hash = base::hash_combine(hash, mAlpha);
+            return hash;
+        }
+
     private:
         float mRed   = 1.0f;
         float mGreen = 1.0f;
