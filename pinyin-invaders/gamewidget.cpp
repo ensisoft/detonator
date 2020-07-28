@@ -2624,14 +2624,7 @@ void GameWidget::playMusic()
 {
 #ifdef GAME_ENABLE_AUDIO
     static const char* tracks[] = {
-        "music/01_speedway.ogg",
-        "music/02_chip_beach.ogg",
-        "music/03_press_any_key_to_continue.ogg",
-        "music/04_i_want_more_candy.ogg",
-        "music/05_rain_island.ogg",
-        "music/06_space_troopers.ogg",
-        "music/07_stars_dont_twinkle.ogg",
-        "music/08_the_club_entrance.ogg",
+        "music/awake10_megaWall.ogg"
     };
 
     if (mPlayMusic)
