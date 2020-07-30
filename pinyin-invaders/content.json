@@ -1,10 +1,13 @@
 {
   "animations": [
     {
+      "bitflags": 0,
+      "duration": 0.0,
       "nodes": [
         {
           "bitflags": 3,
           "drawable": "Rectangle",
+          "endtime": 0.0,
           "id": "eqyyTFgoPX",
           "layer": 0,
           "linewidth": 1.0,
@@ -24,11 +27,13 @@
           "size": {
             "x": 1200.0,
             "y": 900.0
-          }
+          },
+          "starttime": 0.0
         },
         {
           "bitflags": 11,
           "drawable": "Starfield layer 0",
+          "endtime": 0.0,
           "id": "eQzT1fIZxY",
           "layer": 2,
           "linewidth": 1.0,
@@ -48,11 +53,13 @@
           "size": {
             "x": 1200.0,
             "y": 900.0
-          }
+          },
+          "starttime": 0.0
         },
         {
           "bitflags": 11,
           "drawable": "Starfield layer 1",
+          "endtime": 0.0,
           "id": "4fLtRil2lL",
           "layer": 2,
           "linewidth": 1.0,
@@ -72,11 +79,13 @@
           "size": {
             "x": 1200.0,
             "y": 900.0
-          }
+          },
+          "starttime": 0.0
         },
         {
           "bitflags": 11,
           "drawable": "Starfield layer 2",
+          "endtime": 0.0,
           "id": "9SZAeUshtX",
           "layer": 3,
           "linewidth": 1.0,
@@ -96,11 +105,13 @@
           "size": {
             "x": 1200.0,
             "y": 900.0
-          }
+          },
+          "starttime": 0.0
         },
         {
           "bitflags": 7,
           "drawable": "Rectangle",
+          "endtime": 0.0,
           "id": "wChFz6luAG",
           "layer": 0,
           "linewidth": 1.0,
@@ -120,11 +131,13 @@
           "size": {
             "x": 1362.85693359375,
             "y": 1037.85693359375
-          }
+          },
+          "starttime": 0.0
         },
         {
-          "bitflags": 15,
+          "bitflags": 47,
           "drawable": "Asteroid field",
+          "endtime": 12.0,
           "id": "YJX08Fi01A",
           "layer": 0,
           "linewidth": 1.0,
@@ -144,7 +157,8 @@
           "size": {
             "x": 1336.0,
             "y": 930.0
-          }
+          },
+          "starttime": 8.0
         }
       ],
       "render_tree": {

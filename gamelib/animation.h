@@ -72,6 +72,13 @@ namespace game
             UpdateMaterial,
             // Whether the node should update drawable or not
             UpdateDrawable,
+            // Restart drawables or not
+            RestartDrawable,
+            // Limit the node's active lifetime to be within
+            // the start time and start time + lifetime interval
+            // Outside this time frame the node will not render or
+            // update.
+            LimitLifetime
         };
 
         // This will construct an "empty" node that cannot be
@@ -128,6 +135,10 @@ namespace game
         { mBitFlags.set(f, on_off); }
         bool TestFlag(Flags f) const
         { return mBitFlags.test(f); }
+        void SetStartTime(float value)
+        { mStartTime = value; }
+        void SetEndTime(float value)
+        { mEndTime = value; }
 
         RenderPass GetRenderPass() const
         { return mRenderPass; }
@@ -163,15 +174,22 @@ namespace game
         { return mBitFlags; }
         base::bitflag<Flags>& GetFlags()
         { return mBitFlags; }
+        float GetStartTime() const
+        { return mStartTime; }
+        float GetEndTime() const
+        { return mEndTime; }
 
         std::size_t GetHash() const;
 
         // Update node, i.e. its material and drawable if the relevant
         // update flags are set.
-        void Update(float dt);
+        void Update(float time, float dt);
 
         // Reset node's accumulated time to 0.
-        void ResetTime();
+        void Reset();
+
+        // Returns true if node is alive (active) at this time.
+        bool IsAlive(float time) const;
 
         // Get this node's transformation that applies
         // to the hieararchy of nodes.
@@ -206,9 +224,8 @@ namespace game
         std::shared_ptr<gfx::Material> mMaterial;
         std::shared_ptr<gfx::Drawable> mDrawable;
         // timewise properties.
-        float mLifetime  = 0.0f;
         float mStartTime = 0.0f;
-        float mTime      = 0.0f;
+        float mEndTime   = 0.0f;
         // transformation properties.
         // translation offset relative to the animation.
         glm::vec2 mPosition;
@@ -235,6 +252,14 @@ namespace game
     public:
         using RenderTree = TreeNode<AnimationNode>;
         using RenderTreeNode = TreeNode<AnimationNode>;
+
+        enum class Flags {
+            // Whether to actually playback / perform timeline
+            // actions or not.
+            EnableTimeline,
+            // whether to loop from the end of animation back to start.
+            LoopAnimation
+        };
 
         Animation() = default;
         Animation(const Animation& other);
@@ -309,6 +334,10 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+        void SetFlag(Flags f, bool on_off)
+        { mBitFlags.set(f, on_off); }
+        bool TestFlag(Flags f) const
+        { return mBitFlags.test(f); }
 
         // Get the hash value based on the current properties of the animation
         // i.e. include each node and their drawables and materials but don't
@@ -368,5 +397,12 @@ namespace game
         // i.e. the tree defines the parent-child transformation
         // hiearchy.
         RenderTree mRenderTree;
+        // current playback time.
+        float mCurrentTime = 0.0f;
+        // duration of the animation
+        float mDuration = 0.0f;
+        // Animation flags.
+        base::bitflag<Flags> mBitFlags;
+
     };
 } // namespace

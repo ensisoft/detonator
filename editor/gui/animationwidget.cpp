@@ -945,6 +945,8 @@ void AnimationWidget::animate(double secs)
         mState.animation.Update(secs);
         mTime += secs;
         mUI.time->setText(QString::number(mTime));
+        mUI.timeline->SetCurrentTime(mTime);
+        mUI.timeline->update();
     }
 }
 
@@ -996,7 +998,9 @@ void AnimationWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mTime = 0.0f;
-    mUI.time->clear();
+    mUI.time->setText("0");
+    mUI.timeline->SetCurrentTime(0.0f);
+    mUI.timeline->update();
     mState.animation.Reset();
 }
 
@@ -1215,6 +1219,7 @@ void AnimationWidget::currentComponentRowChanged()
     {
         mUI.cProperties->setEnabled(false);
         mUI.cTransform->setEnabled(false);
+        mUI.chkNodeLifetime->setEnabled(false);
     }
     else
     {
@@ -1460,13 +1465,41 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
     }
 }
 
+void AnimationWidget::on_animDuration_valueChanged(double value)
+{
+    mUI.timeline->SetDuration(value);
+    //mUI.timeline->SetZoom(1.0f);
+    mUI.timeline->update();
+}
+
+void AnimationWidget::on_nodeStartTime_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetStartTime(value);
+    }
+}
+void AnimationWidget::on_nodeEndTime_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetEndTime(value);
+    }
+}
+
+void AnimationWidget::on_chkNodeLifetime_toggled(bool value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNode::Flags::LimitLifetime, value);
+    }
+}
+
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
-
-
 
     gfx::Transform view;
     // apply the view transformation. The view transformation is not part of the
@@ -1682,8 +1715,12 @@ void AnimationWidget::updateCurrentNodeProperties()
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNode::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNode::Flags::UpdateDrawable));
         SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNode::Flags::DoesRender));
+        SetValue(mUI.chkNodeLifetime, node->TestFlag(game::AnimationNode::Flags::LimitLifetime));
+        SetValue(mUI.nodeStartTime, node->GetStartTime());
+        SetValue(mUI.nodeEndTime, node->GetEndTime());
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
+        mUI.chkNodeLifetime->setEnabled(true);
     }
 }
 

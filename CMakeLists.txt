@@ -215,6 +215,8 @@ add_executable(Editor
     editor/gui/settings.cpp
     editor/gui/treewidget.h
     editor/gui/treewidget.cpp
+    editor/gui/timelinewidget.h
+    editor/gui/timelinewidget.cpp
     editor/resource/resource.qrc
     editor/resource/qdarkstyle/style.qrc
     third_party/stb/stb_image.c

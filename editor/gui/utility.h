@@ -107,6 +107,12 @@ void SetValue(QComboBox* combo, T value)
     }
 }
 
+inline void SetValue(QGroupBox* group, bool on_off)
+{
+    QSignalBlocker s(group);
+    group->setChecked(on_off);
+}
+
 inline void SetValue(QLineEdit* line, const std::string& val)
 {
     QSignalBlocker s(line);

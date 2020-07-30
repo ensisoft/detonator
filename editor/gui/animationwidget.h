@@ -98,6 +98,10 @@ namespace gui
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
         void on_chkDoesRender_stateChanged(int);
+        void on_animDuration_valueChanged(double value);
+        void on_nodeStartTime_valueChanged(double value);
+        void on_nodeEndTime_valueChanged(double value);
+        void on_chkNodeLifetime_toggled(bool value);
 
         void currentComponentRowChanged();
         void placeNewParticleSystem();

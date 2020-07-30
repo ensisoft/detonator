@@ -49,6 +49,8 @@ AnimationNode::AnimationNode()
     mBitFlags.set(Flags::DoesRender, true);
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::UpdateDrawable, true);
+    mBitFlags.set(Flags::RestartDrawable, true);
+    mBitFlags.set(Flags::LimitLifetime, false);
 }
 
 std::size_t AnimationNode::GetHash() const
@@ -58,6 +60,8 @@ std::size_t AnimationNode::GetHash() const
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mMaterialName);
     hash = base::hash_combine(hash, mDrawableName);
+    hash = base::hash_combine(hash, mStartTime);
+    hash = base::hash_combine(hash, mEndTime);
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mScale);
@@ -70,32 +74,40 @@ std::size_t AnimationNode::GetHash() const
     return hash;
 }
 
-void AnimationNode::Update(float dt)
+void AnimationNode::Update(float time, float dt)
 {
-    mTime += dt;
+    if (!IsAlive(time))
+        return;
 
     if (TestFlag(Flags::UpdateDrawable))
         mDrawable->Update(dt);
 
     if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
     {
-        if (!p->IsAlive())
+        if (!p->IsAlive() && TestFlag(Flags::RestartDrawable))
             p->Restart();
     }
 
     if (TestFlag(Flags::UpdateMaterial))
-        mMaterial->SetRuntime(mTime - mStartTime);
+        mMaterial->SetRuntime(time);
 }
 
-void AnimationNode::ResetTime()
+void AnimationNode::Reset()
 {
-    mTime = 0.0f;
     if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
     {
         p->Restart();
     }
-
     mMaterial->SetRuntime(0);
+}
+
+bool AnimationNode::IsAlive(float time) const
+{
+    if (!TestFlag(Flags::LimitLifetime))
+        return true;
+    if (time >= mStartTime && time <= mEndTime)
+        return true;
+    return false;
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const
@@ -164,6 +176,8 @@ nlohmann::json AnimationNode::ToJson() const
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "material", mMaterialName);
     base::JsonWrite(json, "drawable", mDrawableName);
+    base::JsonWrite(json, "starttime", mStartTime);
+    base::JsonWrite(json, "endtime", mEndTime);
     base::JsonWrite(json, "position", mPosition);
     base::JsonWrite(json, "size", mSize);
     base::JsonWrite(json, "scale", mScale);
@@ -184,6 +198,8 @@ std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& objec
         !base::JsonReadSafe(object, "name", &ret.mName) ||
         !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
         !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
+        !base::JsonReadSafe(object, "starttime", &ret.mStartTime) ||
+        !base::JsonReadSafe(object, "endtime", &ret.mEndTime) ||
         !base::JsonReadSafe(object, "position", &ret.mPosition) ||
         !base::JsonReadSafe(object, "size", &ret.mSize) ||
         !base::JsonReadSafe(object, "scale", &ret.mScale) ||
@@ -191,16 +207,12 @@ std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& objec
         !base::JsonReadSafe(object, "layer", &ret.mLayer) ||
         !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass))
         return std::nullopt;
-    base::JsonReadSafe(object, "render_style", &ret.mRenderStyle);
-    base::JsonReadSafe(object, "linewidth", &ret.mLineWidth);
 
     std::uint32_t bitflags = 0;
-    if (!base::JsonReadSafe(object, "bitflags", &bitflags))
-    {
-        // default flag values be here.
-        ret.mBitFlags.set(Flags::VisibleInEditor, true);
-    }
-    ret.mBitFlags.set_from_value(bitflags);
+    base::JsonReadSafe(object, "render_style", &ret.mRenderStyle);
+    base::JsonReadSafe(object, "linewidth", &ret.mLineWidth);
+    if (base::JsonReadSafe(object, "bitflags", &bitflags))
+        ret.mBitFlags.set_from_value(bitflags);
 
     return ret;
 }
@@ -232,10 +244,11 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
     class Visitor : public RenderTree::ConstVisitor
     {
     public:
-        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook)
+        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook, float time)
             : mPackets(packets)
             , mTransform(transform)
             , mHook(hook)
+            , mTime(time)
         {}
         virtual void EnterNode(const AnimationNode* node) override
         {
@@ -246,7 +259,7 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
             // do render.
             mTransform.Push(node->GetNodeTransform());
             // if it doesn't render then no draw packets are generated
-            if (node->TestFlag(AnimationNode::Flags::DoesRender))
+            if (node->TestFlag(AnimationNode::Flags::DoesRender) && node->IsAlive(mTime))
             {
                 mTransform.Push(node->GetModelTransform());
 
@@ -288,9 +301,10 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
         std::vector<DrawPacket>& mPackets;
         gfx::Transform& mTransform;
         DrawHook* mHook = nullptr;
+        float mTime = 0.0f;
     };
 
-    Visitor visitor(packets, transform, hook);
+    Visitor visitor(packets, transform, hook, mCurrentTime);
     mRenderTree.PreOrderTraverse(visitor);
 
     // the layer value is negative but for the indexing below
@@ -347,8 +361,9 @@ void Animation::Update(float dt)
 {
     for (auto& node : mNodes)
     {
-        node->Update(dt);
+        node->Update(mCurrentTime + dt, dt);
     }
+    mCurrentTime += dt;
 }
 
 AnimationNode* Animation::AddNode(AnimationNode&& node)
@@ -403,6 +418,9 @@ void Animation::DeleteNodeById(const std::string& id)
 nlohmann::json Animation::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "duration", mDuration);
+    base::JsonWrite(json, "bitflags", mBitFlags.value());
+
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
@@ -431,7 +449,14 @@ AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
 // static
 std::optional<Animation> Animation::FromJson(const nlohmann::json& object)
 {
+    unsigned int bitflags = 0;
+
     Animation ret;
+    if (!base::JsonReadSafe(object, "duration", &ret.mDuration) ||
+        !base::JsonReadSafe(object, "bitflags", &bitflags))
+        return std::nullopt;
+
+    ret.mBitFlags.set_from_value(bitflags);
 
     if (object.contains("nodes"))
     {
@@ -471,8 +496,9 @@ void Animation::Reset()
 {
     for (auto& node : mNodes)
     {
-        node->ResetTime();
+        node->Reset();
     }
+    mCurrentTime = 0;
 }
 
 std::size_t Animation::GetHash() const

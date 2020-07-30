@@ -1220,10 +1220,6 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     // rebuild window menu and shortcuts
     prepareWindowMenu();
 
-    // We need to install this event filter so that we can universally grab
-    // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
-    widget->installEventFilter(this);
-
     // no child window
     return nullptr;
 }
