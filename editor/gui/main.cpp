@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
         // turns out this attribute is needed in order to make Qt
         // create a GLES2 context.
         // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
-        //QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
+        QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
         //QCoreApplication::setAttribute(Qt::AA_NativeWindows);
 
         // set the aliases for icon search paths
