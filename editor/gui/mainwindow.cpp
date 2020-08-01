@@ -485,6 +485,8 @@ void MainWindow::closeWorkspace()
     setWindowTitle(QString("%1").arg(APP_TITLE));
 
     mWorkspace.reset();
+
+    gfx::SetResourceLoader(nullptr);
 }
 
 void MainWindow::showWindow()
@@ -805,6 +807,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
     mUI.menuWorkspace->setEnabled(true);
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
     mWorkspace = std::move(workspace);
+    gfx::SetResourceLoader(mWorkspace.get());
     NOTE("New workspace created.");
 }
 
