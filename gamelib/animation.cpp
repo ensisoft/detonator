@@ -230,10 +230,16 @@ Animation::Animation(const Animation& other)
     nlohmann::json json = other.mRenderTree.ToJson(other);
     // build our render tree.
     mRenderTree = RenderTree::FromJson(json, *this).value();
+    mBitFlags   = other.mBitFlags;
+    mDuration   = other.mDuration;
+    mDelay      = other.mDelay;
 }
 
 void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
 {
+    if (!IsAlive())
+        return;
+
     // here we could apply operations that would apply to the whole
     // animation but currently we don't need such things.
     // if we did we could begin new transformation scope for this
@@ -359,6 +365,24 @@ void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook*
 
 void Animation::Update(float dt)
 {
+    if (mBitFlags.test(Flags::EnableTimeline))
+    {
+        if (mCurrentTime < mDelay)
+        {
+            mCurrentTime += dt;
+            return;
+        }
+
+        const auto animation_time = mCurrentTime - mDelay;
+        if (animation_time >= mDuration)
+        {
+            if (mBitFlags.test(Flags::LoopAnimation))
+                mCurrentTime = std::fmodf(mCurrentTime, mDuration);
+            else return;
+        }
+        dt = std::min(dt, mDuration - animation_time);
+    }
+
     for (auto& node : mNodes)
     {
         node->Update(mCurrentTime + dt, dt);
@@ -419,6 +443,7 @@ nlohmann::json Animation::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "duration", mDuration);
+    base::JsonWrite(json, "delay", mDelay);
     base::JsonWrite(json, "bitflags", mBitFlags.value());
 
     for (const auto& node : mNodes)
@@ -453,7 +478,8 @@ std::optional<Animation> Animation::FromJson(const nlohmann::json& object)
 
     Animation ret;
     if (!base::JsonReadSafe(object, "duration", &ret.mDuration) ||
-        !base::JsonReadSafe(object, "bitflags", &bitflags))
+        !base::JsonReadSafe(object, "bitflags", &bitflags) ||
+        !base::JsonReadSafe(object, "delay", &ret.mDelay))
         return std::nullopt;
 
     ret.mBitFlags.set_from_value(bitflags);
@@ -498,14 +524,48 @@ void Animation::Reset()
     {
         node->Reset();
     }
-    mCurrentTime = 0;
+    mCurrentTime = 0.0f;
+}
+
+bool Animation::IsAlive() const
+{
+    if (!TestFlag(Flags::EnableTimeline))
+        return true;
+
+    if (mCurrentTime < mDelay)
+        return false;
+    const auto animation_time = mCurrentTime - mDelay;
+    if (animation_time >= mDuration)
+        return false;
+    return true;
+}
+
+bool Animation::IsFinished() const
+{
+    // no timeline, never finishes
+    if (!TestFlag(Flags::EnableTimeline))
+        return false;
+    // has timeline, finished if current time is beyond
+    // delay and duration.
+    if (mCurrentTime >= mDelay + mDuration)
+        return true;
+    return false;
 }
 
 std::size_t Animation::GetHash() const
 {
     std::size_t hash = 0;
-    for (const auto& node : mNodes)
+
+    // include the node hashes in the animation hash
+    // this covers both the node values and their traversal order
+    mRenderTree.PreOrderTraverseForEach([&](const AnimationNode* node) {
+        if (node == nullptr)
+            return;
         hash = base::hash_combine(hash, node->GetHash());
+    });
+    hash = base::hash_combine(hash, mDuration);
+    hash = base::hash_combine(hash, mDelay);
+    hash = base::hash_combine(hash, mBitFlags.value());
     return hash;
 }
 
@@ -685,6 +745,9 @@ Animation& Animation::operator=(const Animation& other)
         mNodes.push_back(std::move(node));
 
     mRenderTree = copy.mRenderTree;
+    mBitFlags   = copy.mBitFlags;
+    mDuration   = copy.mDuration;
+    mDelay      = copy.mDelay;
     return *this;
 }
 

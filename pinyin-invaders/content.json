@@ -1,8 +1,9 @@
 {
   "animations": [
     {
-      "bitflags": 0,
-      "duration": 0.0,
+      "bitflags": 2,
+      "delay": 0.0,
+      "duration": 10.0,
       "nodes": [
         {
           "bitflags": 3,
@@ -118,8 +119,8 @@
           "material": "Nebula1",
           "name": "Nebula 1",
           "position": {
-            "x": 3.107177734375,
-            "y": 10.107177734375
+            "x": -8.892822265625,
+            "y": 3.107177734375
           },
           "render_pass": "Draw",
           "render_style": "Solid",
@@ -135,9 +136,9 @@
           "starttime": 0.0
         },
         {
-          "bitflags": 47,
+          "bitflags": 15,
           "drawable": "Asteroid field",
-          "endtime": 12.0,
+          "endtime": 0.0,
           "id": "YJX08Fi01A",
           "layer": 0,
           "linewidth": 1.0,
@@ -148,7 +149,7 @@
             "y": 0.0
           },
           "render_pass": "Draw",
-          "render_style": "Solid",
+          "render_style": "Points",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -158,7 +159,7 @@
             "x": 1336.0,
             "y": 930.0
           },
-          "starttime": 8.0
+          "starttime": 0.0
         }
       ],
       "render_tree": {

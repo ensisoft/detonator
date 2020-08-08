@@ -330,6 +330,10 @@ namespace game
         }
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
+        float GetDelay() const
+        { return mDelay; }
+        float GetDuration() const
+        { return mDuration; }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -338,6 +342,32 @@ namespace game
         { mBitFlags.set(f, on_off); }
         bool TestFlag(Flags f) const
         { return mBitFlags.test(f); }
+        void SetDuration(float duration)
+        { mDuration = duration; }
+        void SetDelay(float delay)
+        { mDelay = delay; }
+        // Get the current time accumulator value.
+        float GetCurrentTime() const
+        { return mCurrentTime; }
+        // Get the current active time i.e. after delay has elapsed
+        // if the timeline is enabled.
+        float GetActiveTime() const
+        {
+            if (!TestFlag(Flags::EnableTimeline))
+                return mCurrentTime;
+            if (mCurrentTime < mDelay)
+                return 0.0f;
+            return mCurrentTime - mDelay;
+        }
+
+        // Return true if the animation is currently alive at the current time,
+        // I.e. the current time is between the animation's start time (delay)
+        // and finish time (delay + duration). Otherwise returns false.
+        // If the animation doesn't use any timeline then this is always true.
+        bool IsAlive() const;
+        // Returns true if the animation is currently running, i.e. not finished.
+        bool IsFinished() const;
+
 
         // Get the hash value based on the current properties of the animation
         // i.e. include each node and their drawables and materials but don't
@@ -400,7 +430,9 @@ namespace game
         // current playback time.
         float mCurrentTime = 0.0f;
         // duration of the animation
-        float mDuration = 0.0f;
+        float mDuration = 1.0f;
+        // delay start of the animation
+        float mDelay    = 0.0f;
         // Animation flags.
         base::bitflag<Flags> mBitFlags;
 

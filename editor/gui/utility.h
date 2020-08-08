@@ -274,6 +274,13 @@ struct SpinBoxValueGetter
     const QSpinBox* spin = nullptr;
 };
 
+struct GroupboxValueGetter
+{
+    operator bool() const
+    { return box->isChecked(); }
+    const QGroupBox* box = nullptr;
+};
+
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
@@ -288,6 +295,8 @@ inline CheckboxGetter GetValue(const QCheckBox* check)
 { return CheckboxGetter { check }; }
 inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
 { return SpinBoxValueGetter { spin }; }
+inline GroupboxValueGetter GetValue(const QGroupBox* box)
+{ return GroupboxValueGetter { box }; }
 
 template<typename Resource>
 inline void SetProperty(Resource& res, const QString& name, const QVariant& prop)

@@ -1,5 +1,6 @@
 {
     "animation_Space": {
+        "checked_for_packing": true
     },
     "material_Asteroid": {
         "checked_for_packing": true,

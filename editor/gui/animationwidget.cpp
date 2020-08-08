@@ -755,6 +755,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             this,      &AnimationWidget::newResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
             this,      &AnimationWidget::resourceToBeDeleted);
+
+    mUI.actionShowTimeline->setChecked(true);
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -789,6 +791,11 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     }
 
     mState.animation.Prepare(*workspace);
+    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
+    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
+    SetValue(mUI.animDuration, mState.animation.GetDuration());
+    SetValue(mUI.animDelay, mState.animation.GetDelay());
+    mUI.timeline->SetDuration(mState.animation.GetDuration());
     mUI.tree->Rebuild();
 }
 
@@ -805,6 +812,8 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionShowTimeline);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewRoundRect);
@@ -830,6 +839,8 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionNewArrow);
     menu.addSeparator();
     menu.addAction(mDrawableMenu->menuAction());
+    menu.addSeparator();
+    menu.addAction(mUI.actionShowTimeline);
 }
 
 bool AnimationWidget::saveState(Settings& settings) const
@@ -843,6 +854,7 @@ bool AnimationWidget::saveState(Settings& settings) const
 
     settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
+    settings.setValue("Animation", "timeline_visible", mUI.timelineGroup->isVisible());
 
     // the animation can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -868,6 +880,9 @@ bool AnimationWidget::loadState(const Settings& settings)
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
     // set a flag to *not* adjust the camere on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
+    const bool timeline_visible = settings.getValue("Animation", "timeline_visible", true);
+    mUI.timelineGroup->setVisible(timeline_visible);
+    mUI.actionShowTimeline->setChecked(timeline_visible);
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
     if (base64.empty())
@@ -904,7 +919,11 @@ bool AnimationWidget::loadState(const Settings& settings)
     }
 
     mState.animation.Prepare(*mState.workspace);
-
+    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
+    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
+    SetValue(mUI.animDuration, mState.animation.GetDuration());
+    SetValue(mUI.animDelay, mState.animation.GetDelay());
+    mUI.timeline->SetDuration(mState.animation.GetDuration());
     mUI.tree->Rebuild();
     return true;
 }
@@ -943,10 +962,21 @@ void AnimationWidget::animate(double secs)
     if (mPlayState == PlayState::Playing)
     {
         mState.animation.Update(secs);
-        mTime += secs;
-        mUI.time->setText(QString::number(mTime));
-        mUI.timeline->SetCurrentTime(mTime);
-        mUI.timeline->update();
+        if (!mState.animation.IsFinished())
+        {
+            mTime += secs;
+            mUI.time->setText(QString::number(mTime));
+            if (mState.animation.TestFlag(game::Animation::Flags::EnableTimeline))
+            {
+                mUI.timeline->SetCurrentTime(mState.animation.GetActiveTime());
+                mUI.timeline->update();
+            }
+        }
+        else
+        {
+            on_actionStop_triggered();
+            NOTE("Animation playback finished.");
+        }
     }
 }
 
@@ -981,6 +1011,12 @@ void AnimationWidget::on_actionPlay_triggered()
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
+    const bool is_timeline_enabled = GetValue(mUI.timelineGroup);
+    const bool is_animation_looping = GetValue(mUI.animIsLooping);
+    mState.animation.SetDuration(GetValue(mUI.animDuration));
+    mState.animation.SetDelay(GetValue(mUI.animDelay));
+    mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, is_timeline_enabled);
+    mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, is_animation_looping);
 }
 
 void AnimationWidget::on_actionPause_triggered()
@@ -1468,8 +1504,13 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
 void AnimationWidget::on_animDuration_valueChanged(double value)
 {
     mUI.timeline->SetDuration(value);
-    //mUI.timeline->SetZoom(1.0f);
     mUI.timeline->update();
+    mState.animation.SetDuration(value);
+}
+
+void AnimationWidget::on_animDelay_valueChanged(double value)
+{
+    mState.animation.SetDelay(value);
 }
 
 void AnimationWidget::on_nodeStartTime_valueChanged(double value)
@@ -1493,6 +1534,16 @@ void AnimationWidget::on_chkNodeLifetime_toggled(bool value)
     {
         node->SetFlag(game::AnimationNode::Flags::LimitLifetime, value);
     }
+}
+
+void AnimationWidget::on_timelineGroup_toggled(bool value)
+{
+    mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, value);
+}
+
+void AnimationWidget::on_animIsLooping_stateChanged(int value)
+{
+    mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, (bool)value);
 }
 
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
