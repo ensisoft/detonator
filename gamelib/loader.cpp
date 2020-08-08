@@ -110,7 +110,7 @@ void LoadResources(const nlohmann::json& json, const std::string& type,
         const std::string& name = value["resource_name"];
         std::optional<Implementation> ret = Implementation::FromJson(value);
         if (!ret.has_value())
-            throw std::runtime_error("Failed to load: /" + type + name);
+            throw std::runtime_error("Failed to load: " + type + "/" + name);
 
         out[name] = std::make_shared<Implementation>(std::move(ret.value()));
         //out[name] = std::make_shared<Implementation>(ret.value());
