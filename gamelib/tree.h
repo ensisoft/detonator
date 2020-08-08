@@ -104,6 +104,25 @@ namespace game
             PreOrderTraverse(visitor);
         }
 
+        template<typename Function>
+        void PreOrderTraverseForEach(Function callback) const
+        {
+            class PrivateVisitor : public ConstVisitor
+            {
+            public:
+                PrivateVisitor(Function callback) : mCallback(std::move(callback))
+                {}
+                virtual void EnterNode(const T* node) override
+                {
+                    mCallback(node);
+                }
+            private:
+                Function mCallback;
+            };
+            PrivateVisitor visitor(std::move(callback));
+            PreOrderTraverse(visitor);
+        }
+
         // Get the value contained within this node if any.
         // For example the root node might not have any value.
         T* GetValue()
