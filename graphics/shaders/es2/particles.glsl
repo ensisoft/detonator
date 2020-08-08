@@ -38,6 +38,7 @@ uniform mat4 kViewMatrix;
 // random per particle value.
 varying float vRandomValue;
 
+varying vec2 vTexCoord;
 void main()
 {
     // put the vertex from "model" space into same coordinate space
