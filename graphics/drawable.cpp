@@ -706,16 +706,14 @@ bool KinematicsParticleEngine::IsAlive() const
 }
 
 // ParticleEngine implementation. Restart the simulation
-// with the previous parameters if possible to do so.
+// with the previous parameters.
 void KinematicsParticleEngine::Restart()
 {
-    if (!mParticles.empty())
-        return;
-    if (mParams.mode != SpawnPolicy::Once)
-        return;
-    InitParticles(size_t(mParams.num_particles));
+    mParticles.clear();
     mTime = 0.0f;
     mNumParticlesHatching = 0;
+
+    InitParticles(size_t(mParams.num_particles));
 }
 
 nlohmann::json KinematicsParticleEngine::ToJson() const

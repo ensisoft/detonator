@@ -253,7 +253,7 @@ namespace gfx
         virtual ~ParticleEngine() = default;
         // Returns true if the simulation has particles and is still running.
         virtual bool IsAlive() const = 0;
-        // Restart the simulation if no longer alive.
+        // Restart the simulation with the current set of parameters.
         virtual void Restart() = 0;
         // todo: add more methods as needed.
     private:
