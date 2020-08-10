@@ -61,11 +61,9 @@ Style:      Bold and Italics modifiers for fonts (hinting, aliasing, and other s
             crammed in here in practical implementations).
 */
 
-namespace gfx
-{
-
+namespace {
 // RAII type for initializing and freeing the Freetype library
-struct TextBuffer::FontLibrary {
+struct FontLibrary {
     FT_Library library;
     FontLibrary(const FontLibrary&) = delete;
     FontLibrary& operator=(const FontLibrary&) = delete;
@@ -73,7 +71,7 @@ struct TextBuffer::FontLibrary {
     {
         if (FT_Init_FreeType(&library))
             throw std::runtime_error("FT_Init_FreeType failed");
-        //DEBUG("Initialized FreeType");
+        DEBUG("Initialized FreeType");
     }
    ~FontLibrary()
     {
@@ -81,7 +79,10 @@ struct TextBuffer::FontLibrary {
         //DEBUG("Done with FreeType");
     }
 };
-std::weak_ptr<TextBuffer::FontLibrary> TextBuffer::Freetype;
+} // namespace
+
+namespace gfx
+{
 
 std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
 {
@@ -261,17 +262,13 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
     // https://www.freetype.org/freetype2/docs/tutorial/step1.html
     const auto FUCKING_MAGIC_SCALE = 64;
 
-    mFreetype = Freetype.lock();
-    if (!mFreetype)
-    {
-        mFreetype = std::make_shared<TextBuffer::FontLibrary>();
-        Freetype  = mFreetype;
-    }
+    static FontLibrary freetype;
+
     FT_Face face;
 
     const auto& font_file = ResolveFile(ResourceLoader::ResourceType::Font, text.font);
 
-    if (FT_New_Face(mFreetype->library, font_file.c_str(), 0, &face))
+    if (FT_New_Face(freetype.library, font_file.c_str(), 0, &face))
         throw std::runtime_error("Failed to load font file: " + font_file);
     auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 

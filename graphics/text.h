@@ -184,10 +184,6 @@ namespace gfx
         static std::optional<TextBuffer> FromJson(const nlohmann::json& json);
 
     private:
-        struct FontLibrary;
-        mutable std::shared_ptr<FontLibrary> mFreetype;
-        static std::weak_ptr<FontLibrary> Freetype;
-
         std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, const Text& style) const;
 
     private:
