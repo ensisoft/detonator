@@ -365,9 +365,9 @@ namespace game
         // and finish time (delay + duration). Otherwise returns false.
         // If the animation doesn't use any timeline then this is always true.
         bool IsAlive() const;
-        // Returns true if the animation is currently running, i.e. not finished.
+        // Returns true if the animation has finished its current timeline.
+        // If the animation doesn't have a timeline then this is always false.
         bool IsFinished() const;
-
 
         // Get the hash value based on the current properties of the animation
         // i.e. include each node and their drawables and materials but don't

@@ -377,9 +377,12 @@ void Animation::Update(float dt)
         const auto animation_time = mCurrentTime - mDelay;
         if (animation_time >= mDuration)
         {
-            if (mBitFlags.test(Flags::LoopAnimation))
-                mCurrentTime = std::fmod(mCurrentTime, mDuration);
-            else return;
+            if (!mBitFlags.test(Flags::LoopAnimation))
+                return;
+
+            mCurrentTime = std::fmod(mCurrentTime, mDuration);
+            for (auto& node : mNodes)
+                node->Reset();
         }
         dt = std::min(dt, mDuration - animation_time);
     }
@@ -545,6 +548,9 @@ bool Animation::IsFinished() const
 {
     // no timeline, never finishes
     if (!TestFlag(Flags::EnableTimeline))
+        return false;
+    // looping never finishes.
+    if (TestFlag(Flags::LoopAnimation))
         return false;
     // has timeline, finished if current time is beyond
     // delay and duration.
