@@ -35,6 +35,7 @@
 #  include <QStyleOptionFocusRect>
 #  include <QStylePainter>
 #  include <QPainter>
+#  include <QPainterPath>
 #  include <QPalette>
 #  include <QBrush>
 #  include <QFont>
