@@ -27,6 +27,7 @@
 #include "warnpop.h"
 
 #include <map>
+#include <cmath>
 
 #include "base/logging.h"
 #include "base/assert.h"
@@ -377,7 +378,7 @@ void Animation::Update(float dt)
         if (animation_time >= mDuration)
         {
             if (mBitFlags.test(Flags::LoopAnimation))
-                mCurrentTime = std::fmodf(mCurrentTime, mDuration);
+                mCurrentTime = std::fmod(mCurrentTime, mDuration);
             else return;
         }
         dt = std::min(dt, mDuration - animation_time);
