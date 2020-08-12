@@ -101,56 +101,21 @@ public:
                             const Drawable& maskShape, const Transform& maskTransform,
                             const Material& material) override
     {
+        const auto& dm = drawTransform.GetAsMatrix();
+        const auto& mm = maskTransform.GetAsMatrix();
+        DrawShape draw;
+        draw.drawable = &drawShape;
+        draw.material = &material;
+        draw.transform = &dm;
+        std::vector<DrawShape> drawlist;
+        drawlist.push_back(draw);
 
-        // todo: clean this up and split into render passes
-        // i.e. masking pass and then drawing pass.
-
-        mDevice->ClearStencil(1);
-
-        Geometry* maskGeom = maskShape.Upload(*mDevice);
-        Geometry* drawGeom = drawShape.Upload(*mDevice);
-        if (!maskGeom || !drawGeom)
-            return;
-        Program* maskProg = GetProgram(maskShape, SolidColor(gfx::Color::White));
-        Program* drawProg = GetProgram(drawShape, material);
-        if (!maskProg || !drawProg)
-            return;
-
-        // create simple orthographic projection matrix.
-        // 0,0 is the window top left, x grows left and y grows down
-        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
-        const auto& kViewMatrixDrawShape = drawTransform.GetAsMatrix();
-        const auto& kViewMatrixMaskShape = maskTransform.GetAsMatrix();
-
-        Device::State state;
-        state.viewport         = IRect(mViewX, mViewY, mViewW, mViewH);
-        state.stencil_func     = Device::State::StencilFunc::PassAlways;
-        state.stencil_dpass    = Device::State::StencilOp::WriteRef;
-        state.stencil_ref      = 0;
-        state.bWriteColor      = false;
-
-        maskProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
-        maskProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixMaskShape));
-
-        Material::RasterState raster;
-        Material::Environment env;
-        env.render_points = maskShape.GetStyle() == Drawable::Style::Points;
-
-        material.Apply(env, *mDevice, *maskProg, raster);
-        mDevice->Draw(*maskProg, *maskGeom, state);
-
-        env.render_points = drawShape.GetStyle() == Drawable::Style::Points;
-
-        drawProg->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
-        drawProg->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrixDrawShape));
-        material.Apply(env, *mDevice, *drawProg, raster);
-
-        state.stencil_func       = Device::State::StencilFunc::RefIsEqual;
-        state.stencil_dpass      = Device::State::StencilOp::WriteRef;
-        state.stencil_ref        = 1;
-        state.bWriteColor        = true;
-        state.blending           = raster.blending;
-        mDevice->Draw(*drawProg, *drawGeom, state);
+        MaskShape mask;
+        mask.drawable  = &maskShape;
+        mask.transform = &mm;
+        std::vector<MaskShape> masklist;
+        masklist.push_back(mask);
+        DrawMasked(drawlist, masklist);
     }
 
     virtual void DrawMasked(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) override

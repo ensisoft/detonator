@@ -59,6 +59,47 @@ public:
 private:
 };
 
+class StencilTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        // draw a gradient in the background
+        {
+            gfx::Material material(gfx::Material::Type::Gradient);
+            material.SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft);
+            material.SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomLeft);
+            material.SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::BottomRight);
+            material.SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::TopRight);
+            gfx::Transform transform;
+            transform.Resize(1024, 768);
+            painter.Draw(gfx::Rectangle(), transform, material);
+        }
+
+        {
+            gfx::Material material(gfx::Material::Type::Texture);
+            material.AddTexture("textures/Checkerboard.png");
+            gfx::Transform mask;
+            mask.Resize(400, 400);
+            mask.Translate(200 + std::cos(mTime) * 200, 200 + std::sin(mTime) * 200);
+            gfx::Transform shape;
+            shape.Resize(1024, 768);
+            painter.DrawMasked(gfx::Rectangle(), shape, gfx::Circle(), mask, material);
+        }
+
+    }
+    virtual void Update(float dts) override
+    {
+        const float velocity = 1.23;
+        mTime += dts * velocity;
+    }
+    virtual std::string GetName() const override
+    { return "StencilTest"; }
+private:
+    float mTime = 0.0f;
+
+};
+
 class GradientTest : public GraphicsTest
 {
 public:
@@ -929,6 +970,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
+    tests.emplace_back(new StencilTest);
 
     bool stop_for_input = false;
 
