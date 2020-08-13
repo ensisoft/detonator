@@ -2466,9 +2466,6 @@ void GameWidget::renderGame()
 
     // paint the background
     {
-        // todo: provide an animation API for figuring out the axis aligned
-        // extents of the animation in current time
-        // for now we just "know" that the dimensions are fixed at some certain size.
         const auto* anim = g_loader->FindAnimation("Space");
         const auto* node = anim->FindNodeByName("Background");
         const auto& rect = anim->GetBoundingBox(node);

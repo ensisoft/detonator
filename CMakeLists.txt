@@ -329,6 +329,35 @@ if (UNIX)
     target_link_libraries(graphics_test ncurses)
 endif()
 
+# gamelib test application.
+add_executable(gamelib_test
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+    graphics/material.cpp
+    graphics/drawable.cpp
+    graphics/drawing.cpp
+    graphics/opengl_es2_device.cpp
+    graphics/painter.cpp
+    graphics/text.cpp
+    graphics/resource.cpp
+    graphics/material.cpp
+    gamelib/animation.cpp
+    gamelib/test/main.cpp
+    third_party/stb/stb_image.c
+    third_party/stb/stb_image_write.c
+)
+target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
+target_link_libraries(gamelib_test freetype_custom_build)
+target_link_libraries(gamelib_test harfbuzz_custom_build)
+target_link_libraries(gamelib_test wdk_system wdk_desktop_gl)
+install(TARGETS gamelib_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+if (UNIX)
+    target_link_libraries(gamelib_test ncurses)
+endif()
+
 # game project
 add_executable(invaders
     pinyin-invaders/level.cpp
