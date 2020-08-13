@@ -41,6 +41,7 @@
 #include "base/utility.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
+#include "graphics/types.h"
 #include "tree.h"
 
 namespace gfx {
@@ -328,6 +329,23 @@ namespace game
             ASSERT(i < mNodes.size());
             return *mNodes[i];
         }
+        // Find animation node by the given name. Returns nullptr if no such
+        // node could be found.
+        AnimationNode* FindNodeByName(const std::string& name)
+        {
+            for (auto& node : mNodes)
+                if (node->GetName() == name) return node.get();
+            return nullptr;
+        }
+        // Find animation node by the given name. Returns nullptr if no such
+        // node could be found.
+        const AnimationNode* FindNodeByName(const std::string& name) const
+        {
+            for (const auto& node : mNodes)
+                if (node->GetName() == name) return node.get();
+            return nullptr;
+        }
+
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
         float GetDelay() const
@@ -390,6 +408,15 @@ namespace game
         glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNode* node) const;
         // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const AnimationNode* node) const;
+
+        // Compute the axis aligned bounding box for the give animation node
+        // at the current time of animation.
+        gfx::FRect GetBoundingBox(const AnimationNode* node) const;
+        // Compute the axis aligned bounding box for the whole animation
+        // i.e. including all the nodes at the current time of animation.
+        // This is a shortcut for getting the union of all the bounding boxes
+        // of all the animation nodes.
+        gfx::FRect GetBoundingBox() const;
 
         // Reset the state of the animation to initial state.
         void Reset();

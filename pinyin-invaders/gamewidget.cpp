@@ -2469,11 +2469,12 @@ void GameWidget::renderGame()
         // todo: provide an animation API for figuring out the axis aligned
         // extents of the animation in current time
         // for now we just "know" that the dimensions are fixed at some certain size.
+        const auto* anim = g_loader->FindAnimation("Space");
+        const auto* node = anim->FindNodeByName("Background");
+        const auto& rect = anim->GetBoundingBox(node);
         gfx::Transform view;
-        view.Scale(w / 1200.0f, h / 900.0f);
-
-        const auto* background = g_loader->FindAnimation("Space");
-        background->Draw(*mCustomGraphicsPainter, view);
+        view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
+        anim->Draw(*mCustomGraphicsPainter, view);
     }
 
     // then paint the animations on top of the background

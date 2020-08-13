@@ -733,6 +733,114 @@ glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node
     return visitor.GetResult();
 }
 
+gfx::FRect Animation::GetBoundingBox(const AnimationNode* node) const
+{
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        Visitor(const AnimationNode* node) : mNode(node)
+        {}
+        virtual void EnterNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+            if (node == mNode)
+            {
+                mTransform.Push(node->GetModelTransform());
+                // node to animation matrix
+                // for each corner of a bounding volume compute new positions per
+                // the transformation matrix and then choose the min/max on each axis.
+                const auto& mat = mTransform.GetAsMatrix();
+                const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+                const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+                const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+                const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+                // choose min/max on each axis.
+                const auto left = std::min(std::min(top_left.x, top_right.x),
+                    std::min(bot_left.x, bot_right.x));
+                const auto right = std::max(std::max(top_left.x, top_right.x),
+                    std::max(bot_left.x, bot_right.x));
+                const auto top = std::min(std::min(top_left.y, top_right.y),
+                    std::min(bot_left.y, bot_right.y));
+                const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                    std::max(bot_left.y, bot_right.y));
+                mResult = gfx::FRect(left, top, right - left, bottom - top);
+
+                mTransform.Pop();
+            }
+        }
+        virtual void LeaveNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+        gfx::FRect GetResult() const
+        { return mResult; }
+    private:
+        const AnimationNode* mNode = nullptr;
+        gfx::FRect mResult;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor(node);
+    mRenderTree.PreOrderTraverse(visitor);
+    return visitor.GetResult();
+}
+
+gfx::FRect Animation::GetBoundingBox() const
+{
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        virtual void EnterNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+            mTransform.Push(node->GetModelTransform());
+            // node to animation matrix.
+            // for each corner of a bounding volume compute new positions per
+            // the transformation matrix and then choose the min/max on each axis.
+            const auto& mat = mTransform.GetAsMatrix();
+            const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+            const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+            const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+            // choose min/max on each axis.
+            const auto left = std::min(std::min(top_left.x, top_right.x),
+                std::min(bot_left.x, bot_right.x));
+            const auto right = std::max(std::max(top_left.x, top_right.x),
+                std::max(bot_left.x, bot_right.x));
+            const auto top = std::min(std::min(top_left.y, top_right.y),
+                std::min(bot_left.y, bot_right.y));
+            const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                std::max(bot_left.y, bot_right.y));
+            mResult = Union(mResult, gfx::FRect(left, top, right - left, bottom - top));
+
+            mTransform.Pop();
+        }
+        virtual void LeaveNode(const AnimationNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+        gfx::FRect GetResult() const
+        { return mResult; }
+    private:
+        gfx::FRect mResult;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor;
+    mRenderTree.PreOrderTraverse(visitor);
+    return visitor.GetResult();
+}
+
 void Animation::Prepare(const GfxFactory& loader)
 {
     for (auto& node : mNodes)
