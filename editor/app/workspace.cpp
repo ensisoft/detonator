@@ -575,20 +575,10 @@ void Workspace::LoadUserSettings(const QString& filename)
     INFO("Loaded private workspace data: '%1'", filename);
 }
 
-QStringList Workspace::ListMaterials() const
+QStringList Workspace::ListAllMaterials() const
 {
     QStringList list;
-    list << "Checkerboard";
-
-    QStringList colors;
-    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
-    for (const auto& val : values)
-    {
-        const std::string name(magic_enum::enum_name(val));
-        colors << FromUtf8(name);
-    }
-    colors.sort();
-    list << colors;
+    list << ListPrimitiveMaterials();
 
     for (const auto& res : mResources)
     {
@@ -598,7 +588,37 @@ QStringList Workspace::ListMaterials() const
     return list;
 }
 
-QStringList Workspace::ListDrawables() const
+QStringList Workspace::ListPrimitiveMaterials() const
+{
+    QStringList colors;
+    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
+    for (const auto& val : values)
+    {
+        const std::string name(magic_enum::enum_name(val));
+        colors << FromUtf8(name);
+    }
+    colors.sort();
+
+    QStringList list;
+    list << "Checkerboard";
+    list << colors;
+    return list;
+}
+
+QStringList Workspace::ListAllDrawables() const
+{
+    QStringList list;
+    list << ListPrimitiveDrawables();
+
+    for (const auto& res : mResources)
+    {
+        if (res->GetType() == Resource::Type::ParticleSystem)
+            list.append(res->GetName());
+    }
+    return list;
+}
+
+QStringList Workspace::ListPrimitiveDrawables() const
 {
     QStringList list;
     list << "Arrow";
@@ -606,12 +626,6 @@ QStringList Workspace::ListDrawables() const
     list << "Rectangle";
     list << "RoundRect";
     list << "Triangle";
-
-    for (const auto& res : mResources)
-    {
-        if (res->GetType() == Resource::Type::ParticleSystem)
-            list.append(res->GetName());
-    }
     return list;
 }
 
@@ -643,7 +657,7 @@ bool Workspace::HasResource(const QString& name, Resource::Type type) const
 
 bool Workspace::IsValidMaterial(const QString& name) const
 {
-    const QStringList& names = ListMaterials();
+    const QStringList& names = ListAllMaterials();
     if (names.contains(name))
         return true;
     return false;
@@ -651,7 +665,7 @@ bool Workspace::IsValidMaterial(const QString& name) const
 
 bool Workspace::IsValidDrawable(const QString& name) const
 {
-    const QStringList& names = ListDrawables();
+    const QStringList& names = ListAllDrawables();
     if (names.contains(name))
         return true;
     return false;

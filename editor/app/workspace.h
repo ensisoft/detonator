@@ -119,11 +119,16 @@ namespace app
         QString GetDir() const
         { return mWorkspaceDir; }
 
-        // Get a list of material names in the workspace.
-        QStringList ListMaterials() const;
-
-        // Get a list of drawable names in the workspace.
-        QStringList ListDrawables() const;
+        // Get a list of all material names in the workspace
+        // including the user defined materials and the "primitive" ones.
+        QStringList ListAllMaterials() const;
+        // Get a list of all primitive (built-in) materials.
+        QStringList ListPrimitiveMaterials() const;
+        // Get a list of all drawable names in the workspace
+        // including the user defined drawables and the "primitive" ones.
+        QStringList ListAllDrawables() const;
+        // Get a list of primitive (build-in) drawables.
+        QStringList ListPrimitiveDrawables() const;
 
         // Save a new resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to

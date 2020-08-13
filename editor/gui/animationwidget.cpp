@@ -521,11 +521,11 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     // this fucking cunt whore will already emit selection changed signal
     mUI.materials->blockSignals(true);
-    mUI.materials->addItems(workspace->ListMaterials());
+    mUI.materials->addItems(workspace->ListAllMaterials());
     mUI.materials->blockSignals(false);
 
     mUI.drawables->blockSignals(true);
-    mUI.drawables->addItems(workspace->ListDrawables());
+    mUI.drawables->addItems(workspace->ListAllDrawables());
     mUI.drawables->blockSignals(false);
 
     mUI.name->setText("My Animation");

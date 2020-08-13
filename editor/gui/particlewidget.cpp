@@ -60,7 +60,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
         this, std::placeholders::_1, std::placeholders::_2);
 
     // get the current list of materials from the workspace
-    mUI.materials->addItems(workspace->ListMaterials());
+    mUI.materials->addItems(workspace->ListAllMaterials());
     mUI.materials->setCurrentIndex(mUI.materials->findText("White"));
 
     // Set default transform state here. if there's a previous user setting
