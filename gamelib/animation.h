@@ -228,7 +228,7 @@ namespace game
         float mEndTime   = 0.0f;
         // transformation properties.
         // translation offset relative to the animation.
-        glm::vec2 mPosition;
+        glm::vec2 mPosition = {0.0f, 0.0f};
         // size is the size of this object in some units
         // (for example pixels)
         glm::vec2 mSize = {1.0f, 1.0f};
