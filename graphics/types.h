@@ -226,6 +226,16 @@ namespace gfx
             mX = pos.GetX();
             mY = pos.GetY();
         }
+        void Translate(T x, T y)
+        {
+            mX += x;
+            mY += y;
+        }
+        void Translate(const Point<T>& pos)
+        {
+            mX += pos.GetX();
+            mY += pos.GetY();
+        }
         bool IsEmpty() const
         {
             const bool has_width  = mWidth != T();
@@ -353,6 +363,27 @@ namespace gfx
         const auto left   = std::max(lhs_left, rhs_left);
         const auto top    = std::max(lhs_top, rhs_top);
         const auto bottom = std::min(lhs_bottom, rhs_bottom);
+        return R(left, top, right - left, bottom - top);
+    }
+
+    template<typename T>
+    Rect<T> Union(const Rect<T>& lhs, const Rect<T>& rhs)
+    {
+        using R = Rect<T>;
+
+        const auto lhs_top    = lhs.GetY();
+        const auto lhs_left   = lhs.GetX();
+        const auto lhs_right  = lhs_left + lhs.GetWidth();
+        const auto lhs_bottom = lhs_top + lhs.GetHeight();
+        const auto rhs_top    = rhs.GetY();
+        const auto rhs_left   = rhs.GetX();
+        const auto rhs_right  = rhs_left + rhs.GetWidth();
+        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+
+        const auto left = std::min(lhs_left, rhs_left);
+        const auto right = std::max(lhs_right, rhs_right);
+        const auto top = std::min(lhs_top, rhs_top);
+        const auto bottom = std::max(lhs_bottom, rhs_bottom);
         return R(left, top, right - left, bottom - top);
     }
 

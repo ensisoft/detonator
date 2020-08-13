@@ -142,6 +142,58 @@ void unit_test_rect_intersect()
 }
 
 template<typename T>
+void unit_test_rect_union()
+{
+    using R = gfx::Rect<T>;
+
+    struct TestCase {
+        R lhs;
+        R rhs;
+        R expected_result;
+    } cases[] = {
+        // empty rectangle
+        {
+            R(0, 0, 0, 0),
+            R(0, 0, 10, 10),
+            R(0, 0, 10, 10)
+        },
+        // empty rectangle
+        {
+            R(0, 0, 10, 10),
+            R(0, 0, 0, 0),
+            R(0, 0, 10, 10)
+        },
+
+        // disjoint rectangles
+        {
+            R(0, 0, 5, 5),
+            R(5, 5, 5, 5),
+            R(0, 0, 10, 10)
+        },
+
+        // disjoint rectangles, negative values.
+        {
+            R(-5, -5, 5, 5),
+            R(-10, -10, 5, 5),
+            R(-10, -10, 10, 10)
+        },
+
+        // overlapping rectangles
+        {
+            R(20, 20, 10, 10),
+            R(25, 25, 5, 5),
+            R(20, 20, 10, 10)
+        }
+    };
+
+    for (const auto& test : cases)
+    {
+        const auto& ret = Union(test.lhs, test.rhs);
+        TEST_REQUIRE(ret == test.expected_result);
+    }
+}
+
+template<typename T>
 void unit_test_rect_serialize()
 {
     const T test_values[] = {
@@ -184,6 +236,8 @@ int test_main(int argc, char* argv[])
 {
     unit_test_rect_intersect<float>();
     unit_test_rect_intersect<int>();
+    unit_test_rect_union<float>();
+    unit_test_rect_union<int>();
     unit_test_rect_serialize<int>();
     unit_test_rect_serialize<float>();
     unit_test_color_serialize();
