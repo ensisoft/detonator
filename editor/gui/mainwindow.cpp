@@ -131,6 +131,7 @@ void MainWindow::loadState()
     mSettings.msaa_sample_count = settings.getValue("Settings", "msaa_sample_count", 4);
     mSettings.target_fps        = settings.getValue("Settings", "target_fps", 120);
     mSettings.sync_to_vblank    = settings.getValue("Settings", "sync_to_vblank", false);
+    mSettings.default_open_win_or_tab = settings.getValue("Settings", "default_open_win_or_tab", QString("Tab"));
 
     QSurfaceFormat format;
     format.setVersion(2, 0);
@@ -626,23 +627,25 @@ void MainWindow::on_actionReloadTextures_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    showWidget(new MaterialWidget(mWorkspace.get()), false);
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(new MaterialWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    showWidget(new ParticleEditorWidget(mWorkspace.get()), false);
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(new ParticleEditorWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionNewAnimation_triggered()
 {
-    showWidget(new AnimationWidget(mWorkspace.get()), false);
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(new AnimationWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionEditResource_triggered()
 {
-    const auto open_new_window = false;
-
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
     editResources(open_new_window);
 }
 
@@ -924,16 +927,17 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
         app::Resource* res = dlg.GetSelected();
         if (res == nullptr)
             return;
+        const auto new_window = mSettings.default_open_win_or_tab == "Window";
         switch (res->GetType())
         {
             case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(mWorkspace.get(), *res), false);
+                showWidget(new MaterialWidget(mWorkspace.get(), *res), new_window);
                 break;
             case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), false);
+                showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), new_window);
                 break;
             case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(mWorkspace.get(), *res), false);
+                showWidget(new AnimationWidget(mWorkspace.get(), *res), new_window);
                 break;
         }
     }
@@ -944,16 +948,17 @@ void MainWindow::on_actionNewResource_triggered()
     DlgNew dlg(this);
     if (dlg.exec() == QDialog::Accepted)
     {
+        const auto new_window = mSettings.default_open_win_or_tab == "Window";
         switch (dlg.GetType())
         {
             case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(mWorkspace.get()), false);
+                showWidget(new MaterialWidget(mWorkspace.get()), new_window);
                 break;
             case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(mWorkspace.get()), false);
+                showWidget(new ParticleEditorWidget(mWorkspace.get()), new_window);
                 break;
             case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(mWorkspace.get()), false);
+                showWidget(new AnimationWidget(mWorkspace.get()), new_window);
                 break;
         }
     }
@@ -1183,6 +1188,7 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "msaa_sample_count", mSettings.msaa_sample_count);
     settings.setValue("Settings", "target_fps", mSettings.target_fps);
     settings.setValue("Settings", "sync_to_vblank", mSettings.sync_to_vblank);
+    settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
 

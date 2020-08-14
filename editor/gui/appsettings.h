@@ -53,6 +53,8 @@ namespace gui
         // sync to vblank or not. if true then target_fps
         // is irrelevant since we're rendering at display fps.
         bool sync_to_vblank = false;
+        // by default open resources in a new window or new tab
+        QString default_open_win_or_tab;
     };
 
 } // namespace

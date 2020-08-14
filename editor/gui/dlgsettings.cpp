@@ -51,6 +51,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     SetValue(mUI.cmbTargetFps, settings.target_fps);
     SetValue(mUI.cmbMSAA, settings.msaa_sample_count);
     SetValue(mUI.chkVSync, settings.sync_to_vblank);
+    SetValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
 }
 
 void DlgSettings::on_btnAccept_clicked()
@@ -65,6 +66,7 @@ void DlgSettings::on_btnAccept_clicked()
     mSettings.target_fps = GetValue(mUI.cmbTargetFps);
     mSettings.msaa_sample_count = GetValue(mUI.cmbMSAA);
     mSettings.sync_to_vblank = GetValue(mUI.chkVSync);
+    mSettings.default_open_win_or_tab = (QString)GetValue(mUI.cmbWinOrTab);
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()
