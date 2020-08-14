@@ -120,6 +120,44 @@ namespace gfx
         virtual void ClearColor(const Color4f& color) = 0;
         virtual void ClearStencil(int value) = 0;
 
+        // Texture minifying filter is used whenever the
+        // pixel being textured maps to an area greater than
+        // one texture element.
+        enum class MinFilter {
+            // Use the texture element nearest to the
+            // center of the pixel (Manhattan distance)
+            Nearest,
+            // Use the weighted average of the four texture
+            // elements that are closest to the pixel.
+            Linear,
+            // Use mips (precomputed) minified textures.
+            // Use the nearest texture element from the nearest
+            // mipmap level
+            Mipmap,
+            // Use mips (precomputed) minified textures.
+            // Use the weighted average of the four texture
+            // elements that are sampled from the closest mipmap level.
+            Bilinear,
+            // Use mips (precomputd minified textures.
+            // Use the weigted average of the four texture
+            // elements that are sampled from the two nearest mipmap levels.
+            Trilinear
+        };
+
+        // Texture magnifying filter is used whenver the
+        // pixel being textured maps to to an area less than
+        // one texture element.
+        enum class MagFilter {
+            // Use the texture element nearest to the center
+            // of the pixel. (Manhattan distance).
+            Nearest,
+            // Use the weighted average of the four texture
+            // elements that are closest to the pixel.
+            Linear
+        };
+        virtual void SetDefaultTextureFilter(MinFilter filter) = 0;
+        virtual void SetDefaultTextureFilter(MagFilter filter) = 0;
+
         // resource creation APIs
         virtual Shader* FindShader(const std::string& name) = 0;
         virtual Shader* MakeShader(const std::string& name) = 0;

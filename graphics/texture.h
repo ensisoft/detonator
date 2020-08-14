@@ -36,43 +36,47 @@ namespace gfx
         enum class Format {
             RGB, RGBA, Grayscale
         };
-        // Texture minifying filter is used whenever the 
+        // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
-        // one texture element. 
+        // one texture element.
         enum class MinFilter {
-            // Use the texture element nearest to the 
+            // Use the default filtering set for the device.
+            Default,
+            // Use the texture element nearest to the
             // center of the pixel (Manhattan distance)
             Nearest,
             // Use the weighted average of the four texture
             // elements that are closest to the pixel.
-            Linear, 
+            Linear,
             // Use mips (precomputed) minified textures.
-            // Use the nearest texture element from the nearest 
+            // Use the nearest texture element from the nearest
             // mipmap level
             Mipmap,
             // Use mips (precomputed) minified textures.
             // Use the weighted average of the four texture
             // elements that are sampled from the closest mipmap level.
-            Bilinear, 
+            Bilinear,
             // Use mips (precomputd minified textures.
             // Use the weigted average of the four texture
             // elements that are sampled from the two nearest mipmap levels.
             Trilinear
         };
-        
-        // Texture magnifying filter is used whenver the 
-        // pixel being textured maps to to an area less than 
+
+        // Texture magnifying filter is used whenver the
+        // pixel being textured maps to to an area less than
         // one texture element.
         enum class MagFilter {
+            // Use the default filtering set for the device.
+            Default,
             // Use the texture element nearest to the center
             // of the pixel. (Manhattan distance).
-            Nearest, 
+            Nearest,
             // Use the weighted average of the four texture
             // elements that are closest to the pixel.
             Linear
         };
 
-        // Texture wrapping options for how to deal with 
+        // Texture wrapping options for how to deal with
         // texture coords outside of [0,1] range,
         enum class Wrapping {
             // Clamp the texture coordinate to the boundary.
@@ -87,7 +91,7 @@ namespace gfx
             if (bit_depth == 8)
                 return Format::Grayscale;
             else if (bit_depth == 24)
-                return Format::RGB; 
+                return Format::RGB;
             else if (bit_depth == 32)
                 return Format::RGBA;
             // this function is only valid for the above bit depths.
@@ -122,7 +126,7 @@ namespace gfx
         // Get the texture height. Initially 0 until Upload is called
         // and texture contents are uploaded.
         virtual unsigned GetHeight() const = 0;
-        // Get the texture format. 
+        // Get the texture format.
         virtual Format GetFormat() const = 0;
         // Enable or disable this texture from being garbage collected.
         // When this is enabled the texture may be deleted if it goes

@@ -317,6 +317,23 @@ public:
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
+    virtual void SetDefaultTextureFilter(MinFilter filter)
+    {
+        mDefaultMinTextureFilter = filter;
+        for (auto& pair : mPrograms)
+        {
+            static_cast<ProgImpl*>(pair.second.get())->SetDefaultTextureFilter(filter);
+        }
+    }
+    virtual void SetDefaultTextureFilter(MagFilter filter)
+    {
+        mDefaultMagTextureFilter = filter;
+        for (auto& pair : mPrograms)
+        {
+            static_cast<ProgImpl*>(pair.second.get())->SetDefaultTextureFilter(filter);
+        }
+    }
+
     virtual Shader* FindShader(const std::string& name) override
     {
         auto it = mShaders.find(name);
@@ -344,6 +361,8 @@ public:
     virtual Program* MakeProgram(const std::string& name) override
     {
         auto program = std::make_unique<ProgImpl>(mGL);
+        program->SetDefaultTextureFilter(mDefaultMinTextureFilter);
+        program->SetDefaultTextureFilter(mDefaultMagTextureFilter);
         auto* ret    = program.get();
         mPrograms[name] = std::move(program);
         return ret;
@@ -674,8 +693,8 @@ private:
 
         GLuint mName = 0;
     private:
-        MinFilter mMinFilter = MinFilter::Nearest;
-        MagFilter mMagFilter = MagFilter::Nearest;
+        MinFilter mMinFilter = MinFilter::Default;
+        MagFilter mMagFilter = MagFilter::Default;
         Wrapping mWrapX = Wrapping::Repeat;
         Wrapping mWrapY = Wrapping::Repeat;
     private:
@@ -948,6 +967,9 @@ private:
             GLenum texture_mag_filter = GL_NONE;
             switch (impl.GetMinFilter())
             {
+                case Texture::MinFilter::Default:
+                    texture_min_filter = ProgImpl::mDefaultTextureMinFilter;
+                    break;
                 case Texture::MinFilter::Nearest:
                     texture_min_filter = GL_NEAREST;
                     break;
@@ -966,7 +988,10 @@ private:
             }
             switch (impl.GetMagFilter())
             {
-               case Texture::MagFilter::Nearest:
+                case Texture::MagFilter::Default:
+                    texture_mag_filter = ProgImpl::mDefaultTextureMagFilter;
+                    break;
+                case Texture::MagFilter::Nearest:
                     texture_mag_filter = GL_NEAREST;
                     break;
                 case Texture::MagFilter::Linear:
@@ -1057,10 +1082,29 @@ private:
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
 
+        void SetDefaultTextureFilter(Device::MinFilter filter)
+        {
+            switch (filter)
+            {
+                case Device::MinFilter::Nearest:   mDefaultTextureMinFilter = GL_NEAREST; break;
+                case Device::MinFilter::Linear:    mDefaultTextureMinFilter = GL_LINEAR;  break;
+                case Device::MinFilter::Mipmap:    mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+                case Device::MinFilter::Bilinear:  mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_NEAREST; break;
+                case Device::MinFilter::Trilinear: mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+            }
+        }
+        void SetDefaultTextureFilter(Device::MagFilter filter)
+        {
+            switch (filter)
+            {
+                case Device::MagFilter::Nearest: mDefaultTextureMagFilter = GL_NEAREST; break;
+                case Device::MagFilter::Linear:  mDefaultTextureMagFilter = GL_LINEAR;  break;
+            }
+        }
     private:
         const OpenGLFunctions& mGL;
-
-    private:
+        GLenum mDefaultTextureMagFilter = GL_NEAREST;
+        GLenum mDefaultTextureMinFilter = GL_NEAREST;
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::vector<TextureImpl*> mFrameTextures;
@@ -1234,6 +1278,8 @@ private:
     std::shared_ptr<Context> mContext;
     std::size_t mFrameNumber = 0;
     OpenGLFunctions mGL;
+    MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
+    MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
 };
 
 // static
@@ -1242,6 +1288,5 @@ std::shared_ptr<Device> Device::Create(Type type,
 {
     return std::make_shared<OpenGLES2GraphicsDevice>(context);
 }
-
 
 } // namespace
