@@ -755,7 +755,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             this,      &AnimationWidget::newResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
             this,      &AnimationWidget::resourceToBeDeleted);
-    
+
     // set UI timeline default values based on the defaults in the animation
     SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
     SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
@@ -889,6 +889,7 @@ bool AnimationWidget::loadState(const Settings& settings)
     settings.loadWidget("Animation", mUI.rotation);
     settings.loadWidget("Animation", mUI.showGrid);
     settings.loadWidget("Animation", mUI.zoom);
+    setWindowTitle(mUI.name->text());
 
     mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
