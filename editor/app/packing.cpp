@@ -26,10 +26,13 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <QCoreApplication>
 #  include <QPainter>
 #  include <QImage>
 #  include <QImageWriter>
 #  include <QPixmap>
+#  include <QDir>
+#  include <QStringList>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -344,7 +347,7 @@ public:
     { return mNumErrors; }
     size_t GetNumFilesCopied() const
     { return mNumFilesCopied; }
-private:
+
     std::string CopyFile(const std::string& file, const QString& where)
     {
         auto it = mResourceMap.find(file);
@@ -451,8 +454,6 @@ private:
 };
 
 } // namespace
-
-
 
 namespace app
 {
@@ -705,6 +706,24 @@ bool PackContent(const std::vector<const Resource*>& resources, const ContentPac
 
     ResourcePacker packer(outdir, options.max_texture_width, options.max_texture_height,
         options.resize_textures, options.combine_textures);
+
+    // not all shaders are referenced by user defined resources
+    // so for now just copy all the shaders that we discover over to
+    // the output folder.
+    QStringList filters;
+    filters << "*.glsl";
+    const auto& appdir  = QCoreApplication::applicationDirPath();
+    const auto& glsldir = app::JoinPath(appdir, "shaders/es2");
+    QDir dir;
+    dir.setPath(glsldir);
+    dir.setNameFilters(filters);
+    const QStringList& files = dir.entryList();
+    for (const auto& file : files)
+    {
+        const QFileInfo info(file);
+        const QString& name = "shaders/es2/" + info.fileName();
+        packer.CopyFile(app::ToUtf8(name), "shaders/es2");
+    }
 
     // collect the resources in the packer.
     for (const auto& resource : mutable_copies)
