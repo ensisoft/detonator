@@ -122,8 +122,12 @@ void ChildWindow::on_actionZoomOut_triggered()
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
-    // for now just accept, later on we could ask the user when there
-    // are pending changes whether he'd like to save his shit
+    if (!mWidget->confirmClose())
+    {
+        event->ignore();
+        return;
+    }
+
     event->accept();
 
     // make sure we cleanup properly while all the resources
