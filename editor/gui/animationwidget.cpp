@@ -755,8 +755,17 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             this,      &AnimationWidget::newResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
             this,      &AnimationWidget::resourceToBeDeleted);
-
-    mUI.actionShowTimeline->setChecked(true);
+    
+    // set UI timeline default values based on the defaults in the animation
+    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
+    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
+    SetValue(mUI.animDuration, mState.animation.GetDuration());
+    SetValue(mUI.animDelay, mState.animation.GetDelay());
+    mUI.timeline->SetDuration(mState.animation.GetDuration());
+    // whether to show or not show timeline on widget open
+    const auto show_timeline = mState.animation.TestFlag(game::Animation::Flags::EnableTimeline);
+    mUI.actionShowTimeline->setChecked(show_timeline);
+    mUI.timelineGroup->setVisible(show_timeline);
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -796,6 +805,11 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     SetValue(mUI.animDuration, mState.animation.GetDuration());
     SetValue(mUI.animDelay, mState.animation.GetDelay());
     mUI.timeline->SetDuration(mState.animation.GetDuration());
+    // whether to show or not show timeline on widget open.
+    const auto show_timeline = mState.animation.TestFlag(game::Animation::Flags::EnableTimeline);
+    mUI.actionShowTimeline->setChecked(show_timeline);
+    mUI.timelineGroup->setVisible(show_timeline);
+
     mUI.tree->Rebuild();
 }
 
