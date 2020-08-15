@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>321</height>
+    <width>441</width>
+    <height>314</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,26 +25,43 @@
      </property>
      <widget class="QWidget" name="tabEditor">
       <attribute name="title">
-       <string>Graphics</string>
+       <string>Settings</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Graphics settings</string>
+          <string>General settings</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
+            <item row="1" column="1" colspan="2">
+             <widget class="QComboBox" name="cmbWinOrTab">
+              <item>
+               <property name="text">
+                <string>Window</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Tab</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="chkVSync">
               <property name="text">
-               <string>Target FPS</string>
+               <string>Sync to vblank</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
              <widget class="QComboBox" name="cmbTargetFps">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="editable">
                <bool>true</bool>
               </property>
@@ -70,55 +87,21 @@
               </item>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="chkVSync">
-              <property name="text">
-               <string>Sync to vblank</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_6">
+             <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>MSAA</string>
+               <string>Open resources in a new</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="cmbMSAA">
-              <property name="editable">
-               <bool>false</bool>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Editor target FPS</string>
               </property>
-              <item>
-               <property name="text">
-                <string>0</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>4</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>8</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>16</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Settings will apply starting from the next window opened.</string>
-            </property>
-           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_2">
@@ -132,6 +115,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Settings will apply starting from the next window opened.</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -238,60 +228,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabSettings">
-      <attribute name="title">
-       <string>Settings</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>General settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>By default open resources in new</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="cmbWinOrTab">
-              <item>
-               <property name="text">
-                <string>Window</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Tab</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>141</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
@@ -329,6 +265,9 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>cmbTargetFps</tabstop>
+  <tabstop>chkVSync</tabstop>
+  <tabstop>cmbWinOrTab</tabstop>
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>
   <tabstop>edtImageEditorArguments</tabstop>
@@ -341,5 +280,22 @@
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>chkVSync</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cmbTargetFps</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>347</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

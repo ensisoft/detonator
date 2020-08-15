@@ -46,8 +46,6 @@ namespace gui
         // is expanded to contain the full native absolute path to the
         // file that the user wants to open.
         QString shader_editor_arguments;
-        // multisample antialiasing sample count.
-        unsigned msaa_sample_count = 4;
         // target fps for each gfx widget
         unsigned target_fps = 120;
         // sync to vblank or not. if true then target_fps

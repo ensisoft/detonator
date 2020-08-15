@@ -32,8 +32,8 @@
 #include "warnpop.h"
 
 #include "editor/app/eventlog.h"
-#include "dlgsettings.h"
-#include "utility.h"
+#include "editor/gui/dlgsettings.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -43,30 +43,29 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     , mSettings(settings)
 {
     mUI.setupUi(this);
-    mUI.edtImageEditorExecutable->setText(settings.image_editor_executable);
-    mUI.edtImageEditorArguments->setText(settings.image_editor_arguments);
-    mUI.edtShaderEditorExecutable->setText(settings.shader_editor_executable);
-    mUI.edtShaderEditorArguments->setText(settings.shader_editor_arguments);
+    SetUIValue(mUI.edtImageEditorExecutable, settings.image_editor_executable);
+    SetUIValue(mUI.edtImageEditorArguments, settings.image_editor_arguments);
+    SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
+    SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
+    SetUIValue(mUI.cmbTargetFps, settings.target_fps);
+    SetUIValue(mUI.chkVSync, settings.sync_to_vblank);
+    SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
 
-    SetValue(mUI.cmbTargetFps, settings.target_fps);
-    SetValue(mUI.cmbMSAA, settings.msaa_sample_count);
-    SetValue(mUI.chkVSync, settings.sync_to_vblank);
-    SetValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
+    mUI.cmbTargetFps->setEnabled(!settings.sync_to_vblank);
 }
 
 void DlgSettings::on_btnAccept_clicked()
 {
-     if (!MustHaveNumber(mUI.cmbTargetFps))
+    if (!MustHaveNumber(mUI.cmbTargetFps))
         return;
 
-    mSettings.image_editor_executable = mUI.edtImageEditorExecutable->text();
-    mSettings.image_editor_arguments  = mUI.edtImageEditorArguments->text();
-    mSettings.shader_editor_executable = mUI.edtShaderEditorExecutable->text();
-    mSettings.shader_editor_arguments  = mUI.edtShaderEditorArguments->text();
-    mSettings.target_fps = GetValue(mUI.cmbTargetFps);
-    mSettings.msaa_sample_count = GetValue(mUI.cmbMSAA);
-    mSettings.sync_to_vblank = GetValue(mUI.chkVSync);
-    mSettings.default_open_win_or_tab = (QString)GetValue(mUI.cmbWinOrTab);
+    GetUIValue(mUI.edtImageEditorExecutable, &mSettings.image_editor_executable);
+    GetUIValue(mUI.edtImageEditorArguments, &mSettings.image_editor_arguments);
+    GetUIValue(mUI.edtShaderEditorExecutable, &mSettings.shader_editor_executable);
+    GetUIValue(mUI.edtShaderEditorArguments, &mSettings.shader_editor_arguments);
+    GetUIValue(mUI.cmbTargetFps, &mSettings.target_fps);
+    GetUIValue(mUI.chkVSync, &mSettings.sync_to_vblank);
+    GetUIValue(mUI.cmbWinOrTab, &mSettings.default_open_win_or_tab);
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()

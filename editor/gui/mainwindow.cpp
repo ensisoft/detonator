@@ -129,22 +129,11 @@ void MainWindow::loadState()
     mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("notepad.exe"));
     mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #endif
-    mSettings.msaa_sample_count = settings.getValue("Settings", "msaa_sample_count", 4);
     mSettings.target_fps        = settings.getValue("Settings", "target_fps", 120);
     mSettings.sync_to_vblank    = settings.getValue("Settings", "sync_to_vblank", false);
     mSettings.default_open_win_or_tab = settings.getValue("Settings", "default_open_win_or_tab", QString("Tab"));
 
-    QSurfaceFormat format;
-    format.setVersion(2, 0);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setDepthBufferSize(0); // currently we don't care
-    format.setAlphaBufferSize(8);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setStencilBufferSize(8);
-    format.setSamples(mSettings.msaa_sample_count);
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
     QSurfaceFormat::setDefaultFormat(format);
 
@@ -260,6 +249,12 @@ bool MainWindow::loadWorkspace(const QString& dir)
     {
         return false;
     }
+
+    const auto& settings = workspace->GetProjectSettings();
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+
+    format.setSamples(settings.multisample_sample_count);
+    QSurfaceFormat::setDefaultFormat(format);
 
     // desktop dimensions
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -838,21 +833,11 @@ void MainWindow::on_actionSettings_triggered()
     if (dlg.exec() == QDialog::Accepted)
     {
         // adjust the default surface format.
-        QSurfaceFormat format;
-        format.setVersion(2, 0);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-        format.setRenderableType(QSurfaceFormat::OpenGLES);
-        format.setDepthBufferSize(0); // currently we don't care
-        format.setAlphaBufferSize(8);
-        format.setRedBufferSize(8);
-        format.setGreenBufferSize(8);
-        format.setBlueBufferSize(8);
-        format.setStencilBufferSize(8);
-        format.setSamples(mSettings.msaa_sample_count);
+        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
         QSurfaceFormat::setDefaultFormat(format);
 
-        DEBUG("New MSAA setting: %1, Sync to VBlank: %2, Target fps: %3", mSettings.msaa_sample_count,
+        DEBUG("New sync to vblank: %1, Target fps: %2",
             mSettings.sync_to_vblank, mSettings.target_fps);
 
         for (int i=0; i<GetCount(mUI.mainTab); ++i)
@@ -972,6 +957,10 @@ void MainWindow::on_actionProjectSettings_triggered()
     DlgProject dlg(this, settings);
     if (dlg.exec() == QDialog::Rejected)
         return;
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setSamples(settings.multisample_sample_count);
+    QSurfaceFormat::setDefaultFormat(format);
 
     mWorkspace->SetProjectSettings(settings);
 }
@@ -1197,7 +1186,6 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
     settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
-    settings.setValue("Settings", "msaa_sample_count", mSettings.msaa_sample_count);
     settings.setValue("Settings", "target_fps", mSettings.target_fps);
     settings.setValue("Settings", "sync_to_vblank", mSettings.sync_to_vblank);
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
