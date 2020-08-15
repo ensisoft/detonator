@@ -327,6 +327,33 @@ namespace app
             return true;
         }
 
+        struct ContentPackingOptions {
+            // the output directory into which place the packed content.
+            QString directory;
+            // the sub directory (package) name that will be created
+            // in the output dir.
+            QString package_name;
+            // Combine small textures into texture atlas files.
+            bool combine_textures = true;
+            // Resize large (oversized) textures to fit in the
+            // specified min/maxtexture dimensions.
+            bool resize_textures = true;
+            // Max texture height. Textures larger than this will be downsized.
+            unsigned max_texture_height = 1024;
+            // Max texture width, Textures larger than this will be downsized.
+            unsigned max_texture_width  = 1024;
+        };
+
+        // Pack the selected resources into a deployable "package".
+        // This includes copying the resource files such as fonts, textures and shaders
+        // and also building content packages such as texture atlas(ses).
+        // The directory in which the output is to be placed will have it's
+        // previous contents OVERWRITTEN.
+        // Returns true if everything went smoothly, otherwise false
+        // and the package process might have failed in some way.
+        // Errors/warnings encountered during the process will be logged.
+        bool PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
+
     signals:
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.

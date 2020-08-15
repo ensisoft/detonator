@@ -140,7 +140,7 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     SetProperty(mWorkspace, "packing_param_pack_name", name);
 
-    app::ContentPackingOptions options;
+    app::Workspace::ContentPackingOptions options;
     options.directory = dir;
     options.package_name = name;
     options.combine_textures = GetValue(mUI.chkCombineTextures);
@@ -148,7 +148,7 @@ void DlgPackage::on_btnStart_clicked()
     options.max_texture_width = GetValue(mUI.cmbMaxTexWidth);
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
 
-    if (!PackContent(resources, options))
+    if (!mWorkspace.PackContent(resources, options))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
