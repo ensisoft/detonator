@@ -118,6 +118,11 @@ inline void SetValue(QLineEdit* line, const std::string& val)
     QSignalBlocker s(line);
     line->setText(app::FromUtf8(val));
 }
+inline void SetValue(QLineEdit* line, const QString& val)
+{
+    QSignalBlocker s(line);
+    line->setText(val);
+}
 
 inline void SetValue(QPlainTextEdit* edit, const std::string& val)
 {
@@ -151,6 +156,12 @@ inline void SetValue(QSpinBox* spin, int value)
 {
     QSignalBlocker s(spin);
     spin->setValue(value);
+}
+
+template<typename Widget, typename Value> inline
+void SetUIValue(Widget* widget, const Value& value)
+{
+    SetValue(widget, value);
 }
 
 inline bool MissingFile(const QLineEdit* edit)
@@ -297,6 +308,12 @@ inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
 { return SpinBoxValueGetter { spin }; }
 inline GroupboxValueGetter GetValue(const QGroupBox* box)
 { return GroupboxValueGetter { box }; }
+
+template<typename Widget, typename Value>
+void GetUIValue(Widget* widget, Value* out)
+{
+    *out = (Value)GetValue(widget);
+}
 
 template<typename Resource>
 inline void SetProperty(Resource& res, const QString& name, const QVariant& prop)

@@ -108,6 +108,7 @@ namespace gui
         void on_actionPackageResources_triggered();
         void on_actionSelectResourceForEditing_triggered();
         void on_actionNewResource_triggered();
+        void on_actionProjectSettings_triggered();
 
         void actionWindowFocus_triggered();
 

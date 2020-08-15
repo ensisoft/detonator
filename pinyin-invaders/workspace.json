@@ -73,6 +73,18 @@
         "use_init_rect": true,
         "use_lifetime": true
     },
+    "project": {
+        "application_name": "Pinyin Invaders",
+        "application_version": "0.4b",
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "multisample_sample_count": 4,
+        "window_can_resize": true,
+        "window_has_border": true,
+        "window_height": 768,
+        "window_set_fullscreen": false,
+        "window_width": 1024
+    },
     "workspace": {
         "packing_param_combine_textures": true,
         "packing_param_max_tex_height": "1024",

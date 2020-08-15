@@ -193,6 +193,9 @@ add_executable(Editor
     editor/gui/dlgpackage.h
     editor/gui/dlgpackage.ui
     editor/gui/dlgpackage.cpp
+    editor/gui/dlgproject.h
+    editor/gui/dlgproject.ui
+    editor/gui/dlgproject.cpp
     editor/gui/dlgopen.h
     editor/gui/dlgopen.ui
     editor/gui/dlgopen.cpp

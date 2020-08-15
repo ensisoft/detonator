@@ -55,6 +55,7 @@
 #include "editor/gui/dlgpackage.h"
 #include "editor/gui/dlgopen.h"
 #include "editor/gui/dlgnew.h"
+#include "editor/gui/dlgproject.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -962,6 +963,17 @@ void MainWindow::on_actionNewResource_triggered()
                 break;
         }
     }
+}
+
+void MainWindow::on_actionProjectSettings_triggered()
+{
+    auto settings = mWorkspace->GetProjectSettings();
+
+    DlgProject dlg(this, settings);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mWorkspace->SetProjectSettings(settings);
 }
 
 void MainWindow::timerLoRes()

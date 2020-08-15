@@ -40,6 +40,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/resource.h"
+#include "graphics/device.h"
 #include "gamelib/gfxfactory.h"
 #include "resource.h"
 #include "utility.h"
@@ -327,6 +328,38 @@ namespace app
             return true;
         }
 
+        // Project settings.
+        struct ProjectSettings {
+            unsigned multisample_sample_count = 0;
+            // user defined name of the application.
+            QString application_name;
+            // User defined version of the application.
+            QString application_version;
+            // default texture minification filter.
+            gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Nearest;
+            // default texture magnification filter.
+            gfx::Device::MagFilter default_mag_filter = gfx::Device::MagFilter::Nearest;
+            // the assumed window width when lauching the application
+            // with its own window.
+            unsigned window_width = 1024;
+            // the assumed window height  when lauching the application
+            // with its own window.
+            unsigned window_height = 768;
+            // window flag to set fullscreen on start.
+            bool window_set_fullscreen = false;
+            // window flag to allow window to be resized.
+            bool window_can_resize = true;
+            // window flag to control window border
+            bool window_has_border = true;
+        };
+
+        const ProjectSettings& GetProjectSettings() const
+        { return mSettings; }
+        ProjectSettings& GetProjectSettings()
+        { return mSettings; }
+        void SetProjectSettings(const ProjectSettings& settings)
+        { mSettings = settings; }
+
         struct ContentPackingOptions {
             // the output directory into which place the packed content.
             QString directory;
@@ -394,6 +427,8 @@ namespace app
         QVariantMap mProperties;
         // user specific workspace properties.
         QVariantMap mUserProperties;
+        // workspace/project settings.
+        ProjectSettings mSettings;
     };
 
 } // namespace

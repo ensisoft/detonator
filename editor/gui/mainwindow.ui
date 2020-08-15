@@ -102,6 +102,7 @@
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
+    <addaction name="actionProjectSettings"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -493,7 +494,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Package Resources ...</string>
+    <string>Package ...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -521,6 +522,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionProjectSettings">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Workspace settings</string>
    </property>
   </action>
  </widget>

@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -124,5 +125,16 @@ void InitializeAppHome(const QString& appname);
 // Get an absolute path to a file/folder in the application
 // home directory.
 QString GetAppFilePath(const QString& name);
+
+template<typename Enum>
+Enum EnumFromString(const QString& str, Enum backup, bool* success = nullptr)
+{
+    const auto& enum_val = magic_enum::enum_cast<Enum>(ToUtf8(str));
+    if (!enum_val.has_value()) {
+        if (success) *success = false;
+        return backup;
+    }
+    return enum_val.value();
+}
 
 } // namespace
