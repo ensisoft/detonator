@@ -40,6 +40,13 @@
 namespace gui
 {
 
+// static
+gfx::Device::MinFilter GfxWindow::DefaultMinFilter =
+    gfx::Device::MinFilter::Nearest;
+// static
+gfx::Device::MagFilter GfxWindow::DefaultMagFilter =
+    gfx::Device::MagFilter::Nearest;
+
 GfxWindow::~GfxWindow()
 {
     ASSERT(!mCustomGraphicsDevice);
@@ -128,6 +135,8 @@ void GfxWindow::paintGL()
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsDevice->ClearColor(mClearColor);
+    mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMagFilter);
+    mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
         onPaintScene(*mCustomGraphicsPainter, ms/1000.0);
 

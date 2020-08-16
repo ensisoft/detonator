@@ -57,6 +57,7 @@
 #include "editor/gui/dlgnew.h"
 #include "editor/gui/dlgproject.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/gfxwidget.h"
 
 namespace gui
 {
@@ -266,6 +267,9 @@ bool MainWindow::loadWorkspace(const QString& dir)
 
     format.setSamples(settings.multisample_sample_count);
     QSurfaceFormat::setDefaultFormat(format);
+
+    GfxWindow::SetDefaultFilter(settings.default_min_filter);
+    GfxWindow::SetDefaultFilter(settings.default_mag_filter);
 
     // desktop dimensions
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -967,6 +971,9 @@ void MainWindow::on_actionProjectSettings_triggered()
     QSurfaceFormat::setDefaultFormat(format);
 
     mWorkspace->SetProjectSettings(settings);
+
+    GfxWindow::SetDefaultFilter(settings.default_min_filter);
+    GfxWindow::SetDefaultFilter(settings.default_mag_filter);
 }
 
 void MainWindow::timerRefreshUI()

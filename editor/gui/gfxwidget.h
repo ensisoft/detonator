@@ -99,6 +99,10 @@ namespace gui
         // keyboard callbacks
         std::function<bool (QKeyEvent* key)>      onKeyPress;
 
+        static void SetDefaultFilter(gfx::Device::MinFilter filter)
+        { DefaultMinFilter = filter; }
+        static void SetDefaultFilter(gfx::Device::MagFilter filter)
+        { DefaultMagFilter = filter; }
 
     public slots:
         void clearColorChanged(QColor color);
@@ -130,6 +134,9 @@ namespace gui
         float mCurrentFps  = 0.0f;
     private:
         QOpenGLContext mContext;
+    private:
+        static gfx::Device::MinFilter DefaultMinFilter;
+        static gfx::Device::MagFilter DefaultMagFilter;
     };
 
     // This is now a "widget shim" that internally creates a QOpenGLWindow
