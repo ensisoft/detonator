@@ -25,35 +25,21 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include "ui_dlgtext.h"
-#  include <QTimer>
+#  include <QOpenGLContext>
+#  include <QSurfaceFormat>
+#  include <QSurface>
 #include "warnpop.h"
 
-#include "graphics/text.h"
+#include "graphics/device.h"
 #include "graphics/painter.h"
-#include "graphics/text.h"
 
 namespace gui
 {
-    class DlgText : public QDialog
-    {
-        Q_OBJECT
-    public:
-        DlgText(QWidget* parent, gfx::TextBuffer& text);
 
-    private slots:
-        void on_btnAccept_clicked();
-        void on_btnCancel_clicked();
-        void on_btnFont_clicked();
-        void finished();
-        void timer();
-    private:
-        void PaintScene(gfx::Painter& painter, double secs);
-    private:
-        Ui::DlgText mUI;
-    private:
-        gfx::TextBuffer& mText;
-        QTimer mTimer;
-    };
+gfx::Device* GetGraphicsDevice(QSurface* surface);
+gfx::Painter* GetGraphicsPainter(QSurface* surface);
+
+void CreateGraphicsDevice(unsigned msaa_samples, bool sync_to_vblank);
+void DisposeGraphicsDevice();
 
 } // namespace

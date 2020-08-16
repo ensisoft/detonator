@@ -533,7 +533,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
-    mUI.widget->setFramerate(120);
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
@@ -995,9 +994,9 @@ void AnimationWidget::animate(double secs)
     }
 }
 
-void AnimationWidget::setTargetFps(unsigned fps)
+void AnimationWidget::render(double dt)
 {
-    mUI.widget->setFramerate(fps);
+    mUI.widget->triggerPaint();
 }
 
 bool AnimationWidget::confirmClose()

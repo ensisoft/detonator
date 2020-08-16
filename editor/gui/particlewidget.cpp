@@ -55,7 +55,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 
     DEBUG("Create ParticleEditorWidget");
     mUI.setupUi(this);
-    mUI.widget->setFramerate(120);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
@@ -280,9 +279,9 @@ void ParticleEditorWidget::animate(double secs)
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
-void ParticleEditorWidget::setTargetFps(unsigned fps)
+void ParticleEditorWidget::render(double dt)
 {
-    mUI.widget->setFramerate(fps);
+    mUI.widget->triggerPaint();
 }
 
 bool ParticleEditorWidget::confirmClose()

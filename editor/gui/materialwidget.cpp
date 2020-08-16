@@ -135,7 +135,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     DEBUG("Create MaterialWidget");
 
     mUI.setupUi(this);
-    mUI.widget->setFramerate(120);
     mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onZoomIn = std::bind(&MaterialWidget::zoomIn, this);
@@ -365,9 +364,9 @@ bool MaterialWidget::confirmClose()
     return true;
 }
 
-void MaterialWidget::setTargetFps(unsigned fps)
+void MaterialWidget::render(double dt)
 {
-    mUI.widget->setFramerate(fps);
+    mUI.widget->triggerPaint();
 }
 
 void MaterialWidget::on_actionPlay_triggered()

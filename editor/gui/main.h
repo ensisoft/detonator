@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2018 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -20,40 +20,36 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+#define LOGTAG "main"
+
 #pragma once
 
 #include "config.h"
 
 #include "warnpush.h"
-#  include "ui_dlgtext.h"
-#  include <QTimer>
+#  include <QApplication>
+#  include <QObject>
 #include "warnpop.h"
 
-#include "graphics/text.h"
-#include "graphics/painter.h"
-#include "graphics/text.h"
+#include "editor/app/eventlog.h"
 
-namespace gui
+class MyApp : public QApplication
 {
-    class DlgText : public QDialog
+    Q_OBJECT
+
+public:
+    MyApp(int argc, char* argv[]) : QApplication(argc, argv)
+    {}
+    virtual bool notify(QObject* receiver, QEvent* e)
     {
-        Q_OBJECT
-    public:
-        DlgText(QWidget* parent, gfx::TextBuffer& text);
-
-    private slots:
-        void on_btnAccept_clicked();
-        void on_btnCancel_clicked();
-        void on_btnFont_clicked();
-        void finished();
-        void timer();
-    private:
-        void PaintScene(gfx::Painter& painter, double secs);
-    private:
-        Ui::DlgText mUI;
-    private:
-        gfx::TextBuffer& mText;
-        QTimer mTimer;
-    };
-
-} // namespace
+        try
+        {
+            return QApplication::notify(receiver, e);
+        }
+        catch (const std::exception& e)
+        {
+            ERROR("Uncaught exception: '%1'", e.what());
+        }
+        return false;
+    }
+};

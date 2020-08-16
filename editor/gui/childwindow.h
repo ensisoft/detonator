@@ -65,7 +65,7 @@ namespace gui
         // if any.
         void Animate(double secs);
 
-        void SetTargetFps(unsigned target);
+        void Render(double dt);
 
     private slots:
         void on_actionClose_triggered();

@@ -76,14 +76,22 @@ MainWindow::MainWindow()
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
     // and tick the workspace for periodic cleanup and stuff.
-    QObject::connect(&mTimerLoRes, &QTimer::timeout, this, &MainWindow::timerLoRes);
+    QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &MainWindow::timerRefreshUI);
+    mRefreshTimer.setInterval(500);
+    mRefreshTimer.start();
+
     // This is the high frequency timer that is used to update animations and etc.
     // simulations.
-    QObject::connect(&mTimerHiRes, &QTimer::timeout, this, &MainWindow::timerHiRes);
-    mTimerLoRes.setInterval(500);
-    mTimerLoRes.start();
-    mTimerHiRes.setInterval(1000.0/60);
-    mTimerHiRes.start();
+    QObject::connect(&mAnimationTimer, &QTimer::timeout, this, &MainWindow::timerAnimate);
+    mAnimationTimer.setInterval(1000.0/60);
+    mAnimationTimer.start();
+
+    // Animation timer that is used to throttle the rendering rate when not syncing
+    // to display vblank. Without this throttle we're our essentially going to
+    // burn the CPU since the workloads are  so small for any modern system.
+    QObject::connect(&mRenderTimer, &QTimer::timeout, this, &MainWindow::timerRender);
+    mRenderTimer.setInterval(1000.0/60.0f);
+    mRenderTimer.start();
 
     auto& events = app::EventLog::get();
     QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
@@ -136,6 +144,9 @@ void MainWindow::loadState()
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
     QSurfaceFormat::setDefaultFormat(format);
+
+    mRenderTimer.setInterval(1000.0/mSettings.target_fps);
+    mRenderTimer.start();
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -840,15 +851,8 @@ void MainWindow::on_actionSettings_triggered()
         DEBUG("New sync to vblank: %1, Target fps: %2",
             mSettings.sync_to_vblank, mSettings.target_fps);
 
-        for (int i=0; i<GetCount(mUI.mainTab); ++i)
-        {
-            auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-            widget->setTargetFps(mSettings.target_fps);
-        }
-        for (auto* child : mChildWindows)
-        {
-            child->SetTargetFps(mSettings.target_fps);
-        }
+        mRenderTimer.setInterval(1000.0/mSettings.target_fps);
+        mRenderTimer.start();
     }
 }
 
@@ -965,12 +969,11 @@ void MainWindow::on_actionProjectSettings_triggered()
     mWorkspace->SetProjectSettings(settings);
 }
 
-void MainWindow::timerLoRes()
+void MainWindow::timerRefreshUI()
 {
-    const auto num_widgets  = mUI.mainTab->count();
     // refresh the UI state, and update the tab widget icon/text
     // if needed.
-    for (int i=0; i<num_widgets; ++i)
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
         widget->refresh();
@@ -1008,9 +1011,9 @@ void MainWindow::timerLoRes()
         mWorkspace->Tick();
 }
 
-void MainWindow::timerHiRes()
+void MainWindow::timerAnimate()
 {
-    //const quint64 ms = mHiResInterval.restart();
+    // todo: think about the timestep
     const float time_step = 1.0f / 60.0f;
 
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
@@ -1021,6 +1024,22 @@ void MainWindow::timerHiRes()
     for (auto* child : mChildWindows)
     {
         child->Animate(time_step);
+    }
+}
+
+void MainWindow::timerRender()
+{
+    // todo: think about the timestep
+    const float time_step = 1.0f / mRenderTimer.interval();
+
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->render(time_step);
+    }
+    for (auto* child : mChildWindows)
+    {
+        child->Render(time_step);
     }
 }
 
@@ -1208,7 +1227,7 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     connect(widget, &MainWidget::openExternalShader,
             this,   &MainWindow::openExternalShader);
 
-    widget->setTargetFps(mSettings.target_fps);
+    //widget->setTargetFps(mSettings.target_fps);
 
     if (new_window)
     {

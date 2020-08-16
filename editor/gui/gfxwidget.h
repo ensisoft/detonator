@@ -29,7 +29,6 @@
 #  include <QOpenGLContext>
 #  include <QKeyEvent>
 #  include <QElapsedTimer>
-#  include <QTimer>
 #  include <QPalette>
 #include "warnpop.h"
 
@@ -72,10 +71,9 @@ namespace gui
             mCustomGraphicsDevice->DeleteTextures();
         }
 
-        void setFramerate(unsigned target)
+        void triggerPaint()
         {
-            const unsigned ms = 1000 / target;
-            mTimer.start(ms, this);
+            paintGL();
         }
 
         gfx::Color4f getClearColor() const
@@ -117,7 +115,6 @@ namespace gui
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
         virtual bool event(QEvent* event) override;
-        virtual void timerEvent(QTimerEvent* event) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
@@ -125,7 +122,6 @@ namespace gui
         gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
     private:
         QElapsedTimer mClock;
-        QBasicTimer   mTimer;
         bool mInitialized = false;
     private:
         quint64 mFrameTime = 0;
@@ -150,10 +146,6 @@ namespace gui
 
         void dispose();
 
-        void setFramerate(unsigned target)
-        {
-            mWindow->setFramerate(target);
-        }
         void reloadShaders()
         {
             mWindow->reloadShaders();
@@ -161,6 +153,11 @@ namespace gui
         void reloadTextures()
         {
             mWindow->reloadTextures();
+        }
+
+        void triggerPaint()
+        {
+            mWindow->triggerPaint();
         }
 
         // callback to invoke when paint must be done.

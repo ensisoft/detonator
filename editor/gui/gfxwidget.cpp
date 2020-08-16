@@ -67,9 +67,6 @@ GfxWindow::GfxWindow()
     // Doing a little hack here and hoping that when the first timer
     // event fires we'd have the final size correctly.
     QTimer::singleShot(10, this, &GfxWindow::doInit);
-
-    // use this timer to throttle the fps
-    setFramerate(120);
 }
 
 void GfxWindow::dispose()
@@ -211,11 +208,6 @@ bool GfxWindow::event(QEvent* event)
         return true;
     }
     return QWindow::event(event);
-}
-
-void GfxWindow::timerEvent(QTimerEvent* event)
-{
-    paintGL();
 }
 
 void GfxWindow::toggleShowFps()

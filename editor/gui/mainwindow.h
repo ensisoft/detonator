@@ -112,8 +112,9 @@ namespace gui
 
         void actionWindowFocus_triggered();
 
-        void timerLoRes();
-        void timerHiRes();
+        void timerRefreshUI();
+        void timerAnimate();
+        void timerRender();
         void showNote(const app::Event& event);
         void openExternalImage(const QString& file);
         void openExternalShader(const QString& file);
@@ -135,10 +136,11 @@ namespace gui
 
     private:
         // the refesh timer to do low frequency UI updates.
-        QTimer mTimerLoRes;
-        // the high frequency time to run widget animations
-        QTimer mTimerHiRes;
-        QElapsedTimer mHiResInterval;
+        QTimer mRefreshTimer;
+        // the timer to run the widget animations.
+        QTimer mAnimationTimer;
+        // the timer to trigger rendering
+        QTimer mRenderTimer;
 
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.

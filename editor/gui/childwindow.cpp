@@ -88,9 +88,9 @@ void ChildWindow::Animate(double secs)
     mWidget->animate(secs);
 }
 
-void ChildWindow::SetTargetFps(unsigned fps)
+void ChildWindow::Render(double dt)
 {
-    mWidget->setTargetFps(fps);
+    mWidget->render(dt);
 }
 
 void ChildWindow::on_actionClose_triggered()

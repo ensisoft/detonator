@@ -46,7 +46,6 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     PopulateFromEnum<gfx::TextBuffer::HorizontalAlignment>(mUI.cmbHAlign);
     PopulateFromEnum<gfx::TextBuffer::VerticalAlignment>(mUI.cmbVAlign);
 
-    mUI.widget->setFramerate(60);
     mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
@@ -82,6 +81,10 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
     connect(this, &QDialog::finished, this, &DlgText::finished);
+
+    connect(&mTimer, &QTimer::timeout, this, &DlgText::timer);
+    mTimer.setInterval(1000.0/60.0f);
+    mTimer.start();
 }
 
 void DlgText::on_btnAccept_clicked()
@@ -105,6 +108,11 @@ void DlgText::on_btnFont_clicked()
 void DlgText::finished()
 {
     mUI.widget->dispose();
+}
+
+void DlgText::timer()
+{
+    mUI.widget->triggerPaint();
 }
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)

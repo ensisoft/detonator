@@ -62,8 +62,8 @@ namespace gui
         virtual void reloadShaders() override;
         virtual void reloadTextures() override;
         virtual void shutdown() override;
-        virtual void animate(double secs) override;
-        virtual void setTargetFps(unsigned fps) override;
+        virtual void animate(double dt) override;
+        virtual void render(double dt) override;
         virtual bool confirmClose() override;
 
     private slots:

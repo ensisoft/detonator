@@ -49,10 +49,10 @@ namespace gui
 
         // High frequency callback for doing animation etc simulation
         // updates.
-        virtual void animate(double secs)
+        virtual void animate(double dt)
         {}
 
-        virtual void setTargetFps(unsigned fps)
+        virtual void render(double dt)
         {}
 
         // Called whenever the widget is getting activated i.e. displayed
