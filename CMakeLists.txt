@@ -427,6 +427,7 @@ add_executable(unit_test_settings misc/unit_test/unit_test_settings.cpp)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
+add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
 
 target_link_libraries(unit_test_device
     wdk_system
