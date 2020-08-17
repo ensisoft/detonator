@@ -44,6 +44,10 @@ namespace audio {
     class AudioSample;
 } // namespace audio
 
+namespace misc {
+    class Settings;
+} // namespace miscs
+
 namespace invaders
 {
     class Game;
@@ -71,24 +75,13 @@ namespace invaders
         GameWidget(wdk::Window& window);
        ~GameWidget();
 
-        // load level data from the specified data file
-        void loadLevels(const std::wstring& file);
+        void initArgs(int argc, char* argv[]);
 
-        // unlock the level identified by it's name
-        void unlockLevel(const std::wstring& name);
+        void load(const misc::Settings& settings);
 
-        // restore previously stored level info
-        void setLevelInfo(const LevelInfo& info);
+        void save(misc::Settings& settings);
 
-        // retrieve the lavel info for the level at index.
-        // returns true when index is a valid index, otherwise false.
-        bool getLevelInfo(LevelInfo& info, unsigned index) const;
-
-        // set the gaming profile
-        void setProfile(const Profile& profile);
-
-        // launch the game contents.
-        void launchGame();
+        void launch();
 
         // step the game forward by dt milliseconds.
         void updateGame(float dt);
@@ -96,50 +89,11 @@ namespace invaders
         // render current game state.
         void renderGame(gfx::Device& device, gfx::Painter& painter);
 
-        // initialize the OpenGL rendering surface (window)
-        // based on the previous size (if any).
-        void initializeGL(unsigned prev_surface_width,
-            unsigned prev_surface_height);
-
-        // Set window to fullscreen if value is true.
-        void setFullscreen(bool value);
-
-        // close the window and dispose of the rendering context.
-        void close();
-
-        // set to true to unlock all levels.
-        void setMasterUnlock(bool onOff);
-
-        // set to true to have unlimited time warps
-        void setUnlimitedWarps(bool onOff)
-        { mUnlimitedWarps = onOff; }
-
-        // set to true to have unlimited bombs
-        void setUnlimitedBombs(bool onOff)
-        { mUnlimitedBombs = onOff; }
-
-        // set to true to play sound effects.
-        void setPlaySounds(bool onOff);
-
-        // set to true to play awesome game music
-        void setPlayMusic(bool onOff)
-        { mPlayMusic = onOff; }
-
-        // set to true to display current fps
-        void setShowFps(bool onOff)
-        { mShowFps = onOff; }
-
         // set most current fps.
         // if setShowFps has been set to true will display
         // the current fps in the top left corner of the window.
         void setFps(float fps)
         { mCurrentfps = fps; }
-
-        bool getPlaySounds() const
-        { return mPlaySounds; }
-
-        bool getPlayMusic() const
-        { return mPlayMusic; }
 
         bool isRunning() const
         { return mRunning; }

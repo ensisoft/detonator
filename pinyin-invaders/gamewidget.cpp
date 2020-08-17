@@ -47,6 +47,7 @@
 #include "graphics/transform.h"
 #include "gamelib/loader.h"
 #include "gamelib/animation.h"
+#include "misc/settings.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -2099,9 +2100,33 @@ GameWidget::GameWidget(wdk::Window& window) : mWindow(window)
 
 GameWidget::~GameWidget() = default;
 
-void GameWidget::loadLevels(const std::wstring& file)
+void GameWidget::initArgs(int argc, char* argv[])
 {
-    mLevels = Level::LoadLevels(file);
+    for (int i=1; i<argc; ++i)
+    {
+        const std::string a(argv[i]);
+        if (a == "--unlock-all")
+            mMasterUnlock = true;
+        else if (a == "--unlimited-warps")
+            mUnlimitedWarps = true;
+        else if (a == "--unlimited-bombs")
+            mUnlimitedBombs = true;
+        else if (a == "--show-fps")
+            mShowFps = true;
+    }
+}
+
+void GameWidget::load(const misc::Settings& settings)
+{
+    const auto width      = settings.GetValue("window", "width", 1200);
+    const auto height     = settings.GetValue("window", "height", 700);
+    const auto fullscreen = settings.GetValue("window", "fullscreen", false);
+    const auto play_sound = settings.GetValue("audio", "sound", true);
+    const auto play_music = settings.GetValue("audio", "music", true);
+    const auto& levels    = settings.GetValue("game", "levels", std::vector<std::string>());
+
+    // load the immutable level data.
+    mLevels = Level::LoadLevels(L"data/levels.txt");
 
     for (const auto& level : mLevels)
     {
@@ -2113,48 +2138,79 @@ void GameWidget::loadLevels(const std::wstring& file)
         if (!level->Validate())
             throw std::runtime_error(base::FormatString("Broken level detected: '%s'", level->GetName()));
     }
+    // always make sure that the first level is unlocked so it's possible to play.
     mLevelInfos[0].locked = false;
-}
 
-void GameWidget::unlockLevel(const std::wstring& name)
-{
-    for (auto& info : mLevelInfos)
+    // load the saved level data, highscores and such
+    for (int i=0; i<levels.size(); ++i)
     {
-        if (info.name != name)
-            continue;
+        const auto& level_name = levels[i];
+        LevelInfo info;
+        info.name      = base::FromUtf8(level_name);
+        info.highScore = settings.GetValue(level_name, "highscore", 0);
+        info.locked    = settings.GetValue(level_name, "locked", true);
 
-        info.locked = false;
-        return;
+        for (auto& i : mLevelInfos)
+        {
+            if (i.name != info.name)
+                continue;
+            i = info;
+            break;
+        }
     }
-}
 
-void GameWidget::setLevelInfo(const LevelInfo& info)
-{
-    for (auto& i : mLevelInfos)
+    // setup the game difficulty/game play profiles
+    const Profile EASY    {L"Easy",    1.6f, 2, 7, 30};
+    const Profile MEDIUM  {L"Medium",  1.8f, 2, 4, 35};
+    const Profile CHINESE {L"Chinese", 2.0f, 2, 4, 40};
+    mProfiles.push_back(EASY);
+    mProfiles.push_back(MEDIUM);
+    mProfiles.push_back(CHINESE);
+
+    // adjust window based on settings.
+    if (fullscreen)
     {
-        if (i.name != info.name)
-            continue;
-
-        i = info;
-        return;
+        mWindow.SetFullscreen(true);
     }
+    else
+    {
+        const auto aspect = (float)GameRows / (float)GameCols;
+        const auto surface_width = width != 0
+            ? width : GameCols * 20;
+        const auto surface_height = height != 0
+            ? height : surface_width * aspect;
+        mWindow.SetSize(surface_width, surface_height);
+    }
+
+    mPlayMusic  = play_music;
+    mPlaySounds = play_sound;
 }
 
-bool GameWidget::getLevelInfo(LevelInfo& info, unsigned index) const
+void GameWidget::save(misc::Settings& settings)
 {
-    if (index >= mLevels.size())
-        return false;
-    info = mLevelInfos[index];
-    return true;
+    settings.SetValue("window", "width",  mWindow.GetSurfaceWidth());
+    settings.SetValue("window", "height", mWindow.GetSurfaceHeight());
+    settings.SetValue("window", "fullscreen", mWindow.IsFullscreen());
+    settings.SetValue("audio", "sound", mPlaySounds);
+    settings.SetValue("audio", "music", mPlayMusic);
+
+    std::vector<std::string> level_names;
+
+    // save level data, highscores and such
+    for (const auto& info : mLevelInfos)
+    {
+        const auto& level_name = base::ToUtf8(info.name);
+        level_names.push_back(level_name);
+        settings.SetValue(level_name, "highscore", info.highScore);
+        settings.SetValue(level_name, "locked", info.locked);
+    }
+    settings.SetValue("game", "levels", level_names);
 }
 
-void GameWidget::setProfile(const Profile& profile)
+void GameWidget::launch()
 {
-    mProfiles.push_back(profile);
-}
-
-void GameWidget::launchGame()
-{
+    mStates.top()->setPlaySounds(mPlaySounds);
+    mStates.top()->setMasterUnlock(mMasterUnlock);
     playMusic();
 }
 
@@ -2310,43 +2366,6 @@ void GameWidget::updateGame(float dt)
             mWarpRemaining -= dt;
         }
     }
-}
-
-
-void GameWidget::setPlaySounds(bool onOff)
-{
-    mPlaySounds = onOff;
-    mStates.top()->setPlaySounds(onOff);
-}
-
-
-void GameWidget::initializeGL(unsigned prev_surface_width, unsigned prev_surface_height)
-{
-    const auto aspect = (float)GameRows / (float)GameCols;
-    const auto surface_width = prev_surface_width != 0
-        ? prev_surface_width
-        : GameCols * 20;
-    const auto surface_height = prev_surface_height != 0
-        ? prev_surface_height
-        : surface_width * aspect;
-
-    mWindow.SetSize(surface_width, surface_height);
-}
-
-void GameWidget::setFullscreen(bool value)
-{
-    mWindow.SetFullscreen(value);
-}
-
-
-void GameWidget::close()
-{
-}
-
-void GameWidget::setMasterUnlock(bool onOff)
-{
-    mMasterUnlock = onOff;
-    mStates.top()->setMasterUnlock(onOff);
 }
 
 void GameWidget::renderGame(gfx::Device& device, gfx::Painter& painter)
