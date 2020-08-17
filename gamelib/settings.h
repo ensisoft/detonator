@@ -35,7 +35,7 @@
 #include "base/utility.h"
 #include "base/platform.h"
 
-namespace misc
+namespace game
 {
     // Load game settings from a "settings" file (currently JSON)
     // Expects that the file is "known" and has good content and is accessible

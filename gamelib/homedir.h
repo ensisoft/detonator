@@ -30,7 +30,7 @@
 
 #include <string>
 
-namespace misc
+namespace game
 {
     // Application home directory in the user's home directory.
     class HomeDir

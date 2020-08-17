@@ -28,13 +28,13 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
-#include "misc/settings.h"
+#include "gamelib/settings.h"
 
 int test_main(int argc, char* argv[])
 {
     // test has value and separte object "name spaces".
     {
-        misc::Settings settings;
+        game::Settings settings;
         TEST_REQUIRE(settings.HasValue("foo", "key") == false);
         TEST_REQUIRE(settings.HasValue("bar", "key") == false);
 
@@ -52,7 +52,7 @@ int test_main(int argc, char* argv[])
             Banana, Apple, Kiwi, Guava
         };
 
-        misc::Settings settings;
+        game::Settings settings;
         settings.SetValue("foo", "key_string", "foobar");
         settings.SetValue("foo", "key_int", 1234);
         settings.SetValue("foo", "key_unsigned_int", 12345u);
@@ -75,7 +75,7 @@ int test_main(int argc, char* argv[])
             Banana, Apple, Kiwi, Quava
         };
 
-        misc::Settings settings;
+        game::Settings settings;
         TEST_REQUIRE(settings.GetValue("foo", "key_string", "foobar") == "foobar");
         TEST_REQUIRE(settings.GetValue("foo", "key_int", 1234) == 1234);
         TEST_REQUIRE(settings.GetValue("foo", "key_unsigned_int", 12345u) == 12345u);
@@ -89,7 +89,7 @@ int test_main(int argc, char* argv[])
             Banana, Apple, Kiwi, Quava
         };
 
-        misc::Settings settings;
+        game::Settings settings;
         settings.SetValue("foo", "key_string", "foobar");
         settings.SetValue("foo", "key_int", 1234);
         settings.SetValue("foo", "key_unsigned_int", 12345u);
@@ -118,7 +118,7 @@ int test_main(int argc, char* argv[])
 
     // test exceptional conditions.
     {
-        misc::Settings settings;
+        game::Settings settings;
         TEST_EXCEPTION(settings.SaveToFile("this/path/is/junk/blah.json"));
         TEST_EXCEPTION(settings.LoadFromFile("this/path/is/junk/blah.json"));
 
@@ -132,7 +132,7 @@ int test_main(int argc, char* argv[])
         const std::vector<unsigned> ints = {1, 4, 55, 12345};
         const std::vector<std::string> strs = {"jeesus", "ajaa", "mopolla"};
 
-        misc::Settings settings;
+        game::Settings settings;
         settings.SetValue("foo", "ints", ints);
         settings.SetValue("foo", "strs", strs);
 

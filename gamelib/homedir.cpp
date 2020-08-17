@@ -37,7 +37,7 @@
 #include "base/utility.h"
 #include "homedir.h"
 
-namespace misc
+namespace game
 {
 
 // static

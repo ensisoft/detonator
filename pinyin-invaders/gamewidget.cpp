@@ -47,7 +47,7 @@
 #include "graphics/transform.h"
 #include "gamelib/loader.h"
 #include "gamelib/animation.h"
-#include "misc/settings.h"
+#include "gamelib/settings.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -2116,7 +2116,7 @@ void GameWidget::initArgs(int argc, char* argv[])
     }
 }
 
-void GameWidget::load(const misc::Settings& settings)
+void GameWidget::load(const game::Settings& settings)
 {
     const auto width      = settings.GetValue("window", "width", 1200);
     const auto height     = settings.GetValue("window", "height", 700);
@@ -2186,7 +2186,7 @@ void GameWidget::load(const misc::Settings& settings)
     mPlaySounds = play_sound;
 }
 
-void GameWidget::save(misc::Settings& settings)
+void GameWidget::save(game::Settings& settings)
 {
     settings.SetValue("window", "width",  mWindow.GetSurfaceWidth());
     settings.SetValue("window", "height", mWindow.GetSurfaceHeight());

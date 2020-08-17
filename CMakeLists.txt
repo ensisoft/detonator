@@ -381,7 +381,7 @@ add_executable(invaders
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    misc/homedir.cpp
+    gamelib/homedir.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
     third_party/stb/stb_image.c
@@ -421,9 +421,8 @@ add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.c
                                   third_party/stb/stb_image_write.c)
 
 # gamelib tests
-add_executable(unit_test_tree   gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
-# misc tests
-add_executable(unit_test_settings misc/unit_test/unit_test_settings.cpp)
+add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
+add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
@@ -439,7 +438,7 @@ target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/misc/unit_test")
+target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_math     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 

@@ -44,7 +44,7 @@ namespace audio {
     class AudioSample;
 } // namespace audio
 
-namespace misc {
+namespace game {
     class Settings;
 } // namespace miscs
 
@@ -77,9 +77,9 @@ namespace invaders
 
         void initArgs(int argc, char* argv[]);
 
-        void load(const misc::Settings& settings);
+        void load(const game::Settings& settings);
 
-        void save(misc::Settings& settings);
+        void save(game::Settings& settings);
 
         void launch();
 

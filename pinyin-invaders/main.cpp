@@ -36,10 +36,10 @@
 #include "audio/device.h"
 #include "base/logging.h"
 #include "gamelib/loader.h"
+#include "gamelib/homedir.h"
+#include "gamelib/settings.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
-#include "misc/homedir.h"
-#include "misc/settings.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -93,11 +93,11 @@ int game_main(int argc, char* argv[])
     audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 
-    misc::HomeDir::Initialize(".pinyin-invaders");
-    misc::Settings settings;
+    game::HomeDir::Initialize(".pinyin-invaders");
+    game::Settings settings;
 
-    if (base::FileExists(misc::HomeDir::MapFile("settings.json")))
-        settings.LoadFromFile(misc::HomeDir::MapFile("settings.json"));
+    if (base::FileExists(game::HomeDir::MapFile("settings.json")))
+        settings.LoadFromFile(game::HomeDir::MapFile("settings.json"));
 
     DEBUG("Initialize OpenGL");
     // context integration glue code that puts together
@@ -212,7 +212,7 @@ int game_main(int argc, char* argv[])
 
     game.save(settings);
 
-    settings.SaveToFile(misc::HomeDir::MapFile("settings.json"));
+    settings.SaveToFile(game::HomeDir::MapFile("settings.json"));
 
     context->Dispose();
     window->Destroy();
