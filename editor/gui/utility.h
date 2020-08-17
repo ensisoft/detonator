@@ -315,6 +315,35 @@ void GetUIValue(Widget* widget, Value* out)
     *out = (Value)GetValue(widget);
 }
 
+#if defined(__MSVC__)
+template<typename Value>
+void GetUIValue(QComboBox* cmb, Value* out)
+{
+    if constexpr (std::is_enum<Value>::value)
+    {
+        *out = EnumFromCombo<Value>(cmb);
+    }
+    else
+    {
+        static_assert("not implemented");
+    }
+}
+inline void GetUIValue(QComboBox* cmb, int* out)
+{
+    const auto& str = cmb->currentText();
+    *out = str.toInt();
+}
+inline void GetUIValue(QComboBox* cmb, unsigned* out)
+{
+    const auto& str = cmb->currentText();
+    *out = str.toUInt();
+}
+inline void GetUIValue(QComboBox* cmb, QString* out)
+{
+    *out = cmb->currentText().trimmed();
+}
+#endif // __MSVC__
+
 template<typename Resource>
 inline void SetProperty(Resource& res, const QString& name, const QVariant& prop)
 {

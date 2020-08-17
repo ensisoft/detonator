@@ -94,7 +94,7 @@ int test_main(int argc, char* argv[])
 
     // with value parsing when values are missing.
     {
-        const char* argv[] = {};
+        const char* argv[] = {"nada"};
 
         base::CommandLineArgumentStack args(0, argv);
         base::CommandLineOptions opt;
@@ -126,7 +126,7 @@ int test_main(int argc, char* argv[])
     // float value. (special since the string format is locale specific)
     {
         const float test_value = 12345.0f;
-        const char* argv[] = {};
+        const char* argv[] = {"nada"};
 
         base::CommandLineArgumentStack args(0, argv);
         base::CommandLineOptions opt;
