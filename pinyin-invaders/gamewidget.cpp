@@ -1861,15 +1861,15 @@ private:
 };
 
 
-GameWidget::GameWidget()
+GameWidget::GameWidget(wdk::Window& window) : mWindow(window)
 {
     mGame.reset(new Game(GameCols, GameRows));
 
     mGame->onMissileKill = [&](const Game::Invader& i, const Game::Missile& m, unsigned killScore)
     {
         auto it = mInvaders.find(i.identity);
-        const auto w = mWindow->GetSurfaceWidth();
-        const auto h = mWindow->GetSurfaceHeight();
+        const auto w = mWindow.GetSurfaceWidth();
+        const auto h = mWindow.GetSurfaceHeight();
         const auto layout = GetGameWindowLayout(w, h);
         const auto scale = layout.GetCellDimensions();
 
@@ -2228,8 +2228,8 @@ void GameWidget::updateGame(float dt)
     static const CollisionType UFO_UFO_Collision =
         { Animation::ColliderType::UFO, Animation::ColliderType::UFO };
 
-    const auto w = mWindow->GetSurfaceWidth();
-    const auto h = mWindow->GetSurfaceHeight();
+    const auto w = mWindow.GetSurfaceWidth();
+    const auto h = mWindow.GetSurfaceHeight();
     const IRect rect(0, 0, w , h);
 
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
@@ -2320,72 +2320,8 @@ void GameWidget::setPlaySounds(bool onOff)
 }
 
 
-void GameWidget::initializeGL(unsigned prev_surface_width,
-    unsigned prev_surface_height)
+void GameWidget::initializeGL(unsigned prev_surface_width, unsigned prev_surface_height)
 {
-    DEBUG("Initialize OpenGL");
-
-    // context integration glue code that puts together
-    // wdk::Context and gfx::Device
-    class WindowContext : public gfx::Device::Context
-    {
-    public:
-        WindowContext()
-        {
-            wdk::Config::Attributes attrs;
-            attrs.red_size  = 8;
-            attrs.green_size = 8;
-            attrs.blue_size = 8;
-            attrs.alpha_size = 8;
-            attrs.stencil_size = 8;
-            attrs.surfaces.window = true;
-            attrs.double_buffer = true;
-            attrs.sampling = wdk::Config::Multisampling::MSAA4;
-            attrs.srgb_buffer = true;
-
-            mConfig   = std::make_unique<wdk::Config>(attrs);
-            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
-                wdk::Context::Type::OpenGL_ES);
-            mVisualID = mConfig->GetVisualID();
-        }
-        virtual void Display() override
-        {
-            mContext->SwapBuffers();
-        }
-        virtual void* Resolve(const char* name) override
-        {
-            return mContext->Resolve(name);
-        }
-        virtual void MakeCurrent() override
-        {
-            mContext->MakeCurrent(mSurface.get());
-        }
-        wdk::uint_t GetVisualID() const
-        { return mVisualID; }
-
-        void SetWindowSurface(wdk::Window& window)
-        {
-            mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
-            mContext->MakeCurrent(mSurface.get());
-            mConfig.release();
-        }
-        void Dispose()
-        {
-            mContext->MakeCurrent(nullptr);
-            mSurface->Dispose();
-            mSurface.reset();
-            mConfig.reset();
-        }
-    private:
-        std::unique_ptr<wdk::Context> mContext;
-        std::unique_ptr<wdk::Surface> mSurface;
-        std::unique_ptr<wdk::Config>  mConfig;
-        wdk::uint_t mVisualID = 0;
-    };
-
-    // Create context
-    auto context = std::make_shared<WindowContext>();
-
     const auto aspect = (float)GameRows / (float)GameCols;
     const auto surface_width = prev_surface_width != 0
         ? prev_surface_width
@@ -2394,46 +2330,17 @@ void GameWidget::initializeGL(unsigned prev_surface_width,
         ? prev_surface_height
         : surface_width * aspect;
 
-    mWindow = std::make_unique<wdk::Window>();
-    mWindow->Create(GAME_TITLE " " GAME_VERSION, surface_width, surface_height, context->GetVisualID());
-    mWindow->on_keydown = std::bind(&GameWidget::onKeyDown, this,
-        std::placeholders::_1);
-    mWindow->on_want_close = [&](const wdk::WindowEventWantClose&) {
-        mRunning = false;
-    };
-
-    context->SetWindowSurface(*mWindow);
-
-    // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
-    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
+    mWindow.SetSize(surface_width, surface_height);
 }
 
 void GameWidget::setFullscreen(bool value)
 {
-    mWindow->SetFullscreen(value);
+    mWindow.SetFullscreen(value);
 }
 
-bool GameWidget::isFullscreen() const
-{
-    return mWindow->IsFullscreen();
-}
 
 void GameWidget::close()
 {
-    mCustomGraphicsPainter.reset();
-    mCustomGraphicsDevice.reset();
-    mWindow->Destroy();
-    mWindow.reset();
-}
-
-void GameWidget::pumpMessages()
-{
-    wdk::native_event_t event;
-    while (wdk::PeekEvent(event))
-    {
-        mWindow->ProcessEvent(event);
-    }
 }
 
 void GameWidget::setMasterUnlock(bool onOff)
@@ -2442,27 +2349,17 @@ void GameWidget::setMasterUnlock(bool onOff)
     mStates.top()->setMasterUnlock(onOff);
 }
 
-unsigned GameWidget::getSurfaceWidth() const
-{
-    return mWindow->GetSurfaceWidth();
-}
-
-unsigned GameWidget::getSurfaceHeight() const
-{
-    return mWindow->GetSurfaceHeight();
-}
-
-void GameWidget::renderGame()
+void GameWidget::renderGame(gfx::Device& device, gfx::Painter& painter)
 {
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
-    const auto w = mWindow->GetSurfaceWidth();
-    const auto h = mWindow->GetSurfaceHeight();
+    const auto w = mWindow.GetSurfaceWidth();
+    const auto h = mWindow.GetSurfaceHeight();
     const IRect rect(0, 0, w , h);
 
-    mCustomGraphicsDevice->BeginFrame();
-    mCustomGraphicsPainter->SetViewport(0, 0, w, h);
-    mCustomGraphicsDevice->ClearColor(gfx::Color::Black);
+    device.BeginFrame();
+    painter.SetViewport(0, 0, w, h);
+    device.ClearColor(gfx::Color::Black);
 
     // paint the background
     {
@@ -2471,13 +2368,13 @@ void GameWidget::renderGame()
         const auto& rect = anim->GetBoundingBox(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
-        anim->Draw(*mCustomGraphicsPainter, view);
+        anim->Draw(painter, view);
     }
 
     // then paint the animations on top of the background
     for (auto& anim : mAnimations)
     {
-        anim->paint(*mCustomGraphicsPainter, rect);
+        anim->paint(painter, rect);
     }
 
     const bool bIsGameRunning = mStates.top()->isGameRunning();
@@ -2490,16 +2387,16 @@ void GameWidget::renderGame()
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->paint(*mCustomGraphicsPainter, rect);
+            invader->paint(painter, rect);
         }
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(*mCustomGraphicsPainter, rect);
+    mStates.top()->paint(painter, rect);
 
     if (mShowFps)
     {
-        gfx::DrawTextRect(*mCustomGraphicsPainter,
+        gfx::DrawTextRect(painter,
             base::FormatString("FPS: %1", mCurrentfps),
             "fonts/ARCADE.TTF", 28,
             gfx::FRect(10, 20, 150, 100),
@@ -2507,19 +2404,19 @@ void GameWidget::renderGame()
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
 
-    mCustomGraphicsDevice->EndFrame();
-    mCustomGraphicsDevice->CleanGarbage(120);
+    device.EndFrame();
+    device.CleanGarbage(120);
 }
 
-void GameWidget::onKeyDown(const wdk::WindowEventKeydown& key)
+void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
 {
     const auto sym = key.symbol;
     const auto mod = key.modifiers;
     if (sym == wdk::Keysym::KeyR && mod.test(wdk::Keymod::Shift))
     {
         DEBUG("Recompile shaders");
-        mCustomGraphicsDevice->DeleteShaders();
-        mCustomGraphicsDevice->DeletePrograms();
+        //mCustomGraphicsDevice->DeleteShaders();
+        //mCustomGraphicsDevice->DeletePrograms();
         return;
     }
     else if (sym == wdk::Keysym::KeyN && mod.test(wdk::Keymod::Shift))
@@ -2549,9 +2446,9 @@ void GameWidget::onKeyDown(const wdk::WindowEventKeydown& key)
         case State::Action::OpenSettings:
             {
                 auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds,
-                    mWindow->IsFullscreen());
+                    mWindow.IsFullscreen());
                 settings->onToggleFullscreen = [this](bool fullscreen) {
-                    mWindow->SetFullscreen(fullscreen);
+                    mWindow.SetFullscreen(fullscreen);
                 };
                 settings->onTogglePlayMusic = [this](bool play) {
                     mPlayMusic = play;
@@ -2616,6 +2513,11 @@ void GameWidget::onKeyDown(const wdk::WindowEventKeydown& key)
             }
             break;
     }
+}
+
+void GameWidget::OnWantClose(const wdk::WindowEventWantClose& close)
+{
+    mRunning = false;
 }
 
 void GameWidget::playMusic()

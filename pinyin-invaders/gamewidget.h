@@ -30,6 +30,8 @@
 #include <stack>
 #include <string>
 
+#include "wdk/window_listener.h"
+
 namespace gfx {
     class Painter;
     class Device;
@@ -47,7 +49,7 @@ namespace invaders
     class Game;
     class Level;
 
-    class GameWidget
+    class GameWidget : public wdk::WindowListener
     {
     public:
         // Level info for persisting level data
@@ -66,7 +68,7 @@ namespace invaders
             unsigned numEnemies = 0;
         };
 
-        GameWidget();
+        GameWidget(wdk::Window& window);
        ~GameWidget();
 
         // load level data from the specified data file
@@ -92,7 +94,7 @@ namespace invaders
         void updateGame(float dt);
 
         // render current game state.
-        void renderGame();
+        void renderGame(gfx::Device& device, gfx::Painter& painter);
 
         // initialize the OpenGL rendering surface (window)
         // based on the previous size (if any).
@@ -102,23 +104,11 @@ namespace invaders
         // Set window to fullscreen if value is true.
         void setFullscreen(bool value);
 
-        // Returns true if in fullscreen mode, otherwise false.
-        bool isFullscreen() const;
-
         // close the window and dispose of the rendering context.
         void close();
 
-        // pump window messages.
-        void pumpMessages();
-
         // set to true to unlock all levels.
         void setMasterUnlock(bool onOff);
-
-        // get current rendering surface (window) width.
-        unsigned getSurfaceWidth() const;
-
-        // get current rendering surface (window) height.
-        unsigned getSurfaceHeight() const;
 
         // set to true to have unlimited time warps
         void setUnlimitedWarps(bool onOff)
@@ -154,9 +144,10 @@ namespace invaders
         bool isRunning() const
         { return mRunning; }
 
+        virtual void OnKeydown(const wdk::WindowEventKeydown& key) override;
+        virtual void OnWantClose(const wdk::WindowEventWantClose& close) override;
     private:
         void playMusic();
-        void onKeyDown(const wdk::WindowEventKeydown& key);
 
     private:
         class State;
@@ -210,9 +201,7 @@ namespace invaders
         std::size_t mMusicTrackIndex = 0;
 #endif
     private:
-        std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
-        std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
-        std::unique_ptr<wdk::Window> mWindow;
+        wdk::Window& mWindow;
     };
 
 } // invaders

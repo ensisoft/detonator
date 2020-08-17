@@ -32,12 +32,20 @@
 #include <thread>
 #include <filesystem>
 
-#include "gamelib/loader.h"
 #include "audio/player.h"
 #include "audio/device.h"
 #include "base/logging.h"
+#include "gamelib/loader.h"
+#include "graphics/device.h"
+#include "graphics/painter.h"
 #include "misc/homedir.h"
 #include "misc/settings.h"
+#include "wdk/opengl/config.h"
+#include "wdk/opengl/context.h"
+#include "wdk/opengl/surface.h"
+#include "wdk/window.h"
+#include "wdk/events.h"
+#include "wdk/system.h"
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -74,6 +82,7 @@ void loadProfile(invaders::GameWidget::Profile profile,
 
 int game_main(int argc, char* argv[])
 {
+
     bool masterUnlock = false;
     bool unlimitedWarps = false;
     bool unlimitedBombs = false;
@@ -118,14 +127,6 @@ int game_main(int argc, char* argv[])
     audio::AudioPlayer audio_player(audio::AudioDevice::Create(GAME_TITLE));
     invaders::g_audio = &audio_player;
 
-#if defined(LINUX_OS)
-    // SIGFPE on floating point exception
-    feenableexcept(FE_INVALID   |
-                   FE_DIVBYZERO |
-                   FE_OVERFLOW  |
-                   FE_UNDERFLOW);
-    DEBUG("Enabled floating point exceptions");
-#endif
 
     misc::HomeDir::Initialize(".pinyin-invaders");
     misc::Settings settings;
@@ -140,14 +141,86 @@ int game_main(int argc, char* argv[])
     const auto playMusic  = settings.GetValue("audio", "music", true);
     const auto& levels    = settings.GetValue("game", "levels", std::vector<std::string>());
 
-    invaders::GameWidget window;
-    window.setMasterUnlock(masterUnlock);
-    window.setUnlimitedWarps(unlimitedWarps);
-    window.setUnlimitedBombs(unlimitedBombs);
-    window.setShowFps(showFps);
-    window.setPlayMusic(playMusic);
-    window.setPlaySounds(playSound);
-    window.loadLevels(L"data/levels.txt");
+    DEBUG("Initialize OpenGL");
+    // context integration glue code that puts together
+    // wdk::Context and gfx::Device
+    class WindowContext : public gfx::Device::Context
+    {
+    public:
+        WindowContext()
+        {
+            wdk::Config::Attributes attrs;
+            attrs.red_size  = 8;
+            attrs.green_size = 8;
+            attrs.blue_size = 8;
+            attrs.alpha_size = 8;
+            attrs.stencil_size = 8;
+            attrs.surfaces.window = true;
+            attrs.double_buffer = true;
+            attrs.sampling = wdk::Config::Multisampling::MSAA4;
+            attrs.srgb_buffer = true;
+
+            mConfig   = std::make_unique<wdk::Config>(attrs);
+            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
+                wdk::Context::Type::OpenGL_ES);
+            mVisualID = mConfig->GetVisualID();
+        }
+        virtual void Display() override
+        {
+            mContext->SwapBuffers();
+        }
+        virtual void* Resolve(const char* name) override
+        {
+            return mContext->Resolve(name);
+        }
+        virtual void MakeCurrent() override
+        {
+            mContext->MakeCurrent(mSurface.get());
+        }
+        wdk::uint_t GetVisualID() const
+        { return mVisualID; }
+
+        void SetWindowSurface(wdk::Window& window)
+        {
+            mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
+            mContext->MakeCurrent(mSurface.get());
+            mConfig.release();
+        }
+        void Dispose()
+        {
+            mContext->MakeCurrent(nullptr);
+            mSurface->Dispose();
+            mSurface.reset();
+            mConfig.reset();
+        }
+    private:
+        std::unique_ptr<wdk::Context> mContext;
+        std::unique_ptr<wdk::Surface> mSurface;
+        std::unique_ptr<wdk::Config>  mConfig;
+        wdk::uint_t mVisualID = 0;
+    };
+
+    // Create context and rendering window.
+    auto context = std::make_shared<WindowContext>();
+    auto window  = std::make_unique<wdk::Window>();
+    window->Create(GAME_TITLE " " GAME_VERSION, width, height, context->GetVisualID());
+    context->SetWindowSurface(*window);
+
+    // create graphics device and painter
+    auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+    auto painter = gfx::Painter::Create(device);
+
+    invaders::GameWidget game(*window);
+    game.setMasterUnlock(masterUnlock);
+    game.setUnlimitedWarps(unlimitedWarps);
+    game.setUnlimitedBombs(unlimitedBombs);
+    game.setShowFps(showFps);
+    game.setPlayMusic(playMusic);
+    game.setPlaySounds(playSound);
+    game.loadLevels(L"data/levels.txt");
+
+    // connect window events to the game
+    wdk::Connect(*window, game);
 
     // set the saved level data
     for (int i=0; i<levels.size(); ++i)
@@ -157,33 +230,33 @@ int game_main(int argc, char* argv[])
         info.name      = base::FromUtf8(level_name);
         info.highScore = settings.GetValue(level_name, "highscore", 0);
         info.locked    = settings.GetValue(level_name, "locked", true);
-        window.setLevelInfo(info);
+        game.setLevelInfo(info);
     }
 
     const invaders::GameWidget::Profile EASY    {L"Easy",    1.6f, 2, 7, 30};
     const invaders::GameWidget::Profile MEDIUM  {L"Medium",  1.8f, 2, 4, 35};
     const invaders::GameWidget::Profile CHINESE {L"Chinese", 2.0f, 2, 4, 40};
 
-    loadProfile(EASY, window, settings);
-    loadProfile(MEDIUM, window, settings);
-    loadProfile(CHINESE, window, settings);
+    loadProfile(EASY, game, settings);
+    loadProfile(MEDIUM, game, settings);
+    loadProfile(CHINESE, game, settings);
 
-    window.initializeGL(width, height);
-    window.setFullscreen(fullscreen);
-    window.launchGame();
+    game.initializeGL(width, height);
+    game.setFullscreen(fullscreen);
+    game.launchGame();
 
     using clock = std::chrono::high_resolution_clock;
 
     auto start = clock::now();
 
-    while (window.isRunning())
+    while (game.isRunning())
     {
         const auto end  = clock::now();
         const auto gone = end - start;
         const auto ms   = std::chrono::duration_cast<std::chrono::milliseconds>(gone).count();
 
-        window.updateGame(ms);
-        window.renderGame();
+        game.updateGame(ms);
+        game.renderGame(*device, *painter);
 
         if (showFps)
         {
@@ -194,27 +267,33 @@ int game_main(int argc, char* argv[])
             if (runtime >= 1000)
             {
                 const float fps = frames / (runtime / 1000.0f);
-                window.setFps(fps);
+                game.setFps(fps);
                 runtime = 0;
                 frames  = 0;
             }
         }
-        window.pumpMessages();
+
+        wdk::native_event_t event;
+        while (wdk::PeekEvent(event))
+        {
+            window->ProcessEvent(event);
+        }
+
         start = end;
     }
 
-    settings.SetValue("window", "width",  window.getSurfaceWidth());
-    settings.SetValue("window", "height", window.getSurfaceHeight());
-    settings.SetValue("window", "fullscreen", window.isFullscreen());
+    settings.SetValue("window", "width",  window->GetSurfaceWidth());
+    settings.SetValue("window", "height", window->GetSurfaceHeight());
+    settings.SetValue("window", "fullscreen", window->IsFullscreen());
 
     // tear down.
-    window.close();
+    game.close();
 
     std::vector<std::string> level_names;
     for (unsigned i=0; ; ++i)
     {
         invaders::GameWidget::LevelInfo info;
-        if (!window.getLevelInfo(info, i))
+        if (!game.getLevelInfo(info, i))
             break;
         const auto& level_name = base::ToUtf8(info.name);
         level_names.push_back(level_name);
@@ -222,16 +301,27 @@ int game_main(int argc, char* argv[])
         settings.SetValue(level_name, "locked", info.locked);
     }
     settings.SetValue("game", "levels", level_names);
-    settings.SetValue("audio", "sound", window.getPlaySounds());
-    settings.SetValue("audio", "music", window.getPlayMusic());
-
+    settings.SetValue("audio", "sound", game.getPlaySounds());
+    settings.SetValue("audio", "music", game.getPlayMusic());
     settings.SaveToFile(misc::HomeDir::MapFile("settings.json"));
 
+    context->Dispose();
+    window->Destroy();
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
+#if defined(LINUX_OS)
+    // SIGFPE on floating point exception
+    feenableexcept(FE_INVALID   |
+                   FE_DIVBYZERO |
+                   FE_OVERFLOW  |
+                   FE_UNDERFLOW);
+    DEBUG("Enabled floating point exceptions");
+#endif
+
+
     try
     {
         return game_main(argc, argv);
