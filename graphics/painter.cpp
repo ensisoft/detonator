@@ -51,6 +51,10 @@ class StandardPainter : public Painter
 {
 public:
     StandardPainter(std::shared_ptr<Device> device)
+      : mDeviceInst(device)
+      , mDevice(device.get())
+    {}
+    StandardPainter(Device* device)
       : mDevice(device)
     {}
 
@@ -208,7 +212,8 @@ private:
     }
 
 private:
-    std::shared_ptr<Device> mDevice;
+    std::shared_ptr<Device> mDeviceInst;
+    Device* mDevice = nullptr;
 private:
     float mViewW = 0.0f;
     float mViewH = 0.0f;
@@ -219,6 +224,11 @@ private:
 
 // static
 std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
+{
+    return std::make_unique<StandardPainter>(device);
+}
+// static
+std::unique_ptr<Painter> Painter::Create(Device* device)
 {
     return std::make_unique<StandardPainter>(device);
 }

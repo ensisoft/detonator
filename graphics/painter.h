@@ -86,6 +86,7 @@ namespace gfx
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
+        static std::unique_ptr<Painter> Create(Device* device);
     private:
     };
 
