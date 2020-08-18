@@ -23,10 +23,14 @@ option(WITH_HarfBuzz "Freetype: Enable harfbuzz" OFF)
 option(WITH_PNG "Freetype: Build with PNG" OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype)
 
+set_property(TARGET freetype_custom_build PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 # harfbuzz (depends on freetype2)
 set(HARFBUZZ_FREETYPE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include" CACHE STRING "Freetype2 include folder")
 set(HARFBUZZ_FREETYPE_LIBRARY "freetype_custom_build" CACHE STRING "Name of the Freetype2 library build.")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/harfbuzz)
+
+set_property(TARGET harfbuzz_custom_build PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Qt color widgets
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/Qt-Color-Widgets)
@@ -332,34 +336,50 @@ if (UNIX)
     target_link_libraries(graphics_test ncurses)
 endif()
 
+
+# main game runner application. The executable will read a
+# config.json and create the window/context for the application as
+# per the configuration. The game logic will be loaded from a .so or .dll
+add_executable(main
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+    gamelib/main/main.cpp)
+target_include_directories(main PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
+target_link_libraries(main wdk_system wdk_desktop_gl)
+if (UNIX)
+    target_link_libraries(main ncurses "-ldl")
+endif()
+
 # gamelib test application.
-add_executable(gamelib_test
+add_library(gamelib_test SHARED
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
     graphics/material.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
-    graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
     graphics/material.cpp
+    graphics/opengl_es2_device.cpp
     gamelib/animation.cpp
     gamelib/test/main.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
 target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
-target_link_libraries(gamelib_test freetype_custom_build)
-target_link_libraries(gamelib_test harfbuzz_custom_build)
-target_link_libraries(gamelib_test wdk_system wdk_desktop_gl)
-install(TARGETS gamelib_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+
+target_link_libraries(gamelib_test PRIVATE freetype_custom_build harfbuzz_custom_build)
+install(TARGETS gamelib_test main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
-if (UNIX)
-    target_link_libraries(gamelib_test ncurses)
+# hide symbols on linux
+if (CMAKE_COMPILER_IS_GNUCC)
+    target_link_options(gamelib_test PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
+
 
 # game project
 add_executable(invaders

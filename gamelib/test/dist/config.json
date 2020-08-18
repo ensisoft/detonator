@@ -1,0 +1,25 @@
+{
+    "config": {
+        "red_size": 8,
+        "green_size": 8,
+        "blue_size": 8,
+        "alpha_size": 8,
+        "stencil_size": 8,
+        "depth_size": 0,
+        "sampling": "MSAA4"
+    },
+    "window": {
+        "width": 1024,
+        "height": 768,
+        "can_resize": true,
+        "has_border": true,
+        "set_fullscreen": false
+    },
+    "application": {
+        "title": "hello world",
+        "version": "0.1b",
+        "library": "gamelib_test",
+        "ticks_per_second": 2.0,
+        "updates_per_second": 60.0
+    }
+}

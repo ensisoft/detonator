@@ -193,7 +193,7 @@ struct OpenGLFunctions
 class OpenGLES2GraphicsDevice : public Device
 {
 public:
-    OpenGLES2GraphicsDevice(std::shared_ptr<Device::Context> context)
+    OpenGLES2GraphicsDevice(Context* context)
         : mContext(context)
     {
     #define RESOLVE(x) mGL.x = reinterpret_cast<decltype(mGL.x)>(mContext->Resolve(#x));
@@ -294,6 +294,11 @@ public:
         DEBUG("Depth bits: %1", depth_bits);
         DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
     }
+    OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
+        : OpenGLES2GraphicsDevice(context.get())
+    {
+        mContextImpl = context;
+    }
    ~OpenGLES2GraphicsDevice()
     {
         DEBUG("~OpenGLES2GraphicsDevice");
@@ -303,7 +308,6 @@ public:
        mShaders.clear();
        mPrograms.clear();
        mGeoms.clear();
-       mContext.reset();
     }
 
     virtual void ClearColor(const Color4f& color) override
@@ -1275,7 +1279,8 @@ private:
     std::map<std::string, std::unique_ptr<Shader>> mShaders;
     std::map<std::string, std::unique_ptr<Program>> mPrograms;
     std::map<std::string, std::unique_ptr<Texture>> mTextures;
-    std::shared_ptr<Context> mContext;
+    std::shared_ptr<Context> mContextImpl;
+    Context* mContext = nullptr;
     std::size_t mFrameNumber = 0;
     OpenGLFunctions mGL;
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
@@ -1285,6 +1290,11 @@ private:
 // static
 std::shared_ptr<Device> Device::Create(Type type,
     std::shared_ptr<Device::Context> context)
+{
+    return std::make_shared<OpenGLES2GraphicsDevice>(context);
+}
+// static
+std::shared_ptr<Device> Device::Create(Type type, Device::Context* context)
 {
     return std::make_shared<OpenGLES2GraphicsDevice>(context);
 }

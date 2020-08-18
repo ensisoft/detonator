@@ -25,13 +25,7 @@
 #include <memory>
 #include <vector>
 #include <cstring>
-#include <chrono>
 #include <cmath>
-#include <iostream>
-
-#if defined(LINUX_OS)
-#  include <fenv.h>
-#endif
 
 #include "base/logging.h"
 #include "base/format.h"
@@ -46,12 +40,7 @@
 #include "graphics/resource.h"
 #include "gamelib/animation.h"
 #include "gamelib/gfxfactory.h"
-#include "wdk/opengl/config.h"
-#include "wdk/opengl/context.h"
-#include "wdk/opengl/surface.h"
-#include "wdk/window.h"
-#include "wdk/events.h"
-#include "wdk/system.h"
+#include "gamelib/main/interface.h"
 
 class TestCase
 {
@@ -170,204 +159,125 @@ private:
     float mTime = 0.0f;
 };
 
-int main(int argc, char* argv[])
+
+class MyApp : public game::App, public wdk::WindowListener
 {
-
-#if defined(LINUX_OS)
-    // SIGFPE on floating point exception
-    feenableexcept(FE_INVALID  |
-                   FE_DIVBYZERO |
-                   FE_OVERFLOW|
-                   FE_UNDERFLOW
-                   );
-    DEBUG("Enabled floating point exceptions");
-#endif
-
-    base::OStreamLogger logger(std::cout);
-    base::SetGlobalLog(&logger);
-    DEBUG("It's alive!");
-    INFO("Copyright (c) 2010-2020 Sami Vaisanen");
-    INFO("http://www.ensisoft.com");
-    INFO("http://github.com/ensisoft/gamestudio");
-
-    auto sampling = wdk::Config::Multisampling::None;
-    bool testing  = false;
-    bool issue_gold = false;
-    std::string casename;
-
-    for (int i=1; i<argc; ++i)
+public:
+    virtual bool ParseArgs(int argc, char* argv[])
     {
-        if (!std::strcmp(argv[i], "--debug-log"))
-            base::EnableDebugLog(true);
-        else if (!std::strcmp(argv[i], "--msaa4"))
-            sampling = wdk::Config::Multisampling::MSAA4;
-        else if (!std::strcmp(argv[i], "--msaa8"))
-            sampling = wdk::Config::Multisampling::MSAA8;
-        else if (!std::strcmp(argv[i], "--msaa16"))
-            sampling = wdk::Config::Multisampling::MSAA16;
-        else if (!std::strcmp(argv[i], "--test"))
-            testing = true;
-        else if (!std::strcmp(argv[i], "--case"))
-            casename = argv[++i];
-        else if (!std::strcmp(argv[i], "--issue-gold"))
-            issue_gold = true;
+        bool debug = false;
+        for (int i = 1; i < argc; ++i)
+        {
+            if (!std::strcmp("--debug", argv[i]))
+                debug = true;
+        }
+        base::EnableDebugLog(debug);
+        return true;
+    }
+    virtual bool GetNextRequest(Request* out) override
+    {
+        return mRequests.GetNext(out);
     }
 
-    // context integration glue code that puts together
-    // wdk::Context and gfx::Device
-    class WindowContext : public gfx::Device::Context
+    // Application implementation
+    virtual void Start()
     {
-    public:
-        WindowContext(wdk::Config::Multisampling sampling)
-        {
-            wdk::Config::Attributes attrs;
-            attrs.red_size  = 8;
-            attrs.green_size = 8;
-            attrs.blue_size = 8;
-            attrs.alpha_size = 8;
-            attrs.stencil_size = 8;
-            attrs.surfaces.window = true;
-            attrs.double_buffer = true;
-            attrs.sampling = sampling; //wdk::Config::Multisampling::MSAA4;
-            attrs.srgb_buffer = true;
+        mTestList.emplace_back(new AnimationTest);
+        mTestList[mTestIndex]->Start();
+    }
 
-            mConfig   = std::make_unique<wdk::Config>(attrs);
-            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
-                wdk::Context::Type::OpenGL_ES);
-            mVisualID = mConfig->GetVisualID();
-        }
-        virtual void Display() override
-        {
-            mContext->SwapBuffers();
-        }
-        virtual void* Resolve(const char* name) override
-        {
-            return mContext->Resolve(name);
-        }
-        virtual void MakeCurrent() override
-        {
-            mContext->MakeCurrent(mSurface.get());
-        }
-        wdk::uint_t GetVisualID() const
-        { return mVisualID; }
+    virtual void Init(gfx::Device::Context* context,
+        unsigned surface_width, unsigned surface_height)
+    {
+        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+        mPainter = gfx::Painter::Create(mDevice);
+    }
 
-        void SetWindowSurface(wdk::Window& window)
-        {
-            mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
-            mContext->MakeCurrent(mSurface.get());
-            mConfig.release();
-        }
-        void Dispose()
-        {
-            mContext->MakeCurrent(nullptr);
-            mSurface->Dispose();
-            mSurface.reset();
-            mConfig.reset();
-        }
-    private:
-        std::unique_ptr<wdk::Context> mContext;
-        std::unique_ptr<wdk::Surface> mSurface;
-        std::unique_ptr<wdk::Config>  mConfig;
-        wdk::uint_t mVisualID = 0;
-    };
+    virtual void Draw() override
+    {
+        mDevice->BeginFrame();
+        mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
+        mPainter->SetViewport(0, 0, 1027, 768);
+        mTestList[mTestIndex]->Render(*mPainter);
+        mDevice->EndFrame(true);
 
-    auto context = std::make_shared<WindowContext>(sampling);
-    auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
-    auto painter = gfx::Painter::Create(device);
+        mDevice->CleanGarbage(120);
+    }
 
-    std::size_t test_index = 0;
-    std::vector<std::unique_ptr<TestCase>> tests;
-    tests.emplace_back(new AnimationTest);
+    virtual void Tick(double time) override
+    {
+        DEBUG("Tick!");
+    }
 
-    bool stop_for_input = false;
+    virtual void Update(double time, double dt) override
+    {
+        // jump animations forward by the some timestep
+        for (auto& test : mTestList)
+            test->Update(dt);
+    }
+    virtual void Shutdown() override
+    {
+        mTestList[mTestIndex]->End();
+    }
+    virtual bool IsRunning() const override
+    { return mRunning; }
+    virtual wdk::WindowListener* GetWindowListener() override
+    { return this; }
 
-    wdk::Window window;
-    window.Create("Demo", 1024, 768, context->GetVisualID());
-    window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
-        const auto current_test_index = test_index;
+    // WindowListener
+    virtual void OnWantClose(const wdk::WindowEventWantClose&) override
+    {
+        mRunning = false;
+    }
+    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    {
+        const auto current_test_index = mTestIndex;
         if (key.symbol == wdk::Keysym::Escape)
-            window.Destroy();
+            mRunning = false;
         else if (key.symbol == wdk::Keysym::ArrowLeft)
-            test_index = test_index ? test_index - 1 : tests.size() - 1;
+            mTestIndex = mTestIndex ? mTestIndex - 1 : mTestList.size() - 1;
         else if (key.symbol == wdk::Keysym::ArrowRight)
-            test_index = (test_index + 1) % tests.size();
+            mTestIndex = (mTestIndex + 1) % mTestList.size();
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
+            TakeScreenshot();
+        else if (key.symbol == wdk::Keysym::Space)
+            mRequests.ToggleFullscreen();
+
+        if (mTestIndex != current_test_index)
         {
-            static unsigned screenshot_number = 0;
-            const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(),
-                window.GetSurfaceHeight());
-
-            gfx::Bitmap<gfx::RGB> tmp;
-
-            const auto& name = "demo_" + std::to_string(screenshot_number) + ".png";
-            gfx::WritePNG(gfx::Bitmap<gfx::RGB>(rgba), name);
-            INFO("Wrote screen capture '%1'", name);
-            screenshot_number++;
-        }
-        if (test_index != current_test_index)
-        {
-            tests[current_test_index]->End();
-            tests[test_index]->Start();
-        }
-        stop_for_input = false;
-    };
-
-    // render in the window
-    context->SetWindowSurface(window);
-
-    tests[test_index]->Start();
-
-    using clock = std::chrono::high_resolution_clock;
-
-    auto stamp = clock::now();
-    float frames  = 0;
-    float seconds = 0.0f;
-
-    while (window.DoesExist())
-    {
-        // measure how much time has elapsed since last iteration
-        const auto now  = clock::now();
-        const auto gone = now - stamp;
-        // if sync to vblank is off then we it's possible that we might be
-        // rendering too fast for milliseconds, let's use microsecond
-        // precision for now. otherwise we'd need to accumulate time worth of
-        // several iterations of the loop in order to have an actual time step
-        // for updating the animations.
-        const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
-        stamp = now;
-
-        // jump animations forward by the *previous* timestep
-        for (auto& test : tests)
-            test->Update(secs);
-
-        device->BeginFrame();
-        device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
-        painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
-
-        // render the current test
-        tests[test_index]->Render(*painter);
-
-        device->EndFrame(true /*display*/);
-        device->CleanGarbage(120);
-
-        // process incoming (window) events
-        wdk::native_event_t event;
-        while (wdk::PeekEvent(event))
-        {
-            window.ProcessEvent(event);
-        }
-
-        ++frames;
-        seconds += secs;
-        if (seconds > 1.0f)
-        {
-            const auto fps = frames / seconds;
-            INFO("FPS: %1", fps);
-            frames = 0.0f;
-            seconds = 0.0f;
+            mTestList[current_test_index]->End();
+            mTestList[mTestIndex]->Start();
         }
     }
+    virtual void UpdateStats(const Stats& stats) override
+    {
+        DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
+            stats.current_fps, stats.total_wall_time, stats.total_game_time, stats.num_frames_rendered);
+    }
+private:
+    void TakeScreenshot()
+    {
+        const auto& rgba = mDevice->ReadColorBuffer(1024, 768);
+        gfx::WritePNG(rgba, "screenshot.png");
+        INFO("Wrote screenshot");
+    }
+private:
+    std::size_t mTestIndex = 0;
+    std::vector<std::unique_ptr<TestCase>> mTestList;
+    std::unique_ptr<gfx::Painter> mPainter;
+    std::shared_ptr<gfx::Device> mDevice;
+    bool mRunning = true;
+    game::AppRequestQueue mRequests;
+};
 
-    context->Dispose();
-    return 0;
+extern "C" {
+
+GAMESTUDIO_APP_LIBRARY_ENTRY_POINT game::App* MakeApp(base::Logger* logger)
+{
+    base::SetThreadLog(logger);
+    INFO("Hello from gamelib test app");
+    return new MyApp;
 }
+
+} // extern "C"
+

@@ -206,6 +206,8 @@ namespace gfx
         // Type = OpenGL_ES2, Context 2.0
         static
         std::shared_ptr<Device> Create(Type type, std::shared_ptr<Context> context);
+        static
+        std::shared_ptr<Device> Create(Type type, Context* context);
     private:
     };
 

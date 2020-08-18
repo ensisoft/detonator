@@ -1,0 +1,4 @@
+FOO {
+  global: MakeApp; # explicitly list symbols to be exported
+  local: *;         # hide everything else
+};
