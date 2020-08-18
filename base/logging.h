@@ -129,23 +129,42 @@ namespace base
     };
 
 
+    template<typename WrappedLogger>
+    class LockedLogger : public Logger
+    {
+    public:
+        LockedLogger(WrappedLogger&& other)
+          : mLogger(std::move(other))
+        {}
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mLogger.Write(type, file, line, msg);
+        }
+        virtual void Write(LogEvent type, const char* msg) const override
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mLogger.Write(type, msg);
+        }
+        virtual void Flush() override
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mLogger.Flush();
+        }
+    private:
+        WrappedLogger mLogger;
+        mutable std::mutex mMutex;
+    };
+
+
     // Set the logger object for all threads to use. Each thread can override
     // this setting by setting a thread specific log. If a thread specific
     // logger is set that will the precedence over global logger.
-    // Thread safe.
+    // In the precense of threads the logger object should be thread safe.
     Logger* SetGlobalLog(Logger* log);
 
-    // Access device for making sure that access to the global logger
-    // is always properly locked and unlocked.
-    struct GlobalLogAccess {
-        std::unique_lock<std::mutex> lock;
-        Logger* logger = nullptr;
-    };
-
-    // Get access to the global logger object (if any)
-    // The access to the logger object is exclusive to the
-    // calling thread.
-    GlobalLogAccess GetGlobalLog();
+    // Get access to the global logger object (if any).
+    Logger* GetGlobalLog();
 
     // Get the calling thread's current logger object (if any)
     Logger* GetThreadLog();
@@ -208,13 +227,12 @@ namespace base
         }
 
         // acquire access to the global logger
-        GlobalLogAccess access = GetGlobalLog();
-        if (!access.logger)
+        auto* global_log = GetGlobalLog();
+        if (!global_log)
             return;
 
-        access.logger->Write(type, file, line, msg.c_str());
-        access.logger->Write(type, formatted_log_message);
-
+        global_log->Write(type, file, line, msg.c_str());
+        global_log->Write(type, formatted_log_message);
     }
 
 } // base

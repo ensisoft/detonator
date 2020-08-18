@@ -30,19 +30,18 @@
 #include <atomic>
 #include "logging.h"
 
+namespace {
 // a thread specific logger object.
 thread_local base::Logger* threadLogger;
 
 // global logger
-base::Logger* globalLogger;
-// global logger mutex. must be acquired before
-// - writing to the logger from multiple threads
-// - setting/resetting the logger object
-std::mutex globalLoggerMutex;
+static base::Logger* globalLogger;
 
 // atomic flag to globally specify whether debug
 // logs are allowed to go through or not
-std::atomic<bool> isGlobalDebugLogEnabled(false);
+static std::atomic<bool> isGlobalDebugLogEnabled(false);
+
+} // namespace
 
 namespace base
 {
@@ -123,19 +122,14 @@ void CursesLogger::Write(LogEvent type, const char* msg) const
 
 Logger* SetGlobalLog(Logger* log)
 {
-    std::unique_lock<std::mutex> lock(globalLoggerMutex);
     auto ret = globalLogger;
     globalLogger = log;
     return ret;
 }
 
-GlobalLogAccess GetGlobalLog()
+Logger* GetGlobalLog()
 {
-    std::unique_lock<std::mutex> lock(globalLoggerMutex);
-    GlobalLogAccess access;
-    access.logger = globalLogger;
-    access.lock   = std::move(lock);
-    return access;
+    return globalLogger;
 }
 
 Logger* GetThreadLog()
@@ -160,7 +154,6 @@ void FlushThreadLog()
 
 void FlushGlobalLog()
 {
-    std::unique_lock<std::mutex> lock(globalLoggerMutex);
     if (!globalLogger)
         return;
     globalLogger->Flush();
