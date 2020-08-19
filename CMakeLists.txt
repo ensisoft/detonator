@@ -348,7 +348,7 @@ add_executable(main
 target_include_directories(main PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
 target_link_libraries(main wdk_system wdk_desktop_gl)
 if (UNIX)
-    target_link_libraries(main ncurses "-ldl")
+    target_link_libraries(main ncurses dl pthread)
 endif()
 
 # gamelib test application.
@@ -382,7 +382,7 @@ endif()
 
 
 # game project
-add_executable(invaders
+add_library(invaders SHARED
     pinyin-invaders/level.cpp
     pinyin-invaders/gamewidget.cpp
     pinyin-invaders/game.cpp
@@ -404,24 +404,25 @@ add_executable(invaders
     gamelib/homedir.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
+    wdk/wdk/keys.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
 target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders")
-target_link_libraries(invaders freetype_custom_build)
-target_link_libraries(invaders harfbuzz_custom_build)
-target_link_libraries(invaders wdk_system wdk_desktop_gl)
+target_link_libraries(invaders PRIVATE freetype_custom_build harfbuzz_custom_build)
 if (WIN32)
   include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")
-  target_link_libraries(invaders "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
+  target_link_libraries(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
 elseif (UNIX)
-  target_link_libraries(invaders ncurses)
-  target_link_libraries(invaders pulse)
-  target_link_libraries(invaders sndfile)
-  target_link_libraries(invaders pthread)
+  target_link_libraries(invaders PRIVATE pulse)
+  target_link_libraries(invaders PRIVATE sndfile)
+  target_link_libraries(invaders PRIVATE pthread)
 endif()
-install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
-
+install(TARGETS invaders main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
+# hide symbols on linux
+if (CMAKE_COMPILER_IS_GNUCC)
+    target_link_options(invaders PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
+endif()
 
 # unit tests
 enable_testing()

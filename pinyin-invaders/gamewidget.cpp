@@ -47,11 +47,11 @@
 #include "graphics/transform.h"
 #include "gamelib/loader.h"
 #include "gamelib/animation.h"
+#include "gamelib/homedir.h"
 #include "gamelib/settings.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
-#include "wdk/window.h"
 #include "wdk/events.h"
 #include "wdk/system.h"
 #include "gamewidget.h"
@@ -66,9 +66,6 @@ using FRect  = gfx::FRect;
 using IRect  = gfx::IRect;
 using FPoint = gfx::FPoint;
 using IPoint = gfx::IPoint;
-
-extern audio::AudioPlayer* g_audio;
-extern game::ResourceLoader* g_loader;
 
 const auto LevelUnlockCriteria = 0.85;
 const auto GameCols = 40;
@@ -1290,9 +1287,11 @@ class GameWidget::MainMenu : public GameWidget::State
 public:
     MainMenu(const std::vector<std::unique_ptr<Level>>& levels,
              const std::vector<GameWidget::LevelInfo>& infos,
+             audio::AudioPlayer* audioPlayer,
              bool bPlaySounds)
     : mLevels(levels)
     , mInfos(infos)
+    , mAudioPlayer(audioPlayer)
     , mPlaySounds(bPlaySounds)
     {}
 
@@ -1443,10 +1442,8 @@ public:
 
         if (bPlaySound && mPlaySounds)
         {
-        #ifdef GAME_ENABLE_AUDIO
             auto swoosh = std::make_unique<audio::AudioFile>("sounds/Slide_Soft_00.ogg", "swoosh");
-            g_audio->Play(std::move(swoosh));
-        #endif
+            mAudioPlayer->Play(std::move(swoosh));
         }
     }
 
@@ -1488,6 +1485,7 @@ private:
 private:
     const std::vector<std::unique_ptr<Level>>& mLevels;
     const std::vector<LevelInfo>& mInfos;
+    audio::AudioPlayer* mAudioPlayer = nullptr;
     int mCurrentLevelIndex   = 0;
     int mCurrentProfileIndex = 0;
     int mCurrentRowIndex  = 1;
@@ -1562,7 +1560,7 @@ public:
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 1), IPoint(1, 2)),
             gfx::Color::White);
-#ifdef GAME_ENABLE_AUDIO
+
         gfx::DrawTextRect(painter,
             base::FormatString("Sounds Effects: %1", mPlaySounds ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
@@ -1573,13 +1571,7 @@ public:
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 3), IPoint(1, 4)),
             mSettingIndex == 1 ? gfx::Color::Green : gfx::Color::White);
-#else
-        gfx::DrawTextRect(painter,
-            "Audio is not supported on this platform."
-            "fonts/ARCADE.TTF", font_size,
-            layout.MapGfxRect(IPoint(0, 2), IPoint(1, 4)),
-            gfx::Color::DarkGray);
-#endif
+
         gfx::DrawTextRect(painter,
             base::FormatString("Fullscreen: %1", mFullscreen ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
@@ -1862,15 +1854,15 @@ private:
 };
 
 
-GameWidget::GameWidget(wdk::Window& window) : mWindow(window)
+GameWidget::GameWidget()
 {
     mGame.reset(new Game(GameCols, GameRows));
 
     mGame->onMissileKill = [&](const Game::Invader& i, const Game::Missile& m, unsigned killScore)
     {
         auto it = mInvaders.find(i.identity);
-        const auto w = mWindow.GetSurfaceWidth();
-        const auto h = mWindow.GetSurfaceHeight();
+        const auto w = mRenderWidth;
+        const auto h = mRenderHeight;
         const auto layout = GetGameWindowLayout(w, h);
         const auto scale = layout.GetCellDimensions();
 
@@ -1907,14 +1899,12 @@ GameWidget::GameWidget(wdk::Window& window) : mWindow(window)
 
         mInvaders.erase(it);
 
-#ifdef GAME_ENABLE_AUDIO
         if (mPlaySounds)
         {
             // sound effects FX
             auto sndExplosion = std::make_unique<audio::AudioFile>("sounds/explode.wav", "explosion");
-            g_audio->Play(std::move(sndExplosion), std::chrono::milliseconds(missileFlyTime));
+            mAudioPlayer->Play(std::move(sndExplosion), std::chrono::milliseconds(missileFlyTime));
         }
-#endif
     };
 
     mGame->onMissileDamage = [&](const Game::Invader& i, const Game::Missile& m)
@@ -2085,22 +2075,12 @@ GameWidget::GameWidget(wdk::Window& window) : mWindow(window)
         mStates.push(std::move(scoreboard));
     };
 
-    // in this space all the background objects travel to the same direction
 
-    for (size_t i=0; i<20; ++i)
-    {
-        const glm::vec2 spaceJunkDirection(-1, 0);
-        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection)));
-    }
-
-    // initialize the input/state stack with the main menu.
-    auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, true);
-    mStates.push(std::move(menu));
 }
 
 GameWidget::~GameWidget() = default;
 
-void GameWidget::initArgs(int argc, char* argv[])
+bool GameWidget::ParseArgs(int argc, char* argv[])
 {
     for (int i=1; i<argc; ++i)
     {
@@ -2113,11 +2093,28 @@ void GameWidget::initArgs(int argc, char* argv[])
             mUnlimitedBombs = true;
         else if (a == "--show-fps")
             mShowFps = true;
+        else if (a == "--debug")
+            base::EnableDebugLog(true);
     }
+    return true;
 }
 
-void GameWidget::load(const game::Settings& settings)
+void GameWidget::Init(gfx::Device::Context* context, unsigned surface_width, unsigned surface_height)
 {
+    mDevice = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+    mPainter = gfx::Painter::Create(mDevice);
+    mRenderWidth = surface_width;
+    mRenderHeight = surface_height;
+    mAudioPlayer = std::make_unique<audio::AudioPlayer>(audio::AudioDevice::Create(GAME_TITLE));
+}
+
+void GameWidget::Load()
+{
+    game::HomeDir::Initialize(".pinyin-invaders");
+    game::Settings settings;
+    if (base::FileExists(game::HomeDir::MapFile("settings.json")))
+        settings.LoadFromFile(game::HomeDir::MapFile("settings.json"));
+
     const auto width      = settings.GetValue("window", "width", 1200);
     const auto height     = settings.GetValue("window", "height", 700);
     const auto fullscreen = settings.GetValue("window", "fullscreen", false);
@@ -2170,7 +2167,7 @@ void GameWidget::load(const game::Settings& settings)
     // adjust window based on settings.
     if (fullscreen)
     {
-        mWindow.SetFullscreen(true);
+        mRequests.SetFullscreen(true);
     }
     else
     {
@@ -2179,18 +2176,23 @@ void GameWidget::load(const game::Settings& settings)
             ? width : GameCols * 20;
         const auto surface_height = height != 0
             ? height : surface_width * aspect;
-        mWindow.SetSize(surface_width, surface_height);
+        mRequests.ResizeWindow(surface_width, surface_height);
     }
 
     mPlayMusic  = play_music;
     mPlaySounds = play_sound;
+    mFullscreen = fullscreen;
+
+    mLoader.LoadResources(".", "content.json");
+    gfx::SetResourceLoader(&mLoader);
 }
 
-void GameWidget::save(game::Settings& settings)
+void GameWidget::Save()
 {
-    settings.SetValue("window", "width",  mWindow.GetSurfaceWidth());
-    settings.SetValue("window", "height", mWindow.GetSurfaceHeight());
-    settings.SetValue("window", "fullscreen", mWindow.IsFullscreen());
+    game::Settings settings;
+    settings.SetValue("window", "width",  mRenderWidth);
+    settings.SetValue("window", "height", mRenderHeight);
+    settings.SetValue("window", "fullscreen", mFullscreen);
     settings.SetValue("audio", "sound", mPlaySounds);
     settings.SetValue("audio", "music", mPlayMusic);
 
@@ -2205,22 +2207,35 @@ void GameWidget::save(game::Settings& settings)
         settings.SetValue(level_name, "locked", info.locked);
     }
     settings.SetValue("game", "levels", level_names);
+    settings.SaveToFile(game::HomeDir::MapFile("settings.json"));
 }
 
-void GameWidget::launch()
+void GameWidget::Start()
 {
+    // in this space all the background objects travel to the same direction
+    for (size_t i=0; i<20; ++i)
+    {
+        const glm::vec2 spaceJunkDirection(-1, 0);
+        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection)));
+    }
+
+    // initialize the input/state stack with the main menu.
+    auto menu = std::make_unique<MainMenu>(mLevels, mLevelInfos, mAudioPlayer.get(), true);
+    mStates.push(std::move(menu));
+
     mStates.top()->setPlaySounds(mPlaySounds);
     mStates.top()->setMasterUnlock(mMasterUnlock);
     playMusic();
 }
 
-void GameWidget::updateGame(float dt)
+void GameWidget::Update(double current_time, double dt)
 {
+    // convert to milliseconds
+    dt = dt * 1000.0;
 
-#ifdef GAME_ENABLE_AUDIO
     // handle audio events.
     audio::AudioPlayer::TrackEvent event;
-    while (g_audio->GetEvent(&event))
+    while (mAudioPlayer->GetEvent(&event))
     {
         DEBUG("Audio event (%1)", event.id);
         if (event.id != mMusicTrackId)
@@ -2230,8 +2245,6 @@ void GameWidget::updateGame(float dt)
         playMusic();
     }
 
-#endif
-
     const auto time = dt * mWarpFactor;
     const auto tick = 1000.0 / mProfiles[mCurrentProfile].speed;
 
@@ -2240,7 +2253,7 @@ void GameWidget::updateGame(float dt)
         mAnimations.emplace_back(new UFO);
     }
 
-    auto* background = g_loader->FindAnimation("Space");
+    auto* background = mLoader.FindAnimation("Space");
     background->Update(time/1000.0f);
 
     mStates.top()->update(time);
@@ -2284,8 +2297,8 @@ void GameWidget::updateGame(float dt)
     static const CollisionType UFO_UFO_Collision =
         { Animation::ColliderType::UFO, Animation::ColliderType::UFO };
 
-    const auto w = mWindow.GetSurfaceWidth();
-    const auto h = mWindow.GetSurfaceHeight();
+    const auto w = mRenderWidth;
+    const auto h = mRenderHeight;
     const IRect rect(0, 0, w , h);
 
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
@@ -2368,32 +2381,32 @@ void GameWidget::updateGame(float dt)
     }
 }
 
-void GameWidget::renderGame(gfx::Device& device, gfx::Painter& painter)
+void GameWidget::Draw()
 {
     // implement simple painter's algorithm here
     // i.e. paint the game scene from back to front.
-    const auto w = mWindow.GetSurfaceWidth();
-    const auto h = mWindow.GetSurfaceHeight();
+    const auto w = mRenderWidth;
+    const auto h = mRenderHeight;
     const IRect rect(0, 0, w , h);
 
-    device.BeginFrame();
-    painter.SetViewport(0, 0, w, h);
-    device.ClearColor(gfx::Color::Black);
+    mDevice->BeginFrame();
+    mDevice->ClearColor(gfx::Color::Black);
+    mPainter->SetViewport(0, 0, w, h);
 
     // paint the background
     {
-        const auto* anim = g_loader->FindAnimation("Space");
+        const auto* anim = mLoader.FindAnimation("Space");
         const auto* node = anim->FindNodeByName("Background");
         const auto& rect = anim->GetBoundingBox(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
-        anim->Draw(painter, view);
+        anim->Draw(*mPainter, view);
     }
 
     // then paint the animations on top of the background
     for (auto& anim : mAnimations)
     {
-        anim->paint(painter, rect);
+        anim->paint(*mPainter, rect);
     }
 
     const bool bIsGameRunning = mStates.top()->isGameRunning();
@@ -2406,16 +2419,16 @@ void GameWidget::renderGame(gfx::Device& device, gfx::Painter& painter)
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->paint(painter, rect);
+            invader->paint(*mPainter, rect);
         }
     }
 
     // finally paint the menu/HUD
-    mStates.top()->paint(painter, rect);
+    mStates.top()->paint(*mPainter, rect);
 
     if (mShowFps)
     {
-        gfx::DrawTextRect(painter,
+        gfx::DrawTextRect(*mPainter,
             base::FormatString("FPS: %1", mCurrentfps),
             "fonts/ARCADE.TTF", 28,
             gfx::FRect(10, 20, 150, 100),
@@ -2423,8 +2436,8 @@ void GameWidget::renderGame(gfx::Device& device, gfx::Painter& painter)
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
 
-    device.EndFrame();
-    device.CleanGarbage(120);
+    mDevice->EndFrame(true);
+    mDevice->CleanGarbage(120);
 }
 
 void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
@@ -2434,8 +2447,8 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
     if (sym == wdk::Keysym::KeyR && mod.test(wdk::Keymod::Shift))
     {
         DEBUG("Recompile shaders");
-        //mCustomGraphicsDevice->DeleteShaders();
-        //mCustomGraphicsDevice->DeletePrograms();
+        mDevice->DeleteShaders();
+        mDevice->DeletePrograms();
         return;
     }
     else if (sym == wdk::Keysym::KeyN && mod.test(wdk::Keymod::Shift))
@@ -2443,12 +2456,10 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
         DEBUG("Next music track");
         if (mPlayMusic)
         {
-        #ifdef GAME_ENABLE_AUDIO
-            g_audio->Cancel(mMusicTrackId);
+            mAudioPlayer->Cancel(mMusicTrackId);
             mMusicTrackId = 0;
             mMusicTrackIndex++;
             playMusic();
-        #endif
         }
         return;
     }
@@ -2464,10 +2475,10 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
             break;
         case State::Action::OpenSettings:
             {
-                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds,
-                    mWindow.IsFullscreen());
+                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds, mFullscreen);
                 settings->onToggleFullscreen = [this](bool fullscreen) {
-                    mWindow.SetFullscreen(fullscreen);
+                    mFullscreen = !mFullscreen;
+                    mRequests.SetFullscreen(mFullscreen);
                 };
                 settings->onTogglePlayMusic = [this](bool play) {
                     mPlayMusic = play;
@@ -2541,7 +2552,6 @@ void GameWidget::OnWantClose(const wdk::WindowEventWantClose& close)
 
 void GameWidget::playMusic()
 {
-#ifdef GAME_ENABLE_AUDIO
     static const char* tracks[] = {
         "music/awake10_megaWall.ogg"
     };
@@ -2551,7 +2561,7 @@ void GameWidget::playMusic()
         if (mMusicTrackId)
         {
             DEBUG("Resume music");
-             g_audio->Resume(mMusicTrackId);
+             mAudioPlayer->Resume(mMusicTrackId);
         }
         else
         {
@@ -2559,7 +2569,7 @@ void GameWidget::playMusic()
             const auto track_index = mMusicTrackIndex % num_tracks;
             DEBUG("Play music track: %1, '%2'", track_index, tracks[track_index]);
             auto music = std::make_unique<audio::AudioFile>(tracks[track_index], "MainMusic");
-            mMusicTrackId = g_audio->Play(std::move(music));
+            mMusicTrackId = mAudioPlayer->Play(std::move(music));
         }
     }
     else
@@ -2567,10 +2577,9 @@ void GameWidget::playMusic()
         if (mMusicTrackId)
         {
             DEBUG("Stop music");
-            g_audio->Pause(mMusicTrackId);
+            mAudioPlayer->Pause(mMusicTrackId);
         }
     }
-#endif
 }
 
 } // invaders

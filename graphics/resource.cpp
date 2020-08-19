@@ -25,8 +25,8 @@
 #include "resource.h"
 
 namespace {
-    gfx::ResourceLoader* gLoader;
-}
+ static gfx::ResourceLoader* gLoader;
+} // namespace
 
 namespace gfx
 {

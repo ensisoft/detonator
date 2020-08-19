@@ -127,6 +127,10 @@ namespace game
         virtual void Init(gfx::Device::Context* context,
             unsigned surface_width, unsigned surface_height) {}
 
+        // Load the game and its data and/or previous state.
+        // Called once before entering the main game upate/render loop.
+        virtual void Load() {}
+
         // Start the application. This is called once before entering the
         // main game update/render loop.
         virtual void Start() {}
@@ -141,6 +145,10 @@ namespace game
         // Update the application. Time is current total application time
         // and dt is the time step in seconds.
         virtual void Update(double current_time, double dt) {}
+
+        // Save the game and its current state.
+        // Called once after leaving the main game update/render loop.
+        virtual void Save() {}
 
         // Shutdown the application. Called once after leaving the
         // main game update/render loop.
@@ -172,6 +180,15 @@ namespace game
         // Update the collected runtime statistics. This is called
         // approximately once per second.
         virtual void UpdateStats(const Stats& stats) {}
+
+        // Called when the primary rendering surface in which the application
+        // renders for display has been resized. Note that this may not be
+        // the same as the current window and its size if an offscreen rendering
+        // is being done!
+        // This is called once on appliation startup and then every time when
+        // the rendering surface size changes.
+        virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) {}
+
     protected:
     private:
     };
@@ -192,7 +209,7 @@ namespace game
         }
         inline void MoveWindow(int x, int y)
         { mQueue.push(game::App::MoveWindow { x, y }); }
-        inline void SizeWindow(unsigned width, unsigned height)
+        inline void ResizeWindow(unsigned width, unsigned height)
         { mQueue.push(game::App::ResizeWindow{width, height}); }
         inline void SetFullscreen(bool fullscreen)
         { mQueue.push(game::App::SetFullscreen{fullscreen}); }
@@ -208,18 +225,16 @@ namespace game
 
 // Win32 / MSVS export/import shit
 #if defined(__MSVC__)
-#  if defined(GAMESTUDIO_IMPORT_APP_LIBRARY)
-#    define GAMESTUDIO_APP_LIBRARY_ENTRY_POINT __declspec(dllimport)
-#  else
-#    define GAMESTUDIO_APP_LIBRARY_ENTRY_POINT __declspec(dllexport)
-#  endif
+#  define GAMESTUDIO_EXPORT __declspec(dllexport)
+#  define GAMESTUDIO_IMPORT __declspec(dllimport)
 #else
-#  define GAMESTUDIO_APP_LIBRARY_ENTRY_POINT
+#  define GAMESTUDIO_EXPORT
+#  define GAMESTUDIO_IMPORT
 #endif
 
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_APP_LIBRARY_ENTRY_POINT game::App* MakeApp(base::Logger*);
+    GAMESTUDIO_IMPORT game::App* MakeApp(base::Logger*);
 } // extern "C"
 
 typedef game::App* (*MakeAppFunc)(base::Logger*);

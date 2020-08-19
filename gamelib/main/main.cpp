@@ -76,7 +76,7 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     if (func == NULL)
         throw std::runtime_error("No game entry point found.");
 
-    std::unique_ptr<game::App> ret(func(base::GetThreadLog()));
+    std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
     return ret;
 }
 #elif defined(WINDOWS_OS)
@@ -93,7 +93,7 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     if (func == NULL)
         throw std::runtime_error("No game entry point found.");
 
-    std::unique_ptr<game::App> ret(func(base::GetThreadLog()));
+    std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
     return ret;
 }
 #endif
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
         opt.Add("--config", "Application configuration JSON file path.", std::string("config.json"));
         opt.Add("--help", "Print this help and exit.");
         opt.Add("--debug", "Enable debug log output.");
-        opt.Parse(args);
+        opt.Parse(args, true);
         if (opt.WasGiven("--help"))
         {
             opt.Print(std::cout);
@@ -208,8 +208,8 @@ int main(int argc, char* argv[])
         // Two(?) solutions for this:
         //  - move the shared common code into a shared shared library
         //  - change the locking mechanism and put it into the logger.
-        base::CursesLogger logger;
-        base::SetThreadLog(&logger);
+        base::LockedLogger<base::CursesLogger> logger((base::CursesLogger()));
+        base::SetGlobalLog(&logger);
         base::EnableDebugLog(opt.WasGiven("--debug"));
         DEBUG("It's alive!");
         INFO("Copyright (c) 2010-2020 Sami Vaisanen");
@@ -228,8 +228,8 @@ int main(int argc, char* argv[])
         // read config JSON
         const auto& json = nlohmann::json::parse(in);
 
-        std::string title;
         std::string library;
+        std::string title = "MainWindow";
         base::JsonReadSafe(json["application"], "title", &title);
         base::JsonReadSafe(json["application"], "library", &library);
         auto app = LoadApp(library);
@@ -287,6 +287,7 @@ int main(int argc, char* argv[])
         app->Init(context.get(), window.GetSurfaceWidth(),
             window.GetSurfaceHeight());
 
+        app->Load();
         app->Start();
 
         // there's plenty of information about different ways ot write a basic
@@ -315,7 +316,13 @@ int main(int argc, char* argv[])
             // process pending window events if any.
             wdk::native_event_t event;
             while(wdk::PeekEvent(event))
+            {
                 window.ProcessEvent(event);
+                // if the window was resized notify the app that the rendering
+                // surface has been resized.
+                if (event.identity() == wdk::native_event_t::type::window_resize)
+                    app->OnRenderingSurfaceResized(window.GetSurfaceWidth(), window.GetSurfaceHeight());
+            }
 
             // Process pending application requests if any.
             game::App::Request request;
@@ -394,6 +401,7 @@ int main(int argc, char* argv[])
             }
         }
 
+        app->Save();
         app->Shutdown();
         app.reset();
 

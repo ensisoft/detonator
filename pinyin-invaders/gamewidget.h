@@ -30,30 +30,21 @@
 #include <stack>
 #include <string>
 
+#include "audio/sample.h"
+#include "audio/player.h"
+#include "audio/device.h"
+#include "gamelib/main/interface.h"
+#include "gamelib/loader.h"
+#include "graphics/device.h"
+#include "graphics/painter.h"
 #include "wdk/window_listener.h"
-
-namespace gfx {
-    class Painter;
-    class Device;
-} // namespace
-namespace wdk {
-    class Window;
-    struct WindowEventKeydown;
-} // namespace wdk
-namespace audio {
-    class AudioSample;
-} // namespace audio
-
-namespace game {
-    class Settings;
-} // namespace miscs
 
 namespace invaders
 {
     class Game;
     class Level;
 
-    class GameWidget : public wdk::WindowListener
+    class GameWidget : public game::App, public wdk::WindowListener
     {
     public:
         // Level info for persisting level data
@@ -72,32 +63,33 @@ namespace invaders
             unsigned numEnemies = 0;
         };
 
-        GameWidget(wdk::Window& window);
+        GameWidget();
        ~GameWidget();
 
-        void initArgs(int argc, char* argv[]);
-
-        void load(const game::Settings& settings);
-
-        void save(game::Settings& settings);
-
-        void launch();
-
-        // step the game forward by dt milliseconds.
-        void updateGame(float dt);
-
-        // render current game state.
-        void renderGame(gfx::Device& device, gfx::Painter& painter);
-
-        // set most current fps.
-        // if setShowFps has been set to true will display
-        // the current fps in the top left corner of the window.
-        void setFps(float fps)
-        { mCurrentfps = fps; }
-
-        bool isRunning() const
+        // App implementation
+        virtual bool GetNextRequest(Request* out) override
+        { return mRequests.GetNext(out); }
+        virtual bool ParseArgs(int argc, char* argv[]) override;
+        virtual void Init(gfx::Device::Context* context,
+            unsigned surface_width, unsigned surface_height) override;
+        virtual void Load() override;
+        virtual void Start() override;
+        virtual void Save() override;
+        virtual void Update(double current_time, double dt) override;
+        virtual void Draw() override;
+        virtual bool IsRunning() const override
         { return mRunning; }
+        virtual void OnRenderingSurfaceResized(unsigned width, unsigned height)
+        {
+            mRenderWidth  = width;
+            mRenderHeight = height;
+        }
+        virtual wdk::WindowListener* GetWindowListener() override
+        { return this; }
+        virtual void UpdateStats(const game::App::Stats& stats) override
+        { mCurrentfps = stats.current_fps; }
 
+        // Window listener implementation.
         virtual void OnKeydown(const wdk::WindowEventKeydown& key) override;
         virtual void OnWantClose(const wdk::WindowEventWantClose& close) override;
     private:
@@ -148,14 +140,19 @@ namespace invaders
         bool mPlayMusic  = true;
         bool mShowFps    = false;
         bool mRunning    = true;
+        bool mFullscreen = false;
     private:
-#ifdef GAME_ENABLE_AUDIO
         std::vector<std::shared_ptr<audio::AudioSample>> mMusicTracks;
+        std::unique_ptr<audio::AudioPlayer> mAudioPlayer;
         std::size_t mMusicTrackId = 0;
         std::size_t mMusicTrackIndex = 0;
-#endif
     private:
-        wdk::Window& mWindow;
+        std::shared_ptr<gfx::Device> mDevice;
+        std::unique_ptr<gfx::Painter> mPainter;
+        unsigned mRenderWidth  = 0;
+        unsigned mRenderHeight = 0;
+        game::AppRequestQueue mRequests;
+        game::ResourceLoader mLoader;
     };
 
 } // invaders

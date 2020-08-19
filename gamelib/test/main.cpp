@@ -272,7 +272,7 @@ private:
 
 extern "C" {
 
-GAMESTUDIO_APP_LIBRARY_ENTRY_POINT game::App* MakeApp(base::Logger* logger)
+GAMESTUDIO_EXPORT game::App* MakeApp(base::Logger* logger)
 {
     base::SetThreadLog(logger);
     INFO("Hello from gamelib test app");
