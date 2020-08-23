@@ -116,7 +116,7 @@ namespace game
         // when the process is started. If false is returned
         // it is used to indicate that there was a problem applying
         // the arguments and the application should not continue.
-        virtual bool ParseArgs(int argc, char* argv[])
+        virtual bool ParseArgs(int argc, const char* argv[])
         { return true; }
 
         // Initialize the application and it's graphics resources.

@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "title", &title);
         base::JsonReadSafe(json["application"], "library", &library);
         auto app = LoadApp(library);
-        if (!app->ParseArgs(argc, argv))
+        if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
 
         wdk::Config::Attributes attrs;

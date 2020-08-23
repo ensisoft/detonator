@@ -69,7 +69,7 @@ namespace invaders
         // App implementation
         virtual bool GetNextRequest(Request* out) override
         { return mRequests.GetNext(out); }
-        virtual bool ParseArgs(int argc, char* argv[]) override;
+        virtual bool ParseArgs(int argc, const char* argv[]) override;
         virtual void Init(gfx::Device::Context* context,
             unsigned surface_width, unsigned surface_height) override;
         virtual void Load() override;

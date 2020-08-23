@@ -2080,7 +2080,7 @@ GameWidget::GameWidget()
 
 GameWidget::~GameWidget() = default;
 
-bool GameWidget::ParseArgs(int argc, char* argv[])
+bool GameWidget::ParseArgs(int argc, const char* argv[])
 {
     for (int i=1; i<argc; ++i)
     {
