@@ -46,6 +46,7 @@
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/childwindow.h"
+#include "editor/gui/playwindow.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
@@ -436,6 +437,11 @@ bool MainWindow::saveWorkspace()
         const auto index_of = mUI.mainTab->indexOf(mCurrentWidget);
         mWorkspace->SetUserProperty("focused_widget_index", index_of);
     }
+    if (mPlayWindow)
+    {
+        mWorkspace->SetUserProperty("play_window_xpos", mPlayWindow->x());
+        mWorkspace->SetUserProperty("play_window_ypos", mPlayWindow->y());
+    }
 
     if (!mWorkspace->Save())
         return false;
@@ -449,6 +455,7 @@ void MainWindow::closeWorkspace()
     {
         ASSERT(mChildWindows.empty());
         ASSERT(mUI.mainTab->count() == 0);
+        ASSERT(!mPlayWindow.get());
         return;
     }
 
@@ -483,6 +490,12 @@ void MainWindow::closeWorkspace()
     mChildWindows.clear();
 
     mCurrentWidget = nullptr;
+
+    if (mPlayWindow)
+    {
+        mPlayWindow->close();
+        mPlayWindow.reset();
+    }
 
     // update window menu.
     prepareWindowMenu();
@@ -976,8 +989,36 @@ void MainWindow::on_actionProjectSettings_triggered()
     GfxWindow::SetDefaultFilter(settings.default_mag_filter);
 }
 
+void MainWindow::on_actionProjectPlay_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    if (!mPlayWindow)
+    {
+        mPlayWindow.reset(new PlayWindow(*mWorkspace));
+        const auto xpos = mWorkspace->GetUserProperty("play_window_xpos", mPlayWindow->x());
+        const auto ypos = mWorkspace->GetUserProperty("play_window_ypos", mPlayWindow->y());
+        mPlayWindow->move(xpos, ypos);
+        mPlayWindow->show();
+        DEBUG("Playwindow position: %1x%2", xpos, ypos);
+    }
+    // bring to the top of the window stack.
+    mPlayWindow->raise();
+}
+
 void MainWindow::timerRefreshUI()
 {
+    if (mPlayWindow)
+    {
+        if (mPlayWindow->IsClosed())
+        {
+            mWorkspace->SetUserProperty("play_window_xpos", mPlayWindow->x());
+            mWorkspace->SetUserProperty("play_window_ypos", mPlayWindow->y());
+            mPlayWindow.reset();
+        }
+    }
+
     // refresh the UI state, and update the tab widget icon/text
     // if needed.
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
@@ -1047,6 +1088,11 @@ void MainWindow::timerRender()
     for (auto* child : mChildWindows)
     {
         child->Render(time_step);
+    }
+
+    if (mPlayWindow)
+    {
+        mPlayWindow->Render(time_step);
     }
 }
 

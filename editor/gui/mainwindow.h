@@ -42,6 +42,7 @@ namespace gui
     class MainWidget;
     class Settings;
     class ChildWindow;
+    class PlayWindow;
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
@@ -109,6 +110,7 @@ namespace gui
         void on_actionSelectResourceForEditing_triggered();
         void on_actionNewResource_triggered();
         void on_actionProjectSettings_triggered();
+        void on_actionProjectPlay_triggered();
 
         void actionWindowFocus_triggered();
 
@@ -157,6 +159,9 @@ namespace gui
         // in which case a new ChildWindow is opened to display/contain the MainWidget.
         // instead of the tab in this window.
         std::vector<ChildWindow*> mChildWindows;
+
+        // The play window if any currently.
+        std::unique_ptr<PlayWindow> mPlayWindow;
     };
 
 } // namespace
