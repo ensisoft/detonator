@@ -335,6 +335,9 @@ namespace app
             QString application_name;
             // User defined version of the application.
             QString application_version;
+            // The library (.so or .dll) that contains the application
+            // entry point and game::App implementation.
+            QString application_library;
             // default texture minification filter.
             gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Nearest;
             // default texture magnification filter.
@@ -351,6 +354,14 @@ namespace app
             bool window_can_resize = true;
             // window flag to control window border
             bool window_has_border = true;
+            // how many times the app ticks per second.
+            unsigned ticks_per_second = 1;
+            // how many times the app updates per second.
+            unsigned updates_per_second = 60;
+            // Working folder when playing the app in the editor.
+            QString working_folder = "${workspace}";
+            // Arguments for when playing the app in the editor.
+            QString command_line_arguments;
         };
 
         const ProjectSettings& GetProjectSettings() const

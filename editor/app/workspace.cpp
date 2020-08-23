@@ -917,15 +917,20 @@ bool Workspace::SaveWorkspace(const QString& filename) const
 
     QJsonObject project;
     project["multisample_sample_count"] = (int)mSettings.multisample_sample_count;
-    project["application_name"] = mSettings.application_name;
-    project["application_version"] = mSettings.application_version;
-    project["default_min_filter"] = toString(mSettings.default_min_filter);
-    project["default_mag_filter"] = toString(mSettings.default_mag_filter);
-    project["window_width"] = (int)mSettings.window_width;
-    project["window_height"] = (int)mSettings.window_height;
-    project["window_set_fullscreen"] = mSettings.window_set_fullscreen;
-    project["window_can_resize"] = mSettings.window_can_resize;
-    project["window_has_border"] = mSettings.window_has_border;
+    project["application_name"]         = mSettings.application_name;
+    project["application_version"]      = mSettings.application_version;
+    project["application_library"]      = mSettings.application_library;
+    project["default_min_filter"]       = toString(mSettings.default_min_filter);
+    project["default_mag_filter"]       = toString(mSettings.default_mag_filter);
+    project["window_width"]             = (int)mSettings.window_width;
+    project["window_height"]            = (int)mSettings.window_height;
+    project["window_set_fullscreen"]    = mSettings.window_set_fullscreen;
+    project["window_can_resize"]        = mSettings.window_can_resize;
+    project["window_has_border"]        = mSettings.window_has_border;
+    project["ticks_per_second"]         = (int)mSettings.ticks_per_second;
+    project["updates_per_second"]       = (int)mSettings.updates_per_second;
+    project["working_folder"]           = mSettings.working_folder;
+    project["command_line_arguments"]   = mSettings.command_line_arguments;
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -979,6 +984,7 @@ bool Workspace::LoadWorkspace(const QString& filename)
     mSettings.multisample_sample_count = project["multisample_sample_count"].toInt();
     mSettings.application_name = project["application_name"].toString();
     mSettings.application_version = project["application_version"].toString();
+    mSettings.application_library = project["application_library"].toString();
     mSettings.default_min_filter = EnumFromString(project["default_min_filter"].toString(),
         gfx::Device::MinFilter::Nearest);
     mSettings.default_mag_filter = EnumFromString(project["default_mag_filter"].toString(),
@@ -988,6 +994,10 @@ bool Workspace::LoadWorkspace(const QString& filename)
     mSettings.window_set_fullscreen = project["window_set_fullscreen"].toBool();
     mSettings.window_can_resize = project["window_can_resize"].toBool();
     mSettings.window_has_border = project["window_has_border"].toBool();
+    mSettings.ticks_per_second = project["ticks_per_second"].toInt();
+    mSettings.updates_per_second = project["updates_per_second"].toInt();
+    mSettings.working_folder = project["working_folder"].toString();
+    mSettings.command_line_arguments = project["command_line_arguments"].toString();
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();

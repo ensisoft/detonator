@@ -56,6 +56,11 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace::ProjectSettings& setting
     SetUIValue(mUI.chkWndHasBorder, mSettings.window_has_border);
     SetUIValue(mUI.edtAppName, mSettings.application_name);
     SetUIValue(mUI.edtAppVersion, mSettings.application_version);
+    SetUIValue(mUI.edtAppLibrary, mSettings.application_library);
+    SetUIValue(mUI.ticksPerSecond, mSettings.ticks_per_second);
+    SetUIValue(mUI.updatesPerSecond, mSettings.updates_per_second);
+    SetUIValue(mUI.edtWorkingFolder, mSettings.working_folder);
+    SetUIValue(mUI.edtArguments, mSettings.command_line_arguments);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -70,6 +75,11 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkWndHasBorder, &mSettings.window_has_border);
     GetUIValue(mUI.edtAppName, &mSettings.application_name);
     GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
+    GetUIValue(mUI.edtAppLibrary, &mSettings.application_library);
+    GetUIValue(mUI.ticksPerSecond, &mSettings.ticks_per_second);
+    GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
+    GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
+    GetUIValue(mUI.edtArguments, &mSettings.command_line_arguments);
     accept();
 }
 void DlgProject::on_btnCancel_clicked()
