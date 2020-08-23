@@ -4,6 +4,7 @@
     <file>16x16_ico_png/log_warning.png</file>
     <file>16x16_ico_png/log_error.png</file>
     <file>16x16_ico_png/log_info.png</file>
+    <file>16x16_ico_png/log_debug.png</file>
 
     <file>16x16_ico_png/app_exit.png</file>
     <file>16x16_ico_png/app_next_window.png</file>
@@ -27,6 +28,7 @@
     <file>16x16_ico_png/workspace_save.png</file>
     <file>16x16_ico_png/workspace_new.png</file>
     <file>16x16_ico_png/bullet.png</file>
+    <file>16x16_ico_png/application.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>

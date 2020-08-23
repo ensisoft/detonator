@@ -85,13 +85,13 @@ namespace base
     public:
         virtual ~Logger() = default;
 
-        // Write a performatted log message to the log.
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const = 0;
+        // Write a not-formatted log message to the log.
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg)  = 0;
 
         // Write a preformatted log event to the log.
         // The log message has information such as the source file/line
-        // baked in.
-        virtual void Write(LogEvent type, const char* msg) const = 0;
+        // and timestamp baked in.
+        virtual void Write(LogEvent type, const char* msg)  = 0;
         // Flush the log.
         virtual void Flush() = 0;
     protected:
@@ -104,9 +104,9 @@ namespace base
     public:
         OStreamLogger(std::ostream& out);
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
         { /* not supported */ }
-        virtual void Write(LogEvent type, const char* msg) const override;
+        virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override;
     private:
         std::ostream& m_out;
@@ -120,9 +120,9 @@ namespace base
         CursesLogger();
        ~CursesLogger();
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
         { /* not supported */ }
-        virtual void Write(LogEvent type, const char* msg) const override;
+        virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override
         { /* no op */ }
     private:
@@ -136,12 +136,13 @@ namespace base
         LockedLogger(WrappedLogger&& other)
           : mLogger(std::move(other))
         {}
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) const override
+        LockedLogger() = default;
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Write(type, file, line, msg);
         }
-        virtual void Write(LogEvent type, const char* msg) const override
+        virtual void Write(LogEvent type, const char* msg) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Write(type, msg);
@@ -151,9 +152,13 @@ namespace base
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Flush();
         }
+        const WrappedLogger& GetLogger() const 
+        { return mLogger; }
+        WrappedLogger& GetLogger()
+        { return mLogger; }
     private:
         WrappedLogger mLogger;
-        mutable std::mutex mMutex;
+        std::mutex mMutex;
     };
 
 

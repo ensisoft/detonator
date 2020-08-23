@@ -50,6 +50,8 @@ namespace app
             // critical file could not be read/written or some required
             // resource could not be acquired.
             Error,
+            // Debugging message.
+            Debug,
         };
         Type type = Type::Info;
 

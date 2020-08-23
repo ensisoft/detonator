@@ -66,7 +66,7 @@ const char* ToString(base::LogEvent e)
 OStreamLogger::OStreamLogger(std::ostream& out) : m_out(out)
 {}
 
-void OStreamLogger::Write(LogEvent type, const char* msg) const
+void OStreamLogger::Write(LogEvent type, const char* msg)
 {
     m_out << msg;
 }
@@ -99,7 +99,7 @@ CursesLogger::~CursesLogger()
 #endif
 }
 
-void CursesLogger::Write(LogEvent type, const char* msg) const
+void CursesLogger::Write(LogEvent type, const char* msg)
 {
  #ifdef BASE_LOGGING_ENABLE_CURSES
     attron(COLOR_PAIR(1 + (short)type));

@@ -39,6 +39,25 @@ EventLog::EventLog() : mEvents(1000)
 EventLog::~EventLog()
 {}
 
+void EventLog::Write(base::LogEvent type, const char* file, int line, const char* msg)
+{
+    // this one is not implemented since we're implementing
+    // only the alternative with pre-formatted messages.
+}
+void EventLog::Write(base::LogEvent type, const char* msg)
+{
+    Event::Type foo;
+    if (type == base::LogEvent::Debug)
+        foo = Event::Type::Debug;
+    else if (type == base::LogEvent::Info)
+        foo = Event::Type::Info;
+    else if (type == base::LogEvent::Warning)
+        foo = Event::Type::Warning;
+    else if (type == base::LogEvent::Error)
+        foo = Event::Type::Error;
+    write(foo, msg, mLogTag);
+}
+
 void EventLog::write(Event::Type type, const QString& msg, const QString& tag)
 {
     Event event;
@@ -110,6 +129,7 @@ QVariant EventLog::data(const QModelIndex& index, int role) const
             case type::Info:    return QIcon("icons:log_info.png");
             case type::Error:   return QIcon("icons:log_error.png");
             case type::Note:    return QIcon("icons:log_note.png");
+            case type::Debug:   return QIcon("icons:log_debug.png");
         }
     }
     return {};

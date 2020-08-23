@@ -41,14 +41,22 @@ namespace app
     // Application event log. events that occur on the background
     // are logged in here for later inspection.
     class EventLog : public QAbstractListModel
+                   , public base::Logger
+
     {
         Q_OBJECT
+
+    public:
+        static EventLog& get();
 
         EventLog();
        ~EventLog();
 
-    public:
-        static EventLog& get();
+        // base::Logger implementation
+        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override;
+        virtual void Write(base::LogEvent type, const char* msg) override;
+        virtual void Flush() override
+        { /* no op */ }
 
         // record a new event in the log
         void write(Event::Type type, const QString& msg, const QString& tag);
@@ -64,11 +72,15 @@ namespace app
 
         std::size_t numEvents() const
         { return mEvents.size(); }
+
+        void SetLogTag(const QString& tag)
+        { mLogTag = tag; }
     signals:
         void newEvent(const app::Event& event);
 
     private:
         boost::circular_buffer<Event> mEvents;
+        QString mLogTag;
     };
 
 // we want every log event to be tracable back to where it came from

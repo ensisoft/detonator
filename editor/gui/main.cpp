@@ -84,7 +84,7 @@ void copyright()
 class ForwardingLogger : public base::Logger
 {
 public:
-    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) const override
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
     {
         // forward Error and warnings to the application log too.
         if (type == base::LogEvent::Error)
@@ -96,7 +96,7 @@ public:
         mLogger.Write(type, file, line, msg);
     }
 
-    virtual void Write(base::LogEvent type, const char* msg) const override
+    virtual void Write(base::LogEvent type, const char* msg) override
     {
         mLogger.Write(type, msg);
     }
