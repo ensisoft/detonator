@@ -163,6 +163,8 @@ namespace app
                 {
                     handle->UpdateInstance(name, type, (const void*)source);
                 }
+
+                emit ResourceUpdated(mResources[i].get());
                 return;
             }
             // if we're here no such resource exists yet.
@@ -402,6 +404,10 @@ namespace app
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.
         void NewResourceAvailable(const Resource* resource);
+        // this signal is emitted after an existing resource has been updated
+        // i.e. saved. The resource object is the *new* resource object
+        // that replaces a previous resource of the same type and name.
+        void ResourceUpdated(const Resource* resource);
 
         // This signal is emitted after a resource object has been
         // removed from the list of resources but before it is's

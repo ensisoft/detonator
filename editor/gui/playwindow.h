@@ -56,7 +56,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        PlayWindow(const app::Workspace& workspace);
+        PlayWindow(app::Workspace& workspace);
        ~PlayWindow();
 
         // Returns true if the user has closed the window.
@@ -74,6 +74,8 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionClose_triggered();
 
+        void ResourceUpdated(const app::Resource* resource);
+
     private:
         virtual void closeEvent(QCloseEvent* event) override;
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
@@ -83,11 +85,12 @@ namespace gui
 
     private:
         class WindowContext;
+        class SessionAssets;
     private:
         Ui::PlayWindow mUI;
     private:
         // our current workspace.
-        const app::Workspace& mWorkspace;
+        app::Workspace& mWorkspace;
         // Previous working directory.
         QString mPreviousWorkingDir;
         // Current working directory that we have to change
@@ -121,7 +124,11 @@ namespace gui
         std::unique_ptr<game::App> mApp;
         // rendering context implementation for the QWindow surface.
         std::unique_ptr<WindowContext> mWindowContext;
-
+        // The current collection of assets for this play session.
+        // The objects are derieved from the Workspacse instead of
+        // loading from file. We then give this asset table object
+        // to the game's app instance for getting data.
+        std::unique_ptr<SessionAssets> mAssets;
         // Current game/app time. Updated in time steps whenever
         // the update timer runs.
         double mCurrentTime = 0.0;

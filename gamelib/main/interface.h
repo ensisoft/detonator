@@ -28,10 +28,12 @@
 
 #include "base/platform.h"
 #include "base/logging.h"
-#include "wdk/window_listener.h"
-#include "wdk/events.h"
+#include "gamelib/asset.h"
+#include "gamelib/gfxfactory.h"
 #include "graphics/device.h"
 #include "graphics/resource.h"
+#include "wdk/events.h"
+#include "wdk/window_listener.h"
 
 // this header defines the interface between a app/game that
 // is built into a shared object (.dll or .so) and the runner/main
@@ -110,6 +112,29 @@ namespace game
         // result happens as the result of the request processing.
         virtual bool GetNextRequest(Request* out)
         { return false;}
+
+        // Parameters pertaining to the environment of the application.
+        struct Environment {
+            // Interface for accessing resources (content) implemented
+            // by the graphics subsystem, i.e. drawble shapes and materials.
+            game::GfxFactory* gfx_factory = nullptr;
+
+            // Interface for accessign high level game content i.e. assets
+            // (most likely) built in the editor such as Animations.
+            game::AssetTable* asset_table = nullptr;
+        };
+
+        // Called whenever there are changes to the current environment
+        // of the application. The provided environment object contains
+        // a collection of interface objects for accessing the game
+        // content at various levels from file based access (i.e. things
+        // such as textures, fonts, shaders) to more derived resources
+        // i.e. materials and drawable shapes to high level game assets
+        // such as animations.
+        // The pointers will remain valid until the next call of
+        // SetEnvironment.
+        virtual void SetEnvironment(const Environment& env)
+        {}
 
         // Called once on application startup. The arguments
         // are the arguments given to the application the command line
@@ -232,9 +257,29 @@ namespace game
 #  define GAMESTUDIO_IMPORT
 #endif
 
+// Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
     GAMESTUDIO_IMPORT game::App* MakeApp(base::Logger*);
 } // extern "C"
 
 typedef game::App* (*MakeAppFunc)(base::Logger*);
+
+// The below interface only exists currently for simplifying
+// the structure of the builds. I.e the dependencies for creating
+// environment objects (such as ContentLoader) can be wrapped inside
+// the game library itself and this lets the loader application to
+// remain free of these dependencies.
+// This is currently only an implementation detail and this mechanism
+// might go away. However currently we provide this helper that will
+// do the wrapping and then expect the game libs to include the right
+// translation unit in their builds.
+extern "C" {
+    GAMESTUDIO_IMPORT void CreateDefaultEnvironment(game::GfxFactory** gfx_factory,
+        game::AssetTable** asset_table);
+    GAMESTUDIO_IMPORT void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory,
+        game::AssetTable* asset_table);
+} // extern "C"
+
+typedef void (*CreateDefaultEnvironmentFunc)(game::GfxFactory**, game::AssetTable**);
+typedef void (*DestroyDefaultEnvironmentFunc)(game::GfxFactory*, game::AssetTable*);

@@ -40,11 +40,7 @@
 namespace game
 {
 
-ResourceLoader::ResourceLoader()
-{
-}
-
-std::shared_ptr<gfx::Material> ResourceLoader::MakeMaterial(const std::string& name) const
+std::shared_ptr<gfx::Material> ContentLoader::MakeMaterial(const std::string& name) const
 {
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
@@ -63,7 +59,7 @@ std::shared_ptr<gfx::Material> ResourceLoader::MakeMaterial(const std::string& n
     return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::HotPink));
 }
 
-std::shared_ptr<gfx::Drawable> ResourceLoader::MakeDrawable(const std::string& name) const
+std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& name) const
 {
     // these are the current primitive cases that are not packed as part of the resources
     if (name == "Rectangle")
@@ -86,7 +82,7 @@ std::shared_ptr<gfx::Drawable> ResourceLoader::MakeDrawable(const std::string& n
     return std::make_shared<gfx::Rectangle>();
 }
 
-std::string ResourceLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
+std::string ContentLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
 {
     std::string str = file;
     if (str.find("pck://", 0) == 0)
@@ -118,7 +114,7 @@ void LoadResources(const nlohmann::json& json, const std::string& type,
     }
 }
 
-void ResourceLoader::LoadResources(const std::string& dir, const std::string& file)
+void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file)
 {
     std::ifstream in(base::OpenBinaryInputStream(file));
     if (!in.is_open())
@@ -143,7 +139,7 @@ void ResourceLoader::LoadResources(const std::string& dir, const std::string& fi
     mResourceFile = file;
 }
 
-const Animation* ResourceLoader::FindAnimation(const std::string& name) const
+const Animation* ContentLoader::FindAnimation(const std::string& name) const
 {
     auto it = mAnimations.find(name);
     if (it == std::end(mAnimations))
@@ -151,7 +147,7 @@ const Animation* ResourceLoader::FindAnimation(const std::string& name) const
     return it->second.get();
 }
 
-Animation* ResourceLoader::FindAnimation(const std::string& name)
+Animation* ContentLoader::FindAnimation(const std::string& name)
 {
     auto it = mAnimations.find(name);
     if (it == std::end(mAnimations))

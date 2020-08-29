@@ -46,6 +46,8 @@
 #include "base/cmdline.h"
 #include "base/utility.h"
 #include "gamelib/main/interface.h"
+#include "gamelib/gfxfactory.h"
+#include "gamelib/asset.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -79,6 +81,25 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
     return ret;
 }
+
+void CreateEnvironment(game::GfxFactory** factory, game::AssetTable** assets)
+{
+    auto* func = (CreateDefaultEnvironmentFunc)::dlsym(application_library, "CreateDefaultEnvironment");
+    if (func == NULL)
+        throw std::runtime_error("No CreateDefaultEnvironment found. Library must be built using gamelib.cpp");
+
+    func(factory, assets);
+}
+
+void DestroyEnvironment(game::GfxFactory* factory, game::AssetTable* assets)
+{
+    auto* func = (DestroyDefaultEnvironmentFunc)::dlsym(application_library, "DesroyDefaultEnvironment");
+    if (func == NULL)
+        return;
+
+    func(factory, assets);
+}
+
 #elif defined(WINDOWS_OS)
 HMODULE application_library;
 
@@ -96,6 +117,25 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
     return ret;
 }
+
+void CreateEnvironment(game::GfxFactory** factory, game::AssetTable** assets)
+{
+    auto* func = (CreateDefaultEnvironmentFunc)::GetProcAddress(application_library, "CreateDefaultEnvironment");
+    if (func == NULL)
+        throw std::runtime_error("No CreateDefaultEnvironment found. Library must be built using gamelib.cpp");
+
+    func(factory, assets);
+}
+
+void DestroyEnvironment(game::GfxFactory* factory, game::AssetTable* assets)
+{
+    auto* func = (DestroyDefaultEnvironmentFunc)GetProcAddress(application_library, "DesroyDefaultEnvironment");
+    if (func == NULL)
+        return;
+
+    func(factory, assets);
+}
+
 #endif
 
 // Glue class to connect the window and device
@@ -229,12 +269,26 @@ int main(int argc, char* argv[])
         const auto& json = nlohmann::json::parse(in);
 
         std::string library;
+        std::string content;
         std::string title = "MainWindow";
         base::JsonReadSafe(json["application"], "title", &title);
         base::JsonReadSafe(json["application"], "library", &library);
+        base::JsonReadSafe(json["application"], "content", &content);
         auto app = LoadApp(library);
         if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
+
+        game::GfxFactory* factory = nullptr;
+        game::AssetTable* assets  = nullptr;
+        CreateEnvironment(&factory, &assets);
+        if (!content.empty())
+        {
+            assets->LoadFromFile(".", content);
+        }
+        game::App::Environment env;
+        env.gfx_factory = factory;
+        env.asset_table = assets;
+        app->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
         attrs.surfaces.window = true;
@@ -286,7 +340,6 @@ int main(int argc, char* argv[])
 
         app->Init(context.get(), window.GetSurfaceWidth(),
             window.GetSurfaceHeight());
-
         app->Load();
         app->Start();
 
@@ -406,6 +459,8 @@ int main(int argc, char* argv[])
         app.reset();
 
         context->Dispose();
+
+        DestroyEnvironment(factory, assets);
 
         DEBUG("Exiting...");
     }

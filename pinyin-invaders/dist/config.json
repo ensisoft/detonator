@@ -20,6 +20,7 @@
         "version": "0.4b",
         "library": "invaders",
         "ticks_per_second": 2.0,
-        "updates_per_second": 60.0
+        "updates_per_second": 60.0,
+        "content": "content.json"
     }
 }

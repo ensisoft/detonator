@@ -33,6 +33,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <string>
 
 #include "base/assert.h"
 #include "graphics/drawable.h"
@@ -161,6 +162,9 @@ namespace app
                 return ptr;
             return nullptr;
         }
+
+        std::string GetNameUtf8() const
+        { return app::ToUtf8(GetName()); }
 
     protected:
         virtual void* GetIf(const std::type_info& expected_type) = 0;

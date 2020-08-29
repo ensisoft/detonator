@@ -27,6 +27,8 @@
 #include <unordered_map>
 #include <memory>
 
+#include "gamelib/asset.h"
+#include "gamelib/gfxfactory.h"
 #include "graphics/resource.h"
 #include "gfxfactory.h"
 
@@ -34,36 +36,37 @@ namespace game
 {
     class Animation;
 
-    // Game resources loader.
-    // Load a JSON based resource description and provide access to these
-    // resources. Such JSON file can be produced by for example resource
-    // packer in the the editor application.
-    class ResourceLoader : public GfxFactory,
-                           public gfx::ResourceLoader
+    // Game content (assets + gfx resources) loader.
+    // Provides access to high level game content, i.e. game assets such as
+    // animations based on their descriptions in the JSON file(s).
+    // Additionally implements the gfx::ResourceLoader in order to implement
+    // access to the low level file based graphics resources such as
+    // texture, font and shader files.
+    class ContentLoader : public GfxFactory,
+                          public AssetTable,
+                          public gfx::ResourceLoader
     {
     public:
-        ResourceLoader();
-
         // GfxFactory implementation. Provides low level GFX
         // resource creation for the game level subsystem.
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
+
+        // AssetTable implementation.
+        virtual const Animation* FindAnimation(const std::string& name) const override;
+        virtual Animation* FindAnimation(const std::string& name) override;
+        // Read the given resource description file.
+        // The expectation is that the file is well formed.
+        // Throws an exception on error ill-formed file.
+        // However no validation is done regarding the completeness
+        // of the content and resources that are loaded from the file.
+        virtual void LoadFromFile(const std::string& dir, const std::string& file) override;
 
         // gfx::ResourceLoader implementation. Provides access to the
         // low level byte buffer / file system file resources such as
         // textures/font files, shaders used by the graphics subsystem.
         virtual std::string ResolveFile(gfx::ResourceLoader::ResourceType type,
             const std::string& file) const override;
-
-        // Read the given resource description file.
-        // The expectation is that the file is well formed.
-        // Throws an exception on error ill-formed file.
-        // However no validation is done regarding the completeness
-        // of the content and resources that are loaded from the file.
-        void LoadResources(const std::string& dir, const std::string& file);
-
-        const Animation* FindAnimation(const std::string& name) const;
-        Animation* FindAnimation(const std::string& name);
 
     private:
         std::string mResourceDir;

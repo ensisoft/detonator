@@ -368,7 +368,9 @@ add_library(gamelib_test SHARED
     graphics/material.cpp
     graphics/opengl_es2_device.cpp
     gamelib/animation.cpp
+    gamelib/loader.cpp
     gamelib/test/main.cpp
+    gamelib/main/gamelib.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
 )
@@ -407,6 +409,7 @@ add_library(invaders SHARED
     gamelib/homedir.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
+    gamelib/main/gamelib.cpp
     wdk/wdk/keys.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c

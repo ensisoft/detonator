@@ -70,6 +70,8 @@ namespace invaders
         virtual bool GetNextRequest(Request* out) override
         { return mRequests.GetNext(out); }
         virtual bool ParseArgs(int argc, const char* argv[]) override;
+        virtual void SetEnvironment(const Environment& env) override
+        { mAssets = env.asset_table; }
         virtual void Init(gfx::Device::Context* context,
             unsigned surface_width, unsigned surface_height) override;
         virtual void Load() override;
@@ -152,7 +154,7 @@ namespace invaders
         unsigned mRenderWidth  = 0;
         unsigned mRenderHeight = 0;
         game::AppRequestQueue mRequests;
-        game::ResourceLoader mLoader;
+        game::AssetTable* mAssets = nullptr;
     };
 
 } // invaders

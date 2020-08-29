@@ -2182,9 +2182,6 @@ void GameWidget::Load()
     mPlayMusic  = play_music;
     mPlaySounds = play_sound;
     mFullscreen = fullscreen;
-
-    mLoader.LoadResources(".", "content.json");
-    gfx::SetResourceLoader(&mLoader);
 }
 
 void GameWidget::Save()
@@ -2253,7 +2250,7 @@ void GameWidget::Update(double current_time, double dt)
         mAnimations.emplace_back(new UFO);
     }
 
-    auto* background = mLoader.FindAnimation("Space");
+    auto* background = mAssets->FindAnimation("Space");
     background->Update(time/1000.0f);
 
     mStates.top()->update(time);
@@ -2395,7 +2392,7 @@ void GameWidget::Draw()
 
     // paint the background
     {
-        const auto* anim = mLoader.FindAnimation("Space");
+        const auto* anim = mAssets->FindAnimation("Space");
         const auto* node = anim->FindNodeByName("Background");
         const auto& rect = anim->GetBoundingBox(node);
         gfx::Transform view;

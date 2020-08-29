@@ -30,6 +30,7 @@
 #include "warnpop.h"
 
 #include <map>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -39,6 +40,7 @@
 #include "editor/gui/playwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "gamelib/main/interface.h"
+#include "gamelib/animation.h"
 #include "wdk/system.h"
 
 namespace {
@@ -174,8 +176,71 @@ private:
     QOpenGLContext* mContext = nullptr;
     QWindow* mSurface = nullptr;
 };
+// implementation of game asset table for accessing the
+// assets/contet created in the editor and sourced from
+// the current workspace instead of from a file.
+class PlayWindow::SessionAssets : public game::AssetTable
+{
+public:
+    SessionAssets(const app::Workspace& workspace)
+        : mWorkspace(workspace)
+    {
+        for (size_t i=0; i<workspace.GetNumResources(); ++i)
+        {
+            const auto& resource = workspace.GetResource(i);
+            if (resource.GetType() != app::Resource::Type::Animation)
+                continue;
+            const game::Animation* anim = nullptr;
+            resource.GetContent(&anim);
 
-PlayWindow::PlayWindow(const app::Workspace& workspace) : mWorkspace(workspace)
+            auto copy = std::make_unique<game::Animation>(*anim);
+            copy->Prepare(mWorkspace);
+
+            mAnimations[resource.GetNameUtf8()] = std::move(copy);
+        }
+    }
+
+    virtual const game::Animation* FindAnimation(const std::string& name) const override
+    {
+        auto it = mAnimations.find(name);
+        if (it == std::end(mAnimations))
+            return nullptr;
+        return it->second.get();
+    }
+    virtual game::Animation* FindAnimation(const std::string& name) override
+    {
+        auto it = mAnimations.find(name);
+        if (it == std::end(mAnimations))
+            return nullptr;
+        return it->second.get();
+    }
+    virtual void LoadFromFile(const std::string&, const std::string&) override
+    {
+        // not implemented, loaded from workspace
+    }
+    void UpdateResource(const app::Resource* resource)
+    {
+        if (resource->GetType() == app::Resource::Type::Animation)
+        {
+            // workspace animation has been updated. recreate the
+            // global instance.
+            const game::Animation* anim = nullptr;
+            resource->GetContent(&anim);
+
+            auto copy = std::make_unique<game::Animation>(*anim);
+            copy->Prepare(mWorkspace);
+
+            mAnimations[resource->GetNameUtf8()] = std::move(copy);
+        }
+    }
+private:
+    const app::Workspace& mWorkspace;
+
+    std::unordered_map<std::string,
+        std::unique_ptr<game::Animation>> mAnimations;
+};
+
+PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
 {
     DEBUG("Create playwindow");
 
@@ -228,8 +293,10 @@ PlayWindow::PlayWindow(const app::Workspace& workspace) : mWorkspace(workspace)
     TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
 
     QString library = settings.application_library;
-#if defined(POSIX_OS)
+#if defined(POSIX_OS) && defined(NDEBUG)
     library = app::JoinPath(mCurrentWorkingDir, "lib" + library + ".so");
+#elif defined(POSIX_OS)
+    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + "d.so");
 #elif defined(WINDOWS_OS)
     library = app::JoinPath(mCurrentWorkingDir, library + ".dll");
 #endif
@@ -255,6 +322,14 @@ PlayWindow::PlayWindow(const app::Workspace& workspace) : mWorkspace(workspace)
         return;
     }
     mApp.reset(app);
+
+    // create new asset table based on the current workspace
+    // and its content.
+    mAssets = std::make_unique<SessionAssets>(mWorkspace);
+    // Connect to a workspace signal for updating the asset table
+    // when user saves edited content into the workspace.
+    QObject::connect(&mWorkspace, &app::Workspace::ResourceUpdated,
+        this, &PlayWindow::ResourceUpdated);
 }
 
 PlayWindow::~PlayWindow()
@@ -284,10 +359,6 @@ void PlayWindow::DoInit()
     {
         mContext.makeCurrent(mSurface);
 
-        const auto surface_width  = mSurface->width();
-        const auto surface_height = mSurface->height();
-        mApp->Init(mWindowContext.get(), surface_width, surface_height);
-
         const auto& settings = mWorkspace.GetProjectSettings();
         std::vector<std::string> args;
         std::vector<const char*> arg_pointers;
@@ -303,6 +374,15 @@ void PlayWindow::DoInit()
             arg_pointers.push_back(str.c_str());
         }
         mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
+
+        game::App::Environment env;
+        env.gfx_factory = &mWorkspace;
+        env.asset_table = mAssets.get();
+        mApp->SetEnvironment(env);
+
+        const auto surface_width  = mSurface->width();
+        const auto surface_height = mSurface->height();
+        mApp->Init(mWindowContext.get(), surface_width, surface_height);
 
         mApp->Load();
         mApp->Start();
@@ -438,6 +518,13 @@ void PlayWindow::on_actionClose_triggered()
 {
     // trigger close event
     this->close();
+}
+
+void PlayWindow::ResourceUpdated(const app::Resource* resource)
+{
+    DEBUG("Update resource '%1'", resource->GetName());
+
+    mAssets->UpdateResource(resource);
 }
 
 void PlayWindow::closeEvent(QCloseEvent* event)
