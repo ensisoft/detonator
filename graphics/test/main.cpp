@@ -879,6 +879,7 @@ int main(int argc, char* argv[])
     auto sampling = wdk::Config::Multisampling::None;
     bool testing  = false;
     bool issue_gold = false;
+    int swap_interval = 0;
     std::string casename;
 
     for (int i=1; i<argc; ++i)
@@ -897,6 +898,8 @@ int main(int argc, char* argv[])
             casename = argv[++i];
         else if (!std::strcmp(argv[i], "--issue-gold"))
             issue_gold = true;
+        else if (!std::strcmp(argv[i], "--vsync"))
+            swap_interval = 1;
     }
 
     // context integration glue code that puts together
@@ -942,6 +945,10 @@ int main(int argc, char* argv[])
             mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
             mContext->MakeCurrent(mSurface.get());
             mConfig.release();
+        }
+        void SetSwapInterval(int swap_interval)
+        {
+            mContext->SetSwapInterval(swap_interval);
         }
         void Dispose()
         {
@@ -1008,6 +1015,7 @@ int main(int argc, char* argv[])
 
     // render in the window
     context->SetWindowSurface(window);
+    context->SetSwapInterval(swap_interval);
 
     if (testing)
     {
