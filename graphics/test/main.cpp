@@ -1001,6 +1001,7 @@ int main(int argc, char* argv[])
         {
             tests[current_test_index]->End();
             tests[test_index]->Start();
+            window.SetTitle(tests[test_index]->GetName());
         }
         stop_for_input = false;
     };
@@ -1123,6 +1124,7 @@ int main(int argc, char* argv[])
     {
 
         tests[test_index]->Start();
+        window.SetTitle(tests[test_index]->GetName());
 
         using clock = std::chrono::high_resolution_clock;
 
