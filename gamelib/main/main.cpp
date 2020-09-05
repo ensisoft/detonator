@@ -73,10 +73,11 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
 #else
     const std::string name = "./lib" + lib + "d.so";
 #endif
-
     application_library = ::dlopen(name.c_str(), RTLD_NOW);
     if (application_library == NULL)
         throw std::runtime_error(dlerror());
+
+    DEBUG("Loaded library: '%1'", name);
 
     auto* func = (MakeAppFunc)::dlsym(application_library, "MakeApp");
     if (func == NULL)
@@ -114,6 +115,9 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     application_library = ::LoadLibraryA(name.c_str());
     if (application_library == NULL)
         throw std::runtime_error("Load library failed."); // todo: error string message
+
+    DEBUG("Loaded library: '%1'", name);
+
     auto* func = (MakeAppFunc)GetProcAddress(application_library, "MakeApp");
     if (func == NULL)
         throw std::runtime_error("No game entry point found.");
@@ -180,6 +184,10 @@ public:
         mSurface->Dispose();
         mSurface.reset();
         mConfig.reset();
+    }
+    void SetSwapInterval(int swap_interval)
+    {
+        mContext->SetSwapInterval(swap_interval);
     }
 private:
     std::unique_ptr<wdk::Context> mContext;
@@ -272,12 +280,14 @@ int main(int argc, char* argv[])
         // read config JSON
         const auto& json = nlohmann::json::parse(in);
 
+        int swap_interval = 0;
         std::string library;
         std::string content;
         std::string title = "MainWindow";
         base::JsonReadSafe(json["application"], "title", &title);
         base::JsonReadSafe(json["application"], "library", &library);
         base::JsonReadSafe(json["application"], "content", &content);
+        base::JsonReadSafe(json["application"], "swap_interval", &swap_interval);
         auto app = LoadApp(library);
         if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
@@ -311,6 +321,7 @@ int main(int argc, char* argv[])
             attrs.red_size, attrs.green_size, attrs.blue_size, attrs.alpha_size,
             attrs.stencil_size, attrs.depth_size);
         DEBUG("Sampling: %1", attrs.sampling);
+        DEBUG("Swap interval: %1", swap_interval);
 
         auto context = std::make_shared<WindowContext>(attrs);
 
@@ -341,6 +352,7 @@ int main(int argc, char* argv[])
         }
 
         context->SetWindowSurface(window);
+        context->SetSwapInterval(swap_interval);
 
         app->Init(context.get(), window.GetSurfaceWidth(),
             window.GetSurfaceHeight());

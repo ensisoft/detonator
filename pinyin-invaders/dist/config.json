@@ -21,6 +21,7 @@
         "library": "invaders",
         "ticks_per_second": 2.0,
         "updates_per_second": 60.0,
-        "content": "content.json"
+        "content": "content.json",
+        "swap_interval": 1
     }
 }
