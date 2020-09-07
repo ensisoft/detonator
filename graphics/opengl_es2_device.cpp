@@ -261,6 +261,7 @@ public:
         GLint alpha_bits = 0;
         GLint depth_bits = 0;
         GLint point_size[2];
+        GLint max_texture_units = 0;
         GL_CALL(glGetIntegerv(GL_STENCIL_BITS, &stencil_bits));
         GL_CALL(glGetIntegerv(GL_RED_BITS, &red_bits));
         GL_CALL(glGetIntegerv(GL_GREEN_BITS, &green_bits));
@@ -268,7 +269,7 @@ public:
         GL_CALL(glGetIntegerv(GL_ALPHA_BITS, &alpha_bits));
         GL_CALL(glGetIntegerv(GL_DEPTH_BITS, &depth_bits));
         GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
-
+        GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units));
         DEBUG("OpenGLESGraphicsDevice");
         DEBUG("GL %1 Vendor: %2, %3",
             mGL.glGetString(GL_VERSION),
@@ -293,6 +294,8 @@ public:
         DEBUG("Alpha bits: %1", alpha_bits);
         DEBUG("Depth bits: %1", depth_bits);
         DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
+        DEBUG("Fragment shader texture units: %1", max_texture_units);
+        mTextureUnits.resize(max_texture_units);
     }
     OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
         : OpenGLES2GraphicsDevice(context.get())
@@ -324,18 +327,10 @@ public:
     virtual void SetDefaultTextureFilter(MinFilter filter)
     {
         mDefaultMinTextureFilter = filter;
-        for (auto& pair : mPrograms)
-        {
-            static_cast<ProgImpl*>(pair.second.get())->SetDefaultTextureFilter(filter);
-        }
     }
     virtual void SetDefaultTextureFilter(MagFilter filter)
     {
         mDefaultMagTextureFilter = filter;
-        for (auto& pair : mPrograms)
-        {
-            static_cast<ProgImpl*>(pair.second.get())->SetDefaultTextureFilter(filter);
-        }
     }
 
     virtual Shader* FindShader(const std::string& name) override
@@ -365,8 +360,6 @@ public:
     virtual Program* MakeProgram(const std::string& name) override
     {
         auto program = std::make_unique<ProgImpl>(mGL);
-        program->SetDefaultTextureFilter(mDefaultMinTextureFilter);
-        program->SetDefaultTextureFilter(mDefaultMagTextureFilter);
         auto* ret    = program.get();
         mPrograms[name] = std::move(program);
         return ret;
@@ -425,10 +418,26 @@ public:
     {
         SetState(state);
 
+        GLenum default_texture_min_filter = GL_NONE;
+        GLenum default_texture_mag_filter = GL_NONE;
+        switch (mDefaultMinTextureFilter)
+        {
+            case Device::MinFilter::Nearest:   default_texture_min_filter = GL_NEAREST; break;
+            case Device::MinFilter::Linear:    default_texture_min_filter = GL_LINEAR;  break;
+            case Device::MinFilter::Mipmap:    default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
+            case Device::MinFilter::Bilinear:  default_texture_min_filter = GL_LINEAR_MIPMAP_NEAREST; break;
+            case Device::MinFilter::Trilinear: default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
+        }
+        switch (mDefaultMagTextureFilter)
+        {
+            case Device::MagFilter::Nearest: default_texture_mag_filter = GL_NEAREST; break;
+            case Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
+        }
+
         auto* myprog = (ProgImpl*)(&program);
         auto* mygeom = (GeomImpl*)(&geometry);
         myprog->SetLastUseFrameNumber(mFrameNumber);
-        myprog->SetState();
+        myprog->SetState(mTextureUnits, default_texture_min_filter, default_texture_mag_filter);
         mygeom->SetLastUseFrameNumber(mFrameNumber);
         mygeom->Draw(myprog->GetName());
     }
@@ -456,7 +465,19 @@ public:
             const auto is_eligible = impl->IsEligibleForGarbageCollection();
             const auto is_expired  = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
             if (is_eligible && is_expired)
+            {
+                size_t unit = 0;
+                for (unit=0; unit<mTextureUnits.size(); ++unit)
+                {
+                    if (mTextureUnits[unit].texture == impl)
+                    {
+                        mTextureUnits[unit].texture = nullptr;
+                        break;
+                    }
+                }
+                // delete the texture
                 it = mTextures.erase(it);
+            }
             else ++it;
         }
     }
@@ -580,6 +601,17 @@ private:
     }
 
 private:
+    class TextureImpl;
+    struct TextureUnit {
+        const TextureImpl* texture = nullptr;
+        Texture::MinFilter min_filter = Texture::MinFilter::Nearest;
+        Texture::MagFilter mag_filter = Texture::MagFilter::Nearest;
+        Texture::Wrapping  wrap_x     = Texture::Wrapping::Clamp;
+        Texture::Wrapping  wrap_y     = Texture::Wrapping::Clamp;
+    };
+
+    using TextureUnits = std::vector<TextureUnit>;
+
     class TextureImpl : public Texture
     {
     public:
@@ -964,62 +996,7 @@ private:
             if (ret == -1)
                 return;
 
-            const auto& impl = dynamic_cast<const TextureImpl&>(texture);
-
-            GLuint texture_name = impl.GetName();
-            GLenum texture_min_filter = GL_NONE;
-            GLenum texture_mag_filter = GL_NONE;
-            switch (impl.GetMinFilter())
-            {
-                case Texture::MinFilter::Default:
-                    texture_min_filter = ProgImpl::mDefaultTextureMinFilter;
-                    break;
-                case Texture::MinFilter::Nearest:
-                    texture_min_filter = GL_NEAREST;
-                    break;
-                case Texture::MinFilter::Linear:
-                    texture_min_filter = GL_LINEAR;
-                    break;
-                case Texture::MinFilter::Mipmap:
-                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
-                    break;
-                case Texture::MinFilter::Bilinear:
-                    texture_min_filter = GL_LINEAR_MIPMAP_NEAREST;
-                    break;
-                case Texture::MinFilter::Trilinear:
-                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
-                    break;
-            }
-            switch (impl.GetMagFilter())
-            {
-                case Texture::MagFilter::Default:
-                    texture_mag_filter = ProgImpl::mDefaultTextureMagFilter;
-                    break;
-                case Texture::MagFilter::Nearest:
-                    texture_mag_filter = GL_NEAREST;
-                    break;
-                case Texture::MagFilter::Linear:
-                    texture_mag_filter = GL_LINEAR;
-                    break;
-            }
-
-            // set all this fucking state here, so we can easily track/understand
-            // which unit the texture is bound to.
-
-            // // first select the desired texture unit.
-            GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
-            // bind the 2D texture.
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
-            // set texture parameters, wrapping and min/mag filters.
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                impl.GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                impl.GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
-            // set the teture unit to the sampler
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform1i(ret, unit));
+            const auto* impl = static_cast<const TextureImpl*>(&texture);
 
             // in OpenGL the expected memory layout of texture data that
             // is given to glTexImage2D doesn't match the "typical" layout
@@ -1058,15 +1035,145 @@ private:
             SetUniform("kDeviceTextureMatrix", kDeviceTextureMatrix);
             */
 
+            if (unit >= mTextures.size())
+                mTextures.resize(unit + 1);
+
             // keep track of textures being used so that if/when this
             // program is actually used to draw stuff we can realize
-            // which textures have actually been used to draw.
-            mFrameTextures.push_back(const_cast<TextureImpl*>(&impl));
+            // which textures will actually be used to draw and do the
+            // texture binds.
+            mTextures[unit].texture  = const_cast<TextureImpl*>(impl);
+            mTextures[unit].location = ret;
         }
 
-        void SetState() //const
+        void SetState(TextureUnits& units,
+            GLenum default_texture_min_filter, GLenum default_texture_mag_filter) //const
         {
             GL_CALL(glUseProgram(mProgram));
+
+            size_t num_textures = mTextures.size();
+            if (num_textures > units.size())
+            {
+                WARN("Program uses more textures than there are units available.");
+                num_textures = units.size();
+            }
+            // for all textures used by this draw, look if the texture
+            // is already bound to some unit. if it is already bound
+            // and texture parameters haven't changed then nothing needs to be
+            // done. Otherwise see if there's a free texture slot and bind
+            // if there or lastly "evict" some texture from some unit and overwrite
+            // with new texture.
+            size_t unit = 0;
+
+            for (size_t i=0; i<num_textures; ++i)
+            {
+                const TextureImpl* texture = mTextures[i].texture;
+
+                // see if there's already a unit that has this texture bound.
+                // if so, we use the same unit.
+                for (unit=0; unit < units.size(); ++unit)
+                {
+                    if (units[unit].texture == texture)
+                        break;
+                }
+                if (unit == units.size())
+                {
+                    // look for a first free unit if any.
+                    for (unit=0; unit<units.size(); ++unit)
+                    {
+                        if (units[unit].texture == nullptr)
+                            break;
+                    }
+                }
+                if (unit == units.size())
+                {
+                    size_t last_used_frame_number = units[0].texture->GetLastUsedFrameNumber();
+                    unit = 0;
+                    // look for a unit we can reuse
+                    for (size_t i=0; i<units.size(); ++i)
+                    {
+                        const auto* bound_texture = units[i].texture;
+                        if (bound_texture->GetLastUsedFrameNumber() < last_used_frame_number)
+                        {
+                            unit = i;
+                        }
+                    }
+                }
+                ASSERT(unit < units.size());
+
+                // if nothing has changed then skip all of the work
+                if (units[unit].texture    == texture &&
+                    units[unit].min_filter == texture->GetMinFilter() &&
+                    units[unit].mag_filter == texture->GetMagFilter() &&
+                    units[unit].wrap_x     == texture->GetWrapX() &&
+                    units[unit].wrap_y     == texture->GetWrapY())
+                {
+                    // set the teture unit to the sampler
+                    GL_CALL(glUniform1i(mTextures[i].location, unit));
+                    continue;
+                }
+
+                GLuint texture_name = texture->GetName();
+                GLenum texture_min_filter = GL_NONE;
+                GLenum texture_mag_filter = GL_NONE;
+                switch (texture->GetMinFilter())
+                {
+                    case Texture::MinFilter::Default:
+                        texture_min_filter = default_texture_min_filter;
+                        break;
+                    case Texture::MinFilter::Nearest:
+                        texture_min_filter = GL_NEAREST;
+                        break;
+                    case Texture::MinFilter::Linear:
+                        texture_min_filter = GL_LINEAR;
+                        break;
+                    case Texture::MinFilter::Mipmap:
+                        texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                        break;
+                    case Texture::MinFilter::Bilinear:
+                        texture_min_filter = GL_LINEAR_MIPMAP_NEAREST;
+                        break;
+                    case Texture::MinFilter::Trilinear:
+                        texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                        break;
+                }
+                switch (texture->GetMagFilter())
+                {
+                    case Texture::MagFilter::Default:
+                        texture_mag_filter = default_texture_mag_filter;
+                        break;
+                    case Texture::MagFilter::Nearest:
+                        texture_mag_filter = GL_NEAREST;
+                        break;
+                    case Texture::MagFilter::Linear:
+                        texture_mag_filter = GL_LINEAR;
+                        break;
+                }
+
+                // set all this fucking state here, so we can easily track/understand
+                // which unit the texture is bound to.
+
+                // // first select the desired texture unit.
+                GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
+                // bind the 2D texture.
+                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+                // set texture parameters, wrapping and min/mag filters.
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                    texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                    texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+                // set the teture unit to the sampler
+                GL_CALL(glUniform1i(mTextures[i].location, unit));
+
+                // store current binding.
+                units[unit].texture = texture;
+                units[unit].min_filter = texture->GetMinFilter();
+                units[unit].mag_filter = texture->GetMagFilter();
+                units[unit].wrap_x = texture->GetWrapX();
+                units[unit].wrap_y = texture->GetWrapY();
+            }
         }
         GLuint GetName() const
         { return mProgram; }
@@ -1074,44 +1181,33 @@ private:
         void SetLastUseFrameNumber(size_t frame_number)
         {
             mFrameNumber = frame_number;
-            for (auto* texture : mFrameTextures)
+            for (auto& it : mTextures)
             {
-                texture->SetLastUseFrameNumber(frame_number);
+                it.texture->SetLastUseFrameNumber(frame_number);
             }
         }
         void BeginFrame()
         {
-            mFrameTextures.clear();
+            // this clear has some unfortunate consequences.
+            // If we don't clear then we're holding onto some texture object
+            // and either a) it cannot be garbage collected or
+            // b) it is garbage collected and we have a dandling pointer.
+            // However doing this clear means that the program cannot be
+            // used across frame's without having it's state reset.
+            mTextures.clear();
         }
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
 
-        void SetDefaultTextureFilter(Device::MinFilter filter)
-        {
-            switch (filter)
-            {
-                case Device::MinFilter::Nearest:   mDefaultTextureMinFilter = GL_NEAREST; break;
-                case Device::MinFilter::Linear:    mDefaultTextureMinFilter = GL_LINEAR;  break;
-                case Device::MinFilter::Mipmap:    mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_LINEAR; break;
-                case Device::MinFilter::Bilinear:  mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_NEAREST; break;
-                case Device::MinFilter::Trilinear: mDefaultTextureMinFilter = GL_LINEAR_MIPMAP_LINEAR; break;
-            }
-        }
-        void SetDefaultTextureFilter(Device::MagFilter filter)
-        {
-            switch (filter)
-            {
-                case Device::MagFilter::Nearest: mDefaultTextureMagFilter = GL_NEAREST; break;
-                case Device::MagFilter::Linear:  mDefaultTextureMagFilter = GL_LINEAR;  break;
-            }
-        }
     private:
         const OpenGLFunctions& mGL;
-        GLenum mDefaultTextureMagFilter = GL_NEAREST;
-        GLenum mDefaultTextureMinFilter = GL_NEAREST;
         GLuint mProgram = 0;
         GLuint mVersion = 0;
-        std::vector<TextureImpl*> mFrameTextures;
+        struct Sampler {
+            GLuint location = 0;
+            TextureImpl* texture = nullptr;
+        };
+        std::vector<Sampler> mTextures;
         std::size_t mFrameNumber = 0;
     };
 
@@ -1285,6 +1381,8 @@ private:
     OpenGLFunctions mGL;
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
+    // texture units and their current settings.
+    TextureUnits mTextureUnits;
 };
 
 // static
