@@ -279,7 +279,7 @@ void ParticleEditorWidget::animate(double secs)
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
-void ParticleEditorWidget::render(double dt)
+void ParticleEditorWidget::render()
 {
     mUI.widget->triggerPaint();
 }

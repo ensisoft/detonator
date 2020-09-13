@@ -156,6 +156,7 @@ int main(int argc, char* argv[])
         format.setStencilBufferSize(8);
         format.setSamples(4);
         format.setSwapInterval(0);
+        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
         QSurfaceFormat::setDefaultFormat(format);
 
         QApplication app(argc, argv);
@@ -189,7 +190,29 @@ int main(int argc, char* argv[])
         window.showWindow();
 
         // run the mainloop
-        app.exec();
+        // this isn't the conventional way to run a qt based
+        // application's main loop. normally one would just call
+        // app.exec() but it seems to greatly degrade the performance
+        // up to an order of magnitude difference in rendering perf
+        // as measured by frames per second.
+        // the problemwith this type of loop however is that on a modern
+        // machine with performant GPU were the GPU workloads
+        // and without sync to vblank enabled we're basically going
+        // to be running a busy loop here burning the CPU.
+        while (!window.isClosed())
+        {
+            app.processEvents();
+
+            window.iterateGameLoop();
+
+            // todo: is there a workable way to throttle this loop execution somehow?
+            // Some thing that was tried was to compute how much of the frame budget time
+            // remains after all the work was done and then spend that much time
+            // either a) sleeping (this_thread::sleeop_for) or b) running QMessageLoop
+            // with a timer interrupt to exit the loop.
+            // Both ways do reduce the CPU load but degrade the performance a lot and
+            // create visible janks.
+        }
 
         DEBUG("Exiting...");
     }

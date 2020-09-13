@@ -63,17 +63,16 @@ namespace gui
         bool IsClosed() const
         { return mClosed; }
 
-        void Render(double dt)
-        { DoRender(); }
+        // Update the application.
+        void Update(double dt);
+
+        // Render the application.
+        void Render();
 
     private slots:
         void DoInit();
-        void DoUpdate();
-        void DoRender();
-        void DoTick();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
-
         void ResourceUpdated(const app::Resource* resource);
 
     private:
@@ -109,10 +108,6 @@ namespace gui
         QWidget* mContainer = nullptr;
         // Logger that we give to the applicarion.
         base::LockedLogger<app::EventLog> mLogger;
-        // the timer to run the app update callback
-        QTimer mUpdateTimer;
-        // The timer to run the app tick callback
-        QTimer mTickTimer;
         // Flag to indicate when the window has been closed or not.
         bool mClosed = false;
         // Flag to indicate if the app is currently "paused".
@@ -131,15 +126,17 @@ namespace gui
         std::unique_ptr<SessionAssets> mAssets;
         // Current game/app time. Updated in time steps whenever
         // the update timer runs.
-        double mCurrentTime = 0.0;
+        double mTimeTotal = 0.0;
+        // time accumulator for keeping track of partial upates
+        double mTimeAccum = 0.0;
+        // time accumulator for doing app ticks.
+        double mTickAccum = 0.0;
         // Current number of frames within the last second.
         unsigned mNumFrames = 0;
         // total number of frames rendered.
         unsigned mNumFramesTotal = 0;
         // Timer to keep track of rendering times.
         QElapsedTimer mFrameTimer;
-        // Timer to keep track of current wall time.
-        QElapsedTimer mTotalTimer;
     };
 
 } // namespace

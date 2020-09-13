@@ -63,9 +63,9 @@ namespace gui
         void RefreshUI();
         // Animate/update the underlying widget and it's simulations
         // if any.
-        void Animate(double secs);
+        void Animate(double dt);
 
-        void Render(double dt);
+        void Render();
 
     private slots:
         void on_actionClose_triggered();

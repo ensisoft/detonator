@@ -30,6 +30,7 @@
 #include "warnpop.h"
 
 #include <map>
+#include <chrono>
 #include <unordered_map>
 
 #include "base/assert.h"
@@ -44,6 +45,31 @@
 #include "wdk/system.h"
 
 namespace {
+
+// returns number of seconds elapsed since the last call
+// of this function.
+double ElapsedSeconds()
+{
+    using clock = std::chrono::steady_clock;
+    static auto start = clock::now();
+    auto now  = clock::now();
+    auto gone = now - start;
+    start = now;
+    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
+        (1000.0 * 1000.0);
+}
+
+// returns number of seconds since the application started
+// running.
+double CurrentRuntime()
+{
+    using clock = std::chrono::steady_clock;
+    static const auto start = clock::now();
+    const auto now  = clock::now();
+    const auto gone = now - start;
+    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
+        (1000.0 * 1000.0);
+}
 
 class TemporaryCurrentDirChange
 {
@@ -262,7 +288,6 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mSurface = new QWindow();
     mSurface->setSurfaceType(QWindow::OpenGLSurface);
     mSurface->installEventFilter(this);
-
     // the container takes ownership of the window.
     mContainer = QWidget::createWindowContainer(mSurface, this);
     mUI.verticalLayout->addWidget(mContainer);
@@ -271,21 +296,6 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mContext.create();
     mContext.makeCurrent(mSurface);
     mWindowContext = std::make_unique<WindowContext>(&mContext, mSurface);
-
-    // this is the timer that is used to run the updates.
-    QObject::connect(&mUpdateTimer, &QTimer::timeout, this, &PlayWindow::DoUpdate);
-    if (settings.updates_per_second)
-    {
-        mUpdateTimer.setInterval(1000/settings.updates_per_second);
-        mUpdateTimer.start();
-    }
-    // This is the timer that is used to run game ticks.
-    QObject::connect(&mTickTimer, &QTimer::timeout, this, &PlayWindow::DoTick);
-    if (settings.ticks_per_second)
-    {
-        mTickTimer.setInterval(1000/settings.ticks_per_second);
-        mTickTimer.start();
-    }
 
     // do one time delayed init on timer.
     QTimer::singleShot(10, this, &PlayWindow::DoInit);
@@ -341,6 +351,128 @@ PlayWindow::~PlayWindow()
     DEBUG("Destroy PlayWindow");
 }
 
+void PlayWindow::Update(double dt)
+{
+    if (!mApp || !mInitDone)
+        return;
+
+    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+
+    mContext.makeCurrent(mSurface);
+
+    // this is the real wall time elapsed since the previous iteration
+    // of the "game loop".
+    // On each iteration of the loop we measure the time
+    // spent producing a frame. the time is then used to take
+    // some number of simulation steps in order for the simulations
+    // to catch up for the *next* frame.
+    const auto& settings = mWorkspace.GetProjectSettings();
+    const auto previous_frame_time = ElapsedSeconds();
+    const auto time_step = 1.0 / settings.updates_per_second;
+    const auto tick_step = 1.0 / settings.ticks_per_second;
+
+    if (!mPaused)
+    {
+        mTimeAccum += previous_frame_time;
+    }
+
+    try
+    {
+        bool quit = false;
+        game::App::Request request;
+        while (mApp->GetNextRequest(&request))
+        {
+            if (const auto* ptr = std::get_if<game::App::ResizeWindow>(&request))
+                ResizeSurface(ptr->width, ptr->height);
+            else if (const auto* ptr = std::get_if<game::App::MoveWindow>(&request))
+                this->move(ptr->xpos, ptr->ypos);
+            else if (const auto* ptr = std::get_if<game::App::SetFullscreen>(&request))
+                SetFullscreen(ptr->fullscreen);
+            else if (const auto* ptr = std::get_if<game::App::ToggleFullscreen>(&request))
+                ToggleFullscreen();
+            else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request))
+                quit = true;
+        }
+        if (!mApp->IsRunning() || quit)
+        {
+            // trigger close event.
+            this->close();
+            return;
+        }
+
+        // do simulation/animation update steps.
+        while (mTimeAccum >= time_step)
+        {
+            // if the simulation step takes more real time than
+            // what the time step is worth we're going to start falling
+            // behind, i.e. the frame times will grow and and for the
+            // bigger time values more simulation steps need to be taken
+            // which will slow things down even more.
+            mApp->Update(mTimeTotal, time_step);
+            mTimeTotal += time_step;
+            mTimeAccum -= time_step;
+
+            // put some accumulated time towards ticking the game.
+            mTickAccum += time_step;
+        }
+
+        // do game tick steps
+        auto tick_time = mTimeTotal;
+        while (mTickAccum >= tick_step)
+        {
+            mApp->Tick(tick_time);
+            tick_time += tick_step;
+            mTickAccum -= tick_step;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in App::Update: '%1'", e.what());
+    }
+}
+
+void PlayWindow::Render()
+{
+    if (!mApp || !mInitDone)
+        return;
+
+    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+
+    mContext.makeCurrent(mSurface);
+    try
+    {
+        // ask the application to draw the current frame.
+        mApp->Draw();
+
+        mNumFrames++;
+        mNumFramesTotal++;
+        mUI.frames->setText(QString::number(mNumFramesTotal));
+        mUI.time->setText(QString::number(mTimeTotal));
+
+        const auto elapsed = mFrameTimer.elapsed();
+        if (elapsed >= 1000)
+        {
+            const auto seconds = elapsed / 1000.0;
+            const auto fps = mNumFrames / seconds;
+            game::App::Stats stats;
+            stats.num_frames_rendered = mNumFramesTotal;
+            stats.total_game_time     = mTimeTotal;
+            stats.total_wall_time     = CurrentRuntime();
+            stats.current_fps         = fps;
+            mApp->UpdateStats(stats);
+
+            mUI.fps->setText(QString::number(fps));
+
+            mNumFrames = 0;
+            mFrameTimer.restart();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in App::Draw: '%1'", e.what());
+    }
+}
+
 void PlayWindow::DoInit()
 {
     if (!mApp)
@@ -390,122 +522,12 @@ void PlayWindow::DoInit()
         // try to give the keyboard focus to the window
         //mSurface->requestActivate();
 
-        mTotalTimer.start();
         mFrameTimer.start();
         mInitDone = true;
     }
     catch (const std::exception& e)
     {
         ERROR("Exception in app init: '%1'", e.what());
-    }
-}
-
-void PlayWindow::DoRender()
-{
-    if (!mApp || !mInitDone)
-        return;
-
-    mContext.makeCurrent(mSurface);
-
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-    try
-    {
-        mApp->Draw();
-
-        mNumFrames++;
-        mNumFramesTotal++;
-        mUI.frames->setText(QString::number(mNumFramesTotal));
-
-        const auto elapsed = mFrameTimer.elapsed();
-        if (elapsed >= 1000)
-        {
-            const auto seconds = elapsed / 1000.0;
-            const auto fps = mNumFrames / seconds;
-            game::App::Stats stats;
-            stats.num_frames_rendered = mNumFramesTotal;
-            stats.total_game_time     = mCurrentTime;
-            stats.total_wall_time     = mTotalTimer.elapsed() / 1000.0;
-            stats.current_fps         = fps;
-            mApp->UpdateStats(stats);
-
-            mUI.fps->setText(QString::number(fps));
-
-            mNumFrames = 0;
-            mFrameTimer.restart();
-        }
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Exception in app draw: '%1'", e.what());
-    }
-}
-
-void PlayWindow::DoUpdate()
-{
-    if (!mApp || mPaused)
-        return;
-
-    // convert milliseconds into seconds.
-    const double time_step = mUpdateTimer.interval() / 1000.0;
-
-    mContext.makeCurrent(mSurface);
-
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-
-    try
-    {
-        bool quit = false;
-        game::App::Request request;
-        while (mApp->GetNextRequest(&request))
-        {
-            if (const auto* ptr = std::get_if<game::App::ResizeWindow>(&request))
-                ResizeSurface(ptr->width, ptr->height);
-            else if (const auto* ptr = std::get_if<game::App::MoveWindow>(&request))
-                this->move(ptr->xpos, ptr->ypos);
-            else if (const auto* ptr = std::get_if<game::App::SetFullscreen>(&request))
-                SetFullscreen(ptr->fullscreen);
-            else if (const auto* ptr = std::get_if<game::App::ToggleFullscreen>(&request))
-                ToggleFullscreen();
-            else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request))
-                quit = true;
-        }
-        if (!mApp->IsRunning() || quit)
-        {
-            // trigger close event.
-            this->close();
-            return;
-        }
-
-        // todo: maybe take multiple update steps here
-        // depending on how much actual time has elapsed ?
-
-        mApp->Update(mCurrentTime, time_step);
-        mCurrentTime += time_step;
-
-        mUI.time->setText(QString::number(mCurrentTime));
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Exception in app update: '%1'", e.what());
-    }
-}
-
-void PlayWindow::DoTick()
-{
-    if (!mApp || mPaused)
-        return;
-
-    mContext.makeCurrent(mSurface);
-
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-
-    try
-    {
-        mApp->Tick(mCurrentTime);
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Exception in app tick: '%1'", e.what());
     }
 }
 

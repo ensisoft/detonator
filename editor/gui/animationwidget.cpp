@@ -994,7 +994,7 @@ void AnimationWidget::animate(double secs)
     }
 }
 
-void AnimationWidget::render(double dt)
+void AnimationWidget::render()
 {
     mUI.widget->triggerPaint();
 }

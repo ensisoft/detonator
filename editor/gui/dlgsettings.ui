@@ -36,7 +36,14 @@
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="1" column="1" colspan="2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Open resources in a new</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
              <widget class="QComboBox" name="cmbWinOrTab">
               <item>
                <property name="text">
@@ -48,57 +55,6 @@
                 <string>Tab</string>
                </property>
               </item>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="chkVSync">
-              <property name="text">
-               <string>Sync to vblank</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="cmbTargetFps">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="editable">
-               <bool>true</bool>
-              </property>
-              <item>
-               <property name="text">
-                <string>30</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>60</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>120</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>144</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Open resources in a new</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Editor target FPS</string>
-              </property>
              </widget>
             </item>
            </layout>
@@ -265,8 +221,6 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>cmbTargetFps</tabstop>
-  <tabstop>chkVSync</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>
@@ -280,22 +234,5 @@
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>chkVSync</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>cmbTargetFps</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>347</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>240</x>
-     <y>92</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

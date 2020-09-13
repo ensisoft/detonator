@@ -60,6 +60,21 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 
+namespace {
+// returns number of seconds elapsed since the last call
+// of this function.
+double ElapsedSeconds()
+{
+    using clock = std::chrono::steady_clock;
+    static auto start = clock::now();
+    auto now  = clock::now();
+    auto gone = now - start;
+    start = now;
+    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
+        (1000.0 * 1000.0);
+}
+} // namespace
+
 namespace gui
 {
 
@@ -81,19 +96,6 @@ MainWindow::MainWindow()
     QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &MainWindow::timerRefreshUI);
     mRefreshTimer.setInterval(500);
     mRefreshTimer.start();
-
-    // This is the high frequency timer that is used to update animations and etc.
-    // simulations.
-    QObject::connect(&mAnimationTimer, &QTimer::timeout, this, &MainWindow::timerAnimate);
-    mAnimationTimer.setInterval(1000.0/60);
-    mAnimationTimer.start();
-
-    // Animation timer that is used to throttle the rendering rate when not syncing
-    // to display vblank. Without this throttle we're our essentially going to
-    // burn the CPU since the workloads are  so small for any modern system.
-    QObject::connect(&mRenderTimer, &QTimer::timeout, this, &MainWindow::timerRender);
-    mRenderTimer.setInterval(1000.0/60.0f);
-    mRenderTimer.start();
 
     auto& events = app::EventLog::get();
     QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
@@ -139,16 +141,7 @@ void MainWindow::loadState()
     mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("notepad.exe"));
     mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #endif
-    mSettings.target_fps        = settings.getValue("Settings", "target_fps", 120);
-    mSettings.sync_to_vblank    = settings.getValue("Settings", "sync_to_vblank", false);
     mSettings.default_open_win_or_tab = settings.getValue("Settings", "default_open_win_or_tab", QString("Tab"));
-
-    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
-    QSurfaceFormat::setDefaultFormat(format);
-
-    mRenderTimer.setInterval(1000.0/mSettings.target_fps);
-    mRenderTimer.start();
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -519,6 +512,50 @@ void MainWindow::showWindow()
     show();
 }
 
+void MainWindow::iterateGameLoop()
+{
+    const auto elapsed_since = ElapsedSeconds();
+    const auto time_step = 1.0/60.0;
+
+    mTimeAccum += elapsed_since;
+
+    while (mTimeAccum >= time_step)
+    {
+        for (int i=0; i<GetCount(mUI.mainTab); ++i)
+        {
+            auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+            widget->animate(time_step);
+        }
+        for (auto* child : mChildWindows)
+        {
+            child->Animate(time_step);
+        }
+
+        if (mPlayWindow)
+        {
+            mPlayWindow->Update(time_step);
+        }
+        mTimeTotal += time_step;
+        mTimeAccum -= time_step;
+    }
+
+    // render all widgets
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->render();
+    }
+    for (auto* child : mChildWindows)
+    {
+        child->Render();
+    }
+
+    if (mPlayWindow)
+    {
+        mPlayWindow->Render();
+    }
+}
+
 void MainWindow::on_mainTab_currentChanged(int index)
 {
     if (mCurrentWidget)
@@ -858,19 +895,7 @@ void MainWindow::on_actionCloseWorkspace_triggered()
 void MainWindow::on_actionSettings_triggered()
 {
     DlgSettings dlg(this, mSettings);
-    if (dlg.exec() == QDialog::Accepted)
-    {
-        // adjust the default surface format.
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-        format.setSwapInterval(mSettings.sync_to_vblank ? 1 : 0);
-        QSurfaceFormat::setDefaultFormat(format);
-
-        DEBUG("New sync to vblank: %1, Target fps: %2",
-            mSettings.sync_to_vblank, mSettings.target_fps);
-
-        mRenderTimer.setInterval(1000.0/mSettings.target_fps);
-        mRenderTimer.start();
-    }
+    dlg.exec();
 }
 
 void MainWindow::on_actionImagePacker_triggered()
@@ -1059,43 +1084,6 @@ void MainWindow::timerRefreshUI()
         mWorkspace->Tick();
 }
 
-void MainWindow::timerAnimate()
-{
-    // todo: think about the timestep
-    const float time_step = 1.0f / 60.0f;
-
-    for (int i=0; i<GetCount(mUI.mainTab); ++i)
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->animate(time_step);
-    }
-    for (auto* child : mChildWindows)
-    {
-        child->Animate(time_step);
-    }
-}
-
-void MainWindow::timerRender()
-{
-    // todo: think about the timestep
-    const float time_step = 1.0f / mRenderTimer.interval();
-
-    for (int i=0; i<GetCount(mUI.mainTab); ++i)
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->render(time_step);
-    }
-    for (auto* child : mChildWindows)
-    {
-        child->Render(time_step);
-    }
-
-    if (mPlayWindow)
-    {
-        mPlayWindow->Render(time_step);
-    }
-}
-
 void MainWindow::showNote(const app::Event& event)
 {
     if (event.type == app::Event::Type::Note)
@@ -1206,6 +1194,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
     // accept the event, will quit the application
     event->accept();
+
+    mIsClosed = true;
 }
 
 bool MainWindow::eventFilter(QObject* destination, QEvent* event)
@@ -1258,8 +1248,6 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
     settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
-    settings.setValue("Settings", "target_fps", mSettings.target_fps);
-    settings.setValue("Settings", "sync_to_vblank", mSettings.sync_to_vblank);
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));

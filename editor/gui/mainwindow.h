@@ -79,6 +79,14 @@ namespace gui
 
         // Show the application window.
         void showWindow();
+        
+        // Perform one iteration of the "game" loop, update and render
+        // all currently open widgets.
+        void iterateGameLoop();
+
+        // Returns true when the window has been closed.
+        bool isClosed() const
+        { return mIsClosed; }
 
     private slots:
         void on_mainTab_currentChanged(int index);
@@ -111,12 +119,8 @@ namespace gui
         void on_actionNewResource_triggered();
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
-
         void actionWindowFocus_triggered();
-
         void timerRefreshUI();
-        void timerAnimate();
-        void timerRender();
         void showNote(const app::Event& event);
         void openExternalImage(const QString& file);
         void openExternalShader(const QString& file);
@@ -139,29 +143,27 @@ namespace gui
     private:
         // the refesh timer to do low frequency UI updates.
         QTimer mRefreshTimer;
-        // the timer to run the widget animations.
-        QTimer mAnimationTimer;
-        // the timer to trigger rendering
-        QTimer mRenderTimer;
-
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.
         AppSettings mSettings;
-
         // currently focused (current) widget in the main tab.
         MainWidget* mCurrentWidget = nullptr;
-
         // workspace object.
         std::unique_ptr<app::Workspace> mWorkspace;
-
         // the list of child windows that are opened to show mainwidgets.
         // it's possible to open some resource in a separate window
         // in which case a new ChildWindow is opened to display/contain the MainWidget.
         // instead of the tab in this window.
         std::vector<ChildWindow*> mChildWindows;
-
         // The play window if any currently.
         std::unique_ptr<PlayWindow> mPlayWindow;
+        // flag to indicate whether window has been closed or not
+        bool mIsClosed = false;
+        // total time measured in update steps frequency.
+        double mTimeTotal = 0.0;
+        // The time accumulator for keeping track of partial
+        // updates.
+        double mTimeAccum = 0.0;
     };
 
 } // namespace

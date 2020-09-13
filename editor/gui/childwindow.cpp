@@ -88,9 +88,9 @@ void ChildWindow::Animate(double secs)
     mWidget->animate(secs);
 }
 
-void ChildWindow::Render(double dt)
+void ChildWindow::Render()
 {
-    mWidget->render(dt);
+    mWidget->render();
 }
 
 void ChildWindow::on_actionClose_triggered()

@@ -364,7 +364,7 @@ bool MaterialWidget::confirmClose()
     return true;
 }
 
-void MaterialWidget::render(double dt)
+void MaterialWidget::render()
 {
     mUI.widget->triggerPaint();
 }

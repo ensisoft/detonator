@@ -47,24 +47,15 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     SetUIValue(mUI.edtImageEditorArguments, settings.image_editor_arguments);
     SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
     SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
-    SetUIValue(mUI.cmbTargetFps, settings.target_fps);
-    SetUIValue(mUI.chkVSync, settings.sync_to_vblank);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
-
-    mUI.cmbTargetFps->setEnabled(!settings.sync_to_vblank);
 }
 
 void DlgSettings::on_btnAccept_clicked()
 {
-    if (!MustHaveNumber(mUI.cmbTargetFps))
-        return;
-
     GetUIValue(mUI.edtImageEditorExecutable, &mSettings.image_editor_executable);
     GetUIValue(mUI.edtImageEditorArguments, &mSettings.image_editor_arguments);
     GetUIValue(mUI.edtShaderEditorExecutable, &mSettings.shader_editor_executable);
     GetUIValue(mUI.edtShaderEditorArguments, &mSettings.shader_editor_arguments);
-    GetUIValue(mUI.cmbTargetFps, &mSettings.target_fps);
-    GetUIValue(mUI.chkVSync, &mSettings.sync_to_vblank);
     GetUIValue(mUI.cmbWinOrTab, &mSettings.default_open_win_or_tab);
     accept();
 }

@@ -52,7 +52,7 @@ namespace gui
         virtual void animate(double dt)
         {}
 
-        virtual void render(double dt)
+        virtual void render()
         {}
 
         // Called whenever the widget is getting activated i.e. displayed

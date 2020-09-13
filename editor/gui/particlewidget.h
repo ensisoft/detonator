@@ -61,7 +61,7 @@ namespace gui
         virtual void reloadTextures() override;
         virtual void shutdown() override;
         virtual void animate(double secs) override;
-        virtual void render(double dt) override;
+        virtual void render() override;
         virtual bool confirmClose() override;
 
     private slots:

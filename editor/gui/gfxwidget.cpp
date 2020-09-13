@@ -123,34 +123,29 @@ void GfxWindow::paintGL()
     if (!mCustomGraphicsDevice)
         return;
 
-    mContext.makeCurrent(this);
+    if (!isExposed())
+        return;
 
-    // Note that this clock measures the time between rendering calls.
-    // so when the window isn't active paintGL isn't called and then
-    // after the window becomes active again this time step will be
-    // large. Therefore it's better not to use this for animation
-    // or such purposes since the simulations might not be stable
-    // with such arbitrary time steps.
-    const quint64 ms = mClock.restart();
+    mContext.makeCurrent(this);
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsDevice->ClearColor(mClearColor);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMagFilter);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
-        onPaintScene(*mCustomGraphicsPainter, ms/1000.0);
+        onPaintScene(*mCustomGraphicsPainter, 0.0);
 
     if (mShowFps)
     {
         mNumFrames++;
-        mFrameTime += ms;
-        if (mFrameTime >= 1000)
+        const auto elapsed = mClock.elapsed();
+        if (elapsed >= 1000)
         {
             // how many frames did get to display in the last period
-            const auto secs = mFrameTime / 1000.0;
+            const auto secs = elapsed / 1000.0;
             mCurrentFps = mNumFrames / secs;
             mNumFrames  = 0;
-            mFrameTime  = 0;
+            mClock.restart();
         }
         gfx::DrawTextRect(*mCustomGraphicsPainter,
             base::FormatString("%1 FPS", (unsigned)mCurrentFps),
@@ -159,19 +154,9 @@ void GfxWindow::paintGL()
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
-    mCustomGraphicsDevice->EndFrame(true /*display*/);
+    mCustomGraphicsDevice->EndFrame(false /*display*/);
     mCustomGraphicsDevice->CleanGarbage(60);
-
-    if (isExposed())
-    {
-        mContext.swapBuffers(this);
-    }
-
-    // animate continuously: schedule an update
-    // Doing this with the vsync disabled is likely going to be
-    // "running too fast" as the workloads are tiny for a modern
-    // GPU and thus this loops basically becomes a busy loop
-    //QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+    mContext.swapBuffers(this);
 }
 
 void GfxWindow::doInit()
@@ -182,8 +167,7 @@ void GfxWindow::doInit()
     const auto h = height();
     onInitScene(w, h);
 
-    // animate continuously: schedule an update
-    //QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+    mClock.start();
  }
 
 void GfxWindow::mouseMoveEvent(QMouseEvent* mickey)
@@ -222,7 +206,6 @@ bool GfxWindow::event(QEvent* event)
 void GfxWindow::toggleShowFps()
 {
     mShowFps = !mShowFps;
-    mFrameTime = 0;
     mNumFrames = 0;
 }
 
