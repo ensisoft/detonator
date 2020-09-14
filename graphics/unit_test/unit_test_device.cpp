@@ -199,8 +199,8 @@ void unit_test_texture()
     auto* texture = dev->MakeTexture("foo");
     TEST_REQUIRE(texture->GetWidth() == 0);
     TEST_REQUIRE(texture->GetHeight() == 0);
-    TEST_REQUIRE(texture->GetMinFilter() == gfx::Texture::MinFilter::Nearest);
-    TEST_REQUIRE(texture->GetMagFilter() == gfx::Texture::MagFilter::Nearest);
+    TEST_REQUIRE(texture->GetMinFilter() == gfx::Texture::MinFilter::Default);
+    TEST_REQUIRE(texture->GetMagFilter() == gfx::Texture::MagFilter::Default);
     TEST_REQUIRE(texture->GetWrapX() == gfx::Texture::Wrapping::Repeat);
     TEST_REQUIRE(texture->GetWrapY() == gfx::Texture::Wrapping::Repeat);
     // format is unspecified.
