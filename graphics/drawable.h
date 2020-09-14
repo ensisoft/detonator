@@ -88,6 +88,10 @@ namespace gfx
         virtual Style GetStyle() const = 0;
         // Pack the drawable resources.
         virtual void Pack(ResourcePacker* packer) const = 0;
+        // Get the ID of the drawable shape. Used to map the
+        // drawable to a device specific program object.
+        inline std::string GetId() const
+        { return typeid(*this).name(); }
     private:
     };
 

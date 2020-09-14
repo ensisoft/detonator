@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1340</width>
-    <height>1004</height>
+    <width>1337</width>
+    <height>1021</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,68 +34,13 @@
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="materialName">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="gamma">
+               <property name="singleStep">
+                <double>0.010000000000000</double>
                </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_24">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Base Color</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="color_widgets::ColorSelector" name="baseColor">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="color">
-                <color>
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </property>
-               <property name="display_mode" stdset="0">
-                <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-               </property>
-               <property name="background">
-                <brush brushstyle="Dense3Pattern">
-                 <color alpha="255">
-                  <red>128</red>
-                  <green>128</green>
-                  <blue>128</blue>
-                 </color>
-                </brush>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_23">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Name</string>
+               <property name="value">
+                <double>1.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -112,8 +57,41 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="surfaceType"/>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="materialName">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_23">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Base Color</string>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_25">
@@ -144,13 +122,42 @@
              <item row="1" column="1">
               <widget class="QComboBox" name="materialType"/>
              </item>
-             <item row="4" column="1">
-              <widget class="QDoubleSpinBox" name="gamma">
-               <property name="singleStep">
-                <double>0.010000000000000</double>
+             <item row="3" column="1">
+              <widget class="color_widgets::ColorSelector" name="baseColor">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <property name="value">
-                <double>1.000000000000000</double>
+               <property name="color">
+                <color>
+                 <red>255</red>
+                 <green>255</green>
+                 <blue>255</blue>
+                </color>
+               </property>
+               <property name="display_mode" stdset="0">
+                <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+               </property>
+               <property name="background">
+                <brush brushstyle="Dense3Pattern">
+                 <color alpha="255">
+                  <red>128</red>
+                  <green>128</green>
+                  <blue>128</blue>
+                 </color>
+                </brush>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="surfaceType"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QCheckBox" name="staticInstance">
+               <property name="text">
+                <string>Static instance</string>
                </property>
               </widget>
              </item>
@@ -1131,11 +1138,13 @@
   <tabstop>materialType</tabstop>
   <tabstop>surfaceType</tabstop>
   <tabstop>gamma</tabstop>
+  <tabstop>staticInstance</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>velocityX</tabstop>
   <tabstop>velocityY</tabstop>
   <tabstop>velocityZ</tabstop>
+  <tabstop>particleAction</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
   <tabstop>wrapX</tabstop>

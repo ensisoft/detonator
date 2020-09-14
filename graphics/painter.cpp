@@ -91,7 +91,7 @@ public:
 
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
-        mat.Apply(env, *mDevice, *prog, raster);
+        mat.ApplyDynamicState(env, *mDevice, *prog, raster);
 
         Device::State state;
         state.viewport     = IRect(mViewX, mViewY, mViewW, mViewH);
@@ -154,7 +154,7 @@ public:
             Material::Environment env;
             env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
 
-            mask_material.Apply(env, *mDevice, *prog, raster);
+            mask_material.ApplyDynamicState(env, *mDevice, *prog, raster);
             mDevice->Draw(*prog, *geom, state);
         }
 
@@ -179,7 +179,7 @@ public:
             Material::Environment env;
             env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
-            draw.material->Apply(env, *mDevice, *prog, raster);
+            draw.material->ApplyDynamicState(env, *mDevice, *prog, raster);
             state.blending = raster.blending;
             mDevice->Draw(*prog, *geom, state);
         }
@@ -188,8 +188,7 @@ public:
 private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
-        const std::string& name = typeid(drawable).name() + std::string("/") +
-            material.GetShaderName();
+        const std::string& name = drawable.GetId() + "/" + material.GetId();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {
@@ -205,6 +204,10 @@ private:
             shaders.push_back(material_shader);
             prog = mDevice->MakeProgram(name);
             prog->Build(shaders);
+            if (prog->IsValid())
+            {
+                material.ApplyStaticState(*mDevice, *prog);
+            }
         }
         if (prog->IsValid())
             return prog;

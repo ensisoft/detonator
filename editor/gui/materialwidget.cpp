@@ -175,6 +175,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    SetValue(mUI.staticInstance, mMaterial.IsStatic());
     SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
     SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
     SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
@@ -259,6 +260,7 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.fps,          mMaterial.GetFps());
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
+    SetValue(mUI.staticInstance, mMaterial.IsStatic());
     SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
     SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
     SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
@@ -788,6 +790,7 @@ void MaterialWidget::SetMaterialProperties() const
     mMaterial.SetColorMapColor(GetValue(mUI.colorMap2), gfx::Material::ColorIndex::BottomLeft);
     mMaterial.SetColorMapColor(GetValue(mUI.colorMap3), gfx::Material::ColorIndex::BottomRight);
     mMaterial.SetGamma(GetValue(mUI.gamma));
+    mMaterial.SetStatic(GetValue(mUI.staticInstance));
     mMaterial.SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial.SetParticleAction(GetValue(mUI.particleAction));
     mMaterial.SetRuntime(mTime);

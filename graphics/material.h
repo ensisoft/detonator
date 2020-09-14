@@ -374,36 +374,25 @@ namespace gfx
 
         // Apply the material properties to the given program object
         // and set the rasterizer state.
-        void Apply(const Environment& env, Device& device, Program& prog, RasterState& state) const;
+        void ApplyDynamicState(const Environment& env, Device& device, Program& prog, RasterState& state) const;
+        // Apply the static state, i.e. the material state that doesn't change
+        // during the material's lifetime and need to be only set once.
+        void ApplyStaticState(Device& device, Program& prog) const;
 
         // Material properties getters.
 
-        std::string GetShaderName() const
-        {
-            const std::size_t hash = std::hash<std::string>()(GetShaderFile());
-            return std::to_string(hash);
-        }
+        // Get the ID for the material. Used to map the material
+        // to a device specific program object.
+        std::string GetId() const;
 
-        std::string GetShaderFile() const
-        {
-            // check if have a user defined specific shader or not.
-            if (!mShaderFile.empty())
-                return mShaderFile;
-
-            if (mType == Type::Color)
-                return "shaders/es2/solid_color.glsl";
-            else if (mType == Type::Gradient)
-                return "shaders/es2/gradient.glsl";
-            else if (mType == Type::Texture)
-                return "shaders/es2/texture_map.glsl";
-            else if (mType == Type::Sprite)
-                return "shaders/es2/texture_map.glsl";
-            ASSERT(!"???");
-            return "";
-        }
+        // Get the ID/handle of the shader source file that
+        // this material uses.
+        std::string GetShaderFile() const;
 
         bool GetBlendFrames() const
         { return mBlendFrames; }
+        bool IsStatic() const
+        { return mStatic; }
         float GetTextureScaleX() const
         { return mTextureScale.x; }
         float GetTextureScaleY() const
@@ -459,6 +448,21 @@ namespace gfx
         Material& SetBlendFrames(bool on_off)
         {
             mBlendFrames = on_off;
+            return *this;
+        }
+
+        // Set whether this material is static or not.
+        // Static materials use their current state to map to a unique
+        // shader program and apply the static material state only once
+        // when the program is created. This can improve performance
+        // since material state that doesn't change doesn't need to be
+        // reset on every draw. However it'll create more program objects
+        // i.e. consume more graphics memory. Additionally frequenct changes
+        // of the material state will be expensive and cause recompilation
+        // and rebuild of the corresponding shader program.
+        Material& SetStatic(bool on_off)
+        {
+            mStatic = on_off;
             return *this;
         }
 
@@ -698,6 +702,7 @@ namespace gfx
         float mRuntime = 0.0f;
         float mFps     = 0.0f;
         bool  mBlendFrames = true;
+        bool  mStatic = false;
         struct TextureSampler {
             FRect box = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             bool enable_gc  = false;

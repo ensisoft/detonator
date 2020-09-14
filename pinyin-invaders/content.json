@@ -256,6 +256,7 @@
         }
       ],
       "shader_file": "",
+      "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Linear",
       "texture_min_filter": "Trilinear",
@@ -325,6 +326,7 @@
         }
       ],
       "shader_file": "",
+      "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Linear",
       "texture_min_filter": "Mipmap",
@@ -373,7 +375,7 @@
         "g": 1.0,
         "r": 1.0
       },
-      "fps": 0.20000000298023224,
+      "fps": 0.0,
       "gamma": 1.0,
       "particle_action": "None",
       "resource_name": "Star",
@@ -394,6 +396,7 @@
         }
       ],
       "shader_file": "",
+      "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Linear",
       "texture_min_filter": "Trilinear",

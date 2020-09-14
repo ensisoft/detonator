@@ -448,7 +448,6 @@ public:
 
     virtual void CleanGarbage(size_t max_num_idle_frames) override
     {
-        /* not needed atm.
         for (auto it = mPrograms.begin(); it != mPrograms.end();)
         {
             auto* impl = static_cast<ProgImpl*>(it->second.get());
@@ -457,7 +456,6 @@ public:
                 it = mPrograms.erase(it);
             else ++it;
         }
-        */
 
         for (auto it = mTextures.begin(); it != mTextures.end();)
         {

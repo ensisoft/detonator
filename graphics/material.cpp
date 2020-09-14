@@ -83,6 +83,7 @@ Material::Material(const Material& other)
     mRuntime     = other.mRuntime;
     mFps         = other.mFps;
     mBlendFrames = other.mBlendFrames;
+    mStatic      = other.mStatic;
     mMinFilter   = other.mMinFilter;
     mMagFilter   = other.mMagFilter;
     mWrapX       = other.mWrapX;
@@ -108,22 +109,19 @@ Material::Material(const Material& other)
 
 Shader* Material::GetShader(Device& device) const
 {
-    const std::string& name = GetShaderName();
     const std::string& file = GetShaderFile();
-
-    ASSERT(!name.empty());
     ASSERT(!file.empty());
 
-    Shader* shader = device.FindShader(name);
+    Shader* shader = device.FindShader(file);
     if (shader == nullptr)
     {
-        shader = device.MakeShader(name);
+        shader = device.MakeShader(file);
         shader->CompileFile(file);
     }
     return shader;
 }
 
-void Material::Apply(const Environment& env, Device& device, Program& prog, RasterState& state) const
+void Material::ApplyDynamicState(const Environment& env, Device& device, Program& prog, RasterState& state) const
 {
     // set rasterizer state.
     if (mSurfaceType == SurfaceType::Opaque)
@@ -226,11 +224,22 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     }
     prog.SetUniform("kApplyRandomParticleRotation",
         env.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
+    prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
     prog.SetUniform("kIsAlphaMask", alpha_masks[0], alpha_masks[1]);
+    prog.SetUniform("kRuntime", mRuntime);
+
+    if (!mStatic)
+    {
+        // if not static then always make sure to apply full material state
+        // in the shader program.
+        ApplyStaticState(device, prog);
+    }
+}
+
+void Material::ApplyStaticState(Device& device, Program& prog) const
+{
     prog.SetUniform("kBaseColor", mBaseColor);
     prog.SetUniform("kGamma", mGamma);
-    prog.SetUniform("kRuntime", mRuntime);
-    prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
     prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
     prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
@@ -238,6 +247,46 @@ void Material::Apply(const Environment& env, Device& device, Program& prog, Rast
     prog.SetUniform("kColor1", mColorMap[1]);
     prog.SetUniform("kColor2", mColorMap[2]);
     prog.SetUniform("kColor3", mColorMap[3]);
+}
+
+std::string Material::GetId() const
+{
+    // if the static flag is set the material id is
+    // derived from the current state, thus  mapping material objects with
+    // different paramaters to unique shader programs (even when they're
+    // the same type of shader program)
+    if (mStatic)
+        return std::to_string(GetHash());
+
+    // get the material id based on the type of the material. in this
+    // case when then material state must be set each time into the
+    // shader program before drawing.
+    // For example if there are two materials m1 and m2 and both are of
+    // type of Color. They'll both internally use the same shader program
+    // but both material instances can have their own properties (i.e.
+    // different color etc material properties) and thus all these
+    // properties must be set on the shader program on each draw when
+    // the material is being used.
+    const std::size_t hash = std::hash<std::string>()(GetShaderFile());
+    return std::to_string(hash);
+}
+
+std::string Material::GetShaderFile() const
+{
+    // check if have a user defined specific shader or not.
+    if (!mShaderFile.empty())
+        return mShaderFile;
+
+    if (mType == Type::Color)
+        return "shaders/es2/solid_color.glsl";
+    else if (mType == Type::Gradient)
+        return "shaders/es2/gradient.glsl";
+    else if (mType == Type::Texture)
+        return "shaders/es2/texture_map.glsl";
+    else if (mType == Type::Sprite)
+        return "shaders/es2/texture_map.glsl";
+    ASSERT(!"???");
+    return "";
 }
 
 size_t Material::GetHash() const
@@ -250,6 +299,7 @@ size_t Material::GetHash() const
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mFps);
     hash = base::hash_combine(hash, mBlendFrames);
+    hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mMinFilter);
     hash = base::hash_combine(hash, mMagFilter);
     hash = base::hash_combine(hash, mWrapX);
@@ -280,6 +330,7 @@ nlohmann::json Material::ToJson() const
     base::JsonWrite(json, "gamma", mGamma);
     base::JsonWrite(json, "fps", mFps);
     base::JsonWrite(json, "blending", mBlendFrames);
+    base::JsonWrite(json, "static", mStatic);
     base::JsonWrite(json, "texture_min_filter", mMinFilter);
     base::JsonWrite(json, "texture_mag_filter", mMagFilter);
     base::JsonWrite(json, "texture_wrap_x", mWrapX);
@@ -317,6 +368,7 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
         !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
         !base::JsonReadSafe(object, "fps", &mat.mFps) ||
         !base::JsonReadSafe(object, "blending", &mat.mBlendFrames) ||
+        !base::JsonReadSafe(object, "static", &mat.mStatic) ||
         !base::JsonReadSafe(object, "texture_min_filter", &mat.mMinFilter) ||
         !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
         !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
@@ -449,6 +501,7 @@ Material& Material::operator=(const Material& other)
     std::swap(mGamma, tmp.mGamma);
     std::swap(mRuntime, tmp.mRuntime);
     std::swap(mBlendFrames, tmp.mBlendFrames);
+    std::swap(mStatic, tmp.mStatic);
     std::swap(mMinFilter, tmp.mMinFilter);
     std::swap(mMagFilter, tmp.mMagFilter);
     std::swap(mWrapX, tmp.mWrapX);
