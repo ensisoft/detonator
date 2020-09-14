@@ -36,6 +36,7 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "resource.h"
 #include "shader.h"
 #include "program.h"
@@ -910,90 +911,174 @@ private:
 
         virtual void SetUniform(const char* name, int x) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform1i(ret, x));
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            if (hash != ret.hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform1i(ret.location, x));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, int x, int y) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform2i(ret, x, y));
+
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            hash = base::hash_combine(hash, y);
+            if (hash != ret.hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform2i(ret.location, x, y));
+                ret.hash = hash;
+            }
         }
 
         virtual void SetUniform(const char* name, float x) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform1f(ret, x));
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            if (ret.hash != hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform1f(ret.location, x));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, float x, float y) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform2f(ret, x, y));
+
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            hash = base::hash_combine(hash, y);
+            if (hash != ret.hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform2f(ret.location, x, y));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, float x, float y, float z) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform3f(ret, x, y, z));
+
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            hash = base::hash_combine(hash, y);
+            hash = base::hash_combine(hash, z);
+            if (hash != ret.hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform3f(ret.location, x, y, z));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, float x, float y, float z, float w) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform4f(ret, x, y, z, w));
+
+            uint32_t hash = 0;
+            hash = base::hash_combine(hash, x);
+            hash = base::hash_combine(hash, y);
+            hash = base::hash_combine(hash, z);
+            hash = base::hash_combine(hash, w);
+            if (hash != ret.hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform4f(ret.location, x, y, z, w));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, const Color4f& color) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniform4f(ret, color.Red(), color.Green(), color.Blue(), color.Alpha()));
+            const auto hash = color.GetHash();
+            if (ret.hash != hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniform4f(ret.location, color.Red(), color.Green(), color.Blue(), color.Alpha()));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniformMatrix2fv(ret, 1, GL_FALSE /* transpose */, (const float*)&matrix));
+
+            uint32_t hash = 0;
+            const auto ptr = (const float*)&matrix;
+            const auto len  = sizeof(matrix) / sizeof(float);
+            for (size_t i=0; i<len; ++i)
+                hash = base::hash_combine(hash, ptr[i]);
+            if (ret.hash != hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniformMatrix2fv(ret.location, 1, GL_FALSE /* transpose */, (const float*)&matrix));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniformMatrix3fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+
+            uint32_t hash = 0;
+            const auto ptr = (const float*)&matrix;
+            const auto len  = sizeof(matrix) / sizeof(float);
+            for (size_t i=0; i<len; ++i)
+                hash = base::hash_combine(hash, ptr[i]);
+
+            if (ret.hash != hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniformMatrix3fv(ret.location, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+                ret.hash = hash;
+            }
         }
         virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
         {
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            if (ret == -1)
+            auto& ret = GetUniform(name);
+            if (ret.location == -1)
                 return;
-            GL_CALL(glUseProgram(mProgram));
-            GL_CALL(glUniformMatrix4fv(ret, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+
+            uint32_t hash = 0;
+            const auto ptr = (const float*)&matrix;
+            const auto len  = sizeof(matrix) / sizeof(float);
+            for (size_t i=0; i<len; ++i)
+                hash = base::hash_combine(hash, ptr[i]);
+
+            if (ret.hash != hash)
+            {
+                GL_CALL(glUseProgram(mProgram));
+                GL_CALL(glUniformMatrix4fv(ret.location, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+                ret.hash = hash;
+            }
         }
 
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
         {
-            auto ret =  mGL.glGetUniformLocation(mProgram, sampler);
-            if (ret == -1)
+            auto ret =  GetUniform(sampler);
+            if (ret.location == -1)
                 return;
 
             const auto* impl = static_cast<const TextureImpl*>(&texture);
@@ -1043,7 +1128,7 @@ private:
             // which textures will actually be used to draw and do the
             // texture binds.
             mTextures[unit].texture  = const_cast<TextureImpl*>(impl);
-            mTextures[unit].location = ret;
+            mTextures[unit].location = ret.location;
         }
 
         void SetState(TextureUnits& units,
@@ -1198,6 +1283,26 @@ private:
         }
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
+
+    private:
+        struct Uniform {
+            int location = 0;
+            uint32_t hash = 0;
+        };
+        std::unordered_map<std::string, Uniform> mUniforms;
+
+        Uniform& GetUniform(const char* name)
+        {
+            auto it = mUniforms.find(name);
+            if (it != std::end(mUniforms))
+                return it->second;
+
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            Uniform u;
+            u.location = ret;
+            mUniforms[name] = u;
+            return mUniforms[name];
+        }
 
     private:
         const OpenGLFunctions& mGL;
