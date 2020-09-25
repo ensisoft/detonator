@@ -512,7 +512,7 @@ void MainWindow::showWindow()
     show();
 }
 
-void MainWindow::iterateGameLoop()
+bool MainWindow::iterateGameLoop()
 {
     const auto elapsed_since = ElapsedSeconds();
     const auto time_step = 1.0/60.0;
@@ -554,6 +554,8 @@ void MainWindow::iterateGameLoop()
     {
         mPlayWindow->Render();
     }
+
+    return mUI.mainTab->count() || mChildWindows.size() || mPlayWindow;
 }
 
 void MainWindow::on_mainTab_currentChanged(int index)
@@ -1196,6 +1198,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
 
     mIsClosed = true;
+
+    emit aboutToClose();
 }
 
 bool MainWindow::eventFilter(QObject* destination, QEvent* event)
@@ -1276,6 +1280,8 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
         ChildWindow* child = new ChildWindow(widget);
         child->show();
         mChildWindows.push_back(child);
+
+        emit newAcceleratedWindowOpen();
         return child;
     }
 
@@ -1288,6 +1294,8 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 
     // rebuild window menu and shortcuts
     prepareWindowMenu();
+
+    emit newAcceleratedWindowOpen();
 
     // no child window
     return nullptr;

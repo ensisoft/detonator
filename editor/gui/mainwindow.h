@@ -79,14 +79,20 @@ namespace gui
 
         // Show the application window.
         void showWindow();
-        
+
         // Perform one iteration of the "game" loop, update and render
         // all currently open widgets.
-        void iterateGameLoop();
+        // Returns true if next fast iteration is needed or false
+        // if there are no windows open that would required fast iteration.x
+        bool iterateGameLoop();
 
         // Returns true when the window has been closed.
         bool isClosed() const
         { return mIsClosed; }
+
+    signals:
+        void newAcceleratedWindowOpen();
+        void aboutToClose();
 
     private slots:
         void on_mainTab_currentChanged(int index);

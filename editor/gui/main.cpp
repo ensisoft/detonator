@@ -33,6 +33,8 @@
 #  include <QDir>
 #  include <QFile>
 #  include <QTextStream>
+#  include <QEventLoop>
+#  include <QObject>
 #  include <boost/version.hpp>
 #include "warnpop.h"
 
@@ -203,7 +205,14 @@ int main(int argc, char* argv[])
         {
             app.processEvents();
 
-            window.iterateGameLoop();
+            if (!window.iterateGameLoop()) {
+                QEventLoop loop;
+                QObject::connect(&window, &gui::MainWindow::newAcceleratedWindowOpen,
+                    &loop, &QEventLoop::quit);
+                QObject::connect(&window, &gui::MainWindow::aboutToClose,
+                    &loop, &QEventLoop::quit);
+                loop.exec();
+            }
 
             // todo: is there a workable way to throttle this loop execution somehow?
             // Some thing that was tried was to compute how much of the frame budget time
