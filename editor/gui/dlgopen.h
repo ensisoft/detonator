@@ -45,6 +45,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_filter_textChanged(const QString& text);
+        void on_listWidget_itemDoubleClicked(QListWidgetItem* item);
 
     private:
         Ui::DlgOpen mUI;

@@ -109,7 +109,12 @@ void DlgOpen::on_filter_textChanged(const QString& text)
     {
         mUI.listWidget->setCurrentItem(mUI.listWidget->item(0));
     }
-
 }
+
+void DlgOpen::on_listWidget_itemDoubleClicked(QListWidgetItem*)
+{
+    accept();
+}
+
 } // namespace
 
