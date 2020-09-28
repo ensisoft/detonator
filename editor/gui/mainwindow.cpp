@@ -1028,6 +1028,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         const auto ypos = mWorkspace->GetUserProperty("play_window_ypos", mPlayWindow->y());
         mPlayWindow->move(xpos, ypos);
         mPlayWindow->show();
+        emit newAcceleratedWindowOpen();
         DEBUG("Playwindow position: %1x%2", xpos, ypos);
     }
     // bring to the top of the window stack.
