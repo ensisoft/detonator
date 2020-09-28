@@ -37,6 +37,60 @@
 #include "utility.h"
 #include "gfxwidget.h"
 
+// Sync to VBLANK and multiple OpenGL Contexts:
+//
+// When rendering to multiple windows there's a problem
+// wrt how to manage the rendering rate. If VSYNC is turned
+// off the main rendering loop (see main.cpp) will run as fast
+// as possible and the application will likely be rendering
+// more frames than the display can actually show. This leads
+// to waste in terms of CPU and GPU processing. For example
+// when running on the laptop within 5 mins the fan is at 100%
+// the laptop is burning hot and the battery is drained. This
+// is not a great idea.
+// However if all the rendering surfaces have VSYNC setting enabled
+// then swapBuffers call will block on every window swap which means
+// there are as many waits (per second) as there are windows. This
+// means that every additional window will decrease the rendering rate.
+// For example let's say the display runs @ 60 Hz, then,
+// 2 windows -> two swaps -> 30fps
+// 3 windows -> three swaps -> 20 fps
+// 6 windows -> 6 swaps -> 10 fps.
+//
+// Using timers or inserting waits anywhere in the rendering path will
+// lead to very janky rendering, so these cannot be used.
+//
+// Ultimately it seems that the solution is to enable sync to VBLANK for
+// only a *single* rendering surface. Thus making sure that we're doing
+// only a single wait per second in the call to swap buffers. So what we
+// try to do here is to have a flag to tell us when some surface has vsync
+// enabled and if that surface is destroyed some other surface needs to
+// enable this flag.
+//
+// Notes about Qt.
+// setSwapInterval is a member of QSurfaceFormat. QSurface and QOpenGLContext
+// both take QSurfaceFormat but for the swap interval setting only the data set
+// in the QSurface matters.
+// The implementation tries to set the swap interval on every call to the platform's
+// (GLX, WGL, EGL) "make current" call. However in the QWindow implementation the
+// QSurfaceFormat is only ever set to "requestedFormat" which is only used *before*
+// the native platform window is ever created.  This means that a subsequent call
+// to QWindow::setFormat will not change the swap interval setting as such but the
+// native resources must be destroyed and then re-created. (doh)
+//
+// See: qwindow.cpp, qglxintegration.cpp
+//
+// Some old discussion about the problem.
+// https://stackoverflow.com/questions/29617370/multiple-opengl-contexts-multiple-windows-multithreading-and-vsync
+//
+// see commit. e14c0325af44512740ad711d0c13fd276efc25b7
+
+namespace {
+    // a global flag to indicate when there's some surface with
+    // VSYNC enabled.
+    bool have_sync = false;
+}// namespace
+
 namespace gui
 {
 
@@ -56,7 +110,13 @@ GfxWindow::~GfxWindow()
 
 GfxWindow::GfxWindow()
 {
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setSwapInterval(have_sync ? 0 : 1);
+
     setSurfaceType(QWindow::OpenGLSurface);
+    setFormat(format);
+
+    have_sync = true;
 
     // the default configuration has been set in main
     mContext.create();
@@ -85,6 +145,17 @@ void GfxWindow::dispose()
     // then the device will end deleting resources that actually belong
     // to a different device! *OOPS*
     mContext.makeCurrent(this);
+
+    const auto& format = this->format();
+    const auto sync = format.swapInterval() == 1;
+    if (sync)
+    {
+        // if this surface was vsynced then toggle the flag
+        // in order to indicate that we have vsync no more and
+        // some other surface must be recreated.
+        DEBUG("Lost VSYNC GfxWindow.");
+        have_sync = false;
+    }
 
     mCustomGraphicsDevice.reset();
     mCustomGraphicsPainter.reset();
@@ -125,6 +196,22 @@ void GfxWindow::paintGL()
 
     if (!isExposed())
         return;
+
+    if (!have_sync)
+    {
+        // if vsync was lost then enable the flag on some other
+        // rendering surface.
+        QSurfaceFormat fmt = format();
+        fmt.setSwapInterval(1);
+        setFormat(fmt);
+
+        // native resources must be recreated. see the comment up top
+        destroy();
+        create();
+        show();
+    }
+
+    have_sync = true;
 
     mContext.makeCurrent(this);
 
@@ -250,6 +337,8 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
             mWindow->toggleShowFps();
         else if (key->key() == Qt::Key_F2)
             showColorDialog();
+        else if (key->key() == Qt::Key_F3)
+            toggleVSync();
 
         if (mWindow && onKeyPress)
             return onKeyPress(key);
@@ -321,6 +410,19 @@ void GfxWidget::translateZoomInOut(QWheelEvent* wheel)
         else if (num_zoom_steps < 0 && onZoomOut)
             onZoomOut();
     }
+}
+
+void GfxWidget::toggleVSync()
+{
+    QSurfaceFormat fmt = mWindow->format();
+    const auto old_swap_interval = fmt.swapInterval();
+    const auto new_swap_interval = old_swap_interval == 0 ? 1 : 0;
+    fmt.setSwapInterval(new_swap_interval);
+    mWindow->setFormat(fmt);
+    mWindow->destroy();
+    mWindow->create();
+    mWindow->show();
+    DEBUG("Swap interval set to %1", new_swap_interval);
 }
 
 } // namespace

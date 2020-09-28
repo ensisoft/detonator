@@ -188,6 +188,7 @@ namespace gui
     private:
         void showColorDialog();
         void translateZoomInOut(QWheelEvent* event);
+        void toggleVSync();
 
     private:
         virtual void resizeEvent(QResizeEvent* event) override;
