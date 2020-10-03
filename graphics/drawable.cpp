@@ -138,6 +138,38 @@ void Arrow::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
+Shader* Line::GetShader(Device& device) const
+{
+    Shader* shader = device.FindShader("vertex_array.glsl");
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader("vertex_array.glsl");
+        shader->CompileFile("shaders/es2/vertex_array.glsl");
+    }
+    return shader;
+}
+Geometry* Line::Upload(Device& device) const
+{
+    Geometry* geom = device.FindGeometry("LineSegment");
+    if (geom == nullptr)
+    {
+        // horizontal line.
+        const gfx::Vertex verts[2] = {
+            {{0.0f,  -0.5f}, {0.0f, 0.5f}},
+            {{1.0f,  -0.5f}, {1.0f, 0.5f}}
+        };
+        geom = device.MakeGeometry("LineSegment");
+        geom->Update(verts, 2);
+        geom->AddDrawCmd(Geometry::DrawType::Lines);
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+void Line::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
 Shader* Circle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");

@@ -117,6 +117,23 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
+    class Line : public Drawable
+    {
+    public:
+        Line(float line_width = 1.0f) : mLineWidth(line_width)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return Style::Solid; }
+        virtual void Pack(ResourcePacker* packer) const override;
+    private:
+        float mLineWidth = 1.0f;
+    };
+
     class Circle : public Drawable
     {
     public:

@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+#include <cmath>
+
 #include "base/assert.h"
 #include "base/utility.h"
 #include "bitmap.h"
@@ -197,4 +199,45 @@ void DrawRectOutline(Painter& painter,
         Rectangle(), mask_transform,
         material);
 }
+
+void DrawLine(Painter& painter,
+    const FPoint& a, const FPoint& b,
+    const Color4f& color,
+    float line_width)
+{
+    DrawLine(painter, a, b, SolidColor(color), line_width);
+}
+
+void DrawLine(Painter& painter,
+    const FPoint& a, const FPoint& b,
+    const Material& material,
+    float line_width)
+{
+    // The line shape defines a horizonal line so in order to
+    // support lines with arbitrary directions we need to figure
+    // out which way to rotate the line shape in order to have a matchin
+    // line (slope) and also how to scale the shape
+    const auto& p = b - a;
+    const auto x = p.GetX();
+    const auto y = p.GetY();
+    // pythagorean distance between the points is the length of the
+    // line, used for horizontal scaling of the shape (along the X axis)
+    const auto length = std::sqrt(x*x + y*y);
+    const auto cosine = std::acos(x / length);
+    // acos gives the principal angle [0, Pi], need to see if the
+    // points would require a negative rotation.
+    const auto angle  = a.GetY() > b.GetY() ? -cosine : cosine;
+
+    Transform trans;
+    trans.Scale(length, line_width);
+    // offset by half the line width so that the vertical center of the
+    // line alings with the point. important when using line widths > 1.0f
+    trans.Translate(0, -0.5*line_width);
+    trans.Rotate(angle);
+    trans.Translate(a);
+
+    // Draw the shape (line)
+    painter.Draw(Line(line_width), trans, material);
+}
+
 } // namespace
