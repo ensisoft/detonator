@@ -204,6 +204,8 @@ int main(int argc, char* argv[])
         while (!window.isClosed())
         {
             app.processEvents();
+            if (window.isClosed())
+                break;
 
             if (!window.iterateGameLoop()) {
                 QEventLoop loop;
