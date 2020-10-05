@@ -646,6 +646,147 @@ void Grid::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
+Shader* Polygon::GetShader(Device& device) const
+{
+    Shader* shader = device.FindShader("vertex_array.glsl");
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader("vertex_array.glsl");
+        shader->CompileFile("shaders/es2/vertex_array.glsl");
+    }
+    return shader;
+}
+Geometry* Polygon::Upload(Device& device) const
+{
+    Geometry* geom = nullptr;
+
+    if (mStatic)
+    {
+        geom = device.FindGeometry(GetName());
+        if (!geom)
+        {
+            geom = device.MakeGeometry(GetName());
+            geom->Update(mVertices);
+            for (const auto& cmd : mDrawCommands)
+            {
+                geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
+            }
+        }
+    }
+    else
+    {
+        geom = device.FindGeometry("DynamicPolygon");
+        if (!geom)
+        {
+            geom = device.MakeGeometry("DynamicPolygon");
+        }
+        geom->Update(mVertices);
+        geom->ClearDraws();
+        for (const auto& cmd : mDrawCommands)
+        {
+            geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
+        }
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
+void Polygon::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
+nlohmann::json Polygon::ToJson() const
+{
+    nlohmann::json json;
+    for (const auto& v : mVertices)
+    {
+        nlohmann::json js = {
+            {"x", v.aPosition.x},
+            {"y", v.aPosition.y},
+            {"s", v.aTexCoord.x},
+            {"t", v.aTexCoord.y}
+        };
+        json["vertices"].push_back(std::move(js));
+    }
+    for (const auto& cmd : mDrawCommands)
+    {
+        nlohmann::json js;
+        base::JsonWrite(js, "type", cmd.type);
+        base::JsonWrite(js, "offset", (unsigned)cmd.offset);
+        base::JsonWrite(js, "count",  (unsigned)cmd.count);
+        json["draws"].push_back(std::move(js));
+    }
+    return json;
+}
+
+// static
+std::optional<Polygon> Polygon::FromJson(const nlohmann::json& object)
+{
+    Polygon ret;
+    if (object.contains("vertices"))
+    {
+        for (const auto& js : object["vertices"].items())
+        {
+            const auto& obj = js.value();
+            float x, y, s, t;
+            if (!base::JsonReadSafe(obj, "x", &x) ||
+                !base::JsonReadSafe(obj, "y", &y) ||
+                !base::JsonReadSafe(obj, "s", &s) ||
+                !base::JsonReadSafe(obj, "t", &t))
+                return std::nullopt;
+            Vertex vertex;
+            vertex.aPosition.x = x;
+            vertex.aPosition.y = y;
+            vertex.aTexCoord.x = s;
+            vertex.aTexCoord.y = t;
+            ret.mVertices.push_back(vertex);
+        }
+    }
+    if (object.contains("draws"))
+    {
+        for (const auto& js : object["draws"].items())
+        {
+            const auto& obj = js.value();
+            unsigned offset = 0;
+            unsigned count  = 0;
+            DrawCommand cmd;
+            if (!base::JsonReadSafe(obj, "type", &cmd.type) ||
+                !base::JsonReadSafe(obj, "offset", &offset) ||
+                !base::JsonReadSafe(obj, "count",  &count))
+                return std::nullopt;
+            cmd.offset = offset;
+            cmd.count  = count;
+            ret.mDrawCommands.push_back(cmd);
+        }
+    }
+    return ret;
+}
+
+std::string Polygon::GetName() const
+{
+    if (!mName.empty())
+        return mName;
+
+    size_t hash = 0;
+    for (const auto& vertex : mVertices)
+    {
+        hash = base::hash_combine(hash, vertex.aPosition.x);
+        hash = base::hash_combine(hash, vertex.aPosition.y);
+        hash = base::hash_combine(hash, vertex.aTexCoord.x);
+        hash = base::hash_combine(hash, vertex.aTexCoord.y);
+    }
+    for (const auto& cmd : mDrawCommands)
+    {
+        hash = base::hash_combine(hash, cmd.type);
+        hash = base::hash_combine(hash, cmd.offset);
+        hash = base::hash_combine(hash, cmd.count);
+    }
+    mName = std::to_string(hash);
+    return mName;
+}
+
+
 Shader* KinematicsParticleEngine::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("particles.glsl");

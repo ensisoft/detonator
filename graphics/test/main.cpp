@@ -59,6 +59,108 @@ public:
 private:
 };
 
+class PolygonTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Polygon poly;
+        poly.SetDynamic(true);
+        AddPacman(poly, 0.4f, -0.5f, 0.3f);
+        AddCircleShape(poly, 0.60f, -0.5f, 0.05f);
+        AddCircleShape(poly, 0.75f, -0.5f, 0.05f);
+        AddCircleShape(poly, 0.90f, -0.5f, 0.05f);
+
+        // pacman body + food dots
+        gfx::Transform transform;
+        transform.Resize(500, 500);
+        transform.MoveTo(200, 200);
+        painter.Draw(poly, transform,
+            gfx::Material(gfx::Material::Type::Gradient).SetBaseColor(gfx::Color::Yellow)
+                .SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::BottomLeft));
+        // eye
+        transform.Resize(40, 40);
+        transform.MoveTo(430, 350);
+        painter.Draw(gfx::Circle(), transform,
+            gfx::SolidColor(gfx::Color::Black));
+
+        // chomp text when mouth is nearly closed
+        const auto mouth = (std::sin(mTime) + 1.0f) / 2.0f * 15;
+        if (mouth <= 5)
+        {
+            gfx::DrawTextRect(painter, "Chomp!",
+                "fonts/AtariFontFullVersion.ttf", 30,
+                gfx::FRect(500, 200, 200, 50),
+                gfx::Color::DarkYellow);
+        }
+    }
+    virtual std::string GetName() const override
+    { return "PolygonTest"; }
+
+    virtual void Update(float dts) override
+    {
+        const float velocity = 5.23;
+        mTime += dts * velocity;
+    }
+private:
+    void AddPacman(gfx::Polygon& poly,  float x, float y, float r)
+    {
+        gfx::Polygon::Vertex center = {
+            {x, y}, {x, -y}
+        };
+        std::vector<gfx::Polygon::Vertex> verts;
+        verts.push_back(center);
+
+        const auto slices = 200;
+        const auto angle = (math::Pi * 2) / slices;
+        const auto mouth = (std::sin(mTime) + 1.0f) / 2.0f * 15;
+        for (int i=mouth; i<=slices-mouth; ++i)
+        {
+            const float a = i * angle;
+            gfx::Polygon::Vertex v;
+            v.aPosition.x = x + std::cos(a) * r;
+            v.aPosition.y = y + std::sin(a) * r;
+            v.aTexCoord.x = v.aPosition.x;
+            v.aTexCoord.y = v.aPosition.y * -1.0f;
+            verts.push_back(v);
+        }
+        gfx::Polygon::DrawCommand cmd;
+        cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+        cmd.offset = poly.GetNumVertices();
+        cmd.count  = verts.size();
+        poly.AddDrawCommand(std::move(verts), cmd);
+    }
+
+    void AddCircleShape(gfx::Polygon& poly,  float x, float y, float r)
+    {
+        gfx::Polygon::Vertex center = {
+            {x, y}, {x, -y}
+        };
+        std::vector<gfx::Polygon::Vertex> verts;
+        verts.push_back(center);
+
+        const auto slices = 200;
+        const auto angle = (math::Pi * 2) / slices;
+        for (int i=0; i<=slices; ++i)
+        {
+            const float a = i * angle;
+            gfx::Polygon::Vertex v;
+            v.aPosition.x = x + std::cos(a) * r;
+            v.aPosition.y = y + std::sin(a) * r;
+            v.aTexCoord.x = v.aPosition.x;
+            v.aTexCoord.y = v.aPosition.y * -1.0f;
+            verts.push_back(v);
+        }
+        gfx::Polygon::DrawCommand cmd;
+        cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+        cmd.offset = poly.GetNumVertices();
+        cmd.count  = verts.size();
+        poly.AddDrawCommand(std::move(verts), cmd);
+    }
+private:
+    float mTime = 0.0f;
+};
+
 class StencilTest : public GraphicsTest
 {
 public:
@@ -978,6 +1080,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new StencilTest);
+    tests.emplace_back(new PolygonTest);
 
     bool stop_for_input = false;
 

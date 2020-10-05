@@ -30,11 +30,13 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <limits>
 
 #include "base/math.h"
+#include "graphics/geometry.h"
 
 namespace gfx
 {
@@ -263,6 +265,136 @@ namespace gfx
         bool mBorderLines = false;
     };
 
+    // Combines multiple primitive draw commands into a single
+    // drawable shape.
+    class Polygon : public Drawable
+    {
+    public:
+        // Define how the geometry is to be rasterized.
+        using DrawType = Geometry::DrawType;
+
+        struct DrawCommand {
+            DrawType type = DrawType::Triangles;
+            size_t offset = 0;
+            size_t count  = 0;
+        };
+
+        using Vertex = gfx::Vertex;
+
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual Style GetStyle() const override
+        { return Style::Solid; }
+        virtual void Pack(ResourcePacker* packer) const override;
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+
+        void Clear()
+        {
+            mVertices.clear();
+            mDrawCommands.clear();
+            mName.clear();
+        }
+        void ClearDrawCommands()
+        {
+            mDrawCommands.clear();
+            mName.clear();
+        }
+        void ClearVertices()
+        {
+            mVertices.clear();
+            mName.clear();
+        }
+
+        void AddVertices(const std::vector<Vertex>& verts)
+        {
+            std::copy(std::begin(verts), std::end(verts), std::back_inserter(mVertices));
+            mName.clear();
+        }
+        void AddVertices(std::vector<Vertex>&& verts)
+        {
+            std::move(std::begin(verts), std::end(verts), std::back_inserter(mVertices));
+            mName.clear();
+        }
+        void AddVertices(const Vertex* vertices, size_t num_verts)
+        {
+            for (size_t i=0; i<num_verts; ++i)
+                mVertices.push_back(vertices[i]);
+            mName.clear();
+        }
+        void AddDrawCommand(const DrawCommand& cmd)
+        {
+            mDrawCommands.push_back(cmd);
+            mName.clear();
+        }
+
+        void AddDrawCommand(const std::vector<Vertex>& verts, const DrawCommand& cmd)
+        {
+            std::copy(std::begin(verts), std::end(verts),
+                std::back_inserter(mVertices));
+            mDrawCommands.push_back(cmd);
+            mName.clear();
+        }
+        void AddDrawCommand(std::vector<Vertex>&& verts, const DrawCommand& cmd)
+        {
+            std::move(std::begin(verts), std::end(verts),
+                std::back_inserter(mVertices));
+            mDrawCommands.push_back(cmd);
+            mName.clear();
+        }
+        void AddDrawCommand(const Vertex* vertices, size_t num_vertices,
+            const DrawCommand& cmd)
+        {
+            for (size_t i=0; i<num_vertices; ++i)
+                mVertices.push_back(vertices[i]);
+            mDrawCommands.push_back(cmd);
+            mName.clear();
+        }
+        size_t GetNumVertices() const
+        { return mVertices.size(); }
+        size_t GetNumDrawCommands() const
+        { return mDrawCommands.size(); }
+        DrawCommand& GetDrawCommand(size_t index)
+        { return mDrawCommands[index]; }
+        const DrawCommand& GetDrawCommand(size_t index) const
+        { return mDrawCommands[index]; }
+        Vertex& GetVertex(size_t index)
+        { return mVertices[index]; }
+        const Vertex& GetVertex(size_t index) const
+        { return mVertices[index]; }
+
+        // Return whether the polygon's data is considered to be
+        // static or not. Static content is not assumed to change
+        // often and will map the polygon to a geometry object
+        // based on the polygon's data. Thus each polygon with
+        // different data will have different geometry object.
+        // However If the polygon is updated frequently this would
+        // then lead to the profileration of excessive geometry objects.
+        // In this case static can be set to false and the polygon
+        // will map to a (single) dynamic geometry object more optimized
+        // for draw/discard type of use.
+        bool IsStatic() const
+        { return mStatic; }
+
+        // Set the polygon static or not. See comments in IsStatic.
+        void SetStatic(bool on_off)
+        { mStatic = on_off; }
+        void SetDynamic(bool on_off)
+        { mStatic = !on_off; }
+
+        // Serialize into JSON.
+        nlohmann::json ToJson() const;
+        // Load from JSON
+        static std::optional<Polygon> FromJson(const nlohmann::json& object);
+    private:
+        std::string GetName() const;
+    private:
+        std::vector<Vertex> mVertices;
+        std::vector<DrawCommand> mDrawCommands;
+        mutable std::string mName; // cached name
+        float mLineWidth = 1.0f;
+        bool mStatic = true;
+    };
 
     // Particle engine interface. Particle engines implement some kind of
     // "particle" / n-body simulation where a variable number of small objects
