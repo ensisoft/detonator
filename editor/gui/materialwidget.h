@@ -76,6 +76,7 @@ namespace gui
         void on_btnEditTextureMap_clicked();
         void on_btnEditShader_clicked();
         void on_btnResetTextureRect_clicked();
+        void on_btnSelectTextureRect_clicked();
         void on_btnNewTextTextureMap_clicked();
         void on_browseShader_clicked();
         void on_textures_currentRowChanged(int row);

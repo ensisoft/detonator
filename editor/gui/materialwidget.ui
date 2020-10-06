@@ -1033,6 +1033,13 @@
               </spacer>
              </item>
              <item>
+              <widget class="QPushButton" name="btnSelectTextureRect">
+               <property name="text">
+                <string>Select ...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="btnResetTextureRect">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1168,6 +1175,7 @@
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
+  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>time</tabstop>

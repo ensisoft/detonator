@@ -285,6 +285,37 @@ namespace gfx
             return Rect<float>(x, y, w, h);
         }
 
+        // Inverse of Normalize. Assuming a normalized rectangle
+        // expand it to a non-normalized rectangle given the
+        // dimensions.
+        template<typename F>
+        Rect<F> Expand(const Size<F>& space) const
+        {
+            // floats or ints.
+            const F x = mX * space.GetWidth();
+            const F y = mY * space.GetHeight();
+            const F w = mWidth * space.GetWidth();
+            const F h = mHeight * space.GetHeight();
+            return Rect<F>(x, y, w, h);
+        }
+        // Inverse of Normalize. Assuming a normalized rectangle
+        // expand it to a non-normalized rectangle given the
+        // dimensions. Since the return rect is expressed with
+        // unsigned types the rectangle cannot have a negative
+        // x,y coord and such negative coords will be clamped to 0, 0
+        Rect<unsigned> Expand(const Size<unsigned>& space) const
+        {
+            // float to unsigned can be undefined conversion if the
+            // value cannot be represented in the destination type.
+            // i.e. negative floats cannot be represented in unsigned type.
+            // http://eel.is/c++draft/conv#fpint
+            const unsigned x = std::max(mX, T(0)) * space.GetWidth();
+            const unsigned y = std::max(mY, T(0)) * space.GetHeight();
+            const unsigned w = mWidth * space.GetWidth();
+            const unsigned h = mHeight * space.GetHeight();
+            return Rect<unsigned>(x, y, w, h);
+        }
+
         // Serialize into JSON
         nlohmann::json ToJson() const
         {

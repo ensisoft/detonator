@@ -49,7 +49,8 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
-#include "materialwidget.h"
+#include "editor/gui/dlgtexturerect.h"
+#include "editor/gui/materialwidget.h"
 
 namespace {
 
@@ -594,6 +595,23 @@ void MaterialWidget::on_btnResetTextureRect_clicked()
     mMaterial.SetTextureRect(row, rect);
 
     on_textures_currentRowChanged(row);
+}
+
+void MaterialWidget::on_btnSelectTextureRect_clicked()
+{
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+    const auto& source = mMaterial.GetTextureSource(row);
+    const auto& rect   = mMaterial.GetTextureRect(row);
+    DlgTextureRect dlg(this, rect, source.Clone());
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mMaterial.SetTextureRect(row, dlg.GetRect());
+
+    on_textures_currentRowChanged(row);
+
 }
 
 void MaterialWidget::on_btnNewTextTextureMap_clicked()
