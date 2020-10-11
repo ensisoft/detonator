@@ -120,6 +120,8 @@ namespace app
         QString GetDir() const
         { return mWorkspaceDir; }
 
+        // Get a list of user defined material names in the workspace.
+        QStringList ListUserDefinedMaterials() const;
         // Get a list of all material names in the workspace
         // including the user defined materials and the "primitive" ones.
         QStringList ListAllMaterials() const;

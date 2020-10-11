@@ -97,6 +97,7 @@
     <addaction name="actionNewMaterial"/>
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewAnimation"/>
+    <addaction name="actionNewCustomShape"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
@@ -548,6 +549,15 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionNewCustomShape">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Custom Shape</string>
    </property>
   </action>
  </widget>

@@ -65,6 +65,8 @@ namespace app
             ParticleSystem,
             // It's an animation
             Animation,
+            // It's a custom shape (drawable)
+            CustomShape,
             // It's a scene description
             Scene,
             // It's an audio track
@@ -105,6 +107,8 @@ namespace app
                     return QIcon("icons:particle.png");
                 case Resource::Type::Animation:
                     return QIcon("icons:animation.png");
+                case Resource::Type::CustomShape:
+                    return QIcon("icons:polygon.png");
                 default: break;
             }
             return QIcon();
@@ -115,6 +119,8 @@ namespace app
         { return GetType() == Type::Material; }
         inline bool IsParticleEngine() const
         { return GetType() == Type::ParticleSystem; }
+        inline bool IsCustomShape() const
+        { return GetType() == Type::CustomShape; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -192,6 +198,11 @@ namespace app
         struct ResourceTypeTraits<game::Animation> {
             static constexpr auto Type = app::Resource::Type::Animation;
         };
+
+        template<>
+        struct ResourceTypeTraits<gfx::Polygon> {
+            static constexpr auto Type = app::Resource::Type::CustomShape;
+        };
     } // detail
 
 
@@ -236,6 +247,8 @@ namespace app
                 json["particles"].push_back(content_json);
             else if (TypeValue == Resource::Type::Animation)
                 json["animations"].push_back(content_json);
+            else if (TypeValue == Resource::Type::CustomShape)
+                json["shapes"].push_back(content_json);
         }
         virtual void Serialize(QJsonObject& json) const override
         {
@@ -245,6 +258,8 @@ namespace app
                 json["particle_" + mName] = QJsonObject::fromVariantMap(mProps);
             else if (TypeValue == Resource::Type::Animation)
                 json["animation_" + mName] = QJsonObject::fromVariantMap(mProps);
+            else if (TypeValue == Resource::Type::CustomShape)
+                json["shape_" + mName] = QJsonObject::fromVariantMap(mProps);
         }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
@@ -267,6 +282,8 @@ namespace app
                 mProps = object["particle_" + mName].toObject().toVariantMap();
             else if (TypeValue == Resource::Type::Animation)
                 mProps = object["animation_" + mName].toObject().toVariantMap();
+            else if (TypeValue == Resource::Type::CustomShape)
+                mProps = object["shape_" + mName].toObject().toVariantMap();
         }
         virtual std::unique_ptr<Resource> Clone() const override
         { return std::make_unique<GameResource>(*this); }
@@ -344,5 +361,6 @@ namespace app
     using MaterialResource = GameResource<gfx::Material>;
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngine>;
     using AnimationResource = GameResource<game::Animation>;
+    using CustomShapeResource = GameResource<gfx::Polygon>;
 
 } // namespace

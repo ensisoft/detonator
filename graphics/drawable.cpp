@@ -699,6 +699,7 @@ void Polygon::Pack(ResourcePacker* packer) const
 nlohmann::json Polygon::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "static", mStatic);
     for (const auto& v : mVertices)
     {
         nlohmann::json js = {
@@ -724,6 +725,9 @@ nlohmann::json Polygon::ToJson() const
 std::optional<Polygon> Polygon::FromJson(const nlohmann::json& object)
 {
     Polygon ret;
+    if (!base::JsonReadSafe(object, "static", &ret.mStatic))
+        return std::nullopt;
+
     if (object.contains("vertices"))
     {
         for (const auto& js : object["vertices"].items())
@@ -763,11 +767,53 @@ std::optional<Polygon> Polygon::FromJson(const nlohmann::json& object)
     return ret;
 }
 
-std::string Polygon::GetName() const
+void Polygon::EraseVertex(size_t index)
 {
-    if (!mName.empty())
-        return mName;
+    ASSERT(index < mVertices.size());
+    auto it = mVertices.begin();
+    std::advance(it, index);
+    mVertices.erase(it);
+    // remove the vertex from the draw commands.
+    for (size_t i=0; i<mDrawCommands.size();)
+    {
+        auto& cmd = mDrawCommands[i];
+        if (index >= cmd.offset && index < cmd.offset + cmd.count) {
+            if (--cmd.count == 0)
+            {
+                auto it = mDrawCommands.begin();
+                std::advance(it, i);
+                mDrawCommands.erase(it);
+                continue;
+            }
+        }
+        else if (index < cmd.offset)
+            cmd.offset--;
+        ++i;
+    }
+    mName.clear();
+}
 
+void Polygon::InsertVertex(const Vertex& vertex, size_t index)
+{
+    ASSERT(index <= mVertices.size());
+
+    auto it = mVertices.begin();
+    std::advance(it, index);
+    mVertices.insert(it, vertex);
+
+    for (size_t i=0; i<mDrawCommands.size(); ++i)
+    {
+        auto& cmd = mDrawCommands[i];
+        if (index >= cmd.offset && index <= cmd.offset + cmd.count)
+            cmd.count++;
+        else if (index < cmd.offset)
+            cmd.offset++;
+    }
+    mName.clear();
+}
+
+std::size_t Polygon::GetHash() const
+{
     size_t hash = 0;
     for (const auto& vertex : mVertices)
     {
@@ -782,10 +828,16 @@ std::string Polygon::GetName() const
         hash = base::hash_combine(hash, cmd.offset);
         hash = base::hash_combine(hash, cmd.count);
     }
-    mName = std::to_string(hash);
-    return mName;
+    return hash;
 }
 
+std::string Polygon::GetName() const
+{
+    if (!mName.empty())
+        return mName;
+    mName = std::to_string(GetHash());
+    return mName;
+}
 
 Shader* KinematicsParticleEngine::GetShader(Device& device) const
 {

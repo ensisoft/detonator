@@ -35,6 +35,7 @@
 #include <vector>
 #include <limits>
 
+#include "base/assert.h"
 #include "base/math.h"
 #include "graphics/geometry.h"
 
@@ -354,14 +355,26 @@ namespace gfx
         { return mVertices.size(); }
         size_t GetNumDrawCommands() const
         { return mDrawCommands.size(); }
-        DrawCommand& GetDrawCommand(size_t index)
-        { return mDrawCommands[index]; }
         const DrawCommand& GetDrawCommand(size_t index) const
         { return mDrawCommands[index]; }
-        Vertex& GetVertex(size_t index)
-        { return mVertices[index]; }
         const Vertex& GetVertex(size_t index) const
         { return mVertices[index]; }
+
+        void UpdateVertex(const Vertex& vert, size_t index)
+        {
+            ASSERT(index < mVertices.size());
+            mVertices[index] = vert;
+            mName.clear();
+        }
+        void EraseVertex(size_t index);
+        void InsertVertex(const Vertex& vert, size_t index);
+
+        void UpdateDrawCommand(const DrawCommand& cmd, size_t index)
+        {
+            ASSERT(index < mDrawCommands.size());
+            mDrawCommands[index] = cmd;
+            mName.clear();
+        }
 
         // Return whether the polygon's data is considered to be
         // static or not. Static content is not assumed to change
@@ -382,12 +395,16 @@ namespace gfx
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
 
+        // Get a hash value based on the content of the polygon.
+        std::size_t GetHash() const;
+        // Get a (non human) readable name of the polygon based
+        // on the content.
+        std::string GetName() const;
+
         // Serialize into JSON.
         nlohmann::json ToJson() const;
         // Load from JSON
         static std::optional<Polygon> FromJson(const nlohmann::json& object);
-    private:
-        std::string GetName() const;
     private:
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;

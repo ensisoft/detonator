@@ -126,6 +126,7 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
 
     game::LoadResources<gfx::Material, gfx::Material>(json, "materials", mGlobalMaterialInstances);
     game::LoadResources<gfx::Drawable, gfx::KinematicsParticleEngine>(json, "particles", mGlobalDrawableInstances);
+    game::LoadResources<gfx::Drawable, gfx::Polygon>(json, "shapes", mGlobalDrawableInstances);
     game::LoadResources<Animation, Animation>(json, "animations", mAnimations);
 
     for (auto it = mAnimations.begin(); it != mAnimations.end();

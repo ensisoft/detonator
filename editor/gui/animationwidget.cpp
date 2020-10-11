@@ -676,7 +676,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.actionNewRect->setChecked(false);
         mUI.actionNewCircle->setChecked(false);
         mUI.actionNewTriangle->setChecked(false);
-        mUI.actionNewArrow->setChecked(false);
         mUI.actionNewRoundRect->setChecked(false);
     };
 
@@ -721,9 +720,13 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     // create the memu for creating instances of user defined drawables
     // since there doesn't seem to be a way to do this in the designer.
-    mDrawableMenu = new QMenu(this);
-    mDrawableMenu->menuAction()->setIcon(QIcon("icons:particle.png"));
-    mDrawableMenu->menuAction()->setText("New...");
+    mParticleSystems = new QMenu(this);
+    mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
+    mParticleSystems->menuAction()->setText("New...");
+
+    mCustomShapes = new QMenu(this);
+    mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
+    mCustomShapes->menuAction()->setText("New...");
 
     // update the drawable menu with drawable items.
     for (size_t i=0; i<workspace->GetNumResources(); ++i)
@@ -732,9 +735,15 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         const auto& name = resource.GetName();
         if (resource.GetType() == app::Resource::Type::ParticleSystem)
         {
-            QAction* action = mDrawableMenu->addAction(name);
+            QAction* action = mParticleSystems->addAction(name);
             connect(action, &QAction::triggered,
                     this,   &AnimationWidget::placeNewParticleSystem);
+        }
+        else if(resource.GetType() == app::Resource::Type::CustomShape)
+        {
+            QAction* action = mCustomShapes->addAction(name);
+            connect(action, &QAction::triggered,
+                this,       &AnimationWidget::placeNewCustomShape);
         }
     }
 
@@ -832,9 +841,11 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionNewRoundRect);
     bar.addAction(mUI.actionNewCircle);
     bar.addAction(mUI.actionNewTriangle);
-    bar.addAction(mUI.actionNewArrow);
     bar.addSeparator();
-    bar.addAction(mDrawableMenu->menuAction());
+    bar.addAction(mCustomShapes->menuAction());
+    bar.addSeparator();
+    bar.addAction(mParticleSystems->menuAction());
+
 }
 void AnimationWidget::addActions(QMenu& menu)
 {
@@ -849,9 +860,10 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionNewRoundRect);
     menu.addAction(mUI.actionNewCircle);
     menu.addAction(mUI.actionNewTriangle);
-    menu.addAction(mUI.actionNewArrow);
     menu.addSeparator();
-    menu.addAction(mDrawableMenu->menuAction());
+    menu.addAction(mCustomShapes->menuAction());
+    menu.addSeparator();
+    menu.addAction(mParticleSystems->menuAction());
     menu.addSeparator();
     menu.addAction(mUI.actionShowTimeline);
 }
@@ -1093,7 +1105,6 @@ void AnimationWidget::on_actionNewRect_triggered()
     mUI.actionNewRect->setChecked(true);
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(false);
-    mUI.actionNewArrow->setChecked(false);
     mUI.actionNewRoundRect->setChecked(false);
 }
 
@@ -1104,7 +1115,6 @@ void AnimationWidget::on_actionNewCircle_triggered()
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(true);
     mUI.actionNewTriangle->setChecked(false);
-    mUI.actionNewArrow->setChecked(false);
     mUI.actionNewRoundRect->setChecked(false);
 }
 
@@ -1115,18 +1125,6 @@ void AnimationWidget::on_actionNewTriangle_triggered()
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(true);
-    mUI.actionNewArrow->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-}
-
-void AnimationWidget::on_actionNewArrow_triggered()
-{
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Arrow"));
-
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewTriangle->setChecked(false);
-    mUI.actionNewArrow->setChecked(true);
     mUI.actionNewRoundRect->setChecked(false);
 }
 
@@ -1137,7 +1135,6 @@ void AnimationWidget::on_actionNewRoundRect_triggered()
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
     mUI.actionNewTriangle->setChecked(false);
-    mUI.actionNewArrow->setChecked(false);
     mUI.actionNewRoundRect->setChecked(true);
 }
 
@@ -1290,6 +1287,18 @@ void AnimationWidget::placeNewParticleSystem()
     mCurrentTool.reset(new PlaceTool(mState, material, drawable));
 }
 
+void AnimationWidget::placeNewCustomShape()
+{
+    const auto* action = qobject_cast<QAction*>(sender());
+    // using the text in the action as the name of the drawable.
+    const auto drawable = action->text();
+    // check the resource in order to get the default material name set in the
+    // particle editor.
+    const auto& resource = mState.workspace->GetResource(drawable, app::Resource::Type::CustomShape);
+    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+    mCurrentTool.reset(new PlaceTool(mState, material, drawable));
+}
+
 void AnimationWidget::newResourceAvailable(const app::Resource* resource)
 {
     // this is simple, just add new resources in the appropriate UI objects.
@@ -1299,8 +1308,15 @@ void AnimationWidget::newResourceAvailable(const app::Resource* resource)
     }
     else if (resource->GetType() == app::Resource::Type::ParticleSystem)
     {
-        QAction* action = mDrawableMenu->addAction(resource->GetName());
+        QAction* action = mParticleSystems->addAction(resource->GetName());
         connect(action, &QAction::triggered, this, &AnimationWidget::placeNewParticleSystem);
+
+        mUI.drawables->addItem(resource->GetName());
+    }
+    else if (resource->GetType() == app::Resource::Type::CustomShape)
+    {
+        QAction* action = mCustomShapes->addAction(resource->GetName());
+        connect(action, &QAction::triggered, this, &AnimationWidget::placeNewCustomShape);
 
         mUI.drawables->addItem(resource->GetName());
     }
@@ -1338,7 +1354,8 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 
         mUI.materials->blockSignals(false);
     }
-    else if (resource->GetType() == app::Resource::Type::ParticleSystem)
+    else if (resource->GetType() == app::Resource::Type::ParticleSystem ||
+             resource->GetType() == app::Resource::Type::CustomShape)
     {
         // todo: what do do with drawables that are no longer available ?
         const auto index = mUI.drawables->findText(resource->GetName());
@@ -1367,18 +1384,24 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
             mUI.drawables->setCurrentIndex(index);
         }
         mUI.drawables->blockSignals(false);
-
         // rebuild the drawable menu
-        mDrawableMenu->clear();
+        mParticleSystems->clear();
+        mCustomShapes->clear();
         for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
         {
             const auto& resource = mState.workspace->GetResource(i);
             const auto& name = resource.GetName();
             if (resource.GetType() == app::Resource::Type::ParticleSystem)
             {
-                QAction* action = mDrawableMenu->addAction(name);
+                QAction* action = mParticleSystems->addAction(name);
                 connect(action, &QAction::triggered,
                         this,   &AnimationWidget::placeNewParticleSystem);
+            }
+            else if (resource.GetType() == app::Resource::Type::CustomShape)
+            {
+                QAction* action = mCustomShapes->addAction(name);
+                connect(action, &QAction::triggered,
+                        this,   &AnimationWidget::placeNewCustomShape);
             }
         }
     }

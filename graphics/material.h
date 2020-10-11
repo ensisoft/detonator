@@ -492,6 +492,11 @@ namespace gfx
             mBaseColor = color;
             return *this;
         }
+        Material& SetBaseAlpha(float alpha)
+        {
+            mBaseColor.SetAlpha(alpha);
+            return *this;
+        }
 
         enum class ColorIndex {
             TopLeft, TopRight,

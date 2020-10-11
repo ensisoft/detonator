@@ -611,24 +611,37 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
 
-    if (!HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
+    if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
-        ERROR("Request for a drawable that doesn't exist: '%1'", name);
-        return std::make_shared<gfx::Rectangle>();
+        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
+        const gfx::KinematicsParticleEngine* engine = nullptr;
+        resource.GetContent(&engine);
+        auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
+
+        // add a copy in the collection of private instances so that
+        // if/when the resource is modified the object using the resource
+        // will also reflect those changes.
+        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
+        mPrivateInstances.push_back(std::move(handle));
+        return ret;
+    }
+    else if (HasResource(FromUtf8(name), Resource::Type::CustomShape))
+    {
+        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::CustomShape);
+        const gfx::Polygon* polygon = nullptr;
+        resource.GetContent(&polygon);
+        auto ret = std::make_shared<gfx::Polygon>(*polygon);
+
+        // add a copy in the collection of private instances so that
+        // if/when the resource is modified the object using the resource
+        // will also reflect those changes.
+        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Polygon>>(FromUtf8(name), ret);
+        mPrivateInstances.push_back(std::move(handle));
+        return ret;
     }
 
-    // we have only particle engines right now as drawables
-    const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
-    const gfx::KinematicsParticleEngine* engine = nullptr;
-    resource.GetContent(&engine);
-    auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
-
-    // add a copy in the collection of private instances so that
-    // if/when the resource is modified the object using the resource
-    // will also reflect those changes.
-    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
-    mPrivateInstances.push_back(std::move(handle));
-    return ret;
+    ERROR("Request for a drawable that doesn't exist: '%1'", name);
+    return std::make_shared<gfx::Rectangle>();
 }
 
 std::string Workspace::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
@@ -863,6 +876,22 @@ bool Workspace::LoadContent(const QString& filename)
             resources.push_back(std::make_unique<AnimationResource>(std::move(animation), name));
         }
     }
+    if (json.contains("shapes"))
+    {
+        for (const auto& json_p : json["shapes"].items())
+        {
+            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
+            std::optional<gfx::Polygon> ret = gfx::Polygon::FromJson(json_p.value());
+            if (!ret.has_value())
+            {
+                ERROR("Failed to load custom shape '%1' properties.", name);
+                continue;
+            }
+            auto& shape = ret.value();
+            DEBUG("Loaded shape: '%1'", name);
+            resources.push_back(std::make_unique<CustomShapeResource>(std::move(shape), name));
+        }
+    }
 
     mResources = std::move(resources);
     INFO("Loaded content file '%1'", filename);
@@ -1058,6 +1087,17 @@ QStringList Workspace::ListPrimitiveMaterials() const
     return list;
 }
 
+QStringList Workspace::ListUserDefinedMaterials() const
+{
+    QStringList list;
+    for (const auto& res : mResources)
+    {
+        if (res->GetType() == Resource::Type::Material)
+            list.append(res->GetName());
+    }
+    return list;
+}
+
 QStringList Workspace::ListAllDrawables() const
 {
     QStringList list;
@@ -1066,6 +1106,8 @@ QStringList Workspace::ListAllDrawables() const
     for (const auto& res : mResources)
     {
         if (res->GetType() == Resource::Type::ParticleSystem)
+            list.append(res->GetName());
+        else if(res->GetType() == Resource::Type::CustomShape)
             list.append(res->GetName());
     }
     return list;
@@ -1090,7 +1132,8 @@ bool Workspace::HasDrawable(const QString& name) const
 {
     // only have particle systems now as an alternative drawable
     // in addition to primitives.
-    return HasResource(name, Resource::Type::ParticleSystem);
+    return HasResource(name, Resource::Type::ParticleSystem) ||
+           HasResource(name, Resource::Type::CustomShape);
 }
 
 bool Workspace::HasParticleSystem(const QString& name) const
@@ -1275,6 +1318,12 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             const gfx::KinematicsParticleEngine* engine = nullptr;
             resource->GetContent(&engine);
             engine->Pack(&packer);
+        }
+        else if (resource->IsCustomShape())
+        {
+            const gfx::Polygon* polygon = nullptr;
+            resource->GetContent(&polygon);
+            polygon->Pack(&packer);
         }
     }
 

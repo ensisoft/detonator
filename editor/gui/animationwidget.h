@@ -74,7 +74,6 @@ namespace gui
         void on_actionNewRect_triggered();
         void on_actionNewCircle_triggered();
         void on_actionNewTriangle_triggered();
-        void on_actionNewArrow_triggered();
         void on_actionNewRoundRect_triggered();
         void on_actionDeleteComponent_triggered();
         void on_tree_customContextMenuRequested(QPoint);
@@ -108,6 +107,7 @@ namespace gui
 
         void currentComponentRowChanged();
         void placeNewParticleSystem();
+        void placeNewCustomShape();
         void newResourceAvailable(const app::Resource* resource);
         void resourceToBeDeleted(const app::Resource* resource);
         void treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
@@ -131,7 +131,9 @@ namespace gui
         Ui::AnimationWidget mUI;
         // there doesn't seem to be a way to do this in the designer
         // so we create our menu for user defined drawables
-        QMenu* mDrawableMenu = nullptr;
+        QMenu* mParticleSystems = nullptr;
+        // menu for the custom shapes
+        QMenu* mCustomShapes = nullptr;
     private:
         // current tool (if any, can be nullptr when no tool is selected).
         std::unique_ptr<Tool> mCurrentTool;

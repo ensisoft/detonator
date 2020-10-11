@@ -29,6 +29,7 @@
     <file>16x16_ico_png/workspace_new.png</file>
     <file>16x16_ico_png/bullet.png</file>
     <file>16x16_ico_png/application.png</file>
+    <file>16x16_ico_png/polygon.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
@@ -46,6 +47,7 @@
     <file>32x32_ico_png/package.png</file>
     <file>32x32_ico_png/round_rect.png</file>
     <file>32x32_ico_png/timeline.png</file>
+    <file>32x32_ico_png/triangle_fan.png</file>
 
     <file>texture.png</file>
   </qresource>

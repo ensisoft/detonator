@@ -1074,21 +1074,6 @@
     <string>New Triangle</string>
    </property>
   </action>
-  <action name="actionNewArrow">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/arrow.png</normaloff>:/32x32_ico_png/arrow.png</iconset>
-   </property>
-   <property name="text">
-    <string>New Arrow</string>
-   </property>
-   <property name="toolTip">
-    <string>New Arrow</string>
-   </property>
-  </action>
   <action name="actionSave">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">

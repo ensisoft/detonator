@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>708</width>
-    <height>264</height>
+    <width>568</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,6 +30,93 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="0">
+       <widget class="QPushButton" name="btnAnimation">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>2D Animation</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resource/resource.qrc">
+          <normaloff>:/16x16_ico_png/animation.png</normaloff>:/16x16_ico_png/animation.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btnParticle">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Particle Engine</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resource/resource.qrc">
+          <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Materials define how objecs look. Materials are applied on shapes and particles.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="btnCustomShape">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Custom Shape</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resource/resource.qrc">
+          <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Display kinematic particles in motion based on velocity, motion etc.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Create a new custom shape out of draw primitives</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="btnMaterial">
         <property name="sizePolicy">
@@ -65,67 +152,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="btnParticle">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Particle Engine</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../resource/resource.qrc">
-          <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="btnAnimation">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>2D Animation</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../resource/resource.qrc">
-          <normaloff>:/16x16_ico_png/animation.png</normaloff>:/16x16_ico_png/animation.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Materials define how objecs look. Materials are applied on shapes and particles.</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Display kinematic particles in motion based on velocity, motion etc.</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Combine shapes into an hierarchy of nodes and define their visual properties.</string>
@@ -165,9 +192,10 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>btnMaterial</tabstop>
   <tabstop>btnParticle</tabstop>
   <tabstop>btnAnimation</tabstop>
+  <tabstop>btnCustomShape</tabstop>
+  <tabstop>btnMaterial</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources>

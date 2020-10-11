@@ -29,6 +29,7 @@
 #  include <QByteArray>
 #  include <QDir>
 #  include <QFile>
+#  include <QPoint>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -47,6 +48,8 @@ namespace app
     { return FromUtf8(str); }
     inline QString toString(const QString& str)
     { return str; }
+    inline QString toString(const QPoint& point)
+    { return QString("%1,%2").arg(point.x()).arg(point.y()); }
     inline QString toString(bool value)
     { return (value ? "True" : "False"); }
 

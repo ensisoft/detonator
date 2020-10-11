@@ -108,6 +108,7 @@ namespace gui
         void on_actionNewMaterial_triggered();
         void on_actionNewParticleSystem_triggered();
         void on_actionNewAnimation_triggered();
+        void on_actionNewCustomShape_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();

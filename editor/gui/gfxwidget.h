@@ -96,6 +96,7 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMousePress;
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
         std::function<void (QWheelEvent* wheel)>  onMouseWheel;
+        std::function<void (QMouseEvent* mickey)> onMouseDoubleClick;
         // keyboard callbacks
         std::function<bool (QKeyEvent* key)>      onKeyPress;
 
@@ -116,6 +117,7 @@ namespace gui
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
+        virtual void mouseDoubleClickEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
         virtual bool event(QEvent* event) override;
@@ -179,6 +181,7 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseMove;
         std::function<void (QMouseEvent* mickey)> onMousePress;
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
+        std::function<void (QMouseEvent* mickey)> onMouseDoubleClick;
         // keyboard callbacks.
         std::function<bool (QKeyEvent* key)>      onKeyPress;
 

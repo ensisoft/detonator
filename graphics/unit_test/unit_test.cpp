@@ -276,6 +276,81 @@ void unit_test_polygon_serialize()
     TEST_REQUIRE(poly.GetDrawCommand(0).count == 555);
 }
 
+void unit_test_polygon_vertex_operations()
+{
+    gfx::Polygon poly;
+
+    std::vector<gfx::Polygon::Vertex> verts;
+    verts.resize(6);
+    verts[0].aPosition.x = 0.0f;
+    verts[1].aPosition.x = 1.0f;
+    verts[2].aPosition.x = 2.0f;
+    verts[3].aPosition.x = 3.0f;
+    verts[4].aPosition.x = 4.0f;
+    verts[5].aPosition.x = 5.0f;
+    poly.AddVertices(verts);
+
+    {
+        gfx::Polygon::DrawCommand cmd;
+        cmd.offset = 0;
+        cmd.count  = 3;
+        poly.AddDrawCommand(cmd);
+    }
+
+    {
+        gfx::Polygon::DrawCommand cmd;
+        cmd.offset = 3;
+        cmd.count  = 3;
+        poly.AddDrawCommand(cmd);
+    }
+
+    // check precondition.
+    TEST_REQUIRE(poly.GetNumVertices() == 6);
+    TEST_REQUIRE(poly.GetNumDrawCommands() == 2);
+    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 0.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 1.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 2.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 3.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(4).aPosition.x, 4.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(5).aPosition.x, 5.0f));
+
+    poly.EraseVertex(4);
+    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
+
+    poly.EraseVertex(0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 2);
+    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 2);
+    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
+
+    // check result.
+    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 1.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 2.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 3.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 5.0f));
+
+    poly.InsertVertex(verts[0], 0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
+
+    poly.InsertVertex(verts[4], 4);
+    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
+    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
+    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 3);
+    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 0.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 1.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 2.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 3.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(4).aPosition.x, 4.0f));
+    TEST_REQUIRE(real::equals(poly.GetVertex(5).aPosition.x, 5.0f));
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_rect_intersect<float>();
@@ -286,5 +361,6 @@ int test_main(int argc, char* argv[])
     unit_test_rect_serialize<float>();
     unit_test_color_serialize();
     unit_test_polygon_serialize();
+    unit_test_polygon_vertex_operations();
     return 0;
 }

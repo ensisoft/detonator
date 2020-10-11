@@ -31,6 +31,7 @@
 #  include <QColor>
 #  include <QSignalBlocker>
 #  include <QFileInfo>
+#  include <QPoint>
 #  include <color_selector.hpp>
 #include "warnpop.h"
 
@@ -40,6 +41,7 @@
 
 #include "base/assert.h"
 #include "graphics/color4f.h"
+#include "graphics/types.h"
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/resource.h"
@@ -57,6 +59,11 @@ inline gfx::Color4f ToGfx(const QColor& color)
     const float g  = color.greenF();
     const float b  = color.blueF();
     return gfx::Color4f(r, g, b, a);
+}
+
+inline gfx::FPoint ToGfx(const QPoint& p)
+{
+    return gfx::FPoint(p.x(), p.y());
 }
 
 inline QColor FromGfx(const gfx::Color4f& color)
