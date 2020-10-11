@@ -110,6 +110,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.numParticles, params.num_particles);
     SetValue(mUI.simWidth, params.max_xpos);
     SetValue(mUI.simHeight, params.max_ypos);
+    SetValue(mUI.gravity, params.gravity);
     SetValue(mUI.minLifetime, params.min_lifetime);
     SetValue(mUI.maxLifetime, params.max_lifetime);
     SetValue(mUI.minPointsize, params.min_point_size);
@@ -169,6 +170,7 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.simHeight);
     settings.saveWidget("Particle", mUI.motion);
     settings.saveWidget("Particle", mUI.boundary);
+    settings.saveWidget("Particle", mUI.gravity);
     settings.saveWidget("Particle", mUI.when);
     settings.saveWidget("Particle", mUI.numParticles);
     settings.saveWidget("Particle", mUI.initRect);
@@ -207,6 +209,7 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.motion);
     settings.loadWidget("Particle", mUI.boundary);
     settings.loadWidget("Particle", mUI.when);
+    settings.loadWidget("Particle", mUI.gravity);
     settings.loadWidget("Particle", mUI.numParticles);
     settings.loadWidget("Particle", mUI.initRect);
     settings.loadWidget("Particle", mUI.initX);
@@ -378,6 +381,7 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngine::Params& par
     params.num_particles  = GetValue(mUI.numParticles);
     params.max_xpos       = GetValue(mUI.simWidth);
     params.max_ypos       = GetValue(mUI.simHeight);
+    params.gravity        = GetValue(mUI.gravity);
     //params.min_lifetime   = GetValue(mUI.minLifetime);
     //params.max_lifetime   = GetValue(mUI.maxLifetime);
     params.min_point_size = GetValue(mUI.minPointsize);

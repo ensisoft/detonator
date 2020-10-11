@@ -964,6 +964,7 @@ nlohmann::json KinematicsParticleEngine::ToJson() const
     base::JsonWrite(json, "max_point_size", mParams.max_point_size);
     base::JsonWrite(json, "growth_over_time", mParams.rate_of_change_in_size_wrt_time);
     base::JsonWrite(json, "growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
+    base::JsonWrite(json, "gravity", mParams.gravity);
     return json;
 }
 
@@ -990,7 +991,8 @@ std::optional<KinematicsParticleEngine> KinematicsParticleEngine::FromJson(const
         !base::JsonReadSafe(object, "min_point_size", &params.min_point_size) ||
         !base::JsonReadSafe(object, "max_point_size", &params.max_point_size) ||
         !base::JsonReadSafe(object, "growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
-        !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist))
+        !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
+        !base::JsonReadSafe(object, "gravity", &params.gravity))
             return std::nullopt;
     return KinematicsParticleEngine(params);
 }
@@ -1050,6 +1052,11 @@ bool KinematicsParticleEngine::UpdateParticle(size_t i, float dt)
     // update change in position
     if (mParams.motion == Motion::Linear)
         p.position += (p.direction * dt);
+    else if (mParams.motion == Motion::Projectile)
+    {
+        p.position += (p.direction * dt);
+        p.direction.y += (dt * mParams.gravity);
+    }
 
     const auto& p1 = p.position;
     const auto& dp = p1 - p0;

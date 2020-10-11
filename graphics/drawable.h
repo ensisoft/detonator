@@ -455,7 +455,11 @@ namespace gfx
         // Define the motion of the particle.
         enum class Motion {
             // Follow a linear path.
-            Linear
+            Linear,
+            // Particles follow a curved path where gravity applies
+            // to the vertical component of the particles' velocity
+            // vector.
+            Projectile
         };
             // Control what happens to the particle when it reaches
         // the boundary of the simulation.
@@ -528,6 +532,8 @@ namespace gfx
             // rate of change with respect to unit of distance
             // travelled.
             float rate_of_change_in_size_wrt_dist = 0.0f;
+            // the gravity that applies when using projectile particles.
+            float gravity = 0.3;
         };
 
         KinematicsParticleEngine(const Params& init) : mParams(init)
