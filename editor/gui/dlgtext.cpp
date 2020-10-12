@@ -46,8 +46,19 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     PopulateFromEnum<gfx::TextBuffer::HorizontalAlignment>(mUI.cmbHAlign);
     PopulateFromEnum<gfx::TextBuffer::VerticalAlignment>(mUI.cmbVAlign);
 
+    // do the graphics dispose in finished handler which is triggered
+    // regardless whether we do accept/reject or the user clicks the X
+    // or presses Esc.
+    connect(this, &QDialog::finished, this, &DlgText::finished);
+    // render on timer
+    connect(&mTimer, &QTimer::timeout, this, &DlgText::timer);
+
     mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onInitScene = [&](unsigned, unsigned) {
+        mTimer.setInterval(1000.0/60.0);
+        mTimer.start();
+    };
 
     QStringList filters;
     filters << "*.ttf" << "*.otf";
@@ -76,15 +87,6 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     }
     SetValue(mUI.bufferWidth, text.GetWidth());
     SetValue(mUI.bufferHeight, text.GetHeight());
-
-    // do the graphics dispose in finished handler which is triggered
-    // regardless whether we do accept/reject or the user clicks the X
-    // or presses Esc.
-    connect(this, &QDialog::finished, this, &DlgText::finished);
-
-    connect(&mTimer, &QTimer::timeout, this, &DlgText::timer);
-    mTimer.setInterval(1000.0/60.0f);
-    mTimer.start();
 }
 
 void DlgText::on_btnAccept_clicked()

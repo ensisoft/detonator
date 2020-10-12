@@ -120,7 +120,6 @@ namespace gui
         virtual void mouseDoubleClickEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
-        virtual bool event(QEvent* event) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;

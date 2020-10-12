@@ -194,8 +194,16 @@ void GfxWindow::paintGL()
     if (!mCustomGraphicsDevice)
         return;
 
-    if (!isExposed())
-        return;
+    // Remove the check and condition for early exit and skipping of swap buffers.
+    // If the code returns early when the window is not exposed then sync to vlank
+    // is also skipped. (See comment up top about sync to vblank). Why this then
+    // matters is that if all the gfx windows are obscured/not visible, i.e. none
+    // are exposed then the editor's main loop runs unthrottle (since there's no
+    // longer sync to vblank). It looks like the easiest way to counter this issue
+    // is thus simply to omit the check for window exposure.
+    //
+    //if (!isExposed())
+    //    return;
 
     if (!have_sync)
     {
@@ -283,16 +291,6 @@ void GfxWindow::wheelEvent(QWheelEvent* wheel)
 void GfxWindow::mouseDoubleClickEvent(QMouseEvent* mickey)
 {
     onMouseDoubleClick(mickey);
-}
-
-bool GfxWindow::event(QEvent* event)
-{
-    if (event->type() == QEvent::UpdateRequest)
-    {
-        paintGL();
-        return true;
-    }
-    return QWindow::event(event);
 }
 
 void GfxWindow::toggleShowFps()

@@ -55,10 +55,13 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::uni
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
     connect(this, &QDialog::finished, this, &DlgTextureRect::finished);
-
+    // render on timer.
     connect(&mTimer, &QTimer::timeout, this, &DlgTextureRect::timer);
-    mTimer.setInterval(1000.0/60.0f);
-    mTimer.start();
+
+    mUI.widget->onInitScene = [&](unsigned, unsigned) {
+        mTimer.setInterval(1000.0/60.0);
+        mTimer.start();
+    };
 
     const auto& bitmap = texture->GetData();
     if (bitmap != nullptr)
