@@ -1330,7 +1330,23 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
         // create a new child window that will hold the widget.
         ChildWindow* child = new ChildWindow(widget);
         child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
+
+        // resize and relocate on the desktop, by default the window seems
+        // to be at a position that requires it to be immediately used and
+        // resize by the user. ugh
+        const auto width  = std::max((int)(this->width() * 0.8), child->width());
+        const auto height = std::max((int)(this->height() *0.8), child->height());
+        const auto xpos = x() + (this->width() - width) / 2;
+        const auto ypos = y() + (this->height() - height) / 2;
+        child->resize(width, height);
+        child->move(xpos, ypos);
+        // showing the widget *after* resize/move might produce incorrect
+        // results since apparently the window's dimensions are not fully
+        // know until it has been show (presumably some layout is done)
+        // however doing the show first and and then move/resize is visually
+        // not very pleasing.
         child->show();
+
         mChildWindows.push_back(child);
 
         emit newAcceleratedWindowOpen();
