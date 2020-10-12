@@ -84,7 +84,9 @@ namespace gui
         // all currently open widgets.
         // Returns true if next fast iteration is needed or false
         // if there are no windows open that would required fast iteration.x
-        bool iterateGameLoop();
+        void iterateGameLoop();
+
+        bool haveAcceleratedWindows() const;
 
         // Returns true when the window has been closed.
         bool isClosed() const
@@ -141,6 +143,7 @@ namespace gui
         void editResources(bool open_new_window);
 
     private:
+        bool event(QEvent* event)  override;
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
         bool eventFilter(QObject* destination, QEvent* event) override;
 

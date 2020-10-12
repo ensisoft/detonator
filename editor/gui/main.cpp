@@ -207,22 +207,20 @@ int main(int argc, char* argv[])
             if (window.isClosed())
                 break;
 
-            if (!window.iterateGameLoop()) {
+            if (!window.haveAcceleratedWindows())
+            {
+                DEBUG("Enter slow event loop.");
+                // enter a temporary "slow" event loop until there are again
+                // windows that require "acceleration" i.e. continuous game loop
+                // style processing.
                 QEventLoop loop;
                 QObject::connect(&window, &gui::MainWindow::newAcceleratedWindowOpen,
                     &loop, &QEventLoop::quit);
                 QObject::connect(&window, &gui::MainWindow::aboutToClose,
                     &loop, &QEventLoop::quit);
                 loop.exec();
+                DEBUG("Exit slow event loop.");
             }
-
-            // todo: is there a workable way to throttle this loop execution somehow?
-            // Some thing that was tried was to compute how much of the frame budget time
-            // remains after all the work was done and then spend that much time
-            // either a) sleeping (this_thread::sleeop_for) or b) running QMessageLoop
-            // with a timer interrupt to exit the loop.
-            // Both ways do reduce the CPU load but degrade the performance a lot and
-            // create visible janks.
         }
 
         DEBUG("Exiting...");

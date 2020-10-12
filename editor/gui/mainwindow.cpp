@@ -74,6 +74,20 @@ double ElapsedSeconds()
     return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
         (1000.0 * 1000.0);
 }
+
+class IterateGameLoopEvent : public QEvent
+{
+public:
+    IterateGameLoopEvent() : QEvent(GetIdentity())
+    {}
+    static QEvent::Type GetIdentity()
+    {
+        static auto id = QEvent::registerEventType();
+        return (QEvent::Type)id;
+    }
+private:
+};
+
 } // namespace
 
 namespace gui
@@ -104,6 +118,8 @@ MainWindow::MainWindow()
     mUI.eventlist->setModel(&events);
 
     setWindowTitle(QString("%1").arg(APP_TITLE));
+
+    QCoreApplication::postEvent(this, new IterateGameLoopEvent);
 }
 
 MainWindow::~MainWindow()
@@ -515,7 +531,7 @@ void MainWindow::showWindow()
     show();
 }
 
-bool MainWindow::iterateGameLoop()
+void MainWindow::iterateGameLoop()
 {
     const auto elapsed_since = ElapsedSeconds();
     const auto time_step = 1.0/60.0;
@@ -557,7 +573,10 @@ bool MainWindow::iterateGameLoop()
     {
         mPlayWindow->Render();
     }
+}
 
+bool MainWindow::haveAcceleratedWindows() const
+{
     return mUI.mainTab->count() || mChildWindows.size() || mPlayWindow;
 }
 
@@ -1045,6 +1064,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         mPlayWindow->move(xpos, ypos);
         mPlayWindow->show();
         emit newAcceleratedWindowOpen();
+        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
         DEBUG("Playwindow position: %1x%2", xpos, ypos);
     }
     // bring to the top of the window stack.
@@ -1189,6 +1209,20 @@ void MainWindow::openExternalShader(const QString& file)
     DEBUG("Start application '%1'", mSettings.shader_editor_executable);
 }
 
+bool MainWindow::event(QEvent* event)
+{
+    if (event->type() == IterateGameLoopEvent::GetIdentity())
+    {
+        iterateGameLoop();
+
+        if (haveAcceleratedWindows())
+            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+
+        return true;
+    }
+    return QMainWindow::event(event);
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     event->ignore();
@@ -1300,6 +1334,7 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
         mChildWindows.push_back(child);
 
         emit newAcceleratedWindowOpen();
+        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
         return child;
     }
 
@@ -1314,7 +1349,7 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     prepareWindowMenu();
 
     emit newAcceleratedWindowOpen();
-
+    QCoreApplication::postEvent(this, new IterateGameLoopEvent);
     // no child window
     return nullptr;
 }
