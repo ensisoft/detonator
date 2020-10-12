@@ -192,10 +192,10 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>btnMaterial</tabstop>
   <tabstop>btnParticle</tabstop>
   <tabstop>btnAnimation</tabstop>
   <tabstop>btnCustomShape</tabstop>
-  <tabstop>btnMaterial</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources>
