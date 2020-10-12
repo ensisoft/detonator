@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QtWidgets>
+#  include <QMenu>
 #  include "ui_childwindow.h"
 #include "warnpop.h"
 
@@ -66,6 +67,8 @@ namespace gui
         void Animate(double dt);
 
         void Render();
+
+        void SetSharedWorkspaceMenu(QMenu* menu);
 
     private slots:
         void on_actionClose_triggered();

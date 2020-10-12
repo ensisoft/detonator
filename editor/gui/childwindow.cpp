@@ -93,6 +93,11 @@ void ChildWindow::Render()
     mWidget->render();
 }
 
+void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
+{
+    mUI.menubar->insertMenu(mUI.menuEdit->menuAction(), menu);
+}
+
 void ChildWindow::on_actionClose_triggered()
 {
     // this will create close event

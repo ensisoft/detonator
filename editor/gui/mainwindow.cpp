@@ -959,13 +959,13 @@ void MainWindow::on_workspace_doubleClicked()
 
 void MainWindow::on_actionPackageResources_triggered()
 {
-    DlgPackage dlg(this, *mWorkspace);
+    DlgPackage dlg(QApplication::activeWindow(), *mWorkspace);
     dlg.exec();
 }
 
 void MainWindow::on_actionSelectResourceForEditing_triggered()
 {
-    DlgOpen dlg(this, *mWorkspace);
+    DlgOpen dlg(QApplication::activeWindow(), *mWorkspace);
     if (dlg.exec() == QDialog::Accepted)
     {
         app::Resource* res = dlg.GetSelected();
@@ -992,7 +992,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
 
 void MainWindow::on_actionNewResource_triggered()
 {
-    DlgNew dlg(this);
+    DlgNew dlg(QApplication::activeWindow());
     if (dlg.exec() == QDialog::Accepted)
     {
         const auto new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1018,7 +1018,7 @@ void MainWindow::on_actionProjectSettings_triggered()
 {
     auto settings = mWorkspace->GetProjectSettings();
 
-    DlgProject dlg(this, settings);
+    DlgProject dlg(QApplication::activeWindow(), settings);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1295,6 +1295,7 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     {
         // create a new child window that will hold the widget.
         ChildWindow* child = new ChildWindow(widget);
+        child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
         child->show();
         mChildWindows.push_back(child);
 
