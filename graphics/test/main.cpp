@@ -643,15 +643,15 @@ public:
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
             transform.Translate(-450.0f, 150.0f);
-            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Solid), transform, materials[1]);
+            painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Solid), transform, materials[1]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Outline), transform, materials[2]);
+            painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Outline), transform, materials[2]);
             transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
             transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Triangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+            painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
             transform.Translate(-450.0f, 150.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe), transform, materials[0]);

@@ -64,8 +64,8 @@ std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& na
     // these are the current primitive cases that are not packed as part of the resources
     if (name == "Rectangle")
         return std::make_shared<gfx::Rectangle>();
-    else if (name == "Triangle")
-        return std::make_shared<gfx::Triangle>();
+    else if (name == "IsocelesTriangle")
+        return std::make_shared<gfx::IsocelesTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
     else if (name == "Arrow")

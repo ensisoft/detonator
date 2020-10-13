@@ -521,7 +521,7 @@ void RoundRectangle::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
-Shader* Triangle::GetShader(Device& device) const
+Shader* IsocelesTriangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
     if (s == nullptr || !s->IsValid())
@@ -534,12 +534,12 @@ Shader* Triangle::GetShader(Device& device) const
     return s;
 }
 
-Geometry* Triangle::Upload(Device& device) const
+Geometry* IsocelesTriangle::Upload(Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
 
-    Geometry* geom = device.FindGeometry("Triangle");
+    Geometry* geom = device.FindGeometry("IsocelesTriangle");
     if (!geom)
     {
         const Vertex verts[3] = {
@@ -547,7 +547,7 @@ Geometry* Triangle::Upload(Device& device) const
             { {0.0f, -1.0f}, {0.0f, 1.0f} },
             { {1.0f, -1.0f}, {1.0f, 1.0f} }
         };
-        geom = device.MakeGeometry("Triangle");
+        geom = device.MakeGeometry("IsocelesTriangle");
         geom->Update(verts, 3);
     }
     geom->SetLineWidth(mLineWidth);
@@ -561,7 +561,7 @@ Geometry* Triangle::Upload(Device& device) const
     return geom;
 }
 
-void Triangle::Pack(ResourcePacker* packer) const
+void IsocelesTriangle::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }

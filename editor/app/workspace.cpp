@@ -602,8 +602,8 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     // each ship will render the same particle stream.
     if (name == "Rectangle")
         return std::make_shared<gfx::Rectangle>();
-    else if (name == "Triangle")
-        return std::make_shared<gfx::Triangle>();
+    else if (name == "IsocelesTriangle")
+        return std::make_shared<gfx::IsocelesTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
     else if (name == "Arrow")
@@ -1120,7 +1120,7 @@ QStringList Workspace::ListPrimitiveDrawables() const
     list << "Circle";
     list << "Rectangle";
     list << "RoundRect";
-    list << "Triangle";
+    list << "IsocelesTriangle";
     return list;
 }
 

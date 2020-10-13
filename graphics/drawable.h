@@ -211,13 +211,13 @@ namespace gfx
         float mRadius = 0.05;
     };
 
-    class Triangle : public Drawable
+    class IsocelesTriangle : public Drawable
     {
     public:
-        Triangle() = default;
-        Triangle(Style style) : mStyle(style)
+        IsocelesTriangle() = default;
+        IsocelesTriangle(Style style) : mStyle(style)
         {}
-        Triangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        IsocelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;

@@ -1120,7 +1120,7 @@ void AnimationWidget::on_actionNewCircle_triggered()
 
 void AnimationWidget::on_actionNewTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Triangle"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "IsocelesTriangle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
