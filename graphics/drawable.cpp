@@ -566,6 +566,202 @@ void IsocelesTriangle::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
+Shader* RightTriangle::GetShader(Device& device) const
+{
+    Shader* s = device.FindShader("vertex_array.glsl");
+    if (s == nullptr || !s->IsValid())
+    {
+        if (s == nullptr)
+            s = device.MakeShader("vertex_array.glsl");
+        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
+            return nullptr;
+    }
+    return s;
+}
+
+Geometry* RightTriangle::Upload(Device& device) const
+{
+    if (mStyle == Style::Points)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("RightTriangle");
+    if (!geom)
+    {
+        const Vertex verts[3] = {
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} }
+        };
+        geom = device.MakeGeometry("RightTriangle");
+        geom->Update(verts, 3);
+    }
+    geom->SetLineWidth(mLineWidth);
+    geom->ClearDraws();
+    if (mStyle == Style::Solid)
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    else if (mStyle == Style::Outline)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (mStyle == Style::Wireframe)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    return geom;
+}
+
+void RightTriangle::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
+Shader* Trapezoid::GetShader(Device& device) const
+{
+    Shader* s = device.FindShader("vertex_array.glsl");
+    if (s == nullptr || !s->IsValid())
+    {
+        if (s == nullptr)
+            s = device.MakeShader("vertex_array.glsl");
+        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
+            return nullptr;
+    }
+    return s;
+}
+
+Geometry* Trapezoid::Upload(Device& device) const
+{
+    if (mStyle == Style::Points)
+        return nullptr;
+
+    Geometry* geom = nullptr;
+    if (mStyle == Style::Outline)
+    {
+        geom = device.FindGeometry("TrapezoidOutline");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                { {0.2f,  0.0f}, {0.2f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
+                { {0.8f,  0.0f}, {0.8f, 0.0f} }
+            };
+
+            geom = device.MakeGeometry("TrapezoidOutline");
+            geom->Update(verts, 4);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        }
+    }
+    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    {
+        geom = device.FindGeometry("Trapezoid");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                {{0.0f, -1.0f}, {0.0f, 1.0f}},
+                {{0.2f, -1.0f}, {0.2f, 1.0f}},
+
+                {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                {{0.2f, -1.0f}, {0.2f, 1.0f}},
+                {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+                {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                {{0.8f,  0.0f}, {0.8f, 0.0f}},
+                {{0.2f,  0.0f}, {0.2f, 0.0f}},
+
+                {{0.8f,  0.0f}, {0.8f, 0.0f}},
+                {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                {{1.0f, -1.0f}, {1.0f, 1.0f}}
+            };
+            geom = device.MakeGeometry("Trapezoid");
+            geom->Update(verts, 12);
+        }
+        geom->ClearDraws();
+        if (mStyle == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (mStyle == Style::Wireframe)
+        {
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
+        }
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
+void Trapezoid::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
+Shader* Parallelogram::GetShader(Device& device) const
+{
+    Shader* s = device.FindShader("vertex_array.glsl");
+    if (s == nullptr || !s->IsValid())
+    {
+        if (s == nullptr)
+            s = device.MakeShader("vertex_array.glsl");
+        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
+            return nullptr;
+    }
+    return s;
+}
+
+Geometry* Parallelogram::Upload(Device& device) const
+{
+    if (mStyle == Style::Points)
+        return nullptr;
+
+    Geometry* geom = nullptr;
+    if (mStyle == Style::Outline)
+    {
+        geom = device.FindGeometry("ParallelogramOutline");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                { {0.2f,  0.0f}, {0.2f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {0.8f, -1.0f}, {0.8f, 1.0f} },
+                { {1.0f,  0.0f}, {1.0f, 0.0f} }
+            };
+            geom = device.MakeGeometry("ParallelogramOutline");
+            geom->Update(verts, 4);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        }
+    }
+    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    {
+        geom = device.FindGeometry("Parallelogram");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                {{0.0f, -1.0f}, {0.0f, 1.0f}},
+                {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+                {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                {{1.0f,  0.0f}, {1.0f, 0.0f}},
+                {{0.2f,  0.0f}, {0.2f, 0.0f}}
+            };
+            geom = device.MakeGeometry("Parallelogram");
+            geom->Update(verts, 6);
+        }
+        geom->ClearDraws();
+        if (mStyle == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (mStyle == Style::Wireframe)
+        {
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+        }
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
+void Parallelogram::Pack(ResourcePacker* packer) const
+{
+    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+
 Shader* Grid::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");

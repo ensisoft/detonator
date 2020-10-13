@@ -66,10 +66,16 @@ std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& na
         return std::make_shared<gfx::Rectangle>();
     else if (name == "IsocelesTriangle")
         return std::make_shared<gfx::IsocelesTriangle>();
+    else if (name == "RightTriangle")
+        return std::make_shared<gfx::RightTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
+    else if (name == "Trapezoid")
+        return std::make_shared<gfx::Trapezoid>();
+    else if (name == "Parallelogram")
+        return std::make_shared<gfx::Parallelogram>();
 
     auto it = mGlobalDrawableInstances.find(name);
     if (it != std::end(mGlobalDrawableInstances))

@@ -631,7 +631,19 @@ public:
             transform.Translate(120.0f, 0.0f);
             painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-450.0f, 150.0f);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+
+
+            transform.Translate(-1020.0f, 150.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Solid), transform, materials[1]);
@@ -652,8 +664,18 @@ public:
             painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
             transform.Translate(120.0f, 0.0f);
             painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-450.0f, 150.0f);
+            transform.Translate(-1020.0f, 150.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Solid), transform, materials[1]);
@@ -663,8 +685,18 @@ public:
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
             transform.Translate(120.0f, 0.0f);
             painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-450.0f, 150.0f);
+            transform.Translate(-1020.0f, 150.0f);
             painter.Draw(gfx::Grid(5, 5), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::Grid(5, 5), transform, materials[1]);

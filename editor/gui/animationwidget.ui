@@ -1059,13 +1059,13 @@
     <string>New Circle</string>
    </property>
   </action>
-  <action name="actionNewTriangle">
+  <action name="actionNewIsocelesTriangle">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/triangle.png</normaloff>:/32x32_ico_png/triangle.png</iconset>
+     <normaloff>:/32x32_ico_png/isoceles_triangle.png</normaloff>:/32x32_ico_png/isoceles_triangle.png</iconset>
    </property>
    <property name="text">
     <string>New Triangle</string>
@@ -1114,6 +1114,51 @@
    </property>
    <property name="toolTip">
     <string>Toggle timeline visibility</string>
+   </property>
+  </action>
+  <action name="actionNewRightTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/right_triangle.png</normaloff>:/32x32_ico_png/right_triangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Triangle</string>
+   </property>
+   <property name="toolTip">
+    <string>New right triangle</string>
+   </property>
+  </action>
+  <action name="actionNewTrapezoid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/trapezoid.png</normaloff>:/32x32_ico_png/trapezoid.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Trapezoid</string>
+   </property>
+   <property name="toolTip">
+    <string>New trapezoid</string>
+   </property>
+  </action>
+  <action name="actionNewParallelogram">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/parallelogram.png</normaloff>:/32x32_ico_png/parallelogram.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Parallelogram</string>
+   </property>
+   <property name="toolTip">
+    <string>New parallelogram</string>
    </property>
   </action>
  </widget>

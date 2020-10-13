@@ -42,12 +42,15 @@
     <file>32x32_ico_png/tool_rotate.png</file>
     <file>32x32_ico_png/rectangle.png</file>
     <file>32x32_ico_png/circle.png</file>
-    <file>32x32_ico_png/triangle.png</file>
+    <file>32x32_ico_png/isoceles_triangle.png</file>
     <file>32x32_ico_png/arrow.png</file>
     <file>32x32_ico_png/package.png</file>
     <file>32x32_ico_png/round_rect.png</file>
     <file>32x32_ico_png/timeline.png</file>
     <file>32x32_ico_png/triangle_fan.png</file>
+    <file>32x32_ico_png/right_triangle.png</file>
+    <file>32x32_ico_png/trapezoid.png</file>
+    <file>32x32_ico_png/parallelogram.png</file>
 
     <file>texture.png</file>
   </qresource>

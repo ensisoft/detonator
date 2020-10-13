@@ -233,6 +233,73 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
+    class RightTriangle : public Drawable
+    {
+    public:
+        RightTriangle() = default;
+        RightTriangle(Style style) : mStyle(style)
+        {}
+        RightTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
+    private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
+    };
+
+
+    class Trapezoid : public Drawable
+    {
+    public:
+        Trapezoid() = default;
+        Trapezoid(Style style) : mStyle(style)
+        {}
+        Trapezoid(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
+    private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
+    };
+
+    class Parallelogram : public Drawable
+    {
+    public:
+        Parallelogram() = default;
+        Parallelogram(Style style) : mStyle(style)
+        {}
+        Parallelogram(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+        virtual void Pack(ResourcePacker* packer) const override;
+    private:
+        Style mStyle = Style::Solid;
+        float mLineWidth = 1.0f;
+    };
+
     // render a series of intersecting horizontal and vertical lines
     // at some particular interval (gap distance)
     class Grid : public Drawable

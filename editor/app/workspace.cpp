@@ -604,10 +604,16 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         return std::make_shared<gfx::Rectangle>();
     else if (name == "IsocelesTriangle")
         return std::make_shared<gfx::IsocelesTriangle>();
+    else if (name == "RightTriangle")
+        return std::make_shared<gfx::RightTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
+    else if (name == "Trapezoid")
+        return std::make_shared<gfx::Trapezoid>();
+    else if (name == "Parallelogram")
+        return std::make_shared<gfx::Parallelogram>();
 
     if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
@@ -1115,9 +1121,12 @@ QStringList Workspace::ListPrimitiveDrawables() const
 {
     QStringList list;
     list << "Circle";
-    list << "Rectangle";
-    list << "RoundRect";
     list << "IsocelesTriangle";
+    list << "Parallelogram";
+    list << "Rectangle";
+    list << "RightTriangle";
+    list << "RoundRect";
+    list << "Trapezoid";
     return list;
 }
 
