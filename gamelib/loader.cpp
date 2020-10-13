@@ -68,8 +68,6 @@ std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& na
         return std::make_shared<gfx::IsocelesTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
-    else if (name == "Arrow")
-        return std::make_shared<gfx::Arrow>();
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
 

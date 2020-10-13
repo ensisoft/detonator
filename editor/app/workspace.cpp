@@ -606,8 +606,6 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
         return std::make_shared<gfx::IsocelesTriangle>();
     else if (name == "Circle")
         return std::make_shared<gfx::Circle>();
-    else if (name == "Arrow")
-        return std::make_shared<gfx::Arrow>();
     else if (name == "RoundRect")
         return std::make_shared<gfx::RoundRectangle>();
 
@@ -1116,7 +1114,6 @@ QStringList Workspace::ListAllDrawables() const
 QStringList Workspace::ListPrimitiveDrawables() const
 {
     QStringList list;
-    list << "Arrow";
     list << "Circle";
     list << "Rectangle";
     list << "RoundRect";
