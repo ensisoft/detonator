@@ -500,6 +500,7 @@ Material& Material::operator=(const Material& other)
     std::swap(mType, tmp.mType);
     std::swap(mGamma, tmp.mGamma);
     std::swap(mRuntime, tmp.mRuntime);
+    std::swap(mFps, tmp.mFps);
     std::swap(mBlendFrames, tmp.mBlendFrames);
     std::swap(mStatic, tmp.mStatic);
     std::swap(mMinFilter, tmp.mMinFilter);
