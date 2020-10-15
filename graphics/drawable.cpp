@@ -133,11 +133,6 @@ Geometry* Arrow::Upload(Device& device) const
     return geom;
 }
 
-void Arrow::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
 Shader* Line::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -164,10 +159,6 @@ Geometry* Line::Upload(Device& device) const
     }
     geom->SetLineWidth(mLineWidth);
     return geom;
-}
-void Line::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 Shader* Circle::GetShader(Device& device) const
@@ -253,11 +244,6 @@ Geometry* Circle::Upload(Device& device) const
     return geom;
 }
 
-void Circle::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
 Shader* Rectangle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -319,12 +305,7 @@ Geometry* Rectangle::Upload(Device& device) const
     return geom;
 }
 
-void Rectangle::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
-Shader* RoundRectangle::GetShader(Device& device) const
+Shader* RoundRectangleClass::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
     if (shader == nullptr)
@@ -335,9 +316,11 @@ Shader* RoundRectangle::GetShader(Device& device) const
     return shader;
 }
 
-Geometry* RoundRectangle::Upload(Device& device) const
+Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) const
 {
-    if (mStyle == Style::Points)
+    using Style = Drawable::Style;
+
+    if (style == Style::Points)
         return nullptr;
 
     const auto r = mRadius;
@@ -357,7 +340,7 @@ Geometry* RoundRectangle::Upload(Device& device) const
         {1.0f-r, -1.0f+r}, // bottom right
     };
 
-    if (mStyle == Style::Outline)
+    if (style == Style::Outline)
     {
         geom = device.FindGeometry("RoundRectOutline");
         if (geom == nullptr)
@@ -409,12 +392,12 @@ Geometry* RoundRectangle::Upload(Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
-    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    else if (style == Style::Solid || style == Style::Wireframe)
     {
-        geom = device.FindGeometry(mStyle == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+        geom = device.FindGeometry(style == Style::Solid ? "RoundRect" : "RoundRectWireframe");
         if (geom == nullptr)
         {
-            geom = device.MakeGeometry(mStyle == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+            geom = device.MakeGeometry(style == Style::Solid ? "RoundRect" : "RoundRectWireframe");
 
             // center body
             std::vector<Vertex> vs = {
@@ -443,7 +426,7 @@ Geometry* RoundRectangle::Upload(Device& device) const
                 {{1.0f-r,       -r}, {1.0f-r,      r}},
             };
 
-            if (mStyle == Style::Solid)
+            if (style == Style::Solid)
             {
                 geom->AddDrawCmd(Geometry::DrawType::Triangles, 0, 18);
             }
@@ -468,7 +451,7 @@ Geometry* RoundRectangle::Upload(Device& device) const
                 center.aTexCoord.x = corners[i].x;
                 center.aTexCoord.y = corners[i].y * -1.0f;
 
-                if (mStyle == Style::Solid)
+                if (style == Style::Solid)
                 {
                     // triangle fan center point
                     vs.push_back(center);
@@ -487,7 +470,7 @@ Geometry* RoundRectangle::Upload(Device& device) const
                     vs.push_back(v);
 
                     angle += increment;
-                    if (mStyle == Style::Wireframe)
+                    if (style == Style::Wireframe)
                     {
                         const auto x = std::cos(angle) * mRadius;
                         const auto y = std::sin(angle) * mRadius;
@@ -500,11 +483,11 @@ Geometry* RoundRectangle::Upload(Device& device) const
                         vs.push_back(center);
                     }
                 }
-                if (mStyle == Style::Solid)
+                if (style == Style::Solid)
                 {
                     geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset);
                 }
-                else if (mStyle == Style::Wireframe)
+                else if (style == Style::Wireframe)
                 {
                     geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
                 }
@@ -512,13 +495,25 @@ Geometry* RoundRectangle::Upload(Device& device) const
             geom->Update(std::move(vs));
         }
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
-void RoundRectangle::Pack(ResourcePacker* packer) const
+void RoundRectangleClass::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
+}
+nlohmann::json RoundRectangleClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "radius", mRadius);
+    return json;
+}
+
+bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
+{
+    if (!base::JsonReadSafe(json, "radius", &mRadius))
+        return false;
+    return true;
 }
 
 Shader* IsocelesTriangle::GetShader(Device& device) const
@@ -561,11 +556,6 @@ Geometry* IsocelesTriangle::Upload(Device& device) const
     return geom;
 }
 
-void IsocelesTriangle::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
 Shader* RightTriangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
@@ -604,11 +594,6 @@ Geometry* RightTriangle::Upload(Device& device) const
     else if (mStyle == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
-}
-
-void RightTriangle::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 Shader* Trapezoid::GetShader(Device& device) const
@@ -687,11 +672,6 @@ Geometry* Trapezoid::Upload(Device& device) const
     return geom;
 }
 
-void Trapezoid::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
 Shader* Parallelogram::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
@@ -757,12 +737,7 @@ Geometry* Parallelogram::Upload(Device& device) const
     return geom;
 }
 
-void Parallelogram::Pack(ResourcePacker* packer) const
-{
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
-}
-
-Shader* Grid::GetShader(Device& device) const
+Shader* GridClass::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
     if (shader == nullptr)
@@ -773,7 +748,7 @@ Shader* Grid::GetShader(Device& device) const
     return shader;
 }
 
-Geometry* Grid::Upload(Device& device) const
+Geometry* GridClass::Upload(Device& device) const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mNumVerticalLines);
@@ -833,16 +808,33 @@ Geometry* Grid::Upload(Device& device) const
         geom->Update(std::move(verts));
         geom->AddDrawCmd(Geometry::DrawType::Lines);
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
-void Grid::Pack(ResourcePacker* packer) const
+void GridClass::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
-Shader* Polygon::GetShader(Device& device) const
+nlohmann::json GridClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "vertical_lines", mNumVerticalLines);
+    base::JsonWrite(json, "horizontal_lines", mNumHorizontalLines);
+    base::JsonWrite(json, "border_lines", mBorderLines);
+    return json;
+}
+
+bool GridClass::LoadFromJson(const nlohmann::json& json)
+{
+    if (!base::JsonReadSafe(json, "vertical_lines", &mNumVerticalLines) ||
+        !base::JsonReadSafe(json, "horizontal_lines", &mNumHorizontalLines) ||
+        !base::JsonReadSafe(json, "border_lines", &mBorderLines))
+        return false;
+    return true;
+}
+
+Shader* PolygonClass::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
     if (shader == nullptr)
@@ -852,7 +844,7 @@ Shader* Polygon::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* Polygon::Upload(Device& device) const
+Geometry* PolygonClass::Upload(const InstanceState& state, Device& device) const
 {
     Geometry* geom = nullptr;
 
@@ -883,16 +875,16 @@ Geometry* Polygon::Upload(Device& device) const
             geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
         }
     }
-    geom->SetLineWidth(mLineWidth);
+    geom->SetLineWidth(state.line_width);
     return geom;
 }
 
-void Polygon::Pack(ResourcePacker* packer) const
+void PolygonClass::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
-nlohmann::json Polygon::ToJson() const
+nlohmann::json PolygonClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "static", mStatic);
@@ -917,10 +909,22 @@ nlohmann::json Polygon::ToJson() const
     return json;
 }
 
-// static
-std::optional<Polygon> Polygon::FromJson(const nlohmann::json& object)
+bool PolygonClass::LoadFromJson(const nlohmann::json& json)
 {
-    Polygon ret;
+    auto ret = PolygonClass::FromJson(json);
+    if (!ret.has_value())
+        return false;
+    auto& val = ret.value();
+    mVertices = std::move(val.mVertices);
+    mDrawCommands = std::move(val.mDrawCommands);
+    mStatic = val.mStatic;
+    return true;
+}
+
+// static
+std::optional<PolygonClass> PolygonClass::FromJson(const nlohmann::json& object)
+{
+    PolygonClass ret;
     if (!base::JsonReadSafe(object, "static", &ret.mStatic))
         return std::nullopt;
 
@@ -963,7 +967,7 @@ std::optional<Polygon> Polygon::FromJson(const nlohmann::json& object)
     return ret;
 }
 
-void Polygon::EraseVertex(size_t index)
+void PolygonClass::EraseVertex(size_t index)
 {
     ASSERT(index < mVertices.size());
     auto it = mVertices.begin();
@@ -989,7 +993,7 @@ void Polygon::EraseVertex(size_t index)
     mName.clear();
 }
 
-void Polygon::InsertVertex(const Vertex& vertex, size_t index)
+void PolygonClass::InsertVertex(const Vertex& vertex, size_t index)
 {
     ASSERT(index <= mVertices.size());
 
@@ -1008,7 +1012,7 @@ void Polygon::InsertVertex(const Vertex& vertex, size_t index)
     mName.clear();
 }
 
-std::size_t Polygon::GetHash() const
+std::size_t PolygonClass::GetHash() const
 {
     size_t hash = 0;
     for (const auto& vertex : mVertices)
@@ -1027,7 +1031,7 @@ std::size_t Polygon::GetHash() const
     return hash;
 }
 
-std::string Polygon::GetName() const
+std::string PolygonClass::GetName() const
 {
     if (!mName.empty())
         return mName;
@@ -1035,7 +1039,7 @@ std::string Polygon::GetName() const
     return mName;
 }
 
-Shader* KinematicsParticleEngine::GetShader(Device& device) const
+Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("particles.glsl");
     if (shader == nullptr)
@@ -1045,8 +1049,8 @@ Shader* KinematicsParticleEngine::GetShader(Device& device) const
     }
     return shader;
 }
-// Drawable implementation. Upload particles to the device.
-Geometry* KinematicsParticleEngine::Upload(Device& device) const
+
+Geometry* KinematicsParticleEngineClass::Upload(const InstanceState& state, Device& device) const
 {
     Geometry* geom = device.FindGeometry("particle-buffer");
     if (!geom)
@@ -1054,7 +1058,7 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
         geom = device.MakeGeometry("particle-buffer");
     }
     std::vector<Vertex> verts;
-    for (const auto& p : mParticles)
+    for (const auto& p : state.particles)
     {
         // in order to use vertex_arary.glsl we need to convert the points to
         // lower right quadrant coordinates.
@@ -1077,67 +1081,64 @@ Geometry* KinematicsParticleEngine::Upload(Device& device) const
     return geom;
 }
 
-void KinematicsParticleEngine::Pack(ResourcePacker* packer) const
+void KinematicsParticleEngineClass::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/particles.glsl");
 }
 
 // Update the particle simulation.
-void KinematicsParticleEngine::Update(float dt)
+void KinematicsParticleEngineClass::Update(InstanceState& state, float dt) const
 {
-    mTime += dt;
-
     // update each particle
-    for (size_t i=0; i<mParticles.size();)
+    for (size_t i=0; i<state.particles.size();)
     {
-        if (UpdateParticle(i, dt))
+        if (UpdateParticle(state, i, dt))
         {
             ++i;
             continue;
         }
-        KillParticle(i);
+        KillParticle(state, i);
     }
 
     // Spawn new particles if needed.
     if (mParams.mode == SpawnPolicy::Maintain)
     {
         const auto num_particles_always = size_t(mParams.num_particles);
-        const auto num_particles_now = mParticles.size();
+        const auto num_particles_now = state.particles.size();
         const auto num_particles_needed = num_particles_always - num_particles_now;
-        InitParticles(num_particles_needed);
+        InitParticles(state, num_particles_needed);
     }
     else if (mParams.mode == SpawnPolicy::Continuous)
     {
         // the number of particles is taken as the rate of particles per
         // second. fractionally cumulate partciles and then
         // spawn when we have some number non-fractional particles.
-        mNumParticlesHatching += mParams.num_particles * dt;
-        const auto num = size_t(mNumParticlesHatching);
-        InitParticles(num);
-        mNumParticlesHatching -= num;
+        state.hatching += mParams.num_particles * dt;
+        const auto num = size_t(state.hatching);
+        InitParticles(state, num);
+        state.hatching -= num;
     }
 }
 
 // ParticleEngine implementation.
-bool KinematicsParticleEngine::IsAlive() const
+bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
 {
     if (mParams.mode == SpawnPolicy::Continuous)
         return true;
-    return !mParticles.empty();
+    return !state.particles.empty();
 }
 
 // ParticleEngine implementation. Restart the simulation
 // with the previous parameters.
-void KinematicsParticleEngine::Restart()
+void KinematicsParticleEngineClass::Restart(InstanceState& state) const
 {
-    mParticles.clear();
-    mTime = 0.0f;
-    mNumParticlesHatching = 0;
-
-    InitParticles(size_t(mParams.num_particles));
+    state.particles.clear();
+    state.time = 0.0f;
+    state.hatching = 0.0f;
+    InitParticles(state, size_t(mParams.num_particles));
 }
 
-nlohmann::json KinematicsParticleEngine::ToJson() const
+nlohmann::json KinematicsParticleEngineClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "motion", mParams.motion);
@@ -1164,8 +1165,18 @@ nlohmann::json KinematicsParticleEngine::ToJson() const
     return json;
 }
 
+bool KinematicsParticleEngineClass::LoadFromJson(const nlohmann::json& json)
+{
+    auto ret = FromJson(json);
+    if (!ret.has_value())
+        return false;
+    const auto& val = ret.value();
+    mParams = val.mParams;
+    return true;
+}
+
 // static
-std::optional<KinematicsParticleEngine> KinematicsParticleEngine::FromJson(const nlohmann::json& object)
+std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const nlohmann::json& object)
 {
     Params params;
     if (!base::JsonReadSafe(object, "motion", &params.motion) ||
@@ -1190,10 +1201,10 @@ std::optional<KinematicsParticleEngine> KinematicsParticleEngine::FromJson(const
         !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
         !base::JsonReadSafe(object, "gravity", &params.gravity))
             return std::nullopt;
-    return KinematicsParticleEngine(params);
+    return KinematicsParticleEngineClass(params);
 }
 
-std::size_t KinematicsParticleEngine::GetHash() const
+std::size_t KinematicsParticleEngineClass::GetHash() const
 {
     static_assert(std::is_trivially_copyable<Params>::value);
     size_t hash = 0;
@@ -1206,7 +1217,7 @@ std::size_t KinematicsParticleEngine::GetHash() const
     return hash;
 }
 
-void KinematicsParticleEngine::InitParticles(size_t num)
+void KinematicsParticleEngineClass::InitParticles(InstanceState& state, size_t num) const
 {
     for (size_t i=0; i<num; ++i)
     {
@@ -1224,19 +1235,19 @@ void KinematicsParticleEngine::InitParticles(size_t num)
         // direction vector in order to save space.
         p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
         p.randomizer = math::rand(0.0f, 1.0f);
-        mParticles.push_back(p);
+        state.particles.push_back(p);
     }
 }
-void KinematicsParticleEngine::KillParticle(size_t i)
+void KinematicsParticleEngineClass::KillParticle(InstanceState& state, size_t i) const
 {
-    const auto last = mParticles.size() - 1;
-    std::swap(mParticles[i], mParticles[last]);
-    mParticles.pop_back();
+    const auto last = state.particles.size() - 1;
+    std::swap(state.particles[i], state.particles[last]);
+    state.particles.pop_back();
 }
 
-bool KinematicsParticleEngine::UpdateParticle(size_t i, float dt)
+bool KinematicsParticleEngineClass::UpdateParticle(InstanceState& state, size_t i, float dt) const
 {
-    auto& p = mParticles[i];
+    auto& p = state.particles[i];
 
     // countdown to end of lifetime
     p.lifetime -= dt;
@@ -1312,5 +1323,45 @@ bool KinematicsParticleEngine::UpdateParticle(size_t i, float dt)
     return true;
 }
 
+std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)
+{
+    // factory function based on type switching.
+    // Alternative way would be to have a virtual function in the DrawableClass
+    // but this would have 2 problems: creating based shared_ptr of the drawable
+    // class would require shared_from_this which I consider to be bad practice and
+    // it'd cause some problems at some point.
+    // secondly it'd create a circular depedency between class and the instance types
+    // which is going to cause some problems at some point.
+
+    switch (klass->GetType())
+    {
+        case DrawableClass::Type::Arrow:
+            return std::make_unique<Arrow>();
+        case DrawableClass::Type::Line:
+            return std::make_unique<Line>();
+        case DrawableClass::Type::Circle:
+            return std::make_unique<Circle>();
+        case DrawableClass::Type::Rectangle:
+            return std::make_unique<Rectangle>();
+        case DrawableClass::Type::RoundRectangle:
+            return std::make_unique<RoundRectangle>(std::static_pointer_cast<const RoundRectangleClass>(klass));
+        case DrawableClass::Type::IsocelesTriangle:
+            return std::make_unique<IsocelesTriangle>();
+        case DrawableClass::Type::RightTriangle:
+            return std::make_unique<RightTriangle>();
+        case DrawableClass::Type::Trapezoid:
+            return std::make_unique<Trapezoid>();
+        case DrawableClass::Type::Parallelogram:
+            return std::make_unique<Parallelogram>();
+        case DrawableClass::Type::Grid:
+            return std::make_unique<Grid>(std::static_pointer_cast<const GridClass>(klass));
+        case DrawableClass::Type::KinematicsParticleEngine:
+            return std::make_unique<KinematicsParticleEngine>(std::static_pointer_cast<const KinematicsParticleEngineClass>(klass));
+        case DrawableClass::Type::Polygon:
+            return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
+    }
+    ASSERT(!"???");
+    return {};
+}
 
 } // namespace

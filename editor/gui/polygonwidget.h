@@ -81,7 +81,7 @@ namespace gui
         // the current workspace.
         app::Workspace* mWorkspace = nullptr;
         // the current polygon we're editing.
-        gfx::Polygon mPolygon;
+        gfx::PolygonClass mPolygon;
         // the current material for the blueprint (the background image)
         std::shared_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.

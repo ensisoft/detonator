@@ -40,13 +40,13 @@
 
 namespace {
 
-std::vector<gfx::Polygon::Vertex> MakeVerts(const std::vector<QPoint>& points,
+std::vector<gfx::PolygonClass::Vertex> MakeVerts(const std::vector<QPoint>& points,
     float width, float height)
 {
-    std::vector<gfx::Polygon::Vertex> verts;
+    std::vector<gfx::PolygonClass::Vertex> verts;
     for (const auto& p : points)
     {
-        gfx::Polygon::Vertex vertex;
+        gfx::PolygonClass::Vertex vertex;
         vertex.aPosition.x = p.x() / width;
         vertex.aPosition.y = p.y() / height * -1.0;
         vertex.aTexCoord.x = p.x() / width;
@@ -103,7 +103,7 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& res
     GetProperty(resource, "material", mUI.blueprints);
     GetProperty(resource, "draw_alpha", mUI.alpha);
 
-    mPolygon = *resource.GetContent<gfx::Polygon>();
+    mPolygon = *resource.GetContent<gfx::PolygonClass>();
     mOriginalHash = mPolygon.GetHash();
     setWindowTitle(mUI.name->text());
 }
@@ -166,7 +166,7 @@ bool PolygonWidget::loadState(const Settings& settings)
         return true;
 
     const auto& json = nlohmann::json::parse(base64::Decode(base64));
-    auto ret  = gfx::Polygon::FromJson(json);
+    auto ret  = gfx::PolygonClass::FromJson(json);
     if (!ret.has_value())
     {
         WARN("Failed to load polygon widget state.");
@@ -278,7 +278,7 @@ void PolygonWidget::on_actionSave_triggered()
     if (mWorkspace->HasResource(name, app::Resource::Type::CustomShape))
     {
         const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::CustomShape);
-        const gfx::Polygon* polygon = nullptr;
+        const gfx::PolygonClass* polygon = nullptr;
         resource.GetContent(&polygon);
         if (polygon->GetHash() != mOriginalHash)
         {
@@ -387,15 +387,15 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         painter.Draw(gfx::Grid(19, 19), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
     }
 
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
-    painter.Draw(mPolygon, view,
+    painter.Draw(gfx::Polygon(mPolygon), view,
         gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, alpha))
-        .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -432,15 +432,15 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Resize(width, height);
     view.MoveTo(0, 0);
 
-    gfx::Polygon poly;
-    gfx::Polygon::DrawCommand cmd;
-    cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+    gfx::PolygonClass poly;
+    gfx::PolygonClass::DrawCommand cmd;
+    cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
     cmd.offset = 0;
     cmd.count  = points.size();
     poly.AddDrawCommand(MakeVerts(points, width, height), cmd);
-    painter.Draw(poly, view,
+    painter.Draw(gfx::Polygon(poly), view,
         gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, alpha))
-        .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 }
 
 void PolygonWidget::OnMousePress(QMouseEvent* mickey)
@@ -579,7 +579,7 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // figure out which draw command this vertex belongs to.
     // note that there could be multiple draw commands but for
     // now we assume there's only one.
-    gfx::Polygon::DrawCommand cmd;
+    gfx::PolygonClass::DrawCommand cmd;
     for (size_t i=0; i<mPolygon.GetNumDrawCommands(); ++i)
     {
         const auto& c = mPolygon.GetDrawCommand(i);
@@ -616,7 +616,7 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
         else if (after == winding)
             insert_position = index + cmd.offset + 1;
     }
-    gfx::Polygon::Vertex vertex;
+    gfx::PolygonClass::Vertex vertex;
     vertex.aPosition = aPosition;
     vertex.aTexCoord.x = vertex.aPosition.x;
     vertex.aTexCoord.y = -vertex.aPosition.y;
@@ -630,8 +630,8 @@ bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)
         const auto width  = mUI.widget->width();
         const auto height = mUI.widget->height();
 
-        gfx::Polygon::DrawCommand cmd;
-        cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+        gfx::PolygonClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
         cmd.offset = mPolygon.GetNumVertices();
         mPolygon.AddDrawCommand(MakeVerts(mPoints, width, height), cmd);

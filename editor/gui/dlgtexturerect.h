@@ -62,7 +62,7 @@ namespace gui
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
-        gfx::Material mMaterial;
+        std::unique_ptr<gfx::Material> mMaterial;
         gfx::FRect mRect;
     private:
         QPoint mStartPoint;

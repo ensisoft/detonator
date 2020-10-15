@@ -30,11 +30,16 @@
 #include "gamelib/asset.h"
 #include "gamelib/gfxfactory.h"
 #include "graphics/resource.h"
+#include "graphics/material.h"
+#include "graphics/drawable.h"
 #include "gfxfactory.h"
 
 namespace game
 {
     class Animation;
+    class AnimationClass;
+    class AnimationNode;
+    class AnimationNodeClass;
 
     // Game content (assets + gfx resources) loader.
     // Provides access to high level game content, i.e. game assets such as
@@ -49,12 +54,15 @@ namespace game
     public:
         // GfxFactory implementation. Provides low level GFX
         // resource creation for the game level subsystem.
+        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
         // AssetTable implementation.
-        virtual const Animation* FindAnimation(const std::string& name) const override;
-        virtual Animation* FindAnimation(const std::string& name) override;
+        virtual const AnimationClass* FindAnimationClass(const std::string& name) const override;
+        virtual std::unique_ptr<Animation> CreateAnimation(const std::string& name) const override;
+
         // Read the given resource description file.
         // The expectation is that the file is well formed.
         // Throws an exception on error ill-formed file.
@@ -71,21 +79,22 @@ namespace game
     private:
         std::string mResourceDir;
         std::string mResourceFile;
-        // These are the material objects that have been loaded
-        // from the resource file. These instances can be used
-        // directly when a global material instance is wanted.
-        // in case of a unique instance then a copy needs to be made.
+        // These are the material types that have been loaded
+        // from the resource file.
         std::unordered_map<std::string,
-            std::shared_ptr<gfx::Material>> mGlobalMaterialInstances;
-        // Similar to the materials these are the global material
-        // instances that have been loaded from the resource file.
-        // These can be used directly when a global instance is needed
-        // otherwise in case of a unique instance a copy needs to be made.
+            std::shared_ptr<gfx::MaterialClass>> mMaterials;
+        // These are the particle engine types that have been loaded
+        // from the resource file.
         std::unordered_map<std::string,
-            std::shared_ptr<gfx::Drawable>> mGlobalDrawableInstances;
-
+            std::shared_ptr<gfx::KinematicsParticleEngineClass>> mParticleEngines;
+        // These are the custom shapes (polygons) that have been loaded
+        // from the resource file.
         std::unordered_map<std::string,
-            std::shared_ptr<Animation>> mAnimations;
+            std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
+        // These are the animations that have been loaded
+        // from the resource file.
+        std::unordered_map<std::string,
+            std::shared_ptr<AnimationClass>> mAnimations;
 
     };
 } // namespace

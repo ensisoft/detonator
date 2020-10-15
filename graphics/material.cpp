@@ -73,14 +73,13 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     return nullptr;
 }
 
-Material::Material(const Material& other)
+MaterialClass::MaterialClass(const MaterialClass& other)
 {
     mShaderFile  = other.mShaderFile;
     mBaseColor   = other.mBaseColor;
     mSurfaceType = other.mSurfaceType;
     mType        = other.mType;
     mGamma       = other.mGamma;
-    mRuntime     = other.mRuntime;
     mFps         = other.mFps;
     mBlendFrames = other.mBlendFrames;
     mStatic      = other.mStatic;
@@ -107,7 +106,7 @@ Material::Material(const Material& other)
     }
 }
 
-Shader* Material::GetShader(Device& device) const
+Shader* MaterialClass::GetShader(Device& device) const
 {
     const std::string& file = GetShaderFile();
     ASSERT(!file.empty());
@@ -121,7 +120,8 @@ Shader* Material::GetShader(Device& device) const
     return shader;
 }
 
-void Material::ApplyDynamicState(const Environment& env, Device& device, Program& prog, RasterState& state) const
+void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInstance& inst,
+    Device& device, Program& prog, RasterState& state) const
 {
     // set rasterizer state.
     if (mSurfaceType == SurfaceType::Opaque)
@@ -149,9 +149,9 @@ void Material::ApplyDynamicState(const Environment& env, Device& device, Program
         // if we're a sprite then we should probably animate if we have an FPS setting.
         const auto animating         = mType == Type::Sprite && mFps > 0.0f;
         const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
-        const auto frame_fraction    = animating ? std::fmod(mRuntime, frame_interval) : 0.0f;
+        const auto frame_fraction    = animating ? std::fmod(inst.runtime, frame_interval) : 0.0f;
         const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
-        const auto first_frame_index = animating ? (unsigned)(mRuntime/frame_interval) : 0u;
+        const auto first_frame_index = animating ? (unsigned)(inst.runtime/frame_interval) : 0u;
 
         const auto frame_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
         const unsigned frame_index[2] = {
@@ -226,7 +226,7 @@ void Material::ApplyDynamicState(const Environment& env, Device& device, Program
         env.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
     prog.SetUniform("kRenderPoints", env.render_points ? 1.0f : 0.0f);
     prog.SetUniform("kIsAlphaMask", alpha_masks[0], alpha_masks[1]);
-    prog.SetUniform("kRuntime", mRuntime);
+    prog.SetUniform("kRuntime", inst.runtime);
 
     if (!mStatic)
     {
@@ -236,7 +236,7 @@ void Material::ApplyDynamicState(const Environment& env, Device& device, Program
     }
 }
 
-void Material::ApplyStaticState(Device& device, Program& prog) const
+void MaterialClass::ApplyStaticState(Device& device, Program& prog) const
 {
     prog.SetUniform("kBaseColor", mBaseColor);
     prog.SetUniform("kGamma", mGamma);
@@ -249,7 +249,7 @@ void Material::ApplyStaticState(Device& device, Program& prog) const
     prog.SetUniform("kColor3", mColorMap[3]);
 }
 
-std::string Material::GetId() const
+std::string MaterialClass::GetId() const
 {
     // if the static flag is set the material id is
     // derived from the current state, thus  mapping material objects with
@@ -271,7 +271,7 @@ std::string Material::GetId() const
     return std::to_string(hash);
 }
 
-std::string Material::GetShaderFile() const
+std::string MaterialClass::GetShaderFile() const
 {
     // check if have a user defined specific shader or not.
     if (!mShaderFile.empty())
@@ -289,7 +289,7 @@ std::string Material::GetShaderFile() const
     return "";
 }
 
-size_t Material::GetHash() const
+size_t MaterialClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mShaderFile);
@@ -320,7 +320,7 @@ size_t Material::GetHash() const
     return hash;
 }
 
-nlohmann::json Material::ToJson() const
+nlohmann::json MaterialClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "shader_file", mShaderFile);
@@ -357,9 +357,9 @@ nlohmann::json Material::ToJson() const
     return json;
 }
 // static
-std::optional<Material> Material::FromJson(const nlohmann::json& object)
+std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& object)
 {
-    Material mat;
+    MaterialClass mat;
 
     if (!base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
         !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
@@ -413,7 +413,7 @@ std::optional<Material> Material::FromJson(const nlohmann::json& object)
     return mat;
 }
 
-void Material::BeginPacking(ResourcePacker* packer) const
+void MaterialClass::BeginPacking(ResourcePacker* packer) const
 {
     packer->PackShader(this, GetShaderFile());
     for (const auto& sampler : mTextures)
@@ -474,7 +474,7 @@ void Material::BeginPacking(ResourcePacker* packer) const
     }
 }
 
-void Material::FinishPacking(const ResourcePacker* packer)
+void MaterialClass::FinishPacking(const ResourcePacker* packer)
 {
     mShaderFile = packer->GetPackedShaderId(this);
     for (auto& sampler : mTextures)
@@ -488,18 +488,17 @@ void Material::FinishPacking(const ResourcePacker* packer)
     }
 }
 
-Material& Material::operator=(const Material& other)
+MaterialClass& MaterialClass::operator=(const MaterialClass& other)
 {
     if (this == &other)
         return *this;
 
-    Material tmp(other);
+    MaterialClass tmp(other);
     std::swap(mShaderFile, tmp.mShaderFile);
     std::swap(mBaseColor, tmp.mBaseColor);
     std::swap(mSurfaceType, tmp.mSurfaceType);
     std::swap(mType, tmp.mType);
     std::swap(mGamma, tmp.mGamma);
-    std::swap(mRuntime, tmp.mRuntime);
     std::swap(mFps, tmp.mFps);
     std::swap(mBlendFrames, tmp.mBlendFrames);
     std::swap(mStatic, tmp.mStatic);
@@ -510,10 +509,21 @@ Material& Material::operator=(const Material& other)
     std::swap(mTextureScale, tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
     std::swap(mTextures, tmp.mTextures);
-    std::swap(mColorMap, tmp.mColorMap);
+    std::swap(mColorMap[0], tmp.mColorMap[0]);
+    std::swap(mColorMap[1], tmp.mColorMap[1]);
+    std::swap(mColorMap[2], tmp.mColorMap[2]);
+    std::swap(mColorMap[3], tmp.mColorMap[3]);
     std::swap(mParticleAction, tmp.mParticleAction);
     return *this;
 }
 
+std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)
+{
+    return std::make_unique<Material>(klass);
+}
 
+std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass)
+{
+    return std::make_unique<Material>(klass);
+}
 } // namespace

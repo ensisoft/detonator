@@ -64,7 +64,7 @@ class PolygonTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Polygon poly;
+        gfx::PolygonClass poly;
         poly.SetDynamic(true);
         AddPacman(poly, 0.4f, -0.5f, 0.3f);
         AddCircleShape(poly, 0.60f, -0.5f, 0.05f);
@@ -75,9 +75,10 @@ public:
         gfx::Transform transform;
         transform.Resize(500, 500);
         transform.MoveTo(200, 200);
-        painter.Draw(poly, transform,
-            gfx::Material(gfx::Material::Type::Gradient).SetBaseColor(gfx::Color::Yellow)
-                .SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::BottomLeft));
+        painter.Draw(gfx::Polygon(poly), transform,
+            gfx::MaterialClass(gfx::MaterialClass::Type::Gradient)
+                .SetBaseColor(gfx::Color::Yellow)
+                .SetColorMapColor(gfx::Color::Black, gfx::MaterialClass::ColorIndex::BottomLeft));
         // eye
         transform.Resize(40, 40);
         transform.MoveTo(430, 350);
@@ -103,12 +104,12 @@ public:
         mTime += dts * velocity;
     }
 private:
-    void AddPacman(gfx::Polygon& poly,  float x, float y, float r)
+    void AddPacman(gfx::PolygonClass& poly,  float x, float y, float r)
     {
-        gfx::Polygon::Vertex center = {
+        gfx::PolygonClass::Vertex center = {
             {x, y}, {x, -y}
         };
-        std::vector<gfx::Polygon::Vertex> verts;
+        std::vector<gfx::PolygonClass::Vertex> verts;
         verts.push_back(center);
 
         const auto slices = 200;
@@ -117,26 +118,26 @@ private:
         for (int i=mouth; i<=slices-mouth; ++i)
         {
             const float a = i * angle;
-            gfx::Polygon::Vertex v;
+            gfx::PolygonClass::Vertex v;
             v.aPosition.x = x + std::cos(a) * r;
             v.aPosition.y = y + std::sin(a) * r;
             v.aTexCoord.x = v.aPosition.x;
             v.aTexCoord.y = v.aPosition.y * -1.0f;
             verts.push_back(v);
         }
-        gfx::Polygon::DrawCommand cmd;
-        cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+        gfx::PolygonClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
         poly.AddDrawCommand(std::move(verts), cmd);
     }
 
-    void AddCircleShape(gfx::Polygon& poly,  float x, float y, float r)
+    void AddCircleShape(gfx::PolygonClass& poly,  float x, float y, float r)
     {
-        gfx::Polygon::Vertex center = {
+        gfx::PolygonClass::Vertex center = {
             {x, y}, {x, -y}
         };
-        std::vector<gfx::Polygon::Vertex> verts;
+        std::vector<gfx::PolygonClass::Vertex> verts;
         verts.push_back(center);
 
         const auto slices = 200;
@@ -144,15 +145,15 @@ private:
         for (int i=0; i<=slices; ++i)
         {
             const float a = i * angle;
-            gfx::Polygon::Vertex v;
+            gfx::PolygonClass::Vertex v;
             v.aPosition.x = x + std::cos(a) * r;
             v.aPosition.y = y + std::sin(a) * r;
             v.aTexCoord.x = v.aPosition.x;
             v.aTexCoord.y = v.aPosition.y * -1.0f;
             verts.push_back(v);
         }
-        gfx::Polygon::DrawCommand cmd;
-        cmd.type   = gfx::Polygon::DrawType::TriangleFan;
+        gfx::PolygonClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
         poly.AddDrawCommand(std::move(verts), cmd);
@@ -168,18 +169,18 @@ public:
     {
         // draw a gradient in the background
         {
-            gfx::Material material(gfx::Material::Type::Gradient);
-            material.SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft);
-            material.SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomLeft);
-            material.SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::BottomRight);
-            material.SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::TopRight);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Gradient);
+            material.SetColorMapColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::TopLeft);
+            material.SetColorMapColor(gfx::Color::Green, gfx::MaterialClass::ColorIndex::BottomLeft);
+            material.SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::BottomRight);
+            material.SetColorMapColor(gfx::Color::Black, gfx::MaterialClass::ColorIndex::TopRight);
             gfx::Transform transform;
             transform.Resize(1024, 768);
             painter.Draw(gfx::Rectangle(), transform, material);
         }
 
         {
-            gfx::Material material(gfx::Material::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/Checkerboard.png");
             gfx::Transform mask;
             mask.Resize(400, 400);
@@ -207,11 +208,11 @@ class GradientTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Material material(gfx::Material::Type::Gradient);
-        material.SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft);
-        material.SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomLeft);
-        material.SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::BottomRight);
-        material.SetColorMapColor(gfx::Color::Black, gfx::Material::ColorIndex::TopRight);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Gradient);
+        material.SetColorMapColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::TopLeft);
+        material.SetColorMapColor(gfx::Color::Green, gfx::MaterialClass::ColorIndex::BottomLeft);
+        material.SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::BottomRight);
+        material.SetColorMapColor(gfx::Color::Black, gfx::MaterialClass::ColorIndex::TopRight);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), material);
     }
     virtual std::string GetName() const override
@@ -226,25 +227,25 @@ public:
     {
         // whole texture (box = 1.0f)
         {
-            gfx::Material material(gfx::Material::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/uv_test_512.png");
             material.SetTextureRect(0, gfx::Rect(0.0f, 0.0f, 1.0f, 1.0f));
             gfx::FillRect(painter, gfx::FRect(0, 0, 128, 128), material);
 
             material.SetTextureScaleX(2.0);
             material.SetTextureScaleY(2.0);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(150, 0, 128, 128), material);
 
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             gfx::FillRect(painter, gfx::FRect(300, 0, 128, 128), material);
 
             material.SetTextureScaleX(-2.0);
             material.SetTextureScaleY(-2.0);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             gfx::FillRect(painter, gfx::FRect(450, 0, 128, 128), material);
         }
 
@@ -252,21 +253,21 @@ public:
         // todo: maybe just limit the box to 0.0, 1.0 range and dismiss this case ?
         {
             // clamp
-            gfx::Material material(gfx::Material::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/uv_test_512.png");
             material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 1.0));
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(0, 150, 128, 128), material);
 
             material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 2.0));
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(150, 150, 128, 128), material);
 
             material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 2.0, 2.0));
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             gfx::FillRect(painter, gfx::FRect(300, 150, 128, 128), material);
 
         }
@@ -275,16 +276,16 @@ public:
         {
             // basic case. sampling within the box.
 
-            gfx::Material material(gfx::Material::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/uv_test_512.png");
             material.SetTextureRect(0, gfx::FRect(0.5, 0.5, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(0, 300, 128, 128), material);
 
             // clamping with texture boxing.
-            material.SetTextureMinFilter(gfx::Material::MinTextureFilter::Linear);
+            material.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Linear);
             material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 0.5, 0.5));
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureScaleX(2.0);
             material.SetTextureScaleY(2.0);
             gfx::FillRect(painter, gfx::FRect(150, 300, 128, 128), material);
@@ -293,70 +294,68 @@ public:
             material.SetTextureRect(0, gfx::FRect(0.0, 0.0, 0.5, 0.5));
             material.SetTextureScaleX(2.0);
             material.SetTextureScaleY(2.0);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             gfx::FillRect(painter, gfx::FRect(300, 300, 128, 128), material);
 
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             material.SetTextureScaleX(1.0f);
             material.SetTextureScaleY(1.0f);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(450, 300, 128, 128), material);
 
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             material.SetTextureScaleX(2.0f);
             material.SetTextureScaleY(2.0f);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(600, 300, 128, 128), material);
 
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             material.SetTextureScaleX(2.0f);
             material.SetTextureScaleY(2.0f);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(750, 300, 128, 128), material);
         }
 
         // texture velocity
         {
-            gfx::Material material(gfx::Material::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/uv_test_512.png");
-            material.SetRuntime(mTime);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Repeat);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Repeat);
-
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
             material.SetTextureVelocityX(0.2);
-            gfx::FillRect(painter, gfx::FRect(0, 450, 128, 128), material);
+            gfx::FillRect(painter, gfx::FRect(0, 450, 128, 128), gfx::Material(material, mTime));
 
             material.SetTextureVelocityX(0.0);
             material.SetTextureVelocityY(0.2);
-            gfx::FillRect(painter, gfx::FRect(150, 450, 128, 128), material);
+            gfx::FillRect(painter, gfx::FRect(150, 450, 128, 128), gfx::Material(material, mTime));
 
             material.SetTextureVelocityX(0.25);
             material.SetTextureVelocityY(0.2);
             material.SetTextureRect(0, gfx::FRect(0.25, 0.25, 0.5, 0.5));
-            gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), material);
+            gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), gfx::Material(material, mTime));
 
             material.SetTextureVelocityX(0.0f);
             material.SetTextureVelocityY(0.0f);
             material.SetTextureVelocityZ(3.134);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-            gfx::FillRect(painter, gfx::FRect(450, 450, 128, 128), material);
+            gfx::FillRect(painter, gfx::FRect(450, 450, 128, 128), gfx::Material(material, mTime));
 
             material.SetTextureVelocityX(0.0f);
             material.SetTextureVelocityY(0.0f);
             material.SetTextureVelocityZ(-3.134);
-            material.SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-            material.SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-            gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), material);
+            gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), gfx::Material(material, mTime));
         }
     }
     virtual void Update(float dt)
@@ -373,22 +372,21 @@ private:
 class SpriteTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    SpriteTest()
     {
         {
-            gfx::Material material(gfx::Material::Type::Sprite);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
             material.AddTexture("textures/red_64x64.png");
             material.AddTexture("textures/green_64x64.png");
-            material.SetTextureMinFilter(gfx::Material::MinTextureFilter::Linear);
+            material.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Linear);
             material.SetFps(0.5); // two seconds to a frame
-            material.SetRuntime(mTime);
             material.SetBlendFrames(false);
-            gfx::FillRect(painter, gfx::FRect(20, 20, 200, 200), material);
+            mMaterial = gfx::CreateMaterialInstance(material);
         }
 
         {
-            gfx::Material material(gfx::Material::Type::Sprite);
-            material.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             material.AddTexture("textures/bird/frame-1.png");
             material.AddTexture("textures/bird/frame-2.png");
             material.AddTexture("textures/bird/frame-3.png");
@@ -398,10 +396,18 @@ public:
             material.AddTexture("textures/bird/frame-7.png");
             material.AddTexture("textures/bird/frame-8.png");
             material.SetFps(10.0f);
-            material.SetRuntime(mTime);
             material.SetBlendFrames(true);
-            gfx::FillRect(painter, gfx::FRect(250, 250, 300, 300), material);
+            mBird = gfx::CreateMaterialInstance(material);
         }
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        mMaterial->SetRuntime(mTime);
+        gfx::FillRect(painter, gfx::FRect(20, 20, 200, 200), *mMaterial);
+
+        mBird->SetRuntime(mTime);
+        gfx::FillRect(painter, gfx::FRect(250, 250, 300, 300), *mBird);
     }
 
     virtual void Update(float dt) override
@@ -410,6 +416,8 @@ public:
     { return "SpriteTest"; }
 private:
     float mTime = 0.0f;
+    std::unique_ptr<gfx::Material> mMaterial;
+    std::unique_ptr<gfx::Material> mBird;
 };
 
 class TransformTest : public GraphicsTest
@@ -603,7 +611,7 @@ class ShapesTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Material materials[4];
+        gfx::MaterialClass materials[4];
         materials[0] = gfx::SolidColor(gfx::Color::Red);
         materials[1] = gfx::TextureMap("textures/uv_test_512.png");
         materials[2] = gfx::SolidColor(gfx::Color::HotPink);
@@ -611,10 +619,10 @@ public:
 
         // in order to validate the texture coordinates let's set
         // the filtering to nearest and clamp to edge on sampling
-        materials[1].SetTextureMinFilter(gfx::Material::MinTextureFilter::Nearest);
-        materials[1].SetTextureMagFilter(gfx::Material::MagTextureFilter::Nearest);
-        materials[1].SetTextureWrapX(gfx::Material::TextureWrapping::Clamp);
-        materials[1].SetTextureWrapY(gfx::Material::TextureWrapping::Clamp);
+        materials[1].SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+        materials[1].SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+        materials[1].SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+        materials[1].SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
 
         {
             gfx::Transform transform;
@@ -730,9 +738,9 @@ public:
     RenderParticleTest()
     {
         {
-            ParticleEngine::Params p;
-            p.mode = ParticleEngine::SpawnPolicy::Continuous;
-            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
+            gfx::KinematicsParticleEngineClass::Params p;
+            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -752,13 +760,13 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
             p.rate_of_change_in_size_wrt_time = -2.0f;
-            mFire.reset(new ParticleEngine(p));
+            mFire.reset(new gfx::KinematicsParticleEngine(p));
         }
 
         {
-            ParticleEngine::Params p;
-            p.mode = ParticleEngine::SpawnPolicy::Continuous;
-            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
+            gfx::KinematicsParticleEngineClass::Params p;
+            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -778,13 +786,13 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -4.0f;
             p.rate_of_change_in_size_wrt_time = -8.0f;
-            mSmoke.reset(new ParticleEngine(p));
+            mSmoke.reset(new gfx::KinematicsParticleEngine(p));
         }
 
         {
-            ParticleEngine::Params p;
-            p.mode = ParticleEngine::SpawnPolicy::Continuous;
-            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
+            gfx::KinematicsParticleEngineClass::Params p;
+            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 1000;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -802,13 +810,13 @@ public:
             p.max_point_size = 40;
             p.rate_of_change_in_size_wrt_time = -2.0f;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
-            mBlood.reset(new ParticleEngine(p));
+            mBlood.reset(new gfx::KinematicsParticleEngine(p));
         }
 
         {
-            ParticleEngine::Params p;
-            p.mode = ParticleEngine::SpawnPolicy::Continuous;
-            p.boundary = ParticleEngine::BoundaryPolicy::Kill;
+            gfx::KinematicsParticleEngineClass::Params p;
+            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 0.45;
             p.min_lifetime = 20.0f;
             p.max_lifetime = 20.0f;
@@ -826,7 +834,7 @@ public:
             p.max_lifetime = 30.0f;
             p.min_point_size = 100;
             p.max_point_size = 150;
-            mClouds.reset(new ParticleEngine(p));
+            mClouds.reset(new gfx::KinematicsParticleEngine(p));
         }
 
     }
@@ -842,18 +850,18 @@ public:
         painter.Draw(*mSmoke, t,
             gfx::TextureMap("textures/BlackSmoke.png")
                 .SetBaseColor(gfx::Color4f(35, 35, 35, 20))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
         painter.Draw(*mFire, t,
             gfx::TextureMap("textures/BlackSmoke.png")
                 .SetBaseColor(gfx::Color4f(0x71, 0x38, 0x0, 0xff))
-                .SetSurfaceType(gfx::Material::SurfaceType::Emissive));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive));
 
         t.Translate(500, 0);
         painter.Draw(*mBlood, t,
             gfx::TextureMap("textures/RoundParticle.png")
                 .SetBaseColor(gfx::Color4f(234, 5, 3, 255))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
         t.Reset();
         t.Resize(2000, 200);
@@ -861,7 +869,7 @@ public:
         painter.Draw(*mClouds, t,
             gfx::TextureMap("textures/WhiteCloud.png")
                 .SetBaseColor(gfx::Color4f(224, 224, 224, 255))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
     }
     virtual void Update(float dts) override
@@ -971,10 +979,10 @@ public:
             painter.Draw(gfx::Rectangle(), transform,
                 gfx::BitmapText(buff)
                     .SetBaseColor(gfx::Color::White)
-                    .SetColorMapColor(gfx::Color::Red, gfx::Material::ColorIndex::TopLeft)
-                    .SetColorMapColor(gfx::Color::Blue, gfx::Material::ColorIndex::TopRight)
-                    .SetColorMapColor(gfx::Color::Yellow, gfx::Material::ColorIndex::BottomLeft)
-                    .SetColorMapColor(gfx::Color::Green, gfx::Material::ColorIndex::BottomRight));
+                    .SetColorMapColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::TopLeft)
+                    .SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::TopRight)
+                    .SetColorMapColor(gfx::Color::Yellow, gfx::MaterialClass::ColorIndex::BottomLeft)
+                    .SetColorMapColor(gfx::Color::Green, gfx::MaterialClass::ColorIndex::BottomRight));
 
         }
 

@@ -40,50 +40,72 @@
 namespace game
 {
 
-std::shared_ptr<gfx::Material> ContentLoader::MakeMaterial(const std::string& name) const
+std::shared_ptr<const gfx::MaterialClass> ContentLoader::GetMaterialClass(const std::string& name) const
 {
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
     {
         const std::string enum_name(magic_enum::enum_name(val));
         if (enum_name == name)
-            return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color4f(val)));
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
     }
 
-    auto it = mGlobalMaterialInstances.find(name);
-    if (it != std::end(mGlobalMaterialInstances))
+    auto it = mMaterials.find(name);
+    if (it != std::end(mMaterials))
         return it->second;
 
-    ERROR("No such material: '%1'", name);
+    ERROR("No such material class: '%1'", name);
     // for development purposes return some kind of valid object.
-    return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::HotPink));
+    return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+}
+
+std::shared_ptr<const gfx::DrawableClass> ContentLoader::GetDrawableClass(const std::string& name) const
+{
+    // these are the current primitive cases that are not packed as part of the resources
+    if (name == "Rectangle")
+        return std::make_shared<gfx::RectangleClass>();
+    else if (name == "IsocelesTriangle")
+        return std::make_shared<gfx::IsocelesTriangleClass>();
+    else if (name == "RightTriangle")
+        return std::make_shared<gfx::RightTriangleClass>();
+    else if (name == "Circle")
+        return std::make_shared<gfx::CircleClass>();
+    else if (name == "RoundRect")
+        return std::make_shared<gfx::RoundRectangleClass>();
+    else if (name == "Trapezoid")
+        return std::make_shared<gfx::TrapezoidClass>();
+    else if (name == "Parallelogram")
+        return std::make_shared<gfx::ParallelogramClass>();
+
+    // todo: perhaps need an identifier for the type of resource in question.
+    // currently there's a name conflict that objects of different types but
+    // with same names cannot be fully resolved by name only.
+
+    {
+        auto it = mParticleEngines.find(name);
+        if (it != std::end(mParticleEngines))
+            return it->second;
+    }
+
+    {
+        auto it = mCustomShapes.find(name);
+        if (it != std::end(mCustomShapes))
+            return it->second;
+    }
+
+    ERROR("No such drawable: '%1'", name);
+    // for development purposes return some kind of valid object.
+    return std::make_shared<gfx::RectangleClass>();
+}
+
+std::shared_ptr<gfx::Material> ContentLoader::MakeMaterial(const std::string& name) const
+{
+    return gfx::CreateMaterialInstance(GetMaterialClass(name));
 }
 
 std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& name) const
 {
-    // these are the current primitive cases that are not packed as part of the resources
-    if (name == "Rectangle")
-        return std::make_shared<gfx::Rectangle>();
-    else if (name == "IsocelesTriangle")
-        return std::make_shared<gfx::IsocelesTriangle>();
-    else if (name == "RightTriangle")
-        return std::make_shared<gfx::RightTriangle>();
-    else if (name == "Circle")
-        return std::make_shared<gfx::Circle>();
-    else if (name == "RoundRect")
-        return std::make_shared<gfx::RoundRectangle>();
-    else if (name == "Trapezoid")
-        return std::make_shared<gfx::Trapezoid>();
-    else if (name == "Parallelogram")
-        return std::make_shared<gfx::Parallelogram>();
-
-    auto it = mGlobalDrawableInstances.find(name);
-    if (it != std::end(mGlobalDrawableInstances))
-        return it->second;
-
-    ERROR("No such drawable: '%1'", name);
-    // for development purposes return some kind of valid object.
-    return std::make_shared<gfx::Rectangle>();
+    return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
 std::string ContentLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
@@ -128,23 +150,23 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     // might throw.
     const auto& json = nlohmann::json::parse(buffer);
 
-    game::LoadResources<gfx::Material, gfx::Material>(json, "materials", mGlobalMaterialInstances);
-    game::LoadResources<gfx::Drawable, gfx::KinematicsParticleEngine>(json, "particles", mGlobalDrawableInstances);
-    game::LoadResources<gfx::Drawable, gfx::Polygon>(json, "shapes", mGlobalDrawableInstances);
-    game::LoadResources<Animation, Animation>(json, "animations", mAnimations);
+    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials);
+    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines);
+    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes);
+    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations);
 
     for (auto it = mAnimations.begin(); it != mAnimations.end();
         ++it)
     {
         const auto& name = it->first;
-        Animation* anim  = it->second.get();
+        AnimationClass* anim  = it->second.get();
         anim->Prepare(*this);
     }
     mResourceDir  = dir;
     mResourceFile = file;
 }
 
-const Animation* ContentLoader::FindAnimation(const std::string& name) const
+const AnimationClass* ContentLoader::FindAnimationClass(const std::string& name) const
 {
     auto it = mAnimations.find(name);
     if (it == std::end(mAnimations))
@@ -152,12 +174,12 @@ const Animation* ContentLoader::FindAnimation(const std::string& name) const
     return it->second.get();
 }
 
-Animation* ContentLoader::FindAnimation(const std::string& name)
+std::unique_ptr<Animation> ContentLoader::CreateAnimation(const std::string& name) const
 {
     auto it = mAnimations.find(name);
     if (it == std::end(mAnimations))
         return nullptr;
-    return it->second.get();
+    return std::make_unique<Animation>(it->second);
 }
 
 } // namespace

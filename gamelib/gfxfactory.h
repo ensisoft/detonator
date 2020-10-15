@@ -30,7 +30,9 @@
 
 namespace gfx {
     class Material;
+    class MaterialClass;
     class Drawable;
+    class DrawableClass;
 }// namespace
 
 namespace game
@@ -44,6 +46,9 @@ namespace game
     {
     public:
         virtual ~GfxFactory() = default;
+
+        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const = 0;
+        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const = 0;
         //
         // == About sharing/not-sharing gfx resources ==
         //

@@ -29,6 +29,7 @@
 namespace game
 {
     class Animation;
+    class AnimationClass;
 
     // AssetTable is the high level interface for a game/app to
     // access the high level game content/assets.
@@ -36,17 +37,12 @@ namespace game
     {
     public:
         virtual ~AssetTable() = default;
-
-        // Find an animation by the given name. If not found will return a nullptr.
-        // The returned instance is the single global instance of this animation
+        // Find an animation class by the given name. If not found will return a nullptr.
+        // The returned instance is the single global instance of this animation class object
         // and every call will return the same object.
-        virtual const Animation* FindAnimation(const std::string& name) const = 0;
-
-        // Find an animation by the given name. If not found will return a nullptr.
-        // The returned instance is the single object instance of this animation
-        // and every call will return the same object.
-        virtual Animation* FindAnimation(const std::string& name) = 0;
-
+        virtual const AnimationClass* FindAnimationClass(const std::string& name) const = 0;
+        // Create an instance of animation of the specific animation class type identified by name.
+        virtual std::unique_ptr<Animation> CreateAnimation(const std::string& name) const = 0;
         // Load content from a JSON file. Expects the file to be well formed, on
         // an ill-formed JSON file an exception is thrown.
         // No validation is done regarding the completeness of the loaded content,

@@ -95,8 +95,8 @@ namespace gui
     private:
         // current workspace object
         app::Workspace* mWorkspace = nullptr;
-        // the material we're editing
-        mutable gfx::Material mMaterial;
+        // the material class we're editing
+        mutable gfx::MaterialClass mMaterial;
         // play state
         enum PlayState {
             Playing, Paused, Stopped

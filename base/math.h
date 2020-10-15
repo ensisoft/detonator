@@ -57,6 +57,50 @@ namespace math
         return val;
     }
 
+    template<typename T> inline
+    T lerp(const T& y0, const T& y1, float t)
+    {
+        return (1.0f - t) * y0 + t * y1;
+    }
+
+    // Interpolation defines the function used to determine  the intermediate
+    // values between y0 and y1 are achieved when T varies between 0.0f and 1.0f.
+    // I.e. when T is 0.0 interpolation returns y0 and when T is 1.0 interpolation
+    // returns y1, For other values a mix of y0 and y1 is returned.
+    // https://codeplea.com/simple-interpolation
+    enum class Interpolation {
+        // No interpolation, a discrete jump from y0 to y1 when t is > 0.5.
+        Step,
+        // Linear interpolation also known as "lerp". Take a linear mix
+        // of y0 and y1 in exact proportions per t.
+        Linear,
+        // Use cosine function to smooth t before doing linear interpolation.
+        Cosine,
+        // Use a polynomial function to smooth t before doing linear interpolation.
+        SmoothStep,
+        // Accelerate increase in y1 value when t approaches 1.0f
+        Acceleration,
+        // Decelerate increase in y1 value when t approaches 1.0f
+        Deceleration
+    };
+
+    template<typename T> inline
+    T interpolate(const T& y0, const T& y1, float t, Interpolation method)
+    {
+        if (method == Interpolation::Step)
+            return (t < 0.5f) ? y0 : y1;
+        else if (method == Interpolation::Cosine)
+            t = -std::cos(Pi * t) * 0.5 + 0.5;
+        else if (method == Interpolation::SmoothStep)
+            t = 3*t*t - 2*t*t*t;
+        else if (method == Interpolation::Acceleration)
+            t = t*t;
+        else if (method == Interpolation::Deceleration)
+            t = 1.0f - ((1-t)*(1-t));
+        return math::lerp(y0, y1, t);
+    }
+
+
     // epsilon based check for float equality
     template<typename RealT> inline
     bool equals(RealT goal, RealT value, RealT epsilon = 0.0001)

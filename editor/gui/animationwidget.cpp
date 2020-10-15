@@ -56,20 +56,20 @@ namespace gui
 class AnimationWidget::TreeModel : public TreeWidget::TreeModel
 {
 public:
-    TreeModel(game::Animation& anim)  : mAnimation(anim)
+    TreeModel(game::AnimationClass& anim)  : mAnimation(anim)
     {}
 
     virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
     {
         auto& root = mAnimation.GetRenderTree();
 
-        class Visitor : public game::Animation::RenderTree::Visitor
+        class Visitor : public game::AnimationClass::RenderTree::Visitor
         {
         public:
             Visitor(std::vector<TreeWidget::TreeItem>& list)
                 : mList(list)
             {}
-            virtual void EnterNode(game::AnimationNode* node)
+            virtual void EnterNode(game::AnimationNodeClass* node)
             {
                 TreeWidget::TreeItem item;
                 item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
@@ -79,14 +79,14 @@ public:
                 if (node)
                 {
                     item.SetIcon(QIcon("icons:eye.png"));
-                    if (!node->TestFlag(game::AnimationNode::Flags::VisibleInEditor))
+                    if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
                         item.SetIconMode(QIcon::Disabled);
                     else item.SetIconMode(QIcon::Normal);
                 }
                 mList.push_back(item);
                 mLevel++;
             }
-            virtual void LeaveNode(game::AnimationNode* node)
+            virtual void LeaveNode(game::AnimationNodeClass* node)
             {
                 mLevel--;
             }
@@ -99,7 +99,7 @@ public:
         root.PreOrderTraverse(visitor);
     }
 private:
-    game::Animation& mAnimation;
+    game::AnimationClass& mAnimation;
 };
 
 
@@ -122,8 +122,10 @@ public:
         , mMaterialName(material)
         , mDrawableName(drawable)
     {
-        mDrawable = mState.workspace->MakeDrawable(mDrawableName);
-        mMaterial = mState.workspace->MakeMaterial(mMaterialName);
+        mDrawableClass = mState.workspace->GetDrawableClass(mDrawableName);
+        mMaterialClass = mState.workspace->GetMaterialClass(mMaterialName);
+        mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
+        mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const
     {
@@ -199,14 +201,19 @@ public:
         const float width = mAlwaysSquare ? hypotenuse : diff.x;
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
-        game::AnimationNode node;
-        node.SetMaterial(app::ToUtf8(mMaterialName), mMaterial);
-        node.SetDrawable(app::ToUtf8(mDrawableName), mDrawable);
+        game::AnimationNodeClass node;
+        node.SetMaterial(app::ToUtf8(mMaterialName), mMaterialClass);
+        node.SetDrawable(app::ToUtf8(mDrawableName), mDrawableClass);
         node.SetName(name);
         // the given object position is to be aligned with the center of the shape
         node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
         node.SetSize(glm::vec2(width, height));
         node.SetScale(glm::vec2(1.0f, 1.0f));
+        // for visual appearance only.
+        // set the drawable/material instance so that when the class node instance
+        // is drawn later it looks the same as when it was first added
+        node.SetDrawableInstance(std::move(mDrawable));
+        node.SetMaterialInstance(std::move(mMaterial));
 
         // by default we're appending to the root item.
         auto& root  = mState.animation.GetRenderTree();
@@ -245,8 +252,10 @@ private:
 private:
     QString mMaterialName;
     QString mDrawableName;
-    std::shared_ptr<gfx::Drawable> mDrawable;
-    std::shared_ptr<gfx::Material> mMaterial;
+    std::shared_ptr<const gfx::DrawableClass> mDrawableClass;
+    std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
+    std::unique_ptr<gfx::Material> mMaterial;
+    std::unique_ptr<gfx::Drawable> mDrawable;
 };
 
 class AnimationWidget::CameraTool : public AnimationWidget::Tool
@@ -300,7 +309,7 @@ private:
 class AnimationWidget::MoveTool : public AnimationWidget::Tool
 {
 public:
-    MoveTool(State& state, game::AnimationNode* node)
+    MoveTool(State& state, game::AnimationNodeClass* node)
       : mState(state)
       , mNode(node)
     {}
@@ -370,7 +379,7 @@ public:
         return false;
     }
 private:
-    game::AnimationNode* mNode = nullptr;
+    game::AnimationNodeClass* mNode = nullptr;
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
@@ -381,7 +390,7 @@ private:
 class AnimationWidget::ResizeTool : public AnimationWidget::Tool
 {
 public:
-    ResizeTool(State& state, game::AnimationNode* node)
+    ResizeTool(State& state, game::AnimationNodeClass* node)
       : mState(state)
       , mNode(node)
     {}
@@ -434,7 +443,7 @@ public:
         return false;
     }
 private:
-    game::AnimationNode* mNode = nullptr;
+    game::AnimationNodeClass* mNode = nullptr;
     AnimationWidget::State& mState;
     // previous mouse position, for each mouse move we update the objects'
     // position by the delta between previous and current mouse pos.
@@ -445,7 +454,7 @@ private:
 class AnimationWidget::RotateTool : public AnimationWidget::Tool
 {
 public:
-    RotateTool(State& state, game::AnimationNode* node)
+    RotateTool(State& state, game::AnimationNodeClass* node)
       : mState(state)
       , mNode(node)
     {}
@@ -501,7 +510,7 @@ private:
     }
 private:
     AnimationWidget::State& mState;
-    game::AnimationNode* mNode = nullptr;
+    game::AnimationNodeClass* mNode = nullptr;
     // previous mouse position, for each mouse move we update the object's
     // position by the delta between previous and current mouse pos.
     glm::vec4 mPreviousMousePos;
@@ -532,6 +541,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
+
+    mUI.timelineGroup->setVisible(false);
 
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
@@ -609,7 +620,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
                 mouse_widget_position_y, 1.0f, 1.0f);
 
-            std::vector<game::AnimationNode*> nodes_hit;
+            std::vector<game::AnimationNodeClass*> nodes_hit;
             std::vector<glm::vec2> hitbox_coords;
             mState.animation.CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
                 &nodes_hit, &hitbox_coords);
@@ -623,14 +634,14 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             else
             {
                 const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
-                const game::AnimationNode* previous  = selected
-                    ? static_cast<const game::AnimationNode*>(selected->GetUserData())
+                const game::AnimationNodeClass* previous  = selected
+                    ? static_cast<const game::AnimationNodeClass*>(selected->GetUserData())
                     : nullptr;
 
                 // if the currently selected node is among the ones being hit
                 // then retain that selection.
                 // otherwise select the last one of the list. (the rightmost child)
-                game::AnimationNode* hit = nodes_hit.back();
+                game::AnimationNodeClass* hit = nodes_hit.back();
                 glm::vec2 hitpos = hitbox_coords.back();
                 for (size_t i=0; i<nodes_hit.size(); ++i)
                 {
@@ -753,8 +764,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     setWindowTitle("My Animation");
 
-    PopulateFromEnum<game::AnimationNode::RenderPass>(mUI.renderPass);
-    PopulateFromEnum<game::AnimationNode::RenderStyle>(mUI.renderStyle);
+    PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
+    PopulateFromEnum<game::AnimationNodeClass::RenderStyle>(mUI.renderStyle);
 
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
@@ -767,16 +778,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
             this,      &AnimationWidget::resourceToBeDeleted);
 
-    // set UI timeline default values based on the defaults in the animation
-    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
-    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
-    SetValue(mUI.animDuration, mState.animation.GetDuration());
-    SetValue(mUI.animDelay, mState.animation.GetDelay());
-    mUI.timeline->SetDuration(mState.animation.GetDuration());
-    // whether to show or not show timeline on widget open
-    const auto show_timeline = mState.animation.TestFlag(game::Animation::Flags::EnableTimeline);
-    mUI.actionShowTimeline->setChecked(show_timeline);
-    mUI.timelineGroup->setVisible(show_timeline);
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -786,7 +787,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     mUI.name->setText(resource.GetName());
     setWindowTitle(resource.GetName());
 
-    mState.animation = *resource.GetContent<game::Animation>();
+    mState.animation = *resource.GetContent<game::AnimationClass>();
     mOriginalHash = mState.animation.GetHash();
 
     // if some resource has been deleted we need to replace it.
@@ -799,28 +800,18 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
-            node.SetMaterial("Checkerboard", workspace->MakeMaterial("Checkerboard"));
+            node.SetMaterial("Checkerboard", workspace->GetMaterialClass("Checkerboard"));
         }
         if (!workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
-            node.SetMaterial("Checkerboard", workspace->MakeMaterial("Checkerboard"));
-            node.SetDrawable("Rectangle", workspace->MakeDrawable("Rectangle"));
+            node.SetMaterial("Checkerboard", workspace->GetMaterialClass("Checkerboard"));
+            node.SetDrawable("Rectangle", workspace->GetDrawableClass("Rectangle"));
         }
     }
 
     mState.animation.Prepare(*workspace);
-    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
-    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
-    SetValue(mUI.animDuration, mState.animation.GetDuration());
-    SetValue(mUI.animDelay, mState.animation.GetDelay());
-    mUI.timeline->SetDuration(mState.animation.GetDuration());
-    // whether to show or not show timeline on widget open.
-    const auto show_timeline = mState.animation.TestFlag(game::Animation::Flags::EnableTimeline);
-    mUI.actionShowTimeline->setChecked(show_timeline);
-    mUI.timelineGroup->setVisible(show_timeline);
-
     mUI.tree->Rebuild();
 }
 
@@ -837,8 +828,6 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
-    bar.addSeparator();
-    bar.addAction(mUI.actionShowTimeline);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewRoundRect);
@@ -873,8 +862,6 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mCustomShapes->menuAction());
     menu.addSeparator();
     menu.addAction(mParticleSystems->menuAction());
-    menu.addSeparator();
-    menu.addAction(mUI.actionShowTimeline);
 }
 
 bool AnimationWidget::saveState(Settings& settings) const
@@ -885,11 +872,8 @@ bool AnimationWidget::saveState(Settings& settings) const
     settings.saveWidget("Animation", mUI.rotation);
     settings.saveWidget("Animation", mUI.showGrid);
     settings.saveWidget("Animation", mUI.zoom);
-
     settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
-    settings.setValue("Animation", "timeline_visible", mUI.timelineGroup->isVisible());
-
     // the animation can already serialize into JSON.
     // so let's use the JSON serialization in the animation
     // and then convert that into base64 string which we can
@@ -915,16 +899,13 @@ bool AnimationWidget::loadState(const Settings& settings)
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
     // set a flag to *not* adjust the camere on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
-    const bool timeline_visible = settings.getValue("Animation", "timeline_visible", true);
-    mUI.timelineGroup->setVisible(timeline_visible);
-    mUI.actionShowTimeline->setChecked(timeline_visible);
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
     if (base64.empty())
         return true;
 
     const auto& json = nlohmann::json::parse(base64::Decode(base64));
-    auto ret  = game::Animation::FromJson(json);
+    auto ret  = game::AnimationClass::FromJson(json);
     if (!ret.has_value())
     {
         WARN("Failed to load animation widget state.");
@@ -942,23 +923,18 @@ bool AnimationWidget::loadState(const Settings& settings)
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
-            node.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
+            node.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
         }
         if (!mState.workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
-            node.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
-            node.SetDrawable("Rectangle", mState.workspace->MakeDrawable("Rectangle"));
+            node.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
+            node.SetDrawable("Rectangle", mState.workspace->GetDrawableClass("Rectangle"));
         }
     }
 
     mState.animation.Prepare(*mState.workspace);
-    SetValue(mUI.timelineGroup, mState.animation.TestFlag(game::Animation::Flags::EnableTimeline));
-    SetValue(mUI.animIsLooping, mState.animation.TestFlag(game::Animation::Flags::LoopAnimation));
-    SetValue(mUI.animDuration, mState.animation.GetDuration());
-    SetValue(mUI.animDelay, mState.animation.GetDelay());
-    mUI.timeline->SetDuration(mState.animation.GetDuration());
     mUI.tree->Rebuild();
     return true;
 }
@@ -996,22 +972,10 @@ void AnimationWidget::animate(double secs)
     // update the animation if we're currently playing
     if (mPlayState == PlayState::Playing)
     {
-        mState.animation.Update(secs);
-        if (!mState.animation.IsFinished())
-        {
-            mTime += secs;
-            mUI.time->setText(QString::number(mTime));
-            if (mState.animation.TestFlag(game::Animation::Flags::EnableTimeline))
-            {
-                mUI.timeline->SetCurrentTime(mState.animation.GetActiveTime());
-                mUI.timeline->update();
-            }
-        }
-        else
-        {
-            on_actionStop_triggered();
-            NOTE("Animation playback finished.");
-        }
+        mState.animation.Update(mTime, secs);
+
+        mTime += secs;
+        mUI.time->setText(QString::number(mTime));
     }
 }
 
@@ -1048,10 +1012,6 @@ void AnimationWidget::on_actionPlay_triggered()
     mUI.actionStop->setEnabled(true);
     const bool is_timeline_enabled = GetValue(mUI.timelineGroup);
     const bool is_animation_looping = GetValue(mUI.animIsLooping);
-    mState.animation.SetDuration(GetValue(mUI.animDuration));
-    mState.animation.SetDelay(GetValue(mUI.animDelay));
-    mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, is_timeline_enabled);
-    mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, is_animation_looping);
 }
 
 void AnimationWidget::on_actionPause_triggered()
@@ -1064,15 +1024,14 @@ void AnimationWidget::on_actionPause_triggered()
 
 void AnimationWidget::on_actionStop_triggered()
 {
+    mTime = 0.0f;
     mPlayState = PlayState::Stopped;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mTime = 0.0f;
     mUI.time->setText("0");
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->update();
-    mState.animation.Reset();
 }
 
 void AnimationWidget::on_actionSave_triggered()
@@ -1084,7 +1043,7 @@ void AnimationWidget::on_actionSave_triggered()
     if (mState.workspace->HasResource(name, app::Resource::Type::Animation))
     {
         const auto& resource = mState.workspace->GetResource(name, app::Resource::Type::Animation);
-        const game::Animation* animation = nullptr;
+        const game::AnimationClass* animation = nullptr;
         resource.GetContent(&animation);
         if (animation->GetHash() != mOriginalHash)
         {
@@ -1199,7 +1158,7 @@ void AnimationWidget::on_actionNewParallelogram_triggered()
 
 void AnimationWidget::on_actionDeleteComponent_triggered()
 {
-    const game::AnimationNode* item = GetCurrentNode();
+    const game::AnimationNodeClass* item = GetCurrentNode();
     if (item == nullptr)
         return;
 
@@ -1216,7 +1175,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
         std::string name;
     };
     std::vector<Carcass> graveyard;
-    node->PreOrderTraverseForEach([&](game::AnimationNode* value) {
+    node->PreOrderTraverseForEach([&](game::AnimationNodeClass* value) {
         Carcass carcass;
         carcass.id   = value->GetId();
         carcass.name = value->GetName();
@@ -1287,7 +1246,7 @@ void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
     if (auto* node = GetCurrentNode())
     {
         const auto& material_name = app::ToUtf8(name);
-        node->SetMaterial(material_name, mState.workspace->MakeMaterial(material_name));
+        node->SetMaterial(material_name, mState.workspace->GetMaterialClass(material_name));
     }
 }
 
@@ -1296,7 +1255,7 @@ void AnimationWidget::on_drawables_currentIndexChanged(const QString& name)
     if (auto* node = GetCurrentNode())
     {
         const auto& drawable_name = app::ToUtf8(name);
-        node->SetDrawable(drawable_name, mState.workspace->MakeDrawable(drawable_name));
+        node->SetDrawable(drawable_name, mState.workspace->GetDrawableClass(drawable_name));
     }
 }
 
@@ -1304,7 +1263,7 @@ void AnimationWidget::on_renderPass_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const game::AnimationNode::RenderPass pass = GetValue(mUI.renderPass);
+        const game::AnimationNodeClass::RenderPass pass = GetValue(mUI.renderPass);
         node->SetRenderPass(pass);
     }
 }
@@ -1313,19 +1272,18 @@ void AnimationWidget::on_renderStyle_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const game::AnimationNode::RenderStyle style = GetValue(mUI.renderStyle);
+        const game::AnimationNodeClass::RenderStyle style = GetValue(mUI.renderStyle);
         node->SetRenderStyle(style);
     }
 }
 
 void AnimationWidget::currentComponentRowChanged()
 {
-    const game::AnimationNode* node = GetCurrentNode();
+    const game::AnimationNodeClass* node = GetCurrentNode();
     if (node == nullptr)
     {
         mUI.cProperties->setEnabled(false);
         mUI.cTransform->setEnabled(false);
-        mUI.chkNodeLifetime->setEnabled(false);
     }
     else
     {
@@ -1396,7 +1354,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
             {
                 WARN("Animation node '%1' uses a material '%2' that is deleted.",
                     component.GetName(), resource->GetName());
-                component.SetMaterial("Checkerboard", mState.workspace->MakeMaterial("Checkerboard"));
+                component.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
             }
         }
         if (auto* comp = GetCurrentNode())
@@ -1428,7 +1386,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
             {
                 WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
                     node.GetName(), resource->GetName());
-                node.SetDrawable("Rectangle", mState.workspace->MakeDrawable("Rectangle"));
+                node.SetDrawable("Rectangle", mState.workspace->GetDrawableClass("Rectangle"));
             }
         }
         if (auto* node = GetCurrentNode())
@@ -1469,8 +1427,8 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
     auto& tree = mState.animation.GetRenderTree();
-    auto* src_value = static_cast<game::AnimationNode*>(item->GetUserData());
-    auto* dst_value = static_cast<game::AnimationNode*>(target->GetUserData());
+    auto* src_value = static_cast<game::AnimationNodeClass*>(item->GetUserData());
+    auto* dst_value = static_cast<game::AnimationNodeClass*>(target->GetUserData());
 
     // find the game graph node that contains this AnimationNode.
     auto* src_node   = tree.FindNodeByValue(src_value);
@@ -1480,7 +1438,7 @@ void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::Tree
     if (src_node->FindNodeByValue(dst_value))
         return;
 
-    game::Animation::RenderTreeNode branch = *src_node;
+    game::AnimationClass::RenderTreeNode branch = *src_node;
     src_parent->DeleteChild(src_node);
 
     auto* dst_node  = tree.FindNodeByValue(dst_value);
@@ -1491,12 +1449,12 @@ void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::Tree
 void AnimationWidget::treeClickEvent(TreeWidget::TreeItem* item)
 {
     //DEBUG("Tree click event: %1", item->GetId());
-    auto* node = static_cast<game::AnimationNode*>(item->GetUserData());
+    auto* node = static_cast<game::AnimationNodeClass*>(item->GetUserData());
     if (node == nullptr)
         return;
 
-    const bool visibility = node->TestFlag(game::AnimationNode::Flags::VisibleInEditor);
-    node->SetFlag(game::AnimationNode::Flags::VisibleInEditor, !visibility);
+    const bool visibility = node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor);
+    node->SetFlag(game::AnimationNodeClass::Flags::VisibleInEditor, !visibility);
     item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
 }
 
@@ -1567,7 +1525,7 @@ void AnimationWidget::on_cName_textChanged(const QString& text)
         return;
     if (!item->GetUserData())
         return;
-    auto* node = static_cast<game::AnimationNode*>(item->GetUserData());
+    auto* node = static_cast<game::AnimationNodeClass*>(item->GetUserData());
 
     node->SetName(app::ToUtf8(text));
     item->SetText(text);
@@ -1579,67 +1537,45 @@ void AnimationWidget::on_chkUpdateMaterial_stateChanged(int state)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::AnimationNode::Flags::UpdateMaterial, state);
+        node->SetFlag(game::AnimationNodeClass::Flags::UpdateMaterial, state);
     }
 }
 void AnimationWidget::on_chkUpdateDrawable_stateChanged(int state)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::AnimationNode::Flags::UpdateDrawable, state);
+        node->SetFlag(game::AnimationNodeClass::Flags::UpdateDrawable, state);
     }
 }
 void AnimationWidget::on_chkDoesRender_stateChanged(int state)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::AnimationNode::Flags::DoesRender, state);
+        node->SetFlag(game::AnimationNodeClass::Flags::DoesRender, state);
     }
 }
 
 void AnimationWidget::on_animDuration_valueChanged(double value)
 {
-    mUI.timeline->SetDuration(value);
-    mUI.timeline->update();
-    mState.animation.SetDuration(value);
+    //mUI.timeline->SetDuration(value);
+    //mUI.timeline->update();
+    //mState.animation.SetDuration(value);
 }
 
 void AnimationWidget::on_animDelay_valueChanged(double value)
 {
-    mState.animation.SetDelay(value);
+    //mState.animation.SetDelay(value);
 }
 
-void AnimationWidget::on_nodeStartTime_valueChanged(double value)
-{
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetStartTime(value);
-    }
-}
-void AnimationWidget::on_nodeEndTime_valueChanged(double value)
-{
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetEndTime(value);
-    }
-}
-
-void AnimationWidget::on_chkNodeLifetime_toggled(bool value)
-{
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetFlag(game::AnimationNode::Flags::LimitLifetime, value);
-    }
-}
 
 void AnimationWidget::on_timelineGroup_toggled(bool value)
 {
-    mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, value);
+    //mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, value);
 }
 
 void AnimationWidget::on_animIsLooping_stateChanged(int value)
 {
-    mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, (bool)value);
+    //mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, (bool)value);
 }
 
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
@@ -1659,22 +1595,22 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    class DrawHook : public game::Animation::DrawHook
+    class DrawHook : public game::AnimationClass::DrawHook
     {
     public:
-        DrawHook(game::AnimationNode* selected, PlayState playstate)
+        DrawHook(game::AnimationNodeClass* selected, PlayState playstate)
           : mSelected(selected)
           , mPlayState(playstate)
         {}
-        virtual bool InspectPacket(const game::AnimationNode* node, game::Animation::DrawPacket&) override
+        virtual bool InspectPacket(const game::AnimationNodeClass* node, game::AnimationClass::DrawPacket&) override
         {
-            if (!node->TestFlag(game::AnimationNode::Flags::VisibleInEditor))
+            if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
                 return false;
             return true;
         }
-        virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::Animation::DrawPacket>& packets) override
+        virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans, std::vector<game::AnimationClass::DrawPacket>& packets) override
         {
-            const auto is_mask     = node->GetRenderPass() == game::AnimationNode::RenderPass::Mask;
+            const auto is_mask     = node->GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask;
             const auto is_selected = node == mSelected;
             const auto is_playing  = mPlayState == PlayState::Playing;
 
@@ -1684,12 +1620,12 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
                 // visualize it.
                 trans.Push(node->GetModelTransform());
-                    game::Animation::DrawPacket box;
+                    game::AnimationClass::DrawPacket box;
                     box.transform = trans.GetAsMatrix();
                     box.material  = yellow;
                     box.drawable  = rect; //node->GetDrawable();
                     box.layer     = node->GetLayer() + 1;
-                    box.pass      = game::AnimationNode::RenderPass::Draw;
+                    box.pass      = game::AnimationNodeClass::RenderPass::Draw;
                     packets.push_back(box);
                 trans.Pop();
             }
@@ -1705,7 +1641,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
-                game::Animation::DrawPacket selection;
+                game::AnimationClass::DrawPacket selection;
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
@@ -1717,7 +1653,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
                 trans.Translate(size.x*0.5f-10.0f, size.y*0.5f-10.0f);
-                game::Animation::DrawPacket sizing_box;
+                game::AnimationClass::DrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
@@ -1729,7 +1665,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f, 10.0f);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                game::Animation::DrawPacket rotation_circle;
+                game::AnimationClass::DrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
@@ -1738,7 +1674,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
             trans.Pop();
         }
     private:
-        const game::AnimationNode* mSelected = nullptr;
+        const game::AnimationNodeClass* mSelected = nullptr;
         const PlayState mPlayState = PlayState::Playing;
     };
 
@@ -1782,23 +1718,22 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         view.Translate(grid_origin_x, grid_origin_y);
         painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
         view.Translate(-grid_width, 0);
         painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
         view.Translate(0, -grid_height);
         painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
         view.Translate(grid_width, 0);
         painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
         view.Pop();
     }
-
 
     // begin the animation transformation space
     view.Push();
@@ -1825,18 +1760,16 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
     // pop view transformation
     view.Pop();
-
-
 }
 
-game::AnimationNode* AnimationWidget::GetCurrentNode()
+game::AnimationNodeClass* AnimationWidget::GetCurrentNode()
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return nullptr;
     if (!item->GetUserData())
         return nullptr;
-    return static_cast<game::AnimationNode*>(item->GetUserData());
+    return static_cast<game::AnimationNodeClass*>(item->GetUserData());
 }
 
 void AnimationWidget::updateCurrentNodeProperties()
@@ -1859,15 +1792,11 @@ void AnimationWidget::updateCurrentNodeProperties()
         SetValue(mUI.cSizeY, size.y);
         SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
         SetValue(mUI.lineWidth, node->GetLineWidth());
-        SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNode::Flags::UpdateMaterial));
-        SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNode::Flags::UpdateDrawable));
-        SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNode::Flags::DoesRender));
-        SetValue(mUI.chkNodeLifetime, node->TestFlag(game::AnimationNode::Flags::LimitLifetime));
-        SetValue(mUI.nodeStartTime, node->GetStartTime());
-        SetValue(mUI.nodeEndTime, node->GetEndTime());
+        SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
+        SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
+        SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
-        mUI.chkNodeLifetime->setEnabled(true);
     }
 }
 

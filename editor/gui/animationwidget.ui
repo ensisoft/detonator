@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1500</width>
-    <height>952</height>
+    <width>1563</width>
+    <height>1167</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -838,58 +838,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QGroupBox" name="chkNodeLifetime">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="title">
-                 <string>Limit lifetime</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <layout class="QGridLayout" name="gridLayout">
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_13">
-                   <property name="text">
-                    <string>End time (s)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="nodeEndTime">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="nodeStartTime">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_14">
-                   <property name="text">
-                    <string>Start time (s)</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
                <spacer name="verticalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -1101,21 +1049,6 @@
     <string>New Round Rect</string>
    </property>
   </action>
-  <action name="actionShowTimeline">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/timeline.png</normaloff>:/32x32_ico_png/timeline.png</iconset>
-   </property>
-   <property name="text">
-    <string>Timeline</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle timeline visibility</string>
-   </property>
-  </action>
   <action name="actionNewRightTriangle">
    <property name="checkable">
     <bool>true</bool>
@@ -1215,9 +1148,6 @@
   <tabstop>cRotation</tabstop>
   <tabstop>cPlus90</tabstop>
   <tabstop>cMinus90</tabstop>
-  <tabstop>chkNodeLifetime</tabstop>
-  <tabstop>nodeStartTime</tabstop>
-  <tabstop>nodeEndTime</tabstop>
   <tabstop>showGrid</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>time</tabstop>
@@ -1225,22 +1155,5 @@
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>actionShowTimeline</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>timelineGroup</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>641</x>
-     <y>736</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

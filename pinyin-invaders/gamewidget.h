@@ -126,6 +126,7 @@ namespace invaders
         std::vector<LevelInfo> mLevelInfos;
         std::vector<Profile> mProfiles;
         std::list<std::unique_ptr<Animation>> mAnimations;
+        std::unique_ptr<game::Animation> mBackground;
 
         std::unique_ptr<Game> mGame;
         unsigned mCurrentLevel   = 0;

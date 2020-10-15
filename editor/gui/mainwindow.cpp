@@ -36,6 +36,10 @@
 #  include <QSurfaceFormat>
 #include "warnpop.h"
 
+#if defined(__GCC__)
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <algorithm>
 
 #include "base/assert.h"

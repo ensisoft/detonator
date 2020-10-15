@@ -89,18 +89,22 @@ To* CollisionCast(const std::unique_ptr<From>& lhs,
 
 inline gfx::Material SlidingGlintEffect(float secs)
 {
-    return gfx::Material(gfx::Material::Type::Color)
-        .SetShaderFile("shaders/es2/sliding_glint_effect.glsl")
-        .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-        .SetRuntime(secs);
+    auto klass = gfx::MaterialClass(gfx::MaterialClass::Type::Color);
+    klass.SetShaderFile("shaders/es2/sliding_glint_effect.glsl");
+    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    gfx::Material material(klass);
+    material.SetRuntime(secs);
+    return material;
 }
 
 inline gfx::Material ConcentricRingsEffect(float secs)
 {
-    return gfx::Material(gfx::Material::Type::Color)
-        .SetShaderFile("shaders/es2/concentric_rings_effect.glsl")
-        .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
-        .SetRuntime(secs);
+    auto klass = gfx::MaterialClass(gfx::MaterialClass::Type::Color);
+    klass.SetShaderFile("shaders/es2/concentric_rings_effect.glsl");
+    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    gfx::Material material(klass);
+    material.SetRuntime(secs);
+    return material;
 }
 
 //
@@ -360,7 +364,8 @@ public:
         gfx::Transform t;
         t.Resize(size * mScale);
         t.MoveTo(width * mX + xpos, height * mY + ypos);
-        painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name).SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+        painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name)
+            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
     }
 
     virtual FRect getBounds(const IRect& rect) const override
@@ -415,9 +420,9 @@ public:
       : mPosition(position)
       , mStartTime(start)
       , mLifeTime(lifetime)
-      , mSprite(gfx::SpriteMap())
     {
-        mSprite.SetFps(80.0 / (lifetime/1000.0f));
+        gfx::MaterialClass klass = gfx::SpriteMap();
+        klass.SetFps(80.0 / (lifetime/1000.0f));
         // each explosion frame is 100x100 px
         // and there are 80 frames total.
         for (unsigned i=0; i<80; ++i)
@@ -427,9 +432,10 @@ public:
             const auto w = 100 / 1024.0f; // normalize over width
             const auto h = 100 / 1024.0f; // normalize over height
             const gfx::FRect frame(col * w, row * h, w, h);
-            mSprite.AddTexture("textures/ExplosionMap.png");
-            mSprite.SetTextureRect(i, frame);
+            klass.AddTexture("textures/ExplosionMap.png");
+            klass.SetTextureRect(i, frame);
         }
+        mSprite = gfx::CreateMaterialInstance(klass);
     }
 
     virtual bool update(float dt) override
@@ -449,7 +455,7 @@ public:
         if (mTime < mStartTime)
             return;
 
-        mSprite.SetRuntime((mTime - mStartTime) / 1000.0f);
+        mSprite->SetRuntime((mTime - mStartTime) / 1000.0f);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
@@ -460,7 +466,7 @@ public:
         gfx::Transform t;
         t.Resize(scaledWidth, scaledHeight);
         t.MoveTo(position - FPoint(scaledWidth / 2.0, scaledHeight / 2.0));
-        painter.Draw(gfx::Rectangle(), t, mSprite);
+        painter.Draw(gfx::Rectangle(), t, *mSprite);
     }
 
     void setScale(float scale)
@@ -476,7 +482,7 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    gfx::Material mSprite;
+    std::unique_ptr<gfx::Material> mSprite;
 };
 
 
@@ -489,7 +495,7 @@ public:
         , mLifeTime(lifetime)
         , mPosition(position)
     {
-        ParticleEngine::Params params;
+        gfx::KinematicsParticleEngineClass::Params params;
         params.max_xpos = 500;
         params.max_ypos = 500;
         params.init_rect_xpos = 250;
@@ -501,7 +507,7 @@ public:
         params.max_point_size = 2.0f;
         params.min_velocity = 200.0f;
         params.max_velocity = 300.0f;
-        params.mode = ParticleEngine::SpawnPolicy::Once;
+        params.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
         mParticles = std::make_unique<ParticleEngine>(params);
     }
     virtual bool update(float dt) override
@@ -532,7 +538,7 @@ public:
 
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/RoundParticle.png")
-            .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
+            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive)
             .SetBaseColor(mColor * 0.8));
     }
 
@@ -555,15 +561,16 @@ public:
         : mPosition(position)
         , mStartTime(start)
         , mLifeTime(lifetime)
-        , mSprite(gfx::SpriteSet())
     {
-        mSprite.SetFps(10);
+        mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::SpriteSet());
+        mMaterialClass->SetFps(10);
         for (int i=0; i<=24; ++i)
         {
             const auto& name = base::FormatString("textures/smoke/blackSmoke%1.png",  i);
-            mSprite.AddTexture(name);
+            mMaterialClass->AddTexture(name);
         }
-        mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
+        mMaterialClass->SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
+        mSprite = gfx::CreateMaterialInstance(mMaterialClass);
     }
 
     virtual bool update(float dt) override
@@ -584,8 +591,8 @@ public:
 
         const auto time  = mTime - mStartTime;
         const auto alpha = 0.4 - 0.4 * (time / mLifeTime);
-        mSprite.SetRuntime(time / 1000.0f);
-        mSprite.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, alpha));
+        mSprite->SetRuntime(time / 1000.0f);
+        mMaterialClass->SetBaseAlpha(alpha);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();
@@ -596,7 +603,7 @@ public:
         gfx::Transform t;
         t.Resize(pxw, pxh);
         t.MoveTo(pos - FPoint(pxw/2.0f, pxh/2.0f));
-        painter.Draw(gfx::Rectangle(), t, mSprite);
+        painter.Draw(gfx::Rectangle(), t, *mSprite);
 
     }
 
@@ -610,7 +617,8 @@ private:
     float mTime  = 0.0f;
     float mScale = 1.0f;
 private:
-    gfx::Material mSprite;
+    std::shared_ptr<gfx::MaterialClass> mMaterialClass;
+    std::unique_ptr<gfx::Material> mSprite;
 };
 
 
@@ -705,7 +713,7 @@ public:
             rotation.Translate(pos);
             painter.Draw(gfx::Rectangle(), rotation,
                 gfx::TextureMap(mTexture)
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent)
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent)
                 .SetTextureRect(0, p.rc)
                 .SetBaseColor(gfx::Color4f(gfx::Color::White, p.alpha)));
         }
@@ -811,7 +819,7 @@ public:
 
         if (!mParticles)
         {
-            ParticleEngine::Params params;
+            gfx::KinematicsParticleEngineClass::Params params;
             params.init_rect_width  = 0.0f;
             params.init_rect_height = jetScaledHeight;
             params.max_xpos = jetScaledWidth;
@@ -824,7 +832,7 @@ public:
             params.direction_sector_start_angle = 0.0f;
             params.direction_sector_size = 0.0f;
             params.rate_of_change_in_size_wrt_time = -20.0f;
-            params.mode = ParticleEngine::SpawnPolicy::Continuous;
+            params.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
             mParticles = std::make_unique<ParticleEngine>(params);
         }
         // set the target rectangle with the dimensions of the
@@ -850,7 +858,7 @@ public:
         // draw the particles first
         painter.Draw(*mParticles, t,
             gfx::TextureMap("textures/BlackSmoke.png")
-            .SetSurfaceType(gfx::Material::SurfaceType::Emissive)
+            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive)
             .SetBaseColor(getJetStreamColor(mShipType) * 0.6));
 
         t.Reset();
@@ -861,7 +869,7 @@ public:
         // the exhaust particles begin at the end of the ship
         painter.Draw(gfx::Rectangle(), t,
             gfx::TextureMap(getShipTextureIdentifier(mShipType))
-                .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
         const auto fontsize = unitScale.GetY() / 1.75;
         gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
@@ -893,7 +901,7 @@ public:
                         (width - shipScaledWidth) * -0.5);
             painter.Draw(gfx::Rectangle(), t,
                 gfx::TextureMap("textures/spr_shield.png")
-                    .SetSurfaceType(gfx::Material::SurfaceType::Transparent));
+                    .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
         }
     }
 
@@ -1040,7 +1048,7 @@ private:
 class GameWidget::UFO : public GameWidget::Animation
 {
 public:
-    UFO() : mSprite(gfx::SpriteSet())
+    UFO()
     {
         mPosition.x = math::rand(0.0, 1.0);
         mPosition.y = math::rand(0.0, 1.0);
@@ -1049,13 +1057,15 @@ public:
         const auto y = math::rand(-1.0, 1.0);
         mDirection = glm::normalize(glm::vec2(x, y));
 
-        mSprite.AddTexture("textures/alien/e_f1.png");
-        mSprite.AddTexture("textures/alien/e_f2.png");
-        mSprite.AddTexture("textures/alien/e_f3.png");
-        mSprite.AddTexture("textures/alien/e_f4.png");
-        mSprite.AddTexture("textures/alien/e_f5.png");
-        mSprite.AddTexture("textures/alien/e_f6.png");
-        mSprite.SetFps(10);
+        gfx::MaterialClass klass = gfx::SpriteSet();
+        klass.AddTexture("textures/alien/e_f1.png");
+        klass.AddTexture("textures/alien/e_f2.png");
+        klass.AddTexture("textures/alien/e_f3.png");
+        klass.AddTexture("textures/alien/e_f4.png");
+        klass.AddTexture("textures/alien/e_f5.png");
+        klass.AddTexture("textures/alien/e_f6.png");
+        klass.SetFps(10);
+        mSprite = gfx::CreateMaterialInstance(klass);
     }
 
     virtual bool update(float dt) override
@@ -1090,7 +1100,7 @@ public:
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
 
-        mSprite.SetRuntime(sec);
+        mSprite->SetRuntime(sec);
 
         gfx::Transform rings;
         rings.Resize(200, 200);
@@ -1100,7 +1110,7 @@ public:
         gfx::Transform ufo;
         ufo.Resize(40, 40);
         ufo.MoveTo(pos - FPoint(20.0f, 20.0f));
-        painter.Draw(gfx::Rectangle(), ufo, mSprite);
+        painter.Draw(gfx::Rectangle(), ufo, *mSprite);
     }
 
     virtual FRect getBounds(const IRect& rect) const override
@@ -1143,21 +1153,23 @@ private:
     glm::vec2 mDirection;
     glm::vec2 mPosition;
 private:
-    gfx::Material mSprite;
+    std::unique_ptr<gfx::Material> mSprite;
 };
 
 
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(float lifetime) : mLifeTime(lifetime), mSprite(gfx::SpriteSet())
+    BigExplosion(float lifetime) : mLifeTime(lifetime)
     {
+        gfx::MaterialClass klass = gfx::SpriteSet();
         for (int i=1; i<=90; ++i)
         {
             const auto& name = base::FormatString("textures/bomb/explosion1_00%1.png", i);
-            mSprite.AddTexture(name);
+            klass.AddTexture(name);
         }
-        mSprite.SetFps(90 / (lifetime/1000.0f));
+        klass.SetFps(90 / (lifetime/1000.0f));
+        mSprite = gfx::CreateMaterialInstance(klass);
     }
 
     virtual bool update(float dt) override
@@ -1169,7 +1181,7 @@ public:
     }
     virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        mSprite.SetRuntime(mRunTime / 1000.0f);
+        mSprite->SetRuntime(mRunTime / 1000.0f);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto ExplosionWidth = layout.GetGridWidth() * 2.0f;
@@ -1181,14 +1193,14 @@ public:
         gfx::Transform bang;
         bang.Resize(ExplosionWidth, ExplosionHeight);
         bang.MoveTo(x, y);
-        painter.Draw(gfx::Rectangle(), bang, mSprite);
+        painter.Draw(gfx::Rectangle(), bang, *mSprite);
 
     }
 private:
     const float mLifeTime = 0.0f;
     float mRunTime = 0.0f;
 private:
-    gfx::Material mSprite;
+    std::unique_ptr<gfx::Material> mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation
@@ -2209,6 +2221,8 @@ void GameWidget::Save()
 
 void GameWidget::Start()
 {
+    mBackground = mAssets->CreateAnimation("Space");
+
     // in this space all the background objects travel to the same direction
     for (size_t i=0; i<20; ++i)
     {
@@ -2250,8 +2264,7 @@ void GameWidget::Update(double current_time, double dt)
         mAnimations.emplace_back(new UFO);
     }
 
-    auto* background = mAssets->FindAnimation("Space");
-    background->Update(time/1000.0f);
+    mBackground->Update(time/1000.0f);
 
     mStates.top()->update(time);
 
@@ -2392,12 +2405,11 @@ void GameWidget::Draw()
 
     // paint the background
     {
-        const auto* anim = mAssets->FindAnimation("Space");
-        const auto* node = anim->FindNodeByName("Background");
-        const auto& rect = anim->GetBoundingBox(node);
+        const auto* node = (*mBackground)->FindNodeByName("Background");
+        const auto& rect = (*mBackground)->GetBoundingBox(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
-        anim->Draw(*mPainter, view);
+        mBackground->Draw(*mPainter, view);
     }
 
     // then paint the animations on top of the background

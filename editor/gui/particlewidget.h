@@ -77,7 +77,7 @@ namespace gui
         void resourceToBeDeleted(const app::Resource* resource);
 
     private:
-        void fillParams(gfx::KinematicsParticleEngine::Params& params) const;
+        void fillParams(gfx::KinematicsParticleEngineClass::Params& params) const;
 
     private:
         Ui::ParticleWidget mUI;

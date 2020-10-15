@@ -144,9 +144,9 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     mText.ClearText();
     mText.AddText(std::move(text_and_style));
 
-    gfx::Material material;
-    material.SetType(gfx::Material::Type::Texture);
-    material.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
+    gfx::MaterialClass material;
+    material.SetType(gfx::MaterialClass::Type::Texture);
+    material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material.SetBaseColor(gfx::Color::White);
     material.AddTexture(mText);
 

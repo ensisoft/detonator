@@ -89,14 +89,51 @@ namespace gfx
         virtual void SetStyle(Style style) {}
         // Get the current style.
         virtual Style GetStyle() const = 0;
-        // Pack the drawable resources.
-        virtual void Pack(ResourcePacker* packer) const = 0;
+        // Returns true if the drawable is still considered to be alive.
+        // For example a particle simulation still has live particles.
+        virtual bool IsAlive() const
+        { return true; }
+        // Restart the drawable, if applicable.
+        virtual void Restart() {}
         // Get the ID of the drawable shape. Used to map the
         // drawable to a device specific program object.
         inline std::string GetId() const
         { return typeid(*this).name(); }
     private:
     };
+
+    // DrawableClass defines a new type of drawable.
+    class DrawableClass
+    {
+    public:
+        // Type of the drawable (and its instances)
+        enum class Type {
+            Arrow,
+            Circle,
+            Grid,
+            IsocelesTriangle,
+            KinematicsParticleEngine,
+            Line,
+            Parallelogram,
+            Polygon,
+            Rectangle,
+            RightTriangle,
+            RoundRectangle,
+            Trapezoid
+        };
+        virtual ~DrawableClass() = default;
+        // Get the type of the drawable.
+        virtual Type GetType() const = 0;
+        // Pack the drawable resources.
+        virtual void Pack(ResourcePacker* packer) const = 0;
+        // Serialize into JSON
+        virtual nlohmann::json ToJson() const = 0;
+        // Load state from JSON object. Returns true if succesful
+        // otherwise false.
+        virtual bool LoadFromJson(const nlohmann::json& json) = 0;
+    private:
+    };
+
 
     class Arrow : public Drawable
     {
@@ -114,7 +151,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -123,7 +159,8 @@ namespace gfx
     class Line : public Drawable
     {
     public:
-        Line(float line_width = 1.0f) : mLineWidth(line_width)
+        Line() = default;
+        Line(float line_width) : mLineWidth(line_width)
         {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
@@ -132,7 +169,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Solid; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         float mLineWidth = 1.0f;
     };
@@ -153,7 +189,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -176,39 +211,75 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
+    };
+
+    class RoundRectangleClass : public DrawableClass
+    {
+    public:
+        RoundRectangleClass() = default;
+        RoundRectangleClass(float radius) : mRadius(radius)
+        {}
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(Drawable::Style style, Device& device) const;
+
+        float GetRadius() const
+        { return mRadius; }
+        void SetRadius(float radius)
+        { mRadius = radius;}
+
+        virtual Type GetType() const override
+        { return DrawableClass::Type::RoundRectangle; }
+        virtual void Pack(ResourcePacker* packer) const override;
+        virtual nlohmann::json ToJson() const override;
+        virtual bool LoadFromJson(const nlohmann::json& json) override;
+    private:
+        float mRadius = 0.05;
     };
 
     // Rectangle with rounded corners
     class RoundRectangle : public Drawable
     {
     public:
-        RoundRectangle() = default;
-        RoundRectangle(Style style) : mStyle(style)
+        RoundRectangle()
+        {
+            mClass = std::make_shared<const RoundRectangleClass>();
+        }
+        RoundRectangle(Style style) : RoundRectangle()
+        {
+            mStyle = style;
+        }
+        RoundRectangle(Style style, float linewidth) : RoundRectangle()
+        {
+            mStyle = style;
+            mLineWidth = linewidth;
+        }
+        RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass)
+            : mClass(klass)
         {}
-        RoundRectangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+
+        virtual Shader* GetShader(Device& device) const override
+        { return mClass->GetShader(device); }
+        virtual Geometry* Upload(Device& device) const override
+        {
+            Geometry* geom = mClass->Upload(mStyle, device);
+            if (geom)
+                geom->SetLineWidth(mLineWidth);
+            return geom;
+        }
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-
-        float GetRadius() const
-        { return mRadius; }
-        void SetRadius(float radius)
-        { mRadius = radius;}
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
+        std::shared_ptr<const RoundRectangleClass> mClass;
+
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
-        float mRadius = 0.05;
     };
 
     class IsocelesTriangle : public Drawable
@@ -227,7 +298,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -249,7 +319,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -272,7 +341,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -294,10 +362,37 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual void Pack(ResourcePacker* packer) const override;
     private:
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
+    };
+
+    class GridClass : public DrawableClass
+    {
+    public:
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(Device& device) const;
+        void SetNumVerticalLines(unsigned lines)
+        { mNumVerticalLines = lines; }
+        void SetNumHorizontalLines(unsigned lines)
+        { mNumHorizontalLines = lines; }
+        void SetBorders(bool on_off)
+        { mBorderLines = on_off; }
+        int GetNumVerticalLines() const
+        { return mNumVerticalLines; }
+        int GetNumHorizontalLines() const
+        { return mNumHorizontalLines; }
+        bool HasBorderLines() const
+        { return mBorderLines; }
+        virtual Type GetType() const override
+        { return DrawableClass::Type::Grid; }
+        virtual void Pack(ResourcePacker* packer) const override;
+        virtual nlohmann::json ToJson() const override;
+        virtual bool LoadFromJson(const nlohmann::json& json) override;
+    private:
+        unsigned mNumVerticalLines = 1;
+        unsigned mNumHorizontalLines = 1;
+        bool mBorderLines = false;
     };
 
     // render a series of intersecting horizontal and vertical lines
@@ -305,37 +400,42 @@ namespace gfx
     class Grid : public Drawable
     {
     public:
+        Grid(const std::shared_ptr<const GridClass>& klass)
+            : mClass(klass)
+        {}
+
         // the num vertical and horizontal lines is the number of lines
         // *inside* the grid. I.e. not including the enclosing border lines
         Grid(unsigned num_vertical_lines, unsigned num_horizontal_lines, bool border_lines = true)
-            : mNumVerticalLines(num_vertical_lines)
-            , mNumHorizontalLines(num_horizontal_lines)
-            , mBorderLines(border_lines)
-        {}
-        Grid() = default;
-
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        {
+            auto klass = std::make_shared<GridClass>();
+            klass->SetNumVerticalLines(num_vertical_lines);
+            klass->SetNumHorizontalLines(num_horizontal_lines);
+            klass->SetBorders(border_lines);
+            mClass = klass;
+        }
+        virtual Shader* GetShader(Device& device) const override
+        { return mClass->GetShader(device); }
+        virtual Geometry* Upload(Device& device) const override
+        {
+            Geometry* geom = mClass->Upload(device);
+            if (geom)
+                geom->SetLineWidth(mLineWidth);
+            return geom;
+        }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
-        virtual void Pack(ResourcePacker* packer) const override;
 
-        void SetNumVerticalLines(unsigned lines)
-        { mNumVerticalLines = lines; }
-        void SetNumHorizontalLines(unsigned lines)
-        { mNumHorizontalLines = lines; }
     private:
-        unsigned mNumVerticalLines = 1;
-        unsigned mNumHorizontalLines = 1;
+        std::shared_ptr<const GridClass> mClass;
         float mLineWidth = 1.0f;
-        bool mBorderLines = false;
     };
 
     // Combines multiple primitive draw commands into a single
     // drawable shape.
-    class Polygon : public Drawable
+    class PolygonClass : public DrawableClass
     {
     public:
         // Define how the geometry is to be rasterized.
@@ -349,13 +449,13 @@ namespace gfx
 
         using Vertex = gfx::Vertex;
 
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
-        virtual Style GetStyle() const override
-        { return Style::Solid; }
-        virtual void Pack(ResourcePacker* packer) const override;
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
+        struct InstanceState {
+            float line_width = 1.0f;
+        };
+
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(const InstanceState& state, Device& device) const;
+
 
         void Clear()
         {
@@ -468,17 +568,52 @@ namespace gfx
         // on the content.
         std::string GetName() const;
 
-        // Serialize into JSON.
-        nlohmann::json ToJson() const;
+        virtual void Pack(ResourcePacker* packer) const override;
+        virtual Type GetType() const override
+        { return Type::Polygon; }
+        virtual nlohmann::json ToJson() const override;
+        virtual bool LoadFromJson(const nlohmann::json& json) override;
+
         // Load from JSON
-        static std::optional<Polygon> FromJson(const nlohmann::json& object);
+        static std::optional<PolygonClass> FromJson(const nlohmann::json& object);
     private:
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         mutable std::string mName; // cached name
-        float mLineWidth = 1.0f;
         bool mStatic = true;
     };
+
+    class Polygon : public Drawable
+    {
+    public:
+        Polygon(const std::shared_ptr<const PolygonClass>& klass)
+            : mClass(klass)
+        {}
+        Polygon(const PolygonClass& klass)
+        {
+            mClass = std::make_shared<PolygonClass>(klass);
+        }
+        virtual Shader* GetShader(Device& device) const override
+        {
+            return mClass->GetShader(device);
+        }
+        virtual Geometry* Upload(Device& device) const override
+        {
+            return mClass->Upload(mState, device);
+        }
+        virtual Style GetStyle() const override
+        {
+            return Style::Solid;
+        }
+        virtual void SetLineWidth(float width)
+        {
+            mState.line_width = width;
+        }
+    private:
+        std::shared_ptr<const PolygonClass> mClass;
+        PolygonClass::InstanceState mState;
+    };
+
 
     // Particle engine interface. Particle engines implement some kind of
     // "particle" / n-body simulation where a variable number of small objects
@@ -488,19 +623,22 @@ namespace gfx
     public:
         // Destructor
         virtual ~ParticleEngine() = default;
-        // Returns true if the simulation has particles and is still running.
-        virtual bool IsAlive() const = 0;
-        // Restart the simulation with the current set of parameters.
-        virtual void Restart() = 0;
-        // todo: add more methods as needed.
+        // Todo: add particle engine specific methods if needed.
     private:
     };
 
-    // KinematicsParticleEngine implements particle simulation
-    // based on pure motion without reference to the forces
-    // or the masses acting upon the particles.
-    class KinematicsParticleEngine : public Drawable,
-                                     public ParticleEngine
+    // KinematicsParticleEngineClass holds data for some type of
+    // particle engine. The data and the class implementation together
+    // are used to define a "type" / class for particle engines.
+    // For example the user might have defined a particle engine called
+    // "smoke" with some particular set of parameters. Once instance
+    // (a c++ object) of KinematicsParticleEngineClass is then used to
+    // represent this particle engine type. KinematicsParticleEngine
+    // objects are then instances of some engine type and point to the
+    // class for class specific behaviour while containing their
+    // instance specific data. (I.e. one instance of "smoke" can have
+    // particles in different stages as some other instance of "smoke".
+    class KinematicsParticleEngineClass : public DrawableClass
     {
     public:
         struct Particle {
@@ -603,54 +741,151 @@ namespace gfx
             float gravity = 0.3;
         };
 
-        KinematicsParticleEngine(const Params& init) : mParams(init)
-        {
-            InitParticles(size_t(mParams.num_particles));
-        }
-        KinematicsParticleEngine() = default;
+        // State of any instance of KinematicsParticleEngine.
+        struct InstanceState {
+            // the simulation particles.
+            std::vector<Particle> particles;
+            // simulation time.
+            float time     = 0.0f;
+            // fractional count of new particles being hatched.
+            float hatching = 0.0f;
+        };
 
-        // Drawable implementation. Compile the shader.
-        virtual Shader* GetShader(Device& device) const override;
-        // Drawable implementation. Upload particles to the device.
-        virtual Geometry* Upload(Device& device) const override;
-        virtual Style GetStyle() const override
-        { return Style::Points; }
-        virtual void Pack(ResourcePacker* packer) const override;
+        KinematicsParticleEngineClass() = default;
+        KinematicsParticleEngineClass(const Params& init) : mParams(init)
+        {}
 
-        // Update the particle simulation.
-        virtual void Update(float dt) override;
-        // ParticleEngine implementation.
-        virtual bool IsAlive() const override;
-        // ParticleEngine implementation. Restart the simulation
-        // with the previous parameters if possible to do so.
-        virtual void Restart() override;
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(const InstanceState& state, Device& device) const;
 
-        size_t GetNumParticlesAlive() const
-        { return mParticles.size(); }
+        void Update(InstanceState& state, float dt) const;
+        void Restart(InstanceState& state) const;
+        bool IsAlive(const InstanceState& state) const;
+
+        // Get the params.
         const Params& GetParams() const
         { return mParams; }
-
-        void Configure(const Params& p)
+        // Set the params.
+        void SetParams(const Params& p)
         { mParams = p;}
 
-        // Serialize into JSON.
-        nlohmann::json ToJson() const;
+        virtual Type GetType() const override
+        { return DrawableClass::Type::KinematicsParticleEngine; }
+        virtual void Pack(ResourcePacker* packer) const override;
+        virtual nlohmann::json ToJson() const override;
+        virtual bool LoadFromJson(const nlohmann::json& json) override;
+
         // Load from JSON
-        static std::optional<KinematicsParticleEngine> FromJson(const nlohmann::json& object);
+        static std::optional<KinematicsParticleEngineClass> FromJson(const nlohmann::json& object);
 
         // Get a hash value based on the engine parameters
         // and excluding any runtime data.
         std::size_t GetHash() const;
+    private:
+        void InitParticles(InstanceState& state, size_t num) const;
+        void KillParticle(InstanceState& state, size_t i) const;
+        bool UpdateParticle(InstanceState& state, size_t i, float dt) const;
+    private:
+        Params mParams;
+    };
+
+    // KinematicsParticleEngine implements particle simulation
+    // based on pure motion without reference to the forces
+    // or the masses acting upon the particles.
+    // It represents an instance of a some type of KinematicsParticleEngineClass,
+    // which is the "type definition" i.e. class for some particle engine.
+    class KinematicsParticleEngine : public Drawable,
+                                     public ParticleEngine
+    {
+    public:
+        // Create a new particle engine based on an existing particle engine
+        // class definition.
+        KinematicsParticleEngine(std::shared_ptr<const KinematicsParticleEngineClass> klass)
+            : mClass(klass)
+        {
+            Restart();
+        }
+        KinematicsParticleEngine(const KinematicsParticleEngineClass& klass)
+        {
+            mClass = std::make_shared<KinematicsParticleEngineClass>(klass);
+            Restart();
+        }
+        KinematicsParticleEngine(const KinematicsParticleEngineClass::Params& params)
+        {
+            mClass = std::make_shared<KinematicsParticleEngineClass>(params);
+            Restart();
+        }
+
+        // Drawable implementation. Compile the shader.
+        virtual Shader* GetShader(Device& device) const override
+        {
+            return mClass->GetShader(device);
+        }
+        // Drawable implementation. Upload particles to the device.
+        virtual Geometry* Upload(Device& device) const override
+        {
+            return mClass->Upload(mState, device);
+        }
+        virtual Style GetStyle() const override
+        {
+            return Style::Points;
+        }
+
+        // Update the particle simulation.
+        virtual void Update(float dt) override
+        {
+            mClass->Update(mState, dt);
+        }
+
+        virtual bool IsAlive() const override
+        {
+            return mClass->IsAlive(mState);
+        }
+        virtual void Restart() override
+        {
+            mClass->Restart(mState);
+        }
+        // Get the current number of alive particles.
+        size_t GetNumParticlesAlive() const
+        { return mState.particles.size(); }
 
     private:
-        void InitParticles(size_t num);
-        void KillParticle(size_t i);
-        bool UpdateParticle(size_t i, float dt);
-    private:
-        /* const */ Params mParams;
-        float mNumParticlesHatching = 0.0f;
-        float mTime = 0.0f;
-        std::vector<Particle> mParticles;
+        // this is the "class" object for this particle engine type.
+        std::shared_ptr<const KinematicsParticleEngineClass> mClass;
+        // this is this particle engine's state.
+        KinematicsParticleEngineClass::InstanceState mState;
     };
+
+    namespace detail {
+        // generic shim to help refactoring efforts.
+        // todo: replace this with the actual class types for
+        // RoundRectangle and Circle (anything that has parameters
+        // that affect the geometry generation)
+        template<DrawableClass::Type ActualType>
+        class GenericDrawableClass : public DrawableClass
+        {
+        public:
+            virtual Type GetType() const override
+            { return ActualType; }
+            virtual void Pack(ResourcePacker*) const override {}
+            virtual nlohmann::json ToJson() const override
+            { return nlohmann::json {}; }
+            virtual bool LoadFromJson(const nlohmann::json&) override
+            { return true; }
+        };
+    } // namespace
+
+    // shim type definitions for drawables that don't have their
+    // own actual type class yet.
+    using ArrowClass = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
+    using CircleClass = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
+    using IsocelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsocelesTriangle>;
+    using LineClass = detail::GenericDrawableClass<DrawableClass::Type::Line>;
+    using ParallelogramClass = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
+    using RectangleClass = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
+    using RightTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
+    using TrapezoidClass = detail::GenericDrawableClass<DrawableClass::Type::Trapezoid>;
+
+    std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 
 } // namespace

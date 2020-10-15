@@ -78,12 +78,23 @@ namespace app
         // QAbstractFileEngineHandler implementation
         virtual QAbstractFileEngine* create(const QString& file) const override;
 
-        std::shared_ptr<gfx::Material> MakeMaterial(const QString& name)
+        std::shared_ptr<gfx::Material> MakeMaterial(const QString& name) const
         { return MakeMaterial(ToUtf8(name)); }
-        std::shared_ptr<gfx::Drawable> MakeDrawable(const QString& name)
+        std::shared_ptr<gfx::Drawable> MakeDrawable(const QString& name) const
         { return MakeDrawable(ToUtf8(name)); }
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const QString& name) const
+        { return GetMaterialClass(ToUtf8(name)); }
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const char* name) const
+        { return GetMaterialClass(std::string(name)); }
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const QString& name) const
+        { return GetDrawableClass(ToUtf8(name)); }
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const char* name) const
+        { return GetDrawableClass(std::string(name)); }
+        std::shared_ptr<const game::AnimationClass> GetAnimationClass(const std::string& name) const;
 
         // gfxfactory implementation
+        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
@@ -147,25 +158,9 @@ namespace app
                 if (res->GetName() != name || res->GetType() != type)
                     continue;
 
-                // overwrite the existing resource type. the caller
-                // is expected to have confirmed with the user that this is OK
-                // note that we must make sure to not only update the
-                // contained resource parameters but also the application level
-                // resource object and since that is a polymorphic type
-                // we must allocate new resource object.
-                mResources[i] = std::make_unique<GameResource<T>>(resource);
-
-                // see if there are instances of this resource in use that we
-                // also want to update with the latest changes.
-                // note that there can be multiple handles here!
-                // here we're only interested in updating the gfx object content (parameters)
-                const auto* source = resource.GetContent();
-
-                for (auto& handle : mPrivateInstances)
-                {
-                    handle->UpdateInstance(name, type, (const void*)source);
-                }
-
+                auto* ptr = static_cast<GameResource<T>*>(res.get());
+                ptr->UpdateContent(*resource.GetContent());
+                ptr->UpdateProperties(resource.GetProperies());
                 emit ResourceUpdated(mResources[i].get());
                 return;
             }
@@ -432,14 +427,7 @@ namespace app
         // from the workspace data files. these are created
         // and edited by the user through the editor.
         std::vector<std::unique_ptr<Resource>> mResources;
-        // we keep track of private instances of resource objects
-        // through non-owning pointer.
-        // such instances came into life when resources of other
-        // types use other resources, for example when an animation
-        // uses a material but the reason why we track them here
-        // is that we can reflect the changes done to the resources
-        // in the system that uses it!
-        mutable std::vector<std::unique_ptr<ResourceHandle>> mPrivateInstances;
+
     private:
         QString mWorkspaceDir;
         // workspace specific properties

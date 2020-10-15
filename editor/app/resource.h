@@ -186,21 +186,21 @@ namespace app
         struct ResourceTypeTraits;
 
         template<>
-        struct ResourceTypeTraits<gfx::KinematicsParticleEngine> {
+        struct ResourceTypeTraits<gfx::KinematicsParticleEngineClass> {
             static constexpr auto Type = app::Resource::Type::ParticleSystem;
         };
         template<>
-        struct ResourceTypeTraits<gfx::Material> {
+        struct ResourceTypeTraits<gfx::MaterialClass> {
             static constexpr auto Type = app::Resource::Type::Material;
         };
 
         template<>
-        struct ResourceTypeTraits<game::Animation> {
+        struct ResourceTypeTraits<game::AnimationClass> {
             static constexpr auto Type = app::Resource::Type::Animation;
         };
 
         template<>
-        struct ResourceTypeTraits<gfx::Polygon> {
+        struct ResourceTypeTraits<gfx::PolygonClass> {
             static constexpr auto Type = app::Resource::Type::CustomShape;
         };
     } // detail
@@ -214,13 +214,20 @@ namespace app
         static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
 
         GameResource(const Content& content, const QString& name)
-            : mContent(content)
-            , mName(name)
-        {}
+            : mName(name)
+        {
+            mContent = std::make_shared<Content>(content);
+        }
         GameResource(Content&& content, const QString& name)
-            : mContent(std::move(content))
-            , mName(name)
-        {}
+            : mName(name)
+        {
+            mContent = std::make_shared<Content>(std::move(content));
+        }
+        GameResource(const GameResource& other)
+        {
+            mContent = std::make_shared<Content>(*other.mContent);
+            mName = other.mName;
+        }
         virtual QString GetName() const override
         {
            return mName;
@@ -231,7 +238,7 @@ namespace app
         }
         virtual void Serialize(nlohmann::json& json) const override
         {
-            nlohmann::json content_json = mContent.ToJson();
+            nlohmann::json content_json = mContent->ToJson();
             // tag some additional data with the content's JSON
             // in this case just the name so that we can map the object
             // to its additional properties.
@@ -287,80 +294,64 @@ namespace app
         }
         virtual std::unique_ptr<Resource> Clone() const override
         { return std::make_unique<GameResource>(*this); }
+
+        void UpdateContent(const Content& data)
+        { *mContent = data; }
+        void UpdateProperties(const QVariantMap& props)
+        { mProps = props;}
+
         Content* GetContent()
-        { return &mContent; }
+        { return mContent.get(); }
         const Content* GetContent() const
-        { return &mContent; }
+        { return mContent.get(); }
+        const QVariantMap& GetProperies() const
+        { return mProps;}
+
+        std::shared_ptr<const Content> GetSharedResource() const
+        { return mContent; }
+
+        GameResource& operator=(const GameResource& other) = delete;
 
     protected:
         virtual void* GetIf(const std::type_info& expected_type) override
         {
             if (typeid(Content) == expected_type)
-                return &mContent;
+                return (void*)mContent.get();
             return nullptr;
         }
         virtual const void* GetIf(const std::type_info& expected_type) const override
         {
             if (typeid(Content) == expected_type)
-                return &mContent;
+                return (const void*)mContent.get();
             return nullptr;
         }
     private:
-        Content mContent;
+        std::shared_ptr<Content> mContent;
+        //Content mContent;
         QString mName;
         QVariantMap mProps;
     };
 
-    // Resource handle wraps a gfx resource object
-    // and provides some additional functionality that pertains
-    // only to the *instance*. Not the resource type per se.
-    class ResourceHandle
+    template<typename T> inline
+    const GameResource<T>& ResourceCast(const Resource& res)
     {
-    public:
-        virtual ~ResourceHandle() = default;
-        // Update the instance data, for example material parameters from a gfx::Material object.
-        virtual void UpdateInstance(const QString& name, Resource::Type type, const void* gfx_content_source) = 0;
-        // Checks if the handle has expired.
-        virtual bool IsExpired() const = 0;
-        // Return the name of the resource that this instance represents..
-        virtual QString GetName() const = 0;
-    };
-
-    template<typename Content>
-    class WeakGraphicsResourceHandle : public ResourceHandle
+        using ResourceType = GameResource<T>;
+        const auto* ptr = dynamic_cast<const ResourceType*>(&res);
+        ASSERT(ptr);
+        return *ptr;
+    }
+    template<typename T> inline
+    GameResource<T>& ResourceCast(Resource& res)
     {
-    public:
-        static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
+        using ResourceType = GameResource<T>;
+        auto* ptr = dynamic_cast<ResourceType*>(&res);
+        ASSERT(ptr);
+        return *ptr;
+    }
 
-        WeakGraphicsResourceHandle(const QString& name, std::shared_ptr<Content> handle)
-            : mName(name)
-            , mHandle(handle)
-        {}
-        virtual void UpdateInstance(const QString& name, Resource::Type source_type, const void* gfx_content_source) override
-        {
-            if (TypeValue != source_type)
-                return;
-            else if (mName != name)
-                return;
-            auto ptr = mHandle.lock();
-            if (!ptr)
-                return;
-            *ptr = *static_cast<const Content*>(gfx_content_source);
-        }
-        virtual bool IsExpired() const override
-        { return mHandle.expired(); }
-        virtual QString GetName() const override
-        { return mName; }
-
-    private:
-        const QString mName;
-        std::weak_ptr<Content> mHandle;
-    };
-
-
-    using MaterialResource = GameResource<gfx::Material>;
-    using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngine>;
-    using AnimationResource = GameResource<game::Animation>;
-    using CustomShapeResource = GameResource<gfx::Polygon>;
+    using MaterialResource       = GameResource<gfx::MaterialClass>;
+    using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
+    using CustomShapeResource    = GameResource<gfx::PolygonClass>;
+    using AnimationResource      = GameResource<game::AnimationClass>;
 
 } // namespace

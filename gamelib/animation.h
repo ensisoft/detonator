@@ -35,10 +35,12 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
+#include "base/math.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/types.h"
@@ -46,7 +48,9 @@
 
 namespace gfx {
     class Drawable;
+    class DrawableClass;
     class Material;
+    class MaterialClass;
     class Painter;
     class Transform;
 } // namespace
@@ -55,7 +59,10 @@ namespace game
 {
     class GfxFactory;
 
-    class AnimationNode
+    // AnimationNodeClass holds the data for some particular type of an animation node.
+    // This includes the drawable shape and the associated material and the node's
+    // transformation data (relative to its parent).
+    class AnimationNodeClass
     {
     public:
         enum class RenderPass {
@@ -75,37 +82,35 @@ namespace game
             UpdateDrawable,
             // Restart drawables or not
             RestartDrawable,
-            // Limit the node's active lifetime to be within
-            // the start time and start time + lifetime interval
-            // Outside this time frame the node will not render or
-            // update.
-            LimitLifetime
         };
 
         // This will construct an "empty" node that cannot be
         // drawn yet. You'll need to se the various properties
         // for drawable/material etc.
-        AnimationNode();
+        AnimationNodeClass();
 
         // Set the drawable object (shape) for this component.
         // The name identifies the resource in the gfx resource loader.
-        void SetDrawable(const std::string& name, std::shared_ptr<gfx::Drawable> drawable)
+        void SetDrawable(const std::string& name,
+            const std::shared_ptr<const gfx::DrawableClass>& klass)
         {
-            mDrawable = std::move(drawable);
-            mDrawableName = name;
-            if (mDrawable)
-            {
-                mDrawable->SetLineWidth(mLineWidth);
-                mDrawable->SetStyle(mRenderStyle);
-            }
+            mDrawableName  = name;
+            mDrawableClass = klass;
+            mDrawable.reset();
         }
+        void SetDrawable(const std::string& name)
+        { mDrawableName= name; }
         // Set the material object for this component.
         // The name identifies the runtime material resource in the gfx resource loader.
-        void SetMaterial(const std::string& name, std::shared_ptr<gfx::Material> material)
+        void SetMaterial(const std::string& name,
+            const std::shared_ptr<const gfx::MaterialClass>& klass)
         {
-            mMaterial = std::move(material);
-            mMaterialName = name;
+            mMaterialName  = name;
+            mMaterialClass = klass;
+            mMaterial.reset();
         }
+        void SetMaterial(const std::string& name)
+        { mMaterialName = name; }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
         void SetName(const std::string& name)
@@ -121,25 +126,13 @@ namespace game
         void SetRotation(float value)
         { mRotation = value; }
         void SetRenderStyle(RenderStyle style)
-        {
-            mRenderStyle = style;
-            if (mDrawable)
-                mDrawable->SetStyle(mRenderStyle);
-        }
+        { mRenderStyle = style; }
         void SetLineWidth(float value)
-        {
-            mLineWidth = value;
-            if (mDrawable)
-                mDrawable->SetLineWidth(mLineWidth);
-        }
+        { mLineWidth = value; }
         void SetFlag(Flags f, bool on_off)
         { mBitFlags.set(f, on_off); }
         bool TestFlag(Flags f) const
         { return mBitFlags.test(f); }
-        void SetStartTime(float value)
-        { mStartTime = value; }
-        void SetEndTime(float value)
-        { mEndTime = value; }
 
         RenderPass GetRenderPass() const
         { return mRenderPass; }
@@ -151,22 +144,20 @@ namespace game
         { return mId; }
         std::string GetName() const
         { return mName; }
-        std::shared_ptr<gfx::Material> GetMaterial()
-        { return mMaterial; }
-        std::shared_ptr<const gfx::Material> GetMaterial() const
-        { return mMaterial; }
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
+        { return mMaterialClass; }
         std::string GetMaterialName() const
         { return mMaterialName; }
-        std::shared_ptr<gfx::Drawable> GetDrawable()
-        { return mDrawable; }
-        std::shared_ptr<const gfx::Drawable> GetDrawable() const
-        { return mDrawable; }
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
+        { return mDrawableClass; }
         std::string GetDrawableName() const
         { return mDrawableName; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
         glm::vec2 GetSize() const
         { return mSize; }
+        glm::vec2 GetScale() const
+        { return mScale; }
         float GetRotation() const
         { return mRotation; }
         float GetLineWidth() const
@@ -175,22 +166,35 @@ namespace game
         { return mBitFlags; }
         base::bitflag<Flags>& GetFlags()
         { return mBitFlags; }
-        float GetStartTime() const
-        { return mStartTime; }
-        float GetEndTime() const
-        { return mEndTime; }
 
-        std::size_t GetHash() const;
+        // Shim function to support generic RenderTree draw even for the
+        // class object.
+        std::shared_ptr<const gfx::Drawable> GetDrawable() const
+        {
+            if (!mDrawable)
+                mDrawable = CreateDrawableInstance();
+            mDrawable->SetStyle(mRenderStyle);
+            mDrawable->SetLineWidth(mLineWidth);
+            return mDrawable;
+        }
+        // Shim function to support generic RenderTree draw event for the
+        // class object.
+        std::shared_ptr<const gfx::Material> GetMaterial() const
+        {
+            if (!mMaterial)
+                mMaterial = CreateMaterialInstance();
+            return mMaterial;
+        }
+        void SetDrawableInstance(std::unique_ptr<gfx::Drawable> drawable)
+        { mDrawable = std::move(drawable); }
+        void SetMaterialInstance(std::unique_ptr<gfx::Material> material)
+        { mMaterial = std::move(material); }
 
-        // Update node, i.e. its material and drawable if the relevant
-        // update flags are set.
-        void Update(float time, float dt);
+        // Create new instance of drawable for this type of node.
+        std::unique_ptr<gfx::Drawable> CreateDrawableInstance() const;
 
-        // Reset node's accumulated time to 0.
-        void Reset();
-
-        // Returns true if node is alive (active) at this time.
-        bool IsAlive(float time) const;
+        // Create new instance of material for this type of node.
+        std::unique_ptr<gfx::Material> CreateMaterialInstance() const;
 
         // Get this node's transformation that applies
         // to the hieararchy of nodes.
@@ -200,18 +204,30 @@ namespace game
         // node's drawable object(s).
         glm::mat4 GetModelTransform() const;
 
-        // Prepare this animation component for rendering
+        // Get the node hash based on the member values.
+        std::size_t GetHash() const;
+
+        // Update node, i.e. its material and drawable if the relevant
+        // update flags are set.
+        void Update(float time, float dt);
+
+        // Reset runtime state to empty. If you call this you'll need to
+        // call Prepare also again.
+        void Reset();
+
+        // Prepare this animation node class object
         // by loading all the needed runtime resources.
-        void Prepare(const GfxFactory& loader);
+        void Prepare(const GfxFactory& loader) const;
 
         // serialize the component properties into JSON.
         nlohmann::json ToJson() const;
 
-        // Load a component and it's properties from a JSON object.
+        // Create a new AnimationNodeClass object based on the JSON.
+        // Returns std::nullopt if the deserialization failed.
         // Note that this does not yet create/load any runtime objects
         // such as materials or such but they are loaded later when the
-        // component is prepared.
-        static std::optional<AnimationNode> FromJson(const nlohmann::json& object);
+        // class object is prepared.
+        static std::optional<AnimationNodeClass> FromJson(const nlohmann::json& object);
     private:
         // generic properties.
         std::string mId;
@@ -222,11 +238,8 @@ namespace game
         // around so that we we know which resources to load at runtime.
         std::string mMaterialName;
         std::string mDrawableName;
-        std::shared_ptr<gfx::Material> mMaterial;
-        std::shared_ptr<gfx::Drawable> mDrawable;
-        // timewise properties.
-        float mStartTime = 0.0f;
-        float mEndTime   = 0.0f;
+        mutable std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
+        mutable std::shared_ptr<const gfx::DrawableClass> mDrawableClass;
         // transformation properties.
         // translation offset relative to the animation.
         glm::vec2 mPosition = {0.0f, 0.0f};
@@ -245,152 +258,793 @@ namespace game
         float mLineWidth = 1.0f;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
+        // cached material instance and drawable instance
+        // to avoid having to recreate new instances all the time
+        // when the *class* object is drawn.
+        mutable std::shared_ptr<gfx::Material> mMaterial;
+        mutable std::shared_ptr<gfx::Drawable> mDrawable;
+    };
+
+    // AnimationNode is an instance of some specific type of AnimationNodeClass
+    // and it contains the per instance animation node data.
+    class AnimationNode
+    {
+    public:
+        using Flags = AnimationNodeClass::Flags;
+        using RenderPass = AnimationNodeClass::RenderPass;
+
+        AnimationNode(const std::shared_ptr<const AnimationNodeClass>& klass)
+            : mClass(klass)
+        {
+            Reset();
+        }
+        // settters for instance state.
+        void SetTranslation(const glm::vec2& pos)
+        { mPosition = pos; }
+        void SetScale(const glm::vec2& scale)
+        { mScale = scale; }
+        void SetSize(const glm::vec2& size)
+        { mSize = size; }
+        void SetRotation(float value)
+        { mRotation = value; }
+
+        // getters for instance state.
+        glm::vec2 GetTranslation() const
+        { return mPosition; }
+        glm::vec2 GetSize() const
+        { return mSize; }
+        glm::vec2 GetScale() const
+        { return mScale; }
+        float GetRotation() const
+        { return mRotation; }
+        std::shared_ptr<const gfx::Material> GetMaterial() const
+        { return mMaterial; }
+        std::shared_ptr<const gfx::Drawable> GetDrawable() const
+        { return mDrawable; }
+
+        // Getters for class object state.
+        bool TestFlag(AnimationNodeClass::Flags flags) const
+        { return mClass->TestFlag(flags); }
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
+        { return mClass->GetMaterialClass(); }
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
+        { return mClass->GetDrawableClass(); }
+        AnimationNodeClass::RenderPass GetRenderPass() const
+        { return mClass->GetRenderPass(); }
+        int GetLayer() const
+        { return mClass->GetLayer(); }
+        std::string GetName() const
+        { return mClass->GetName(); }
+        std::string GetId() const
+        { return mClass->GetId(); }
+
+        // Reset node's state to the initial state
+        void Reset();
+
+        //  Update node's state.
+        void Update(float time, float dt);
+
+        // Get this node's transformation that applies
+        // to the hieararchy of nodes.
+        glm::mat4 GetNodeTransform() const;
+
+        // Get this node's transformation that applies to this
+        // node's drawable object(s).
+        glm::mat4 GetModelTransform() const;
+
+        // accessor the node's class type object.
+        const AnimationNodeClass& GetClass() const
+        { return *mClass.get(); }
+
+        // shortcut operator for accessing the members of the node's class type.
+        const AnimationNodeClass* operator->() const
+        { return mClass.get(); }
+
+    private:
+        // the static class object.
+        std::shared_ptr<const AnimationNodeClass> mClass;
+        // the material instance.
+        std::shared_ptr<gfx::Material> mMaterial;
+        // the drawable instance.
+        std::shared_ptr<gfx::Drawable> mDrawable;
+        // the instance state of this animation node.
+        // transformation properties.
+        // translation offset relative to the parent node.
+        glm::vec2 mPosition = {0.0f, 0.0f};
+        // size of the node in absolute units (not relative to parent)
+        glm::vec2 mSize = {1.0f, 1.0f};
+        // scale of the node. applies to the hierarchy. could be
+        // used to define the "size" of the node relative to the parent.
+        glm::vec2 mScale = {1.0f, 1.0f};
+        // rotation of the node (relative to parent)
+        float mRotation = 0.0f;
+    };
+
+    // AnimationActuatorClass defines an interface for classes of
+    // animation actuators. Animation actuators are objects that
+    // modify the state of some animation nodes possibly over time
+    // by for example doing interpolation between different nodes states
+    // or by toggling some state flags at specific points in time.
+    class AnimationActuatorClass
+    {
+    public:
+        // The type of the actuator class.
+        enum class Type {
+            // Transform actuators modify the transform state of the node
+            // i.e. the translation, scale and rotation variables.
+            Transform
+        };
+        // dtor.
+        virtual ~AnimationActuatorClass() = default;
+        // Serialize the actuator class object into JSON.
+        virtual nlohmann::json ToJson() const = 0;
+        // Load the actuator class object state from JSON. Returns true
+        // succesful otherwise false and the object is not valid state.
+        virtual bool FromJson(const nlohmann::json& object) = 0;
+        // Get the hash of the object state.
+        virtual size_t GetHash() const = 0;
+        // Create an exact clone of this actuator class object.
+        virtual std::unique_ptr<AnimationActuatorClass> Clone() const = 0;
+        // Get the type of the represented actuator.
+        virtual Type GetType() const = 0;
+    private:
+    };
+
+    // AnimationTransformActuatorClass holds the transform data for some
+    // particular type of transform type object.
+    class AnimationTransformActuatorClass : public AnimationActuatorClass
+    {
+    public:
+        // The interpolation method.
+        using Interpolation = math::Interpolation;
+
+        AnimationTransformActuatorClass() = default;
+        AnimationTransformActuatorClass(const std::string& node) : mNodeId(node)
+        {}
+        float GetStartTime() const
+        { return mStartTime; }
+        float GetDuration() const
+        { return mDuration; }
+        Interpolation GetInterpolation() const
+        { return mInterpolation; }
+        glm::vec2 GetEndPosition() const
+        { return mEndPosition; }
+        glm::vec2 GetEndSize() const
+        { return mEndSize; }
+        float GetEndRotation() const
+        { return mEndRotation; }
+        std::string GetNodeId() const
+        { return mNodeId; }
+
+        void SetNodeId(const std::string& id)
+        { mNodeId = id; }
+        void SetStartTime(float start)
+        { mStartTime = math::clamp(0.0f, 1.0f, start); }
+        void SetDuration(float duration)
+        { mDuration = math::clamp(0.0f, 1.0f, duration); }
+        void SetInterpolation(Interpolation interp)
+        { mInterpolation = interp; }
+        void SetEndPosition(const glm::vec2& pos)
+        { mEndPosition = pos; }
+        void SetEndSize(const glm::vec2& size)
+        { mEndSize = size; }
+        void SetEndRotation(float rot)
+        { mEndRotation = rot; }
+
+        virtual nlohmann::json ToJson() const override
+        {
+            nlohmann::json json;
+            base::JsonWrite(json, "node",      mNodeId);
+            base::JsonWrite(json, "method",    mInterpolation);
+            base::JsonWrite(json, "starttime", mStartTime);
+            base::JsonWrite(json, "duration",  mDuration);
+            base::JsonWrite(json, "position",  mEndPosition);
+            base::JsonWrite(json, "size",      mEndSize);
+            base::JsonWrite(json, "rotation",  mEndRotation);
+            return json;
+        }
+        virtual bool FromJson(const nlohmann::json& json) override
+        {
+            return base::JsonReadSafe(json, "node", &mNodeId) &&
+                   base::JsonReadSafe(json, "starttime", &mStartTime) &&
+                   base::JsonReadSafe(json, "duration",  &mDuration) &&
+                   base::JsonReadSafe(json, "position",  &mEndPosition) &&
+                   base::JsonReadSafe(json, "size",      &mEndSize) &&
+                   base::JsonReadSafe(json, "rotation",  &mEndRotation) &&
+                   base::JsonReadSafe(json, "method",    &mInterpolation);
+        }
+        virtual std::size_t GetHash() const override
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mNodeId);
+            hash = base::hash_combine(hash, mInterpolation);
+            hash = base::hash_combine(hash, mStartTime);
+            hash = base::hash_combine(hash, mDuration);
+            hash = base::hash_combine(hash, mEndPosition);
+            hash = base::hash_combine(hash, mEndSize);
+            hash = base::hash_combine(hash, mEndRotation);
+            return hash;
+        }
+        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        { return std::make_unique<AnimationTransformActuatorClass>(*this); }
+        virtual Type GetType() const override
+        { return Type::Transform; }
+    private:
+        // id of the node we're going to change.
+        std::string mNodeId;
+        // the interpolation method to be used.
+        Interpolation mInterpolation = Interpolation::Linear;
+        // Normalized start time.
+        float mStartTime = 0.0f;
+        // Normalized duration.
+        float mDuration = 1.0f;
+        // the ending state of the the transformation.
+        // the ending position (translation relative to parent)
+        glm::vec2 mEndPosition = {0.0f, 0.0f};
+        // the ending size
+        glm::vec2 mEndSize = {1.0f, 1.0f};
+        // the ending rotation.
+        float mEndRotation = 0.0f;
+    };
+
+    // Apply action/transformation or some other change on an animation node
+    // possibly by using an interpolation between the starting and the ending
+    // state.
+    class AnimationActuator
+    {
+    public:
+        using Type = AnimationActuatorClass::Type;
+        // Start the action/transition to be applied by this actuator.
+        // The node is the node in question that the changes will be applied to.
+        virtual void Start(AnimationNode& node) = 0;
+        // Apply an interpolation of the state based on the time value t onto to the node.
+        virtual void Apply(AnimationNode& node, float t) = 0;
+        // Finish the action/transition to be applied by this actuator.
+        // The node is the node in question that the changes will (were) applied to.
+        virtual void Finish(AnimationNode& node) = 0;
+        // Get the normalized start time when this actuator begins to take effect.
+        virtual float GetStartTime() const = 0;
+        // Get the normalized duration of the duration of the actuator's transformation.
+        virtual float GetDuration() const = 0;
+        // Get the id of the node that will be modified by this actuator.
+        virtual std::string GetNodeId() const = 0;
+        // Create an exact clone of this actuator object.
+        virtual std::unique_ptr<AnimationActuator> Clone() const = 0;
+    private:
+    };
+
+    // Apply a change to node's transformation, i.e. one of the following
+    // properties: size, position or translation.
+    class AnimationTransformActuator : public AnimationActuator
+    {
+    public:
+        AnimationTransformActuator(const std::shared_ptr<const AnimationTransformActuatorClass>& klass)
+            : mClass(klass)
+        {}
+        AnimationTransformActuator(const AnimationTransformActuatorClass& klass)
+            : mClass(std::make_shared<AnimationTransformActuatorClass>(klass))
+        {}
+        virtual void Start(AnimationNode& node) override
+        {
+            mStartPosition = node.GetTranslation();
+            mStartSize     = node.GetSize();
+            mStartRotation = node.GetRotation();
+        }
+        virtual void Apply(AnimationNode& node, float t) override
+        {
+            // apply interpolated state on the node.
+            const auto method = mClass->GetInterpolation();
+            const auto& p = math::interpolate(mStartPosition, mClass->GetEndPosition(), t, method);
+            const auto& s = math::interpolate(mStartSize,     mClass->GetEndSize(),     t, method);
+            const auto& r = math::interpolate(mStartRotation, mClass->GetEndRotation(), t, method);
+            node.SetTranslation(p);
+            node.SetSize(s);
+            node.SetRotation(r);
+        }
+        virtual void Finish(AnimationNode& node) override
+        {
+            node.SetTranslation(mClass->GetEndPosition());
+            node.SetRotation(mClass->GetEndRotation());
+            node.SetSize(mClass->GetEndSize());
+        }
+        virtual float GetStartTime() const override
+        { return mClass->GetStartTime(); }
+        virtual float GetDuration() const override
+        { return mClass->GetDuration(); }
+        virtual std::string GetNodeId() const override
+        { return mClass->GetNodeId(); }
+        virtual std::unique_ptr<AnimationActuator> Clone() const override
+        { return std::make_unique<AnimationTransformActuator>(*this); }
+    private:
+        std::shared_ptr<const AnimationTransformActuatorClass> mClass;
+        // The starting state for the transformation.
+        // the transform actuator will then interpolate between the
+        // current starting and expected ending state.
+        glm::vec2 mStartPosition = {0.0f, 0.0f};
+        glm::vec2 mStartSize = {1.0f, 1.0f};
+        float mStartRotation = 0.0f;
+    };
+
+    // AnimationTrackClass defines a new type of animation track that includes
+    // the static state of the animation such as the modified ending results
+    // of the nodes involved.
+    class AnimationTrackClass
+    {
+    public:
+        AnimationTrackClass() = default;
+        // Create a deep copy of the class object.
+        AnimationTrackClass(const AnimationTrackClass& other)
+        {
+            for (const auto& a : other.mActuators)
+            {
+                mActuators.push_back(a->Clone());
+            }
+            mName     = other.mName;
+            mDuration = other.mDuration;
+            mLooping  = other.mLooping;
+        }
+        // Set the human readable name for the animation track.
+        void SetName(const std::string& name)
+        { mName = name; }
+        // Set the duration for the animation track. These could be seconds
+        // but ultimately it's up to the application to define what is the
+        // real world meaning of the units in question.
+        void SetDuration(float duration)
+        { mDuration = duration; }
+        // Enable/disable looping flag. A looping animation will never end
+        // and will reset after the reaching the end. I.e. all the actuators
+        // involved will have their states reset to the initial state which
+        // will be re-applied to the node instances. For an animation without
+        // any perceived jumps or discontinuitys it's important that the animation
+        // should transform nodes back to their initial state before the end
+        // of the animation track.
+        void SetLooping(bool looping)
+        { mLooping = looping; }
+
+        // Get the human readable name of the animation track.
+        std::string GetName() const
+        { return mName; }
+        // Get the normalized duration of the animation track.
+        float GetDuration() const
+        { return mDuration; }
+        // Returns true if the animation track is looping or not.
+        bool IsLooping() const
+        { return mLooping; }
+
+        // Add a new actuator that applies state update/action on some animation node.
+        void AddActuator(std::shared_ptr<AnimationActuatorClass> actuator)
+        {
+            mActuators.push_back(std::move(actuator));
+        }
+        // Add a new actuator that applies state update/action on some animation node.
+        template<typename Actuator>
+        void AddActuator(const Actuator& actuator)
+        {
+            std::shared_ptr<AnimationActuatorClass> foo(new Actuator(actuator));
+            mActuators.push_back(std::move(foo));
+        }
+
+        // Get the number of animation actuator class objects currently
+        // in this animation track.
+        size_t GetNumActuators() const
+        { return mActuators.size(); }
+
+        // Get the animation actuator class object at index i.
+        const AnimationActuatorClass& GetActuatorClass(size_t i) const
+        { return *mActuators[i]; }
+
+        // Create an instance of some actuator class type at the given index.
+        // For example if the type of actuator class at index N is
+        // AnimationTransformActuatorClass then the returnd object will be an
+        // instance of AnimationTransformActuator.
+        std::unique_ptr<AnimationActuator> CreateActuatorInstance(size_t i) const
+        {
+            const auto& klass = mActuators[i];
+            if (klass->GetType() == AnimationActuatorClass::Type::Transform)
+                return std::make_unique<AnimationTransformActuator>(std::static_pointer_cast<AnimationTransformActuatorClass>(klass));
+            return {};
+        }
+
+        // Get the hash value based on the static data.
+        std::size_t GetHash() const
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mName);
+            hash = base::hash_combine(hash, mDuration);
+            hash = base::hash_combine(hash, mLooping);
+            for (const auto& actuator : mActuators)
+                hash = base::hash_combine(hash, actuator->GetHash());
+            return hash;
+        }
+
+        // Serialize into JSON.
+        nlohmann::json ToJson() const
+        {
+            nlohmann::json json;
+            base::JsonWrite(json, "name",     mName);
+            base::JsonWrite(json, "duration", mDuration);
+            base::JsonWrite(json, "looping",  mLooping);
+            for (const auto& actuator : mActuators)
+            {
+                nlohmann::json js;
+                base::JsonWrite(js, "type", actuator->GetType());
+                base::JsonWrite(js, "actuator", *actuator);
+                json["actuators "].push_back(std::move(js));
+            }
+            return json;
+        }
+        // Try to create new instance of AnimationTrackClass based on the data
+        // loaded from JSON. On failure returns std::nullopt otherwise returns
+        // an instance of the class object.
+        static std::optional<AnimationTrackClass> FromJson(const nlohmann::json& json)
+        {
+            AnimationTrackClass ret;
+            if (!base::JsonReadSafe(json, "name", &ret.mName) ||
+                !base::JsonReadSafe(json, "duration", &ret.mDuration) ||
+                !base::JsonReadSafe(json, "looping", &ret.mLooping))
+                return std::nullopt;
+            if (!json.contains("actuators"))
+                return ret;
+            for (const auto& json_actuator : json["actuators"].items())
+            {
+                const auto& obj = json_actuator.value();
+                AnimationActuatorClass::Type type;
+                if (!base::JsonReadSafe(obj, "type", &type))
+                    return std::nullopt;
+                std::shared_ptr<AnimationActuatorClass> actuator;
+                if (type == AnimationActuatorClass::Type::Transform)
+                    actuator = std::make_shared<AnimationTransformActuatorClass>();
+
+                if (!actuator->FromJson(obj["actuator"]))
+                    return std::nullopt;
+                ret.mActuators.push_back(actuator);
+            }
+            return ret;
+        }
+        // Do a deep copy on the asignment of a new object.
+        AnimationTrackClass& operator=(const AnimationTrackClass& other)
+        {
+            if (this == &other)
+                return *this;
+            AnimationTrackClass copy(other);
+            std::swap(mActuators, copy.mActuators);
+            std::swap(mName, copy.mName);
+            std::swap(mDuration, copy.mDuration);
+            std::swap(mLooping, copy.mLooping);
+            return *this;
+        }
+    private:
+        // The list of animation actuators that apply transforms
+        std::vector<std::shared_ptr<AnimationActuatorClass>> mActuators;
+        // Human readable name of the track.
+        std::string mName;
+        // the duration of this track.
+        float mDuration = 1.0f;
+        // Loop animation or not. If looping then never completes.
+        bool mLooping = false;
     };
 
 
-    class Animation
+    // AnimationTrack is an instance of some type of AnimationTrackClass.
+    // It contains the per instance data of the animation track which is
+    // modified over time through updates to the track and its actuators states.
+    class AnimationTrack
     {
     public:
-        using RenderTree = TreeNode<AnimationNode>;
-        using RenderTreeNode = TreeNode<AnimationNode>;
-
-        enum class Flags {
-            // Whether to actually playback / perform timeline
-            // actions or not.
-            EnableTimeline,
-            // whether to loop from the end of animation back to start.
-            LoopAnimation
-        };
-
-        Animation() = default;
-        Animation(const Animation& other);
-
-        struct DrawPacket {
-            // shortcut to the node's material.
-            std::shared_ptr<const gfx::Material> material;
-            // shortcut to the node's drawable.
-            std::shared_ptr<const gfx::Drawable> drawable;
-            // transform that pertains to the draw.
-            glm::mat4 transform;
-            // the animation layer this draw belongs to.
-            int layer = 0;
-            // the render pass this draw belongs to.
-            AnimationNode::RenderPass pass = AnimationNode::RenderPass::Draw;
-        };
-
-        class DrawHook
+        // Create a new animation track based on the given class object.
+        AnimationTrack(const std::shared_ptr<const AnimationTrackClass>& klass)
+            : mClass(klass)
         {
-        public:
-            virtual ~DrawHook() = default;
-            // This is a hook function to inspect and  modify the the draw packet produced by the
-            // given animation node. The return value can be used to indicate filtering.
-            // If the function returns false thepacket is dropped. Otherwise it's added to the
-            // current drawlist with any possible modifications.
-            virtual bool InspectPacket(const AnimationNode* node, DrawPacket& packet) { return true; }
-            // This is a hook function to append extra draw packets to the current drawlist
-            // based on the node.
-            // Transform is the combined transformation hierarchy containing the transformations
-            // from this current node to "view".
-            virtual void AppendPackets(const AnimationNode* node, gfx::Transform& trans, std::vector<DrawPacket>& packets) {}
-        protected:
-        };
+            for (size_t i=0; i<mClass->GetNumActuators(); ++i)
+            {
+                NodeTrack track;
+                track.actuator = mClass->CreateActuatorInstance(i);
+                track.node     = track.actuator->GetNodeId();
+                track.ended    = false;
+                track.started  = false;
+                mTracks.push_back(std::move(track));
+            }
+        }
+        // Create a new animation track based on the given class object
+        // which will be copied.
+        AnimationTrack(const AnimationTrackClass& klass)
+            : AnimationTrack(std::make_shared<AnimationTrackClass>(klass))
+        {}
+        // Create a new animation track baed on the given class object.
+        AnimationTrack(const AnimationTrack& other) : mClass(other.mClass)
+        {
+            for (size_t i=0; i<other.mTracks.size(); ++i)
+            {
+                NodeTrack track;
+                track.node     = other.mTracks[i].node;
+                track.actuator = other.mTracks[i].actuator->Clone();
+                track.ended    = other.mTracks[i].ended;
+                track.started  = other.mTracks[i].started;
+                mTracks.push_back(std::move(track));
+            }
+            mCurrentTime = other.mCurrentTime;
+        }
+        // Move ctor.
+        AnimationTrack(AnimationTrack&& other)
+        {
+            mClass       = other.mClass;
+            mTracks      = std::move(other.mTracks);
+            mCurrentTime = other.mCurrentTime;
+        }
 
-        // Draw the animation and its components.
-        // Each component is transformed relative to the parent transformation "trans".
-        // Optional draw hook can be used to modify the draw packets before submission to the
-        // paint device.
-        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
-
-        // Update the animation and it's nodes.
-        // Triggers the actions and events specified on the timeline.
+        // Update the animation track state.
         void Update(float dt);
+        // Apply state/transition updates/interpolated intermdiate states (if any)
+        // onto the given node.
+        void Apply(AnimationNode& node) const;
+        // Prepare the animation track to restart.
+        void Restart();
+        // Returns true if the animation is complete, i.e. all the
+        // actions have been performed.
+        bool IsComplete() const;
+
+        // Returns whether the animation is looping or not.
+        bool IsLooping() const
+        { return mClass->IsLooping(); }
+        // Get the human readable name of the animation track.
+        std::string GetName() const
+        { return mClass->GetName(); }
+
+        // Access for the tracks class object.
+        const AnimationTrackClass& GetClass() const
+        { return *mClass; }
+        // Shortcut operator for accessing the members of the track's class object.
+        const AnimationTrackClass* operator->() const
+        { return mClass.get(); }
+    private:
+        // the class object
+        std::shared_ptr<const AnimationTrackClass> mClass;
+        // For each node we keep a list of actions that are to be performed
+        // at specific times.
+        struct NodeTrack {
+            std::string node;
+            std::unique_ptr<AnimationActuator> actuator;
+            mutable bool started = false;
+            mutable bool ended   = false;
+        };
+        std::vector<NodeTrack> mTracks;
+
+        // current play back time for this track.
+        float mCurrentTime = 0.0f;
+    };
+
+    struct AnimationDrawPacket {
+        // shortcut to the node's material.
+        std::shared_ptr<const gfx::Material> material;
+        // shortcut to the node's drawable.
+        std::shared_ptr<const gfx::Drawable> drawable;
+        // transform that pertains to the draw.
+        glm::mat4 transform;
+        // the animation layer this draw belongs to.
+        int layer = 0;
+        // the render pass this draw belongs to.
+        AnimationNode::RenderPass pass = AnimationNode::RenderPass::Draw;
+    };
+
+    template<typename Node>
+    class AnimationDrawHook
+    {
+    public:
+        virtual ~AnimationDrawHook() = default;
+        // This is a hook function to inspect and  modify the the draw packet produced by the
+        // given animation node. The return value can be used to indicate filtering.
+        // If the function returns false thepacket is dropped. Otherwise it's added to the
+        // current drawlist with any possible modifications.
+        virtual bool InspectPacket(const Node* node, AnimationDrawPacket& packet) { return true; }
+        // This is a hook function to append extra draw packets to the current drawlist
+        // based on the node.
+        // Transform is the combined transformation hierarchy containing the transformations
+        // from this current node to "view".
+        virtual void AppendPackets(const Node* node, gfx::Transform& trans,
+            std::vector<AnimationDrawPacket>& packets) {}
+    protected:
+    };
+
+    // AnimationClass holds the data for some particular type of animation,
+    // i.e. the AnimationNodes that form the visual look and the appearance
+    // of the animation combined in a transformation hiearchy.
+    class AnimationClass
+    {
+    public:
+        using RenderTree     = TreeNode<AnimationNodeClass>;
+        using RenderTreeNode = TreeNode<AnimationNodeClass>;
+        using DrawHook   = AnimationDrawHook<AnimationNodeClass>;
+        using DrawPacket = AnimationDrawPacket;
+
+        AnimationClass() = default;
+        AnimationClass(const AnimationClass& other);
 
         // Add a new animation node. Returns pointer to the node
         // that was added to the animation.
-        AnimationNode* AddNode(AnimationNode&& node);
-
+        AnimationNodeClass* AddNode(AnimationNodeClass&& node);
         // Add a new animation node. Returns a pointer to the node
         // that was added to the anímation.
-        AnimationNode* AddNode(const AnimationNode& node);
+        AnimationNodeClass* AddNode(const AnimationNodeClass& node);
+        // Add a new animation node. Returns a pointer to the node
+        // that was added to the anímation.
+        AnimationNodeClass* AddNode(std::unique_ptr<AnimationNodeClass> node);
 
         // Delete a node by the given index.
         void DeleteNodeByIndex(size_t i);
+        // Delete a node by the given id. Returns tre if the node
+        // was found and deleted otherwise false.
+        bool DeleteNodeById(const std::string& id);
+        // Delete a node by the given name. Returns true if the node
+        // was found and deleted otherwise false.
+        bool DeleteNodeByName(const std::string& name);
 
-        // Delete a node by the given id. THe node is expected to exist.
-        void DeleteNodeById(const std::string& id);
-
-        AnimationNode& GetNode(size_t i)
-        {
-            ASSERT(i < mNodes.size());
-            return *mNodes[i];
-        }
-        const AnimationNode& GetNode(size_t i) const
-        {
-            ASSERT(i < mNodes.size());
-            return *mNodes[i];
-        }
+        // Get the animation node class object by index.
+        // The index must be valid.
+        AnimationNodeClass& GetNode(size_t i);
         // Find animation node by the given name. Returns nullptr if no such
         // node could be found.
-        AnimationNode* FindNodeByName(const std::string& name)
-        {
-            for (auto& node : mNodes)
-                if (node->GetName() == name) return node.get();
-            return nullptr;
-        }
+        AnimationNodeClass* FindNodeByName(const std::string& name);
+        // Find animation node by the given id. Returns nullptr if no such
+        // node could be found.
+        AnimationNodeClass* FindNodeById(const std::string& id);
+
+        // Get the animation node class object by index.
+        // The index must be valid.
+        const AnimationNodeClass& GetNode(size_t i) const;
         // Find animation node by the given name. Returns nullptr if no such
         // node could be found.
-        const AnimationNode* FindNodeByName(const std::string& name) const
-        {
-            for (const auto& node : mNodes)
-                if (node->GetName() == name) return node.get();
-            return nullptr;
-        }
+        const AnimationNodeClass* FindNodeByName(const std::string& name) const;
+        // Find animation node by the given id. Returns nullptr if no such
+        // node could be found.
+        const AnimationNodeClass* FindNodeById(const std::string& id) const;
 
-        std::size_t GetNumNodes() const
-        { return mNodes.size(); }
-        float GetDelay() const
-        { return mDelay; }
-        float GetDuration() const
-        { return mDuration; }
-        RenderTree& GetRenderTree()
-        { return mRenderTree; }
-        const RenderTree& GetRenderTree() const
-        { return mRenderTree; }
-        void SetFlag(Flags f, bool on_off)
-        { mBitFlags.set(f, on_off); }
-        bool TestFlag(Flags f) const
-        { return mBitFlags.test(f); }
-        void SetDuration(float duration)
-        { mDuration = duration; }
-        void SetDelay(float delay)
-        { mDelay = delay; }
-        // Get the current time accumulator value.
-        float GetCurrentTime() const
-        { return mCurrentTime; }
-        // Get the current active time i.e. after delay has elapsed
-        // if the timeline is enabled.
-        float GetActiveTime() const
-        {
-            if (!TestFlag(Flags::EnableTimeline))
-                return mCurrentTime;
-            if (mCurrentTime < mDelay)
-                return 0.0f;
-            return mCurrentTime - mDelay;
-        }
+        std::shared_ptr<const AnimationNodeClass> GetSharedAnimationNodeClass(size_t i) const;
 
-        // Return true if the animation is currently alive at the current time,
-        // I.e. the current time is between the animation's start time (delay)
-        // and finish time (delay + duration). Otherwise returns false.
-        // If the animation doesn't use any timeline then this is always true.
-        bool IsAlive() const;
-        // Returns true if the animation has finished its current timeline.
-        // If the animation doesn't have a timeline then this is always false.
-        bool IsFinished() const;
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(AnimationTrackClass&& track);
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(const AnimationTrackClass& track);
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track);
+        // Get the animation track class object by index.
+        // The index must be valid.
+        AnimationTrackClass* GetAnimationTrack(size_t i);
+        // Find animation track class object by name. Returns nullptr if no such
+        // track could be found.
+        AnimationTrackClass* FindAnimationTrackByName(const std::string& name);
+        // Get the animation track class object by index.
+        // The index must be valid.
+        const AnimationTrackClass* GetAnimationTrack(size_t i) const;
+        // Find animation track class object by name. Returns nullptr if no such
+        // track could be found.
+        const AnimationTrackClass* FindAnimationTrackByName(const std::string& name) const;
+
+        std::shared_ptr<const AnimationTrackClass> GetSharedAnimationTrackClass(size_t i) const;
+
+        // Update the animation and its node class objects.
+        void Update(float time, float dt);
+
+        // Reset the class object state.
+        void Reset();
+
+        // Prepare and load the runtime resources if not yet loaded.
+        void Prepare(const GfxFactory& loader) const;
+
+        // Draw a representation of the animation class instance.
+        // This functionality is mostly to support editor functionality
+        // and to simplify working with an AnimationClass instance.
+        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
+
+        // Perform coarse hit test to see if the given x,y point
+        // intersects with any node's drawable in the animation.
+        // The testing is coarse in the sense that it's done against the node's
+        // drawable shapes size box and ignores things such as transparency.
+        // The hit nodes are stored in the hits vector and the positions with the
+        // nodes' hitboxes are (optionally) strored in the hitbox_positions vector.
+        void CoarseHitTest(float x, float y, std::vector<AnimationNodeClass*>* hits,
+            std::vector<glm::vec2>* hitbox_positions = nullptr);
+        void CoarseHitTest(float x, float y, std::vector<const AnimationNodeClass*>* hits,
+            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
+
+        // Map coordinates in some AnimationNode's (see AnimationNode::GetNodeTransform) space
+        // into animation coordinate space.
+        glm::vec2 MapCoordsFromNode(float x, float y, const AnimationNodeClass* node) const;
+        // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
+        glm::vec2 MapCoordsToNode(float x, float y, const AnimationNodeClass* node) const;
+
+        // Compute the axis aligned bounding box for the give animation node
+        // at the current time of animation.
+        gfx::FRect GetBoundingBox(const AnimationNodeClass* node) const;
+        // Compute the axis aligned bounding box for the whole animation
+        // i.e. including all the nodes at the current time of animation.
+        // This is a shortcut for getting the union of all the bounding boxes
+        // of all the animation nodes.
+        gfx::FRect GetBoundingBox() const;
 
         // Get the hash value based on the current properties of the animation
         // i.e. include each node and their drawables and materials but don't
         // include transient state such as current runtime.
         std::size_t GetHash() const;
+
+        // Serialize the animation into JSON.
+        nlohmann::json ToJson() const;
+
+        // Lookup a AnimationNode based on the serialized ID in the JSON.
+        AnimationNodeClass* TreeNodeFromJson(const nlohmann::json& json);
+
+        // Create an animation object based on the JSON. Returns nullopt if
+        // deserialization failed.
+        static std::optional<AnimationClass> FromJson(const nlohmann::json& object);
+
+        // Serialize an animation node contained in the RenderTree to JSON by doing
+        // a shallow (id only) based serialization.
+        // Later in TreeNodeFromJson when reading back the render tree we simply
+        // look up the node based on the ID.
+        static nlohmann::json TreeNodeToJson(const AnimationNodeClass* node);
+
+        std::size_t GetNumTracks() const
+        { return mAnimationTracks.size(); }
+        std::size_t GetNumNodes() const
+        { return mNodes.size(); }
+        RenderTree& GetRenderTree()
+        { return mRenderTree; }
+        const RenderTree& GetRenderTree() const
+        { return mRenderTree; }
+
+        AnimationClass& operator=(const AnimationClass& other);
+
+    private:
+        // The list of animation nodes that belong to this animation.
+        // we're allocating the nodes on the free store so that the
+        // render tree pointers remain valid even if the vector is resized
+        std::vector<std::shared_ptr<AnimationNodeClass>> mNodes;
+        // scenegraph / render tree for hieracarchical traversal
+        // and transformation of the animation nodes. the tree defines
+        // the parent-child transformation hierarchy.
+        RenderTree mRenderTree;
+        // the list of animation tracks that are pre-defined with this
+        // type of animation.
+        std::vector<std::shared_ptr<AnimationTrackClass>> mAnimationTracks;
+    };
+
+    // Animation is an instance of some type of AnimationClass. The "type"
+    // i.e the functionality and the behaviour is defined by the AnimationClass
+    // and animation holds the specific animation instance data.
+    // The animation insta ce can be transformed by an AnimationTrack which
+    // can apply transformations and changes on the nodes of the animation
+    // over time.
+    class Animation
+    {
+    public:
+        using RenderTree     = TreeNode<AnimationNode>;
+        using RenderTreeNode = TreeNode<AnimationNode>;
+        using DrawHook       = AnimationDrawHook<AnimationNode>;
+        using DrawPacket     = AnimationDrawPacket;
+
+        // Create new animation instance based on some animation class.
+        Animation(const std::shared_ptr<const AnimationClass>& klass);
+        Animation(const AnimationClass& klass);
+
+        // Update the animation and its nodes.
+        // Triggers the actions and events specified on the timeline.
+        void Update(float dt);
+
+        // Play the given animation track.
+        void Play(std::unique_ptr<AnimationTrack> track);
+        void Play(const AnimationTrack& track)
+        { Play(std::make_unique<AnimationTrack>(track)); }
+        void Play(AnimationTrack&& track)
+        { Play(std::make_unique<AnimationTrack>(std::move(track))); }
+        void Play(const std::string& track);
+
+        // Draw the animation and its nodes.
+        // Each node is transformed relative to the parent transformation "trans".
+        // Optional draw hook can be used to modify the draw packets before submission to the
+        // paint device.
+        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
 
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's drawable in the animation.
@@ -421,47 +1075,37 @@ namespace game
         // Reset the state of the animation to initial state.
         void Reset();
 
-        // Prepare and load the runtime resources if not yet loaded.
-        void Prepare(const GfxFactory& loader);
+        // Get the class object instance.
+        const AnimationClass& GetClass() const
+        { return *mClass.get(); }
 
-        // Serialize the animation into JSON.
-        nlohmann::json ToJson() const;
+        // shortcut operator for accessing the class object instance
+        const AnimationClass* operator->() const
+        { return mClass.get(); }
 
-        // Lookup a AnimationNode based on the serialized ID in the JSON.
+        size_t GetNumNodes() const
+        { return mNodes.size(); }
+        AnimationNode& GetNode(size_t i)
+        { return *mNodes[i]; }
+        const AnimationNode& GetNode(size_t i) const
+        { return *mNodes[i]; }
+
         AnimationNode* TreeNodeFromJson(const nlohmann::json& json);
-
-        // Create an animation object based on the JSON. Returns nullopt if
-        // deserialization failed.
-        static std::optional<Animation> FromJson(const nlohmann::json& object);
-
-        // Serialize an animation node contained in the RenderTree to JSON by doing
-        // a shallow (id only) based serialization.
-        // Later in TreeNodeFromJson when reading back the render tree we simply
-        // look up the node based on the ID.
-        static nlohmann::json TreeNodeToJson(const AnimationNode* node);
-
-        Animation& operator=(const Animation& other);
-
     private:
-        // The list of components that are to be drawn as part
-        // of the animation. Each component has a unique transform
-        // relative to the animation.
-        // we're allocating the AnimationNods on the free store
-        // so that the pointers remain valid even if the vector is resized
+        // the class object.
+        std::shared_ptr<const AnimationClass> mClass;
+        // the instance data for this animation.
+        // The current animation track if any.
+        std::unique_ptr<AnimationTrack> mAnimationTrack;
+        // The animation node instances for this animation.
         std::vector<std::unique_ptr<AnimationNode>> mNodes;
-        // scenegraph / render tree for hierarchical
-        // traversal and transformation of the animation nodes.
-        // i.e. the tree defines the parent-child transformation
-        // hiearchy.
+        // The render tree for this animation
         RenderTree mRenderTree;
         // current playback time.
         float mCurrentTime = 0.0f;
-        // duration of the animation
-        float mDuration = 1.0f;
-        // delay start of the animation
-        float mDelay    = 0.0f;
-        // Animation flags.
-        base::bitflag<Flags> mBitFlags;
-
     };
+
+
+    std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass);
+
 } // namespace

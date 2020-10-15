@@ -72,9 +72,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.name->setText("My Particle System");
     setWindowTitle("My Particle System");
 
-    PopulateFromEnum<gfx::KinematicsParticleEngine::Motion>(mUI.motion);
-    PopulateFromEnum<gfx::KinematicsParticleEngine::BoundaryPolicy>(mUI.boundary);
-    PopulateFromEnum<gfx::KinematicsParticleEngine::SpawnPolicy>(mUI.when);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
 
     // connect workspace signals for resource management
     connect(mWorkspace, &app::Workspace::NewResourceAvailable,
@@ -102,7 +102,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "use_growth", mUI.growth);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
 
-    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngine>();
+    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
     const auto& params = engine->GetParams();
     SetValue(mUI.motion, params.motion);
     SetValue(mUI.when,   params.mode);
@@ -289,10 +289,10 @@ void ParticleEditorWidget::render()
 
 bool ParticleEditorWidget::confirmClose()
 {
-    gfx::KinematicsParticleEngine::Params params;
-    gfx::KinematicsParticleEngine engine;
+    gfx::KinematicsParticleEngineClass::Params params;
+    gfx::KinematicsParticleEngineClass engine;
     fillParams(params);
-    engine.Configure(params);
+    engine.SetParams(params);
 
     const auto hash = engine.GetHash();
     if (hash == mOriginalHash)
@@ -326,10 +326,10 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     const QString& name = GetValue(mUI.name);
 
-    gfx::KinematicsParticleEngine::Params params;
-    gfx::KinematicsParticleEngine engine;
+    gfx::KinematicsParticleEngineClass::Params params;
+    gfx::KinematicsParticleEngineClass engine;
     fillParams(params);
-    engine.Configure(params);
+    engine.SetParams(params);
 
     // what's the new hash
     const auto hash = engine.GetHash();
@@ -337,7 +337,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     if (mWorkspace->HasParticleSystem(name))
     {
         const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::ParticleSystem);
-        const gfx::KinematicsParticleEngine* engine = nullptr;
+        const gfx::KinematicsParticleEngineClass* engine = nullptr;
         resource.GetContent(&engine);
         if (engine->GetHash() != mOriginalHash)
         {
@@ -373,7 +373,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     setWindowTitle(name);
 }
 
-void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngine::Params& params) const
+void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params& params) const
 {
     params.motion         = GetValue(mUI.motion);
     params.mode           = GetValue(mUI.when);
@@ -445,7 +445,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         return;
     }
 
-    gfx::KinematicsParticleEngine::Params p;
+    gfx::KinematicsParticleEngineClass::Params p;
     fillParams(p);
     mEngine.reset(new gfx::KinematicsParticleEngine(p));
 

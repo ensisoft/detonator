@@ -102,9 +102,6 @@ namespace gui
         void on_chkDoesRender_stateChanged(int);
         void on_animDuration_valueChanged(double value);
         void on_animDelay_valueChanged(double value);
-        void on_nodeStartTime_valueChanged(double value);
-        void on_nodeEndTime_valueChanged(double value);
-        void on_chkNodeLifetime_toggled(bool value);
         void on_timelineGroup_toggled(bool value);
         void on_animIsLooping_stateChanged(int);
 
@@ -118,7 +115,7 @@ namespace gui
 
     private:
         void paintScene(gfx::Painter& painter, double secs);
-        game::AnimationNode* GetCurrentNode();
+        game::AnimationNodeClass* GetCurrentNode();
         void updateCurrentNodeProperties();
         void updateCurrentNodePosition(float dx, float dy);
     private:
@@ -144,7 +141,7 @@ namespace gui
         // state shared with the tools is packed inside a single
         // struct type for convenience
         struct State {
-            game::Animation animation;
+            game::AnimationClass animation;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
 

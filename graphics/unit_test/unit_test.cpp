@@ -251,9 +251,9 @@ void unit_test_polygon_serialize()
     v0.aTexCoord.y = -0.5f;
     verts.push_back(v0);
 
-    gfx::Polygon poly;
-    gfx::Polygon::DrawCommand cmd;
-    cmd.type = gfx::Polygon::DrawType::TriangleFan;
+    gfx::PolygonClass poly;
+    gfx::PolygonClass::DrawCommand cmd;
+    cmd.type = gfx::PolygonClass::DrawType::TriangleFan;
     cmd.offset = 1243;
     cmd.count = 555;
     poly.AddDrawCommand(std::move(verts), cmd);
@@ -264,23 +264,20 @@ void unit_test_polygon_serialize()
     TEST_REQUIRE(poly.GetNumVertices() == 0);
     TEST_REQUIRE(poly.GetNumDrawCommands() == 0);
 
-    const auto& result = gfx::Polygon::FromJson(data);
-    TEST_REQUIRE(result.has_value());
-
-    poly = std::move(result.value());
+    TEST_REQUIRE(poly.LoadFromJson(data));
     TEST_REQUIRE(poly.GetNumVertices() == 1);
     TEST_REQUIRE(poly.GetNumDrawCommands() == 1);
     TEST_REQUIRE(poly.GetVertex(0) == v0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).type == gfx::Polygon::DrawType::TriangleFan);
+    TEST_REQUIRE(poly.GetDrawCommand(0).type == gfx::PolygonClass::DrawType::TriangleFan);
     TEST_REQUIRE(poly.GetDrawCommand(0).offset == 1243);
     TEST_REQUIRE(poly.GetDrawCommand(0).count == 555);
 }
 
 void unit_test_polygon_vertex_operations()
 {
-    gfx::Polygon poly;
+    gfx::PolygonClass poly;
 
-    std::vector<gfx::Polygon::Vertex> verts;
+    std::vector<gfx::PolygonClass::Vertex> verts;
     verts.resize(6);
     verts[0].aPosition.x = 0.0f;
     verts[1].aPosition.x = 1.0f;
@@ -291,14 +288,14 @@ void unit_test_polygon_vertex_operations()
     poly.AddVertices(verts);
 
     {
-        gfx::Polygon::DrawCommand cmd;
+        gfx::PolygonClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
     }
 
     {
-        gfx::Polygon::DrawCommand cmd;
+        gfx::PolygonClass::DrawCommand cmd;
         cmd.offset = 3;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);

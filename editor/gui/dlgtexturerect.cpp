@@ -69,9 +69,11 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::uni
         mWidth  = bitmap->GetWidth();
         mHeight = bitmap->GetHeight();
     }
-    mMaterial.AddTexture(std::move(texture));
-    mMaterial.SetType(gfx::Material::Type::Texture);
-    mMaterial.SetSurfaceType(gfx::Material::SurfaceType::Transparent);
+    gfx::MaterialClass klass;
+    klass.AddTexture(std::move(texture));
+    klass.SetType(gfx::MaterialClass::Type::Texture);
+    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    mMaterial = gfx::CreateMaterialInstance(klass);
 
     const auto& rc = mRect.Expand(gfx::USize(mWidth, mHeight));
     mUI.edtX->setText(QString::number(rc.GetX()));
@@ -112,7 +114,7 @@ void DlgTextureRect::OnPaintScene(gfx::Painter& painter, double)
     const auto render_height = mHeight * scale;
     const auto xpos = (width - render_width) * 0.5f;
     const auto ypos = (height - render_height) * 0.5f;
-    gfx::FillRect(painter, gfx::FRect(xpos, ypos, render_width, render_height), mMaterial);
+    gfx::FillRect(painter, gfx::FRect(xpos, ypos, render_width, render_height), *mMaterial);
 
     // draw the cross hairs
     const auto x = mCurrentPoint.x();

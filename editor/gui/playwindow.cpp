@@ -210,60 +210,29 @@ class PlayWindow::SessionAssets : public game::AssetTable
 public:
     SessionAssets(const app::Workspace& workspace)
         : mWorkspace(workspace)
+    {}
+    virtual const game::AnimationClass* FindAnimationClass(const std::string& name) const override
     {
-        for (size_t i=0; i<workspace.GetNumResources(); ++i)
-        {
-            const auto& resource = workspace.GetResource(i);
-            if (resource.GetType() != app::Resource::Type::Animation)
-                continue;
-            const game::Animation* anim = nullptr;
-            resource.GetContent(&anim);
-
-            auto copy = std::make_unique<game::Animation>(*anim);
-            copy->Prepare(mWorkspace);
-
-            mAnimations[resource.GetNameUtf8()] = std::move(copy);
-        }
+        auto klass = mWorkspace.GetAnimationClass(name);
+        return klass.get();
+    }
+    virtual std::unique_ptr<game::Animation> CreateAnimation(const std::string& name) const override
+    {
+        auto klass = mWorkspace.GetAnimationClass(name);
+        klass->Prepare(mWorkspace);
+        return game::CreateAnimationInstance(klass);
     }
 
-    virtual const game::Animation* FindAnimation(const std::string& name) const override
-    {
-        auto it = mAnimations.find(name);
-        if (it == std::end(mAnimations))
-            return nullptr;
-        return it->second.get();
-    }
-    virtual game::Animation* FindAnimation(const std::string& name) override
-    {
-        auto it = mAnimations.find(name);
-        if (it == std::end(mAnimations))
-            return nullptr;
-        return it->second.get();
-    }
     virtual void LoadFromFile(const std::string&, const std::string&) override
     {
         // not implemented, loaded from workspace
     }
     void UpdateResource(const app::Resource* resource)
     {
-        if (resource->GetType() == app::Resource::Type::Animation)
-        {
-            // workspace animation has been updated. recreate the
-            // global instance.
-            const game::Animation* anim = nullptr;
-            resource->GetContent(&anim);
-
-            auto copy = std::make_unique<game::Animation>(*anim);
-            copy->Prepare(mWorkspace);
-
-            mAnimations[resource->GetNameUtf8()] = std::move(copy);
-        }
     }
 private:
-    const app::Workspace& mWorkspace;
 
-    std::unordered_map<std::string,
-        std::unique_ptr<game::Animation>> mAnimations;
+    const app::Workspace& mWorkspace;
 };
 
 PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)

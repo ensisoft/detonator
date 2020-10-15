@@ -535,41 +535,41 @@ QAbstractFileEngine* Workspace::create(const QString& file) const
     return new QFSFileEngine(ret);
 }
 
-std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) const
+std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClass(const std::string& name) const
+{
+    const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Animation);
+
+    return ResourceCast<game::AnimationClass>(resource).GetSharedResource();
+}
+
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClass(const std::string& name) const
 {
     // Checkerboard is a special material that is always available.
     // It is used as the initial material when user hasn't selected
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
     if (name == "Checkerboard")
-        return std::make_shared<gfx::Material>(gfx::TextureMap("app://textures/Checkerboard.png"));
+        return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("app://textures/Checkerboard.png"));
 
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
     {
         const std::string enum_name(magic_enum::enum_name(val));
         if (enum_name == name)
-            return std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color4f(val)));
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
     }
     if (!HasMaterial(FromUtf8(name)))
     {
         ERROR("Request for a material that doesn't exist: '%1'", name);
-        return std::make_shared<gfx::Material>(gfx::TextureMap("app://textures/Checkerboard.png"));
+        return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("app://textures/Checkerboard.png"));
     }
 
     const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
-    const gfx::Material* content = nullptr;
-    resource.GetContent(&content);
-    auto ret = std::make_shared<gfx::Material>(*content);
 
-    // add a copy in the collection of private instances so that
-    // if/when the resource is modified the object using the resource
-    // will also reflect those changes.
-    auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Material>>(FromUtf8(name), ret);
-    mPrivateInstances.push_back(std::move(handle));
-    return ret;
+    return ResourceCast<gfx::MaterialClass>(resource).GetSharedResource();
 }
-std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
+
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std::string& name) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -601,51 +601,47 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
     if (name == "Rectangle")
-        return std::make_shared<gfx::Rectangle>();
+        return std::make_shared<gfx::RectangleClass>();
     else if (name == "IsocelesTriangle")
-        return std::make_shared<gfx::IsocelesTriangle>();
+        return std::make_shared<gfx::IsocelesTriangleClass>();
     else if (name == "RightTriangle")
-        return std::make_shared<gfx::RightTriangle>();
+        return std::make_shared<gfx::RightTriangleClass>();
     else if (name == "Circle")
-        return std::make_shared<gfx::Circle>();
+        return std::make_shared<gfx::CircleClass>();
     else if (name == "RoundRect")
-        return std::make_shared<gfx::RoundRectangle>();
+        return std::make_shared<gfx::RoundRectangleClass>();
     else if (name == "Trapezoid")
-        return std::make_shared<gfx::Trapezoid>();
+        return std::make_shared<gfx::TrapezoidClass>();
     else if (name == "Parallelogram")
-        return std::make_shared<gfx::Parallelogram>();
+        return std::make_shared<gfx::ParallelogramClass>();
+
+    // todo: perhaps need an identifier for the type of resource in question.
+    // currently there's a name conflict that objects of different types but
+    // with same names cannot be fully resolved by name only.
 
     if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
     {
         const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
-        const gfx::KinematicsParticleEngine* engine = nullptr;
-        resource.GetContent(&engine);
-        auto ret = std::make_shared<gfx::KinematicsParticleEngine>(*engine);
-
-        // add a copy in the collection of private instances so that
-        // if/when the resource is modified the object using the resource
-        // will also reflect those changes.
-        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::KinematicsParticleEngine>>(FromUtf8(name), ret);
-        mPrivateInstances.push_back(std::move(handle));
-        return ret;
+        return ResourceCast<gfx::KinematicsParticleEngineClass>(resource).GetSharedResource();
     }
     else if (HasResource(FromUtf8(name), Resource::Type::CustomShape))
     {
         const Resource& resource = GetResource(FromUtf8(name), Resource::Type::CustomShape);
-        const gfx::Polygon* polygon = nullptr;
-        resource.GetContent(&polygon);
-        auto ret = std::make_shared<gfx::Polygon>(*polygon);
-
-        // add a copy in the collection of private instances so that
-        // if/when the resource is modified the object using the resource
-        // will also reflect those changes.
-        auto handle = std::make_unique<WeakGraphicsResourceHandle<gfx::Polygon>>(FromUtf8(name), ret);
-        mPrivateInstances.push_back(std::move(handle));
-        return ret;
+        return ResourceCast<gfx::PolygonClass>(resource).GetSharedResource();
     }
 
     ERROR("Request for a drawable that doesn't exist: '%1'", name);
-    return std::make_shared<gfx::Rectangle>();
+    return std::make_shared<gfx::RectangleClass>();
+}
+
+std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) const
+{
+    return gfx::CreateMaterialInstance(GetMaterialClass(name));
+}
+
+std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
+{
+    return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
 std::string Workspace::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
@@ -837,7 +833,7 @@ bool Workspace::LoadContent(const QString& filename)
         {
             const auto& name = app::FromUtf8(json_mat.value()["resource_name"]);
 
-            std::optional<gfx::Material> ret = gfx::Material::FromJson(json_mat.value());
+            std::optional<gfx::MaterialClass> ret = gfx::MaterialClass::FromJson(json_mat.value());
             if (!ret.has_value())
             {
                 ERROR("Failed to load material '%1' properties.", name);
@@ -853,7 +849,7 @@ bool Workspace::LoadContent(const QString& filename)
         for (const auto& json_p : json["particles"].items())
         {
             const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<gfx::KinematicsParticleEngine> ret = gfx::KinematicsParticleEngine::FromJson(json_p.value());
+            std::optional<gfx::KinematicsParticleEngineClass> ret = gfx::KinematicsParticleEngineClass::FromJson(json_p.value());
             if (!ret.has_value())
             {
                 ERROR("Failed to load particle system '%1' properties.", name);
@@ -869,7 +865,7 @@ bool Workspace::LoadContent(const QString& filename)
         for (const auto& json_p : json["animations"].items())
         {
             const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<game::Animation> ret = game::Animation::FromJson(json_p.value());
+            std::optional<game::AnimationClass> ret = game::AnimationClass::FromJson(json_p.value());
             if (!ret.has_value())
             {
                 ERROR("Failed to load animation '%1' properties.", name);
@@ -885,7 +881,7 @@ bool Workspace::LoadContent(const QString& filename)
         for (const auto& json_p : json["shapes"].items())
         {
             const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<gfx::Polygon> ret = gfx::Polygon::FromJson(json_p.value());
+            std::optional<gfx::PolygonClass> ret = gfx::PolygonClass::FromJson(json_p.value());
             if (!ret.has_value())
             {
                 ERROR("Failed to load custom shape '%1' properties.", name);
@@ -1234,24 +1230,7 @@ void Workspace::DeleteResources(QModelIndexList& list)
 
 void Workspace::Tick()
 {
-    // cleanup expired handles that point to stale objects that
-    // are no longer actually referenced.
-    for (size_t i=0; i<mPrivateInstances.size(); )
-    {
-        if (mPrivateInstances[i]->IsExpired())
-        {
-            const auto name = mPrivateInstances[i]->GetName();
-            const auto last = mPrivateInstances.size() - 1;
-            std::swap(mPrivateInstances[i], mPrivateInstances[last]);
-            mPrivateInstances.pop_back();
-            DEBUG("Deleted resource tracking handle %1", name);
-        }
-        else
-        {
-            ++i;
-        }
 
-    }
 }
 
 bool Workspace::PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options)
@@ -1315,19 +1294,19 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         if (resource->IsMaterial())
         {
             // todo: maybe move to Resource interface ?
-            const gfx::Material* material = nullptr;
+            const gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
             material->BeginPacking(&packer);
         }
         else if (resource->IsParticleEngine())
         {
-            const gfx::KinematicsParticleEngine* engine = nullptr;
+            const gfx::KinematicsParticleEngineClass* engine = nullptr;
             resource->GetContent(&engine);
             engine->Pack(&packer);
         }
         else if (resource->IsCustomShape())
         {
-            const gfx::Polygon* polygon = nullptr;
+            const gfx::PolygonClass* polygon = nullptr;
             resource->GetContent(&polygon);
             polygon->Pack(&packer);
         }
@@ -1340,7 +1319,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         if (resource->IsMaterial())
         {
             // todo: maybe move to resource interface ?
-            gfx::Material* material = nullptr;
+            gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
             material->FinishPacking(&packer);
         }

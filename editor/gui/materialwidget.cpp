@@ -146,20 +146,20 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.materialName->setText("My Material");
     setWindowTitle("My Material");
 
-    PopulateFromEnum<gfx::Material::MinTextureFilter>(mUI.minFilter);
-    PopulateFromEnum<gfx::Material::MagTextureFilter>(mUI.magFilter);
-    PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapX);
-    PopulateFromEnum<gfx::Material::TextureWrapping>(mUI.wrapY);
-    PopulateFromEnum<gfx::Material::SurfaceType>(mUI.surfaceType);
-    PopulateFromEnum<gfx::Material::Type>(mUI.materialType);
-    PopulateFromEnum<gfx::Material::ParticleAction>(mUI.particleAction);
+    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
+    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
+    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapX);
+    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapY);
+    PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
+    PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
+    PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
 {
     DEBUG("Editing material: '%1'", resource.GetName());
 
-    mMaterial = *resource.GetContent<gfx::Material>();
+    mMaterial = *resource.GetContent<gfx::MaterialClass>();
     SetValue(mUI.materialType, mMaterial.GetType());
     SetValue(mUI.surfaceType,  mMaterial.GetSurfaceType());
     SetValue(mUI.minFilter,    mMaterial.GetMinTextureFilter());
@@ -177,10 +177,10 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
     SetValue(mUI.staticInstance, mMaterial.IsStatic());
-    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
-    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
-    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
-    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomRight));
+    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::TopLeft));
+    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::TopRight));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::BottomLeft));
+    SetValue(mUI.colorMap3,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::BottomRight));
     GetProperty(resource, "shader_file", mUI.shaderFile);
     GetProperty(resource, "use_shader_file", mUI.customShader);
 
@@ -236,7 +236,7 @@ bool MaterialWidget::loadState(const Settings& settings)
         return true;
 
     const auto& json = nlohmann::json::parse(base64::Decode(base64));
-    auto ret = gfx::Material::FromJson(json);
+    auto ret = gfx::MaterialClass::FromJson(json);
     if (!ret.has_value())
     {
         WARN("Failed to load material widget state.");
@@ -262,10 +262,10 @@ bool MaterialWidget::loadState(const Settings& settings)
     SetValue(mUI.blend,        mMaterial.GetBlendFrames());
     SetValue(mUI.gamma,        mMaterial.GetGamma());
     SetValue(mUI.staticInstance, mMaterial.IsStatic());
-    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopLeft));
-    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::TopRight));
-    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomLeft));
-    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::Material::ColorIndex::BottomRight));
+    SetValue(mUI.colorMap0,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::TopLeft));
+    SetValue(mUI.colorMap1,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::TopRight));
+    SetValue(mUI.colorMap2,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::BottomLeft));
+    SetValue(mUI.colorMap3,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::BottomRight));
     settings.loadWidget("Material", mUI.materialName);
     settings.loadWidget("Material", mUI.shaderFile);
     settings.loadWidget("Material", mUI.customShader);
@@ -410,7 +410,7 @@ void MaterialWidget::on_actionSave_triggered()
     if (mWorkspace->HasMaterial(name))
     {
         const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
-        const gfx::Material* material = nullptr;
+        const gfx::MaterialClass* material = nullptr;
         resource.GetContent(&material);
         if (material->GetHash() != mOriginalHash)
         {
@@ -721,24 +721,24 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
 
     // enable/disable UI properties based on the
     // material type.
-    const gfx::Material::Type type = GetValue(mUI.materialType);
+    const gfx::MaterialClass::Type type = GetValue(mUI.materialType);
 
-    if (type == gfx::Material::Type::Color)
+    if (type == gfx::MaterialClass::Type::Color)
     {
         mUI.baseProperties->setEnabled(true);
     }
-    else if (type == gfx::Material::Type::Gradient)
+    else if (type == gfx::MaterialClass::Type::Gradient)
     {
         //mUI.colorMap->setEnabled(true);
     }
-    else if (type == gfx::Material::Type::Texture)
+    else if (type == gfx::MaterialClass::Type::Texture)
     {
         mUI.texturing->setEnabled(true);
         mUI.textureMaps->setEnabled(true);
         mUI.textureProp->setEnabled(true);
         mUI.textureRect->setEnabled(true);
     }
-    else if (type == gfx::Material::Type::Sprite)
+    else if (type == gfx::MaterialClass::Type::Sprite)
     {
         mUI.texturing->setEnabled(true);
         mUI.textureMaps->setEnabled(true);
@@ -803,15 +803,14 @@ void MaterialWidget::SetMaterialProperties() const
 
     mMaterial.SetType(GetValue(mUI.materialType));
     mMaterial.SetBaseColor(GetValue(mUI.baseColor));
-    mMaterial.SetColorMapColor(GetValue(mUI.colorMap0), gfx::Material::ColorIndex::TopLeft);
-    mMaterial.SetColorMapColor(GetValue(mUI.colorMap1), gfx::Material::ColorIndex::TopRight);
-    mMaterial.SetColorMapColor(GetValue(mUI.colorMap2), gfx::Material::ColorIndex::BottomLeft);
-    mMaterial.SetColorMapColor(GetValue(mUI.colorMap3), gfx::Material::ColorIndex::BottomRight);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap0), gfx::MaterialClass::ColorIndex::TopLeft);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap1), gfx::MaterialClass::ColorIndex::TopRight);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap2), gfx::MaterialClass::ColorIndex::BottomLeft);
+    mMaterial.SetColorMapColor(GetValue(mUI.colorMap3), gfx::MaterialClass::ColorIndex::BottomRight);
     mMaterial.SetGamma(GetValue(mUI.gamma));
     mMaterial.SetStatic(GetValue(mUI.staticInstance));
     mMaterial.SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial.SetParticleAction(GetValue(mUI.particleAction));
-    mMaterial.SetRuntime(mTime);
     mMaterial.SetFps(GetValue(mUI.fps));
     mMaterial.SetBlendFrames(GetValue(mUI.blend));
     mMaterial.SetTextureMinFilter(GetValue(mUI.minFilter));
@@ -833,6 +832,9 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     SetMaterialProperties();
 
+    gfx::Material material(mMaterial);
+    material.SetRuntime(mTime);
+
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;
     const auto content_height = width * zoom;
@@ -840,7 +842,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto ypos = (height - content_height) * 0.5f;
 
     // use the material to fill a rectangle in the middle of the screen.
-    gfx::FillRect(painter, gfx::FRect(xpos, ypos, content_width, content_height), mMaterial);
+    gfx::FillRect(painter, gfx::FRect(xpos, ypos, content_width, content_height), material);
 }
 
 } // namespace

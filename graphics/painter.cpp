@@ -85,8 +85,8 @@ public:
 
         const auto style = shape.GetStyle();
 
-        Material::RasterState raster;
-        Material::Environment env;
+        MaterialClass::RasterState raster;
+        MaterialClass::Environment env;
         env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
@@ -150,8 +150,8 @@ public:
             prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*mask.transform));
 
-            Material::RasterState raster;
-            Material::Environment env;
+            MaterialClass::RasterState raster;
+            MaterialClass::Environment env;
             env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
 
             mask_material.ApplyDynamicState(env, *mDevice, *prog, raster);
@@ -175,8 +175,8 @@ public:
 
             prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*draw.transform));
-            Material::RasterState raster;
-            Material::Environment env;
+            MaterialClass::RasterState raster;
+            MaterialClass::Environment env;
             env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
             draw.material->ApplyDynamicState(env, *mDevice, *prog, raster);
@@ -188,14 +188,14 @@ public:
 private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
-        const std::string& name = drawable.GetId() + "/" + material.GetId();
+        const std::string& name = drawable.GetId() + "/" + material->GetId();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {
             Shader* drawable_shader = drawable.GetShader(*mDevice);
             if (!drawable_shader || !drawable_shader->IsValid())
                 return nullptr;
-            Shader* material_shader = material.GetShader(*mDevice);
+            Shader* material_shader = material->GetShader(*mDevice);
             if (!material_shader || !material_shader->IsValid())
                 return nullptr;
 
@@ -206,7 +206,7 @@ private:
             prog->Build(shaders);
             if (prog->IsValid())
             {
-                material.ApplyStaticState(*mDevice, *prog);
+                material->ApplyStaticState(*mDevice, *prog);
             }
         }
         if (prog->IsValid())

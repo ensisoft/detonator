@@ -75,8 +75,8 @@ void DrawTextRect(Painter& painter,
     text_and_style.valign = va;
     buff.AddText(text_and_style);
 
-    auto material = BitmapText(buff);
-    material.SetBaseColor(color);
+    auto klass = BitmapText(buff);
+    klass.SetBaseColor(color);
     if (blinking)
     {
         // create 1x1 transparent texture and
@@ -84,13 +84,15 @@ void DrawTextRect(Painter& painter,
         // two.
         static Bitmap<Grayscale> nada(1, 1);
         nada.SetPixel(0, 0, 0);
-        material.AddTexture(nada);
-        material.SetTextureGc(1, false);
-        material.SetFps(1.5f);
-        material.SetRuntime(base::GetRuntimeSec());
-        material.SetBlendFrames(false); // sharp cut off i.e. no blending between textures.
-        material.SetType(Material::Type::Sprite); // animate between text and nada
+        klass.AddTexture(nada);
+        klass.SetTextureGc(1, false);
+        klass.SetFps(1.5f);
+        klass.SetBlendFrames(false); // sharp cut off i.e. no blending between textures.
+        klass.SetType(MaterialClass::Type::Sprite); // animate between text and nada
     }
+    gfx::Material material(klass);
+    if (blinking)
+        material.SetRuntime(base::GetRuntimeSec());
 
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());
@@ -107,8 +109,8 @@ void FillRect(Painter& painter,
 
     FillRect(painter, rect,
         SolidColor(color).SetSurfaceType(alpha == 1.0f
-            ? Material::SurfaceType::Opaque
-            : Material::SurfaceType::Transparent),
+            ? MaterialClass::SurfaceType::Opaque
+            : MaterialClass::SurfaceType::Transparent),
         rotation);
 }
 
@@ -144,8 +146,8 @@ void DrawRectOutline(Painter& painter,
 
     DrawRectOutline(painter, rect,
         SolidColor(color).SetSurfaceType(alpha == 1.0f
-            ? Material::SurfaceType::Opaque
-            : Material::SurfaceType::Transparent),
+            ? MaterialClass::SurfaceType::Opaque
+            : MaterialClass::SurfaceType::Transparent),
         line_width, rotation);
 }
 

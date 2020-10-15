@@ -40,10 +40,451 @@
 #include "animation.h"
 #include "gfxfactory.h"
 
+namespace {
+
+template<typename Node>
+struct RenderTreeFunctions {
+    using RenderTree = game::TreeNode<Node>;
+    using DrawHook   = game::AnimationDrawHook<Node>;
+    using DrawPacket = game::AnimationDrawPacket;
+
+    static void Draw(const RenderTree& tree, gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook)
+    {
+        // here we could apply operations that would apply to the whole
+        // animation but currently we don't need such things.
+        // if we did we could begin new transformation scope for this
+        // by pushing a new scope in the transformation stack.
+        // transfrom.Push();
+        std::vector<DrawPacket> packets;
+
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook)
+                : mPackets(packets)
+                , mTransform(transform)
+                , mHook(hook)
+            {}
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+
+                // always push the node's transform, it might have children that
+                // do render.
+                mTransform.Push(node->GetNodeTransform());
+                // if it doesn't render then no draw packets are generated
+                if (node->TestFlag(Node::Flags::DoesRender))
+                {
+                    mTransform.Push(node->GetModelTransform());
+
+                    DrawPacket packet;
+                    packet.material  = node->GetMaterial();
+                    packet.drawable  = node->GetDrawable();
+                    packet.layer     = node->GetLayer();
+                    packet.pass      = node->GetRenderPass();
+                    packet.transform = mTransform.GetAsMatrix();
+                    if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
+                        mPackets.push_back(std::move(packet));
+
+                    // pop the model transform
+                    mTransform.Pop();
+                }
+
+                // append any extra packets if needed.
+                if (mHook)
+                {
+                    const auto num_transforms = mTransform.GetNumTransforms();
+
+                    std::vector<DrawPacket> packets;
+                    mHook->AppendPackets(node, mTransform, packets);
+                    for (auto& p : packets)
+                        mPackets.push_back(std::move(p));
+
+                    // make sure the stack is popped properly.
+                    ASSERT(mTransform.GetNumTransforms() == num_transforms);
+                }
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Pop();
+            }
+        private:
+            std::vector<DrawPacket>& mPackets;
+            gfx::Transform& mTransform;
+            DrawHook* mHook = nullptr;
+        };
+
+        Visitor visitor(packets, transform, hook);
+        tree.PreOrderTraverse(visitor);
+
+        // the layer value is negative but for the indexing below
+        // we must have postive values only.
+        int first_layer_index = 0;
+        for (auto& packet : packets)
+        {
+            first_layer_index = std::min(first_layer_index, packet.layer);
+        }
+        // offset the layers.
+        for (auto& packet : packets)
+        {
+            packet.layer += std::abs(first_layer_index);
+        }
+
+        struct Layer {
+            std::vector<gfx::Painter::DrawShape> draw_list;
+            std::vector<gfx::Painter::MaskShape> mask_list;
+        };
+        std::vector<Layer> layers;
+
+        for (auto& packet : packets)
+        {
+            const auto layer_index = packet.layer;
+            if (layer_index >= layers.size())
+                layers.resize(layer_index + 1);
+
+            Layer& layer = layers[layer_index];
+            if (packet.pass == Node::RenderPass::Draw)
+            {
+                gfx::Painter::DrawShape shape;
+                shape.transform = &packet.transform;
+                shape.drawable  = packet.drawable.get();
+                shape.material  = packet.material.get();
+                layer.draw_list.push_back(shape);
+            }
+            else if (packet.pass == Node::RenderPass::Mask)
+            {
+                gfx::Painter::MaskShape shape;
+                shape.transform = &packet.transform;
+                shape.drawable  = packet.drawable.get();
+                layer.mask_list.push_back(shape);
+            }
+        }
+        for (const auto& layer : layers)
+        {
+            painter.DrawMasked(layer.draw_list, layer.mask_list);
+        }
+        // if we used a new trańsformation scope pop it here.
+        //transform.Pop();
+    }
+
+    static void CoarseHitTest(RenderTree& tree, float x, float y, std::vector<Node*>* hits, std::vector<glm::vec2>* hitbox_positions)
+    {
+        class Visitor : public RenderTree::Visitor
+        {
+        public:
+            Visitor(const glm::vec4& point, std::vector<Node*>* hits, std::vector<glm::vec2>* boxes)
+                : mHitPoint(point)
+                , mHits(hits)
+                , mBoxes(boxes)
+            {}
+
+            virtual void EnterNode(Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Push(node->GetNodeTransform());
+                // using the model transform will put the coordinates in the drawable coordinate
+                // space, i.e. normalized coordinates.
+                mTransform.Push(node->GetModelTransform());
+
+                const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+                const auto& hitpoint_in_node = animation_to_node * mHitPoint;
+
+                if (hitpoint_in_node.x >= 0.0f &&
+                    hitpoint_in_node.x < 1.0f &&
+                    hitpoint_in_node.y >= 0.0f &&
+                    hitpoint_in_node.y < 1.0f)
+                {
+                    mHits->push_back(node);
+                    if (mBoxes)
+                    {
+                        const auto& size = node->GetSize();
+                        mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
+                    }
+                }
+                mTransform.Pop();
+            }
+            virtual void LeaveNode(Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Pop();
+            }
+        private:
+            const glm::vec4 mHitPoint;
+            gfx::Transform mTransform;
+            std::vector<Node*>* mHits = nullptr;
+            std::vector<glm::vec2>* mBoxes = nullptr;
+        };
+
+        Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
+        tree.PreOrderTraverse(visitor);
+    }
+
+    static void CoarseHitTest(const RenderTree& tree, float x, float y, std::vector<const Node*>* hits, std::vector<glm::vec2>* hitbox_positions)
+    {
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            Visitor(const glm::vec4& point, std::vector<const Node*>* hits, std::vector<glm::vec2>* boxes)
+                : mHitPoint(point)
+                , mHits(hits)
+                , mBoxes(boxes)
+            {}
+
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Push(node->GetNodeTransform());
+                // using the model transform will put the coordinates in the drawable coordinate
+                // space, i.e. normalized coordinates.
+                mTransform.Push(node->GetModelTransform());
+
+                const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+                const auto& hitpoint_in_node = animation_to_node * mHitPoint;
+
+                if (hitpoint_in_node.x >= 0.0f &&
+                    hitpoint_in_node.x < 1.0f &&
+                    hitpoint_in_node.y >= 0.0f &&
+                    hitpoint_in_node.y < 1.0f)
+                {
+                    mHits->push_back(node);
+                    if (mBoxes)
+                    {
+                        const auto& size = node->GetSize();
+                        mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
+                    }
+                }
+                mTransform.Pop();
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Pop();
+            }
+        private:
+            const glm::vec4 mHitPoint;
+            gfx::Transform mTransform;
+            std::vector<const Node*>* mHits = nullptr;
+            std::vector<glm::vec2>* mBoxes = nullptr;
+        };
+
+        Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
+        tree.PreOrderTraverse(visitor);
+    }
+
+    static glm::vec2 MapCoordsFromNode(const RenderTree& tree, float x, float y, const Node* node)
+    {
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            Visitor(float x, float y, const Node* node)
+                : mX(x), mY(y), mNode(node)
+            {}
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+
+                mTransform.Push(node->GetNodeTransform());
+
+                // if it's the node we're interested in
+                if (node == mNode)
+                {
+                    const auto& mat = mTransform.GetAsMatrix();
+                    const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
+                    mResult = glm::vec2(vec.x, vec.y);
+                }
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Pop();
+            }
+            glm::vec2 GetResult() const
+            { return mResult; }
+        private:
+            const float mX = 0.0f;
+            const float mY = 0.0f;
+            const Node* mNode = nullptr;
+            glm::vec2 mResult;
+            gfx::Transform mTransform;
+        };
+
+        Visitor visitor(x, y, node);
+        tree.PreOrderTraverse(visitor);
+        return visitor.GetResult();
+    }
+
+    static glm::vec2 MapCoordsToNode(const RenderTree& tree, float x, float y, const Node* node)
+    {
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            Visitor(float x, float y, const Node* node)
+            : mCoords(x, y, 1.0f, 1.0f)
+            , mNode(node)
+            {}
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Push(node->GetNodeTransform());
+
+                if (node == mNode)
+                {
+                    const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+                    const auto& vec = animation_to_node * mCoords;
+                    mResult = glm::vec2(vec.x, vec.y);
+                }
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Pop();
+            }
+            glm::vec2 GetResult() const
+            { return mResult; }
+
+        private:
+            const glm::vec4 mCoords;
+            const Node* mNode = nullptr;
+            glm::vec2 mResult;
+            gfx::Transform mTransform;
+        };
+
+        Visitor visitor(x, y, node);
+        tree.PreOrderTraverse(visitor);
+        return visitor.GetResult();
+    }
+
+    static gfx::FRect GetBoundingBox(const RenderTree& tree, const Node* node)
+    {
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            Visitor(const Node* node) : mNode(node)
+            {}
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Push(node->GetNodeTransform());
+                if (node == mNode)
+                {
+                    mTransform.Push(node->GetModelTransform());
+                    // node to animation matrix
+                    // for each corner of a bounding volume compute new positions per
+                    // the transformation matrix and then choose the min/max on each axis.
+                    const auto& mat = mTransform.GetAsMatrix();
+                    const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+                    const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+                    const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+                    const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+                    // choose min/max on each axis.
+                    const auto left = std::min(std::min(top_left.x, top_right.x),
+                        std::min(bot_left.x, bot_right.x));
+                    const auto right = std::max(std::max(top_left.x, top_right.x),
+                        std::max(bot_left.x, bot_right.x));
+                    const auto top = std::min(std::min(top_left.y, top_right.y),
+                        std::min(bot_left.y, bot_right.y));
+                    const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                        std::max(bot_left.y, bot_right.y));
+                    mResult = gfx::FRect(left, top, right - left, bottom - top);
+
+                    mTransform.Pop();
+                }
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Pop();
+            }
+            gfx::FRect GetResult() const
+            { return mResult; }
+        private:
+            const Node* mNode = nullptr;
+            gfx::FRect mResult;
+            gfx::Transform mTransform;
+        };
+
+        Visitor visitor(node);
+        tree.PreOrderTraverse(visitor);
+        return visitor.GetResult();
+    }
+
+    static gfx::FRect GetBoundingBox(const RenderTree& tree)
+    {
+        class Visitor : public RenderTree::ConstVisitor
+        {
+        public:
+            virtual void EnterNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Push(node->GetNodeTransform());
+                mTransform.Push(node->GetModelTransform());
+                // node to animation matrix.
+                // for each corner of a bounding volume compute new positions per
+                // the transformation matrix and then choose the min/max on each axis.
+                const auto& mat = mTransform.GetAsMatrix();
+                const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+                const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+                const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+                const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+                // choose min/max on each axis.
+                const auto left = std::min(std::min(top_left.x, top_right.x),
+                    std::min(bot_left.x, bot_right.x));
+                const auto right = std::max(std::max(top_left.x, top_right.x),
+                    std::max(bot_left.x, bot_right.x));
+                const auto top = std::min(std::min(top_left.y, top_right.y),
+                    std::min(bot_left.y, bot_right.y));
+                const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                    std::max(bot_left.y, bot_right.y));
+                mResult = Union(mResult, gfx::FRect(left, top, right - left, bottom - top));
+
+                mTransform.Pop();
+            }
+            virtual void LeaveNode(const Node* node) override
+            {
+                if (!node)
+                    return;
+                mTransform.Pop();
+            }
+            gfx::FRect GetResult() const
+            { return mResult; }
+        private:
+            gfx::FRect mResult;
+            gfx::Transform mTransform;
+        };
+
+        Visitor visitor;
+        tree.PreOrderTraverse(visitor);
+        return visitor.GetResult();
+    }
+}; // RenderTreeFunctions
+
+} // namespace
+
 namespace game
 {
 
-AnimationNode::AnimationNode()
+AnimationNodeClass::AnimationNodeClass()
 {
     mId = base::RandomString(10);
     mBitFlags.set(Flags::VisibleInEditor, true);
@@ -51,18 +492,49 @@ AnimationNode::AnimationNode()
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::UpdateDrawable, true);
     mBitFlags.set(Flags::RestartDrawable, true);
-    mBitFlags.set(Flags::LimitLifetime, false);
 }
 
-std::size_t AnimationNode::GetHash() const
+glm::mat4 AnimationNodeClass::GetNodeTransform() const
+{
+    // transformation order is the order they're
+    // written here.
+    gfx::Transform transform;
+    // transform.Scale(mScale); // currently not supported.
+    transform.Rotate(mRotation);
+    transform.Translate(mPosition);
+    return transform.GetAsMatrix();
+}
+
+glm::mat4 AnimationNodeClass::GetModelTransform() const
+{
+    gfx::Transform transform;
+    transform.Scale(mSize);
+    // offset the object so that the center of the shape is aligned
+    // with the position parameter.
+    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    return transform.GetAsMatrix();
+}
+
+std::unique_ptr<gfx::Drawable> AnimationNodeClass::CreateDrawableInstance() const
+{
+    auto ret = gfx::CreateDrawableInstance(mDrawableClass);
+    // configure with the class defaults.
+    ret->SetLineWidth(mLineWidth);
+    ret->SetStyle(mRenderStyle);
+    return ret;
+}
+std::unique_ptr<gfx::Material> AnimationNodeClass::CreateMaterialInstance() const
+{
+    return gfx::CreateMaterialInstance(mMaterialClass);
+}
+
+std::size_t AnimationNodeClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mMaterialName);
     hash = base::hash_combine(hash, mDrawableName);
-    hash = base::hash_combine(hash, mStartTime);
-    hash = base::hash_combine(hash, mEndTime);
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mScale);
@@ -75,64 +547,20 @@ std::size_t AnimationNode::GetHash() const
     return hash;
 }
 
-void AnimationNode::Update(float time, float dt)
+void AnimationNodeClass::Update(float time, float dt)
 {
-    if (!IsAlive(time))
-        return;
-
-    if (TestFlag(Flags::UpdateDrawable))
-        mDrawable->Update(dt);
-
-    if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
-    {
-        if (!p->IsAlive() && TestFlag(Flags::RestartDrawable))
-            p->Restart();
-    }
-
-    if (TestFlag(Flags::UpdateMaterial))
-        mMaterial->SetRuntime(time);
+    // currently no op
 }
 
-void AnimationNode::Reset()
+void AnimationNodeClass::Reset()
 {
-    if (auto* p = dynamic_cast<gfx::ParticleEngine*>(mDrawable.get()))
-    {
-        p->Restart();
-    }
-    mMaterial->SetRuntime(0);
+    mMaterialClass.reset();
+    mDrawableClass.reset();
+    mMaterial.reset();
+    mDrawable.reset();
 }
 
-bool AnimationNode::IsAlive(float time) const
-{
-    if (!TestFlag(Flags::LimitLifetime))
-        return true;
-    if (time >= mStartTime && time <= mEndTime)
-        return true;
-    return false;
-}
-
-glm::mat4 AnimationNode::GetNodeTransform() const
-{
-    // transformation order is the order they're
-    // written here.
-    gfx::Transform transform;
-    // transform.Scale(mScale); // currently not supported.
-    transform.Rotate(mRotation);
-    transform.Translate(mPosition);
-    return transform.GetAsMatrix();
-}
-
-glm::mat4 AnimationNode::GetModelTransform() const
-{
-    gfx::Transform transform;
-    transform.Scale(mSize);
-    // offset the object so that the center of the shape is aligned
-    // with the position parameter.
-    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
-    return transform.GetAsMatrix();
-}
-
-void AnimationNode::Prepare(const GfxFactory& loader)
+void AnimationNodeClass::Prepare(const GfxFactory& loader) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -163,22 +591,17 @@ void AnimationNode::Prepare(const GfxFactory& loader)
     // However it's also possible that the particle engines are shared and each
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
-    mDrawable = loader.MakeDrawable(mDrawableName);
-    mMaterial = loader.MakeMaterial(mMaterialName);
-
-    mDrawable->SetStyle(mRenderStyle);
-    mDrawable->SetLineWidth(mLineWidth);
+    mDrawableClass = loader.GetDrawableClass(mDrawableName);
+    mMaterialClass = loader.GetMaterialClass(mMaterialName);
 }
 
-nlohmann::json AnimationNode::ToJson() const
+nlohmann::json AnimationNodeClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "material", mMaterialName);
     base::JsonWrite(json, "drawable", mDrawableName);
-    base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "endtime", mEndTime);
     base::JsonWrite(json, "position", mPosition);
     base::JsonWrite(json, "size", mSize);
     base::JsonWrite(json, "scale", mScale);
@@ -192,38 +615,146 @@ nlohmann::json AnimationNode::ToJson() const
 }
 
 // static
-std::optional<AnimationNode> AnimationNode::FromJson(const nlohmann::json& object)
+std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::json& object)
 {
-    AnimationNode ret;
+    std::uint32_t bitflags = 0;
+
+    AnimationNodeClass ret;
     if (!base::JsonReadSafe(object, "id", &ret.mId) ||
         !base::JsonReadSafe(object, "name", &ret.mName) ||
         !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
         !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
-        !base::JsonReadSafe(object, "starttime", &ret.mStartTime) ||
-        !base::JsonReadSafe(object, "endtime", &ret.mEndTime) ||
         !base::JsonReadSafe(object, "position", &ret.mPosition) ||
         !base::JsonReadSafe(object, "size", &ret.mSize) ||
         !base::JsonReadSafe(object, "scale", &ret.mScale) ||
         !base::JsonReadSafe(object, "rotation", &ret.mRotation) ||
         !base::JsonReadSafe(object, "layer", &ret.mLayer) ||
-        !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass))
+        !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass) ||
+        !base::JsonReadSafe(object, "render_style", &ret.mRenderStyle) ||
+        !base::JsonReadSafe(object, "linewidth", &ret.mLineWidth) ||
+        !base::JsonReadSafe(object, "bitflags", &bitflags))
         return std::nullopt;
 
-    std::uint32_t bitflags = 0;
-    base::JsonReadSafe(object, "render_style", &ret.mRenderStyle);
-    base::JsonReadSafe(object, "linewidth", &ret.mLineWidth);
-    if (base::JsonReadSafe(object, "bitflags", &bitflags))
-        ret.mBitFlags.set_from_value(bitflags);
-
+    ret.mBitFlags.set_from_value(bitflags);
     return ret;
 }
 
-Animation::Animation(const Animation& other)
+void AnimationNode::Reset()
+{
+    // initialize instance state based on the class's initial state.
+    mPosition = mClass->GetTranslation();
+    mSize     = mClass->GetSize();
+    mScale    = mClass->GetScale();
+    mRotation = mClass->GetRotation();
+    mMaterial = mClass->CreateMaterialInstance();
+    mDrawable = mClass->CreateDrawableInstance();
+}
+
+void AnimationNode::Update(float time, float dt)
+{
+    if (TestFlag(Flags::UpdateDrawable))
+        mDrawable->Update(dt);
+
+    if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
+        mDrawable->Restart();
+
+    if (TestFlag(Flags::UpdateMaterial))
+        mMaterial->Update(dt);
+}
+
+glm::mat4 AnimationNode::GetNodeTransform() const
+{
+    // transformation order is the order they're
+    // written here.
+    gfx::Transform transform;
+    // transform.Scale(mScale); // currently not supported.
+    transform.Rotate(mRotation);
+    transform.Translate(mPosition);
+    return transform.GetAsMatrix();
+}
+
+glm::mat4 AnimationNode::GetModelTransform() const
+{
+    gfx::Transform transform;
+    transform.Scale(mSize);
+    // offset the object so that the center of the shape is aligned
+    // with the position parameter.
+    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    return transform.GetAsMatrix();
+}
+
+void AnimationTrack::Update(float dt)
+{
+    const auto duration = mClass->GetDuration();
+
+    mCurrentTime = math::clamp(0.0f, duration, mCurrentTime + dt);
+}
+
+void AnimationTrack::Apply(AnimationNode& node) const
+{
+    const auto duration = mClass->GetDuration();
+    const auto pos = mCurrentTime / duration;
+
+    // todo: keep the tracks in some smarter data structure or perhaps
+    // in a sorted vector and then binary search.
+    for (auto& track : mTracks)
+    {
+        if (track.node != node.GetId())
+            continue;
+
+        const auto start = track.actuator->GetStartTime();
+        const auto len   = track.actuator->GetDuration();
+        const auto end   = math::clamp(0.0f, 1.0f, start + len);
+        if (pos < start)
+            continue;
+        else if (pos >= end)
+        {
+            if (!track.ended)
+            {
+                track.actuator->Finish(node);
+                track.ended = true;
+            }
+            continue;
+        }
+        if (!track.started)
+        {
+            track.actuator->Start(node);
+            track.started = true;
+        }
+        const auto t = math::clamp(0.0f, 1.0f, (pos - start) / len);
+        track.actuator->Apply(node, t);
+    }
+}
+
+void AnimationTrack::Restart()
+{
+    for (auto& track : mTracks)
+    {
+        ASSERT(track.started);
+        ASSERT(track.ended);
+        track.started = false;
+        track.ended   = false;
+    }
+    mCurrentTime = 0.0f;
+}
+
+bool AnimationTrack::IsComplete() const
+{
+    for (const auto& track : mTracks)
+    {
+        if (!track.ended)
+            return false;
+    }
+    return true;
+}
+
+
+AnimationClass::AnimationClass(const AnimationClass& other)
 {
     // make a deep copy of the nodes.
     for (const auto& node : other.mNodes)
     {
-        mNodes.push_back(std::make_unique<AnimationNode>(*node));
+        mNodes.push_back(std::make_unique<AnimationNodeClass>(*node));
     }
 
     // use the json serialization setup the copy of the
@@ -231,170 +762,9 @@ Animation::Animation(const Animation& other)
     nlohmann::json json = other.mRenderTree.ToJson(other);
     // build our render tree.
     mRenderTree = RenderTree::FromJson(json, *this).value();
-    mBitFlags   = other.mBitFlags;
-    mDuration   = other.mDuration;
-    mDelay      = other.mDelay;
 }
 
-void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
-{
-    if (!IsAlive())
-        return;
-
-    // here we could apply operations that would apply to the whole
-    // animation but currently we don't need such things.
-    // if we did we could begin new transformation scope for this
-    // by pushing a new scope in the transformation stack.
-    // transfrom.Push();
-    std::vector<DrawPacket> packets;
-
-    class Visitor : public RenderTree::ConstVisitor
-    {
-    public:
-        Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook, float time)
-            : mPackets(packets)
-            , mTransform(transform)
-            , mHook(hook)
-            , mTime(time)
-        {}
-        virtual void EnterNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-
-            // always push the node's transform, it might have children that
-            // do render.
-            mTransform.Push(node->GetNodeTransform());
-            // if it doesn't render then no draw packets are generated
-            if (node->TestFlag(AnimationNode::Flags::DoesRender) && node->IsAlive(mTime))
-            {
-                mTransform.Push(node->GetModelTransform());
-
-                DrawPacket packet;
-                packet.material  = node->GetMaterial();
-                packet.drawable  = node->GetDrawable();
-                packet.layer     = node->GetLayer();
-                packet.pass      = node->GetRenderPass();
-                packet.transform = mTransform.GetAsMatrix();
-                if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                    mPackets.push_back(std::move(packet));
-
-                // pop the model transform
-                mTransform.Pop();
-            }
-
-            // append any extra packets if needed.
-            if (mHook)
-            {
-                const auto num_transforms = mTransform.GetNumTransforms();
-
-                std::vector<DrawPacket> packets;
-                mHook->AppendPackets(node, mTransform, packets);
-                for (auto& p : packets)
-                    mPackets.push_back(std::move(p));
-
-                // make sure the stack is popped properly.
-                ASSERT(mTransform.GetNumTransforms() == num_transforms);
-            }
-        }
-        virtual void LeaveNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Pop();
-        }
-    private:
-        std::vector<DrawPacket>& mPackets;
-        gfx::Transform& mTransform;
-        DrawHook* mHook = nullptr;
-        float mTime = 0.0f;
-    };
-
-    Visitor visitor(packets, transform, hook, mCurrentTime);
-    mRenderTree.PreOrderTraverse(visitor);
-
-    // the layer value is negative but for the indexing below
-    // we must have postive values only.
-    int first_layer_index = 0;
-    for (auto& packet : packets)
-    {
-        first_layer_index = std::min(first_layer_index, packet.layer);
-    }
-    // offset the layers.
-    for (auto& packet : packets)
-    {
-        packet.layer += std::abs(first_layer_index);
-    }
-
-    struct Layer {
-        std::vector<gfx::Painter::DrawShape> draw_list;
-        std::vector<gfx::Painter::MaskShape> mask_list;
-    };
-    std::vector<Layer> layers;
-
-    for (auto& packet : packets)
-    {
-        const auto layer_index = packet.layer;
-        if (layer_index >= layers.size())
-            layers.resize(layer_index + 1);
-
-        Layer& layer = layers[layer_index];
-        if (packet.pass == AnimationNode::RenderPass::Draw)
-        {
-            gfx::Painter::DrawShape shape;
-            shape.transform = &packet.transform;
-            shape.drawable  = packet.drawable.get();
-            shape.material  = packet.material.get();
-            layer.draw_list.push_back(shape);
-        }
-        else if (packet.pass == AnimationNode::RenderPass::Mask)
-        {
-            gfx::Painter::MaskShape shape;
-            shape.transform = &packet.transform;
-            shape.drawable  = packet.drawable.get();
-            layer.mask_list.push_back(shape);
-        }
-    }
-    for (const auto& layer : layers)
-    {
-        painter.DrawMasked(layer.draw_list, layer.mask_list);
-    }
-    // if we used a new trańsformation scope pop it here.
-    //transform.Pop();
-}
-
-void Animation::Update(float dt)
-{
-    if (mBitFlags.test(Flags::EnableTimeline))
-    {
-        if (mCurrentTime < mDelay)
-        {
-            mCurrentTime += dt;
-            return;
-        }
-
-        const auto animation_time = mCurrentTime - mDelay;
-        if (animation_time >= mDuration)
-        {
-            if (!mBitFlags.test(Flags::LoopAnimation))
-                return;
-
-            mCurrentTime = std::fmod(mCurrentTime, mDuration);
-            for (auto& node : mNodes)
-                node->Reset();
-        }
-        dt = std::min(dt, mDuration - animation_time);
-    }
-
-    for (auto& node : mNodes)
-    {
-        node->Update(mCurrentTime + dt, dt);
-    }
-    mCurrentTime += dt;
-}
-
-AnimationNode* Animation::AddNode(AnimationNode&& node)
+AnimationNodeClass* AnimationClass::AddNode(AnimationNodeClass&& node)
 {
 #if true
     for (const auto& old : mNodes)
@@ -402,13 +772,10 @@ AnimationNode* Animation::AddNode(AnimationNode&& node)
         ASSERT(old->GetId() != node.GetId());
     }
 #endif
-
-    mNodes.push_back(std::make_unique<AnimationNode>(std::move(node)));
+    mNodes.push_back(std::make_shared<AnimationNodeClass>(std::move(node)));
     return mNodes.back().get();
 }
-// Add a new animation node. Returns a pointer to the node
-// that was added to the anímation.
-AnimationNode* Animation::AddNode(const AnimationNode& node)
+AnimationNodeClass* AnimationClass::AddNode(const AnimationNodeClass& node)
 {
 #if true
     for (const auto& old : mNodes)
@@ -416,52 +783,238 @@ AnimationNode* Animation::AddNode(const AnimationNode& node)
         ASSERT(old->GetId() != node.GetId());
     }
 #endif
-
-    mNodes.push_back(std::make_unique<AnimationNode>(node));
+    mNodes.push_back(std::make_shared<AnimationNodeClass>(node));
     return mNodes.back().get();
 }
 
-void Animation::DeleteNodeByIndex(size_t i)
+AnimationNodeClass* AnimationClass::AddNode(std::unique_ptr<AnimationNodeClass> node)
+{
+#if true
+    for (const auto& old : mNodes)
+    {
+        ASSERT(old->GetId() != node->GetId());
+    }
+#endif
+    mNodes.push_back(std::move(node));
+    return mNodes.back().get();
+}
+
+void AnimationClass::DeleteNodeByIndex(size_t i)
 {
     ASSERT(i < mNodes.size());
     auto it = std::begin(mNodes);
     std::advance(it, i);
     mNodes.erase(it);
 }
-// Delete a node by the given id.
-void Animation::DeleteNodeById(const std::string& id)
+
+bool AnimationClass::DeleteNodeById(const std::string& id)
 {
     for (auto it = mNodes.begin(); it != mNodes.end(); ++it)
     {
         if ((*it)->GetId() == id)
         {
             mNodes.erase(it);
-            return;
+            return true;
         }
     }
-    ASSERT(!"No such node found.");
+    return false;
 }
 
+bool AnimationClass::DeleteNodeByName(const std::string& name)
+{
+    for (auto it = mNodes.begin(); it != mNodes.end(); ++it)
+    {
+        if ((*it)->GetName() == name)
+        {
+            mNodes.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
 
-nlohmann::json Animation::ToJson() const
+AnimationNodeClass& AnimationClass::GetNode(size_t i)
+{
+    ASSERT(i < mNodes.size());
+    return *mNodes[i];
+}
+AnimationNodeClass* AnimationClass::FindNodeByName(const std::string& name)
+{
+    for (auto& node : mNodes)
+        if (node->GetName() == name) return node.get();
+    return nullptr;
+}
+AnimationNodeClass* AnimationClass::FindNodeById(const std::string& id)
+{
+    for (auto& node : mNodes)
+        if (node->GetId() == id) return node.get();
+    return nullptr;
+}
+
+const AnimationNodeClass& AnimationClass::GetNode(size_t i) const
+{
+    ASSERT(i < mNodes.size());
+    return *mNodes[i];
+}
+const AnimationNodeClass* AnimationClass::FindNodeByName(const std::string& name) const
+{
+    for (const auto& node : mNodes)
+        if (node->GetName() == name) return node.get();
+    return nullptr;
+}
+const AnimationNodeClass* AnimationClass::FindNodeById(const std::string& id) const
+{
+    for (const auto& node : mNodes)
+        if (node->GetId() == id) return node.get();
+    return nullptr;
+}
+
+std::shared_ptr<const AnimationNodeClass> AnimationClass::GetSharedAnimationNodeClass(size_t i) const
+{
+    ASSERT(i < mNodes.size());
+    return mNodes[i];
+}
+
+AnimationTrackClass* AnimationClass::AddAnimationTrack(AnimationTrackClass&& track)
+{
+    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track)));
+    return mAnimationTracks.back().get();
+}
+
+AnimationTrackClass* AnimationClass::AddAnimationTrack(const AnimationTrackClass& track)
+{
+    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(track));
+    return mAnimationTracks.back().get();
+}
+
+AnimationTrackClass* AnimationClass::AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track)
+{
+    mAnimationTracks.push_back(std::move(track));
+    return mAnimationTracks.back().get();
+}
+
+AnimationTrackClass* AnimationClass::GetAnimationTrack(size_t i)
+{
+    ASSERT(i < mAnimationTracks.size());
+    return mAnimationTracks[i].get();
+}
+
+AnimationTrackClass* AnimationClass::FindAnimationTrackByName(const std::string& name)
+{
+    for (const auto& klass : mAnimationTracks)
+    {
+        if (klass->GetName() == name)
+            return klass.get();
+    }
+    return nullptr;
+}
+
+const AnimationTrackClass* AnimationClass::GetAnimationTrack(size_t i) const
+{
+    ASSERT(i < mAnimationTracks.size());
+    return mAnimationTracks[i].get();
+}
+
+const AnimationTrackClass* AnimationClass::FindAnimationTrackByName(const std::string& name) const
+{
+    for (const auto& klass : mAnimationTracks)
+    {
+        if (klass->GetName() == name)
+            return klass.get();
+    }
+    return nullptr;
+}
+
+std::shared_ptr<const AnimationTrackClass> AnimationClass::GetSharedAnimationTrackClass(size_t i) const
+{
+    ASSERT(i < mAnimationTracks.size());
+    return mAnimationTracks[i];
+}
+
+void AnimationClass::Update(float time, float dt)
+{
+    for (auto& node : mNodes)
+        node->Update(time, dt);
+}
+
+void AnimationClass::Reset()
+{
+    for (auto& node : mNodes)
+        node->Reset();
+}
+
+void AnimationClass::Prepare(const GfxFactory& loader) const
+{
+    for (auto& node : mNodes)
+        node->Prepare(loader);
+}
+
+void AnimationClass::Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook) const
+{
+    RenderTreeFunctions<AnimationNodeClass>::Draw(mRenderTree, painter, trans, hook);
+}
+
+void AnimationClass::CoarseHitTest(float x, float y, std::vector<AnimationNodeClass*>* hits,
+    std::vector<glm::vec2>* hitbox_positions)
+{
+    RenderTreeFunctions<AnimationNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+void AnimationClass::CoarseHitTest(float x, float y, std::vector<const AnimationNodeClass*>* hits,
+    std::vector<glm::vec2>* hitbox_positions) const
+{
+    RenderTreeFunctions<AnimationNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+glm::vec2 AnimationClass::MapCoordsFromNode(float x, float y, const AnimationNodeClass* node) const
+{
+    return RenderTreeFunctions<AnimationNodeClass>::MapCoordsFromNode(mRenderTree, x, y, node);
+}
+
+glm::vec2 AnimationClass::MapCoordsToNode(float x, float y, const AnimationNodeClass* node) const
+{
+    return RenderTreeFunctions<AnimationNodeClass>::MapCoordsToNode(mRenderTree, x, y, node);
+}
+
+gfx::FRect AnimationClass::GetBoundingBox(const AnimationNodeClass* node) const
+{
+    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingBox(mRenderTree, node);
+}
+
+gfx::FRect AnimationClass::GetBoundingBox() const
+{
+    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingBox(mRenderTree);
+}
+
+std::size_t AnimationClass::GetHash() const
+{
+    std::size_t hash = 0;
+    // include the node hashes in the animation hash
+    // this covers both the node values and their traversal order
+    mRenderTree.PreOrderTraverseForEach([&](const AnimationNodeClass* node) {
+        if (node == nullptr)
+            return;
+        hash = base::hash_combine(hash, node->GetHash());
+    });
+    return hash;
+}
+
+nlohmann::json AnimationClass::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "duration", mDuration);
-    base::JsonWrite(json, "delay", mDelay);
-    base::JsonWrite(json, "bitflags", mBitFlags.value());
-
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
     }
+    for (const auto& track : mAnimationTracks)
+    {
+        json["tracks"].push_back(track->ToJson());
+    }
 
-    using Serializer = Animation;
-
+    using Serializer = AnimationClass;
     json["render_tree"] = mRenderTree.ToJson<Serializer>();
     return json;
 }
 
-AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
+AnimationNodeClass* AnimationClass::TreeNodeFromJson(const nlohmann::json& json)
 {
     if (!json.contains("id")) // root node has no id
         return nullptr;
@@ -474,29 +1027,31 @@ AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
     return nullptr;
 }
 
-
 // static
-std::optional<Animation> Animation::FromJson(const nlohmann::json& object)
+std::optional<AnimationClass> AnimationClass::FromJson(const nlohmann::json& object)
 {
     unsigned int bitflags = 0;
 
-    Animation ret;
-    if (!base::JsonReadSafe(object, "duration", &ret.mDuration) ||
-        !base::JsonReadSafe(object, "bitflags", &bitflags) ||
-        !base::JsonReadSafe(object, "delay", &ret.mDelay))
-        return std::nullopt;
-
-    ret.mBitFlags.set_from_value(bitflags);
+    AnimationClass ret;
 
     if (object.contains("nodes"))
     {
         for (const auto& json : object["nodes"].items())
         {
-            std::optional<AnimationNode> comp = AnimationNode::FromJson(json.value());
+            std::optional<AnimationNodeClass> comp = AnimationNodeClass::FromJson(json.value());
             if (!comp.has_value())
                 return std::nullopt;
-            auto node = std::make_unique<AnimationNode>(std::move(comp.value()));
-            ret.mNodes.push_back(std::move(node));
+            ret.mNodes.push_back(std::make_shared<AnimationNodeClass>(std::move(comp.value())));
+        }
+    }
+    if (object.contains("tracks"))
+    {
+        for (const auto& json : object["tracks"].items())
+        {
+            std::optional<AnimationTrackClass> track = AnimationTrackClass::FromJson(json.value());
+            if (!track.has_value())
+                return std::nullopt;
+            ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
         }
     }
 
@@ -510,7 +1065,7 @@ std::optional<Animation> Animation::FromJson(const nlohmann::json& object)
 }
 
 // static
-nlohmann::json Animation::TreeNodeToJson(const AnimationNode* node)
+nlohmann::json AnimationClass::TreeNodeToJson(const AnimationNodeClass* node)
 {
     // do only shallow serialization of the animation node,
     // i.e. only record the id so that we can restore the node
@@ -521,6 +1076,126 @@ nlohmann::json Animation::TreeNodeToJson(const AnimationNode* node)
     return ret;
 }
 
+AnimationClass& AnimationClass::operator=(const AnimationClass& other)
+{
+    if (this == &other)
+        return *this;
+
+    AnimationClass copy(other);
+    mNodes = std::move(copy.mNodes);
+    mRenderTree = copy.mRenderTree;
+    return *this;
+}
+
+Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
+    : mClass(klass)
+{
+    // build render tree, first ceate instances of all node classes
+    // then build the render tree based on the node instances
+    for (size_t i=0; i<mClass->GetNumNodes(); ++i)
+    {
+        mNodes.push_back(std::make_unique<AnimationNode>(mClass->GetSharedAnimationNodeClass(i)));
+    }
+    // rebuild the render tree through JSON serialization
+    nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
+
+    mRenderTree = RenderTree::FromJson(json, *this).value();
+
+}
+Animation::Animation(const AnimationClass& klass)
+    : Animation(std::make_shared<AnimationClass>(klass))
+{}
+
+void Animation::Update(float dt)
+{
+    mCurrentTime += dt;
+
+    for (auto& node : mNodes)
+    {
+        node->Update(mCurrentTime, dt);
+    }
+    if (!mAnimationTrack)
+        return;
+
+    mAnimationTrack->Update(dt);
+    for (auto& node : mNodes)
+    {
+        mAnimationTrack->Apply(*node);
+    }
+
+    if (!mAnimationTrack->IsComplete())
+        return;
+
+    DEBUG("AnimationTrack '%1' completed.", mAnimationTrack->GetName());
+
+    if (mAnimationTrack->IsLooping())
+    {
+        mAnimationTrack->Restart();
+        for (auto& node : mNodes)
+        {
+            node->Reset();
+        }
+        return;
+    }
+    mAnimationTrack.reset();
+}
+
+void Animation::Play(std::unique_ptr<AnimationTrack> track)
+{
+    // todo: what to do if there's a previous track ?
+    // possibilities: reset or queue?
+    mAnimationTrack = std::move(track);
+}
+
+void Animation::Play(const std::string& track)
+{
+    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
+        if (klass->GetName() != track)
+            continue;
+        auto track = std::make_unique<AnimationTrack>(klass);
+        Play(std::move(track));
+        return;
+    }
+}
+
+void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
+{
+    RenderTreeFunctions<AnimationNode>::Draw(mRenderTree, painter, transform, hook);
+}
+
+void Animation::CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,
+    std::vector<glm::vec2>* hitbox_positions)
+{
+    RenderTreeFunctions<AnimationNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+
+void Animation::CoarseHitTest(float x, float y, std::vector<const AnimationNode*>* hits,
+    std::vector<glm::vec2>* hitbox_positions) const
+{
+    RenderTreeFunctions<AnimationNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+
+glm::vec2 Animation::MapCoordsFromNode(float x, float y, const AnimationNode* node) const
+{
+    return RenderTreeFunctions<AnimationNode>::MapCoordsFromNode(mRenderTree, x, y, node);
+}
+
+glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node) const
+{
+    return RenderTreeFunctions<AnimationNode>::MapCoordsToNode(mRenderTree, x, y, node);
+}
+
+gfx::FRect Animation::GetBoundingBox(const AnimationNode* node) const
+{
+    return RenderTreeFunctions<AnimationNode>::GetBoundingBox(mRenderTree, node);
+}
+
+gfx::FRect Animation::GetBoundingBox() const
+{
+    return RenderTreeFunctions<AnimationNode>::GetBoundingBox(mRenderTree);
+}
 
 void Animation::Reset()
 {
@@ -529,341 +1204,24 @@ void Animation::Reset()
         node->Reset();
     }
     mCurrentTime = 0.0f;
+    mAnimationTrack.release();
 }
 
-bool Animation::IsAlive() const
+AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
 {
-    if (!TestFlag(Flags::EnableTimeline))
-        return true;
+    if (!json.contains("id")) // root node has no id
+        return nullptr;
+    const std::string& id = json["id"];
+    for (auto& it : mNodes)
+        if (it->GetId() == id) return it.get();
 
-    if (mCurrentTime < mDelay)
-        return false;
-    const auto animation_time = mCurrentTime - mDelay;
-    if (animation_time >= mDuration)
-        return false;
-    return true;
+    ASSERT(!"no such node found");
+    return nullptr;
 }
 
-bool Animation::IsFinished() const
+std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass)
 {
-    // no timeline, never finishes
-    if (!TestFlag(Flags::EnableTimeline))
-        return false;
-    // looping never finishes.
-    if (TestFlag(Flags::LoopAnimation))
-        return false;
-    // has timeline, finished if current time is beyond
-    // delay and duration.
-    if (mCurrentTime >= mDelay + mDuration)
-        return true;
-    return false;
-}
-
-std::size_t Animation::GetHash() const
-{
-    std::size_t hash = 0;
-
-    // include the node hashes in the animation hash
-    // this covers both the node values and their traversal order
-    mRenderTree.PreOrderTraverseForEach([&](const AnimationNode* node) {
-        if (node == nullptr)
-            return;
-        hash = base::hash_combine(hash, node->GetHash());
-    });
-    hash = base::hash_combine(hash, mDuration);
-    hash = base::hash_combine(hash, mDelay);
-    hash = base::hash_combine(hash, mBitFlags.value());
-    return hash;
-}
-
-void Animation::CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,
-    std::vector<glm::vec2>* hitbox_positions)
-{
-    class Visitor : public RenderTree::Visitor
-    {
-    public:
-        Visitor(const glm::vec4& point, std::vector<AnimationNode*>* hits, std::vector<glm::vec2>* boxes)
-            : mHitPoint(point)
-            , mHits(hits)
-            , mBoxes(boxes)
-        {}
-
-        virtual void EnterNode(AnimationNode* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Push(node->GetNodeTransform());
-            // using the model transform will put the coordinates in the drawable coordinate
-            // space, i.e. normalized coordinates.
-            mTransform.Push(node->GetModelTransform());
-
-            const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-            const auto& hitpoint_in_node = animation_to_node * mHitPoint;
-
-            if (hitpoint_in_node.x >= 0.0f &&
-                hitpoint_in_node.x < 1.0f &&
-                hitpoint_in_node.y >= 0.0f &&
-                hitpoint_in_node.y < 1.0f)
-            {
-                mHits->push_back(node);
-                if (mBoxes)
-                {
-                    const auto& size = node->GetSize();
-                    mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
-                }
-            }
-            mTransform.Pop();
-        }
-        virtual void LeaveNode(AnimationNode* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Pop();
-        }
-    private:
-        const glm::vec4 mHitPoint;
-        gfx::Transform mTransform;
-        std::vector<AnimationNode*>* mHits = nullptr;
-        std::vector<glm::vec2>* mBoxes = nullptr;
-    };
-
-    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
-    mRenderTree.PreOrderTraverse(visitor);
-}
-
-void Animation::CoarseHitTest(float x, float y, std::vector<const AnimationNode*>* hits,
-    std::vector<glm::vec2>* hitbox_positions) const
-{
-    std::vector<AnimationNode*> nodes;
-    const_cast<Animation*>(this)->CoarseHitTest(x, y, &nodes, hitbox_positions);
-    for (auto* node : nodes)
-        hits->push_back(node);
-}
-
-glm::vec2 Animation::MapCoordsFromNode(float x, float y, const AnimationNode* node) const
-{
-    class Visitor : public RenderTree::ConstVisitor
-    {
-    public:
-        Visitor(float x, float y, const AnimationNode* node)
-          : mX(x), mY(y), mNode(node)
-        {}
-        virtual void EnterNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Push(node->GetNodeTransform());
-
-            // if it's the node we're interested in
-            if (node == mNode)
-            {
-                const auto& mat = mTransform.GetAsMatrix();
-                const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
-                mResult = glm::vec2(vec.x, vec.y);
-            }
-        }
-
-        virtual void LeaveNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-
-        glm::vec2 GetResult() const
-        { return mResult; }
-    private:
-        const float mX = 0.0f;
-        const float mY = 0.0f;
-        const AnimationNode* mNode = nullptr;
-        glm::vec2 mResult;
-        gfx::Transform mTransform;
-    };
-
-    Visitor visitor(x, y, node);
-    mRenderTree.PreOrderTraverse(visitor);
-
-    return visitor.GetResult();
-}
-
-glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node) const
-{
-    class Visitor : public RenderTree::ConstVisitor
-    {
-    public:
-        Visitor(float x, float y, const AnimationNode* node)
-          : mCoords(x, y, 1.0f, 1.0f)
-          , mNode(node)
-        {}
-        virtual void EnterNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-
-            if (node == mNode)
-            {
-                const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-                const auto& vec = animation_to_node * mCoords;
-                mResult = glm::vec2(vec.x, vec.y);
-            }
-        }
-        virtual void LeaveNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        glm::vec2 GetResult() const
-        { return mResult; }
-
-    private:
-        const glm::vec4 mCoords;
-        const AnimationNode* mNode = nullptr;
-        glm::vec2 mResult;
-        gfx::Transform mTransform;
-    };
-
-    Visitor visitor(x, y, node);
-    mRenderTree.PreOrderTraverse(visitor);
-
-    return visitor.GetResult();
-}
-
-gfx::FRect Animation::GetBoundingBox(const AnimationNode* node) const
-{
-    class Visitor : public RenderTree::ConstVisitor
-    {
-    public:
-        Visitor(const AnimationNode* node) : mNode(node)
-        {}
-        virtual void EnterNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            if (node == mNode)
-            {
-                mTransform.Push(node->GetModelTransform());
-                // node to animation matrix
-                // for each corner of a bounding volume compute new positions per
-                // the transformation matrix and then choose the min/max on each axis.
-                const auto& mat = mTransform.GetAsMatrix();
-                const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-                const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-                const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-                const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-                // choose min/max on each axis.
-                const auto left = std::min(std::min(top_left.x, top_right.x),
-                    std::min(bot_left.x, bot_right.x));
-                const auto right = std::max(std::max(top_left.x, top_right.x),
-                    std::max(bot_left.x, bot_right.x));
-                const auto top = std::min(std::min(top_left.y, top_right.y),
-                    std::min(bot_left.y, bot_right.y));
-                const auto bottom = std::max(std::max(top_left.y, top_right.y),
-                    std::max(bot_left.y, bot_right.y));
-                mResult = gfx::FRect(left, top, right - left, bottom - top);
-
-                mTransform.Pop();
-            }
-        }
-        virtual void LeaveNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        gfx::FRect GetResult() const
-        { return mResult; }
-    private:
-        const AnimationNode* mNode = nullptr;
-        gfx::FRect mResult;
-        gfx::Transform mTransform;
-    };
-
-    Visitor visitor(node);
-    mRenderTree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
-}
-
-gfx::FRect Animation::GetBoundingBox() const
-{
-    class Visitor : public RenderTree::ConstVisitor
-    {
-    public:
-        virtual void EnterNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            mTransform.Push(node->GetModelTransform());
-            // node to animation matrix.
-            // for each corner of a bounding volume compute new positions per
-            // the transformation matrix and then choose the min/max on each axis.
-            const auto& mat = mTransform.GetAsMatrix();
-            const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-            const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-            const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-            const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-            // choose min/max on each axis.
-            const auto left = std::min(std::min(top_left.x, top_right.x),
-                std::min(bot_left.x, bot_right.x));
-            const auto right = std::max(std::max(top_left.x, top_right.x),
-                std::max(bot_left.x, bot_right.x));
-            const auto top = std::min(std::min(top_left.y, top_right.y),
-                std::min(bot_left.y, bot_right.y));
-            const auto bottom = std::max(std::max(top_left.y, top_right.y),
-                std::max(bot_left.y, bot_right.y));
-            mResult = Union(mResult, gfx::FRect(left, top, right - left, bottom - top));
-
-            mTransform.Pop();
-        }
-        virtual void LeaveNode(const AnimationNode* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        gfx::FRect GetResult() const
-        { return mResult; }
-    private:
-        gfx::FRect mResult;
-        gfx::Transform mTransform;
-    };
-
-    Visitor visitor;
-    mRenderTree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
-}
-
-void Animation::Prepare(const GfxFactory& loader)
-{
-    for (auto& node : mNodes)
-    {
-        node->Prepare(loader);
-    }
-}
-
-Animation& Animation::operator=(const Animation& other)
-{
-    if (this == &other)
-        return *this;
-
-    Animation copy(other);
-
-    for (auto& node : copy.mNodes)
-        mNodes.push_back(std::move(node));
-
-    mRenderTree = copy.mRenderTree;
-    mBitFlags   = copy.mBitFlags;
-    mDuration   = copy.mDuration;
-    mDelay      = copy.mDelay;
-    return *this;
+    return std::make_unique<Animation>(klass);
 }
 
 } // namespace

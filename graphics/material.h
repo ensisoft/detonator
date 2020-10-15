@@ -304,9 +304,14 @@ namespace gfx
 
     } // detail
 
-    // Material objects hold the material parameters per material instance
-    // and apply the parameters to the program object and rasterizer state.
-    class Material
+    // MaterialClass holds the data for some particular type of material.
+    // For example user might have defined material called "marble" with some
+    // particular textures and parameters. One instance (a c++ object) of
+    // MaterialClass would be used to represent this material type.
+    // Material objects are then "instances" that represent an instance
+    // of some material type.(I.e. they references a material class) and
+    // contain per instance specific state.
+    class MaterialClass
     {
     public:
         enum class SurfaceType {
@@ -348,13 +353,13 @@ namespace gfx
         using TextureWrapping  = Texture::Wrapping;
 
         // constructor.
-        Material(Type type) : mType(type)
+        MaterialClass(Type type) : mType(type)
         {}
         // allow "invalid" material to be constructed.
-        Material() = default;
+        MaterialClass() = default;
 
-        // Make a deep copy of the material.
-        Material(const Material& other);
+        // Make a deep copy of the material class.
+        MaterialClass(const MaterialClass& other);
 
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
@@ -372,14 +377,20 @@ namespace gfx
             Blending blending = Blending::None;
         };
 
+        // state of a material instance of this type of material.
+        struct MaterialInstance {
+            float runtime = 0.0f;
+        };
+
         // Apply the material properties to the given program object
         // and set the rasterizer state.
-        void ApplyDynamicState(const Environment& env, Device& device, Program& prog, RasterState& state) const;
+        void ApplyDynamicState(const Environment& env, const MaterialInstance& inst,
+            Device& device, Program& prog, RasterState& state) const;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
         void ApplyStaticState(Device& device, Program& prog) const;
 
-        // Material properties getters.
+        // MaterialClass properties getters.
 
         // Get the ID for the material. Used to map the material
         // to a device specific program object.
@@ -424,10 +435,10 @@ namespace gfx
         ParticleAction GetParticleAction() const
         { return mParticleAction; }
 
-        // Material properties setters.
+        // MaterialClass properties setters.
 
         // Set the material to use a specific shader.
-        Material& SetShaderFile(const std::string& shader_file)
+        MaterialClass& SetShaderFile(const std::string& shader_file)
         {
             mShaderFile = shader_file;
             return *this;
@@ -436,7 +447,7 @@ namespace gfx
         // Set the functional material type that describes approximately
         // how the material should behave. The final output depends
         // on the actual shader being used.
-        Material& SetType(Type type)
+        MaterialClass& SetType(Type type)
         {
             mType = type;
             return *this;
@@ -445,7 +456,7 @@ namespace gfx
         // Set whether to cut sharply between animation frames or
         // whether to smooth the transition by blending adjacent frames
         // together when in-between frames.
-        Material& SetBlendFrames(bool on_off)
+        MaterialClass& SetBlendFrames(bool on_off)
         {
             mBlendFrames = on_off;
             return *this;
@@ -460,7 +471,7 @@ namespace gfx
         // i.e. consume more graphics memory. Additionally frequenct changes
         // of the material state will be expensive and cause recompilation
         // and rebuild of the corresponding shader program.
-        Material& SetStatic(bool on_off)
+        MaterialClass& SetStatic(bool on_off)
         {
             mStatic = on_off;
             return *this;
@@ -470,29 +481,23 @@ namespace gfx
         // Values below 1.0f will result in the rendered image
         // being "brighter" and above 1.0f will make it "darker".
         // The default is 1.0f
-        Material& SetGamma(float gamma)
+        MaterialClass& SetGamma(float gamma)
         {
             mGamma = gamma;
             return *this;
         }
-        Material& SetFps(float fps)
+        MaterialClass& SetFps(float fps)
         {
             mFps = fps;
             return *this;
         }
-        Material& SetRuntime(float time)
-        {
-            mRuntime = time;
-            return *this;
-        }
-
         // Set the first material color.
-        Material& SetBaseColor(const Color4f& color)
+        MaterialClass& SetBaseColor(const Color4f& color)
         {
             mBaseColor = color;
             return *this;
         }
-        Material& SetBaseAlpha(float alpha)
+        MaterialClass& SetBaseAlpha(float alpha)
         {
             mBaseColor.SetAlpha(alpha);
             return *this;
@@ -503,7 +508,7 @@ namespace gfx
             BottomLeft, BottomRight
         };
 
-        Material& SetColorMapColor(const Color4f& color, ColorIndex index)
+        MaterialClass& SetColorMapColor(const Color4f& color, ColorIndex index)
         {
             if (index == ColorIndex::TopLeft)
                 mColorMap[0] = color;
@@ -531,32 +536,32 @@ namespace gfx
         }
 
         // Set the surface type.
-        Material& SetSurfaceType(SurfaceType type)
+        MaterialClass& SetSurfaceType(SurfaceType type)
         {
             mSurfaceType = type;
             return *this;
         }
 
-        Material& SetParticleAction(ParticleAction action)
+        MaterialClass& SetParticleAction(ParticleAction action)
         {
             mParticleAction = action;
             return *this;
         }
 
-        Material& AddTexture(const std::string& file, const std::string& name = "")
+        MaterialClass& AddTexture(const std::string& file, const std::string& name = "")
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureFileSource>(file, name);
             return *this;
         }
-        Material& AddTexture(const TextBuffer& text)
+        MaterialClass& AddTexture(const TextBuffer& text)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
             mTextures.back().enable_gc = true;
             return *this;
         }
-        Material& AddTexture(TextBuffer&& text)
+        MaterialClass& AddTexture(TextBuffer&& text)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
@@ -564,7 +569,7 @@ namespace gfx
             return *this;
         }
         template<typename T>
-        Material& AddTexture(const Bitmap<T>& bitmap)
+        MaterialClass& AddTexture(const Bitmap<T>& bitmap)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(bitmap);
@@ -572,20 +577,20 @@ namespace gfx
         }
 
         template<typename T>
-        Material& AddTexture(Bitmap<T>&& bitmap)
+        MaterialClass& AddTexture(Bitmap<T>&& bitmap)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(std::move(bitmap));
             return *this;
         }
 
-        Material& AddTexture(std::unique_ptr<TextureSource> source)
+        MaterialClass& AddTexture(std::unique_ptr<TextureSource> source)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::move(source);
             return *this;
         }
-        Material& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
+        MaterialClass& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::move(source);
@@ -593,65 +598,65 @@ namespace gfx
             return *this;
         }
 
-        Material& SetTextureRect(std::size_t index, const FRect& rect)
+        MaterialClass& SetTextureRect(std::size_t index, const FRect& rect)
         {
             ASSERT(index < mTextures.size());
             mTextures[index].box = rect;
             return *this;
         }
-        Material& SetTextureGc(std::size_t index, bool on_off)
+        MaterialClass& SetTextureGc(std::size_t index, bool on_off)
         {
             ASSERT(index < mTextures.size());
             mTextures[index].enable_gc = on_off;
             return *this;
         }
-        Material& SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
+        MaterialClass& SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
         {
             ASSERT(index < mTextures.size());
             mTextures[index].source = std::move(source);
             return *this;
         }
-        Material& SetTextureMinFilter(MinTextureFilter filter)
+        MaterialClass& SetTextureMinFilter(MinTextureFilter filter)
         {
             mMinFilter = filter;
             return *this;
         }
-        Material& SetTextureMagFilter(MagTextureFilter filter)
+        MaterialClass& SetTextureMagFilter(MagTextureFilter filter)
         {
             mMagFilter = filter;
             return *this;
         }
-        Material& SetTextureScaleX(float x)
+        MaterialClass& SetTextureScaleX(float x)
         {
             mTextureScale.x = x;
             return *this;
         }
-        Material& SetTextureScaleY(float y)
+        MaterialClass& SetTextureScaleY(float y)
         {
             mTextureScale.y = y;
             return *this;
         }
-        Material& SetTextureVelocityX(float x)
+        MaterialClass& SetTextureVelocityX(float x)
         {
             mTextureVelocity.x = x;
             return *this;
         }
-        Material& SetTextureVelocityY(float y)
+        MaterialClass& SetTextureVelocityY(float y)
         {
             mTextureVelocity.y = y;
             return *this;
         }
-        Material& SetTextureVelocityZ(float angle_radians)
+        MaterialClass& SetTextureVelocityZ(float angle_radians)
         {
             mTextureVelocity.z = angle_radians;
             return *this;
         }
-        Material& SetTextureWrapX(TextureWrapping wrap)
+        MaterialClass& SetTextureWrapX(TextureWrapping wrap)
         {
             mWrapX = wrap;
             return *this;
         }
-        Material& SetTextureWrapY(TextureWrapping wrap)
+        MaterialClass& SetTextureWrapY(TextureWrapping wrap)
         {
             mWrapY = wrap;
             return *this;
@@ -688,13 +693,13 @@ namespace gfx
 
         nlohmann::json ToJson() const;
 
-        static std::optional<Material> FromJson(const nlohmann::json& object);
+        static std::optional<MaterialClass> FromJson(const nlohmann::json& object);
 
         void BeginPacking(ResourcePacker* packer) const;
         void FinishPacking(const ResourcePacker* packer);
 
         // Deep copy of the material. Can be a bit expensive.
-        Material& operator=(const Material& other);
+        MaterialClass& operator=(const MaterialClass& other);
 
     private:
         // warning: remember to edit the copy constructor
@@ -704,7 +709,6 @@ namespace gfx
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         Type mType = Type::Color;
         float mGamma   = 1.0f;
-        float mRuntime = 0.0f;
         float mFps     = 0.0f;
         bool  mBlendFrames = true;
         bool  mStatic = false;
@@ -726,20 +730,70 @@ namespace gfx
         ParticleAction mParticleAction = ParticleAction::None;
     };
 
-    // This material will fill the drawn shape with solid color value.
-    inline Material SolidColor(const Color4f& color)
+    // Material is an instance of some specific type of material.
+    // The "type" (i.e. what kind of material it is) is defined by
+    // The MaterialClass which is shared between instances of any
+    // spefic material type.
+    class Material
     {
-        return Material(Material::Type::Color)
+    public:
+        // Create new material instance based on the given material class.
+        Material(const std::shared_ptr<const MaterialClass>& klass, float time = 0.0f)
+            : mClass(klass)
+            , mRuntime(time)
+        {}
+        Material(const MaterialClass& klass, float time = 0.0f)
+        {
+            mClass = std::make_shared<MaterialClass>(klass);
+            mRuntime = time;
+        }
+
+        // Get the material class object instance.
+        const MaterialClass& GetClass() const
+        { return *mClass; }
+        // Shortcut operator for accessing the class object instance.
+        const MaterialClass* operator->() const
+        { return mClass.get(); }
+
+        // Apply the material properties to the given program object
+        // and set the rasterizer state.
+        void ApplyDynamicState(const MaterialClass::Environment& env, Device& device, Program& prog,
+            MaterialClass::RasterState& state) const
+        {
+            // currently the only dynamic (instance) state is the material
+            // runtime. However if there's more such instance specific
+            // data it'd be set here.
+            MaterialClass::MaterialInstance instance;
+            instance.runtime = mRuntime;
+            mClass->ApplyDynamicState(env, instance, device, prog, state);
+        }
+
+        void SetRuntime(float runtime)
+        { mRuntime = runtime; }
+        void Update(float dt)
+        { mRuntime += dt; }
+    private:
+        // This is the "class" object for this material type.
+        std::shared_ptr<const MaterialClass> mClass;
+        // Current runtime for this material instance.
+        float mRuntime = 0.0f;
+    };
+
+
+    // This material will fill the drawn shape with solid color value.
+    inline MaterialClass SolidColor(const Color4f& color)
+    {
+        return MaterialClass(MaterialClass::Type::Color)
             .SetBaseColor(color);
     }
 
     // This material will map the given texture onto the drawn shape.
     // The object being drawn must provide texture coordinates.
-    inline Material TextureMap(const std::string& texture)
+    inline MaterialClass TextureMap(const std::string& texture)
     {
-        return Material(Material::Type::Texture)
+        return MaterialClass(MaterialClass::Type::Texture)
             .AddTexture(texture)
-            .SetSurfaceType(Material::SurfaceType::Opaque);
+            .SetSurfaceType(MaterialClass::SurfaceType::Opaque);
     }
 
     // SpriteSet is a material which renders a simple animation
@@ -748,19 +802,19 @@ namespace gfx
     // renders a coherent animation.
     // In order to blend between the frames of the animation
     // the current time value needs to be set.
-    inline Material SpriteSet()
+    inline MaterialClass SpriteSet()
     {
-        return Material(Material::Type::Sprite)
-            .SetSurfaceType(Material::SurfaceType::Transparent);
+        return MaterialClass(MaterialClass::Type::Sprite)
+            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     }
-    inline Material SpriteSet(const std::initializer_list<std::string>& textures)
+    inline MaterialClass SpriteSet(const std::initializer_list<std::string>& textures)
     {
         auto material = SpriteSet();
         for (const auto& texture : textures)
             material.AddTexture(texture);
         return material;
     }
-    inline Material SpriteSet(const std::vector<std::string>& textures)
+    inline MaterialClass SpriteSet(const std::vector<std::string>& textures)
     {
         auto material = SpriteSet();
         for (const auto& texture : textures)
@@ -773,12 +827,12 @@ namespace gfx
     // texture at some fps.
     // The assumption is that cycling through the regions
     // renders a coherent animation.
-    inline Material SpriteMap()
+    inline MaterialClass SpriteMap()
     {
-        return Material(Material::Type::Sprite)
-            .SetSurfaceType(Material::SurfaceType::Transparent);
+        return MaterialClass(MaterialClass::Type::Sprite)
+            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     }
-    inline Material SpriteMap(const std::string& texture, const std::vector<FRect>& frames)
+    inline MaterialClass SpriteMap(const std::string& texture, const std::vector<FRect>& frames)
     {
         auto material = SpriteMap();
         for (size_t i=0; i<frames.size(); ++i)
@@ -794,11 +848,15 @@ namespace gfx
     // texture object of it. The resulting texture object is then
     // mapped onto the shape being drawn.
     // The drawable shape must provide texture coordinates.
-    inline Material BitmapText(const TextBuffer& text)
+    inline MaterialClass BitmapText(const TextBuffer& text)
     {
-        return Material(Material::Type::Texture)
+        return MaterialClass(MaterialClass::Type::Texture)
             .AddTexture(text)
-            .SetSurfaceType(Material::SurfaceType::Transparent);
+            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     }
+
+
+    std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
+    std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
 
 } // namespace
