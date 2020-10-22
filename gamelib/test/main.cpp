@@ -216,6 +216,10 @@ public:
         const auto velocity = 1.245;
         mTime += dts * velocity;
 
+        //auto& tree = mAnimation->GetRenderTree();
+        auto* node = mAnimation->FindNodeByName("Child 0"); //tree.GetChildNode(0).GetChildNode(0);
+        node->SetScale(std::sin(mTime) + 1.0f);
+
         for (size_t i=0; i<mAnimation->GetNumNodes(); ++i)
         {
             auto& node = mAnimation->GetNode(i);

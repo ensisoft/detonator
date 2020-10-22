@@ -279,10 +279,18 @@ namespace game
             Reset();
         }
         // settters for instance state.
+        void SetTranslation(float x, float y)
+        { mPosition = glm::vec2(x, y); }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
+        void SetScale(float x, float y)
+        { mScale = glm::vec2(x, y); }
+        void SetScale(float scale)
+        { mScale = glm::vec2(scale, scale); }
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
+        void SetSize(float x, float y)
+        { mSize = glm::vec2(x, y); }
         void SetSize(const glm::vec2& size)
         { mSize = size; }
         void SetRotation(float value)
@@ -411,6 +419,8 @@ namespace game
         { return mEndPosition; }
         glm::vec2 GetEndSize() const
         { return mEndSize; }
+        glm::vec2 GetEndScale() const
+        { return mEndScale; }
         float GetEndRotation() const
         { return mEndRotation; }
         std::string GetNodeId() const
@@ -430,6 +440,8 @@ namespace game
         { mEndSize = size; }
         void SetEndRotation(float rot)
         { mEndRotation = rot; }
+        void SetEndScale(const glm::vec2& scale)
+        { mEndScale = scale; }
 
         virtual nlohmann::json ToJson() const override
         {
@@ -440,6 +452,7 @@ namespace game
             base::JsonWrite(json, "duration",  mDuration);
             base::JsonWrite(json, "position",  mEndPosition);
             base::JsonWrite(json, "size",      mEndSize);
+            base::JsonWrite(json, "scale",     mEndScale);
             base::JsonWrite(json, "rotation",  mEndRotation);
             return json;
         }
@@ -450,6 +463,7 @@ namespace game
                    base::JsonReadSafe(json, "duration",  &mDuration) &&
                    base::JsonReadSafe(json, "position",  &mEndPosition) &&
                    base::JsonReadSafe(json, "size",      &mEndSize) &&
+                   base::JsonReadSafe(json, "scale",     &mEndScale) &&
                    base::JsonReadSafe(json, "rotation",  &mEndRotation) &&
                    base::JsonReadSafe(json, "method",    &mInterpolation);
         }
@@ -462,6 +476,7 @@ namespace game
             hash = base::hash_combine(hash, mDuration);
             hash = base::hash_combine(hash, mEndPosition);
             hash = base::hash_combine(hash, mEndSize);
+            hash = base::hash_combine(hash, mEndScale);
             hash = base::hash_combine(hash, mEndRotation);
             return hash;
         }
@@ -483,6 +498,8 @@ namespace game
         glm::vec2 mEndPosition = {0.0f, 0.0f};
         // the ending size
         glm::vec2 mEndSize = {1.0f, 1.0f};
+        // the ending scale.
+        glm::vec2 mEndScale = {1.0f, 1.0f};
         // the ending rotation.
         float mEndRotation = 0.0f;
     };
@@ -528,6 +545,7 @@ namespace game
         {
             mStartPosition = node.GetTranslation();
             mStartSize     = node.GetSize();
+            mStartScale    = node.GetScale();
             mStartRotation = node.GetRotation();
         }
         virtual void Apply(AnimationNode& node, float t) override
@@ -537,15 +555,18 @@ namespace game
             const auto& p = math::interpolate(mStartPosition, mClass->GetEndPosition(), t, method);
             const auto& s = math::interpolate(mStartSize,     mClass->GetEndSize(),     t, method);
             const auto& r = math::interpolate(mStartRotation, mClass->GetEndRotation(), t, method);
+            const auto& f = math::interpolate(mStartScale,    mClass->GetEndScale(),    t, method);
             node.SetTranslation(p);
             node.SetSize(s);
             node.SetRotation(r);
+            node.SetScale(f);
         }
         virtual void Finish(AnimationNode& node) override
         {
             node.SetTranslation(mClass->GetEndPosition());
             node.SetRotation(mClass->GetEndRotation());
             node.SetSize(mClass->GetEndSize());
+            node.SetScale(mClass->GetEndScale());
         }
         virtual float GetStartTime() const override
         { return mClass->GetStartTime(); }
@@ -561,8 +582,9 @@ namespace game
         // the transform actuator will then interpolate between the
         // current starting and expected ending state.
         glm::vec2 mStartPosition = {0.0f, 0.0f};
-        glm::vec2 mStartSize = {1.0f, 1.0f};
-        float mStartRotation = 0.0f;
+        glm::vec2 mStartSize  = {1.0f, 1.0f};
+        glm::vec2 mStartScale = {1.0f, 1.0f};
+        float mStartRotation  = 0.0f;
     };
 
     // AnimationTrackClass defines a new type of animation track that includes
@@ -1085,10 +1107,33 @@ namespace game
 
         size_t GetNumNodes() const
         { return mNodes.size(); }
+
+        // Get the animation node class object by index.
+        // The index must be valid.
         AnimationNode& GetNode(size_t i)
         { return *mNodes[i]; }
+        // Find animation node by the given name. Returns nullptr if no such
+        // node could be found.
+        AnimationNode* FindNodeByName(const std::string& name);
+        // Find animation node by the given id. Returns nullptr if no such
+        // node could be found.
+        AnimationNode* FindNodeById(const std::string& id);
+
+        // Get the animation node class object by index.
+        // The index must be valid.
         const AnimationNode& GetNode(size_t i) const
         { return *mNodes[i]; }
+        // Find animation node by the given name. Returns nullptr if no such
+        // node could be found.
+        const AnimationNode* FindNodeByName(const std::string& name) const;
+        // Find animation node by the given id. Returns nullptr if no such
+        // node could be found.
+        const AnimationNode* FindNodeById(const std::string& id) const;
+
+        RenderTree& GetRenderTree()
+        { return mRenderTree; }
+        const RenderTree& GetRenderTree() const
+        { return mRenderTree; }
 
         AnimationNode* TreeNodeFromJson(const nlohmann::json& json);
     private:

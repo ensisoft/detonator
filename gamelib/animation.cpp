@@ -499,7 +499,7 @@ glm::mat4 AnimationNodeClass::GetNodeTransform() const
     // transformation order is the order they're
     // written here.
     gfx::Transform transform;
-    // transform.Scale(mScale); // currently not supported.
+    transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
@@ -667,7 +667,7 @@ glm::mat4 AnimationNode::GetNodeTransform() const
     // transformation order is the order they're
     // written here.
     gfx::Transform transform;
-    // transform.Scale(mScale); // currently not supported.
+    transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
@@ -1205,6 +1205,31 @@ void Animation::Reset()
     }
     mCurrentTime = 0.0f;
     mAnimationTrack.release();
+}
+
+AnimationNode* Animation::FindNodeByName(const std::string& name)
+{
+    for (auto& node : mNodes)
+        if (node->GetName() == name) return node.get();
+    return nullptr;
+}
+AnimationNode* Animation::FindNodeById(const std::string& id)
+{
+    for (auto& node : mNodes)
+        if (node->GetId() == id) return node.get();
+    return nullptr;
+}
+const AnimationNode* Animation::FindNodeByName(const std::string& name) const
+{
+    for (const auto& node : mNodes)
+        if (node->GetName() == name) return node.get();
+    return nullptr;
+}
+const AnimationNode* Animation::FindNodeById(const std::string& id) const
+{
+    for (const auto& node : mNodes)
+        if (node->GetId() == id) return node.get();
+    return nullptr;
 }
 
 AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)

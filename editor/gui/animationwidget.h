@@ -91,11 +91,13 @@ namespace gui
         void on_renderStyle_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
         void on_lineWidth_valueChanged(double value);
-        void on_cSizeX_valueChanged(double value);
-        void on_cSizeY_valueChanged(double value);
-        void on_cTranslateX_valueChanged(double value);
-        void on_cTranslateY_valueChanged(double value);
-        void on_cRotation_valueChanged(double value);
+        void on_nodeSizeX_valueChanged(double value);
+        void on_nodeSizeY_valueChanged(double value);
+        void on_nodeTranslateX_valueChanged(double value);
+        void on_nodeTranslateY_valueChanged(double value);
+        void on_nodeScaleX_valueChanged(double value);
+        void on_nodeScaleY_valueChanged(double value);
+        void on_nodeRotation_valueChanged(double value);
         void on_cName_textChanged(const QString& text);
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
@@ -160,7 +162,7 @@ namespace gui
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;
         // current time of the animation. accumulates when running.
-        float mTime = 0.0f;
+        float mAnimationTime = 0.0f;
         // possible states of the animation playback.
         enum PlayState {
             Playing, Paused, Stopped
@@ -169,5 +171,9 @@ namespace gui
         PlayState mPlayState = PlayState::Stopped;
 
         bool mCameraWasLoaded = false;
+
+        float mCurrentTime;
+        float mViewTransformStartTime = 0.0f;
+        float mViewTransformRotation = 0.0f;
     };
 } // namespace

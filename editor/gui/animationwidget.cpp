@@ -30,6 +30,7 @@
 #  include <QMessageBox>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
+#  include <glm/gtx/matrix_decompose.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -972,11 +973,12 @@ void AnimationWidget::animate(double secs)
     // update the animation if we're currently playing
     if (mPlayState == PlayState::Playing)
     {
-        mState.animation.Update(mTime, secs);
+        mState.animation.Update(mAnimationTime, secs);
 
-        mTime += secs;
-        mUI.time->setText(QString::number(mTime));
+        mAnimationTime += secs;
+        mUI.time->setText(QString::number(mAnimationTime));
     }
+    mCurrentTime += secs;
 }
 
 void AnimationWidget::render()
@@ -1024,7 +1026,7 @@ void AnimationWidget::on_actionPause_triggered()
 
 void AnimationWidget::on_actionStop_triggered()
 {
-    mTime = 0.0f;
+    mAnimationTime = 0.0f;
     mPlayState = PlayState::Stopped;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
@@ -1207,32 +1209,38 @@ void AnimationWidget::on_plus90_clicked()
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
+    mViewTransformRotation = value;
+    mViewTransformStartTime = mCurrentTime;
 }
 
 void AnimationWidget::on_minus90_clicked()
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
+    mViewTransformRotation = value;
+    mViewTransformStartTime = mCurrentTime;
 }
 
 void AnimationWidget::on_cPlus90_clicked()
 {
-    const auto value = mUI.cRotation->value();
-    mUI.cRotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
+    const auto value = mUI.nodeRotation->value();
+    mUI.nodeRotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
 }
 void AnimationWidget::on_cMinus90_clicked()
 {
-    const auto value = mUI.cRotation->value();
-    mUI.cRotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
+    const auto value = mUI.nodeRotation->value();
+    mUI.nodeRotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
 }
 
 void AnimationWidget::on_resetTransform_clicked()
 {
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
+    const auto rotation = mUI.rotation->value();
     mState.camera_offset_x = width * 0.5f;
     mState.camera_offset_y = height * 0.5f;
-
+    mViewTransformRotation = rotation;
+    mViewTransformStartTime = mCurrentTime;
     // this is camera offset to the center of the widget.
     mUI.translateX->setValue(0);
     mUI.translateY->setValue(0);
@@ -1474,7 +1482,7 @@ void AnimationWidget::on_lineWidth_valueChanged(double value)
     }
 }
 
-void AnimationWidget::on_cSizeX_valueChanged(double value)
+void AnimationWidget::on_nodeSizeX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1483,7 +1491,7 @@ void AnimationWidget::on_cSizeX_valueChanged(double value)
         node->SetSize(size);
     }
 }
-void AnimationWidget::on_cSizeY_valueChanged(double value)
+void AnimationWidget::on_nodeSizeY_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1492,7 +1500,7 @@ void AnimationWidget::on_cSizeY_valueChanged(double value)
         node->SetSize(size);
     }
 }
-void AnimationWidget::on_cTranslateX_valueChanged(double value)
+void AnimationWidget::on_nodeTranslateX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1501,7 +1509,7 @@ void AnimationWidget::on_cTranslateX_valueChanged(double value)
         node->SetTranslation(translate);
     }
 }
-void AnimationWidget::on_cTranslateY_valueChanged(double value)
+void AnimationWidget::on_nodeTranslateY_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1510,7 +1518,28 @@ void AnimationWidget::on_cTranslateY_valueChanged(double value)
         node->SetTranslation(translate);
     }
 }
-void AnimationWidget::on_cRotation_valueChanged(double value)
+
+void AnimationWidget::on_nodeScaleX_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto scale = node->GetScale();
+        scale.x = value;
+        node->SetScale(scale);
+    }
+}
+
+void AnimationWidget::on_nodeScaleY_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto scale = node->GetScale();
+        scale.y = value;
+        node->SetScale(scale);
+    }
+}
+
+void AnimationWidget::on_nodeRotation_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1584,6 +1613,11 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
+    const auto view_rotation_time = math::clamp(0.0f, 1.0f,
+        mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
+        view_rotation_time, math::Interpolation::Cosine);
+
     gfx::Transform view;
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
@@ -1591,7 +1625,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     view.Push();
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.Rotate(qDegreesToRadians(view_rotation_angle));
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
@@ -1649,10 +1683,21 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
                 packets.push_back(selection);
             trans.Pop();
 
+            // decompose the matrix in order to get the combined scaling component
+            // so that we can use the inverse scale to keep the resize and rotation
+            // indicators always with same size.
+            const auto& mat = trans.GetAsMatrix();
+            glm::vec3 scale;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::quat orientation;
+            glm::decompose(mat, scale, orientation, translation, skew,  perspective);
+
             // draw the resize indicator. (lower right corner box)
             trans.Push();
-                trans.Scale(10.0f, 10.0f);
-                trans.Translate(size.x*0.5f-10.0f, size.y*0.5f-10.0f);
+                trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+                trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
                 game::AnimationClass::DrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
@@ -1663,7 +1708,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
             // draw the rotation indicator. (upper left corner circle)
             trans.Push();
-                trans.Scale(10.0f, 10.0f);
+                trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
                 game::AnimationClass::DrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
@@ -1780,17 +1825,20 @@ void AnimationWidget::updateCurrentNodeProperties()
 
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
+        const auto& scale = node->GetScale();
         SetValue(mUI.cName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
         SetValue(mUI.renderStyle, node->GetRenderStyle());
         SetValue(mUI.layer, node->GetLayer());
         SetValue(mUI.materials, node->GetMaterialName());
         SetValue(mUI.drawables, node->GetDrawableName());
-        SetValue(mUI.cTranslateX, translate.x);
-        SetValue(mUI.cTranslateY, translate.y);
-        SetValue(mUI.cSizeX, size.x);
-        SetValue(mUI.cSizeY, size.y);
-        SetValue(mUI.cRotation, qRadiansToDegrees(node->GetRotation()));
+        SetValue(mUI.nodeTranslateX, translate.x);
+        SetValue(mUI.nodeTranslateY, translate.y);
+        SetValue(mUI.nodeSizeX, size.x);
+        SetValue(mUI.nodeSizeY, size.y);
+        SetValue(mUI.nodeScaleX, scale.x);
+        SetValue(mUI.nodeScaleY, scale.y);
+        SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
         SetValue(mUI.lineWidth, node->GetLineWidth());
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));

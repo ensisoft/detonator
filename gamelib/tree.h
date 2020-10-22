@@ -130,6 +130,11 @@ namespace game
         const T* GetValue() const
         { return mNodeValue; }
 
+        T* operator->()
+        { return mNodeValue; }
+        const T* operator->() const
+        { return mNodeValue; }
+
         // Set the value referred to by this treenode.
         void SetValue(T* value)
         { mNodeValue = value; }
