@@ -301,9 +301,15 @@ struct RenderTreeFunctions {
                 // if it's the node we're interested in
                 if (node == mNode)
                 {
-                    const auto& mat = mTransform.GetAsMatrix();
-                    const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
-                    mResult = glm::vec2(vec.x, vec.y);
+                    const auto& size = mNode->GetSize();
+                    mTransform.Push();
+                        // offset the drawable size, don't use the scale operation
+                        // because then the input would need to be in the model space (i.e. [0.0f, 1.0f])
+                        mTransform.Translate(-size.x*0.5f, -size.y*0.5f);
+                        const auto& mat = mTransform.GetAsMatrix();
+                        const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
+                        mResult = glm::vec2(vec.x, vec.y);
+                    mTransform.Pop();
                 }
             }
             virtual void LeaveNode(const Node* node) override
@@ -344,9 +350,15 @@ struct RenderTreeFunctions {
 
                 if (node == mNode)
                 {
-                    const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-                    const auto& vec = animation_to_node * mCoords;
-                    mResult = glm::vec2(vec.x, vec.y);
+                    const auto& size = mNode->GetSize();
+                    mTransform.Push();
+                        // offset the drawable size, don't use the scale operation
+                        // because then the output would be in the model space (i.e. [0.0f, 1.0f])
+                        mTransform.Translate(-size.x*0.5f, -size.y*0.5f);
+                        const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
+                        const auto& vec = animation_to_node * mCoords;
+                        mResult = glm::vec2(vec.x, vec.y);
+                    mTransform.Pop();
                 }
             }
             virtual void LeaveNode(const Node* node) override
@@ -456,7 +468,10 @@ struct RenderTreeFunctions {
                     std::min(bot_left.y, bot_right.y));
                 const auto bottom = std::max(std::max(top_left.y, top_right.y),
                     std::max(bot_left.y, bot_right.y));
-                mResult = Union(mResult, gfx::FRect(left, top, right - left, bottom - top));
+                const auto box = gfx::FRect(left, top, right - left, bottom - top);
+                if (mResult.IsEmpty())
+                    mResult = box;
+                else mResult = Union(mResult, box);
 
                 mTransform.Pop();
             }
@@ -757,6 +772,12 @@ AnimationClass::AnimationClass(const AnimationClass& other)
         mNodes.push_back(std::make_unique<AnimationNodeClass>(*node));
     }
 
+    // make a deep copy of the animation tracks
+    for (const auto& track : other.mAnimationTracks)
+    {
+        mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
+    }
+
     // use the json serialization setup the copy of the
     // render tree.
     nlohmann::json json = other.mRenderTree.ToJson(other);
@@ -891,6 +912,26 @@ AnimationTrackClass* AnimationClass::AddAnimationTrack(std::unique_ptr<Animation
 {
     mAnimationTracks.push_back(std::move(track));
     return mAnimationTracks.back().get();
+}
+
+void AnimationClass::DeleteAnimationTrack(size_t i)
+{
+    ASSERT(i < mAnimationTracks.size());
+    auto it = mAnimationTracks.begin();
+    std::advance(it, i);
+    mAnimationTracks.erase(it);
+}
+
+bool AnimationClass::DeleteAnimationTrackByName(const std::string& name)
+{
+    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    {
+        if ((*it)->GetName() == name) {
+            mAnimationTracks.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 AnimationTrackClass* AnimationClass::GetAnimationTrack(size_t i)
@@ -1083,6 +1124,7 @@ AnimationClass& AnimationClass::operator=(const AnimationClass& other)
 
     AnimationClass copy(other);
     mNodes = std::move(copy.mNodes);
+    mAnimationTracks = std::move(copy.mAnimationTracks);
     mRenderTree = copy.mRenderTree;
     return *this;
 }

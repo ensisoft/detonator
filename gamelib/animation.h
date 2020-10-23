@@ -278,6 +278,10 @@ namespace game
         {
             Reset();
         }
+        AnimationNode(const AnimationNodeClass& klass)
+            : AnimationNode(std::make_shared<AnimationNodeClass>(klass))
+        {}
+
         // settters for instance state.
         void SetTranslation(float x, float y)
         { mPosition = glm::vec2(x, y); }
@@ -325,6 +329,8 @@ namespace game
         { return mClass->GetName(); }
         std::string GetId() const
         { return mClass->GetId(); }
+        float GetLineWidth() const
+        { return mClass->GetLineWidth(); }
 
         // Reset node's state to the initial state
         void Reset();
@@ -691,7 +697,7 @@ namespace game
                 nlohmann::json js;
                 base::JsonWrite(js, "type", actuator->GetType());
                 base::JsonWrite(js, "actuator", *actuator);
-                json["actuators "].push_back(std::move(js));
+                json["actuators"].push_back(std::move(js));
             }
             return json;
         }
@@ -931,6 +937,10 @@ namespace game
         // Add a new animation track class object. Returns a pointer to the node that
         // was added to the animation.
         AnimationTrackClass* AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track);
+        // Delete an animation track by the given index.
+        void DeleteAnimationTrack(size_t i);
+        // Delete an animation track by the given name.
+        bool DeleteAnimationTrackByName(const std::string& name);
         // Get the animation track class object by index.
         // The index must be valid.
         AnimationTrackClass* GetAnimationTrack(size_t i);
@@ -1134,6 +1144,10 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+
+        // Get the accumulated animation time.
+        float GetCurrentTime() const
+        { return mCurrentTime; }
 
         AnimationNode* TreeNodeFromJson(const nlohmann::json& json);
     private:

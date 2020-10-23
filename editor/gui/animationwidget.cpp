@@ -409,7 +409,7 @@ public:
         // adding some delta d to any extent (width or height i.e dx or dy) will
         // only grow that dimension by half d on either side of the axis, thus
         // falling behind the actual mouse movement.
-        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos) * 2.0f;
+        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos); // * 2.0f;
 
         const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
         if (maintain_aspect_ratio)
