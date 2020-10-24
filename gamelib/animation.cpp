@@ -564,7 +564,19 @@ std::size_t AnimationNodeClass::GetHash() const
 
 void AnimationNodeClass::Update(float time, float dt)
 {
-    // currently no op
+    if (mDrawable)
+    {
+        if (TestFlag(Flags::UpdateDrawable))
+            mDrawable->Update(dt);
+        if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
+            mDrawable->Restart();
+    }
+
+    if (mMaterial)
+    {
+        if (TestFlag(Flags::UpdateMaterial))
+            mMaterial->Update(dt);
+    }
 }
 
 void AnimationNodeClass::Reset()

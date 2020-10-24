@@ -543,6 +543,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
+    mUI.actionPlay->setEnabled(true);
+    mUI.actionPause->setEnabled(false);
+    mUI.actionStop->setEnabled(false);
+
     mUI.timelineGroup->setVisible(false);
 
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
