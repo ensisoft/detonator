@@ -226,6 +226,7 @@ namespace app
         GameResource(const GameResource& other)
         {
             mContent = std::make_shared<Content>(*other.mContent);
+            mProps   = other.mProps;
             mName = other.mName;
         }
         virtual QString GetName() const override
