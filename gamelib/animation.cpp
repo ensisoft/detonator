@@ -772,9 +772,10 @@ bool AnimationTrack::IsComplete() const
         if (!track.ended)
             return false;
     }
-    return true;
+    if (mCurrentTime >= mClass->GetDuration())
+        return true;
+    return false;
 }
-
 
 AnimationClass::AnimationClass(const AnimationClass& other)
 {
@@ -946,10 +947,22 @@ bool AnimationClass::DeleteAnimationTrackByName(const std::string& name)
     return false;
 }
 
-AnimationTrackClass* AnimationClass::GetAnimationTrack(size_t i)
+bool AnimationClass::DeleteAnimationTrackById(const std::string& id)
+{
+    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    {
+        if ((*it)->GetId() == id) {
+            mAnimationTracks.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+AnimationTrackClass& AnimationClass::GetAnimationTrack(size_t i)
 {
     ASSERT(i < mAnimationTracks.size());
-    return mAnimationTracks[i].get();
+    return *mAnimationTracks[i].get();
 }
 
 AnimationTrackClass* AnimationClass::FindAnimationTrackByName(const std::string& name)
@@ -962,10 +975,10 @@ AnimationTrackClass* AnimationClass::FindAnimationTrackByName(const std::string&
     return nullptr;
 }
 
-const AnimationTrackClass* AnimationClass::GetAnimationTrack(size_t i) const
+const AnimationTrackClass& AnimationClass::GetAnimationTrack(size_t i) const
 {
     ASSERT(i < mAnimationTracks.size());
-    return mAnimationTracks[i].get();
+    return *mAnimationTracks[i].get();
 }
 
 const AnimationTrackClass* AnimationClass::FindAnimationTrackByName(const std::string& name) const
@@ -1047,6 +1060,8 @@ std::size_t AnimationClass::GetHash() const
             return;
         hash = base::hash_combine(hash, node->GetHash());
     });
+    for (const auto& track : mAnimationTracks)
+        hash = base::hash_combine(hash, track->GetHash());
     return hash;
 }
 
@@ -1201,17 +1216,35 @@ void Animation::Play(std::unique_ptr<AnimationTrack> track)
     mAnimationTrack = std::move(track);
 }
 
-void Animation::Play(const std::string& track)
+void Animation::PlayByName(const std::string& name)
 {
     for (size_t i=0; i<mClass->GetNumTracks(); ++i)
     {
         const auto& klass = mClass->GetSharedAnimationTrackClass(i);
-        if (klass->GetName() != track)
+        if (klass->GetName() != name)
             continue;
         auto track = std::make_unique<AnimationTrack>(klass);
         Play(std::move(track));
         return;
     }
+}
+
+void Animation::PlayById(const std::string& id)
+{
+    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
+        if (klass->GetId() != id)
+            continue;
+        auto track = std::make_unique<AnimationTrack>(klass);
+        Play(std::move(track));
+        return;
+    }
+}
+
+bool Animation::IsPlaying() const
+{
+    return !!mAnimationTrack;
 }
 
 void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
@@ -1301,6 +1334,11 @@ AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
 std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass)
 {
     return std::make_unique<Animation>(klass);
+}
+
+std::unique_ptr<AnimationTrack> CreateAnimationTrackInstance(const std::shared_ptr<const AnimationTrackClass>& klass)
+{
+    return std::make_unique<AnimationTrack>(klass);
 }
 
 } // namespace

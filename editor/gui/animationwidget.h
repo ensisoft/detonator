@@ -29,6 +29,9 @@
 #  include <QMenu>
 #include "warnpop.h"
 
+#include <memory>
+#include <string>
+
 #include "editor/gui/mainwidget.h"
 #include "gamelib/animation.h"
 
@@ -65,6 +68,7 @@ namespace gui
         virtual void animate(double secs) override;
         virtual void render() override;
         virtual bool confirmClose() override;
+        virtual void refresh() override;
 
     private slots:
         void on_actionPlay_triggered();
@@ -102,10 +106,10 @@ namespace gui
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
         void on_chkDoesRender_stateChanged(int);
-        void on_animDuration_valueChanged(double value);
-        void on_animDelay_valueChanged(double value);
-        void on_timelineGroup_toggled(bool value);
-        void on_animIsLooping_stateChanged(int);
+        void on_btnNewTrack_clicked();
+        void on_btnEditTrack_clicked();
+        void on_btnDeleteTrack_clicked();
+        void on_trackList_itemSelectionChanged();
 
         void currentComponentRowChanged();
         void placeNewParticleSystem();
@@ -143,7 +147,8 @@ namespace gui
         // state shared with the tools is packed inside a single
         // struct type for convenience
         struct State {
-            game::AnimationClass animation;
+            // shared with the track widget.
+            std::shared_ptr<game::AnimationClass> animation;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
 
@@ -158,6 +163,9 @@ namespace gui
         // tree model for accessing the animations' render tree
         // data from the tree widget.
         std::unique_ptr<TreeModel> mTreeModel;
+        // the identifier string for sharing the animation in the
+        // cache with the animation track widget instances.
+        std::string mIdentifier;
         // the original hash value that is used to
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;
@@ -172,7 +180,7 @@ namespace gui
 
         bool mCameraWasLoaded = false;
 
-        float mCurrentTime;
+        float mCurrentTime = 0.0f;
         float mViewTransformStartTime = 0.0f;
         float mViewTransformRotation = 0.0f;
     };

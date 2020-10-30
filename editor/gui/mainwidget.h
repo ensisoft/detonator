@@ -79,6 +79,7 @@ namespace gui
     signals:
         void openExternalImage(const QString& file);
         void openExternalShader(const QString& file);
+        void openNewWidget(MainWidget* widget);
 
     private:
     };

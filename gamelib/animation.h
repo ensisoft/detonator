@@ -401,6 +401,18 @@ namespace game
         virtual std::unique_ptr<AnimationActuatorClass> Clone() const = 0;
         // Get the type of the represented actuator.
         virtual Type GetType() const = 0;
+        // Get the ID of the node affected by this actuator.
+        virtual std::string GetNodeId() const = 0;
+        // Get the normalized start time when this actuator starts.
+        virtual float GetStartTime() const = 0;
+        // Get the normalized duration of this actuator.
+        virtual float GetDuration() const = 0;
+        // Set a new start time for the actuator.
+        virtual void SetStartTime(float start) = 0;
+        // Set the new duration value for the actuator.
+        virtual void SetDuration(float duration) = 0;
+        // Get the id of this actuator
+        virtual std::string GetId() const = 0;
     private:
     };
 
@@ -412,13 +424,24 @@ namespace game
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        AnimationTransformActuatorClass() = default;
+        AnimationTransformActuatorClass()
+        { mId = base::RandomString(10); }
         AnimationTransformActuatorClass(const std::string& node) : mNodeId(node)
-        {}
-        float GetStartTime() const
+        { mId = base::RandomString(10); }
+        virtual Type GetType() const override
+        { return Type::Transform; }
+        virtual std::string GetNodeId() const
+        { return mNodeId; }
+        virtual float GetStartTime() const override
         { return mStartTime; }
-        float GetDuration() const
+        virtual float GetDuration() const override
         { return mDuration; }
+        virtual void SetStartTime(float start) override
+        { mStartTime = math::clamp(0.0f, 1.0f, start); }
+        virtual void SetDuration(float duration) override
+        { mDuration = math::clamp(0.0f, 1.0f, duration); }
+        virtual std::string GetId() const override
+        { return mId; }
         Interpolation GetInterpolation() const
         { return mInterpolation; }
         glm::vec2 GetEndPosition() const
@@ -429,29 +452,32 @@ namespace game
         { return mEndScale; }
         float GetEndRotation() const
         { return mEndRotation; }
-        std::string GetNodeId() const
-        { return mNodeId; }
+
 
         void SetNodeId(const std::string& id)
         { mNodeId = id; }
-        void SetStartTime(float start)
-        { mStartTime = math::clamp(0.0f, 1.0f, start); }
-        void SetDuration(float duration)
-        { mDuration = math::clamp(0.0f, 1.0f, duration); }
+
         void SetInterpolation(Interpolation interp)
         { mInterpolation = interp; }
         void SetEndPosition(const glm::vec2& pos)
         { mEndPosition = pos; }
+        void SetEndPosition(float x, float y)
+        { mEndPosition = glm::vec2(x, y); }
         void SetEndSize(const glm::vec2& size)
         { mEndSize = size; }
+        void SetEndSize(float x, float y)
+        { mEndSize = glm::vec2(x, y); }
         void SetEndRotation(float rot)
         { mEndRotation = rot; }
         void SetEndScale(const glm::vec2& scale)
         { mEndScale = scale; }
+        void SetEndScale(float x, float y)
+        { mEndScale = glm::vec2(x, y); }
 
         virtual nlohmann::json ToJson() const override
         {
             nlohmann::json json;
+            base::JsonWrite(json, "id", mId);
             base::JsonWrite(json, "node",      mNodeId);
             base::JsonWrite(json, "method",    mInterpolation);
             base::JsonWrite(json, "starttime", mStartTime);
@@ -464,7 +490,8 @@ namespace game
         }
         virtual bool FromJson(const nlohmann::json& json) override
         {
-            return base::JsonReadSafe(json, "node", &mNodeId) &&
+            return base::JsonReadSafe(json, "id", &mId) &&
+                   base::JsonReadSafe(json, "node", &mNodeId) &&
                    base::JsonReadSafe(json, "starttime", &mStartTime) &&
                    base::JsonReadSafe(json, "duration",  &mDuration) &&
                    base::JsonReadSafe(json, "position",  &mEndPosition) &&
@@ -476,6 +503,7 @@ namespace game
         virtual std::size_t GetHash() const override
         {
             std::size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
             hash = base::hash_combine(hash, mNodeId);
             hash = base::hash_combine(hash, mInterpolation);
             hash = base::hash_combine(hash, mStartTime);
@@ -488,9 +516,10 @@ namespace game
         }
         virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
         { return std::make_unique<AnimationTransformActuatorClass>(*this); }
-        virtual Type GetType() const override
-        { return Type::Transform; }
+
     private:
+        // id of the actuator.
+        std::string mId;
         // id of the node we're going to change.
         std::string mNodeId;
         // the interpolation method to be used.
@@ -599,7 +628,8 @@ namespace game
     class AnimationTrackClass
     {
     public:
-        AnimationTrackClass() = default;
+        AnimationTrackClass()
+        { mId = base::RandomString(10); }
         // Create a deep copy of the class object.
         AnimationTrackClass(const AnimationTrackClass& other)
         {
@@ -607,9 +637,18 @@ namespace game
             {
                 mActuators.push_back(a->Clone());
             }
+            mId       = other.mId;
             mName     = other.mName;
             mDuration = other.mDuration;
             mLooping  = other.mLooping;
+        }
+        AnimationTrackClass(AnimationTrackClass&& other)
+        {
+            mId = std::move(other.mId);
+            mActuators = std::move(other.mActuators);
+            mName      = std::move(other.mName);
+            mDuration  = other.mDuration;
+            mLooping   = other.mLooping;
         }
         // Set the human readable name for the animation track.
         void SetName(const std::string& name)
@@ -632,6 +671,9 @@ namespace game
         // Get the human readable name of the animation track.
         std::string GetName() const
         { return mName; }
+        // Get the id of this animation class object.
+        std::string GetId() const
+        { return mId; }
         // Get the normalized duration of the animation track.
         float GetDuration() const
         { return mDuration; }
@@ -651,6 +693,44 @@ namespace game
             std::shared_ptr<AnimationActuatorClass> foo(new Actuator(actuator));
             mActuators.push_back(std::move(foo));
         }
+
+        void DeleteActuator(size_t index)
+        {
+            ASSERT(index < mActuators.size());
+            auto it = mActuators.begin();
+            std::advance(it, index);
+            mActuators.erase(it);
+        }
+
+        bool DeleteActuatorById(const std::string& id)
+        {
+            for (auto it = mActuators.begin(); it != mActuators.end(); ++it)
+            {
+                if ((*it)->GetId() == id) {
+                    mActuators.erase(it);
+                    return true;
+                }
+            }
+            return false;
+        }
+        AnimationActuatorClass* FindActuatorById(const std::string& id)
+        {
+            for (auto& actuator : mActuators) {
+                if (actuator->GetId() == id)
+                    return actuator.get();
+            }
+            return nullptr;
+        }
+        const AnimationActuatorClass* FindActuatorById(const std::string& id) const
+        {
+            for (auto& actuator : mActuators) {
+                if (actuator->GetId() == id)
+                    return actuator.get();
+            }
+            return nullptr;
+        }
+        void Clear()
+        { mActuators.clear(); }
 
         // Get the number of animation actuator class objects currently
         // in this animation track.
@@ -677,6 +757,7 @@ namespace game
         std::size_t GetHash() const
         {
             std::size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
             hash = base::hash_combine(hash, mName);
             hash = base::hash_combine(hash, mDuration);
             hash = base::hash_combine(hash, mLooping);
@@ -689,6 +770,7 @@ namespace game
         nlohmann::json ToJson() const
         {
             nlohmann::json json;
+            base::JsonWrite(json, "id", mId);
             base::JsonWrite(json, "name",     mName);
             base::JsonWrite(json, "duration", mDuration);
             base::JsonWrite(json, "looping",  mLooping);
@@ -707,7 +789,8 @@ namespace game
         static std::optional<AnimationTrackClass> FromJson(const nlohmann::json& json)
         {
             AnimationTrackClass ret;
-            if (!base::JsonReadSafe(json, "name", &ret.mName) ||
+            if (!base::JsonReadSafe(json, "id", &ret.mId) ||
+                !base::JsonReadSafe(json, "name", &ret.mName) ||
                 !base::JsonReadSafe(json, "duration", &ret.mDuration) ||
                 !base::JsonReadSafe(json, "looping", &ret.mLooping))
                 return std::nullopt;
@@ -735,6 +818,7 @@ namespace game
             if (this == &other)
                 return *this;
             AnimationTrackClass copy(other);
+            std::swap(mId, copy.mId);
             std::swap(mActuators, copy.mActuators);
             std::swap(mName, copy.mName);
             std::swap(mDuration, copy.mDuration);
@@ -742,6 +826,7 @@ namespace game
             return *this;
         }
     private:
+        std::string mId;
         // The list of animation actuators that apply transforms
         std::vector<std::shared_ptr<AnimationActuatorClass>> mActuators;
         // Human readable name of the track.
@@ -817,7 +902,9 @@ namespace game
         // Get the human readable name of the animation track.
         std::string GetName() const
         { return mClass->GetName(); }
-
+        // get the current time.
+        float GetCurrentTime() const
+        { return mCurrentTime; }
         // Access for the tracks class object.
         const AnimationTrackClass& GetClass() const
         { return *mClass; }
@@ -941,15 +1028,17 @@ namespace game
         void DeleteAnimationTrack(size_t i);
         // Delete an animation track by the given name.
         bool DeleteAnimationTrackByName(const std::string& name);
+        // Delete an animation track by the given id.
+        bool DeleteAnimationTrackById(const std::string& id);
         // Get the animation track class object by index.
         // The index must be valid.
-        AnimationTrackClass* GetAnimationTrack(size_t i);
+        AnimationTrackClass& GetAnimationTrack(size_t i);
         // Find animation track class object by name. Returns nullptr if no such
         // track could be found.
         AnimationTrackClass* FindAnimationTrackByName(const std::string& name);
         // Get the animation track class object by index.
         // The index must be valid.
-        const AnimationTrackClass* GetAnimationTrack(size_t i) const;
+        const AnimationTrackClass& GetAnimationTrack(size_t i) const;
         // Find animation track class object by name. Returns nullptr if no such
         // track could be found.
         const AnimationTrackClass* FindAnimationTrackByName(const std::string& name) const;
@@ -1070,7 +1159,21 @@ namespace game
         { Play(std::make_unique<AnimationTrack>(track)); }
         void Play(AnimationTrack&& track)
         { Play(std::make_unique<AnimationTrack>(std::move(track))); }
-        void Play(const std::string& track);
+        // Play a previously recorded (stored in the animation class object)
+        // animation track identified by name. Note that there could be
+        // ambiquity between the names, i.e. multiple tracks with the same name.
+        void PlayByName(const std::string& name);
+        // Play a previously recorded (stored in the animation class object)
+        // animation track identified by its track id.
+        void PlayById(const std::string& id);
+
+        // Returns true if an animation track is still playing.
+        bool IsPlaying() const;
+        // Get the current track if any. (when IsPlaying is true)
+        AnimationTrack* GetCurrentTrack()
+        { return mAnimationTrack.get(); }
+        const AnimationTrack* GetCurrentTrack() const
+        { return mAnimationTrack.get(); }
 
         // Draw the animation and its nodes.
         // Each node is transformed relative to the parent transformation "trans".
@@ -1166,5 +1269,6 @@ namespace game
 
 
     std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass);
+    std::unique_ptr<AnimationTrack> CreateAnimationTrackInstance(const std::shared_ptr<const AnimationTrackClass>& klass);
 
 } // namespace

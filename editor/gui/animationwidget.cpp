@@ -34,12 +34,16 @@
 #include "warnpop.h"
 
 #include <algorithm>
+#include <unordered_set>
 #include <cmath>
 
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/treewidget.h"
+#include "editor/gui/animationtrackwidget.h"
+#include "editor/gui/animationwidget.h"
 #include "base/assert.h"
 #include "base/math.h"
 #include "graphics/painter.h"
@@ -217,8 +221,8 @@ public:
         node.SetMaterialInstance(std::move(mMaterial));
 
         // by default we're appending to the root item.
-        auto& root  = mState.animation.GetRenderTree();
-        auto* child = mState.animation.AddNode(std::move(node));
+        auto& root  = mState.animation->GetRenderTree();
+        auto* child = mState.animation->AddNode(std::move(node));
         root.AppendChild(child);
 
         mState.scenegraph_tree_view->Rebuild();
@@ -229,9 +233,9 @@ public:
     }
     bool CheckNameAvailability(const std::string& name) const
     {
-        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+        for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
         {
-            const auto& node = mState.animation.GetNode(i);
+            const auto& node = mState.animation->GetNode(i);
             if (node.GetName() == name)
                 return false;
         }
@@ -322,7 +326,7 @@ public:
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
-        const auto& tree = mState.animation.GetRenderTree();
+        const auto& tree = mState.animation->GetRenderTree();
         const auto& tree_node = tree.FindNodeByValue(mNode);
         const auto* parent = tree.FindParent(tree_node);
         // if the object we're moving has a parent we need to map the mouse movement
@@ -334,7 +338,7 @@ public:
         // root node. then the below else branch should go away(?)
         if (parent && parent->GetValue())
         {
-            const auto& mouse_pos_in_node = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+            const auto& mouse_pos_in_node = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
             const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
             glm::vec2 position = mNode->GetTranslation();
@@ -362,12 +366,12 @@ public:
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
         // see the comments in MouseMove about the branched logic.
-        const auto& tree = mState.animation.GetRenderTree();
+        const auto& tree = mState.animation->GetRenderTree();
         const auto& tree_node = tree.FindNodeByValue(mNode);
         const auto* parent = tree.FindParent(tree_node);
         if (parent && parent->GetValue())
         {
-            mPreviousMousePos = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+            mPreviousMousePos = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
         }
         else
         {
@@ -402,7 +406,7 @@ public:
         const auto& mouse_pos = mickey->pos();
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-        const auto& mouse_pos_in_node = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
+        const auto& mouse_pos_in_node = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
 
         // double the mouse movement so that the object's size follows the actual mouse movement.
         // Since the object's position is with respect to the center of the shape
@@ -436,7 +440,7 @@ public:
         const auto& mouse_pos = mickey->pos();
         const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-        mPreviousMousePos = mState.animation.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
+        mPreviousMousePos = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
     }
     virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
     {
@@ -468,7 +472,7 @@ public:
         const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
         const auto& node_size = mNode->GetSize();
-        const auto& node_center_in_view = glm::vec4(mState.animation.MapCoordsFromNode(node_size.x*0.5f, node_size.y*0.5, mNode),
+        const auto& node_center_in_view = glm::vec4(mState.animation->MapCoordsFromNode(node_size.x*0.5f, node_size.y*0.5, mNode),
             1.0f, 1.0f);
 
         // compute the delta between the current mouse position angle and the previous mouse position angle
@@ -522,8 +526,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     DEBUG("Create AnimationWidget");
 
     mUI.setupUi(this);
-
-    mTreeModel.reset(new TreeModel(mState.animation));
+    mState.animation = std::make_shared<game::AnimationClass>();
+    mTreeModel.reset(new TreeModel(*mState.animation));
 
     mState.scenegraph_tree_model = mTreeModel.get();
     mState.scenegraph_tree_view  = mUI.tree;
@@ -546,8 +550,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-
-    mUI.timelineGroup->setVisible(false);
 
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
@@ -627,7 +629,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
             std::vector<game::AnimationNodeClass*> nodes_hit;
             std::vector<glm::vec2> hitbox_coords;
-            mState.animation.CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
+            mState.animation->CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
                 &nodes_hit, &hitbox_coords);
 
             // if nothing was hit clear the selection.
@@ -792,13 +794,16 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     mUI.name->setText(resource.GetName());
     setWindowTitle(resource.GetName());
 
-    mState.animation = *resource.GetContent<game::AnimationClass>();
-    mOriginalHash = mState.animation.GetHash();
+    const game::AnimationClass* content = nullptr;
+    resource.GetContent(&content);
+    mState.animation = std::make_shared<game::AnimationClass>(*content);
+
+    mOriginalHash = mState.animation->GetHash();
 
     // if some resource has been deleted we need to replace it.
-    for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
-        auto& node = mState.animation.GetNode(i);
+        auto& node = mState.animation->GetNode(i);
         const auto& material = app::FromUtf8(node.GetMaterialName());
         const auto& drawable = app::FromUtf8(node.GetDrawableName());
         if (!workspace->IsValidMaterial(material))
@@ -815,8 +820,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
             node.SetDrawable("Rectangle", workspace->GetDrawableClass("Rectangle"));
         }
     }
+    mState.animation->Prepare(*workspace);
 
-    mState.animation.Prepare(*workspace);
+    mTreeModel.reset(new TreeModel(*mState.animation));
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 }
 
@@ -883,7 +890,7 @@ bool AnimationWidget::saveState(Settings& settings) const
     // so let's use the JSON serialization in the animation
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mState.animation.ToJson();
+    const auto& json = mState.animation->ToJson();
     const auto& base64 = base64::Encode(json.dump(2));
     settings.setValue("Animation", "content", base64);
     return true;
@@ -913,15 +920,22 @@ bool AnimationWidget::loadState(const Settings& settings)
     auto ret  = game::AnimationClass::FromJson(json);
     if (!ret.has_value())
     {
-        WARN("Failed to load animation widget state.");
+        ERROR("Failed to load animation widget state.");
         return false;
     }
-    mState.animation = std::move(ret.value());
+    auto klass = std::move(ret.value());
+    auto hash  = klass.GetHash();
+    mState.animation = FindSharedAnimation(hash);
+    if (!mState.animation)
+    {
+        mState.animation = std::make_shared<game::AnimationClass>(std::move(klass));
+        ShareAnimation(mState.animation);
+    }
 
     // if some resource has been deleted we need to replace it.
-    for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
-        auto& node = mState.animation.GetNode(i);
+        auto& node = mState.animation->GetNode(i);
         const auto& material = app::FromUtf8(node.GetMaterialName());
         const auto& drawable = app::FromUtf8(node.GetDrawableName());
         if (!mState.workspace->IsValidMaterial(material))
@@ -939,7 +953,10 @@ bool AnimationWidget::loadState(const Settings& settings)
         }
     }
 
-    mState.animation.Prepare(*mState.workspace);
+    mState.animation->Prepare(*mState.workspace);
+    mOriginalHash = mState.animation->GetHash();
+    mTreeModel.reset(new TreeModel(*mState.animation));
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
     return true;
 }
@@ -977,7 +994,7 @@ void AnimationWidget::animate(double secs)
     // update the animation if we're currently playing
     if (mPlayState == PlayState::Playing)
     {
-        mState.animation.Update(mAnimationTime, secs);
+        mState.animation->Update(mAnimationTime, secs);
 
         mAnimationTime += secs;
         mUI.time->setText(QString::number(mAnimationTime));
@@ -992,7 +1009,7 @@ void AnimationWidget::render()
 
 bool AnimationWidget::confirmClose()
 {
-    const auto hash = mState.animation.GetHash();
+    const auto hash = mState.animation->GetHash();
     if (hash == mOriginalHash)
         return true;
 
@@ -1010,14 +1027,37 @@ bool AnimationWidget::confirmClose()
     return true;
 }
 
+void AnimationWidget::refresh()
+{
+    auto selected = mUI.trackList->selectedItems();
+    std::unordered_set<std::string> selected_item_ids;
+    for (const auto* item : selected)
+        selected_item_ids.insert(app::ToUtf8(item->data(Qt::UserRole).toString()));
+
+    mUI.trackList->clear();
+    mUI.btnDeleteTrack->setEnabled(false);
+    mUI.btnEditTrack->setEnabled(false);
+    for (size_t i=0; i<mState.animation->GetNumTracks(); ++i)
+    {
+        const auto& track = mState.animation->GetAnimationTrack(i);
+        const auto& name  = app::FromUtf8(track.GetName());
+        const auto& id    = app::FromUtf8(track.GetId());
+        QListWidgetItem* item = new QListWidgetItem;
+        item->setText(name);
+        item->setData(Qt::UserRole, id);
+        item->setIcon(QIcon("icons:animation_track.png"));
+        mUI.trackList->addItem(item);
+        if (selected_item_ids.find(track.GetId()) != selected_item_ids.end())
+            item->setSelected(true);
+    }
+}
+
 void AnimationWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
-    const bool is_timeline_enabled = GetValue(mUI.timelineGroup);
-    const bool is_animation_looping = GetValue(mUI.animIsLooping);
 }
 
 void AnimationWidget::on_actionPause_triggered()
@@ -1036,8 +1076,6 @@ void AnimationWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mUI.time->setText("0");
-    mUI.timeline->SetCurrentTime(0.0f);
-    mUI.timeline->update();
 }
 
 void AnimationWidget::on_actionSave_triggered()
@@ -1062,9 +1100,9 @@ void AnimationWidget::on_actionSave_triggered()
         }
     }
 
-    mOriginalHash = mState.animation.GetHash();
+    mOriginalHash = mState.animation->GetHash();
 
-    app::AnimationResource resource(mState.animation, name);
+    app::AnimationResource resource(*mState.animation, name);
     mState.workspace->SaveResource(resource);
 
     INFO("Saved animation '%1'", name);
@@ -1168,7 +1206,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
     if (item == nullptr)
         return;
 
-    auto& tree = mState.animation.GetRenderTree();
+    auto& tree = mState.animation->GetRenderTree();
 
     // find the game graph node that contains this AnimationNode.
     auto* node = tree.FindNodeByValue(item);
@@ -1191,7 +1229,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
     for (auto& carcass : graveyard)
     {
         DEBUG("Deleting child '%1', %2", carcass.name, carcass.id);
-        mState.animation.DeleteNodeById(carcass.id);
+        mState.animation->DeleteNodeById(carcass.id);
     }
 
     // find the parent node
@@ -1358,9 +1396,9 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
         const auto index = mUI.materials->findText(resource->GetName());
         mUI.materials->blockSignals(true);
         mUI.materials->removeItem(index);
-        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+        for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
         {
-            auto& component = mState.animation.GetNode(i);
+            auto& component = mState.animation->GetNode(i);
             const auto& material = app::FromUtf8(component.GetMaterialName());
             if (material == resource->GetName())
             {
@@ -1390,9 +1428,9 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
         const auto index = mUI.drawables->findText(resource->GetName());
         mUI.drawables->blockSignals(true);
         mUI.drawables->removeItem(index);
-        for (size_t i=0; i<mState.animation.GetNumNodes(); ++i)
+        for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
         {
-            auto& node = mState.animation.GetNode(i);
+            auto& node = mState.animation->GetNode(i);
             const auto& drawable = app::FromUtf8(node.GetDrawableName());
             if (drawable == resource->GetName())
             {
@@ -1438,7 +1476,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
-    auto& tree = mState.animation.GetRenderTree();
+    auto& tree = mState.animation->GetRenderTree();
     auto* src_value = static_cast<game::AnimationNodeClass*>(item->GetUserData());
     auto* dst_value = static_cast<game::AnimationNodeClass*>(target->GetUserData());
 
@@ -1588,27 +1626,51 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
     }
 }
 
-void AnimationWidget::on_animDuration_valueChanged(double value)
+void AnimationWidget::on_btnNewTrack_clicked()
 {
-    //mUI.timeline->SetDuration(value);
-    //mUI.timeline->update();
-    //mState.animation.SetDuration(value);
+    // sharing the animation class object with the new animation
+    // track widget.
+    AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.animation);
+    emit openNewWidget(widget);
+}
+void AnimationWidget::on_btnEditTrack_clicked()
+{
+    auto items = mUI.trackList->selectedItems();
+    if (items.isEmpty())
+        return;
+    QListWidgetItem* item = items[0];
+    QString id = item->data(Qt::UserRole).toString();
+
+    for (size_t i=0; i<mState.animation->GetNumTracks(); ++i)
+    {
+        const auto& klass = mState.animation->GetAnimationTrack(i);
+        if (klass.GetId() != app::ToUtf8(id))
+            continue;
+
+        AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace,
+            mState.animation, klass);
+        emit openNewWidget(widget);
+    }
+}
+void AnimationWidget::on_btnDeleteTrack_clicked()
+{
+    auto items = mUI.trackList->selectedItems();
+    if (items.isEmpty())
+        return;
+    QListWidgetItem* item = items[0];
+    QString id = item->data(Qt::UserRole).toString();
+
+    mState.animation->DeleteAnimationTrackById(app::ToUtf8(id));
+
+    // this will remove it from the widget.
+    delete item;
 }
 
-void AnimationWidget::on_animDelay_valueChanged(double value)
+void AnimationWidget::on_trackList_itemSelectionChanged()
 {
-    //mState.animation.SetDelay(value);
-}
-
-
-void AnimationWidget::on_timelineGroup_toggled(bool value)
-{
-    //mState.animation.SetFlag(game::Animation::Flags::EnableTimeline, value);
-}
-
-void AnimationWidget::on_animIsLooping_stateChanged(int value)
-{
-    //mState.animation.SetFlag(game::Animation::Flags::LoopAnimation, (bool)value);
+    auto list = mUI.trackList->selectedItems();
+    mUI.btnEditTrack->setEnabled(!list.isEmpty());
+    mUI.btnDeleteTrack->setEnabled(!list.isEmpty());
 }
 
 void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
@@ -1786,7 +1848,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
 
     // begin the animation transformation space
     view.Push();
-        mState.animation.Draw(painter, view, &hook);
+        mState.animation->Draw(painter, view, &hook);
     view.Pop();
 
     if (mCurrentTool)

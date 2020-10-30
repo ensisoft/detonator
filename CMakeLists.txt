@@ -90,15 +90,17 @@ endif()
 
 # why is this not set!?
 # should come from cmake through find_package(Boost, ...)
-if(NOT Boost_LIBRARY_DIRS)
-    message(WARNING "
+if (MSVC)
+    if(NOT Boost_LIBRARY_DIRS)
+        message(WARNING "
 Boost_LIBRARY_DIRS is not set.
 I'm going to use a default for MSVS 14 2015 Win64.
 If that doesn't match your build environment/compiler/arch you will need
 to edit the line below this message manually.
 Sorry about that :-(
 ")
-    set(Boost_LIBRARY_DIRS "${BOOST_ROOT}/lib64-msvc-14.0")
+        set(Boost_LIBRARY_DIRS "${BOOST_ROOT}/lib64-msvc-14.0")
+    endif()
 endif()
 
 message(STATUS "${Boost_INCLUDE_DIRS}")
@@ -182,6 +184,9 @@ add_executable(Editor
     editor/gui/animationwidget.h
     editor/gui/animationwidget.ui
     editor/gui/animationwidget.cpp
+    editor/gui/animationtrackwidget.h
+    editor/gui/animationtrackwidget.ui
+    editor/gui/animationtrackwidget.cpp
     editor/gui/childwindow.h
     editor/gui/childwindow.cpp
     editor/gui/childwindow.ui
@@ -282,13 +287,15 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+# support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
+target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate)
 target_link_libraries(Editor freetype_custom_build)
 target_link_libraries(Editor harfbuzz_custom_build)
 if (UNIX)
     target_link_libraries(Editor ncurses)
 endif()
-install(TARGETS Editor DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 

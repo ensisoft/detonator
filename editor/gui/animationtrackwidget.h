@@ -1,0 +1,170 @@
+// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
+//
+// http://www.ensisoft.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
+
+#pragma once
+
+#include "config.h"
+
+#include "warnpush.h"
+#  include "ui_animationtrackwidget.h"
+#  include <glm/glm.hpp>
+#include "warnpop.h"
+
+#include <memory>
+
+#include "editor/gui/mainwidget.h"
+#include "editor/app/workspace.h"
+#include "gamelib/animation.h"
+
+namespace gui
+{
+    // User interface widget for editing animation tracks.
+    // All edits are eventually stored in an animation class object,
+    // which is shared with AnimationWidget instance. When a track is
+    // saved it's saved in the AnimationClass object.
+    class AnimationTrackWidget : public MainWidget
+    {
+        Q_OBJECT
+
+    public:
+        // constructors.
+        AnimationTrackWidget(app::Workspace* workspace);
+        AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::AnimationClass>& anim);
+        AnimationTrackWidget(app::Workspace* workspace,
+                const std::shared_ptr<game::AnimationClass>& anim,
+                const game::AnimationTrackClass& track);
+       ~AnimationTrackWidget();
+
+        // MainWidget implementation.
+        virtual void addActions(QToolBar& bar) override;
+        virtual void addActions(QMenu& menu) override;
+        virtual bool saveState(Settings& settings) const override;
+        virtual bool loadState(const Settings& settings) override;
+        virtual void zoomIn() override;
+        virtual void zoomOut() override;
+        virtual void reloadShaders() override;
+        virtual void reloadTextures() override;
+        virtual void shutdown() override;
+        virtual void render() override;
+        virtual void animate(double secs) override;
+        virtual bool confirmClose() override;
+
+    private slots:
+        void on_actionPlay_triggered();
+        void on_actionPause_triggered();
+        void on_actionStop_triggered();
+        void on_actionSave_triggered();
+        void on_actionReset_triggered();
+        void on_actionDeleteActuator_triggered();
+        void on_actionClearActuators_triggered();
+        void on_actionAddTransformActuator_triggered();
+        void on_btnAddActuator_clicked();
+        void on_btnActuatorPlus90_clicked();
+        void on_btnActuatorMinus90_clicked();
+        void on_btnActuatorReset_clicked();
+        void on_btnViewPlus90_clicked();
+        void on_btnViewMinus90_clicked();
+        void on_btnViewReset_clicked();
+        void on_duration_valueChanged(double value);
+        void on_looping_stateChanged(int);
+        void on_actuatorStartTime_valueChanged(double value);
+        void on_actuatorEndTime_valueChanged(double value);
+        void on_actuatorNode_currentIndexChanged(int index);
+        void on_actuatorMethod_currentIndexChanged(int index);
+        void on_timeline_customContextMenuRequested(QPoint);
+        void on_actuatorEndPosX_valueChanged(double value);
+        void on_actuatorEndPosY_valueChanged(double value);
+        void on_actuatorEndSizeX_valueChanged(double value);
+        void on_actuatorEndSizeY_valueChanged(double value);
+        void on_actuatorEndScaleX_valueChanged(double value);
+        void on_actuatorEndScaleY_valueChanged(double value);
+        void on_actuatorEndRotation_valueChanged(double value);
+        void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
+        void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
+    private:
+        void PaintScene(gfx::Painter& painter, double secs);
+        void UpdateTransformActuatorUI();
+        void SetSelectedActuatorProperties();
+    private:
+        Ui::AnimationTrack mUI;
+    private:
+        class Tool;
+        class TreeModel;
+        class TimelineModel;
+        class CameraTool;
+        class MoveTool;
+        class ResizeTool;
+        class RotateTool;
+        // Tree model to display the animation's render tree.
+        std::unique_ptr<TreeModel> mTreeModel;
+        // Timeline model to display the actuators on a timeline.
+        std::unique_ptr<TimelineModel> mTimelineModel;
+        // The current tool that performs actions on user (mouse) input.
+        // can be nullptr when no tool is currently being applied.
+        std::unique_ptr<Tool> mCurrentTool;
+        // The workspace object.
+        app::Workspace* mWorkspace = nullptr;
+        // Current state that is accessed and modified by this widget
+        // object's event handlers (slots) and also by the current tool.
+        struct State {
+            float camera_offset_x = 0.0f;
+            float camera_offset_y = 0.0f;
+            std::shared_ptr<game::AnimationClass> animation;
+            std::shared_ptr<game::AnimationTrackClass> track;
+        } mState;
+        // Current time accumulator.
+        float mCurrentTime = 0.0f;
+        // Interpolation variables for smoothing view rotations.
+        float mViewTransformStartTime = 0.0f;
+        float mViewTransformRotation = 0.0f;
+        // Animation object is used render the animation track
+        // while it's being edited. We use an animation object
+        // instead of the animation class object is because there
+        // should be no changes to the animation class object's
+        // render tree. (i.e. node transformations)
+        std::unique_ptr<game::Animation> mAnimation;
+        // State enumration for the playback state.
+        enum class PlayState {
+            // Currently playing back an animation track.
+            Playing,
+            // Have an animation track but the time accumulation
+            // and updates are paused.
+            Paused,
+            // No animation track. Editing actuators state.
+            Stopped
+        };
+        // The current playback/editing state.
+        PlayState mPlayState = PlayState::Stopped;
+        // Animation object that exists when playing back the
+        // animation track.
+        std::unique_ptr<game::Animation> mPlaybackAnimation;
+        // Original hash (when starting to edit an existing track)
+        // used to compare for changes when closing.
+        std::size_t mOriginalHash = 0;
+    };
+
+    // Functions used to share animation class objects between AnimationTrackWidget
+    // and AnimationWidget instances.
+    std::shared_ptr<game::AnimationClass> FindSharedAnimation(size_t hash);
+    void ShareAnimation(const std::shared_ptr<game::AnimationClass>& klass);
+
+} // namespace

@@ -133,6 +133,7 @@ namespace gui
         void showNote(const app::Event& event);
         void openExternalImage(const QString& file);
         void openExternalShader(const QString& file);
+        void openNewWidget(MainWidget* widget);
 
     private:
         bool saveState();

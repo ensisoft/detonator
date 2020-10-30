@@ -19,6 +19,7 @@
     <file>16x16_ico_png/add.png</file>
     <file>16x16_ico_png/edit.png</file>
     <file>16x16_ico_png/animation.png</file>
+    <file>16x16_ico_png/animation_track.png</file>
     <file>16x16_ico_png/eye.png</file>
     <file>16x16_ico_png/settings.png</file>
     <file>16x16_ico_png/text.png</file>
@@ -30,6 +31,7 @@
     <file>16x16_ico_png/bullet.png</file>
     <file>16x16_ico_png/application.png</file>
     <file>16x16_ico_png/polygon.png</file>
+    <file>16x16_ico_png/clear.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
@@ -51,6 +53,7 @@
     <file>32x32_ico_png/right_triangle.png</file>
     <file>32x32_ico_png/trapezoid.png</file>
     <file>32x32_ico_png/parallelogram.png</file>
+    <file>32x32_ico_png/reset.png</file>
 
     <file>texture.png</file>
   </qresource>

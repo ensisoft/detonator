@@ -73,6 +73,24 @@ namespace gui
             return mSettings->Save();
         }
 
+        template<typename T>
+        bool getValue(const QString& module, const QString& key, T* out) const
+        {
+            const auto& value = mSettings->GetValue(module + "/" + key);
+            if (!value.isValid())
+                return false;
+            *out = qvariant_cast<T>(value);
+            return true;
+        }
+        bool getValue(const QString& module, const QString& key, std::size_t* out) const
+        {
+            const auto& value = mSettings->GetValue(module + "/" + key);
+            if (!value.isValid())
+                return false;
+            *out = qvariant_cast<quint64>(value);
+            return true;
+        }
+
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
         // then the default value is returned.
@@ -90,6 +108,13 @@ namespace gui
             const QString& temp = getValue(module, key, app::FromUtf8(defaultValue));
             return app::ToUtf8(temp);
         }
+        std::size_t getValue(const QString& module, const QString& key, std::size_t defaultValue) const
+        {
+            const auto& value = mSettings->GetValue(module + "/" + key);
+            if (!value.isValid())
+                return defaultValue;
+            return qvariant_cast<quint64>(value);
+        }
 
         // Set a value in the settings object under the specific key
         // under a specific module.
@@ -102,6 +127,10 @@ namespace gui
         void setValue(const QString& module, const QString& key, const std::string& value)
         {
             setValue(module, key, app::FromUtf8(value));
+        }
+        void setValue(const QString& module, const QString& key, std::size_t value)
+        {
+            setValue<quint64>(module, key, quint64(value));
         }
 
         // Save the UI state of a widget.
@@ -144,7 +173,10 @@ namespace gui
         }
         void saveWidget(const QString& module, const QDoubleSpinBox* spin)
         {
-            setValue(module, spin->objectName(), spin->value());
+            const auto& name = spin->objectName();
+            setValue(module, name, spin->value());
+            setValue(module, name+"_min_value", spin->minimum());
+            setValue(module, name+"_max_value", spin->maximum());
         }
         void saveWidget(const QString& module, const QGroupBox* grp)
         {
@@ -215,9 +247,13 @@ namespace gui
         }
         void loadWidget(const QString& module, QDoubleSpinBox* spin) const
         {
-            const double value = getValue<double>(module, spin->objectName(),
-                spin->value());
+            const auto& name = spin->objectName();
+            const double min   = getValue<double>(module, name + "_min_value", spin->minimum());
+            const double max   = getValue<double>(module, name + "_max_value", spin->maximum());
+            const double value = getValue<double>(module, name, spin->value());
             QSignalBlocker s(spin);
+            spin->setMaximum(max);
+            spin->setMinimum(min);
             spin->setValue(value);
         }
         void loadWidget(const QString& module, QSpinBox* spin) const

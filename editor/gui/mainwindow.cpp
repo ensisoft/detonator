@@ -64,6 +64,7 @@
 #include "editor/gui/dlgproject.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
+#include "editor/gui/animationtrackwidget.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -314,6 +315,8 @@ bool MainWindow::loadWorkspace(const QString& dir)
             widget = new AnimationWidget(workspace.get());
         else if (klass == PolygonWidget::staticMetaObject.className())
             widget = new PolygonWidget(workspace.get());
+        else if (klass == AnimationTrackWidget::staticMetaObject.className())
+            widget = new AnimationTrackWidget(workspace.get());
 
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
@@ -1213,6 +1216,12 @@ void MainWindow::openExternalShader(const QString& file)
     DEBUG("Start application '%1'", mSettings.shader_editor_executable);
 }
 
+void MainWindow::openNewWidget(MainWidget* widget)
+{
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(widget, open_new_window);
+}
+
 bool MainWindow::event(QEvent* event)
 {
     if (event->type() == IterateGameLoopEvent::GetIdentity())
@@ -1326,6 +1335,8 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
             this,   &MainWindow::openExternalImage);
     connect(widget, &MainWidget::openExternalShader,
             this,   &MainWindow::openExternalShader);
+    connect(widget, &MainWidget::openNewWidget,
+        this, &MainWindow::openNewWidget);
 
     //widget->setTargetFps(mSettings.target_fps);
 
