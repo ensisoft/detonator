@@ -11,9 +11,9 @@ namespace gui
 {
     class Settings;
 
-    // MainWidget interfact is an abstraction for extending the
+    // MainWidget interface is an abstraction for extending the
     // application functionality vertically starting from
-    // a visible user interface. The MainWidget's plug into
+    // a visible user interface. The MainWidgets plug into the
     // MainWindow and are then subsequently managed by the MainWindow
     // which can display/hide/activate etc. them.
     class MainWidget : public QWidget
@@ -23,63 +23,119 @@ namespace gui
     public:
         virtual ~MainWidget() = default;
 
-        // Load the widget user interface state.
-        // Returns true if succesful otherwise false to indicate
-        // that not all of the could be loaded.
-        virtual bool loadState(const Settings& settings)
+        // Load the widget and the underlying resource state.
+        // This is invoked when then the application restores
+        // windows/widgets that were open the last time application
+        // was closed.
+        // Should return true if everything was successfully loaded
+        // otherwise false. Errors/problems should be logged.
+        virtual bool LoadState(const Settings& settings)
         { return true; }
 
-        // Save the widget user interface state.
-        virtual bool saveState(Settings& settings) const
+        // Save the widget and the underlying resource state.
+        // This is invoked when the application exits and the
+        // current application state is being saved for the
+        // next application run. (See LoadState).
+        // Should return true if everything was successful,
+        // otherwise false on error(s).
+        virtual bool SaveState(Settings& settings) const
         { return true; }
 
         // Add user actions specific to the widget in the menu.
-        virtual void addActions(QMenu& menu)
+        virtual void AddActions(QMenu& menu)
         {}
 
         // Add user actions specific to the widget in the toolbar.
-        virtual void addActions(QToolBar& bar)
+        virtual void AddActions(QToolBar& bar)
         {}
 
         // Refresh the widget contents.
         // the MainWindow will call this periodically so the widget
         // can do whatever latency insensitive state updates.
-        virtual void refresh()
+        virtual void Refresh()
         {}
 
-        // High frequency callback for doing animation etc simulation
-        // updates.
-        virtual void animate(double dt)
+        // Update the widget and the associated animation, simulation
+        // etc. data model.
+        // This is called at a high frequency that is specified in the
+        // workspace settings. The variable dt is the current time step
+        // i.e. delta time that can be used in simulations for numerical
+        // integration.
+        virtual void Update(double dt)
         {}
 
-        virtual void render()
+        // Render the contents of the widget. If the widget doesn't have
+        // custom accelerated rendering then likely nothing needs to be done.
+        // Otherwise a new frame should be rendered in the accelerated
+        // graphics widget. This is called frequently as part of the application's
+        // main update/render loop.
+        virtual void Render()
         {}
 
         // Called whenever the widget is getting activated i.e. displayed
         // in the MainWindow.
-        virtual void activate() {}
+        virtual void Activate() {}
 
         // Called when the widget is deactivated and is no longer the
         // active tab in the MainWindow.
-        virtual void deactivate() {}
+        virtual void Deactivate() {}
 
-        // Called before the application shutsdown.
-        // The widget should release it's resources at this point.
-        virtual void shutdown() {}
+        // Called when the widget is being closed and deleted.
+        // This can happen when the user has requested to simply close
+        // the widget/window or when the application is about to exit.
+        // If your widget uses any graphics resources (for example
+        // it has embedded GfxWidget) it's important to implement this
+        // function and dispose all such resources. After the call
+        // returns the widget will be deleted.
+        virtual void Shutdown() {}
 
-        virtual void zoomIn() {};
-        virtual void zoomOut() {}
+        // Should return true if widget supports zoom in. It's possible
+        // that widget doesn't support zoom at all or has already reached
+        // the maximum zoom.
+        // See ZoomIn and ZoomOut
+        virtual bool CanZoomIn() const
+        { return false; }
 
-        virtual void reloadShaders() {};
-        virtual void reloadTextures() {};
+        // Should return true if widget supports zoom in. It's possible
+        // that widget doesn't support zoom at all or has already reached
+        // the maximum zoom.
+        // See ZoomIn and ZoomOut
+        virtual bool CanZoomOut() const
+        { return false; }
 
-        virtual bool confirmClose() // const
+        // Ask the widget to zoom in on the content.
+        virtual void ZoomIn() {};
+
+        // Ask the widget to zoom out on the content.
+        virtual void ZoomOut() {}
+
+        // If the widget uses graphics resources (shaders) ask
+        // them to be reloaded.
+        virtual void ReloadShaders() {};
+        // If the widget uses graphics resources (textures) ask
+        // them to be reloaded.
+        virtual void ReloadTextures() {};
+
+        // Called before the widget is being closed by the user.
+        // If there are any pending/unsaved changes the widget
+        // implementation can ask the user for a confirmation and
+        // then proceed to save/discard such changes.
+        // If true is returned main window will proceed to close the
+        // widget. Otherwise the window is *not* closed and nothing
+        // happens.
+        virtual bool ConfirmClose() // const
         { return true; }
 
     signals:
-        void openExternalImage(const QString& file);
-        void openExternalShader(const QString& file);
-        void openNewWidget(MainWidget* widget);
+        // Request to open the given image file in an external
+        // image editor.
+        void OpenExternalImage(const QString& file);
+        // Request to open the given shader file in an external
+        // text/shader editor.
+        void OpenExternalShader(const QString& file);
+        // Request to display the new widget. Will transfer
+        // ownership of the widget the mainwindow.
+        void OpenNewWidget(MainWidget* widget);
 
     private:
     };

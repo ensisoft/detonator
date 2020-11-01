@@ -321,7 +321,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
 
-        if (!widget->loadState(settings))
+        if (!widget->LoadState(settings))
         {
             WARN("Widget '%1 failed to load state.", widget->windowTitle());
             success = false;
@@ -392,7 +392,7 @@ bool MainWindow::saveWorkspace()
 
         Settings settings(file);
         settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
-        if (!widget->saveState(settings))
+        if (!widget->SaveState(settings))
         {
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
             success = false;
@@ -434,7 +434,7 @@ bool MainWindow::saveWorkspace()
         settings.setValue("MainWindow", "window_ypos", child->y());
         settings.setValue("MainWindow", "window_width", child->width());
         settings.setValue("MainWindow", "window_height", child->height());
-        if (!widget->saveState(settings))
+        if (!widget->SaveState(settings))
         {
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
             success = false;
@@ -489,7 +489,7 @@ void MainWindow::closeWorkspace()
     while (mUI.mainTab->count())
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
-        widget->shutdown();
+        widget->Shutdown();
         widget->setParent(nullptr);
         // cleverly enough this will remove the tab. so the loop
         // here must be carefully done to access the tab at index 0
@@ -550,7 +550,7 @@ void MainWindow::iterateGameLoop()
         for (int i=0; i<GetCount(mUI.mainTab); ++i)
         {
             auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-            widget->animate(time_step);
+            widget->Update(time_step);
         }
         for (auto* child : mChildWindows)
         {
@@ -569,7 +569,7 @@ void MainWindow::iterateGameLoop()
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->render();
+        widget->Render();
     }
     for (auto* child : mChildWindows)
     {
@@ -590,7 +590,7 @@ bool MainWindow::haveAcceleratedWindows() const
 void MainWindow::on_mainTab_currentChanged(int index)
 {
     if (mCurrentWidget)
-        mCurrentWidget->deactivate();
+        mCurrentWidget->Deactivate();
 
     mCurrentWidget = nullptr;
     mUI.mainToolBar->clear();
@@ -600,24 +600,26 @@ void MainWindow::on_mainTab_currentChanged(int index)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
 
-        widget->activate();
-        widget->addActions(*mUI.mainToolBar);
-        widget->addActions(*mUI.menuTemp);
+        widget->Activate();
+        widget->AddActions(*mUI.mainToolBar);
+        widget->AddActions(*mUI.menuTemp);
 
         QString name = widget->metaObject()->className();
         name.remove("gui::");
         name.remove("Widget");
         mUI.menuEdit->setEnabled(true);
-        //mUI.menuTemp->setVisible(true);
         mUI.menuTemp->setEnabled(true);
         mUI.menuTemp->setTitle(name);
         mCurrentWidget = widget;
+        mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
+        mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
     }
     else
     {
-        //mUI.menuTemp->setVisible(false);
         mUI.menuTemp->setEnabled(false);
         mUI.menuEdit->setEnabled(false);
+        mUI.actionZoomIn->setEnabled(false);
+        mUI.actionZoomOut->setEnabled(false);
     }
 
     // add the stuff that is always in the edit menu
@@ -630,7 +632,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
     auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
-    if (!widget->confirmClose())
+    if (!widget->ConfirmClose())
         return;
 
     if (widget == mCurrentWidget)
@@ -639,7 +641,7 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     // does not delete the widget.
     mUI.mainTab->removeTab(index);
 
-    widget->shutdown();
+    widget->Shutdown();
     widget->setParent(nullptr);
     delete widget;
 
@@ -692,20 +694,22 @@ void MainWindow::on_actionZoomIn_triggered()
 {
     if (!mCurrentWidget)
         return;
-    mCurrentWidget->zoomIn();
+    mCurrentWidget->ZoomIn();
+    mUI.actionZoomIn->setEnabled(mCurrentWidget->CanZoomIn());
 }
 void MainWindow::on_actionZoomOut_triggered()
 {
     if (!mCurrentWidget)
         return;
-    mCurrentWidget->zoomOut();
+    mCurrentWidget->ZoomOut();
+    mUI.actionZoomOut->setEnabled(mCurrentWidget->CanZoomOut());
 }
 
 void MainWindow::on_actionReloadShaders_triggered()
 {
     if (!mCurrentWidget)
         return;
-    mCurrentWidget->reloadShaders();
+    mCurrentWidget->ReloadShaders();
     INFO("'%1' shaders reloaded.", mCurrentWidget->windowTitle());
 }
 
@@ -713,7 +717,7 @@ void MainWindow::on_actionReloadTextures_triggered()
 {
     if (!mCurrentWidget)
         return;
-    mCurrentWidget->reloadTextures();
+    mCurrentWidget->ReloadTextures();
     INFO("'%1' textures reloaded.", mCurrentWidget->windowTitle());
 }
 
@@ -1095,7 +1099,7 @@ void MainWindow::timerRefreshUI()
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->refresh();
+        widget->Refresh();
         const auto& icon = widget->windowIcon();
         const auto& text = widget->windowTitle();
         mUI.mainTab->setTabText(i, text);
@@ -1128,6 +1132,12 @@ void MainWindow::timerRefreshUI()
 
     if (mWorkspace)
         mWorkspace->Tick();
+
+    if (mCurrentWidget)
+    {
+        mUI.actionZoomIn->setEnabled(mCurrentWidget->CanZoomIn());
+        mUI.actionZoomOut->setEnabled(mCurrentWidget->CanZoomOut());
+    }
 }
 
 void MainWindow::showNote(const app::Event& event)
@@ -1138,7 +1148,7 @@ void MainWindow::showNote(const app::Event& event)
     }
 }
 
-void MainWindow::openExternalImage(const QString& file)
+void MainWindow::OpenExternalImage(const QString& file)
 {
     if (mSettings.image_editor_executable.isEmpty())
     {
@@ -1177,7 +1187,7 @@ void MainWindow::openExternalImage(const QString& file)
     DEBUG("Start application '%1'", mSettings.image_editor_executable);
 }
 
-void MainWindow::openExternalShader(const QString& file)
+void MainWindow::OpenExternalShader(const QString& file)
 {
     if (mSettings.shader_editor_executable.isEmpty())
     {
@@ -1216,7 +1226,7 @@ void MainWindow::openExternalShader(const QString& file)
     DEBUG("Start application '%1'", mSettings.shader_editor_executable);
 }
 
-void MainWindow::openNewWidget(MainWidget* widget)
+void MainWindow::OpenNewWidget(MainWidget* widget)
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
     showWidget(widget, open_new_window);
@@ -1292,9 +1302,9 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
     for (int i=0; i<std::abs(num_zoom_steps); ++i)
     {
         if (num_zoom_steps > 0)
-            mCurrentWidget->zoomIn();
+            mCurrentWidget->ZoomIn();
         else if (num_zoom_steps < 0)
-            mCurrentWidget->zoomOut();
+            mCurrentWidget->ZoomOut();
     }
 
     return true;
@@ -1320,7 +1330,7 @@ bool MainWindow::saveState()
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
 
-    // QMainWindow::saveState saves the current state of the mainwindow toolbars
+    // QMainWindow::SaveState saves the current state of the mainwindow toolbars
     // and dockwidgets.
     settings.setValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     return settings.Save();
@@ -1331,12 +1341,12 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     ASSERT(widget->parent() == nullptr);
 
     // connect the important signals here.
-    connect(widget, &MainWidget::openExternalImage,
-            this,   &MainWindow::openExternalImage);
-    connect(widget, &MainWidget::openExternalShader,
-            this,   &MainWindow::openExternalShader);
-    connect(widget, &MainWidget::openNewWidget,
-        this, &MainWindow::openNewWidget);
+    connect(widget, &MainWidget::OpenExternalImage,
+            this,   &MainWindow::OpenExternalImage);
+    connect(widget, &MainWidget::OpenExternalShader,
+            this,   &MainWindow::OpenExternalShader);
+    connect(widget, &MainWidget::OpenNewWidget,
+            this, &MainWindow::OpenNewWidget);
 
     //widget->setTargetFps(mSettings.target_fps);
 

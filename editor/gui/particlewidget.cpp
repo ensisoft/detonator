@@ -63,7 +63,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.materials->setCurrentIndex(mUI.materials->findText("White"));
 
     // Set default transform state here. if there's a previous user setting
-    // they'll get loaded in loadState and will override these values.
+    // they'll get loaded in LoadState and will override these values.
     mUI.transform->setChecked(false);
     mUI.scaleX->setValue(500);
     mUI.scaleY->setValue(500);
@@ -136,7 +136,7 @@ ParticleEditorWidget::~ParticleEditorWidget()
     DEBUG("Destroy ParticleEdtiorWidget");
 }
 
-void ParticleEditorWidget::addActions(QToolBar& bar)
+void ParticleEditorWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -146,7 +146,7 @@ void ParticleEditorWidget::addActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
 }
 
-void ParticleEditorWidget::addActions(QMenu& menu)
+void ParticleEditorWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -156,7 +156,7 @@ void ParticleEditorWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
 }
 
-bool ParticleEditorWidget::saveState(Settings& settings) const
+bool ParticleEditorWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Particle", mUI.name);
     settings.saveWidget("Particle", mUI.materials);
@@ -194,7 +194,7 @@ bool ParticleEditorWidget::saveState(Settings& settings) const
     return true;
 }
 
-bool ParticleEditorWidget::loadState(const Settings& settings)
+bool ParticleEditorWidget::LoadState(const Settings& settings)
 {
     settings.loadWidget("Particle", mUI.name);
     settings.loadWidget("Particle", mUI.materials);
@@ -232,22 +232,22 @@ bool ParticleEditorWidget::loadState(const Settings& settings)
     return true;
 }
 
-void ParticleEditorWidget::reloadShaders()
+void ParticleEditorWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
 
-void ParticleEditorWidget::reloadTextures()
+void ParticleEditorWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
 
-void ParticleEditorWidget::shutdown()
+void ParticleEditorWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
 
-void ParticleEditorWidget::animate(double secs)
+void ParticleEditorWidget::Update(double secs)
 {
     if (!mEngine)
         return;
@@ -282,12 +282,12 @@ void ParticleEditorWidget::animate(double secs)
     mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
-void ParticleEditorWidget::render()
+void ParticleEditorWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
 
-bool ParticleEditorWidget::confirmClose()
+bool ParticleEditorWidget::ConfirmClose()
 {
     gfx::KinematicsParticleEngineClass::Params params;
     gfx::KinematicsParticleEngineClass engine;

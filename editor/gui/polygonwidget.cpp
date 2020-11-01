@@ -113,7 +113,7 @@ PolygonWidget::~PolygonWidget()
     DEBUG("Destroy PolygonWidget");
 }
 
-void PolygonWidget::addActions(QToolBar& bar)
+void PolygonWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -124,7 +124,7 @@ void PolygonWidget::addActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionNewTriangleFan);
 }
-void PolygonWidget::addActions(QMenu& menu)
+void PolygonWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -136,7 +136,7 @@ void PolygonWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionNewTriangleFan);
 }
 
-bool PolygonWidget::saveState(Settings& settings) const
+bool PolygonWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Polygon", mUI.name);
     settings.saveWidget("Polygon", mUI.blueprints);
@@ -153,7 +153,7 @@ bool PolygonWidget::saveState(Settings& settings) const
     settings.setValue("Polygon", "content", base64);
     return true;
 }
-bool PolygonWidget::loadState(const Settings& settings)
+bool PolygonWidget::LoadState(const Settings& settings)
 {
     settings.loadWidget("Polygon", mUI.name);
     settings.loadWidget("Polygon", mUI.blueprints);
@@ -176,24 +176,24 @@ bool PolygonWidget::loadState(const Settings& settings)
     return true;
 }
 
-void PolygonWidget::reloadShaders()
+void PolygonWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
-void PolygonWidget::reloadTextures()
+void PolygonWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
-void PolygonWidget::shutdown()
+void PolygonWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
-void PolygonWidget::render()
+void PolygonWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
 
-void PolygonWidget::animate(double secs)
+void PolygonWidget::Update(double secs)
 {
     if (mPaused || !mPlaying)
         return;
@@ -217,7 +217,7 @@ void PolygonWidget::animate(double secs)
     }
 }
 
-bool PolygonWidget::confirmClose()
+bool PolygonWidget::ConfirmClose()
 {
     const auto hash = mPolygon.GetHash();
     if (hash == mOriginalHash)

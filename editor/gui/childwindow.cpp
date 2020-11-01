@@ -52,10 +52,12 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
     menu_name.remove("gui::");
     menu_name.remove("Widget");
     mUI.menuTemp->setTitle(menu_name);
+    mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
+    mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
 
-    mWidget->activate();
-    mWidget->addActions(*mUI.toolBar);
-    mWidget->addActions(*mUI.menuTemp);
+    mWidget->Activate();
+    mWidget->AddActions(*mUI.toolBar);
+    mWidget->AddActions(*mUI.menuTemp);
 
     // We need to install this event filter so that we can universally grab
     // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
@@ -75,22 +77,25 @@ ChildWindow::~ChildWindow()
 
 void ChildWindow::RefreshUI()
 {
-    mWidget->refresh();
+    mWidget->Refresh();
     // update the window icon and title if they have changed.
     const auto& icon = mWidget->windowIcon();
     const auto& text = mWidget->windowTitle();
     setWindowTitle(text);
     setWindowIcon(icon);
+
+    mUI.actionZoomIn->setEnabled(mWidget->CanZoomIn());
+    mUI.actionZoomOut->setEnabled(mWidget->CanZoomOut());
 }
 
 void ChildWindow::Animate(double secs)
 {
-    mWidget->animate(secs);
+    mWidget->Update(secs);
 }
 
 void ChildWindow::Render()
 {
-    mWidget->render();
+    mWidget->Render();
 }
 
 void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
@@ -106,28 +111,30 @@ void ChildWindow::on_actionClose_triggered()
 
 void ChildWindow::on_actionReloadShaders_triggered()
 {
-    mWidget->reloadShaders();
+    mWidget->ReloadShaders();
     INFO("'%1' shaders reloaded.", mWidget->windowTitle());
 }
 
 void ChildWindow::on_actionReloadTextures_triggered()
 {
-    mWidget->reloadTextures();
+    mWidget->ReloadTextures();
     INFO("'%1' textures reloaded.", mWidget->windowTitle());
 }
 
 void ChildWindow::on_actionZoomIn_triggered()
 {
-    mWidget->zoomIn();
+    mWidget->ZoomIn();
+    mUI.actionZoomIn->setEnabled(mWidget->CanZoomIn());
 }
 void ChildWindow::on_actionZoomOut_triggered()
 {
-    mWidget->zoomOut();
+    mWidget->ZoomOut();
+    mUI.actionZoomOut->setEnabled(mWidget->CanZoomOut());
 }
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
-    if (!mWidget->confirmClose())
+    if (!mWidget->ConfirmClose())
     {
         event->ignore();
         return;
@@ -138,7 +145,7 @@ void ChildWindow::closeEvent(QCloseEvent* event)
     // make sure we cleanup properly while all the resources
     // such as the OpenGL contexts (and the window) are still
     // valid.
-    mWidget->shutdown();
+    mWidget->Shutdown();
 
     const auto& text  = mWidget->windowTitle();
     const auto& klass = mWidget->metaObject()->className();
@@ -181,9 +188,9 @@ bool ChildWindow::eventFilter(QObject* destination, QEvent* event)
     for (int i=0; i<std::abs(num_zoom_steps); ++i)
     {
         if (num_zoom_steps > 0)
-            mWidget->zoomIn();
+            mWidget->ZoomIn();
         else if (num_zoom_steps < 0)
-            mWidget->zoomOut();
+            mWidget->ZoomOut();
     }
 
     return true;

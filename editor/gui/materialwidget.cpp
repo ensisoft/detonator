@@ -138,8 +138,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.setupUi(this);
     mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onZoomIn = std::bind(&MaterialWidget::zoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&MaterialWidget::zoomOut, this);
+    mUI.widget->onZoomIn = std::bind(&MaterialWidget::ZoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&MaterialWidget::ZoomOut, this);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
@@ -210,7 +210,7 @@ MaterialWidget::~MaterialWidget()
     DEBUG("Destroy MaterialWidget");
 }
 
-void MaterialWidget::addActions(QToolBar& bar)
+void MaterialWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -219,7 +219,7 @@ void MaterialWidget::addActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
 }
-void MaterialWidget::addActions(QMenu& menu)
+void MaterialWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -229,7 +229,7 @@ void MaterialWidget::addActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
 }
 
-bool MaterialWidget::loadState(const Settings& settings)
+bool MaterialWidget::LoadState(const Settings& settings)
 {
     const std::string& base64 = settings.getValue("Material", "content", std::string(""));
     if (base64.empty())
@@ -293,7 +293,7 @@ bool MaterialWidget::loadState(const Settings& settings)
     return true;
 }
 
-bool MaterialWidget::saveState(Settings& settings) const
+bool MaterialWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Material", mUI.materialName);
     settings.saveWidget("Material", mUI.shaderFile);
@@ -310,34 +310,47 @@ bool MaterialWidget::saveState(Settings& settings) const
     return true;
 }
 
-void MaterialWidget::zoomIn()
+bool MaterialWidget::CanZoomIn() const
+{
+    const auto max = mUI.zoom->maximum();
+    const auto val = mUI.zoom->value();
+    return val < max;
+}
+bool MaterialWidget::CanZoomOut() const
+{
+    const auto min = mUI.zoom->minimum();
+    const auto val = mUI.zoom->value();
+    return val > min;
+}
+
+void MaterialWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
     mUI.zoom->setValue(value + 0.1);
 }
 
-void MaterialWidget::zoomOut()
+void MaterialWidget::ZoomOut()
 {
     const auto value = mUI.zoom->value();
     if (value > 0.1)
         mUI.zoom->setValue(value - 0.1);
 }
 
-void MaterialWidget::reloadShaders()
+void MaterialWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
-void MaterialWidget::reloadTextures()
+void MaterialWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
 
-void MaterialWidget::shutdown()
+void MaterialWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
 
-void MaterialWidget::animate(double secs)
+void MaterialWidget::Update(double secs)
 {
     if (mState == PlayState::Playing)
     {
@@ -346,7 +359,7 @@ void MaterialWidget::animate(double secs)
     mUI.time->setText(QString::number(mTime));
 }
 
-bool MaterialWidget::confirmClose()
+bool MaterialWidget::ConfirmClose()
 {
     // any unsaved changes ?
     const auto hash = mMaterial.GetHash();
@@ -367,7 +380,7 @@ bool MaterialWidget::confirmClose()
     return true;
 }
 
-void MaterialWidget::render()
+void MaterialWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
@@ -550,7 +563,7 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
     auto& source = mMaterial.GetTextureSource(row);
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
     {
-        emit openExternalImage(app::FromUtf8(ptr->GetFilename()));
+        emit OpenExternalImage(app::FromUtf8(ptr->GetFilename()));
     }
     else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(&source))
     {
@@ -582,7 +595,7 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
 
 void MaterialWidget::on_btnEditShader_clicked()
 {
-    emit openExternalShader(mUI.shaderFile->text());
+    emit OpenExternalShader(mUI.shaderFile->text());
 }
 
 void MaterialWidget::on_btnResetTextureRect_clicked()

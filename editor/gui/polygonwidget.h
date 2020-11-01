@@ -47,16 +47,16 @@ namespace gui
         PolygonWidget(app::Workspace* workspace, const app::Resource& resource);
        ~PolygonWidget();
 
-        virtual void addActions(QToolBar& bar) override;
-        virtual void addActions(QMenu& menu) override;
-        virtual bool saveState(Settings& settings) const override;
-        virtual bool loadState(const Settings& settings) override;
-        virtual void reloadShaders() override;
-        virtual void reloadTextures() override;
-        virtual void shutdown() override;
-        virtual void render() override;
-        virtual void animate(double secs) override;
-        virtual bool confirmClose() override;
+        virtual void AddActions(QToolBar& bar) override;
+        virtual void AddActions(QMenu& menu) override;
+        virtual bool SaveState(Settings& settings) const override;
+        virtual bool LoadState(const Settings& settings) override;
+        virtual void ReloadShaders() override;
+        virtual void ReloadTextures() override;
+        virtual void Shutdown() override;
+        virtual void Render() override;
+        virtual void Update(double secs) override;
+        virtual bool ConfirmClose() override;
 
     private slots:
         void on_actionPlay_triggered();

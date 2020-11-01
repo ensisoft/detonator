@@ -551,8 +551,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
 
-    mUI.widget->onZoomIn  = std::bind(&AnimationWidget::zoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&AnimationWidget::zoomOut, this);
+    mUI.widget->onZoomIn  = std::bind(&AnimationWidget::ZoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&AnimationWidget::ZoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         if (!mCameraWasLoaded) {
             mState.camera_offset_x = width * 0.5;
@@ -832,7 +832,7 @@ AnimationWidget::~AnimationWidget()
     DEBUG("Destroy AnimationWidget");
 }
 
-void AnimationWidget::addActions(QToolBar& bar)
+void AnimationWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -854,7 +854,7 @@ void AnimationWidget::addActions(QToolBar& bar)
     bar.addAction(mParticleSystems->menuAction());
 
 }
-void AnimationWidget::addActions(QMenu& menu)
+void AnimationWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -876,7 +876,7 @@ void AnimationWidget::addActions(QMenu& menu)
     menu.addAction(mParticleSystems->menuAction());
 }
 
-bool AnimationWidget::saveState(Settings& settings) const
+bool AnimationWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Animation", mUI.name);
     settings.saveWidget("Animation", mUI.scaleX);
@@ -895,7 +895,7 @@ bool AnimationWidget::saveState(Settings& settings) const
     settings.setValue("Animation", "content", base64);
     return true;
 }
-bool AnimationWidget::loadState(const Settings& settings)
+bool AnimationWidget::LoadState(const Settings& settings)
 {
     ASSERT(mState.workspace);
 
@@ -961,35 +961,48 @@ bool AnimationWidget::loadState(const Settings& settings)
     return true;
 }
 
-void AnimationWidget::zoomIn()
+bool AnimationWidget::CanZoomIn() const
+{
+    const auto max = mUI.zoom->maximum();
+    const auto val = mUI.zoom->value();
+    return val < max;
+}
+bool AnimationWidget::CanZoomOut() const
+{
+    const auto min = mUI.zoom->minimum();
+    const auto val = mUI.zoom->value();
+    return val > min;
+}
+
+void AnimationWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
     mUI.zoom->setValue(value + 0.1);
 }
 
-void AnimationWidget::zoomOut()
+void AnimationWidget::ZoomOut()
 {
     const auto value = mUI.zoom->value();
     if (value > 0.1)
         mUI.zoom->setValue(value - 0.1);
 }
 
-void AnimationWidget::reloadShaders()
+void AnimationWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
 
-void AnimationWidget::reloadTextures()
+void AnimationWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
 
-void AnimationWidget::shutdown()
+void AnimationWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
 
-void AnimationWidget::animate(double secs)
+void AnimationWidget::Update(double secs)
 {
     // update the animation if we're currently playing
     if (mPlayState == PlayState::Playing)
@@ -1002,12 +1015,12 @@ void AnimationWidget::animate(double secs)
     mCurrentTime += secs;
 }
 
-void AnimationWidget::render()
+void AnimationWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
 
-bool AnimationWidget::confirmClose()
+bool AnimationWidget::ConfirmClose()
 {
     const auto hash = mState.animation->GetHash();
     if (hash == mOriginalHash)
@@ -1027,7 +1040,7 @@ bool AnimationWidget::confirmClose()
     return true;
 }
 
-void AnimationWidget::refresh()
+void AnimationWidget::Refresh()
 {
     auto selected = mUI.trackList->selectedItems();
     std::unordered_set<std::string> selected_item_ids;
@@ -1631,7 +1644,7 @@ void AnimationWidget::on_btnNewTrack_clicked()
     // sharing the animation class object with the new animation
     // track widget.
     AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.animation);
-    emit openNewWidget(widget);
+    emit OpenNewWidget(widget);
 }
 void AnimationWidget::on_btnEditTrack_clicked()
 {
@@ -1649,7 +1662,7 @@ void AnimationWidget::on_btnEditTrack_clicked()
 
         AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace,
             mState.animation, klass);
-        emit openNewWidget(widget);
+        emit OpenNewWidget(widget);
     }
 }
 void AnimationWidget::on_btnDeleteTrack_clicked()

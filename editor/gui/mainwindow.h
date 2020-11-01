@@ -131,9 +131,9 @@ namespace gui
         void actionWindowFocus_triggered();
         void timerRefreshUI();
         void showNote(const app::Event& event);
-        void openExternalImage(const QString& file);
-        void openExternalShader(const QString& file);
-        void openNewWidget(MainWidget* widget);
+        void OpenExternalImage(const QString& file);
+        void OpenExternalShader(const QString& file);
+        void OpenNewWidget(MainWidget* widget);
 
     private:
         bool saveState();

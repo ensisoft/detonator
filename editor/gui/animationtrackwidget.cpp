@@ -446,8 +446,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.tree->SetModel(mTreeModel.get());
     mUI.name->setText("My Track");
 
-    mUI.widget->onZoomIn  = std::bind(&AnimationTrackWidget::zoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&AnimationTrackWidget::zoomOut, this);
+    mUI.widget->onZoomIn  = std::bind(&AnimationTrackWidget::ZoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&AnimationTrackWidget::ZoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         mState.camera_offset_x = width * 0.5;
         mState.camera_offset_y = height * 0.5;
@@ -628,7 +628,7 @@ AnimationTrackWidget::~AnimationTrackWidget()
     DEBUG("Destroy AnimationTrackWidget");
 }
 
-void AnimationTrackWidget::addActions(QToolBar& bar)
+void AnimationTrackWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -639,7 +639,7 @@ void AnimationTrackWidget::addActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionReset);
 }
-void AnimationTrackWidget::addActions(QMenu& menu)
+void AnimationTrackWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -650,7 +650,7 @@ void AnimationTrackWidget::addActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionReset);
 }
-bool AnimationTrackWidget::saveState(Settings& settings) const
+bool AnimationTrackWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("TrackWidget", mUI.name);
     settings.saveWidget("TrackWidget", mUI.duration);
@@ -686,7 +686,7 @@ bool AnimationTrackWidget::saveState(Settings& settings) const
     }
     return true;
 }
-bool AnimationTrackWidget::loadState(const Settings& settings)
+bool AnimationTrackWidget::LoadState(const Settings& settings)
 {
     settings.loadWidget("TrackWidget", mUI.name);
     settings.loadWidget("TrackWidget", mUI.duration);
@@ -759,36 +759,49 @@ bool AnimationTrackWidget::loadState(const Settings& settings)
     return true;
 }
 
-void AnimationTrackWidget::zoomIn()
+bool AnimationTrackWidget::CanZoomIn() const
+{
+    const auto max = mUI.zoom->maximum();
+    const auto val = mUI.zoom->value();
+    return val < max;
+}
+bool AnimationTrackWidget::CanZoomOut() const
+{
+    const auto min = mUI.zoom->minimum();
+    const auto val = mUI.zoom->value();
+    return val > min;
+}
+
+void AnimationTrackWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
     mUI.zoom->setValue(value + 0.1);
 }
 
-void AnimationTrackWidget::zoomOut()
+void AnimationTrackWidget::ZoomOut()
 {
     const auto value = mUI.zoom->value();
     if (value > 0.1)
         mUI.zoom->setValue(value - 0.1);
 }
 
-void AnimationTrackWidget::reloadShaders()
+void AnimationTrackWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
-void AnimationTrackWidget::reloadTextures()
+void AnimationTrackWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
-void AnimationTrackWidget::shutdown()
+void AnimationTrackWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
-void AnimationTrackWidget::render()
+void AnimationTrackWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
-void AnimationTrackWidget::animate(double secs)
+void AnimationTrackWidget::Update(double secs)
 {
     mCurrentTime += secs;
 
@@ -824,7 +837,7 @@ void AnimationTrackWidget::animate(double secs)
         mUI.time->setText(QString::number(time));
     }
 }
-bool AnimationTrackWidget::confirmClose()
+bool AnimationTrackWidget::ConfirmClose()
 {
     const auto hash = mState.track->GetHash();
     if (hash == mOriginalHash)
