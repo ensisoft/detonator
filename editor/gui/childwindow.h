@@ -79,7 +79,6 @@ namespace gui
 
     private:
         virtual void closeEvent(QCloseEvent* event) override;
-        virtual bool eventFilter(QObject* destination, QEvent* event) override;
     private:
         Ui::ChildWindow mUI;
     private:

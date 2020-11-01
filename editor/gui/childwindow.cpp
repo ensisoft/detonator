@@ -58,10 +58,6 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
     mWidget->Activate();
     mWidget->AddActions(*mUI.toolBar);
     mWidget->AddActions(*mUI.menuTemp);
-
-    // We need to install this event filter so that we can universally grab
-    // Mouse wheel up/down + Ctrl and conver these into zoom in/out actions.
-    mWidget->installEventFilter(this);
 }
 
 ChildWindow::~ChildWindow()
@@ -160,40 +156,6 @@ void ChildWindow::closeEvent(QCloseEvent* event)
     // mainwindow will check from time to if the window object
     // should be deleted.
     mClosed = true;
-}
-
-bool ChildWindow::eventFilter(QObject* destination, QEvent* event)
-{
-    if (destination != mWidget)
-        return QObject::eventFilter(destination, event);
-
-    if (event->type() != QEvent::Wheel)
-        return QObject::eventFilter(destination, event);
-
-    const auto* wheel = static_cast<QWheelEvent*>(event);
-    const auto mods = wheel->modifiers();
-    if (mods != Qt::ControlModifier)
-        return QObject::eventFilter(destination, event);
-
-    const QPoint& num_degrees = wheel->angleDelta() / 8;
-    const QPoint& num_steps = num_degrees / 15;
-    // only consider the wheel scroll steps on the vertical
-    // axis for zooming.
-    // if steps are positive the wheel is scrolled away from the user
-    // and if steps are negative the wheel is scrolled towards the user.
-    const int num_zoom_steps = num_steps.y();
-
-    //DEBUG("Zoom steps: %1", num_zoom_steps);
-
-    for (int i=0; i<std::abs(num_zoom_steps); ++i)
-    {
-        if (num_zoom_steps > 0)
-            mWidget->ZoomIn();
-        else if (num_zoom_steps < 0)
-            mWidget->ZoomOut();
-    }
-
-    return true;
 }
 
 } // namespace

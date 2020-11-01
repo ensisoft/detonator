@@ -146,7 +146,6 @@ namespace gui
     private:
         bool event(QEvent* event)  override;
         void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
-        bool eventFilter(QObject* destination, QEvent* event) override;
 
     private:
         Ui::MainWindow mUI;

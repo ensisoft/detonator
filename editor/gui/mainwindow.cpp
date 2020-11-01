@@ -1276,40 +1276,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit aboutToClose();
 }
 
-bool MainWindow::eventFilter(QObject* destination, QEvent* event)
-{
-    if (destination != mCurrentWidget)
-        return QObject::eventFilter(destination, event);
-
-    if (event->type() != QEvent::Wheel)
-        return QObject::eventFilter(destination, event);
-
-    const auto* wheel = static_cast<QWheelEvent*>(event);
-    const auto mods = wheel->modifiers();
-    if (mods != Qt::ControlModifier)
-        return QObject::eventFilter(destination, event);
-
-    const QPoint& num_degrees = wheel->angleDelta() / 8;
-    const QPoint& num_steps = num_degrees / 15;
-    // only consider the wheel scroll steps on the vertical
-    // axis for zooming.
-    // if steps are positive the wheel is scrolled away from the user
-    // and if steps are negative the wheel is scrolled towards the user.
-    const int num_zoom_steps = num_steps.y();
-
-    //DEBUG("Zoom steps: %1", num_zoom_steps);
-
-    for (int i=0; i<std::abs(num_zoom_steps); ++i)
-    {
-        if (num_zoom_steps > 0)
-            mCurrentWidget->ZoomIn();
-        else if (num_zoom_steps < 0)
-            mCurrentWidget->ZoomOut();
-    }
-
-    return true;
-}
-
 bool MainWindow::saveState()
 {
     // persist the properties of the mainwindow itself.
