@@ -24,6 +24,18 @@
 
 #include "config.h"
 
+// note that wingdi.h also has ERROR macro. On Windows Qt headers incluce
+// windows.h which includes wingdi.h which redefines the ERROR macro which
+// causes macro collision. This is a hack to already include wingdi.h 
+// (has to be done through windows.h) and then undefine ERROR which allows
+// the code below to hijack the macro name. The problem obviously is that
+// any code that would then try to use WinGDI with the ERROR macro would 
+// produce garbage errors. 
+#ifdef _WIN32
+#  include <windows.h>
+#  undef ERROR
+#endif
+
 #include "warnpush.h"
 #  include <boost/circular_buffer.hpp>
 #  include <QAbstractListModel>
@@ -35,6 +47,14 @@
 #include "base/logging.h"
 #include "format.h"
 #include "event.h"
+
+// Careful with the macros here. base/logging.h has macros by the same name.
+// we're going to hijack the names here and change the definition to better
+// suit the application.
+#undef WARN
+#undef ERROR
+#undef INFO
+#undef DEBUG
 
 namespace app
 {
@@ -83,6 +103,8 @@ namespace app
         QString mLogTag;
     };
 
+} // namespace
+
 // we want every log event to be tracable back to where it came from
 // so thus every module should define it's own LOGTAG
 #ifndef LOGTAG
@@ -90,15 +112,6 @@ namespace app
 #    warning every module importing eventlog needs to define LOGTAG
 #  endif
 #endif
-
-#undef WARN
-#undef ERROR
-#undef INFO
-#undef DEBUG
-
-// Careful with the macros here. base/logging.h has macros by the same name.
-// we're going to hijack the names here and change the definition to better
-// suit the application.
 
 #undef WARN
 #define WARN(msg, ...) \
@@ -119,5 +132,3 @@ namespace app
 #undef DEBUG
 #define DEBUG(msg, ...) \
     base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(app::toString(msg, ## __VA_ARGS__)))
-
-} // namespace

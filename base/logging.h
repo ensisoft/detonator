@@ -32,11 +32,16 @@
 
 #include "format.h"
 
-// wingdi defines ERROR
+// note that wingdi.h also has ERROR macro. On Windows Qt headers incluce
+// windows.h which includes wingdi.h which redefines the ERROR macro which
+// causes macro collision. This is a hack to already include wingdi.h 
+// (has to be done through windows.h) and then undefine ERROR which allows
+// the code below to hijack the macro name. The problem obviously is that
+// any code that would then try to use WinGDI with the ERROR macro would 
+// produce garbage errors. 
 #ifdef _WIN32
-  #ifdef ERROR
-    #undef ERROR
-  #endif
+#  include <Windows.h>
+#  undef ERROR
 #endif
 
 #ifdef BASE_LOGGING_ENABLE_LOG
