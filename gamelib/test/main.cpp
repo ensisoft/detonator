@@ -27,6 +27,8 @@
 #include <cstring>
 #include <cmath>
 
+#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+
 #include "base/logging.h"
 #include "base/format.h"
 #include "graphics/image.h"

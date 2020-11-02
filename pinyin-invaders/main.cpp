@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+
 #include "base/logging.h"
 #include "gamelib/main/interface.h"
 #include "gamewidget.h"

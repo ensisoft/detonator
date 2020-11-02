@@ -20,6 +20,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+
 #include "base/assert.h"
 #include "gamelib/main/interface.h"
 #include "gamelib/loader.h"

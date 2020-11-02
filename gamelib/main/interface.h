@@ -252,15 +252,21 @@ namespace game
 #if defined(__MSVC__)
 #  define GAMESTUDIO_EXPORT __declspec(dllexport)
 #  define GAMESTUDIO_IMPORT __declspec(dllimport)
+#  if defined(GAMESTUDIO_GAMELIB_IMPLEMENTATION)
+#    define GAMESTUDIO_API __declspec(dllexport)
+#  else 
+#    define GAMESTUDIO_API __declspec(dllimport)
+#  endif
 #else
 #  define GAMESTUDIO_EXPORT
 #  define GAMESTUDIO_IMPORT
+#  define GAMESTUDIO_API
 #endif
 
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_IMPORT game::App* MakeApp(base::Logger*);
+    GAMESTUDIO_API game::App* MakeApp(base::Logger*);
 } // extern "C"
 
 typedef game::App* (*MakeAppFunc)(base::Logger*);
@@ -275,9 +281,9 @@ typedef game::App* (*MakeAppFunc)(base::Logger*);
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
 extern "C" {
-    GAMESTUDIO_IMPORT void CreateDefaultEnvironment(game::GfxFactory** gfx_factory,
+    GAMESTUDIO_API void CreateDefaultEnvironment(game::GfxFactory** gfx_factory,
         game::AssetTable** asset_table);
-    GAMESTUDIO_IMPORT void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory,
+    GAMESTUDIO_API void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory,
         game::AssetTable* asset_table);
 } // extern "C"
 
