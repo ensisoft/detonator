@@ -54,6 +54,10 @@ namespace gui
         // Returns true if the user has closed the window.
         bool IsClosed() const
         { return mClosed; }
+        // Returns true if the contents should be popped back
+        // into the main tab.
+        bool ShouldPopIn() const
+        { return mPopInRequested; }
         // Get the contained widget.
         const MainWidget* GetWidget() const
         { return mWidget; }
@@ -70,8 +74,13 @@ namespace gui
 
         void SetSharedWorkspaceMenu(QMenu* menu);
 
+        // Take the mainwidget inside this child window.
+        // The ownership is transferred to the caller!
+        MainWidget* TakeWidget();
+
     private slots:
         void on_actionClose_triggered();
+        void on_actionPopIn_triggered();
         void on_actionReloadShaders_triggered();
         void on_actionReloadTextures_triggered();
         void on_actionZoomIn_triggered();
@@ -84,5 +93,6 @@ namespace gui
     private:
         MainWidget* mWidget = nullptr;
         bool mClosed = false;
+        bool mPopInRequested = false;
     };
 } // namespace

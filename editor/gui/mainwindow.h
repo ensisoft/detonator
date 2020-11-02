@@ -103,6 +103,7 @@ namespace gui
         void on_actionWindowClose_triggered();
         void on_actionWindowNext_triggered();
         void on_actionWindowPrev_triggered();
+        void on_actionWindowPopOut_triggered();
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();

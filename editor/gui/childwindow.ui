@@ -39,6 +39,7 @@
      <string>Window</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionPopIn"/>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -127,6 +128,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionPopIn">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/app_pop_in_window.png</normaloff>:/16x16_ico_png/app_pop_in_window.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pop In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+I</string>
    </property>
   </action>
  </widget>

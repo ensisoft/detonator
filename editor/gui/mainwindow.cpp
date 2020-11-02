@@ -256,6 +256,7 @@ void MainWindow::prepareWindowMenu()
     }
     // and this is in the window menu
     mUI.menuWindow->addSeparator();
+    mUI.menuWindow->addAction(mUI.actionWindowPopOut);
     mUI.menuWindow->addAction(mUI.actionWindowClose);
     mUI.menuWindow->addAction(mUI.actionWindowNext);
     mUI.menuWindow->addAction(mUI.actionWindowPrev);
@@ -589,6 +590,8 @@ bool MainWindow::haveAcceleratedWindows() const
 
 void MainWindow::on_mainTab_currentChanged(int index)
 {
+    DEBUG("Main tab current changed %1", index);
+
     if (mCurrentWidget)
         mCurrentWidget->Deactivate();
 
@@ -688,6 +691,30 @@ void MainWindow::on_actionWindowPrev_triggered()
     const auto size = mUI.mainTab->count();
     const auto prev = (cur == 0) ? size - 1 : cur - 1;
     mUI.mainTab->setCurrentIndex(prev);
+}
+
+void MainWindow::on_actionWindowPopOut_triggered()
+{
+    const auto index = mUI.mainTab->currentIndex();
+    if (index == -1)
+        return;
+
+    auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
+
+    // does not delete the widget. should trigger currentChanged.
+    mUI.mainTab->removeTab(index);
+    widget->setParent(nullptr);
+
+    ChildWindow* window = showWidget(widget, true);
+    widget->show();
+    widget->updateGeometry();
+    window->updateGeometry();
+    // seems that we need some delay (presumaly to allow some
+    // event processing to take place) on Windows before
+    // calling the update geometry. Without this the window is  
+    // somewhat fucked up in its appearance. (Layout is off)
+    QTimer::singleShot(10, window, &QWidget::updateGeometry);
+    QTimer::singleShot(10, widget, &QWidget::updateGeometry);
 }
 
 void MainWindow::on_actionZoomIn_triggered()
@@ -1111,7 +1138,23 @@ void MainWindow::timerRefreshUI()
     for (size_t i=0; i<mChildWindows.size(); )
     {
         ChildWindow* child = mChildWindows[i];
-        if (child->IsClosed())
+        if (child->ShouldPopIn())
+        {
+            MainWidget* widget = child->TakeWidget();
+            child->close();
+            // careful about not fucking up the iteration of this loop
+            // however we're going to add as a tab so the widget will
+            // go into the main tab not into mChildWindows.
+            showWidget(widget, false /* new window */);
+            // seems that we need some delay (presumaly to allow some
+            // event processing to take place) on Windows before
+            // calling the update geometry. Without this the window is  
+            // somewhat fucked up in its appearance. (Layout is off)
+            QTimer::singleShot(10, widget, &QWidget::updateGeometry);
+            QTimer::singleShot(10, mUI.mainTab, &QWidget::updateGeometry);
+        }
+
+        if (child->IsClosed() || child->ShouldPopIn())
         {
             const auto last = mChildWindows.size() - 1;
             std::swap(mChildWindows[i], mChildWindows[last]);
@@ -1306,6 +1349,18 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
 {
     ASSERT(widget->parent() == nullptr);
 
+    // disconnect the signals if already connected. why?
+    // because this function is also called when a widget is
+    // moved from main tab to a window or vice versa.
+    // without disconnect the connections are duped and problems
+    // will happen.
+    disconnect(widget, &MainWidget::OpenExternalImage,
+            this,   &MainWindow::OpenExternalImage);
+    disconnect(widget, &MainWidget::OpenExternalShader,
+            this,   &MainWindow::OpenExternalShader);
+    disconnect(widget, &MainWidget::OpenNewWidget,
+            this, &MainWindow::OpenNewWidget);
+
     // connect the important signals here.
     connect(widget, &MainWidget::OpenExternalImage,
             this,   &MainWindow::OpenExternalImage);
@@ -1313,8 +1368,6 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
             this,   &MainWindow::OpenExternalShader);
     connect(widget, &MainWidget::OpenNewWidget,
             this, &MainWindow::OpenNewWidget);
-
-    //widget->setTargetFps(mSettings.target_fps);
 
     if (new_window)
     {

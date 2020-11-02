@@ -62,13 +62,16 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
 
 ChildWindow::~ChildWindow()
 {
-    const auto& text  = mWidget->windowTitle();
-    const auto& klass = mWidget->metaObject()->className();
-    DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
+    if (mWidget)
+    {
+        const auto &text = mWidget->windowTitle();
+        const auto &klass = mWidget->metaObject()->className();
+        DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
 
-    mUI.verticalLayout->removeWidget(mWidget);
-    mWidget->setParent(nullptr);
-    delete mWidget;
+        mUI.verticalLayout->removeWidget(mWidget);
+        mWidget->setParent(nullptr);
+        delete mWidget;
+    }
 }
 
 void ChildWindow::RefreshUI()
@@ -99,12 +102,24 @@ void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
     mUI.menubar->insertMenu(mUI.menuEdit->menuAction(), menu);
 }
 
+MainWidget* ChildWindow::TakeWidget()
+{
+    auto* ret = mWidget;
+    mUI.verticalLayout->removeWidget(mWidget);
+    mWidget->setParent(nullptr);
+    mWidget = nullptr;
+    return ret;
+}
+
 void ChildWindow::on_actionClose_triggered()
 {
     // this will create close event
     close();
 }
-
+void ChildWindow::on_actionPopIn_triggered()
+{
+    mPopInRequested = true;
+}
 void ChildWindow::on_actionReloadShaders_triggered()
 {
     mWidget->ReloadShaders();
@@ -130,6 +145,9 @@ void ChildWindow::on_actionZoomOut_triggered()
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
+    if (!mWidget)
+        return;
+
     if (!mWidget->ConfirmClose())
     {
         event->ignore();

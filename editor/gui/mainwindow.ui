@@ -560,6 +560,18 @@
     <string>New Custom Shape</string>
    </property>
   </action>
+  <action name="actionWindowPopOut">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/app_pop_out_window.png</normaloff>:/16x16_ico_png/app_pop_out_window.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pop Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../resource/resource.qrc"/>
