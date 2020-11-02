@@ -1176,7 +1176,7 @@ Resource& Workspace::GetResource(const QString& name, Resource::Type type)
         if (res->GetType() == type && res->GetName() == name)
             return *res;
     }
-    ASSERT(!"no such resource");
+    BUG("No such resource");
 }
 
 const Resource& Workspace::GetResource(const QString& name, Resource::Type type) const
@@ -1186,7 +1186,7 @@ const Resource& Workspace::GetResource(const QString& name, Resource::Type type)
         if (res->GetType() == type && res->GetName() == name)
             return *res;
     }
-    ASSERT(!"no such resource");
+    BUG("No such resource");
 }
 
 void Workspace::DeleteResources(QModelIndexList& list)

@@ -32,10 +32,10 @@ namespace debug
     // check if running in debugger
     bool has_debugger();
 
-    NORETURN
+    [[noreturn]]
     void do_assert(const char* expression, const char* file, const char* func, int line);
 
-    NORETURN
+    [[noreturn]]
     void do_break();
 
 } // debug
@@ -78,3 +78,10 @@ namespace debug
         func; \
     } while(0)
 #endif
+
+#define BUG(message)                                                    \
+  do {                                                                  \
+    debug::has_debugger()                                               \
+  ? debug::do_break()                                                   \
+  : debug::do_assert(message, __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+} while(0)

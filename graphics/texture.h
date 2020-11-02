@@ -98,7 +98,7 @@ namespace gfx
             // everything else is considered a bug.
             // when reading data from external sources validation
             // of expected formats needs to be done elsewhere.
-            ASSERT(!"Unexpected bit depth detected.");
+            BUG("Unexpected bit depth.");
         }
 
         // Set texture minification filter.
