@@ -1537,6 +1537,14 @@ void AnimationWidget::on_lineWidth_valueChanged(double value)
     }
 }
 
+void AnimationWidget::on_alpha_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetAlpha(value);
+    }
+}
+
 void AnimationWidget::on_nodeSizeX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
@@ -1636,6 +1644,14 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
     if (auto* node = GetCurrentNode())
     {
         node->SetFlag(game::AnimationNodeClass::Flags::DoesRender, state);
+    }
+}
+
+void AnimationWidget::on_chkOverrideAlpha_stateChanged(int state)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNodeClass::Flags::OverrideAlpha, state);
     }
 }
 
@@ -1919,6 +1935,7 @@ void AnimationWidget::updateCurrentNodeProperties()
         SetValue(mUI.nodeScaleY, scale.y);
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
         SetValue(mUI.lineWidth, node->GetLineWidth());
+        SetValue(mUI.alpha, node->GetAlpha());
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
         SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));

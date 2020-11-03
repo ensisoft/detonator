@@ -97,6 +97,7 @@ namespace gui
         void on_renderStyle_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
         void on_lineWidth_valueChanged(double value);
+        void on_alpha_valueChanged(double value);
         void on_nodeSizeX_valueChanged(double value);
         void on_nodeSizeY_valueChanged(double value);
         void on_nodeTranslateX_valueChanged(double value);
@@ -108,6 +109,7 @@ namespace gui
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
         void on_chkDoesRender_stateChanged(int);
+        void on_chkOverrideAlpha_stateChanged(int);
         void on_btnNewTrack_clicked();
         void on_btnEditTrack_clicked();
         void on_btnDeleteTrack_clicked();

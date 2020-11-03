@@ -380,6 +380,7 @@ namespace gfx
         // state of a material instance of this type of material.
         struct MaterialInstance {
             float runtime = 0.0f;
+            float alpha   = 1.0f;
         };
 
         // Apply the material properties to the given program object
@@ -428,6 +429,8 @@ namespace gfx
         { return mWrapY; }
         const Color4f& GetBaseColor() const
         { return mBaseColor; }
+        float GetBaseAlpha() const
+        { return mBaseColor.Alpha(); }
         SurfaceType GetSurfaceType() const
         { return mSurfaceType; }
         Type GetType() const
@@ -518,7 +521,7 @@ namespace gfx
                 mColorMap[2] = color;
             else if (index == ColorIndex::BottomRight)
                 mColorMap[3] = color;
-            else ASSERT("incorrect color index");
+            else BUG("incorrect color index");
             return *this;
         }
         Color4f GetColorMapColor(ColorIndex index) const
@@ -531,7 +534,7 @@ namespace gfx
                 return mColorMap[2];
             else if (index == ColorIndex::BottomRight)
                 return mColorMap[3];
-            else ASSERT("incorrect color index");
+            else BUG("incorrect color index");
             return Color4f();
         }
 
@@ -741,13 +744,15 @@ namespace gfx
         Material(const std::shared_ptr<const MaterialClass>& klass, float time = 0.0f)
             : mClass(klass)
             , mRuntime(time)
-        {}
+        {
+            mAlpha = mClass->GetBaseAlpha();
+        }
         Material(const MaterialClass& klass, float time = 0.0f)
         {
             mClass = std::make_shared<MaterialClass>(klass);
             mRuntime = time;
+            mAlpha   = mClass->GetBaseAlpha();
         }
-
         // Get the material class object instance.
         const MaterialClass& GetClass() const
         { return *mClass; }
@@ -765,9 +770,13 @@ namespace gfx
             // data it'd be set here.
             MaterialClass::MaterialInstance instance;
             instance.runtime = mRuntime;
+            instance.alpha   = mAlpha;
             mClass->ApplyDynamicState(env, instance, device, prog, state);
         }
-
+        // Set the material's alpha value. will be clamped to [0.0f, 1.0f] range
+        // and only works if the material supports transparent(alpha) blendign.
+        void SetAlpha(float alpha)
+        { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
         void SetRuntime(float runtime)
         { mRuntime = runtime; }
         void Update(float dt)
@@ -777,6 +786,8 @@ namespace gfx
         std::shared_ptr<const MaterialClass> mClass;
         // Current runtime for this material instance.
         float mRuntime = 0.0f;
+        // Alpha value.
+        float mAlpha = 1.0f;
     };
 
 

@@ -562,15 +562,15 @@ public:
         , mStartTime(start)
         , mLifeTime(lifetime)
     {
-        mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::SpriteSet());
-        mMaterialClass->SetFps(10);
+        auto klass  = std::make_shared<gfx::MaterialClass>(gfx::SpriteSet());
+        klass->SetFps(10);
         for (int i=0; i<=24; ++i)
         {
             const auto& name = base::FormatString("textures/smoke/blackSmoke%1.png",  i);
-            mMaterialClass->AddTexture(name);
+            klass->AddTexture(name);
         }
-        mMaterialClass->SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
-        mSprite = gfx::CreateMaterialInstance(mMaterialClass);
+        klass->SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 0.3));
+        mSprite = gfx::CreateMaterialInstance(klass);
     }
 
     virtual bool update(float dt) override
@@ -592,7 +592,7 @@ public:
         const auto time  = mTime - mStartTime;
         const auto alpha = 0.4 - 0.4 * (time / mLifeTime);
         mSprite->SetRuntime(time / 1000.0f);
-        mMaterialClass->SetBaseAlpha(alpha);
+        mSprite->SetAlpha(alpha);
 
         const auto& layout = GetGameWindowLayout(rect);
         const auto unitScale = layout.GetCellDimensions();

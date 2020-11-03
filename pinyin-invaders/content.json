@@ -3,6 +3,7 @@
     {
       "nodes": [
         {
+          "alpha": 1.0,
           "bitflags": 3,
           "drawable": "Rectangle",
           "id": "eqyyTFgoPX",
@@ -27,6 +28,7 @@
           }
         },
         {
+          "alpha": 1.0,
           "bitflags": 11,
           "drawable": "Starfield layer 0",
           "id": "eQzT1fIZxY",
@@ -51,6 +53,7 @@
           }
         },
         {
+          "alpha": 1.0,
           "bitflags": 11,
           "drawable": "Starfield layer 1",
           "id": "4fLtRil2lL",
@@ -75,6 +78,7 @@
           }
         },
         {
+          "alpha": 1.0,
           "bitflags": 11,
           "drawable": "Starfield layer 2",
           "id": "9SZAeUshtX",
@@ -99,6 +103,7 @@
           }
         },
         {
+          "alpha": 1.0,
           "bitflags": 7,
           "drawable": "Rectangle",
           "id": "wChFz6luAG",
@@ -123,6 +128,7 @@
           }
         },
         {
+          "alpha": 1.0,
           "bitflags": 15,
           "drawable": "Asteroid field",
           "id": "YJX08Fi01A",

@@ -234,11 +234,17 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInst
         // in the shader program.
         ApplyStaticState(device, prog);
     }
+
+    // set the instance alpha. todo: maybe this should just be a float
+    gfx::Color4f color = mBaseColor;
+    color.SetAlpha(inst.alpha);
+    prog.SetUniform("kBaseColor", color);
 }
 
 void MaterialClass::ApplyStaticState(Device& device, Program& prog) const
 {
-    prog.SetUniform("kBaseColor", mBaseColor);
+    // color is now set always because of instance alpha.
+    //prog.SetUniform("kBaseColor", mBaseColor);
     prog.SetUniform("kGamma", mGamma);
     prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
@@ -253,7 +259,7 @@ std::string MaterialClass::GetId() const
 {
     // if the static flag is set the material id is
     // derived from the current state, thus  mapping material objects with
-    // different paramaters to unique shader programs (even when they're
+    // different parameters to unique shader programs (even when they're
     // the same type of shader program)
     if (mStatic)
         return std::to_string(GetHash());
@@ -285,7 +291,7 @@ std::string MaterialClass::GetShaderFile() const
         return "shaders/es2/texture_map.glsl";
     else if (mType == Type::Sprite)
         return "shaders/es2/texture_map.glsl";
-    ASSERT(!"???");
+    BUG("???");
     return "";
 }
 

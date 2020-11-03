@@ -507,6 +507,27 @@ AnimationNodeClass::AnimationNodeClass()
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::UpdateDrawable, true);
     mBitFlags.set(Flags::RestartDrawable, true);
+    mBitFlags.set(Flags::OverrideAlpha, false);
+}
+
+std::shared_ptr<const gfx::Drawable> AnimationNodeClass::GetDrawable() const
+{
+    if (!mDrawable)
+        mDrawable = CreateDrawableInstance();
+    mDrawable->SetStyle(mRenderStyle);
+    mDrawable->SetLineWidth(mLineWidth);
+    return mDrawable;
+}
+
+std::shared_ptr<const gfx::Material> AnimationNodeClass::GetMaterial() const
+{
+    if (!mMaterial)
+        mMaterial = CreateMaterialInstance();
+
+    if (TestFlag(Flags::OverrideAlpha))
+        mMaterial->SetAlpha(mAlpha);
+    else mMaterial->SetAlpha((*mMaterial)->GetBaseAlpha());
+    return mMaterial;
 }
 
 glm::mat4 AnimationNodeClass::GetNodeTransform() const
@@ -540,7 +561,11 @@ std::unique_ptr<gfx::Drawable> AnimationNodeClass::CreateDrawableInstance() cons
 }
 std::unique_ptr<gfx::Material> AnimationNodeClass::CreateMaterialInstance() const
 {
-    return gfx::CreateMaterialInstance(mMaterialClass);
+    auto ret = gfx::CreateMaterialInstance(mMaterialClass);
+    // configure with the class defaults.
+    if (TestFlag(Flags::OverrideAlpha))
+        ret->SetAlpha(mAlpha);
+    return ret;
 }
 
 std::size_t AnimationNodeClass::GetHash() const
@@ -554,6 +579,7 @@ std::size_t AnimationNodeClass::GetHash() const
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mRotation);
+    hash = base::hash_combine(hash, mAlpha);
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mRenderPass);
     hash = base::hash_combine(hash, mRenderStyle);
@@ -633,6 +659,7 @@ nlohmann::json AnimationNodeClass::ToJson() const
     base::JsonWrite(json, "size", mSize);
     base::JsonWrite(json, "scale", mScale);
     base::JsonWrite(json, "rotation", mRotation);
+    base::JsonWrite(json, "alpha", mAlpha);
     base::JsonWrite(json, "layer", mLayer);
     base::JsonWrite(json, "render_pass", mRenderPass);
     base::JsonWrite(json, "render_style", mRenderStyle);
@@ -655,6 +682,7 @@ std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::j
         !base::JsonReadSafe(object, "size", &ret.mSize) ||
         !base::JsonReadSafe(object, "scale", &ret.mScale) ||
         !base::JsonReadSafe(object, "rotation", &ret.mRotation) ||
+        !base::JsonReadSafe(object, "alpha", &ret.mAlpha) ||
         !base::JsonReadSafe(object, "layer", &ret.mLayer) ||
         !base::JsonReadSafe(object, "render_pass", &ret.mRenderPass) ||
         !base::JsonReadSafe(object, "render_style", &ret.mRenderStyle) ||
@@ -666,6 +694,18 @@ std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::j
     return ret;
 }
 
+std::shared_ptr<const gfx::Material> AnimationNode::GetMaterial() const
+{
+    if (TestFlag(Flags::OverrideAlpha))
+        mMaterial->SetAlpha(mAlpha);
+    else mMaterial->SetAlpha((*mMaterial)->GetBaseAlpha());
+    return mMaterial;
+}
+std::shared_ptr<const gfx::Drawable> AnimationNode::GetDrawable() const
+{
+    return mDrawable;
+}
+
 void AnimationNode::Reset()
 {
     // initialize instance state based on the class's initial state.
@@ -673,6 +713,7 @@ void AnimationNode::Reset()
     mSize     = mClass->GetSize();
     mScale    = mClass->GetScale();
     mRotation = mClass->GetRotation();
+    mAlpha    = mClass->GetAlpha();
     mMaterial = mClass->CreateMaterialInstance();
     mDrawable = mClass->CreateDrawableInstance();
 }
@@ -1091,7 +1132,7 @@ AnimationNodeClass* AnimationClass::TreeNodeFromJson(const nlohmann::json& json)
     for (auto& it : mNodes)
         if (it->GetId() == id) return it.get();
 
-    ASSERT(!"no such node found.");
+    BUG("No such node found.");
     return nullptr;
 }
 
@@ -1327,7 +1368,7 @@ AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
     for (auto& it : mNodes)
         if (it->GetId() == id) return it.get();
 
-    ASSERT(!"no such node found");
+    BUG("No such node found");
     return nullptr;
 }
 

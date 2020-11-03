@@ -82,6 +82,8 @@ namespace game
             UpdateDrawable,
             // Restart drawables or not
             RestartDrawable,
+            // Override the material alpha value.
+            OverrideAlpha
         };
 
         // This will construct an "empty" node that cannot be
@@ -129,6 +131,8 @@ namespace game
         { mRenderStyle = style; }
         void SetLineWidth(float value)
         { mLineWidth = value; }
+        void SetAlpha(float value)
+        { mAlpha = value; }
         void SetFlag(Flags f, bool on_off)
         { mBitFlags.set(f, on_off); }
         bool TestFlag(Flags f) const
@@ -162,6 +166,8 @@ namespace game
         { return mRotation; }
         float GetLineWidth() const
         { return mLineWidth; }
+        float GetAlpha() const
+        { return mAlpha; }
         const base::bitflag<Flags>& GetFlags() const
         { return mBitFlags; }
         base::bitflag<Flags>& GetFlags()
@@ -169,22 +175,11 @@ namespace game
 
         // Shim function to support generic RenderTree draw even for the
         // class object.
-        std::shared_ptr<const gfx::Drawable> GetDrawable() const
-        {
-            if (!mDrawable)
-                mDrawable = CreateDrawableInstance();
-            mDrawable->SetStyle(mRenderStyle);
-            mDrawable->SetLineWidth(mLineWidth);
-            return mDrawable;
-        }
+        std::shared_ptr<const gfx::Drawable> GetDrawable() const;
         // Shim function to support generic RenderTree draw event for the
         // class object.
-        std::shared_ptr<const gfx::Material> GetMaterial() const
-        {
-            if (!mMaterial)
-                mMaterial = CreateMaterialInstance();
-            return mMaterial;
-        }
+        std::shared_ptr<const gfx::Material> GetMaterial() const;
+
         void SetDrawableInstance(std::unique_ptr<gfx::Drawable> drawable)
         { mDrawable = std::move(drawable); }
         void SetMaterialInstance(std::unique_ptr<gfx::Material> material)
@@ -197,7 +192,7 @@ namespace game
         std::unique_ptr<gfx::Material> CreateMaterialInstance() const;
 
         // Get this node's transformation that applies
-        // to the hieararchy of nodes.
+        // to the hierarchy of nodes.
         glm::mat4 GetNodeTransform() const;
 
         // Get this node's transformation that applies to this
@@ -246,11 +241,14 @@ namespace game
         // size is the size of this object in some units
         // (for example pixels)
         glm::vec2 mSize = {1.0f, 1.0f};
-        // scale applies an additional scale to this hiearchy.
+        // scale applies an additional scale to this hierarchy.
         glm::vec2 mScale = {1.0f, 1.0f};
         // rotation around z axis positive rotation is CW
         float mRotation = 0.0f;
-        // rendering properties. which layer and wich pass.
+        // alpha value. 0.0f = fully transparent 1.0f = fully opaque.
+        // only works with materials that support alpha blending.
+        float mAlpha = 1.0f;
+        // rendering properties. which layer and which pass.
         int mLayer = 0;
         RenderPass mRenderPass = RenderPass::Draw;
         RenderStyle mRenderStyle = RenderStyle::Solid;
@@ -299,6 +297,8 @@ namespace game
         { mSize = size; }
         void SetRotation(float value)
         { mRotation = value; }
+        void SetAlpha(float value)
+        { mAlpha = value; }
 
         // getters for instance state.
         glm::vec2 GetTranslation() const
@@ -309,10 +309,8 @@ namespace game
         { return mScale; }
         float GetRotation() const
         { return mRotation; }
-        std::shared_ptr<const gfx::Material> GetMaterial() const
-        { return mMaterial; }
-        std::shared_ptr<const gfx::Drawable> GetDrawable() const
-        { return mDrawable; }
+        std::shared_ptr<const gfx::Material> GetMaterial() const;
+        std::shared_ptr<const gfx::Drawable> GetDrawable() const;
 
         // Getters for class object state.
         bool TestFlag(AnimationNodeClass::Flags flags) const
@@ -331,6 +329,8 @@ namespace game
         { return mClass->GetId(); }
         float GetLineWidth() const
         { return mClass->GetLineWidth(); }
+        float GetAlpha() const
+        { return mAlpha; }
 
         // Reset node's state to the initial state
         void Reset();
@@ -339,7 +339,7 @@ namespace game
         void Update(float time, float dt);
 
         // Get this node's transformation that applies
-        // to the hieararchy of nodes.
+        // to the hierarchy of nodes.
         glm::mat4 GetNodeTransform() const;
 
         // Get this node's transformation that applies to this
@@ -372,6 +372,10 @@ namespace game
         glm::vec2 mScale = {1.0f, 1.0f};
         // rotation of the node (relative to parent)
         float mRotation = 0.0f;
+        // current alpha value. 0.0f = fully transparent
+        // 1.0f = fully opaque. only works with materials
+        // that support transparency (alpha blending)
+        float mAlpha = 1.0f;
     };
 
     // AnimationActuatorClass defines an interface for classes of
