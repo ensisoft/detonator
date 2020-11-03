@@ -29,19 +29,41 @@
 
 namespace gfx
 {
+    // 2 float vector data object. Use glm::vec2 for math.
     struct Vec2 {
-        float x;// = 0.0f;
-        float y;// = 0.0f;
+        float x = 0.0f;
+        float y = 0.0f;
     };
 
+    // Vertex for 2D drawing on the XY plane.
     struct Vertex {
+        // Coordinate / position of the vertex in the model space.
+        // Model space is a 2D space on XY plane where X varies from
+        // 0.0f to 1.0f (left to right when mapped onto render target)
+        // and Y varies from 0.0f to -1.0f ( from top to bottom when
+        // mapped onto render target).
         Vec2 aPosition;
+        // Texture coordinate for the vertex. Texture coordinates
+        // are normalized and can vary beyond 0.0f-1.0f range in
+        // which case they either get clamped or wrapped.
+        // Texture coordinates on the X axis vary from 0.0f to 1.0f
+        // i.e. from left to right on horizontal axis.
+        // Texture coordinates on the Y axis vary from 0.0f to 1.0f
+        // i.e. from top to bottom on the vertical axis. (0.0f is
+        // the *top* row of pixels and 1.0f is the *bottom* row of
+        // pixels).
         Vec2 aTexCoord;
+        // Arbitrary data that is accompanied by the vertex. Used for
+        // example by the particle system to provide particle sizes/alphas
+        // to the shader programs.
+        Vec2 aData;
     };
 
     // Encapsulate information about a particular geometry
     // and how how that geometry is to be rendered and
-    // rasterized.
+    // rasterized. A geometry object contains a set of vertex
+    // data and then multiple draw commands each command
+    // addressing some subset of the vertices.
     class Geometry
     {
     public:
@@ -55,7 +77,7 @@ namespace gfx
             // Draw a series of triangles all connected to the
             // first vertex
             TriangleFan,
-            // Draw the vertices as a series of conneced lines
+            // Draw the vertices as a series of connected lines
             // where each pair of adjacent vertices are connected
             // by a line.
             // In this draw the line width setting applies.
@@ -78,13 +100,13 @@ namespace gfx
         // the geometry as a series of lines.
         virtual void SetLineWidth(float width) = 0;
         // Update the geometry object's data buffer contents.
-        virtual void Update(const Vertex* verts, std::size_t count) = 0;
+        virtual void Update(const Vertex* vertices, std::size_t count) = 0;
         // Update the geometry objects' data buffer contents
         // with the given vector of data.
-        virtual void Update(const std::vector<Vertex>& verts) = 0;
+        virtual void Update(const std::vector<Vertex>& vertices) = 0;
         // Update the geoemtry object's data buffer contents
         // by moving the contents of verts into geometry object.
-        virtual void Update(std::vector<Vertex>&& verts) = 0;
+        virtual void Update(std::vector<Vertex>&& vertices) = 0;
     private:
     };
 } // namespace

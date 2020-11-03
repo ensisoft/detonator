@@ -99,7 +99,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "transform_rotation", mUI.rotation);
     GetProperty(resource, "use_init_rect", mUI.initRect);
     GetProperty(resource, "use_direction_sector", mUI.dirSector);
-    GetProperty(resource, "use_growth", mUI.growth);
+    GetProperty(resource, "use_size_derivatives", mUI.sizeDerivatives);
+    GetProperty(resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
 
     const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
@@ -115,6 +116,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.maxLifetime, params.max_lifetime);
     SetValue(mUI.minPointsize, params.min_point_size);
     SetValue(mUI.maxPointsize, params.max_point_size);
+    SetValue(mUI.minAlpha, params.min_alpha);
+    SetValue(mUI.maxAlpha, params.max_alpha);
     SetValue(mUI.minVelocity, params.min_velocity);
     SetValue(mUI.maxVelocity, params.max_velocity);
     SetValue(mUI.initX, params.init_rect_xpos);
@@ -123,8 +126,10 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.initHeight, params.init_rect_height);
     SetValue(mUI.dirStartAngle, qRadiansToDegrees(params.direction_sector_start_angle));
     SetValue(mUI.dirSizeAngle, qRadiansToDegrees(params.direction_sector_size));
-    SetValue(mUI.timeDerivative, params.rate_of_change_in_size_wrt_time);
-    SetValue(mUI.distDerivative, params.rate_of_change_in_size_wrt_dist);
+    SetValue(mUI.timeSizeDerivative, params.rate_of_change_in_size_wrt_time);
+    SetValue(mUI.distSizeDerivative, params.rate_of_change_in_size_wrt_dist);
+    SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
+    SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
 
     mOriginalHash = engine->GetHash();
 
@@ -187,10 +192,15 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.maxLifetime);
     settings.saveWidget("Particle", mUI.minPointsize);
     settings.saveWidget("Particle", mUI.maxPointsize);
+    settings.saveWidget("Particle", mUI.minAlpha);
+    settings.saveWidget("Particle", mUI.maxAlpha);
     settings.saveWidget("Particle", mUI.canExpire);
-    settings.saveWidget("Particle", mUI.growth);
-    settings.saveWidget("Particle", mUI.timeDerivative);
-    settings.saveWidget("Particle", mUI.distDerivative);
+    settings.saveWidget("Particle", mUI.sizeDerivatives);
+    settings.saveWidget("Particle", mUI.timeSizeDerivative);
+    settings.saveWidget("Particle", mUI.distSizeDerivative);
+    settings.saveWidget("Particle", mUI.alphaDerivatives);
+    settings.saveWidget("Particle", mUI.timeAlphaDerivative);
+    settings.saveWidget("Particle", mUI.distAlphaDerivative);
     return true;
 }
 
@@ -225,10 +235,15 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.maxLifetime);
     settings.loadWidget("Particle", mUI.minPointsize);
     settings.loadWidget("Particle", mUI.maxPointsize);
+    settings.loadWidget("Particle", mUI.minAlpha);
+    settings.loadWidget("Particle", mUI.maxAlpha);
     settings.loadWidget("Particle", mUI.canExpire);
-    settings.loadWidget("Particle", mUI.growth);
-    settings.loadWidget("Particle", mUI.timeDerivative);
-    settings.loadWidget("Particle", mUI.distDerivative);
+    settings.loadWidget("Particle", mUI.sizeDerivatives);
+    settings.loadWidget("Particle", mUI.timeSizeDerivative);
+    settings.loadWidget("Particle", mUI.distSizeDerivative);
+    settings.loadWidget("Particle", mUI.alphaDerivatives);
+    settings.loadWidget("Particle", mUI.timeAlphaDerivative);
+    settings.loadWidget("Particle", mUI.distAlphaDerivative);
     return true;
 }
 
@@ -364,7 +379,8 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
     SetProperty(particle_resource, "use_init_rect", mUI.initRect);
     SetProperty(particle_resource, "use_direction_sector", mUI.dirSector);
-    SetProperty(particle_resource, "use_growth", mUI.growth);
+    SetProperty(particle_resource, "use_size_derivatives", mUI.sizeDerivatives);
+    SetProperty(particle_resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     mWorkspace->SaveResource(particle_resource);
 
@@ -382,12 +398,12 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params
     params.max_xpos       = GetValue(mUI.simWidth);
     params.max_ypos       = GetValue(mUI.simHeight);
     params.gravity        = GetValue(mUI.gravity);
-    //params.min_lifetime   = GetValue(mUI.minLifetime);
-    //params.max_lifetime   = GetValue(mUI.maxLifetime);
     params.min_point_size = GetValue(mUI.minPointsize);
     params.max_point_size = GetValue(mUI.maxPointsize);
     params.min_velocity   = GetValue(mUI.minVelocity);
     params.max_velocity   = GetValue(mUI.maxVelocity);
+    params.min_alpha      = GetValue(mUI.minAlpha);
+    params.max_alpha      = GetValue(mUI.maxAlpha);
 
     if (mUI.initRect->isChecked())
     {
@@ -424,10 +440,21 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params
         params.max_lifetime   = std::numeric_limits<float>::max();
     }
 
-    if (mUI.growth->isChecked())
+    if (mUI.sizeDerivatives->isChecked())
     {
-        params.rate_of_change_in_size_wrt_time = GetValue(mUI.timeDerivative);
-        params.rate_of_change_in_size_wrt_dist = GetValue(mUI.distDerivative);
+        params.rate_of_change_in_size_wrt_time = GetValue(mUI.timeSizeDerivative);
+        params.rate_of_change_in_size_wrt_dist = GetValue(mUI.distSizeDerivative);
+    }
+    else
+    {
+        params.rate_of_change_in_size_wrt_time = 0.0f;
+        params.rate_of_change_in_size_wrt_dist = 0.0f;
+    }
+
+    if (mUI.alphaDerivatives->isChecked())
+    {
+        params.rate_of_change_in_alpha_wrt_time = GetValue(mUI.timeAlphaDerivative);
+        params.rate_of_change_in_alpha_wrt_dist = GetValue(mUI.distAlphaDerivative);
     }
     else
     {

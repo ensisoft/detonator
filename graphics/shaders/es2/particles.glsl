@@ -27,7 +27,8 @@
 attribute vec2 aPosition;
 // texture coordinate for the vertex
 attribute vec2 aTexCoord;
-
+// per particle data.
+attribute vec2 aData;
 // transform vertex from view space into NDC
 // we're using orthographic projection
 uniform mat4 kProjectionMatrix;
@@ -37,6 +38,8 @@ uniform mat4 kViewMatrix;
 
 // random per particle value.
 varying float vRandomValue;
+// per particle alpha
+varying float vAlpha;
 
 varying vec2 vTexCoord;
 void main()
@@ -52,6 +55,9 @@ void main()
     // * gl_PointCoord must be used instead.
     // * we're using aTexCoord to provide the particle size  and the random value.
     vRandomValue = aTexCoord.y;
+
+    // grab the particle alpha value from the data attribute.
+    vAlpha = aData.x;
 
     // outgoing vertex position.
     gl_Position = kProjectionMatrix * kViewMatrix * vertex;

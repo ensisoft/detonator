@@ -655,6 +655,10 @@ namespace gfx
             float distance  = 0.0f;
             // random float value between 0.0f and 1.0f
             float randomizer = 0.0f;
+            // alpha value between 0.0f and 1.0f
+            // 0.0f = particle is fully transparent.
+            // 1.0f = particle is fully opaque.
+            float alpha = 1.0f;
         };
 
         // Define the motion of the particle.
@@ -725,18 +729,24 @@ namespace gfx
             float min_velocity = 1.0f;
             float max_velocity = 1.0f;
             // each particle has a direction vector within a sector
-            // defined by start angle and the size of the sectore
+            // defined by start angle and the size of the sector
             // expressed by angle
             float direction_sector_start_angle = 0.0f;
             float direction_sector_size = math::Pi * 2.0f;
             // min max points sizes.
             float min_point_size = 1.0f;
             float max_point_size = 1.0f;
+            // min max alpha values.
+            float min_alpha = 1.0f;
+            float max_alpha = 1.0f;
             // rate of change with respect to unit of time.
             float rate_of_change_in_size_wrt_time = 0.0f;
-            // rate of change with respect to unit of distance
-            // travelled.
+            // rate of change with respect to unit of distance.
             float rate_of_change_in_size_wrt_dist = 0.0f;
+            // rate of change in alpha value with respect to unit of time.
+            float rate_of_change_in_alpha_wrt_time = 0.0f;
+            // rate of change in alpha value with respect to unit of distance.
+            float rate_of_change_in_alpha_wrt_dist = 0.0f;
             // the gravity that applies when using projectile particles.
             float gravity = 0.3;
         };

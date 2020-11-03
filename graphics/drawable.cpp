@@ -1060,8 +1060,8 @@ Geometry* KinematicsParticleEngineClass::Upload(const InstanceState& state, Devi
     std::vector<Vertex> verts;
     for (const auto& p : state.particles)
     {
-        // in order to use vertex_arary.glsl we need to convert the points to
-        // lower right quadrant coordinates.
+        // Convert the particle coordinates to lower right
+        // quadrant coordinates.
         Vertex v;
         v.aPosition.x = p.position.x / mParams.max_xpos;
         v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
@@ -1072,6 +1072,8 @@ Geometry* KinematicsParticleEngineClass::Upload(const InstanceState& state, Devi
         // we can use this to simulate particle rotation for example
         // (if the material supports it)
         v.aTexCoord.y = p.randomizer;
+        // Use the particle data to pass the per particle alpha.
+        v.aData.x = p.alpha;
         verts.push_back(v);
     }
 
@@ -1159,8 +1161,12 @@ nlohmann::json KinematicsParticleEngineClass::ToJson() const
     base::JsonWrite(json, "direction_sector_size", mParams.direction_sector_size);
     base::JsonWrite(json, "min_point_size", mParams.min_point_size);
     base::JsonWrite(json, "max_point_size", mParams.max_point_size);
+    base::JsonWrite(json, "min_alpha", mParams.min_alpha);
+    base::JsonWrite(json, "max_alpha", mParams.max_alpha);
     base::JsonWrite(json, "growth_over_time", mParams.rate_of_change_in_size_wrt_time);
     base::JsonWrite(json, "growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
+    base::JsonWrite(json, "alpha_over_time", mParams.rate_of_change_in_alpha_wrt_time);
+    base::JsonWrite(json, "alpha_over_dist", mParams.rate_of_change_in_alpha_wrt_dist);
     base::JsonWrite(json, "gravity", mParams.gravity);
     return json;
 }
@@ -1197,8 +1203,12 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
         !base::JsonReadSafe(object, "direction_sector_size", &params.direction_sector_size) ||
         !base::JsonReadSafe(object, "min_point_size", &params.min_point_size) ||
         !base::JsonReadSafe(object, "max_point_size", &params.max_point_size) ||
+        !base::JsonReadSafe(object, "min_alpha", &params.min_alpha) ||
+        !base::JsonReadSafe(object, "max_alpha", &params.max_alpha) ||
         !base::JsonReadSafe(object, "growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
         !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
+        !base::JsonReadSafe(object, "alpha_over_time", &params.rate_of_change_in_alpha_wrt_time) ||
+        !base::JsonReadSafe(object, "alpha_over_dist", &params.rate_of_change_in_alpha_wrt_dist) ||
         !base::JsonReadSafe(object, "gravity", &params.gravity))
             return std::nullopt;
     return KinematicsParticleEngineClass(params);
@@ -1230,6 +1240,7 @@ void KinematicsParticleEngineClass::InitParticles(InstanceState& state, size_t n
         Particle p;
         p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
         p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
+        p.alpha     = math::rand(mParams.min_alpha, mParams.max_alpha);
         p.position  = glm::vec2(mParams.init_rect_xpos + initx, mParams.init_rect_ypos + inity);
         // note that the velocity vector is baked into the
         // direction vector in order to save space.
@@ -1269,12 +1280,19 @@ bool KinematicsParticleEngineClass::UpdateParticle(InstanceState& state, size_t 
     const auto& dp = p1 - p0;
     const auto  dd = glm::length(dp);
 
-    // update change in size with respect to time.
+    // Update particle size with respect to time and distance
     p.pointsize += (dt * mParams.rate_of_change_in_size_wrt_time);
-    // update change in size with respect to distance
     p.pointsize += (dd * mParams.rate_of_change_in_size_wrt_dist);
     if (p.pointsize <= 0.0f)
         return false;
+
+    // update particle alpha value with respect to time and distance.
+    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_time);
+    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_dist);
+    if (p.alpha <= 0.0f)
+        return false;
+    p.alpha = math::clamp(0.0f, 1.0f, p.alpha);
+
     // accumulate distance approximation
     p.distance += dd;
 
@@ -1360,7 +1378,7 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
         case DrawableClass::Type::Polygon:
             return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
     }
-    ASSERT(!"???");
+    BUG("???");
     return {};
 }
 

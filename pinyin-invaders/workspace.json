@@ -3,7 +3,6 @@
         "checked_for_packing": true
     },
     "material_Asteroid": {
-        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -18,7 +17,6 @@
         "use_shader_file": false
     },
     "particle_Asteroid field": {
-        "checked_for_packing": true,
         "material": "Asteroid",
         "transform_enabled": false,
         "transform_height": 500,
@@ -26,13 +24,13 @@
         "transform_width": 500,
         "transform_xpos": 0,
         "transform_ypos": 0,
+        "use_alpha_derivatives": false,
         "use_direction_sector": true,
-        "use_growth": false,
         "use_init_rect": true,
-        "use_lifetime": false
+        "use_lifetime": false,
+        "use_size_derivatives": false
     },
     "particle_Starfield layer 0": {
-        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -40,13 +38,13 @@
         "transform_width": 500,
         "transform_xpos": 0,
         "transform_ypos": 0,
+        "use_alpha_derivatives": false,
         "use_direction_sector": true,
-        "use_growth": false,
         "use_init_rect": true,
-        "use_lifetime": true
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "particle_Starfield layer 1": {
-        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -54,13 +52,13 @@
         "transform_width": 500,
         "transform_xpos": 0,
         "transform_ypos": 0,
+        "use_alpha_derivatives": false,
         "use_direction_sector": true,
-        "use_growth": false,
         "use_init_rect": true,
-        "use_lifetime": true
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "particle_Starfield layer 2": {
-        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -68,10 +66,11 @@
         "transform_width": 500,
         "transform_xpos": 0,
         "transform_ypos": 0,
+        "use_alpha_derivatives": false,
         "use_direction_sector": true,
-        "use_growth": false,
         "use_init_rect": true,
-        "use_lifetime": true
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "project": {
         "application_library": "invaders",

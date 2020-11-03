@@ -790,8 +790,9 @@ private:
 
         void Draw(GLuint program)
         {
-            GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
-            GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
+            const GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
+            const GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
+            const GLint aData     = mGL.glGetAttribLocation(program, "aData");
             const uint8_t* base = reinterpret_cast<const uint8_t*>(&mData[0]);
             if (aPosition != -1)
             {
@@ -804,6 +805,12 @@ private:
                 GL_CALL(glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE,
                     sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
                 GL_CALL(glEnableVertexAttribArray(aTexCoord));
+            }
+            if (aData != -1)
+            {
+                GL_CALL(glVertexAttribPointer(aData, 2, GL_FLOAT, GL_FALSE,
+                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aData))));
+                GL_CALL(glEnableVertexAttribArray(aData));
             }
 
             for (const auto& draw : mDrawCommands)

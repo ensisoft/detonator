@@ -27,7 +27,12 @@ precision mediump float;
 uniform vec4 kBaseColor;
 uniform float kGamma;
 
+// per vertex alpha.
+varying float vAlpha;
+
 void main()
 {
-  gl_FragColor = pow(kBaseColor, vec4(kGamma));
+  vec4 color = kBaseColor;
+  color.a *= vAlpha;
+  gl_FragColor = pow(color, vec4(kGamma));
 }

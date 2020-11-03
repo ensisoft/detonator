@@ -59,6 +59,8 @@ uniform vec4 kColor3;
 varying vec2 vTexCoord;
 // random per particle value.
 varying float vRandomValue;
+// per vertex alpha
+varying float vAlpha;
 
 vec4 MixGradient(vec2 coords)
 {
@@ -148,6 +150,7 @@ void main()
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
     vec4 col = mix(tex * mix_base_gradient, mix_base_gradient * tex.a, mask);
+    col.a *= vAlpha;
 
     // apply gamma (in)correction.
     gl_FragColor = pow(col, vec4(kGamma));

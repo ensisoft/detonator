@@ -21,7 +21,9 @@ varying vec2 vTexCoord;
 // in order to simulate some per particle feature
 // in the material system.
 varying float vRandomValue;
-
+// outgoing per vertex alpha value.
+// Currently only used by particle engines.
+varying float vAlpha;
 void main()
 {
     // put the vertex from "model" space into same coordinate space
@@ -34,11 +36,12 @@ void main()
     // texture coordinates to fragment shader.
     vTexCoord = aTexCoord;
 
-    // todo: provide this if needed. currently only particle engins
+    // todo: provide this if needed. currently only particle engines
     // support this, not other geomeries. for other drawables it 
     // could come from an uniform (applies to the shape as a whole)
     // or from the vertex data (applies to each vertex separately)
     vRandomValue = 0.0;
+    vAlpha = 1.0;
 
     // output position.
     gl_Position = kProjectionMatrix * kViewMatrix * vertex;

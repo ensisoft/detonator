@@ -35,6 +35,8 @@ uniform float kGamma;
 uniform float kRenderPoints;
 
 varying vec2 vTexCoord;
+// per vertex alpha.
+varying float vAlpha;
 
 vec4 MixGradient(vec2 coords)
 {
@@ -49,5 +51,6 @@ void main()
 {
   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
   vec4 color  = MixGradient(coords);
+  color.a *= vAlpha;
   gl_FragColor = pow(color, vec4(kGamma));
 }
