@@ -64,6 +64,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionNewTriangleFan_toggled(bool checked);
+        void on_actionClear_triggered();
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
 

@@ -126,6 +126,8 @@ void PolygonWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewTriangleFan);
+    bar.addSeparator();
+    bar.addAction(mUI.actionClear);
 }
 void PolygonWidget::AddActions(QMenu& menu)
 {
@@ -137,6 +139,8 @@ void PolygonWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionNewTriangleFan);
+    menu.addSeparator();
+    menu.addAction(mUI.actionClear);
 }
 
 bool PolygonWidget::SaveState(Settings& settings) const
@@ -321,6 +325,13 @@ void PolygonWidget::on_actionNewTriangleFan_toggled(bool checked)
         mPoints.clear();
         mActive = false;
     }
+}
+
+void PolygonWidget::on_actionClear_triggered()
+{
+    mPolygon.ClearVertices();
+    mPolygon.ClearDrawCommands();
+    mUI.actionClear->setEnabled(false);
 }
 
 void PolygonWidget::NewResourceAvailable(const app::Resource* resource)
@@ -654,6 +665,7 @@ bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)
         mPoints.clear();
 
         mUI.actionNewTriangleFan->setChecked(false);
+        mUI.actionClear->setEnabled(true);
         mActive = false;
     }
     else if (key->key() == Qt::Key_Delete ||
@@ -661,6 +673,8 @@ bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)
     {
         if (mVertexIndex < mPolygon.GetNumVertices())
             mPolygon.EraseVertex(mVertexIndex);
+        if (mPolygon.GetNumVertices() == 0)
+            mUI.actionClear->setEnabled(false);
     }
     else if (key->key() == Qt::Key_E)
     {

@@ -264,6 +264,21 @@
     <string>Pause</string>
    </property>
   </action>
+  <action name="actionClear">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/log_empty.png</normaloff>:/32x32_ico_png/log_empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear all vertices</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
