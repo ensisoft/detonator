@@ -78,6 +78,13 @@ namespace gui
     private:
         Ui::PolygonWidget mUI;
     private:
+        enum class GridDensity {
+            Grid10x10 = 10,
+            Grid20x20 = 20,
+            Grid50x50 = 50,
+            Grid100x100 = 100
+        };
+        GridDensity mGrid = GridDensity::Grid20x20;
         // the current workspace.
         app::Workspace* mWorkspace = nullptr;
         // the current polygon we're editing.

@@ -154,6 +154,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Grid</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmbGrid"/>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -263,6 +273,15 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>name</tabstop>
+  <tabstop>staticInstance</tabstop>
+  <tabstop>blueprints</tabstop>
+  <tabstop>alpha</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>chkSnap</tabstop>
+  <tabstop>chkShowGrid</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>

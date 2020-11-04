@@ -93,6 +93,9 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace) : mWorkspace(workspace)
         this, &PolygonWidget::NewResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
         this, &PolygonWidget::ResourceToBeDeleted);
+
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
 }
 
 PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& resource) : PolygonWidget(workspace)
@@ -143,6 +146,7 @@ bool PolygonWidget::SaveState(Settings& settings) const
     settings.saveWidget("Polygon", mUI.alpha);
     settings.saveWidget("Polygon", mUI.blueprints);
     settings.saveWidget("Polygon", mUI.chkShowGrid);
+    settings.saveWidget("Polygon", mUI.cmbGrid);
 
     // the polygon can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -159,6 +163,7 @@ bool PolygonWidget::LoadState(const Settings& settings)
     settings.loadWidget("Polygon", mUI.blueprints);
     settings.loadWidget("Polygon", mUI.blueprints);
     settings.loadWidget("Polygon", mUI.chkShowGrid);
+    settings.loadWidget("Polygon", mUI.cmbGrid);
     setWindowTitle(mUI.name->text());
 
     const std::string& base64 = settings.getValue("Polygon", "content", std::string(""));
@@ -385,7 +390,9 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (GetValue(mUI.chkShowGrid))
     {
-        painter.Draw(gfx::Grid(19, 19), view,
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        const unsigned num_cell_lines = static_cast<unsigned>(grid) - 1;
+        painter.Draw(gfx::Grid(num_cell_lines, num_cell_lines), view,
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
                 .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
     }
@@ -473,11 +480,14 @@ void PolygonWidget::OnMouseRelease(QMouseEvent* mickey)
 
     if (GetValue(mUI.chkSnap))
     {
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        const float num_cells = static_cast<float>(grid);
+
         const auto width  = mUI.widget->width();
         const auto height = mUI.widget->height();
         const auto& pos = mickey->pos();
-        const auto cell_width = width / 20.0f;
-        const auto cell_height = height / 20.0f;
+        const auto cell_width = width / num_cells;
+        const auto cell_height = height / num_cells;
         const auto x = std::round(pos.x() / cell_width) * cell_width;
         const auto y = std::round(pos.y() / cell_height) * cell_height;
         mPoints.push_back(QPoint(x, y));
@@ -499,8 +509,11 @@ void PolygonWidget::OnMouseMove(QMouseEvent* mickey)
         auto vertex = mPolygon.GetVertex(mVertexIndex);
         if (GetValue(mUI.chkSnap))
         {
-            const auto cell_width = width / 20.0f;
-            const auto cell_height = height / 20.0f;
+            const GridDensity grid = GetValue(mUI.cmbGrid);
+            const float num_cells = static_cast<float>(grid);
+
+            const auto cell_width = width / num_cells;
+            const auto cell_height = height / num_cells;
             const auto new_x = std::round(pos.x() / cell_width) * cell_width;
             const auto new_y = std::round(pos.y() / cell_height) * cell_height;
             const auto old_x = std::round((vertex.aPosition.x * width) / cell_width) * cell_width;
@@ -545,9 +558,12 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     QPoint point = mickey->pos();
     if (GetValue(mUI.chkSnap))
     {
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        const float num_cells = static_cast<float>(grid);
+
         const auto& pos = mickey->pos();
-        const auto cell_width = width / 20.0f;
-        const auto cell_height = height / 20.0f;
+        const auto cell_width = width / num_cells;
+        const auto cell_height = height / num_cells;
         const auto x = std::round(pos.x() / cell_width) * cell_width;
         const auto y = std::round(pos.y() / cell_height) * cell_height;
         point = QPoint(x, y);
