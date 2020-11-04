@@ -1260,9 +1260,16 @@ QComboBox::item:alternate {
   background: #19232D;
 }
 
+/* disable this for now since it causes a weird 
+   bug on Qt 5.15.1 on Linux where the combobox
+   when opened has tremendous amount of space between
+   the top item and selected item and the rest of the items.
+*/
+/*
 QComboBox::item:checked {
   font-weight: bold;
 }
+*/
 
 QComboBox::item:selected {
   border: 0px solid transparent;
