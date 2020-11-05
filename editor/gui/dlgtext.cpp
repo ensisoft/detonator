@@ -45,7 +45,8 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     mUI.setupUi(this);
     PopulateFromEnum<gfx::TextBuffer::HorizontalAlignment>(mUI.cmbHAlign);
     PopulateFromEnum<gfx::TextBuffer::VerticalAlignment>(mUI.cmbVAlign);
-
+    SetValue(mUI.cmbVAlign, gfx::TextBuffer::VerticalAlignment::AlignCenter);
+    SetValue(mUI.cmbHAlign, gfx::TextBuffer::HorizontalAlignment::AlignCenter);
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
