@@ -374,9 +374,14 @@ void PolygonWidget::ResourceToBeDeleted(const app::Resource* resource)
 
 void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    painter.SetViewport(0, 0, width, height);
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto xoffset = (widget_width - size) / 2;
+    const auto yoffset = (widget_height - size) / 2;
+    const auto width = size;
+    const auto height = size;
+    painter.SetViewport(xoffset, yoffset, size, size);
 
     gfx::Transform view;
     view.Resize(width, height);
@@ -463,9 +468,16 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
 
 void PolygonWidget::OnMousePress(QMouseEvent* mickey)
 {
-    const auto width = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto& point = mickey->pos();
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto xoffset = (widget_width - size) / 2;
+    const auto yoffset = (widget_height - size) / 2;
+    const auto width = size;
+    const auto height = size;
+
+    const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
+
     for (size_t i=0; i<mPolygon.GetNumVertices(); ++i)
     {
         const auto& vert = mPolygon.GetVertex(i);
@@ -489,14 +501,21 @@ void PolygonWidget::OnMouseRelease(QMouseEvent* mickey)
     if (!mActive)
         return;
 
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto xoffset = (widget_width - size) / 2;
+    const auto yoffset = (widget_height - size) / 2;
+    const auto width  = size;
+    const auto height = size;
+
+    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+
     if (GetValue(mUI.chkSnap))
     {
         const GridDensity grid = GetValue(mUI.cmbGrid);
         const float num_cells = static_cast<float>(grid);
 
-        const auto width  = mUI.widget->width();
-        const auto height = mUI.widget->height();
-        const auto& pos = mickey->pos();
         const auto cell_width = width / num_cells;
         const auto cell_height = height / num_cells;
         const auto x = std::round(pos.x() / cell_width) * cell_width;
@@ -505,15 +524,20 @@ void PolygonWidget::OnMouseRelease(QMouseEvent* mickey)
     }
     else
     {
-        mPoints.push_back(mickey->pos());
+        mPoints.push_back(pos);
     }
 }
 
 void PolygonWidget::OnMouseMove(QMouseEvent* mickey)
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto& pos = mickey->pos();
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto xoffset = (widget_width - size) / 2;
+    const auto yoffset = (widget_height - size) / 2;
+    const auto width  = size;
+    const auto height = size;
+    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
     if (mDragging)
     {
@@ -534,7 +558,7 @@ void PolygonWidget::OnMouseMove(QMouseEvent* mickey)
             if (new_x != old_x || new_y != old_y)
             {
                 const QPoint& snap_point =  QPoint(new_x, new_y);
-                QCursor::setPos(mUI.widget->mapToGlobal(snap_point));
+                QCursor::setPos(mUI.widget->mapToGlobal(snap_point + QPoint(xoffset, yoffset)));
                 mCurrentPoint = snap_point;
             }
         }
@@ -561,18 +585,23 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // find the vertex closes to the click point
     // use polygon winding order to figure out whether
     // the new vertex should come before or after the closest vertex
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto xoffset = (widget_width - size) / 2;
+    const auto yoffset = (widget_height - size) / 2;
+    const auto width  = size;
+    const auto height = size;
+    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
     const auto num_vertices = mPolygon.GetNumVertices();
 
-    QPoint point = mickey->pos();
+    QPoint point = pos;
     if (GetValue(mUI.chkSnap))
     {
         const GridDensity grid = GetValue(mUI.cmbGrid);
         const float num_cells = static_cast<float>(grid);
 
-        const auto& pos = mickey->pos();
         const auto cell_width = width / num_cells;
         const auto cell_height = height / num_cells;
         const auto x = std::round(pos.x() / cell_width) * cell_width;
@@ -652,11 +681,14 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 
 bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)
 {
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto size = std::min(widget_width, widget_height);
+    const auto width  = size;
+    const auto height = size;
+
     if (key->key() == Qt::Key_Escape && mActive)
     {
-        const auto width  = mUI.widget->width();
-        const auto height = mUI.widget->height();
-
         gfx::PolygonClass::DrawCommand cmd;
         cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
