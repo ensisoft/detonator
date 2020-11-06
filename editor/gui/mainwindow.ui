@@ -37,10 +37,16 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuRecentWorkspaces">
+     <property name="title">
+      <string>Recent Workspaces</string>
+     </property>
+    </widget>
     <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionNewWorkspace"/>
     <addaction name="actionLoadWorkspace"/>
+    <addaction name="menuRecentWorkspaces"/>
     <addaction name="separator"/>
     <addaction name="actionCloseWorkspace"/>
     <addaction name="separator"/>

@@ -152,6 +152,7 @@ void MainWindow::loadState()
     const auto show_eventlog  = settings.getValue("MainWindow", "show_event_log", true);
     const auto show_workspace = settings.getValue("MainWindow", "show_workspace", true);
     const auto& dock_state    = settings.getValue("MainWindow", "toolbar_and_dock_state", QByteArray());
+    settings.getValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
 #if defined(POSIX_OS)
     mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("/usr/bin/gimp"));
     mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
@@ -193,6 +194,8 @@ void MainWindow::loadState()
     mUI.menuEdit->setEnabled(false);
     mUI.menuTemp->setEnabled(false);
     mUI.workspace->setModel(nullptr);
+
+    BuildRecentWorkspacesMenu();
 
     // check if we have a flag to disable workspace loading.
     // useful for development purposes when you know the workspace
@@ -870,6 +873,13 @@ void MainWindow::on_actionLoadWorkspace_triggered()
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
 
+    if (!mRecentWorkspaces.contains(dir))
+        mRecentWorkspaces.insert(0, dir);
+    if (mRecentWorkspaces.size() > 10)
+        mRecentWorkspaces.pop_back();
+
+    BuildRecentWorkspacesMenu();
+
     NOTE("Loaded workspace.");
 }
 
@@ -1274,6 +1284,65 @@ void MainWindow::OpenNewWidget(MainWidget* widget)
     showWidget(widget, open_new_window);
 }
 
+void MainWindow::OpenRecentWorkspace()
+{
+    const QAction* action = qobject_cast<const QAction*>(sender());
+
+    const QString& dir = action->data().toString();
+
+    // check here whether the files actually exist.
+    // todo: maybe move into workspace to validate folder
+    if (MissingFile(app::JoinPath(dir, "content.json")) ||
+        MissingFile(app::JoinPath(dir, "workspace.json")))
+    {
+        // todo: could ask if the user would like to create a new workspace instead.
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr(            "The folder"
+                                   "\n\n'%1'\n\n"
+                                   "doesn't seem contain workspace files.\n"
+                                   "Would you like to remove it from the recent workspaces list?").arg(dir));
+        if (msg.exec() == QMessageBox::Yes)
+        {
+            mRecentWorkspaces.removeAll(dir);
+            BuildRecentWorkspacesMenu();
+        }
+        return;
+    }
+
+    // todo: should/could ask about saving. the current workspace if we have any changes.
+    if (!saveWorkspace())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText("There was a problem saving the current workspace.\n"
+                    "Do you still want to continue ?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    // close existing workspace if any.
+    closeWorkspace();
+
+    // load new workspace.
+    if (!loadWorkspace(dir))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to open workspace\n"
+                       "\n\n'%1'\n\n"
+                       "See the application log for more information.").arg(dir));
+        msg.exec();
+        return;
+    }
+
+    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
+
+    NOTE("Loaded workspace.");
+}
+
 bool MainWindow::event(QEvent* event)
 {
     if (event->type() == IterateGameLoopEvent::GetIdentity())
@@ -1318,6 +1387,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
     emit aboutToClose();
 }
 
+void MainWindow::BuildRecentWorkspacesMenu()
+{
+    mUI.menuRecentWorkspaces->clear();
+    for (const auto& recent : mRecentWorkspaces)
+    {
+        QAction* action = mUI.menuRecentWorkspaces->addAction(QDir::toNativeSeparators(recent));
+        action->setData(recent);
+        connect(action, &QAction::triggered, this, &MainWindow::OpenRecentWorkspace);
+    }
+}
+
 bool MainWindow::saveState()
 {
     // persist the properties of the mainwindow itself.
@@ -1337,6 +1417,7 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
+    settings.setValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
 
     // QMainWindow::SaveState saves the current state of the mainwindow toolbars
     // and dockwidgets.

@@ -28,6 +28,7 @@
 #  include <QtWidgets>
 #  include <QTimer>
 #  include <QElapsedTimer>
+#  include <QStringList>
 #  include "ui_mainwindow.h"
 #include "warnpop.h"
 
@@ -135,8 +136,10 @@ namespace gui
         void OpenExternalImage(const QString& file);
         void OpenExternalShader(const QString& file);
         void OpenNewWidget(MainWidget* widget);
+        void OpenRecentWorkspace();
 
     private:
+        void BuildRecentWorkspacesMenu();
         bool saveState();
         bool loadWorkspace(const QString& dir);
         bool saveWorkspace();
@@ -175,6 +178,8 @@ namespace gui
         // The time accumulator for keeping track of partial
         // updates.
         double mTimeAccum = 0.0;
+        // List of recently opened workspaces.
+        QStringList mRecentWorkspaces;
     };
 
 } // namespace
