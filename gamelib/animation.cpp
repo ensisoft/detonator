@@ -818,6 +818,8 @@ bool AnimationTrack::IsComplete() const
 
 AnimationClass::AnimationClass(const AnimationClass& other)
 {
+    mId = other.mId;
+
     // make a deep copy of the nodes.
     for (const auto& node : other.mNodes)
     {
@@ -1092,6 +1094,7 @@ gfx::FRect AnimationClass::GetBoundingBox() const
 std::size_t AnimationClass::GetHash() const
 {
     std::size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const AnimationNodeClass* node) {
@@ -1107,6 +1110,7 @@ std::size_t AnimationClass::GetHash() const
 nlohmann::json AnimationClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
@@ -1137,9 +1141,9 @@ AnimationNodeClass* AnimationClass::TreeNodeFromJson(const nlohmann::json& json)
 // static
 std::optional<AnimationClass> AnimationClass::FromJson(const nlohmann::json& object)
 {
-    unsigned int bitflags = 0;
-
     AnimationClass ret;
+    if (!base::JsonReadSafe(object, "id", &ret.mId))
+        return std::nullopt;
 
     if (object.contains("nodes"))
     {
@@ -1189,6 +1193,7 @@ AnimationClass& AnimationClass::operator=(const AnimationClass& other)
         return *this;
 
     AnimationClass copy(other);
+    mId = std::move(copy.mId);
     mNodes = std::move(copy.mNodes);
     mAnimationTracks = std::move(copy.mAnimationTracks);
     mRenderTree = copy.mRenderTree;

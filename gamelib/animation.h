@@ -1139,7 +1139,8 @@ namespace game
         using DrawHook   = AnimationDrawHook<AnimationNodeClass>;
         using DrawPacket = AnimationDrawPacket;
 
-        AnimationClass() = default;
+        AnimationClass()
+        { mId = base::RandomString(10); }
         AnimationClass(const AnimationClass& other);
 
         // Add a new animation node. Returns pointer to the node
@@ -1274,6 +1275,9 @@ namespace game
         // look up the node based on the ID.
         static nlohmann::json TreeNodeToJson(const AnimationNodeClass* node);
 
+        // Get the animation id.
+        std::string GetId() const
+        { return mId; }
         std::size_t GetNumTracks() const
         { return mAnimationTracks.size(); }
         std::size_t GetNumNodes() const
@@ -1286,6 +1290,7 @@ namespace game
         AnimationClass& operator=(const AnimationClass& other);
 
     private:
+        std::string mId;
         // The list of animation nodes that belong to this animation.
         // we're allocating the nodes on the free store so that the
         // render tree pointers remain valid even if the vector is resized

@@ -76,12 +76,13 @@ namespace gfx
         virtual ~TextureSource() = default;
         // Get the type of the source of the texture data.
         virtual Source GetSourceType() const = 0;
-        // Get the name for the texture for the device.
-        // This is expected to be unique and is used to map the source to a
-        // device texture resource. Not human readable.
+        // Get texture source class/resource id.
         virtual std::string GetId() const = 0;
         // Get the human readable / and settable name.
         virtual std::string GetName() const = 0;
+        // Get the texture hash that is used to map the content to a
+        // GPU side object.
+        virtual std::size_t GetHash() const = 0;
         // Set the texture source human readable name.
         virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap. If there's a content
@@ -97,7 +98,7 @@ namespace gfx
         // Serialize into JSON object.
         virtual nlohmann::json ToJson() const
         { return nlohmann::json{}; }
-        // Load state from JSON object. Returns true if succesful
+        // Load state from JSON object. Returns true if successful
         // otherwise false.
         virtual bool FromJson(const nlohmann::json& object)
         { return false; }
@@ -116,39 +117,41 @@ namespace gfx
         class TextureFileSource : public TextureSource
         {
         public:
-            TextureFileSource(const std::string& file,
-                              const std::string& name)
+            TextureFileSource(const std::string& file, const std::string& name)
               : mFile(file)
               , mName(name)
-            {}
-            TextureFileSource() = default;
+            {
+                mId = base::RandomString(10);
+            }
+            TextureFileSource()
+            { mId = base::RandomString(10); }
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
             virtual std::string GetId() const override
-            { return mFile; }
+            { return mId; }
             virtual std::string GetName() const override
             { return mName; }
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, mFile); }
             virtual void SetName(const std::string& name)
             { mName = name; }
-
             virtual std::shared_ptr<IBitmap> GetData() const override;
-
             virtual std::unique_ptr<TextureSource> Clone() const override
             { return std::make_unique<TextureFileSource>(*this); }
-
             virtual bool CanSerialize() const override
             { return true; }
             virtual nlohmann::json ToJson() const override
             {
-                nlohmann::json json = {
-                    {"file", mFile},
-                    {"name", mName}
-                };
+                nlohmann::json json;
+                base::JsonWrite(json, "id", mId);
+                base::JsonWrite(json, "file", mFile);
+                base::JsonWrite(json, "name", mName);
                 return json;
             }
             virtual bool FromJson(const nlohmann::json& object) override
             {
-                return base::JsonReadSafe(object, "file", &mFile) &&
+                return base::JsonReadSafe(object, "id", &mId) &&
+                       base::JsonReadSafe(object, "file", &mFile) &&
                        base::JsonReadSafe(object, "name", &mName);
             }
             virtual void BeginPacking(ResourcePacker* packer) const override
@@ -163,6 +166,7 @@ namespace gfx
             const std::string& GetFilename() const
             { return mFile; }
         private:
+            std::string mId;
             std::string mFile;
             std::string mName;
         private:
@@ -172,17 +176,22 @@ namespace gfx
         class TextureBitmapSource : public TextureSource
         {
         public:
+            TextureBitmapSource()
+            { mId = base::RandomString(10); }
             template<typename T>
-            TextureBitmapSource(const Bitmap<T>& bmp)
-              : mBitmap(new Bitmap<T>(bmp))
-            {}
+            TextureBitmapSource(const Bitmap<T>& bmp) : TextureBitmapSource()
+            {
+                mBitmap.reset(new Bitmap<T>(bmp));
+            }
             template<typename T>
-            TextureBitmapSource(Bitmap<T>&& bmp)
-              : mBitmap(new Bitmap<T>(std::move(bmp)))
-            {}
-            TextureBitmapSource() = default;
+            TextureBitmapSource(Bitmap<T>&& bmp) : TextureBitmapSource()
+            {
+                mBitmap.reset(new Bitmap<T>(std::move(bmp)));
+            }
+
             TextureBitmapSource(const TextureBitmapSource& other)
             {
+                mId   = other.mId;
                 mName = other.mName;
                 if (other.mBitmap)
                     mBitmap = other.mBitmap->Clone();
@@ -191,11 +200,14 @@ namespace gfx
             virtual Source GetSourceType() const override
             { return Source::Bitmap; }
             virtual std::string GetId() const override
+            { return mId; }
+            virtual std::size_t GetHash() const override
             {
                 size_t hash = mBitmap->GetHash();
                 hash = base::hash_combine(hash, mBitmap->GetWidth());
                 hash = base::hash_combine(hash, mBitmap->GetHeight());
-                return std::to_string(hash);
+                hash = base::hash_combine(hash, mId);
+                return hash;
             }
             virtual std::string GetName() const override
             { return mName; }
@@ -206,6 +218,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Clone() const override
             { return std::make_unique<TextureBitmapSource>(*this); }
         private:
+            std::string mId;
             std::shared_ptr<IBitmap> mBitmap;
             std::string mName;
         };
@@ -214,30 +227,41 @@ namespace gfx
         class TextureTextBufferSource : public TextureSource
         {
         public:
+            TextureTextBufferSource()
+            { mId = base::RandomString(10); }
+
             TextureTextBufferSource(const TextBuffer& text)
               : mTextBuffer(text)
-            {}
+            {
+                mId = base::RandomString(10);
+            }
             TextureTextBufferSource(const TextBuffer& text, const std::string& name)
               : mTextBuffer(text)
               , mName(name)
-            {}
+            {
+                mId = base::RandomString(10);
+            }
             TextureTextBufferSource(TextBuffer&& text)
               : mTextBuffer(std::move(text))
-            {}
+            {
+                mId = base::RandomString(10);
+            }
             TextureTextBufferSource(TextBuffer&& text, std::string&& name)
               : mTextBuffer(std::move(text))
               , mName(std::move(name))
-            {}
-            TextureTextBufferSource() = default;
-
+            {
+                mId = base::RandomString(10);
+            }
             virtual Source GetSourceType() const override
             { return Source::TextBuffer; }
             virtual std::string GetId() const override
+            { return mId; }
+            virtual std::size_t GetHash() const override
             {
                 size_t hash = mTextBuffer.GetHash();
                 hash = base::hash_combine(hash, mTextBuffer.GetWidth());
                 hash = base::hash_combine(hash, mTextBuffer.GetHeight());
-                return std::to_string(hash);
+                return hash;
             }
             virtual std::string GetName() const override
             { return mName; }
@@ -253,15 +277,17 @@ namespace gfx
             virtual nlohmann::json ToJson() const override
             {
                 nlohmann::json json;
-                json["name"] = mName;
-                json["buffer"] = mTextBuffer.ToJson();
+                base::JsonWrite(json, "id", mId);
+                base::JsonWrite(json, "name", mName);
+                base::JsonWrite(json, "buffer", mTextBuffer);
                 return json;
             }
             virtual bool FromJson(const nlohmann::json& json) override
             {
                 if (!json.contains("buffer") || !json["buffer"].is_object())
                     return false;
-                if (!base::JsonReadSafe(json, "name", &mName))
+                if (!base::JsonReadSafe(json, "name", &mName) ||
+                    !base::JsonReadSafe(json, "id", &mId))
                     return false;
                 auto ret = TextBuffer::FromJson(json["buffer"]);
                 if (!ret.has_value())
@@ -299,6 +325,7 @@ namespace gfx
             { mTextBuffer = std::move(text); }
         private:
             TextBuffer mTextBuffer;
+            std::string mId;
             std::string mName;
         };
 
@@ -354,9 +381,10 @@ namespace gfx
 
         // constructor.
         MaterialClass(Type type) : mType(type)
-        {}
+        { mId = base::RandomString(10); }
         // allow "invalid" material to be constructed.
-        MaterialClass() = default;
+        MaterialClass()
+        { mId = base::RandomString(10); }
 
         // Make a deep copy of the material class.
         MaterialClass(const MaterialClass& other);
@@ -393,9 +421,13 @@ namespace gfx
 
         // MaterialClass properties getters.
 
-        // Get the ID for the material. Used to map the material
-        // to a device specific program object.
-        std::string GetId() const;
+        // get the class/resource id.
+        std::string GetId() const
+        { return mId; }
+
+        // Get the program ID for the material that is
+        // Used to map the material to a device specific program object.
+        std::string GetProgramId() const;
 
         // Get the ID/handle of the shader source file that
         // this material uses.
@@ -705,6 +737,8 @@ namespace gfx
         MaterialClass& operator=(const MaterialClass& other);
 
     private:
+        // material class id.
+        std::string mId;
         // warning: remember to edit the copy constructor
         // and the assignment operator if members are added.
         std::string mShaderFile;

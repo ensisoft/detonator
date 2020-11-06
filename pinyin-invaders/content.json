@@ -1,6 +1,7 @@
 {
   "animations": [
     {
+      "id": "Q9LbPJnta0",
       "nodes": [
         {
           "alpha": 1.0,
@@ -228,6 +229,7 @@
       },
       "fps": 0.0,
       "gamma": 1.0,
+      "id": "lIO2x5dmry",
       "particle_action": "Rotate",
       "resource_name": "Asteroid",
       "samplers": [
@@ -241,6 +243,7 @@
           "enable_gc": false,
           "source": {
             "file": "ws://assets/asteroid0.png",
+            "id": "jU0mZoayLq",
             "name": "asteroid0"
           },
           "type": "Filesystem"
@@ -298,6 +301,7 @@
       },
       "fps": 0.0,
       "gamma": 1.0,
+      "id": "zQGgrkSE8i",
       "particle_action": "None",
       "resource_name": "Nebula1",
       "samplers": [
@@ -311,6 +315,7 @@
           "enable_gc": false,
           "source": {
             "file": "ws://assets/Nebula1.png",
+            "id": "wLOHLh7Nhz",
             "name": "Nebula1"
           },
           "type": "Filesystem"
@@ -368,6 +373,7 @@
       },
       "fps": 0.0,
       "gamma": 1.0,
+      "id": "46yvmCSzSL",
       "particle_action": "None",
       "resource_name": "Star",
       "samplers": [
@@ -381,6 +387,7 @@
           "enable_gc": false,
           "source": {
             "file": "ws://assets/RoundParticle.png",
+            "id": "you23Mal3f",
             "name": "RoundParticle"
           },
           "type": "Filesystem"

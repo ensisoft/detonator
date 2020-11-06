@@ -542,7 +542,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.drawables->addItems(workspace->ListAllDrawables());
     mUI.drawables->blockSignals(false);
 
-    mUI.name->setText("My Animation");
+    SetValue(mUI.name, QString("My Animation"));
+    SetValue(mUI.ID, mState.animation->GetId());
 
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -799,6 +800,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     mOriginalHash = mState.animation->GetHash();
 
     SetValue(mUI.name, resource.GetName());
+    SetValue(mUI.ID, content->GetId());
     setWindowTitle(resource.GetName());
 
     // if some resource has been deleted we need to replace it.

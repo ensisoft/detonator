@@ -145,6 +145,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.actionStop->setEnabled(false);
     mUI.materialName->setText("My Material");
     setWindowTitle("My Material");
+    SetValue(mUI.materialID, mMaterial.GetId());
 
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
@@ -197,6 +198,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
 
     mUI.textures->setCurrentRow(0);
     mUI.materialName->setText(resource.GetName());
+    SetValue(mUI.materialName, resource.GetName());
+    SetValue(mUI.materialID, mMaterial.GetId());
     setWindowTitle(resource.GetName());
 
     mOriginalHash = mMaterial.GetHash();
@@ -245,6 +248,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     mMaterial = std::move(ret.value());
 
     // restore UI from the material values.
+    SetValue(mUI.materialID, mMaterial.GetId());
     SetValue(mUI.materialType, mMaterial.GetType());
     SetValue(mUI.surfaceType,  mMaterial.GetSurfaceType());
     SetValue(mUI.minFilter,    mMaterial.GetMinTextureFilter());
@@ -675,12 +679,13 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     {
         mUI.textureRect->setEnabled(false);
         mUI.textureProp->setEnabled(false);
-        mUI.textureWidth->setText("");
-        mUI.textureHeight->setText("");
-        mUI.textureDepth->setText("");
+        mUI.textureWidth->clear();
+        mUI.textureHeight->clear();
+        mUI.textureDepth->clear();
         mUI.btnDelTextureMap->setEnabled(false);
         mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
-        mUI.textureHandle->setText("");
+        mUI.textureFile->clear();
+        mUI.textureID->clear();
         return;
     }
 
@@ -712,11 +717,16 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     {
         mUI.texturePreview->setPixmap(QPixmap("texture.png"));
     }
-    mUI.rectX->setValue(rect.GetX());
-    mUI.rectY->setValue(rect.GetY());
-    mUI.rectW->setValue(rect.GetWidth());
-    mUI.rectH->setValue(rect.GetHeight());
-    mUI.textureHandle->setText(app::FromUtf8(source.GetId()));
+    SetValue(mUI.rectX, rect.GetX());
+    SetValue(mUI.rectY, rect.GetY());
+    SetValue(mUI.rectW, rect.GetWidth());
+    SetValue(mUI.rectH, rect.GetHeight());
+    SetValue(mUI.textureID, source.GetId());
+    if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
+    {
+        SetValue(mUI.textureFile, ptr->GetFilename());
+    }
+
 
     mUI.textureProp->setEnabled(true);
     mUI.textureRect->setEnabled(true);

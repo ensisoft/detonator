@@ -75,6 +75,7 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 
 MaterialClass::MaterialClass(const MaterialClass& other)
 {
+    mId          = other.mId;
     mShaderFile  = other.mShaderFile;
     mBaseColor   = other.mBaseColor;
     mSurfaceType = other.mSurfaceType;
@@ -165,7 +166,7 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInst
         {
             const auto& sampler = mTextures[frame_index[i]];
             const auto& source  = sampler.source;
-            const auto& name    = source->GetId();
+            const auto& name    = std::to_string(source->GetHash());
             auto* texture = device.FindTexture(name);
             if (!texture)
             {
@@ -255,7 +256,7 @@ void MaterialClass::ApplyStaticState(Device& device, Program& prog) const
     prog.SetUniform("kColor3", mColorMap[3]);
 }
 
-std::string MaterialClass::GetId() const
+std::string MaterialClass::GetProgramId() const
 {
     // if the static flag is set the material id is
     // derived from the current state, thus  mapping material objects with
@@ -298,6 +299,7 @@ std::string MaterialClass::GetShaderFile() const
 size_t MaterialClass::GetHash() const
 {
     size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mShaderFile);
     hash = base::hash_combine(hash, mBaseColor.GetHash());
     hash = base::hash_combine(hash, mSurfaceType);
@@ -329,6 +331,7 @@ size_t MaterialClass::GetHash() const
 nlohmann::json MaterialClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "shader_file", mShaderFile);
     base::JsonWrite(json, "type", mType);
     base::JsonWrite(json, "color", mBaseColor);
@@ -366,8 +369,8 @@ nlohmann::json MaterialClass::ToJson() const
 std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& object)
 {
     MaterialClass mat;
-
-    if (!base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
+    if (!base::JsonReadSafe(object, "id", &mat.mId) ||
+        !base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
         !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
         !base::JsonReadSafe(object, "type", &mat.mType) ||
         !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
@@ -404,6 +407,7 @@ std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& objec
             source = std::make_shared<detail::TextureTextBufferSource>();
         else if (type == TextureSource::Source::Bitmap)
             source = std::make_shared<detail::TextureBitmapSource>();
+        else return std::nullopt;
 
         if (!source->FromJson(obj["source"]))
             return std::nullopt;
@@ -500,6 +504,7 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
         return *this;
 
     MaterialClass tmp(other);
+    std::swap(mId, tmp.mId);
     std::swap(mShaderFile, tmp.mShaderFile);
     std::swap(mBaseColor, tmp.mBaseColor);
     std::swap(mSurfaceType, tmp.mSurfaceType);
