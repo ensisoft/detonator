@@ -42,37 +42,21 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <layout class="QGridLayout" name="gridLayout">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="delay">
+                 <property name="enabled">
+                  <bool>false</bool>
                  </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_11">
                  <property name="text">
-                  <string>Name</string>
+                  <string>Delay (s)</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="name">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_12">
-                 <property name="text">
-                  <string>Duration (s)</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
+               <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="duration">
                  <property name="decimals">
                   <number>2</number>
@@ -88,17 +72,53 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_11">
-                 <property name="text">
-                  <string>Delay (s)</string>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="trackName">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
-                <widget class="QDoubleSpinBox" name="delay">
-                 <property name="enabled">
-                  <bool>false</bool>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Duration (s)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Name</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Track ID</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QLineEdit" name="trackID">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -412,6 +432,9 @@
              </widget>
             </item>
             <item>
+             <widget class="QComboBox" name="cmbGrid"/>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -428,7 +451,17 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="showGrid">
+             <widget class="QCheckBox" name="chkShowOrigin">
+              <property name="text">
+               <string>Show origin</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkShowGrid">
               <property name="text">
                <string>Show grid</string>
               </property>
@@ -527,6 +560,43 @@
             <enum>Qt::CustomContextMenu</enum>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkShowMaterialActuators">
+             <property name="text">
+              <string>Show material actuators</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkShowTransformActuators">
+             <property name="text">
+              <string>Show transform actuators</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -1112,9 +1182,10 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>name</tabstop>
+  <tabstop>trackName</tabstop>
   <tabstop>duration</tabstop>
   <tabstop>delay</tabstop>
+  <tabstop>trackID</tabstop>
   <tabstop>looping</tabstop>
   <tabstop>viewPosX</tabstop>
   <tabstop>viewPosY</tabstop>
@@ -1126,7 +1197,11 @@
   <tabstop>btnViewReset</tabstop>
   <tabstop>time</tabstop>
   <tabstop>zoom</tabstop>
-  <tabstop>showGrid</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>chkShowOrigin</tabstop>
+  <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowMaterialActuators</tabstop>
+  <tabstop>chkShowTransformActuators</tabstop>
   <tabstop>actuatorNode</tabstop>
   <tabstop>actuatorType</tabstop>
   <tabstop>actuatorStartTime</tabstop>

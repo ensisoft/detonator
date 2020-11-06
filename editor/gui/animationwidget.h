@@ -105,7 +105,7 @@ namespace gui
         void on_nodeScaleX_valueChanged(double value);
         void on_nodeScaleY_valueChanged(double value);
         void on_nodeRotation_valueChanged(double value);
-        void on_cName_textChanged(const QString& text);
+        void on_nodeName_textChanged(const QString& text);
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
         void on_chkDoesRender_stateChanged(int);
@@ -145,9 +145,15 @@ namespace gui
         // menu for the custom shapes
         QMenu* mCustomShapes = nullptr;
     private:
+        // the grid display options.
+        enum class GridDensity {
+            Grid10x10 = 10,
+            Grid20x20 = 20,
+            Grid50x50 = 50,
+            Grid100x100 = 100
+        };
         // current tool (if any, can be nullptr when no tool is selected).
         std::unique_ptr<Tool> mCurrentTool;
-    private:
         // state shared with the tools is packed inside a single
         // struct type for convenience
         struct State {

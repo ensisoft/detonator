@@ -383,8 +383,13 @@ public:
         for (size_t i=0; i<track.GetNumActuators(); ++i)
         {
             const auto& actuator = track.GetActuatorClass(i);
-            const auto& id   = actuator.GetNodeId();
             const auto type  = actuator.GetType();
+            if (type == game::AnimationActuatorClass::Type::Transform && !mState.show_transform_actuators)
+                continue;
+            else if (type == game::AnimationActuatorClass::Type::Material && !mState.show_material_actuators)
+                continue;
+
+            const auto& id   = actuator.GetNodeId();
             const auto& node = anim.FindNodeById(id);
             const auto& name = app::FromUtf8(node->GetName());
             const auto id_hash = base::hash_combine(0, id);
@@ -447,7 +452,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     }
     mUI.btnAddActuator->setEnabled(false);
     mUI.tree->SetModel(mTreeModel.get());
-    mUI.name->setText("My Track");
+    SetValue(mUI.trackName, QString("My Track"));
 
     mUI.widget->onZoomIn  = std::bind(&AnimationTrackWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationTrackWidget::ZoomOut, this);
@@ -577,6 +582,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::AnimationActuatorClass::Type>(mUI.actuatorType);
     PopulateFromEnum<game::AnimationTransformActuatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::MaterialActuatorClass::Interpolation>(mUI.materialInterpolation);
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
 
     connect(mUI.timeline, &TimelineWidget::SelectedItemChanged,
         this, &AnimationTrackWidget::SelectedItemChanged);
@@ -593,6 +600,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
     mState.track->SetLooping(GetValue(mUI.looping));
     mState.track->SetDuration(GetValue(mUI.duration));
     mAnimation = game::CreateAnimationInstance(mState.animation);
+    SetValue(mUI.trackID, mState.track->GetId());
 
     // Put the nodes in the list.
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
@@ -612,7 +620,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     // Edit an existing animation track for the given animation.
     mState.animation = anim;
     mState.track     = std::make_shared<game::AnimationTrackClass>(track); // edit a copy.
-    SetValue(mUI.name, track.GetName());
+    SetValue(mUI.trackID, track.GetId());
+    SetValue(mUI.trackName, track.GetName());
     SetValue(mUI.looping, track.IsLooping());
     SetValue(mUI.duration, track.GetDuration());
     mAnimation = game::CreateAnimationInstance(mState.animation);
@@ -657,11 +666,13 @@ void AnimationTrackWidget::AddActions(QMenu& menu)
 }
 bool AnimationTrackWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("TrackWidget", mUI.name);
+    settings.saveWidget("TrackWidget", mUI.trackID);
+    settings.saveWidget("TrackWidget", mUI.trackName);
     settings.saveWidget("TrackWidget", mUI.duration);
     settings.saveWidget("TrackWidget", mUI.delay);
     settings.saveWidget("TrackWidget", mUI.looping);
     settings.saveWidget("TrackWidget", mUI.zoom);
+    settings.saveWidget("TrackWidget", mUI.cmbGrid);
     settings.saveWidget("TrackWidget", mUI.actuatorNode);
     settings.saveWidget("TrackWidget", mUI.actuatorType);
     settings.saveWidget("TrackWidget", mUI.actuatorStartTime);
@@ -676,7 +687,10 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.transformEndRotation);
     settings.saveWidget("TrackWidget", mUI.materialInterpolation);
     settings.saveWidget("TrackWidget", mUI.materialEndAlpha);
-    settings.saveWidget("TrackWidget", mUI.showGrid);
+    settings.saveWidget("TrackWidget", mUI.chkShowOrigin);
+    settings.saveWidget("TrackWidget", mUI.chkShowGrid);
+    settings.saveWidget("TrackWidget", mUI.chkShowTransformActuators);
+    settings.saveWidget("TrackWidget", mUI.chkShowMaterialActuators);
     settings.setValue("TrackWidget", "original_hash", mOriginalHash);
 
     // use the animation's JSON serialization to save the state.
@@ -695,11 +709,13 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
 }
 bool AnimationTrackWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("TrackWidget", mUI.name);
+    settings.loadWidget("TrackWidget", mUI.trackID);
+    settings.loadWidget("TrackWidget", mUI.trackName);
     settings.loadWidget("TrackWidget", mUI.duration);
     settings.loadWidget("TrackWidget", mUI.delay);
     settings.loadWidget("TrackWidget", mUI.looping);
     settings.loadWidget("TrackWidget", mUI.zoom);
+    settings.loadWidget("TrackWidget", mUI.cmbGrid);
     settings.loadWidget("TrackWidget", mUI.actuatorNode);
     settings.loadWidget("TrackWidget", mUI.actuatorType);
     settings.loadWidget("TrackWidget", mUI.actuatorStartTime);
@@ -714,7 +730,10 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.transformEndRotation);
     settings.loadWidget("TrackWidget", mUI.materialInterpolation);
     settings.loadWidget("TrackWidget", mUI.materialEndAlpha);
-    settings.loadWidget("Trackwidget", mUI.showGrid);
+    settings.loadWidget("TrackWidget", mUI.chkShowOrigin);
+    settings.loadWidget("TrackWidget", mUI.chkShowGrid);
+    settings.loadWidget("TrackWidget", mUI.chkShowTransformActuators);
+    settings.loadWidget("TrackWidget", mUI.chkShowMaterialActuators);
     settings.getValue("TrackWidget", "original_hash", &mOriginalHash);
 
     // try to restore the shared animation class object
@@ -760,6 +779,8 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     mAnimation = game::CreateAnimationInstance(mState.animation);
 
+    mState.show_transform_actuators = GetValue(mUI.chkShowTransformActuators);
+    mState.show_material_actuators  = GetValue(mUI.chkShowMaterialActuators);
     SetValue(mUI.looping, mState.track->IsLooping());
     SetValue(mUI.duration, mState.track->GetDuration());
     mUI.tree->Rebuild();
@@ -916,9 +937,9 @@ void AnimationTrackWidget::on_actionStop_triggered()
 
 void AnimationTrackWidget::on_actionSave_triggered()
 {
-    if (!MustHaveInput(mUI.name))
+    if (!MustHaveInput(mUI.trackName))
         return;
-    mState.track->SetName(GetValue(mUI.name));
+    mState.track->SetName(GetValue(mUI.trackName));
 
     mOriginalHash = mState.track->GetHash();
 
@@ -1347,6 +1368,17 @@ void AnimationTrackWidget::on_materialEndAlpha_valueChanged(double value)
     SetSelectedActuatorProperties();
 }
 
+void AnimationTrackWidget::on_chkShowMaterialActuators_stateChanged(int)
+{
+    mState.show_material_actuators = GetValue(mUI.chkShowMaterialActuators);
+    mUI.timeline->Rebuild();
+}
+void AnimationTrackWidget::on_chkShowTransformActuators_stateChanged(int)
+{
+    mState.show_transform_actuators = GetValue(mUI.chkShowTransformActuators);
+    mUI.timeline->Rebuild();
+}
+
 void AnimationTrackWidget::on_btnAddActuator_clicked()
 {
     const auto& name = app::ToUtf8(GetValue(mUI.actuatorNode));
@@ -1759,7 +1791,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 
 
     // render endless background grid.
-    if (mUI.showGrid->isChecked())
+    if (mUI.chkShowGrid->isChecked())
     {
         view.Push();
 
@@ -1769,7 +1801,8 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         const int grid_size = std::max(width / xs, height / ys) / zoom;
         // work out the scale factor for the grid. we want some convenient scale so that
         // each grid cell maps to some convenient number of units (a multiple of 10)
-        const auto cell_size_units  = 50;
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        const auto cell_size_units  = static_cast<int>(grid); // 50;
         const auto num_grid_lines = (grid_size / cell_size_units) - 1;
         const auto num_cells = num_grid_lines + 1;
         const auto cell_size_normalized = 1.0f / (num_grid_lines + 1);
@@ -1834,19 +1867,22 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Pop();
 
     // right arrow
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
-    view.Pop();
+    if (GetValue(mUI.chkShowOrigin))
+    {
+        view.Push();
+            view.Scale(100.0f, 5.0f);
+            view.Translate(0.0f, -2.5f);
+            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
+        view.Pop();
 
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(-50.0f, -2.5f);
-        view.Rotate(math::Pi * 0.5f);
-        view.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
-    view.Pop();
+        view.Push();
+            view.Scale(100.0f, 5.0f);
+            view.Translate(-50.0f, -2.5f);
+            view.Rotate(math::Pi * 0.5f);
+            view.Translate(0.0f, 50.0f);
+            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+        view.Pop();
+    }
 
     // pop view transformation
     view.Pop();

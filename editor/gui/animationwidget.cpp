@@ -773,6 +773,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 
     PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
     PopulateFromEnum<game::AnimationNodeClass::RenderStyle>(mUI.renderStyle);
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
 
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
@@ -791,14 +793,13 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
   : AnimationWidget(workspace)
 {
     DEBUG("Editing animation '%1'", resource.GetName());
-    mUI.name->setText(resource.GetName());
-    setWindowTitle(resource.GetName());
-
     const game::AnimationClass* content = nullptr;
     resource.GetContent(&content);
     mState.animation = std::make_shared<game::AnimationClass>(*content);
-
     mOriginalHash = mState.animation->GetHash();
+
+    SetValue(mUI.name, resource.GetName());
+    setWindowTitle(resource.GetName());
 
     // if some resource has been deleted we need to replace it.
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
@@ -879,10 +880,13 @@ void AnimationWidget::AddActions(QMenu& menu)
 bool AnimationWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Animation", mUI.name);
+    settings.saveWidget("Animation", mUI.ID);
     settings.saveWidget("Animation", mUI.scaleX);
     settings.saveWidget("Animation", mUI.scaleY);
     settings.saveWidget("Animation", mUI.rotation);
-    settings.saveWidget("Animation", mUI.showGrid);
+    settings.saveWidget("Animation", mUI.chkShowOrigin);
+    settings.saveWidget("Animation", mUI.chkShowGrid);
+    settings.saveWidget("Animation", mUI.cmbGrid);
     settings.saveWidget("Animation", mUI.zoom);
     settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
@@ -900,10 +904,13 @@ bool AnimationWidget::LoadState(const Settings& settings)
     ASSERT(mState.workspace);
 
     settings.loadWidget("Animation", mUI.name);
+    settings.loadWidget("Animation", mUI.ID);
     settings.loadWidget("Animation", mUI.scaleX);
     settings.loadWidget("Animation", mUI.scaleY);
     settings.loadWidget("Animation", mUI.rotation);
-    settings.loadWidget("Animation", mUI.showGrid);
+    settings.loadWidget("Animation", mUI.chkShowOrigin);
+    settings.loadWidget("Animation", mUI.chkShowGrid);
+    settings.loadWidget("Animation", mUI.cmbGrid);
     settings.loadWidget("Animation", mUI.zoom);
     setWindowTitle(mUI.name->text());
 
@@ -1610,7 +1617,7 @@ void AnimationWidget::on_nodeRotation_valueChanged(double value)
     }
 }
 
-void AnimationWidget::on_cName_textChanged(const QString& text)
+void AnimationWidget::on_nodeName_textChanged(const QString& text)
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
@@ -1821,7 +1828,7 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
     DrawHook hook(GetCurrentNode(), mPlayState);
 
     // render endless background grid.
-    if (mUI.showGrid->isChecked())
+    if (GetValue(mUI.chkShowGrid))
     {
         view.Push();
 
@@ -1831,7 +1838,8 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         const int grid_size = std::max(width / xs, height / ys) / zoom;
         // work out the scale factor for the grid. we want some convenient scale so that
         // each grid cell maps to some convenient number of units (a multiple of 10)
-        const auto cell_size_units  = 50;
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        const auto cell_size_units  = static_cast<int>(grid); //50;
         const auto num_grid_lines = (grid_size / cell_size_units) - 1;
         const auto num_cells = num_grid_lines + 1;
         const auto cell_size_normalized = 1.0f / (num_grid_lines + 1);
@@ -1884,19 +1892,22 @@ void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
         mCurrentTool->Render(painter, view);
 
     // right arrow
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
-    view.Pop();
+    if (GetValue(mUI.chkShowOrigin))
+    {
+        view.Push();
+            view.Scale(100.0f, 5.0f);
+            view.Translate(0.0f, -2.5f);
+            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
+        view.Pop();
 
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(-50.0f, -2.5f);
-        view.Rotate(math::Pi * 0.5f);
-        view.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
-    view.Pop();
+        view.Push();
+            view.Scale(100.0f, 5.0f);
+            view.Translate(-50.0f, -2.5f);
+            view.Rotate(math::Pi * 0.5f);
+            view.Translate(0.0f, 50.0f);
+            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+        view.Pop();
+    }
 
     // pop view transformation
     view.Pop();
@@ -1921,7 +1932,8 @@ void AnimationWidget::updateCurrentNodeProperties()
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         const auto& scale = node->GetScale();
-        SetValue(mUI.cName, node->GetName());
+        SetValue(mUI.nodeID, node->GetId());
+        SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
         SetValue(mUI.renderStyle, node->GetRenderStyle());
         SetValue(mUI.layer, node->GetLayer());

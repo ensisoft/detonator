@@ -104,6 +104,8 @@ namespace gui
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
         void on_materialEndAlpha_valueChanged(double value);
+        void on_chkShowMaterialActuators_stateChanged(int);
+        void on_chkShowTransformActuators_stateChanged(int);
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
     private:
@@ -120,6 +122,13 @@ namespace gui
         class MoveTool;
         class ResizeTool;
         class RotateTool;
+        // the grid display options.
+        enum class GridDensity {
+            Grid10x10 = 10,
+            Grid20x20 = 20,
+            Grid50x50 = 50,
+            Grid100x100 = 100
+        };
         // Tree model to display the animation's render tree.
         std::unique_ptr<TreeModel> mTreeModel;
         // Timeline model to display the actuators on a timeline.
@@ -136,6 +145,8 @@ namespace gui
             float camera_offset_y = 0.0f;
             std::shared_ptr<game::AnimationClass> animation;
             std::shared_ptr<game::AnimationTrackClass> track;
+            bool show_material_actuators = true;
+            bool show_transform_actuators = true;
         } mState;
         // Current time accumulator.
         float mCurrentTime = 0.0f;
