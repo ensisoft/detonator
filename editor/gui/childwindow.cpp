@@ -63,10 +63,17 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
 ChildWindow::~ChildWindow()
 {
     Shutdown();
+
+    DEBUG("Destroy ChildWindow");
 }
 
 void ChildWindow::RefreshUI()
 {
+    if (mPopInRequested || mClosed)
+        return;
+    else if (!mWidget)
+        return;
+
     mWidget->Refresh();
     // update the window icon and title if they have changed.
     const auto& icon = mWidget->windowIcon();
@@ -80,11 +87,19 @@ void ChildWindow::RefreshUI()
 
 void ChildWindow::Animate(double secs)
 {
+    if (mPopInRequested || mClosed)
+        return;
+    else if (!mWidget)
+        return;
     mWidget->Update(secs);
 }
 
 void ChildWindow::Render()
 {
+    if (mPopInRequested || mClosed)
+        return;
+    else if (!mWidget)
+        return;
     mWidget->Render();
 }
 
@@ -99,7 +114,7 @@ void ChildWindow::Shutdown()
     {
         const auto &text = mWidget->windowTitle();
         const auto &klass = mWidget->metaObject()->className();
-        DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
+        DEBUG("Shutdown child window (widget=%1) '%2'", klass, text);
 
         mUI.verticalLayout->removeWidget(mWidget);
         mWidget->setParent(nullptr);
@@ -125,8 +140,15 @@ MainWidget* ChildWindow::TakeWidget()
 
 void ChildWindow::on_actionClose_triggered()
 {
-    // this will create close event
-    close();
+    if (!mWidget->ConfirmClose())
+        return;
+
+    // Make sure to cleanup first while the window
+    // (and the X11 surface) still exists
+    Shutdown();
+
+    mClosed = true;
+    hide();
 }
 void ChildWindow::on_actionPopIn_triggered()
 {
@@ -157,19 +179,26 @@ void ChildWindow::on_actionZoomOut_triggered()
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
-    event->accept();
+    DEBUG("Child window close event.");
 
     if (!mWidget)
         return;
 
+    event->ignore();
+
     if (!mWidget->ConfirmClose())
-    {
-        event->ignore();
         return;
-    }
+
+    event->accept();
+
     const auto& text  = mWidget->windowTitle();
     const auto& klass = mWidget->metaObject()->className();
     DEBUG("Close child window (widget=%1) '%2'", klass, text);
+
+    // Make sure to cleanup while the window and the rendering
+    // surface still exist!
+    Shutdown();
+    
     // we could emit an event here to indicate that the window
     // is getting closed but that's a sure-fire way of getting
     // unwanted recursion that will fuck shit up.  (i.e this window

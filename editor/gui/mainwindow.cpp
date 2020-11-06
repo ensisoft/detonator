@@ -502,6 +502,7 @@ void MainWindow::closeWorkspace()
     for (auto* child : mChildWindows)
     {
         child->Shutdown();
+        child->close();
         delete child;
     }
     mChildWindows.clear();
@@ -1156,6 +1157,7 @@ void MainWindow::timerRefreshUI()
             const auto last = mChildWindows.size() - 1;
             std::swap(mChildWindows[i], mChildWindows[last]);
             mChildWindows.pop_back();
+            child->close();
             delete child;
         }
         else
