@@ -523,10 +523,6 @@ std::shared_ptr<const gfx::Material> AnimationNodeClass::GetMaterial() const
 {
     if (!mMaterial)
         mMaterial = CreateMaterialInstance();
-
-    if (TestFlag(Flags::OverrideAlpha))
-        mMaterial->SetAlpha(mAlpha);
-    else mMaterial->SetAlpha((*mMaterial)->GetBaseAlpha());
     return mMaterial;
 }
 
@@ -695,16 +691,16 @@ std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::j
 }
 
 std::shared_ptr<const gfx::Material> AnimationNode::GetMaterial() const
-{
-    if (TestFlag(Flags::OverrideAlpha))
-        mMaterial->SetAlpha(mAlpha);
-    else mMaterial->SetAlpha((*mMaterial)->GetBaseAlpha());
-    return mMaterial;
-}
+{  return mMaterial; }
+
+std::shared_ptr<gfx::Material> AnimationNode::GetMaterial()
+{ return mMaterial; }
+
 std::shared_ptr<const gfx::Drawable> AnimationNode::GetDrawable() const
-{
-    return mDrawable;
-}
+{ return mDrawable; }
+
+std::shared_ptr<gfx::Drawable> AnimationNode::GetDrawable()
+{ return mDrawable; }
 
 void AnimationNode::Reset()
 {
@@ -716,6 +712,8 @@ void AnimationNode::Reset()
     mAlpha    = mClass->GetAlpha();
     mMaterial = mClass->CreateMaterialInstance();
     mDrawable = mClass->CreateDrawableInstance();
+    if (TestFlag(Flags::OverrideAlpha))
+        mMaterial->SetAlpha(mAlpha);
 }
 
 void AnimationNode::Update(float time, float dt)

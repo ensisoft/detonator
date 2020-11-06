@@ -79,27 +79,31 @@ namespace gui
         void on_actionDeleteActuator_triggered();
         void on_actionClearActuators_triggered();
         void on_actionAddTransformActuator_triggered();
+        void on_actionAddMaterialActuator_triggered();
         void on_btnAddActuator_clicked();
-        void on_btnActuatorPlus90_clicked();
-        void on_btnActuatorMinus90_clicked();
-        void on_btnActuatorReset_clicked();
+        void on_btnTransformPlus90_clicked();
+        void on_btnTransformMinus90_clicked();
+        void on_btnTransformReset_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
         void on_duration_valueChanged(double value);
         void on_looping_stateChanged(int);
+        void on_timeline_customContextMenuRequested(QPoint);
         void on_actuatorStartTime_valueChanged(double value);
         void on_actuatorEndTime_valueChanged(double value);
         void on_actuatorNode_currentIndexChanged(int index);
-        void on_actuatorMethod_currentIndexChanged(int index);
-        void on_timeline_customContextMenuRequested(QPoint);
-        void on_actuatorEndPosX_valueChanged(double value);
-        void on_actuatorEndPosY_valueChanged(double value);
-        void on_actuatorEndSizeX_valueChanged(double value);
-        void on_actuatorEndSizeY_valueChanged(double value);
-        void on_actuatorEndScaleX_valueChanged(double value);
-        void on_actuatorEndScaleY_valueChanged(double value);
-        void on_actuatorEndRotation_valueChanged(double value);
+        void on_actuatorType_currentIndexChanged(int index);
+        void on_transformInterpolation_currentIndexChanged(int index);
+        void on_materialInterpolation_currentIndexChanged(int index);
+        void on_transformEndPosX_valueChanged(double value);
+        void on_transformEndPosY_valueChanged(double value);
+        void on_transformEndSizeX_valueChanged(double value);
+        void on_transformEndSizeY_valueChanged(double value);
+        void on_transformEndScaleX_valueChanged(double value);
+        void on_transformEndScaleY_valueChanged(double value);
+        void on_transformEndRotation_valueChanged(double value);
+        void on_materialEndAlpha_valueChanged(double value);
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
     private:
@@ -144,7 +148,7 @@ namespace gui
         // should be no changes to the animation class object's
         // render tree. (i.e. node transformations)
         std::unique_ptr<game::Animation> mAnimation;
-        // State enumration for the playback state.
+        // State enumeration for the playback state.
         enum class PlayState {
             // Currently playing back an animation track.
             Playing,

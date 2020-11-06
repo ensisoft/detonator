@@ -781,6 +781,10 @@ namespace gfx
         { mRuntime = runtime; }
         void Update(float dt)
         { mRuntime += dt; }
+        float GetAlpha() const
+        { return mAlpha; }
+        float GetRuntime() const
+        { return mRuntime; }
     private:
         // This is the "class" object for this material type.
         std::shared_ptr<const MaterialClass> mClass;

@@ -22,6 +22,10 @@
 
 #pragma once
 
+#ifndef LOGTAG
+#  define LOGTAG "gamelib"
+#endif
+
 #include "config.h"
 
 #include "warnpush.h"
@@ -40,6 +44,7 @@
 #include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
+#include "base/logging.h"
 #include "base/math.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -132,9 +137,17 @@ namespace game
         void SetLineWidth(float value)
         { mLineWidth = value; }
         void SetAlpha(float value)
-        { mAlpha = value; }
+        {
+            mAlpha = value;
+            if (TestFlag(Flags::OverrideAlpha) && mMaterial)
+                mMaterial->SetAlpha(mAlpha);
+        }
         void SetFlag(Flags f, bool on_off)
-        { mBitFlags.set(f, on_off); }
+        {
+            if (f == Flags::OverrideAlpha && mMaterial)
+                mMaterial->SetAlpha(on_off ? mAlpha : mMaterialClass->GetBaseAlpha());
+            mBitFlags.set(f, on_off);
+        }
         bool TestFlag(Flags f) const
         { return mBitFlags.test(f); }
 
@@ -298,7 +311,11 @@ namespace game
         void SetRotation(float value)
         { mRotation = value; }
         void SetAlpha(float value)
-        { mAlpha = value; }
+        {
+            mAlpha = value;
+            if (TestFlag(Flags::OverrideAlpha))
+                mMaterial->SetAlpha(mAlpha);
+        }
 
         // getters for instance state.
         glm::vec2 GetTranslation() const
@@ -311,6 +328,8 @@ namespace game
         { return mRotation; }
         std::shared_ptr<const gfx::Material> GetMaterial() const;
         std::shared_ptr<const gfx::Drawable> GetDrawable() const;
+        std::shared_ptr<gfx::Material> GetMaterial();
+        std::shared_ptr<gfx::Drawable> GetDrawable();
 
         // Getters for class object state.
         bool TestFlag(AnimationNodeClass::Flags flags) const
@@ -390,23 +409,23 @@ namespace game
         enum class Type {
             // Transform actuators modify the transform state of the node
             // i.e. the translation, scale and rotation variables.
-            Transform
+            Transform,
+            // Material actuators modify the material instance state/parameters
+            // of some particular animation node.
+            Material
         };
         // dtor.
         virtual ~AnimationActuatorClass() = default;
-        // Serialize the actuator class object into JSON.
-        virtual nlohmann::json ToJson() const = 0;
-        // Load the actuator class object state from JSON. Returns true
-        // succesful otherwise false and the object is not valid state.
-        virtual bool FromJson(const nlohmann::json& object) = 0;
+        // Get the id of this actuator
+        virtual std::string GetId() const = 0;
+        // Get the ID of the node affected by this actuator.
+        virtual std::string GetNodeId() const = 0;
         // Get the hash of the object state.
-        virtual size_t GetHash() const = 0;
+        virtual std::size_t GetHash() const = 0;
         // Create an exact clone of this actuator class object.
         virtual std::unique_ptr<AnimationActuatorClass> Clone() const = 0;
         // Get the type of the represented actuator.
         virtual Type GetType() const = 0;
-        // Get the ID of the node affected by this actuator.
-        virtual std::string GetNodeId() const = 0;
         // Get the normalized start time when this actuator starts.
         virtual float GetStartTime() const = 0;
         // Get the normalized duration of this actuator.
@@ -415,9 +434,96 @@ namespace game
         virtual void SetStartTime(float start) = 0;
         // Set the new duration value for the actuator.
         virtual void SetDuration(float duration) = 0;
-        // Get the id of this actuator
-        virtual std::string GetId() const = 0;
+        // Serialize the actuator class object into JSON.
+        virtual nlohmann::json ToJson() const = 0;
+        // Load the actuator class object state from JSON. Returns true
+        // succesful otherwise false and the object is not valid state.
+        virtual bool FromJson(const nlohmann::json& object) = 0;
     private:
+    };
+
+    // MaterialActuatorClass holds the data to change a node's
+    // material in some particular way. The changeable parameters
+    // are the possible material instance parameters.
+    class MaterialActuatorClass : public AnimationActuatorClass
+    {
+    public:
+        // The interpolation method.
+        using Interpolation = math::Interpolation;
+
+        MaterialActuatorClass()
+        { mId = base::RandomString(10); }
+        Interpolation GetInterpolation() const
+        { return mInterpolation; }
+        void SetInterpolation(Interpolation method)
+        { mInterpolation = method; }
+        float GetEndAlpha() const
+        { return mEndAlpha; }
+        void SetEndAlpha(float alpha)
+        { mEndAlpha = alpha; }
+        void SetNodeId(const std::string& id)
+        { mNodeId = id; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetNodeId() const override
+        { return mNodeId; }
+        virtual std::size_t GetHash() const override
+        {
+            std::size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
+            hash = base::hash_combine(hash, mNodeId);
+            hash = base::hash_combine(hash, mInterpolation);
+            hash = base::hash_combine(hash, mStartTime);
+            hash = base::hash_combine(hash, mDuration);
+            hash = base::hash_combine(hash, mEndAlpha);
+            return hash;
+        }
+        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        { return std::make_unique<MaterialActuatorClass>(*this); }
+        virtual Type GetType() const override
+        { return Type::Material; }
+        virtual float GetStartTime() const override
+        { return mStartTime; }
+        virtual float GetDuration() const override
+        { return mDuration; }
+        virtual void SetStartTime(float start) override
+        { mStartTime = start; }
+        virtual void SetDuration(float duration) override
+        { mDuration = duration; }
+        virtual nlohmann::json ToJson() const override
+        {
+            nlohmann::json json;
+            base::JsonWrite(json, "id", mId);
+            base::JsonWrite(json, "node", mNodeId);
+            base::JsonWrite(json, "method", mInterpolation);
+            base::JsonWrite(json, "starttime", mStartTime);
+            base::JsonWrite(json, "duration", mDuration);
+            base::JsonWrite(json, "alpha", mEndAlpha);
+            return json;
+        }
+        virtual bool FromJson(const nlohmann::json& json) override
+        {
+            return base::JsonReadSafe(json, "id", &mId) &&
+                   base::JsonReadSafe(json, "node", &mNodeId) &&
+                   base::JsonReadSafe(json, "method", &mInterpolation) &&
+                   base::JsonReadSafe(json, "starttime", &mStartTime) &&
+                   base::JsonReadSafe(json, "duration", &mDuration) &&
+                   base::JsonReadSafe(json, "alpha", &mEndAlpha);
+        }
+    private:
+        // id of the actuator.
+        std::string mId;
+        // id of the node that the action will be applied on.
+        std::string mNodeId;
+        // the interpolation method to be used.
+        Interpolation mInterpolation = Interpolation::Linear;
+        // Normalized start time of the action
+        float mStartTime = 0.0f;
+        // Normalized duration of the action.
+        float mDuration = 1.0f;
+        // Material parameters to change over time.
+        // The ending alpha value.
+        float mEndAlpha = 1.0f;
     };
 
     // AnimationTransformActuatorClass holds the transform data for some
@@ -567,6 +673,58 @@ namespace game
         // Create an exact clone of this actuator object.
         virtual std::unique_ptr<AnimationActuator> Clone() const = 0;
     private:
+    };
+
+    // Apply a material change on a node's material instance.
+    class MaterialActuator : public AnimationActuator
+    {
+    public:
+        MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
+           : mClass(klass)
+        {}
+        MaterialActuator(const MaterialActuatorClass& klass)
+            : mClass(std::make_shared<MaterialActuatorClass>(klass))
+        {}
+        MaterialActuator(MaterialActuatorClass&& klass)
+            : mClass(std::make_shared<MaterialActuatorClass>(std::move(klass)))
+        {}
+        virtual void Start(AnimationNode& node) override
+        {
+            const bool has_alpha_blending = node.GetMaterialClass()->GetSurfaceType() ==
+                    gfx::MaterialClass::SurfaceType::Transparent;
+            if (!has_alpha_blending) {
+                WARN("Material doesn't enable blending.");
+            }
+
+            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
+                mStartAlpha = node.GetAlpha();
+            else mStartAlpha = node.GetMaterial()->GetAlpha();
+        }
+        virtual void Apply(AnimationNode& node, float t) override
+        {
+            const auto method = mClass->GetInterpolation();
+            const float value = math::interpolate(mStartAlpha, mClass->GetEndAlpha(), t, method);
+            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
+                node.SetAlpha(value);
+            else node.GetMaterial()->SetAlpha(value);
+        }
+        virtual void Finish(AnimationNode& node) override
+        {
+            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
+                node.SetAlpha(mClass->GetEndAlpha());
+            else node.GetMaterial()->SetAlpha(mClass->GetEndAlpha());
+        }
+        virtual float GetStartTime() const override
+        { return mClass->GetStartTime(); }
+        virtual float GetDuration() const override
+        { return mClass->GetDuration(); }
+        virtual std::string GetNodeId() const override
+        { return mClass->GetNodeId(); }
+        virtual std::unique_ptr<AnimationActuator> Clone() const override
+        { return std::make_unique<MaterialActuator>(*this); }
+    private:
+        std::shared_ptr<const MaterialActuatorClass> mClass;
+        float mStartAlpha = 1.0f;
     };
 
     // Apply a change to node's transformation, i.e. one of the following
@@ -754,6 +912,9 @@ namespace game
             const auto& klass = mActuators[i];
             if (klass->GetType() == AnimationActuatorClass::Type::Transform)
                 return std::make_unique<AnimationTransformActuator>(std::static_pointer_cast<AnimationTransformActuatorClass>(klass));
+            else if (klass->GetType() == AnimationActuatorClass::Type::Material)
+                return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
+            BUG("Unknown actuator type");
             return {};
         }
 
@@ -809,6 +970,9 @@ namespace game
                 std::shared_ptr<AnimationActuatorClass> actuator;
                 if (type == AnimationActuatorClass::Type::Transform)
                     actuator = std::make_shared<AnimationTransformActuatorClass>();
+                else if (type == AnimationActuatorClass::Type::Material)
+                    actuator = std::make_shared<MaterialActuatorClass>();
+                else BUG("Unknown actuator type.");
 
                 if (!actuator->FromJson(obj["actuator"]))
                     return std::nullopt;
