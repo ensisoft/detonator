@@ -62,16 +62,7 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
 
 ChildWindow::~ChildWindow()
 {
-    if (mWidget)
-    {
-        const auto &text = mWidget->windowTitle();
-        const auto &klass = mWidget->metaObject()->className();
-        DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
-
-        mUI.verticalLayout->removeWidget(mWidget);
-        mWidget->setParent(nullptr);
-        delete mWidget;
-    }
+    Shutdown();
 }
 
 void ChildWindow::RefreshUI()
@@ -100,6 +91,27 @@ void ChildWindow::Render()
 void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
 {
     mUI.menubar->insertMenu(mUI.menuEdit->menuAction(), menu);
+}
+
+void ChildWindow::Shutdown()
+{
+    if (mWidget)
+    {
+        const auto &text = mWidget->windowTitle();
+        const auto &klass = mWidget->metaObject()->className();
+        DEBUG("Destroy child window (widget=%1) '%2'", klass, text);
+
+        mUI.verticalLayout->removeWidget(mWidget);
+        mWidget->setParent(nullptr);
+
+        // make sure we cleanup properly while all the resources
+        // such as the OpenGL contexts (and the window) are still
+        // valid.
+        mWidget->Shutdown();
+
+        delete mWidget;
+        mWidget = nullptr;
+    }
 }
 
 MainWidget* ChildWindow::TakeWidget()
@@ -145,6 +157,8 @@ void ChildWindow::on_actionZoomOut_triggered()
 
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
+    event->accept();
+
     if (!mWidget)
         return;
 
@@ -153,18 +167,9 @@ void ChildWindow::closeEvent(QCloseEvent* event)
         event->ignore();
         return;
     }
-
-    event->accept();
-
-    // make sure we cleanup properly while all the resources
-    // such as the OpenGL contexts (and the window) are still
-    // valid.
-    mWidget->Shutdown();
-
     const auto& text  = mWidget->windowTitle();
     const auto& klass = mWidget->metaObject()->className();
     DEBUG("Close child window (widget=%1) '%2'", klass, text);
-
     // we could emit an event here to indicate that the window
     // is getting closed but that's a sure-fire way of getting
     // unwanted recursion that will fuck shit up.  (i.e this window

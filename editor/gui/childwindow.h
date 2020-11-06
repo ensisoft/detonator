@@ -74,6 +74,8 @@ namespace gui
 
         void SetSharedWorkspaceMenu(QMenu* menu);
 
+        void Shutdown();
+
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!
         MainWidget* TakeWidget();

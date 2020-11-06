@@ -501,10 +501,7 @@ void MainWindow::closeWorkspace()
     // delete child windows
     for (auto* child : mChildWindows)
     {
-        // when the child window is deleted it will do
-        // widget shutdown.
-        // todo: maybe this should be explicit rather than implicit via dtor ?
-        child->close();
+        child->Shutdown();
         delete child;
     }
     mChildWindows.clear();
