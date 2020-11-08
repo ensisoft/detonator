@@ -354,8 +354,6 @@ nlohmann::json MaterialClass::ToJson() const
 
     for (const auto& sampler : mTextures)
     {
-        if (!sampler.source->CanSerialize())
-            continue;
         nlohmann::json js;
         base::JsonWrite(js, "box", sampler.box);
         base::JsonWrite(js, "type", sampler.source->GetSourceType());
@@ -405,8 +403,10 @@ std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& objec
             source = std::make_shared<detail::TextureFileSource>();
         else if (type == TextureSource::Source::TextBuffer)
             source = std::make_shared<detail::TextureTextBufferSource>();
-        else if (type == TextureSource::Source::Bitmap)
-            source = std::make_shared<detail::TextureBitmapSource>();
+        else if (type == TextureSource::Source::BitmapBuffer)
+            source = std::make_shared<detail::TextureBitmapBufferSource>();
+        else if (type == TextureSource::Source::BitmapGenerator)
+            source = std::make_shared<detail::TextureBitmapGeneratorSource>();
         else return std::nullopt;
 
         if (!source->FromJson(obj["source"]))

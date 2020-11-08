@@ -23,10 +23,12 @@
 #include "config.h"
 
 #include <cmath>
+#include <iostream>
 
-#include "base/test_minimal.h" 
-#include "../color4f.h"
-#include "../bitmap.h"
+#include "base/test_minimal.h"
+#include "base/test_float.h"
+#include "graphics/color4f.h"
+#include "graphics/bitmap.h"
 
 int test_main(int argc, char* argv[])
 {
@@ -293,5 +295,33 @@ int test_main(int argc, char* argv[])
         WritePPM(bmp, "bitmap.ppm");
     }
 
+    // random noise bitmap generation
+    {
+        gfx::NoiseBitmapGenerator gen;
+        gen.SetWidth(256);
+        gen.SetHeight(256);
+        gfx::NoiseBitmapGenerator::Layer layers[] = {
+            {2399,23346353,458912449, 4.0f, 200.0f},
+            {2963, 29297533, 458913047, 8.0f, 64.0f},
+            {5689, 88124567, 458912471, 128.0f, 4.0}
+        };
+        gen.AddLayer(layers[0]);
+        gen.AddLayer(layers[1]);
+        gen.AddLayer(layers[2]);
+        auto bitmap = gen.Generate();
+        WritePNG(*bitmap, "noise.png");
+
+        const auto& json = gen.ToJson();
+        gfx::NoiseBitmapGenerator other;
+        other.FromJson(json);
+        TEST_REQUIRE(other.GetWidth() == 256);
+        TEST_REQUIRE(other.GetHeight() == 256);
+        TEST_REQUIRE(other.GetNumLayers() == 3);
+        TEST_REQUIRE(other.GetLayer(0).prime0 == 2399);
+        TEST_REQUIRE(other.GetLayer(0).prime1 == 23346353);
+        TEST_REQUIRE(other.GetLayer(0).prime2 == 458912449);
+        TEST_REQUIRE(other.GetLayer(0).frequency == real::float32(4.0f));
+        TEST_REQUIRE(other.GetLayer(0).amplitude == real::float32(200.0f));
+    }
     return 0;
 }

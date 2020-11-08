@@ -165,6 +165,12 @@ inline void SetValue(QSpinBox* spin, int value)
     spin->setValue(value);
 }
 
+inline void SetValue(QSlider* slider, int value)
+{
+    QSignalBlocker s(slider);
+    slider->setValue(value);
+}
+
 template<typename Widget, typename Value> inline
 void SetUIValue(Widget* widget, const Value& value)
 {

@@ -196,6 +196,8 @@ add_executable(Editor
     editor/gui/dlgsettings.h
     editor/gui/dlgsettings.ui
     editor/gui/dlgsettings.cpp
+    editor/gui/dlgbitmap.h
+    editor/gui/dlgbitmap.cpp
     editor/gui/dlgtext.h
     editor/gui/dlgtext.cpp
     editor/gui/dlgtext.ui
@@ -340,6 +342,7 @@ add_executable(graphics_test
     graphics/test/main.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
+    third_party/base64/base64.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
 target_link_libraries(graphics_test freetype_custom_build)
@@ -386,6 +389,7 @@ add_library(gamelib_test SHARED
     gamelib/main/gamelib.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
+    third_party/base64/base64.cpp
 )
 target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
 
@@ -426,6 +430,7 @@ add_library(invaders SHARED
     wdk/wdk/keys.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
+    third_party/base64/base64.cpp
 )
 target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders")
 target_link_libraries(invaders PRIVATE freetype_custom_build harfbuzz_custom_build)
@@ -446,7 +451,7 @@ endif()
 # unit tests
 enable_testing()
 # graphics unit tests
-add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp)
+add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp third_party/stb/stb_image_write.c)
 add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c)
 add_executable(unit_test          graphics/unit_test/unit_test.cpp graphics/drawable.cpp base/assert.cpp)
 add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
@@ -471,7 +476,8 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     graphics/resource.cpp
     gamelib/animation.cpp
     third_party/stb/stb_image.c
-    third_party/stb/stb_image_write.c)
+    third_party/stb/stb_image_write.c
+    third_party/base64/base64.cpp)
 add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
 
 # base tests

@@ -10,6 +10,12 @@
     <height>1021</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Material</string>
   </property>
@@ -725,7 +731,7 @@
                     <enum>Qt::Horizontal</enum>
                    </property>
                    <property name="sizeType">
-                    <enum>QSizePolicy::Minimum</enum>
+                    <enum>QSizePolicy::Preferred</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -736,9 +742,27 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btnNewTextTextureMap">
+                  <widget class="QToolButton" name="btnAddTextureMap">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="text">
-                    <string>New Text ...</string>
+                    <string>Add ...</string>
+                   </property>
+                   <property name="popupMode">
+                    <enum>QToolButton::MenuButtonPopup</enum>
+                   </property>
+                   <property name="toolButtonStyle">
+                    <enum>Qt::ToolButtonTextOnly</enum>
+                   </property>
+                   <property name="autoRaise">
+                    <bool>false</bool>
+                   </property>
+                   <property name="arrowType">
+                    <enum>Qt::NoArrow</enum>
                    </property>
                   </widget>
                  </item>
@@ -747,15 +771,14 @@
                    <property name="enabled">
                     <bool>false</bool>
                    </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="text">
                     <string>Delete</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btnAddTextureMap">
-                   <property name="text">
-                    <string>Browse ...</string>
                    </property>
                   </widget>
                  </item>
@@ -1201,9 +1224,8 @@
   <tabstop>btnEditShader</tabstop>
   <tabstop>browseShader</tabstop>
   <tabstop>textures</tabstop>
-  <tabstop>btnNewTextTextureMap</tabstop>
-  <tabstop>btnDelTextureMap</tabstop>
   <tabstop>btnAddTextureMap</tabstop>
+  <tabstop>btnDelTextureMap</tabstop>
   <tabstop>textureFile</tabstop>
   <tabstop>textureID</tabstop>
   <tabstop>textureWidth</tabstop>
@@ -1216,8 +1238,8 @@
   <tabstop>rectH</tabstop>
   <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
-  <tabstop>zoom</tabstop>
   <tabstop>time</tabstop>
+  <tabstop>zoom</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

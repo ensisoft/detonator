@@ -20,7 +20,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#define LOGTAG "material"
+#define LOGTAG "gui"
 
 #include "config.h"
 
@@ -49,6 +49,7 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
+#include "editor/gui/dlgbitmap.h"
 #include "editor/gui/dlgtexturerect.h"
 #include "editor/gui/materialwidget.h"
 
@@ -144,6 +145,16 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
     mUI.materialName->setText("My Material");
+
+    QMenu* menu  = new QMenu(this);
+    QAction* add_texture_from_file = menu->addAction("File");
+    QAction* add_texture_from_text = menu->addAction("Text");
+    QAction* add_texture_from_bitmap = menu->addAction(("Bitmap"));
+    connect(add_texture_from_file, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromFile);
+    connect(add_texture_from_text, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromText);
+    connect(add_texture_from_bitmap, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromBitmap);
+    mUI.btnAddTextureMap->setMenu(menu);
+
     setWindowTitle("My Material");
     SetValue(mUI.materialID, mMaterial.GetId());
 
@@ -454,74 +465,7 @@ void MaterialWidget::on_actionSave_triggered()
 
 void MaterialWidget::on_btnAddTextureMap_clicked()
 {
-    const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Image File(s)"), "", tr("Images (*.png *.jpg *.jpeg)"));
-    if (list.isEmpty())
-        return;
-
-    for (const auto& item : list)
-    {
-        const QFileInfo info(item);
-        const auto& name = info.baseName();
-        const auto& file = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
-
-        std::vector<TexturePackImage> images;
-
-        if (FileExists(file + ".json"))
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msg.setText(tr("Looks like this file '%1' has an associated JSON file."
-                "Would you like me to try to read it?").arg(name));
-            if (msg.exec() == QMessageBox::Yes)
-            {
-                ReadTexturePack(file + ".json", &images);
-            }
-        }
-        const QPixmap pix(file);
-        if (pix.isNull())
-        {
-            ERROR("Failed to read image '%1'", file);
-            continue;
-        }
-
-        // if no JSON file was read (or failed to read) then we create one
-        // texture pack image which covers the whole image.
-        if (images.empty())
-        {
-            TexturePackImage whole_image;
-            whole_image.width  = pix.width();
-            whole_image.height = pix.height();
-            whole_image.xpos   = 0;
-            whole_image.ypos   = 0;
-            whole_image.name   = name;
-            images.push_back(std::move(whole_image));
-        }
-
-        const float texture_width  = pix.width();
-        const float texture_height = pix.height();
-        // add all the images in the material and in the UI's list widget
-        for (const auto& img : images)
-        {
-            auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file), app::ToUtf8(img.name));
-            QListWidgetItem* item = new QListWidgetItem(mUI.textures);
-            item->setText(img.name);
-            item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
-            mUI.textures->addItem(item);
-
-            // normalize the texture coords.
-            gfx::FRect texture_box;
-            texture_box.SetX(img.xpos / texture_width);
-            texture_box.SetY(img.ypos / texture_height);
-            texture_box.SetWidth(img.width / texture_width);
-            texture_box.SetHeight(img.height / texture_height);
-            // add texture source with texture source box.
-            mMaterial.AddTexture(std::move(source), texture_box);
-        }
-    }
-    const auto index = mUI.textures->currentRow();
-    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
+    mUI.btnAddTextureMap->showMenu();
 }
 
 void MaterialWidget::on_btnDelTextureMap_clicked()
@@ -587,10 +531,19 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
         // Update the texture source's TextBuffer
         ptr->SetTextBuffer(std::move(text));
 
-        // important need to remember to update item id
-        // ín case we want to delete the right texture map later.
-        QListWidgetItem* item = mUI.textures->item(row);
-        item->setData(Qt::UserRole, app::FromUtf8(ptr->GetId()));
+        // update the preview.
+        on_textures_currentRowChanged(row);
+    }
+    else if (auto* ptr = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(&source))
+    {
+        // make a copy for editing.
+        auto copy = ptr->GetGenerator().Clone();
+        DlgBitmap dlg(this, std::move(copy));
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        // override the generator with changes.
+        ptr->SetGenerator(dlg.GetResult());
 
         // update the preview.
         on_textures_currentRowChanged(row);
@@ -629,37 +582,6 @@ void MaterialWidget::on_btnSelectTextureRect_clicked()
 
     on_textures_currentRowChanged(row);
 
-}
-
-void MaterialWidget::on_btnNewTextTextureMap_clicked()
-{
-    // anything set in this text buffer will be default
-    // when the dialog is opened.
-    gfx::TextBuffer text(100, 100);
-
-    DlgText dlg(this, text);
-
-    if (dlg.exec() == QDialog::Rejected)
-        return;
-
-    // map the font files.
-    for (size_t i=0; i<text.GetNumTexts(); ++i)
-    {
-        auto& style_and_text = text.GetText(i);
-        style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
-    }
-
-    auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text), "TextBuffer");
-
-    QListWidgetItem* item = new QListWidgetItem(mUI.textures);
-    item->setText("TextBuffer");
-    item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
-    mUI.textures->addItem(item);
-
-    mMaterial.AddTexture(std::move(source));
-
-    const auto index = mUI.textures->currentRow();
-    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
 }
 
 void MaterialWidget::on_browseShader_clicked()
@@ -722,11 +644,11 @@ void MaterialWidget::on_textures_currentRowChanged(int index)
     SetValue(mUI.rectW, rect.GetWidth());
     SetValue(mUI.rectH, rect.GetHeight());
     SetValue(mUI.textureID, source.GetId());
+    SetValue(mUI.textureFile, QString("N/A"));
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(&source))
     {
         SetValue(mUI.textureFile, ptr->GetFilename());
     }
-
 
     mUI.textureProp->setEnabled(true);
     mUI.textureRect->setEnabled(true);
@@ -810,6 +732,133 @@ void MaterialWidget::on_rectH_valueChanged(double value)
     gfx::FRect rect = mMaterial.GetTextureRect(row);
     rect.SetHeight(value);
     mMaterial.SetTextureRect(row, rect);
+}
+
+void MaterialWidget::AddNewTextureMapFromFile()
+{
+    const auto& list = QFileDialog::getOpenFileNames(this,
+    tr("Select Image File(s)"), "", tr("Images (*.png *.jpg *.jpeg)"));
+    if (list.isEmpty())
+        return;
+
+    for (const auto& item : list)
+    {
+        const QFileInfo info(item);
+        const auto& name = info.baseName();
+        const auto& file = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
+
+        std::vector<TexturePackImage> images;
+
+        if (FileExists(file + ".json"))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText(tr("Looks like this file '%1' has an associated JSON file."
+                           "Would you like me to try to read it?").arg(name));
+            if (msg.exec() == QMessageBox::Yes)
+            {
+                ReadTexturePack(file + ".json", &images);
+            }
+        }
+        const QPixmap pix(file);
+        if (pix.isNull())
+        {
+            ERROR("Failed to read image '%1'", file);
+            continue;
+        }
+
+        // if no JSON file was read (or failed to read) then we create one
+        // texture pack image which covers the whole image.
+        if (images.empty())
+        {
+            TexturePackImage whole_image;
+            whole_image.width  = pix.width();
+            whole_image.height = pix.height();
+            whole_image.xpos   = 0;
+            whole_image.ypos   = 0;
+            whole_image.name   = name;
+            images.push_back(std::move(whole_image));
+        }
+
+        const float texture_width  = pix.width();
+        const float texture_height = pix.height();
+        // add all the images in the material and in the UI's list widget
+        for (const auto& img : images)
+        {
+            auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file));
+            source->SetName(app::ToUtf8(img.name));
+            QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+            item->setText(img.name);
+            item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
+            mUI.textures->addItem(item);
+
+            // normalize the texture coords.
+            gfx::FRect texture_box;
+            texture_box.SetX(img.xpos / texture_width);
+            texture_box.SetY(img.ypos / texture_height);
+            texture_box.SetWidth(img.width / texture_width);
+            texture_box.SetHeight(img.height / texture_height);
+            // add texture source with texture source box.
+            mMaterial.AddTexture(std::move(source), texture_box);
+        }
+    }
+    const auto index = mUI.textures->currentRow();
+    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
+}
+
+void MaterialWidget::AddNewTextureMapFromText()
+{
+    // anything set in this text buffer will be default
+    // when the dialog is opened.
+    gfx::TextBuffer text(100, 100);
+
+    DlgText dlg(this, text);
+
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    // map the font files.
+    for (size_t i=0; i<text.GetNumTexts(); ++i)
+    {
+        auto& style_and_text = text.GetText(i);
+        style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
+    }
+
+    auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));
+    source->SetName("TextBuffer");
+
+    QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+    item->setText("TextBuffer");
+    item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
+    mUI.textures->addItem(item);
+
+    mMaterial.AddTexture(std::move(source));
+
+    const auto index = mUI.textures->currentRow();
+    mUI.textures->setCurrentRow(index == -1 ? 0 : index);
+
+}
+void MaterialWidget::AddNewTextureMapFromBitmap()
+{
+    auto generator = std::make_unique<gfx::NoiseBitmapGenerator>();
+    generator->SetWidth(100);
+    generator->SetHeight(100);
+
+    DlgBitmap dlg(this, std::move(generator));
+
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    auto result = dlg.GetResult();
+    auto source = std::make_unique<gfx::detail::TextureBitmapGeneratorSource>(std::move(result));
+    source->SetName("Noise");
+    QListWidgetItem* item = new QListWidgetItem(mUI.textures);
+    item->setText("Noise");
+    item->setData(Qt::UserRole, app::FromUtf8(source->GetId()));
+    mUI.textures->addItem(item);
+
+    mMaterial.AddTexture(std::move(source));
 }
 
 void MaterialWidget::SetMaterialProperties() const

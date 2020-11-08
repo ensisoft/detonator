@@ -79,7 +79,6 @@ namespace gui
         void on_btnEditShader_clicked();
         void on_btnResetTextureRect_clicked();
         void on_btnSelectTextureRect_clicked();
-        void on_btnNewTextTextureMap_clicked();
         void on_browseShader_clicked();
         void on_textures_currentRowChanged(int row);
         void on_materialType_currentIndexChanged(const QString& text);
@@ -87,6 +86,9 @@ namespace gui
         void on_rectY_valueChanged(double value);
         void on_rectW_valueChanged(double value);
         void on_rectH_valueChanged(double value);
+        void AddNewTextureMapFromFile();
+        void AddNewTextureMapFromText();
+        void AddNewTextureMapFromBitmap();
 
     private:
         void SetMaterialProperties() const;

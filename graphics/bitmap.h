@@ -24,6 +24,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <stb/stb_image_write.h>
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include <limits>
 #include <vector>
 #include <cassert>
@@ -35,11 +40,11 @@
 #include <algorithm>
 #include <functional>
 
-#include <stb/stb_image_write.h>
-
 #include "base/assert.h"
-#include "color4f.h"
-#include "types.h"
+#include "base/math.h"
+#include "base/utility.h"
+#include "graphics/color4f.h"
+#include "graphics/types.h"
 
 // macro poisoning
 #undef RGB
@@ -781,5 +786,186 @@ namespace gfx
     {
         return WritePNG(bmp, filename.c_str());
     }
+    inline void WritePNG(const IBitmap& bmp, const std::string& filename)
+    {
+        const auto w = bmp.GetWidth();
+        const auto h = bmp.GetHeight();
+        const auto d = bmp.GetDepthBits() / 8;
+        if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
+            throw std::runtime_error(std::string("failed to write png: " + filename));
+    }
+
+    // Interface for accessing / generating bitmaps procedurally.
+    // Each implementation implements some procedural method for
+    // creating a bitmap and generating its content.
+    class IBitmapGenerator
+    {
+    public:
+        // Get the function type of the implementation.
+        enum class Function {
+            Noise
+        };
+        // Destructor.
+        virtual ~IBitmapGenerator() = default;
+        // Get the generation function.
+        virtual Function GetFunction() const = 0;
+        // Generate a new bitmap using the algorithm.
+        virtual std::unique_ptr<IBitmap> Generate() const = 0;
+        // Clone this generator.
+        virtual std::unique_ptr<IBitmapGenerator> Clone() const = 0;
+        // Get the hash value of the generator.
+        virtual std::size_t GetHash() const = 0;
+        // Serialize the generator into JSON.
+        virtual nlohmann::json ToJson() const = 0;
+        // Load the generator's state from the given JSON object.
+        // Returns true if successful otherwise false.
+        virtual bool FromJson(const nlohmann::json& json) = 0;
+        // Get the width of the bitmaps that will be generated (in pixels).
+        virtual unsigned GetWidth() const = 0;
+        // Get the height of the bitmaps that will be generated (in pixels).
+        virtual unsigned GetHeight() const = 0;
+        // Set the width of the bitmaps that will be generated (in pixels).
+        virtual void SetWidth(unsigned width) = 0;
+        // Set the height of the bitmaps that will be generated (in pixels).
+        virtual void SetHeight(unsigned height) = 0;
+    private:
+    };
+
+    // Implement bitmap generation using a noise function.
+    // Each layer of noise is defined as a function with prime
+    // number seeds and frequency and amplitude. The bitmap
+    // is filled by sampling all the noise layers / functions
+    // and summing their signals.
+    class NoiseBitmapGenerator : public IBitmapGenerator
+    {
+    public:
+        struct Layer {
+            std::uint32_t prime0 = 7;
+            std::uint32_t prime1 = 743;
+            std::uint32_t prime2 = 7873;
+            float frequency = 1.0f;
+            float amplitude = 1.0f;
+        };
+        NoiseBitmapGenerator() = default;
+        NoiseBitmapGenerator(unsigned width, unsigned height)
+            : mWidth(width)
+            , mHeight(height)
+        {}
+        size_t GetNumLayers() const
+        { return mLayers.size(); }
+        void AddLayer(const Layer& layer)
+        { mLayers.push_back(layer); }
+        const Layer& GetLayer(size_t index) const
+        { return mLayers[index]; }
+        Layer& GetLayer(size_t index)
+        { return mLayers[index]; }
+        void DelLayer(size_t index)
+        {
+            auto it = mLayers.begin();
+            std::advance(it, index);
+            mLayers.erase(it);
+        }
+        bool HasLayers() const
+        { return !mLayers.empty(); }
+
+        virtual Function GetFunction() const override
+        { return Function::Noise; }
+        virtual std::unique_ptr<IBitmapGenerator> Clone() const override
+        { return std::make_unique<NoiseBitmapGenerator>(*this); }
+        virtual unsigned GetWidth() const override
+        { return mWidth; }
+        virtual unsigned GetHeight() const override
+        { return mHeight; }
+        virtual void SetHeight(unsigned height) override
+        { mHeight = height; }
+        virtual void SetWidth(unsigned width) override
+        { mWidth = width; }
+        virtual nlohmann::json ToJson() const override
+        {
+            nlohmann::json json;
+            base::JsonWrite(json, "width", mWidth);
+            base::JsonWrite(json, "height", mHeight);
+            for (const auto& layer : mLayers)
+            {
+                nlohmann::json js;
+                base::JsonWrite(js, "prime0", layer.prime0);
+                base::JsonWrite(js, "prime1", layer.prime1);
+                base::JsonWrite(js, "prime2", layer.prime2);
+                base::JsonWrite(js, "frequency", layer.frequency);
+                base::JsonWrite(js, "amplitude", layer.amplitude);
+                json["layers"].push_back(std::move(js));
+            }
+            return json;
+        }
+
+        virtual bool FromJson(const nlohmann::json& json) override
+        {
+            if (!base::JsonReadSafe(json, "width", &mWidth) ||
+                !base::JsonReadSafe(json, "height", &mHeight))
+                return false;
+            if (!json.contains("layers"))
+                return true;
+
+            for (const auto& js : json["layers"].items())
+            {
+                const auto& obj = js.value();
+                Layer layer;
+                if (!base::JsonReadSafe(obj, "prime0", &layer.prime0) ||
+                    !base::JsonReadSafe(obj, "prime1", &layer.prime1) ||
+                    !base::JsonReadSafe(obj, "prime2", &layer.prime2) ||
+                    !base::JsonReadSafe(obj, "frequency", &layer.frequency) ||
+                    !base::JsonReadSafe(obj, "amplitude", &layer.amplitude))
+                    return false;
+                mLayers.push_back(std::move(layer));
+            }
+            return true;
+        }
+
+
+        virtual std::unique_ptr<IBitmap> Generate() const override
+        {
+            auto ret = std::make_unique<GrayscaleBitmap>();
+            ret->Resize(mWidth, mHeight);
+            const float w = mWidth;
+            const float h = mHeight;
+            for (unsigned y=0; y<mHeight; ++y)
+            {
+                for (unsigned x = 0; x < mWidth; ++x)
+                {
+                    float pixel = 0.0f;
+                    for (const auto &layer : mLayers)
+                    {
+                        const math::NoiseGenerator gen(layer.frequency, layer.prime0, layer.prime1, layer.prime2);
+                        const auto amplitude = math::clamp(0.0f, 255.0f, layer.amplitude);
+                        const auto sample = gen.GetSample(x/w, y/h);
+                        pixel += (sample * amplitude);
+                    }
+                    Grayscale px;
+                    px.r = math::clamp(0u, 255u, (unsigned)pixel);
+                    ret->SetPixel(y, x, px);
+                }
+            }
+            return ret;
+        }
+        virtual size_t GetHash() const override
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mWidth);
+            hash = base::hash_combine(hash, mHeight);
+            for (const auto& layer : mLayers)
+            {
+                hash = base::hash_combine(hash,layer.prime0);
+                hash = base::hash_combine(hash,layer.prime1);
+                hash = base::hash_combine(hash,layer.prime2);
+                hash = base::hash_combine(hash, layer.amplitude);
+                hash = base::hash_combine(hash, layer.frequency);
+            }
+            return hash;
+        }
+    private:
+        unsigned mWidth  = 0;
+        unsigned mHeight = 0;
+        std::vector<Layer> mLayers;
+    };
 
 } // namespace

@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
 #  include <nlohmann/json.hpp>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
 #include <map>
@@ -68,9 +69,10 @@ namespace gfx
             // Data comes as an in memory bitmap rasterized by the TextBuffer
             // based on the text/font content/parameters.
             TextBuffer,
-            // Data comes as an arbitrary bitmap that the user can manipulate
-            // as per pixel by pixel basis.
-            Bitmap
+            // Data comes from a bitmap buffer.
+            BitmapBuffer,
+            // Data comes from a bitmap generator algorithm.
+            BitmapGenerator
         };
 
         virtual ~TextureSource() = default;
@@ -92,16 +94,11 @@ namespace gfx
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
         // Clone this texture source.
         virtual std::unique_ptr<TextureSource> Clone() const = 0;
-        // Returns whether texture source can serialize into JSON or not.
-        virtual bool CanSerialize() const
-        { return false; }
         // Serialize into JSON object.
-        virtual nlohmann::json ToJson() const
-        { return nlohmann::json{}; }
+        virtual nlohmann::json ToJson() const = 0;
         // Load state from JSON object. Returns true if successful
         // otherwise false.
-        virtual bool FromJson(const nlohmann::json& object)
-        { return false; }
+        virtual bool FromJson(const nlohmann::json& object) = 0;
         // Begin packing the texture source into the packer.
         virtual void BeginPacking(ResourcePacker* packer) const
         {}
@@ -117,14 +114,10 @@ namespace gfx
         class TextureFileSource : public TextureSource
         {
         public:
-            TextureFileSource(const std::string& file, const std::string& name)
-              : mFile(file)
-              , mName(name)
-            {
-                mId = base::RandomString(10);
-            }
             TextureFileSource()
             { mId = base::RandomString(10); }
+            TextureFileSource(const std::string& file) : TextureFileSource()
+            { mFile = file; }
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
             virtual std::string GetId() const override
@@ -138,8 +131,7 @@ namespace gfx
             virtual std::shared_ptr<IBitmap> GetData() const override;
             virtual std::unique_ptr<TextureSource> Clone() const override
             { return std::make_unique<TextureFileSource>(*this); }
-            virtual bool CanSerialize() const override
-            { return true; }
+
             virtual nlohmann::json ToJson() const override
             {
                 nlohmann::json json;
@@ -173,32 +165,33 @@ namespace gfx
         };
 
         // Source texture data from a bitmap
-        class TextureBitmapSource : public TextureSource
+        class TextureBitmapBufferSource : public TextureSource
         {
         public:
-            TextureBitmapSource()
+            TextureBitmapBufferSource()
             { mId = base::RandomString(10); }
+            TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap) : TextureBitmapBufferSource()
+            { mBitmap = std::move(bitmap); }
             template<typename T>
-            TextureBitmapSource(const Bitmap<T>& bmp) : TextureBitmapSource()
+            TextureBitmapBufferSource(const Bitmap<T>& bmp) : TextureBitmapBufferSource()
             {
                 mBitmap.reset(new Bitmap<T>(bmp));
             }
             template<typename T>
-            TextureBitmapSource(Bitmap<T>&& bmp) : TextureBitmapSource()
+            TextureBitmapBufferSource(Bitmap<T>&& bmp) : TextureBitmapBufferSource()
             {
                 mBitmap.reset(new Bitmap<T>(std::move(bmp)));
             }
 
-            TextureBitmapSource(const TextureBitmapSource& other)
+            TextureBitmapBufferSource(const TextureBitmapBufferSource& other)
             {
-                mId   = other.mId;
-                mName = other.mName;
-                if (other.mBitmap)
-                    mBitmap = other.mBitmap->Clone();
+                mId     = other.mId;
+                mName   = other.mName;
+                mBitmap = other.mBitmap->Clone();
             }
 
             virtual Source GetSourceType() const override
-            { return Source::Bitmap; }
+            { return Source::BitmapBuffer; }
             virtual std::string GetId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
@@ -206,7 +199,6 @@ namespace gfx
                 size_t hash = mBitmap->GetHash();
                 hash = base::hash_combine(hash, mBitmap->GetWidth());
                 hash = base::hash_combine(hash, mBitmap->GetHeight());
-                hash = base::hash_combine(hash, mId);
                 return hash;
             }
             virtual std::string GetName() const override
@@ -216,11 +208,119 @@ namespace gfx
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
             virtual std::unique_ptr<TextureSource> Clone() const override
-            { return std::make_unique<TextureBitmapSource>(*this); }
+            { return std::make_unique<TextureBitmapBufferSource>(*this); }
+            virtual nlohmann::json ToJson() const override
+            {
+                const auto depth = mBitmap->GetDepthBits() / 8;
+                const auto width = mBitmap->GetWidth();
+                const auto height = mBitmap->GetHeight();
+                const auto bytes = width * height * depth;
+                nlohmann::json json;
+                base::JsonWrite(json, "id", mId);
+                base::JsonWrite(json, "name", mName);
+                base::JsonWrite(json, "width", width);
+                base::JsonWrite(json, "height", height);
+                base::JsonWrite(json, "depth", depth);
+                base::JsonWrite(json, "data",
+                    base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
+                return json;
+            }
+            virtual bool FromJson(const nlohmann::json& json) override
+            {
+                unsigned width = 0;
+                unsigned height = 0;
+                unsigned depth  = 0;
+                std::string base64;
+                if (!base::JsonReadSafe(json, "id", &mId) ||
+                    !base::JsonReadSafe(json, "name", &mName) ||
+                    !base::JsonReadSafe(json, "width", &width) ||
+                    !base::JsonReadSafe(json, "height", &height) ||
+                    !base::JsonReadSafe(json, "depth", &depth) ||
+                    !base::JsonReadSafe(json, "data", &base64))
+                    return false;
+                const auto& data = base64::Decode(base64);
+                if (depth == 1)
+                    mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*)&data[0], width, height);
+                else if (depth == 3)
+                    mBitmap = std::make_shared<RgbBitmap>((const RGB*)&data[0], width, height);
+                else if (depth == 4)
+                    mBitmap = std::make_shared<RgbaBitmap>((const RGBA*)&data[0], width, height);
+                else return false;
+                return true;
+            }
         private:
             std::string mId;
-            std::shared_ptr<IBitmap> mBitmap;
             std::string mName;
+            std::shared_ptr<IBitmap> mBitmap;
+        };
+
+        // Source texture data from a bitmap
+        class TextureBitmapGeneratorSource : public TextureSource
+        {
+        public:
+            TextureBitmapGeneratorSource()
+            { mId = base::RandomString(10); }
+            TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator)
+                : TextureBitmapGeneratorSource()
+            {
+                mGenerator = std::move(generator);
+            }
+            TextureBitmapGeneratorSource(const TextureBitmapGeneratorSource& other)
+            {
+                mGenerator = other.mGenerator->Clone();
+                mId = other.mId;
+                mName = other.mName;
+            }
+
+            virtual Source GetSourceType() const override
+            { return Source::BitmapGenerator; }
+            virtual std::string GetId() const override
+            { return mId; }
+            virtual std::size_t GetHash() const override
+            { return mGenerator->GetHash(); }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
+            virtual std::shared_ptr<IBitmap> GetData() const override
+            { return mGenerator->Generate(); }
+            virtual std::unique_ptr<TextureSource> Clone() const override
+            { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
+
+            virtual nlohmann::json ToJson() const override
+            {
+                nlohmann::json json;
+                base::JsonWrite(json, "id", mId);
+                base::JsonWrite(json, "name", mName);
+                base::JsonWrite(json, "function", mGenerator->GetFunction());
+                base::JsonWrite(json, "generator", *mGenerator);
+                return json;
+            }
+            virtual bool FromJson(const nlohmann::json& json) override
+            {
+                IBitmapGenerator::Function function;
+                if (!base::JsonReadSafe(json, "id", &mId) ||
+                    !base::JsonReadSafe(json, "name", &mName) ||
+                    !base::JsonReadSafe(json, "function", &function))
+                    return false;
+                if (function == IBitmapGenerator::Function::Noise)
+                    mGenerator = std::make_unique<NoiseBitmapGenerator>();
+                if (!mGenerator->FromJson(json["generator"]))
+                    return false;
+                return true;
+            }
+
+            IBitmapGenerator& GetGenerator()
+            { return *mGenerator; }
+            const IBitmapGenerator& GetGenerator() const
+            { return *mGenerator; }
+
+            void SetGenerator(std::unique_ptr<IBitmapGenerator> generator)
+            { mGenerator = std::move(generator); }
+        private:
+            std::string mId;
+            std::string mName;
+            std::unique_ptr<IBitmapGenerator> mGenerator;
         };
 
         // Rasterize text buffer and provide as a texture source.
@@ -230,28 +330,15 @@ namespace gfx
             TextureTextBufferSource()
             { mId = base::RandomString(10); }
 
-            TextureTextBufferSource(const TextBuffer& text)
-              : mTextBuffer(text)
+            TextureTextBufferSource(const TextBuffer& text) : TextureTextBufferSource()
             {
-                mId = base::RandomString(10);
+                mTextBuffer = text;
             }
-            TextureTextBufferSource(const TextBuffer& text, const std::string& name)
-              : mTextBuffer(text)
-              , mName(name)
+            TextureTextBufferSource(TextBuffer&& text) : TextureTextBufferSource()
             {
-                mId = base::RandomString(10);
+                mTextBuffer = std::move(text);
             }
-            TextureTextBufferSource(TextBuffer&& text)
-              : mTextBuffer(std::move(text))
-            {
-                mId = base::RandomString(10);
-            }
-            TextureTextBufferSource(TextBuffer&& text, std::string&& name)
-              : mTextBuffer(std::move(text))
-              , mName(std::move(name))
-            {
-                mId = base::RandomString(10);
-            }
+
             virtual Source GetSourceType() const override
             { return Source::TextBuffer; }
             virtual std::string GetId() const override
@@ -272,8 +359,6 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Clone() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 
-            virtual bool CanSerialize() const override
-            { return true; }
             virtual nlohmann::json ToJson() const override
             {
                 nlohmann::json json;
@@ -583,10 +668,10 @@ namespace gfx
             return *this;
         }
 
-        MaterialClass& AddTexture(const std::string& file, const std::string& name = "")
+        MaterialClass& AddTexture(const std::string& file)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureFileSource>(file, name);
+            mTextures.back().source = std::make_unique<detail::TextureFileSource>(file);
             return *this;
         }
         MaterialClass& AddTexture(const TextBuffer& text)
@@ -603,11 +688,36 @@ namespace gfx
             mTextures.back().enable_gc = true;
             return *this;
         }
+
+        MaterialClass& AddTexture(const NoiseBitmapGenerator& generator)
+        {
+            auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+            mTextures.back().enable_gc = true;
+            return *this;
+        }
+        MaterialClass& AddTexture(NoiseBitmapGenerator&& generator)
+        {
+            auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+            mTextures.back().enable_gc = true;
+            return *this;
+        }
+        MaterialClass& AddTexture(std::unique_ptr<IBitmapGenerator> generator)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
+            mTextures.back().enable_gc = true;
+            return *this;
+        }
+
         template<typename T>
         MaterialClass& AddTexture(const Bitmap<T>& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(bitmap);
+            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(bitmap);
             return *this;
         }
 
@@ -615,7 +725,7 @@ namespace gfx
         MaterialClass& AddTexture(Bitmap<T>&& bitmap)
         {
             mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapSource>(std::move(bitmap));
+            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(std::move(bitmap));
             return *this;
         }
 
@@ -723,7 +833,7 @@ namespace gfx
         }
 
         // Get the hash value of the material based on the current material
-        // properties excluding the transident state i.e. runtime.
+        // properties excluding the transient state i.e. runtime.
         size_t GetHash() const;
 
         nlohmann::json ToJson() const;
