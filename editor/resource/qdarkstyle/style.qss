@@ -1070,8 +1070,11 @@ https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtoolbutton
 
 --------------------------------------------------------------------------- */
 QToolButton {
-  background-color: transparent;
-  border: 1px solid transparent;
+
+  /* background-color: transparent; */
+  /* border: 1px solid transparent; */
+  background-color: #505F69;
+  border: 1px solid #32414B;
   border-radius: 4px;
   margin: 0px;
   padding: 2px;
@@ -1096,7 +1099,9 @@ QToolButton:pressed {
 }
 
 QToolButton:disabled {
-  border: none;
+   background-color: #32414B;
+   border: 1px solid #32414B;
+  /* border: none; */
 }
 
 QToolButton:hover {
