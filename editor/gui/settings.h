@@ -90,6 +90,14 @@ namespace gui
             *out = qvariant_cast<quint64>(value);
             return true;
         }
+        bool getValue(const QString& module, const QString& key, std::string* out) const
+        {
+            const auto& value = mSettings->GetValue(module + "/" + key);
+            if (!value.isValid())
+                return false;
+            *out = app::ToUtf8(qvariant_cast<QString>(value));
+            return true;
+        }
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist

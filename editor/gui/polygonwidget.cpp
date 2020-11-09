@@ -84,7 +84,8 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace) : mWorkspace(workspace)
     mUI.blueprints->addItems(workspace->ListUserDefinedMaterials());
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.name->setText("My Custom Shape");
+    SetValue(mUI.name, QString("My Custom Shape"));
+    SetValue(mUI.ID, mPolygon.GetId());
 
     setWindowTitle("My Custom Shape");
     setFocusPolicy(Qt::StrongFocus);
@@ -101,13 +102,13 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace) : mWorkspace(workspace)
 PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& resource) : PolygonWidget(workspace)
 {
     DEBUG("Editing custom shape '%1'", resource.GetName());
-
-    mUI.name->setText(resource.GetName());
-    GetProperty(resource, "material", mUI.blueprints);
-    GetProperty(resource, "draw_alpha", mUI.alpha);
-
     mPolygon = *resource.GetContent<gfx::PolygonClass>();
     mOriginalHash = mPolygon.GetHash();
+
+    SetValue(mUI.name, resource.GetName());
+    SetValue(mUI.ID, mPolygon.GetId());
+    GetProperty(resource, "material", mUI.blueprints);
+    GetProperty(resource, "draw_alpha", mUI.alpha);
     setWindowTitle(mUI.name->text());
 }
 

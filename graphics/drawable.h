@@ -36,6 +36,7 @@
 #include <limits>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "base/math.h"
 #include "graphics/geometry.h"
 
@@ -122,6 +123,8 @@ namespace gfx
             Trapezoid
         };
         virtual ~DrawableClass() = default;
+        // Get the class object resource id.
+        virtual std::string GetId() const = 0;
         // Get the type of the drawable.
         virtual Type GetType() const = 0;
         // Pack the drawable resources.
@@ -219,9 +222,10 @@ namespace gfx
     class RoundRectangleClass : public DrawableClass
     {
     public:
-        RoundRectangleClass() = default;
+        RoundRectangleClass()
+        { mId = base::RandomString(10); }
         RoundRectangleClass(float radius) : mRadius(radius)
-        {}
+        { mId = base::RandomString(10); }
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Drawable::Style style, Device& device) const;
 
@@ -232,10 +236,13 @@ namespace gfx
 
         virtual Type GetType() const override
         { return DrawableClass::Type::RoundRectangle; }
+        virtual std::string GetId() const override
+        { return mId; }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
     private:
+        std::string mId;
         float mRadius = 0.05;
     };
 
@@ -370,6 +377,8 @@ namespace gfx
     class GridClass : public DrawableClass
     {
     public:
+        GridClass()
+        { mId = base::RandomString(10); }
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Device& device) const;
         void SetNumVerticalLines(unsigned lines)
@@ -386,10 +395,13 @@ namespace gfx
         { return mBorderLines; }
         virtual Type GetType() const override
         { return DrawableClass::Type::Grid; }
+        virtual std::string GetId() const override
+        { return mId; }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
     private:
+        std::string mId;
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;
         bool mBorderLines = false;
@@ -453,9 +465,11 @@ namespace gfx
             float line_width = 1.0f;
         };
 
+        PolygonClass()
+        { mId = base::RandomString(10); }
+
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const InstanceState& state, Device& device) const;
-
 
         void Clear()
         {
@@ -571,12 +585,15 @@ namespace gfx
         virtual void Pack(ResourcePacker* packer) const override;
         virtual Type GetType() const override
         { return Type::Polygon; }
+        virtual std::string GetId() const override
+        { return mId; }
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
 
         // Load from JSON
         static std::optional<PolygonClass> FromJson(const nlohmann::json& object);
     private:
+        std::string mId;
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         mutable std::string mName; // cached name
@@ -761,9 +778,11 @@ namespace gfx
             float hatching = 0.0f;
         };
 
-        KinematicsParticleEngineClass() = default;
+        KinematicsParticleEngineClass()
+        { mId = base::RandomString(10); }
+
         KinematicsParticleEngineClass(const Params& init) : mParams(init)
-        {}
+        { mId = base::RandomString(10); }
 
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const InstanceState& state, Device& device) const;
@@ -781,6 +800,8 @@ namespace gfx
 
         virtual Type GetType() const override
         { return DrawableClass::Type::KinematicsParticleEngine; }
+        virtual std::string GetId() const override
+        { return mId; }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
@@ -796,6 +817,7 @@ namespace gfx
         void KillParticle(InstanceState& state, size_t i) const;
         bool UpdateParticle(InstanceState& state, size_t i, float dt) const;
     private:
+        std::string mId;
         Params mParams;
     };
 
@@ -875,6 +897,10 @@ namespace gfx
         class GenericDrawableClass : public DrawableClass
         {
         public:
+            GenericDrawableClass()
+            { mId = base::RandomString(10); }
+            virtual std::string GetId() const override
+            { return mId; }
             virtual Type GetType() const override
             { return ActualType; }
             virtual void Pack(ResourcePacker*) const override {}
@@ -882,6 +908,8 @@ namespace gfx
             { return nlohmann::json {}; }
             virtual bool LoadFromJson(const nlohmann::json&) override
             { return true; }
+        private:
+            std::string mId;
         };
     } // namespace
 

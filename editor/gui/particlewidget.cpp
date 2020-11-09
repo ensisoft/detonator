@@ -29,6 +29,7 @@
 #  include <QFileDialog>
 #  include <QMessageBox>
 #  include <QTextStream>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
 #include "graphics/painter.h"
@@ -69,8 +70,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.scaleY->setValue(500);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.name->setText("My Particle System");
-    setWindowTitle("My Particle System");
+    SetValue(mUI.name, QString("My Particle System"));
+    SetValue(mUI.ID, mClass.GetId());
 
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
@@ -81,14 +82,16 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
             this,       &ParticleEditorWidget::newResourceAvailable);
     connect(mWorkspace, &app::Workspace::ResourceToBeDeleted,
             this,       &ParticleEditorWidget::resourceToBeDeleted);
+
+    setWindowTitle("My Particle System");
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
 {
     const auto& name = resource.GetName();
+    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
+    const auto& params = engine->GetParams();
     DEBUG("Editing particle system: '%1'", name);
-
-    mUI.name->setText(name);
 
     GetProperty(resource, "material", mUI.materials);
     GetProperty(resource, "transform_enabled", mUI.transform);
@@ -103,8 +106,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
 
-    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
-    const auto& params = engine->GetParams();
+    SetValue(mUI.name, name);
+    SetValue(mUI.ID, engine->GetId());
     SetValue(mUI.motion, params.motion);
     SetValue(mUI.when,   params.mode);
     SetValue(mUI.boundary, params.boundary);
@@ -132,6 +135,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
 
     mOriginalHash = engine->GetHash();
+    mClass = *engine;
 
     setWindowTitle(name);
 }
@@ -163,7 +167,11 @@ void ParticleEditorWidget::AddActions(QMenu& menu)
 
 bool ParticleEditorWidget::SaveState(Settings& settings) const
 {
+    const auto& json = mClass.ToJson();
+    const auto& base64 = base64::Encode(json.dump());
+    settings.setValue("Particle", "content", base64);
     settings.saveWidget("Particle", mUI.name);
+    settings.saveWidget("Particle", mUI.ID);
     settings.saveWidget("Particle", mUI.materials);
     settings.saveWidget("Particle", mUI.transform);
     settings.saveWidget("Particle", mUI.translateX);
@@ -206,7 +214,24 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
 
 bool ParticleEditorWidget::LoadState(const Settings& settings)
 {
+    std::string base64;
+    if (!settings.getValue("Particle", "content", &base64))
+    {
+        ERROR("Content data is missing.");
+        return false;
+    }
+    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
+    if (!ret.has_value())
+    {
+        ERROR("Failed to restore class from JSON.");
+        return false;
+    }
+    mClass = std::move(ret.value());
+    mOriginalHash = mClass.GetHash();
+
     settings.loadWidget("Particle", mUI.name);
+    settings.loadWidget("Particle", mUI.ID);
     settings.loadWidget("Particle", mUI.materials);
     settings.loadWidget("Particle", mUI.transform);
     settings.loadWidget("Particle", mUI.translateX);
@@ -342,12 +367,11 @@ void ParticleEditorWidget::on_actionSave_triggered()
     const QString& name = GetValue(mUI.name);
 
     gfx::KinematicsParticleEngineClass::Params params;
-    gfx::KinematicsParticleEngineClass engine;
     fillParams(params);
-    engine.SetParams(params);
+    mClass.SetParams(params);
 
     // what's the new hash
-    const auto hash = engine.GetHash();
+    const auto hash = mClass.GetHash();
 
     if (mWorkspace->HasParticleSystem(name))
     {
@@ -369,7 +393,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     mOriginalHash = hash;
 
     // setup the resource with the current auxiliary params
-    app::ParticleSystemResource particle_resource(std::move(engine), name);
+    app::ParticleSystemResource particle_resource(mClass, name);
     SetProperty(particle_resource, "material", mUI.materials);
     SetProperty(particle_resource, "transform_enabled", mUI.transform);
     SetProperty(particle_resource, "transform_xpos", mUI.translateX);

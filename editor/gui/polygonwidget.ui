@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Polygon</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/resource.qrc">
@@ -34,16 +34,10 @@
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_28">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="staticInstance">
                <property name="text">
-                <string>Name</string>
+                <string>Static instance</string>
                </property>
               </widget>
              </item>
@@ -57,10 +51,36 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="staticInstance">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_28">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
-                <string>Static instance</string>
+                <string>Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="ID">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_30">
+               <property name="text">
+                <string>ID</string>
                </property>
               </widget>
              </item>
@@ -290,6 +310,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>name</tabstop>
+  <tabstop>ID</tabstop>
   <tabstop>staticInstance</tabstop>
   <tabstop>blueprints</tabstop>
   <tabstop>alpha</tabstop>

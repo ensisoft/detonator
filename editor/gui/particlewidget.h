@@ -83,6 +83,7 @@ namespace gui
         Ui::ParticleWidget mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
+        gfx::KinematicsParticleEngineClass mClass;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
         std::shared_ptr<gfx::Material> mMaterial;
         bool mPaused = false;

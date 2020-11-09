@@ -505,13 +505,15 @@ void RoundRectangleClass::Pack(ResourcePacker* packer) const
 nlohmann::json RoundRectangleClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "radius", mRadius);
     return json;
 }
 
 bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
 {
-    if (!base::JsonReadSafe(json, "radius", &mRadius))
+    if (!base::JsonReadSafe(json, "id", &mId) ||
+        !base::JsonReadSafe(json, "radius", &mRadius))
         return false;
     return true;
 }
@@ -819,6 +821,7 @@ void GridClass::Pack(ResourcePacker* packer) const
 nlohmann::json GridClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "vertical_lines", mNumVerticalLines);
     base::JsonWrite(json, "horizontal_lines", mNumHorizontalLines);
     base::JsonWrite(json, "border_lines", mBorderLines);
@@ -827,7 +830,8 @@ nlohmann::json GridClass::ToJson() const
 
 bool GridClass::LoadFromJson(const nlohmann::json& json)
 {
-    if (!base::JsonReadSafe(json, "vertical_lines", &mNumVerticalLines) ||
+    if (!base::JsonReadSafe(json, "id", &mId) ||
+        !base::JsonReadSafe(json, "vertical_lines", &mNumVerticalLines) ||
         !base::JsonReadSafe(json, "horizontal_lines", &mNumHorizontalLines) ||
         !base::JsonReadSafe(json, "border_lines", &mBorderLines))
         return false;
@@ -887,6 +891,7 @@ void PolygonClass::Pack(ResourcePacker* packer) const
 nlohmann::json PolygonClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "static", mStatic);
     for (const auto& v : mVertices)
     {
@@ -1143,6 +1148,7 @@ void KinematicsParticleEngineClass::Restart(InstanceState& state) const
 nlohmann::json KinematicsParticleEngineClass::ToJson() const
 {
     nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "motion", mParams.motion);
     base::JsonWrite(json, "mode", mParams.mode);
     base::JsonWrite(json, "boundary", mParams.boundary);
@@ -1184,8 +1190,10 @@ bool KinematicsParticleEngineClass::LoadFromJson(const nlohmann::json& json)
 // static
 std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const nlohmann::json& object)
 {
+    std::string id;
     Params params;
-    if (!base::JsonReadSafe(object, "motion", &params.motion) ||
+    if (!base::JsonReadSafe(object, "id", &id) ||
+        !base::JsonReadSafe(object, "motion", &params.motion) ||
         !base::JsonReadSafe(object, "mode", &params.mode) ||
         !base::JsonReadSafe(object, "boundary", &params.boundary) ||
         !base::JsonReadSafe(object, "num_particles", &params.num_particles) ||
@@ -1211,7 +1219,10 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
         !base::JsonReadSafe(object, "alpha_over_dist", &params.rate_of_change_in_alpha_wrt_dist) ||
         !base::JsonReadSafe(object, "gravity", &params.gravity))
             return std::nullopt;
-    return KinematicsParticleEngineClass(params);
+    KinematicsParticleEngineClass ret;
+    ret.mId = std::move(id);
+    ret.SetParams(params);
+    return ret;
 }
 
 std::size_t KinematicsParticleEngineClass::GetHash() const
