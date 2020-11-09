@@ -199,12 +199,11 @@ namespace gfx
 
         nlohmann::json ToJson() const
         {
-            nlohmann::json json = {
-                {"r", mRed},
-                {"g", mGreen},
-                {"b", mBlue},
-                {"a", mAlpha}
-            };
+            nlohmann::json json;
+            base::JsonWrite(json, "r", mRed);
+            base::JsonWrite(json, "g", mGreen);
+            base::JsonWrite(json, "b", mBlue);
+            base::JsonWrite(json, "a", mAlpha);
             return json;
         }
         static std::optional<Color4f> FromJson(const nlohmann::json& object)

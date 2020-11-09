@@ -507,31 +507,30 @@ void JsonAppend(JsonValue& json, const ValueT& value)
 template<typename JsonValue>
 void JsonAppend(JsonValue& json, const glm::vec2& vec)
 {
-    json.push_back(nlohmann::json {
-            {"x", vec.x },
-            {"y", vec.y }
-        });
+    nlohmann::json obj;
+    obj["x"] = vec.x;
+    obj["y"] = vec.y;
+    json.push_back(std::move(obj));
 }
 template<typename JsonValue>
 void JsonAppend(JsonValue& json, const glm::vec3& vec)
 {
-    json.push_back(nlohmann::json {
-            {"x", vec.x },
-            {"y", vec.y },
-            {"z", vec.z }
-        });
+    nlohmann::json obj;
+    obj["x"] = vec.x;
+    obj["y"] = vec.y;
+    obj["z"] = vec.z;
+    json.push_back(std::move(obj));
 }
 template<typename JsonValue>
 void JsonAppend(JsonValue& json, const glm::vec4& vec)
 {
-    json.push_back(nlohmann::json {
-            {"x", vec.x },
-            {"y", vec.y },
-            {"z", vec.z },
-            {"w", vec.w }
-        });
+    nlohmann::json obj;
+    obj["x"] = vec.x;
+    obj["y"] = vec.y;
+    obj["z"] = vec.z;
+    obj["w"] = vec.w;
+    json.push_back(std::move(obj));
 }
-
 
 template<typename JsonObject, typename EnumT> inline
 void JsonWriteEnum(JsonObject& object, const char* name, EnumT value)
@@ -587,29 +586,29 @@ void JsonWrite(JsonObject& object, const char* name, const ValueT& value)
 template<typename JsonObject>
 void JsonWrite(JsonObject& object, const char* name, const glm::vec2& vec)
 {
-    object[name] = JsonObject {
-        {"x", vec.x },
-        {"y", vec.y }
-    };
+    JsonObject json;
+    JsonWrite(json, "x", vec.x);
+    JsonWrite(json, "y", vec.y);
+    object[name] = std::move(json);
 }
 template<typename JsonObject>
 void JsonWrite(JsonObject& object, const char* name, const glm::vec3& vec)
 {
-    object[name] = JsonObject {
-        {"x", vec.x },
-        {"y", vec.y },
-        {"z", vec.z }
-    };
+    JsonObject json;
+    JsonWrite(json, "x", vec.x);
+    JsonWrite(json, "y", vec.y);
+    JsonWrite(json, "z", vec.z);
+    object[name] = std::move(json);
 }
 template<typename JsonObject>
 void JsonWrite(JsonObject& object, const char* name, const glm::vec4& vec)
 {
-    object[name] = JsonObject {
-        {"x", vec.x },
-        {"y", vec.y },
-        {"z", vec.z },
-        {"w", vec.w }
-    };
+    JsonObject json;
+    JsonWrite(json, "x", vec.x);
+    JsonWrite(json, "y", vec.y);
+    JsonWrite(json, "z", vec.z);
+    JsonWrite(json, "w", vec.w);
+    object[name] = std::move(json);
 }
 
 inline bool FileExists(const std::string& filename)

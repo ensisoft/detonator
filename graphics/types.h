@@ -55,10 +55,9 @@ namespace gfx
 
         nlohmann::json ToJson() const
         {
-            nlohmann::json json = {
-                {"w", mWidth},
-                {"h", mHeight}
-            };
+            nlohmann::json json;
+            base::JsonWrite(json, "w", mWidth);
+            base::JsonWrite(json, "h", mHeight);
             return json;
         }
         static std::optional<Size<T>> FromJson(const nlohmann::json& object)
@@ -112,10 +111,9 @@ namespace gfx
 
         nlohmann::json ToJson() const
         {
-            nlohmann::json json = {
-                {"x", mX},
-                {"y", mY}
-            };
+            nlohmann::json json;
+            base::JsonWrite(json, "x", mX);
+            base::JsonWrite(json, "y", mY);
             return json;
         }
         static std::optional<Point<T>> FromJson(const nlohmann::json& object)
@@ -319,12 +317,11 @@ namespace gfx
         // Serialize into JSON
         nlohmann::json ToJson() const
         {
-            nlohmann::json json = {
-                {"x", mX},
-                {"y", mY},
-                {"w", mWidth},
-                {"h", mHeight}
-            };
+            nlohmann::json json;
+            base::JsonWrite(json, "x", mX);
+            base::JsonWrite(json, "y", mY);
+            base::JsonWrite(json, "w", mWidth);
+            base::JsonWrite(json, "h", mHeight);
             return json;
         }
 
