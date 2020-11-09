@@ -73,6 +73,8 @@ namespace app
             AudioTrack
         };
         virtual ~Resource() = default;
+        // Get the identifier of the class object type.
+        virtual QString GetId() const = 0;
         // Get the human readable name of the resource.
         virtual QString GetName() const = 0;
         // Get the type of the resource.
@@ -171,6 +173,8 @@ namespace app
 
         std::string GetNameUtf8() const
         { return app::ToUtf8(GetName()); }
+        std::string GetIdUtf8() const
+        { return app::ToUtf8(GetId()); }
 
     protected:
         virtual void* GetIf(const std::type_info& expected_type) = 0;
@@ -217,26 +221,27 @@ namespace app
             : mName(name)
         {
             mContent = std::make_shared<Content>(content);
+            mId = app::FromUtf8(mContent->GetId());
         }
         GameResource(Content&& content, const QString& name)
             : mName(name)
         {
             mContent = std::make_shared<Content>(std::move(content));
+            mId = app::FromUtf8(mContent->GetId());
         }
         GameResource(const GameResource& other)
         {
             mContent = std::make_shared<Content>(*other.mContent);
             mProps   = other.mProps;
             mName = other.mName;
+            mId   = other.mId;
         }
+        virtual QString GetId() const override
+        { return mId; }
         virtual QString GetName() const override
-        {
-           return mName;
-        }
+        { return mName; }
         virtual Type GetType() const override
-        {
-            return TypeValue;
-        }
+        { return TypeValue; }
         virtual void Serialize(nlohmann::json& json) const override
         {
             nlohmann::json content_json = mContent->ToJson();
@@ -296,6 +301,8 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const override
         { return std::make_unique<GameResource>(*this); }
 
+        void UpdateName(const QString& name)
+        { mName = name; }
         void UpdateContent(const Content& data)
         { *mContent = data; }
         void UpdateProperties(const QVariantMap& props)
@@ -328,7 +335,7 @@ namespace app
         }
     private:
         std::shared_ptr<Content> mContent;
-        //Content mContent;
+        QString mId;
         QString mName;
         QVariantMap mProps;
     };

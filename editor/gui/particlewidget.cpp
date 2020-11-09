@@ -370,28 +370,6 @@ void ParticleEditorWidget::on_actionSave_triggered()
     fillParams(params);
     mClass.SetParams(params);
 
-    // what's the new hash
-    const auto hash = mClass.GetHash();
-
-    if (mWorkspace->HasParticleSystem(name))
-    {
-        const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::ParticleSystem);
-        const gfx::KinematicsParticleEngineClass* engine = nullptr;
-        resource.GetContent(&engine);
-        if (engine->GetHash() != mOriginalHash)
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msg.setText("Workspace already contains particle system by this name. Overwrite?");
-            if (msg.exec() == QMessageBox::No)
-                return;
-        }
-    }
-
-    // update the hash to the new value.
-    mOriginalHash = hash;
-
     // setup the resource with the current auxiliary params
     app::ParticleSystemResource particle_resource(mClass, name);
     SetProperty(particle_resource, "material", mUI.materials);
@@ -407,6 +385,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     mWorkspace->SaveResource(particle_resource);
+    mOriginalHash = mClass.GetHash();
 
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);

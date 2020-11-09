@@ -150,18 +150,20 @@ namespace app
         template<typename T>
         void SaveResource(const GameResource<T>& resource)
         {
-            const auto& name = resource.GetName();
+            const auto& id = resource.GetId();
             const auto  type = resource.GetType();
             for (size_t i=0; i<mResources.size(); ++i)
             {
                 auto& res = mResources[i];
-                if (res->GetName() != name || res->GetType() != type)
+                if (res->GetId() != id || res->GetType() != type)
                     continue;
 
                 auto* ptr = static_cast<GameResource<T>*>(res.get());
+                ptr->UpdateName(resource.GetName());
                 ptr->UpdateContent(*resource.GetContent());
                 ptr->UpdateProperties(resource.GetProperies());
                 emit ResourceUpdated(mResources[i].get());
+                emit dataChanged(index(i, 0), index(i, 2));
                 return;
             }
             // if we're here no such resource exists yet.

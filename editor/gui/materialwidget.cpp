@@ -435,27 +435,10 @@ void MaterialWidget::on_actionSave_triggered()
 
     const QString& name = GetValue(mUI.materialName);
 
-    if (mWorkspace->HasMaterial(name))
-    {
-        const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::Material);
-        const gfx::MaterialClass* material = nullptr;
-        resource.GetContent(&material);
-        if (material->GetHash() != mOriginalHash)
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msg.setText(tr("Workspace already contains a material by this name. Overwrite?"));
-            if (msg.exec() == QMessageBox::No)
-                return;
-        }
-    }
-
     app::MaterialResource resource(mMaterial, name);
-    resource.SetProperty("shader_file", mUI.shaderFile->text());
-    resource.SetProperty("use_shader_file", mUI.customShader->isChecked());
+    SetProperty(resource,"shader_file", mUI.shaderFile);
+    SetProperty(resource,"use_shader_file", mUI.customShader);
     mWorkspace->SaveResource(resource);
-
     mOriginalHash = mMaterial.GetHash();
 
     NOTE("Saved material '%1'", name);

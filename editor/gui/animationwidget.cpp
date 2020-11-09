@@ -1104,28 +1104,10 @@ void AnimationWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.name))
         return;
-
     const QString& name = GetValue(mUI.name);
-    if (mState.workspace->HasResource(name, app::Resource::Type::Animation))
-    {
-        const auto& resource = mState.workspace->GetResource(name, app::Resource::Type::Animation);
-        const game::AnimationClass* animation = nullptr;
-        resource.GetContent(&animation);
-        if (animation->GetHash() != mOriginalHash)
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msg.setText("Workspace already contains animation by this name. Overwrite?");
-            if (msg.exec() == QMessageBox::No)
-                return;
-        }
-    }
-
-    mOriginalHash = mState.animation->GetHash();
-
-    app::AnimationResource resource(*mState.animation, name);
+    const app::AnimationResource resource(*mState.animation, name);
     mState.workspace->SaveResource(resource);
+    mOriginalHash = mState.animation->GetHash();
 
     INFO("Saved animation '%1'", name);
     NOTE("Saved animation '%1'", name);

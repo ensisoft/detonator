@@ -285,21 +285,6 @@ void PolygonWidget::on_actionSave_triggered()
         return;
 
     const QString& name = GetValue(mUI.name);
-    if (mWorkspace->HasResource(name, app::Resource::Type::CustomShape))
-    {
-        const auto& resource = mWorkspace->GetResource(name, app::Resource::Type::CustomShape);
-        const gfx::PolygonClass* polygon = nullptr;
-        resource.GetContent(&polygon);
-        if (polygon->GetHash() != mOriginalHash)
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msg.setText("Workspace already contains a shape by this name. Overwrite?");
-            if (msg.exec() == QMessageBox::No)
-                return;
-        }
-    }
 
     // update the hash to the new value.
     mOriginalHash = mPolygon.GetHash();
