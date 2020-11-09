@@ -67,6 +67,11 @@ ChildWindow::~ChildWindow()
     DEBUG("Destroy ChildWindow");
 }
 
+void ChildWindow::ShowNote(const QString& note) const
+{
+    mUI.statusBar->showMessage(note, 5000);
+}
+
 void ChildWindow::RefreshUI()
 {
     if (mPopInRequested || mClosed)

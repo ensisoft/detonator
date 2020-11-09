@@ -76,6 +76,9 @@ namespace gui
 
         void Shutdown();
 
+        // Show a note in the status bar.
+        void ShowNote(const QString& note) const;
+
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!
         MainWidget* TakeWidget();

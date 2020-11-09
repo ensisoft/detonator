@@ -1197,6 +1197,10 @@ void MainWindow::showNote(const app::Event& event)
     if (event.type == app::Event::Type::Note)
     {
         mUI.statusbar->showMessage(event.message, 5000);
+        for (const auto* child : mChildWindows)
+        {
+            child->ShowNote(event.message);
+        }
     }
 }
 

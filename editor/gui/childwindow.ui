@@ -70,6 +70,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionClose">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
