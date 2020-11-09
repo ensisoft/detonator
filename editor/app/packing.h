@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #include "warnpop.h"
 
+#include <any>
 #include <vector>
 #include <string>
 
@@ -43,16 +44,15 @@ namespace app
         unsigned width  = 0;
         // the height of the image
         unsigned height = 0;
-        // user defined pointer to arbitrary data.
+        // success flag to indicate whether the object
+        // was successfully packed or not.
         bool success    = false;
-        union {
-            const void* const_user;
-            void* user;
-        };
-        // user defined integer data.
-        std::size_t index = 0;
-        // user defined string data.
+        // arbitrary user defined data.
+        std::any data;
+        // arbitrary user defined string.
         std::string cookie;
+        // arbitrary user defined index.
+        std::size_t index = 0;
     };
 
     struct RectanglePackSize {
