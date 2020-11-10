@@ -98,26 +98,32 @@ namespace game
 
         // Set the drawable object (shape) for this component.
         // The name identifies the resource in the gfx resource loader.
-        void SetDrawable(const std::string& name,
-            const std::shared_ptr<const gfx::DrawableClass>& klass)
+        void SetDrawable(const std::shared_ptr<const gfx::DrawableClass>& klass)
         {
-            mDrawableName  = name;
+            mDrawableId  = klass->GetId();
             mDrawableClass = klass;
             mDrawable.reset();
         }
-        void SetDrawable(const std::string& name)
-        { mDrawableName= name; }
+        void SetDrawable(const std::string& id)
+        {
+            mDrawableId= id;
+            mMaterialClass.reset();
+            mMaterial.reset();
+        }
         // Set the material object for this component.
         // The name identifies the runtime material resource in the gfx resource loader.
-        void SetMaterial(const std::string& name,
-            const std::shared_ptr<const gfx::MaterialClass>& klass)
+        void SetMaterial(const std::shared_ptr<const gfx::MaterialClass>& klass)
         {
-            mMaterialName  = name;
+            mMaterialId    = klass->GetId();
             mMaterialClass = klass;
             mMaterial.reset();
         }
-        void SetMaterial(const std::string& name)
-        { mMaterialName = name; }
+        void SetMaterial(const std::string& id)
+        {
+            mMaterialId = id;
+            mMaterialClass.reset();
+            mMaterial.reset();
+        }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
         void SetName(const std::string& name)
@@ -164,11 +170,11 @@ namespace game
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
         { return mMaterialClass; }
         std::string GetMaterialName() const
-        { return mMaterialName; }
+        { return mMaterialId; }
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
         { return mDrawableClass; }
         std::string GetDrawableName() const
-        { return mDrawableName; }
+        { return mDrawableId; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
         glm::vec2 GetSize() const
@@ -244,8 +250,8 @@ namespace game
         std::string mName;
         // visual properties. we keep the material/drawable names
         // around so that we we know which resources to load at runtime.
-        std::string mMaterialName;
-        std::string mDrawableName;
+        mutable std::string mMaterialId;
+        mutable std::string mDrawableId;
         mutable std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
         mutable std::shared_ptr<const gfx::DrawableClass> mDrawableClass;
         // transformation properties.

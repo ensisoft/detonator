@@ -569,8 +569,8 @@ std::size_t AnimationNodeClass::GetHash() const
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mMaterialName);
-    hash = base::hash_combine(hash, mDrawableName);
+    hash = base::hash_combine(hash, mMaterialId);
+    hash = base::hash_combine(hash, mDrawableId);
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mScale);
@@ -640,8 +640,22 @@ void AnimationNodeClass::Prepare(const GfxFactory& loader) const
     // However it's also possible that the particle engines are shared and each
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
-    mDrawableClass = loader.GetDrawableClass(mDrawableName);
-    mMaterialClass = loader.GetMaterialClass(mMaterialName);
+    const auto drawable_class_id = mDrawableId;
+    const auto material_class_id = mMaterialId;
+    mDrawableClass = loader.GetDrawableClass(mDrawableId);
+    mMaterialClass = loader.GetMaterialClass(mMaterialId);
+    mDrawableId = mDrawableClass->GetId();
+    mMaterialId = mMaterialClass->GetId();
+    if (mDrawableId != drawable_class_id)
+    {
+        WARN("Animation node '%1' drawable ('%2') no longer available.",
+             mName, drawable_class_id);
+    }
+    if (mMaterialId != material_class_id)
+    {
+        WARN("Animation node '%1' material ('%2') no longer available.",
+             mName, material_class_id);
+    }
 }
 
 nlohmann::json AnimationNodeClass::ToJson() const
@@ -649,8 +663,8 @@ nlohmann::json AnimationNodeClass::ToJson() const
     nlohmann::json json;
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "material", mMaterialName);
-    base::JsonWrite(json, "drawable", mDrawableName);
+    base::JsonWrite(json, "material", mMaterialId);
+    base::JsonWrite(json, "drawable", mDrawableId);
     base::JsonWrite(json, "position", mPosition);
     base::JsonWrite(json, "size", mSize);
     base::JsonWrite(json, "scale", mScale);
@@ -672,8 +686,8 @@ std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::j
     AnimationNodeClass ret;
     if (!base::JsonReadSafe(object, "id", &ret.mId) ||
         !base::JsonReadSafe(object, "name", &ret.mName) ||
-        !base::JsonReadSafe(object, "material", &ret.mMaterialName) ||
-        !base::JsonReadSafe(object, "drawable", &ret.mDrawableName) ||
+        !base::JsonReadSafe(object, "material", &ret.mMaterialId) ||
+        !base::JsonReadSafe(object, "drawable", &ret.mDrawableId) ||
         !base::JsonReadSafe(object, "position", &ret.mPosition) ||
         !base::JsonReadSafe(object, "size", &ret.mSize) ||
         !base::JsonReadSafe(object, "scale", &ret.mScale) ||
@@ -820,7 +834,7 @@ AnimationClass::AnimationClass(const AnimationClass& other)
 {
     mId = other.mId;
 
-    // make a deep copy of the nodes.
+    // make a deep copy of the nodes.o
     for (const auto& node : other.mNodes)
     {
         mNodes.push_back(std::make_unique<AnimationNodeClass>(*node));

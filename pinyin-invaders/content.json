@@ -6,11 +6,11 @@
         {
           "alpha": 1.0,
           "bitflags": 3,
-          "drawable": "Rectangle",
+          "drawable": "_rect",
           "id": "eqyyTFgoPX",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "Black",
+          "material": "_Black",
           "name": "Background",
           "position": {
             "x": 600.0,
@@ -31,11 +31,11 @@
         {
           "alpha": 1.0,
           "bitflags": 11,
-          "drawable": "Starfield layer 0",
+          "drawable": "hR9OWOACQy",
           "id": "eQzT1fIZxY",
           "layer": 2,
           "linewidth": 1.0,
-          "material": "Star",
+          "material": "46yvmCSzSL",
           "name": "Stars0",
           "position": {
             "x": 0.0,
@@ -56,11 +56,11 @@
         {
           "alpha": 1.0,
           "bitflags": 11,
-          "drawable": "Starfield layer 1",
+          "drawable": "9D2vt3ioun",
           "id": "4fLtRil2lL",
           "layer": 2,
           "linewidth": 1.0,
-          "material": "Star",
+          "material": "46yvmCSzSL",
           "name": "Stars1",
           "position": {
             "x": 0.0,
@@ -81,11 +81,11 @@
         {
           "alpha": 1.0,
           "bitflags": 11,
-          "drawable": "Starfield layer 2",
+          "drawable": "d8CDbfETmY",
           "id": "9SZAeUshtX",
           "layer": 3,
           "linewidth": 1.0,
-          "material": "Star",
+          "material": "46yvmCSzSL",
           "name": "Stars2",
           "position": {
             "x": 0.0,
@@ -106,11 +106,11 @@
         {
           "alpha": 1.0,
           "bitflags": 7,
-          "drawable": "Rectangle",
+          "drawable": "_rect",
           "id": "wChFz6luAG",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "Nebula1",
+          "material": "zQGgrkSE8i",
           "name": "Nebula 1",
           "position": {
             "x": -8.892822265625,
@@ -131,11 +131,11 @@
         {
           "alpha": 1.0,
           "bitflags": 15,
-          "drawable": "Asteroid field",
+          "drawable": "FbK00HsTug",
           "id": "YJX08Fi01A",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "Asteroid",
+          "material": "lIO2x5dmry",
           "name": "Asteroids",
           "position": {
             "x": 0.0,
@@ -191,6 +191,7 @@
         ],
         "node": null
       },
+      "resource_id": "Q9LbPJnta0",
       "resource_name": "Space"
     }
   ],
@@ -231,6 +232,7 @@
       "gamma": 1.0,
       "id": "lIO2x5dmry",
       "particle_action": "Rotate",
+      "resource_id": "lIO2x5dmry",
       "resource_name": "Asteroid",
       "samplers": [
         {
@@ -303,6 +305,7 @@
       "gamma": 1.0,
       "id": "zQGgrkSE8i",
       "particle_action": "None",
+      "resource_id": "zQGgrkSE8i",
       "resource_name": "Nebula1",
       "samplers": [
         {
@@ -375,6 +378,7 @@
       "gamma": 1.0,
       "id": "46yvmCSzSL",
       "particle_action": "None",
+      "resource_id": "46yvmCSzSL",
       "resource_name": "Star",
       "samplers": [
         {
@@ -440,6 +444,7 @@
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 500.0,
+      "resource_id": "hR9OWOACQy",
       "resource_name": "Starfield layer 0"
     },
     {
@@ -469,6 +474,7 @@
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 200.0,
+      "resource_id": "9D2vt3ioun",
       "resource_name": "Starfield layer 1"
     },
     {
@@ -498,6 +504,7 @@
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 100.0,
+      "resource_id": "d8CDbfETmY",
       "resource_name": "Starfield layer 2"
     },
     {
@@ -527,6 +534,7 @@
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 10.0,
+      "resource_id": "FbK00HsTug",
       "resource_name": "Asteroid field"
     }
   ]

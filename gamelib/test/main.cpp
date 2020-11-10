@@ -173,8 +173,8 @@ public:
         game::AnimationClass animation;
         {
             game::AnimationNodeClass node;
-            node.SetDrawable("rectangle", nullptr);
-            node.SetMaterial("uv_test", nullptr);
+            node.SetDrawable("rectangle");
+            node.SetMaterial("uv_test");
             node.SetSize(glm::vec2(200.0f, 200.0f));
             node.SetName("Root");
             auto* nptr = animation.AddNode(std::move(node));
@@ -184,8 +184,8 @@ public:
 
         {
             game::AnimationNodeClass node;
-            node.SetDrawable("rectangle", nullptr);
-            node.SetMaterial("uv_test", nullptr);
+            node.SetDrawable("rectangle");
+            node.SetMaterial("uv_test");
             node.SetSize(glm::vec2(100.0f, 100.0f));
             node.SetTranslation(glm::vec2(150.0f, 150.0f));
             node.SetName("Child 0");
@@ -196,8 +196,8 @@ public:
 
         {
             game::AnimationNodeClass node;
-            node.SetDrawable("rectangle", nullptr);
-            node.SetMaterial("uv_test", nullptr);
+            node.SetDrawable("rectangle");
+            node.SetMaterial("uv_test");
             node.SetSize(glm::vec2(50.0f, 50.0f));
             node.SetTranslation(glm::vec2(75.0f, 75.0f));
             node.SetName("Child 1");

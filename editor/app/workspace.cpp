@@ -474,6 +474,41 @@ namespace app
 Workspace::Workspace()
 {
     DEBUG("Create workspace");
+
+    // initialize the primitive resources, i.e the materials
+    // and drawables that are part of the workspace without any
+    // user interaction.
+
+    // Checkerboard is a special material that is always available.
+    // It is used as the initial material when user hasn't selected
+    // anything or when the material referenced by some object is deleted
+    // the material reference can be updated to Checkerboard.
+    auto checkerboard = gfx::TextureMap("app://textures/Checkerboard.png");
+    checkerboard.SetId("_checkerboard");
+    mResources.emplace_back(new MaterialResource(std::move(checkerboard), "Checkerboard"));
+
+    // add some primitive colors.
+    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
+    for (const auto& val : values)
+    {
+        const std::string color_name(magic_enum::enum_name(val));
+        auto color = gfx::SolidColor(gfx::Color4f(val));
+        color.SetId("_" + color_name);
+        mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
+    }
+
+    mResources.emplace_back(new DrawableResource<gfx::RectangleClass>("Rectangle"));
+    mResources.emplace_back(new DrawableResource<gfx::IsocelesTriangleClass>("IsoscelesTriangle"));
+    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>("RightTriangle"));
+    mResources.emplace_back(new DrawableResource<gfx::CircleClass>("Circle"));
+    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>("RoundRect"));
+    mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>("Trapezoid"));
+    mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>("Parallelogram"));
+
+    for (auto& resource : mResources)
+    {
+        resource->SetIsPrimitive(true);
+    }
 }
 
 Workspace::~Workspace()
@@ -535,41 +570,105 @@ QAbstractFileEngine* Workspace::create(const QString& file) const
     return new QFSFileEngine(ret);
 }
 
-std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClass(const std::string& name) const
+std::shared_ptr<gfx::Material> Workspace::MakeMaterialByName(const QString& name) const
 {
-    const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Animation);
+    return gfx::CreateMaterialInstance(GetMaterialClassByName(name));
 
-    return ResourceCast<game::AnimationClass>(resource).GetSharedResource();
+}
+std::shared_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const QString& name) const
+{
+    return gfx::CreateDrawableInstance(GetDrawableClassByName(name));
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClass(const std::string& name) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const QString& name) const
 {
-    // Checkerboard is a special material that is always available.
-    // It is used as the initial material when user hasn't selected
-    // anything or when the material referenced by some object is deleted
-    // the material reference can be updated to Checkerboard.
-    if (name == "Checkerboard")
-        return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("app://textures/Checkerboard.png"));
-
-    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
-    for (const auto& val : values)
+    for (const auto& resource : mResources)
     {
-        const std::string enum_name(magic_enum::enum_name(val));
-        if (enum_name == name)
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
+        if (resource->GetType() != Resource::Type::Material)
+            continue;
+        else if (resource->GetName() != name)
+            continue;
+        return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
     }
-    if (!HasMaterial(FromUtf8(name)))
-    {
-        ERROR("Request for a material that doesn't exist: '%1'", name);
-        return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("app://textures/Checkerboard.png"));
-    }
-
-    const Resource& resource = GetResource(FromUtf8(name), Resource::Type::Material);
-
-    return ResourceCast<gfx::MaterialClass>(resource).GetSharedResource();
+    ERROR("Request for a material that doesn't exist: '%1'", name);
+    return GetMaterialClassByName(QString("Checkerboard"));
 }
 
-std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std::string& name) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const char* name) const
+{
+    // convenience shim
+    return GetMaterialClassByName(QString::fromUtf8(name));
+}
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const QString& name) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (!(resource->GetType() == Resource::Type::CustomShape ||
+              resource->GetType() == Resource::Type::ParticleSystem ||
+              resource->GetType() == Resource::Type::Drawable))
+            continue;
+        else if (resource->GetName() != name)
+            continue;
+
+        if (resource->GetType() == Resource::Type::Drawable)
+            return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
+        if (resource->GetType() == Resource::Type::ParticleSystem)
+            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+        else if (resource->GetType() == Resource::Type::CustomShape)
+            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for a drawable that doesn't exist: '%1'", name);
+    return std::make_shared<gfx::RectangleClass>();
+}
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const char* name) const
+{
+    // convenience shim
+    return GetDrawableClassByName(QString::fromUtf8(name));
+}
+
+std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassByName(const QString& name) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Animation)
+            continue;
+        else if (resource->GetName() != name)
+            continue;
+        return ResourceCast<game::AnimationClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for an animation that doesn't exist: '%1'", name);
+    return nullptr;
+}
+
+std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassById(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Animation)
+            continue;
+        else if (resource->GetId() != id)
+            continue;
+        return ResourceCast<game::AnimationClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for an animation that doesn't exist: '%1'", id);
+    return nullptr;
+}
+
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClass(const std::string& klass) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Material)
+            continue;
+        else if (resource->GetIdUtf8() != klass)
+            continue;
+        return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for a material that doesn't exist: '%1'", klass);
+    return GetMaterialClass(std::string("_checkerboard"));
+}
+
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std::string& klass) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -589,9 +688,10 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std:
     // User defined resources on the other hand *can be* unique.
     // For example particle engines, the underlying object type is same for
     // particle engine A and B, but their defining properties are completely
-    // different. To distinguish the set of properties the user gives each
-    // particle engine a "name". Then when loading such objects we must
-    // load them by name. Additionally the resources may or may not be
+    // different. To distinguish the set of properties the system gives each
+    // particle engine a unique "class id". The class is then used to identify
+    // the class object instance.
+    // Additionally the resources may or may not be
     // shared. For example when a fleet of alien spaceships are rendered
     // each spaceship might have their own particle engine (own simulation state)
     // thus producing a unique rendering for each spaceship. However the problem
@@ -600,37 +700,20 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std:
     // However it's also possible that the particle engines are shared and each
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
-    if (name == "Rectangle")
-        return std::make_shared<gfx::RectangleClass>();
-    else if (name == "IsocelesTriangle")
-        return std::make_shared<gfx::IsocelesTriangleClass>();
-    else if (name == "RightTriangle")
-        return std::make_shared<gfx::RightTriangleClass>();
-    else if (name == "Circle")
-        return std::make_shared<gfx::CircleClass>();
-    else if (name == "RoundRect")
-        return std::make_shared<gfx::RoundRectangleClass>();
-    else if (name == "Trapezoid")
-        return std::make_shared<gfx::TrapezoidClass>();
-    else if (name == "Parallelogram")
-        return std::make_shared<gfx::ParallelogramClass>();
 
-    // todo: perhaps need an identifier for the type of resource in question.
-    // currently there's a name conflict that objects of different types but
-    // with same names cannot be fully resolved by name only.
-
-    if (HasResource(FromUtf8(name), Resource::Type::ParticleSystem))
+    for (const auto& resource : mResources)
     {
-        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::ParticleSystem);
-        return ResourceCast<gfx::KinematicsParticleEngineClass>(resource).GetSharedResource();
-    }
-    else if (HasResource(FromUtf8(name), Resource::Type::CustomShape))
-    {
-        const Resource& resource = GetResource(FromUtf8(name), Resource::Type::CustomShape);
-        return ResourceCast<gfx::PolygonClass>(resource).GetSharedResource();
-    }
+        if (resource->GetIdUtf8() != klass)
+            continue;
 
-    ERROR("Request for a drawable that doesn't exist: '%1'", name);
+        if (resource->GetType() == Resource::Type::Drawable)
+            return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
+        else if (resource->GetType() == Resource::Type::ParticleSystem)
+            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+        else if (resource->GetType() == Resource::Type::CustomShape)
+            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for a drawable that doesn't exist: '%1'", klass);
     return std::make_shared<gfx::RectangleClass>();
 }
 
@@ -805,6 +888,30 @@ QString Workspace::MapFileToFilesystem(const QString& file) const
     return ret;
 }
 
+template<typename ClassType>
+void LoadResources(const std::string& array,
+                   const nlohmann::json& json,
+                   std::vector<std::unique_ptr<Resource>>& vector)
+{
+    DEBUG("Loading %1", array);
+
+    if (!json.contains(array))
+        return;
+    for (const auto& object : json[array].items())
+    {
+        const auto& value = object.value();
+        const std::string name = value["resource_name"];
+        std::optional<ClassType> ret = ClassType::FromJson(value);
+        if (!ret.has_value())
+        {
+            ERROR("Failed to load resource '%1'", name);
+            continue;
+        }
+        vector.push_back(std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name)));
+        DEBUG("Loaded resource '%1'", name);
+    }
+}
+
 bool Workspace::LoadContent(const QString& filename)
 {
     QFile file(filename);
@@ -825,75 +932,23 @@ bool Workspace::LoadContent(const QString& filename)
     // todo: this can throw, use the nothrow and log error
     const auto& json = nlohmann::json::parse(beg, end);
 
-    std::vector<std::unique_ptr<Resource>> resources;
+    LoadResources<gfx::MaterialClass>("materials", json, mResources);
+    LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);
+    LoadResources<gfx::PolygonClass>("shapes", json, mResources);
+    LoadResources<game::AnimationClass>("animations", json, mResources);
 
-    if (json.contains("materials"))
-    {
-        for (const auto& json_mat : json["materials"].items())
-        {
-            const auto& name = app::FromUtf8(json_mat.value()["resource_name"]);
+    // setup an invariant that states that the primitive materials
+    // are in the list of resources after the user defined ones.
+    // this way the the addressing scheme (when user clicks on an item
+    // in the list of resources) doesn't need to change and it's possible
+    // to easily limit the items to be displayed only to those that are
+    // user defined.
+    auto primitives_start = std::stable_partition(mResources.begin(), mResources.end(),
+        [](const auto& resource)  {
+            return resource->IsPrimitive() == false;
+        });
+    mVisibleCount = std::distance(mResources.begin(), primitives_start);
 
-            std::optional<gfx::MaterialClass> ret = gfx::MaterialClass::FromJson(json_mat.value());
-            if (!ret.has_value())
-            {
-                ERROR("Failed to load material '%1' properties.", name);
-                continue;
-            }
-            auto& material = ret.value();
-            DEBUG("Loaded material: '%1'", name);
-            resources.push_back(std::make_unique<MaterialResource>(std::move(material), name));
-        }
-    }
-    if (json.contains("particles"))
-    {
-        for (const auto& json_p : json["particles"].items())
-        {
-            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<gfx::KinematicsParticleEngineClass> ret = gfx::KinematicsParticleEngineClass::FromJson(json_p.value());
-            if (!ret.has_value())
-            {
-                ERROR("Failed to load particle system '%1' properties.", name);
-                continue;
-            }
-            auto& particle = ret.value();
-            DEBUG("Loaded particle system: '%1'", name);
-            resources.push_back(std::make_unique<ParticleSystemResource>(std::move(particle), name));
-        }
-    }
-    if (json.contains("animations"))
-    {
-        for (const auto& json_p : json["animations"].items())
-        {
-            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<game::AnimationClass> ret = game::AnimationClass::FromJson(json_p.value());
-            if (!ret.has_value())
-            {
-                ERROR("Failed to load animation '%1' properties.", name);
-                continue;
-            }
-            auto& animation = ret.value();
-            DEBUG("Loaded animation: '%1'", name);
-            resources.push_back(std::make_unique<AnimationResource>(std::move(animation), name));
-        }
-    }
-    if (json.contains("shapes"))
-    {
-        for (const auto& json_p : json["shapes"].items())
-        {
-            const auto& name = app::FromUtf8(json_p.value()["resource_name"]);
-            std::optional<gfx::PolygonClass> ret = gfx::PolygonClass::FromJson(json_p.value());
-            if (!ret.has_value())
-            {
-                ERROR("Failed to load custom shape '%1' properties.", name);
-                continue;
-            }
-            auto& shape = ret.value();
-            DEBUG("Loaded shape: '%1'", name);
-            resources.push_back(std::make_unique<CustomShapeResource>(std::move(shape), name));
-        }
-    }
-
-    mResources = std::move(resources);
     INFO("Loaded content file '%1'", filename);
     return true;
 }
@@ -910,6 +965,12 @@ bool Workspace::SaveContent(const QString& filename) const
     nlohmann::json json;
     for (const auto& resource : mResources)
     {
+        // skip persisting primitive resources since they're always
+        // created as part of the workspace creation and their resource
+        // IDs are fixed.
+        if (resource->IsPrimitive())
+            continue;
+        // serialize the user defined resource.
         resource->Serialize(json);
     }
 
@@ -969,6 +1030,8 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     // resource object.
     for (const auto& resource : mResources)
     {
+        if (resource->IsPrimitive())
+            continue;
         resource->Serialize(json);
     }
     // set the root object to the json document then serialize
@@ -1011,21 +1074,21 @@ bool Workspace::LoadWorkspace(const QString& filename)
 
     const QJsonObject& project = docu["project"].toObject();
     mSettings.multisample_sample_count = project["multisample_sample_count"].toInt();
-    mSettings.application_name = project["application_name"].toString();
-    mSettings.application_version = project["application_version"].toString();
-    mSettings.application_library = project["application_library"].toString();
-    mSettings.default_min_filter = EnumFromString(project["default_min_filter"].toString(),
+    mSettings.application_name       = project["application_name"].toString();
+    mSettings.application_version    = project["application_version"].toString();
+    mSettings.application_library    = project["application_library"].toString();
+    mSettings.default_min_filter     = EnumFromString(project["default_min_filter"].toString(),
         gfx::Device::MinFilter::Nearest);
-    mSettings.default_mag_filter = EnumFromString(project["default_mag_filter"].toString(),
+    mSettings.default_mag_filter     = EnumFromString(project["default_mag_filter"].toString(),
         gfx::Device::MagFilter::Nearest);
-    mSettings.window_width = project["window_width"].toInt();
-    mSettings.window_height = project["window_height"].toInt();
-    mSettings.window_set_fullscreen = project["window_set_fullscreen"].toBool();
-    mSettings.window_can_resize = project["window_can_resize"].toBool();
-    mSettings.window_has_border = project["window_has_border"].toBool();
-    mSettings.ticks_per_second = project["ticks_per_second"].toInt();
-    mSettings.updates_per_second = project["updates_per_second"].toInt();
-    mSettings.working_folder = project["working_folder"].toString();
+    mSettings.window_width           = project["window_width"].toInt();
+    mSettings.window_height          = project["window_height"].toInt();
+    mSettings.window_set_fullscreen  = project["window_set_fullscreen"].toBool();
+    mSettings.window_can_resize      = project["window_can_resize"].toBool();
+    mSettings.window_has_border      = project["window_has_border"].toBool();
+    mSettings.ticks_per_second       = project["ticks_per_second"].toInt();
+    mSettings.updates_per_second     = project["updates_per_second"].toInt();
+    mSettings.working_folder         = project["working_folder"].toString();
     mSettings.command_line_arguments = project["command_line_arguments"].toString();
 
     // load the workspace properties.
@@ -1061,39 +1124,31 @@ QStringList Workspace::ListAllMaterials() const
 {
     QStringList list;
     list << ListPrimitiveMaterials();
-
-    for (const auto& res : mResources)
-    {
-        if (res->GetType() == Resource::Type::Material)
-            list.append(res->GetName());
-    }
+    list << ListUserDefinedMaterials();
     return list;
 }
 
 QStringList Workspace::ListPrimitiveMaterials() const
 {
-    QStringList colors;
-    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
-    for (const auto& val : values)
-    {
-        const std::string name(magic_enum::enum_name(val));
-        colors << FromUtf8(name);
-    }
-    colors.sort();
-
     QStringList list;
-    list << "Checkerboard";
-    list << colors;
+    for (const auto& resource : mResources)
+    {
+        if (resource->IsPrimitive() &&
+            resource->GetType() == Resource::Type::Material)
+            list.append(resource->GetName());
+    }
+    list.sort();
     return list;
 }
 
 QStringList Workspace::ListUserDefinedMaterials() const
 {
     QStringList list;
-    for (const auto& res : mResources)
+    for (const auto& resource : mResources)
     {
-        if (res->GetType() == Resource::Type::Material)
-            list.append(res->GetName());
+        if (!resource->IsPrimitive() &&
+             resource->GetType() == Resource::Type::Material)
+            list.append(resource->GetName());
     }
     return list;
 }
@@ -1102,28 +1157,58 @@ QStringList Workspace::ListAllDrawables() const
 {
     QStringList list;
     list << ListPrimitiveDrawables();
-
-    for (const auto& res : mResources)
-    {
-        if (res->GetType() == Resource::Type::ParticleSystem)
-            list.append(res->GetName());
-        else if(res->GetType() == Resource::Type::CustomShape)
-            list.append(res->GetName());
-    }
+    list << ListUserDefinedDrawables();
     return list;
 }
 
 QStringList Workspace::ListPrimitiveDrawables() const
 {
     QStringList list;
-    list << "Circle";
-    list << "IsocelesTriangle";
-    list << "Parallelogram";
-    list << "Rectangle";
-    list << "RightTriangle";
-    list << "RoundRect";
-    list << "Trapezoid";
+    for (const auto& resource : mResources)
+    {
+        if (resource->IsPrimitive() &&
+            (resource->GetType() == Resource::Type::ParticleSystem ||
+             resource->GetType() == Resource::Type::CustomShape ||
+             resource->GetType() == Resource::Type::Drawable))
+            list.append(resource->GetName());
+    }
     return list;
+}
+
+QStringList Workspace::ListUserDefinedDrawables() const
+{
+    QStringList list;
+    for (const auto& resource : mResources)
+    {
+        if (!resource->IsPrimitive() &&
+                (resource->GetType() == Resource::Type::ParticleSystem ||
+                 resource->GetType() == Resource::Type::CustomShape ||
+                 resource->GetType() == Resource::Type::Drawable))
+            list.append(resource->GetName());
+    }
+    return list;
+}
+
+QString Workspace::MapDrawableName(const QString &id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == id)
+            return resource->GetName();
+    }
+    ERROR("No such drawable class '%1'", id);
+    return "Rectangle";
+}
+
+QString Workspace::MapMaterialName(const QString &id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == id)
+            return resource->GetName();
+    }
+    ERROR("No such material class '%1'", id);
+    return "Checkerboard";
 }
 
 bool Workspace::HasMaterial(const QString& name) const
@@ -1153,19 +1238,27 @@ bool Workspace::HasResource(const QString& name, Resource::Type type) const
     return false;
 }
 
-bool Workspace::IsValidMaterial(const QString& name) const
+bool Workspace::IsValidMaterial(const QString& klass) const
 {
-    const QStringList& names = ListAllMaterials();
-    if (names.contains(name))
-        return true;
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() == Resource::Type::Material &&
+            resource->GetId() == klass)
+            return true;
+    }
     return false;
 }
 
-bool Workspace::IsValidDrawable(const QString& name) const
+bool Workspace::IsValidDrawable(const QString& klass) const
 {
-    const QStringList& names = ListAllDrawables();
-    if (names.contains(name))
-        return true;
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == klass &&
+            (resource->GetType() == Resource::Type::ParticleSystem ||
+             resource->GetType() == Resource::Type::CustomShape ||
+             resource->GetType() == Resource::Type::Drawable))
+            return true;
+    }
     return false;
 }
 
@@ -1193,8 +1286,6 @@ void Workspace::DeleteResources(QModelIndexList& list)
 {
     qSort(list);
 
-    int removed = 0;
-
     // because the high probability of unwanted recursion
     // fucking this iteration up (for example by something
     // calling back to this workspace from Resource
@@ -1208,18 +1299,17 @@ void Workspace::DeleteResources(QModelIndexList& list)
 
     for (int i=0; i<list.size(); ++i)
     {
-        const auto row = list[i].row() - removed;
+        const auto row = list[i].row() - i;
         beginRemoveRows(QModelIndex(), row, row);
 
         auto it = std::begin(mResources);
         std::advance(it, row);
         graveyard.push_back(std::move(*it));
         mResources.erase(it);
+        mVisibleCount--;
 
         endRemoveRows();
-        ++removed;
     }
-
     // invoke a resource deletion signal for each resource now
     // by iterating over the separate container. (avoids broken iteration)
     for (const auto& carcass : graveyard)

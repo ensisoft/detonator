@@ -114,6 +114,13 @@ void SetValue(QComboBox* combo, T value)
     }
 }
 
+inline void SetList(QComboBox* combo, const QStringList& list)
+{
+    QSignalBlocker s(combo);
+    combo->clear();
+    combo->addItems(list);
+}
+
 inline void SetValue(QGroupBox* group, bool on_off)
 {
     QSignalBlocker s(group);

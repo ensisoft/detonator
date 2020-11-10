@@ -301,7 +301,7 @@ void ParticleEditorWidget::Update(double secs)
         const auto& material_name = mUI.materials->currentText();
         if (mMaterialName != material_name)
         {
-            mMaterial = mWorkspace->MakeMaterial(material_name);
+            mMaterial = mWorkspace->MakeMaterialByName(material_name);
             mMaterialName = material_name;
         }
         mMaterial->SetRuntime(mTime);
@@ -552,7 +552,7 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
     const auto& material_name = mUI.materials->currentText();
     if (mMaterialName != material_name)
     {
-        mMaterial = mWorkspace->MakeMaterial(material_name);
+        mMaterial = mWorkspace->MakeMaterialByName(material_name);
         mMaterialName = material_name;
     }
 

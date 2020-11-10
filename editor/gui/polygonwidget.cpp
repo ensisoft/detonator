@@ -218,7 +218,7 @@ void PolygonWidget::Update(double secs)
     }
     else if (blueprint != mBlueprintName)
     {
-        mBlueprint = mWorkspace->MakeMaterial(blueprint);
+        mBlueprint = mWorkspace->MakeMaterialByName(blueprint);
         mBlueprintName = blueprint;
     }
     if (mBlueprint)
@@ -380,7 +380,7 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     }
     else if (mBlueprintName != blueprint)
     {
-        mBlueprint = mWorkspace->MakeMaterial(blueprint);
+        mBlueprint = mWorkspace->MakeMaterialByName(blueprint);
         mBlueprintName = blueprint;
     }
 

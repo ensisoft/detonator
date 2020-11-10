@@ -47,8 +47,8 @@ namespace game
     public:
         virtual ~GfxFactory() = default;
 
-        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const = 0;
-        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const = 0;
+        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& id) const = 0;
+        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& id) const = 0;
         //
         // == About sharing/not-sharing gfx resources ==
         //
@@ -65,8 +65,8 @@ namespace game
 
         // Create an instance of a material identified by the material name.
         // todo: share/nonshare flag
-        virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const = 0;
-        virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const = 0;
+        virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& klass) const = 0;
+        virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& klass) const = 0;
     private:
     };
 } // namespace

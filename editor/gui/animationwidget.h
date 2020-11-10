@@ -120,6 +120,7 @@ namespace gui
         void placeNewCustomShape();
         void newResourceAvailable(const app::Resource* resource);
         void resourceToBeDeleted(const app::Resource* resource);
+        void resourceUpdated(const app::Resource* resource);
         void treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
         void treeClickEvent(TreeWidget::TreeItem* item);
 
@@ -128,6 +129,7 @@ namespace gui
         game::AnimationNodeClass* GetCurrentNode();
         void updateCurrentNodeProperties();
         void updateCurrentNodePosition(float dx, float dy);
+        void RebuildDrawableMenus();
     private:
         class TreeModel;
         class Tool;

@@ -2221,7 +2221,7 @@ void GameWidget::Save()
 
 void GameWidget::Start()
 {
-    mBackground = mAssets->CreateAnimation("Space");
+    mBackground = mAssets->CreateAnimationByName("Space");
 
     // in this space all the background objects travel to the same direction
     for (size_t i=0; i<20; ++i)

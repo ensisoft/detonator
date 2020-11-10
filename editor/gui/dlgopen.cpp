@@ -50,6 +50,8 @@ DlgOpen::DlgOpen(QWidget* parent, app::Workspace& workspace)
     for (size_t i=0; i<num_resources; ++i)
     {
         const auto& resource = mWorkspace.GetResource(i);
+        if (resource.IsPrimitive())
+            continue;
         QListWidgetItem* item = new QListWidgetItem();
         item->setIcon(resource.GetIcon());
         item->setText(resource.GetName());
@@ -94,6 +96,8 @@ void DlgOpen::on_filter_textChanged(const QString& text)
     for (size_t i=0; i<num_resources; ++i)
     {
         const auto& resource = mWorkspace.GetResource(i);
+        if (resource.IsPrimitive())
+            continue;
         const auto& name = resource.GetName().toLower();
         if (name.contains(text))
         {

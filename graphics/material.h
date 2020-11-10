@@ -509,6 +509,8 @@ namespace gfx
         // get the class/resource id.
         std::string GetId() const
         { return mId; }
+        void SetId(const std::string& id)
+        { mId = id; }
 
         // Get the program ID for the material that is
         // Used to map the material to a device specific program object.

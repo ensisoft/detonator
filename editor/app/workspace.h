@@ -71,30 +71,25 @@ namespace app
         virtual QVariant data(const QModelIndex& index, int role) const override;
         virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
         virtual int rowCount(const QModelIndex&) const override
-        { return static_cast<int>(mResources.size()); }
+        { return static_cast<int>(mVisibleCount); }
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
 
         // QAbstractFileEngineHandler implementation
         virtual QAbstractFileEngine* create(const QString& file) const override;
 
-        std::shared_ptr<gfx::Material> MakeMaterial(const QString& name) const
-        { return MakeMaterial(ToUtf8(name)); }
-        std::shared_ptr<gfx::Drawable> MakeDrawable(const QString& name) const
-        { return MakeDrawable(ToUtf8(name)); }
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const QString& name) const
-        { return GetMaterialClass(ToUtf8(name)); }
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const char* name) const
-        { return GetMaterialClass(std::string(name)); }
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const QString& name) const
-        { return GetDrawableClass(ToUtf8(name)); }
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const char* name) const
-        { return GetDrawableClass(std::string(name)); }
-        std::shared_ptr<const game::AnimationClass> GetAnimationClass(const std::string& name) const;
+        std::shared_ptr<gfx::Material> MakeMaterialByName(const QString& name) const;
+        std::shared_ptr<gfx::Drawable> MakeDrawableByName(const QString& name) const;
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const QString& name) const;
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const char* name) const;
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const QString& name) const;
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
+        std::shared_ptr<const game::AnimationClass> GetAnimationClassByName(const QString& name) const;
+        std::shared_ptr<const game::AnimationClass> GetAnimationClassById(const QString& id) const;
 
         // gfxfactory implementation
-        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& id) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& id) const override;
         virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
@@ -143,7 +138,17 @@ namespace app
         QStringList ListAllDrawables() const;
         // Get a list of primitive (build-in) drawables.
         QStringList ListPrimitiveDrawables() const;
+        // Get a list of user defined drawables.
+        QStringList ListUserDefinedDrawables() const;
 
+        // Map material id to a human readable name.
+        QString MapMaterialName(const QString& id) const;
+        QString MapMaterialName(const std::string& id) const
+        { return MapMaterialName(FromUtf8(id)); }
+        // Map drawable id to a human readable name.
+        QString MapDrawableName(const QString& id) const;
+        QString MapDrawableName(const std::string& id) const
+        { return MapDrawableName(FromUtf8(id)); }
         // Save a new resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to
         // the workspace.
@@ -168,12 +173,15 @@ namespace app
             }
             // if we're here no such resource exists yet.
             // Create a new resource and add it to the list of resources.
-            beginInsertRows(QModelIndex(), mResources.size(), mResources.size());
-            mResources.push_back(std::make_unique<GameResource<T>>(resource));
+            beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
+            // insert at the end of the visible range which is from [0, mVisibleCount)
+            mResources.insert(mResources.begin() + mVisibleCount,
+                              std::make_unique<GameResource<T>>(resource));
             endInsertRows();
 
-            auto& back = mResources.back();
+            auto& back = mResources[mVisibleCount];
             emit NewResourceAvailable(back.get());
+            mVisibleCount++;
         }
 
         // Returns whether a material by this name already exists or not.
@@ -188,18 +196,22 @@ namespace app
         // Returns whether a particle system by this name already exists or not.
         bool HasParticleSystem(const QString& name) const;
 
-        // Checks whether the material name is a valid material name.
+        // Checks whether the material class id is a valid material class.
         // Includes primitives and user defined materials.
-        bool IsValidMaterial(const QString& name) const;
-        // Checks whether the drawable name is a valid drawable naem.
+        bool IsValidMaterial(const QString& klass) const;
+        bool IsValidMaterial(const std::string& klass) const
+        { return IsValidMaterial(FromUtf8(klass)); }
+        // Checks whether the drawable class id is a valid drawable class.
         // Includes primitives and user defined drawable shapes.
-        bool IsValidDrawable(const QString& name) const;
+        bool IsValidDrawable(const QString& klass) const;
+        bool IsValidDrawable(const std::string& klass) const
+        { return IsValidDrawable(FromUtf8(klass)); }
 
         // Returns whether some particular resource exists or not.
         // Only checks for a user defined resource not for primitives.
         bool HasResource(const QString& name, Resource::Type type) const;
 
-        // Get the Qt data model implementation for displaying the
+        // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)
         QAbstractTableModel* GetResourceModel()
         { return this; }
@@ -429,7 +441,7 @@ namespace app
         // from the workspace data files. these are created
         // and edited by the user through the editor.
         std::vector<std::unique_ptr<Resource>> mResources;
-
+        std::size_t mVisibleCount = 0;
     private:
         QString mWorkspaceDir;
         // workspace specific properties

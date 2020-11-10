@@ -127,8 +127,8 @@ public:
         , mMaterialName(material)
         , mDrawableName(drawable)
     {
-        mDrawableClass = mState.workspace->GetDrawableClass(mDrawableName);
-        mMaterialClass = mState.workspace->GetMaterialClass(mMaterialName);
+        mDrawableClass = mState.workspace->GetDrawableClassByName(mDrawableName);
+        mMaterialClass = mState.workspace->GetMaterialClassByName(mMaterialName);
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
@@ -207,8 +207,8 @@ public:
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
         game::AnimationNodeClass node;
-        node.SetMaterial(app::ToUtf8(mMaterialName), mMaterialClass);
-        node.SetDrawable(app::ToUtf8(mDrawableName), mDrawableClass);
+        node.SetMaterial(mMaterialClass);
+        node.SetDrawable(mDrawableClass);
         node.SetName(name);
         // the given object position is to be aligned with the center of the shape
         node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
@@ -533,18 +533,6 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mState.scenegraph_tree_view  = mUI.tree;
     mState.workspace = workspace;
 
-    // this fucking cunt whore will already emit selection changed signal
-    mUI.materials->blockSignals(true);
-    mUI.materials->addItems(workspace->ListAllMaterials());
-    mUI.materials->blockSignals(false);
-
-    mUI.drawables->blockSignals(true);
-    mUI.drawables->addItems(workspace->ListAllDrawables());
-    mUI.drawables->blockSignals(false);
-
-    SetValue(mUI.name, QString("My Animation"));
-    SetValue(mUI.ID, mState.animation->GetId());
-
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
@@ -745,38 +733,23 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
     mParticleSystems->menuAction()->setText("New...");
-
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("New...");
-
-    // update the drawable menu with drawable items.
-    for (size_t i=0; i<workspace->GetNumResources(); ++i)
-    {
-        const auto& resource = workspace->GetResource(i);
-        const auto& name = resource.GetName();
-        if (resource.GetType() == app::Resource::Type::ParticleSystem)
-        {
-            QAction* action = mParticleSystems->addAction(name);
-            connect(action, &QAction::triggered,
-                    this,   &AnimationWidget::placeNewParticleSystem);
-        }
-        else if(resource.GetType() == app::Resource::Type::CustomShape)
-        {
-            QAction* action = mCustomShapes->addAction(name);
-            connect(action, &QAction::triggered,
-                this,       &AnimationWidget::placeNewCustomShape);
-        }
-    }
-
-
-    setWindowTitle("My Animation");
+    RebuildDrawableMenus();
 
     PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
     PopulateFromEnum<game::AnimationNodeClass::RenderStyle>(mUI.renderStyle);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
 
+    SetValue(mUI.name, QString("My Animation"));
+    SetValue(mUI.ID, mState.animation->GetId());
+    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
+    SetList(mUI.materials, mState.workspace->ListAllMaterials());
+    setWindowTitle("My Animation");
+
+    // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged,
             this, &AnimationWidget::currentComponentRowChanged);
     connect(mUI.tree, &TreeWidget::dragEvent,  this, &AnimationWidget::treeDragEvent);
@@ -787,7 +760,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             this,      &AnimationWidget::newResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
             this,      &AnimationWidget::resourceToBeDeleted);
-
+    connect(workspace, &app::Workspace::ResourceUpdated,
+            this, &AnimationWidget::resourceUpdated);
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -807,20 +781,19 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
         auto& node = mState.animation->GetNode(i);
-        const auto& material = app::FromUtf8(node.GetMaterialName());
-        const auto& drawable = app::FromUtf8(node.GetDrawableName());
+        const auto& material = node.GetMaterialName();
+        const auto& drawable = node.GetDrawableName();
         if (!workspace->IsValidMaterial(material))
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
-            node.SetMaterial("Checkerboard", workspace->GetMaterialClass("Checkerboard"));
+            node.SetMaterial(workspace->GetMaterialClassByName("Checkerboard"));
         }
         if (!workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
-            node.SetMaterial("Checkerboard", workspace->GetMaterialClass("Checkerboard"));
-            node.SetDrawable("Rectangle", workspace->GetDrawableClass("Rectangle"));
+            node.SetDrawable(workspace->GetDrawableClassByName("Rectangle"));
         }
     }
     mState.animation->Prepare(*workspace);
@@ -945,20 +918,19 @@ bool AnimationWidget::LoadState(const Settings& settings)
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
         auto& node = mState.animation->GetNode(i);
-        const auto& material = app::FromUtf8(node.GetMaterialName());
-        const auto& drawable = app::FromUtf8(node.GetDrawableName());
+        const auto& material = node.GetMaterialName();
+        const auto& drawable = node.GetDrawableName();
         if (!mState.workspace->IsValidMaterial(material))
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
-            node.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
+            node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
         }
         if (!mState.workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
-            node.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
-            node.SetDrawable("Rectangle", mState.workspace->GetDrawableClass("Rectangle"));
+            node.SetDrawable(mState.workspace->GetDrawableClassByName("Rectangle"));
         }
     }
 
@@ -1142,7 +1114,7 @@ void AnimationWidget::on_actionNewCircle_triggered()
 
 void AnimationWidget::on_actionNewIsocelesTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "IsocelesTriangle"));
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "IsoscelesTriangle"));
 
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -1299,8 +1271,7 @@ void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const auto& material_name = app::ToUtf8(name);
-        node->SetMaterial(material_name, mState.workspace->GetMaterialClass(material_name));
+        node->SetMaterial(mState.workspace->GetMaterialClassByName(name));
     }
 }
 
@@ -1308,8 +1279,7 @@ void AnimationWidget::on_drawables_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        const auto& drawable_name = app::ToUtf8(name);
-        node->SetDrawable(drawable_name, mState.workspace->GetDrawableClass(drawable_name));
+        node->SetDrawable(mState.workspace->GetDrawableClassByName(name));
     }
 }
 
@@ -1372,110 +1342,54 @@ void AnimationWidget::placeNewCustomShape()
 
 void AnimationWidget::newResourceAvailable(const app::Resource* resource)
 {
-    // this is simple, just add new resources in the appropriate UI objects.
-    if (resource->GetType() == app::Resource::Type::Material)
+    SetList(mUI.materials, mState.workspace->ListAllMaterials());
+    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
+    if (auto* node = GetCurrentNode())
     {
-        mUI.materials->addItem(resource->GetName());
+        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
+        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
     }
-    else if (resource->GetType() == app::Resource::Type::ParticleSystem)
-    {
-        QAction* action = mParticleSystems->addAction(resource->GetName());
-        connect(action, &QAction::triggered, this, &AnimationWidget::placeNewParticleSystem);
+    RebuildDrawableMenus();
+}
 
-        mUI.drawables->addItem(resource->GetName());
-    }
-    else if (resource->GetType() == app::Resource::Type::CustomShape)
+void AnimationWidget::resourceUpdated(const app::Resource *resource)
+{
+    SetList(mUI.materials, mState.workspace->ListAllMaterials());
+    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
+    if (auto* node = GetCurrentNode())
     {
-        QAction* action = mCustomShapes->addAction(resource->GetName());
-        connect(action, &QAction::triggered, this, &AnimationWidget::placeNewCustomShape);
-
-        mUI.drawables->addItem(resource->GetName());
+        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
+        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
     }
+    RebuildDrawableMenus();
 }
 
 void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 {
-    if (resource->GetType() == app::Resource::Type::Material)
+    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
-        const auto index = mUI.materials->findText(resource->GetName());
-        mUI.materials->blockSignals(true);
-        mUI.materials->removeItem(index);
-        for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
+        auto& node = mState.animation->GetNode(i);
+        if (node.GetMaterialName() == resource->GetIdUtf8())
         {
-            auto& component = mState.animation->GetNode(i);
-            const auto& material = app::FromUtf8(component.GetMaterialName());
-            if (material == resource->GetName())
-            {
-                WARN("Animation node '%1' uses a material '%2' that is deleted.",
-                    component.GetName(), resource->GetName());
-                component.SetMaterial("Checkerboard", mState.workspace->GetMaterialClass("Checkerboard"));
-            }
+            WARN("Animation node '%1' uses a material '%2' that is deleted.",
+                 node.GetName(), resource->GetName());
+            node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
         }
-        if (auto* comp = GetCurrentNode())
+        else if (node.GetDrawableName() == resource->GetIdUtf8())
         {
-            // either this material still exists or the component's material
-            // was changed in the loop above.
-            // in either case the material name should be found in the current
-            // list of material names in the UI combobox.
-            const auto& material = app::FromUtf8(comp->GetMaterialName());
-            const auto index = mUI.materials->findText(material);
-            ASSERT(index != -1);
-            mUI.materials->setCurrentIndex(index);
-        }
-
-        mUI.materials->blockSignals(false);
-    }
-    else if (resource->GetType() == app::Resource::Type::ParticleSystem ||
-             resource->GetType() == app::Resource::Type::CustomShape)
-    {
-        // todo: what do do with drawables that are no longer available ?
-        const auto index = mUI.drawables->findText(resource->GetName());
-        mUI.drawables->blockSignals(true);
-        mUI.drawables->removeItem(index);
-        for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
-        {
-            auto& node = mState.animation->GetNode(i);
-            const auto& drawable = app::FromUtf8(node.GetDrawableName());
-            if (drawable == resource->GetName())
-            {
-                WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
-                    node.GetName(), resource->GetName());
-                node.SetDrawable("Rectangle", mState.workspace->GetDrawableClass("Rectangle"));
-            }
-        }
-        if (auto* node = GetCurrentNode())
-        {
-            // either this material still exists or the component's material
-            // was changed in the loop above.
-            // in either case the material name should be found in the current
-            // list of material names in the UI combobox.
-            const auto& material = app::FromUtf8(node->GetDrawableName());
-            const auto index = mUI.drawables->findText(material);
-            ASSERT(index != -1);
-            mUI.drawables->setCurrentIndex(index);
-        }
-        mUI.drawables->blockSignals(false);
-        // rebuild the drawable menu
-        mParticleSystems->clear();
-        mCustomShapes->clear();
-        for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
-        {
-            const auto& resource = mState.workspace->GetResource(i);
-            const auto& name = resource.GetName();
-            if (resource.GetType() == app::Resource::Type::ParticleSystem)
-            {
-                QAction* action = mParticleSystems->addAction(name);
-                connect(action, &QAction::triggered,
-                        this,   &AnimationWidget::placeNewParticleSystem);
-            }
-            else if (resource.GetType() == app::Resource::Type::CustomShape)
-            {
-                QAction* action = mCustomShapes->addAction(name);
-                connect(action, &QAction::triggered,
-                        this,   &AnimationWidget::placeNewCustomShape);
-            }
+            WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
+                 node.GetName(), resource->GetName());
+            node.SetDrawable(mState.workspace->GetDrawableClassByName("Rectangle"));
         }
     }
+    SetList(mUI.materials, mState.workspace->ListAllMaterials());
+    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
+    if (auto* node = GetCurrentNode())
+    {
+        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
+        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
+    }
+    RebuildDrawableMenus();
 }
 
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
@@ -1916,13 +1830,15 @@ void AnimationWidget::updateCurrentNodeProperties()
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         const auto& scale = node->GetScale();
+        const auto& material = mState.workspace->MapMaterialName(node->GetMaterialName());
+        const auto& drawable = mState.workspace->MapDrawableName(node->GetDrawableName());
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
         SetValue(mUI.renderStyle, node->GetRenderStyle());
         SetValue(mUI.layer, node->GetLayer());
-        SetValue(mUI.materials, node->GetMaterialName());
-        SetValue(mUI.drawables, node->GetDrawableName());
+        SetValue(mUI.materials, material);
+        SetValue(mUI.drawables, drawable);
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
         SetValue(mUI.nodeSizeX, size.x);
@@ -1948,6 +1864,31 @@ void AnimationWidget::updateCurrentNodePosition(float dx, float dy)
         pos.x += dx;
         pos.y += dy;
         node->SetTranslation(pos);
+    }
+}
+
+void AnimationWidget::RebuildDrawableMenus()
+{
+    // rebuild the drawable menus for custom shapes
+    // and particle systems.
+    mParticleSystems->clear();
+    mCustomShapes->clear();
+    for (size_t i = 0; i < mState.workspace->GetNumResources(); ++i)
+    {
+        const auto &resource = mState.workspace->GetResource(i);
+        const auto &name = resource.GetName();
+        if (resource.GetType() == app::Resource::Type::ParticleSystem)
+        {
+            QAction *action = mParticleSystems->addAction(name);
+            connect(action, &QAction::triggered,
+                    this, &AnimationWidget::placeNewParticleSystem);
+        }
+        else if (resource.GetType() == app::Resource::Type::CustomShape)
+        {
+            QAction *action = mCustomShapes->addAction(name);
+            connect(action, &QAction::triggered,
+                    this, &AnimationWidget::placeNewCustomShape);
+        }
     }
 }
 

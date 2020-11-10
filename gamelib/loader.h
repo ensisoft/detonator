@@ -60,8 +60,10 @@ namespace game
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
         // AssetTable implementation.
-        virtual const AnimationClass* FindAnimationClass(const std::string& name) const override;
-        virtual std::unique_ptr<Animation> CreateAnimation(const std::string& name) const override;
+        virtual const AnimationClass* FindAnimationClassByName(const std::string& name) const override;
+        virtual const AnimationClass* FindAnimationClassById(const std::string& id) const override;
+        virtual std::unique_ptr<Animation> CreateAnimationByName(const std::string& name) const override;
+        virtual std::unique_ptr<Animation> CreateAnimationById(const std::string& id) const override;
 
         // Read the given resource description file.
         // The expectation is that the file is well formed.
@@ -95,6 +97,9 @@ namespace game
         // from the resource file.
         std::unordered_map<std::string,
             std::shared_ptr<AnimationClass>> mAnimations;
+
+        // name table. maps ids to human readable names.
+        std::unordered_map<std::string, std::string> mNameTable;
 
     };
 } // namespace

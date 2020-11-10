@@ -70,7 +70,9 @@ namespace app
             // It's a scene description
             Scene,
             // It's an audio track
-            AudioTrack
+            AudioTrack,
+            // It's a generic drawable.
+            Drawable
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -79,10 +81,17 @@ namespace app
         virtual QString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
+        // Set the resource id.
+        virtual void SetId(const QString& id) = 0;
+        // Mark the resource primitive or not.
+        virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
         virtual void Serialize(nlohmann::json& json) const =0;
         // Serialize additional non-content properties into JSON
         virtual void Serialize(QJsonObject& json) const = 0;
+        // Returns true if the resource is considered primitive, i.e. not
+        // user defined.
+        virtual bool IsPrimitive() const = 0;
         // Returns true if resource has a property by the given name.
         virtual bool HasProperty(const QString& name) const = 0;
         // Set a property value. If the property exists already the previous
@@ -207,27 +216,43 @@ namespace app
         struct ResourceTypeTraits<gfx::PolygonClass> {
             static constexpr auto Type = app::Resource::Type::CustomShape;
         };
+        template <>
+        struct ResourceTypeTraits<gfx::DrawableClass> {
+            static constexpr auto Type = app::Resource::Type::Drawable;
+        };
     } // detail
 
-
-    template<typename Content>
-    class GameResource : public Resource
+    template<typename BaseTypeContent>
+    class GameResourceBase : public Resource
     {
     public:
-        using GfxType = Content;
-        static constexpr auto TypeValue = detail::ResourceTypeTraits<Content>::Type;
+        virtual std::shared_ptr<const BaseTypeContent> GetSharedResource() const = 0;
+    private:
+    };
+
+    template<typename BaseType, typename Content = BaseType>
+    class GameResource : public GameResourceBase<BaseType>
+    {
+    public:
+        static constexpr auto TypeValue = detail::ResourceTypeTraits<BaseType>::Type;
 
         GameResource(const Content& content, const QString& name)
-            : mName(name)
         {
             mContent = std::make_shared<Content>(content);
-            mId = app::FromUtf8(mContent->GetId());
+            mId   = app::FromUtf8(mContent->GetId());
+            mName = name;
         }
         GameResource(Content&& content, const QString& name)
-            : mName(name)
         {
             mContent = std::make_shared<Content>(std::move(content));
+            mId      = app::FromUtf8(mContent->GetId());
+            mName    = name;
+        }
+        GameResource(const QString& name)
+        {
+            mContent = std::make_shared<Content>();
             mId = app::FromUtf8(mContent->GetId());
+            mName = name;
         }
         GameResource(const GameResource& other)
         {
@@ -240,8 +265,12 @@ namespace app
         { return mId; }
         virtual QString GetName() const override
         { return mName; }
-        virtual Type GetType() const override
+        virtual Resource::Type GetType() const override
         { return TypeValue; }
+        virtual void SetId(const QString& id) override
+        { mId = id; }
+        virtual void SetIsPrimitive(bool primitive) override
+        { mPrimitive = primitive; }
         virtual void Serialize(nlohmann::json& json) const override
         {
             nlohmann::json content_json = mContent->ToJson();
@@ -253,6 +282,7 @@ namespace app
             // and there could be possibilities for name conflicts
             ASSERT(content_json.contains("resource_name") == false);
             content_json["resource_name"] = app::ToUtf8(mName);
+            content_json["resource_id"]   = app::ToUtf8(mId);
 
             if constexpr (TypeValue == Resource::Type::Material)
                 json["materials"].push_back(content_json);
@@ -276,6 +306,8 @@ namespace app
         }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
+        virtual bool IsPrimitive() const override
+        { return mPrimitive; }
         virtual void SetProperty(const QString& name, const QVariant& value) override
         { mProps[name] = value; }
         virtual QVariant GetProperty(const QString& name, const QVariant& def) const override
@@ -301,6 +333,10 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const override
         { return std::make_unique<GameResource>(*this); }
 
+        // GameResourceBase
+        virtual std::shared_ptr<const BaseType> GetSharedResource() const override
+        { return mContent; }
+
         void UpdateName(const QString& name)
         { mName = name; }
         void UpdateContent(const Content& data)
@@ -314,9 +350,6 @@ namespace app
         { return mContent.get(); }
         const QVariantMap& GetProperies() const
         { return mProps;}
-
-        std::shared_ptr<const Content> GetSharedResource() const
-        { return mContent; }
 
         GameResource& operator=(const GameResource& other) = delete;
 
@@ -338,20 +371,21 @@ namespace app
         QString mId;
         QString mName;
         QVariantMap mProps;
+        bool mPrimitive = false;
     };
 
     template<typename T> inline
-    const GameResource<T>& ResourceCast(const Resource& res)
+    const GameResourceBase<T>& ResourceCast(const Resource& res)
     {
-        using ResourceType = GameResource<T>;
+        using ResourceType = GameResourceBase<T>;
         const auto* ptr = dynamic_cast<const ResourceType*>(&res);
         ASSERT(ptr);
         return *ptr;
     }
     template<typename T> inline
-    GameResource<T>& ResourceCast(Resource& res)
+    GameResourceBase<T>& ResourceCast(Resource& res)
     {
-        using ResourceType = GameResource<T>;
+        using ResourceType = GameResourceBase<T>;
         auto* ptr = dynamic_cast<ResourceType*>(&res);
         ASSERT(ptr);
         return *ptr;
@@ -361,5 +395,8 @@ namespace app
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using AnimationResource      = GameResource<game::AnimationClass>;
+
+    template<typename DerivedType>
+       using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
 
 } // namespace

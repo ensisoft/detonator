@@ -45,9 +45,13 @@ std::shared_ptr<const gfx::MaterialClass> ContentLoader::GetMaterialClass(const 
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
     {
-        const std::string enum_name(magic_enum::enum_name(val));
-        if (enum_name == name)
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
+        const std::string color_name(magic_enum::enum_name(val));
+        if ("_" + color_name == name)
+        {
+            auto ret = std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
+            ret->SetId("_" + color_name);
+            return ret;
+        }
     }
 
     auto it = mMaterials.find(name);
@@ -62,19 +66,19 @@ std::shared_ptr<const gfx::MaterialClass> ContentLoader::GetMaterialClass(const 
 std::shared_ptr<const gfx::DrawableClass> ContentLoader::GetDrawableClass(const std::string& name) const
 {
     // these are the current primitive cases that are not packed as part of the resources
-    if (name == "Rectangle")
+    if (name == "_rect")
         return std::make_shared<gfx::RectangleClass>();
-    else if (name == "IsocelesTriangle")
+    else if (name == "_isosceles_triangle")
         return std::make_shared<gfx::IsocelesTriangleClass>();
-    else if (name == "RightTriangle")
+    else if (name == "_right_triangle")
         return std::make_shared<gfx::RightTriangleClass>();
-    else if (name == "Circle")
+    else if (name == "_circle")
         return std::make_shared<gfx::CircleClass>();
-    else if (name == "RoundRect")
+    else if (name == "_round_rect")
         return std::make_shared<gfx::RoundRectangleClass>();
-    else if (name == "Trapezoid")
+    else if (name == "_trapezoid")
         return std::make_shared<gfx::TrapezoidClass>();
-    else if (name == "Parallelogram")
+    else if (name == "_parallelogram")
         return std::make_shared<gfx::ParallelogramClass>();
 
     // todo: perhaps need an identifier for the type of resource in question.
@@ -122,20 +126,22 @@ std::string ContentLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, c
 
 template<typename Interface, typename Implementation>
 void LoadResources(const nlohmann::json& json, const std::string& type,
-    std::unordered_map<std::string, std::shared_ptr<Interface>>& out)
+    std::unordered_map<std::string, std::shared_ptr<Interface>>& out,
+    std::unordered_map<std::string, std::string>& names)
 {
     if (!json.contains(type))
         return;
     for (const auto& iter : json[type].items())
     {
         auto& value = iter.value();
+        const std::string& id   = value["resource_id"];
         const std::string& name = value["resource_name"];
         std::optional<Implementation> ret = Implementation::FromJson(value);
         if (!ret.has_value())
             throw std::runtime_error("Failed to load: " + type + "/" + name);
 
-        out[name] = std::make_shared<Implementation>(std::move(ret.value()));
-        //out[name] = std::make_shared<Implementation>(ret.value());
+        out[id] = std::make_shared<Implementation>(std::move(ret.value()));
+        names[id] = name;
         DEBUG("Loaded '%1/%2'", type, name);
     }
 }
@@ -150,10 +156,10 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     // might throw.
     const auto& json = nlohmann::json::parse(buffer);
 
-    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials);
-    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines);
-    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes);
-    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations);
+    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials, mNameTable);
+    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, mNameTable);
+    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, mNameTable);
+    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, mNameTable);
 
     for (auto it = mAnimations.begin(); it != mAnimations.end();
         ++it)
@@ -166,20 +172,40 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     mResourceFile = file;
 }
 
-const AnimationClass* ContentLoader::FindAnimationClass(const std::string& name) const
+const AnimationClass* ContentLoader::FindAnimationClassById(const std::string& id) const
 {
-    auto it = mAnimations.find(name);
+    auto it = mAnimations.find(id);
     if (it == std::end(mAnimations))
         return nullptr;
     return it->second.get();
 }
 
-std::unique_ptr<Animation> ContentLoader::CreateAnimation(const std::string& name) const
+const AnimationClass* ContentLoader::FindAnimationClassByName(const std::string &name) const
 {
-    auto it = mAnimations.find(name);
+    for (auto pair : mNameTable)
+    {
+        if (pair.second == name)
+            return FindAnimationClassById(pair.first);
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Animation> ContentLoader::CreateAnimationByName(const std::string& name) const
+{
+    for (auto pair : mNameTable)
+    {
+        if (pair.second == name)
+            return CreateAnimationById(pair.first);
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Animation> ContentLoader::CreateAnimationById(const std::string &id) const
+{
+    auto it = mAnimations.find(id);
     if (it == std::end(mAnimations))
         return nullptr;
-    return std::make_unique<Animation>(it->second);
+    return game::CreateAnimationInstance(it->second);
 }
 
 } // namespace

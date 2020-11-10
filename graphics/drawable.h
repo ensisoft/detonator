@@ -897,10 +897,32 @@ namespace gfx
         class GenericDrawableClass : public DrawableClass
         {
         public:
-            GenericDrawableClass()
-            { mId = base::RandomString(10); }
             virtual std::string GetId() const override
-            { return mId; }
+            {
+                // since the generic drawable class doesn't actually
+                // have any state that would define new drawable types
+                // the IDs can be fixed.
+                using types = DrawableClass::Type;
+                if constexpr (ActualType == types::Arrow)
+                    return "_arrow";
+                else if (ActualType == types::Circle)
+                    return "_circle";
+                else if (ActualType == types::IsocelesTriangle)
+                    return "_isosceles_triangle";
+                else if (ActualType == types::Line)
+                    return "_line";
+                else if (ActualType == types::Parallelogram)
+                    return "_parallelogram";
+                else if (ActualType == types::Rectangle)
+                    return "_rect";
+                else if (ActualType == types::RoundRectangle)
+                    return "_round_rect";
+                else if (ActualType == types::RightTriangle)
+                    return "_right_triangle";
+                else if (ActualType == types::Trapezoid)
+                    return "_trapezoid";
+                else BUG("???");
+            }
             virtual Type GetType() const override
             { return ActualType; }
             virtual void Pack(ResourcePacker*) const override {}
@@ -909,7 +931,7 @@ namespace gfx
             virtual bool LoadFromJson(const nlohmann::json&) override
             { return true; }
         private:
-            std::string mId;
+
         };
     } // namespace
 

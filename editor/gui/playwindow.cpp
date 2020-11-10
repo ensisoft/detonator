@@ -211,14 +211,26 @@ public:
     SessionAssets(const app::Workspace& workspace)
         : mWorkspace(workspace)
     {}
-    virtual const game::AnimationClass* FindAnimationClass(const std::string& name) const override
+    virtual const game::AnimationClass* FindAnimationClassByName(const std::string& name) const override
     {
-        auto klass = mWorkspace.GetAnimationClass(name);
+        auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
         return klass.get();
     }
-    virtual std::unique_ptr<game::Animation> CreateAnimation(const std::string& name) const override
+    virtual const game::AnimationClass* FindAnimationClassById(const std::string& id) const override
     {
-        auto klass = mWorkspace.GetAnimationClass(name);
+        auto klass = mWorkspace.GetAnimationClassById(app::FromUtf8(id));
+        return klass.get();
+    }
+
+    virtual std::unique_ptr<game::Animation> CreateAnimationByName(const std::string& name) const override
+    {
+        auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
+        klass->Prepare(mWorkspace);
+        return game::CreateAnimationInstance(klass);
+    }
+    virtual std::unique_ptr<game::Animation> CreateAnimationById(const std::string& id) const override
+    {
+        auto klass = mWorkspace.GetAnimationClassById(app::FromUtf8(id));
         klass->Prepare(mWorkspace);
         return game::CreateAnimationInstance(klass);
     }
@@ -227,11 +239,7 @@ public:
     {
         // not implemented, loaded from workspace
     }
-    void UpdateResource(const app::Resource* resource)
-    {
-    }
 private:
-
     const app::Workspace& mWorkspace;
 };
 
@@ -514,8 +522,6 @@ void PlayWindow::on_actionClose_triggered()
 void PlayWindow::ResourceUpdated(const app::Resource* resource)
 {
     DEBUG("Update resource '%1'", resource->GetName());
-
-    mAssets->UpdateResource(resource);
 }
 
 void PlayWindow::closeEvent(QCloseEvent* event)

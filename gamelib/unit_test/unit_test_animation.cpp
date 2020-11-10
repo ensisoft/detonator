@@ -73,8 +73,8 @@ TestFactory* g_factory = nullptr;
 void unit_test_animation_node()
 {
     game::AnimationNodeClass node;
-    node.SetDrawable("rectangle", nullptr);
-    node.SetMaterial("test", nullptr);
+    node.SetDrawable("rectangle");
+    node.SetMaterial("test");
     node.SetSize(glm::vec2(100.0f, 100.0f));
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
     node.SetScale(glm::vec2(4.0f, 5.0f));
@@ -179,13 +179,13 @@ void unit_test_animation_transform_actuator()
     {
         game::AnimationTransformActuator instance(act);
         game::AnimationNodeClass klass;
-        klass.Prepare(*g_factory);
         klass.SetDrawable("drawable");
         klass.SetMaterial("material");
         klass.SetTranslation(glm::vec2(5.0f, 5.0f));
         klass.SetSize(glm::vec2(1.0f, 1.0f));
         klass.SetRotation(0.0f);
         klass.SetScale(glm::vec2(1.0f, 1.0f));
+        klass.Prepare(*g_factory);
 
         // create node instance
         game::AnimationNode node(klass);
@@ -218,13 +218,13 @@ void unit_test_animation_transform_actuator()
 void unit_test_animation_track()
 {
     game::AnimationNodeClass klass;
-    klass.Prepare(*g_factory);
     klass.SetDrawable("drawable");
     klass.SetMaterial("material");
     klass.SetTranslation(glm::vec2(5.0f, 5.0f));
     klass.SetSize(glm::vec2(1.0f, 1.0f));
     klass.SetRotation(0.0f);
     klass.SetScale(glm::vec2(1.0f, 1.0f));
+    klass.Prepare(*g_factory);
 
     // create node instance
     game::AnimationNode node(klass);

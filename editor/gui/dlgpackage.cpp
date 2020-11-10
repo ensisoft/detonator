@@ -50,12 +50,15 @@ DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
     for (size_t i=0; i<num_resources; ++i)
     {
         const auto& resource = mWorkspace.GetResource(i);
+        if (resource.IsPrimitive())
+            continue;
         const bool check = resource.GetProperty("checked_for_packing", true);
         QListWidgetItem* item = new QListWidgetItem();
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(check ? Qt::Checked : Qt::Unchecked);
         item->setIcon(resource.GetIcon());
         item->setText(resource.GetName());
+        item->setData(Qt::UserRole, quint64(i));
         mUI.listWidget->addItem(item);
     }
 
@@ -125,8 +128,9 @@ void DlgPackage::on_btnStart_clicked()
     for (size_t i=0; i<GetCount(mUI.listWidget); ++i)
     {
         const QListWidgetItem* item = mUI.listWidget->item(i);
-        auto& resource = mWorkspace.GetResource(i);
+        const auto index   = item->data(Qt::UserRole).toULongLong();
         const auto checked = item->checkState() == Qt::Checked;
+        auto& resource = mWorkspace.GetResource(index);
         resource.SetProperty("checked_for_packing", checked);
         if (checked)
         {
