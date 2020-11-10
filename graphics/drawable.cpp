@@ -161,6 +161,158 @@ Geometry* Line::Upload(Device& device) const
     return geom;
 }
 
+Shader* Capsule::GetShader(Device &device) const
+{
+    Shader* shader = device.FindShader("vertex_array.glsl");
+    if (shader == nullptr)
+    {
+        shader = device.MakeShader("vertex_array.glsl");
+        shader->CompileFile("shaders/es2/vertex_array.glsl");
+    }
+    return shader;
+}
+
+Geometry* Capsule::Upload(Device &device) const
+{
+    if (mStyle == Style::Points)
+        return nullptr;
+    // todo LOD information
+    const auto slices = 50;
+    const auto* name = mStyle == Style::Outline ? "CapsuleOutline" :
+                      (mStyle == Style::Wireframe ? "CapsuleWireframe" : "Capsule");
+    Geometry* geom = device.FindGeometry(name);
+    if (!geom)
+    {
+        geom = device.MakeGeometry(name);
+
+        std::vector<Vertex> vs;
+        auto offset = 0;
+
+        // semi-circle at the left end.
+        Vertex left_center;
+        left_center.aPosition.x =  0.1f;
+        left_center.aPosition.y = -0.5f;
+        left_center.aTexCoord.x =  0.1f;
+        left_center.aTexCoord.y =  0.5f;
+        if (mStyle == Style::Solid)
+            vs.push_back(left_center);
+
+        const float left_radius = 0.1;
+        const float left_angle_increment = math::Pi / slices;
+        float left_angle = math::Pi * 0.5;
+        for (unsigned i=0; i<= slices; ++i)
+        {
+            const auto x = std::cos(left_angle) * left_radius;
+            const auto y = std::sin(left_angle) * left_radius;
+            Vertex v;
+            v.aPosition.x =  0.1 + x;
+            v.aPosition.y = -0.5 - y;
+            v.aTexCoord.x =  0.1 + x;
+            v.aTexCoord.y =  0.5 + y;
+            vs.push_back(v);
+
+            left_angle += left_angle_increment;
+
+            if (mStyle == Style::Wireframe)
+            {
+                const auto x = std::cos(left_angle) * left_radius;
+                const auto y = std::sin(left_angle) * left_radius;
+                Vertex v;
+                v.aPosition.x =  0.1 + x;
+                v.aPosition.y = -0.5 - y;
+                v.aTexCoord.x =  0.1 + x;
+                v.aTexCoord.y =  0.5 + y;
+                vs.push_back(v);
+                vs.push_back(left_center);
+            }
+        }
+        if (mStyle == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+        else if (mStyle == Style::Outline)
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+        else if (mStyle == Style::Wireframe)
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+
+        offset = vs.size();
+
+        // semi circle at the right end
+        Vertex right_center;
+        right_center.aPosition.x =  0.9f;
+        right_center.aPosition.y = -0.5f;
+        right_center.aTexCoord.x =  0.9f;
+        right_center.aTexCoord.y =  0.5f;
+        if (mStyle == Style::Solid)
+            vs.push_back(right_center);
+
+        const float right_radius = 0.1;
+        const float right_angle_increment = math::Pi / slices;
+        float right_angle = math::Pi * -0.5;
+        for (unsigned i=0; i<= slices; ++i)
+        {
+            const auto x = std::cos(right_angle) * right_radius;
+            const auto y = std::sin(right_angle) * right_radius;
+            Vertex v;
+            v.aPosition.x =  0.9 + x;
+            v.aPosition.y = -0.5 - y;
+            v.aTexCoord.x =  0.9 + x;
+            v.aTexCoord.y =  0.5 + y;
+            vs.push_back(v);
+
+            right_angle += right_angle_increment;
+
+            if (mStyle == Style::Wireframe)
+            {
+                const auto x = std::cos(right_angle) * right_radius;
+                const auto y = std::sin(right_angle) * right_radius;
+                Vertex v;
+                v.aPosition.x =  0.9 + x;
+                v.aPosition.y = -0.5 - y;
+                v.aTexCoord.x =  0.9 + x;
+                v.aTexCoord.y =  0.5 + y;
+                vs.push_back(v);
+                vs.push_back(right_center);
+            }
+        }
+        if (mStyle == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+        else if (mStyle == Style::Outline)
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+        else if (mStyle == Style::Wireframe)
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+
+        // center box.
+        const Vertex box[6] = {
+            { {0.1f,  -0.4f}, {0.1f, 0.4f} },
+            { {0.1f,  -0.6f}, {0.1f, 0.6f} },
+            { {0.9f,  -0.6f}, {0.9f, 0.6f} },
+
+            { {0.1f,  -0.4f}, {0.1f, 0.4f} },
+            { {0.9f,  -0.6f}, {0.9f, 0.6f} },
+            { {0.9f,  -0.4f}, {0.9f, 0.4f} }
+        };
+        offset = vs.size();
+        vs.push_back(box[0]);
+        vs.push_back(box[1]);
+        vs.push_back(box[2]);
+        vs.push_back(box[3]);
+        vs.push_back(box[4]);
+        vs.push_back(box[5]);
+        if (mStyle == Style::Solid)
+        {
+            geom->AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
+        }
+        else
+        {
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset+0, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset+3, 3);
+        }
+
+        geom->Update(std::move(vs));
+    }
+    geom->SetLineWidth(mLineWidth);
+    return geom;
+}
+
 Shader* Circle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -1368,13 +1520,15 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<Arrow>();
         case DrawableClass::Type::Line:
             return std::make_unique<Line>();
+        case DrawableClass::Type::Capsule:
+            return std::make_unique<Capsule>();
         case DrawableClass::Type::Circle:
             return std::make_unique<Circle>();
         case DrawableClass::Type::Rectangle:
             return std::make_unique<Rectangle>();
         case DrawableClass::Type::RoundRectangle:
             return std::make_unique<RoundRectangle>(std::static_pointer_cast<const RoundRectangleClass>(klass));
-        case DrawableClass::Type::IsocelesTriangle:
+        case DrawableClass::Type::IsoscelesTriangle:
             return std::make_unique<IsocelesTriangle>();
         case DrawableClass::Type::RightTriangle:
             return std::make_unique<RightTriangle>();

@@ -680,13 +680,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mCurrentTool->MouseRelease(mickey, view);
 
         mCurrentTool.release();
-        mUI.actionNewRect->setChecked(false);
-        mUI.actionNewCircle->setChecked(false);
-        mUI.actionNewIsocelesTriangle->setChecked(false);
-        mUI.actionNewRightTriangle->setChecked(false);
-        mUI.actionNewRoundRect->setChecked(false);
-        mUI.actionNewTrapezoid->setChecked(false);
-        mUI.actionNewParallelogram->setChecked(false);
+        CheckPlacementActions(nullptr);
     };
 
     mUI.widget->onKeyPress = [&](QKeyEvent* key) {
@@ -732,10 +726,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     // since there doesn't seem to be a way to do this in the designer.
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
-    mParticleSystems->menuAction()->setText("New...");
+    mParticleSystems->menuAction()->setText("Particle");
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
-    mCustomShapes->menuAction()->setText("New...");
+    mCustomShapes->menuAction()->setText("Polygon");
     RebuildDrawableMenus();
 
     PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
@@ -824,6 +818,7 @@ void AnimationWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewRightTriangle);
     bar.addAction(mUI.actionNewTrapezoid);
     bar.addAction(mUI.actionNewParallelogram);
+    bar.addAction(mUI.actionNewCapsule);
     bar.addSeparator();
     bar.addAction(mCustomShapes->menuAction());
     bar.addSeparator();
@@ -846,6 +841,7 @@ void AnimationWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewRightTriangle);
     menu.addAction(mUI.actionNewTrapezoid);
     menu.addAction(mUI.actionNewParallelogram);
+    menu.addAction(mUI.actionNewCapsule);
     menu.addSeparator();
     menu.addAction(mCustomShapes->menuAction());
     menu.addSeparator();
@@ -1090,90 +1086,55 @@ void AnimationWidget::on_actionNewRect_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Rectangle"));
 
-    mUI.actionNewRect->setChecked(true);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewRect);
 }
 
 void AnimationWidget::on_actionNewCircle_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Circle"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(true);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewCircle);
 }
 
 void AnimationWidget::on_actionNewIsocelesTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "IsoscelesTriangle"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(true);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewIsocelesTriangle);
 }
 
 void AnimationWidget::on_actionNewRightTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "RightTriangle"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(true);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewRightTriangle);
 }
 
 void AnimationWidget::on_actionNewRoundRect_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "RoundRect"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(true);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewRoundRect);
 }
 
 void AnimationWidget::on_actionNewTrapezoid_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Trapezoid"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(true);
-    mUI.actionNewParallelogram->setChecked(false);
+    CheckPlacementActions(mUI.actionNewTrapezoid);
 }
 void AnimationWidget::on_actionNewParallelogram_triggered()
 {
     mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Parallelogram"));
 
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsocelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(true);
+    CheckPlacementActions(mUI.actionNewParallelogram);
+}
+
+void AnimationWidget::on_actionNewCapsule_triggered()
+{
+    mCurrentTool.reset(new PlaceTool(mState, "Checkerboard", "Capsule"));
+
+    CheckPlacementActions(mUI.actionNewCapsule);
 }
 
 void AnimationWidget::on_actionDeleteComponent_triggered()
@@ -1890,6 +1851,21 @@ void AnimationWidget::RebuildDrawableMenus()
                     this, &AnimationWidget::placeNewCustomShape);
         }
     }
+}
+
+void AnimationWidget::CheckPlacementActions(QAction* selected)
+{
+    mUI.actionNewRect->setChecked(false);
+    mUI.actionNewCircle->setChecked(false);
+    mUI.actionNewIsocelesTriangle->setChecked(false);
+    mUI.actionNewRightTriangle->setChecked(false);
+    mUI.actionNewRoundRect->setChecked(false);
+    mUI.actionNewTrapezoid->setChecked(false);
+    mUI.actionNewParallelogram->setChecked(false);
+    mUI.actionNewCapsule->setChecked(false);
+
+    if (selected)
+        selected->setChecked(true);
 }
 
 } // namespace

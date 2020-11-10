@@ -72,6 +72,8 @@ std::shared_ptr<const gfx::DrawableClass> ContentLoader::GetDrawableClass(const 
         return std::make_shared<gfx::IsocelesTriangleClass>();
     else if (name == "_right_triangle")
         return std::make_shared<gfx::RightTriangleClass>();
+    else if (name == "_capsule")
+        return std::make_shared<gfx::CapsuleClass>();
     else if (name == "_circle")
         return std::make_shared<gfx::CircleClass>();
     else if (name == "_round_rect")

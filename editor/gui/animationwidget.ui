@@ -1081,7 +1081,10 @@
      <normaloff>:/32x32_ico_png/rectangle.png</normaloff>:/32x32_ico_png/rectangle.png</iconset>
    </property>
    <property name="text">
-    <string>New Rect</string>
+    <string>Rect</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new rectangle</string>
    </property>
   </action>
   <action name="actionDeleteComponent">
@@ -1135,10 +1138,10 @@
      <normaloff>:/32x32_ico_png/circle.png</normaloff>:/32x32_ico_png/circle.png</iconset>
    </property>
    <property name="text">
-    <string>New Circle</string>
+    <string>Circle</string>
    </property>
    <property name="toolTip">
-    <string>New Circle</string>
+    <string>Place new circle</string>
    </property>
   </action>
   <action name="actionNewIsocelesTriangle">
@@ -1150,10 +1153,10 @@
      <normaloff>:/32x32_ico_png/isoceles_triangle.png</normaloff>:/32x32_ico_png/isoceles_triangle.png</iconset>
    </property>
    <property name="text">
-    <string>New Triangle</string>
+    <string>Triangle</string>
    </property>
    <property name="toolTip">
-    <string>New Triangle</string>
+    <string>Place new isosceles triangle</string>
    </property>
   </action>
   <action name="actionSave">
@@ -1180,7 +1183,10 @@
      <normaloff>:/32x32_ico_png/round_rect.png</normaloff>:/32x32_ico_png/round_rect.png</iconset>
    </property>
    <property name="text">
-    <string>New Rect</string>
+    <string>Rect</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new rounded rect</string>
    </property>
   </action>
   <action name="actionNewRightTriangle">
@@ -1192,10 +1198,10 @@
      <normaloff>:/32x32_ico_png/right_triangle.png</normaloff>:/32x32_ico_png/right_triangle.png</iconset>
    </property>
    <property name="text">
-    <string>New Triangle</string>
+    <string>Triangle</string>
    </property>
    <property name="toolTip">
-    <string>New right triangle</string>
+    <string>Place new right angled triangle</string>
    </property>
   </action>
   <action name="actionNewTrapezoid">
@@ -1207,10 +1213,10 @@
      <normaloff>:/32x32_ico_png/trapezoid.png</normaloff>:/32x32_ico_png/trapezoid.png</iconset>
    </property>
    <property name="text">
-    <string>New Trapezoid</string>
+    <string>Trapezoid</string>
    </property>
    <property name="toolTip">
-    <string>New trapezoid</string>
+    <string>Place new trapezoid</string>
    </property>
   </action>
   <action name="actionNewParallelogram">
@@ -1222,10 +1228,25 @@
      <normaloff>:/32x32_ico_png/parallelogram.png</normaloff>:/32x32_ico_png/parallelogram.png</iconset>
    </property>
    <property name="text">
-    <string>New Parallelogram</string>
+    <string>Parallelogram</string>
    </property>
    <property name="toolTip">
-    <string>New parallelogram</string>
+    <string>Place new parallelogram</string>
+   </property>
+  </action>
+  <action name="actionNewCapsule">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/capsule.png</normaloff>:/32x32_ico_png/capsule.png</iconset>
+   </property>
+   <property name="text">
+    <string>Capsule</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new capsule</string>
    </property>
   </action>
  </widget>

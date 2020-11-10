@@ -83,6 +83,7 @@ namespace gui
         void on_actionNewRightTriangle_triggered();
         void on_actionNewRoundRect_triggered();
         void on_actionNewTrapezoid_triggered();
+        void on_actionNewCapsule_triggered();
         void on_actionNewParallelogram_triggered();
         void on_actionDeleteComponent_triggered();
         void on_tree_customContextMenuRequested(QPoint);
@@ -130,6 +131,7 @@ namespace gui
         void updateCurrentNodeProperties();
         void updateCurrentNodePosition(float dx, float dy);
         void RebuildDrawableMenus();
+        void CheckPlacementActions(QAction* selected);
     private:
         class TreeModel;
         class Tool;

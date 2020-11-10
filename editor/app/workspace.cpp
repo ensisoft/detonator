@@ -497,6 +497,7 @@ Workspace::Workspace()
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }
 
+    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>("Capsule"));
     mResources.emplace_back(new DrawableResource<gfx::RectangleClass>("Rectangle"));
     mResources.emplace_back(new DrawableResource<gfx::IsocelesTriangleClass>("IsoscelesTriangle"));
     mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>("RightTriangle"));

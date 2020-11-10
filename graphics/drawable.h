@@ -110,9 +110,10 @@ namespace gfx
         // Type of the drawable (and its instances)
         enum class Type {
             Arrow,
+            Capsule,
             Circle,
             Grid,
-            IsocelesTriangle,
+            IsoscelesTriangle,
             KinematicsParticleEngine,
             Line,
             Parallelogram,
@@ -131,7 +132,7 @@ namespace gfx
         virtual void Pack(ResourcePacker* packer) const = 0;
         // Serialize into JSON
         virtual nlohmann::json ToJson() const = 0;
-        // Load state from JSON object. Returns true if succesful
+        // Load state from JSON object. Returns true if successful
         // otherwise false.
         virtual bool LoadFromJson(const nlohmann::json& json) = 0;
     private:
@@ -173,6 +174,25 @@ namespace gfx
         virtual Style GetStyle() const override
         { return Style::Solid; }
     private:
+        float mLineWidth = 1.0f;
+    };
+
+    class Capsule : public Drawable
+    {
+    public:
+        Capsule() = default;
+        Capsule(Style style) : mStyle(style)
+        {}
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(Device& device) const override;
+        virtual void SetStyle(Style style) override
+        { mStyle = style;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+    private:
+        Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
 
@@ -905,9 +925,11 @@ namespace gfx
                 using types = DrawableClass::Type;
                 if constexpr (ActualType == types::Arrow)
                     return "_arrow";
+                else if (ActualType == types::Capsule)
+                    return "_capsule";
                 else if (ActualType == types::Circle)
                     return "_circle";
-                else if (ActualType == types::IsocelesTriangle)
+                else if (ActualType == types::IsoscelesTriangle)
                     return "_isosceles_triangle";
                 else if (ActualType == types::Line)
                     return "_line";
@@ -938,8 +960,9 @@ namespace gfx
     // shim type definitions for drawables that don't have their
     // own actual type class yet.
     using ArrowClass = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
+    using CapsuleClass = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
     using CircleClass = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
-    using IsocelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsocelesTriangle>;
+    using IsocelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
     using LineClass = detail::GenericDrawableClass<DrawableClass::Type::Line>;
     using ParallelogramClass = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
     using RectangleClass = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
