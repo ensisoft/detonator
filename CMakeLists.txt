@@ -405,10 +405,10 @@ endif()
 
 # game project
 add_library(invaders SHARED
-    pinyin-invaders/level.cpp
-    pinyin-invaders/gamewidget.cpp
-    pinyin-invaders/game.cpp
-    pinyin-invaders/main.cpp
+    games/invaders/level.cpp
+    games/invaders/gamewidget.cpp
+    games/invaders/game.cpp
+    games/invaders/main.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/sample.cpp
@@ -432,7 +432,7 @@ add_library(invaders SHARED
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp
 )
-target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders")
+target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/games/invaders")
 target_link_libraries(invaders PRIVATE freetype_custom_build harfbuzz_custom_build)
 if (WIN32)
   include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")
@@ -442,7 +442,7 @@ elseif (UNIX)
   target_link_libraries(invaders PRIVATE sndfile)
   target_link_libraries(invaders PRIVATE pthread)
 endif()
-install(TARGETS invaders main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/pinyin-invaders/dist")
+install(TARGETS invaders main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(invaders PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
