@@ -1082,7 +1082,8 @@ bool PolygonClass::LoadFromJson(const nlohmann::json& json)
 std::optional<PolygonClass> PolygonClass::FromJson(const nlohmann::json& object)
 {
     PolygonClass ret;
-    if (!base::JsonReadSafe(object, "static", &ret.mStatic))
+    if (!base::JsonReadSafe(object, "id", &ret.mId) ||
+        !base::JsonReadSafe(object, "static", &ret.mStatic))
         return std::nullopt;
 
     if (object.contains("vertices"))
