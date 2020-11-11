@@ -30,9 +30,8 @@
 
 extern "C" {
 
-GAMESTUDIO_EXPORT game::App* MakeApp(base::Logger* logger)
+GAMESTUDIO_EXPORT game::App* MakeApp()
 {
-    base::SetGlobalLog(logger);
     INFO("%1 %2", GAME_TITLE, GAME_VERSION);
     return new invaders::GameWidget();
 }

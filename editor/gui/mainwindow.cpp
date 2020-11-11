@@ -1104,11 +1104,28 @@ void MainWindow::on_actionProjectPlay_triggered()
 
     if (!mPlayWindow)
     {
-        mPlayWindow.reset(new PlayWindow(*mWorkspace));
-        const auto xpos = mWorkspace->GetUserProperty("play_window_xpos", mPlayWindow->x());
-        const auto ypos = mWorkspace->GetUserProperty("play_window_ypos", mPlayWindow->y());
-        mPlayWindow->move(xpos, ypos);
-        mPlayWindow->show();
+        const auto& settings = mWorkspace->GetProjectSettings();
+        if (settings.application_library.isEmpty())
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setIcon(QMessageBox::Question);
+            msg.setText("You haven't set the application library for the project.\n"
+                        "The game should be built into a library (a .dll or .so file)\n"
+                        "which is then loaded by me.\n"
+                        "You can change the application library in the workspace settings.");
+            msg.exec();
+            return;
+        }
+        auto window = std::make_unique<PlayWindow>(*mWorkspace);
+        const auto xpos = mWorkspace->GetUserProperty("play_window_xpos", window->x());
+        const auto ypos = mWorkspace->GetUserProperty("play_window_ypos", window->y());
+        window->move(xpos, ypos);
+        window->show();
+        if (!window->LoadGame())
+            return;
+
+        mPlayWindow = std::move(window);
         emit newAcceleratedWindowOpen();
         QCoreApplication::postEvent(this, new IterateGameLoopEvent);
         DEBUG("Playwindow position: %1x%2", xpos, ypos);

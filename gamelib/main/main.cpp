@@ -62,10 +62,16 @@
 // and start invoking callbacks on the implementation
 // provided by the game module.
 
+// entry point functions that are resolved when the game library is loaded.
+MakeAppFunc                   GameLibMakeApp;
+SetResourceLoaderFunc         GameLibSetResourceLoader;
+SetGlobalLoggerFunc           GameLibSetGlobalLogger;
+CreateDefaultEnvironmentFunc  GameLibCreateEnvironment;
+DestroyDefaultEnvironmentFunc GameLibDestroyEnvironment;
+
 #if defined(POSIX_OS)
 void* application_library;
-
-std::unique_ptr<game::App> LoadApp(const std::string& lib)
+void LoadAppLibrary(const std::string& lib)
 {
     // todo: check for path in the filename
 #if defined(NDEBUG)
@@ -76,74 +82,33 @@ std::unique_ptr<game::App> LoadApp(const std::string& lib)
     application_library = ::dlopen(name.c_str(), RTLD_NOW);
     if (application_library == NULL)
         throw std::runtime_error(dlerror());
-
-    DEBUG("Loaded library: '%1'", name);
-
-    auto* func = (MakeAppFunc)::dlsym(application_library, "MakeApp");
-    if (func == NULL)
-        throw std::runtime_error("No game entry point found.");
-
-    std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
+}
+void* LoadFunction(const char* name)
+{
+    void* ret = dlsym(application_library, name);
+    if (ret == nullptr)
+        throw std::runtime_error(std::string("No such entry point: ") + name);
+    DEBUG("Resolved '%1' (%2)", name, ret);
     return ret;
-}
-
-void CreateEnvironment(game::GfxFactory** factory, game::AssetTable** assets)
-{
-    auto* func = (CreateDefaultEnvironmentFunc)::dlsym(application_library, "CreateDefaultEnvironment");
-    if (func == NULL)
-        throw std::runtime_error("No CreateDefaultEnvironment found. Library must be built using gamelib.cpp");
-
-    func(factory, assets);
-}
-
-void DestroyEnvironment(game::GfxFactory* factory, game::AssetTable* assets)
-{
-    auto* func = (DestroyDefaultEnvironmentFunc)::dlsym(application_library, "DesroyDefaultEnvironment");
-    if (func == NULL)
-        return;
-
-    func(factory, assets);
 }
 
 #elif defined(WINDOWS_OS)
 HMODULE application_library;
-
-std::unique_ptr<game::App> LoadApp(const std::string& lib)
+void LoadAppLibrary(const std::string& lib)
 {
     std::string name = lib + ".dll";
-
     application_library = ::LoadLibraryA(name.c_str());
     if (application_library == NULL)
         throw std::runtime_error("Load library failed."); // todo: error string message
-
-    DEBUG("Loaded library: '%1'", name);
-
-    auto* func = (MakeAppFunc)GetProcAddress(application_library, "MakeApp");
-    if (func == NULL)
-        throw std::runtime_error("No game entry point found.");
-
-    std::unique_ptr<game::App> ret(func(base::GetGlobalLog()));
+}
+void* LoadFunction(const char* name)
+{
+    void* ret = GetProcAddress(application_library, name);
+    if (ret == nullptr)
+        throw std::runtime_error(std::string("No such entry point: ") + name);
+    DEBUG("Resolved '%1' (%2)", name, ret);
     return ret;
 }
-
-void CreateEnvironment(game::GfxFactory** factory, game::AssetTable** assets)
-{
-    auto* func = (CreateDefaultEnvironmentFunc)::GetProcAddress(application_library, "CreateDefaultEnvironment");
-    if (func == NULL)
-        throw std::runtime_error("No CreateDefaultEnvironment found. Library must be built using gamelib.cpp");
-
-    func(factory, assets);
-}
-
-void DestroyEnvironment(game::GfxFactory* factory, game::AssetTable* assets)
-{
-    auto* func = (DestroyDefaultEnvironmentFunc)GetProcAddress(application_library, "DesroyDefaultEnvironment");
-    if (func == NULL)
-        return;
-
-    func(factory, assets);
-}
-
 #endif
 
 // Glue class to connect the window and device
@@ -288,17 +253,33 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "library", &library);
         base::JsonReadSafe(json["application"], "content", &content);
         base::JsonReadSafe(json["application"], "swap_interval", &swap_interval);
-        auto app = LoadApp(library);
-        if (!app->ParseArgs(argc, (const char**)argv))
-            return 0;
+        LoadAppLibrary(library);
+        DEBUG("Loaded library: '%1'", library);
 
+        GameLibMakeApp            = (MakeAppFunc)LoadFunction("MakeApp");
+        GameLibSetResourceLoader  = (SetResourceLoaderFunc)LoadFunction("SetResourceLoader");
+        GameLibSetGlobalLogger    = (SetGlobalLoggerFunc)LoadFunction("SetGlobalLogger");
+        GameLibCreateEnvironment  = (CreateDefaultEnvironmentFunc)LoadFunction("CreateDefaultEnvironment");
+        GameLibDestroyEnvironment = (DestroyDefaultEnvironmentFunc)LoadFunction("DestroyDefaultEnvironment");
+
+        // we've created the logger object, so pass it to the gamelib.
+        GameLibSetGlobalLogger(&logger);
+
+        // The implementations of these types are built into the gamelib
+        // so the gamelib needs to give this application a pointer back.
         game::GfxFactory* factory = nullptr;
         game::AssetTable* assets  = nullptr;
-        CreateEnvironment(&factory, &assets);
+        GameLibCreateEnvironment(&factory, &assets);
         if (!content.empty())
         {
             assets->LoadFromFile(".", content);
         }
+
+        // Create the app instance.
+        std::unique_ptr<game::App> app(GameLibMakeApp());
+        if (!app->ParseArgs(argc, (const char**)argv))
+            return 0;
+
         game::App::Environment env;
         env.gfx_factory = factory;
         env.asset_table = assets;
@@ -344,18 +325,17 @@ int main(int argc, char* argv[])
             wdk::Connect(window, *listener);
         }
 
+        // Create application window
         window.Create(title, window_width, window_height, context->GetVisualID(),
             window_can_resize, window_has_border, true);
-        if (window_set_fullscreen)
-        {
-            window.SetFullscreen(true);
-        }
+        window.SetFullscreen(window_set_fullscreen);
 
+        // Setup context to render in the window.
         context->SetWindowSurface(window);
         context->SetSwapInterval(swap_interval);
 
-        app->Init(context.get(), window.GetSurfaceWidth(),
-            window.GetSurfaceHeight());
+        // setup application
+        app->Init(context.get(), window.GetSurfaceWidth(), window.GetSurfaceHeight());
         app->Load();
         app->Start();
 
@@ -476,8 +456,9 @@ int main(int argc, char* argv[])
 
         context->Dispose();
 
-        DestroyEnvironment(factory, assets);
-
+        GameLibDestroyEnvironment(factory, assets);
+        GameLibSetResourceLoader(nullptr);
+        GameLibSetGlobalLogger(nullptr);
         DEBUG("Exiting...");
     }
     catch (const std::exception& e)

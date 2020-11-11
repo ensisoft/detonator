@@ -391,10 +391,9 @@ private:
 
 extern "C" {
 
-GAMESTUDIO_EXPORT game::App* MakeApp(base::Logger* logger)
+GAMESTUDIO_EXPORT game::App* MakeApp()
 {
-    base::SetThreadLog(logger);
-    INFO("Hello from gamelib test app");
+    DEBUG("test app");
     return new MyApp;
 }
 

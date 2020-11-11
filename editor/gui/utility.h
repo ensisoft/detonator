@@ -138,6 +138,28 @@ inline void SetValue(QLineEdit* line, const QString& val)
     line->setText(val);
 }
 
+inline void SetValue(QLineEdit* line, int val)
+{
+    QSignalBlocker s(line);
+    line->setText(QString::number(val));
+}
+inline void SetValue(QLineEdit* line, unsigned val)
+{
+    QSignalBlocker s(line);
+    line->setText(QString::number(val));
+}
+
+inline void SetValue(QLineEdit* line, float val)
+{
+    QSignalBlocker s(line);
+    line->setText(QString::number(val));
+}
+inline void SetValue(QLineEdit* line, double val)
+{
+    QSignalBlocker s(line);
+    line->setText(QString::number(val));
+}
+
 inline void SetValue(QPlainTextEdit* edit, const std::string& val)
 {
     QSignalBlocker s(edit);

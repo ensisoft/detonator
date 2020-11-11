@@ -56,6 +56,11 @@
 namespace base
 {
 
+inline bool StartsWith(const std::string& str, const std::string& what)
+{
+    return str.find(what) == 0;
+}
+
 inline std::string RandomString(size_t len)
 {
     static const char* alphabet =

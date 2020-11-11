@@ -266,10 +266,10 @@ namespace game
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_API game::App* MakeApp(base::Logger*);
+    GAMESTUDIO_API game::App* MakeApp();
 } // extern "C"
 
-typedef game::App* (*MakeAppFunc)(base::Logger*);
+typedef game::App* (*MakeAppFunc)();
 
 // The below interface only exists currently for simplifying
 // the structure of the builds. I.e the dependencies for creating
@@ -281,11 +281,13 @@ typedef game::App* (*MakeAppFunc)(base::Logger*);
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
 extern "C" {
-    GAMESTUDIO_API void CreateDefaultEnvironment(game::GfxFactory** gfx_factory,
-        game::AssetTable** asset_table);
-    GAMESTUDIO_API void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory,
-        game::AssetTable* asset_table);
+    GAMESTUDIO_API void CreateDefaultEnvironment(game::GfxFactory** gfx_factory, game::AssetTable** asset_table);
+    GAMESTUDIO_API void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory, game::AssetTable* asset_table);
+    GAMESTUDIO_API void SetResourceLoader(gfx::ResourceLoader* loader);
+    GAMESTUDIO_API void SetGlobalLogger(base::Logger* logger);
 } // extern "C"
 
 typedef void (*CreateDefaultEnvironmentFunc)(game::GfxFactory**, game::AssetTable**);
 typedef void (*DestroyDefaultEnvironmentFunc)(game::GfxFactory*, game::AssetTable*);
+typedef void (*SetResourceLoaderFunc)(gfx::ResourceLoader*);
+typedef void (*SetGlobalLoggerFunc)(base::Logger*);

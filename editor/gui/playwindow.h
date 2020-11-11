@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "base/logging.h"
+#include "gamelib/main/interface.h"
 #include "editor/app/eventlog.h"
 
 namespace app {
@@ -72,6 +73,13 @@ namespace gui
         // Do periodic low frequency tick.
         void Tick();
 
+        // Load the gamelibrary and launch the game.
+        // Returns true if successful or false if some problem happened.
+        bool LoadGame();
+
+        // Shut down the game and unload the library.
+        void Shutdown();
+
     private slots:
         void DoInit();
         void on_actionPause_triggered();
@@ -103,6 +111,10 @@ namespace gui
         QString mCurrentWorkingDir;
         // loader for the game/app library.
         QLibrary mLibrary;
+        // entry point functions into the game/app library.
+        MakeAppFunc                   mGameLibMakeApp = nullptr;
+        SetResourceLoaderFunc         mGameLibSetResourceLoader = nullptr;
+        SetGlobalLoggerFunc           mGameLibSetGlobalLogger = nullptr;
         // Qt's Open GL context for the QWindow.
         QOpenGLContext mContext;
         // This is the actual OpenGL renderable surface.

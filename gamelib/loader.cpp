@@ -122,14 +122,14 @@ std::string ContentLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, c
     else if (str.find("ws://", 0) == 0)
         str = str.substr(5);
 
-    //DEBUG("Mapped %1 to %2", file, str);
+    DEBUG("Mapped %1 to %2", file, str);
     return str;
 }
 
 template<typename Interface, typename Implementation>
 void LoadResources(const nlohmann::json& json, const std::string& type,
     std::unordered_map<std::string, std::shared_ptr<Interface>>& out,
-    std::unordered_map<std::string, std::string>& names)
+    std::unordered_map<std::string, std::string>* namemap)
 {
     if (!json.contains(type))
         return;
@@ -143,7 +143,8 @@ void LoadResources(const nlohmann::json& json, const std::string& type,
             throw std::runtime_error("Failed to load: " + type + "/" + name);
 
         out[id] = std::make_shared<Implementation>(std::move(ret.value()));
-        names[id] = name;
+        if (namemap)
+            (*namemap)[name] = id;
         DEBUG("Loaded '%1/%2'", type, name);
     }
 }
@@ -158,10 +159,10 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     // might throw.
     const auto& json = nlohmann::json::parse(buffer);
 
-    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials, mNameTable);
-    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, mNameTable);
-    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, mNameTable);
-    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, mNameTable);
+    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials, nullptr);
+    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, nullptr);
+    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
+    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, &mAnimationNameTable);
 
     for (auto it = mAnimations.begin(); it != mAnimations.end();
         ++it)
@@ -177,37 +178,41 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
 const AnimationClass* ContentLoader::FindAnimationClassById(const std::string& id) const
 {
     auto it = mAnimations.find(id);
-    if (it == std::end(mAnimations))
-        return nullptr;
-    return it->second.get();
+    if (it != std::end(mAnimations))
+        return it->second.get();
+
+    ERROR("No such animation class '%1'", id);
+    return nullptr;
 }
 
-const AnimationClass* ContentLoader::FindAnimationClassByName(const std::string &name) const
+const AnimationClass* ContentLoader::FindAnimationClassByName(const std::string& name) const
 {
-    for (auto pair : mNameTable)
-    {
-        if (pair.second == name)
-            return FindAnimationClassById(pair.first);
-    }
+    auto it = mAnimationNameTable.find(name);
+    if (it != mAnimationNameTable.end())
+        return FindAnimationClassById(it->second);
+
+    ERROR("No such animation class: '%1'", name);
     return nullptr;
 }
 
 std::unique_ptr<Animation> ContentLoader::CreateAnimationByName(const std::string& name) const
 {
-    for (auto pair : mNameTable)
-    {
-        if (pair.second == name)
-            return CreateAnimationById(pair.first);
-    }
+    auto it = mAnimationNameTable.find(name);
+    if (it != mAnimationNameTable.end())
+        return CreateAnimationById(it->second);
+
+    ERROR("No such animation class: '%1'", name);
     return nullptr;
 }
 
-std::unique_ptr<Animation> ContentLoader::CreateAnimationById(const std::string &id) const
+std::unique_ptr<Animation> ContentLoader::CreateAnimationById(const std::string& id) const
 {
     auto it = mAnimations.find(id);
-    if (it == std::end(mAnimations))
-        return nullptr;
-    return game::CreateAnimationInstance(it->second);
+    if (it != std::end(mAnimations))
+        return game::CreateAnimationInstance(it->second);
+
+    ERROR("No such animation class: '%1'", id);
+    return nullptr;
 }
 
 } // namespace

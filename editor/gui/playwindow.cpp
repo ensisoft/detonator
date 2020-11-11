@@ -35,11 +35,13 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/app/utility.h"
 #include "editor/gui/playwindow.h"
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/utility.h"
 #include "gamelib/main/interface.h"
 #include "gamelib/animation.h"
 #include "wdk/system.h"
@@ -203,14 +205,17 @@ private:
     QWindow* mSurface = nullptr;
 };
 // implementation of game asset table for accessing the
-// assets/contet created in the editor and sourced from
+// assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
-class PlayWindow::SessionAssets : public game::AssetTable
+class PlayWindow::SessionAssets : public game::AssetTable,
+                                  public gfx::ResourceLoader
 {
 public:
-    SessionAssets(const app::Workspace& workspace)
+    SessionAssets(const app::Workspace& workspace, const QString& gamedir)
         : mWorkspace(workspace)
+        , mGameDir(gamedir)
     {}
+    // Asset table implementation
     virtual const game::AnimationClass* FindAnimationClassByName(const std::string& name) const override
     {
         auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
@@ -234,18 +239,47 @@ public:
         klass->Prepare(mWorkspace);
         return game::CreateAnimationInstance(klass);
     }
-
     virtual void LoadFromFile(const std::string&, const std::string&) override
     {
         // not implemented, loaded from workspace
     }
+
+    // Resource loader implementation
+    virtual std::string ResolveFile(ResourceType type, const std::string& file) const override
+    {
+        auto it = mFileMaps.find(file);
+        if (it != mFileMaps.end())
+            return it->second;
+
+        // called when the gfx system wants to resolve a file.
+        // the app could have hardcoded paths that are relative to it's working dir.
+        // the app could have paths that are encoded in the assets. For example ws://foo/bar.meh.png
+        // the encoded case is resolved here using the workspace as the resolver.
+        if (base::StartsWith(file, "ws://") ||
+            base::StartsWith(file, "app://") ||
+            base::StartsWith(file, "fs://"))
+            return mWorkspace.ResolveFile(type, file);
+
+        // What to do with paths such as "textures/UFO/ufo.png" ?
+        // the application expects this to be relative and to be resolved
+        // based on the current working directory when the application
+        // is launched.
+        const auto& resolved = app::JoinPath(mGameDir, app::FromUtf8(file));
+        const auto& ret = app::ToUtf8(resolved);
+        mFileMaps[file] = ret;
+        DEBUG("Mapping gfx resource '%1' => '%2'", file, resolved);
+        return ret;
+    }
+
 private:
     const app::Workspace& mWorkspace;
+    const QString mGameDir;
+    mutable std::unordered_map<std::string, std::string> mFileMaps;
 };
 
 PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
 {
-    DEBUG("Create playwindow");
+    DEBUG("Create PlayWindow");
 
     auto& logger = mLogger.GetLoggerUnsafe().GetLogger();
 
@@ -275,54 +309,18 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mContext.makeCurrent(mSurface);
     mWindowContext = std::make_unique<WindowContext>(&mContext, mSurface);
 
-    // do one time delayed init on timer.
-    QTimer::singleShot(10, this, &PlayWindow::DoInit);
-
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-
-    QString library = settings.application_library;
-#if defined(POSIX_OS) && defined(NDEBUG)
-    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + ".so");
-#elif defined(POSIX_OS)
-    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + "d.so");
-#elif defined(WINDOWS_OS)
-    library = app::JoinPath(mCurrentWorkingDir, library + ".dll");
-#endif
-
-    mLibrary.setFileName(library);
-    mLibrary.setLoadHints(QLibrary::ResolveAllSymbolsHint);
-    if (!mLibrary.load())
-    {
-        ERROR("Failed to load library '%1' (%2)", library, mLibrary.errorString());
-        return;
-    }
-
-    auto* func = (MakeAppFunc)mLibrary.resolve("MakeApp");
-    if (func == nullptr)
-    {
-        ERROR("Failed to resolve app entry point (MakeApp)");
-        return;
-    }
-    auto* app = func(&mLogger);
-    if (app == nullptr)
-    {
-        ERROR("Failed to create app instance.");
-        return;
-    }
-    mApp.reset(app);
-
     // create new asset table based on the current workspace
     // and its content.
-    mAssets = std::make_unique<SessionAssets>(mWorkspace);
+    mAssets = std::make_unique<SessionAssets>(mWorkspace, mCurrentWorkingDir);
     // Connect to a workspace signal for updating the asset table
     // when user saves edited content into the workspace.
     QObject::connect(&mWorkspace, &app::Workspace::ResourceUpdated,
-        this, &PlayWindow::ResourceUpdated);
+                     this, &PlayWindow::ResourceUpdated);
 }
 
 PlayWindow::~PlayWindow()
 {
-    mLibrary.unload();
+    Shutdown();
 
     QDir::setCurrent(mPreviousWorkingDir);
 
@@ -424,8 +422,8 @@ void PlayWindow::Render()
 
         mNumFrames++;
         mNumFramesTotal++;
-        mUI.frames->setText(QString::number(mNumFramesTotal));
-        mUI.time->setText(QString::number(mTimeTotal));
+        SetValue(mUI.frames, mNumFramesTotal);
+        SetValue(mUI.time, mTimeTotal);
 
         const auto elapsed = mFrameTimer.elapsed();
         if (elapsed >= 1000)
@@ -439,7 +437,7 @@ void PlayWindow::Render()
             stats.current_fps         = fps;
             mApp->UpdateStats(stats);
 
-            mUI.fps->setText(QString::number(fps));
+            SetValue(mUI.fps, fps);
 
             mNumFrames = 0;
             mFrameTimer.restart();
@@ -457,6 +455,90 @@ void PlayWindow::Tick()
     auto logger = mLogger.GetLoggerSafe();
     logger->Dispatch();
 }
+
+bool PlayWindow::LoadGame()
+{
+    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+
+    const auto& settings = mWorkspace.GetProjectSettings();
+    QString library = settings.application_library;
+#if defined(POSIX_OS) && defined(NDEBUG)
+    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + ".so");
+#elif defined(POSIX_OS)
+    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + "d.so");
+#elif defined(WINDOWS_OS)
+    library = app::JoinPath(mCurrentWorkingDir, library + ".dll");
+#endif
+
+    mLibrary.setFileName(library);
+    mLibrary.setLoadHints(QLibrary::ResolveAllSymbolsHint);
+    if (!mLibrary.load())
+    {
+        ERROR("Failed to load library '%1' (%2)", library, mLibrary.errorString());
+        return false;
+    }
+
+    mGameLibMakeApp            = (MakeAppFunc)mLibrary.resolve("MakeApp");
+    mGameLibSetResourceLoader  = (SetResourceLoaderFunc)mLibrary.resolve("SetResourceLoader");
+    mGameLibSetGlobalLogger    = (SetGlobalLoggerFunc)mLibrary.resolve("SetGlobalLogger");
+    if (!mGameLibMakeApp)
+        ERROR("Failed to resolve 'MakeApp'.");
+    else if (!mGameLibSetResourceLoader)
+        ERROR("Failed to resolve 'SetResourceLoader'.");
+    else if (!mGameLibSetGlobalLogger)
+        ERROR("Failed to resolve 'SetGlobalLogger'.");
+    if (!mGameLibMakeApp || !mGameLibSetGlobalLogger || !mGameLibSetResourceLoader)
+        return false;
+
+    mGameLibSetGlobalLogger(&mLogger);
+    mGameLibSetResourceLoader(mAssets.get());
+
+    std::unique_ptr<game::App> app;
+    app.reset(mGameLibMakeApp());
+    if (!app)
+    {
+        ERROR("Failed to create app instance.");
+        return false;
+    }
+    mApp = std::move(app);
+
+    // do one time delayed init on timer.
+    QTimer::singleShot(10, this, &PlayWindow::DoInit);
+
+    return true;
+}
+
+void PlayWindow::Shutdown()
+{
+    mContext.makeCurrent(mSurface);
+    try
+    {
+        if (mApp)
+        {
+            DEBUG("Shutting down game...");
+            TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+            mApp->Save();
+            mApp->Shutdown();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        ERROR("Exception in app close: '%1'", e.what());
+    }
+    mApp.reset();
+
+    if (mGameLibSetResourceLoader)
+        mGameLibSetResourceLoader(nullptr);
+    if (mGameLibSetGlobalLogger)
+        mGameLibSetGlobalLogger(nullptr);
+
+    mLibrary.unload();
+
+    mGameLibMakeApp = nullptr;
+    mGameLibSetGlobalLogger = nullptr;
+    mGameLibSetResourceLoader = nullptr;
+}
+
 
 void PlayWindow::DoInit()
 {
@@ -550,26 +632,22 @@ void PlayWindow::NewLogEvent(const app::Event& event)
 
 void PlayWindow::closeEvent(QCloseEvent* event)
 {
-    DEBUG("Close event");
+    DEBUG("Play window close event");
 
     event->accept();
 
-    mContext.makeCurrent(mSurface);
+    // Make sure to cleanup while the window and the rendering
+    // surface still exist!
+    Shutdown();
 
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-
-    try
-    {
-        mApp->Save();
-        mApp->Shutdown();
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Exception in app close: '%1'", e.what());
-    }
-
-    mApp.reset();
-
+    // we could emit an event here to indicate that the window
+    // is getting closed but that's a sure-fire way of getting
+    // unwanted recursion that will fuck shit up.  (i.e this window
+    // getting deleted which will run the destructor which will
+    // make this function have an invalided *this* pointer. bad.
+    // so instead of doing that we just set a flag and the
+    // mainwindow will check from time to if the window object
+    // should be deleted.
     mClosed = true;
 }
 

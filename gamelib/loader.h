@@ -98,8 +98,8 @@ namespace game
         std::unordered_map<std::string,
             std::shared_ptr<AnimationClass>> mAnimations;
 
-        // name table. maps ids to human readable names.
-        std::unordered_map<std::string, std::string> mNameTable;
+        // name table. maps animation names to ids.
+        std::unordered_map<std::string, std::string> mAnimationNameTable;
 
     };
 } // namespace

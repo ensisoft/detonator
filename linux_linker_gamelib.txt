@@ -1,4 +1,14 @@
+# ld VERSION script example
+# https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_node/ld_25.html
+
 FOO {
-  global: MakeApp;CreateDefaultEnvironment;DestroyDefaultEnvironment; # explicitly list symbols to be exported
-  local: *;         # hide everything else
+  # explicitly list symbols to be exported.
+  global: MakeApp;
+          CreateDefaultEnvironment;
+          DestroyDefaultEnvironment;
+          SetGlobalLogger;
+          SetResourceLoader;
+
+  # hide everything else
+  local: *;
 };

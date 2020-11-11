@@ -23,6 +23,7 @@
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 
 #include "base/assert.h"
+#include "base/logging.h"
 #include "gamelib/main/interface.h"
 #include "gamelib/loader.h"
 #include "graphics/resource.h"
@@ -46,7 +47,16 @@ GAMESTUDIO_EXPORT void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory,
     ASSERT(dynamic_cast<game::ContentLoader*>(gfx_factory) ==
            dynamic_cast<game::ContentLoader*>(asset_table));
     delete asset_table;
+}
 
+GAMESTUDIO_EXPORT void SetResourceLoader(gfx::ResourceLoader* loader)
+{
+    gfx::SetResourceLoader(loader);
+}
+
+GAMESTUDIO_EXPORT void SetGlobalLogger(base::Logger* logger)
+{
+    base::SetGlobalLog(logger);
 }
 
 } // extern "C"
