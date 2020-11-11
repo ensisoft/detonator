@@ -247,11 +247,12 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
 {
     DEBUG("Create playwindow");
 
-    auto& logger = mLogger.GetLogger();
+    auto& logger = mLogger.GetLoggerUnsafe().GetLogger();
 
     mUI.setupUi(this);
     mUI.actionClose->setShortcut(QKeySequence::Close);
     mUI.log->setModel(&logger);
+    connect(&logger, &app::EventLog::newEvent, this, &PlayWindow::NewLogEvent);
 
     const auto& settings = mWorkspace.GetProjectSettings();
     logger.SetLogTag(settings.application_name);
@@ -450,6 +451,13 @@ void PlayWindow::Render()
     }
 }
 
+void PlayWindow::Tick()
+{
+    // flush the buffer logger to the main log.
+    auto logger = mLogger.GetLoggerSafe();
+    logger->Dispatch();
+}
+
 void PlayWindow::DoInit()
 {
     if (!mApp)
@@ -519,9 +527,25 @@ void PlayWindow::on_actionClose_triggered()
     this->close();
 }
 
+void PlayWindow::on_tabWidget_currentChanged(int index)
+{
+    mUI.tabWidget->setTabIcon(1,QIcon("icons:log_info.png"));
+}
+
 void PlayWindow::ResourceUpdated(const app::Resource* resource)
 {
     DEBUG("Update resource '%1'", resource->GetName());
+}
+
+void PlayWindow::NewLogEvent(const app::Event& event)
+{
+    if (mUI.tabWidget->currentWidget() == mUI.tabLog)
+        return;
+
+    if (event.type == app::Event::Type::Warning)
+        mUI.tabWidget->setTabIcon(1, QIcon("icons:log_warning.png"));
+    else if (event.type == app::Event::Type::Error)
+        mUI.tabWidget->setTabIcon(1,QIcon("icons:log_error.png"));
 }
 
 void PlayWindow::closeEvent(QCloseEvent* event)

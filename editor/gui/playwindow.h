@@ -69,11 +69,16 @@ namespace gui
         // Render the application.
         void Render();
 
+        // Do periodic low frequency tick.
+        void Tick();
+
     private slots:
         void DoInit();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
+        void on_tabWidget_currentChanged(int index);
         void ResourceUpdated(const app::Resource* resource);
+        void NewLogEvent(const app::Event& event);
 
     private:
         virtual void closeEvent(QCloseEvent* event) override;
@@ -106,8 +111,9 @@ namespace gui
         QWindow* mSurface = nullptr;
         // The widget container for the QWindow (mSurface)
         QWidget* mContainer = nullptr;
-        // Logger that we give to the applicarion.
-        base::LockedLogger<app::EventLog> mLogger;
+        // Logger that we give to the application.
+        // Note the thread safety because of for example audio threading.
+        base::LockedLogger<base::BufferLogger<app::EventLog>> mLogger;
         // Flag to indicate when the window has been closed or not.
         bool mClosed = false;
         // Flag to indicate if the app is currently "paused".

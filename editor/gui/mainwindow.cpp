@@ -1185,6 +1185,9 @@ void MainWindow::timerRefreshUI()
     if (mWorkspace)
         mWorkspace->Tick();
 
+    if (mPlayWindow)
+        mPlayWindow->Tick();
+
     if (mCurrentWidget)
     {
         mUI.actionZoomIn->setEnabled(mCurrentWidget->CanZoomIn());
