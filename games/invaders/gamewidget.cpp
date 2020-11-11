@@ -333,83 +333,56 @@ private:
 class GameWidget::Asteroid : public GameWidget::Animation
 {
 public:
-    Asteroid(const glm::vec2& direction)
+    Asteroid(const glm::vec2& direction, std::unique_ptr<game::Animation> sprite)
+       : mSprite(std::move(sprite))
     {
-        mX = math::rand(0.0f, 1.0f);
-        mY = math::rand(0.0f, 1.0f);
+        mPosition.x = math::rand(0.0f, 1.0f);
+        mPosition.y = math::rand(0.0f, 1.0f);
         mVelocity  = 0.08 + math::rand(0.0, 0.08);
-        mScale     = math::rand(0.2, 0.8);
-        mTexture   = math::rand(0, 2);
         mDirection = direction;
     }
     virtual bool update(float dt) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
-        mX = math::wrap(-0.2f, 1.0f, mX + d.x);
-        mY = math::wrap(-0.2f, 1.0f, mY + d.y);
+        mPosition.x = math::wrap(-0.2f, 1.0f, mPosition.x + d.x);
+        mPosition.y = math::wrap(-0.2f, 1.0f, mPosition.y + d.y);
         return true;
     }
     virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        const auto& size = getTextureSize(mTexture);
-        const char* name = getTextureName(mTexture);
-
         // the asteroids are just in their own space which we simply map
         // to the whole of the given rectangle
         const auto width  = rect.GetWidth();
         const auto height = rect.GetHeight();
         const auto xpos = rect.GetX();
         const auto ypos = rect.GetY();
-
+        const auto pos = FPoint(mPosition.x * width + xpos,
+                                mPosition.y * height + ypos);
         gfx::Transform t;
-        t.Resize(size * mScale);
-        t.MoveTo(width * mX + xpos, height * mY + ypos);
-        painter.Draw(gfx::Rectangle(), t, gfx::TextureMap(name)
-            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
+        t.MoveTo(pos);
+        mSprite->Draw(painter, t);
     }
 
     virtual FRect getBounds(const IRect& rect) const override
     {
-        const auto& size = getTextureSize(mTexture);
-
         const auto width  = rect.GetWidth();
         const auto height = rect.GetHeight();
         const auto xpos = rect.GetX();
         const auto ypos = rect.GetY();
+        const auto pos = FPoint(mPosition.x * width + xpos,
+                                mPosition.y * height + ypos);
 
-        FRect bounds;
-        bounds.Resize(size * mScale);
-        bounds.Move(width * mX + xpos, height * mY + ypos);
+        auto bounds = mSprite->GetBoundingBox();
+        bounds.Translate(pos);
         return bounds;
     }
     virtual ColliderType getColliderType() const override
     { return ColliderType::Asteroid; }
 private:
-    static const char* getTextureName(unsigned index)
-    {
-        static const char* textures[] = {
-            "textures/asteroid0.png",
-            "textures/asteroid1.png",
-            "textures/asteroid2.png"
-        };
-        return textures[index];
-    }
-    static gfx::FSize getTextureSize(unsigned index)
-    {
-        static gfx::FSize sizes[] = {
-            gfx::FSize(78, 74),
-            gfx::FSize(74, 63),
-            gfx::FSize(72, 58)
-        };
-        return sizes[index];
-    }
-private:
     float mVelocity = 0.0f;
-    float mScale = 1.0f;
-    float mX = 0.0f;
-    float mY = 0.0f;
+    glm::vec2 mPosition;
     glm::vec2 mDirection;
-    unsigned mTexture = 0;
+    std::unique_ptr<game::Animation> mSprite;
 };
 
 // Flame/Smoke emitter
@@ -751,35 +724,14 @@ private:
 class GameWidget::Invader : public GameWidget::Animation
 {
 public:
-    enum class ShipType {
-        Slow,
-        Fast,
-        Tough,
-        Boss
-    };
-
-    Invader(const glm::vec2& position, const std::wstring& str, float velocity, ShipType type)
+    Invader(const glm::vec2& position, const std::wstring& str, float velocity, float scale,
+            std::unique_ptr<game::Animation> sprite)
       : mPosition(position)
       , mText(str)
       , mVelocity(velocity)
-      , mShipType(type)
-    {
-        // keep in mind that the exact shape of the jet stream depends
-        // on the contours of the ship in the texture.
-        // for example a ship that has only one exhaust pipe in the
-        // middle of the ship would not emit exhaust particles for the
-        // entire height of the ship.
-        // therefore we must still look up this data from the image
-        // even if we're not actually using the image data per se anymore.
-        const gfx::Image ship(getShipTextureIdentifier(type));
-        const gfx::Image jet(getJetStreamTextureIdentifier(type));
-        mShipWidth  = ship.GetWidth();
-        mShipHeight = ship.GetHeight();
-        // see comments above about the shape and size of the exhaust area
-        mJetWidth  = jet.GetWidth();
-        mJetHeight = jet.GetHeight();
-    }
-
+      , mScale(scale)
+      , mSprite(std::move(sprite))
+    {}
     virtual bool update(float dt) override
     {
         const auto direction = glm::vec2(-1.0f, 0.0f);
@@ -791,8 +743,7 @@ public:
             if (mLifeTime > mMaxLifeTime)
                 return false;
         }
-        if (mParticles)
-            mParticles->Update(dt/1000.0f);
+        mSprite->Update(dt/1000.0f);
         return true;
     }
 
@@ -805,117 +756,22 @@ public:
         const auto spriteScale = layout.GetCellDimensions();
         const auto position    = layout.MapPoint(mPosition);
 
-        const float shipWidth  = mShipWidth;
-        const float shipHeight = mShipHeight;
-        const float shipAspect = shipHeight / shipWidth;
-        const float shipScaledWidth  = spriteScale.GetX() * getScale();
-        const float shipScaledHeight = shipScaledWidth * shipAspect;
-
-        const float jetWidth  = mJetWidth;
-        const float jetHeight = mJetHeight;
-        const float jetAspect = jetHeight / jetWidth;
-        const float jetScaledWidth  = spriteScale.GetX() * getScale();
-        const float jetScaledHeight = jetScaledWidth * jetAspect;
-
-        if (!mParticles)
-        {
-            gfx::KinematicsParticleEngineClass::Params params;
-            params.init_rect_width  = 0.0f;
-            params.init_rect_height = jetScaledHeight;
-            params.max_xpos = jetScaledWidth;
-            params.max_ypos = jetScaledHeight;
-            params.num_particles = 200;
-            params.min_velocity = 100.0f;
-            params.max_velocity = 150.0f;
-            params.min_point_size = 20.0f;
-            params.max_point_size = 30.0f;
-            params.direction_sector_start_angle = 0.0f;
-            params.direction_sector_size = 0.0f;
-            params.rate_of_change_in_size_wrt_time = -20.0f;
-            params.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-            mParticles = std::make_unique<ParticleEngine>(params);
-        }
-        // set the target rectangle with the dimensions of the
-        // sprite we want to draw.
-        // the ship rect is the coordinate to which the jet stream and
-        // the text are relative to.
-        // the ship's x,y coordinate is offset so that the center of the
-        // sprite is where the ship's game space coordinate maps to.
-        const auto shipTopLeft = position -
-            FPoint(shipScaledWidth / 2.0f, shipScaledHeight / 2.0f);
-
-        // have to do a little fudge here since the scarab ship has
-        // a contour such that positioning the particle engine just behind
-        // the ship texture will leave a silly gap between the ship and the
-        // particles.
-        const auto fudgeFactor = mShipType == ShipType::Slow ? 0.8 : 1.0f;
-
         gfx::Transform t;
-        t.Resize(jetScaledWidth, jetScaledHeight);
-        t.MoveTo(shipTopLeft);
-        t.Translate(shipScaledWidth * fudgeFactor, (shipScaledHeight - jetScaledHeight) / 2.0f);
+        t.MoveTo(position);
+        mSprite->Draw(painter, t);
 
-        // draw the particles first
-        painter.Draw(*mParticles, t,
-            gfx::TextureMap("textures/BlackSmoke.png")
-            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive)
-            .SetBaseColor(getJetStreamColor(mShipType) * 0.6));
+        const auto* box = mSprite->FindNodeByName("Box");
+        auto text = mSprite->GetBoundingBox(box);
+        text.Translate(position);
+        gfx::DrawTextRect(painter, base::ToUtf8(mText),
+       "fonts/SourceHanSerifTC-SemiBold.otf", 36, text,
+             gfx::Color::Gray);
+        return;
 
-        t.Reset();
-        t.Resize(shipScaledWidth, shipScaledHeight);
-        t.MoveTo(shipTopLeft);
-
-        // then draw the ship so that it creates a nice clear cut where
-        // the exhaust particles begin at the end of the ship
-        painter.Draw(gfx::Rectangle(), t,
-            gfx::TextureMap(getShipTextureIdentifier(mShipType))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-
-        const auto fontsize = unitScale.GetY() / 1.75;
-        gfx::TextBuffer text(shipScaledWidth, shipScaledHeight);
-        gfx::TextBuffer::Text text_and_style;
-        text_and_style.text = base::ToUtf8(mText);
-        text_and_style.font = "fonts/SourceHanSerifTC-SemiBold.otf";
-        text_and_style.fontsize = fontsize;
-        text_and_style.halign = gfx::TextBuffer::HorizontalAlignment::AlignLeft;
-        text_and_style.valign = gfx::TextBuffer::VerticalAlignment::AlignCenter;
-        text.AddText(std::move(text_and_style));
-
-        t.Translate(shipScaledWidth * 0.6 + jetScaledWidth * 0.75, 0);
-
-        painter.Draw(gfx::Rectangle(), t, gfx::BitmapText(text)
-            .SetBaseColor(gfx::Color::DarkYellow));
-
-        if (mShieldIsOn)
-        {
-            FRect rect;
-            // we don't bother to calculate the size for the shield properly
-            // in order to cover the whole ship. instead we use a little fudge
-            // factor to expand the shield.
-            const auto fudge = 1.25f;
-            const auto width = shipScaledWidth;
-            gfx::Transform t;
-            t.Resize(width * fudge, width * fudge);
-            t.MoveTo(shipTopLeft);
-            t.Translate((width - shipScaledWidth) * -0.5,
-                        (width - shipScaledWidth) * -0.5);
-            painter.Draw(gfx::Rectangle(), t,
-                gfx::TextureMap("textures/spr_shield.png")
-                    .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-        }
     }
 
     float getScale() const
-    {
-        switch (mShipType)
-        {
-            case ShipType::Slow:  return 5.0f;
-            case ShipType::Fast:  return 4.0f;
-            case ShipType::Boss:  return 6.5f;
-            case ShipType::Tough: return 3.5f;
-        }
-        return 1.0f;
-    }
+    { return mScale; }
 
     // get the invader position in game space at some later time
     // where time is in seconds.
@@ -937,61 +793,23 @@ public:
     { mText = str; }
 
     std::string getTextureName() const
-    { return getShipTextureIdentifier(mShipType); }
-
-    void enableShield(bool onOff)
-    { mShieldIsOn = onOff; }
-
-private:
-    static gfx::Color4f getJetStreamColor(ShipType type)
     {
-        static gfx::Color4f colors[] = {
-            gfx::Color4f(117, 221, 234, 100),
-            gfx::Color4f(252, 214, 131, 100),
-            gfx::Color4f(126, 200, 255, 100),
-            gfx::Color4f(5, 244, 159, 100)
-        };
-        return colors[(int)type];
-    }
-    static const char* getShipTextureIdentifier(ShipType type)
-    {
-        static const char* textures[] = {
-            "textures/Cricket.png",
-            "textures/Mantis.png",
-            "textures/Scarab.png",
-            "textures/Locust.png"
-        };
-        return textures[(int)type];
-    }
+        const auto* node = mSprite->FindNodeByName("Ship");
+        const auto& mat = node->GetMaterialClass();
+        const auto& tex = mat->GetTextureSource(0);
+        if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
+            return p->GetFilename();
 
-    static const char* getJetStreamTextureIdentifier(ShipType type)
-    {
-        static const char* textures[] = {
-            "textures/Cricket_jet.png",
-            "textures/Mantis_jet.png",
-            "textures/Scarab_jet.png",
-            "textures/Locust_jet.png"
-        };
-        return textures[(int)type];
+        return "";
     }
-
 private:
     glm::vec2 mPosition;
     std::wstring mText;
     float mLifeTime    = 0.0f;
     float mMaxLifeTime = 0.0f;
     float mVelocity    = 0.0f;
-    // texture dimension in pixels
-    unsigned mShipWidth   = 0.0f;
-    unsigned mShipHeight  = 0.0f;
-    // texture dimension in pixels
-    unsigned mJetWidth    = 0.0f;
-    unsigned mJetHeight   = 0.0f;
-    std::unique_ptr<ParticleEngine> mParticles;
-private:
-    ShipType mShipType = ShipType::Slow;
-private:
-    bool mShieldIsOn = false;
+    float mScale       = 0.0f;
+    std::unique_ptr<game::Animation> mSprite;
 };
 
 class GameWidget::Missile : public GameWidget::Animation
@@ -1048,7 +866,8 @@ private:
 class GameWidget::UFO : public GameWidget::Animation
 {
 public:
-    UFO()
+    UFO(std::unique_ptr<game::Animation> ufo)
+        : mSprite(std::move(ufo))
     {
         mPosition.x = math::rand(0.0, 1.0);
         mPosition.y = math::rand(0.0, 1.0);
@@ -1056,16 +875,6 @@ public:
         const auto x = math::rand(-1.0, 1.0);
         const auto y = math::rand(-1.0, 1.0);
         mDirection = glm::normalize(glm::vec2(x, y));
-
-        gfx::MaterialClass klass = gfx::SpriteSet();
-        klass.AddTexture("textures/alien/e_f1.png");
-        klass.AddTexture("textures/alien/e_f2.png");
-        klass.AddTexture("textures/alien/e_f3.png");
-        klass.AddTexture("textures/alien/e_f4.png");
-        klass.AddTexture("textures/alien/e_f5.png");
-        klass.AddTexture("textures/alien/e_f6.png");
-        klass.SetFps(10);
-        mSprite = gfx::CreateMaterialInstance(klass);
     }
 
     virtual bool update(float dt) override
@@ -1086,6 +895,7 @@ public:
         const auto y = mPosition.y;
         mPosition.x = math::wrap(0.0f, 1.0f, x);
         mPosition.y = math::wrap(0.0f, 1.0f, y);
+        mSprite->Update(dt / 1000.0f);
         return true;
     }
 
@@ -1096,21 +906,12 @@ public:
         const auto xpos   = rect.GetX();
         const auto ypos   = rect.GetY();
 
-        const auto sec = mRuntime / 1000.0f;
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
 
-        mSprite->SetRuntime(sec);
-
-        gfx::Transform rings;
-        rings.Resize(200, 200);
-        rings.MoveTo(pos - FPoint(100.0f, 100.0f));
-        painter.Draw(gfx::Rectangle(), rings, ConcentricRingsEffect(sec));
-
         gfx::Transform ufo;
-        ufo.Resize(40, 40);
-        ufo.MoveTo(pos - FPoint(20.0f, 20.0f));
-        painter.Draw(gfx::Rectangle(), ufo, *mSprite);
+        ufo.MoveTo(pos);
+        mSprite->Draw(painter, ufo);
     }
 
     virtual FRect getBounds(const IRect& rect) const override
@@ -1122,9 +923,8 @@ public:
 
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
-        FRect bounds;
-        bounds.Move(pos - FPoint(20.0f, 20.0f));
-        bounds.Resize(40.0f, 40.0f);
+        auto bounds = mSprite->GetBoundingBox(mSprite->FindNodeByName("UFO"));
+        bounds.Translate(pos);
         return bounds;
     }
 
@@ -1147,60 +947,54 @@ public:
     }
 
     std::string getTextureName() const
-    { return "textures/alien/e_f1.png"; }
+    {
+        // todo: simplify.
+        const auto* node = mSprite->FindNodeByName("UFO");
+        const auto& mat  = node->GetMaterialClass();
+        const auto& tex  = mat->GetTextureSource(0);
+        if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
+            return p->GetFilename();
+        return "";
+    }
 private:
     float mRuntime = 0.0f;
     glm::vec2 mDirection;
     glm::vec2 mPosition;
 private:
-    std::unique_ptr<gfx::Material> mSprite;
+    std::unique_ptr<game::Animation> mSprite;
 };
 
 
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(float lifetime) : mLifeTime(lifetime)
-    {
-        gfx::MaterialClass klass = gfx::SpriteSet();
-        for (int i=1; i<=90; ++i)
-        {
-            const auto& name = base::FormatString("textures/bomb/explosion1_00%1.png", i);
-            klass.AddTexture(name);
-        }
-        klass.SetFps(90 / (lifetime/1000.0f));
-        mSprite = gfx::CreateMaterialInstance(klass);
-    }
+    BigExplosion(std::unique_ptr<game::Animation> sprite, float lifetime)
+        : mLifeTime(lifetime)
+        , mSprite(std::move(sprite))
+    {}
 
     virtual bool update(float dt) override
     {
-        mRunTime += dt;
-        if (mRunTime > mLifeTime)
+        mRuntime += dt;
+        if (mRuntime > mLifeTime)
             return false;
+        mSprite->Update(dt/1000.0f);
         return true;
     }
     virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        mSprite->SetRuntime(mRunTime / 1000.0f);
-
-        const auto& layout = GetGameWindowLayout(rect);
-        const auto ExplosionWidth = layout.GetGridWidth() * 2.0f;
-        const auto ExplosionHeight = layout.GetGridHeight() * 2.3f;
-
-        const auto x = layout.GetGridWidth() / 2 - (ExplosionWidth * 0.5);
-        const auto y = layout.GetGridHeight() / 2 - (ExplosionHeight * 0.5);
+        const auto x = rect.GetWidth() * 0.5;
+        const auto y = rect.GetHeight() * 0.5;
 
         gfx::Transform bang;
-        bang.Resize(ExplosionWidth, ExplosionHeight);
         bang.MoveTo(x, y);
-        painter.Draw(gfx::Rectangle(), bang, *mSprite);
-
+        mSprite->Draw(painter, bang);
     }
 private:
     const float mLifeTime = 0.0f;
-    float mRunTime = 0.0f;
+    float mRuntime = 0.0f;
 private:
-    std::unique_ptr<gfx::Material> mSprite;
+    std::unique_ptr<game::Animation> mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation
@@ -1971,9 +1765,7 @@ GameWidget::GameWidget()
 
     mGame->onBomb = [&](const Game::Bomb& b)
     {
-        std::unique_ptr<Animation> explosion(new BigExplosion(1500));
-
-
+        std::unique_ptr<Animation> explosion(new BigExplosion(mAssets->CreateAnimationByName(("Big Explosion")), 1500));
         mAnimations.push_back(std::move(explosion));
     };
 
@@ -1988,33 +1780,32 @@ GameWidget::GameWidget()
     {
         auto it = mInvaders.find(i.identity);
         auto& inv = it->second;
-        inv->enableShield(onOff);
+
     };
 
     mGame->onInvaderSpawn = [&](const Game::Invader& inv)
     {
-        Invader::ShipType type = Invader::ShipType::Slow;
+        std::unique_ptr<game::Animation> sprite;
+        float scale = 1.0f;
         if (inv.type == Game::InvaderType::Boss)
         {
-            type = Invader::ShipType::Boss;
+            sprite = mAssets->CreateAnimationByName("Locust");
+            scale = 6.5f;
+        }
+        else if (inv.speed == 1 && inv.killList.size() == 1)
+        {
+            sprite = mAssets->CreateAnimationByName("Cricket");
+            scale = 5.0f;
+        }
+        else if (inv.speed == 1)
+        {
+            sprite = mAssets->CreateAnimationByName("Mantis");
+            scale = 4.0f;
         }
         else
         {
-            if (inv.speed == 1)
-            {
-                if (inv.killList.size() == 1)
-                {
-                    type = Invader::ShipType::Slow;
-                }
-                else
-                {
-                    type = Invader::ShipType::Fast;
-                }
-            }
-            else
-            {
-                type = Invader::ShipType::Tough;
-            }
+            sprite = mAssets->CreateAnimationByName("Scarab");
+            scale = 3.5f;
         }
 
         // where's the invader ?
@@ -2034,8 +1825,9 @@ GameWidget::GameWidget()
         for (const auto& s : inv.viewList)
             viewstring += s;
 
-        std::unique_ptr<Invader> invader(new Invader(glm::vec2(x, y), viewstring, velocity, type));
-        invader->enableShield(inv.shield_on_ticks != 0);
+        std::unique_ptr<Invader> invader(new Invader(glm::vec2(x, y), viewstring, velocity, scale, std::move(sprite)));
+
+
         mInvaders[inv.identity] = std::move(invader);
     };
 
@@ -2227,7 +2019,8 @@ void GameWidget::Start()
     for (size_t i=0; i<20; ++i)
     {
         const glm::vec2 spaceJunkDirection(-1, 0);
-        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection)));
+        auto anim = mAssets->CreateAnimationByName("Asteroid");
+        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection), std::move(anim)));
     }
 
     // initialize the input/state stack with the main menu.
@@ -2261,7 +2054,7 @@ void GameWidget::Update(double current_time, double dt)
 
     if (UFO::shouldMakeRandomAppearance())
     {
-        mAnimations.emplace_back(new UFO);
+        mAnimations.emplace_back(new UFO(mAssets->CreateAnimationByName("UFO")));
     }
 
     mBackground->Update(time/1000.0f);
@@ -2355,12 +2148,9 @@ void GameWidget::Update(double current_time, double dt)
             const auto startNow = 0.0f;
             const auto lifetime = 1000.0f;
 
-            std::unique_ptr<Explosion> explosion(new Explosion(position, startNow, lifetime));
             std::unique_ptr<Debris> debris(new Debris(UFO->getTextureName(),
                 position, startNow, lifetime + 500));
-            explosion->setScale(3.0f);
             mAnimations.push_back(std::move(debris));
-            mAnimations.push_back(std::move(explosion));
 
             if (lhsColliderType == Animation::ColliderType::UFO)
                 it = mAnimations.erase(it);
@@ -2471,6 +2261,10 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
             playMusic();
         }
         return;
+    }
+    else if (sym == wdk::Keysym::KeyU)
+    {
+        mAnimations.emplace_back(new UFO(mAssets->CreateAnimationByName("UFO")));
     }
 
     const auto action = mStates.top()->mapAction(key);

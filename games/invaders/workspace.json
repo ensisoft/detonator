@@ -1,12 +1,64 @@
 {
+    "animation_Asteroid": {
+        "checked_for_packing": true
+    },
+    "animation_Big Explosion": {
+    },
+    "animation_Cricket": {
+    },
+    "animation_Locust": {
+        "checked_for_packing": true
+    },
+    "animation_Mantis": {
+        "checked_for_packing": true
+    },
+    "animation_Scarab": {
+        "checked_for_packing": true
+    },
     "animation_Space": {
         "checked_for_packing": true
     },
+    "animation_UFO": {
+        "checked_for_packing": true
+    },
     "material_Asteroid": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Big Explosion": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Box": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Cricket": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Cricket Smoke": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Locust": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Mantis": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
     "material_Nebula1": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_Scarab": {
         "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
@@ -16,7 +68,18 @@
         "shader_file": "",
         "use_shader_file": false
     },
+    "material_UFO": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "material_UFO Rings": {
+        "checked_for_packing": true,
+        "shader_file": "ws://assets/shaders/es2/concentric_rings_effect.glsl",
+        "use_shader_file": true
+    },
     "particle_Asteroid field": {
+        "checked_for_packing": true,
         "material": "Asteroid",
         "transform_enabled": false,
         "transform_height": 500,
@@ -30,7 +93,23 @@
         "use_lifetime": false,
         "use_size_derivatives": false
     },
+    "particle_Exhaust": {
+        "checked_for_packing": true,
+        "material": "Cricket Smoke",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": true
+    },
     "particle_Starfield layer 0": {
+        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -45,6 +124,7 @@
         "use_size_derivatives": false
     },
     "particle_Starfield layer 1": {
+        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -59,6 +139,7 @@
         "use_size_derivatives": false
     },
     "particle_Starfield layer 2": {
+        "checked_for_packing": true,
         "material": "Star",
         "transform_enabled": false,
         "transform_height": 500,
@@ -76,7 +157,7 @@
         "application_library": "invaders",
         "application_name": "Pinyin Invaders",
         "application_version": "0.4b",
-        "command_line_arguments": "--debug --show-fps",
+        "command_line_arguments": "--debug",
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
         "multisample_sample_count": 4,
@@ -88,6 +169,22 @@
         "window_set_fullscreen": false,
         "window_width": 1024,
         "working_folder": "${workspace}/dist"
+    },
+    "shape_Cricket": {
+        "checked_for_packing": true,
+        "material": "Cricket"
+    },
+    "shape_Locust": {
+        "checked_for_packing": true,
+        "material": "Locust"
+    },
+    "shape_Mantis": {
+        "checked_for_packing": true,
+        "material": "Mantis"
+    },
+    "shape_Scarab": {
+        "checked_for_packing": true,
+        "material": "Scarab"
     },
     "workspace": {
         "packing_param_combine_textures": true,
