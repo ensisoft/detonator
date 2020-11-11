@@ -84,9 +84,6 @@ namespace gui
         void DoInit();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
-        void on_tabWidget_currentChanged(int index);
-        void ResourceUpdated(const app::Resource* resource);
-        void NewLogEvent(const app::Event& event);
 
     private:
         virtual void closeEvent(QCloseEvent* event) override;

@@ -286,7 +286,6 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mUI.setupUi(this);
     mUI.actionClose->setShortcut(QKeySequence::Close);
     mUI.log->setModel(&logger);
-    connect(&logger, &app::EventLog::newEvent, this, &PlayWindow::NewLogEvent);
 
     const auto& settings = mWorkspace.GetProjectSettings();
     logger.SetLogTag(settings.application_name);
@@ -302,6 +301,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mSurface->installEventFilter(this);
     // the container takes ownership of the window.
     mContainer = QWidget::createWindowContainer(mSurface, this);
+    mContainer->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::MinimumExpanding);
     mUI.verticalLayout->addWidget(mContainer);
 
     // the default configuration has been set in main
@@ -312,10 +312,6 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     // create new asset table based on the current workspace
     // and its content.
     mAssets = std::make_unique<SessionAssets>(mWorkspace, mCurrentWorkingDir);
-    // Connect to a workspace signal for updating the asset table
-    // when user saves edited content into the workspace.
-    QObject::connect(&mWorkspace, &app::Workspace::ResourceUpdated,
-                     this, &PlayWindow::ResourceUpdated);
 }
 
 PlayWindow::~PlayWindow()
@@ -609,27 +605,6 @@ void PlayWindow::on_actionClose_triggered()
     this->close();
 }
 
-void PlayWindow::on_tabWidget_currentChanged(int index)
-{
-    mUI.tabWidget->setTabIcon(1,QIcon("icons:log_info.png"));
-}
-
-void PlayWindow::ResourceUpdated(const app::Resource* resource)
-{
-    DEBUG("Update resource '%1'", resource->GetName());
-}
-
-void PlayWindow::NewLogEvent(const app::Event& event)
-{
-    if (mUI.tabWidget->currentWidget() == mUI.tabLog)
-        return;
-
-    if (event.type == app::Event::Type::Warning)
-        mUI.tabWidget->setTabIcon(1, QIcon("icons:log_warning.png"));
-    else if (event.type == app::Event::Type::Error)
-        mUI.tabWidget->setTabIcon(1,QIcon("icons:log_error.png"));
-}
-
 void PlayWindow::closeEvent(QCloseEvent* event)
 {
     DEBUG("Play window close event");
@@ -669,55 +644,61 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         return QMainWindow::event(event);
 
     TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
-
-    if (event->type() == QEvent::KeyPress)
+    try
     {
-        const auto* key_event = static_cast<const QKeyEvent*>(event);
-        const auto mods = key_event->modifiers();
+        if (event->type() == QEvent::KeyPress)
+        {
+            const auto *key_event = static_cast<const QKeyEvent *>(event);
+            const auto mods = key_event->modifiers();
 
-        wdk::WindowEventKeydown key;
-        key.symbol = MapVirtualKey(key_event->key());
+            wdk::WindowEventKeydown key;
+            key.symbol = MapVirtualKey(key_event->key());
 
-        //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
+            //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
 
-        if (mods & Qt::ShiftModifier)
-            key.modifiers |= wdk::Keymod::Shift;
-        if (mods & Qt::ControlModifier)
-            key.modifiers |= wdk::Keymod::Control;
-        if (mods & Qt::AltModifier)
-            key.modifiers |= wdk::Keymod::Alt;
-        listener->OnKeydown(key);
-        return true;
+            if (mods & Qt::ShiftModifier)
+                key.modifiers |= wdk::Keymod::Shift;
+            if (mods & Qt::ControlModifier)
+                key.modifiers |= wdk::Keymod::Control;
+            if (mods & Qt::AltModifier)
+                key.modifiers |= wdk::Keymod::Alt;
+            listener->OnKeydown(key);
+            return true;
+        }
+        else if (event->type() == QEvent::KeyRelease)
+        {
+            const auto *key_event = static_cast<const QKeyEvent *>(event);
+            const auto mods = key_event->modifiers();
+
+            wdk::WindowEventKeyup key;
+            key.symbol = MapVirtualKey(key_event->key());
+
+            //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
+
+            if (mods & Qt::ShiftModifier)
+                key.modifiers |= wdk::Keymod::Shift;
+            if (mods & Qt::ControlModifier)
+                key.modifiers |= wdk::Keymod::Control;
+            if (mods & Qt::AltModifier)
+                key.modifiers |= wdk::Keymod::Alt;
+            listener->OnKeyup(key);
+            return true;
+
+        } 
+        if (event->type() == QEvent::Resize)
+        {
+            const auto width = mSurface->width();
+            const auto height = mSurface->height();
+            mApp->OnRenderingSurfaceResized(width, height);
+
+            // try to give the keyboard focus to the window
+            //mSurface->requestActivate();
+            return true;
+        }
     }
-    else if (event->type() == QEvent::KeyRelease)
+    catch (const std::exception& e)
     {
-        const auto* key_event = static_cast<const QKeyEvent*>(event);
-        const auto mods = key_event->modifiers();
-
-        wdk::WindowEventKeyup key;
-        key.symbol = MapVirtualKey(key_event->key());
-
-        //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
-
-        if (mods & Qt::ShiftModifier)
-            key.modifiers |= wdk::Keymod::Shift;
-        if (mods & Qt::ControlModifier)
-            key.modifiers |= wdk::Keymod::Control;
-        if (mods & Qt::AltModifier)
-            key.modifiers |= wdk::Keymod::Alt;
-        listener->OnKeyup(key);
-        return true;
-
-    }
-    else if (event->type() == QEvent::Resize)
-    {
-        const auto width  = mSurface->width();
-        const auto height = mSurface->height();
-        mApp->OnRenderingSurfaceResized(width, height);
-
-        // try to give the keyboard focus to the window
-        //mSurface->requestActivate();
-        return true;
+        ERROR("Exception in app '%1'", e.what());
     }
 
     return QMainWindow::event(event);
