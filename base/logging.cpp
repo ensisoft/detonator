@@ -28,6 +28,8 @@
 #include <cassert>
 #include <iostream>
 #include <atomic>
+#include <chrono>
+#include <cstdio>
 #include "logging.h"
 
 namespace {
@@ -167,6 +169,47 @@ bool IsDebugLogEnabled()
 void EnableDebugLog(bool on_off)
 {
     isGlobalDebugLogEnabled = on_off;
+}
+
+void WriteLogMessage(LogEvent type, const char* file, int line, const std::string& message)
+{
+    using steady_clock = std::chrono::steady_clock;
+    // magic static is thread safe.
+    static const auto first_event_time = steady_clock::now();
+    const auto current_event_time = steady_clock::now();
+    const auto elapsed = current_event_time - first_event_time;
+    const double seconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() / 1000.0;
+
+    // format the whole log string.
+    // todo: fix this potential buffer issue here.
+    char formatted_log_message[512] = {0};
+
+    auto* thread_log = GetThreadLog();
+    auto* global_log = GetGlobalLog();
+    if ((thread_log && thread_log->TestWriteMask(Logger::WriteType::WriteFormatted)) ||
+        (global_log && global_log->TestWriteMask(Logger::WriteType::WriteFormatted)))
+    {
+        std::snprintf(formatted_log_message, sizeof(formatted_log_message) - 1,
+                      "[%f] %s: %s:%d \"%s\"\n",
+                      seconds, ToString(type), file, line, message.c_str());
+    }
+    if (thread_log)
+    {
+        if (thread_log->TestWriteMask(Logger::WriteType::WriteRaw))
+            thread_log->Write(type, file, line, message.c_str());
+        if (thread_log->TestWriteMask(Logger::WriteType::WriteFormatted))
+            thread_log->Write(type, formatted_log_message);
+        return;
+    }
+
+    // acquire access to the global logger
+    if (!global_log)
+        return;
+
+    if (global_log->TestWriteMask(Logger::WriteType::WriteRaw))
+        global_log->Write(type, file, line, message.c_str());
+    if (global_log->TestWriteMask(Logger::WriteType::WriteFormatted))
+        global_log->Write(type, formatted_log_message);
 }
 
 } // base

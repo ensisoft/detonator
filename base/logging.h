@@ -27,10 +27,9 @@
 #include <iosfwd>
 #include <string>
 #include <mutex>
-#include <chrono>
-#include <cstdio>
 
-#include "format.h"
+#include "base/format.h"
+#include "base/bitflag.h"
 
 // note that wingdi.h also has ERROR macro. On Windows Qt headers incluce
 // windows.h which includes wingdi.h which redefines the ERROR macro which
@@ -99,7 +98,38 @@ namespace base
         virtual void Write(LogEvent type, const char* msg)  = 0;
         // Flush the log.
         virtual void Flush() = 0;
+
+        enum class WriteType {
+            WriteRaw,
+            WriteFormatted
+        };
+        virtual base::bitflag<WriteType> GetWriteMask() const
+        {
+            base::bitflag<WriteType> writes;
+            writes.set(WriteType::WriteRaw);
+            writes.set(WriteType::WriteFormatted);
+            return writes;
+        }
+        inline bool TestWriteMask(WriteType bit) const
+        {
+            const auto& bits = GetWriteMask();
+            return bits.test(bit);
+        }
     protected:
+    private:
+    };
+
+    class NullLogger : public Logger
+    {
+    public:
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        { }
+        virtual void Write(LogEvent type, const char* msg) override
+        {}
+        virtual void Flush() override
+        {}
+        virtual base::bitflag<WriteType> GetWriteMask() const override
+        { return base::bitflag<WriteType>(); }
     private:
     };
 
@@ -113,6 +143,8 @@ namespace base
         { /* not supported */ }
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override;
+        virtual base::bitflag<WriteType> GetWriteMask() const override
+        { return WriteType::WriteFormatted; }
     private:
         std::ostream& m_out;
     };
@@ -130,18 +162,26 @@ namespace base
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override
         { /* no op */ }
+        virtual base::bitflag<WriteType> GetWriteMask() const override
+        { return WriteType::WriteFormatted; }
     private:
     };
 
-
+    // Protect access to a non-thread safe logger object
+    // by wrapping it inside a locked logger for exclusive
+    // and locked access.
     template<typename WrappedLogger>
     class LockedLogger : public Logger
     {
     public:
-        LockedLogger(WrappedLogger&& other)
-          : mLogger(std::move(other))
-        {}
-        LockedLogger() = default;
+        LockedLogger()
+        {
+            mWrites.set(WriteType::WriteFormatted);
+            mWrites.set(WriteType::WriteRaw);
+        }
+        LockedLogger(WrappedLogger&& other) : LockedLogger()
+        { mLogger = std::move(other); }
+
         virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
@@ -157,13 +197,118 @@ namespace base
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Flush();
         }
-        const WrappedLogger& GetLogger() const 
+        virtual bitflag<WriteType> GetWriteMask() const override
+        { return mWrites; }
+        class LoggerAccess
+        {
+        public:
+            LoggerAccess(std::unique_lock<std::mutex> lock,  WrappedLogger& logger)
+                : mLock(std::move(lock))
+                , mLogger(logger)
+            {}
+            WrappedLogger* operator->()
+            { return &mLogger; }
+        private:
+            std::unique_lock<std::mutex> mLock;
+            WrappedLogger& mLogger;
+        };
+        LoggerAccess GetLoggerSafe()
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            return LoggerAccess(std::move(lock), mLogger);
+        }
+        WrappedLogger& GetLoggerUnsafe()
         { return mLogger; }
-        WrappedLogger& GetLogger()
-        { return mLogger; }
+
+        void EnableWrite(WriteType type, bool on_off)
+        { mWrites.set(type, on_off); }
     private:
         WrappedLogger mLogger;
         std::mutex mMutex;
+        bitflag<WriteType> mWrites;
+    };
+
+    // Insert log messages into an intermediate buffer 
+    // until flushed into the wrapped logger. This is
+    // convenient when combined with the LockedLogger
+    // when the *real* logger has thread affinity. 
+    // I.e you can do LockedLogger<BufferLogger<MyLogger>> logger;
+    // and multiple threads can log safely by pushing into
+    // the log buffer from which the events can then be dispatched
+    // by a single thread into the actual logger.
+    template<typename WrappedLogger>
+    class BufferLogger : public Logger
+    {
+    public:
+        struct LogMessage {
+            LogEvent type = LogEvent::Debug;
+            std::string file;
+            std::string msg;
+            int line = 0;
+        };
+        BufferLogger()
+        {
+            mWrites.set(WriteType::WriteFormatted);
+            mWrites.set(WriteType::WriteRaw);
+        }
+        BufferLogger(WrappedLogger&& other) : BufferLogger()
+        {  mLogger = std::move(other); }
+
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        {
+            LogMessage log;
+            log.type = type;
+            log.file = file;
+            log.line = line;
+            log.msg  = msg;
+            mBuffer.push_back(std::move(log));
+        }
+        virtual void Write(LogEvent type, const char* msg) override
+        {
+            LogMessage log;
+            log.type = type;
+            log.msg  = msg;
+            mBuffer.push_back(std::move(log));
+        }
+        virtual void Flush() override
+        {
+            // not implemented because of potentially
+            // using this buffer logger with the locked logger.
+        }
+        virtual bitflag<WriteType> GetWriteMask() const override
+        { return mWrites; }
+
+        // Dispatch the buffered log messages to the actual
+        // logger object. If using multiple threads you should
+        // probably only use a single thread to call this,
+        // i.e. the thread that "owns" the WrappedLogger
+        // when there's thread affinity.
+        void Dispatch()
+        {
+            for (const auto& msg : mBuffer)
+            {
+                if (msg.file.empty()) {
+                    mLogger.Write(msg.type, msg.msg.c_str());
+                } else {
+                    mLogger.Write(msg.type, msg.file.c_str(), msg.line, msg.msg.c_str());
+                }
+            }
+            mBuffer.clear();
+        }
+        size_t GetBufferMsgCount() const
+        { return mBuffer.size(); }
+        const LogMessage& GetMessage(size_t i) const
+        { return mBuffer[i]; }
+        const WrappedLogger& GetLogger() const
+        { return mLogger; }
+        WrappedLogger& GetLogger()
+        { return mLogger; }
+        void EnableWrite(WriteType type, bool on_off)
+        { mWrites.set(type, on_off); }
+    private:
+        std::vector<LogMessage> mBuffer;
+        WrappedLogger mLogger;
+        bitflag<WriteType> mWrites;
     };
 
 
@@ -199,6 +344,9 @@ namespace base
     // debug logging on or off
     void EnableDebugLog(bool on_off);
 
+    // Write new log message in the loggers.
+    void WriteLogMessage(LogEvent type, const char* file, int line, const std::string& message);
+
     // Interface for writing a variable argument message to the
     // calling thread's logger or the global logger.
     template<typename... Args>
@@ -209,40 +357,8 @@ namespace base
             if (!IsDebugLogEnabled())
                 return;
         }
-
-        using steady_clock = std::chrono::steady_clock;
-        // magic static is thread safe.
-        static const auto first_event_time = steady_clock::now();
-        const auto current_event_time = steady_clock::now();
-        const auto elapsed = current_event_time - first_event_time;
-        const double seconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() / 1000.0;
-
         // format the message in the log statement.
-        const auto& msg = FormatString(fmt, args...);
-
-        // format the whole log string.
-        // todo: fix this potential buffer issue here.
-        char formatted_log_message[512] = {0};
-
-        std::snprintf(formatted_log_message, sizeof(formatted_log_message)-1,
-            "[%f] %s: %s:%d \"%s\"\n",
-            seconds, ToString(type), file, line, msg.c_str());
-
-        auto* thread_log = GetThreadLog();
-        if (thread_log)
-        {
-            thread_log->Write(type, file, line, msg.c_str());
-            thread_log->Write(type, formatted_log_message);
-            return;
-        }
-
-        // acquire access to the global logger
-        auto* global_log = GetGlobalLog();
-        if (!global_log)
-            return;
-
-        global_log->Write(type, file, line, msg.c_str());
-        global_log->Write(type, formatted_log_message);
+        WriteLogMessage(type, file, line, FormatString(fmt, args...));
     }
 
 } // base
