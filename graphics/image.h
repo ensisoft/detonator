@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -25,17 +25,13 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <stb/stb_image.h>
 #include "warnpop.h"
 
-#include <fstream>
 #include <string>
-#include <stdexcept>
 
 #include "base/assert.h"
-#include "base/platform.h"
-#include "base/utility.h"
-#include "bitmap.h"
+#include "graphics/bitmap.h"
+#include "graphics/resource.h"
 
 namespace gfx
 {
@@ -43,55 +39,36 @@ namespace gfx
     class Image
     {
     public:
+        // Construct an invalid image. (IsValid will be false).
+        // You'll need to explicitly call Load after this.
         Image() = default;
-        Image(const std::string& file)
-        {
-            Load(file);
-        }
+
+        // Construct a new image object and try to load an image
+        // immediately using the given file name.
+        // If the image load fails the object will be constructed
+        // (i.e. no exception is thrown) but IsValid will be false.
+        // The optional resource type is a hint to the resource loader
+        // (in case of using encoded file identifier) as to what's the
+        // purpose of the data.
+        Image(const std::string& file, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
         Image(const Image&) = delete;
-       ~Image()
-        {
-            if (mData)
-                stbi_image_free(mData);
-        }
+       ~Image();
 
-        void Load(const std::string& filename)
-        {
-            #if defined(WINDOWS_OS)
-                std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
-            #elif defined(POSIX_OS)
-                std::fstream in(filename, std::ios::in | std::ios::binary);
-            #endif
-            if (!in.is_open())
-                throw std::runtime_error("failed to open file: " + filename);
+        // Try to load an image file identified by the given file
+        // resource identifier. The identifier can be an encoded
+        // identifier such as "app://foo/bar/image.png" or a "raw"
+        // path such as /home/user/image.png. If the file is an
+        // encoded path it is resolved through the ResourceLoader.
+        // On error returns false and the image object remains
+        // unchanged.
+        bool Load(const std::string& file, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
 
-            in.seekg(0, std::ios::end);
-            const auto size = (std::size_t)in.tellg();
-            in.seekg(0, std::ios::beg);
-
-            std::vector<char> data;
-            data.resize(size);
-            in.read(&data[0], size);
-            if ((std::size_t)in.gcount() != size)
-                throw std::runtime_error("failed to read all of: " + filename);
-
-            int xres  = 0;
-            int yres  = 0;
-            int depth = 0;
-            auto* bmp = stbi_load_from_memory((const stbi_uc*)data.data(),
-                (int)data.size(), &xres, &yres, &depth, 0);
-            if (bmp == nullptr)
-                throw std::runtime_error("failed to decompress image: " + filename);
-            if (mData)
-                stbi_image_free(mData);
-
-            mFilename = filename;
-            mWidth  = static_cast<unsigned>(xres);
-            mHeight = static_cast<unsigned>(yres);
-            mDepth  = static_cast<unsigned>(depth);
-            mData   = bmp;
-        }
-
+        // Copy (and optionally convert) the pixel contents of the
+        // image into a specific type of bitmap object.
+        // The bitmap allows for more fine grained control over
+        // the pixel data such as GetPixel/SetPixel if that's what you need.
+        // If the image cannot be represented as a bitmap of any type
+        // known to the system an invalid bitmap will be returned.
         template<typename PixelT>
         Bitmap<PixelT> AsBitmap() const
         {
@@ -109,14 +86,19 @@ namespace gfx
 
             return ret;
         }
+        // Returns true if the image has been loaded, otherwise false.
         bool IsValid() const
         { return mData != nullptr; }
+        // Get image width in pixels.
         unsigned GetWidth() const
         { return mWidth; }
+        // Get image height in pixels.
         unsigned GetHeight() const
         { return mHeight; }
+        // Get the depth of the image in bits.
         unsigned GetDepthBits() const
         { return mDepth * 8; }
+        // Get the raw data pointer to the image bits.
         const void* GetData() const
         { return mData; }
 
@@ -126,6 +108,6 @@ namespace gfx
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
         unsigned mDepth  = 0;
-        stbi_uc* mData   = nullptr;
+        unsigned char* mData = nullptr;
     };
 } // namespace

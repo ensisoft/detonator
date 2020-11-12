@@ -38,10 +38,16 @@ namespace gfx
     class ResourceLoader
     {
     public:
+        // Expected Type of the resource to be loaded.
         enum class ResourceType {
+            // Image file with the purpose of being used as a texture.
             Texture,
+            // A glsl shader file (text)
             Shader,
-            Font
+            // Font (.otf) file.
+            Font,
+            // Compressed image such as .png or .jpeg
+            Image
         };
 
         // Resolve the given (pseudo) filename to an actual filename on the file system.

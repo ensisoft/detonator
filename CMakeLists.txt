@@ -164,6 +164,7 @@ add_executable(Editor
     graphics/drawable.cpp
     graphics/material.h
     graphics/material.cpp
+    graphics/image.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -338,7 +339,7 @@ add_executable(graphics_test
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    graphics/material.cpp
+    graphics/image.cpp
     graphics/test/main.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -381,7 +382,7 @@ add_library(gamelib_test SHARED
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    graphics/material.cpp
+    graphics/image.cpp
     graphics/opengl_es2_device.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
@@ -417,6 +418,7 @@ add_library(invaders SHARED
     base/format.cpp
     base/logging.cpp
     graphics/material.cpp
+    graphics/image.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
     graphics/opengl_es2_device.cpp
@@ -452,7 +454,9 @@ endif()
 enable_testing()
 # graphics unit tests
 add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp third_party/stb/stb_image_write.c)
-add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c)
+add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c
+        graphics/image.cpp
+        graphics/resource.cpp)
 add_executable(unit_test          graphics/unit_test/unit_test.cpp graphics/drawable.cpp base/assert.cpp)
 add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
     graphics/opengl_es2_device.cpp
@@ -472,6 +476,7 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     base/logging.cpp
     graphics/drawable.cpp
     graphics/material.cpp
+    graphics/image.cpp
     graphics/text.cpp
     graphics/resource.cpp
     gamelib/animation.cpp

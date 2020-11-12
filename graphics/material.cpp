@@ -41,18 +41,21 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
         // Todo: image class should probably provide a non-throw load
         // but then it also needs some mechanism for getting the error
         // message why it failed.
-        Image file(ResolveFile(ResourceLoader::ResourceType::Texture, mFile));
+        Image file(mFile, ResourceLoader::ResourceType::Texture);
         if (file.GetDepthBits() == 8)
             return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
         else if (file.GetDepthBits() == 24)
             return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
         else if (file.GetDepthBits() == 32)
             return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
-        else throw std::runtime_error("unexpected image depth: " + std::to_string(file.GetDepthBits()));
+
+        ERROR("Failed to load texture. '%1'", mFile);
+        return nullptr;
     }
     catch (const std::exception& e)
     {
         ERROR(e.what());
+        ERROR("Failed to load texture. '%1'", mFile);
     }
     return nullptr;
 }
@@ -69,6 +72,7 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     catch (const std::exception& e)
     {
         ERROR(e.what());
+        ERROR("Failed to rasterize text buffer.");
     }
     return nullptr;
 }
