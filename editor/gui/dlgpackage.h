@@ -45,10 +45,14 @@ namespace gui
         void on_btnBrowse_clicked();
         void on_btnStart_clicked();
         void on_btnClose_clicked();
+        void ResourcePackingUpdate(const QString& action, int step, int max);
+    private:
+        virtual void closeEvent(QCloseEvent* event) override;
     private:
         Ui::DlgPackage mUI;
     private:
         app::Workspace& mWorkspace;
+        bool mPackageInProgress = false;
     };
 } // namespace
 

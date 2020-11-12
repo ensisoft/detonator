@@ -28,6 +28,7 @@
 #  include <QStringList>
 #  include <QFileDialog>
 #  include <QMessageBox>
+#  include <QEventLoop>
 #  include <QDir>
 #include "warnpop.h"
 
@@ -68,7 +69,11 @@ DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
     GetProperty(workspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     GetProperty(workspace, "packing_param_pack_name", mUI.editPckName);
 
-    mUI.editOutDir->setText(app::CleanPath(workspace.GetDir()));
+    SetValue(mUI.editOutDir, app::CleanPath(workspace.GetDir()));
+    mUI.progressBar->setVisible(false);
+
+    connect(&mWorkspace, &app::Workspace::ResourcePackingUpdate,
+            this, &DlgPackage::ResourcePackingUpdate);
 }
 
 void DlgPackage::on_btnSelectAll_clicked()
@@ -122,6 +127,10 @@ void DlgPackage::on_btnStart_clicked()
         if (msg.exec() == QMessageBox::No)
             return;
     }
+    mUI.btnStart->setEnabled(false);
+    mUI.btnClose->setEnabled(false);
+    mUI.progressBar->setVisible(true);
+    mPackageInProgress = true;
 
     std::vector<const app::Resource*> resources;
 
@@ -152,16 +161,14 @@ void DlgPackage::on_btnStart_clicked()
     options.max_texture_width = GetValue(mUI.cmbMaxTexWidth);
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
 
-    if (!mWorkspace.PackContent(resources, options))
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Content packing completed with errors/warnings.\n"
-            "Please see the log for details."));
-        msg.exec();
-    }
-    else
+    const auto success = mWorkspace.PackContent(resources, options);
+
+    mUI.btnStart->setEnabled(true);
+    mUI.btnClose->setEnabled(true);
+    mUI.progressBar->setVisible(false);
+    mPackageInProgress = false;
+
+    if (success)
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Information);
@@ -169,11 +176,42 @@ void DlgPackage::on_btnStart_clicked()
         msg.setText(tr("Success!\nHave a good day. :)"));
         msg.exec();
     }
+    else
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Content packing completed with errors/warnings.\n"
+                       "Please see the log for details."));
+        msg.exec();
+    }
 }
 
 void DlgPackage::on_btnClose_clicked()
 {
     close();
+}
+
+void DlgPackage::closeEvent(QCloseEvent* event)
+{
+    if (mPackageInProgress)
+    {
+        event->ignore();
+        return;
+    }
+    event->accept();
+}
+
+void DlgPackage::ResourcePackingUpdate(const QString& action, int step, int max)
+{
+    if (step > max)
+        step = max;
+    mUI.progressBar->setValue(step);
+    mUI.progressBar->setMaximum(max);
+    mUI.progressBar->setFormat(QString("%1 %p%").arg(action));
+
+    QEventLoop footgun;
+    footgun.processEvents();
 }
 
 } // namespace

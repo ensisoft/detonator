@@ -428,6 +428,13 @@ namespace app
         // signal handler returns the pointer is no longer valid!
         void ResourceToBeDeleted(const Resource* resource);
 
+        // This signal is emitted intermittedly during  the
+        // execution of PackContent.
+        // Action is the name of the current action (human readable)
+        // and step is the number of the current step out of total
+        // steps under this action.
+        void ResourcePackingUpdate(const QString& action, int step, int total);
+
     private:
         bool LoadContent(const QString& file);
         bool LoadWorkspace(const QString& file);

@@ -48,6 +48,7 @@
 #include <memory>
 #include <unordered_map>
 #include <set>
+#include <functional>
 
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -126,7 +127,9 @@ public:
         return it->second.rect;
     }
 
-    void PackTextures()
+    using TexturePackingProgressCallback = std::function<void (std::string, int, int)>;
+
+    void PackTextures(TexturePackingProgressCallback  progress)
     {
         if (mTextureMap.empty())
             return;
@@ -161,13 +164,18 @@ public:
         // 1. go over the list of textures, ignore duplicates
         // 2. select textures that seem like a good "fit" for packing. (size ?)
         // 3. combine the textures into atlas/atlasses.
-        // -- composit the actual image files.
+        // -- composite the actual image files.
         // 4. copy the src image contents into the container image.
         // 5. write the container/packed image into the package folder
         // 6. update the textures whose source images were packaged (the file handle and the rectangle box)
 
+        int cur_step = 0;
+        int max_step = static_cast<int>(mTextureMap.size());
+
         for (auto it = mTextureMap.begin(); it != mTextureMap.end(); ++it)
         {
+            progress("Copying textures...", cur_step++, max_step);
+
             const TextureSource& tex = it->second;
             if (tex.file.empty())
                 continue;
@@ -222,14 +230,18 @@ public:
         }
 
         unsigned atlas_number = 0;
+        cur_step = 0;
+        max_step = static_cast<int>(sources.size());
 
         while (!sources.empty())
         {
+            progress("Packing textures...", cur_step++, max_step);
+
             app::RectanglePackSize packing_rect_result;
             app::PackRectangles({kMaxTextureWidth, kMaxTextureHeight}, sources, &packing_rect_result);
             // ok, some of the textures might have failed to pack on this pass.
-            // separate the ones that were succesfully packed from the ones that
-            // weren't. then composit the image for the success cases.
+            // separate the ones that were successfully packed from the ones that
+            // weren't. then composite the image for the success cases.
             auto first_success = std::partition(sources.begin(), sources.end(),
                 [](const auto& pack_rect) {
                     // put the failed cases first.
@@ -326,12 +338,15 @@ public:
 
             atlas_number++;
         }
-
+        cur_step = 0;
+        max_step = static_cast<int>(mTextureMap.size());
         // update texture object mappings, file handles and texture boxes.
         // for each texture object, look up where the original file handle
         // maps to. Then the original texture box is now a box within a box.
         for (auto& pair : mTextureMap)
         {
+            progress("Remapping textures...", cur_step++, max_step);
+
             TextureSource& tex = pair.second;
             const auto original_file = tex.file;
             const auto original_rect = tex.rect;
@@ -1372,16 +1387,20 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     dir.setPath(glsldir);
     dir.setNameFilters(filters);
     const QStringList& files = dir.entryList();
-    for (const auto& file : files)
+    for (int i=0; i<files.size(); ++i)
     {
+        emit ResourcePackingUpdate("Copying shaders...", i, files.size());
+        const QFile file(files[i]);
         const QFileInfo info(file);
         const QString& name = "shaders/es2/" + info.fileName();
         packer.CopyFile(app::ToUtf8(name), "shaders/es2");
     }
 
     // collect the resources in the packer.
-    for (const auto& resource : mutable_copies)
+    for (int i=0; i<mutable_copies.size(); ++i)
     {
+        const auto& resource = mutable_copies[i];
+        emit ResourcePackingUpdate("Collecting resources...", i, mutable_copies.size());
         if (resource->IsMaterial())
         {
             // todo: maybe move to Resource interface ?
@@ -1403,10 +1422,14 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
-    packer.PackTextures();
+    packer.PackTextures([this](const std::string& action, int step, int max) {
+        emit ResourcePackingUpdate(FromLatin(action), step, max);
+    });
 
-    for (const auto& resource : mutable_copies)
+    for (int i=0; i<mutable_copies.size(); ++i)
     {
+        const auto& resource = mutable_copies[i];
+        emit ResourcePackingUpdate("Updating resources...", i, mutable_copies.size());
         if (resource->IsMaterial())
         {
             // todo: maybe move to resource interface ?
@@ -1415,6 +1438,8 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             material->FinishPacking(&packer);
         }
     }
+
+    emit ResourcePackingUpdate("Writing JSON file...", 0, 0);
 
     // finally serialize
     nlohmann::json json;
@@ -1441,7 +1466,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     }
     else
     {
-        INFO("Packed %1 resource(s) into %2 succesfully.", resources.size(), outdir);
+        INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
         //INFO("%1 files copied.", packer.GetNumFilesCopied());
     }
     return packer.GetNumErrors() == 0;
