@@ -452,25 +452,19 @@ endif()
 
 # unit tests
 enable_testing()
-# graphics unit tests
-add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp third_party/stb/stb_image_write.c)
-add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c
-        graphics/image.cpp
-        graphics/resource.cpp)
-add_executable(unit_test          graphics/unit_test/unit_test.cpp graphics/drawable.cpp base/assert.cpp)
-add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
-    graphics/opengl_es2_device.cpp
-    graphics/resource.cpp
-    third_party/stb/stb_image_write.c)
+
 #editor unit tests
 add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.cpp
                                   editor/app/packing.cpp
                                   base/assert.cpp
                                   third_party/stb/stb_image.c
                                   third_party/stb/stb_image_write.c)
+add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
+target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 
 # gamelib tests
-add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp    base/assert.cpp)
+add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
+add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp  base/assert.cpp)
 add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     base/assert.cpp
     base/logging.cpp
@@ -483,7 +477,16 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
-add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
+target_link_libraries(unit_test_anim
+        freetype_custom_build
+        harfbuzz_custom_build)
+
+target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+add_test(NAME unit_test_tree COMMAND unit_test_tree)
+add_test(NAME unit_test_anim COMMAND unit_test_anim)
+add_test(NAME unit_test_settings COMMAND unit_test_settings)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
@@ -493,23 +496,41 @@ target_include_directories(unit_test_logging PRIVATE "${CMAKE_CURRENT_LIST_DIR}/
 if (UNIX)
    target_link_libraries(unit_test_logging PRIVATE pthread)
 endif()
+target_include_directories(unit_test_math     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
+add_test(NAME unit_test_math COMMAND unit_test_math)
+add_test(NAME unit_test_cmdline COMMAND unit_test_cmdline)
+add_test(NAME unit_test_logging COMMAND unit_test_logging)
 
+# gfx tests
+add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp third_party/stb/stb_image_write.c)
+add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c
+        graphics/image.cpp
+        graphics/resource.cpp)
+add_executable(unit_test          graphics/unit_test/unit_test.cpp graphics/drawable.cpp base/assert.cpp)
+add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
+        graphics/opengl_es2_device.cpp
+        graphics/resource.cpp
+        third_party/stb/stb_image_write.c)
 target_link_libraries(unit_test_device
     wdk_system
     wdk_desktop_gl
     freetype_custom_build
     harfbuzz_custom_build)
-target_link_libraries(unit_test_anim
-    freetype_custom_build
-    harfbuzz_custom_build)
 
+add_test(NAME unit_test_bitmap COMMAND unit_test_bitmap)
+add_test(NAME unit_test_image COMMAND unit_test_image)
+add_test(NAME unit_test COMMAND unit_test)
+add_test(NAME unit_test_device COMMAND unit_test_device)
 target_include_directories(unit_test_bitmap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_math     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test")
-target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+
+
+
+
+
+
+
+
 
