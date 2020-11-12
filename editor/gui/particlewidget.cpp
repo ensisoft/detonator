@@ -461,8 +461,8 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params
     }
     else
     {
-        params.rate_of_change_in_size_wrt_time = 0.0f;
-        params.rate_of_change_in_size_wrt_dist = 0.0f;
+        params.rate_of_change_in_alpha_wrt_time = 0.0f;
+        params.rate_of_change_in_alpha_wrt_dist = 0.0f;
     }
 }
 
