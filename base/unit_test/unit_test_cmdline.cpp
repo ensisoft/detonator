@@ -58,6 +58,22 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(opt.WasGiven("--bar"));
     }
 
+    // on/off flags mismatched order
+    {
+        const char* argv[] = {
+                "--bar",
+                "--foo"
+        };
+        base::CommandLineArgumentStack args(2, argv);
+        base::CommandLineOptions opt;
+        opt.Add("--foo", "foo help");
+        opt.Add("--bar", "bar help");
+        opt.Parse(args);
+        TEST_REQUIRE(opt.WasGiven("--foo"));
+        TEST_REQUIRE(opt.WasGiven("--bar"));
+    }
+
+
     // on/off flags
     {
         const char* argv[] = {
@@ -90,6 +106,36 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(opt.WasGiven("--string"));
         TEST_REQUIRE(opt.GetValue<int>("--integer") == 1234);
         TEST_REQUIRE(opt.GetValue<std::string>("--string") == "foobar");
+    }
+
+    // with value parsing when values are given, mismatched order.
+    {
+        const char* argv[] = {
+                "--string=foobar",
+                "--integer=1234"
+        };
+        base::CommandLineArgumentStack args(2, argv);
+        base::CommandLineOptions opt;
+        opt.Add("--integer", "integer help", 0);
+        opt.Add("--string", "string help", std::string(""));
+        opt.Parse(args);
+        TEST_REQUIRE(opt.WasGiven("--integer"));
+        TEST_REQUIRE(opt.WasGiven("--string"));
+        TEST_REQUIRE(opt.GetValue<int>("--integer") == 1234);
+        TEST_REQUIRE(opt.GetValue<std::string>("--string") == "foobar");
+    }
+
+    // string with spaces
+    {
+        const char* argv[] = {
+                "--string=jeesus ajaa mopolla"
+        };
+        base::CommandLineArgumentStack args(1, argv);
+        base::CommandLineOptions opt;
+        opt.Add("--string", "string help", std::string(""));
+        opt.Parse(args);
+        TEST_REQUIRE(opt.WasGiven("--string"));
+        TEST_REQUIRE(opt.GetValue<std::string>("--string") == "jeesus ajaa mopolla");
     }
 
     // with value parsing when values are missing.

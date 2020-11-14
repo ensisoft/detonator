@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Sami Väisänen, Ensisoft
+ // Copyright (c) 2016 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -20,7 +20,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#include "platform.h"
+#include "base/platform.h"
 
 #pragma once
 
@@ -35,6 +35,23 @@
 #include <cassert>
 
 // simplistic command line parser
+//
+// How to deal with string arguments with spaces ?
+// TLDR; In your terminal either pass:
+//
+//  "--foobar=some string"
+//
+//           or
+//
+//  --foobar=\"foo bar\”
+//
+// Longer explanation. The argument parsing code assumes
+// that whatever should be considered as a single string
+// is passed as a single string. So therefore it's up to
+// the code doing the invocation to figure out how to
+// quote string argument with spaces so that they arrive to
+// your program's main function as a single entry in
+// the argv array.
 
 namespace base
 {
@@ -50,6 +67,9 @@ namespace base
                 throw std::runtime_error(std::string("Can't interpret '") +  str + "' as wanted value type.");
             return value;
         }
+        template<>
+        std::string FromString<std::string>(const char* str)
+        { return str; }
     } // detail
 
     // CommandLineArgumentStack initialized from a set of arguments given as a
@@ -58,7 +78,7 @@ namespace base
     {
     public:
         // Initialize the command line from the given char* array
-        // and the legth of the array.  This will copy the data.
+        // and the length of the array.  This will copy the data.
         // so it's safe to discard the array after the constructor
         // returns.
         CommandLineArgumentStack(int count, const char* argv[])
@@ -96,6 +116,16 @@ namespace base
         std::vector<std::string> m_argv;
     };
 
+    // Helper function to create a command lin argument stack
+    // based on the standard arguments given to the main function.
+    // Assumes that argv[0] is the program name and this is skipped.
+    // The arguments are copied and after the function returns
+    // the argv array may be discarded.
+    inline CommandLineArgumentStack CreateStandardArgs(int argc, char* argv[])
+    {
+        return CommandLineArgumentStack(argc-1, (const char**)&argv[1]);
+    }
+
     // Interface for argument processing.
     class CommandLineArg
     {
@@ -103,7 +133,7 @@ namespace base
         virtual ~CommandLineArg() = default;
         // Try to accept the current argument and consume the expected
         // number of associated values from the command line stack.
-        // Returns true if succesful or false if the command line stack
+        // Returns true if successful or false if the command line stack
         // didn't contain the expected data.
         virtual bool Accept(CommandLineArgumentStack& cmd) = 0;
         // Checks whether this argument object matches the given name.
@@ -241,7 +271,7 @@ namespace base
     // a set of command line arguments. This is a two step process.
     // First the command line options instance is created and configured
     // with the appropriate command line args that are expected and
-    // matched agains the actual command line args given by the user.
+    // matched again the actual command line args given by the user.
     class CommandLineOptions
     {
     public:
@@ -287,6 +317,11 @@ namespace base
 
             }
         }
+        void Parse(CommandLineArgumentStack&& cmd, bool allow_unexpected)
+        {
+            CommandLineArgumentStack temp = std::move(cmd);
+            Parse(temp, allow_unexpected);
+        }
 
         // Convenience wrapper for converting a parse failure into boolean
         // result for simplicity. if the error string pointer is non nullptr
@@ -303,6 +338,11 @@ namespace base
                 return false;
             }
             return true;
+        }
+        bool Parse(CommandLineArgumentStack&& cmd, std::string* error)
+        {
+            CommandLineArgumentStack temp = std::move(cmd);
+            return Parse(temp, error);
         }
 
         const CommandLineArg& Get(const char* name) const
@@ -335,8 +375,25 @@ namespace base
                 if (opt->IsMatch(name))
                     return opt->As<T>();
             }
-            assert("No such argument.");
+            assert(!"No such argument.");
             return T();
+        }
+        template<typename T>
+        bool GetValue(const char* name, T* out) const
+        {
+            for (const auto& opt : m_options_list)
+            {
+                if (!opt->IsMatch(name))
+                    continue;
+                if (opt->WasMatched())
+                {
+                    *out = opt->As<T>();
+                    return true;
+                }
+                return false;
+            }
+            assert(!"No such argument.");
+            return false;
         }
 
         void Print(std::ostream& out) const
