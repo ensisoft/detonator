@@ -145,8 +145,11 @@ namespace base
         virtual void Flush() override;
         virtual base::bitflag<WriteType> GetWriteMask() const override
         { return WriteType::WriteFormatted; }
+        void EnableTerminalColors(bool on_off)
+        { mTerminalColors = on_off; }
     private:
         std::ostream& m_out;
+        bool mTerminalColors = true;
     };
 
     // Similar to OStreamLogger except uses
@@ -208,6 +211,8 @@ namespace base
             {}
             WrappedLogger* operator->()
             { return &mLogger; }
+            WrappedLogger& GetLogger()
+            { return mLogger; }
         private:
             std::unique_lock<std::mutex> mLock;
             WrappedLogger& mLogger;

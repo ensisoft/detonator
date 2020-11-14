@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#if defined(WINDOWS_OS)
+#  include <Windows.h>
+#endif
+
 #ifdef BASE_LOGGING_ENABLE_CURSES
 #  include <curses.h>
 #endif
@@ -70,7 +74,91 @@ OStreamLogger::OStreamLogger(std::ostream& out) : m_out(out)
 
 void OStreamLogger::Write(LogEvent type, const char* msg)
 {
+    if (!mTerminalColors)
+    {
+        m_out << msg;
+        return;
+    }
+    // Using raw terminal escape sequences here. This might or might
+    // not work depending on the terminal. Also if the ostream
+    // is *not* connected to a terminal output (could be a file)
+    // then strange garbage will be in the file. In such case
+    // one would want to disable the term colors i.e set
+    // mTerminalColors to false.
+    //
+    // But why? Because ncurses sucks monkey balls. Ncurses has
+    // problems such as not being able to report whether it's
+    // actually been initialized or not. Consider a case you have
+    // several independent components that all want to use ncurses.
+    // What happens if they all call initsrc or endwin? I can't find
+    // any documentation about the behaviour of ncurses in such
+    // cases.
+    // Additionally ncurses when initialized requires the use of
+    // ncurses output functions. Raw stdout output will then be
+    // garbled. This doesn't play nice with code that simply does
+    // a printf or std::cout call to print something.
+
+    // More information about the terminal escape colors  (and codes)
+    // is available at Wikipedia.
+    // https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+    //
+    // In case wiki gets re-written below is a handy C application
+    // to print text with different foreground/background attr
+    // combinations.
+    //
+
+    /*
+    int main(void)
+    {
+        int i, j, n;
+
+        for (i = 0; i < 11; i++) {
+            for (j = 0; j < 10; j++) {
+                n = 10*i + j;
+                if (n > 108) break;
+                //printf("\033[%dm %3d \033[m", n, n);
+                std::cout << "\033[" << n << "m";
+                std::cout << " " << n << " ";
+                std::cout << "\033[m";
+            }
+            std::cout << std::endl;
+            //printf("\n");
+        }
+        return (0);
+    }
+    */
+#if defined(POSIX_OS)
+    // output terminal escape code to change text color.
+    if (type == LogEvent::Debug)
+        m_out << "\033[" << 36 << "m";
+    else if (type == LogEvent::Error)
+        m_out << "\033[" << 31 << "m";
+    else if (type == LogEvent::Warning)
+        m_out << "\033[" << 33 << "m";
+    //else if (type == LogEvent::Info)
+    //    m_out << "\033[" << 32 << "m";
+
+    // print the actual message
     m_out << msg;
+
+    // reset terminal color.
+    m_out << "\033[m";
+#elif defined(WINDOWS_OS)
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO console = {0};
+    GetConsoleScreenBufferInfo(out, &console);
+    if (type == LogEvent::Debug)
+        SetConsoleTextAttribute(out, FOREGROUND_GREEN | FOREGROUND_BLUE);
+    else if (type == LogEvent::Error)
+        SetConsoleTextAttribute(out, FOREGROUND_RED);
+    else if (type == LogEvent::Warning)
+        SetConsoleTextAttribute(out, FOREGROUND_RED | FOREGROUND_GREEN);
+    //else if (type == LogEvent::Info)
+    //    SetConsoleTextAttribute(out, FOREGROUND_GREEN);
+
+    m_out << msg;
+    SetConsoleTextAttribute(out, console.wAttributes);
+#endif
 }
 
 void OStreamLogger::Flush()
@@ -88,7 +176,7 @@ CursesLogger::CursesLogger()
 
     // init some colors
     init_pair(1+(short)LogEvent::Debug, COLOR_CYAN, -1);
-    init_pair(1+(short)LogEvent::Info,  COLOR_WHITE, -1);
+    init_pair(1+(short)LogEvent::Info,  -1, -1);
     init_pair(1+(short)LogEvent::Warning, COLOR_YELLOW, -1);
     init_pair(1+(short)LogEvent::Error, COLOR_RED, -1);
 #endif

@@ -41,6 +41,7 @@
 #  include <unistd.h>
 #endif
 
+#include <iostream>
 
 // So where is my core file?
 // check that core file is unlimited
@@ -85,6 +86,12 @@ void do_assert(const char* expression, const char* file, const char* func, int l
     // if one thread is already asserting then spin lock other threads here.
     if (mutex.test_and_set())
         while (1);
+
+    // flush previous output before dumping core.
+    std::cerr.flush();
+    std::cout.flush();
+    std::fflush(stdout);
+    std::fflush(stderr);
 
     std::fprintf(stderr, "%s:%i: %s: Assertion `%s' failed.\n", file, line, func, expression);
 

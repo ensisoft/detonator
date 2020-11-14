@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <thread>
+#include <iostream>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
@@ -118,6 +119,19 @@ int test_main(int argc, char* argv[])
         t0.join();
         t1.join();
         TEST_REQUIRE(log.GetLoggerUnsafe().GetBufferMsgCount() == 300);
+        base::SetGlobalLog(nullptr);
+        base::SetThreadLog(nullptr);
+    }
+
+    // test some terminal colors
+    {
+        base::OStreamLogger logger(std::cout);
+        logger.EnableTerminalColors(true);
+        base::SetGlobalLog(&logger);
+        DEBUG("Hello");
+        INFO("Hello");
+        WARN("Hello");
+        ERROR("Hello");
     }
 
     return 0;
