@@ -1037,6 +1037,7 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     project["updates_per_second"]       = (int)mSettings.updates_per_second;
     project["working_folder"]           = mSettings.working_folder;
     project["command_line_arguments"]   = mSettings.command_line_arguments;
+    project["use_gamehost_process"]     = mSettings.use_gamehost_process;
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1106,6 +1107,7 @@ bool Workspace::LoadWorkspace(const QString& filename)
     mSettings.updates_per_second     = project["updates_per_second"].toInt();
     mSettings.working_folder         = project["working_folder"].toString();
     mSettings.command_line_arguments = project["command_line_arguments"].toString();
+    mSettings.use_gamehost_process   = project["use_gamehost_process"].toBool();
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -1205,6 +1207,31 @@ QStringList Workspace::ListUserDefinedDrawables() const
     return list;
 }
 
+void Workspace::SaveResource(const Resource& resource)
+{
+    const auto& id = resource.GetId();
+    for (size_t i=0; i<mResources.size(); ++i)
+    {
+        auto& res = mResources[i];
+        if (res->GetId() != id)
+            continue;
+        res->UpdateFrom(resource);
+        emit ResourceUpdated(mResources[i].get());
+        emit dataChanged(index(i, 0), index(i, 2));
+        return;
+    }
+    // if we're here no such resource exists yet.
+    // Create a new resource and add it to the list of resources.
+    beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
+    // insert at the end of the visible range which is from [0, mVisibleCount)
+    mResources.insert(mResources.begin() + mVisibleCount, resource.Clone());
+    endInsertRows();
+
+    auto& back = mResources[mVisibleCount];
+    emit NewResourceAvailable(back.get());
+    mVisibleCount++;
+}
+
 QString Workspace::MapDrawableName(const QString &id) const
 {
     for (const auto& resource : mResources)
@@ -1225,33 +1252,6 @@ QString Workspace::MapMaterialName(const QString &id) const
     }
     ERROR("No such material class '%1'", id);
     return "Checkerboard";
-}
-
-bool Workspace::HasMaterial(const QString& name) const
-{
-    return HasResource(name, Resource::Type::Material);
-}
-bool Workspace::HasDrawable(const QString& name) const
-{
-    // only have particle systems now as an alternative drawable
-    // in addition to primitives.
-    return HasResource(name, Resource::Type::ParticleSystem) ||
-           HasResource(name, Resource::Type::CustomShape);
-}
-
-bool Workspace::HasParticleSystem(const QString& name) const
-{
-    return HasResource(name, Resource::Type::ParticleSystem);
-}
-
-bool Workspace::HasResource(const QString& name, Resource::Type type) const
-{
-    for (const auto& res : mResources)
-    {
-        if (res->GetType() == type && res->GetName() == name)
-            return true;
-    }
-    return false;
 }
 
 bool Workspace::IsValidMaterial(const QString& klass) const
@@ -1278,7 +1278,33 @@ bool Workspace::IsValidDrawable(const QString& klass) const
     return false;
 }
 
-Resource& Workspace::GetResource(const QString& name, Resource::Type type)
+Resource& Workspace::GetResource(size_t index)
+{
+    ASSERT(index < mResources.size());
+    return *mResources[index];
+}
+
+Resource* Workspace::FindResourceById(const QString &id)
+{
+    for (auto& res : mResources)
+    {
+        if (res->GetId() == id)
+            return res.get();
+    }
+    return nullptr;
+}
+
+Resource* Workspace::FindResourceByName(const QString &name, Resource::Type type)
+{
+    for (auto& res : mResources)
+    {
+        if (res->GetName() == name && res->GetType() == type)
+            return res.get();
+    }
+    return nullptr;
+}
+
+Resource& Workspace::GetResourceByName(const QString& name, Resource::Type type)
 {
     for (auto& res : mResources)
     {
@@ -1288,7 +1314,7 @@ Resource& Workspace::GetResource(const QString& name, Resource::Type type)
     BUG("No such resource");
 }
 
-const Resource& Workspace::GetResource(const QString& name, Resource::Type type) const
+const Resource& Workspace::GetResourceByName(const QString& name, Resource::Type type) const
 {
     for (const auto& res : mResources)
     {
@@ -1296,6 +1322,31 @@ const Resource& Workspace::GetResource(const QString& name, Resource::Type type)
             return *res;
     }
     BUG("No such resource");
+}
+
+const Resource* Workspace::FindResourceById(const QString &id) const
+{
+    for (const auto& res : mResources)
+    {
+        if (res->GetId() == id)
+            return res.get();
+    }
+    return nullptr;
+}
+const Resource* Workspace::FindResourceByName(const QString &name, Resource::Type type) const
+{
+    for (const auto& res : mResources)
+    {
+        if (res->GetName() == name && res->GetType() == type)
+            return res.get();
+    }
+    return nullptr;
+}
+
+const Resource& Workspace::GetResource(size_t index) const
+{
+    ASSERT(index < mResources.size());
+    return *mResources[index];
 }
 
 void Workspace::DeleteResources(QModelIndexList& list)
@@ -1470,6 +1521,16 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         //INFO("%1 files copied.", packer.GetNumFilesCopied());
     }
     return packer.GetNumErrors() == 0;
+}
+
+void Workspace::UpdateResource(const Resource* resource)
+{
+    SaveResource(*resource);
+}
+
+void Workspace::UpdateUserProperty(const QString& name, const QVariant& data)
+{
+    mUserProperties[name] = data;
 }
 
 } // namespace

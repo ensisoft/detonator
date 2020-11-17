@@ -1284,7 +1284,7 @@ void AnimationWidget::placeNewParticleSystem()
 
     // check the resource in order to get the default material name set in the
     // particle editor.
-    const auto& resource = mState.workspace->GetResource(drawable, app::Resource::Type::ParticleSystem);
+    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::ParticleSystem);
     const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
     mCurrentTool.reset(new PlaceTool(mState, material, drawable));
 }
@@ -1296,7 +1296,7 @@ void AnimationWidget::placeNewCustomShape()
     const auto drawable = action->text();
     // check the resource in order to get the default material name set in the
     // particle editor.
-    const auto& resource = mState.workspace->GetResource(drawable, app::Resource::Type::CustomShape);
+    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::CustomShape);
     const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
     mCurrentTool.reset(new PlaceTool(mState, material, drawable));
 }

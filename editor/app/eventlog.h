@@ -44,9 +44,11 @@
 #  include <QString>
 #include "warnpop.h"
 
+#include <functional>
+
 #include "base/logging.h"
-#include "format.h"
-#include "event.h"
+#include "editor/app/format.h"
+#include "editor/app/event.h"
 
 // Careful with the macros here. base/logging.h has macros by the same name.
 // we're going to hijack the names here and change the definition to better
@@ -61,8 +63,6 @@ namespace app
     // Application event log. events that occur on the background
     // are logged in here for later inspection.
     class EventLog : public QAbstractListModel
-                   , public base::Logger
-
     {
         Q_OBJECT
 
@@ -71,12 +71,6 @@ namespace app
 
         EventLog();
        ~EventLog();
-
-        // base::Logger implementation
-        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override;
-        virtual void Write(base::LogEvent type, const char* msg) override;
-        virtual void Flush() override
-        { /* no op */ }
 
         // record a new event in the log
         void write(Event::Type type, const QString& msg, const QString& tag);
@@ -93,8 +87,9 @@ namespace app
         std::size_t numEvents() const
         { return mEvents.size(); }
 
-        void SetLogTag(const QString& tag)
-        { mLogTag = tag; }
+        using NewEventCallback = std::function<void(const app::Event&)>;
+        NewEventCallback OnNewEvent;
+
     signals:
         void newEvent(const app::Event& event);
 

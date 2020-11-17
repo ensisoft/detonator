@@ -81,6 +81,12 @@ namespace app
         virtual QString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
+        // Update the content's of this resource based on
+        // the other resource where the other resource *must*
+        // have the same runtime type.
+        // The updated properties include the underlying content
+        // the  and the properties.
+        virtual void UpdateFrom(const Resource& other) = 0;
         // Set the resource id.
         virtual void SetId(const QString& id) = 0;
         // Mark the resource primitive or not.
@@ -269,6 +275,14 @@ namespace app
         { return TypeValue; }
         virtual void SetId(const QString& id) override
         { mId = id; }
+        virtual void UpdateFrom(const Resource& other) override
+        {
+            const auto* ptr = dynamic_cast<const GameResource*>(&other);
+            ASSERT(ptr != nullptr);
+            mName  = ptr->mName;
+            mProps = ptr->mProps;
+            *mContent = *ptr->mContent;
+        }
         virtual void SetIsPrimitive(bool primitive) override
         { mPrimitive = primitive; }
         virtual void Serialize(nlohmann::json& json) const override
@@ -337,13 +351,6 @@ namespace app
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
         { return mContent; }
 
-        void UpdateName(const QString& name)
-        { mName = name; }
-        void UpdateContent(const Content& data)
-        { *mContent = data; }
-        void UpdateProperties(const QVariantMap& props)
-        { mProps = props;}
-
         Content* GetContent()
         { return mContent.get(); }
         const Content* GetContent() const
@@ -397,6 +404,6 @@ namespace app
     using AnimationResource      = GameResource<game::AnimationClass>;
 
     template<typename DerivedType>
-       using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
+    using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
 
 } // namespace

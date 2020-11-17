@@ -36,9 +36,7 @@
 
 #include <memory>
 
-#include "base/logging.h"
 #include "gamelib/main/interface.h"
-#include "editor/app/eventlog.h"
 
 namespace app {
     class Workspace;
@@ -73,15 +71,24 @@ namespace gui
         // Do periodic low frequency tick.
         void Tick();
 
-        // Load the gamelibrary and launch the game.
+        // Load the game library and launch the game.
         // Returns true if successful or false if some problem happened.
         bool LoadGame();
 
         // Shut down the game and unload the library.
         void Shutdown();
 
+        // Load the window state (window size/position
+        // and visibility of status bar and dock widget) from the
+        // current Workspace.
+        void LoadState();
+
+        // Save the current window state (window size/position
+        // and visibility of status bar and dock widget) in the
+        // current Workspace.
+        void SaveState();
     private slots:
-        void DoInit();
+        void DoAppInit();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
 
@@ -95,6 +102,7 @@ namespace gui
     private:
         class WindowContext;
         class SessionAssets;
+        class SessionLogger;
     private:
         Ui::PlayWindow mUI;
     private:
@@ -120,9 +128,6 @@ namespace gui
         QWindow* mSurface = nullptr;
         // The widget container for the QWindow (mSurface)
         QWidget* mContainer = nullptr;
-        // Logger that we give to the application.
-        // Note the thread safety because of for example audio threading.
-        base::LockedLogger<base::BufferLogger<app::EventLog>> mLogger;
         // Flag to indicate when the window has been closed or not.
         bool mClosed = false;
         // Flag to indicate if the app is currently "paused".
@@ -130,6 +135,9 @@ namespace gui
         bool mPaused = false;
         // False until DoInit has run.
         bool mInitDone = false;
+        // Logger that we give to the application.
+        // Note the thread safety because of for example audio threading.
+        std::unique_ptr<SessionLogger> mLogger;
         // The game/app object we've created and loaded from the library.
         std::unique_ptr<game::App> mApp;
         // rendering context implementation for the QWindow surface.

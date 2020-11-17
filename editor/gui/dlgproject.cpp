@@ -61,6 +61,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace::ProjectSettings& setting
     SetUIValue(mUI.updatesPerSecond, mSettings.updates_per_second);
     SetUIValue(mUI.edtWorkingFolder, mSettings.working_folder);
     SetUIValue(mUI.edtArguments, mSettings.command_line_arguments);
+    SetUIValue(mUI.chkGameProcess, mSettings.use_gamehost_process);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -80,6 +81,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
     GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
     GetUIValue(mUI.edtArguments, &mSettings.command_line_arguments);
+    GetUIValue(mUI.chkGameProcess, &mSettings.use_gamehost_process);
     accept();
 }
 void DlgProject::on_btnCancel_clicked()

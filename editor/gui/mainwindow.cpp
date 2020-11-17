@@ -462,8 +462,7 @@ bool MainWindow::saveWorkspace()
     }
     if (mPlayWindow)
     {
-        mWorkspace->SetUserProperty("play_window_xpos", mPlayWindow->x());
-        mWorkspace->SetUserProperty("play_window_ypos", mPlayWindow->y());
+        mPlayWindow->SaveState();
     }
 
     if (!mWorkspace->Save())
@@ -512,8 +511,20 @@ void MainWindow::closeWorkspace()
 
     mCurrentWidget = nullptr;
 
+    if (mGameProcess.IsRunning())
+    {
+        mGameProcess.Kill();
+    }
+
+    if (mIPCHost)
+    {
+        mIPCHost->Close();
+        mIPCHost.reset();
+    }
+
     if (mPlayWindow)
     {
+        mPlayWindow->Shutdown();
         mPlayWindow->close();
         mPlayWindow.reset();
     }
@@ -1101,37 +1112,112 @@ void MainWindow::on_actionProjectPlay_triggered()
 {
     if (!mWorkspace)
         return;
+    else if (mPlayWindow)
+        return;
+    else if (mGameProcess.IsRunning())
+        return;
 
-    if (!mPlayWindow)
+    const auto& settings = mWorkspace->GetProjectSettings();
+    if (settings.application_library.isEmpty())
     {
-        const auto& settings = mWorkspace->GetProjectSettings();
-        if (settings.application_library.isEmpty())
-        {
-            QMessageBox msg(this);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Question);
-            msg.setText("You haven't set the application library for the project.\n"
-                        "The game should be built into a library (a .dll or .so file)\n"
-                        "which is then loaded by me.\n"
-                        "You can change the application library in the workspace settings.");
-            msg.exec();
-            return;
-        }
-        auto window = std::make_unique<PlayWindow>(*mWorkspace);
-        const auto xpos = mWorkspace->GetUserProperty("play_window_xpos", window->x());
-        const auto ypos = mWorkspace->GetUserProperty("play_window_ypos", window->y());
-        window->move(xpos, ypos);
-        window->show();
-        if (!window->LoadGame())
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't set the application library for the project.\n"
+                    "The game should be built into a library (a .dll or .so file)\n"
+                    "which is then loaded by me.\n"
+                    "You can change the application library in the workspace settings.");
+        msg.exec();
+        return;
+    }
+
+    if (settings.use_gamehost_process)
+    {
+        // todo: maybe save to some temporary location ?
+        // Save workspace for the loading the initial content
+        // in the game host
+        if (!mWorkspace->Save())
             return;
 
-        mPlayWindow = std::move(window);
-        emit newAcceleratedWindowOpen();
-        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
-        DEBUG("Playwindow position: %1x%2", xpos, ypos);
+        ASSERT(!mIPCHost);
+        app::IPCHost::Cleanup("gamestudio-local-socket");
+        auto ipc = std::make_unique<app::IPCHost>();
+        if (!ipc->Open("gamestudio-local-socket"))
+            return;
+
+        connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, ipc.get(),
+                &app::IPCHost::ResourceUpdated);
+        connect(ipc.get(), &app::IPCHost::UserPropertyUpdated, mWorkspace.get(),
+                &app::Workspace::UpdateUserProperty);
+        DEBUG("Local socket is open.");
+
+        QStringList game_host_args;
+        game_host_args << "--no-term-colors";
+        game_host_args << "--workspace";
+        game_host_args << mWorkspace->GetDir();
+        for (const auto& arg : QCoreApplication::arguments())
+        {
+            if (arg == "--no-dark-style")
+                game_host_args << "--no-dark-style";
+        }
+        QString game_host_name = "EditorGameHost";
+#if defined(WINDOWS_OS)
+        game_host_name.append(".exe");
+#endif
+        const auto& game_host_file = app::JoinPath(QCoreApplication::applicationDirPath(), game_host_name);
+        const auto& game_host_log  = app::JoinPath(QCoreApplication::applicationDirPath(), "game_host.log");
+        const auto& game_host_cwd  = QDir::currentPath();
+        mGameProcess.EnableTimeout(false);
+        mGameProcess.onFinished = [this](){
+            DEBUG("Game process finished.");
+            if (mGameProcess.GetError() != app::Process::Error::None)
+                ERROR("Game process error: '%1'", mGameProcess.GetError());
+
+            mIPCHost->Close();
+            mIPCHost.reset();
+        };
+        mGameProcess.onStdOut = [](const QString& msg) {
+            if (msg.isEmpty())
+                return;
+            // read an encoded log message from the game host process.
+            // todo: for the debug message we might want to figure out the
+            // source file and line from the message itself by parsing the message.
+            // for the time being this is skipped.
+            if (msg[0] == "E")
+                app::EventLog::get().write(app::Event::Type::Error, msg, "game");
+            else if (msg[0] == "W")
+                app::EventLog::get().write(app::Event::Type::Warning, msg, "game");
+            else if (msg[0] == "I")
+                app::EventLog::get().write(app::Event::Type::Info, msg, "game");
+            else if (msg[0] == "D")
+                base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(msg));
+        };
+        mGameProcess.onStdErr = [](const QString& msg) {
+            app::EventLog::get().write(app::Event::Type::Error, msg, "game");
+        };
+        mGameProcess.Start(game_host_file, game_host_args, game_host_log, game_host_cwd);
+        mIPCHost = std::move(ipc);
+
     }
-    // bring to the top of the window stack.
-    mPlayWindow->raise();
+    else
+    {
+        if (!mPlayWindow)
+        {
+            auto window = std::make_unique<PlayWindow>(*mWorkspace);
+            window->LoadState();
+            window->show();
+            if (!window->LoadGame())
+                return;
+            mPlayWindow = std::move(window);
+            emit newAcceleratedWindowOpen();
+            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+        }
+        else
+        {
+            // bring to the top of the window stack.
+            mPlayWindow->raise();
+        }
+    }
 }
 
 void MainWindow::timerRefreshUI()
@@ -1140,8 +1226,9 @@ void MainWindow::timerRefreshUI()
     {
         if (mPlayWindow->IsClosed())
         {
-            mWorkspace->SetUserProperty("play_window_xpos", mPlayWindow->x());
-            mWorkspace->SetUserProperty("play_window_ypos", mPlayWindow->y());
+            mPlayWindow->SaveState();
+            mPlayWindow->Shutdown();
+            mPlayWindow->close();
             mPlayWindow.reset();
         }
     }

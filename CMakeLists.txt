@@ -137,6 +137,7 @@ endif()
 
 find_package(Qt5Widgets)
 find_package(Qt5OpenGL)
+find_package(Qt5Network)
 if (NOT Qt5Widgets_FOUND)
     message("
 Qt5 was not found. I will not be able to build the game.
@@ -182,6 +183,9 @@ add_executable(Editor
     editor/app/workspace.h
     editor/app/workspace.cpp
     editor/app/packing.cpp
+    editor/app/process.h
+    editor/app/process.cpp
+    editor/app/ipc.cpp
     editor/gui/animationwidget.h
     editor/gui/animationwidget.ui
     editor/gui/animationwidget.cpp
@@ -292,7 +296,7 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui"
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
-target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate)
+target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(Editor freetype_custom_build)
 target_link_libraries(Editor harfbuzz_custom_build)
 if (UNIX)
@@ -302,6 +306,50 @@ install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
+# game host application which provides a host process to load the game
+# libraries for playback.
+add_executable(EditorGameHost
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+    graphics/drawable.cpp
+    graphics/material.cpp
+    graphics/image.cpp
+    graphics/text.cpp
+    graphics/resource.cpp
+    gamelib/animation.cpp
+    editor/app/format.cpp
+    editor/app/utility.cpp
+    editor/app/eventlog.h
+    editor/app/eventlog.cpp
+    editor/app/packing.cpp
+    editor/app/workspace.h
+    editor/app/workspace.cpp
+    editor/app/ipc.h
+    editor/app/ipc.cpp
+    editor/gui/host.cpp
+    editor/gui/utility.h
+    editor/gui/playwindow.h
+    editor/gui/playwindow.ui
+    editor/gui/playwindow.cpp
+    editor/resource/resource.qrc
+    editor/resource/qdarkstyle/style.qrc
+    third_party/base64/base64.cpp
+    third_party/stb/stb_image_write.c
+    third_party/stb/stb_image.c
+)
+target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+# support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
+target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
+if (UNIX)
+    target_link_libraries(EditorGameHost ncurses)
+endif()
+target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(EditorGameHost freetype_custom_build)
+target_link_libraries(EditorGameHost harfbuzz_custom_build)
+install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # audio test application. Simple console application that plays
 # OGG and WAV files in several different formats.
@@ -459,8 +507,30 @@ add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.c
                                   base/assert.cpp
                                   third_party/stb/stb_image.c
                                   third_party/stb/stb_image_write.c)
+add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
+        base/assert.cpp
+        base/logging.cpp
+        graphics/material.cpp
+        graphics/resource.cpp
+        graphics/text.cpp
+        graphics/drawable.cpp
+        graphics/image.cpp
+        gamelib/animation.cpp
+        editor/app/eventlog.cpp
+        editor/app/format.cpp
+        editor/app/utility.cpp
+        editor/app/workspace.cpp
+        editor/app/ipc.cpp
+        editor/app/packing.cpp
+        third_party/base64/base64.cpp
+        third_party/stb/stb_image.c)
 add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
+add_test(NAME unit_test_ipc     COMMAND unit_test_icp)
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(unit_test_ipc freetype_custom_build)
+target_link_libraries(unit_test_ipc harfbuzz_custom_build)
 
 # gamelib tests
 add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)

@@ -234,27 +234,17 @@
           <string>Playing in editor</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="2">
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="edtArguments"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Working folder</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>Arguments</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="text">
+             <string>Browse ...</string>
             </property>
            </widget>
           </item>
@@ -265,7 +255,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -277,6 +267,23 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="edtArguments"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Working folder</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="chkGameProcess">
+            <property name="text">
+             <string>Launch in separate process</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -336,6 +343,7 @@
   <tabstop>edtWorkingFolder</tabstop>
   <tabstop>pushButton_2</tabstop>
   <tabstop>edtArguments</tabstop>
+  <tabstop>chkGameProcess</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

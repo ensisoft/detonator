@@ -35,87 +35,82 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Time (s)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="time">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Frames</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="frames">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>FPS</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="fps">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Application log</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QListView" name="log">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QFrame" name="statusBarFrame">
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
          </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>211</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Time (s)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="time">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Frames</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="frames">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>FPS</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="fps">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -144,8 +139,16 @@
     </property>
     <addaction name="actionPause"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionViewStatusbar"/>
+    <addaction name="actionViewEventlog"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuApplication"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -162,6 +165,43 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPause"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Application log</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QListView" name="log">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionPause">
    <property name="checkable">
@@ -190,9 +230,64 @@
     <string>Close</string>
    </property>
   </action>
+  <action name="actionViewStatusbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status bar</string>
+   </property>
+  </action>
+  <action name="actionViewEventlog">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Eventlog</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionViewEventlog</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dockWidget</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>529</x>
+     <y>595</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewStatusbar</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>statusbar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>529</x>
+     <y>742</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

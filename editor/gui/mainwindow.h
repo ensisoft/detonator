@@ -29,6 +29,7 @@
 #  include <QTimer>
 #  include <QElapsedTimer>
 #  include <QStringList>
+#  include <QProcess>
 #  include "ui_mainwindow.h"
 #include "warnpop.h"
 
@@ -36,6 +37,8 @@
 #include <memory>
 
 #include "editor/app/workspace.h"
+#include "editor/app/process.h"
+#include "editor/app/ipc.h"
 #include "editor/gui/appsettings.h"
 
 namespace gui
@@ -180,6 +183,13 @@ namespace gui
         double mTimeAccum = 0.0;
         // List of recently opened workspaces.
         QStringList mRecentWorkspaces;
+        // the child process for running the game
+        // in a separate process (GameHost).
+        app::Process mGameProcess;
+        // Local host socket for communicating workspace
+        // events to the child (client) game process over
+        // ICP messaging.
+        std::unique_ptr<app::IPCHost> mIPCHost;
     };
 
 } // namespace

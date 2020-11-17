@@ -86,6 +86,11 @@ void copyright()
 class ForwardingLogger : public base::Logger
 {
 public:
+    ForwardingLogger() : mLogger(std::cout)
+    {
+        mLogger.EnableTerminalColors(true);
+    }
+
     virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
     {
         // forward Error and warnings to the application log too.
@@ -107,7 +112,7 @@ public:
         mLogger.Flush();
     }
 private:
-    base::CursesLogger mLogger;
+    base::OStreamLogger mLogger;
 };
 
 int main(int argc, char* argv[])

@@ -32,6 +32,8 @@
 #include <map>
 #include <chrono>
 #include <unordered_map>
+#include <mutex>
+#include <vector>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -42,6 +44,7 @@
 #include "editor/gui/playwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/settings.h"
 #include "gamelib/main/interface.h"
 #include "gamelib/animation.h"
 #include "wdk/system.h"
@@ -77,13 +80,17 @@ class TemporaryCurrentDirChange
 {
 public:
     TemporaryCurrentDirChange(const QString&  current, const QString& prev)
-        : mCurrent(current)
-        , mPrevious(prev)
+        : mCurrent(QDir::cleanPath(current))
+        , mPrevious(QDir::cleanPath(prev))
     {
+        if (mCurrent == mPrevious)
+            return;
         QDir::setCurrent(current);
     }
    ~TemporaryCurrentDirChange()
     {
+        if (mCurrent == mPrevious)
+            return;
         QDir::setCurrent(mPrevious);
     }
     TemporaryCurrentDirChange(const TemporaryCurrentDirChange&) = delete;
@@ -277,19 +284,83 @@ private:
     mutable std::unordered_map<std::string, std::string> mFileMaps;
 };
 
+// implement base::logger and forward the log events
+// to an app::EventLog object and to base logger
+class PlayWindow::SessionLogger : public base::Logger
+{
+public:
+    // base::Logger implementation
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+    {
+        // this one is not implemented since we're implementing
+        // only the alternative with pre-formatted messages.
+    }
+    virtual void Write(base::LogEvent type, const char* msg) override
+    {
+        LogEvent event;
+        if (type == base::LogEvent::Debug)
+            event.type = app::Event::Type::Debug;
+        else if (type == base::LogEvent::Info)
+            event.type = app::Event::Type::Info;
+        else if (type == base::LogEvent::Warning)
+            event.type = app::Event::Type::Warning;
+        else if (type == base::LogEvent::Error)
+            event.type = app::Event::Type::Error;
+
+        event.msg = QString::fromUtf8(msg);
+
+        // this write could be called by some other thread in the
+        // application such as the audio thread.
+        // so thread safely enqueue the event into a buffer
+        // and then it's dispatched from there late (by this
+        // app's main thread to the app::EventLog)
+        std::unique_lock<std::mutex> lock(mMutex);
+        mBuffer.push_back(event);
+    }
+    virtual void Flush() override
+    { /* no op */ }
+
+    void Dispatch()
+    {
+        // Dispatch to app::EventLog.
+        std::unique_lock<std::mutex> lock(mMutex);
+        for (const auto& event : mBuffer)
+        {
+            mLogger.write(event.type, event.msg, mLogTag);
+        }
+        mBuffer.clear();
+    }
+
+    void SetLogTag(const QString& tag)
+    { mLogTag = tag; }
+
+    QAbstractListModel* GetModel()
+    { return &mLogger; }
+private:
+    struct LogEvent {
+        QString msg;
+        app::Event::Type type;
+    };
+
+    app::EventLog mLogger;
+    std::mutex mMutex;
+    std::vector<LogEvent> mBuffer;
+    QString mLogTag;
+};
+
 PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
 {
     DEBUG("Create PlayWindow");
-
-    auto& logger = mLogger.GetLoggerUnsafe().GetLogger();
+    mLogger = std::make_unique<SessionLogger>();
 
     mUI.setupUi(this);
     mUI.actionClose->setShortcut(QKeySequence::Close);
-    mUI.log->setModel(&logger);
+    mUI.log->setModel(mLogger->GetModel());
+    mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
 
     const auto& settings = mWorkspace.GetProjectSettings();
-    logger.SetLogTag(settings.application_name);
     setWindowTitle(settings.application_name);
+    mLogger->SetLogTag(settings.application_name);
 
     mPreviousWorkingDir = QDir::currentPath();
     mCurrentWorkingDir  = settings.working_folder;
@@ -448,8 +519,7 @@ void PlayWindow::Render()
 void PlayWindow::Tick()
 {
     // flush the buffer logger to the main log.
-    auto logger = mLogger.GetLoggerSafe();
-    logger->Dispatch();
+    mLogger->Dispatch();
 }
 
 bool PlayWindow::LoadGame()
@@ -486,7 +556,7 @@ bool PlayWindow::LoadGame()
     if (!mGameLibMakeApp || !mGameLibSetGlobalLogger || !mGameLibSetResourceLoader)
         return false;
 
-    mGameLibSetGlobalLogger(&mLogger);
+    mGameLibSetGlobalLogger(mLogger.get());
     mGameLibSetResourceLoader(mAssets.get());
 
     std::unique_ptr<game::App> app;
@@ -499,8 +569,7 @@ bool PlayWindow::LoadGame()
     mApp = std::move(app);
 
     // do one time delayed init on timer.
-    QTimer::singleShot(10, this, &PlayWindow::DoInit);
-
+    QTimer::singleShot(10, this, &PlayWindow::DoAppInit);
     return true;
 }
 
@@ -535,19 +604,68 @@ void PlayWindow::Shutdown()
     mGameLibSetResourceLoader = nullptr;
 }
 
+void PlayWindow::LoadState()
+{
+    // if this is the first the project is launched resize
+    // the rendering surface to the initial size specified
+    // in the project settings. otherwise use the size
+    // from the previous run.
+    // note that the application is later able to request
+    // a different size however. (See the requests processing)
+    const auto& project = mWorkspace.GetProjectSettings();
+    const auto& window_geometry = mWorkspace.GetUserProperty("play_window_geometry", QByteArray());
+    const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty("play_window_toolbar_and_dock_state", QByteArray());
 
-void PlayWindow::DoInit()
+    if (!window_geometry.isEmpty())
+        restoreGeometry(window_geometry);
+
+    if (!toolbar_and_dock_state.isEmpty())
+        restoreState(toolbar_and_dock_state);
+
+    // try to resize. See the comments above.
+    if (window_geometry.isEmpty())
+    {
+        ResizeSurface(project.window_width, project.window_height);
+    }
+
+    // try to disable the resizing of the rendering surface.
+    // probably won't work as expected.
+    if (!project.window_can_resize)
+    {
+        const auto w = project.window_width;
+        const auto h = project.window_height;
+        mSurface->setMaximumSize(QSize(w, h));
+        mSurface->setMinimumSize(QSize(w, h));
+        mSurface->setBaseSize(QSize(w, h));
+    }
+
+    const bool show_status_bar = mWorkspace.GetUserProperty("play_window_show_statusbar",
+                                                            mUI.statusbar->isVisible());
+    const bool show_eventlog = mWorkspace.GetUserProperty("play_window_show_eventlog",
+                                                          mUI.dockWidget->isVisible());
+    QSignalBlocker foo(mUI.actionViewEventlog);
+    QSignalBlocker bar(mUI.actionViewStatusbar);
+    mUI.actionViewEventlog->setChecked(show_eventlog);
+    mUI.actionViewStatusbar->setChecked(show_status_bar);
+    mUI.statusbar->setVisible(show_status_bar);
+    mUI.dockWidget->setVisible(show_eventlog);
+}
+
+void PlayWindow::SaveState()
+{
+    mWorkspace.SetUserProperty("play_window_show_statusbar", mUI.statusbar->isVisible());
+    mWorkspace.SetUserProperty("play_window_show_eventlog", mUI.dockWidget->isVisible());
+    mWorkspace.SetUserProperty("play_window_geometry", saveGeometry());
+    mWorkspace.SetUserProperty("play_window_toolbar_and_dock_state", saveState());
+}
+
+void PlayWindow::DoAppInit()
 {
     if (!mApp)
         return;
 
     // assumes that the current working directory has not been changed!
     const auto& host_app_path = QCoreApplication::applicationFilePath();
-
-    // try to resize the rendering surface to the initial dimensions given
-    // in the project settings.
-    const auto& settings = mWorkspace.GetProjectSettings();
-    ResizeSurface(settings.window_width, settings.window_height);
 
     TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
     try
@@ -601,20 +719,13 @@ void PlayWindow::on_actionPause_triggered()
 
 void PlayWindow::on_actionClose_triggered()
 {
-    // trigger close event
-    this->close();
+    mClosed = true;
 }
 
 void PlayWindow::closeEvent(QCloseEvent* event)
 {
     DEBUG("Play window close event");
-
-    event->accept();
-
-    // Make sure to cleanup while the window and the rendering
-    // surface still exist!
-    Shutdown();
-
+    event->ignore();
     // we could emit an event here to indicate that the window
     // is getting closed but that's a sure-fire way of getting
     // unwanted recursion that will fuck shit up.  (i.e this window

@@ -22,7 +22,8 @@
 
 #include "config.h"
 
-#include "format.h"
+#include "base/assert.h"
+#include "editor/app/format.h"
 
 namespace app
 {
@@ -32,7 +33,7 @@ QString toString(QFile::FileError error)
     using e = QFile::FileError;
     switch (error)
     {
-        case e::NoError:          return "No error occrred.";
+        case e::NoError:          return "No error occurred.";
         case e::ReadError:        return "An error occurred when reading from the file.";
         case e::WriteError:       return "An error occurred when writing to the file.";
         case e::FatalError:       return "A fatal error occurred.";
@@ -48,7 +49,58 @@ QString toString(QFile::FileError error)
         case e::PermissionsError: return "The file could not be accessed (no permission).";
         case e::CopyError:        return "The file could not be copied.";
     }
-    return "???";
+    BUG("???");
+    return "";
+}
+
+QString toString(QLocalSocket::LocalSocketError error)
+{
+    using e = QLocalSocket::LocalSocketError;
+    switch (error)
+    {
+        case e::ConnectionError:                 return "Connection error";
+        case e::ConnectionRefusedError:          return "Connection refused error.";
+        case e::DatagramTooLargeError:           return "Datagram too large error.";
+        case e::OperationError:                  return "Operation error.";
+        case e::PeerClosedError:                 return "Peer closed error.";
+        case e::ServerNotFoundError:             return "Server not found error.";
+        case e::SocketAccessError:               return "Socket access error.";
+        case e::SocketResourceError:             return "Socket resource error.";
+        case e::SocketTimeoutError:              return "Socket timeout error.";
+        case e::UnknownSocketError:              return "Unknown socket error.";
+        case e::UnsupportedSocketOperationError: return "Unsupported socket operation error.";
+    }
+    BUG("???");
+    return "";
+}
+
+QString toString(QProcess::ProcessState state)
+{
+    using s = QProcess::ProcessState;
+    switch (state)
+    {
+        case s::NotRunning: return "Not running";
+        case s::Starting:   return "Starting";
+        case s::Running:    return "Running";
+    }
+    BUG("???");
+    return "";
+}
+
+QString toString(QProcess::ProcessError error)
+{
+    using e = QProcess::ProcessError;
+    switch (error)
+    {
+        case e::FailedToStart: return "Failed to start";
+        case e::Crashed:       return "Crashed";
+        case e::ReadError:     return "Read error";
+        case e::UnknownError:  return "Unknown error";
+        case e::WriteError:    return "Write error";
+        case e::Timedout:      return "Timed out";
+    }
+    BUG("???");
+    return "";
 }
 
 } // app

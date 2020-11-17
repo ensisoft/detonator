@@ -3,8 +3,10 @@
         "checked_for_packing": true
     },
     "animation_Big Explosion": {
+        "checked_for_packing": true
     },
     "animation_Cricket": {
+        "checked_for_packing": true
     },
     "animation_Locust": {
         "checked_for_packing": true
@@ -27,10 +29,12 @@
         "use_shader_file": false
     },
     "material_Big Explosion": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
     "material_Box": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -40,6 +44,7 @@
         "use_shader_file": false
     },
     "material_Cricket Smoke": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -163,6 +168,7 @@
         "multisample_sample_count": 4,
         "ticks_per_second": 1,
         "updates_per_second": 60,
+        "use_gamehost_process": true,
         "window_can_resize": true,
         "window_has_border": true,
         "window_height": 768,

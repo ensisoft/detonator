@@ -120,6 +120,11 @@ namespace app
         // directory.
         bool Save();
 
+        // Save a new resource in the workspace. If the resource by the same type
+        // and name exists it's overwritten, otherwise a new resource is added to
+        // the workspace.
+        void SaveResource(const Resource& resource);
+
         // Get human readable name for the workspace.
         QString GetName() const;
         // Get current workspace directory
@@ -149,52 +154,6 @@ namespace app
         QString MapDrawableName(const QString& id) const;
         QString MapDrawableName(const std::string& id) const
         { return MapDrawableName(FromUtf8(id)); }
-        // Save a new resource in the workspace. If the resource by the same type
-        // and name exists it's overwritten, otherwise a new resource is added to
-        // the workspace.
-        template<typename T>
-        void SaveResource(const GameResource<T>& resource)
-        {
-            const auto& id = resource.GetId();
-            const auto  type = resource.GetType();
-            for (size_t i=0; i<mResources.size(); ++i)
-            {
-                auto& res = mResources[i];
-                if (res->GetId() != id || res->GetType() != type)
-                    continue;
-
-                auto* ptr = static_cast<GameResource<T>*>(res.get());
-                ptr->UpdateName(resource.GetName());
-                ptr->UpdateContent(*resource.GetContent());
-                ptr->UpdateProperties(resource.GetProperies());
-                emit ResourceUpdated(mResources[i].get());
-                emit dataChanged(index(i, 0), index(i, 2));
-                return;
-            }
-            // if we're here no such resource exists yet.
-            // Create a new resource and add it to the list of resources.
-            beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
-            // insert at the end of the visible range which is from [0, mVisibleCount)
-            mResources.insert(mResources.begin() + mVisibleCount,
-                              std::make_unique<GameResource<T>>(resource));
-            endInsertRows();
-
-            auto& back = mResources[mVisibleCount];
-            emit NewResourceAvailable(back.get());
-            mVisibleCount++;
-        }
-
-        // Returns whether a material by this name already exists or not.
-        // Only checks for the materials that the user has defined and
-        // added to the workspace. Primitives are not included. For
-        // validation use IsValidMaterial.
-        bool HasMaterial(const QString& name) const;
-        // Returns whether a drawable by this name already exists or not.
-        // Only checks for the user defined drawables. Primitives are not included.
-        // For validation use IsValidDrawable.
-        bool HasDrawable(const QString& name) const;
-        // Returns whether a particle system by this name already exists or not.
-        bool HasParticleSystem(const QString& name) const;
 
         // Checks whether the material class id is a valid material class.
         // Includes primitives and user defined materials.
@@ -207,10 +166,6 @@ namespace app
         bool IsValidDrawable(const std::string& klass) const
         { return IsValidDrawable(FromUtf8(klass)); }
 
-        // Returns whether some particular resource exists or not.
-        // Only checks for a user defined resource not for primitives.
-        bool HasResource(const QString& name, Resource::Type type) const;
-
         // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)
         QAbstractTableModel* GetResourceModel()
@@ -221,26 +176,23 @@ namespace app
         { return mResources.size(); }
 
         // Get resource at a specific index in the list of all resources.
-        Resource& GetResource(size_t i)
-        {
-            ASSERT(i < mResources.size());
-            return *mResources[i];
-        }
-
+        Resource& GetResource(size_t i);
+        // Get a resource identified by name and type.
+        // The resource must exist.
+        Resource& GetResourceByName(const QString& name, Resource::Type type);
+        // Find resource by id. Returns nullptr if it doesn't exist.
+        Resource* FindResourceById(const QString& id);
+        // Find resource by name and type. Returns nullptr if not found.
+        Resource* FindResourceByName(const QString& name, Resource::Type type);
+        // Get a resource identified by name and type.
+        // The resource must exist.
+        const Resource& GetResourceByName(const QString& name, Resource::Type type) const;
+        // Find resource by id. Returns nullptr if it doesn't exist.
+        const Resource* FindResourceById(const QString& id) const;
+        // Find resource by name and type. Returns nullptr if not found.
+        const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.
-        const Resource& GetResource(size_t i) const
-        {
-            ASSERT(i < mResources.size());
-            return *mResources[i];
-        }
-
-        // Get a resource identified by name and type.
-        // The resource must exist.
-        Resource& GetResource(const QString& name, Resource::Type type);
-        // Get a resource identified by name and type.
-        // The resource must exist.
-        const Resource& GetResource(const QString& name, Resource::Type type) const;
-
+        const Resource& GetResource(size_t i) const;
         // Delete the resources identified by the selection list.
         // The list can contain multiple items and can be discontinuous
         // and unsorted. Afterwards it will be sorted (ascending) based
@@ -303,29 +255,38 @@ namespace app
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise it's added.
         void SetUserProperty(const QString& name, const QVariant& value)
-        { mUserProperties[name] = value; }
-        // Return the value of the property identied by name.
-        // If the property doesn't exist returns default value.
-        QVariant GetUserProperty(const QString& name, const QVariant& def) const
+        {
+            mUserProperties[name] = value;
+            emit UserPropertyUpdated(name, value);
+        }
+        void SetUserProperty(const QString& name, const QByteArray& bytes)
+        {
+            // QByteArray goes into variant but the JSON serialization through
+            // QJsonObject::fromVariantMap doesn't seem to work right.
+            QString base64 = bytes.toBase64();
+            mUserProperties[name] = base64;
+            emit UserPropertyUpdated(name, base64);
+        }
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns the default value.
+        QByteArray GetUserProperty(const QString& name, const QByteArray& def) const
         {
             QVariant ret = mUserProperties[name];
             if (ret.isNull())
                 return def;
-            return ret;
+            QString base64 = ret.toString();
+            if (!base64.isEmpty())
+                return QByteArray::fromBase64(base64.toLatin1());
+            return QByteArray();
         }
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns a null variant.
-        QVariant GetUserProperty(const QString& name) const
-        { return mUserProperties[name]; }
-
         // Return the value of the property identified by name.
         // If the property doesn't exist returns the default value.
         template<typename T>
         T GetUserProperty(const QString& name, const T& def) const
         {
-            if (!HasUserProperty(name))
+            QVariant ret = mUserProperties[name];
+            if (ret.isNull())
                 return def;
-            const auto& ret = GetUserProperty(name);
             return qvariant_cast<T>(ret);
         }
         // Get the value of a property.
@@ -334,10 +295,22 @@ namespace app
         template<typename T>
         bool GetUserProperty(const QString& name, T* out) const
         {
-            if (!HasUserProperty(name))
+            QVariant ret = mUserProperties[name];
+            if (ret.isNull())
                 return false;
-            const auto& ret = GetUserProperty(name);
             *out = qvariant_cast<T>(ret);
+            return true;
+        }
+        bool GetUserProperty(const QString& name, QByteArray* out) const
+        {
+            QVariant ret = mUserProperties[name];
+            if (ret.isNull())
+                return false;
+            QString base64 = ret.toString();
+            if (base64.isEmpty())
+                return false;
+
+            *out = QByteArray::fromBase64(base64.toLatin1());
             return true;
         }
 
@@ -375,6 +348,11 @@ namespace app
             QString working_folder = "${workspace}";
             // Arguments for when playing the app in the editor.
             QString command_line_arguments;
+            // Use a separate game host process for playing the app.
+            // Using a separate process will protect the editor
+            // process from errors in the game app but it might
+            // make debugging the game app more complicated.
+            bool use_gamehost_process = true;
         };
 
         const ProjectSettings& GetProjectSettings() const
@@ -411,7 +389,18 @@ namespace app
         // Errors/warnings encountered during the process will be logged.
         bool PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
 
+    public slots:
+        // Save or update a resource in the workspace. If the resource by the same type
+        // and name exists it's overwritten, otherwise a new resource is added to
+        // the workspace.
+        void UpdateResource(const Resource* resource);
+        // Save or update a user property.
+        void UpdateUserProperty(const QString& name, const QVariant& data);
+
     signals:
+        // Emitted when user property is set.
+        void UserPropertyUpdated(const QString& name, const QVariant& data);
+
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.
         void NewResourceAvailable(const Resource* resource);

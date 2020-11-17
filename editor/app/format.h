@@ -30,6 +30,8 @@
 #  include <QDir>
 #  include <QFile>
 #  include <QPoint>
+#  include <QLocalSocket>
+#  include <QProcess>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -41,6 +43,9 @@
 namespace app
 {
     QString toString(QFile::FileError error);
+    QString toString(QLocalSocket::LocalSocketError error);
+    QString toString(QProcess::ProcessState state);
+    QString toString(QProcess::ProcessError error);
 
     inline QString toString(const std::string& s)
     { return FromUtf8(s); }
