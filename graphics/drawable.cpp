@@ -228,13 +228,40 @@ Geometry* Capsule::Upload(Device &device) const
         }
         if (mStyle == Style::Solid)
             geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (mStyle == Style::Outline)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
         else if (mStyle == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
-        offset = vs.size();
+        if (mStyle != Style::Outline)
+        {
+            // center box.
+            const Vertex box[6] = {
+                {{0.1f, -0.4f}, {0.1f, 0.4f}},
+                {{0.1f, -0.6f}, {0.1f, 0.6f}},
+                {{0.9f, -0.6f}, {0.9f, 0.6f}},
 
+                {{0.1f, -0.4f}, {0.1f, 0.4f}},
+                {{0.9f, -0.6f}, {0.9f, 0.6f}},
+                {{0.9f, -0.4f}, {0.9f, 0.4f}}
+            };
+            offset = vs.size();
+            vs.push_back(box[0]);
+            vs.push_back(box[1]);
+            vs.push_back(box[2]);
+            vs.push_back(box[3]);
+            vs.push_back(box[4]);
+            vs.push_back(box[5]);
+            if (mStyle == Style::Solid)
+            {
+                geom->AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
+            }
+            else
+            {
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset + 0, 3);
+                geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset + 3, 3);
+            }
+        }
+
+        offset = vs.size();
         // semi circle at the right end
         Vertex right_center;
         right_center.aPosition.x =  0.9f;
@@ -275,37 +302,11 @@ Geometry* Capsule::Upload(Device &device) const
         }
         if (mStyle == Style::Solid)
             geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (mStyle == Style::Outline)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
         else if (mStyle == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
-        // center box.
-        const Vertex box[6] = {
-            { {0.1f,  -0.4f}, {0.1f, 0.4f} },
-            { {0.1f,  -0.6f}, {0.1f, 0.6f} },
-            { {0.9f,  -0.6f}, {0.9f, 0.6f} },
-
-            { {0.1f,  -0.4f}, {0.1f, 0.4f} },
-            { {0.9f,  -0.6f}, {0.9f, 0.6f} },
-            { {0.9f,  -0.4f}, {0.9f, 0.4f} }
-        };
-        offset = vs.size();
-        vs.push_back(box[0]);
-        vs.push_back(box[1]);
-        vs.push_back(box[2]);
-        vs.push_back(box[3]);
-        vs.push_back(box[4]);
-        vs.push_back(box[5]);
-        if (mStyle == Style::Solid)
-        {
-            geom->AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
-        }
-        else
-        {
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset+0, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset+3, 3);
-        }
+        if (mStyle == Style::Outline)
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
 
         geom->Update(std::move(vs));
     }

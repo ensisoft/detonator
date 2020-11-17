@@ -650,7 +650,6 @@ public:
             transform.Translate(120.0f, 0.0f);
             painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-
             transform.Translate(-1020.0f, 150.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
@@ -662,7 +661,18 @@ public:
             transform.Translate(120.0f, 0.0f);
             painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
 
-            transform.Translate(-450.0f, 150.0f);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Wireframe), transform, materials[0]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Solid), transform, materials[1]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Outline), transform, materials[2]);
+            transform.Translate(110.0f, 0.0f);
+            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Wireframe), transform, materials[1]);
+            transform.Translate(120.0f, 0.0f);
+            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+
+            transform.Translate(-1020.0f, 150.0f);
             painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
             transform.Translate(110.0f, 0.0f);
             painter.Draw(gfx::IsocelesTriangle(gfx::Drawable::Style::Solid), transform, materials[1]);

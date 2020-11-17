@@ -183,6 +183,8 @@ namespace gfx
         Capsule() = default;
         Capsule(Style style) : mStyle(style)
         {}
+        Capsule(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        {}
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(Device& device) const override;
         virtual void SetStyle(Style style) override
