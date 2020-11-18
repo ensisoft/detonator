@@ -137,6 +137,7 @@ namespace base
     class OStreamLogger : public Logger
     {
     public:
+        OStreamLogger() = default;
         OStreamLogger(std::ostream& out);
 
         virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
@@ -148,7 +149,7 @@ namespace base
         void EnableTerminalColors(bool on_off)
         { mTerminalColors = on_off; }
     private:
-        std::ostream& m_out;
+        std::ostream* m_out = nullptr;
         bool mTerminalColors = true;
     };
 

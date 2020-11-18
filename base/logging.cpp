@@ -69,14 +69,14 @@ const char* ToString(base::LogEvent e)
     return "";
 }
 
-OStreamLogger::OStreamLogger(std::ostream& out) : m_out(out)
+OStreamLogger::OStreamLogger(std::ostream& out) : m_out(&out)
 {}
 
 void OStreamLogger::Write(LogEvent type, const char* msg)
 {
     if (!mTerminalColors)
     {
-        m_out << msg;
+        (*m_out) << msg;
         return;
     }
     // Using raw terminal escape sequences here. This might or might
@@ -130,19 +130,19 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
 #if defined(POSIX_OS)
     // output terminal escape code to change text color.
     if (type == LogEvent::Debug)
-        m_out << "\033[" << 36 << "m";
+        *m_out << "\033[" << 36 << "m";
     else if (type == LogEvent::Error)
-        m_out << "\033[" << 31 << "m";
+        *m_out << "\033[" << 31 << "m";
     else if (type == LogEvent::Warning)
-        m_out << "\033[" << 33 << "m";
+        *m_out << "\033[" << 33 << "m";
     //else if (type == LogEvent::Info)
     //    m_out << "\033[" << 32 << "m";
 
     // print the actual message
-    m_out << msg;
+    *m_out << msg;
 
     // reset terminal color.
-    m_out << "\033[m";
+    *m_out << "\033[m";
 #elif defined(WINDOWS_OS)
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO console = {0};
@@ -156,14 +156,14 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
     //else if (type == LogEvent::Info)
     //    SetConsoleTextAttribute(out, FOREGROUND_GREEN);
 
-    m_out << msg;
+    *m_out << msg;
     SetConsoleTextAttribute(out, console.wAttributes);
 #endif
 }
 
 void OStreamLogger::Flush()
 {
-    m_out.flush();
+    (*m_out).flush();
 }
 
 CursesLogger::CursesLogger()
