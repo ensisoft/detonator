@@ -165,7 +165,9 @@ struct RenderTreeFunctions {
         }
         for (const auto& layer : layers)
         {
-            painter.DrawMasked(layer.draw_list, layer.mask_list);
+            if (layer.mask_list.empty())
+                painter.Draw(layer.draw_list);
+            else painter.Draw(layer.draw_list, layer.mask_list);
         }
         // if we used a new trańsformation scope pop it here.
         //transform.Pop();

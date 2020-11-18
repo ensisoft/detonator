@@ -187,7 +187,7 @@ public:
             mask.Translate(200 + std::cos(mTime) * 200, 200 + std::sin(mTime) * 200);
             gfx::Transform shape;
             shape.Resize(1024, 768);
-            painter.DrawMasked(gfx::Rectangle(), shape, gfx::Circle(), mask, material);
+            painter.Draw(gfx::Rectangle(), shape, gfx::Circle(), mask, material);
         }
 
     }

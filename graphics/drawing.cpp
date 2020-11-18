@@ -196,10 +196,10 @@ void DrawRectOutline(Painter& painter,
     // NV_path_rendering (when available) or then manually fill
     // the line gaps with quads.
 
-    painter.DrawMasked(
-        Rectangle(), outline_transform,
-        Rectangle(), mask_transform,
-        material);
+    painter.Draw(
+            Rectangle(), outline_transform,
+            Rectangle(), mask_transform,
+            material);
 }
 
 void DrawLine(Painter& painter,

@@ -67,9 +67,9 @@ namespace gfx
         // 1. Draw the mask shape using the given mask transform into the stencil buffer.
         // 2. Draw the actual shape using the given material and transform into the color
         //    buffer in the area not covered by the mask.
-        virtual void DrawMasked(const Drawable& drawShape, const Transform& drawTransform,
-                                const Drawable& maskShape, const Transform& maskTransform,
-                                const Material& material) = 0;
+        virtual void Draw(const Drawable& drawShape, const Transform& drawTransform,
+                          const Drawable& maskShape, const Transform& maskTransform,
+                          const Material& material) = 0;
 
         struct MaskShape {
             const glm::mat4* transform = nullptr;
@@ -82,7 +82,9 @@ namespace gfx
         };
         // Draw the shapes in the draw list after combining all the shapes in the mast list
         // into a single mask that covers some areas of the render buffer.
-        virtual void DrawMasked(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) = 0;
+        virtual void Draw(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) = 0;
+
+        virtual void Draw(const std::vector<DrawShape>& shapes) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);

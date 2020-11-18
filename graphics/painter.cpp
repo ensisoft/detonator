@@ -34,15 +34,15 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
-#include "device.h"
-#include "shader.h"
-#include "program.h"
-#include "geometry.h"
-#include "painter.h"
-#include "drawable.h"
-#include "material.h"
-#include "transform.h"
-#include "types.h"
+#include "graphics/device.h"
+#include "graphics/shader.h"
+#include "graphics/program.h"
+#include "graphics/geometry.h"
+#include "graphics/painter.h"
+#include "graphics/drawable.h"
+#include "graphics/material.h"
+#include "graphics/transform.h"
+#include "graphics/types.h"
 
 namespace gfx
 {
@@ -101,9 +101,9 @@ public:
         mDevice->Draw(*prog, *geom, state);
     }
 
-    virtual void DrawMasked(const Drawable& drawShape, const Transform& drawTransform,
-                            const Drawable& maskShape, const Transform& maskTransform,
-                            const Material& material) override
+    virtual void Draw(const Drawable& drawShape, const Transform& drawTransform,
+                      const Drawable& maskShape, const Transform& maskTransform,
+                      const Material& material) override
     {
         const auto& dm = drawTransform.GetAsMatrix();
         const auto& mm = maskTransform.GetAsMatrix();
@@ -119,10 +119,10 @@ public:
         mask.transform = &mm;
         std::vector<MaskShape> masklist;
         masklist.push_back(mask);
-        DrawMasked(drawlist, masklist);
+        Draw(drawlist, masklist);
     }
 
-    virtual void DrawMasked(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) override
+    virtual void Draw(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) override
     {
         mDevice->ClearStencil(1);
 
@@ -182,6 +182,38 @@ public:
             draw.material->ApplyDynamicState(env, *mDevice, *prog, raster);
             state.blending = raster.blending;
             mDevice->Draw(*prog, *geom, state);
+        }
+    }
+
+    virtual void Draw(const std::vector<DrawShape>& shapes) override
+    {
+        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+
+        for (const auto& draw : shapes)
+        {
+            Geometry* geom = draw.drawable->Upload(*mDevice);
+            if (geom == nullptr)
+                continue;
+            Program* program = GetProgram(*draw.drawable, *draw.material);
+            if (program == nullptr)
+                continue;
+
+            program->SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program->SetUniform("kViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(*draw.transform));
+
+            MaterialClass::RasterState raster;
+            MaterialClass::Environment env;
+            env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+            draw.material->ApplyDynamicState(env, *mDevice, *program, raster);
+
+            Device::State state;
+            state.viewport     = IRect(mViewX, mViewY, mViewW, mViewH);
+            state.bWriteColor  = true;
+            state.stencil_func = Device::State::StencilFunc::Disabled;
+            state.blending     = raster.blending;
+            mDevice->Draw(*program, *geom, state);
         }
     }
 
