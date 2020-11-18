@@ -89,6 +89,9 @@ namespace {
     // a global flag to indicate when there's some surface with
     // VSYNC enabled.
     bool have_sync = false;
+
+    std::weak_ptr<QOpenGLContext> shared_context;
+    std::weak_ptr<gfx::Device> shared_device;
 }// namespace
 
 namespace gui
@@ -118,10 +121,16 @@ GfxWindow::GfxWindow()
 
     have_sync = true;
 
-    // the default configuration has been set in main
-    mContext.create();
-    mContext.makeCurrent(this);
-
+    auto context = shared_context.lock();
+    if (!context)
+    {
+        context = std::make_shared<QOpenGLContext>();
+        // the default configuration has been set in main
+        context->create();
+        shared_context = context;
+    }
+    mContext = context;
+    mContext->makeCurrent(this);
     // There's the problem that it seems a bit tricky to get the
     // OpenGLWidget's size (framebuffer size) properly when
     // starting things up. When the widget is loaded  there are
@@ -144,7 +153,7 @@ void GfxWindow::dispose()
     // for example texture 0, however if the wrong context is current
     // then the device will end deleting resources that actually belong
     // to a different device! *OOPS*
-    mContext.makeCurrent(this);
+    mContext->makeCurrent(this);
 
     const auto& format = this->format();
     const auto sync = format.swapInterval() == 1;
@@ -181,11 +190,16 @@ void GfxWindow::initializeGL()
         QOpenGLContext* mContext = nullptr;
     };
 
-    mContext.makeCurrent(this);
-
-    // create custom painter for fancier shader based effects.
-    mCustomGraphicsDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<WindowContext>(&mContext));
+    mContext->makeCurrent(this);
+    auto device = shared_device.lock();
+    if (!device)
+    {
+        // create custom painter for fancier shader based effects.
+        device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                            std::make_shared<WindowContext>(mContext.get()));
+        shared_device = device;
+    }
+    mCustomGraphicsDevice  = device;
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 
@@ -221,7 +235,7 @@ void GfxWindow::paintGL()
 
     have_sync = true;
 
-    mContext.makeCurrent(this);
+    mContext->makeCurrent(this);
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsDevice->ClearColor(mClearColor);
@@ -251,7 +265,7 @@ void GfxWindow::paintGL()
     }
     mCustomGraphicsDevice->EndFrame(false /*display*/);
     mCustomGraphicsDevice->CleanGarbage(60);
-    mContext.swapBuffers(this);
+    mContext->swapBuffers(this);
 }
 
 void GfxWindow::doInit()

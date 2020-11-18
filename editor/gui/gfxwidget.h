@@ -133,7 +133,7 @@ namespace gui
         bool  mShowFps     = false;
         float mCurrentFps  = 0.0f;
     private:
-        QOpenGLContext mContext;
+        std::shared_ptr<QOpenGLContext> mContext;
     private:
         static gfx::Device::MinFilter DefaultMinFilter;
         static gfx::Device::MagFilter DefaultMagFilter;
