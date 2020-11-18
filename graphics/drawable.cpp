@@ -1250,6 +1250,28 @@ void KinematicsParticleEngineClass::Pack(ResourcePacker* packer) const
 // Update the particle simulation.
 void KinematicsParticleEngineClass::Update(InstanceState& state, float dt) const
 {
+    // In case particles become heavy on the CPU here are some ways to try
+    // to mitigate the issue:
+    // - Reduce the number of particles in the content (i.e. use less particles
+    //   in animations etc.)
+    // - Share complete particle engines between assets, i.e. instead of each
+    //   animation (for example space ship) using it's own particle engine
+    //   instance each kind of ship could share one particle engine.
+    // - Parallelize the particle updates, i.e. try to throw more CPU cores
+    //   at the issue.
+    // - Use the GPU instead of the CPU. On GL ES 2 there are no transform
+    //   feedback buffers. But for any simple particle animation such as this
+    //   that doesn't use any second degree derivatives it should be possible
+    //   to do the simulation on the GPU without transform feedback. I.e. in the
+    //   absence of acceleration a numerical integration of particle position
+    //   is not needed but a new position can simply be computed with
+    //   vec2 pos = initial_pos + time * velocity;
+    //   Just that one problem that remains is killing particles at the end
+    //   of their lifetime or when their size or alpha value reaches 0.
+    //   Possibly a hybrid solution could be used.
+    //   It could also be possible to simulate transform feedback through
+    //   texture writes. For example here: https://nullprogram.com/webgl-particles/
+
     // update each particle
     for (size_t i=0; i<state.particles.size();)
     {

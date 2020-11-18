@@ -56,7 +56,156 @@ public:
     virtual void Start() {}
     virtual void End() {}
     virtual std::string GetName() const = 0;
+    virtual bool IsFeatureTest() const
+    { return true; }
 private:
+};
+
+// Render nothing test.
+class NullTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter&) override
+    {}
+    virtual std::string GetName() const override
+    { return "NullTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+};
+
+// replication of https://www.vsynctester.com
+// alternate between red and cyan, if you see any
+// red or cyan then vsync is failing.
+class VSyncTest : public GraphicsTest
+{
+public:
+    VSyncTest()
+    {
+        mColors.push_back(gfx::Color::Red);
+        mColors.push_back(gfx::Color::Cyan);
+    }
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::DrawTextRect(painter,
+          "VSYNC TEST",
+          "fonts/AtariFontFullVersion.ttf", 40,
+          gfx::FRect(100, 100, 500, 30),
+          mColors[mColorIndex]);
+        mColorIndex = (mColorIndex + 1) % mColors.size();
+    }
+    virtual std::string GetName() const override
+    { return "VSyncTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+    std::vector<gfx::Color4f> mColors;
+    std::size_t mColorIndex = 0;
+};
+
+class MegaParticleTest : public GraphicsTest
+{
+public:
+    MegaParticleTest()
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
+        p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Reflect;
+        p.num_particles = 100000;
+        p.min_lifetime = std::numeric_limits<float>::max();
+        p.max_lifetime = std::numeric_limits<float>::max();
+        p.max_xpos = 1.0f;
+        p.max_ypos = 1.0f;
+        p.init_rect_xpos = 0.0f;
+        p.init_rect_ypos = 0.0f;
+        p.init_rect_width = 1.0f;
+        p.init_rect_height = 1.0f;
+        p.direction_sector_start_angle = 0.0f;
+        p.direction_sector_size = math::Pi * 2.0;
+        p.min_velocity = 0.2;
+        p.max_velocity = 0.5;
+        p.min_point_size = 2;
+        p.max_point_size = 2;
+        gfx::KinematicsParticleEngineClass klass(p);
+        mEngine.reset(new gfx::KinematicsParticleEngine(p));
+    }
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        painter.Draw(*mEngine, transform, gfx::SolidColor(gfx::Color::HotPink));
+    }
+    virtual void Update(float dt) override
+    {
+        if (!mStarted)
+            return;
+        mEngine->Update(dt);
+    }
+    virtual void Start() override
+    { mStarted = true; }
+    virtual void End() override
+    { mStarted = false; }
+    virtual std::string GetName() const
+    { return "MegaParticleTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+    std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
+    bool mStarted = false;
+};
+
+class JankTest : public GraphicsTest
+{
+public:
+    JankTest()
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
+        p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Reflect;
+        p.num_particles = 1000;
+        p.min_lifetime = std::numeric_limits<float>::max();
+        p.max_lifetime = std::numeric_limits<float>::max();
+        p.max_xpos = 1.0f;
+        p.max_ypos = 1.0f;
+        p.init_rect_xpos = 0.0f;
+        p.init_rect_ypos = 0.0f;
+        p.init_rect_width = 0.0f;
+        p.init_rect_height = 1.0f;
+        p.direction_sector_start_angle = 0.0f;
+        p.direction_sector_size = 0.0f;
+        p.min_velocity = 0.2;
+        p.max_velocity = 0.2;
+        p.min_point_size = 40;
+        p.max_point_size = 40;
+        {
+            gfx::KinematicsParticleEngineClass klass(p);
+            mEngine[0].reset(new gfx::KinematicsParticleEngine(klass));
+        }
+
+        {
+            p.init_rect_xpos = 0.5f;
+            gfx::KinematicsParticleEngineClass klass(p);
+            mEngine[1].reset(new gfx::KinematicsParticleEngine(klass));
+        }
+    }
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        painter.Draw(*mEngine[0], transform, gfx::SolidColor(gfx::Color::HotPink));
+        painter.Draw(*mEngine[1], transform, gfx::SolidColor(gfx::Color::Green));
+    }
+    virtual void Update(float dt) override
+    {
+        mEngine[0]->Update(dt);
+        mEngine[1]->Update(dt);
+    }
+    virtual std::string GetName() const override
+    { return "JankTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+    std::unique_ptr<gfx::KinematicsParticleEngine> mEngine[2];
 };
 
 class PolygonTest : public GraphicsTest
@@ -1022,6 +1171,7 @@ private:
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
+    logger.EnableTerminalColors(true);
     base::SetGlobalLog(&logger);
     DEBUG("It's alive!");
     INFO("Copyright (c) 2010-2019 Sami Vaisanen");
@@ -1031,6 +1181,7 @@ int main(int argc, char* argv[])
     auto sampling = wdk::Config::Multisampling::None;
     bool testing  = false;
     bool issue_gold = false;
+    bool fullscreen = false;
     int swap_interval = 0;
     std::string casename;
 
@@ -1052,6 +1203,8 @@ int main(int argc, char* argv[])
             issue_gold = true;
         else if (!std::strcmp(argv[i], "--vsync"))
             swap_interval = 1;
+        else if (!std::strcmp(argv[i], "--fullscreen"))
+            fullscreen = true;
     }
 
     // context integration glue code that puts together
@@ -1131,11 +1284,16 @@ int main(int argc, char* argv[])
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new StencilTest);
     tests.emplace_back(new PolygonTest);
+    tests.emplace_back(new JankTest);
+    tests.emplace_back(new MegaParticleTest);
+    tests.emplace_back(new VSyncTest);
+    tests.emplace_back(new NullTest);
 
     bool stop_for_input = false;
 
     wdk::Window window;
     window.Create("Demo", 1024, 768, context->GetVisualID());
+    window.SetFullscreen(fullscreen);
     window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
         const auto current_test_index = test_index;
         if (key.symbol == wdk::Keysym::Escape)
@@ -1176,6 +1334,9 @@ int main(int argc, char* argv[])
 
         for (auto& test : tests)
         {
+            if (!test->IsFeatureTest())
+                continue;
+
             if (!casename.empty())
             {
                 if (casename != test->GetName())
@@ -1292,6 +1453,7 @@ int main(int argc, char* argv[])
         auto stamp = clock::now();
         float frames  = 0;
         float seconds = 0.0f;
+        std::vector<double> frame_times;
 
         while (window.DoesExist())
         {
@@ -1305,6 +1467,8 @@ int main(int argc, char* argv[])
             // for updating the animations.
             const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
             stamp = now;
+
+            frame_times.push_back(secs);
 
             // jump animations forward by the *previous* timestep
             for (auto& test : tests)
@@ -1329,10 +1493,12 @@ int main(int argc, char* argv[])
 
             ++frames;
             seconds += secs;
-            if (seconds > 1.0f)
+            if (seconds > 2.0f)
             {
                 const auto fps = frames / seconds;
-                INFO("FPS: %1", fps);
+                const auto [min, max] = std::minmax_element(frame_times.begin(), frame_times.end());
+                INFO("Time: %1s, frames: %2, FPS: %3 min: %4, max: %5", seconds, frames, fps, *min, *max);
+                frame_times.clear();
                 frames = 0.0f;
                 seconds = 0.0f;
             }

@@ -400,10 +400,6 @@ target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
 install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
-if (UNIX)
-    target_link_libraries(graphics_test ncurses)
-endif()
-
 
 # main game runner application. The executable will read a
 # config.json and create the window/context for the application as
