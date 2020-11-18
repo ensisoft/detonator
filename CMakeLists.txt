@@ -525,7 +525,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         third_party/base64/base64.cpp
         third_party/stb/stb_image.c)
 add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
-add_test(NAME unit_test_ipc     COMMAND unit_test_icp)
+add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
@@ -595,12 +595,4 @@ target_include_directories(unit_test_bitmap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-
-
-
-
-
-
-
-
 
