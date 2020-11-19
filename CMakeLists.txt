@@ -14,26 +14,9 @@ https://github.com/ensisoft/gamestudio
 
 ")
 
-# begin with the turds in 3rd party libs
 
-# Freetype2
-option(WITH_ZLIB "Freetype: Enable zlib " OFF)
-option(WITH_BZip2 "Freetype: Enable bzip2 " OFF)
-option(WITH_HarfBuzz "Freetype: Enable harfbuzz" OFF)
-option(WITH_PNG "Freetype: Build with PNG" OFF)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype)
-
-set_property(TARGET freetype_custom_build PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-# harfbuzz (depends on freetype2)
-set(HARFBUZZ_FREETYPE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include" CACHE STRING "Freetype2 include folder")
-set(HARFBUZZ_FREETYPE_LIBRARY "freetype_custom_build" CACHE STRING "Name of the Freetype2 library build.")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/harfbuzz)
-
-set_property(TARGET harfbuzz_custom_build PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-# Qt color widgets
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/Qt-Color-Widgets)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
@@ -108,10 +91,6 @@ message(STATUS "${Boost_LIBRARY_DIRS}")
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/freetype/include")
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src")
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/harfbuzz/src/generated")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
@@ -297,11 +276,7 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(Editor freetype_custom_build)
-target_link_libraries(Editor harfbuzz_custom_build)
-if (UNIX)
-    target_link_libraries(Editor ncurses)
-endif()
+target_link_libraries(Editor ${CONAN_LIBS})
 install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
@@ -343,12 +318,8 @@ target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/edi
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
-if (UNIX)
-    target_link_libraries(EditorGameHost ncurses)
-endif()
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(EditorGameHost freetype_custom_build)
-target_link_libraries(EditorGameHost harfbuzz_custom_build)
+target_link_libraries(EditorGameHost ${CONAN_LIBS})
 install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # audio test application. Simple console application that plays
@@ -365,12 +336,10 @@ add_executable(audio_test
 )
 target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(audio_test Qt5::Widgets)
-if (WIN32)
-    target_link_libraries(audio_test "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
-elseif (UNIX)
+target_link_libraries(audio_test ${CONAN_LIBS})
+if (UNIX)
     target_link_libraries(audio_test ncurses)
     target_link_libraries(audio_test pulse)
-    target_link_libraries(audio_test sndfile)
     target_link_libraries(audio_test pthread)
 endif()
 install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
@@ -394,8 +363,7 @@ add_executable(graphics_test
     third_party/base64/base64.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
-target_link_libraries(graphics_test freetype_custom_build)
-target_link_libraries(graphics_test harfbuzz_custom_build)
+target_link_libraries(graphics_test ${CONAN_LIBS})
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
 install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
@@ -437,8 +405,7 @@ add_library(gamelib_test SHARED
     third_party/base64/base64.cpp
 )
 target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
-
-target_link_libraries(gamelib_test PRIVATE freetype_custom_build harfbuzz_custom_build)
+target_link_libraries(gamelib_test PRIVATE ${CONAN_LIBS})
 install(TARGETS gamelib_test main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
@@ -479,13 +446,9 @@ add_library(invaders SHARED
     third_party/base64/base64.cpp
 )
 target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/games/invaders")
-target_link_libraries(invaders PRIVATE freetype_custom_build harfbuzz_custom_build)
-if (WIN32)
-  include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile")
-  target_link_libraries(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/libsndfile-1.lib")
-elseif (UNIX)
+target_link_libraries(invaders PRIVATE ${CONAN_LIBS})
+if (UNIX)
   target_link_libraries(invaders PRIVATE pulse)
-  target_link_libraries(invaders PRIVATE sndfile)
   target_link_libraries(invaders PRIVATE pthread)
 endif()
 install(TARGETS invaders main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
@@ -525,8 +488,7 @@ add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(unit_test_ipc freetype_custom_build)
-target_link_libraries(unit_test_ipc harfbuzz_custom_build)
+target_link_libraries(unit_test_ipc ${CONAN_LIBS})
 
 # gamelib tests
 add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
@@ -543,9 +505,7 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
-target_link_libraries(unit_test_anim
-        freetype_custom_build
-        harfbuzz_custom_build)
+target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
@@ -580,8 +540,7 @@ add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/a
 target_link_libraries(unit_test_device
     wdk_system
     wdk_desktop_gl
-    freetype_custom_build
-    harfbuzz_custom_build)
+    ${CONAN_LIBS})
 
 add_test(NAME unit_test_bitmap COMMAND unit_test_bitmap)
 add_test(NAME unit_test_image COMMAND unit_test_image)
