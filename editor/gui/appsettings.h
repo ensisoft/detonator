@@ -37,7 +37,7 @@ namespace gui
         QString image_editor_executable;
         // the arguments for the image editor. The special argument ${file}
         // is expanded to contain the full native absolute path to the
-        // file that user waats to work with.
+        // file that user wants to work with.
         QString image_editor_arguments;
         // the path to the currently set external editor for shader (.glsl) files.
         // for example /usr/bin/gedit
@@ -48,6 +48,9 @@ namespace gui
         QString shader_editor_arguments;
         // by default open resources in a new window or new tab
         QString default_open_win_or_tab;
+        // Name of the qt style when using some specific QStyle
+        // or "GameStudio" when using our darkstyle.
+        QString style_name = GAMESTUDIO_DEFAULT_STYLE_NAME;
     };
 
 } // namespace

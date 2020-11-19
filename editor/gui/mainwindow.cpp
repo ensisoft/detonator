@@ -98,7 +98,7 @@ private:
 namespace gui
 {
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(QApplication& app) : mApplication(app)
 {
     mUI.setupUi(this);
     mUI.actionExit->setShortcut(QKeySequence::Quit);
@@ -165,6 +165,24 @@ void MainWindow::loadState()
     mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
 #endif
     mSettings.default_open_win_or_tab = settings.getValue("Settings", "default_open_win_or_tab", QString("Tab"));
+    mSettings.style_name = settings.getValue("Settings", "style_name", mSettings.style_name);
+    if (mSettings.style_name == GAMESTUDIO_DEFAULT_STYLE_NAME)
+    {
+        QFile style(":qdarkstyle/style.qss");
+        style.open(QIODevice::ReadOnly);
+        QTextStream stream(&style);
+        mApplication.setStyleSheet(stream.readAll());
+    }
+    else
+    {
+        QStyle* style = QApplication::setStyle(mSettings.style_name);
+        if (style == nullptr) {
+            WARN("No such application style '%1'", mSettings.style_name);
+        } else {
+            QApplication::setPalette(style->standardPalette());
+            DEBUG("Application style set to '%1'", mSettings.style_name);
+        }
+    }
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -981,8 +999,32 @@ void MainWindow::on_actionCloseWorkspace_triggered()
 
 void MainWindow::on_actionSettings_triggered()
 {
+    const QString current_style = mSettings.style_name;
     DlgSettings dlg(this, mSettings);
-    dlg.exec();
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    if (current_style == mSettings.style_name)
+        return;
+
+    if (mSettings.style_name == GAMESTUDIO_DEFAULT_STYLE_NAME)
+    {
+        QFile style(":qdarkstyle/style.qss");
+        style.open(QIODevice::ReadOnly);
+        QTextStream stream(&style);
+        mApplication.setStyleSheet(stream.readAll());
+    }
+    else
+    {
+        QStyle* style = QApplication::setStyle(mSettings.style_name);
+        if (style == nullptr) {
+            WARN("No such application style '%1'", mSettings.style_name);
+        } else {
+            mApplication.setStyleSheet("");
+            QApplication::setPalette(style->standardPalette());
+            DEBUG("Application style set to '%1'", mSettings.style_name);
+        }
+    }
 }
 
 void MainWindow::on_actionImagePacker_triggered()
@@ -1155,11 +1197,9 @@ void MainWindow::on_actionProjectPlay_triggered()
         game_host_args << "--no-term-colors";
         game_host_args << "--workspace";
         game_host_args << mWorkspace->GetDir();
-        for (const auto& arg : QCoreApplication::arguments())
-        {
-            if (arg == "--no-dark-style")
-                game_host_args << "--no-dark-style";
-        }
+        game_host_args << "--style";
+        game_host_args << mSettings.style_name;
+
         QString game_host_name = "EditorGameHost";
 #if defined(WINDOWS_OS)
         game_host_name.append(".exe");
@@ -1526,6 +1566,7 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
     settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
+    settings.setValue("Settings", "style_name", mSettings.style_name);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.setValue("MainWindow", "recent_workspaces", mRecentWorkspaces);

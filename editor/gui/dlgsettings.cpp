@@ -25,10 +25,13 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QApplication>
 #  include <QStringList>
 #  include <QFileInfo>
 #  include <QFileDialog>
 #  include <QDir>
+#  include <QStyle>
+#  include <QStyleFactory>
 #include "warnpop.h"
 
 #include "editor/app/eventlog.h"
@@ -48,6 +51,19 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
     SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
+
+    // add our own style.
+    mUI.cmbStyle->addItem(GAMESTUDIO_DEFAULT_STYLE_NAME);
+
+    // add Qt's built-in / plugin styles.
+    const auto& styles = QStyleFactory::keys();
+    for (const auto& style : styles)
+    {
+        mUI.cmbStyle->addItem(style);
+    }
+    const auto index = mUI.cmbStyle->findText(settings.style_name);
+    if (index != -1)
+        mUI.cmbStyle->setCurrentIndex(index);
 }
 
 void DlgSettings::on_btnAccept_clicked()
@@ -57,6 +73,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtShaderEditorExecutable, &mSettings.shader_editor_executable);
     GetUIValue(mUI.edtShaderEditorArguments, &mSettings.shader_editor_arguments);
     GetUIValue(mUI.cmbWinOrTab, &mSettings.default_open_win_or_tab);
+    GetUIValue(mUI.cmbStyle, &mSettings.style_name);
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()

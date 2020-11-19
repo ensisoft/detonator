@@ -56,7 +56,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        MainWindow();
+        MainWindow(QApplication& app);
        ~MainWindow();
 
         // Close the widget object and delete it.
@@ -158,6 +158,7 @@ namespace gui
         Ui::MainWindow mUI;
 
     private:
+        QApplication& mApplication;
         // the refesh timer to do low frequency UI updates.
         QTimer mRefreshTimer;
         // current application settings that are not part of any

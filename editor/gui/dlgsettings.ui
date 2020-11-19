@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
+    <width>469</width>
     <height>314</height>
    </rect>
   </property>
@@ -36,14 +36,14 @@
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
                <string>Open resources in a new</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1" colspan="2">
+            <item row="1" column="1" colspan="2">
              <widget class="QComboBox" name="cmbWinOrTab">
               <item>
                <property name="text">
@@ -56,6 +56,16 @@
                </property>
               </item>
              </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Application style</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QComboBox" name="cmbStyle"/>
             </item>
            </layout>
           </item>
@@ -71,13 +81,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Settings will apply starting from the next window opened.</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
@@ -221,6 +224,7 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>cmbStyle</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>

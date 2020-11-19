@@ -172,23 +172,9 @@ int main(int argc, char* argv[])
         // note that this needs to be called *after* the QApplication object has been created.
         QCoreApplication::addLibraryPath(app::JoinPath(QCoreApplication::applicationDirPath(), "plugins"));
 
-        if (use_dark_style)
-        {
-            QFile style(":qdarkstyle/style.qss");
-            if (style.open(QIODevice::ReadOnly))
-            {
-                QTextStream stream(&style);
-                app.setStyleSheet(stream.readAll());
-                INFO("Loaded qdarkstyle. Start with --no-dark-style to disable.");
-            }
-            else
-            {
-                ERROR("Failed to load qdarkstyle.");
-            }
-        }
         // Create the application main window into which we add
         // main widgets.
-        gui::MainWindow window;
+        gui::MainWindow window(app);
 
         window.loadState();
         window.prepareFileMenu();
