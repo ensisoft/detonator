@@ -2076,6 +2076,11 @@ https://stackoverflow.com/questions/14581498/qt-stylesheet-for-hline-vline-color
   background-color: #32414B;
 }
 
+QFrame:hover {
+  border: 1px solid #148CD2;
+  color: #F0F0F0;
+}
+
 /* QSplitter --------------------------------------------------------------
 
 https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qsplitter

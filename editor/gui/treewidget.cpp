@@ -106,31 +106,6 @@ TreeWidget::TreeWidget(QWidget* parent) : QAbstractScrollArea(parent)
 
     // looks like it doesn't appear automatically.. ?
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
-    // when using the qdarkstyle the stylesheet uses a "highlight" on the
-    // frame border when hovering.
-    // Theoretically it should be possible to set this property on
-    // the custom widget in the style.qss file but good fucking luck making it work...
-    // https://wiki.qt.io/Qt_Style_Sheets_and_Custom_Painting_Example
-    // https://forum.qt.io/topic/27948/solved-custom-widget-with-custom-stylesheet
-    bool dark_style = true;
-    const QStringList& args = QCoreApplication::arguments();
-    for (const QString& arg : args)
-    {
-        if (arg == "--no-dark-style")
-        {
-            dark_style = false;
-            break;
-        }
-    }
-    if (dark_style)
-    {
-        setStyleSheet(
-            "QFrame:hover {\n"
-            "  border: 1px solid #148CD2;\n"
-            "  color: #F0F0F0;\n"
-            "}");
-    }
 }
 
 void TreeWidget::Rebuild()
