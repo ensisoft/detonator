@@ -41,7 +41,7 @@ const int MINOR_VERSION = 3;
 #define BASE_LOGGING_ENABLE_LOG
 //#define BASE_FORMAT_SUPPORT_QT
 #ifdef POSIX_OS
-  #define BASE_LOGGING_ENABLE_CURSES
+//  #define BASE_LOGGING_ENABLE_CURSES
 #endif
 
 // game specific definitions go here.
