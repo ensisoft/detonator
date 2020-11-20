@@ -680,14 +680,12 @@ namespace gfx
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
-            mTextures.back().enable_gc = true;
             return *this;
         }
         MaterialClass& AddTexture(TextBuffer&& text)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
-            mTextures.back().enable_gc = true;
             return *this;
         }
 
@@ -696,7 +694,6 @@ namespace gfx
             auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
-            mTextures.back().enable_gc = true;
             return *this;
         }
         MaterialClass& AddTexture(NoiseBitmapGenerator&& generator)
@@ -704,14 +701,12 @@ namespace gfx
             auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
-            mTextures.back().enable_gc = true;
             return *this;
         }
         MaterialClass& AddTexture(std::unique_ptr<IBitmapGenerator> generator)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
-            mTextures.back().enable_gc = true;
             return *this;
         }
 
@@ -818,16 +813,54 @@ namespace gfx
             it += index;
             mTextures.erase(it);
         }
+        const TextureSource* FindTextureSourceById(const std::string& id) const
+        {
+            for (const auto& tex : mTextures)
+            {
+                if (tex.source->GetId() == id)
+                    return tex.source.get();
+            }
+            return nullptr;
+        }
+        const TextureSource* FindTextureSourceByName(const std::string& name) const
+        {
+            for (const auto& tex : mTextures)
+            {
+                if (tex.source->GetName() == name)
+                    return tex.source.get();
+            }
+            return nullptr;
+        }
         const TextureSource& GetTextureSource(size_t index) const
         {
             ASSERT(index < mTextures.size());
             return *mTextures[index].source;
+        }
+
+        TextureSource* FindTextureSourceById(const std::string& id)
+        {
+            for (const auto& tex : mTextures)
+            {
+                if (tex.source->GetId() == id)
+                    return tex.source.get();
+            }
+            return nullptr;
+        }
+        TextureSource* FindTextureSourceByName(const std::string& name)
+        {
+            for (const auto& tex : mTextures)
+            {
+                if (tex.source->GetName() == name)
+                    return tex.source.get();
+            }
+            return nullptr;
         }
         TextureSource& GetTextureSource(size_t index)
         {
             ASSERT(index < mTextures.size());
             return *mTextures[index].source;
         }
+
         FRect GetTextureRect(size_t index) const
         {
             ASSERT(index < mTextures.size());

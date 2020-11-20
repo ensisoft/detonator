@@ -75,29 +75,42 @@ void DrawTextRect(Painter& painter,
     text_and_style.valign = va;
     buff.AddText(text_and_style);
 
-    auto klass = BitmapText(buff);
-    klass.SetBaseColor(color);
+    static auto klass = std::make_shared<gfx::MaterialClass>();
+    klass->SetType(MaterialClass::Type::Texture);
+    klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    //klass->SetStatic(true); fix this bug
+    klass->SetBaseColor(color);
+    if (klass->GetNumTextures() == 0)
+    {
+        klass->AddTexture(buff);
+        // let this texture object be garbage collected
+        // when it's no longer used.
+        klass->SetTextureGc(0, true); //
+    }
+    else
+    {
+        auto& source = klass->GetTextureSource(0);
+        auto& text = static_cast<detail::TextureTextBufferSource&>(source);
+        text.SetTextBuffer(std::move(buff));
+    }
+
+    // if the text is set to be blinking do a sharp cut off
+    // and when we have the "off" interval then simply don't
+    // render the text.
     if (blinking)
     {
-        // create 1x1 transparent texture and
-        // set the material frame rate so that it animates between these
-        // two.
-        static Bitmap<Grayscale> nada(1, 1);
-        nada.SetPixel(0, 0, 0);
-        klass.AddTexture(nada);
-        klass.SetTextureGc(1, false);
-        klass.SetFps(1.5f);
-        klass.SetBlendFrames(false); // sharp cut off i.e. no blending between textures.
-        klass.SetType(MaterialClass::Type::Sprite); // animate between text and nada
+        const auto fps = 1.5;
+        const auto full_period = 2.0 / fps;
+        const auto half_period = full_period * 0.5;
+        const auto time = fmodf(base::GetRuntimeSec(), full_period);
+        if (time >= half_period)
+            return;
     }
-    gfx::Material material(klass);
-    if (blinking)
-        material.SetRuntime(base::GetRuntimeSec());
 
     Transform t;
     t.Resize(rect.GetWidth(), rect.GetHeight());
     t.MoveTo(rect.GetX(), rect.GetY());
-    painter.Draw(Rectangle(), t, material);
+    painter.Draw(Rectangle(), t, Material(klass));
 }
 
 void FillRect(Painter& painter,
