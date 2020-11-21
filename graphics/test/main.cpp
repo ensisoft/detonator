@@ -1049,6 +1049,127 @@ private:
 };
 
 
+class TextAlignTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto cycle = 2.0f;
+        const auto reminder = fmodf(mTime, cycle);
+        const bool show_box = reminder >= 1.0f;
+
+        // top row
+        gfx::DrawTextRect(painter,
+            "Left,top\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(50, 50, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(50, 50, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Center,top\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(300, 50, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(300, 50, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Right,top\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(550, 50, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignTop);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(550, 50, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        // middle row
+        gfx::DrawTextRect(painter,
+            "Left,center\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(50, 300, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(50, 300, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Center,center\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(300, 300, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(300, 300, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Right,center\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(550, 300, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignVCenter);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(550, 300, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        // bottom row
+        gfx::DrawTextRect(painter,
+            "Left,bottom\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(50, 550, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignBottom);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(50, 550, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Center,bottom\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(300, 550, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignBottom);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(300, 550, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "Right,bottom\naligned\ntext",
+            "fonts/AtariFontFullVersion.ttf", 14,
+            gfx::FRect(550, 550, 200, 200),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(550, 550, 200, 200), gfx::Color::HotPink, 1.0f);
+
+        gfx::DrawTextRect(painter,
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n",
+            "fonts/AtariFontFullVersion.ttf", 20,
+            gfx::FRect(800, 50, 173, 173),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom);
+        if (show_box)
+            gfx::DrawRectOutline(painter, gfx::FRect(800, 50, 173, 173), gfx::Color::HotPink, 1.0f);
+    }
+    virtual std::string GetName() const override
+    { return "TextAlignTest"; }
+
+    virtual void Update(float dt) override
+    {
+        mTime += dt;
+    }
+private:
+    float mTime = 0.0f;
+};
+
 // Render test text with some different fonts and text styling
 // properties.
 class RenderTextTest : public GraphicsTest
@@ -1277,6 +1398,7 @@ int main(int argc, char* argv[])
     std::vector<std::unique_ptr<GraphicsTest>> tests;
     tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
+    tests.emplace_back(new TextAlignTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapesTest);
     tests.emplace_back(new TextureTest);
