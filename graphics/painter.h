@@ -47,21 +47,51 @@ namespace gfx
     {
     public:
         virtual ~Painter() = default;
-
+        // Set the size of the target rendering surface. (The surface that
+        // is the backing surface of the device context).
+        // The surface size is needed for viewport and scissor settings.
+        // You should call this whenever the surface (for example the window)
+        // has been resized. The setting will be kept until the next call
+        // to surface size.
+        virtual void SetSurfaceSize(unsigned width, unsigned height) = 0;
         // Set the current render target view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
         // width and height are the dimensions of the viewport.
         virtual void SetViewport(int x, int y, unsigned with, unsigned height) = 0;
-
+        // Set the current clip (scissor) rect that will limit the rasterized
+        // fragments inside the scissor rectangle only and discard any fragments
+        // that would be rendered outside the scissor rect.
+        // The scissor rectangle is defined in the render target coordinate space
+        // (i.e window coordinates). X and Y are the top left corner of the
+        // scissor rectangle with width extending to the right and height
+        // extending towards the bottom.
+        virtual void SetScissor(int x, int y, unsigned width, unsigned  height) = 0;
+        // Clear any scissor setting.
+        virtual void ClearScissor() = 0;
+        // Set the logical viewport of the scene to be rendered for
+        // orthographic 2D projection. This defines a logical coordinate
+        // transformation such that objects that are placed within the
+        // rectangle defined by the top left and bottom right coordinates
+        // are visible in the rendered scene.
+        // For example if left = 0.0f and width = 10.0f an object A that is
+        // a 5.0f in width and is at coordinate -5.0f would not be shown.
+        // While an object B that is at 1.0f and is 2.0f units wide would be
+        // visible in the scene.
+        // Do not confuse this with SetViewport which defines the viewport
+        // in terms of device/render target coordinate space. I.e. the area
+        // of the rendering surface where the pixels of the rendered scene are
+        // placed in the surface.
+        virtual void SetView(float left, float top, float width, float height) = 0;
+        // Set the logical viewport for "top left" origin based drawing.
+        inline void SetTopLeftView(float width, float height)
+        { SetView(0.0f, 0.0f, width, height); }
         // Clear the render target with the given clear color.
         // You probably want to do this as the first step before
         // doing any other drawing.
         virtual void Clear(const Color4f& color) = 0;
-
         // Draw the given shape using the given material with the given transformation.
         virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
-
         // Draw using a mask to cover some areas where painting is not desired.
         // This is a two step draw operation:
         // 1. Draw the mask shape using the given mask transform into the stencil buffer.

@@ -57,13 +57,25 @@ public:
     StandardPainter(Device* device)
       : mDevice(device)
     {}
-
-    virtual void SetViewport(int x, int y, unsigned width, unsigned height)
+    virtual void SetSurfaceSize(unsigned width, unsigned height) override
     {
-        mViewW = width;
-        mViewH = height;
-        mViewX = x;
-        mViewY = y;
+        mSurfacesize = ISize((int)width, (int)height);
+    }
+    virtual void SetViewport(int x, int y, unsigned width, unsigned height) override
+    {
+        mViewport = IRect(x, y, width, height);
+    }
+    virtual void SetScissor(int x, int y, unsigned width, unsigned height) override
+    {
+        mScissor = IRect(x, y, width, height);
+    }
+    virtual void ClearScissor() override
+    {
+        mScissor = IRect(0, 0, 0, 0);
+    }
+    virtual void SetView(float left, float top, float width, float height) override
+    {
+        mView = FRect(left, top, width, height);
     }
 
     virtual void Clear(const Color4f& color) override
@@ -80,7 +92,7 @@ public:
 
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
-        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+        const auto& kProjectionMatrix = MakeOrtho();
         const auto& kViewMatrix = transform.GetAsMatrix();
 
         const auto style = shape.GetStyle();
@@ -94,7 +106,8 @@ public:
         mat.ApplyDynamicState(env, *mDevice, *prog, raster);
 
         Device::State state;
-        state.viewport     = IRect(mViewX, mViewY, mViewW, mViewH);
+        state.viewport     = MapToDevice(mViewport);
+        state.scissor      = MapToDevice(mScissor);
         state.bWriteColor  = true;
         state.stencil_func = Device::State::StencilFunc::Disabled;
         state.blending     = raster.blending;
@@ -126,10 +139,11 @@ public:
     {
         mDevice->ClearStencil(1);
 
-        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+        const auto& kProjectionMatrix = MakeOrtho();
 
         Device::State state;
-        state.viewport = IRect(mViewX, mViewY, mViewW, mViewH);
+        state.viewport      = MapToDevice(mViewport);
+        state.scissor       = MapToDevice(mScissor);
         state.stencil_func  = Device::State::StencilFunc::PassAlways;
         state.stencil_dpass = Device::State::StencilOp::WriteRef;
         state.stencil_ref   = 0;
@@ -187,7 +201,7 @@ public:
 
     virtual void Draw(const std::vector<DrawShape>& shapes) override
     {
-        const auto& kProjectionMatrix = glm::ortho(0.0f, mViewW, mViewH, 0.0f);
+        const auto& kProjectionMatrix = MakeOrtho();
 
         for (const auto& draw : shapes)
         {
@@ -209,7 +223,8 @@ public:
             draw.material->ApplyDynamicState(env, *mDevice, *program, raster);
 
             Device::State state;
-            state.viewport     = IRect(mViewX, mViewY, mViewW, mViewH);
+            state.viewport     = MapToDevice(mViewport);
+            state.scissor      = MapToDevice(mScissor);
             state.bWriteColor  = true;
             state.stencil_func = Device::State::StencilFunc::Disabled;
             state.blending     = raster.blending;
@@ -245,16 +260,39 @@ private:
             return prog;
         return nullptr;
     }
-
+    glm::mat4 MakeOrtho() const
+    {
+        const auto left   = mView.GetX();
+        const auto right  = mView.GetWidth() + left;
+        const auto top    = mView.GetY();
+        const auto bottom = mView.GetHeight() + top;
+        return glm::ortho(left, right, bottom, top);
+    }
+    IRect MapToDevice(const IRect& rect) const
+    {
+        if (rect.IsEmpty())
+            return rect;
+        // map from window coordinates (top left origin) to device
+        // coords (bottom left origin)
+        const auto bottom = rect.GetY() + rect.GetHeight();
+        const auto x = rect.GetX();
+        const auto y = mSurfacesize.GetHeight() - bottom;
+        return IRect(x, y, rect.GetWidth(), rect.GetHeight());
+    }
 private:
     std::shared_ptr<Device> mDeviceInst;
     Device* mDevice = nullptr;
 private:
-    float mViewW = 0.0f;
-    float mViewH = 0.0f;
-    float mViewX = 0.0f;
-    float mViewY = 0.0f;
-
+    // Expected Size of the rendering surface.
+    ISize mSurfacesize;
+    // the viewport setting for mapping the NDC coordinates
+    // into some region of the rendering surface.
+    IRect mViewport;
+    // the current scissor setting to be applied
+    // on the rendering surface.
+    IRect mScissor;
+    // logical viewport for the orthographic projection.
+    FRect mView;
 };
 
 // static

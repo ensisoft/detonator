@@ -184,6 +184,7 @@ struct OpenGLFunctions
     PFNGLGETINTEGERVPROC             glGetIntegerv;
     PFNGLREADPIXELSPROC              glReadPixels;
     PFNGLLINEWIDTHPROC               glLineWidth;
+    PFNGLSCISSORPROC                 glScissor;
 };
 
 //
@@ -253,6 +254,7 @@ public:
         RESOLVE(glGetIntegerv);
         RESOLVE(glReadPixels);
         RESOLVE(glLineWidth);
+        RESOLVE(glScissor);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -557,7 +559,14 @@ private:
     void SetState(const State& state)
     {
         GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
-            state.viewport.GetWidth(), state.viewport.GetHeight()));
+                           state.viewport.GetWidth(), state.viewport.GetHeight()));
+
+        // enable scissor if needed.
+        if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
+        {
+            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
+                              state.scissor.GetWidth(), state.scissor.GetHeight()));
+        }
 
         switch (state.blending)
         {

@@ -61,6 +61,56 @@ public:
 private:
 };
 
+class ScissorTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto cycle = 2.0f;
+        const auto time = fmodf(mTime, cycle);
+        const bool clip = time >= (cycle * 0.5);
+        if (clip)
+            painter.SetScissor(10, 10, 300, 300);
+
+        gfx::FillRect(painter, gfx::FRect(0, 0, 1024, 768),
+                      gfx::TextureMap("textures/uv_test_512.png"));
+        painter.ClearScissor();
+    }
+    virtual std::string GetName() const override
+    { return "ScissorTest"; }
+    virtual void Update(float dt)
+    {
+        mTime += dt;
+    }
+private:
+    float mTime = 0.0f;
+};
+
+class ViewportTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto cycle = 2.0f;
+        const auto time = fmodf(mTime, cycle);
+        const bool clip = time >= (cycle * 0.5);
+        if (clip)
+            painter.SetViewport(10, 10, 300, 300);
+
+        gfx::FillRect(painter, gfx::FRect(0, 0, 1024, 768),
+                      gfx::TextureMap("textures/uv_test_512.png"));
+
+    }
+    virtual std::string GetName() const override
+    { return "ViewportTest"; }
+    virtual void Update(float dt)
+    {
+        mTime += dt;
+    }
+private:
+    float mTime = 0.0f;
+};
+
 // Render nothing test.
 class NullTest : public GraphicsTest
 {
@@ -1410,12 +1460,20 @@ int main(int argc, char* argv[])
     tests.emplace_back(new MegaParticleTest);
     tests.emplace_back(new VSyncTest);
     tests.emplace_back(new NullTest);
+    tests.emplace_back(new ScissorTest);
+    tests.emplace_back(new ViewportTest);
 
     bool stop_for_input = false;
 
     wdk::Window window;
+    unsigned surface_width  = 1024;
+    unsigned surface_height = 768;
     window.Create("Demo", 1024, 768, context->GetVisualID());
     window.SetFullscreen(fullscreen);
+    window.on_resize = [&](const wdk::WindowEventResize& resize) {
+        surface_width = resize.width;
+        surface_height = resize.height;
+    };
     window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
         const auto current_test_index = test_index;
         if (key.symbol == wdk::Keysym::Escape)
@@ -1476,7 +1534,9 @@ int main(int argc, char* argv[])
 
                 device->BeginFrame();
                 device->ClearColor(gfx::Color::Black);
-                painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
+                painter->SetViewport(0, 0, surface_width, surface_height);
+                painter->SetSurfaceSize(surface_width, surface_height);
+                painter->SetTopLeftView(surface_width, surface_height);
                 // render the test.
                 test->Render(*painter);
 
@@ -1598,8 +1658,9 @@ int main(int argc, char* argv[])
 
             device->BeginFrame();
             device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
-            painter->SetViewport(0, 0, window.GetSurfaceWidth(), window.GetSurfaceHeight());
-
+            painter->SetViewport(0, 0, surface_width, surface_height);
+            painter->SetSurfaceSize(surface_width, surface_height);
+            painter->SetTopLeftView(surface_width, surface_height);
             // render the current test
             tests[test_index]->Render(*painter);
 

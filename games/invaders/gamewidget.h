@@ -85,6 +85,7 @@ namespace invaders
         {
             mRenderWidth  = width;
             mRenderHeight = height;
+            mPainter->SetSurfaceSize(width, height);
         }
         virtual wdk::WindowListener* GetWindowListener() override
         { return this; }

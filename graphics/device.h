@@ -78,6 +78,7 @@ namespace gfx
             std::uint8_t stencil_ref   = 0x0;
 
             IRect viewport;
+            IRect scissor;
         };
 
         enum class Type {
@@ -88,7 +89,7 @@ namespace gfx
         // to resolve the (possibly context specific) OpenGL entry points.
         // This abstraction allows the device to remain agnostic as to
         // what kind of windowing system/graphics subsystem is creating the context
-        // and what is the ultimate rendering target (pbuffer, fbo, pixmap or window)
+        // and what is the ultimate rendering target (pbuffer, pixmap or window)
         class Context
         {
         public:
@@ -103,7 +104,7 @@ namespace gfx
             // i.e. through calling some method on  WGL, GLX, EGL or AGL.
             // So if an application is creating multiple contexts in some thread
             // before starting to use any particular context it has to be
-            // made the "current contet". The context contains all the
+            // made the "current content". The context contains all the
             // OpenGL API state.
             virtual void MakeCurrent() = 0;
             // Resolve an OpenGL API function to a function pointer.
@@ -138,13 +139,13 @@ namespace gfx
             // Use the weighted average of the four texture
             // elements that are sampled from the closest mipmap level.
             Bilinear,
-            // Use mips (precomputd minified textures.
-            // Use the weigted average of the four texture
+            // Use mips (precomputed) minified textures.
+            // Use the weighted average of the four texture
             // elements that are sampled from the two nearest mipmap levels.
             Trilinear
         };
 
-        // Texture magnifying filter is used whenver the
+        // Texture magnifying filter is used whenever the
         // pixel being textured maps to to an area less than
         // one texture element.
         enum class MagFilter {

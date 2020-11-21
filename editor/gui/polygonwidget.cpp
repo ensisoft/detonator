@@ -368,6 +368,7 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto width = size;
     const auto height = size;
     painter.SetViewport(xoffset, yoffset, size, size);
+    painter.SetTopLeftView(width, height);
 
     gfx::Transform view;
     view.Resize(width, height);

@@ -270,6 +270,7 @@ public:
     {
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
         mPainter = gfx::Painter::Create(mDevice);
+        mPainter->SetSurfaceSize(surface_width, surface_height);
     }
 
     virtual void Draw() override
@@ -277,6 +278,7 @@ public:
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
         mPainter->SetViewport(0, 0, 1027, 768);
+        mPainter->SetTopLeftView(1027.0f, 768.0f);
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);
 

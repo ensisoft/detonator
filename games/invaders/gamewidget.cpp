@@ -1910,6 +1910,7 @@ void GameWidget::Init(gfx::Device::Context* context, unsigned surface_width, uns
     mRenderWidth = surface_width;
     mRenderHeight = surface_height;
     mAudioPlayer = std::make_unique<audio::AudioPlayer>(audio::AudioDevice::Create(GAME_TITLE));
+    mPainter->SetSurfaceSize(surface_width, surface_height);
 }
 
 void GameWidget::Load()
@@ -2190,8 +2191,9 @@ void GameWidget::Draw()
     const IRect rect(0, 0, w , h);
 
     mDevice->BeginFrame();
-    mDevice->ClearColor(gfx::Color::Black);
+    mPainter->Clear(gfx::Color::Black);
     mPainter->SetViewport(0, 0, w, h);
+    mPainter->SetTopLeftView(w, h);
 
     // paint the background
     {

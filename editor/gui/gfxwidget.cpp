@@ -242,7 +242,12 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMagFilter);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
+    {
+        mCustomGraphicsPainter->SetTopLeftView((float)width(), (float)height());
+        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
+        mCustomGraphicsPainter->SetSurfaceSize(width(), height());
         onPaintScene(*mCustomGraphicsPainter, 0.0);
+    }
 
     if (mShowFps)
     {

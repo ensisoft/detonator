@@ -53,6 +53,16 @@ namespace gfx
         T GetWidth() const { return mWidth; }
         T GetHeight() const { return mHeight; }
 
+        // returns true if either dimension is 0.
+        bool IsZero() const
+        {
+            const bool has_width  = mWidth != T();
+            const bool has_height = mHeight != T();
+            if (has_height || has_width)
+                return false;
+            return true;
+        }
+
         nlohmann::json ToJson() const
         {
             nlohmann::json json;
