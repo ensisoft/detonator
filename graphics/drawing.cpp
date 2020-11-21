@@ -46,35 +46,32 @@ void DrawTextRect(Painter& painter,
     unsigned properties)
 {
     TextBuffer buff(rect.GetWidth(), rect.GetHeight());
-
-    TextBuffer::HorizontalAlignment ha;
-    TextBuffer::VerticalAlignment va;
     if ((alignment & 0xf) == AlignTop)
-        va = TextBuffer::VerticalAlignment::AlignTop;
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignTop);
     else if((alignment & 0xf) == AlignVCenter)
-        va = TextBuffer::VerticalAlignment::AlignCenter;
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignCenter);
     else if ((alignment & 0xf) == AlignBottom)
-        va = TextBuffer::VerticalAlignment::AlignBottom;
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignBottom);
 
     if ((alignment & 0xf0) == AlignLeft)
-        ha = TextBuffer::HorizontalAlignment::AlignLeft;
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignLeft);
     else if ((alignment & 0xf0) == AlignHCenter)
-        ha = TextBuffer::HorizontalAlignment::AlignCenter;
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignCenter);
     else if ((alignment & 0xf0) == AlignRight)
-        ha = TextBuffer::HorizontalAlignment::AlignRight;
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignRight);
 
     const bool underline = properties & TextProp::Underline;
     const bool blinking  = properties & TextProp::Blinking;
 
+    // Add blob of text in the buffer.
     TextBuffer::Text text_and_style;
     text_and_style.text = text;
     text_and_style.font = font;
     text_and_style.fontsize = font_size_px;
     text_and_style.underline = underline;
-    text_and_style.halign = ha;
-    text_and_style.valign = va;
     buff.AddText(text_and_style);
 
+    // Setup material to shade the text.
     static auto klass = std::make_shared<gfx::MaterialClass>();
     klass->SetType(MaterialClass::Type::Texture);
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
@@ -108,8 +105,8 @@ void DrawTextRect(Painter& painter,
     }
 
     Transform t;
-    t.Resize(rect.GetWidth(), rect.GetHeight());
-    t.MoveTo(rect.GetX(), rect.GetY());
+    t.Resize(rect);
+    t.MoveTo(rect);
     painter.Draw(Rectangle(), t, Material(klass));
 }
 

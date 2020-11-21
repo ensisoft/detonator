@@ -82,12 +82,12 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
         SetValue(mUI.fontSize, text_and_style.fontsize);
         SetValue(mUI.underline, text_and_style.underline);
         SetValue(mUI.lineHeight, text_and_style.lineheight);
-        SetValue(mUI.cmbVAlign, text_and_style.valign);
-        SetValue(mUI.cmbHAlign, text_and_style.halign);
         SetValue(mUI.text, text_and_style.text);
     }
-    SetValue(mUI.bufferWidth, text.GetWidth());
-    SetValue(mUI.bufferHeight, text.GetHeight());
+    SetValue(mUI.bufferWidth, text.GetBufferWidth());
+    SetValue(mUI.bufferHeight, text.GetBufferHeight());
+    SetValue(mUI.cmbVAlign, text.GetVerticalAlignment());
+    SetValue(mUI.cmbHAlign, text.GetHorizontalAligment());
 }
 
 void DlgText::on_btnAccept_clicked()
@@ -108,6 +108,11 @@ void DlgText::on_btnFont_clicked()
     mUI.cmbFont->setCurrentText(list[0]);
 }
 
+void DlgText::on_btnAdjust_clicked()
+{
+    mAdjustOnce = true;
+}
+
 void DlgText::finished()
 {
     mUI.widget->dispose();
@@ -120,6 +125,9 @@ void DlgText::timer()
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)
 {
+    const bool adjust = mAdjustOnce;
+    mAdjustOnce = false;
+
     const auto widget_width = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
     painter.SetViewport(0, 0, widget_width, widget_height);
@@ -129,21 +137,30 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     if (text.isEmpty() || font.isEmpty())
         return;
 
-    const unsigned buffer_width  = GetValue(mUI.bufferWidth);
-    const unsigned buffer_height = GetValue(mUI.bufferHeight);
+    unsigned buffer_width  = adjust ? 0 : GetValue(mUI.bufferWidth);
+    unsigned buffer_height = adjust ? 0 : GetValue(mUI.bufferHeight);
 
     gfx::TextBuffer::Text text_and_style;
     text_and_style.text       = app::ToUtf8(text);
     text_and_style.font       = app::ToUtf8(font);
     text_and_style.fontsize   = GetValue(mUI.fontSize);
     text_and_style.underline  = GetValue(mUI.underline);
-    text_and_style.valign     = GetValue(mUI.cmbVAlign);
-    text_and_style.halign     = GetValue(mUI.cmbHAlign);
     text_and_style.lineheight = GetValue(mUI.lineHeight);
 
-    mText.SetSize(buffer_width, buffer_height);
+    mText.SetBufferSize(buffer_width, buffer_height);
     mText.ClearText();
     mText.AddText(std::move(text_and_style));
+    mText.SetAlignment((gfx::TextBuffer::VerticalAlignment)GetValue(mUI.cmbVAlign));
+    mText.SetAlignment((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
+    if (adjust)
+    {
+        const auto& bitmap = mText.Rasterize();
+        buffer_width  = bitmap->GetWidth();
+        buffer_height = bitmap->GetHeight();
+        SetValue(mUI.bufferWidth, buffer_width);
+        SetValue(mUI.bufferHeight, buffer_height);
+        mText.SetBufferSize(buffer_width, buffer_height);
+    }
 
     gfx::MaterialClass material;
     material.SetType(gfx::MaterialClass::Type::Texture);

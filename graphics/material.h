@@ -344,18 +344,12 @@ namespace gfx
             virtual std::string GetId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
-            {
-                size_t hash = mTextBuffer.GetHash();
-                hash = base::hash_combine(hash, mTextBuffer.GetWidth());
-                hash = base::hash_combine(hash, mTextBuffer.GetHeight());
-                return hash;
-            }
+            { return mTextBuffer.GetHash(); }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
-
             virtual std::unique_ptr<TextureSource> Clone() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 

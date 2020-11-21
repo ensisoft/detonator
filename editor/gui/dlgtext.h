@@ -45,6 +45,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnFont_clicked();
+        void on_btnAdjust_clicked();
         void finished();
         void timer();
     private:
@@ -54,6 +55,7 @@ namespace gui
     private:
         gfx::TextBuffer& mText;
         QTimer mTimer;
+        bool mAdjustOnce = false;
     };
 
 } // namespace

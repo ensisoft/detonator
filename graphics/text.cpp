@@ -38,8 +38,8 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
-#include "resource.h"
-#include "text.h"
+#include "graphics/resource.h"
+#include "graphics/text.h"
 
 // some good information here about text rendering
 // https://gankra.github.io/blah/text-hates-you/
@@ -84,24 +84,65 @@ struct FontLibrary {
 namespace gfx
 {
 
+void TextBuffer::SetBufferSize(unsigned int width, unsigned int height)
+{
+    mBufferWidth  = width;
+    mBufferHeight = height;
+}
+
 std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
 {
+    std::vector<std::shared_ptr<Bitmap<Grayscale>>> line_bitmaps;
+    int text_height = 0;
+    int text_width = 0;
+    // rasterize the lines and accumulate the metrics for the
+    // height of all the text blocks and the maximum line width.
+    for (const auto& text : mText)
+    {
+        std::stringstream ss(text.text);
+        std::string line;
+        // rasterize each line
+        while (std::getline(ss, line))
+        {
+            // if there's a new line without content what's the height of the line ?
+            // we could probably solve this by looking at some font metrics
+            // but for now we're just going to rasterize some character with the font
+            // and font size setting and use the height of that as the height of an empty line.
+            const bool was_empty = line.empty();
+            if (line.empty())
+                line = "k";
+
+            auto bmp = Rasterize(line, text);
+            if (was_empty)
+                bmp->Fill(Grayscale{0});
+
+            text_height += bmp->GetHeight();
+            text_width = std::max(text_width, (int)bmp->GetWidth());
+            line_bitmaps.push_back(std::move(bmp));
+        }
+    }
+    // if we have expected text buffer dimensions set
+    // then honor those, otherwise base the size on the
+    // metrics from above.
+    const auto width = mBufferWidth ? (int)mBufferWidth : text_width;
+    const auto height = mBufferHeight ? (int)mBufferHeight : text_height;
+
     // the repeated allocation bitmaps for rasterizing content is
     // actually more expensive than the actual rasterization.
     // we can keep a small cache of frequently used bitmap sizes.
     static std::map<std::uint64_t,
-        std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
+            std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
 
     std::shared_ptr<Bitmap<Grayscale>> out;
 
-    const std::uint64_t key = ((uint64_t)mWidth << 32) | mHeight;
+    const std::uint64_t key = ((uint64_t)width << 32) | height;
     auto it = cache.find(key);
     if (it == std::end(cache))
     {
-        out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
+        out = std::make_shared<Bitmap<Grayscale>>(width, height);
         cache[key] = out;
     }
-    else if (it->second.use_count() == 1)
+    else if (it->second.unique())
     {
         // the cached bitmap can only be shared when there's nobody
         // else using it at the moment. in other words the only shared_ptr
@@ -123,57 +164,32 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
         // the expectation currently is that the text raster buffers
         // are used to upload to the GPU and then discarded and not
         // being held onto.
-        out = std::make_shared<Bitmap<Grayscale>>(mWidth, mHeight);
+        out = std::make_shared<Bitmap<Grayscale>>(width, height);
     }
 
-    for (const auto& text : mText)
+    int ypos = 0;
+    int xpos = 0;
+    if (mVerticalAlign == VerticalAlignment::AlignTop)
+        ypos = 0;
+    else if (mVerticalAlign == VerticalAlignment::AlignCenter)
+        ypos = (height - text_height) / 2;
+    else if (mVerticalAlign == VerticalAlignment::AlignBottom)
+        ypos = height - text_height;
+
+    for (const auto& bmp : line_bitmaps)
     {
-        std::stringstream ss(text.text);
-        std::string line;
-        std::vector<std::shared_ptr<Bitmap<Grayscale>>> line_bitmaps;
+        xpos = 0;
+        if (mHorizontalAlign == HorizontalAlignment::AlignLeft)
+            xpos = 0;
+        else if (mHorizontalAlign == HorizontalAlignment::AlignCenter)
+            xpos = (width - (int)bmp->GetWidth()) / 2;
+        else if (mHorizontalAlign == HorizontalAlignment::AlignRight)
+            xpos = width - (int)bmp->GetWidth();
 
-        int total_height = 0;
-
-        // rasterize each line
-        while (std::getline(ss, line))
-        {
-            // if there's a new line without content what's the height of the line ?
-            // we could probably solve this by looking at some font metrics
-            // but for now we're just going to rasterize some character with the font
-            // and font size setting and use the height of that as the height of an empty line.
-            const bool was_empty = line.empty();
-            if (line.empty())
-                line = "k";
-
-            auto bmp = Rasterize(line, text);
-            if (was_empty)
-                bmp->Fill(Grayscale{0});
-
-            total_height += bmp->GetHeight();
-            line_bitmaps.push_back(std::move(bmp));
-        }
-        int ypos = 0;
-        if (text.valign == VerticalAlignment::AlignTop)
-            ypos = 0;
-        else if (text.valign == VerticalAlignment::AlignCenter)
-            ypos = ((int)mHeight - total_height) / 2;
-        else if (text.valign == VerticalAlignment::AlignBottom)
-            ypos = mHeight - total_height;
-
-        for (const auto& bmp : line_bitmaps)
-        {
-            int xpos = 0;
-            if (text.halign == HorizontalAlignment::AlignLeft)
-                xpos = 0;
-            else if (text.halign == HorizontalAlignment::AlignCenter)
-                xpos = ((int)mWidth - (int)bmp->GetWidth()) / 2;
-            else if (text.halign == HorizontalAlignment::AlignRight)
-                xpos = mWidth - bmp->GetWidth();
-
-            out->Copy(xpos, ypos, *bmp);
-            ypos += bmp->GetHeight();
-        }
+        out->Copy(xpos, ypos, *bmp);
+        ypos += bmp->GetHeight();
     }
+
     // for debugging purposes dump the rasterized bitmap as .ppm file
 #if 0
     Bitmap<RGB> tmp;
@@ -189,6 +205,10 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
 std::size_t TextBuffer::GetHash() const
 {
     std::size_t hash = 0;
+    hash = base::hash_combine(hash, mBufferWidth);
+    hash = base::hash_combine(hash, mBufferHeight);
+    hash = base::hash_combine(hash, mVerticalAlign);
+    hash = base::hash_combine(hash, mHorizontalAlign);
     for (const auto& t : mText)
     {
         hash = base::hash_combine(hash, t.text);
@@ -198,8 +218,6 @@ std::size_t TextBuffer::GetHash() const
         // generates a different hash.
         hash = base::hash_combine(hash, (unsigned)t.lineheight);
         hash = base::hash_combine(hash, (unsigned)t.fontsize);
-        hash = base::hash_combine(hash, (unsigned)t.halign);
-        hash = base::hash_combine(hash, (unsigned)t.valign);
         hash = base::hash_combine(hash, (unsigned)t.underline);
     }
     return hash;
@@ -208,8 +226,10 @@ std::size_t TextBuffer::GetHash() const
 nlohmann::json TextBuffer::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "width", mWidth);
-    base::JsonWrite(json, "height", mHeight);
+    base::JsonWrite(json, "width", mBufferWidth);
+    base::JsonWrite(json, "height", mBufferHeight);
+    base::JsonWrite(json, "horizontal_alignment", mHorizontalAlign);
+    base::JsonWrite(json, "vertical_alignment", mVerticalAlign);
     for (const auto& text : mText)
     {
         nlohmann::json js;
@@ -218,8 +238,6 @@ nlohmann::json TextBuffer::ToJson() const
         base::JsonWrite(js, "font_size", text.fontsize);
         base::JsonWrite(js, "line_height", text.lineheight);
         base::JsonWrite(js, "underline", text.underline);
-        base::JsonWrite(js, "horizontal_alignment", text.halign);
-        base::JsonWrite(js, "vertical_alignment", text.valign);
         json["texts"].push_back(js);
     }
     return json;
@@ -229,8 +247,10 @@ nlohmann::json TextBuffer::ToJson() const
 std::optional<TextBuffer> TextBuffer::FromJson(const nlohmann::json& json)
 {
     TextBuffer buffer;
-    if (!base::JsonReadSafe(json, "width", &buffer.mWidth) ||
-        !base::JsonReadSafe(json, "height", &buffer.mHeight))
+    if (!base::JsonReadSafe(json, "width", &buffer.mBufferWidth) ||
+        !base::JsonReadSafe(json, "height", &buffer.mBufferHeight) ||
+        !base::JsonReadSafe(json, "horizontal_alignment", &buffer.mHorizontalAlign) ||
+        !base::JsonReadSafe(json, "vertical_alignment", &buffer.mVerticalAlign))
         return std::nullopt;
 
     if (!json.contains("texts"))
@@ -244,9 +264,7 @@ std::optional<TextBuffer> TextBuffer::FromJson(const nlohmann::json& json)
             !base::JsonReadSafe(js, "font_file", &t.font) ||
             !base::JsonReadSafe(js, "font_size", &t.fontsize) ||
             !base::JsonReadSafe(js, "line_height", &t.lineheight) |
-            !base::JsonReadSafe(js, "underline", &t.underline) ||
-            !base::JsonReadSafe(js, "horizontal_alignment", &t.halign) ||
-            !base::JsonReadSafe(js, "vertical_alignment", &t.valign))
+            !base::JsonReadSafe(js, "underline", &t.underline))
             return std::nullopt;
         buffer.mText.push_back(std::move(t));
     }

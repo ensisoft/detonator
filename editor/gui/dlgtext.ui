@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
+    <width>497</width>
     <height>793</height>
    </rect>
   </property>
@@ -169,6 +169,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="btnAdjust">
+             <property name="text">
+              <string>Adjust</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer_4">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -297,6 +304,7 @@
   <tabstop>text</tabstop>
   <tabstop>bufferWidth</tabstop>
   <tabstop>bufferHeight</tabstop>
+  <tabstop>btnAdjust</tabstop>
   <tabstop>chkScale</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>

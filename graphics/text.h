@@ -34,7 +34,7 @@
 #include <optional>
 
 #include "base/assert.h"
-#include "bitmap.h"
+#include "graphics/bitmap.h"
 
 namespace gfx
 {
@@ -44,34 +44,28 @@ namespace gfx
     class TextBuffer
     {
     public:
-        // Construct the text buffer with given maximum
-        // width and height dimensions.
+        // Construct the text buffer with given buffer dimensions.
         // The dimensions are used when aligning and positioning
         // the rasterized text in the buffer.
-        // the units are pixels.
+        // the units are pixels. 
         TextBuffer(unsigned width, unsigned height)
-          : mWidth(width)
-          , mHeight(height)
+          : mBufferWidth(width)
+          , mBufferHeight(height)
         {}
         // Construct an empty text buffer without any dimensions.
         // The buffer needs to be resized before the content can
         // be rasterized.
         TextBuffer() = default;
 
-        // get the width (length) of the buffer
-        unsigned GetWidth() const
-        { return mWidth; }
-
+        // Get the width of the raster buffer if set. This is the
+        // static dimension when requesting a fixed size buffer.
+        unsigned GetBufferWidth() const
+        { return mBufferWidth; }
         // get the height of the buffer.
-        unsigned GetHeight() const
-        { return mHeight; }
-
+        unsigned GetBufferHeight() const
+        { return mBufferHeight; }
         // Set the new text buffer size.
-        void SetSize(unsigned width, unsigned height)
-        {
-            mWidth = width;
-            mHeight = height;
-        }
+        void SetBufferSize(unsigned width, unsigned height);
 
         // Rasterize the text buffer contents into a bitmap
         std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
@@ -86,6 +80,14 @@ namespace gfx
             AlignCenter,
             AlignBottom
         };
+        void SetAlignment(HorizontalAlignment align)
+        { mHorizontalAlign = align; }
+        void SetAlignment(VerticalAlignment align)
+        { mVerticalAlign = align; }
+        HorizontalAlignment GetHorizontalAligment() const
+        { return mHorizontalAlign; }
+        VerticalAlignment GetVerticalAlignment() const
+        { return mVerticalAlign; }
 
         // Some general notes about text styling:
         // Common "styling" options such as Italic and Bold text are normally
@@ -117,12 +119,6 @@ namespace gfx
 
             // Text underline flag.
             bool underline = false;
-
-            // horizontal text alignment with respect to the rasterized buffer.
-            HorizontalAlignment halign = HorizontalAlignment::AlignCenter;
-
-            // vertical text alignment with respect to the rasterized buffer.
-            VerticalAlignment valign = VerticalAlignment::AlignCenter;
         };
 
         // Add text to the buffer.
@@ -187,9 +183,14 @@ namespace gfx
         std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, const Text& style) const;
 
     private:
-        unsigned mWidth  = 0;
-        unsigned mHeight = 0;
-
+        // static raster buffer (bitmap) width or 0 if size to content is wanted.
+        unsigned mBufferWidth  = 0;
+        // static buffer buffer (bitmap) height or 0 if size to content is wanted.
+        unsigned mBufferHeight = 0;
+        // horizontal text alignment with respect to the rasterized buffer.
+        HorizontalAlignment mHorizontalAlign = HorizontalAlignment::AlignCenter;
+        // vertical text alignment with respect to the rasterized buffer.
+        VerticalAlignment mVerticalAlign = VerticalAlignment::AlignCenter;
         std::vector<Text> mText;
     };
 
