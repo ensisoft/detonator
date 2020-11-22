@@ -746,7 +746,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         return QMainWindow::event(event);
 
     // no app? return
-    if (!mApp)
+    if (!mApp || !mInitDone)
         return QMainWindow::event(event);
 
     // app not providing a listener? return
