@@ -185,6 +185,8 @@ struct OpenGLFunctions
     PFNGLREADPIXELSPROC              glReadPixels;
     PFNGLLINEWIDTHPROC               glLineWidth;
     PFNGLSCISSORPROC                 glScissor;
+    PFNGLCULLFACEPROC                glCullFace;
+    PFNGLFRONTFACEPROC               glFrontFace;
 };
 
 //
@@ -255,6 +257,8 @@ public:
         RESOLVE(glReadPixels);
         RESOLVE(glLineWidth);
         RESOLVE(glScissor);
+        RESOLVE(glCullFace);
+        RESOLVE(glFrontFace);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -299,6 +303,12 @@ public:
         DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
         DEBUG("Fragment shader texture units: %1", max_texture_units);
         mTextureUnits.resize(max_texture_units);
+
+        // set some initial state that is currently not changed
+        GL_CALL(glDisable(GL_DEPTH_TEST));
+        GL_CALL(glEnable(GL_CULL_FACE));
+        GL_CALL(glCullFace(GL_BACK));
+        GL_CALL(glFrontFace(GL_CCW));
     }
     OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
         : OpenGLES2GraphicsDevice(context.get())

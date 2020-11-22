@@ -176,10 +176,16 @@ Geometry* Capsule::Upload(Device &device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
+
     // todo LOD information
     const auto slices = 50;
+    const auto radius = 0.1f;
+    const auto max_slice = mStyle == Style::Solid ? slices + 1 : slices;
+    const auto angle_increment = math::Pi / slices;
+
     const auto* name = mStyle == Style::Outline ? "CapsuleOutline" :
                       (mStyle == Style::Wireframe ? "CapsuleWireframe" : "Capsule");
+
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
@@ -190,38 +196,36 @@ Geometry* Capsule::Upload(Device &device) const
 
         // semi-circle at the left end.
         Vertex left_center;
-        left_center.aPosition.x =  0.1f;
+        left_center.aPosition.x =  radius;
         left_center.aPosition.y = -0.5f;
-        left_center.aTexCoord.x =  0.1f;
+        left_center.aTexCoord.x =  radius;
         left_center.aTexCoord.y =  0.5f;
         if (mStyle == Style::Solid)
             vs.push_back(left_center);
 
-        const float left_radius = 0.1;
-        const float left_angle_increment = math::Pi / slices;
         float left_angle = math::Pi * 0.5;
-        for (unsigned i=0; i<= slices; ++i)
+        for (unsigned i=0; i<max_slice; ++i)
         {
-            const auto x = std::cos(left_angle) * left_radius;
-            const auto y = std::sin(left_angle) * left_radius;
+            const auto x = std::cos(left_angle) * radius;
+            const auto y = std::sin(left_angle) * radius;
             Vertex v;
-            v.aPosition.x =  0.1 + x;
-            v.aPosition.y = -0.5 - y;
-            v.aTexCoord.x =  0.1 + x;
-            v.aTexCoord.y =  0.5 + y;
+            v.aPosition.x =  radius + x;
+            v.aPosition.y = -0.5f + y;
+            v.aTexCoord.x =  radius + x;
+            v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
 
-            left_angle += left_angle_increment;
+            left_angle += angle_increment;
 
             if (mStyle == Style::Wireframe)
             {
-                const auto x = std::cos(left_angle) * left_radius;
-                const auto y = std::sin(left_angle) * left_radius;
+                const auto x = std::cos(left_angle) * radius;
+                const auto y = std::sin(left_angle) * radius;
                 Vertex v;
-                v.aPosition.x =  0.1 + x;
-                v.aPosition.y = -0.5 - y;
-                v.aTexCoord.x =  0.1 + x;
-                v.aTexCoord.y =  0.5 + y;
+                v.aPosition.x =  radius + x;
+                v.aPosition.y = -0.5f + y;
+                v.aTexCoord.x =  radius + x;
+                v.aTexCoord.y =  0.5f - y;
                 vs.push_back(v);
                 vs.push_back(left_center);
             }
@@ -262,40 +266,40 @@ Geometry* Capsule::Upload(Device &device) const
         }
 
         offset = vs.size();
+
         // semi circle at the right end
         Vertex right_center;
-        right_center.aPosition.x =  0.9f;
+        right_center.aPosition.x =  1.0f - radius;
         right_center.aPosition.y = -0.5f;
-        right_center.aTexCoord.x =  0.9f;
+        right_center.aTexCoord.x =  1.0f - radius;
         right_center.aTexCoord.y =  0.5f;
         if (mStyle == Style::Solid)
             vs.push_back(right_center);
 
-        const float right_radius = 0.1;
         const float right_angle_increment = math::Pi / slices;
         float right_angle = math::Pi * -0.5;
-        for (unsigned i=0; i<= slices; ++i)
+        for (unsigned i=0; i<max_slice; ++i)
         {
-            const auto x = std::cos(right_angle) * right_radius;
-            const auto y = std::sin(right_angle) * right_radius;
+            const auto x = std::cos(right_angle) * radius;
+            const auto y = std::sin(right_angle) * radius;
             Vertex v;
-            v.aPosition.x =  0.9 + x;
-            v.aPosition.y = -0.5 - y;
-            v.aTexCoord.x =  0.9 + x;
-            v.aTexCoord.y =  0.5 + y;
+            v.aPosition.x =  1.0f - radius + x;
+            v.aPosition.y = -0.5f + y;
+            v.aTexCoord.x =  1.0f - radius + x;
+            v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
 
             right_angle += right_angle_increment;
 
             if (mStyle == Style::Wireframe)
             {
-                const auto x = std::cos(right_angle) * right_radius;
-                const auto y = std::sin(right_angle) * right_radius;
+                const auto x = std::cos(right_angle) * radius;
+                const auto y = std::sin(right_angle) * radius;
                 Vertex v;
-                v.aPosition.x =  0.9 + x;
-                v.aPosition.y = -0.5 - y;
-                v.aTexCoord.x =  0.9 + x;
-                v.aTexCoord.y =  0.5 + y;
+                v.aPosition.x =  1.0f - radius + x;
+                v.aPosition.y = -0.5f + y;
+                v.aTexCoord.x =  1.0f - radius + x;
+                v.aTexCoord.y =  0.5f - y;
                 vs.push_back(v);
                 vs.push_back(right_center);
             }
