@@ -316,6 +316,16 @@ namespace app
 
         // Project settings.
         struct ProjectSettings {
+            enum class WindowMode {
+                // Use fullscreen rendering surface (it's still a window but
+                // conceptually slightly different)
+                // The size of the rendering surface will be determined
+                // by the resolution of the display.
+                Fullscreen,
+                // Use a window of specific rendering surface size
+                // border and resize settings.
+                Windowed,
+            };
             unsigned multisample_sample_count = 0;
             // user defined name of the application.
             QString application_name;
@@ -328,18 +338,20 @@ namespace app
             gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Nearest;
             // default texture magnification filter.
             gfx::Device::MagFilter default_mag_filter = gfx::Device::MagFilter::Nearest;
-            // the assumed window width when lauching the application
-            // with its own window.
+            // The starting window mode.
+            WindowMode window_mode = WindowMode::Windowed;
+            // the assumed window width when launching the application
+            // with its own window, i.e. when window_mode is Windowed.
             unsigned window_width = 1024;
             // the assumed window height  when lauching the application
             // with its own window.
             unsigned window_height = 768;
-            // window flag to set fullscreen on start.
-            bool window_set_fullscreen = false;
             // window flag to allow window to be resized.
             bool window_can_resize = true;
             // window flag to control window border
             bool window_has_border = true;
+            // vsync or not.
+            bool window_vsync = false;
             // how many times the app ticks per second.
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.
@@ -368,6 +380,12 @@ namespace app
             // the sub directory (package) name that will be created
             // in the output dir.
             QString package_name;
+            // Whether to write the content.json file that has the workspace
+            // content for the game.
+            bool write_content_file = true;
+            // Whether to write the config.json file that has the configuration
+            // for launching the game.
+            bool write_config_file = true;
             // Combine small textures into texture atlas files.
             bool combine_textures = true;
             // Resize large (oversized) textures to fit in the

@@ -68,6 +68,8 @@ DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
     GetProperty(workspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     GetProperty(workspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     GetProperty(workspace, "packing_param_pack_name", mUI.editPckName);
+    GetProperty(workspace, "packing_param_write_config", mUI.chkWriteConfig);
+    GetProperty(workspace, "packing_param_write_content", mUI.chkWriteContent);
 
     SetValue(mUI.editOutDir, app::CleanPath(workspace.GetDir()));
     mUI.progressBar->setVisible(false);
@@ -152,14 +154,18 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     SetProperty(mWorkspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     SetProperty(mWorkspace, "packing_param_pack_name", name);
+    SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
+    SetProperty(mWorkspace, "packing_param_write_content", mUI.chkWriteContent);
 
     app::Workspace::ContentPackingOptions options;
-    options.directory = dir;
-    options.package_name = name;
-    options.combine_textures = GetValue(mUI.chkCombineTextures);
-    options.resize_textures  = GetValue(mUI.chkResizeTextures);
-    options.max_texture_width = GetValue(mUI.cmbMaxTexWidth);
+    options.directory          = dir;
+    options.package_name       = name;
+    options.combine_textures   = GetValue(mUI.chkCombineTextures);
+    options.resize_textures    = GetValue(mUI.chkResizeTextures);
+    options.max_texture_width  = GetValue(mUI.cmbMaxTexWidth);
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
+    options.write_config_file  = GetValue(mUI.chkWriteConfig);
+    options.write_content_file = GetValue(mUI.chkWriteContent);
 
     const auto success = mWorkspace.PackContent(resources, options);
 

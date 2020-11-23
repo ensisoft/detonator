@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>485</height>
+    <width>521</width>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,44 +34,6 @@
           <string>Application settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Default MSAA</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Application version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Initial window height</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QSpinBox" name="ticksPerSecond">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QLineEdit" name="edtAppVersion"/>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Application name</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
@@ -79,59 +41,25 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Initial window width</string>
+             <string>Window flags</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbMinFilter"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Default texture mag filter</string>
+             <string>Window height</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="wndHeight">
-            <property name="minimum">
-             <number>768</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-           </widget>
+          <item row="13" column="1">
+           <widget class="QLineEdit" name="edtAppVersion"/>
           </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="wndWidth">
-            <property name="minimum">
-             <number>1024</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Application library</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QCheckBox" name="chkWndIsFullscreen">
-              <property name="text">
-               <string>Fullscreen</string>
-              </property>
-             </widget>
-            </item>
             <item>
              <widget class="QCheckBox" name="chkWndCanResize">
               <property name="text">
@@ -146,30 +74,78 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="chkVsync">
+              <property name="text">
+               <string>VSYNC</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
-          <item row="12" column="1">
-           <widget class="QLineEdit" name="edtAppLibrary"/>
-          </item>
-          <item row="9" column="1">
+          <item row="11" column="1">
            <widget class="QLineEdit" name="edtAppName"/>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Window flags</string>
-            </property>
-           </widget>
+          <item row="14" column="1">
+           <widget class="QLineEdit" name="edtAppLibrary"/>
           </item>
-          <item row="7" column="0">
+          <item row="9" column="0">
            <widget class="QLabel" name="label_14">
             <property name="text">
              <string>Ticks per second</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbMagFilter"/>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="wndHeight">
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Application version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbMinFilter"/>
+          </item>
+          <item row="9" column="1">
+           <widget class="QSpinBox" name="ticksPerSecond">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Application library</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Default texture mag filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="wndWidth">
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+           </widget>
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="cmbMSAA">
@@ -198,14 +174,10 @@
             </item>
            </widget>
           </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Updates per second</string>
-            </property>
-           </widget>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cmbMagFilter"/>
           </item>
-          <item row="8" column="1">
+          <item row="10" column="1">
            <widget class="QSpinBox" name="updatesPerSecond">
             <property name="minimum">
              <number>1</number>
@@ -217,6 +189,44 @@
              <number>60</number>
             </property>
            </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Window mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Application name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Updates per second</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Window width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Default MSAA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbWindowMode"/>
           </item>
          </layout>
         </widget>
@@ -330,11 +340,12 @@
   <tabstop>cmbMSAA</tabstop>
   <tabstop>cmbMinFilter</tabstop>
   <tabstop>cmbMagFilter</tabstop>
+  <tabstop>cmbWindowMode</tabstop>
   <tabstop>wndWidth</tabstop>
   <tabstop>wndHeight</tabstop>
-  <tabstop>chkWndIsFullscreen</tabstop>
   <tabstop>chkWndCanResize</tabstop>
   <tabstop>chkWndHasBorder</tabstop>
+  <tabstop>chkVsync</tabstop>
   <tabstop>ticksPerSecond</tabstop>
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>

@@ -245,14 +245,12 @@ int main(int argc, char* argv[])
         // read config JSON
         const auto& json = nlohmann::json::parse(in);
 
-        int swap_interval = 0;
         std::string library;
         std::string content;
         std::string title = "MainWindow";
         base::JsonReadSafe(json["application"], "title", &title);
         base::JsonReadSafe(json["application"], "library", &library);
         base::JsonReadSafe(json["application"], "content", &content);
-        base::JsonReadSafe(json["application"], "swap_interval", &swap_interval);
         LoadAppLibrary(library);
         DEBUG("Loaded library: '%1'", library);
 
@@ -302,7 +300,7 @@ int main(int argc, char* argv[])
             attrs.red_size, attrs.green_size, attrs.blue_size, attrs.alpha_size,
             attrs.stencil_size, attrs.depth_size);
         DEBUG("Sampling: %1", attrs.sampling);
-        DEBUG("Swap interval: %1", swap_interval);
+
 
         auto context = std::make_shared<WindowContext>(attrs);
 
@@ -311,11 +309,13 @@ int main(int argc, char* argv[])
         bool window_can_resize = true;
         bool window_has_border = true;
         bool window_set_fullscreen = false;
+        bool window_vsync = false;
         base::JsonReadSafe(json["window"], "width", &window_width);
         base::JsonReadSafe(json["window"], "height", &window_height);
         base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
         base::JsonReadSafe(json["window"], "has_border", &window_has_border);
         base::JsonReadSafe(json["window"], "set_fullscreen", &window_set_fullscreen);
+        base::JsonReadSafe(json["window"], "vsync", &window_vsync);
 
         wdk::Window window;
         // makes sure to connect the listener before creating the window
@@ -332,7 +332,8 @@ int main(int argc, char* argv[])
 
         // Setup context to render in the window.
         context->SetWindowSurface(window);
-        context->SetSwapInterval(swap_interval);
+        context->SetSwapInterval(window_vsync ? 1 : 0);
+        DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
 
         // setup application
         app->Init(context.get(), window.GetSurfaceWidth(), window.GetSurfaceHeight());

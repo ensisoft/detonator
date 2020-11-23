@@ -13,7 +13,7 @@
         "height": 768,
         "can_resize": true,
         "has_border": true,
-        "set_fullscreen": false
+        "vsync": false,
     },
     "application": {
         "title": "hello world",

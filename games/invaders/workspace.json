@@ -172,7 +172,8 @@
         "window_can_resize": true,
         "window_has_border": true,
         "window_height": 768,
-        "window_set_fullscreen": false,
+        "window_mode": "Windowed",
+        "window_vsync": true,
         "window_width": 1024,
         "working_folder": "${workspace}/dist"
     },
@@ -197,6 +198,8 @@
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_pack_name": "dist/",
-        "packing_param_resize_large_textures": true
+        "packing_param_resize_large_textures": true,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
     }
 }

@@ -1028,11 +1028,12 @@ bool Workspace::SaveWorkspace(const QString& filename) const
     project["application_library"]      = mSettings.application_library;
     project["default_min_filter"]       = toString(mSettings.default_min_filter);
     project["default_mag_filter"]       = toString(mSettings.default_mag_filter);
+    project["window_mode"]              = toString(mSettings.window_mode);
     project["window_width"]             = (int)mSettings.window_width;
     project["window_height"]            = (int)mSettings.window_height;
-    project["window_set_fullscreen"]    = mSettings.window_set_fullscreen;
     project["window_can_resize"]        = mSettings.window_can_resize;
     project["window_has_border"]        = mSettings.window_has_border;
+    project["window_vsync"]             = mSettings.window_vsync;
     project["ticks_per_second"]         = (int)mSettings.ticks_per_second;
     project["updates_per_second"]       = (int)mSettings.updates_per_second;
     project["working_folder"]           = mSettings.working_folder;
@@ -1098,11 +1099,13 @@ bool Workspace::LoadWorkspace(const QString& filename)
         gfx::Device::MinFilter::Nearest);
     mSettings.default_mag_filter     = EnumFromString(project["default_mag_filter"].toString(),
         gfx::Device::MagFilter::Nearest);
+    mSettings.window_mode            = EnumFromString(project["window_mode"].toString(),
+        ProjectSettings::WindowMode::Windowed);
     mSettings.window_width           = project["window_width"].toInt();
     mSettings.window_height          = project["window_height"].toInt();
-    mSettings.window_set_fullscreen  = project["window_set_fullscreen"].toBool();
     mSettings.window_can_resize      = project["window_can_resize"].toBool();
     mSettings.window_has_border      = project["window_has_border"].toBool();
+    mSettings.window_vsync           = project["window_vsync"].toBool();
     mSettings.ticks_per_second       = project["ticks_per_second"].toInt();
     mSettings.updates_per_second     = project["updates_per_second"].toInt();
     mSettings.working_folder         = project["working_folder"].toString();
@@ -1398,16 +1401,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         ERROR("Failed to create %1", outdir);
         return false;
     }
-    // filename of the JSON based descriptor that contains all the
-    // resource definitions.
-    const auto& json_filename = JoinPath(outdir, "content.json");
-
-    QFile json_file(json_filename);
-    if (!json_file.open(QIODevice::WriteOnly))
-    {
-        ERROR("Failed to open file: '%1' for writing (%2)", json_filename, json_file.error());
-        return false;
-    }
 
     // unfortunately we need to make copies of the resources
     // since packaging might modify the resources yet the
@@ -1490,37 +1483,110 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
-    emit ResourcePackingUpdate("Writing JSON file...", 0, 0);
-
-    // finally serialize
-    nlohmann::json json;
-    json["json_version"]  = 1;
-    json["made_with_app"] = APP_TITLE;
-    json["made_with_ver"] = APP_VERSION;
-    for (const auto& resource : mutable_copies)
+    // write content file ?
+    if (options.write_content_file)
     {
-        resource->Serialize(json);
+        emit ResourcePackingUpdate("Writing content JSON file...", 0, 0);
+        // filename of the JSON based descriptor that contains all the
+        // resource definitions.
+        const auto &json_filename = JoinPath(outdir, "content.json");
+
+        QFile json_file;
+        json_file.setFileName(json_filename);
+        json_file.open(QIODevice::WriteOnly);
+        if (!json_file.isOpen())
+        {
+            ERROR("Failed to open file: '%1' for writing (%2)", json_filename, json_file.error());
+            return false;
+        }
+
+        // finally serialize
+        nlohmann::json json;
+        json["json_version"] = 1;
+        json["made_with_app"] = APP_TITLE;
+        json["made_with_ver"] = APP_VERSION;
+        for (const auto &resource : mutable_copies)
+        {
+            resource->Serialize(json);
+        }
+
+        const auto &str = json.dump(2);
+        if (json_file.write(&str[0], str.size()) == -1)
+        {
+            ERROR("Failed to write JSON file: '%1' %2", json_filename, json_file.error());
+            return false;
+        }
+        json_file.flush();
+        json_file.close();
     }
 
-    const auto& str = json.dump(2);
-    if (json_file.write(&str[0], str.size()) == -1)
+    // write config file?
+    if (options.write_config_file)
     {
-        ERROR("Failed to write JSON file: '%1' %2", json_filename, json_file.error());
-        return false;
+        emit ResourcePackingUpdate("Writing config JSON file...", 0, 0);
+
+        const auto& json_filename = JoinPath(outdir, "config.json");
+        QFile json_file;
+        json_file.setFileName(json_filename);
+        json_file.open(QIODevice::WriteOnly);
+        if (!json_file.isOpen())
+        {
+            ERROR("Failed to open file: '%1' for writing (%2)", json_filename, json_file.error());
+            return false;
+        }
+        nlohmann:: json json;
+        json["json_version"]  = 1;
+        json["made_with_app"] = APP_TITLE;
+        json["made_with_ver"] = APP_VERSION;
+        json["config"]["red_size"]     = 8;
+        json["config"]["green_size"]   = 8;
+        json["config"]["blue_size"]    = 8;
+        json["config"]["alpha_size"]   = 8;
+        json["config"]["stencil_size"] = 8;
+        json["config"]["depth_size"]   = 0;
+        if (mSettings.multisample_sample_count == 0)
+            json["config"]["sampling"] = "None";
+        else if (mSettings.multisample_sample_count == 4)
+            json["config"]["sampling"] = "MSAA4";
+        else if (mSettings.multisample_sample_count == 8)
+            json["config"]["sampling"] = "MSAA8";
+        else if (mSettings.multisample_sample_count == 16)
+            json["config"]["sampling"] = "MSAA16";
+        json["window"]["width"]  = mSettings.window_width;
+        json["window"]["height"] = mSettings.window_height;
+        json["window"]["can_resize"] = mSettings.window_can_resize;
+        json["window"]["has_border"] = mSettings.window_has_border;
+        json["window"]["vsync"]      = mSettings.window_vsync;
+        if (mSettings.window_mode == ProjectSettings::WindowMode::Windowed)
+            json["window"]["set_fullscreen"] = false;
+        else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
+            json["window"]["set_fullscreen"] = true;
+        json["application"]["title"]   = ToUtf8(mSettings.application_name);
+        json["application"]["version"] = ToUtf8(mSettings.application_version);
+        json["application"]["library"] = ToUtf8(mSettings.application_library);
+        json["application"]["ticks_per_second"]   = (float)mSettings.ticks_per_second;
+        json["application"]["updates_per_second"] = (float)mSettings.updates_per_second;
+        json["application"]["content"] = "content.json";
+
+        const auto& str = json.dump(2);
+        if (json_file.write(&str[0], str.size()) == -1)
+        {
+            ERROR("Failed to write JSON file: '%1' '%2'", json_filename, json_file.error());
+            return false;
+        }
+        json_file.flush();
+        json_file.close();
     }
-    json_file.flush();
-    json_file.close();
+
     if (const auto errors = packer.GetNumErrors())
     {
         WARN("Resource packing completed with errors (%1).", errors);
         WARN("Please see the log file for details about errors.");
+        return false;
     }
-    else
-    {
-        INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
-        //INFO("%1 files copied.", packer.GetNumFilesCopied());
-    }
-    return packer.GetNumErrors() == 0;
+
+    INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
+    return true;
 }
 
 void Workspace::UpdateResource(const Resource* resource)
