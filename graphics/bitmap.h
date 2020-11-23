@@ -60,7 +60,7 @@ namespace gfx
         u8 r = 0;
         Grayscale(u8 r) : r(r)
         {}
-        Grayscale() {}
+        Grayscale() = default;
         Grayscale(const RGB& rgb); // defined after RGB
         Grayscale(const RGBA& rgba); // defined after RGBA
     };
@@ -69,7 +69,7 @@ namespace gfx
         u8 r = 0;
         u8 g = 0;
         u8 b = 0;
-        RGB() {}
+        RGB() = default;
         RGB(u8 r, u8 g, u8 b) : r(r), g(g), b(b)
         {}
         RGB(Color c)
@@ -161,7 +161,7 @@ namespace gfx
         u8 b = 0;
         u8 a = 255;
 
-        RGBA() {}
+        RGBA() = default;
         RGBA(u8 r, u8 g, u8 b, u8 a) : r(r), g(g), b(b), a(a)
         {}
         RGBA(Color c)
@@ -416,7 +416,10 @@ namespace gfx
         template<typename T> explicit
         Bitmap(const Bitmap<T>& other)
         {
-            Resize(other.GetWidth(), other.GetHeight());
+            // don't invoke virtual functions from a ctor!
+            mWidth = other.GetWidth();
+            mHeight = other.GetHeight();
+            mPixels.resize(mWidth * mHeight);
             Copy(0, 0, other);
         }
 
@@ -470,7 +473,7 @@ namespace gfx
             const auto ptr = (const uint8_t*)&mPixels[0];
             const auto len  = mPixels.size() * sizeof(Pixel);
             for (size_t i=0; i<len; ++i)
-                hash_value ^= std::hash<std::uint8_t>()(ptr[i]);
+                hash_value = base::hash_combine(hash_value, ptr[i]);
             return hash_value;
         }
 
@@ -739,6 +742,9 @@ namespace gfx
     template<typename OutputIt>
     void WritePPM(const Bitmap<RGB>& bmp, OutputIt out)
     {
+        static_assert(sizeof(RGB) == 3,
+            "Padding bytes found. Cannot copy RGB data as a byte stream.");
+
         const auto w = bmp.GetWidth();
         const auto h = bmp.GetHeight();
 
@@ -746,11 +752,7 @@ namespace gfx
         ss << "P6 " << w << " " << h << " 255\n";
         std::string header = ss.str();
         std::copy(std::begin(header), std::end(header), out);
-
         // todo: fix if out is pointer.
-        static_assert(sizeof(RGB) == 3,
-            "Padding bytes found. Cannot copy RGB data as a byte stream.");
-
         const auto bytes = w * h * sizeof(RGB);
         const auto* beg  = (const char*)bmp.GetData();
         const auto* end  = (const char*)bmp.GetData() + bytes;
@@ -920,7 +922,6 @@ namespace gfx
             }
             return true;
         }
-
 
         virtual std::unique_ptr<IBitmap> Generate() const override
         {
