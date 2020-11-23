@@ -1464,7 +1464,7 @@ bool KinematicsParticleEngineClass::UpdateParticle(InstanceState& state, size_t 
     else if (mParams.motion == Motion::Projectile)
     {
         p.position += (p.direction * dt);
-        p.direction.y += (dt * mParams.gravity);
+        p.direction += (dt * mParams.gravity);
     }
 
     const auto& p1 = p.position;

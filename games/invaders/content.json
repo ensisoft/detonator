@@ -3000,7 +3000,10 @@
       "boundary": "Wrap",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
-      "gravity": 0.30000001192092896,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
       "id": "hR9OWOACQy",
@@ -3030,7 +3033,10 @@
       "boundary": "Wrap",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
-      "gravity": 0.30000001192092896,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
       "id": "9D2vt3ioun",
@@ -3060,7 +3066,10 @@
       "boundary": "Wrap",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
-      "gravity": 0.30000001192092896,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
       "id": "d8CDbfETmY",
@@ -3090,7 +3099,10 @@
       "boundary": "Wrap",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
-      "gravity": 0.30000001192092896,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
       "id": "FbK00HsTug",
@@ -3120,7 +3132,10 @@
       "boundary": "Kill",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
-      "gravity": 0.30000001192092896,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
       "growth_over_dist": 0.0,
       "growth_over_time": -20.0,
       "id": "wE5I5Tg7p0",

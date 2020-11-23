@@ -72,6 +72,7 @@ namespace gui
         void on_resetTransform_clicked();
         void on_plus90_clicked();
         void on_minus90_clicked();
+        void on_motion_currentIndexChanged(int);
         void paintScene(gfx::Painter& painter, double secs);
         void newResourceAvailable(const app::Resource* resource);
         void resourceToBeDeleted(const app::Resource* resource);

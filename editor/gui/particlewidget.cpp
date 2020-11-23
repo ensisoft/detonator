@@ -76,6 +76,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
+    on_motion_currentIndexChanged(0);
 
     // connect workspace signals for resource management
     connect(mWorkspace, &app::Workspace::NewResourceAvailable,
@@ -114,7 +115,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.numParticles, params.num_particles);
     SetValue(mUI.simWidth, params.max_xpos);
     SetValue(mUI.simHeight, params.max_ypos);
-    SetValue(mUI.gravity, params.gravity);
+    SetValue(mUI.gravityX, params.gravity.x);
+    SetValue(mUI.gravityY, params.gravity.y);
     SetValue(mUI.minLifetime, params.min_lifetime);
     SetValue(mUI.maxLifetime, params.max_lifetime);
     SetValue(mUI.minPointsize, params.min_point_size);
@@ -133,7 +135,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     SetValue(mUI.distSizeDerivative, params.rate_of_change_in_size_wrt_dist);
     SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
     SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
-
+    on_motion_currentIndexChanged(0);
     mOriginalHash = engine->GetHash();
     mClass = *engine;
 
@@ -183,7 +185,8 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.simHeight);
     settings.saveWidget("Particle", mUI.motion);
     settings.saveWidget("Particle", mUI.boundary);
-    settings.saveWidget("Particle", mUI.gravity);
+    settings.saveWidget("Particle", mUI.gravityX);
+    settings.saveWidget("Particle", mUI.gravityY);
     settings.saveWidget("Particle", mUI.when);
     settings.saveWidget("Particle", mUI.numParticles);
     settings.saveWidget("Particle", mUI.initRect);
@@ -244,7 +247,8 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.motion);
     settings.loadWidget("Particle", mUI.boundary);
     settings.loadWidget("Particle", mUI.when);
-    settings.loadWidget("Particle", mUI.gravity);
+    settings.loadWidget("Particle", mUI.gravityX);
+    settings.loadWidget("Particle", mUI.gravityY);
     settings.loadWidget("Particle", mUI.numParticles);
     settings.loadWidget("Particle", mUI.initRect);
     settings.loadWidget("Particle", mUI.initX);
@@ -269,6 +273,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.alphaDerivatives);
     settings.loadWidget("Particle", mUI.timeAlphaDerivative);
     settings.loadWidget("Particle", mUI.distAlphaDerivative);
+    on_motion_currentIndexChanged(0);
     return true;
 }
 
@@ -400,7 +405,8 @@ void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params
     params.num_particles  = GetValue(mUI.numParticles);
     params.max_xpos       = GetValue(mUI.simWidth);
     params.max_ypos       = GetValue(mUI.simHeight);
-    params.gravity        = GetValue(mUI.gravity);
+    params.gravity.x      = GetValue(mUI.gravityX);
+    params.gravity.y      = GetValue(mUI.gravityY);
     params.min_point_size = GetValue(mUI.minPointsize);
     params.max_point_size = GetValue(mUI.maxPointsize);
     params.min_velocity   = GetValue(mUI.minVelocity);
@@ -516,6 +522,21 @@ void ParticleEditorWidget::on_minus90_clicked()
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(value - 90.0f);
+}
+
+void ParticleEditorWidget::on_motion_currentIndexChanged(int)
+{
+    const gfx::KinematicsParticleEngineClass::Motion motion = GetValue(mUI.motion);
+    if (motion == gfx::KinematicsParticleEngineClass::Motion::Projectile)
+    {
+        mUI.gravityY->setEnabled(true);
+        mUI.gravityX->setEnabled(true);
+    }
+    else
+    {
+        mUI.gravityY->setEnabled(false);
+        mUI.gravityX->setEnabled(false);
+    }
 }
 
 void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)

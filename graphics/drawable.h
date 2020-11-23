@@ -787,7 +787,7 @@ namespace gfx
             // rate of change in alpha value with respect to unit of distance.
             float rate_of_change_in_alpha_wrt_dist = 0.0f;
             // the gravity that applies when using projectile particles.
-            float gravity = 0.3;
+            glm::vec2 gravity = {0.0f, 0.3f};
         };
 
         // State of any instance of KinematicsParticleEngine.
