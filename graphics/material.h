@@ -37,9 +37,11 @@
 #include <memory>
 #include <stdexcept>
 #include <functional> // for hash
+#include <optional>
+#include <utility>
+#include <type_traits>
 #include <cmath>
 #include <cassert>
-#include <optional>
 
 #include "base/utility.h"
 #include "base/assert.h"
@@ -154,7 +156,8 @@ namespace gfx
             {
                 mFile = packer->GetPackedTextureId(this);
             }
-
+            void SetFileName(const std::string& file)
+            { mFile = file; }
             const std::string& GetFilename() const
             { return mFile; }
         private:
@@ -248,6 +251,36 @@ namespace gfx
                 else return false;
                 return true;
             }
+            void SetBitmap(std::unique_ptr<IBitmap> bitmap)
+            { mBitmap = std::move(bitmap); }
+            template<typename T>
+            void SetBitmap(const Bitmap<T>& bitmap)
+            { mBitmap = std::make_unique<gfx::Bitmap<T>>(bitmap); }
+            template<typename T>
+            void SetBitmap(Bitmap<T>&& bitmap)
+            { mBitmap = std::make_unique<gfx::Bitmap<T>>(std::move(bitmap)); }
+            const IBitmap& GetBitmap() const
+            { return *mBitmap; }
+
+            template<typename Pixel>
+            const Bitmap<Pixel>* GetBitmap() const
+            {
+                // todo: maybe use some kind of format type.
+                const auto bytes = mBitmap->GetDepthBits() / 8;
+                if (sizeof(Pixel) == bytes)
+                    return static_cast<Bitmap<Pixel>*>(mBitmap.get());
+                return nullptr;
+            }
+            template<typename Pixel> inline
+            bool GetBitmap(const Bitmap<Pixel>** out) const
+            {
+                const auto* ret = GetBitmap<Pixel>();
+                if (ret) {
+                    *out = ret;
+                    return true;
+                }
+                return false;
+            }
         private:
             std::string mId;
             std::string mName;
@@ -317,6 +350,14 @@ namespace gfx
 
             void SetGenerator(std::unique_ptr<IBitmapGenerator> generator)
             { mGenerator = std::move(generator); }
+
+            template<typename T>
+            void SetGenerator(T&& generator)
+            {
+                // generator is a "universal reference"
+                // Meyer's Item. 24
+                mGenerator = std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator));
+            }
         private:
             std::string mId;
             std::string mName;
@@ -670,6 +711,18 @@ namespace gfx
             mTextures.back().source = std::make_unique<detail::TextureFileSource>(file);
             return *this;
         }
+        MaterialClass& AddTexture(const detail::TextureFileSource& texture)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureFileSource>(texture);
+            return *this;
+        }
+        MaterialClass& AddTexture(detail::TextureFileSource&& texture)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureFileSource>(std::move(texture));
+            return *this;
+        }
         MaterialClass& AddTexture(const TextBuffer& text)
         {
             mTextures.emplace_back();
@@ -680,6 +733,31 @@ namespace gfx
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
+            return *this;
+        }
+        MaterialClass& AddTexture(const detail::TextureTextBufferSource& text)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
+            return *this;
+        }
+        MaterialClass& AddTexture(detail::TextureTextBufferSource&& text)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
+            return *this;
+        }
+
+        MaterialClass& AddTexture(const detail::TextureBitmapBufferSource& bitmap)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(bitmap);
+            return *this;
+        }
+        MaterialClass& AddTexture(detail::TextureBitmapBufferSource&& bitmap)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(std::move(bitmap));
             return *this;
         }
 
@@ -698,6 +776,18 @@ namespace gfx
             return *this;
         }
         MaterialClass& AddTexture(std::unique_ptr<IBitmapGenerator> generator)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
+            return *this;
+        }
+        MaterialClass& AddTexture(const detail::TextureBitmapGeneratorSource& generator)
+        {
+            mTextures.emplace_back();
+            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(generator);
+            return *this;
+        }
+        MaterialClass& AddTexture(detail::TextureBitmapGeneratorSource&& generator)
         {
             mTextures.emplace_back();
             mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
@@ -797,7 +887,7 @@ namespace gfx
             mWrapY = wrap;
             return *this;
         }
-        size_t GetNumTextures()
+        size_t GetNumTextures() const
         { return mTextures.size(); }
 
         void DeleteTexture(size_t index)
@@ -830,7 +920,6 @@ namespace gfx
             ASSERT(index < mTextures.size());
             return *mTextures[index].source;
         }
-
         TextureSource* FindTextureSourceById(const std::string& id)
         {
             for (const auto& tex : mTextures)
@@ -859,6 +948,11 @@ namespace gfx
         {
             ASSERT(index < mTextures.size());
             return mTextures[index].box;
+        }
+        bool GetTextureGc(size_t index) const
+        {
+            ASSERT(index < mTextures.size());
+            return mTextures[index].enable_gc;
         }
 
         // Get the hash value of the material based on the current material
