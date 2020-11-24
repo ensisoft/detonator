@@ -75,7 +75,6 @@ void DrawTextRect(Painter& painter,
     static auto klass = std::make_shared<gfx::MaterialClass>();
     klass->SetType(MaterialClass::Type::Texture);
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
-    //klass->SetStatic(true); fix this bug
     klass->SetBaseColor(color);
     if (klass->GetNumTextures() == 0)
     {

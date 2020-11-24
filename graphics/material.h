@@ -526,14 +526,14 @@ namespace gfx
         };
 
         // state of a material instance of this type of material.
-        struct MaterialInstance {
+        struct InstanceState {
             float runtime = 0.0f;
-            float alpha   = 1.0f;
+            Color4f base_color;
         };
 
         // Apply the material properties to the given program object
         // and set the rasterizer state.
-        void ApplyDynamicState(const Environment& env, const MaterialInstance& inst,
+        void ApplyDynamicState(const Environment& env, const InstanceState& inst,
             Device& device, Program& prog, RasterState& state) const;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
@@ -625,7 +625,7 @@ namespace gfx
         // when the program is created. This can improve performance
         // since material state that doesn't change doesn't need to be
         // reset on every draw. However it'll create more program objects
-        // i.e. consume more graphics memory. Additionally frequenct changes
+        // i.e. consume more graphics memory. Additionally frequent changes
         // of the material state will be expensive and cause recompilation
         // and rebuild of the corresponding shader program.
         MaterialClass& SetStatic(bool on_off)
@@ -1012,13 +1012,13 @@ namespace gfx
             : mClass(klass)
             , mRuntime(time)
         {
-            mAlpha = mClass->GetBaseAlpha();
+            mBaseColor = mClass->GetBaseColor();
         }
         Material(const MaterialClass& klass, float time = 0.0f)
         {
             mClass = std::make_shared<MaterialClass>(klass);
-            mRuntime = time;
-            mAlpha   = mClass->GetBaseAlpha();
+            mRuntime   = time;
+            mBaseColor = mClass->GetBaseColor();
         }
         // Get the material class object instance.
         const MaterialClass& GetClass() const
@@ -1035,21 +1035,21 @@ namespace gfx
             // currently the only dynamic (instance) state is the material
             // runtime. However if there's more such instance specific
             // data it'd be set here.
-            MaterialClass::MaterialInstance instance;
+            MaterialClass::InstanceState instance;
             instance.runtime = mRuntime;
-            instance.alpha   = mAlpha;
+            instance.base_color = mBaseColor;
             mClass->ApplyDynamicState(env, instance, device, prog, state);
         }
         // Set the material's alpha value. will be clamped to [0.0f, 1.0f] range
         // and only works if the material supports transparent(alpha) blendign.
         void SetAlpha(float alpha)
-        { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
+        { mBaseColor.SetAlpha(alpha); }
         void SetRuntime(float runtime)
         { mRuntime = runtime; }
         void Update(float dt)
         { mRuntime += dt; }
         float GetAlpha() const
-        { return mAlpha; }
+        { return mBaseColor.Alpha(); }
         float GetRuntime() const
         { return mRuntime; }
     private:
@@ -1057,8 +1057,8 @@ namespace gfx
         std::shared_ptr<const MaterialClass> mClass;
         // Current runtime for this material instance.
         float mRuntime = 0.0f;
-        // Alpha value.
-        float mAlpha = 1.0f;
+        // Base color value.
+        Color4f mBaseColor;
     };
 
 

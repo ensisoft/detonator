@@ -125,7 +125,7 @@ Shader* MaterialClass::GetShader(Device& device) const
     return shader;
 }
 
-void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInstance& inst,
+void MaterialClass::ApplyDynamicState(const Environment& env, const InstanceState& inst,
     Device& device, Program& prog, RasterState& state) const
 {
     // set rasterizer state.
@@ -158,15 +158,16 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInst
         const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
         const auto first_frame_index = animating ? (unsigned)(inst.runtime/frame_interval) : 0u;
 
-        const auto frame_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
+        const auto frame_index_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
         const unsigned frame_index[2] = {
-            (first_frame_index + 0) % frame_count,
-            (first_frame_index + 1) % frame_count
+            (first_frame_index + 0) % frame_index_count,
+            (first_frame_index + 1) % frame_index_count
         };
+        const auto texture_count = mType == Type::Texture ? 1u : 2u;
 
         bool need_software_wrap = true;
 
-        for (unsigned i=0; i<std::min(frame_count, 2u); ++i)
+        for (unsigned i=0; i<texture_count; ++i)
         {
             const auto& sampler = mTextures[frame_index[i]];
             const auto& source  = sampler.source;
@@ -237,37 +238,54 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const MaterialInst
     {
         // if not static then always make sure to apply full material state
         // in the shader program.
-        ApplyStaticState(device, prog);
+        prog.SetUniform("kBaseColor", inst.base_color);
+        prog.SetUniform("kGamma", mGamma);
+        prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
+        prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
+        prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
+        prog.SetUniform("kColor0", mColorMap[0]);
+        prog.SetUniform("kColor1", mColorMap[1]);
+        prog.SetUniform("kColor2", mColorMap[2]);
+        prog.SetUniform("kColor3", mColorMap[3]);
     }
-
-    // set the instance alpha. todo: maybe this should just be a float
-    gfx::Color4f color = mBaseColor;
-    color.SetAlpha(inst.alpha);
-    prog.SetUniform("kBaseColor", color);
 }
 
 void MaterialClass::ApplyStaticState(Device& device, Program& prog) const
 {
-    // color is now set always because of instance alpha.
-    //prog.SetUniform("kBaseColor", mBaseColor);
-    prog.SetUniform("kGamma", mGamma);
-    prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
-    prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
-    prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
-    prog.SetUniform("kColor0", mColorMap[0]);
-    prog.SetUniform("kColor1", mColorMap[1]);
-    prog.SetUniform("kColor2", mColorMap[2]);
-    prog.SetUniform("kColor3", mColorMap[3]);
+    if (mStatic)
+    {
+        prog.SetUniform("kBaseColor", mBaseColor);
+        prog.SetUniform("kGamma", mGamma);
+        prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
+        prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
+        prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
+        prog.SetUniform("kColor0", mColorMap[0]);
+        prog.SetUniform("kColor1", mColorMap[1]);
+        prog.SetUniform("kColor2", mColorMap[2]);
+        prog.SetUniform("kColor3", mColorMap[3]);
+    }
 }
 
 std::string MaterialClass::GetProgramId() const
 {
     // if the static flag is set the material id is
-    // derived from the current state, thus  mapping material objects with
-    // different parameters to unique shader programs (even when they're
-    // the same type of shader program)
+    // derived from the current state that is marked static,
+    // thus mapping material objects with
+    // different parameters to unique shader programs (even when they
+    // share the same underlying shader program)
     if (mStatic)
-        return std::to_string(GetHash());
+    {
+        std::size_t hash = 0;
+        hash = base::hash_combine(hash, mBaseColor.GetHash());
+        hash = base::hash_combine(hash, mGamma);
+        hash = base::hash_combine(hash, mTextureScale);
+        hash = base::hash_combine(hash, mTextureVelocity);
+        hash = base::hash_combine(hash, mColorMap[0].GetHash());
+        hash = base::hash_combine(hash, mColorMap[1].GetHash());
+        hash = base::hash_combine(hash, mColorMap[2].GetHash());
+        hash = base::hash_combine(hash, mColorMap[3].GetHash());
+        return std::to_string(hash);
+    }
 
     // get the material id based on the type of the material. in this
     // case when then material state must be set each time into the
