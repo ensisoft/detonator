@@ -553,6 +553,18 @@ add_executable(unit_test_material graphics/unit_test/unit_test_material.cpp
         third_party/stb/stb_image.c)
 target_link_libraries(unit_test_material ${CONAN_LIBS})
 
+add_executable(unit_test_drawing graphics/unit_test/unit_test_drawing.cpp
+        base/logging.cpp
+        base/assert.cpp
+        graphics/material.cpp
+        graphics/image.cpp
+        graphics/text.cpp
+        graphics/resource.cpp
+        third_party/base64/base64.cpp
+        third_party/stb/stb_image_write.c
+        third_party/stb/stb_image.c)
+target_link_libraries(unit_test_drawing ${CONAN_LIBS})
+add_test(NAME unit_test_drawing COMMAND unit_test_drawing)
 add_test(NAME unit_test_material COMMAND unit_test_material)
 add_test(NAME unit_test_bitmap COMMAND unit_test_bitmap)
 add_test(NAME unit_test_image COMMAND unit_test_image)
@@ -563,4 +575,5 @@ target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_material PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_drawing  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 
