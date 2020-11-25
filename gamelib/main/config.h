@@ -5,7 +5,7 @@
 
 #define BASE_LOGGING_ENABLE_LOG
 #ifdef POSIX_OS
-#  define BASE_LOGGING_ENABLE_CURSES
+//#  define BASE_LOGGING_ENABLE_CURSES
 #endif
 
 // see interface.h

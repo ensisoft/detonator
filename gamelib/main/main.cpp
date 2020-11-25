@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
         // Two(?) solutions for this:
         //  - move the shared common code into a shared shared library
         //  - change the locking mechanism and put it into the logger.
-        base::LockedLogger<base::CursesLogger> logger((base::CursesLogger()));
+        base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
         base::SetGlobalLog(&logger);
         base::EnableDebugLog(opt.WasGiven("--debug"));
         DEBUG("It's alive!");
