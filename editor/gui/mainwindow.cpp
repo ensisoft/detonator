@@ -611,6 +611,8 @@ void MainWindow::iterateGameLoop()
     {
         mPlayWindow->Render();
     }
+
+    GfxWindow::CleanGarbage();
 }
 
 bool MainWindow::haveAcceleratedWindows() const

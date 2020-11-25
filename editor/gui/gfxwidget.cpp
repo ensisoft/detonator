@@ -269,7 +269,7 @@ void GfxWindow::paintGL()
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
     mCustomGraphicsDevice->EndFrame(false /*display*/);
-    mCustomGraphicsDevice->CleanGarbage(60);
+    //mCustomGraphicsDevice->CleanGarbage(60);
     mContext->swapBuffers(this);
 }
 
@@ -321,6 +321,15 @@ void GfxWindow::toggleShowFps()
 void GfxWindow::clearColorChanged(QColor color)
 {
     mClearColor = ToGfx(color);
+}
+
+// static
+void GfxWindow::CleanGarbage()
+{
+    auto device = shared_device.lock();
+    if (!device)
+        return;
+    device->CleanGarbage(120);
 }
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)

@@ -104,6 +104,7 @@ namespace gui
         { DefaultMinFilter = filter; }
         static void SetDefaultFilter(gfx::Device::MagFilter filter)
         { DefaultMagFilter = filter; }
+        static void CleanGarbage();
 
     public slots:
         void clearColorChanged(QColor color);
