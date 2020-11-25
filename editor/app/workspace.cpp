@@ -1194,6 +1194,7 @@ QStringList Workspace::ListPrimitiveDrawables() const
              resource->GetType() == Resource::Type::Drawable))
             list.append(resource->GetName());
     }
+    list.sort();
     return list;
 }
 
@@ -1208,6 +1209,7 @@ QStringList Workspace::ListUserDefinedDrawables() const
                  resource->GetType() == Resource::Type::Drawable))
             list.append(resource->GetName());
     }
+    list.sort();
     return list;
 }
 
