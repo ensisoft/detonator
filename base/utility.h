@@ -44,9 +44,9 @@
 #include <filesystem>
 #include <fstream>
 
-#include "math.h"
-#include "assert.h"
-#include "platform.h"
+#include "base/math.h"
+#include "base/assert.h"
+#include "base/platform.h"
 
 #if defined(__MSVC__)
 #  pragma warning(push)
@@ -55,6 +55,11 @@
 
 namespace base
 {
+
+inline bool Contains(const std::string& str, const std::string& what)
+{
+    return str.find(what) != std::string::npos;
+}
 
 inline bool StartsWith(const std::string& str, const std::string& what)
 {
@@ -639,8 +644,24 @@ inline std::ifstream OpenBinaryInputStream(const std::string& filename)
     return in;
 }
 
-} // base
+inline bool OverwriteTextFile(const std::string& file, const std::string& text)
+{
+#if defined(WINDOWS_OS)
+    std::ofstream out(base::FromUtf8(file), std::ios::out);
+#elif defined(POSIX_OS)
+    std::ofstream out(file, std::ios::out | std::ios::trunc);
+#else
+#  error unimplemented function.
+#endif
+    if (!out.is_open())
+        return false;
+    out << text;
+    if (out.bad() || out.fail())
+        return false;
+    return true;
+}
 
+} // base
 
 #if defined(__MSVC__)
 #  pragma warning(pop) // deprecated use of wstring_convert

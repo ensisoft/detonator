@@ -36,6 +36,7 @@
 #include <string>
 #include <locale>
 #include <codecvt>
+#include <iomanip>
 #include <type_traits>
 
 #if defined(__MSVC__)
@@ -70,7 +71,6 @@ namespace glm {
 namespace base
 {
     namespace detail {
-
         // generic version trying to use stringstream based conversion.
         template<typename T> inline
         std::string ToString(const T& value)
@@ -165,6 +165,20 @@ namespace base
     }
 
     using detail::ToString;
+
+     // format float value to a string ignoring the user's locale.
+     // I.e. the format always uses . as the decimal point.
+    inline std::string ToChars(float value)
+    {
+        // c++17 has to_chars in <charconv> but GCC (stdlib) doesn't
+        // yet support float conversion. gah.
+        std::stringstream ss;
+        std::string ret;
+        ss.imbue(std::locale("C"));
+        ss << std::fixed << std::setprecision(2) << value;
+        ss >> ret;
+        return ret;
+    }
 } // base
 
 #if defined(__MSVC__)

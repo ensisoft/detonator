@@ -55,15 +55,25 @@ class TestShader : public gfx::Shader
 public:
     virtual bool CompileSource(const std::string& source) override
     {
+        mSource = source;
         return true;
     }
     virtual bool CompileFile(const std::string& file) override
     {
+        mFilename = file;
         return true;
     }
     virtual bool IsValid() const override
     { return true; }
+
+    std::string GetFilename() const
+    { return mFilename; }
+
+    std::string GetSource() const
+    { return mSource; }
 private:
+    std::string mFilename;
+    std::string mSource;
 };
 
 class TestTexture : public gfx::Texture
@@ -247,11 +257,17 @@ public:
     // resource creation APIs
     virtual gfx::Shader* FindShader(const std::string& name) override
     {
-        return nullptr;
+        auto it = mShaderIndexMap.find(name);
+        if (it == mShaderIndexMap.end())
+            return nullptr;
+        return mShaders[it->second].get();
     }
     virtual gfx::Shader* MakeShader(const std::string& name) override
     {
-        return nullptr;
+        const size_t index = mShaders.size();
+        mShaders.emplace_back(new TestShader);
+        mShaderIndexMap[name] = index;
+        return mShaders.back().get();
     }
     virtual gfx::Program* FindProgram(const std::string& name) override
     {
@@ -319,15 +335,26 @@ public:
         return *mTextures[index].get();
     }
 
+    const TestShader& GetShader(size_t index) const
+    {
+        TEST_REQUIRE(index < mShaders.size());
+        return *mShaders[index].get();
+    }
+
     void Clear()
     {
         mTextureIndexMap.clear();
         mTextures.clear();
+        mShaderIndexMap.clear();
+        mShaders.clear();
     }
 
 private:
     std::unordered_map<std::string, std::size_t> mTextureIndexMap;
     std::vector<std::unique_ptr<TestTexture>> mTextures;
+
+    std::unordered_map<std::string, std::size_t> mShaderIndexMap;
+    std::vector<std::unique_ptr<TestShader>> mShaders;
 };
 
 
@@ -753,9 +780,114 @@ void unit_test_material_textures()
     }
 }
 
+void unit_test_material_uniform_folding()
+{
+    // fold uniforms into consts in the GLSL when the material is
+    // marked static.
+
+    // dummy shader source which we write to the disk now
+    // in order to simplify the deployment of the unit test.
+    const std::string& original =
+            R"(#version 100
+precision highp float;
+uniform sampler2D kTexture0;
+uniform sampler2D kTexture1;
+uniform float kGamma;
+uniform float kRuntime;
+uniform vec2 kTextureScale;
+uniform vec2 kTextureVelocityXY;
+uniform float kTextureVelocityZ;
+uniform vec4 kBaseColor;
+uniform vec4 kColor0;
+uniform vec4 kColor1;
+uniform vec4 kColor2;
+uniform vec4 kColor3;
+
+const float MyConst1 = 1.24;
+const vec2 MyConst2 = vec2(1.0, 2.0);
+
+#define FOO 12.3
+
+varying vec2 vTexCoord;
+varying float vAlpha;
+
+void main() {
+   vec4 tex0 = texture2D(kTexture0, vTexCoord);
+   vec4 tex1 = texture2D(kTexture1, vTexCoord);
+   gl_FragColor = pow(vec4(1.0), vec4(kGamma));
+}
+)";
+
+    const std::string& expected =
+            R"(#version 100
+precision highp float;
+uniform sampler2D kTexture0;
+uniform sampler2D kTexture1;
+const float kGamma = 0.80;
+uniform float kRuntime;
+const vec2 kTextureScale = vec2(2.00,3.00);
+const vec2 kTextureVelocityXY = vec2(4.00,5.00);
+const float kTextureVelocityZ = -1.00;
+const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);
+const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);
+const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);
+const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);
+const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);
+
+const float MyConst1 = 1.24;
+const vec2 MyConst2 = vec2(1.0, 2.0);
+
+#define FOO 12.3
+
+varying vec2 vTexCoord;
+varying float vAlpha;
+
+void main() {
+   vec4 tex0 = texture2D(kTexture0, vTexCoord);
+   vec4 tex1 = texture2D(kTexture1, vTexCoord);
+   gl_FragColor = pow(vec4(1.0), vec4(kGamma));
+}
+)";
+
+    base::OverwriteTextFile("test_shader.glsl", original);
+
+    gfx::MaterialClass klass;
+    klass.SetShaderFile("test_shader.glsl");
+    klass.SetType(gfx::MaterialClass::Type::Texture);
+    klass.SetBaseColor(gfx::Color::White);
+    klass.SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::BottomLeft);
+    klass.SetColorMapColor(gfx::Color::Green,gfx::MaterialClass::ColorIndex::TopLeft);
+    klass.SetColorMapColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BottomRight);
+    klass.SetColorMapColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::TopRight);
+    klass.SetGamma(0.8f);
+    klass.SetTextureVelocityX(4.0f);
+    klass.SetTextureVelocityY(5.0f);
+    klass.SetTextureVelocityZ(-1.0f);
+    klass.SetTextureScaleX(2.0);
+    klass.SetTextureScaleY(3.0);
+
+    TestDevice device;
+    {
+        klass.SetStatic(true);
+        klass.GetShader(device);
+        const auto& shader = device.GetShader(0);
+        const auto& source = shader.GetSource();
+        TEST_REQUIRE(source == expected);
+    }
+
+    {
+        klass.SetStatic(false);
+        klass.GetShader(device);
+        const auto& shader = device.GetShader(1);
+        const auto& source = shader.GetSource();
+        TEST_REQUIRE(source == original);
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_material_uniforms();
     unit_test_material_textures();
+    unit_test_material_uniform_folding();
     return 0;
 }

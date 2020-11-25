@@ -884,6 +884,7 @@ private:
             if (mProgram)
             {
                 GL_CALL(glDeleteProgram(mProgram));
+                DEBUG("Delete program %1", mProgram);
             }
         }
         virtual bool Build(const std::vector<const Shader*>& shaders) override

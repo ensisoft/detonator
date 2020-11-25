@@ -22,12 +22,36 @@
 
 #include "config.h"
 
+#include <fstream>
+
 #include "base/logging.h"
+#include "base/format.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"
 #include "graphics/program.h"
+#include "graphics/resource.h"
+
+namespace {
+    using namespace base;
+    std::string ToConst(float value)
+    { return base::ToChars(value); }
+    std::string ToConst(const gfx::Color4f& color)
+    {
+        return base::FormatString("vec4(%1,%2,%3,%4)",
+                                  ToChars(color.Red()),
+                                  ToChars(color.Green()),
+                                  ToChars(color.Blue()),
+                                  ToChars(color.Alpha()));
+    }
+    std::string ToConst(const glm::vec2& vec2)
+    { return base::FormatString("vec2(%1,%2)", ToChars(vec2.x), ToChars(vec2.y)); }
+    std::string ToConst(const glm::vec3& vec3)
+    { return base::FormatString("vec3(%1,%2,%3)", ToChars(vec3.x), ToChars(vec3.y), ToChars(vec3.z)); }
+    std::string ToConst(const glm::vec4& vec4)
+    { return base::FormatString("vec4(%1,%2,%3,%4)", ToChars(vec4.x), ToChars(vec4.y), ToChars(vec4.z), ToChars(vec4.w)); }
+} // namespace
 
 namespace gfx
 {
@@ -113,15 +137,57 @@ MaterialClass::MaterialClass(const MaterialClass& other)
 
 Shader* MaterialClass::GetShader(Device& device) const
 {
-    const std::string& file = GetShaderFile();
-    ASSERT(!file.empty());
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, GetShaderFile());
+    hash = base::hash_combine(hash, mStatic ? GetProgramId() : "");
+    const auto& name = std::to_string(hash);
+    Shader* shader = device.FindShader(name);
+    if (shader)
+        return shader;
 
-    Shader* shader = device.FindShader(file);
-    if (shader == nullptr)
+    const auto& mapped = ResolveFile(ResourceLoader::ResourceType::Shader, GetShaderFile());
+    std::ifstream stream;
+    stream.open(mapped);
+    if (!stream.is_open())
     {
-        shader = device.MakeShader(file);
-        shader->CompileFile(file);
+        ERROR("Failed to open shader file: '%1'", mapped);
+        return nullptr;
     }
+    const std::string source(std::istreambuf_iterator<char>(stream), {});
+    std::string code;
+    std::string line;
+    std::stringstream ss(source);
+    while (std::getline(ss, line))
+    {
+        if (mStatic && base::Contains(line, "uniform"))
+        {
+            const auto original = line;
+            if (base::Contains(line, "kGamma"))
+                line = base::FormatString("const float kGamma = %1;", ToConst(mGamma));
+            else if (base::Contains(line, "kBaseColor"))
+                line = base::FormatString("const vec4 kBaseColor = %1;", ToConst(mBaseColor));
+            else if (base::Contains(line, "kTextureScale"))
+                line = base::FormatString("const vec2 kTextureScale = %1;", ToConst(mTextureScale));
+            else if (base::Contains(line, "kTextureVelocityXY"))
+                line = base::FormatString("const vec2 kTextureVelocityXY = %1;", ToConst(glm::vec2(mTextureVelocity)));
+            else if (base::Contains(line, "kTextureVelocityZ"))
+                line = base::FormatString("const float kTextureVelocityZ = %1;", ToConst(mTextureVelocity.z));
+            else if (base::Contains(line, "kColor0"))
+                line = base::FormatString("const vec4 kColor0 = %1;", ToConst(mColorMap[0]));
+            else if (base::Contains(line, "kColor1"))
+                line = base::FormatString("const vec4 kColor1 = %1;", ToConst(mColorMap[1]));
+            else if (base::Contains(line, "kColor2"))
+                line = base::FormatString("const vec4 kColor2 = %1;", ToConst(mColorMap[2]));
+            else if (base::Contains(line, "kColor3"))
+                line = base::FormatString("const vec4 kColor3 = %1;", ToConst(mColorMap[3]));
+            if (original != line)
+                DEBUG("'%1' => '%2", original, line);
+        }
+        code.append(line);
+        code.append("\n");
+    }
+    shader = device.MakeShader(name);
+    shader->CompileSource(code);
     return shader;
 }
 
