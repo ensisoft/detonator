@@ -417,10 +417,10 @@ endif()
 
 # game project
 add_library(invaders SHARED
-    games/invaders/level.cpp
-    games/invaders/gamewidget.cpp
-    games/invaders/game.cpp
-    games/invaders/main.cpp
+    games/invaders/src/level.cpp
+    games/invaders/src/gamewidget.cpp
+    games/invaders/src/game.cpp
+    games/invaders/src/main.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/sample.cpp
@@ -445,7 +445,7 @@ add_library(invaders SHARED
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp
 )
-target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/games/invaders")
+target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/games/invaders/src")
 target_link_libraries(invaders PRIVATE ${CONAN_LIBS})
 if (UNIX)
   target_link_libraries(invaders PRIVATE pulse)
