@@ -453,6 +453,7 @@ private:
             mNumErrors++;
             return;
         }
+        dst_io.setPermissions(src_io.permissions());
         mNumFilesCopied++;
         DEBUG("Copied %1 bytes from %2 to %3", buffer.count(), src, dst);
     }
@@ -1584,6 +1585,12 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         WARN("Please see the log file for details about errors.");
         return false;
     }
+    // Copy game main executable.
+    std::string runner = "GameMain";
+#if defined(WINDOWS_OS)
+    runner.append(".exe");
+#endif
+    packer.CopyFile(runner, "");
 
     INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
     return true;

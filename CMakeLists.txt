@@ -372,16 +372,17 @@ install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
 # main game runner application. The executable will read a
 # config.json and create the window/context for the application as
 # per the configuration. The game logic will be loaded from a .so or .dll
-add_executable(main
+add_executable(GameMain
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
     gamelib/main/main.cpp)
-target_include_directories(main PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
-target_link_libraries(main wdk_system wdk_desktop_gl)
+target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
+target_link_libraries(GameMain wdk_system wdk_desktop_gl)
 if (UNIX)
-    target_link_libraries(main ncurses dl pthread)
+    target_link_libraries(GameMain dl pthread)
 endif()
+install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # gamelib test application.
 add_library(gamelib_test SHARED
@@ -406,7 +407,7 @@ add_library(gamelib_test SHARED
 )
 target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
 target_link_libraries(gamelib_test PRIVATE ${CONAN_LIBS})
-install(TARGETS gamelib_test main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+install(TARGETS gamelib_test GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
 # hide symbols on linux
@@ -451,7 +452,7 @@ if (UNIX)
   target_link_libraries(invaders PRIVATE pulse)
   target_link_libraries(invaders PRIVATE pthread)
 endif()
-install(TARGETS invaders main DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
+install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(invaders PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
