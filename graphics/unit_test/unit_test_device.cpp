@@ -738,9 +738,207 @@ void main() {
     }
 
 }
-void unit_test_render_set_matrix_uniforms()
+void unit_test_render_set_matrix2x2_uniform()
 {
-    // todo:
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+    };
+    geom->Update(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const std::string& fssrc =
+            R"(#version 100
+precision mediump float;
+uniform mat2 kMatrix;
+void main() {
+  gl_FragColor = vec4(
+    kMatrix[0][0] +
+    kMatrix[1][0] +
+    kMatrix[0][1] +
+    kMatrix[1][1]);
+})";
+
+    const std::string& vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* vs = dev->MakeShader("vert");
+    auto* fs = dev->MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+    auto* prog = dev->MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    const gfx::Program::Matrix2x2 matrix = {
+        {0.25f, 0.25f},
+        {0.25f, 0.25f}
+    };
+    prog->SetUniform("kMatrix", matrix);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // this has alpha in it.
+    const auto& bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+}
+
+void unit_test_render_set_matrix3x3_uniform()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+    };
+    geom->Update(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const std::string& fssrc =
+            R"(#version 100
+precision mediump float;
+uniform mat3 kMatrix;
+void main() {
+  float r = kMatrix[0][0] + kMatrix[0][1] + kMatrix[0][2];
+  float g = kMatrix[1][0] + kMatrix[1][1] + kMatrix[1][2];
+  float b = kMatrix[2][0] + kMatrix[2][1] + kMatrix[2][2];
+  gl_FragColor = vec4(r, g, b, 1.0);
+})";
+
+    const std::string& vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* vs = dev->MakeShader("vert");
+    auto* fs = dev->MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+    auto* prog = dev->MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    const gfx::Program::Matrix3x3 matrix = {
+            {0.25f, 0.25f, 0.50f},
+            {0.25f, 0.50f, 0.25f},
+            {0.50f, 0.25f, 0.25f}
+    };
+    prog->SetUniform("kMatrix", matrix);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // this has alpha in it.
+    const auto& bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+}
+
+void unit_test_render_set_matrix4x4_uniform()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+    };
+    geom->Update(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const std::string& fssrc =
+            R"(#version 100
+precision mediump float;
+uniform mat4 kMatrix;
+void main() {
+  float r = kMatrix[0][0] + kMatrix[0][1] + kMatrix[0][2] + kMatrix[0][3];
+  float g = kMatrix[1][0] + kMatrix[1][1] + kMatrix[1][2] + kMatrix[1][3];
+  float b = kMatrix[2][0] + kMatrix[2][1] + kMatrix[2][2] + kMatrix[2][3];
+  float a = kMatrix[3][0] + kMatrix[3][1] + kMatrix[3][2] + kMatrix[3][3];
+  gl_FragColor = vec4(r, g, b, a);
+})";
+
+    const std::string& vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* vs = dev->MakeShader("vert");
+    auto* fs = dev->MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+    auto* prog = dev->MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    const gfx::Program::Matrix4x4 matrix = {
+            {0.25f, 0.25, 0.25f, 0.25f},
+            {0.25f, 0.25, 0.25f, 0.25f},
+            {0.25f, 0.25, 0.25f, 0.25f},
+            {0.25f, 0.25, 0.25f, 0.25f}
+    };
+    prog->SetUniform("kMatrix", matrix);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // this has alpha in it.
+    const auto& bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
 }
 
 int test_main(int argc, char* argv[])
@@ -755,6 +953,8 @@ int test_main(int argc, char* argv[])
     unit_test_render_with_multiple_textures();
     unit_test_render_set_float_uniforms();
     unit_test_render_set_int_uniforms();
-    unit_test_render_set_matrix_uniforms();
+    unit_test_render_set_matrix2x2_uniform();
+    unit_test_render_set_matrix3x3_uniform();
+    unit_test_render_set_matrix4x4_uniform();
     return 0;
 }
