@@ -210,12 +210,49 @@ void unit_test_data()
         }
     }
 
-    // test assignment
-    gfx::MaterialClass copy;
-    copy = klass;
-    TEST_REQUIRE(copy.GetHash() == klass.GetHash());
-    TEST_REQUIRE(copy.GetId() == klass.GetId());
+    // test copy and assignment
+    {
+        // copy construction
+        gfx::MaterialClass copy(klass);
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetNumTextures() == klass.GetNumTextures());
+        for (size_t i=0; i<copy.GetNumTextures(); ++i)
+        {
+            const auto& cpy = copy.GetTextureSource(i);
+            const auto& src = klass.GetTextureSource(i);
+            TEST_REQUIRE(cpy.GetHash() == src.GetHash());
+            TEST_REQUIRE(cpy.GetId() == src.GetId());
+        }
+        // assignment
+        copy = klass;
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetNumTextures() == klass.GetNumTextures());
+        for (size_t i=0; i<copy.GetNumTextures(); ++i)
+        {
+            const auto& cpy = copy.GetTextureSource(i);
+            const auto& src = klass.GetTextureSource(i);
+            TEST_REQUIRE(cpy.GetHash() == src.GetHash());
+            TEST_REQUIRE(cpy.GetId() == src.GetId());
+        }
+    }
 
+    // test cloning
+    {
+        gfx::MaterialClass clone(klass.Clone());
+        TEST_REQUIRE(clone.GetHash() != klass.GetHash());
+        TEST_REQUIRE(clone.GetId() != klass.GetId());
+        TEST_REQUIRE(clone.GetNumTextures() == klass.GetNumTextures());
+        for (size_t i=0; i<clone.GetNumTextures(); ++i)
+        {
+            const auto& cpy = clone.GetTextureSource(i);
+            const auto& src = klass.GetTextureSource(i);
+            TEST_REQUIRE(cpy.GetId() != src.GetId());
+            TEST_REQUIRE(cpy.GetHash() != src.GetHash());
+            TEST_REQUIRE(cpy.GetContentHash() == src.GetContentHash());
+        }
+    }
 }
 
 int test_main(int argc, char* argv[])

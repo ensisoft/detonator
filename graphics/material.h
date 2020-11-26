@@ -84,9 +84,14 @@ namespace gfx
         virtual std::string GetId() const = 0;
         // Get the human readable / and settable name.
         virtual std::string GetName() const = 0;
-        // Get the texture hash that is used to map the content to a
-        // GPU side object.
+        // The texture source hash value based on the properties
+        // of the texture source object itself *and* the it's
+        // content (See GetContentHash)
         virtual std::size_t GetHash() const = 0;
+        // Get the texture hash that is used to map the content to a
+        // GPU side object. This hash value only covers the bits of
+        // the *content* i.e the content of the IBitmap to be generated.
+        virtual std::size_t GetContentHash() const = 0;
         // Set the texture source human readable name.
         virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap. If there's a content
@@ -94,8 +99,11 @@ namespace gfx
         // The returned bitmap can be potentially shared but in an immutable
         // fashion.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
-        // Clone this texture source.
+        // Create a similar clone of this texture source but
+        // with unique id.
         virtual std::unique_ptr<TextureSource> Clone() const = 0;
+        // Create an exact copy of this texture source object.
+        virtual std::unique_ptr<TextureSource> Copy() const = 0;
         // Serialize into JSON object.
         virtual nlohmann::json ToJson() const = 0;
         // Load state from JSON object. Returns true if successful
@@ -127,11 +135,24 @@ namespace gfx
             virtual std::string GetName() const override
             { return mName; }
             virtual std::size_t GetHash() const override
+            {
+                auto hash = GetContentHash();
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
+                return hash;
+            }
+            virtual std::size_t GetContentHash() const override
             { return base::hash_combine(0, mFile); }
             virtual void SetName(const std::string& name)
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
             virtual std::unique_ptr<TextureSource> Clone() const override
+            {
+                auto ret = std::make_unique<TextureFileSource>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+            virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureFileSource>(*this); }
 
             virtual nlohmann::json ToJson() const override
@@ -197,7 +218,14 @@ namespace gfx
             { return Source::BitmapBuffer; }
             virtual std::string GetId() const override
             { return mId; }
-            virtual std::size_t GetHash() const override
+            virtual std::size_t GetHash()  const override
+            {
+                auto hash = GetContentHash();
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
+                return hash;
+            }
+            virtual std::size_t GetContentHash() const override
             {
                 size_t hash = mBitmap->GetHash();
                 hash = base::hash_combine(hash, mBitmap->GetWidth());
@@ -211,7 +239,14 @@ namespace gfx
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
             virtual std::unique_ptr<TextureSource> Clone() const override
+            {
+                auto ret = std::make_unique<TextureBitmapBufferSource>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+            virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapBufferSource>(*this); }
+
             virtual nlohmann::json ToJson() const override
             {
                 const auto depth = mBitmap->GetDepthBits() / 8;
@@ -310,6 +345,13 @@ namespace gfx
             virtual std::string GetId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
+            {
+                auto hash = GetContentHash();
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
+                return hash;
+            }
+            virtual std::size_t GetContentHash() const override
             { return mGenerator->GetHash(); }
             virtual std::string GetName() const override
             { return mName; }
@@ -318,6 +360,12 @@ namespace gfx
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mGenerator->Generate(); }
             virtual std::unique_ptr<TextureSource> Clone() const override
+            {
+                auto ret = std::make_unique<TextureBitmapGeneratorSource>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+            virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
 
             virtual nlohmann::json ToJson() const override
@@ -385,6 +433,13 @@ namespace gfx
             virtual std::string GetId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
+            {
+                auto hash = GetContentHash();
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
+                return hash;
+            }
+            virtual std::size_t GetContentHash() const override
             { return mTextBuffer.GetHash(); }
             virtual std::string GetName() const override
             { return mName; }
@@ -392,6 +447,12 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
             virtual std::unique_ptr<TextureSource> Clone() const override
+            {
+                auto ret = std::make_unique<TextureTextBufferSource>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+            virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 
             virtual nlohmann::json ToJson() const override
@@ -955,8 +1016,8 @@ namespace gfx
             return mTextures[index].enable_gc;
         }
 
-        // Get the hash value of the material based on the current material
-        // properties excluding the transient state i.e. runtime.
+        // Get the hash value of the material based on the
+        // current material properties.
         size_t GetHash() const;
 
         nlohmann::json ToJson() const;
@@ -965,6 +1026,11 @@ namespace gfx
 
         void BeginPacking(ResourcePacker* packer) const;
         void FinishPacking(const ResourcePacker* packer);
+
+        // Make a clone of this material class. The cloned object
+        // has all the same properties as this material class object
+        // but has it's own unique id.
+        MaterialClass Clone() const;
 
         // Deep copy of the material. Can be a bit expensive.
         MaterialClass& operator=(const MaterialClass& other);

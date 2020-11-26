@@ -103,34 +103,34 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 
 MaterialClass::MaterialClass(const MaterialClass& other)
 {
-    mId          = other.mId;
-    mShaderFile  = other.mShaderFile;
-    mBaseColor   = other.mBaseColor;
-    mSurfaceType = other.mSurfaceType;
-    mType        = other.mType;
-    mGamma       = other.mGamma;
-    mFps         = other.mFps;
-    mBlendFrames = other.mBlendFrames;
-    mStatic      = other.mStatic;
-    mMinFilter   = other.mMinFilter;
-    mMagFilter   = other.mMagFilter;
-    mWrapX       = other.mWrapX;
-    mWrapY       = other.mWrapY;
-    mTextureScale = other.mTextureScale;
+    mId              = other.mId;
+    mShaderFile      = other.mShaderFile;
+    mBaseColor       = other.mBaseColor;
+    mSurfaceType     = other.mSurfaceType;
+    mType            = other.mType;
+    mGamma           = other.mGamma;
+    mFps             = other.mFps;
+    mBlendFrames     = other.mBlendFrames;
+    mStatic          = other.mStatic;
+    mMinFilter       = other.mMinFilter;
+    mMagFilter       = other.mMagFilter;
+    mWrapX           = other.mWrapX;
+    mWrapY           = other.mWrapY;
+    mTextureScale    = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
-    mColorMap[0] = other.mColorMap[0];
-    mColorMap[1] = other.mColorMap[1];
-    mColorMap[2] = other.mColorMap[2];
-    mColorMap[3] = other.mColorMap[3];
-    mParticleAction = other.mParticleAction;
+    mColorMap[0]     = other.mColorMap[0];
+    mColorMap[1]     = other.mColorMap[1];
+    mColorMap[2]     = other.mColorMap[2];
+    mColorMap[3]     = other.mColorMap[3];
+    mParticleAction  = other.mParticleAction;
 
     // copy texture samplers.
     for (const auto& sampler : other.mTextures)
     {
         TextureSampler copy;
-        copy.box = sampler.box;
+        copy.box       = sampler.box;
         copy.enable_gc = sampler.enable_gc;
-        copy.source = sampler.source->Clone();
+        copy.source    = sampler.source->Copy();
         mTextures.push_back(std::move(copy));
     }
 }
@@ -237,7 +237,7 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const InstanceStat
         {
             const auto& sampler = mTextures[frame_index[i]];
             const auto& source  = sampler.source;
-            const auto& name    = std::to_string(source->GetHash());
+            const auto& name    = std::to_string(source->GetContentHash());
             auto* texture = device.FindTexture(name);
             if (!texture)
             {
@@ -409,7 +409,7 @@ size_t MaterialClass::GetHash() const
     hash = base::hash_combine(hash, mParticleAction);
     for (const auto& sampler : mTextures)
     {
-        hash = base::hash_combine(hash, sampler.source->GetId());
+        hash = base::hash_combine(hash, sampler.source->GetHash());
         hash = base::hash_combine(hash, sampler.enable_gc);
         hash = base::hash_combine(hash, sampler.box.GetHash());
     }
@@ -585,6 +585,42 @@ void MaterialClass::FinishPacking(const ResourcePacker* packer)
         sampler.box = packer->GetPackedTextureBox(handle);
     }
 }
+
+MaterialClass MaterialClass::Clone() const
+{
+    MaterialClass ret;
+    ret.mShaderFile      = mShaderFile;
+    ret.mBaseColor       = mBaseColor;
+    ret.mSurfaceType     = mSurfaceType;
+    ret.mType            = mType;
+    ret.mGamma           = mGamma;
+    ret.mFps             = mFps;
+    ret.mBlendFrames     = mBlendFrames;
+    ret.mStatic          = mStatic;
+    ret.mMinFilter       = mMinFilter;
+    ret.mMagFilter       = mMagFilter;
+    ret.mWrapX           = mWrapX;
+    ret.mWrapY           = mWrapY;
+    ret.mTextureScale    = mTextureScale;
+    ret.mTextureVelocity = mTextureVelocity;
+    ret.mColorMap[0]     = mColorMap[0];
+    ret.mColorMap[1]     = mColorMap[1];
+    ret.mColorMap[2]     = mColorMap[2];
+    ret.mColorMap[3]     = mColorMap[3];
+    ret.mParticleAction  = mParticleAction;
+
+    // copy texture samplers.
+    for (const auto& sampler : mTextures)
+    {
+        TextureSampler clone;
+        clone.box       = sampler.box;
+        clone.enable_gc = sampler.enable_gc;
+        clone.source    = sampler.source->Clone();
+        ret.mTextures.push_back(std::move(clone));
+    }
+    return ret;
+}
+
 
 MaterialClass& MaterialClass::operator=(const MaterialClass& other)
 {
