@@ -124,10 +124,16 @@ namespace gfx
             Trapezoid
         };
         virtual ~DrawableClass() = default;
-        // Get the class object resource id.
-        virtual std::string GetId() const = 0;
         // Get the type of the drawable.
         virtual Type GetType() const = 0;
+        // Get the class object resource id.
+        virtual std::string GetId() const = 0;
+        // Create a copy of this drawable class object but with unique id.
+        virtual std::unique_ptr<DrawableClass> Clone() const = 0;
+        // Create an exact copy of this drawable object.
+        virtual std::unique_ptr<DrawableClass> Copy() const = 0;
+        // Get the hash of the drawable class object  based on its properties.
+        virtual std::size_t GetHash() const = 0;
         // Pack the drawable resources.
         virtual void Pack(ResourcePacker* packer) const = 0;
         // Serialize into JSON
@@ -260,6 +266,21 @@ namespace gfx
         { return DrawableClass::Type::RoundRectangle; }
         virtual std::string GetId() const override
         { return mId; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        {
+            auto ret = std::make_unique<RoundRectangleClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<RoundRectangleClass>(*this); }
+        virtual std::size_t GetHash() const override
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
+            hash = base::hash_combine(hash, mRadius);
+            return hash;
+        }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
@@ -415,10 +436,27 @@ namespace gfx
         { return mNumHorizontalLines; }
         bool HasBorderLines() const
         { return mBorderLines; }
+
         virtual Type GetType() const override
         { return DrawableClass::Type::Grid; }
         virtual std::string GetId() const override
         { return mId; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        {
+            auto ret = std::make_unique<GridClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<GridClass>(*this); }
+        virtual std::size_t GetHash() const override
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
+            hash = base::hash_combine(hash, mNumHorizontalLines);
+            hash = base::hash_combine(hash, mNumVerticalLines);
+            return hash;
+        }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
@@ -585,7 +623,7 @@ namespace gfx
         // based on the polygon's data. Thus each polygon with
         // different data will have different geometry object.
         // However If the polygon is updated frequently this would
-        // then lead to the profileration of excessive geometry objects.
+        // then lead to the proliferation of excessive geometry objects.
         // In this case static can be set to false and the polygon
         // will map to a (single) dynamic geometry object more optimized
         // for draw/discard type of use.
@@ -598,8 +636,6 @@ namespace gfx
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
 
-        // Get a hash value based on the content of the polygon.
-        std::size_t GetHash() const;
         // Get a (non human) readable name of the polygon based
         // on the content.
         std::string GetName() const;
@@ -609,6 +645,16 @@ namespace gfx
         { return Type::Polygon; }
         virtual std::string GetId() const override
         { return mId; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        {
+            auto ret = std::make_unique<PolygonClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<PolygonClass>(*this); }
+
+        virtual std::size_t GetHash() const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
 
@@ -824,16 +870,23 @@ namespace gfx
         { return DrawableClass::Type::KinematicsParticleEngine; }
         virtual std::string GetId() const override
         { return mId; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        {
+            auto ret = std::make_unique<KinematicsParticleEngineClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<KinematicsParticleEngineClass>(*this); }
         virtual void Pack(ResourcePacker* packer) const override;
         virtual nlohmann::json ToJson() const override;
         virtual bool LoadFromJson(const nlohmann::json& json) override;
+        // Get a hash value based on the engine parameters
+        // and excluding any runtime data.
+        virtual std::size_t GetHash() const override;
 
         // Load from JSON
         static std::optional<KinematicsParticleEngineClass> FromJson(const nlohmann::json& object);
-
-        // Get a hash value based on the engine parameters
-        // and excluding any runtime data.
-        std::size_t GetHash() const;
     private:
         void InitParticles(InstanceState& state, size_t num) const;
         void KillParticle(InstanceState& state, size_t i) const;
@@ -947,6 +1000,12 @@ namespace gfx
                     return "_trapezoid";
                 else BUG("???");
             }
+            virtual std::unique_ptr<DrawableClass> Clone() const override
+            { return std::make_unique<GenericDrawableClass>(*this); }
+            virtual std::unique_ptr<DrawableClass> Copy() const override
+            { return std::make_unique<GenericDrawableClass>(*this); }
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, GetId()); }
             virtual Type GetType() const override
             { return ActualType; }
             virtual void Pack(ResourcePacker*) const override {}

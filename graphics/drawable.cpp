@@ -1045,6 +1045,30 @@ void PolygonClass::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
+std::size_t PolygonClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mStatic);
+    for (const auto& vertex : mVertices)
+    {
+        hash = base::hash_combine(hash, vertex.aTexCoord.x);
+        hash = base::hash_combine(hash, vertex.aTexCoord.y);
+        hash = base::hash_combine(hash, vertex.aPosition.x);
+        hash = base::hash_combine(hash, vertex.aPosition.y);
+        hash = base::hash_combine(hash, vertex.aData.x);
+        hash = base::hash_combine(hash, vertex.aData.y);
+    }
+    for (const auto& draw : mDrawCommands)
+    {
+        hash = base::hash_combine(hash, draw.type);
+        hash = base::hash_combine(hash, draw.count);
+        hash = base::hash_combine(hash, draw.offset);
+    }
+    return hash;
+}
+
 nlohmann::json PolygonClass::ToJson() const
 {
     nlohmann::json json;
@@ -1077,9 +1101,10 @@ bool PolygonClass::LoadFromJson(const nlohmann::json& json)
     if (!ret.has_value())
         return false;
     auto& val = ret.value();
-    mVertices = std::move(val.mVertices);
+    mId           = std::move(val.mId);
+    mVertices     = std::move(val.mVertices);
     mDrawCommands = std::move(val.mDrawCommands);
-    mStatic = val.mStatic;
+    mStatic       = val.mStatic;
     return true;
 }
 
@@ -1173,25 +1198,6 @@ void PolygonClass::InsertVertex(const Vertex& vertex, size_t index)
             cmd.offset++;
     }
     mName.clear();
-}
-
-std::size_t PolygonClass::GetHash() const
-{
-    size_t hash = 0;
-    for (const auto& vertex : mVertices)
-    {
-        hash = base::hash_combine(hash, vertex.aPosition.x);
-        hash = base::hash_combine(hash, vertex.aPosition.y);
-        hash = base::hash_combine(hash, vertex.aTexCoord.x);
-        hash = base::hash_combine(hash, vertex.aTexCoord.y);
-    }
-    for (const auto& cmd : mDrawCommands)
-    {
-        hash = base::hash_combine(hash, cmd.type);
-        hash = base::hash_combine(hash, cmd.offset);
-        hash = base::hash_combine(hash, cmd.count);
-    }
-    return hash;
 }
 
 std::string PolygonClass::GetName() const
@@ -1409,11 +1415,12 @@ std::size_t KinematicsParticleEngineClass::GetHash() const
 {
     static_assert(std::is_trivially_copyable<Params>::value);
     size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
 
     const auto* ptr = reinterpret_cast<const unsigned char*>(&mParams);
     const auto  len = sizeof(mParams);
     for (size_t i=0; i<len; ++i)
-        hash ^= std::hash<unsigned char>()(ptr[i]);
+        hash = base::hash_combine(hash, ptr[i]);
 
     return hash;
 }

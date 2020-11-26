@@ -26,7 +26,6 @@
 #include "base/test_float.h"
 #include "graphics/types.h"
 #include "graphics/color4f.h"
-#include "graphics/drawable.h"
 
 bool operator==(const gfx::Color4f& lhs, const gfx::Color4f& rhs)
 {
@@ -53,14 +52,6 @@ bool operator==(const gfx::Rect<T>& lhs,
         lhs.GetY() == rhs.GetY() &&
         lhs.GetWidth() == rhs.GetWidth() &&
         lhs.GetHeight() == rhs.GetHeight();
-}
-
-bool operator==(const gfx::Vertex& lhs, const gfx::Vertex& rhs)
-{
-    return real::equals(lhs.aPosition.x, rhs.aPosition.x) &&
-           real::equals(lhs.aPosition.y, rhs.aPosition.y) &&
-           real::equals(lhs.aTexCoord.x, rhs.aTexCoord.x) &&
-           real::equals(lhs.aTexCoord.y, rhs.aTexCoord.y);
 }
 
 template<typename T>
@@ -241,112 +232,6 @@ void unit_test_color_serialize()
     }
 }
 
-void unit_test_polygon_serialize()
-{
-    std::vector<gfx::Vertex> verts;
-    gfx::Vertex v0;
-    v0.aPosition.x = 1.0f;
-    v0.aPosition.y = 2.0f;
-    v0.aTexCoord.x = -1.0f;
-    v0.aTexCoord.y = -0.5f;
-    verts.push_back(v0);
-
-    gfx::PolygonClass poly;
-    gfx::PolygonClass::DrawCommand cmd;
-    cmd.type = gfx::PolygonClass::DrawType::TriangleFan;
-    cmd.offset = 1243;
-    cmd.count = 555;
-    poly.AddDrawCommand(std::move(verts), cmd);
-
-    const auto& data = poly.ToJson();
-
-    poly.Clear();
-    TEST_REQUIRE(poly.GetNumVertices() == 0);
-    TEST_REQUIRE(poly.GetNumDrawCommands() == 0);
-
-    TEST_REQUIRE(poly.LoadFromJson(data));
-    TEST_REQUIRE(poly.GetNumVertices() == 1);
-    TEST_REQUIRE(poly.GetNumDrawCommands() == 1);
-    TEST_REQUIRE(poly.GetVertex(0) == v0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).type == gfx::PolygonClass::DrawType::TriangleFan);
-    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 1243);
-    TEST_REQUIRE(poly.GetDrawCommand(0).count == 555);
-}
-
-void unit_test_polygon_vertex_operations()
-{
-    gfx::PolygonClass poly;
-
-    std::vector<gfx::PolygonClass::Vertex> verts;
-    verts.resize(6);
-    verts[0].aPosition.x = 0.0f;
-    verts[1].aPosition.x = 1.0f;
-    verts[2].aPosition.x = 2.0f;
-    verts[3].aPosition.x = 3.0f;
-    verts[4].aPosition.x = 4.0f;
-    verts[5].aPosition.x = 5.0f;
-    poly.AddVertices(verts);
-
-    {
-        gfx::PolygonClass::DrawCommand cmd;
-        cmd.offset = 0;
-        cmd.count  = 3;
-        poly.AddDrawCommand(cmd);
-    }
-
-    {
-        gfx::PolygonClass::DrawCommand cmd;
-        cmd.offset = 3;
-        cmd.count  = 3;
-        poly.AddDrawCommand(cmd);
-    }
-
-    // check precondition.
-    TEST_REQUIRE(poly.GetNumVertices() == 6);
-    TEST_REQUIRE(poly.GetNumDrawCommands() == 2);
-    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 0.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 1.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 2.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 3.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(4).aPosition.x, 4.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(5).aPosition.x, 5.0f));
-
-    poly.EraseVertex(4);
-    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
-
-    poly.EraseVertex(0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 2);
-    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 2);
-    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
-
-    // check result.
-    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 1.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 2.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 3.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 5.0f));
-
-    poly.InsertVertex(verts[0], 0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 2);
-
-    poly.InsertVertex(verts[4], 4);
-    TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);
-    TEST_REQUIRE(poly.GetDrawCommand(0).count  == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).offset == 3);
-    TEST_REQUIRE(poly.GetDrawCommand(1).count  == 3);
-    TEST_REQUIRE(real::equals(poly.GetVertex(0).aPosition.x, 0.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(1).aPosition.x, 1.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(2).aPosition.x, 2.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(3).aPosition.x, 3.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(4).aPosition.x, 4.0f));
-    TEST_REQUIRE(real::equals(poly.GetVertex(5).aPosition.x, 5.0f));
-}
 
 int test_main(int argc, char* argv[])
 {
@@ -357,7 +242,6 @@ int test_main(int argc, char* argv[])
     unit_test_rect_serialize<int>();
     unit_test_rect_serialize<float>();
     unit_test_color_serialize();
-    unit_test_polygon_serialize();
-    unit_test_polygon_vertex_operations();
+
     return 0;
 }
