@@ -660,6 +660,13 @@ void AnimationNodeClass::Prepare(const GfxFactory& loader) const
     }
 }
 
+AnimationNodeClass AnimationNodeClass::Clone() const
+{
+    AnimationNodeClass ret(*this);
+    ret.mId = base::RandomString(10);
+    return ret;
+}
+
 nlohmann::json AnimationNodeClass::ToJson() const
 {
     nlohmann::json json;
@@ -1200,6 +1207,49 @@ nlohmann::json AnimationClass::TreeNodeToJson(const AnimationNodeClass* node)
     nlohmann::json ret;
     if (node)
         ret["id"] = node->GetId();
+    return ret;
+}
+
+AnimationClass AnimationClass::Clone() const
+{
+    AnimationClass ret;
+
+    struct Serializer {
+        AnimationNodeClass* TreeNodeFromJson(const nlohmann::json& json)
+        {
+            if (!json.contains("id")) // root node has no id
+                return nullptr;
+            const std::string& old_id = json["id"];
+            const std::string& new_id = idmap[old_id];
+            auto* ret = nodes[new_id];
+            ASSERT(ret != nullptr && "No such node found.");
+            return ret;
+        }
+        std::unordered_map<std::string, std::string> idmap;
+        std::unordered_map<std::string, AnimationNodeClass*> nodes;
+    };
+    Serializer serializer;
+
+    // make a deep copy of the nodes.
+    for (const auto& node : mNodes)
+    {
+        auto clone = std::make_unique<AnimationNodeClass>(node->Clone());
+        serializer.idmap[node->GetId()] = clone->GetId();
+        serializer.nodes[clone->GetId()] = clone.get();
+        ret.mNodes.push_back(std::move(clone));
+    }
+
+    // make a deep copy of the animation tracks
+    for (const auto& track : mAnimationTracks)
+    {
+        ret.mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(track->Clone()));
+    }
+
+    // use the json serialization setup the copy of the
+    // render tree.
+    nlohmann::json json = mRenderTree.ToJson(*this);
+    // build our render tree.
+    ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
     return ret;
 }
 

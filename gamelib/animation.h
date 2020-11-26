@@ -233,6 +233,10 @@ namespace game
         // by loading all the needed runtime resources.
         void Prepare(const GfxFactory& loader) const;
 
+        // Make a new unique copy of this animation node class with
+        // all the same properties but a different unique ID.
+        AnimationNodeClass Clone() const;
+
         // serialize the component properties into JSON.
         nlohmann::json ToJson() const;
 
@@ -428,7 +432,10 @@ namespace game
         virtual std::string GetNodeId() const = 0;
         // Get the hash of the object state.
         virtual std::size_t GetHash() const = 0;
-        // Create an exact clone of this actuator class object.
+        // Create an exact copy of this actuator class object.
+        virtual std::unique_ptr<AnimationActuatorClass> Copy() const = 0;
+        // Create a new actuator class instance with same property values
+        // with this object but with a unique id.
         virtual std::unique_ptr<AnimationActuatorClass> Clone() const = 0;
         // Get the type of the represented actuator.
         virtual Type GetType() const = 0;
@@ -443,7 +450,7 @@ namespace game
         // Serialize the actuator class object into JSON.
         virtual nlohmann::json ToJson() const = 0;
         // Load the actuator class object state from JSON. Returns true
-        // succesful otherwise false and the object is not valid state.
+        // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const nlohmann::json& object) = 0;
     private:
     };
@@ -484,8 +491,14 @@ namespace game
             hash = base::hash_combine(hash, mEndAlpha);
             return hash;
         }
-        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        virtual std::unique_ptr<AnimationActuatorClass> Copy() const override
         { return std::make_unique<MaterialActuatorClass>(*this); }
+        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        {
+            auto ret = std::make_unique<MaterialActuatorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
         virtual Type GetType() const override
         { return Type::Material; }
         virtual float GetStartTime() const override
@@ -630,8 +643,14 @@ namespace game
             hash = base::hash_combine(hash, mEndRotation);
             return hash;
         }
-        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        virtual std::unique_ptr<AnimationActuatorClass> Copy() const override
         { return std::make_unique<AnimationTransformActuatorClass>(*this); }
+        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        {
+            auto ret = std::make_unique<AnimationTransformActuatorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
 
     private:
         // id of the actuator.
@@ -676,8 +695,8 @@ namespace game
         virtual float GetDuration() const = 0;
         // Get the id of the node that will be modified by this actuator.
         virtual std::string GetNodeId() const = 0;
-        // Create an exact clone of this actuator object.
-        virtual std::unique_ptr<AnimationActuator> Clone() const = 0;
+        // Create an exact copy of this actuator object.
+        virtual std::unique_ptr<AnimationActuator> Copy() const = 0;
     private:
     };
 
@@ -726,7 +745,7 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::unique_ptr<AnimationActuator> Clone() const override
+        virtual std::unique_ptr<AnimationActuator> Copy() const override
         { return std::make_unique<MaterialActuator>(*this); }
     private:
         std::shared_ptr<const MaterialActuatorClass> mClass;
@@ -777,7 +796,7 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::unique_ptr<AnimationActuator> Clone() const override
+        virtual std::unique_ptr<AnimationActuator> Copy() const override
         { return std::make_unique<AnimationTransformActuator>(*this); }
     private:
         std::shared_ptr<const AnimationTransformActuatorClass> mClass;
@@ -803,7 +822,7 @@ namespace game
         {
             for (const auto& a : other.mActuators)
             {
-                mActuators.push_back(a->Clone());
+                mActuators.push_back(a->Copy());
             }
             mId       = other.mId;
             mName     = other.mName;
@@ -812,7 +831,7 @@ namespace game
         }
         AnimationTrackClass(AnimationTrackClass&& other)
         {
-            mId = std::move(other.mId);
+            mId        = std::move(other.mId);
             mActuators = std::move(other.mActuators);
             mName      = std::move(other.mName);
             mDuration  = other.mDuration;
@@ -830,7 +849,7 @@ namespace game
         // and will reset after the reaching the end. I.e. all the actuators
         // involved will have their states reset to the initial state which
         // will be re-applied to the node instances. For an animation without
-        // any perceived jumps or discontinuitys it's important that the animation
+        // any perceived jumps or discontinuity it's important that the animation
         // should transform nodes back to their initial state before the end
         // of the animation track.
         void SetLooping(bool looping)
@@ -911,7 +930,7 @@ namespace game
 
         // Create an instance of some actuator class type at the given index.
         // For example if the type of actuator class at index N is
-        // AnimationTransformActuatorClass then the returnd object will be an
+        // AnimationTransformActuatorClass then the returned object will be an
         // instance of AnimationTransformActuator.
         std::unique_ptr<AnimationActuator> CreateActuatorInstance(size_t i) const
         {
@@ -986,7 +1005,19 @@ namespace game
             }
             return ret;
         }
-        // Do a deep copy on the asignment of a new object.
+
+        AnimationTrackClass Clone() const
+        {
+            AnimationTrackClass ret;
+            ret.mName     = mName;
+            ret.mDuration = mDuration;
+            ret.mLooping  = mLooping;
+            for (const auto& klass : mActuators)
+                ret.mActuators.push_back(klass->Clone());
+            return ret;
+        }
+
+        // Do a deep copy on the assignment of a new object.
         AnimationTrackClass& operator=(const AnimationTrackClass& other)
         {
             if (this == &other)
@@ -1044,7 +1075,7 @@ namespace game
             {
                 NodeTrack track;
                 track.node     = other.mTracks[i].node;
-                track.actuator = other.mTracks[i].actuator->Clone();
+                track.actuator = other.mTracks[i].actuator->Copy();
                 track.ended    = other.mTracks[i].ended;
                 track.started  = other.mTracks[i].started;
                 mTracks.push_back(std::move(track));
@@ -1061,7 +1092,7 @@ namespace game
 
         // Update the animation track state.
         void Update(float dt);
-        // Apply state/transition updates/interpolated intermdiate states (if any)
+        // Apply state/transition updates/interpolated intermediate states (if any)
         // onto the given node.
         void Apply(AnimationNode& node) const;
         // Prepare the animation track to restart.
@@ -1293,6 +1324,8 @@ namespace game
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
 
+        AnimationClass Clone() const;
+
         AnimationClass& operator=(const AnimationClass& other);
 
     private:
@@ -1301,7 +1334,7 @@ namespace game
         // we're allocating the nodes on the free store so that the
         // render tree pointers remain valid even if the vector is resized
         std::vector<std::shared_ptr<AnimationNodeClass>> mNodes;
-        // scenegraph / render tree for hieracarchical traversal
+        // scenegraph / render tree for hierarchical traversal
         // and transformation of the animation nodes. the tree defines
         // the parent-child transformation hierarchy.
         RenderTree mRenderTree;

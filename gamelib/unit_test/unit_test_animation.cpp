@@ -73,70 +73,100 @@ TestFactory* g_factory = nullptr;
 void unit_test_animation_node()
 {
     game::AnimationNodeClass node;
+    node.SetName("root");
     node.SetDrawable("rectangle");
     node.SetMaterial("test");
     node.SetSize(glm::vec2(100.0f, 100.0f));
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
     node.SetScale(glm::vec2(4.0f, 5.0f));
     node.SetRotation(1.5f);
-    node.SetName("root");
     node.SetRenderPass(game::AnimationNodeClass::RenderPass::Mask);
     node.SetFlag(game::AnimationNodeClass::Flags::UpdateDrawable, true);
     node.SetFlag(game::AnimationNodeClass::Flags::RestartDrawable, false);
     node.SetLayer(10);
     node.SetLineWidth(5.0f);
 
+    TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetDrawableName() == "rectangle");
     TEST_REQUIRE(node.GetMaterialName() == "test");
-    TEST_REQUIRE(node.GetSize() == glm::vec2(100.0f, 100.0f));
-    TEST_REQUIRE(node.GetTranslation() == glm::vec2(150.0f, -150.0f));
-    TEST_REQUIRE(node.GetScale() == glm::vec2(4.0f, 5.0f));
-    TEST_REQUIRE(real::equals(node.GetRotation(), 1.5f));
-    TEST_REQUIRE(real::equals(node.GetLineWidth(), 5.0f));
-    TEST_REQUIRE(node.GetName() == "root");
-    TEST_REQUIRE(node.GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask);
+    TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
+    TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
+    TEST_REQUIRE(node.GetScale()        == glm::vec2(4.0f, 5.0f));
+    TEST_REQUIRE(node.GetRotation()     == real::float32(1.5f));
+    TEST_REQUIRE(node.GetLineWidth()    == real::float32(5.0f));
+    TEST_REQUIRE(node.GetRenderPass()   == game::AnimationNodeClass::RenderPass::Mask);
     TEST_REQUIRE(node.TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable) == true);
     TEST_REQUIRE(node.TestFlag(game::AnimationNodeClass::Flags::RestartDrawable) == false);
     TEST_REQUIRE(node.GetLayer() == 10);
 
-    // test serialization
-    auto ret = game::AnimationNodeClass::FromJson(node.ToJson());
-    TEST_REQUIRE(ret.has_value());
-    auto copy = std::move(ret.value());
-    TEST_REQUIRE(node.GetDrawableName() == "rectangle");
-    TEST_REQUIRE(node.GetMaterialName() == "test");
-    TEST_REQUIRE(node.GetSize() == glm::vec2(100.0f, 100.0f));
-    TEST_REQUIRE(node.GetTranslation() == glm::vec2(150.0f, -150.0f));
-    TEST_REQUIRE(node.GetScale() == glm::vec2(4.0f, 5.0f));
-    TEST_REQUIRE(real::equals(node.GetRotation(), 1.5f));
-    TEST_REQUIRE(real::equals(node.GetLineWidth(), 5.0f));
-    TEST_REQUIRE(node.GetName() == "root");
-    TEST_REQUIRE(node.GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask);
-    TEST_REQUIRE(node.TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable) == true);
-    TEST_REQUIRE(node.TestFlag(game::AnimationNodeClass::Flags::RestartDrawable) == false);
+    // to/from json
+    {
+        auto ret = game::AnimationNodeClass::FromJson(node.ToJson());
+        TEST_REQUIRE(ret.has_value());
+        TEST_REQUIRE(ret->GetName()         == "root");
+        TEST_REQUIRE(ret->GetDrawableName() == "rectangle");
+        TEST_REQUIRE(ret->GetMaterialName() == "test");
+        TEST_REQUIRE(ret->GetSize()         == glm::vec2(100.0f, 100.0f));
+        TEST_REQUIRE(ret->GetTranslation()  == glm::vec2(150.0f, -150.0f));
+        TEST_REQUIRE(ret->GetScale()        == glm::vec2(4.0f, 5.0f));
+        TEST_REQUIRE(ret->GetRotation()     == real::float32(1.5f));
+        TEST_REQUIRE(ret->GetLineWidth()    == real::float32(5.0f));
+        TEST_REQUIRE(ret->GetRenderPass()   == game::AnimationNodeClass::RenderPass::Mask);
+        TEST_REQUIRE(ret->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable) == true);
+        TEST_REQUIRE(ret->TestFlag(game::AnimationNodeClass::Flags::RestartDrawable) == false);
+        TEST_REQUIRE(ret->GetHash() == node.GetHash());
+    }
 
-    node.Prepare(*g_factory);
+    // test copy and copy ctor
+    {
+        auto copy(node);
+        TEST_REQUIRE(copy.GetHash() == node.GetHash());
+        TEST_REQUIRE(copy.GetId()   == node.GetId());
+        copy = node;
+        TEST_REQUIRE(copy.GetHash() == node.GetHash());
+        TEST_REQUIRE(copy.GetId()   == node.GetId());
+    }
+
+    // test clone
+    {
+        auto clone = node.Clone();
+        TEST_REQUIRE(clone.GetHash() != node.GetHash());
+        TEST_REQUIRE(clone.GetId()   != node.GetId());
+        TEST_REQUIRE(clone.GetName()         == "root");
+        TEST_REQUIRE(clone.GetDrawableName() == "rectangle");
+        TEST_REQUIRE(clone.GetMaterialName() == "test");
+        TEST_REQUIRE(clone.GetSize()         == glm::vec2(100.0f, 100.0f));
+        TEST_REQUIRE(clone.GetTranslation()  == glm::vec2(150.0f, -150.0f));
+        TEST_REQUIRE(clone.GetScale()        == glm::vec2(4.0f, 5.0f));
+        TEST_REQUIRE(clone.GetRotation()     == real::float32(1.5f));
+        TEST_REQUIRE(clone.GetLineWidth()    == real::float32(5.0f));
+        TEST_REQUIRE(clone.GetRenderPass()   == game::AnimationNodeClass::RenderPass::Mask);
+        TEST_REQUIRE(clone.TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable) == true);
+        TEST_REQUIRE(clone.TestFlag(game::AnimationNodeClass::Flags::RestartDrawable) == false);
+    }
 
     // test instance state.
     {
+        node.Prepare(*g_factory);
+
         // check initial state.
         game::AnimationNode instance(node);
-        TEST_REQUIRE(instance.GetSize() == glm::vec2(100.0f, 100.0f));
+        TEST_REQUIRE(instance.GetName()        == "root");
+        TEST_REQUIRE(instance.GetSize()        == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(instance.GetTranslation() == glm::vec2(150.0f, -150.0f));
-        TEST_REQUIRE(instance.GetScale() == glm::vec2(4.0f, 5.0f));
-        TEST_REQUIRE(instance.GetName() == "root");
-        TEST_REQUIRE(instance.GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask);
-        TEST_REQUIRE(real::equals(instance.GetRotation(), 1.5f));
-        TEST_REQUIRE(real::equals(instance.GetLineWidth(), 5.0f));
+        TEST_REQUIRE(instance.GetScale()       == glm::vec2(4.0f, 5.0f));
+        TEST_REQUIRE(instance.GetRotation()    == real::float32(1.5f));
+        TEST_REQUIRE(instance.GetLineWidth()   == real::float32(5.0f));
+        TEST_REQUIRE(instance.GetRenderPass()  == game::AnimationNodeClass::RenderPass::Mask);
 
         instance.SetSize(glm::vec2(200.0f, 200.0f));
         instance.SetTranslation(glm::vec2(350.0f, -350.0f));
         instance.SetScale(glm::vec2(1.0f, 1.0f));
         instance.SetRotation(2.5f);
-        TEST_REQUIRE(instance.GetSize() == glm::vec2(200.0f, 200.0f));
+        TEST_REQUIRE(instance.GetSize()        == glm::vec2(200.0f, 200.0f));
         TEST_REQUIRE(instance.GetTranslation() == glm::vec2(350.0f, -350.0f));
-        TEST_REQUIRE(instance.GetScale() == glm::vec2(1.0f, 1.0f));
-        TEST_REQUIRE(real::equals(instance.GetRotation(), 2.5f));
+        TEST_REQUIRE(instance.GetScale()       == glm::vec2(1.0f, 1.0f));
+        TEST_REQUIRE(instance.GetRotation()    == real::float32(2.5f));
     }
 }
 
@@ -152,28 +182,67 @@ void unit_test_animation_transform_actuator()
     act.SetEndScale(glm::vec2(3.0f, 8.0f));
     act.SetEndRotation(1.5f);
 
-    TEST_REQUIRE(act.GetNodeId() == "123");
-    TEST_REQUIRE(act.GetStartTime() == real::float32(0.1f));
-    TEST_REQUIRE(act.GetDuration() == real::float32(0.5f));
     TEST_REQUIRE(act.GetInterpolation() == game::AnimationTransformActuatorClass::Interpolation::Cosine);
-    TEST_REQUIRE(act.GetEndPosition() == glm::vec2(100.0f, 50.0f));
-    TEST_REQUIRE(act.GetEndSize() == glm::vec2(5.0f, 6.0f));
-    TEST_REQUIRE(act.GetEndScale() == glm::vec2(3.0f, 8.0f));
-    TEST_REQUIRE(act.GetEndRotation() == real::float32(1.5f));
+    TEST_REQUIRE(act.GetNodeId()        == "123");
+    TEST_REQUIRE(act.GetStartTime()     == real::float32(0.1f));
+    TEST_REQUIRE(act.GetDuration()      == real::float32(0.5f));
+    TEST_REQUIRE(act.GetEndPosition()   == glm::vec2(100.0f, 50.0f));
+    TEST_REQUIRE(act.GetEndSize()       == glm::vec2(5.0f, 6.0f));
+    TEST_REQUIRE(act.GetEndScale()      == glm::vec2(3.0f, 8.0f));
+    TEST_REQUIRE(act.GetEndRotation()   == real::float32(1.5f));
 
     // serialize
     {
         game::AnimationTransformActuatorClass copy;
         copy.FromJson(act.ToJson());
-        TEST_REQUIRE(copy.GetNodeId() == "123");
-        TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
-        TEST_REQUIRE(copy.GetDuration() == real::float32(0.5f));
         TEST_REQUIRE(copy.GetInterpolation() == game::AnimationTransformActuatorClass::Interpolation::Cosine);
-        TEST_REQUIRE(copy.GetEndPosition() == glm::vec2(100.0f, 50.0f));
-        TEST_REQUIRE(copy.GetEndSize() == glm::vec2(5.0f, 6.0f));
-        TEST_REQUIRE(copy.GetEndScale() == glm::vec2(3.0f, 8.0f));
-        TEST_REQUIRE(copy.GetEndRotation() == real::float32(1.5f));
+        TEST_REQUIRE(copy.GetNodeId()        == "123");
+        TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetEndPosition()   == glm::vec2(100.0f, 50.0f));
+        TEST_REQUIRE(copy.GetEndSize()       == glm::vec2(5.0f, 6.0f));
+        TEST_REQUIRE(copy.GetEndScale()      == glm::vec2(3.0f, 8.0f));
+        TEST_REQUIRE(copy.GetEndRotation()   == real::float32(1.5f));
+        TEST_REQUIRE(copy.GetId()   == act.GetId());
+        TEST_REQUIRE(copy.GetHash() == act.GetHash());
     }
+
+    // copy assignment and copy ctor
+    {
+        auto copy(act);
+        TEST_REQUIRE(copy.GetHash() == act.GetHash());
+        TEST_REQUIRE(copy.GetId()   == act.GetId());
+        TEST_REQUIRE(copy.GetInterpolation() == game::AnimationTransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetNodeId()        == "123");
+        TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetEndPosition()   == glm::vec2(100.0f, 50.0f));
+        TEST_REQUIRE(copy.GetEndSize()       == glm::vec2(5.0f, 6.0f));
+        TEST_REQUIRE(copy.GetEndScale()      == glm::vec2(3.0f, 8.0f));
+        TEST_REQUIRE(copy.GetEndRotation()   == real::float32(1.5f));
+
+        copy = act;
+        TEST_REQUIRE(copy.GetHash() == act.GetHash());
+        TEST_REQUIRE(copy.GetId()   == act.GetId());
+    }
+
+    // copy and clone
+    {
+        auto copy = act.Copy();
+        TEST_REQUIRE(copy->GetHash()          == act.GetHash());
+        TEST_REQUIRE(copy->GetId()            == act.GetId());
+        TEST_REQUIRE(copy->GetNodeId()        == "123");
+        TEST_REQUIRE(copy->GetStartTime()     == real::float32(0.1f));
+        TEST_REQUIRE(copy->GetDuration()      == real::float32(0.5f));
+
+        auto clone = act.Clone();
+        TEST_REQUIRE(clone->GetHash()          != act.GetHash());
+        TEST_REQUIRE(clone->GetId()            != act.GetId());
+        TEST_REQUIRE(clone->GetNodeId()        == "123");
+        TEST_REQUIRE(clone->GetStartTime()     == real::float32(0.1f));
+        TEST_REQUIRE(clone->GetDuration()      == real::float32(0.5f));
+    }
+
 
     // instance
     {
@@ -195,23 +264,22 @@ void unit_test_animation_transform_actuator()
 
         instance.Apply(node, 1.0f);
         TEST_REQUIRE(node.GetTranslation() == glm::vec2(100.0f, 50.0f));
-        TEST_REQUIRE(node.GetSize() == glm::vec2(5.0f, 6.0f));
-        TEST_REQUIRE(node.GetScale() == glm::vec2(3.0f, 8.0f));
-        TEST_REQUIRE(node.GetRotation() == real::float32(1.5));
+        TEST_REQUIRE(node.GetSize()        == glm::vec2(5.0f, 6.0f));
+        TEST_REQUIRE(node.GetScale()       == glm::vec2(3.0f, 8.0f));
+        TEST_REQUIRE(node.GetRotation()    == real::float32(1.5));
 
         instance.Apply(node, 0.0f);
         TEST_REQUIRE(node.GetTranslation() == glm::vec2(5.0f, 5.0f));
-        TEST_REQUIRE(node.GetSize() == glm::vec2(1.0f, 1.0f));
-        TEST_REQUIRE(node.GetScale() == glm::vec2(1.0f, 1.0f));
-        TEST_REQUIRE(node.GetRotation() == real::float32(0.0));
+        TEST_REQUIRE(node.GetSize()        == glm::vec2(1.0f, 1.0f));
+        TEST_REQUIRE(node.GetScale()       == glm::vec2(1.0f, 1.0f));
+        TEST_REQUIRE(node.GetRotation()    == real::float32(0.0));
 
         instance.Finish(node);
         TEST_REQUIRE(node.GetTranslation() == glm::vec2(100.0f, 50.0f));
-        TEST_REQUIRE(node.GetSize() == glm::vec2(5.0f, 6.0f));
-        TEST_REQUIRE(node.GetScale() == glm::vec2(3.0f, 8.0f));
-        TEST_REQUIRE(node.GetRotation() == real::float32(1.5));
+        TEST_REQUIRE(node.GetSize()        == glm::vec2(5.0f, 6.0f));
+        TEST_REQUIRE(node.GetScale()       == glm::vec2(3.0f, 8.0f));
+        TEST_REQUIRE(node.GetRotation()    == real::float32(1.5));
     }
-
 }
 
 
@@ -256,11 +324,33 @@ void unit_test_animation_track()
     {
         auto ret = game::AnimationTrackClass::FromJson(track.ToJson());
         TEST_REQUIRE(ret.has_value());
-        auto copy = std::move(ret.value());
+        TEST_REQUIRE(ret->GetNumActuators() == 1);
+        TEST_REQUIRE(ret->IsLooping()       == true);
+        TEST_REQUIRE(ret->GetName()         == "test");
+        TEST_REQUIRE(ret->GetDuration()     == real::float32(10.0f));
+        TEST_REQUIRE(ret->GetId()           == track.GetId());
+        TEST_REQUIRE(ret->GetHash()         == track.GetHash());
+    }
+
+    // copy assignment and copy ctor
+    {
+        auto copy(track);
         TEST_REQUIRE(copy.GetNumActuators() == 1);
-        TEST_REQUIRE(copy.IsLooping() == true);
-        TEST_REQUIRE(copy.GetName() == "test");
-        TEST_REQUIRE(copy.GetDuration() == real::float32(10.0f));
+        TEST_REQUIRE(copy.IsLooping()       == true);
+        TEST_REQUIRE(copy.GetName()         == "test");
+        TEST_REQUIRE(copy.GetDuration()     == real::float32(10.0f));
+        TEST_REQUIRE(copy.GetId()           == track.GetId());
+        TEST_REQUIRE(copy.GetHash()         == track.GetHash());
+        copy = track;
+        TEST_REQUIRE(copy.GetId()           == track.GetId());
+        TEST_REQUIRE(copy.GetHash()         == track.GetHash());
+    }
+
+    // clone
+    {
+        auto clone = track.Clone();
+        TEST_REQUIRE(clone.GetId() != track.GetId());
+        TEST_REQUIRE(clone.GetHash() != track.GetHash());
     }
 
     // instance
@@ -332,13 +422,50 @@ void unit_test_animation()
     {
         auto ret = game::AnimationClass::FromJson(animation.ToJson());
         TEST_REQUIRE(ret.has_value());
-        auto copy = std::move(ret.value());
+        TEST_REQUIRE(ret->GetNumNodes() == 3);
+        TEST_REQUIRE(ret->GetNode(0).GetName() == "root");
+        TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");
+        TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
+        TEST_REQUIRE(ret->GetNumTracks() == 2);
+        TEST_REQUIRE(ret->FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(ret->GetId()   == animation.GetId());
+        TEST_REQUIRE(ret->GetHash() == animation.GetHash());
+    }
+
+    // copy construction and assignment
+    {
+        auto copy(animation);
         TEST_REQUIRE(copy.GetNumNodes() == 3);
         TEST_REQUIRE(copy.GetNode(0).GetName() == "root");
         TEST_REQUIRE(copy.GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(copy.GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(copy.GetNumTracks() == 2);
         TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(copy.GetId()   == animation.GetId());
+        TEST_REQUIRE(copy.GetHash() == animation.GetHash());
+
+        copy = animation;
+        TEST_REQUIRE(copy.GetNumNodes() == 3);
+        TEST_REQUIRE(copy.GetNode(0).GetName() == "root");
+        TEST_REQUIRE(copy.GetNode(1).GetName() == "child_1");
+        TEST_REQUIRE(copy.GetNode(2).GetName() == "child_2");
+        TEST_REQUIRE(copy.GetNumTracks() == 2);
+        TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(copy.GetId()   == animation.GetId());
+        TEST_REQUIRE(copy.GetHash() == animation.GetHash());
+    }
+
+    // clone
+    {
+        auto clone(animation.Clone());
+        TEST_REQUIRE(clone.GetNumNodes() == 3);
+        TEST_REQUIRE(clone.GetNode(0).GetName() == "root");
+        TEST_REQUIRE(clone.GetNode(1).GetName() == "child_1");
+        TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
+        TEST_REQUIRE(clone.GetNumTracks() == 2);
+        TEST_REQUIRE(clone.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(clone.GetId()   != animation.GetId());
+        TEST_REQUIRE(clone.GetHash() != animation.GetHash());
     }
 
     animation.Prepare(*g_factory);
@@ -472,6 +599,71 @@ void unit_test_animation_render_tree()
         vec = anim_class.MapCoordsToNode(20.0f, 20.0f, node);
         TEST_REQUIRE(math::equals(1.0f, vec.x));
         TEST_REQUIRE(math::equals(1.0f, vec.y));
+    }
+
+    // copying preserves the render tree.
+    {
+        game::AnimationClass klass;
+        game::AnimationNodeClass parent;
+        game::AnimationNodeClass child0;
+        game::AnimationNodeClass child1;
+        game::AnimationNodeClass child2;
+        parent.SetName("parent");
+        child0.SetName("child0");
+        child1.SetName("child1");
+        child2.SetName("child2");
+        auto* p  = klass.AddNode(parent);
+        auto* c0 = klass.AddNode(child0);
+        auto* c1 = klass.AddNode(child1);
+        auto* c2 = klass.AddNode(child2);
+        std::string names;
+        {
+            auto& tree = klass.GetRenderTree();
+            auto& root = tree.AppendChild();
+            root.SetValue(p);
+            tree.GetChildNode(0).AppendChild(c0);
+            tree.GetChildNode(0).AppendChild(c1);
+            tree.GetChildNode(0).GetChildNode(0).AppendChild(c2);
+            tree.PreOrderTraverseForEach([&names](const auto* node) {
+                if (node)
+                {
+                    names.append(node->GetName());
+                    names.append(" ");
+                }
+            });
+        }
+        std::cout << names << std::endl;
+        TEST_REQUIRE(names == "parent child0 child2 child1 ");
+
+        std::string test;
+        auto copy(klass);
+        copy.GetRenderTree().PreOrderTraverseForEach([&test](const auto* node) {
+            if (node) {
+                test.append(node->GetName());
+                test.append(" ");
+            }
+        });
+        TEST_REQUIRE(test == names);
+
+        test.clear();
+        copy = klass;
+        copy.GetRenderTree().PreOrderTraverseForEach([&test](const auto* node) {
+            if (node) {
+                test.append(node->GetName());
+                test.append(" ");
+            }
+        });
+        TEST_REQUIRE(test == names);
+
+        test.clear();
+        copy = klass.Clone();
+        copy.GetRenderTree().PreOrderTraverseForEach([&test](const auto* node) {
+            if (node) {
+                test.append(node->GetName());
+                test.append(" ");
+            }
+        });
+        TEST_REQUIRE(test == names);
     }
 
 }
