@@ -208,6 +208,7 @@ void MainWindow::loadState()
 
     mUI.actionSaveWorkspace->setEnabled(false);
     mUI.actionCloseWorkspace->setEnabled(false);
+    mUI.actionSelectResourceForEditing->setEnabled(false);
     mUI.menuWorkspace->setEnabled(false);
     mUI.menuEdit->setEnabled(false);
     mUI.menuTemp->setEnabled(false);
@@ -376,6 +377,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
     mUI.workspace->setModel(workspace->GetResourceModel());
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
+    mUI.actionSelectResourceForEditing->setEnabled(true);
     mUI.menuWorkspace->setEnabled(true);
     mWorkspace = std::move(workspace);
     return success;
@@ -552,6 +554,7 @@ void MainWindow::closeWorkspace()
 
     mUI.actionSaveWorkspace->setEnabled(false);
     mUI.actionCloseWorkspace->setEnabled(false);
+    mUI.actionSelectResourceForEditing->setEnabled(false);
     mUI.menuWorkspace->setEnabled(false);
     mUI.menuEdit->setEnabled(false);
     mUI.menuTemp->setEnabled(false);
@@ -981,6 +984,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
     mUI.workspace->setModel(workspace.get());
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
+    mUI.actionSelectResourceForEditing->setEnabled(true);
     mUI.menuWorkspace->setEnabled(true);
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
     mWorkspace = std::move(workspace);
@@ -1094,6 +1098,9 @@ void MainWindow::on_actionPackageResources_triggered()
 
 void MainWindow::on_actionSelectResourceForEditing_triggered()
 {
+    if (!mWorkspace)
+        return;
+
     DlgOpen dlg(QApplication::activeWindow(), *mWorkspace);
     if (dlg.exec() == QDialog::Accepted)
     {
