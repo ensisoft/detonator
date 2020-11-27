@@ -917,7 +917,14 @@ void LoadResources(const std::string& array,
     for (const auto& object : json[array].items())
     {
         const auto& value = object.value();
-        const std::string name = value["resource_name"];
+        std::string name;
+        std::string id;
+        if (!base::JsonReadSafe(value, "resource_name", &name) ||
+            !base::JsonReadSafe(value, "resource_id", &id))
+        {
+            ERROR("Unexpected JSON. Maybe old workspace version?");
+            continue;
+        }
         std::optional<ClassType> ret = ClassType::FromJson(value);
         if (!ret.has_value())
         {
@@ -940,14 +947,29 @@ bool Workspace::LoadContent(const QString& filename)
     const auto& buff = file.readAll(); // QByteArray
     if (buff.isEmpty())
     {
-        INFO("No workspace content found in file: '%1'", filename);
+        // odd but not necessarily wrong. Could be an empty workspace
+        // without any content.
+        WARN("No workspace content found in file: '%1'", filename);
         return true;
     }
 
-    const auto* beg = buff.data();
-    const auto* end = buff.data() + buff.size();
-    // todo: this can throw, use the nothrow and log error
-    const auto& json = nlohmann::json::parse(beg, end);
+    // Warning about nlohmann::json
+    // !! SEMANTICS CHANGE BETWEEN DEBUG AND RELEASE BUILD !!
+    //
+    // Trying to access an attribute using operator[] does not check
+    // whether a given key exists. instead it uses a standard CRT assert
+    // which then changes semantics depending whether NDEBUG is defined
+    // or not.
+
+    const auto* beg  = buff.data();
+    const auto* end  = buff.data() + buff.size();
+    auto [ok, json, error] = base::JsonParse(beg, end);
+    if (!ok)
+    {
+        ERROR("Failed to parse JSON file: '%1'", filename);
+        ERROR("JSON parse error: '%1'", error);
+        return false;
+    }
 
     LoadResources<gfx::MaterialClass>("materials", json, mResources);
     LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);

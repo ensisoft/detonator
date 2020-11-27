@@ -43,6 +43,7 @@
 #include <random>
 #include <filesystem>
 #include <fstream>
+#include <tuple>
 
 #include "base/math.h"
 #include "base/assert.h"
@@ -186,6 +187,29 @@ std::wstring Widen(const std::string& str)
         ret.push_back(c);
     return ret;
 }
+
+template<typename It> inline
+std::tuple<bool, nlohmann::json, std::string> JsonParse(It beg, It end)
+{
+    // if exceptions are suppressed there are no diagnostics
+    // so use this wrapper.
+    std::string message;
+    nlohmann::json json;
+    bool ok = true;
+    try
+    {
+        json = nlohmann::json::parse(beg, end);
+    }
+    catch (const nlohmann::detail::parse_error& err)
+    {
+        std::stringstream ss;
+        ss << "JSON parse error '" << err.what() << "'";
+        ss >> message;
+        ok = false;
+    }
+    return std::make_tuple(ok, std::move(json), std::move(message));
+}
+
 
 // works with nlohmann::json
 // using a template here simply to avoid having to specify a type
