@@ -484,12 +484,18 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         editor/app/packing.cpp
         third_party/base64/base64.cpp
         third_party/stb/stb_image.c)
+add_executable(unit_test_resource editor/app/unit_test/unit_test_resource.cpp
+        editor/app/utility.cpp
+        base/assert.cpp)
 add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)
+add_test(NAME unit_test_resource COMMAND unit_test_resource)
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_resource PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc ${CONAN_LIBS})
+target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets)
 
 # gamelib tests
 add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)

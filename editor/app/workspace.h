@@ -198,6 +198,8 @@ namespace app
         // and unsorted. Afterwards it will be sorted (ascending) based
         // on the item row numbers.
         void DeleteResources(QModelIndexList& list);
+        // Create duplicate copies of the selected resources.
+        void DuplicateResources(QModelIndexList& list);
 
         // Perform periodic workspace tick for cleaning up resources
         // that are no longer used/referenced.

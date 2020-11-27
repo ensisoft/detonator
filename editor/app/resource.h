@@ -87,8 +87,8 @@ namespace app
         // The updated properties include the underlying content
         // the  and the properties.
         virtual void UpdateFrom(const Resource& other) = 0;
-        // Set the resource id.
-        virtual void SetId(const QString& id) = 0;
+        // Set the name of the resource.
+        virtual void SetName(const QString& name) = 0;
         // Mark the resource primitive or not.
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
@@ -103,15 +103,22 @@ namespace app
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise it's added.
         virtual void SetProperty(const QString& name, const QVariant& value) = 0;
-        // Return the value of the property identied by name.
+        // Return the value of the property identified by name.
         // If the property doesn't exist returns default value.
-        virtual QVariant GetProperty(const QString& name, const QVariant& def) const = 0;
+        virtual QVariant GetVariantProperty(const QString& name, const QVariant& def) const = 0;
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
-        virtual QVariant GetProperty(const QString& name) const = 0;
-        // Load the additional properies from the json object.
+        virtual QVariant GetVariantProperty(const QString& name) const = 0;
+        // Load the additional properties from the json object.
         virtual void LoadProperties(const QJsonObject& json) = 0;
-        // Make a duplicate of the current resource.
+        // Make an an exact copy of this resource. This means
+        // that the copied resource contains all the same properties
+        // as this object including the resource id.
+        virtual std::unique_ptr<Resource> Copy() const = 0;
+        // Make a duplicate clone of the this resource. This means
+        // that the duplicated resource contains all the same properties
+        // as this object but is a distinct resource object (type) and
+        // has a different/unique resource id.
         virtual std::unique_ptr<Resource> Clone() const = 0;
 
         // helper to map the type to an icon in the application.
@@ -144,7 +151,7 @@ namespace app
         {
             if (!HasProperty(name))
                 return def;
-            const auto& ret = GetProperty(name);
+            const auto& ret = GetVariantProperty(name);
             return qvariant_cast<T>(ret);
         }
         template<typename T>
@@ -152,7 +159,7 @@ namespace app
         {
             if (!HasProperty(name))
                 return false;
-            const auto& ret = GetProperty(name);
+            const auto& ret = GetVariantProperty(name);
             *out = qvariant_cast<T>(ret);
             return true;
         }
@@ -245,36 +252,41 @@ namespace app
         GameResource(const Content& content, const QString& name)
         {
             mContent = std::make_shared<Content>(content);
-            mId   = app::FromUtf8(mContent->GetId());
             mName = name;
         }
         GameResource(Content&& content, const QString& name)
         {
             mContent = std::make_shared<Content>(std::move(content));
-            mId      = app::FromUtf8(mContent->GetId());
+            mName    = name;
+        }
+        template<typename T>
+        GameResource(std::unique_ptr<T> content, const QString& name)
+        {
+            std::shared_ptr<T> shared(std::move(content));
+            mContent = std::static_pointer_cast<Content>(shared);
             mName    = name;
         }
         GameResource(const QString& name)
         {
             mContent = std::make_shared<Content>();
-            mId = app::FromUtf8(mContent->GetId());
             mName = name;
         }
         GameResource(const GameResource& other)
         {
-            mContent = std::make_shared<Content>(*other.mContent);
-            mProps   = other.mProps;
-            mName = other.mName;
-            mId   = other.mId;
+            mContent   = std::make_shared<Content>(*other.mContent);
+            mProps     = other.mProps;
+            mName      = other.mName;
+            mPrimitive = other.mPrimitive;
         }
+
         virtual QString GetId() const override
-        { return mId; }
+        { return app::FromUtf8(mContent->GetId());  }
         virtual QString GetName() const override
         { return mName; }
         virtual Resource::Type GetType() const override
         { return TypeValue; }
-        virtual void SetId(const QString& id) override
-        { mId = id; }
+        virtual void SetName(const QString& name) override
+        { mName = name; }
         virtual void UpdateFrom(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const GameResource*>(&other);
@@ -289,14 +301,10 @@ namespace app
         {
             nlohmann::json content_json = mContent->ToJson();
             // tag some additional data with the content's JSON
-            // in this case just the name so that we can map the object
-            // to its additional properties.
-            // note that we could basically put all the properties here as well
-            // but then we'd have to serialize everything in QVariant manually.
-            // and there could be possibilities for name conflicts
             ASSERT(content_json.contains("resource_name") == false);
+            ASSERT(content_json.contains("resource_id") == false);
             content_json["resource_name"] = app::ToUtf8(mName);
-            content_json["resource_id"]   = app::ToUtf8(mId);
+            content_json["resource_id"]   = app::ToUtf8(GetId());
 
             if constexpr (TypeValue == Resource::Type::Material)
                 json["materials"].push_back(content_json);
@@ -309,14 +317,7 @@ namespace app
         }
         virtual void Serialize(QJsonObject& json) const override
         {
-            if constexpr (TypeValue == Resource::Type::Material)
-                json["material_" + mName]  = QJsonObject::fromVariantMap(mProps);
-            else if (TypeValue == Resource::Type::ParticleSystem)
-                json["particle_" + mName] = QJsonObject::fromVariantMap(mProps);
-            else if (TypeValue == Resource::Type::Animation)
-                json["animation_" + mName] = QJsonObject::fromVariantMap(mProps);
-            else if (TypeValue == Resource::Type::CustomShape)
-                json["shape_" + mName] = QJsonObject::fromVariantMap(mProps);
+            json[GetId()] = QJsonObject::fromVariantMap(mProps);
         }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
@@ -324,28 +325,28 @@ namespace app
         { return mPrimitive; }
         virtual void SetProperty(const QString& name, const QVariant& value) override
         { mProps[name] = value; }
-        virtual QVariant GetProperty(const QString& name, const QVariant& def) const override
+        virtual QVariant GetVariantProperty(const QString& name, const QVariant& def) const override
         {
             QVariant ret = mProps[name];
             if (ret.isNull())
                 return def;
             return ret;
         }
-        virtual QVariant GetProperty(const QString& name) const override
+        virtual QVariant GetVariantProperty(const QString& name) const override
         { return mProps[name]; }
         virtual void LoadProperties(const QJsonObject& object) override
         {
-            if constexpr (TypeValue == Resource::Type::Material)
-                mProps = object["material_" + mName].toObject().toVariantMap();
-            else if (TypeValue == Resource::Type::ParticleSystem)
-                mProps = object["particle_" + mName].toObject().toVariantMap();
-            else if (TypeValue == Resource::Type::Animation)
-                mProps = object["animation_" + mName].toObject().toVariantMap();
-            else if (TypeValue == Resource::Type::CustomShape)
-                mProps = object["shape_" + mName].toObject().toVariantMap();
+            mProps = object[GetId()].toObject().toVariantMap();
         }
-        virtual std::unique_ptr<Resource> Clone() const override
+        virtual std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
+        virtual std::unique_ptr<Resource> Clone() const override
+        {
+            auto ret = std::make_unique<GameResource>(mContent->Clone(), mName);
+            ret->mProps = mProps;
+            ret->mPrimitive = mPrimitive;
+            return ret;
+        }
 
         // GameResourceBase
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
@@ -355,8 +356,12 @@ namespace app
         { return mContent.get(); }
         const Content* GetContent() const
         { return mContent.get(); }
-        const QVariantMap& GetProperies() const
+        const QVariantMap& GetProperties() const
         { return mProps;}
+        void ClearProperties()
+        { mProps.clear(); }
+
+        using Resource::GetContent;
 
         GameResource& operator=(const GameResource& other) = delete;
 
@@ -375,7 +380,6 @@ namespace app
         }
     private:
         std::shared_ptr<Content> mContent;
-        QString mId;
         QString mName;
         QVariantMap mProps;
         bool mPrimitive = false;

@@ -1215,6 +1215,8 @@ QStringList Workspace::ListUserDefinedDrawables() const
 
 void Workspace::SaveResource(const Resource& resource)
 {
+    RECURSION_GUARD(this, "ResourceList");
+
     const auto& id = resource.GetId();
     for (size_t i=0; i<mResources.size(); ++i)
     {
@@ -1230,7 +1232,7 @@ void Workspace::SaveResource(const Resource& resource)
     // Create a new resource and add it to the list of resources.
     beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
     // insert at the end of the visible range which is from [0, mVisibleCount)
-    mResources.insert(mResources.begin() + mVisibleCount, resource.Clone());
+    mResources.insert(mResources.begin() + mVisibleCount, resource.Copy());
     endInsertRows();
 
     auto& back = mResources[mVisibleCount];
@@ -1357,6 +1359,8 @@ const Resource& Workspace::GetResource(size_t index) const
 
 void Workspace::DeleteResources(QModelIndexList& list)
 {
+    RECURSION_GUARD(this, "ResourceList");
+
     qSort(list);
 
     // because the high probability of unwanted recursion
@@ -1391,6 +1395,37 @@ void Workspace::DeleteResources(QModelIndexList& list)
     }
 }
 
+void Workspace::DuplicateResources(QModelIndexList &list)
+{
+    RECURSION_GUARD(this, "ResourceList");
+
+    qSort(list);
+
+    std::vector<std::unique_ptr<Resource>> dupes;
+    for (int i=0; i<list.size(); ++i)
+    {
+        const auto row = list[i].row();
+        const auto& resource = GetResource(row);
+        auto clone = resource.Clone();
+        clone->SetName(QString("Copy of %1").arg(resource.GetName()));
+        dupes.push_back(std::move(clone));
+    }
+
+    for (int i=0; i<(int)dupes.size(); ++i)
+    {
+        const auto pos = list[i].row() + i;
+        beginInsertRows(QModelIndex(), pos, pos);
+        auto it = mResources.begin();
+        it += pos;
+        auto* dupe = dupes[i].get();
+        mResources.insert(it, std::move(dupes[i]));
+        mVisibleCount++;
+        endInsertRows();
+
+        emit NewResourceAvailable(dupe);
+    }
+}
+
 void Workspace::Tick()
 {
 
@@ -1417,7 +1452,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     std::vector<std::unique_ptr<Resource>> mutable_copies;
     for (const auto* resource : resources)
     {
-        mutable_copies.push_back(resource->Clone());
+        mutable_copies.push_back(resource->Copy());
     }
 
     ResourcePacker packer(outdir, options.max_texture_width, options.max_texture_height,

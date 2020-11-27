@@ -1,162 +1,81 @@
 {
-    "animation_Asteroid": {
+    "0LQtJeq8Dl": {
+        "checked_for_packing": true,
+        "material": "Scarab"
+    },
+    "0ryFZH376L": {
         "checked_for_packing": true
     },
-    "animation_Big Explosion": {
+    "46yvmCSzSL": {
         "checked_for_packing": true
     },
-    "animation_Cricket": {
+    "4sXzaaFmvE": {
         "checked_for_packing": true
     },
-    "animation_Locust": {
+    "5OtYNGYEi5": {
+        "checked_for_packing": true,
+        "material": "Locust"
+    },
+    "6AzTqiy7MH": {
         "checked_for_packing": true
     },
-    "animation_Mantis": {
+    "9D2vt3ioun": {
         "checked_for_packing": true
     },
-    "animation_Scarab": {
+    "AqPWpeetnB": {
         "checked_for_packing": true
     },
-    "animation_Space": {
+    "AsK76ObHJo": {
         "checked_for_packing": true
     },
-    "animation_UFO": {
+    "E6ZHdAHRBY": {
         "checked_for_packing": true
     },
-    "material_Asteroid": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+    "EMBqY9KWth": {
+        "checked_for_packing": true
     },
-    "material_Big Explosion": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+    "FbK00HsTug": {
+        "checked_for_packing": true
     },
-    "material_Box": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Cricket": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Cricket Smoke": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Locust": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Mantis": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Nebula1": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Scarab": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_Star": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_UFO": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
-    },
-    "material_UFO Rings": {
+    "HMQvdCNPy4": {
         "checked_for_packing": true,
         "shader_file": "ws://assets/shaders/es2/concentric_rings_effect.glsl",
         "use_shader_file": true
     },
-    "particle_Asteroid field": {
-        "checked_for_packing": true,
-        "material": "Asteroid",
-        "transform_enabled": false,
-        "transform_height": 500,
-        "transform_rotation": 0,
-        "transform_width": 500,
-        "transform_xpos": 0,
-        "transform_ypos": 0,
-        "use_alpha_derivatives": false,
-        "use_direction_sector": true,
-        "use_init_rect": true,
-        "use_lifetime": false,
-        "use_size_derivatives": false
+    "Kt7KKux9mo": {
+        "checked_for_packing": true
     },
-    "particle_Exhaust": {
-        "checked_for_packing": true,
-        "material": "Cricket Smoke",
-        "transform_enabled": false,
-        "transform_height": 500,
-        "transform_rotation": 0,
-        "transform_width": 500,
-        "transform_xpos": 0,
-        "transform_ypos": 0,
-        "use_alpha_derivatives": false,
-        "use_direction_sector": true,
-        "use_init_rect": true,
-        "use_lifetime": true,
-        "use_size_derivatives": true
+    "Q9LbPJnta0": {
+        "checked_for_packing": true
     },
-    "particle_Starfield layer 0": {
-        "checked_for_packing": true,
-        "material": "Star",
-        "transform_enabled": false,
-        "transform_height": 500,
-        "transform_rotation": 0,
-        "transform_width": 500,
-        "transform_xpos": 0,
-        "transform_ypos": 0,
-        "use_alpha_derivatives": false,
-        "use_direction_sector": true,
-        "use_init_rect": true,
-        "use_lifetime": true,
-        "use_size_derivatives": false
+    "ZlFaftPBiF": {
+        "checked_for_packing": true
     },
-    "particle_Starfield layer 1": {
+    "ZxF4YiTJ0d": {
         "checked_for_packing": true,
-        "material": "Star",
-        "transform_enabled": false,
-        "transform_height": 500,
-        "transform_rotation": 0,
-        "transform_width": 500,
-        "transform_xpos": 0,
-        "transform_ypos": 0,
-        "use_alpha_derivatives": false,
-        "use_direction_sector": true,
-        "use_init_rect": true,
-        "use_lifetime": true,
-        "use_size_derivatives": false
+        "material": "Mantis"
     },
-    "particle_Starfield layer 2": {
+    "d8CDbfETmY": {
+        "checked_for_packing": true
+    },
+    "gLRYUQObGy": {
+        "checked_for_packing": true
+    },
+    "hR9OWOACQy": {
+        "checked_for_packing": true
+    },
+    "k0uqQHtPFX": {
         "checked_for_packing": true,
-        "material": "Star",
-        "transform_enabled": false,
-        "transform_height": 500,
-        "transform_rotation": 0,
-        "transform_width": 500,
-        "transform_xpos": 0,
-        "transform_ypos": 0,
-        "use_alpha_derivatives": false,
-        "use_direction_sector": true,
-        "use_init_rect": true,
-        "use_lifetime": true,
-        "use_size_derivatives": false
+        "material": "Cricket"
+    },
+    "lIO2x5dmry": {
+        "checked_for_packing": true
+    },
+    "n6I4hvN8l1": {
+        "checked_for_packing": true
+    },
+    "nf6vDCSp3f": {
+        "checked_for_packing": true
     },
     "project": {
         "application_library": "invaders",
@@ -177,21 +96,17 @@
         "window_width": 1024,
         "working_folder": "${workspace}/dist"
     },
-    "shape_Cricket": {
-        "checked_for_packing": true,
-        "material": "Cricket"
+    "qFf44e10n1": {
+        "checked_for_packing": true
     },
-    "shape_Locust": {
-        "checked_for_packing": true,
-        "material": "Locust"
+    "tl86yqbmeJ": {
+        "checked_for_packing": true
     },
-    "shape_Mantis": {
-        "checked_for_packing": true,
-        "material": "Mantis"
+    "uXIb9I3vik": {
+        "checked_for_packing": true
     },
-    "shape_Scarab": {
-        "checked_for_packing": true,
-        "material": "Scarab"
+    "wE5I5Tg7p0": {
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -201,5 +116,8 @@
         "packing_param_resize_large_textures": true,
         "packing_param_write_config": true,
         "packing_param_write_content": true
+    },
+    "zQGgrkSE8i": {
+        "checked_for_packing": true
     }
 }

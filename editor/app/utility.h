@@ -33,6 +33,10 @@
 #include <fstream>
 #include <vector>
 #include <cstdint>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "base/assert.h"
 
 // general dumping ground for utility type of functionality
 // preferably not specific to any GUI or application.
@@ -136,5 +140,44 @@ Enum EnumFromString(const QString& str, Enum backup, bool* success = nullptr)
     }
     return enum_val.value();
 }
+
+struct MemberRecursionGuard {
+    MemberRecursionGuard(const void* who, std::string where) : mObject(who), mWhere(where)
+    {
+        auto& map = GetMap();
+        if (!map[who].insert(where).second) {
+            BUG("You've recursed. Now behold a core dump!");
+        }
+    }
+   ~MemberRecursionGuard()
+    {
+        auto& map = GetMap();
+        auto it = map.find(mObject);
+        ASSERT(it != map.end());
+        auto& entries = it->second;
+        ASSERT(entries.find(mWhere) != entries.end());
+        entries.erase(mWhere);
+        if (entries.empty()) {
+            map.erase(mObject);
+        }
+    }
+    MemberRecursionGuard() = delete;
+    MemberRecursionGuard(const MemberRecursionGuard&) = delete;
+    MemberRecursionGuard& operator=(const MemberRecursionGuard&) = delete;
+
+    using EntrySet = std::unordered_set<std::string>;
+    using ObjectMap = std::unordered_map<const void*, EntrySet>;
+private:
+    static ObjectMap& GetMap()
+    {
+        static ObjectMap map;
+        return map;
+    }
+    const void* mObject = nullptr;
+    const std::string mWhere;
+};
+
+#define RECURSION_GUARD(who, where) \
+    MemberRecursionGuard recursion_guard(who, where)
 
 } // namespace

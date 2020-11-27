@@ -578,6 +578,15 @@
     <string>Ctrl+Shift+O</string>
    </property>
   </action>
+  <action name="actionDuplicateResource">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/copy.png</normaloff>:/16x16_ico_png/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Duplicate</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../resource/resource.qrc"/>

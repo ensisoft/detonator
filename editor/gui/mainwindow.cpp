@@ -837,6 +837,12 @@ void MainWindow::on_actionDeleteResource_triggered()
     mWorkspace->DeleteResources(selected);
 }
 
+void MainWindow::on_actionDuplicateResource_triggered()
+{
+    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    mWorkspace->DuplicateResources(selected);
+}
+
 void MainWindow::on_actionSaveWorkspace_triggered()
 {
     if (!mWorkspace->Save())
@@ -1054,6 +1060,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 {
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
+    mUI.actionDuplicateResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
@@ -1067,6 +1074,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
+    menu.addSeparator();
+    menu.addAction(mUI.actionDuplicateResource);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.exec(QCursor::pos());
