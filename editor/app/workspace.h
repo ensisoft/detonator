@@ -328,7 +328,8 @@ namespace app
                 // border and resize settings.
                 Windowed,
             };
-            unsigned multisample_sample_count = 0;
+            // sample count when using multi-sampled render targets.
+            unsigned multisample_sample_count = 4;
             // user defined name of the application.
             QString application_name;
             // User defined version of the application.
