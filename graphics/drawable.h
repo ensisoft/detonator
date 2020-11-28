@@ -455,6 +455,7 @@ namespace gfx
             hash = base::hash_combine(hash, mId);
             hash = base::hash_combine(hash, mNumHorizontalLines);
             hash = base::hash_combine(hash, mNumVerticalLines);
+            hash = base::hash_combine(hash, mBorderLines);
             return hash;
         }
         virtual void Pack(ResourcePacker* packer) const override;

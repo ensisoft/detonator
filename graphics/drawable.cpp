@@ -909,9 +909,12 @@ Shader* GridClass::GetShader(Device& device) const
 
 Geometry* GridClass::Upload(Device& device) const
 {
+    // use the content properties to generate a name for the
+    // gpu side geometry.
     size_t hash = 0;
     hash = base::hash_combine(hash, mNumVerticalLines);
     hash = base::hash_combine(hash, mNumHorizontalLines);
+    hash = base::hash_combine(hash, mBorderLines);
     const auto& name = std::to_string(hash);
 
     Geometry* geom = device.FindGeometry(name);
