@@ -371,7 +371,10 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     painter.SetTopLeftView(width, height);
 
     gfx::Transform view;
-    view.Resize(width, height);
+    // fiddle with the view transform in order to avoid having
+    // some content (fragments) get clipped against the viewport.
+    view.Resize(width-2, height-2);
+    view.MoveTo(1, 1);
 
     const auto& blueprint = mUI.blueprints->currentText();
     if (blueprint.isEmpty())
@@ -399,7 +402,11 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
             gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
                 .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
     }
-
+    else
+    {
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 1.0f), view,
+                     gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray)));
+    }
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
@@ -414,7 +421,7 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
         const auto& vert = mPolygon.GetVertex(i);
         const auto x = width * vert.aPosition.x;
         const auto y = height * -vert.aPosition.y;
-        view.MoveTo(x, y);
+        view.MoveTo(x+1, y+1);
         view.Translate(-3, -3);
         if (mVertexIndex == i)
         {
@@ -439,8 +446,8 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
     std::vector<QPoint> points = mPoints;
     points.push_back(mCurrentPoint);
 
-    view.Resize(width, height);
-    view.MoveTo(0, 0);
+    view.Resize(width-2, height-2);
+    view.MoveTo(1, 1);
 
     gfx::PolygonClass poly;
     gfx::PolygonClass::DrawCommand cmd;
