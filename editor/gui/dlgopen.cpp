@@ -31,11 +31,12 @@
 #  include <QDir>
 #include "warnpop.h"
 
+#include "base/math.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/packing.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
-#include "dlgopen.h"
+#include "editor/gui/dlgopen.h"
 
 namespace gui
 {
@@ -63,6 +64,9 @@ DlgOpen::DlgOpen(QWidget* parent, app::Workspace& workspace)
     {
         mUI.listWidget->setCurrentItem(mUI.listWidget->item(0));
     }
+    // capture some special key presses in order to move the
+    // selection (current item) in the list widget more conveniently.
+    mUI.filter->installEventFilter(this);
 }
 
 app::Resource* DlgOpen::GetSelected()
@@ -118,6 +122,38 @@ void DlgOpen::on_filter_textChanged(const QString& text)
 void DlgOpen::on_listWidget_itemDoubleClicked(QListWidgetItem*)
 {
     accept();
+}
+
+bool DlgOpen::eventFilter(QObject* destination, QEvent* event)
+{
+    // returning true will eat the event and stop from
+    // other event handlers ever seeing the event.
+    if (destination != mUI.filter)
+        return false;
+    else if (event->type() != QEvent::KeyPress)
+        return false;
+    else if (mUI.listWidget->count() == 0)
+        return false;
+
+    const auto* key = static_cast<QKeyEvent*>(event);
+    const bool ctrl = key->modifiers() & Qt::ControlModifier;
+
+    int current = mUI.listWidget->currentIndex().row();
+    if (current == -1)
+        current = 0;
+
+    if (ctrl && key->key() == Qt::Key_N)
+        current = math::wrap(0, mUI.listWidget->count()-1, current+1);
+    else if (ctrl && key->key() == Qt::Key_P)
+        current = math::wrap(0, mUI.listWidget->count()-1, current-1);
+    else if (key->key() == Qt::Key_Up)
+        current = math::wrap(0, mUI.listWidget->count()-1, current-1);
+    else if (key->key() == Qt::Key_Down)
+        current = math::wrap(0, mUI.listWidget->count()-1, current+1);
+    else return false;
+
+    mUI.listWidget->setCurrentItem(mUI.listWidget->item(current));
+    return true;
 }
 
 } // namespace

@@ -46,7 +46,8 @@ namespace gui
         void on_btnCancel_clicked();
         void on_filter_textChanged(const QString& text);
         void on_listWidget_itemDoubleClicked(QListWidgetItem* item);
-
+    private:
+        virtual bool eventFilter(QObject* destination, QEvent* event) override;
     private:
         Ui::DlgOpen mUI;
     private:
