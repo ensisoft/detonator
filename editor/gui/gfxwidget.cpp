@@ -88,7 +88,9 @@
 namespace {
     // a global flag to indicate when there's some surface with
     // VSYNC enabled.
-    bool have_sync = false;
+    bool have_vsync = false;
+    // a global flag for toggling vsync on/off.
+    bool should_have_vsync = true;
 
     std::weak_ptr<QOpenGLContext> shared_context;
     std::weak_ptr<gfx::Device> shared_device;
@@ -113,13 +115,18 @@ GfxWindow::~GfxWindow()
 
 GfxWindow::GfxWindow()
 {
+    // if we need a vsynced rendering surface but don't
+    // have any yet then this window should become one that is
+    // synced.
+    mVsync = should_have_vsync && !have_vsync;
+
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    format.setSwapInterval(have_sync ? 0 : 1);
+    format.setSwapInterval(mVsync ? 1 : 0);
 
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(format);
 
-    have_sync = true;
+    have_vsync = should_have_vsync;
 
     auto context = shared_context.lock();
     if (!context)
@@ -155,15 +162,13 @@ void GfxWindow::dispose()
     // to a different device! *OOPS*
     mContext->makeCurrent(this);
 
-    const auto& format = this->format();
-    const auto sync = format.swapInterval() == 1;
-    if (sync)
+    if (mVsync)
     {
         // if this surface was vsynced then toggle the flag
         // in order to indicate that we have vsync no more and
         // some other surface must be recreated.
         DEBUG("Lost VSYNC GfxWindow.");
-        have_sync = false;
+        have_vsync = false;
     }
 
     mCustomGraphicsDevice.reset();
@@ -219,21 +224,16 @@ void GfxWindow::paintGL()
     //if (!isExposed())
     //    return;
 
-    if (!have_sync)
+    if (should_have_vsync && !have_vsync && !mVsync)
     {
-        // if vsync was lost then enable the flag on some other
-        // rendering surface.
-        QSurfaceFormat fmt = format();
-        fmt.setSwapInterval(1);
-        setFormat(fmt);
-
-        // native resources must be recreated. see the comment up top
-        destroy();
-        create();
-        show();
+        recreateRenderingSurface(true);
+        have_vsync = true;
     }
-
-    have_sync = true;
+    else if (!should_have_vsync && have_vsync && mVsync)
+    {
+        recreateRenderingSurface(false);
+        have_vsync = false;
+    }
 
     mContext->makeCurrent(this);
 
@@ -271,6 +271,20 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->EndFrame(false /*display*/);
     //mCustomGraphicsDevice->CleanGarbage(60);
     mContext->swapBuffers(this);
+}
+
+void GfxWindow::recreateRenderingSurface(bool vsync)
+{
+    // set swap interval value on the surface format.
+    QSurfaceFormat fmt = format();
+    fmt.setSwapInterval(vsync ? 1 : 0);
+    setFormat(fmt);
+    // native resources must be recreated. see the comment up top
+    destroy();
+    create();
+    show();
+
+    mVsync = vsync;
 }
 
 void GfxWindow::doInit()
@@ -449,15 +463,8 @@ void GfxWidget::translateZoomInOut(QWheelEvent* wheel)
 
 void GfxWidget::toggleVSync()
 {
-    QSurfaceFormat fmt = mWindow->format();
-    const auto old_swap_interval = fmt.swapInterval();
-    const auto new_swap_interval = old_swap_interval == 0 ? 1 : 0;
-    fmt.setSwapInterval(new_swap_interval);
-    mWindow->setFormat(fmt);
-    mWindow->destroy();
-    mWindow->create();
-    mWindow->show();
-    DEBUG("Swap interval set to %1", new_swap_interval);
+    should_have_vsync = !should_have_vsync;
+    DEBUG("VSYNC set to %1", should_have_vsync);
 }
 
 } // namespace

@@ -115,6 +115,7 @@ namespace gui
     private:
         void initializeGL();
         void paintGL();
+        void recreateRenderingSurface(bool vsync);
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
@@ -129,10 +130,12 @@ namespace gui
     private:
         QElapsedTimer mClock;
         bool mInitialized = false;
+        bool mVsync       = false;
     private:
         quint64 mNumFrames = 0;
         bool  mShowFps     = false;
         float mCurrentFps  = 0.0f;
+
     private:
         std::shared_ptr<QOpenGLContext> mContext;
     private:
