@@ -44,16 +44,15 @@
 #include "editor/gui/treewidget.h"
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/animationwidget.h"
+#include "editor/gui/utility.h"
 #include "base/assert.h"
+#include "base/format.h"
 #include "base/math.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-#include "animationwidget.h"
-#include "utility.h"
-#include "treewidget.h"
 
 namespace gui
 {
@@ -554,7 +553,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.translateX->setValue(dist_x);
         mUI.translateY->setValue(dist_y);
     };
-    mUI.widget->onPaintScene = std::bind(&AnimationWidget::paintScene,
+    mUI.widget->onPaintScene = std::bind(&AnimationWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
     mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
@@ -579,7 +578,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.translateX->setValue(dist_x);
         mUI.translateY->setValue(dist_y);
 
-        updateCurrentNodeProperties();
+        UpdateCurrentNodeProperties();
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
@@ -686,7 +685,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.widget->onKeyPress = [&](QKeyEvent* key) {
         switch (key->key()) {
             case Qt::Key_Delete:
-                on_actionDeleteComponent_triggered();
+                on_actionNodeDelete_triggered();
                 break;
             case Qt::Key_W:
                 mState.camera_offset_y += 20.0f;
@@ -701,16 +700,16 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                 mState.camera_offset_x -= 20.0f;
                 break;
             case Qt::Key_Left:
-                updateCurrentNodePosition(-20.0f, 0.0f);
+                UpdateCurrentNodePosition(-20.0f, 0.0f);
                 break;
             case Qt::Key_Right:
-                updateCurrentNodePosition(20.0f, 0.0f);
+                UpdateCurrentNodePosition(20.0f, 0.0f);
                 break;
             case Qt::Key_Up:
-                updateCurrentNodePosition(0.0f, -20.0f);
+                UpdateCurrentNodePosition(0.0f, -20.0f);
                 break;
             case Qt::Key_Down:
-                updateCurrentNodePosition(0.0f, 20.0f);
+                UpdateCurrentNodePosition(0.0f, 20.0f);
                 break;
             case Qt::Key_Escape:
                 mUI.tree->ClearSelection();
@@ -1137,7 +1136,7 @@ void AnimationWidget::on_actionNewCapsule_triggered()
     CheckPlacementActions(mUI.actionNewCapsule);
 }
 
-void AnimationWidget::on_actionDeleteComponent_triggered()
+void AnimationWidget::on_actionNodeDelete_triggered()
 {
     const game::AnimationNodeClass* item = GetCurrentNode();
     if (item == nullptr)
@@ -1150,7 +1149,7 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
 
     // traverse the tree starting from the node to be deleted
     // and capture the ids of the animation nodes that are part
-    // of this hiearchy.
+    // of this hierarchy.
     struct Carcass {
         std::string id;
         std::string name;
@@ -1177,10 +1176,67 @@ void AnimationWidget::on_actionDeleteComponent_triggered()
     mUI.tree->Rebuild();
 }
 
+void AnimationWidget::on_actionNodeMoveUpLayer_triggered()
+{
+    game::AnimationNodeClass* node = GetCurrentNode();
+    if (node == nullptr)
+        return;
+    const int layer = node->GetLayer();
+    node->SetLayer(layer + 1);
+
+    UpdateCurrentNodeProperties();
+}
+void AnimationWidget::on_actionNodeMoveDownLayer_triggered()
+{
+    game::AnimationNodeClass* node = GetCurrentNode();
+    if (node == nullptr)
+        return;
+    const int layer = node->GetLayer();
+    node->SetLayer(layer - 1);
+
+    UpdateCurrentNodeProperties();
+}
+
+void AnimationWidget::on_actionNodeDuplicate_triggered()
+{
+    game::AnimationNodeClass* node = GetCurrentNode();
+    if (node == nullptr)
+        return;
+
+    // do a deep copy of a hierarchy of nodes starting from
+    // the selected node and add the new hierarchy as a new
+    // child of the selected node's parent
+
+    auto& tree = mState.animation->GetRenderTree();
+    auto* tree_node = tree.FindNodeByValue(node);
+    auto* tree_node_parent = tree.FindParent(tree_node);
+
+    // deep copy of the node.
+    auto copy_root = tree_node->Clone();
+    // replace all node references with copies of the nodes.
+    copy_root.PreOrderTraverseForEachTreeNode([&](game::AnimationClass::RenderTreeNode* node) {
+        game::AnimationNodeClass* child = mState.animation->AddNode((*node)->Clone());
+        child->SetName(base::FormatString("Copy of %1", (*node)->GetName()));
+        node->SetValue(child);
+    });
+    // update the the translation for the parent of the new hierarchy
+    // so that it's possible to tell it apart from the source of the copy.
+    copy_root->SetTranslation(node->GetTranslation() * 1.2f);
+    tree_node_parent->AppendChild(std::move(copy_root));
+
+    mState.scenegraph_tree_view->Rebuild();
+    mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(copy_root->GetId()));
+}
+
 void AnimationWidget::on_tree_customContextMenuRequested(QPoint)
 {
     QMenu menu(this);
-    menu.addAction(mUI.actionDeleteComponent);
+    menu.addAction(mUI.actionNodeMoveUpLayer);
+    menu.addAction(mUI.actionNodeMoveDownLayer);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeDuplicate);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeDelete);
     menu.exec(QCursor::pos());
 }
 
@@ -1272,7 +1328,7 @@ void AnimationWidget::currentComponentRowChanged()
     }
     else
     {
-        updateCurrentNodeProperties();
+        UpdateCurrentNodeProperties();
     }
 }
 
@@ -1568,7 +1624,7 @@ void AnimationWidget::on_trackList_itemSelectionChanged()
     mUI.btnDeleteTrack->setEnabled(!list.isEmpty());
 }
 
-void AnimationWidget::paintScene(gfx::Painter& painter, double secs)
+void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
@@ -1782,7 +1838,7 @@ game::AnimationNodeClass* AnimationWidget::GetCurrentNode()
     return static_cast<game::AnimationNodeClass*>(item->GetUserData());
 }
 
-void AnimationWidget::updateCurrentNodeProperties()
+void AnimationWidget::UpdateCurrentNodeProperties()
 {
     if (const auto* node = GetCurrentNode())
     {
@@ -1817,7 +1873,7 @@ void AnimationWidget::updateCurrentNodeProperties()
     }
 }
 
-void AnimationWidget::updateCurrentNodePosition(float dx, float dy)
+void AnimationWidget::UpdateCurrentNodePosition(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {

@@ -46,6 +46,44 @@ namespace game
         TreeNode(T* value) : mNodeValue(value)
         {}
 
+        // A tree visitor but with the ability to visit
+        // (and possibly mutate) the tree nodes itself.
+        class TreeVisitor
+        {
+        public:
+            virtual void EnterNode(TreeNode* node) {};
+            virtual void LeaveNode(TreeNode* node) {};
+        protected:
+            ~TreeVisitor() = default;
+        };
+        void PreOrderTraverse(TreeVisitor& visitor)
+        {
+            visitor.EnterNode(this);
+            for (auto& child : mChildren)
+            {
+                child.PreOrderTraverse(visitor);
+            }
+            visitor.LeaveNode(this);
+        }
+        template<typename Function>
+        void PreOrderTraverseForEachTreeNode(Function callback)
+        {
+            class PrivateTreeVisitor : public TreeVisitor
+            {
+            public:
+                PrivateTreeVisitor(Function callback) : mCallback(std::move(callback))
+                {}
+                virtual void EnterNode(TreeNode* node)
+                {
+                    mCallback(node);
+                }
+            private:
+                Function mCallback;
+            } visitor(std::move(callback));
+
+            PreOrderTraverse(visitor);
+        }
+
         class Visitor
         {
         public:
@@ -142,6 +180,12 @@ namespace game
         // Get the number of child nodes this node has.
         size_t GetNumChildren() const
         { return mChildren.size(); }
+
+        // Make a deep copy of this tree node.
+        TreeNode Clone() const
+        {
+            return TreeNode(*this);
+        }
 
         // get the number of nodes in the tree starting from this
         // node *including* this node itself.

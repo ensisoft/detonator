@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1514</width>
-    <height>1180</height>
+    <width>1507</width>
+    <height>1134</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -575,6 +575,13 @@
                 <layout class="QVBoxLayout" name="verticalLayout_9">
                  <item>
                   <layout class="QGridLayout" name="gridLayout_2">
+                   <item row="8" column="0">
+                    <widget class="QLabel" name="label_12">
+                     <property name="text">
+                      <string>Alpha</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="5" column="1">
                     <widget class="QSpinBox" name="layer">
                      <property name="sizePolicy">
@@ -591,6 +598,19 @@
                      </property>
                     </widget>
                    </item>
+                   <item row="7" column="0">
+                    <widget class="QLabel" name="label_5">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Line width</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="5" column="0">
                     <widget class="QLabel" name="label_27">
                      <property name="sizePolicy">
@@ -604,6 +624,9 @@
                      </property>
                     </widget>
                    </item>
+                   <item row="6" column="1">
+                    <widget class="QComboBox" name="renderStyle"/>
+                   </item>
                    <item row="3" column="1">
                     <widget class="QComboBox" name="materials">
                      <property name="sizePolicy">
@@ -614,54 +637,8 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="8" column="0">
-                    <widget class="QLabel" name="label_12">
-                     <property name="text">
-                      <string>Alpha</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="8" column="1">
-                    <widget class="QDoubleSpinBox" name="alpha">
-                     <property name="minimum">
-                      <double>0.000000000000000</double>
-                     </property>
-                     <property name="maximum">
-                      <double>1.000000000000000</double>
-                     </property>
-                     <property name="singleStep">
-                      <double>0.100000000000000</double>
-                     </property>
-                     <property name="stepType">
-                      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="2" column="1">
                     <widget class="QComboBox" name="drawables"/>
-                   </item>
-                   <item row="4" column="1">
-                    <widget class="QComboBox" name="renderPass">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_3">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Name</string>
-                     </property>
-                    </widget>
                    </item>
                    <item row="7" column="1">
                     <widget class="QDoubleSpinBox" name="lineWidth">
@@ -673,32 +650,6 @@
                      </property>
                      <property name="minimum">
                       <double>1.000000000000000</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="label_10">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Drawable</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="1">
-                    <widget class="QComboBox" name="renderStyle"/>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QLineEdit" name="nodeName">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
                      </property>
                     </widget>
                    </item>
@@ -741,8 +692,15 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="0">
-                    <widget class="QLabel" name="label_5">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_14">
+                     <property name="text">
+                      <string>Node ID</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_3">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                        <horstretch>0</horstretch>
@@ -750,14 +708,40 @@
                       </sizepolicy>
                      </property>
                      <property name="text">
-                      <string>Line width</string>
+                      <string>Name</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_14">
+                   <item row="4" column="1">
+                    <widget class="QComboBox" name="renderPass">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLineEdit" name="nodeName">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_10">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="text">
-                      <string>Node ID</string>
+                      <string>Drawable</string>
                      </property>
                     </widget>
                    </item>
@@ -771,6 +755,22 @@
                      </property>
                      <property name="readOnly">
                       <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="8" column="1">
+                    <widget class="QDoubleSpinBox" name="alpha">
+                     <property name="minimum">
+                      <double>0.000000000000000</double>
+                     </property>
+                     <property name="maximum">
+                      <double>1.000000000000000</double>
+                     </property>
+                     <property name="singleStep">
+                      <double>0.100000000000000</double>
+                     </property>
+                     <property name="stepType">
+                      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                      </property>
                     </widget>
                    </item>
@@ -1087,7 +1087,7 @@
     <string>Place new rectangle</string>
    </property>
   </action>
-  <action name="actionDeleteComponent">
+  <action name="actionNodeDelete">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
@@ -1096,7 +1096,7 @@
     <string>Delete</string>
    </property>
    <property name="toolTip">
-    <string>Delete animation component</string>
+    <string>Delete animation node</string>
    </property>
   </action>
   <action name="actionPlay">
@@ -1247,6 +1247,39 @@
    </property>
    <property name="toolTip">
     <string>Place new capsule</string>
+   </property>
+  </action>
+  <action name="actionNodeMoveUpLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/layer_up.png</normaloff>:/16x16_ico_png/layer_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Up</string>
+   </property>
+   <property name="toolTip">
+    <string>Move node up one layer</string>
+   </property>
+  </action>
+  <action name="actionNodeMoveDownLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/layer_down.png</normaloff>:/16x16_ico_png/layer_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Down</string>
+   </property>
+   <property name="toolTip">
+    <string>Move node down one layer</string>
+   </property>
+  </action>
+  <action name="actionNodeDuplicate">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/copy.png</normaloff>:/16x16_ico_png/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Duplicate</string>
    </property>
   </action>
  </widget>

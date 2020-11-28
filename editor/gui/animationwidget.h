@@ -85,7 +85,10 @@ namespace gui
         void on_actionNewTrapezoid_triggered();
         void on_actionNewCapsule_triggered();
         void on_actionNewParallelogram_triggered();
-        void on_actionDeleteComponent_triggered();
+        void on_actionNodeDelete_triggered();
+        void on_actionNodeMoveUpLayer_triggered();
+        void on_actionNodeMoveDownLayer_triggered();
+        void on_actionNodeDuplicate_triggered();
         void on_tree_customContextMenuRequested(QPoint);
         void on_plus90_clicked();
         void on_minus90_clicked();
@@ -126,10 +129,10 @@ namespace gui
         void treeClickEvent(TreeWidget::TreeItem* item);
 
     private:
-        void paintScene(gfx::Painter& painter, double secs);
         game::AnimationNodeClass* GetCurrentNode();
-        void updateCurrentNodeProperties();
-        void updateCurrentNodePosition(float dx, float dy);
+        void PaintScene(gfx::Painter& painter, double secs);
+        void UpdateCurrentNodeProperties();
+        void UpdateCurrentNodePosition(float dx, float dy);
         void RebuildDrawableMenus();
         void CheckPlacementActions(QAction* selected);
     private:
