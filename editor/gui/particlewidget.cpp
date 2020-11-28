@@ -335,11 +335,10 @@ void ParticleEditorWidget::Render()
 bool ParticleEditorWidget::ConfirmClose()
 {
     gfx::KinematicsParticleEngineClass::Params params;
-    gfx::KinematicsParticleEngineClass engine;
     fillParams(params);
-    engine.SetParams(params);
+    mClass.SetParams(params);
 
-    const auto hash = engine.GetHash();
+    const auto hash = mClass.GetHash();
     if (hash == mOriginalHash)
         return true;
 
