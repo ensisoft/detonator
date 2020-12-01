@@ -55,6 +55,36 @@ bool operator==(const gfx::Rect<T>& lhs,
 }
 
 template<typename T>
+void unit_test_rect()
+{
+    using R = gfx::Rect<T>;
+    R r;
+    TEST_REQUIRE(r.IsEmpty());
+    TEST_REQUIRE(r.GetHeight() == T(0));
+    TEST_REQUIRE(r.GetWidth() == T(0));
+    TEST_REQUIRE(r.GetX() == T(0));
+    TEST_REQUIRE(r.GetY() == T(0));
+
+    r.Resize(100, 150);
+    TEST_REQUIRE(r.IsEmpty() == false);
+    TEST_REQUIRE(r.GetHeight() == T(150));
+    TEST_REQUIRE(r.GetWidth() == T(100));
+    TEST_REQUIRE(r.GetX() == T(0));
+    TEST_REQUIRE(r.GetY() == T(0));
+
+    r.Move(10, 20);
+    TEST_REQUIRE(r.IsEmpty() == false);
+    TEST_REQUIRE(r.GetHeight() == T(150));
+    TEST_REQUIRE(r.GetWidth() == T(100));
+    TEST_REQUIRE(r.GetX() == T(10));
+    TEST_REQUIRE(r.GetY() == T(20));
+
+    r.Translate(90, 80);
+    TEST_REQUIRE(r.GetX() == T(100));
+    TEST_REQUIRE(r.GetY() == T(100));
+}
+
+template<typename T>
 void unit_test_rect_intersect()
 {
     using R = gfx::Rect<T>;
@@ -235,6 +265,7 @@ void unit_test_color_serialize()
 
 int test_main(int argc, char* argv[])
 {
+    unit_test_rect<int>();
     unit_test_rect_intersect<float>();
     unit_test_rect_intersect<int>();
     unit_test_rect_union<float>();

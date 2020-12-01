@@ -306,6 +306,8 @@ namespace gfx
     class Bitmap : public IBitmap
     {
     public:
+        using PixelType = Pixel;
+
         // pixel to pixel
         struct Pixel2Pixel {
             bool operator()(const Pixel& lhs, const Pixel& rhs) const
@@ -643,12 +645,39 @@ namespace gfx
             }
         }
 
+        // Copy a region of pixels from this bitmap into a new bitmap.
+        template<typename PixelType>
+        Bitmap<PixelType> Copy(const URect& rect) const
+        {
+            const auto& rc = Intersect(GetRect(), rect);
+            Bitmap<PixelType> ret;
+            ret.Resize(rc.GetWidth(), rc.GetHeight());
+
+            for (unsigned y=0; y<rc.GetHeight(); ++y)
+            {
+                for (unsigned x=0; x<rc.GetWidth(); ++x)
+                {
+                    const auto& point = rc.MapToGlobal(x, y);
+                    const auto& pixel = GetPixel(point);
+                    ret.SetPixel(y, x, pixel);
+                }
+            }
+            return ret;
+        }
+
+        Bitmap Copy(const URect& rect) const
+        {
+            return Copy<PixelType>(rect);
+        }
+
         // Get pixel pointer to the raw data.
         const Pixel* GetData() const
         { return mPixels.empty() ? nullptr : &mPixels[0]; }
 
         URect GetRect() const
         { return URect(0u, 0u, mWidth, mHeight); }
+        USize GetSize() const
+        { return USize(mWidth, mHeight); }
 
     private:
         std::vector<Pixel> mPixels;

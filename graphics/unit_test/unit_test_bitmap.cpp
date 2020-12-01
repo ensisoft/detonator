@@ -32,7 +32,7 @@
 
 int test_main(int argc, char* argv[])
 {
-    // test empty bitmap for "emptyness"
+    // test empty bitmap for "emptiness"
     {
         gfx::Bitmap<gfx::RGB> bmp;
         TEST_REQUIRE(bmp.GetWidth() == 0);
@@ -41,7 +41,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(bmp.IsValid() == false);
     }
 
-    // test initialized bitmap for "non emptyness"
+    // test initialized bitmap for "non emptiness"
     {
 
         gfx::Bitmap<gfx::RGB> bmp(2, 2);
@@ -253,6 +253,55 @@ int test_main(int argc, char* argv[])
         dst.Fill(gfx::Color::White);
         dst.Copy(-2, -2, src);                                   
         TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::White);
+    }
+
+    // test copying of data out of a bitmap.
+    {
+        gfx::Bitmap<gfx::RGB> src(4, 4);
+        src.Fill(gfx::URect(0, 0, 2, 2), gfx::Color::Red);
+        src.Fill(gfx::URect(2, 0, 2, 2), gfx::Color::Green);
+        src.Fill(gfx::URect(0, 2, 2, 2), gfx::Color::Blue);
+        src.Fill(gfx::URect(2, 2, 2, 2), gfx::Color::Yellow);
+        // copy whole bitmap.
+        {
+            const auto& ret = src.Copy(gfx::URect(0, 0, 4, 4));
+            TEST_REQUIRE(Compare(ret, src));
+        }
+        // copy a sub rectangle
+        {
+            const auto& ret = src.Copy(gfx::URect(2, 2, 2, 2));
+            TEST_REQUIRE(ret.GetHeight() == 2);
+            TEST_REQUIRE(ret.GetWidth() == 2);
+            TEST_REQUIRE(ret.GetPixel(0, 0) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(1, 0) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(0, 1) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(1, 1) == gfx::Color::Yellow);
+        }
+        // copy sub rectangle that is larger than source.
+        {
+            const auto& ret = src.Copy(gfx::URect(2, 2, 3, 3));
+            TEST_REQUIRE(ret.GetHeight() == 2);
+            TEST_REQUIRE(ret.GetWidth() == 2);
+            TEST_REQUIRE(ret.GetPixel(0, 0) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(1, 0) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(0, 1) == gfx::Color::Yellow);
+            TEST_REQUIRE(ret.GetPixel(1, 1) == gfx::Color::Yellow);
+        }
+        src.Resize(5, 3);
+        src.Fill(gfx::Color::Green);
+        src.Fill(gfx::URect(2, 0, 3, 3), gfx::Color::HotPink);
+        {
+            const auto& ret = src.Copy(gfx::URect(1, 0, 2, 3));
+            TEST_REQUIRE(ret.GetWidth() == 2);
+            TEST_REQUIRE(ret.GetHeight() == 3);
+            TEST_REQUIRE(ret.GetPixel(0, 0) == gfx::Color::Green);
+            TEST_REQUIRE(ret.GetPixel(1, 0) == gfx::Color::Green);
+            TEST_REQUIRE(ret.GetPixel(2, 0) == gfx::Color::Green);
+            TEST_REQUIRE(ret.GetPixel(0, 1) == gfx::Color::HotPink);
+            TEST_REQUIRE(ret.GetPixel(1, 1) == gfx::Color::HotPink);
+            TEST_REQUIRE(ret.GetPixel(2, 1) == gfx::Color::HotPink);
+
+        }
     }
 
     // test flip
