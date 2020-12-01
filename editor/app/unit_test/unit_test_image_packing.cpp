@@ -103,7 +103,7 @@ void unit_test_bounded()
         TEST_REQUIRE(app::PackRectangles(app::RectanglePackSize{64, 64}, list) == true);
         TEST_REQUIRE(list[0].success);
         TEST_REQUIRE(list[0].xpos == 0);
-        TEST_REQUIRE(list[1].ypos == 0);
+        TEST_REQUIRE(list[0].ypos == 0);
     }
 
     {
