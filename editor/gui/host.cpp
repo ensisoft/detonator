@@ -242,7 +242,7 @@ void Main(int argc, char* argv[])
     }
 
     app::Workspace workspace;
-    if (!workspace.Load(app::FromUtf8(wsdir)))
+    if (!workspace.LoadWorkspace(app::FromUtf8(wsdir)))
         return;
     gfx::SetResourceLoader(&workspace);
 

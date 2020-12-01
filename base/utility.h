@@ -210,6 +210,19 @@ std::tuple<bool, nlohmann::json, std::string> JsonParse(It beg, It end)
     return std::make_tuple(ok, std::move(json), std::move(message));
 }
 
+inline
+std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& filename)
+{
+#if defined(WINDOWS_OS)
+    std::ifstream stream(base::FromUtf8(filename), std::ios::in);
+#elif defined(POSIX_OS)
+    std::ifstream stream(filename, std::ios::in);
+#else
+#  error unimplemented function
+#endif
+    const std::string contents(std::istreambuf_iterator<char>(stream), {});
+    return JsonParse(contents.begin(), contents.end());
+}
 
 // works with nlohmann::json
 // using a template here simply to avoid having to specify a type

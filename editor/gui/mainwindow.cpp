@@ -296,7 +296,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
 
     gfx::SetResourceLoader(workspace.get());
 
-    if (!workspace->Load(dir))
+    if (!workspace->LoadWorkspace(dir))
     {
         return false;
     }
@@ -485,7 +485,7 @@ bool MainWindow::saveWorkspace()
         mPlayWindow->SaveState();
     }
 
-    if (!mWorkspace->Save())
+    if (!mWorkspace->SaveWorkspace())
         return false;
 
     return true;
@@ -848,7 +848,7 @@ void MainWindow::on_actionDuplicateResource_triggered()
 
 void MainWindow::on_actionSaveWorkspace_triggered()
 {
-    if (!mWorkspace->Save())
+    if (!mWorkspace->SaveWorkspace())
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -970,7 +970,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
     }
 
     auto workspace = std::make_unique<app::Workspace>();
-    if (!workspace->OpenNew(dir))
+    if (!workspace->MakeWorkspace(dir))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1196,7 +1196,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         // todo: maybe save to some temporary location ?
         // Save workspace for the loading the initial content
         // in the game host
-        if (!mWorkspace->Save())
+        if (!mWorkspace->SaveWorkspace())
             return;
 
         ASSERT(!mIPCHost);

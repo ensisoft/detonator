@@ -161,8 +161,8 @@ int test_main(int argc, char* argv[])
         std::cout << std::endl;
     };
 
-    //unit_test_ipc_host();
-    //unit_test_ipc_client();
+    unit_test_ipc_host();
+    unit_test_ipc_client();
     unit_test_ipc_send_recv();
     return 0;
 }

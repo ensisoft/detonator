@@ -27,6 +27,7 @@
 #  include <QByteArray>
 #  include <QtGlobal>
 #  include <QFile>
+#  include <QTextStream>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -58,6 +59,10 @@ std::uint64_t GetFileHash(const QString& file)
 
 QString JoinPath(const QString& lhs, const QString& rhs)
 {
+    if (lhs.isEmpty())
+        return rhs;
+    else if (rhs.isEmpty())
+        return lhs;
     const auto p = lhs + "/" + rhs;
     return QDir::toNativeSeparators(QDir::cleanPath(p));
 }
@@ -69,8 +74,8 @@ QString CleanPath(const QString& path)
 
 bool MakePath(const QString& path)
 {
-    QDir dir(path);
-    return dir.mkpath(path);
+    QDir d;
+    return d.mkpath(path);
 }
 
 QString FromUtf8(const std::string& str)
@@ -159,6 +164,30 @@ bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes)
 
     out.write(static_cast<const char*>(data), bytes);
     return true;
+}
+
+bool WriteTextFile(const QString& file, const QString& content)
+{
+    QFile out;
+    out.setFileName(file);
+    out.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    if (!out.isOpen())
+        return false;
+
+    QTextStream stream(&out);
+    stream.setCodec("UTF-8");
+    stream << content;
+    return true;
+}
+
+QString ReadTextFile(const QString& file)
+{
+    QFile in;
+    in.setFileName(file);
+    in.open(QIODevice::ReadOnly);
+    if (!in.isOpen())
+        return QString();
+    return QString::fromUtf8(in.readAll());
 }
 
 QString RandomString()

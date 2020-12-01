@@ -227,6 +227,8 @@ public:
                 rc.cookie = tex.file;
                 sources.push_back(rc);
             }
+
+            dupemap.insert(tex.file);
         }
 
         unsigned atlas_number = 0;
@@ -775,12 +777,12 @@ std::string Workspace::ResolveFile(gfx::ResourceLoader::ResourceType type, const
     return ToUtf8(ret);
 }
 
-bool Workspace::Load(const QString& dir)
+bool Workspace::LoadWorkspace(const QString& dir)
 {
-    ASSERT(mWorkspaceDir.isEmpty());
+    ASSERT(!mIsOpen);
 
     if (!LoadContent(JoinPath(dir, "content.json")) ||
-        !LoadWorkspace(JoinPath(dir, "workspace.json")))
+        !LoadProperties(JoinPath(dir, "workspace.json")))
         return false;
 
     // we don't really care if this fails or not. nothing permanently
@@ -794,26 +796,38 @@ bool Workspace::Load(const QString& dir)
     mWorkspaceDir = dir;
     if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
         mWorkspaceDir.append("/");
+
+    mIsOpen = true;
     return true;
 }
 
-bool Workspace::OpenNew(const QString& dir)
+bool Workspace::MakeWorkspace(const QString& directory)
 {
+    ASSERT(!mIsOpen);
+
+    QDir dir;
+    if (!dir.mkpath(directory))
+    {
+        ERROR("Failed to create workspace directory. '%1'", directory);
+        return false;
+    }
+
     // this is where we could initialize the workspace with some resources
     // or whatnot.
-    mWorkspaceDir = dir;
+    mWorkspaceDir = directory;
     if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
         mWorkspaceDir.append("/");
 
+    mIsOpen = true;
     return true;
 }
 
-bool Workspace::Save()
+bool Workspace::SaveWorkspace()
 {
     ASSERT(!mWorkspaceDir.isEmpty());
 
     if (!SaveContent(JoinPath(mWorkspaceDir, "content.json")) ||
-        !SaveWorkspace(JoinPath(mWorkspaceDir, "workspace.json")))
+        !SaveProperties(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
 
     // should we notify the user if this fails or do we care?
@@ -821,6 +835,24 @@ bool Workspace::Save()
 
     INFO("Saved workspace '%1'", mWorkspaceDir);
     return true;
+}
+
+void Workspace::CloseWorkspace()
+{
+    // remove all non-primitive resources.
+    QAbstractTableModel::beginResetModel();
+    mResources.erase(std::remove_if(mResources.begin(), mResources.end(),
+                                    [](const auto& res) { return !res->IsPrimitive(); }),
+                     mResources.end());
+    QAbstractTableModel::endResetModel();
+
+    mVisibleCount = 0;
+
+    mProperties.clear();
+    mUserProperties.clear();
+    mWorkspaceDir.clear();
+    mSettings = ProjectSettings {};
+    mIsOpen   = false;
 }
 
 QString Workspace::GetName() const
@@ -840,7 +872,7 @@ QString Workspace::AddFileToWorkspace(const QString& file)
     // of making the workspace "portable".
     // Portable here means two things:
     // * portable from one operating system to another (from Windows to Linux or vice versa)
-    // * portable from one user's enviroment to another user's environment even when on
+    // * portable from one user's environment to another user's environment even when on
     //   the same operating system (i.e. from Windows to Windows or Linux to Linux)
     //
     // Using relative file paths (as opposed to absolute file paths) solves the problem
@@ -884,6 +916,12 @@ QString Workspace::AddFileToWorkspace(const QString& file)
     // user's computer to another system, unless it's accessible on every
     // machine using the same path (for example a shared file system mount)
     return QString("fs://%1").arg(file);
+}
+
+// convenience wrapper
+std::string Workspace::AddFileToWorkspace(const std::string& file)
+{
+    return ToUtf8(AddFileToWorkspace(FromUtf8(file)));
 }
 
 QString Workspace::MapFileToFilesystem(const QString& file) const
@@ -1032,7 +1070,7 @@ bool Workspace::SaveContent(const QString& filename) const
     return true;
 }
 
-bool Workspace::SaveWorkspace(const QString& filename) const
+bool Workspace::SaveProperties(const QString& filename) const
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
@@ -1100,7 +1138,7 @@ void Workspace::SaveUserSettings(const QString& filename) const
     INFO("Saved private workspace data in '%1'", filename);
 }
 
-bool Workspace::LoadWorkspace(const QString& filename)
+bool Workspace::LoadProperties(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
@@ -1313,6 +1351,20 @@ Resource& Workspace::GetResource(size_t index)
     ASSERT(index < mResources.size());
     return *mResources[index];
 }
+Resource& Workspace::GetPrimitiveResource(size_t index)
+{
+    const auto num_primitives = mResources.size() - mVisibleCount;
+
+    ASSERT(index < num_primitives);
+    return *mResources[mVisibleCount + index];
+}
+
+Resource& Workspace::GetUserDefinedResource(size_t index)
+{
+    ASSERT(index < mVisibleCount);
+
+    return *mResources[index];
+}
 
 Resource* Workspace::FindResourceById(const QString &id)
 {
@@ -1379,14 +1431,27 @@ const Resource& Workspace::GetResource(size_t index) const
     return *mResources[index];
 }
 
-void Workspace::DeleteResources(QModelIndexList& list)
+void Workspace::DeleteResources(const QModelIndexList& list)
+{
+    std::vector<size_t> indices;
+    for (const auto& i : list)
+        indices.push_back(i.row());
+
+    DeleteResources(indices);
+}
+void Workspace::DeleteResource(size_t index)
+{
+    DeleteResources(std::vector<size_t>{index});
+}
+
+void Workspace::DeleteResources(std::vector<size_t> indices)
 {
     RECURSION_GUARD(this, "ResourceList");
 
-    qSort(list);
+    std::sort(indices.begin(), indices.end(), std::less<size_t>());
 
     // because the high probability of unwanted recursion
-    // fucking this iteration up (for example by something
+    // messing this iteration up (for example by something
     // calling back to this workspace from Resource
     // deletion signal handler and adding a new resource) we
     // must take some special care here.
@@ -1396,9 +1461,9 @@ void Workspace::DeleteResources(QModelIndexList& list)
     // for each resource.
     std::vector<std::unique_ptr<Resource>> graveyard;
 
-    for (int i=0; i<list.size(); ++i)
+    for (int i=0; i<indices.size(); ++i)
     {
-        const auto row = list[i].row() - i;
+        const auto row = indices[i] - i;
         beginRemoveRows(QModelIndex(), row, row);
 
         auto it = std::begin(mResources);
@@ -1417,16 +1482,23 @@ void Workspace::DeleteResources(QModelIndexList& list)
     }
 }
 
-void Workspace::DuplicateResources(QModelIndexList &list)
+void Workspace::DuplicateResources(const QModelIndexList& list)
+{
+    std::vector<size_t> indices;
+    for (const auto& i : list)
+        indices.push_back(i.row());
+}
+
+void Workspace::DuplicateResources(std::vector<size_t> indices)
 {
     RECURSION_GUARD(this, "ResourceList");
 
-    qSort(list);
+    std::sort(indices.begin(), indices.end(), std::less<size_t>());
 
     std::vector<std::unique_ptr<Resource>> dupes;
-    for (int i=0; i<list.size(); ++i)
+    for (int i=0; i<indices.size(); ++i)
     {
-        const auto row = list[i].row();
+        const auto row = indices[i];
         const auto& resource = GetResource(row);
         auto clone = resource.Clone();
         clone->SetName(QString("Copy of %1").arg(resource.GetName()));
@@ -1435,7 +1507,7 @@ void Workspace::DuplicateResources(QModelIndexList &list)
 
     for (int i=0; i<(int)dupes.size(); ++i)
     {
-        const auto pos = list[i].row() + i;
+        const auto pos = indices[i]+ i;
         beginInsertRows(QModelIndex(), pos, pos);
         auto it = mResources.begin();
         it += pos;
@@ -1446,6 +1518,11 @@ void Workspace::DuplicateResources(QModelIndexList &list)
 
         emit NewResourceAvailable(dupe);
     }
+}
+
+void Workspace::DuplicateResource(size_t index)
+{
+    DuplicateResources(std::vector<size_t>{index});
 }
 
 void Workspace::Tick()

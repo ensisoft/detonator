@@ -97,28 +97,29 @@ namespace app
         virtual std::string ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const override;
 
         // Try to load the content of the workspace from the files in the given
+        // directory. Returns true on success. Any errors are logged.
+        bool LoadWorkspace(const QString& dir);
+        // Make a new workspace in the given directory and then proceed as if
+        // this workspace had been loaded from that directory. This is the
+        // alternative to Load in terms of opening a workspace.
+        // Returns true on success. Any errors are logged.
+        bool MakeWorkspace(const QString& dir);
+        // Try to save the contents of the workspace in the previously opened
         // directory.
-        bool Load(const QString& dir);
+        bool SaveWorkspace();
+        // Close the current workspace.
+        void CloseWorkspace();
+        // Returns true if the workspace is currently open.
+        bool IsOpen() const
+        { return mIsOpen; }
 
         // Add a file to the workspace and return a path to the file encoded in
         // "workspace file" notation.
         QString AddFileToWorkspace(const QString& file);
-
-        // convenience wrapper
-        std::string AddFileToWorkspace(const std::string& file)
-        {
-            return ToUtf8(AddFileToWorkspace(FromUtf8(file)));
-        }
+        std::string AddFileToWorkspace(const std::string& file);
 
         // Map a "workspace file" to a file path in the file system.
         QString MapFileToFilesystem(const QString& file) const;
-
-        // Open new workspace in the given directory.
-        bool OpenNew(const QString& dir);
-
-        // Try to save the contents of the workspace in the previously opened
-        // directory.
-        bool Save();
 
         // Save a new resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to
@@ -171,12 +172,21 @@ namespace app
         QAbstractTableModel* GetResourceModel()
         { return this; }
 
-        // Get the number of resources.
+        // Get the number of all resources including
+        // user defined and primitive resources.
         size_t GetNumResources() const
         { return mResources.size(); }
+        size_t GetNumPrimitiveResources() const
+        { return mResources.size() - mVisibleCount; }
+        size_t GetNumUserDefinedResources() const
+        { return mVisibleCount; }
 
         // Get resource at a specific index in the list of all resources.
         Resource& GetResource(size_t i);
+        // Get a user defined resource.
+        Resource& GetUserDefinedResource(size_t index);
+        // Get a user defined resource.
+        Resource& GetPrimitiveResource(size_t index);
         // Get a resource identified by name and type.
         // The resource must exist.
         Resource& GetResourceByName(const QString& name, Resource::Type type);
@@ -197,9 +207,13 @@ namespace app
         // The list can contain multiple items and can be discontinuous
         // and unsorted. Afterwards it will be sorted (ascending) based
         // on the item row numbers.
-        void DeleteResources(QModelIndexList& list);
+        void DeleteResources(const QModelIndexList& list);
+        void DeleteResources(std::vector<size_t> indices);
+        void DeleteResource(size_t index);
         // Create duplicate copies of the selected resources.
-        void DuplicateResources(QModelIndexList& list);
+        void DuplicateResources(const QModelIndexList& list);
+        void DuplicateResources(std::vector<size_t> indices);
+        void DuplicateResource(size_t index);
 
         // Perform periodic workspace tick for cleaning up resources
         // that are no longer used/referenced.
@@ -447,10 +461,10 @@ namespace app
 
     private:
         bool LoadContent(const QString& file);
-        bool LoadWorkspace(const QString& file);
+        bool LoadProperties(const QString& file);
         void LoadUserSettings(const QString& file);
         bool SaveContent(const QString& file) const;
-        bool SaveWorkspace(const QString& file) const;
+        bool SaveProperties(const QString& file) const;
         void SaveUserSettings(const QString& file) const;
 
     private:
@@ -467,6 +481,7 @@ namespace app
         QVariantMap mUserProperties;
         // workspace/project settings.
         ProjectSettings mSettings;
+        bool mIsOpen = false;
     };
 
 } // namespace

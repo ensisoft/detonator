@@ -487,15 +487,36 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
 add_executable(unit_test_resource editor/app/unit_test/unit_test_resource.cpp
         editor/app/utility.cpp
         base/assert.cpp)
+add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
+        editor/app/utility.cpp
+        editor/app/format.cpp
+        editor/app/eventlog.cpp
+        editor/app/workspace.cpp
+        editor/app/packing.cpp
+        gamelib/animation.cpp
+        gamelib/loader.cpp
+        graphics/drawable.cpp
+        graphics/material.cpp
+        graphics/image.cpp
+        graphics/resource.cpp
+        graphics/text.cpp
+        base/assert.cpp
+        base/logging.cpp
+        third_party/base64/base64.cpp
+        third_party/stb/stb_image.c
+        third_party/stb/stb_image_write.c)
 add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)
 add_test(NAME unit_test_resource COMMAND unit_test_resource)
+add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
 target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_resource PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets)
+target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 
 # gamelib tests
 add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
