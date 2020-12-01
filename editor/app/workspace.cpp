@@ -60,11 +60,18 @@
 
 namespace {
 
-    QString GetAppDir()
-    {
-        static const auto& dir = QCoreApplication::applicationDirPath() + "/";
-        return dir;
-    }
+QString GetAppDir()
+{
+    static const auto& dir = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
+#if defined(POSIX_OS)
+    return dir + "/";
+#elif defined(WINDOWS_OS)
+    return dir + "\\";
+#else
+# error unimplemented function
+#endif
+    return dir;
+}
 
 class ResourcePacker : public gfx::ResourcePacker
 {
@@ -793,10 +800,14 @@ bool Workspace::LoadWorkspace(const QString& dir)
     LoadUserSettings(JoinPath(dir, ".workspace_private.json"));
 
     INFO("Loaded workspace '%1'", dir);
-    mWorkspaceDir = dir;
-    if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
+    mWorkspaceDir = CleanPath(dir);
+#if defined(POSIX_OS)
+    if (!mWorkspaceDir.endsWith("/"))
         mWorkspaceDir.append("/");
-
+#elif defined(WINDOWS_OS)
+    if (!mWorkspaceDir.endsWith("\\"))
+        mWorkspaceDir.append("\\");
+#endif
     mIsOpen = true;
     return true;
 }
@@ -814,10 +825,14 @@ bool Workspace::MakeWorkspace(const QString& directory)
 
     // this is where we could initialize the workspace with some resources
     // or whatnot.
-    mWorkspaceDir = directory;
-    if (!mWorkspaceDir.endsWith("/") && !mWorkspaceDir.endsWith("\\"))
+    mWorkspaceDir = CleanPath(directory);
+#if defined(POSIX_OS)
+    if (!mWorkspaceDir.endsWith("/"))
         mWorkspaceDir.append("/");
-
+#elif defined(WINDOWS_OS)
+    if (!mWorkspaceDir.endsWith("\\"))
+        mWorkspaceDir.append("\\");
+#endif
     mIsOpen = true;
     return true;
 }
@@ -860,13 +875,13 @@ QString Workspace::GetName() const
     return mWorkspaceDir;
 }
 
-QString Workspace::AddFileToWorkspace(const QString& file)
+QString Workspace::AddFileToWorkspace(const QString& filepath)
 {
     // don't remap already mapped files.
-    if (file.startsWith("app://") ||
-        file.startsWith("fs://") ||
-        file.startsWith("ws://"))
-        return file;
+    if (filepath.startsWith("app://") ||
+        filepath.startsWith("fs://") ||
+        filepath.startsWith("ws://"))
+        return filepath;
 
     // when the user is adding resource files to this project (workspace) there's the problem
     // of making the workspace "portable".
@@ -892,7 +907,8 @@ QString Workspace::AddFileToWorkspace(const QString& file)
 
     // if the file is in the current workspace path or in the path of the current executable
     // we can then express this path as a relative path.
-    static const auto& appdir = QCoreApplication::applicationDirPath();
+    const auto& appdir = GetAppDir();
+    const auto& file = CleanPath(filepath);
 
     if (file.startsWith(mWorkspaceDir))
     {
@@ -900,7 +916,7 @@ QString Workspace::AddFileToWorkspace(const QString& file)
         ret.remove(0, mWorkspaceDir.count());
         if (ret.startsWith("/") || ret.startsWith("\\"))
             ret.remove(0, 1);
-
+        ret = ret.replace("\\", "/");
         return QString("ws://%1").arg(ret);
     }
     else if (file.startsWith(appdir))
@@ -909,7 +925,7 @@ QString Workspace::AddFileToWorkspace(const QString& file)
         ret.remove(0, appdir.count());
         if (ret.startsWith("/") || ret.startsWith("\\"))
             ret.remove(0, 1);
-
+        ret = ret.replace("\\", "/");
         return QString("app://%1").arg(ret);
     }
     // mapping other paths to identity. will not be portable to another
@@ -933,9 +949,9 @@ QString Workspace::MapFileToFilesystem(const QString& file) const
 
     QString ret = file;
     if (ret.startsWith("ws://"))
-        ret.replace("ws://", mWorkspaceDir);
+        ret = CleanPath(ret.replace("ws://", mWorkspaceDir));
     else if (file.startsWith("app://"))
-        ret.replace("app://", GetAppDir());
+        ret = CleanPath(ret.replace("app://", GetAppDir()));
     else if (file.startsWith("fs://"))
         ret.remove(0, 5);
 

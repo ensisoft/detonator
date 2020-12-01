@@ -41,6 +41,22 @@
 #include "base/utility.h"
 #include "utility.h"
 
+namespace {
+
+QString ToNativeSeparators(QString p)
+{
+    // QDir::toNativeSeprators doesn't work with paths
+    // like foo/bar/file.png ??
+#if defined(POSIX_OS)
+    return p.replace("\\", "/");
+#elif  defined(WINDOWS_OS)
+    return p.replace("/", "\\");
+#else
+#  error Not implemented.
+#endif
+}
+
+} // namespace
 namespace app
 {
 
@@ -64,12 +80,12 @@ QString JoinPath(const QString& lhs, const QString& rhs)
     else if (rhs.isEmpty())
         return lhs;
     const auto p = lhs + "/" + rhs;
-    return QDir::toNativeSeparators(QDir::cleanPath(p));
+    return ToNativeSeparators(QDir::cleanPath(p));
 }
 
 QString CleanPath(const QString& path)
 {
-    return QDir::toNativeSeparators(QDir::cleanPath(path));
+    return ToNativeSeparators(QDir::cleanPath(path));
 }
 
 bool MakePath(const QString& path)
@@ -224,7 +240,7 @@ QString GetAppFilePath(const QString& name)
 {
     // pathstr is an absolute path so then this is also
     // an absolute path.
-    return QDir::toNativeSeparators(gAppHome + "/" + name);
+    return ToNativeSeparators(gAppHome + "/" + name);
 }
 
 } // namespace

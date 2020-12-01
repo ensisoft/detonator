@@ -56,17 +56,31 @@ void unit_test_path_mapping()
     app::Workspace workspace;
     workspace.MakeWorkspace(app::JoinPath(cwd, "TestWorkspace"));
 
+#if defined(WINDOWS_OS)
+    TEST_REQUIRE(app::CleanPath("c:/foo/bar.png") == "c:\\foo\\bar.png");
+    TEST_REQUIRE(app::CleanPath("c:\\foo\\bar.png") == "c:\\foo\\bar.png");
+    TEST_REQUIRE(app::CleanPath("foo/bar/image.png") == "foo\\bar\\image.png");
+#endif
+
     // test mapping of paths.
     // paths relative to the workspace are expressed using ws:// reference.
     // paths relative to the application are expressed using app:// reference
     // other paths are expressed using fs:// reference
     TEST_REQUIRE(workspace.AddFileToWorkspace(app::JoinPath(cwd, "TestWorkspace/relative/path/file.png")) == "ws://relative/path/file.png");
     TEST_REQUIRE(workspace.AddFileToWorkspace(app::JoinPath(app, "relative/path/file.png")) == "app://relative/path/file.png");
+
+    TEST_REQUIRE(workspace.AddFileToWorkspace(app::JoinPath(cwd, "TestWorkspace\\relative\\path\\file.png")) == "ws://relative/path/file.png");
+    TEST_REQUIRE(workspace.AddFileToWorkspace(app::JoinPath(app, "relative\\path\\file.png")) == "app://relative/path/file.png");
 #if defined(POSIX_OS)
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("/tmp/file.png")) == "fs:///tmp/file.png");
     TEST_REQUIRE(workspace.MapFileToFilesystem("fs:///tmp/file.png") == "/tmp/file.png");
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("some/file/name.png")) == "fs://some/file/name.png");
     TEST_REQUIRE(workspace.MapFileToFilesystem("fs://some/file/name.png") == "some/file/name.png");
+#elif defined(WINDOWS_OS)
+    TEST_REQUIRE(workspace.AddFileToWorkspace(QString("c:\\tmp\\file.png")) == "fs://c:\\tmp\\file.png");
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://c:\\tmp\\file.png") == "c:\\tmp\\file.png");
+    TEST_REQUIRE(workspace.AddFileToWorkspace(QString("some\\file\\name.png")) == "fs://some\\file\\name.png");
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://some\\file\\name.png") == "some\\file\\name.png");
 #endif
     TEST_REQUIRE(workspace.MapFileToFilesystem("ws://relative/path/file.png") == app::JoinPath(cwd, "TestWorkspace/relative/path/file.png"));
     TEST_REQUIRE(workspace.MapFileToFilesystem("app://relative/path/file.png") == app::JoinPath(app, "relative/path/file.png"));
@@ -76,8 +90,6 @@ void unit_test_path_mapping()
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("app://foo/bar/file.png")) == "app://foo/bar/file.png");
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("fs:///tmp/file.png")) == "fs:///tmp/file.png");
 }
-
-
 
 void unit_test_resource()
 {
