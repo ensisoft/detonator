@@ -779,7 +779,7 @@
              <item row="3" column="0">
               <widget class="QLabel" name="label_24">
                <property name="text">
-                <string>Alpha</string>
+                <string>Alpha (%)</string>
                </property>
               </widget>
              </item>

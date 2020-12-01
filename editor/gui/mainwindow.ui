@@ -471,7 +471,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Image packer ...</string>
+    <string>Image Packer ...</string>
    </property>
   </action>
   <action name="actionLoadWorkspace">
