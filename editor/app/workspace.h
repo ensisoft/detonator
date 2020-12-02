@@ -147,14 +147,14 @@ namespace app
         // Get a list of user defined drawables.
         QStringList ListUserDefinedDrawables() const;
 
-        // Map material id to a human readable name.
-        QString MapMaterialName(const QString& id) const;
-        QString MapMaterialName(const std::string& id) const
-        { return MapMaterialName(FromUtf8(id)); }
-        // Map drawable id to a human readable name.
-        QString MapDrawableName(const QString& id) const;
-        QString MapDrawableName(const std::string& id) const
-        { return MapDrawableName(FromUtf8(id)); }
+        // Map material id to its human readable name.
+        QString MapMaterialIdToName(const QString& id) const;
+        QString MapMaterialIdToName(const std::string& id) const
+        { return MapMaterialIdToName(FromUtf8(id)); }
+        // Map drawable id to its human readable name.
+        QString MapDrawableIdToName(const QString& id) const;
+        QString MapDrawableIdToName(const std::string& id) const
+        { return MapDrawableIdToName(FromUtf8(id)); }
 
         // Checks whether the material class id is a valid material class.
         // Includes primitives and user defined materials.

@@ -340,7 +340,7 @@
           "id": "wSzxrM5UGn",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "_checkerboard",
+          "material": "",
           "name": "Box",
           "position": {
             "x": 9.5,
@@ -444,7 +444,7 @@
           "id": "xD9OseJa8G",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "_checkerboard",
+          "material": "",
           "name": "Box",
           "position": {
             "x": 11.0,
@@ -548,7 +548,7 @@
           "id": "aHZbBN0DAx",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "_checkerboard",
+          "material": "",
           "name": "Box",
           "position": {
             "x": -0.23810577392578125,
@@ -627,7 +627,7 @@
           "id": "FFGOZdMa07",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "_checkerboard",
+          "material": "",
           "name": "Box",
           "position": {
             "x": 0.0,

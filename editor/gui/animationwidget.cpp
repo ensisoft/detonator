@@ -543,6 +543,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::ZoomOut, this);
     mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
         if (!mCameraWasLoaded) {
+            // if the camera hasn't been loaded then compute now the
+            // initial position for the camera.
             mState.camera_offset_x = width * 0.5;
             mState.camera_offset_y = height * 0.5;
         }
@@ -550,8 +552,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         // offset the viewport so that the origin of the 2d space is in the middle of the viewport
         const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
         const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
-        mUI.translateX->setValue(dist_x);
-        mUI.translateY->setValue(dist_y);
+        SetValue(mUI.translateX, dist_x);
+        SetValue(mUI.translateY, dist_y);
     };
     mUI.widget->onPaintScene = std::bind(&AnimationWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -729,22 +731,18 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Polygon");
-    RebuildDrawableMenus();
 
     PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
     PopulateFromEnum<game::AnimationNodeClass::RenderStyle>(mUI.renderStyle);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-
     SetValue(mUI.name, QString("My Animation"));
     SetValue(mUI.ID, mState.animation->GetId());
-    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
-    SetList(mUI.materials, mState.workspace->ListAllMaterials());
     setWindowTitle("My Animation");
 
     // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged,
-            this, &AnimationWidget::currentComponentRowChanged);
+            this, &AnimationWidget::CurrentNodeChanged);
     connect(mUI.tree, &TreeWidget::dragEvent,  this, &AnimationWidget::treeDragEvent);
     connect(mUI.tree, &TreeWidget::clickEvent, this, &AnimationWidget::treeClickEvent);
 
@@ -755,6 +753,9 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             this,      &AnimationWidget::resourceToBeDeleted);
     connect(workspace, &app::Workspace::ResourceUpdated,
             this, &AnimationWidget::resourceUpdated);
+
+    RebuildDrawableMenus();
+    RebuildComboLists();
 }
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -764,25 +765,36 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     const game::AnimationClass* content = nullptr;
     resource.GetContent(&content);
     mState.animation = std::make_shared<game::AnimationClass>(*content);
-    mOriginalHash = mState.animation->GetHash();
+    mOriginalHash    = mState.animation->GetHash();
+    mCameraWasLoaded = true;
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, content->GetId());
+    GetUserProperty(resource, "zoom", mUI.zoom);
+    GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
+    GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "widget", mUI.widget);
+    GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
+    GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
+    GetUserProperty(resource, "camera_rotation", mUI.rotation);
+    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
+    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(resource.GetName());
 
     // if some resource has been deleted we need to replace it.
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
         auto& node = mState.animation->GetNode(i);
-        const auto& material = node.GetMaterialName();
-        const auto& drawable = node.GetDrawableName();
-        if (!workspace->IsValidMaterial(material))
+        const auto& material = node.GetMaterialId();
+        const auto& drawable = node.GetDrawableId();
+        if (!material.empty() && !workspace->IsValidMaterial(material))
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
             node.SetMaterial(workspace->GetMaterialClassByName("Checkerboard"));
         }
-        if (!workspace->IsValidDrawable(drawable))
+        if (!drawable.empty() && !workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
@@ -858,6 +870,7 @@ bool AnimationWidget::SaveState(Settings& settings) const
     settings.saveWidget("Animation", mUI.chkShowGrid);
     settings.saveWidget("Animation", mUI.cmbGrid);
     settings.saveWidget("Animation", mUI.zoom);
+    settings.saveWidget("Animation", mUI.widget);
     settings.setValue("Animation", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Animation", "camera_offset_y", mState.camera_offset_y);
     // the animation can already serialize into JSON.
@@ -882,6 +895,7 @@ bool AnimationWidget::LoadState(const Settings& settings)
     settings.loadWidget("Animation", mUI.chkShowGrid);
     settings.loadWidget("Animation", mUI.cmbGrid);
     settings.loadWidget("Animation", mUI.zoom);
+    settings.loadWidget("Animation", mUI.widget);
     setWindowTitle(mUI.name->text());
 
     mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
@@ -913,15 +927,15 @@ bool AnimationWidget::LoadState(const Settings& settings)
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
         auto& node = mState.animation->GetNode(i);
-        const auto& material = node.GetMaterialName();
-        const auto& drawable = node.GetDrawableName();
-        if (!mState.workspace->IsValidMaterial(material))
+        const auto& material = node.GetMaterialId();
+        const auto& drawable = node.GetDrawableId();
+        if (!material.empty() && !mState.workspace->IsValidMaterial(material))
         {
             WARN("Animation node '%1' uses material '%2' that is deleted.",
                 node.GetName(), material);
             node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
         }
-        if (!mState.workspace->IsValidDrawable(drawable))
+        if (!drawable.empty() && !mState.workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
@@ -1072,7 +1086,18 @@ void AnimationWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
     const QString& name = GetValue(mUI.name);
-    const app::AnimationResource resource(*mState.animation, name);
+    app::AnimationResource resource(*mState.animation, name);
+    SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
+    SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
+    SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
+    SetUserProperty(resource, "camera_scale_y", mUI.scaleY);
+    SetUserProperty(resource, "camera_rotation", mUI.rotation);
+    SetUserProperty(resource, "zoom", mUI.zoom);
+    SetUserProperty(resource, "grid", mUI.cmbGrid);
+    SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
+    SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    SetUserProperty(resource, "widget", mUI.widget);
+
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.animation->GetHash();
 
@@ -1288,7 +1313,9 @@ void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetMaterial(mState.workspace->GetMaterialClassByName(name));
+        node->ResetMaterial();
+        if (!name.isEmpty())
+            node->SetMaterial(mState.workspace->GetMaterialClassByName(name));
     }
 }
 
@@ -1296,7 +1323,9 @@ void AnimationWidget::on_drawables_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetDrawable(mState.workspace->GetDrawableClassByName(name));
+        node->ResetDrawable();
+        if (!name.isEmpty())
+            node->SetDrawable(mState.workspace->GetDrawableClassByName(name));
     }
 }
 
@@ -1318,7 +1347,7 @@ void AnimationWidget::on_renderStyle_currentIndexChanged(const QString& name)
     }
 }
 
-void AnimationWidget::currentComponentRowChanged()
+void AnimationWidget::CurrentNodeChanged()
 {
     const game::AnimationNodeClass* node = GetCurrentNode();
     if (node == nullptr)
@@ -1328,6 +1357,8 @@ void AnimationWidget::currentComponentRowChanged()
     }
     else
     {
+        mUI.cProperties->setEnabled(true);
+        mUI.cTransform->setEnabled(true);
         UpdateCurrentNodeProperties();
     }
 }
@@ -1359,26 +1390,15 @@ void AnimationWidget::placeNewCustomShape()
 
 void AnimationWidget::newResourceAvailable(const app::Resource* resource)
 {
-    SetList(mUI.materials, mState.workspace->ListAllMaterials());
-    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
-    if (auto* node = GetCurrentNode())
-    {
-        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
-        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
-    }
+    RebuildComboLists();
     RebuildDrawableMenus();
 }
 
-void AnimationWidget::resourceUpdated(const app::Resource *resource)
+void AnimationWidget::resourceUpdated(const app::Resource* resource)
 {
-    SetList(mUI.materials, mState.workspace->ListAllMaterials());
-    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
-    if (auto* node = GetCurrentNode())
-    {
-        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
-        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
-    }
+    RebuildComboLists();
     RebuildDrawableMenus();
+    UpdateCurrentNodeProperties();
 }
 
 void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
@@ -1386,27 +1406,23 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
     for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
     {
         auto& node = mState.animation->GetNode(i);
-        if (node.GetMaterialName() == resource->GetIdUtf8())
+        if (node.GetMaterialId() == resource->GetIdUtf8())
         {
             WARN("Animation node '%1' uses a material '%2' that is deleted.",
                  node.GetName(), resource->GetName());
             node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
         }
-        else if (node.GetDrawableName() == resource->GetIdUtf8())
+        else if (node.GetDrawableId() == resource->GetIdUtf8())
         {
             WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
                  node.GetName(), resource->GetName());
             node.SetDrawable(mState.workspace->GetDrawableClassByName("Rectangle"));
         }
     }
-    SetList(mUI.materials, mState.workspace->ListAllMaterials());
-    SetList(mUI.drawables, mState.workspace->ListAllDrawables());
-    if (auto* node = GetCurrentNode())
-    {
-        SetValue(mUI.materials, mState.workspace->MapMaterialName(node->GetMaterialName()));
-        SetValue(mUI.drawables, mState.workspace->MapDrawableName(node->GetDrawableName()));
-    }
+
+    RebuildComboLists();
     RebuildDrawableMenus();
+    UpdateCurrentNodeProperties();
 }
 
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
@@ -1459,11 +1475,14 @@ void AnimationWidget::on_lineWidth_valueChanged(double value)
     }
 }
 
-void AnimationWidget::on_alpha_valueChanged(double value)
+void AnimationWidget::on_alpha_valueChanged()
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetAlpha(value);
+        const float value = mUI.alpha->value();
+        const float max   = mUI.alpha->maximum();
+        const float alpha = value / max;
+        node->SetAlpha(alpha);
     }
 }
 
@@ -1842,13 +1861,11 @@ void AnimationWidget::UpdateCurrentNodeProperties()
 {
     if (const auto* node = GetCurrentNode())
     {
-        QSignalBlocker s(mUI.cTransform);
-
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         const auto& scale = node->GetScale();
-        const auto& material = mState.workspace->MapMaterialName(node->GetMaterialName());
-        const auto& drawable = mState.workspace->MapDrawableName(node->GetDrawableName());
+        const auto& material = mState.workspace->MapMaterialIdToName(node->GetMaterialId());
+        const auto& drawable = mState.workspace->MapDrawableIdToName(node->GetDrawableId());
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
@@ -1868,8 +1885,6 @@ void AnimationWidget::UpdateCurrentNodeProperties()
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
         SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));
-        mUI.cProperties->setEnabled(true);
-        mUI.cTransform->setEnabled(true);
     }
 }
 
@@ -1882,6 +1897,15 @@ void AnimationWidget::UpdateCurrentNodePosition(float dx, float dy)
         pos.y += dy;
         node->SetTranslation(pos);
     }
+}
+
+void AnimationWidget::RebuildComboLists()
+{
+    // Prepend an empty string so that the node's drawable/material
+    // can actually be set to "nothing" which is convenient when
+    // it's just node that doesn't need to render anything (transformation node)
+    SetList(mUI.materials, QStringList("") + mState.workspace->ListAllMaterials());
+    SetList(mUI.drawables, QStringList("") + mState.workspace->ListAllDrawables());
 }
 
 void AnimationWidget::RebuildDrawableMenus()

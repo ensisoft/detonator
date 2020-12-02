@@ -122,7 +122,7 @@ struct RenderTreeFunctions {
         tree.PreOrderTraverse(visitor);
 
         // the layer value is negative but for the indexing below
-        // we must have postive values only.
+        // we must have positive values only.
         int first_layer_index = 0;
         for (auto& packet : packets)
         {
@@ -142,6 +142,9 @@ struct RenderTreeFunctions {
 
         for (auto& packet : packets)
         {
+            if (!packet.material || !packet.drawable)
+                continue;
+
             const auto layer_index = packet.layer;
             if (layer_index >= layers.size())
                 layers.resize(layer_index + 1);
@@ -169,7 +172,7 @@ struct RenderTreeFunctions {
                 painter.Draw(layer.draw_list);
             else painter.Draw(layer.draw_list, layer.mask_list);
         }
-        // if we used a new trańsformation scope pop it here.
+        // if we used a new transformation scope pop it here.
         //transform.Pop();
     }
 
@@ -516,8 +519,11 @@ std::shared_ptr<const gfx::Drawable> AnimationNodeClass::GetDrawable() const
 {
     if (!mDrawable)
         mDrawable = CreateDrawableInstance();
-    mDrawable->SetStyle(mRenderStyle);
-    mDrawable->SetLineWidth(mLineWidth);
+    if (mDrawable)
+    {
+        mDrawable->SetStyle(mRenderStyle);
+        mDrawable->SetLineWidth(mLineWidth);
+    }
     return mDrawable;
 }
 
@@ -551,6 +557,9 @@ glm::mat4 AnimationNodeClass::GetModelTransform() const
 
 std::unique_ptr<gfx::Drawable> AnimationNodeClass::CreateDrawableInstance() const
 {
+    if (!mDrawableClass)
+        return nullptr;
+
     auto ret = gfx::CreateDrawableInstance(mDrawableClass);
     // configure with the class defaults.
     ret->SetLineWidth(mLineWidth);
@@ -559,6 +568,9 @@ std::unique_ptr<gfx::Drawable> AnimationNodeClass::CreateDrawableInstance() cons
 }
 std::unique_ptr<gfx::Material> AnimationNodeClass::CreateMaterialInstance() const
 {
+    if (!mMaterialClass)
+        return nullptr;
+
     auto ret = gfx::CreateMaterialInstance(mMaterialClass);
     // configure with the class defaults.
     if (TestFlag(Flags::OverrideAlpha))
@@ -642,21 +654,19 @@ void AnimationNodeClass::Prepare(const GfxFactory& loader) const
     // However it's also possible that the particle engines are shared and each
     // ship (of the same type) just refers to the same particle engine. Then
     // each ship will render the same particle stream.
-    const auto drawable_class_id = mDrawableId;
-    const auto material_class_id = mMaterialId;
-    mDrawableClass = loader.GetDrawableClass(mDrawableId);
-    mMaterialClass = loader.GetMaterialClass(mMaterialId);
-    mDrawableId = mDrawableClass->GetId();
-    mMaterialId = mMaterialClass->GetId();
-    if (mDrawableId != drawable_class_id)
+    if (!mDrawableId.empty())
     {
-        WARN("Animation node '%1' drawable ('%2') no longer available.",
-             mName, drawable_class_id);
+        mDrawableClass = loader.GetDrawableClass(mDrawableId);
+        if (mDrawableClass->GetId() != mDrawableId)
+            WARN("Animation node '%1' drawable ('%2') was not available.", mName, mDrawableId);
+        mDrawableId = mDrawableClass->GetId();
     }
-    if (mMaterialId != material_class_id)
+    if (!mMaterialId.empty())
     {
-        WARN("Animation node '%1' material ('%2') no longer available.",
-             mName, material_class_id);
+        mMaterialClass = loader.GetMaterialClass(mMaterialId);
+        if (mMaterialClass->GetId() != mMaterialId)
+            WARN("Animation node '%1' material ('%2') was not available.", mName, mMaterialId);
+        mMaterialId = mMaterialClass->GetId();
     }
 }
 
@@ -735,20 +745,30 @@ void AnimationNode::Reset()
     mAlpha    = mClass->GetAlpha();
     mMaterial = mClass->CreateMaterialInstance();
     mDrawable = mClass->CreateDrawableInstance();
-    if (TestFlag(Flags::OverrideAlpha))
-        mMaterial->SetAlpha(mAlpha);
+
+    if (mMaterial)
+    {
+        if (TestFlag(Flags::OverrideAlpha))
+            mMaterial->SetAlpha(mAlpha);
+    }
 }
 
 void AnimationNode::Update(float time, float dt)
 {
-    if (TestFlag(Flags::UpdateDrawable))
-        mDrawable->Update(dt);
+    if (mDrawable)
+    {
+        if (TestFlag(Flags::UpdateDrawable))
+            mDrawable->Update(dt);
 
-    if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
-        mDrawable->Restart();
+        if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
+            mDrawable->Restart();
+    }
 
-    if (TestFlag(Flags::UpdateMaterial))
-        mMaterial->Update(dt);
+    if (mMaterial)
+    {
+        if (TestFlag(Flags::UpdateMaterial))
+            mMaterial->Update(dt);
+    }
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const

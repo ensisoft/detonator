@@ -87,8 +87,8 @@ void unit_test_animation_node()
     node.SetLineWidth(5.0f);
 
     TEST_REQUIRE(node.GetName()         == "root");
-    TEST_REQUIRE(node.GetDrawableName() == "rectangle");
-    TEST_REQUIRE(node.GetMaterialName() == "test");
+    TEST_REQUIRE(node.GetDrawableId()   == "rectangle");
+    TEST_REQUIRE(node.GetMaterialId()   == "test");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
     TEST_REQUIRE(node.GetScale()        == glm::vec2(4.0f, 5.0f));
@@ -104,8 +104,8 @@ void unit_test_animation_node()
         auto ret = game::AnimationNodeClass::FromJson(node.ToJson());
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetName()         == "root");
-        TEST_REQUIRE(ret->GetDrawableName() == "rectangle");
-        TEST_REQUIRE(ret->GetMaterialName() == "test");
+        TEST_REQUIRE(ret->GetDrawableId()   == "rectangle");
+        TEST_REQUIRE(ret->GetMaterialId()   == "test");
         TEST_REQUIRE(ret->GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret->GetTranslation()  == glm::vec2(150.0f, -150.0f));
         TEST_REQUIRE(ret->GetScale()        == glm::vec2(4.0f, 5.0f));
@@ -133,8 +133,8 @@ void unit_test_animation_node()
         TEST_REQUIRE(clone.GetHash() != node.GetHash());
         TEST_REQUIRE(clone.GetId()   != node.GetId());
         TEST_REQUIRE(clone.GetName()         == "root");
-        TEST_REQUIRE(clone.GetDrawableName() == "rectangle");
-        TEST_REQUIRE(clone.GetMaterialName() == "test");
+        TEST_REQUIRE(clone.GetDrawableId()   == "rectangle");
+        TEST_REQUIRE(clone.GetMaterialId()   == "test");
         TEST_REQUIRE(clone.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(clone.GetTranslation()  == glm::vec2(150.0f, -150.0f));
         TEST_REQUIRE(clone.GetScale()        == glm::vec2(4.0f, 5.0f));

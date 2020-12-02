@@ -110,6 +110,18 @@ namespace game
             mMaterialClass.reset();
             mMaterial.reset();
         }
+        void ResetDrawable()
+        {
+            mDrawableId.clear();
+            mDrawableClass.reset();
+            mDrawable.reset();
+        }
+        void ResetMaterial()
+        {
+            mMaterialId.clear();
+            mMaterialClass.reset();
+            mMaterial.reset();
+        }
         // Set the material object for this component.
         // The name identifies the runtime material resource in the gfx resource loader.
         void SetMaterial(const std::shared_ptr<const gfx::MaterialClass>& klass)
@@ -169,11 +181,11 @@ namespace game
         { return mName; }
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
         { return mMaterialClass; }
-        std::string GetMaterialName() const
+        std::string GetMaterialId() const
         { return mMaterialId; }
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
         { return mDrawableClass; }
-        std::string GetDrawableName() const
+        std::string GetDrawableId() const
         { return mDrawableId; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -191,6 +203,10 @@ namespace game
         { return mBitFlags; }
         base::bitflag<Flags>& GetFlags()
         { return mBitFlags; }
+        bool HasMaterial() const
+        { return !mMaterialId.empty(); }
+        bool HasDrawable() const
+        { return !mDrawableId.empty(); }
 
         // Shim function to support generic RenderTree draw even for the
         // class object.

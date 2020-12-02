@@ -1329,26 +1329,24 @@ void Workspace::SaveResource(const Resource& resource)
     mVisibleCount++;
 }
 
-QString Workspace::MapDrawableName(const QString &id) const
+QString Workspace::MapDrawableIdToName(const QString& id) const
 {
     for (const auto& resource : mResources)
     {
         if (resource->GetId() == id)
             return resource->GetName();
     }
-    ERROR("No such drawable class '%1'", id);
-    return "Rectangle";
+    return "";
 }
 
-QString Workspace::MapMaterialName(const QString &id) const
+QString Workspace::MapMaterialIdToName(const QString& id) const
 {
     for (const auto& resource : mResources)
     {
         if (resource->GetId() == id)
             return resource->GetName();
     }
-    ERROR("No such material class '%1'", id);
-    return "Checkerboard";
+    return "";
 }
 
 bool Workspace::IsValidMaterial(const QString& klass) const

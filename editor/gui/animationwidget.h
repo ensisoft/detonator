@@ -101,7 +101,7 @@ namespace gui
         void on_renderStyle_currentIndexChanged(const QString& name);
         void on_layer_valueChanged(int layer);
         void on_lineWidth_valueChanged(double value);
-        void on_alpha_valueChanged(double value);
+        void on_alpha_valueChanged();
         void on_nodeSizeX_valueChanged(double value);
         void on_nodeSizeY_valueChanged(double value);
         void on_nodeTranslateX_valueChanged(double value);
@@ -119,7 +119,7 @@ namespace gui
         void on_btnDeleteTrack_clicked();
         void on_trackList_itemSelectionChanged();
 
-        void currentComponentRowChanged();
+        void CurrentNodeChanged();
         void placeNewParticleSystem();
         void placeNewCustomShape();
         void newResourceAvailable(const app::Resource* resource);
@@ -133,6 +133,7 @@ namespace gui
         void PaintScene(gfx::Painter& painter, double secs);
         void UpdateCurrentNodeProperties();
         void UpdateCurrentNodePosition(float dx, float dy);
+        void RebuildComboLists();
         void RebuildDrawableMenus();
         void CheckPlacementActions(QAction* selected);
     private:
