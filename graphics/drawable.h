@@ -609,7 +609,16 @@ namespace gfx
             mName.clear();
         }
         void EraseVertex(size_t index);
-        void InsertVertex(const Vertex& vert, size_t index);
+        // Insert a vertex into the vertex array where the index is
+        // an index within the given draw command. Index can be in
+        // the range [0, cmd.count].
+        // After the new vertex has been inserted the list of draw
+        // commands is then modified to include the new vertex.
+        // I.e. the draw command that includes the
+        // new vertex will grow its count by 1 and all draw commands
+        // that come after the will have their starting offsets
+        // incremented by 1.
+        void InsertVertex(const Vertex& vert, size_t cmd_index, size_t index);
 
         void UpdateDrawCommand(const DrawCommand& cmd, size_t index)
         {
@@ -617,6 +626,10 @@ namespace gfx
             mDrawCommands[index] = cmd;
             mName.clear();
         }
+
+        // Find the draw command that contains the vertex at the given index.
+        // Returns index to the draw command.
+        const size_t FindDrawCommand(size_t vertex_index) const;
 
         // Return whether the polygon's data is considered to be
         // static or not. Static content is not assumed to change

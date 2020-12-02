@@ -1184,23 +1184,43 @@ void PolygonClass::EraseVertex(size_t index)
     mName.clear();
 }
 
-void PolygonClass::InsertVertex(const Vertex& vertex, size_t index)
+void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
 {
-    ASSERT(index <= mVertices.size());
+    ASSERT(cmd_index < mDrawCommands.size());
+    ASSERT(index <= mDrawCommands[cmd_index].count);
 
-    auto it = mVertices.begin();
-    std::advance(it, index);
-    mVertices.insert(it, vertex);
+    // figure out the index where the put the new vertex in the vertex
+    // array.
+    auto& cmd = mDrawCommands[cmd_index];
+    cmd.count = cmd.count + 1;
+
+    const auto vertex_index = cmd.offset + index;
+    mVertices.insert(mVertices.begin() + vertex_index, vertex);
 
     for (size_t i=0; i<mDrawCommands.size(); ++i)
     {
+        if (i == cmd_index)
+            continue;
         auto& cmd = mDrawCommands[i];
-        if (index >= cmd.offset && index <= cmd.offset + cmd.count)
-            cmd.count++;
-        else if (index < cmd.offset)
+        if (vertex_index <= cmd.offset)
             cmd.offset++;
     }
     mName.clear();
+}
+
+const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
+{
+    for (size_t i=0; i<mDrawCommands.size(); ++i)
+    {
+        const auto& cmd = mDrawCommands[i];
+        // first and last index in the vertex buffer
+        // for this draw command.
+        const auto vertex_index_first = cmd.offset;
+        const auto vertex_index_last  = cmd.offset + cmd.count;
+        if (vertex_index >= vertex_index_first && vertex_index < vertex_index_last)
+            return i;
+    }
+    BUG("no draw command found.");
 }
 
 std::string PolygonClass::GetName() const

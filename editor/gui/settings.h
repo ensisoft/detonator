@@ -37,6 +37,8 @@
 #include <string>
 
 #include "editor/app/utility.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/gfxwidget.h"
 
 namespace gui
 {
@@ -57,8 +59,8 @@ namespace gui
             : mSettings(new JsonFileSettingsStorage(filename))
         {}
 
-        // Load the settings from the backign store.
-        // Returns true if succesful, otherwise false and the
+        // Load the settings from the backing store.
+        // Returns true if successful, otherwise false and the
         // error is logged.
         bool Load()
         {
@@ -66,7 +68,7 @@ namespace gui
         }
 
         // Save the settings to the backing store.
-        // Returns true if succesful, otherwise false and the
+        // Returns true if successful, otherwise false and the
         // error is logged.
         bool Save()
         {
@@ -163,6 +165,12 @@ namespace gui
                 setValue(module, objName + "/sort_order", sortOrder);
             }
         }
+        void saveWidget(const QString& module, const gui::GfxWidget* widget)
+        {
+            const auto name = widget->objectName();
+            setValue(module, name + "_clear_color", FromGfx(widget->getClearColor()));
+        }
+
         void saveWidget(const QString& module, const color_widgets::ColorSelector* color)
         {
             setValue(module, color->objectName(), color->color());
@@ -201,6 +209,13 @@ namespace gui
             setValue(module, splitter->objectName(), splitter->saveState());
         }
         // Load the UI state of a widget.
+        void loadWidget(const QString& module, gui::GfxWidget* widget) const
+        {
+            const auto name = widget->objectName();
+            const auto val  = getValue(module, name + "_clear_color", FromGfx(widget->getClearColor()));
+            widget->setClearColor(ToGfx(val));
+        }
+
         void loadWidget(const QString& module, QSplitter* splitter) const
         {
             splitter->restoreState(getValue(module, splitter->objectName(), splitter->saveState()));

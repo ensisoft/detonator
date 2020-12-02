@@ -171,6 +171,11 @@ namespace gui
             mWindow->triggerPaint();
         }
 
+        gfx::Color4f getClearColor() const
+        { return mWindow->getClearColor(); }
+
+        void setClearColor(const gfx::Color4f& color)
+        { mWindow->setClearColor(color); }
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;

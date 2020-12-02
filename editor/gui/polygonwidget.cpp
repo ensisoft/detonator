@@ -56,6 +56,19 @@ std::vector<gfx::PolygonClass::Vertex> MakeVerts(const std::vector<QPoint>& poin
     return verts;
 }
 
+// Map vertex to widget space.
+QPoint MapVertexToWidget(const gfx::PolygonClass::Vertex& vertex,
+    float width, float height)
+{
+    return QPoint(vertex.aPosition.x * width, vertex.aPosition.y * height * -1.0f);
+}
+
+float PointDist(const QPoint& a, const QPoint& b)
+{
+    const auto& diff = a - b;
+    return std::sqrt(diff.x()*diff.x() + diff.y()*diff.y());
+}
+
 } // namespace
 
 namespace gui
@@ -108,7 +121,11 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& res
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
     GetProperty(resource, "material", mUI.blueprints);
-    GetProperty(resource, "draw_alpha", mUI.alpha);
+    GetUserProperty(resource, "alpha", mUI.alpha);
+    GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
+    GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "widget", mUI.widget);
     setWindowTitle(mUI.name->text());
 }
 
@@ -151,7 +168,9 @@ bool PolygonWidget::SaveState(Settings& settings) const
     settings.saveWidget("Polygon", mUI.alpha);
     settings.saveWidget("Polygon", mUI.blueprints);
     settings.saveWidget("Polygon", mUI.chkShowGrid);
+    settings.saveWidget("Polygon", mUI.chkSnap);
     settings.saveWidget("Polygon", mUI.cmbGrid);
+    settings.saveWidget("Polygon", mUI.widget);
 
     // the polygon can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -168,7 +187,9 @@ bool PolygonWidget::LoadState(const Settings& settings)
     settings.loadWidget("Polygon", mUI.blueprints);
     settings.loadWidget("Polygon", mUI.blueprints);
     settings.loadWidget("Polygon", mUI.chkShowGrid);
+    settings.loadWidget("Polygon", mUI.chkSnap);
     settings.loadWidget("Polygon", mUI.cmbGrid);
+    settings.loadWidget("Polygon", mUI.widget);
     setWindowTitle(mUI.name->text());
 
     const std::string& base64 = settings.getValue("Polygon", "content", std::string(""));
@@ -293,6 +314,13 @@ void PolygonWidget::on_actionSave_triggered()
     const QString& material = GetValue(mUI.blueprints);
     if (!material.isEmpty())
         SetProperty(resource, "material", mUI.blueprints);
+
+    SetUserProperty(resource, "alpha",        mUI.alpha);
+    SetUserProperty(resource, "grid",         mUI.cmbGrid);
+    SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
+    SetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
+    SetUserProperty(resource, "widget",       mUI.widget);
+
     mWorkspace->SaveResource(resource);
 
     INFO("Saved shape '%1'", name);
@@ -603,74 +631,61 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
         point = QPoint(x, y);
     }
 
-    // find the closest vertex.
+    // find the vertex closest to the click point.
     float distance = std::numeric_limits<float>::max();
-    size_t index = 0;
+    size_t vertex_index = 0;
     for (size_t i=0; i<num_vertices; ++i)
     {
-        const auto& vert = mPolygon.GetVertex(i);
-        const auto x = width * vert.aPosition.x;
-        const auto y = height * -vert.aPosition.y;
-        const auto r = QPoint(x, y) - point;
-        const auto len = std::sqrt(r.x()*r.x() + r.y()*r.y());
+        const auto vert = MapVertexToWidget(mPolygon.GetVertex(i), width, height);
+        const auto len  = PointDist(point, vert);
         if (len < distance)
         {
-            index = i;
+            vertex_index = i;
             distance = len;
         }
     }
 
     // not found ?
-    if (index == num_vertices)
+    if (vertex_index == num_vertices)
+        return;
+    const auto cmd_index = mPolygon.FindDrawCommand(vertex_index);
+    if (cmd_index == std::numeric_limits<size_t>::max())
         return;
 
-    DEBUG("Closest vertex index %1",index);
+    DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
 
-    // figure out which draw command this vertex belongs to.
-    // note that there could be multiple draw commands but for
-    // now we assume there's only one.
-    gfx::PolygonClass::DrawCommand cmd;
-    for (size_t i=0; i<mPolygon.GetNumDrawCommands(); ++i)
-    {
-        const auto& c = mPolygon.GetDrawCommand(i);
-        if (index >= c.offset &&  index < c.offset + c.count)
-        {
-            cmd = c;
-            break;
-        }
-    }
-    index = index - cmd.offset;
-    const auto prev = 0; //index > 0 ? index - 1 : cmd.count - 1;
-    const auto next = (index + 1) % cmd.count;
+    // degenerate left over triangle ?
+    const auto& cmd = mPolygon.GetDrawCommand(cmd_index);
+    if (cmd.count < 3)
+        return;
 
-    gfx::Vec2 aPosition;
-    aPosition.x = point.x() / (float)width;
-    aPosition.y = point.y() / -(float)height;
+    const auto cmd_vertex_index = vertex_index - cmd.offset;
 
-    const auto winding = math::FindTriangleWindingOrder(mPolygon.GetVertex(prev + cmd.offset).aPosition,
-        mPolygon.GetVertex(index + cmd.offset).aPosition,
-        mPolygon.GetVertex(next + cmd.offset).aPosition);
-
-    const auto before = math::FindTriangleWindingOrder(mPolygon.GetVertex(prev + cmd.offset).aPosition,
-        aPosition, mPolygon.GetVertex(index + cmd.offset).aPosition);
-    const auto after = math::FindTriangleWindingOrder(mPolygon.GetVertex(prev + cmd.offset).aPosition,
-        mPolygon.GetVertex(index + cmd.offset).aPosition, aPosition);
-
-    // by default before the current (closest) vertex.
-    size_t insert_position = index + cmd.offset;
-
-    if (winding != math::TriangleWindingOrder::Undetermined)
-    {
-        if (before == winding)
-            insert_position = index + cmd.offset;
-        else if (after == winding)
-            insert_position = index + cmd.offset + 1;
-    }
     gfx::PolygonClass::Vertex vertex;
-    vertex.aPosition = aPosition;
+    vertex.aPosition.x = point.x() / (float)width;
+    vertex.aPosition.y = point.y() / (float)height * -1.0f;
     vertex.aTexCoord.x = vertex.aPosition.x;
     vertex.aTexCoord.y = -vertex.aPosition.y;
-    mPolygon.InsertVertex(vertex, insert_position);
+
+    // currently back face culling is enabled and the winding
+    // order is set to CCW. That means that in order to
+    // determine where the new vertex should be placed within
+    // the draw command we can check the winding order.
+    // We have two options:
+    // root -> closest -> new vertex
+    // root -> new vertex -> closest
+    //
+    // One of the above should have a CCW winding order and
+    // give us the info where to place the new vertex.
+    // note that there's still a possibility for a degenerate
+    // case (such as when any of the two vertices are collinear)
+    // and this isn't properly handled yet.
+    const auto first = mPolygon.GetVertex(cmd.offset);
+    const auto closest = mPolygon.GetVertex(vertex_index);
+    const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
+    if (winding == math::TriangleWindingOrder::CounterClockwise)
+         mPolygon.InsertVertex(vertex, cmd_index, cmd_vertex_index + 1);
+    else mPolygon.InsertVertex(vertex, cmd_index, cmd_vertex_index);
 }
 
 bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)

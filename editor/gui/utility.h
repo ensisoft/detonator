@@ -45,6 +45,7 @@
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/resource.h"
+#include "editor/gui/gfxwidget.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -470,6 +471,11 @@ inline void SetUserProperty(Resource& res, const QString& name, const color_widg
 {
     res.SetUserProperty(name, color->color());
 }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const gui::GfxWidget* widget)
+{
+    res.SetUserProperty(name + "_clear_color", FromGfx(widget->getClearColor()));
+}
 
 
 template<typename Resource, typename T> inline
@@ -634,6 +640,14 @@ inline void GetUserProperty(const Resource& res, const QString& name, color_widg
         color->setColor(value);
 }
 
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, gui::GfxWidget* widget)
+{
+    QSignalBlocker s(widget);
+    QColor color = FromGfx(widget->getClearColor());
+    if (res.GetUserProperty(name + "_clear_color", &color))
+        widget->setClearColor(ToGfx(color));
+}
 
 template<typename Widget>
 inline int GetCount(Widget* widget)
