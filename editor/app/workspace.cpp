@@ -1127,7 +1127,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     {
         if (resource->IsPrimitive())
             continue;
-        resource->Serialize(json);
+        resource->SaveProperties(json);
     }
     // set the root object to the json document then serialize
     QJsonDocument docu(json);
@@ -1148,6 +1148,13 @@ void Workspace::SaveUserSettings(const QString& filename) const
     }
     QJsonObject json;
     json["user"] = QJsonObject::fromVariantMap(mUserProperties);
+    for (const auto& resource : mResources)
+    {
+        if (resource->IsPrimitive())
+            continue;
+        resource->SaveUserProperties(json);
+    }
+
     QJsonDocument docu(json);
     file.write(docu.toJson());
     file.close();
@@ -1215,6 +1222,12 @@ void Workspace::LoadUserSettings(const QString& filename)
     const auto& buff = file.readAll(); // QByteArray
     const QJsonDocument docu(QJsonDocument::fromJson(buff));
     mUserProperties = docu["user"].toObject().toVariantMap();
+
+    for (auto& resource : mResources)
+    {
+        resource->LoadUserProperties(docu.object());
+    }
+
     INFO("Loaded private workspace data: '%1'", filename);
 }
 

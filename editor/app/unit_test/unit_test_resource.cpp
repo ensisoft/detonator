@@ -149,6 +149,7 @@ int test_main(int argc, char* argv[])
     r.SetProperty("koli", QString("hip hop"));
     r.SetProperty("neli", 123.0);
     r.SetProperty("vika", quint64(123));
+    r.SetUserProperty("foo", 42);
 
     TEST_REQUIRE(r.HasProperty("eka"));
     TEST_REQUIRE(r.HasProperty("toka"));
@@ -156,27 +157,34 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.HasProperty("neli"));
     TEST_REQUIRE(r.HasProperty("vika"));
     TEST_REQUIRE(r.HasProperty("baz") == false);
+    TEST_REQUIRE(r.HasUserProperty("bar") == false);
 
     TEST_REQUIRE(r.GetProperty("eka", 0) == 123);
     TEST_REQUIRE(r.GetProperty("koli", QString("")) == "hip hop");
     TEST_REQUIRE(r.GetProperty("vika", quint64(0)) == quint64(123));
     TEST_REQUIRE(r.GetProperty("neli", 0.0) == real::float32(123.0));
     TEST_REQUIRE(r.GetProperty("toka", 0.0f) == real::float32(123.0f));
+    TEST_REQUIRE(r.GetUserProperty("foo", 0) == 42);
 
     QJsonObject props;
-    r.Serialize(props);
+    QJsonObject user_props;
+    r.SaveProperties(props);
+    r.SaveUserProperties(user_props);
     r.ClearProperties();
+    r.ClearUserProperties();
     TEST_REQUIRE(!r.HasProperty("eka"));
     TEST_REQUIRE(!r.HasProperty("toka"));
     TEST_REQUIRE(!r.HasProperty("koli"));
     TEST_REQUIRE(!r.HasProperty("neli"));
     TEST_REQUIRE(!r.HasProperty("vika"));
     r.LoadProperties(props);
+    r.LoadUserProperties(user_props);
     TEST_REQUIRE(r.HasProperty("eka"));
     TEST_REQUIRE(r.HasProperty("toka"));
     TEST_REQUIRE(r.HasProperty("koli"));
     TEST_REQUIRE(r.HasProperty("neli"));
     TEST_REQUIRE(r.HasProperty("vika"));
+    TEST_REQUIRE(r.HasUserProperty("foo"));
 
     TestResource0* ptr0 = nullptr;
     TestResource1* ptr1 = nullptr;
@@ -194,6 +202,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(copy.HasProperty("koli"));
         TEST_REQUIRE(copy.HasProperty("neli"));
         TEST_REQUIRE(copy.HasProperty("vika"));
+        TEST_REQUIRE(copy.HasUserProperty("foo"));
     }
 
     // copy
@@ -206,6 +215,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(copy->HasProperty("koli"));
         TEST_REQUIRE(copy->HasProperty("neli"));
         TEST_REQUIRE(copy->HasProperty("vika"));
+        TEST_REQUIRE(copy->HasUserProperty("foo"));
     }
 
     // clone
@@ -218,6 +228,21 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(clone->HasProperty("koli"));
         TEST_REQUIRE(clone->HasProperty("neli"));
         TEST_REQUIRE(clone->HasProperty("vika"));
+        TEST_REQUIRE(clone->HasUserProperty("foo"));
+    }
+
+    // update
+    {
+        Resource other("other");
+        // copies over the data from r into other
+        other.UpdateFrom(r);
+        TEST_REQUIRE(other.GetName() == "joojoo");
+        TEST_REQUIRE(other.HasProperty("eka"));
+        TEST_REQUIRE(other.HasProperty("toka"));
+        TEST_REQUIRE(other.HasProperty("koli"));
+        TEST_REQUIRE(other.HasProperty("neli"));
+        TEST_REQUIRE(other.HasProperty("vika"));
+        TEST_REQUIRE(other.HasUserProperty("foo"));
     }
 
     // clone with a type that returns std::unique_ptr

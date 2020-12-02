@@ -93,24 +93,33 @@ namespace app
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
         virtual void Serialize(nlohmann::json& json) const =0;
-        // Serialize additional non-content properties into JSON
-        virtual void Serialize(QJsonObject& json) const = 0;
+        // Save additional non-content properties into JSON
+        virtual void SaveProperties(QJsonObject& json) const = 0;
+        // Save additional user specific properties into JSON.
+        virtual void SaveUserProperties(QJsonObject& json) const = 0;
         // Returns true if the resource is considered primitive, i.e. not
         // user defined.
         virtual bool IsPrimitive() const = 0;
         // Returns true if resource has a property by the given name.
         virtual bool HasProperty(const QString& name) const = 0;
+        // returns true if the resource as a user property by the given name.
+        virtual bool HasUserProperty(const QString& name) const = 0;
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise it's added.
         virtual void SetProperty(const QString& name, const QVariant& value) = 0;
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns default value.
-        virtual QVariant GetVariantProperty(const QString& name, const QVariant& def) const = 0;
+        // Set a property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        virtual void SetUserProperty(const QString& name, const QVariant& value) = 0;
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
         virtual QVariant GetVariantProperty(const QString& name) const = 0;
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        virtual QVariant GetUserVariantProperty(const QString& name) const = 0;
         // Load the additional properties from the json object.
         virtual void LoadProperties(const QJsonObject& json) = 0;
+        // Load the additional properties from the json object.
+        virtual void LoadUserProperties(const QJsonObject& json) = 0;
         // Make an an exact copy of this resource. This means
         // that the copied resource contains all the same properties
         // as this object including the resource id.
@@ -160,6 +169,25 @@ namespace app
             if (!HasProperty(name))
                 return false;
             const auto& ret = GetVariantProperty(name);
+            *out = qvariant_cast<T>(ret);
+            return true;
+        }
+
+        template<typename T>
+        T GetUserProperty(const QString& name, const T& def) const
+        {
+            if (!HasUserProperty(name))
+                return def;
+            const auto& ret = GetUserVariantProperty(name);
+            return qvariant_cast<T>(ret);
+        }
+
+        template<typename T>
+        bool GetUserProperty(const QString& name, T* out) const
+        {
+            if (!HasUserProperty(name))
+                return false;
+            const auto& ret = GetUserVariantProperty(name);
             *out = qvariant_cast<T>(ret);
             return true;
         }
@@ -276,6 +304,7 @@ namespace app
             mContent   = std::make_shared<Content>(*other.mContent);
             mProps     = other.mProps;
             mName      = other.mName;
+            mUserProps = other.mUserProps;
             mPrimitive = other.mPrimitive;
         }
 
@@ -293,10 +322,13 @@ namespace app
             ASSERT(ptr != nullptr);
             mName  = ptr->mName;
             mProps = ptr->mProps;
-            *mContent = *ptr->mContent;
+            mUserProps = ptr->mUserProps;
+            *mContent  = *ptr->mContent;
         }
         virtual void SetIsPrimitive(bool primitive) override
         { mPrimitive = primitive; }
+        virtual bool IsPrimitive() const override
+        { return mPrimitive; }
         virtual void Serialize(nlohmann::json& json) const override
         {
             nlohmann::json content_json = mContent->ToJson();
@@ -315,28 +347,34 @@ namespace app
             else if (TypeValue == Resource::Type::CustomShape)
                 json["shapes"].push_back(content_json);
         }
-        virtual void Serialize(QJsonObject& json) const override
+        virtual void SaveProperties(QJsonObject& json) const override
         {
             json[GetId()] = QJsonObject::fromVariantMap(mProps);
         }
+        virtual void SaveUserProperties(QJsonObject& json) const override
+        {
+            json[GetId()] = QJsonObject::fromVariantMap(mUserProps);
+        }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
-        virtual bool IsPrimitive() const override
-        { return mPrimitive; }
+        virtual bool HasUserProperty(const QString& name) const override
+        { return mUserProps.contains(name); }
+
         virtual void SetProperty(const QString& name, const QVariant& value) override
         { mProps[name] = value; }
-        virtual QVariant GetVariantProperty(const QString& name, const QVariant& def) const override
-        {
-            QVariant ret = mProps[name];
-            if (ret.isNull())
-                return def;
-            return ret;
-        }
+        virtual void SetUserProperty(const QString& name, const QVariant& value) override
+        { mUserProps[name] = value; }
         virtual QVariant GetVariantProperty(const QString& name) const override
         { return mProps[name]; }
+        virtual QVariant GetUserVariantProperty(const QString& name) const override
+        { return mUserProps[name]; }
         virtual void LoadProperties(const QJsonObject& object) override
         {
             mProps = object[GetId()].toObject().toVariantMap();
+        }
+        virtual void LoadUserProperties(const QJsonObject& object) override
+        {
+            mUserProps = object[GetId()].toObject().toVariantMap();
         }
         virtual std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
@@ -344,6 +382,7 @@ namespace app
         {
             auto ret = std::make_unique<GameResource>(mContent->Clone(), mName);
             ret->mProps = mProps;
+            ret->mUserProps = mUserProps;
             ret->mPrimitive = mPrimitive;
             return ret;
         }
@@ -358,8 +397,12 @@ namespace app
         { return mContent.get(); }
         const QVariantMap& GetProperties() const
         { return mProps;}
+        const QVariantMap& GetUserProperties() const
+        { return mUserProps; }
         void ClearProperties()
         { mProps.clear(); }
+        void ClearUserProperties()
+        { mUserProps.clear(); }
 
         using Resource::GetContent;
 
@@ -382,6 +425,7 @@ namespace app
         std::shared_ptr<Content> mContent;
         QString mName;
         QVariantMap mProps;
+        QVariantMap mUserProps;
         bool mPrimitive = false;
     };
 

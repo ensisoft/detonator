@@ -179,6 +179,8 @@ void unit_test_save_load()
     app::MaterialResource resource(material, "TestMaterial");
     resource.SetProperty("int", 123);
     resource.SetProperty("str", QString("hello"));
+    resource.SetUserProperty("foo", 444);
+    resource.SetUserProperty("bar", 777);
     workspace.SaveResource(resource);
     // workspace properties are specific to the workspace and
     // are saved in the workspace files.
@@ -243,6 +245,8 @@ void unit_test_save_load()
         TEST_REQUIRE(res.GetIdUtf8() == material.GetId());
         TEST_REQUIRE(res.GetProperty("int", 0) == 123);
         TEST_REQUIRE(res.GetProperty("str", QString("")) == QString("hello"));
+        TEST_REQUIRE(res.GetUserProperty("foo", 0) == 444);
+        TEST_REQUIRE(res.GetUserProperty("bar", 0) == 777);
     }
     TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
     TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");

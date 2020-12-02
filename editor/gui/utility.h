@@ -427,6 +427,51 @@ inline void SetProperty(Resource& res, const QString& name, const color_widgets:
     res.SetProperty(name, color->color());
 }
 
+
+
+// user properties.
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QVariant& prop)
+{
+    res.SetUserProperty(name, prop);
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QComboBox* cmb)
+{
+    res.SetUserProperty(name, cmb->currentText());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QLineEdit* edit)
+{
+    res.SetUserProperty(name, edit->text());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QDoubleSpinBox* spin)
+{
+    res.SetUserProperty(name, spin->value());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QSpinBox* spin)
+{
+    res.SetUserProperty(name, spin->value());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QCheckBox* chk)
+{
+    res.SetUserProperty(name, chk->isChecked());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QGroupBox* chk)
+{
+    res.SetUserProperty(name, chk->isChecked());
+}
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const color_widgets::ColorSelector* color)
+{
+    res.SetUserProperty(name, color->color());
+}
+
+
 template<typename Resource, typename T> inline
 void GetProperty(const Resource& res, const QString& name, T* out)
 {
@@ -507,6 +552,88 @@ inline void GetProperty(const Resource& res, const QString& name, color_widgets:
     if (res.GetProperty(name, &value))
         color->setColor(value);
 }
+
+
+template<typename Resource, typename T> inline
+void GetUserProperty(const Resource& res, const QString& name, T* out)
+{
+    res.GetUserProperty(name, out);
+}
+
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+
+    // default to this in case either the property
+    // doesn't exist or the value the property had before
+    // is no longer available. (For example the combobox contains
+    // resource names and the resource has been deleted)
+    //cmb->setCurrentIndex(0);
+    QString text;
+    if (res.GetUserProperty(name, &text))
+    {
+        const auto index = cmb->findText(text);
+        if (index != -1)
+            cmb->setCurrentIndex(index);
+    }
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QLineEdit* edit)
+{
+    QSignalBlocker s(edit);
+
+    QString text;
+    if (res.GetUserProperty(name, &text))
+        edit->setText(text);
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QDoubleSpinBox* spin)
+{
+    QSignalBlocker s(spin);
+
+    double value = 0.0f;
+    if (res.GetUserProperty(name, &value))
+        spin->setValue(value);
+
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QSpinBox* spin)
+{
+    QSignalBlocker s(spin);
+
+    int value = 0;
+    if (res.GetUserProperty(name, &value))
+        spin->setValue(value);
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QCheckBox* chk)
+{
+    QSignalBlocker s(chk);
+
+    bool value = false;
+    if (res.GetUserProperty(name, &value))
+        chk->setChecked(value);
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, QGroupBox* chk)
+{
+    QSignalBlocker s(chk);
+
+    bool value = false;
+    if (res.GetUserProperty(name, &value))
+        chk->setChecked(value);
+}
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const QString& name, color_widgets::ColorSelector* color)
+{
+    QSignalBlocker s(color);
+
+    QColor value;
+    if (res.GetUserProperty(name, &value))
+        color->setColor(value);
+}
+
 
 template<typename Widget>
 inline int GetCount(Widget* widget)
