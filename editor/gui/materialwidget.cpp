@@ -165,6 +165,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
     PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
+    SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
+    SetValue(mUI.cmbModel, "Rectangle");
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -195,6 +197,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.colorMap3,    mMaterial.GetColorMapColor(gfx::MaterialClass::ColorIndex::BottomRight));
     GetProperty(resource, "shader_file", mUI.shaderFile);
     GetProperty(resource, "use_shader_file", mUI.customShader);
+    GetUserProperty(resource, "model", mUI.cmbModel);
+    GetUserProperty(resource, "zoom", mUI.zoom);
+    GetUserProperty(resource, "widget", mUI.widget);
 
     // add the textures to the UI
     size_t num_textures = mMaterial.GetNumTextures();
@@ -285,6 +290,8 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.loadWidget("Material", mUI.shaderFile);
     settings.loadWidget("Material", mUI.customShader);
     settings.loadWidget("Material", mUI.zoom);
+    settings.loadWidget("Material", mUI.cmbModel);
+    settings.loadWidget("Material", mUI.widget);
 
     // restore textures list
     size_t num_textures = mMaterial.GetNumTextures();
@@ -314,6 +321,8 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.saveWidget("Material", mUI.shaderFile);
     settings.saveWidget("Material", mUI.customShader);
     settings.saveWidget("Material", mUI.zoom);
+    settings.saveWidget("Material", mUI.cmbModel);
+    settings.saveWidget("Material", mUI.widget);
 
     SetMaterialProperties();
 
@@ -438,6 +447,9 @@ void MaterialWidget::on_actionSave_triggered()
     app::MaterialResource resource(mMaterial, name);
     SetProperty(resource,"shader_file", mUI.shaderFile);
     SetProperty(resource,"use_shader_file", mUI.customShader);
+    SetUserProperty(resource, "model", mUI.cmbModel);
+    SetUserProperty(resource, "widget", mUI.widget);    
+    SetUserProperty(resource, "zoom", mUI.zoom);
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial.GetHash();
 
@@ -896,8 +908,13 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto xpos = (width - content_width) * 0.5f;
     const auto ypos = (height - content_height) * 0.5f;
 
-    // use the material to fill a rectangle in the middle of the screen.
-    gfx::FillRect(painter, gfx::FRect(xpos, ypos, content_width, content_height), material);
+    // use the material to fill a model shape in the middle of the screen.
+    gfx::Transform transform;
+    transform.MoveTo(xpos, ypos);
+    transform.Resize(content_width, content_height);
+
+    auto drawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
+    painter.Draw(*drawable, transform, material);
 }
 
 } // namespace
