@@ -517,6 +517,16 @@ AnimationNodeClass::AnimationNodeClass()
 
 std::shared_ptr<const gfx::Drawable> AnimationNodeClass::GetDrawable() const
 {
+    return const_cast<AnimationNodeClass*>(this)->GetDrawable();
+}
+
+std::shared_ptr<const gfx::Material> AnimationNodeClass::GetMaterial() const
+{
+    return const_cast<AnimationNodeClass*>(this)->GetMaterial();
+}
+
+std::shared_ptr<gfx::Drawable> AnimationNodeClass::GetDrawable()
+{
     if (!mDrawable)
         mDrawable = CreateDrawableInstance();
     if (mDrawable)
@@ -527,7 +537,7 @@ std::shared_ptr<const gfx::Drawable> AnimationNodeClass::GetDrawable() const
     return mDrawable;
 }
 
-std::shared_ptr<const gfx::Material> AnimationNodeClass::GetMaterial() const
+std::shared_ptr<gfx::Material> AnimationNodeClass::GetMaterial()
 {
     if (!mMaterial)
         mMaterial = CreateMaterialInstance();
@@ -612,6 +622,10 @@ void AnimationNodeClass::Update(float time, float dt)
     {
         if (TestFlag(Flags::UpdateMaterial))
             mMaterial->Update(dt);
+
+        if (TestFlag(Flags::OverrideAlpha))
+            mMaterial->SetAlpha(mAlpha);
+        else mMaterial->ResetAlpha();
     }
 }
 
@@ -745,12 +759,6 @@ void AnimationNode::Reset()
     mAlpha    = mClass->GetAlpha();
     mMaterial = mClass->CreateMaterialInstance();
     mDrawable = mClass->CreateDrawableInstance();
-
-    if (mMaterial)
-    {
-        if (TestFlag(Flags::OverrideAlpha))
-            mMaterial->SetAlpha(mAlpha);
-    }
 }
 
 void AnimationNode::Update(float time, float dt)
@@ -768,6 +776,10 @@ void AnimationNode::Update(float time, float dt)
     {
         if (TestFlag(Flags::UpdateMaterial))
             mMaterial->Update(dt);
+
+        if (TestFlag(Flags::OverrideAlpha))
+            mMaterial->SetAlpha(mAlpha);
+        else mMaterial->ResetAlpha();
     }
 }
 
@@ -1308,6 +1320,12 @@ Animation::Animation(const AnimationClass& klass)
 void Animation::Update(float dt)
 {
     mCurrentTime += dt;
+
+    // note that the order here is important.
+    // The animation track objects may alter the state
+    // of some nodes (for example the alpha override value)
+    // so first update all the nodes and then apply
+    // animation track changes.
 
     for (auto& node : mNodes)
     {

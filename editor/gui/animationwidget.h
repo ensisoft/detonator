@@ -131,8 +131,9 @@ namespace gui
     private:
         game::AnimationNodeClass* GetCurrentNode();
         void PaintScene(gfx::Painter& painter, double secs);
-        void UpdateCurrentNodeProperties();
+        void UpdateCurrentNodeAlpha();
         void UpdateCurrentNodePosition(float dx, float dy);
+        void DisplayCurrentNodeProperties();
         void RebuildComboLists();
         void RebuildDrawableMenus();
         void CheckPlacementActions(QAction* selected);

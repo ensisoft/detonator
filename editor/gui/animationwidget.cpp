@@ -580,7 +580,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
         mUI.translateX->setValue(dist_x);
         mUI.translateY->setValue(dist_y);
 
-        UpdateCurrentNodeProperties();
+        DisplayCurrentNodeProperties();
     };
     mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
 
@@ -1209,7 +1209,7 @@ void AnimationWidget::on_actionNodeMoveUpLayer_triggered()
     const int layer = node->GetLayer();
     node->SetLayer(layer + 1);
 
-    UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 void AnimationWidget::on_actionNodeMoveDownLayer_triggered()
 {
@@ -1219,7 +1219,7 @@ void AnimationWidget::on_actionNodeMoveDownLayer_triggered()
     const int layer = node->GetLayer();
     node->SetLayer(layer - 1);
 
-    UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 
 void AnimationWidget::on_actionNodeDuplicate_triggered()
@@ -1359,7 +1359,7 @@ void AnimationWidget::CurrentNodeChanged()
     {
         mUI.cProperties->setEnabled(true);
         mUI.cTransform->setEnabled(true);
-        UpdateCurrentNodeProperties();
+        DisplayCurrentNodeProperties();
     }
 }
 
@@ -1398,7 +1398,21 @@ void AnimationWidget::resourceUpdated(const app::Resource* resource)
 {
     RebuildComboLists();
     RebuildDrawableMenus();
-    UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
+
+    if (!resource->IsMaterial())
+        return;
+    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
+    {
+        auto& node = mState.animation->GetNode(i);
+        if (node.GetMaterialId() != resource->GetIdUtf8())
+            continue;
+        if (node.TestFlag(game::AnimationNodeClass::Flags::OverrideAlpha))
+            continue;
+        auto material = node.GetMaterial();
+        if (material)
+            material->ResetAlpha();
+    }
 }
 
 void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
@@ -1422,7 +1436,7 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
 
     RebuildComboLists();
     RebuildDrawableMenus();
-    UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 
 void AnimationWidget::treeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
@@ -1477,13 +1491,7 @@ void AnimationWidget::on_lineWidth_valueChanged(double value)
 
 void AnimationWidget::on_alpha_valueChanged()
 {
-    if (auto* node = GetCurrentNode())
-    {
-        const float value = mUI.alpha->value();
-        const float max   = mUI.alpha->maximum();
-        const float alpha = value / max;
-        node->SetAlpha(alpha);
-    }
+    UpdateCurrentNodeAlpha();
 }
 
 void AnimationWidget::on_nodeSizeX_valueChanged(double value)
@@ -1590,10 +1598,7 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
 
 void AnimationWidget::on_chkOverrideAlpha_stateChanged(int state)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetFlag(game::AnimationNodeClass::Flags::OverrideAlpha, state);
-    }
+    UpdateCurrentNodeAlpha();
 }
 
 void AnimationWidget::on_btnNewTrack_clicked()
@@ -1857,7 +1862,50 @@ game::AnimationNodeClass* AnimationWidget::GetCurrentNode()
     return static_cast<game::AnimationNodeClass*>(item->GetUserData());
 }
 
-void AnimationWidget::UpdateCurrentNodeProperties()
+void AnimationWidget::UpdateCurrentNodeAlpha()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const float value  = mUI.alpha->value();
+        const float max    = mUI.alpha->maximum();
+        const float alpha  = value / max;
+        const bool checked = GetValue(mUI.chkOverrideAlpha);
+        node->SetFlag(game::AnimationNodeClass::Flags::OverrideAlpha, checked);
+        node->SetAlpha(alpha);
+        auto material = node->GetMaterial();
+        if (material && checked)
+            material->SetAlpha(alpha);
+        else if (material)
+            material->ResetAlpha();
+
+        if (!checked || !material)
+            return;
+
+        const bool has_alpha_blending = material->GetClass().GetSurfaceType() ==
+                                        gfx::MaterialClass::SurfaceType::Transparent;
+        if (has_alpha_blending)
+            return;
+
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Warning);
+        msg.setText(tr("The current material doesn't enable transparency. Setting alpha will have no effect."));
+        msg.exec();
+    }
+}
+
+void AnimationWidget::UpdateCurrentNodePosition(float dx, float dy)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto pos = node->GetTranslation();
+        pos.x += dx;
+        pos.y += dy;
+        node->SetTranslation(pos);
+    }
+}
+
+void AnimationWidget::DisplayCurrentNodeProperties()
 {
     if (const auto* node = GetCurrentNode())
     {
@@ -1885,17 +1933,6 @@ void AnimationWidget::UpdateCurrentNodeProperties()
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
         SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));
-    }
-}
-
-void AnimationWidget::UpdateCurrentNodePosition(float dx, float dy)
-{
-    if (auto* node = GetCurrentNode())
-    {
-        auto pos = node->GetTranslation();
-        pos.x += dx;
-        pos.y += dy;
-        node->SetTranslation(pos);
     }
 }
 

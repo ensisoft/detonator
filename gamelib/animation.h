@@ -155,17 +155,9 @@ namespace game
         void SetLineWidth(float value)
         { mLineWidth = value; }
         void SetAlpha(float value)
-        {
-            mAlpha = value;
-            if (TestFlag(Flags::OverrideAlpha) && mMaterial)
-                mMaterial->SetAlpha(mAlpha);
-        }
+        { mAlpha = value; }
         void SetFlag(Flags f, bool on_off)
-        {
-            if (f == Flags::OverrideAlpha && mMaterial)
-                mMaterial->SetAlpha(on_off ? mAlpha : mMaterialClass->GetBaseAlpha());
-            mBitFlags.set(f, on_off);
-        }
+        { mBitFlags.set(f, on_off); }
         bool TestFlag(Flags f) const
         { return mBitFlags.test(f); }
 
@@ -208,12 +200,12 @@ namespace game
         bool HasDrawable() const
         { return !mDrawableId.empty(); }
 
-        // Shim function to support generic RenderTree draw even for the
+        // Shim functions to support generic RenderTree draw even for the
         // class object.
         std::shared_ptr<const gfx::Drawable> GetDrawable() const;
-        // Shim function to support generic RenderTree draw event for the
-        // class object.
         std::shared_ptr<const gfx::Material> GetMaterial() const;
+        std::shared_ptr<gfx::Drawable> GetDrawable();
+        std::shared_ptr<gfx::Material> GetMaterial();
 
         void SetDrawableInstance(std::unique_ptr<gfx::Drawable> drawable)
         { mDrawable = std::move(drawable); }
@@ -319,7 +311,7 @@ namespace game
             : AnimationNode(std::make_shared<AnimationNodeClass>(klass))
         {}
 
-        // settters for instance state.
+        // setters for instance state.
         void SetTranslation(float x, float y)
         { mPosition = glm::vec2(x, y); }
         void SetTranslation(const glm::vec2& pos)
@@ -337,11 +329,7 @@ namespace game
         void SetRotation(float value)
         { mRotation = value; }
         void SetAlpha(float value)
-        {
-            mAlpha = value;
-            if (TestFlag(Flags::OverrideAlpha))
-                mMaterial->SetAlpha(mAlpha);
-        }
+        { mAlpha = value; }
 
         // getters for instance state.
         glm::vec2 GetTranslation() const

@@ -1069,7 +1069,7 @@ namespace gfx
     // Material is an instance of some specific type of material.
     // The "type" (i.e. what kind of material it is) is defined by
     // The MaterialClass which is shared between instances of any
-    // spefic material type.
+    // specific material type.
     class Material
     {
     public:
@@ -1102,12 +1102,13 @@ namespace gfx
             // runtime. However if there's more such instance specific
             // data it'd be set here.
             MaterialClass::InstanceState instance;
-            instance.runtime = mRuntime;
-            instance.base_color = mBaseColor;
+            instance.runtime    = mRuntime;
+            instance.base_color = mClass->GetBaseColor();
+            instance.base_color.SetAlpha(mBaseColor.Alpha());
             mClass->ApplyDynamicState(env, instance, device, prog, state);
         }
         // Set the material's alpha value. will be clamped to [0.0f, 1.0f] range
-        // and only works if the material supports transparent(alpha) blendign.
+        // and only works if the material supports transparent(alpha) blending.
         void SetAlpha(float alpha)
         { mBaseColor.SetAlpha(alpha); }
         void SetRuntime(float runtime)
@@ -1118,6 +1119,11 @@ namespace gfx
         { return mBaseColor.Alpha(); }
         float GetRuntime() const
         { return mRuntime; }
+        // Reset alpha to class alpha.
+        void ResetAlpha()
+        {
+            mBaseColor.SetAlpha(mClass->GetBaseAlpha());
+        }
     private:
         // This is the "class" object for this material type.
         std::shared_ptr<const MaterialClass> mClass;
