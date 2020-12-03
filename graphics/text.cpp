@@ -284,10 +284,14 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
 
     FT_Face face;
 
-    const auto& font_file = ResolveFile(ResourceLoader::ResourceType::Font, text.font);
+    // todo: refactor away the exceptions.
 
-    if (FT_New_Face(freetype.library, font_file.c_str(), 0, &face))
-        throw std::runtime_error("Failed to load font file: " + font_file);
+    const auto& font_buff = LoadResource(ResourceLoader::ResourceType::Font, text.font);
+    if (!font_buff)
+        throw std::runtime_error("Failed to load font file: " + text.font);
+
+    if (FT_New_Memory_Face(freetype.library, (const FT_Byte*)font_buff->GetData(), font_buff->GetSize(),0, &face))
+        throw std::runtime_error("Failed to load font file: " + text.font);
     auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
@@ -377,7 +381,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
         const auto& info = it->second;
 
         // compute the extents of the text i.e. the required height and width
-        // of the bitmap into which to composit the glyphs
+        // of the bitmap into which to composite the glyphs
 
         const int xa = glyph_pos[i].x_advance / FUCKING_MAGIC_SCALE;
         const int ya = glyph_pos[i].y_advance / FUCKING_MAGIC_SCALE;
@@ -386,7 +390,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
         const int xo = glyph_pos[i].x_offset / FUCKING_MAGIC_SCALE;
         const int yo = glyph_pos[i].y_offset / FUCKING_MAGIC_SCALE;
 
-        // this is the glyph top left corner relative to the imaginery baseline
+        // this is the glyph top left corner relative to the imaginary baseline
         // where the baseline is at y=0 and y grows up
         const int x = pen_x + info.bearing_x + xo;
         const int y = pen_y + info.bearing_y + yo;

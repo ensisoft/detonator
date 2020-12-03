@@ -53,3 +53,4 @@ const int MINOR_VERSION = 3;
 // i.e some invaders will have shields on during which they can't be destroyed.
 // #define ENABLE_GAME_FEATURE_SHIELD
 
+#define GFX_ENABLE_DEFAULT_FILE_LOAD_CACHE

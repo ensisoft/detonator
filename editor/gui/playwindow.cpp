@@ -252,9 +252,9 @@ public:
     }
 
     // Resource loader implementation
-    virtual std::string ResolveFile(ResourceType type, const std::string& file) const override
+    virtual std::string ResolveURI(ResourceType type, const std::string& URI) const override
     {
-        auto it = mFileMaps.find(file);
+        auto it = mFileMaps.find(URI);
         if (it != mFileMaps.end())
             return it->second;
 
@@ -262,19 +262,19 @@ public:
         // the app could have hardcoded paths that are relative to it's working dir.
         // the app could have paths that are encoded in the assets. For example ws://foo/bar.meh.png
         // the encoded case is resolved here using the workspace as the resolver.
-        if (base::StartsWith(file, "ws://") ||
-            base::StartsWith(file, "app://") ||
-            base::StartsWith(file, "fs://"))
-            return mWorkspace.ResolveFile(type, file);
+        if (base::StartsWith(URI, "ws://") ||
+            base::StartsWith(URI, "app://") ||
+            base::StartsWith(URI, "fs://"))
+            return mWorkspace.ResolveURI(type, URI);
 
         // What to do with paths such as "textures/UFO/ufo.png" ?
         // the application expects this to be relative and to be resolved
         // based on the current working directory when the application
         // is launched.
-        const auto& resolved = app::JoinPath(mGameDir, app::FromUtf8(file));
+        const auto& resolved = app::JoinPath(mGameDir, app::FromUtf8(URI));
         const auto& ret = app::ToUtf8(resolved);
-        mFileMaps[file] = ret;
-        DEBUG("Mapping gfx resource '%1' => '%2'", file, resolved);
+        mFileMaps[URI] = ret;
+        DEBUG("Mapping gfx resource '%1' => '%2'", URI, resolved);
         return ret;
     }
 

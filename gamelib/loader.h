@@ -75,8 +75,7 @@ namespace game
         // gfx::ResourceLoader implementation. Provides access to the
         // low level byte buffer / file system file resources such as
         // textures/font files, shaders used by the graphics subsystem.
-        virtual std::string ResolveFile(gfx::ResourceLoader::ResourceType type,
-            const std::string& file) const override;
+        virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;
 
     private:
         std::string mResourceDir;
@@ -100,6 +99,10 @@ namespace game
 
         // name table. maps animation names to ids.
         std::unordered_map<std::string, std::string> mAnimationNameTable;
+
+        // cache of URIs that have been resolved to file
+        // names already.
+        mutable std::unordered_map<std::string, std::string> mUriCache;
 
     };
 } // namespace

@@ -94,7 +94,7 @@ namespace app
         virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
 
         // gfx::ResourceLoader implementation
-        virtual std::string ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const override;
+        virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;
 
         // Try to load the content of the workspace from the files in the given
         // directory. Returns true on success. Any errors are logged.

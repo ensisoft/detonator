@@ -24,12 +24,31 @@
 
 #include "config.h"
 
-#include "types.h"
-
 #include <string>
+#include <memory>
+
+#include "graphics/types.h"
 
 namespace gfx
 {
+    // Resource is the interface for accessing the actual
+    // content/bytes of some graphics resource such as a
+    // texture, font file etc.
+    // The resource abstraction allows the resource to be
+    // provided through several possible means, such as
+    // loading it from the file system through file reads
+    // or by for example memory mapping it.
+    class Resource
+    {
+    public:
+        virtual ~Resource() = default;
+        // Get the immutable data content pointer.
+        virtual const void* GetData() const = 0;
+        // Get the size of the resource in bytes.
+        virtual size_t GetSize() const = 0;
+    private:
+    };
+
     // ResourceLoader is the interface for accessing actual resources
     // such as textures (.png, .jpg), fonts (.ttf and .otf) and shader
     // (.glsl) files.
@@ -50,20 +69,17 @@ namespace gfx
             Image
         };
 
-        // Resolve the given (pseudo) filename to an actual filename on the file system.
+        // Resolve the given resource URI to an actual filename on the file system.
         // Whenever the graphics system needs some resource such as a font file
-        // or a texture file the file path can be some arbitrary string that doesn't
-        // need to be an actual file system path. It can be a abstract identifier
-        // or a pseudo path or some URI type encoded file/resource locator.
-        // When the resource actually is needed to be loaded this method will be invoked
-        // in order to map the given file to an actual file path accessible
-        // in the file system.
+        // or a texture file the resource is identified by an URI. Before the data
+        // be loaded the URI needs to be mapped to an actual filename.
         // Resource type is the expected type of the resource in question.
-        virtual std::string ResolveFile(ResourceType type, const std::string& file) const = 0;
+        // The return value should be a path of the file in the file system.
+        virtual std::string ResolveURI(ResourceType type, const std::string& URI) const = 0;
 
-        // todo: we could conceivably enhance this interface with some actual
-        // methods for loading the data as well. This would allow for more
-        // complicated resource packing schemes.
+        // Load the contents of the given resource and return a pointer to the actual
+        // contents of the resource. If the load fails a nullptr is returned.
+        virtual std::shared_ptr<const Resource> LoadResource(ResourceType type, const std::string& URI);
     protected:
         ~ResourceLoader() = default;
     private:
@@ -86,7 +102,7 @@ namespace gfx
     class ResourcePacker
     {
     public:
-        // opaque handle type for idetifying and mapping objects
+        // opaque handle type for identifying and mapping objects
         // to their resources.
         // The handle doesn't exist for the packer to gain any insight
         // into the objects that are performing packing but rather just
@@ -96,7 +112,7 @@ namespace gfx
         // Pack the shader resource identified by file.
         virtual void PackShader(ObjectHandle instance, const std::string& file) = 0;
         // Pack the texture resource identified by file. Box is the actual
-        // subrectangle within the texture object.
+        // sub-rectangle within the texture object.
         virtual void PackTexture(ObjectHandle instance, const std::string& file) = 0;
         virtual void SetTextureBox(ObjectHandle instance, const gfx::FRect& box) = 0;
 
@@ -110,7 +126,7 @@ namespace gfx
         // Pack the font resource identified by file.
         virtual void PackFont(ObjectHandle instance, const std::string& file) = 0;
 
-        // The resource pack my assign new (file) identifiers to the
+        // The resource packer may assign new URIs to the
         // resources that are packed. These API's are used to fetch
         // the new identifiers that will be used to identify the
         // resources after packing.
@@ -124,19 +140,19 @@ namespace gfx
 
     // Set the global resource map object.
     // If nothing is ever set the mapping will be effectively
-    // disabled and every resourcde handle maps to itself.
+    // disabled and every resource handle maps to itself.
     void SetResourceLoader(ResourceLoader* map);
 
     // Get the current resource map.
     ResourceLoader* GetResourceLoader();
 
-    // Shortcut for mapping a file path through the resource map if any is set.
-    // If resource map is not set then returns the original file name.
-    inline std::string ResolveFile(ResourceLoader::ResourceType type, const std::string& file)
-    {
-        if (ResourceLoader* loader = GetResourceLoader())
-            return loader->ResolveFile(type, file);
-        return file;
-    }
+    // Shortcut for resolving a graphics resource URI to a filename on the
+    // filesystem through the resource loader if any is set.
+    // If resource loader is not set then returns the original URI.
+    std::string ResolveURI(ResourceLoader::ResourceType type, const std::string& URI);
 
+    // Shortcut for loading the contents of a file through a the resource loader if any is set.
+    // If resource loader is not set then performs a default file loader operation.
+    // Returns nullptr on any error.
+    std::shared_ptr<const Resource> LoadResource(ResourceLoader::ResourceType type, const std::string& URI);
 } // namespace

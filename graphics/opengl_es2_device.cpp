@@ -1354,7 +1354,7 @@ private:
                 GL_CALL(glDeleteShader(mShader));
             }
         }
-        virtual bool CompileFile(const std::string& file) override
+        virtual bool CompileFile(const std::string& URI) override
         {
             //                  == Notes about shaders ==
             // 1. Shaders are specific to a device within compatibility constraints
@@ -1413,20 +1413,20 @@ private:
             // shaders because they're cool to do so and want some special customized
             // shader effect.
             //
-            const auto& mapped_file = ResolveFile(ResourceLoader::ResourceType::Shader, file);
+            const auto& file = ResolveURI(ResourceLoader::ResourceType::Shader, URI);
 
             std::ifstream stream;
-            stream.open(mapped_file);
+            stream.open(file);
             if (!stream.is_open())
             {
-                ERROR("Failed to open shader file: '%1'", mapped_file);
+                ERROR("Failed to open shader file: '%1'", file);
                 return false;
             }
             const std::string source(std::istreambuf_iterator<char>(stream), {});
 
             if (!CompileSource(source))
             {
-                ERROR("Failed to compile shader source file: '%1'", mapped_file);
+                ERROR("Failed to compile shader source file: '%1'", file);
                 return false;
             }
             return true;

@@ -753,7 +753,7 @@ std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) 
     return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
-std::string Workspace::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
+std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const
 {
     // see comments in AddFile about resource path mapping.
     // this method is only called by the graphics/ subsystem

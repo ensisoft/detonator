@@ -44,24 +44,24 @@ namespace gfx
         Image() = default;
 
         // Construct a new image object and try to load an image
-        // immediately using the given file name.
+        // immediately using the given file URI.
         // If the image load fails the object will be constructed
         // (i.e. no exception is thrown) but IsValid will be false.
         // The optional resource type is a hint to the resource loader
         // (in case of using encoded file identifier) as to what's the
         // purpose of the data.
-        Image(const std::string& file, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
+        Image(const std::string& URI, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
         Image(const Image&) = delete;
        ~Image();
 
         // Try to load an image file identified by the given file
         // resource identifier. The identifier can be an encoded
         // identifier such as "app://foo/bar/image.png" or a "raw"
-        // path such as /home/user/image.png. If the file is an
-        // encoded path it is resolved through the ResourceLoader.
+        // path such as /home/user/image.png. If the file is a URI
+        // it is resolved through the ResourceLoader.
         // On error returns false and the image object remains
         // unchanged.
-        bool Load(const std::string& file, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
+        bool Load(const std::string& URI, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
 
         // Copy (and optionally convert) the pixel contents of the
         // image into a specific type of bitmap object.
@@ -104,7 +104,7 @@ namespace gfx
 
         Image& operator=(const Image&) = delete;
     private:
-        std::string mFilename;
+        std::string mURI;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
         unsigned mDepth  = 0;

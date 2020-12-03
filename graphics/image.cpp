@@ -38,47 +38,26 @@
 namespace gfx
 {
 
-Image::Image(const std::string& file, ResourceLoader::ResourceType hint)
+Image::Image(const std::string& URI, ResourceLoader::ResourceType hint)
 {
     // resolve file first.
-    const bool should_resolve = base::StartsWith(file, "ws://") ||
-                                base::StartsWith(file, "fs://") ||
-                                base::StartsWith(file, "app://") ||
-                                base::StartsWith(file, "pck://");
-    const auto& filename = should_resolve ? ResolveFile(hint, file) : file;
-
-#if defined(WINDOWS_OS)
-    std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
-#elif defined(POSIX_OS)
-    std::fstream in(filename, std::ios::in | std::ios::binary);
-#endif
-    if (!in.is_open()) {
-        ERROR("Failed to open '%1' image file.", filename);
+    const auto& buffer = LoadResource(hint, URI);
+    if (!buffer)
+    {
+        ERROR("Failed to load image: '%1' buffer", URI);
         return;
     }
-
-    in.seekg(0, std::ios::end);
-    const auto size = (std::size_t)in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<char> data;
-    data.resize(size);
-    in.read(&data[0], size);
-    if ((std::size_t)in.gcount() != size) {
-        ERROR("Failed to read all of image '%1'", filename);
-        return;
-    }
-
     int xres  = 0;
     int yres  = 0;
     int depth = 0;
-    auto* bmp = stbi_load_from_memory((const stbi_uc*)data.data(),
-                                      (int)data.size(), &xres, &yres, &depth, 0);
-    if (bmp == nullptr) {
-        ERROR("Decompressing image file '%1' failed.", filename);
+    auto* bmp = stbi_load_from_memory((const stbi_uc*)buffer->GetData(),
+                                      (int)buffer->GetSize(), &xres, &yres, &depth, 0);
+    if (bmp == nullptr)
+    {
+        ERROR("Decompressing image file '%1' failed.", URI);
         return;
     }
-    mFilename = filename;
+    mURI    = URI;
     mWidth  = static_cast<unsigned>(xres);
     mHeight = static_cast<unsigned>(yres);
     mDepth  = static_cast<unsigned>(depth);
@@ -91,12 +70,12 @@ Image::~Image()
         stbi_image_free(mData);
 }
 
-bool Image::Load(const std::string& file, ResourceLoader::ResourceType hint)
+bool Image::Load(const std::string& URI, ResourceLoader::ResourceType hint)
 {
-    Image temp(file, hint);
+    Image temp(URI, hint);
     if (!temp.IsValid())
         return false;
-    std::swap(mFilename, temp.mFilename);
+    std::swap(mURI, temp.mURI);
     std::swap(mWidth, temp.mWidth);
     std::swap(mHeight, temp.mHeight);
     std::swap(mDepth, temp.mDepth);

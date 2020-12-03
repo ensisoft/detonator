@@ -114,15 +114,20 @@ std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& na
     return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
-std::string ContentLoader::ResolveFile(gfx::ResourceLoader::ResourceType type, const std::string& file) const
+std::string ContentLoader::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const
 {
-    std::string str = file;
+    auto it = mUriCache.find(URI);
+    if (it != mUriCache.end())
+        return it->second;
+
+    std::string str = URI;
     if (str.find("pck://", 0) == 0)
         str = mResourceDir + "/" + str.substr(6);
     else if (str.find("ws://", 0) == 0)
         str = str.substr(5);
 
-    DEBUG("Mapped %1 to %2", file, str);
+    DEBUG("Mapped %1 to %2", URI, str);
+    mUriCache[URI] = str;
     return str;
 }
 

@@ -145,12 +145,12 @@ Shader* MaterialClass::GetShader(Device& device) const
     if (shader)
         return shader;
 
-    const auto& mapped = ResolveFile(ResourceLoader::ResourceType::Shader, GetShaderFile());
+    const auto& file = ResolveURI(ResourceLoader::ResourceType::Shader, GetShaderFile());
     std::ifstream stream;
-    stream.open(mapped);
+    stream.open(file);
     if (!stream.is_open())
     {
-        ERROR("Failed to open shader file: '%1'", mapped);
+        ERROR("Failed to open shader file: '%1'", file);
         return nullptr;
     }
     const std::string source(std::istreambuf_iterator<char>(stream), {});
