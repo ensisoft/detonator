@@ -23,13 +23,6 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>BItmap function</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QComboBox" name="cmbFunction">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -44,41 +37,15 @@
       <item>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
-         <string>Noise</string>
+         <string>Noise signals</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="1">
-            <widget class="QComboBox" name="cmbNoiseLayers">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSlider" name="noiseAmplitude">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>255</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_8">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_7">
              <property name="text">
-              <string>Frequency</string>
+              <string>Amplitude</string>
              </property>
             </widget>
            </item>
@@ -86,13 +53,6 @@
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Prime</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Amplitude</string>
              </property>
             </widget>
            </item>
@@ -112,6 +72,13 @@
              </property>
             </widget>
            </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Frequency</string>
+             </property>
+            </widget>
+           </item>
            <item row="3" column="1">
             <widget class="QSlider" name="noiseFrequency">
              <property name="enabled">
@@ -128,46 +95,59 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Layer</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnAddNoiseLayer">
-             <property name="text">
-              <string>Add</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnDelNoiseLayer">
+           <item row="2" column="1">
+            <widget class="QSlider" name="noiseAmplitude">
              <property name="enabled">
               <bool>false</bool>
              </property>
-             <property name="text">
-              <string>Del</string>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Signal</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QComboBox" name="cmbNoiseLayers">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnAddNoiseLayer">
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnDelNoiseLayer">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Del</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
@@ -330,11 +310,11 @@
  <tabstops>
   <tabstop>cmbFunction</tabstop>
   <tabstop>cmbNoiseLayers</tabstop>
+  <tabstop>btnAddNoiseLayer</tabstop>
+  <tabstop>btnDelNoiseLayer</tabstop>
   <tabstop>noisePrime0</tabstop>
   <tabstop>noiseAmplitude</tabstop>
   <tabstop>noiseFrequency</tabstop>
-  <tabstop>btnAddNoiseLayer</tabstop>
-  <tabstop>btnDelNoiseLayer</tabstop>
   <tabstop>bmpWidth</tabstop>
   <tabstop>bmpHeight</tabstop>
   <tabstop>chkScale</tabstop>
