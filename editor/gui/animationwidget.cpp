@@ -1929,7 +1929,7 @@ void AnimationWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeScaleY, scale.y);
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
         SetValue(mUI.lineWidth, node->GetLineWidth());
-        SetValue(mUI.alpha, node->GetAlpha());
+        SetValue(mUI.alpha, NormalizedFloat(node->GetAlpha()));
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
         SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));

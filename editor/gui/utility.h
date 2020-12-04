@@ -201,11 +201,16 @@ inline void SetValue(QSlider* slider, int value)
     slider->setValue(value);
 }
 
-inline void SetValue(QSlider* slider, float value)
+struct NormalizedFloat {
+    float value = 0.0f;
+    NormalizedFloat(float val) : value(val) {}
+};
+
+inline void SetValue(QSlider* slider, NormalizedFloat value)
 {
     QSignalBlocker s(slider);
     const float max = slider->maximum();
-    slider->setValue(value * max);
+    slider->setValue(value.value * max);
 }
 
 template<typename Widget, typename Value> inline
