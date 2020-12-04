@@ -142,7 +142,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
         out = std::make_shared<Bitmap<Grayscale>>(width, height);
         cache[key] = out;
     }
-    else if (it->second.unique())
+    else if (it->second.use_count() == 1)
     {
         // the cached bitmap can only be shared when there's nobody
         // else using it at the moment. in other words the only shared_ptr
@@ -193,8 +193,8 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     // for debugging purposes dump the rasterized bitmap as .ppm file
 #if 0
     Bitmap<RGB> tmp;
-    tmp.Resize(out.GetWidth(), out.GetHeight());
-    tmp.Copy(0, 0, mBitmap);
+    tmp.Resize(out->GetWidth(), out->GetHeight());
+    tmp.Copy(0, 0, *out);
     WritePPM(tmp, "/tmp/text-buffer.ppm");
     DEBUG("Wrote rasterized text buffer in '%1'", "/tmp/text-buffer.ppm");
 #endif
@@ -433,10 +433,14 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
         bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
         cache[key] = bmp;
     }
-    else
+    else if (it->second.use_count() == 1)
     {
         bmp = it->second;
         bmp->Fill(Grayscale(0));
+    }
+    else
+    {
+        bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
     }
 
     // the bitmap has 0,0 at top left and y grows down.
