@@ -28,11 +28,10 @@
 #include <memory>
 
 #include "gamelib/asset.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 #include "graphics/resource.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
-#include "gfxfactory.h"
 
 namespace game
 {
@@ -47,17 +46,15 @@ namespace game
     // Additionally implements the gfx::ResourceLoader in order to implement
     // access to the low level file based graphics resources such as
     // texture, font and shader files.
-    class ContentLoader : public GfxFactory,
+    class ContentLoader : public ClassLibrary,
                           public AssetTable,
                           public gfx::ResourceLoader
     {
     public:
         // GfxFactory implementation. Provides low level GFX
         // resource creation for the game level subsystem.
-        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override;
-        virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
-        virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override;
 
         // AssetTable implementation.
         virtual const AnimationClass* FindAnimationClassByName(const std::string& name) const override;

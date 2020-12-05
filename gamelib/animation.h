@@ -62,7 +62,7 @@ namespace gfx {
 
 namespace game
 {
-    class GfxFactory;
+    class ClassLibrary;
 
     // AnimationNodeClass holds the data for some particular type of an animation node.
     // This includes the drawable shape and the associated material and the node's
@@ -239,7 +239,7 @@ namespace game
 
         // Prepare this animation node class object
         // by loading all the needed runtime resources.
-        void Prepare(const GfxFactory& loader) const;
+        void LoadDependentClasses(const ClassLibrary& loader) const;
 
         // Make a new unique copy of this animation node class with
         // all the same properties but a different unique ID.
@@ -1171,7 +1171,7 @@ namespace game
 
     // AnimationClass holds the data for some particular type of animation,
     // i.e. the AnimationNodes that form the visual look and the appearance
-    // of the animation combined in a transformation hiearchy.
+    // of the animation combined in a transformation hierarchy.
     class AnimationClass
     {
     public:
@@ -1262,7 +1262,7 @@ namespace game
         void Reset();
 
         // Prepare and load the runtime resources if not yet loaded.
-        void Prepare(const GfxFactory& loader) const;
+        void LoadDependentClasses(const ClassLibrary& loader) const;
 
         // Draw a representation of the animation class instance.
         // This functionality is mostly to support editor functionality

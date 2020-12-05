@@ -41,7 +41,7 @@
 #include "graphics/transform.h"
 #include "graphics/resource.h"
 #include "gamelib/animation.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 #include "gamelib/main/interface.h"
 
 class TestCase
@@ -50,7 +50,7 @@ public:
     virtual ~TestCase() = default;
     virtual void Render(gfx::Painter& painter) = 0;
     virtual void Update(float dts) {}
-    virtual void Start(game::GfxFactory* factory) {}
+    virtual void Start(game::ClassLibrary* factory) {}
     virtual void End() {}
 private:
 };
@@ -73,7 +73,7 @@ public:
         mAnimations[2]->Draw(painter, transform);
     }
 
-    virtual void Start(game::GfxFactory* factory) override
+    virtual void Start(game::ClassLibrary* factory) override
     {
         game::AnimationNodeClass node;
         node.SetDrawable("rectangle");
@@ -120,7 +120,7 @@ public:
         auto* nptr = animation->AddNode(std::move(node));
         auto& root = animation->GetRenderTree();
         root.AppendChild(nptr);
-        animation->Prepare(*factory);
+        animation->LoadDependentClasses(*factory);
 
         // create 2 instances of the same animation
         mAnimations[0] = std::make_unique<game::Animation>(animation);
@@ -167,7 +167,7 @@ public:
         gfx::DrawRectOutline(painter, bounds, gfx::SolidColor(gfx::Color::DarkYellow), 2.0f);
 
     }
-    virtual void Start(game::GfxFactory* factory) override
+    virtual void Start(game::ClassLibrary* factory) override
     {
         // create new animation class type.
         game::AnimationClass animation;
@@ -207,7 +207,7 @@ public:
         }
 
         // using this as the gfx loader.
-        animation.Prepare(*factory);
+        animation.LoadDependentClasses(*factory);
         // create an animation instance
         mAnimation = std::make_unique<game::Animation>(animation);
     }
@@ -238,7 +238,7 @@ private:
 };
 
 
-class MyApp : public game::App, public game::GfxFactory, public wdk::WindowListener
+class MyApp : public game::App, public game::ClassLibrary, public wdk::WindowListener
 {
 public:
     virtual bool ParseArgs(int argc, const char* argv[]) override
@@ -337,7 +337,7 @@ public:
     }
 
     // GfxFactory
-    virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override
     {
         if (name == "uv_test")
             return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/uv_test_512.png"));
@@ -346,32 +346,13 @@ public:
         ASSERT("No such material class.");
         return nullptr;
     }
-    virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override
     {
         if (name == "circle")
             return std::make_shared<gfx::CircleClass>();
         else if (name == "rectangle")
             return std::make_shared<gfx::RectangleClass>();
         ASSERT(!"No such drawable class.");
-        return nullptr;
-    }
-
-    virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override
-    {
-        if (name == "uv_test")
-            return std::make_shared<gfx::Material>(gfx::TextureMap("textures/uv_test_512.png"));
-        else if (name == "checkerboard")
-            return std::make_shared<gfx::Material>(gfx::TextureMap("textures/Checkerboard.png"));
-        ASSERT(!"No such material.");
-        return nullptr;
-    }
-    virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override
-    {
-        if (name == "circle")
-            return std::make_shared<gfx::Circle>();
-        else if (name == "rectangle")
-            return std::make_shared<gfx::Rectangle>();
-        ASSERT(!"No such drawable.");
         return nullptr;
     }
 

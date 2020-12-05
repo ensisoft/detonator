@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -20,43 +20,32 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+#pragma once
 
-#include "base/assert.h"
-#include "base/logging.h"
-#include "gamelib/main/interface.h"
-#include "gamelib/loader.h"
-#include "graphics/resource.h"
+#include "config.h"
 
-// helper stuff for dependency management for now.
-// see interface.h for more details.
+#include "warnpush.h"
 
-extern "C" {
-GAMESTUDIO_EXPORT void CreateDefaultEnvironment(game::ClassLibrary** gfx_factory,
-    game::AssetTable** asset_table)
+#include "warnpop.h"
+
+namespace gfx {
+    class Material;
+    class MaterialClass;
+    class Drawable;
+    class DrawableClass;
+}// namespace
+
+namespace game
 {
-    auto* ret = new game::ContentLoader();
-    *gfx_factory = ret;
-    *asset_table = ret;
-    gfx::SetResourceLoader(ret);
-}
-GAMESTUDIO_EXPORT void DestroyDefaultEnvironment(game::ClassLibrary* gfx_factory,
-    game::AssetTable* asset_table)
-{
-    gfx::SetResourceLoader(nullptr);
-    ASSERT(dynamic_cast<game::ContentLoader*>(gfx_factory) ==
-           dynamic_cast<game::ContentLoader*>(asset_table));
-    delete asset_table;
-}
+    // Interface for looking up game resource class objects
+    // such as materials, drawables, animations etc.
+    class ClassLibrary
+    {
+    public:
+        virtual ~ClassLibrary() = default;
 
-GAMESTUDIO_EXPORT void SetResourceLoader(gfx::ResourceLoader* loader)
-{
-    gfx::SetResourceLoader(loader);
-}
-
-GAMESTUDIO_EXPORT void SetGlobalLogger(base::Logger* logger)
-{
-    base::SetGlobalLog(logger);
-}
-
-} // extern "C"
+        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const = 0;
+        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const = 0;
+    private:
+    };
+} // namespace

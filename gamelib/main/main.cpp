@@ -46,7 +46,7 @@
 #include "base/cmdline.h"
 #include "base/utility.h"
 #include "gamelib/main/interface.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 #include "gamelib/asset.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
 
         // The implementations of these types are built into the gamelib
         // so the gamelib needs to give this application a pointer back.
-        game::GfxFactory* factory = nullptr;
+        game::ClassLibrary* factory = nullptr;
         game::AssetTable* assets  = nullptr;
         GameLibCreateEnvironment(&factory, &assets);
         if (!content.empty())

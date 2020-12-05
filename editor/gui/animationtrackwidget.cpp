@@ -752,7 +752,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
         if (!mState.animation)
         {
             mState.animation = std::make_shared<game::AnimationClass>(std::move(klass));
-            mState.animation->Prepare(*mWorkspace);
+            mState.animation->LoadDependentClasses(*mWorkspace);
             ShareAnimation(mState.animation);
         }
     }

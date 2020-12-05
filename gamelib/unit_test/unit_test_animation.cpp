@@ -35,7 +35,7 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "gamelib/animation.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 
 bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
 {
@@ -43,32 +43,20 @@ bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
            real::equals(lhs.y, rhs.y);
 }
 
-class TestFactory : public game::GfxFactory
+class TestClassLibrary : public game::ClassLibrary
 {
 public:
-    // GfxFactory
-    virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override
     {
         return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::Yellow));
     }
-    virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override
     {
         return std::make_shared<gfx::CircleClass>();
     }
-
-    virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override
-    {
-        ASSERT(!"No such material.");
-        return nullptr;
-    }
-    virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override
-    {
-        ASSERT(!"No such drawable.");
-        return nullptr;
-    }
 };
 
-TestFactory* g_factory = nullptr;
+TestClassLibrary* g_factory = nullptr;
 
 void unit_test_animation_node()
 {
@@ -147,7 +135,7 @@ void unit_test_animation_node()
 
     // test instance state.
     {
-        node.Prepare(*g_factory);
+        node.LoadDependentClasses(*g_factory);
 
         // check initial state.
         game::AnimationNode instance(node);
@@ -254,7 +242,7 @@ void unit_test_animation_transform_actuator()
         klass.SetSize(glm::vec2(1.0f, 1.0f));
         klass.SetRotation(0.0f);
         klass.SetScale(glm::vec2(1.0f, 1.0f));
-        klass.Prepare(*g_factory);
+        klass.LoadDependentClasses(*g_factory);
 
         // create node instance
         game::AnimationNode node(klass);
@@ -292,7 +280,7 @@ void unit_test_animation_track()
     klass.SetSize(glm::vec2(1.0f, 1.0f));
     klass.SetRotation(0.0f);
     klass.SetScale(glm::vec2(1.0f, 1.0f));
-    klass.Prepare(*g_factory);
+    klass.LoadDependentClasses(*g_factory);
 
     // create node instance
     game::AnimationNode node(klass);
@@ -468,7 +456,7 @@ void unit_test_animation()
         TEST_REQUIRE(clone.GetHash() != animation.GetHash());
     }
 
-    animation.Prepare(*g_factory);
+    animation.LoadDependentClasses(*g_factory);
 
     // instance
     {
@@ -670,8 +658,8 @@ void unit_test_animation_render_tree()
 
 int test_main(int argc, char* argv[])
 {
-    TestFactory factory;
-    g_factory = &factory;
+    TestClassLibrary lib;
+    g_factory = &lib;
 
     unit_test_animation_node();
     unit_test_animation_transform_actuator();

@@ -29,7 +29,7 @@
 #include "base/platform.h"
 #include "base/logging.h"
 #include "gamelib/asset.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 #include "graphics/device.h"
 #include "graphics/resource.h"
 #include "wdk/events.h"
@@ -117,7 +117,7 @@ namespace game
         struct Environment {
             // Interface for accessing resources (content) implemented
             // by the graphics subsystem, i.e. drawble shapes and materials.
-            game::GfxFactory* gfx_factory = nullptr;
+            game::ClassLibrary* gfx_factory = nullptr;
 
             // Interface for accessign high level game content i.e. assets
             // (most likely) built in the editor such as Animations.
@@ -281,13 +281,13 @@ typedef game::App* (*MakeAppFunc)();
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
 extern "C" {
-    GAMESTUDIO_API void CreateDefaultEnvironment(game::GfxFactory** gfx_factory, game::AssetTable** asset_table);
-    GAMESTUDIO_API void DestroyDefaultEnvironment(game::GfxFactory* gfx_factory, game::AssetTable* asset_table);
+    GAMESTUDIO_API void CreateDefaultEnvironment(game::ClassLibrary** gfx_factory, game::AssetTable** asset_table);
+    GAMESTUDIO_API void DestroyDefaultEnvironment(game::ClassLibrary* gfx_factory, game::AssetTable* asset_table);
     GAMESTUDIO_API void SetResourceLoader(gfx::ResourceLoader* loader);
     GAMESTUDIO_API void SetGlobalLogger(base::Logger* logger);
 } // extern "C"
 
-typedef void (*CreateDefaultEnvironmentFunc)(game::GfxFactory**, game::AssetTable**);
-typedef void (*DestroyDefaultEnvironmentFunc)(game::GfxFactory*, game::AssetTable*);
+typedef void (*CreateDefaultEnvironmentFunc)(game::ClassLibrary**, game::AssetTable**);
+typedef void (*DestroyDefaultEnvironmentFunc)(game::ClassLibrary*, game::AssetTable*);
 typedef void (*SetResourceLoaderFunc)(gfx::ResourceLoader*);
 typedef void (*SetGlobalLoggerFunc)(base::Logger*);

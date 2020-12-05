@@ -801,7 +801,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
             node.SetDrawable(workspace->GetDrawableClassByName("Rectangle"));
         }
     }
-    mState.animation->Prepare(*workspace);
+    mState.animation->LoadDependentClasses(*workspace);
 
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());
@@ -943,7 +943,7 @@ bool AnimationWidget::LoadState(const Settings& settings)
         }
     }
 
-    mState.animation->Prepare(*mState.workspace);
+    mState.animation->LoadDependentClasses(*mState.workspace);
     mOriginalHash = mState.animation->GetHash();
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());

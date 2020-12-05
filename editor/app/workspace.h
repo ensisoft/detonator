@@ -41,7 +41,7 @@
 #include "graphics/material.h"
 #include "graphics/resource.h"
 #include "graphics/device.h"
-#include "gamelib/gfxfactory.h"
+#include "gamelib/classlib.h"
 #include "resource.h"
 #include "utility.h"
 
@@ -58,7 +58,7 @@ namespace app
     // that can useful for various purposes.
     class Workspace : public QAbstractTableModel,
                       public QAbstractFileEngineHandler,
-                      public game::GfxFactory,
+                      public game::ClassLibrary,
                       public gfx::ResourceLoader
     {
         Q_OBJECT
@@ -88,10 +88,8 @@ namespace app
         std::shared_ptr<const game::AnimationClass> GetAnimationClassById(const QString& id) const;
 
         // gfxfactory implementation
-        virtual std::shared_ptr<const gfx::MaterialClass> GetMaterialClass(const std::string& id) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> GetDrawableClass(const std::string& id) const override;
-        virtual std::shared_ptr<gfx::Material> MakeMaterial(const std::string& name) const override;
-        virtual std::shared_ptr<gfx::Drawable> MakeDrawable(const std::string& name) const override;
+        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const override;
 
         // gfx::ResourceLoader implementation
         virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;

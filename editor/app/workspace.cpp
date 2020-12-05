@@ -680,7 +680,7 @@ std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassById(con
     return nullptr;
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClass(const std::string& klass) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClass(const std::string& klass) const
 {
     for (const auto& resource : mResources)
     {
@@ -691,10 +691,10 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClass(const std:
         return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
     }
     ERROR("Request for a material that doesn't exist: '%1'", klass);
-    return GetMaterialClass(std::string("_checkerboard"));
+    return FindMaterialClass(std::string("_checkerboard"));
 }
 
-std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std::string& klass) const
+std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClass(const std::string& klass) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -741,16 +741,6 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClass(const std:
     }
     ERROR("Request for a drawable that doesn't exist: '%1'", klass);
     return std::make_shared<gfx::RectangleClass>();
-}
-
-std::shared_ptr<gfx::Material> Workspace::MakeMaterial(const std::string& name) const
-{
-    return gfx::CreateMaterialInstance(GetMaterialClass(name));
-}
-
-std::shared_ptr<gfx::Drawable> Workspace::MakeDrawable(const std::string& name) const
-{
-    return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
 std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const

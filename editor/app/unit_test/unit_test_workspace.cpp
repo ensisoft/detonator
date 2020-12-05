@@ -338,9 +338,9 @@ void unit_test_packing_basic()
 
     game::ContentLoader loader;
     loader.LoadFromFile("TestPackage/test", "TestPackage/test/content.json");
-    TEST_REQUIRE(loader.GetMaterialClass(material.GetId()));
-    TEST_REQUIRE(loader.GetDrawableClass(poly.GetId()));
-    TEST_REQUIRE(loader.GetDrawableClass(particles.GetId()));
+    TEST_REQUIRE(loader.FindMaterialClass(material.GetId()));
+    TEST_REQUIRE(loader.FindDrawableClass(poly.GetId()));
+    TEST_REQUIRE(loader.FindDrawableClass(particles.GetId()));
 
     auto [ok, json, error] = base::JsonParseFile("TestPackage/test/config.json");
     TEST_REQUIRE(ok);
@@ -681,7 +681,7 @@ void unit_test_packing_texture_rects()
 
         game::ContentLoader loader;
         loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        auto mat = loader.GetMaterialClass(material.GetId());
+        auto mat = loader.FindMaterialClass(material.GetId());
         const auto& rect = mat->GetTextureRect(0);
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
@@ -716,7 +716,7 @@ void unit_test_packing_texture_rects()
 
         game::ContentLoader loader;
         loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        auto mat = loader.GetMaterialClass(material.GetId());
+        auto mat = loader.FindMaterialClass(material.GetId());
         const auto& rect = mat->GetTextureRect(0);
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 0.5f, 0.5f));
     }
@@ -764,7 +764,7 @@ void unit_test_packing_texture_rects()
 
         game::ContentLoader loader;
         loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        const auto& mat = loader.GetMaterialClass(material.GetId());
+        const auto& mat = loader.FindMaterialClass(material.GetId());
         const auto& rect0 = mat->GetTextureRect(0);
         const auto& rect1 = mat->GetTextureRect(1);
         const auto src_fixed_rect0 = src_rect0.Expand(bitmap[0].GetSize());

@@ -37,8 +37,8 @@
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
-#include "animation.h"
-#include "gfxfactory.h"
+#include "gamelib/animation.h"
+#include "gamelib/classlib.h"
 
 namespace {
 
@@ -637,7 +637,7 @@ void AnimationNodeClass::Reset()
     mDrawable.reset();
 }
 
-void AnimationNodeClass::Prepare(const GfxFactory& loader) const
+void AnimationNodeClass::LoadDependentClasses(const ClassLibrary& loader) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name
@@ -670,14 +670,14 @@ void AnimationNodeClass::Prepare(const GfxFactory& loader) const
     // each ship will render the same particle stream.
     if (!mDrawableId.empty())
     {
-        mDrawableClass = loader.GetDrawableClass(mDrawableId);
+        mDrawableClass = loader.FindDrawableClass(mDrawableId);
         if (mDrawableClass->GetId() != mDrawableId)
             WARN("Animation node '%1' drawable ('%2') was not available.", mName, mDrawableId);
         mDrawableId = mDrawableClass->GetId();
     }
     if (!mMaterialId.empty())
     {
-        mMaterialClass = loader.GetMaterialClass(mMaterialId);
+        mMaterialClass = loader.FindMaterialClass(mMaterialId);
         if (mMaterialClass->GetId() != mMaterialId)
             WARN("Animation node '%1' material ('%2') was not available.", mName, mMaterialId);
         mMaterialId = mMaterialClass->GetId();
@@ -1105,10 +1105,10 @@ void AnimationClass::Reset()
         node->Reset();
 }
 
-void AnimationClass::Prepare(const GfxFactory& loader) const
+void AnimationClass::LoadDependentClasses(const ClassLibrary& loader) const
 {
     for (auto& node : mNodes)
-        node->Prepare(loader);
+        node->LoadDependentClasses(loader);
 }
 
 void AnimationClass::Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook) const

@@ -237,13 +237,13 @@ public:
     virtual std::unique_ptr<game::Animation> CreateAnimationByName(const std::string& name) const override
     {
         auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
-        klass->Prepare(mWorkspace);
+        klass->LoadDependentClasses(mWorkspace);
         return game::CreateAnimationInstance(klass);
     }
     virtual std::unique_ptr<game::Animation> CreateAnimationById(const std::string& id) const override
     {
         auto klass = mWorkspace.GetAnimationClassById(app::FromUtf8(id));
-        klass->Prepare(mWorkspace);
+        klass->LoadDependentClasses(mWorkspace);
         return game::CreateAnimationInstance(klass);
     }
     virtual void LoadFromFile(const std::string&, const std::string&) override

@@ -40,7 +40,7 @@
 namespace game
 {
 
-std::shared_ptr<const gfx::MaterialClass> ContentLoader::GetMaterialClass(const std::string& name) const
+std::shared_ptr<const gfx::MaterialClass> ContentLoader::FindMaterialClass(const std::string& name) const
 {
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
@@ -63,7 +63,7 @@ std::shared_ptr<const gfx::MaterialClass> ContentLoader::GetMaterialClass(const 
     return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
 }
 
-std::shared_ptr<const gfx::DrawableClass> ContentLoader::GetDrawableClass(const std::string& name) const
+std::shared_ptr<const gfx::DrawableClass> ContentLoader::FindDrawableClass(const std::string& name) const
 {
     // these are the current primitive cases that are not packed as part of the resources
     if (name == "_rect")
@@ -102,16 +102,6 @@ std::shared_ptr<const gfx::DrawableClass> ContentLoader::GetDrawableClass(const 
     ERROR("No such drawable: '%1'", name);
     // for development purposes return some kind of valid object.
     return std::make_shared<gfx::RectangleClass>();
-}
-
-std::shared_ptr<gfx::Material> ContentLoader::MakeMaterial(const std::string& name) const
-{
-    return gfx::CreateMaterialInstance(GetMaterialClass(name));
-}
-
-std::shared_ptr<gfx::Drawable> ContentLoader::MakeDrawable(const std::string& name) const
-{
-    return gfx::CreateDrawableInstance(GetDrawableClass(name));
 }
 
 std::string ContentLoader::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const
@@ -174,7 +164,7 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     {
         const auto& name = it->first;
         AnimationClass* anim  = it->second.get();
-        anim->Prepare(*this);
+        anim->LoadDependentClasses(*this);
     }
     mResourceDir  = dir;
     mResourceFile = file;
