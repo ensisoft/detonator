@@ -214,43 +214,13 @@ private:
 // implementation of game asset table for accessing the
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
-class PlayWindow::SessionAssets : public game::AssetTable,
-                                  public gfx::ResourceLoader
+class PlayWindow::ResourceLoader : public gfx::ResourceLoader
 {
 public:
-    SessionAssets(const app::Workspace& workspace, const QString& gamedir)
+    ResourceLoader(const app::Workspace& workspace, const QString& gamedir)
         : mWorkspace(workspace)
         , mGameDir(gamedir)
     {}
-    // Asset table implementation
-    virtual const game::AnimationClass* FindAnimationClassByName(const std::string& name) const override
-    {
-        auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
-        return klass.get();
-    }
-    virtual const game::AnimationClass* FindAnimationClassById(const std::string& id) const override
-    {
-        auto klass = mWorkspace.GetAnimationClassById(app::FromUtf8(id));
-        return klass.get();
-    }
-
-    virtual std::unique_ptr<game::Animation> CreateAnimationByName(const std::string& name) const override
-    {
-        auto klass = mWorkspace.GetAnimationClassByName(app::FromUtf8(name));
-        klass->LoadDependentClasses(mWorkspace);
-        return game::CreateAnimationInstance(klass);
-    }
-    virtual std::unique_ptr<game::Animation> CreateAnimationById(const std::string& id) const override
-    {
-        auto klass = mWorkspace.GetAnimationClassById(app::FromUtf8(id));
-        klass->LoadDependentClasses(mWorkspace);
-        return game::CreateAnimationInstance(klass);
-    }
-    virtual void LoadFromFile(const std::string&, const std::string&) override
-    {
-        // not implemented, loaded from workspace
-    }
-
     // Resource loader implementation
     virtual std::string ResolveURI(ResourceType type, const std::string& URI) const override
     {
@@ -380,9 +350,9 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mContext.makeCurrent(mSurface);
     mWindowContext = std::make_unique<WindowContext>(&mContext, mSurface);
 
-    // create new asset table based on the current workspace
+    // create new resource loader based on the current workspace
     // and its content.
-    mAssets = std::make_unique<SessionAssets>(mWorkspace, mCurrentWorkingDir);
+    mResourceLoader = std::make_unique<ResourceLoader>(mWorkspace, mCurrentWorkingDir);
 }
 
 PlayWindow::~PlayWindow()
@@ -557,7 +527,7 @@ bool PlayWindow::LoadGame()
         return false;
 
     mGameLibSetGlobalLogger(mLogger.get());
-    mGameLibSetResourceLoader(mAssets.get());
+    mGameLibSetResourceLoader(mResourceLoader.get());
 
     std::unique_ptr<game::App> app;
     app.reset(mGameLibMakeApp());
@@ -689,8 +659,7 @@ void PlayWindow::DoAppInit()
         mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
 
         game::App::Environment env;
-        env.gfx_factory = &mWorkspace;
-        env.asset_table = mAssets.get();
+        env.classlib = &mWorkspace;
         mApp->SetEnvironment(env);
 
         const auto surface_width  = mSurface->width();

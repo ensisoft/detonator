@@ -47,7 +47,6 @@
 #include "base/utility.h"
 #include "gamelib/main/interface.h"
 #include "gamelib/classlib.h"
-#include "gamelib/asset.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -265,12 +264,11 @@ int main(int argc, char* argv[])
 
         // The implementations of these types are built into the gamelib
         // so the gamelib needs to give this application a pointer back.
-        game::ClassLibrary* factory = nullptr;
-        game::AssetTable* assets  = nullptr;
-        GameLibCreateEnvironment(&factory, &assets);
+        game::ClassLibrary* classlib = nullptr;
+        GameLibCreateEnvironment(&classlib);
         if (!content.empty())
         {
-            assets->LoadFromFile(".", content);
+            classlib->LoadFromFile(".", content);
         }
 
         // Create the app instance.
@@ -279,8 +277,7 @@ int main(int argc, char* argv[])
             return 0;
 
         game::App::Environment env;
-        env.gfx_factory = factory;
-        env.asset_table = assets;
+        env.classlib = classlib;
         app->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
@@ -457,7 +454,7 @@ int main(int argc, char* argv[])
 
         context->Dispose();
 
-        GameLibDestroyEnvironment(factory, assets);
+        GameLibDestroyEnvironment(classlib);
         GameLibSetResourceLoader(nullptr);
         GameLibSetGlobalLogger(nullptr);
         DEBUG("Exiting...");

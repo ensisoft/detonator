@@ -24,19 +24,17 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-
-#include "warnpop.h"
+#include <memory>
 
 namespace gfx {
-    class Material;
     class MaterialClass;
-    class Drawable;
     class DrawableClass;
-}// namespace
+} // gfx
 
 namespace game
 {
+    class AnimationClass;
+
     // Interface for looking up game resource class objects
     // such as materials, drawables, animations etc.
     class ClassLibrary
@@ -46,6 +44,22 @@ namespace game
 
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const = 0;
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const = 0;
+        // Find an animation class by the given name. If not found will return a nullptr.
+        // The returned instance is the single global instance of this animation class object
+        // and every call will return the same object. Note that the names are user defined
+        // names given in the editor when creating the content. If a resource has it's name
+        // changed you will need to remember to update your code that calls FindAnimationClassByName
+        // as well. For robustness against name changes a better option is to use the class object
+        // IDs which are immutable.
+        virtual std::shared_ptr<const AnimationClass> FindAnimationClassByName(const std::string& name) const = 0;
+        // Find a class object by it's unique class object identifier.
+        virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const = 0;
+        // Load content from a JSON file. Expects the file to be well formed, on
+        // an ill-formed JSON file an exception is thrown.
+        // No validation is done regarding the completeness of the loaded content,
+        // I.e. it's possible that classes refer to resources (i.e. other classes)
+        // that aren't available.
+        virtual void LoadFromFile(const std::string& dir, const std::string& file) = 0;
     private:
     };
 } // namespace

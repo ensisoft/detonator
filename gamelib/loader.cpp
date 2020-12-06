@@ -170,17 +170,17 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     mResourceFile = file;
 }
 
-const AnimationClass* ContentLoader::FindAnimationClassById(const std::string& id) const
+std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassById(const std::string& id) const
 {
     auto it = mAnimations.find(id);
     if (it != std::end(mAnimations))
-        return it->second.get();
+        return it->second;
 
     ERROR("No such animation class '%1'", id);
     return nullptr;
 }
 
-const AnimationClass* ContentLoader::FindAnimationClassByName(const std::string& name) const
+std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassByName(const std::string& name) const
 {
     auto it = mAnimationNameTable.find(name);
     if (it != mAnimationNameTable.end())
@@ -190,6 +190,7 @@ const AnimationClass* ContentLoader::FindAnimationClassByName(const std::string&
     return nullptr;
 }
 
+/*
 std::unique_ptr<Animation> ContentLoader::CreateAnimationByName(const std::string& name) const
 {
     auto it = mAnimationNameTable.find(name);
@@ -209,5 +210,6 @@ std::unique_ptr<Animation> ContentLoader::CreateAnimationById(const std::string&
     ERROR("No such animation class: '%1'", id);
     return nullptr;
 }
+ */
 
 } // namespace

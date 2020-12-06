@@ -54,6 +54,12 @@ public:
     {
         return std::make_shared<gfx::CircleClass>();
     }
+    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override
+    { return nullptr; }
+    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override
+    { return nullptr; }
+    virtual void LoadFromFile(const std::string& dir, const std::string& file) override
+    {}
 };
 
 TestClassLibrary* g_factory = nullptr;

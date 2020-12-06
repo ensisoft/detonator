@@ -87,9 +87,13 @@ namespace app
         std::shared_ptr<const game::AnimationClass> GetAnimationClassByName(const QString& name) const;
         std::shared_ptr<const game::AnimationClass> GetAnimationClassById(const QString& id) const;
 
-        // gfxfactory implementation
+        // ClassLibrary implementation
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const override;
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const override;
+        virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override;
+        virtual void LoadFromFile(const std::string&, const std::string&) override
+        {}
 
         // gfx::ResourceLoader implementation
         virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;

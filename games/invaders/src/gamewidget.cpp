@@ -1765,7 +1765,7 @@ GameWidget::GameWidget()
 
     mGame->onBomb = [&](const Game::Bomb& b)
     {
-        std::unique_ptr<Animation> explosion(new BigExplosion(mAssets->CreateAnimationByName(("Big Explosion")), 1500));
+        std::unique_ptr<Animation> explosion(new BigExplosion(CreateAnimationByName(("Big Explosion")), 1500));
         mAnimations.push_back(std::move(explosion));
     };
 
@@ -1789,22 +1789,22 @@ GameWidget::GameWidget()
         float scale = 1.0f;
         if (inv.type == Game::InvaderType::Boss)
         {
-            sprite = mAssets->CreateAnimationByName("Locust");
+            sprite = CreateAnimationByName("Locust");
             scale = 6.5f;
         }
         else if (inv.speed == 1 && inv.killList.size() == 1)
         {
-            sprite = mAssets->CreateAnimationByName("Cricket");
+            sprite = CreateAnimationByName("Cricket");
             scale = 5.0f;
         }
         else if (inv.speed == 1)
         {
-            sprite = mAssets->CreateAnimationByName("Mantis");
+            sprite = CreateAnimationByName("Mantis");
             scale = 4.0f;
         }
         else
         {
-            sprite = mAssets->CreateAnimationByName("Scarab");
+            sprite = CreateAnimationByName("Scarab");
             scale = 3.5f;
         }
 
@@ -2014,13 +2014,13 @@ void GameWidget::Save()
 
 void GameWidget::Start()
 {
-    mBackground = mAssets->CreateAnimationByName("Space");
+    mBackground = CreateAnimationByName("Space");
 
     // in this space all the background objects travel to the same direction
     for (size_t i=0; i<20; ++i)
     {
         const glm::vec2 spaceJunkDirection(-1, 0);
-        auto anim = mAssets->CreateAnimationByName("Asteroid");
+        auto anim = CreateAnimationByName("Asteroid");
         mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection), std::move(anim)));
     }
 
@@ -2030,7 +2030,7 @@ void GameWidget::Start()
 
     mStates.top()->setPlaySounds(mPlaySounds);
     mStates.top()->setMasterUnlock(mMasterUnlock);
-    playMusic();
+    PlayMusic();
 }
 
 void GameWidget::Update(double current_time, double dt)
@@ -2047,7 +2047,7 @@ void GameWidget::Update(double current_time, double dt)
             continue;
         mMusicTrackId = 0;
         mMusicTrackIndex++;
-        playMusic();
+        PlayMusic();
     }
 
     const auto time = dt * mWarpFactor;
@@ -2055,7 +2055,7 @@ void GameWidget::Update(double current_time, double dt)
 
     if (UFO::shouldMakeRandomAppearance())
     {
-        mAnimations.emplace_back(new UFO(mAssets->CreateAnimationByName("UFO")));
+        mAnimations.emplace_back(new UFO(CreateAnimationByName("UFO")));
     }
 
     mBackground->Update(time/1000.0f);
@@ -2260,13 +2260,9 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
             mAudioPlayer->Cancel(mMusicTrackId);
             mMusicTrackId = 0;
             mMusicTrackIndex++;
-            playMusic();
+            PlayMusic();
         }
         return;
-    }
-    else if (sym == wdk::Keysym::KeyU)
-    {
-        mAnimations.emplace_back(new UFO(mAssets->CreateAnimationByName("UFO")));
     }
 
     const auto action = mStates.top()->mapAction(key);
@@ -2287,7 +2283,7 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
                 };
                 settings->onTogglePlayMusic = [this](bool play) {
                     mPlayMusic = play;
-                    playMusic();
+                    PlayMusic();
                 };
                 settings->onTogglePlaySounds = [this](bool play) {
                     mPlaySounds = play;
@@ -2355,7 +2351,7 @@ void GameWidget::OnWantClose(const wdk::WindowEventWantClose& close)
     mRunning = false;
 }
 
-void GameWidget::playMusic()
+void GameWidget::PlayMusic()
 {
     static const char* tracks[] = {
         "music/awake10_megaWall.ogg"
@@ -2385,6 +2381,11 @@ void GameWidget::playMusic()
             mAudioPlayer->Pause(mMusicTrackId);
         }
     }
+}
+
+std::unique_ptr<game::Animation> GameWidget::CreateAnimationByName(const std::string &name) const
+{
+    return game::CreateAnimationInstance(mClassLib->FindAnimationClassByName(name));
 }
 
 } // invaders

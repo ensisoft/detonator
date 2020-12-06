@@ -71,7 +71,7 @@ namespace invaders
         { return mRequests.GetNext(out); }
         virtual bool ParseArgs(int argc, const char* argv[]) override;
         virtual void SetEnvironment(const Environment& env) override
-        { mAssets = env.asset_table; }
+        { mClassLib = env.classlib; }
         virtual void Init(gfx::Device::Context* context,
             unsigned surface_width, unsigned surface_height) override;
         virtual void Load() override;
@@ -96,7 +96,8 @@ namespace invaders
         virtual void OnKeydown(const wdk::WindowEventKeydown& key) override;
         virtual void OnWantClose(const wdk::WindowEventWantClose& close) override;
     private:
-        void playMusic();
+        void PlayMusic();
+        std::unique_ptr<game::Animation> CreateAnimationByName(const std::string& name) const;
 
     private:
         class State;
@@ -156,7 +157,7 @@ namespace invaders
         unsigned mRenderWidth  = 0;
         unsigned mRenderHeight = 0;
         game::AppRequestQueue mRequests;
-        game::AssetTable* mAssets = nullptr;
+        game::ClassLibrary* mClassLib = nullptr;
     };
 
 } // invaders

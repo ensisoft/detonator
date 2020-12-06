@@ -336,7 +336,7 @@ public:
             stats.current_fps, stats.total_wall_time, stats.total_game_time, stats.num_frames_rendered);
     }
 
-    // GfxFactory
+    // ClassLibrary
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override
     {
         if (name == "uv_test")
@@ -355,6 +355,12 @@ public:
         ASSERT(!"No such drawable class.");
         return nullptr;
     }
+    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override
+    { return nullptr; }
+    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override
+    { return nullptr; }
+    virtual void LoadFromFile(const std::string& dir, const std::string& file) override
+    {}
 
 private:
     void TakeScreenshot()

@@ -32,21 +32,16 @@
 // see interface.h for more details.
 
 extern "C" {
-GAMESTUDIO_EXPORT void CreateDefaultEnvironment(game::ClassLibrary** gfx_factory,
-    game::AssetTable** asset_table)
+GAMESTUDIO_EXPORT void CreateDefaultEnvironment(game::ClassLibrary** classlib)
 {
     auto* ret = new game::ContentLoader();
-    *gfx_factory = ret;
-    *asset_table = ret;
+    *classlib = ret;
     gfx::SetResourceLoader(ret);
 }
-GAMESTUDIO_EXPORT void DestroyDefaultEnvironment(game::ClassLibrary* gfx_factory,
-    game::AssetTable* asset_table)
+GAMESTUDIO_EXPORT void DestroyDefaultEnvironment(game::ClassLibrary* classlib)
 {
     gfx::SetResourceLoader(nullptr);
-    ASSERT(dynamic_cast<game::ContentLoader*>(gfx_factory) ==
-           dynamic_cast<game::ContentLoader*>(asset_table));
-    delete asset_table;
+    delete classlib;
 }
 
 GAMESTUDIO_EXPORT void SetResourceLoader(gfx::ResourceLoader* loader)

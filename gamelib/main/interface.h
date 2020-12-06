@@ -28,7 +28,6 @@
 
 #include "base/platform.h"
 #include "base/logging.h"
-#include "gamelib/asset.h"
 #include "gamelib/classlib.h"
 #include "graphics/device.h"
 #include "graphics/resource.h"
@@ -78,14 +77,14 @@ namespace game
             // The new window Y position in the desktop.
             int ypos = 0;
         };
-        // Request to have the window put to the fullscreen
+        // Request to have the window put to the full-screen
         // mode or back into windowed mode.
         struct SetFullscreen {
-            // Request the window to be to put into fullscreen mode
+            // Request the window to be to put into full-screen mode
             // when true, or back to window mode when false.
             bool fullscreen = false;
         };
-        // Request to toggle the current window fullscreen mode.
+        // Request to toggle the current window full-screen mode.
         struct ToggleFullscreen {};
 
         // Request to quit.
@@ -106,7 +105,7 @@ namespace game
         // per application main loop iteration. If there are no more requests
         // then false should be returned otherwise returning true indicates
         // that a new request was available.
-        // There's no actual quarantee that any of these requests are honored,
+        // There's no actual guarantee that any of these requests are honored,
         // that depends on the host implementation. Therefore they are just that
         // *requests*. The application should not assume that some particular
         // result happens as the result of the request processing.
@@ -116,12 +115,8 @@ namespace game
         // Parameters pertaining to the environment of the application.
         struct Environment {
             // Interface for accessing resources (content) implemented
-            // by the graphics subsystem, i.e. drawble shapes and materials.
-            game::ClassLibrary* gfx_factory = nullptr;
-
-            // Interface for accessign high level game content i.e. assets
-            // (most likely) built in the editor such as Animations.
-            game::AssetTable* asset_table = nullptr;
+            // by the graphics subsystem, i.e. drawable shapes and materials.
+            game::ClassLibrary* classlib = nullptr;
         };
 
         // Called whenever there are changes to the current environment
@@ -148,12 +143,12 @@ namespace game
         // The context is the current rendering context that can be used
         // to create the graphics device(s).
         // Surface width and height are the current rendering surface
-        // (could be window, could be an offscreen buffer) sizes.
+        // (could be window, could be an off-screen buffer) sizes.
         virtual void Init(gfx::Device::Context* context,
             unsigned surface_width, unsigned surface_height) {}
 
         // Load the game and its data and/or previous state.
-        // Called once before entering the main game upate/render loop.
+        // Called once before entering the main game update/render loop.
         virtual void Load() {}
 
         // Start the application. This is called once before entering the
@@ -163,7 +158,7 @@ namespace game
         // Draw the next frame.
         virtual void Draw() {}
 
-        // Tick the application. Invoked on regular interval. Curren time
+        // Tick the application. Invoked on regular interval. Current time
         // is the total current accumulated application time.
         virtual void Tick(double current_time)  {}
 
@@ -208,9 +203,9 @@ namespace game
 
         // Called when the primary rendering surface in which the application
         // renders for display has been resized. Note that this may not be
-        // the same as the current window and its size if an offscreen rendering
+        // the same as the current window and its size if an off-screen rendering
         // is being done!
-        // This is called once on appliation startup and then every time when
+        // This is called once on application startup and then every time when
         // the rendering surface size changes.
         virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) {}
 
@@ -248,7 +243,7 @@ namespace game
 
 } // namespace
 
-// Win32 / MSVS export/import shit
+// Win32 / MSVS export/import declarations
 #if defined(__MSVC__)
 #  define GAMESTUDIO_EXPORT __declspec(dllexport)
 #  define GAMESTUDIO_IMPORT __declspec(dllimport)
@@ -281,13 +276,13 @@ typedef game::App* (*MakeAppFunc)();
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
 extern "C" {
-    GAMESTUDIO_API void CreateDefaultEnvironment(game::ClassLibrary** gfx_factory, game::AssetTable** asset_table);
-    GAMESTUDIO_API void DestroyDefaultEnvironment(game::ClassLibrary* gfx_factory, game::AssetTable* asset_table);
+    GAMESTUDIO_API void CreateDefaultEnvironment(game::ClassLibrary** classlib);
+    GAMESTUDIO_API void DestroyDefaultEnvironment(game::ClassLibrary* classlib);
     GAMESTUDIO_API void SetResourceLoader(gfx::ResourceLoader* loader);
     GAMESTUDIO_API void SetGlobalLogger(base::Logger* logger);
 } // extern "C"
 
-typedef void (*CreateDefaultEnvironmentFunc)(game::ClassLibrary**, game::AssetTable**);
-typedef void (*DestroyDefaultEnvironmentFunc)(game::ClassLibrary*, game::AssetTable*);
+typedef void (*CreateDefaultEnvironmentFunc)(game::ClassLibrary**);
+typedef void (*DestroyDefaultEnvironmentFunc)(game::ClassLibrary*);
 typedef void (*SetResourceLoaderFunc)(gfx::ResourceLoader*);
 typedef void (*SetGlobalLoggerFunc)(base::Logger*);

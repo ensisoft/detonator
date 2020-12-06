@@ -101,7 +101,7 @@ namespace gui
 
     private:
         class WindowContext;
-        class SessionAssets;
+        class ResourceLoader;
         class SessionLogger;
     private:
         Ui::PlayWindow mUI;
@@ -142,11 +142,10 @@ namespace gui
         std::unique_ptr<game::App> mApp;
         // rendering context implementation for the QWindow surface.
         std::unique_ptr<WindowContext> mWindowContext;
-        // The current collection of assets for this play session.
-        // The objects are derieved from the Workspacse instead of
-        // loading from file. We then give this asset table object
-        // to the game's app instance for getting data.
-        std::unique_ptr<SessionAssets> mAssets;
+        // This resource loader implements the resolveURI to map
+        // URIs to files based on the workspace configuration for 
+        // the game playing (i.e. the working folder)
+        std::unique_ptr<ResourceLoader> mResourceLoader;
         // Current game/app time. Updated in time steps whenever
         // the update timer runs.
         double mTimeTotal = 0.0;

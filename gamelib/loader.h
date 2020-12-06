@@ -27,7 +27,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include "gamelib/asset.h"
 #include "gamelib/classlib.h"
 #include "graphics/resource.h"
 #include "graphics/material.h"
@@ -47,27 +46,18 @@ namespace game
     // access to the low level file based graphics resources such as
     // texture, font and shader files.
     class ContentLoader : public ClassLibrary,
-                          public AssetTable,
                           public gfx::ResourceLoader
     {
     public:
-        // GfxFactory implementation. Provides low level GFX
+        // ClassLibrary implementation.
         // resource creation for the game level subsystem.
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override;
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override;
-
-        // AssetTable implementation.
-        virtual const AnimationClass* FindAnimationClassByName(const std::string& name) const override;
-        virtual const AnimationClass* FindAnimationClassById(const std::string& id) const override;
-        virtual std::unique_ptr<Animation> CreateAnimationByName(const std::string& name) const override;
-        virtual std::unique_ptr<Animation> CreateAnimationById(const std::string& id) const override;
-
-        // Read the given resource description file.
-        // The expectation is that the file is well formed.
-        // Throws an exception on error ill-formed file.
-        // However no validation is done regarding the completeness
-        // of the content and resources that are loaded from the file.
+        virtual std::shared_ptr<const AnimationClass> FindAnimationClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string& dir, const std::string& file) override;
+        //virtual std::unique_ptr<Animation> CreateAnimationByName(const std::string& name) const override;
+        //virtual std::unique_ptr<Animation> CreateAnimationById(const std::string& id) const override;
 
         // gfx::ResourceLoader implementation. Provides access to the
         // low level byte buffer / file system file resources such as

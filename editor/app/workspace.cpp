@@ -743,6 +743,27 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClass(const std
     return std::make_shared<gfx::RectangleClass>();
 }
 
+std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassByName(const std::string& name) const
+{
+    // this method is called when workspace is used as a game::ClassLibrary
+    // not sure if this the best place tod o this but we're going to 
+    // resolve the dependent class objects here. 
+    auto ret = GetAnimationClassByName(FromUtf8(name));
+    if (ret)
+        ret->LoadDependentClasses(*this);
+    return ret;
+}
+std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassById(const std::string& id) const
+{
+    // this method is called when workspace is used as a game::ClassLibrary
+    // not sure if this the best place tod o this but we're going to 
+    // resolve the dependent class objects here. 
+    auto ret = GetAnimationClassById(FromUtf8(id));
+    if (ret)
+        ret->LoadDependentClasses(*this);
+    return ret;
+}
+
 std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const
 {
     // see comments in AddFile about resource path mapping.
