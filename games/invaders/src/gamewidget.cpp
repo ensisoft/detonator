@@ -983,11 +983,15 @@ public:
     }
     virtual void paint(gfx::Painter& painter, const IRect& rect) override
     {
-        const auto x = rect.GetWidth() * 0.5;
-        const auto y = rect.GetHeight() * 0.5;
+        const auto size = std::max(rect.GetWidth(), rect.GetHeight());
+        const auto explosion_size = size * 3;
+        const auto box = mSprite->GetBoundingBox();
+        const auto scalex = explosion_size / box.GetWidth();
+        const auto scaley = explosion_size / box.GetHeight();
 
         gfx::Transform bang;
-        bang.MoveTo(x, y);
+        bang.Scale(scalex, scaley);
+        bang.MoveTo(rect.GetWidth() * 0.5, rect.GetHeight() * 0.5);
         mSprite->Draw(painter, bang);
     }
 private:
@@ -1765,7 +1769,7 @@ GameWidget::GameWidget()
 
     mGame->onBomb = [&](const Game::Bomb& b)
     {
-        std::unique_ptr<Animation> explosion(new BigExplosion(CreateAnimationByName(("Big Explosion")), 1500));
+        std::unique_ptr<Animation> explosion(new BigExplosion(CreateAnimationByName(("Big Explosion")), 800));
         mAnimations.push_back(std::move(explosion));
     };
 
@@ -2191,7 +2195,7 @@ void GameWidget::Draw()
     const IRect rect(0, 0, w , h);
 
     mDevice->BeginFrame();
-    mPainter->Clear(gfx::Color::Black);
+    mPainter->Clear(gfx::Color4f(7, 14, 22, 255));
     mPainter->SetViewport(0, 0, w, h);
     mPainter->SetTopLeftView(w, h);
 

@@ -4,7 +4,6 @@
         "material": "Scarab"
     },
     "0ryFZH376L": {
-        "checked_for_packing": true
     },
     "46yvmCSzSL": {
         "checked_for_packing": true
@@ -46,7 +45,6 @@
         "checked_for_packing": true
     },
     "Q9LbPJnta0": {
-        "checked_for_packing": true
     },
     "ZlFaftPBiF": {
         "checked_for_packing": true
@@ -59,7 +57,8 @@
         "checked_for_packing": true
     },
     "gLRYUQObGy": {
-        "checked_for_packing": true
+        "shader_file": "",
+        "use_shader_file": false
     },
     "hR9OWOACQy": {
         "checked_for_packing": true
@@ -72,7 +71,8 @@
         "checked_for_packing": true
     },
     "n6I4hvN8l1": {
-        "checked_for_packing": true
+        "shader_file": "",
+        "use_shader_file": false
     },
     "nf6vDCSp3f": {
         "checked_for_packing": true
@@ -106,7 +106,18 @@
         "checked_for_packing": true
     },
     "wE5I5Tg7p0": {
-        "checked_for_packing": true
+        "material": "Cricket Smoke",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": true,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": true
     },
     "workspace": {
         "packing_param_combine_textures": true,

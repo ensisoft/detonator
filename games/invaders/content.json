@@ -6,11 +6,11 @@
         {
           "alpha": 1.0,
           "bitflags": 3,
-          "drawable": "_rect",
+          "drawable": "",
           "id": "eqyyTFgoPX",
           "layer": 0,
           "linewidth": 1.0,
-          "material": "_Black",
+          "material": "",
           "name": "Background",
           "position": {
             "x": 600.0,
@@ -720,8 +720,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 2067.2724609375,
-            "y": 1420.5711669921875
+            "x": 400.0,
+            "y": 400.0
           }
         }
       ],
@@ -1441,7 +1441,7 @@
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
+      "texture_min_filter": "Trilinear",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
