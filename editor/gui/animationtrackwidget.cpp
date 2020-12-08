@@ -325,7 +325,7 @@ public:
             virtual void EnterNode(game::AnimationNodeClass* node)
             {
                 TreeWidget::TreeItem item;
-                item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
+                item.SetId(node ? app::FromUtf8(node->GetClassId()) : "root");
                 item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
                 item.SetUserData(node);
                 item.SetLevel(mLevel);
@@ -372,7 +372,7 @@ public:
         {
             const auto& node = anim.GetNode(i);
             const auto& name = node.GetName();
-            const auto& id   = node.GetId();
+            const auto& id   = node.GetClassId();
             id_to_index_map[id] = list->size();
             TimelineWidget::Timeline line;
             line.SetName(app::FromUtf8(name));
@@ -426,6 +426,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     DEBUG("Create AnimationTrackWidget");
     mTreeModel     = std::make_unique<TreeModel>(mState);
     mTimelineModel = std::make_unique<TimelineModel>(mState);
+    mRenderer.SetLoader(workspace);
 
     mUI.setupUi(this);
     mUI.actionPlay->setEnabled(true);
@@ -752,7 +753,6 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
         if (!mState.animation)
         {
             mState.animation = std::make_shared<game::AnimationClass>(std::move(klass));
-            mState.animation->LoadDependentClasses(*mWorkspace);
             ShareAnimation(mState.animation);
         }
     }
@@ -840,6 +840,7 @@ void AnimationTrackWidget::Update(double secs)
         return;
 
     mPlaybackAnimation->Update(secs);
+    mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
     if (!mPlaybackAnimation->IsPlaying())
     {
@@ -1007,7 +1008,7 @@ void AnimationTrackWidget::on_actionAddTransformActuator_triggered()
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != node.GetId())
+        if (klass.GetNodeId() != node.GetClassId())
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -1018,7 +1019,7 @@ void AnimationTrackWidget::on_actionAddTransformActuator_triggered()
     }
 
     game::AnimationTransformActuatorClass klass;
-    klass.SetNodeId(node.GetId());
+    klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(lo_bound);
     klass.SetDuration(hi_bound - lo_bound);
     klass.SetEndPosition(node.GetTranslation());
@@ -1058,7 +1059,7 @@ void AnimationTrackWidget::on_actionAddMaterialActuator_triggered()
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != node.GetId())
+        if (klass.GetNodeId() != node.GetClassId())
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -1068,7 +1069,7 @@ void AnimationTrackWidget::on_actionAddMaterialActuator_triggered()
             lo_bound = std::max(lo_bound, end);
     }
     game::MaterialActuatorClass klass;
-    klass.SetNodeId(node.GetId());
+    klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(lo_bound);
     klass.SetDuration(hi_bound - lo_bound);
     klass.SetEndAlpha(GetValue(mUI.materialEndAlpha));
@@ -1184,9 +1185,16 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
         SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
+
+        const auto& material_id = node.GetMaterialId();
+        if (!material_id.empty())
+        {
+            const auto& material = mWorkspace->FindMaterialClass(material_id);
+            SetValue(mUI.materialEndAlpha, material->GetBaseAlpha());
+        }
         if (node.TestFlag(game::AnimationNodeClass::Flags::OverrideAlpha))
             SetValue(mUI.materialEndAlpha, node.GetAlpha());
-        else SetValue(mUI.materialEndAlpha, node.GetMaterial()->GetAlpha());
+
 
         // there could be multiple slots where the next actuator is
         // to placed. the limits would be difficult to express
@@ -1396,7 +1404,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     const auto norm_start = actuator_start / animation_duration;
     const auto norm_end   = actuator_end / animation_duration;
 
-    const auto& id = node->GetId();
+    const auto& id = node->GetClassId();
     float lo_bound = 0.0f;
     float hi_bound = 1.0f;
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
@@ -1420,7 +1428,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     if (type == game::AnimationActuatorClass::Type::Transform)
     {
         game::AnimationTransformActuatorClass klass;
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(node->GetClassId());
         klass.SetStartTime(start);
         klass.SetDuration(end - start);
         klass.SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1433,7 +1441,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     else if (type == game::AnimationActuatorClass::Type::Material)
     {
         game::MaterialActuatorClass klass;
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(node->GetClassId());
         klass.SetStartTime(start);
         klass.SetDuration(end - start);
         klass.SetEndAlpha(GetValue(mUI.materialEndAlpha));
@@ -1697,20 +1705,20 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    class DrawHook : public game::Animation::DrawHook
+    class DrawHook : public game::AnimationInstanceDrawHook
     {
     public:
         DrawHook(const game::AnimationNode* selected, State& state)
           : mSelected(selected)
           , mState(state)
         {}
-        virtual bool InspectPacket(const game::AnimationNode* node, game::AnimationClass::DrawPacket& packet) override
+        virtual bool InspectPacket(const game::AnimationNode* node, game::AnimationDrawPacket& packet) override
         {
             if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
                 return false;
             return true;
         }
-        virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::AnimationClass::DrawPacket>& packets) override
+        virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::AnimationDrawPacket>& packets) override
         {
             const auto is_mask     = node->GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask;
             const auto is_selected = node == mSelected;
@@ -1720,7 +1728,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
                 static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
                 // visualize it.
                 trans.Push(node->GetModelTransform());
-                    game::AnimationClass::DrawPacket box;
+                    game::AnimationDrawPacket box;
                     box.transform = trans.GetAsMatrix();
                     box.material  = yellow;
                     box.drawable  = rect; //node->GetDrawable();
@@ -1741,7 +1749,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
-                game::AnimationClass::DrawPacket selection;
+                game::AnimationDrawPacket selection;
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
@@ -1764,7 +1772,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-                game::AnimationClass::DrawPacket sizing_box;
+                game::AnimationDrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
@@ -1776,7 +1784,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                game::AnimationClass::DrawPacket rotation_circle;
+                game::AnimationDrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
@@ -1850,7 +1858,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Push();
         if (mPlaybackAnimation)
         {
-            mPlaybackAnimation->Draw(painter, view, nullptr);
+            mRenderer.Draw(*mPlaybackAnimation, painter, view, nullptr);
         }
         else
         {
@@ -1862,7 +1870,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
                 node = &mAnimation->GetNode(index-1);
             }
             DrawHook hook(node, mState);
-            mAnimation->Draw(painter, view, &hook);
+            mRenderer.Draw(*mAnimation, painter, view, &hook);
         }
     view.Pop();
 

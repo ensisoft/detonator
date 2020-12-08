@@ -986,7 +986,7 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_5">
                  <property name="text">
-                  <string>Alpha</string>
+                  <string>Node alpha</string>
                  </property>
                 </widget>
                </item>

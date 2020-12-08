@@ -4,6 +4,7 @@
         "material": "Scarab"
     },
     "0ryFZH376L": {
+        "checked_for_packing": true
     },
     "46yvmCSzSL": {
         "checked_for_packing": true
@@ -19,7 +20,19 @@
         "checked_for_packing": true
     },
     "9D2vt3ioun": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "AqPWpeetnB": {
         "checked_for_packing": true
@@ -31,10 +44,24 @@
         "checked_for_packing": true
     },
     "EMBqY9KWth": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
     },
     "FbK00HsTug": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "material": "Asteroid",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "HMQvdCNPy4": {
         "checked_for_packing": true,
@@ -45,6 +72,7 @@
         "checked_for_packing": true
     },
     "Q9LbPJnta0": {
+        "checked_for_packing": true
     },
     "ZlFaftPBiF": {
         "checked_for_packing": true
@@ -54,14 +82,39 @@
         "material": "Mantis"
     },
     "d8CDbfETmY": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "gLRYUQObGy": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
     "hR9OWOACQy": {
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "material": "Star",
+        "transform_enabled": false,
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": false
     },
     "k0uqQHtPFX": {
         "checked_for_packing": true,
@@ -71,6 +124,7 @@
         "checked_for_packing": true
     },
     "n6I4hvN8l1": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -106,6 +160,7 @@
         "checked_for_packing": true
     },
     "wE5I5Tg7p0": {
+        "checked_for_packing": true,
         "material": "Cricket Smoke",
         "transform_enabled": false,
         "transform_height": 500,

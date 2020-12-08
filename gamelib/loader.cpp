@@ -159,13 +159,6 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
     game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, &mAnimationNameTable);
 
-    for (auto it = mAnimations.begin(); it != mAnimations.end();
-        ++it)
-    {
-        const auto& name = it->first;
-        AnimationClass* anim  = it->second.get();
-        anim->LoadDependentClasses(*this);
-    }
     mResourceDir  = dir;
     mResourceFile = file;
 }
@@ -189,27 +182,5 @@ std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassByName(co
     ERROR("No such animation class: '%1'", name);
     return nullptr;
 }
-
-/*
-std::unique_ptr<Animation> ContentLoader::CreateAnimationByName(const std::string& name) const
-{
-    auto it = mAnimationNameTable.find(name);
-    if (it != mAnimationNameTable.end())
-        return CreateAnimationById(it->second);
-
-    ERROR("No such animation class: '%1'", name);
-    return nullptr;
-}
-
-std::unique_ptr<Animation> ContentLoader::CreateAnimationById(const std::string& id) const
-{
-    auto it = mAnimations.find(id);
-    if (it != std::end(mAnimations))
-        return game::CreateAnimationInstance(it->second);
-
-    ERROR("No such animation class: '%1'", id);
-    return nullptr;
-}
- */
 
 } // namespace

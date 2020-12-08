@@ -42,6 +42,7 @@
 #include "graphics/resource.h"
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
+#include "gamelib/renderer.h"
 #include "gamelib/main/interface.h"
 
 class TestCase
@@ -50,7 +51,7 @@ public:
     virtual ~TestCase() = default;
     virtual void Render(gfx::Painter& painter) = 0;
     virtual void Update(float dts) {}
-    virtual void Start(game::ClassLibrary* factory) {}
+    virtual void Start(game::ClassLibrary* loader) {}
     virtual void End() {}
 private:
 };
@@ -62,45 +63,47 @@ public:
     {
         gfx::Transform transform;
         transform.Translate(200, 200);
-        mAnimations[0]->Draw(painter, transform);
+        mRenderer.Draw(*mAnimations[0], painter, transform);
 
         transform.Reset();
         transform.MoveTo(500,200);
-        mAnimations[1]->Draw(painter, transform);
+        mRenderer.Draw(*mAnimations[1], painter, transform);
 
         transform.Reset();
         transform.MoveTo(800, 200);
-        mAnimations[2]->Draw(painter, transform);
+        mRenderer.Draw(*mAnimations[2], painter, transform);
     }
 
-    virtual void Start(game::ClassLibrary* factory) override
+    virtual void Start(game::ClassLibrary* loader) override
     {
+        mRenderer.SetLoader(loader);
+
         game::AnimationNodeClass node;
         node.SetDrawable("rectangle");
         node.SetMaterial("uv_test");
         node.SetSize(glm::vec2(200.0f, 200.0f));
         node.SetName("Root");
 
-        game::AnimationTransformActuatorClass move(node.GetId());
+        game::AnimationTransformActuatorClass move(node.GetClassId());
         move.SetEndPosition(glm::vec2(0.0f, 200.0f));
         move.SetEndSize(glm::vec2(200.0f, 200.0f));
         move.SetDuration(0.25);
         move.SetStartTime(0.0f);
 
-        game::AnimationTransformActuatorClass resize(node.GetId());
+        game::AnimationTransformActuatorClass resize(node.GetClassId());
         resize.SetEndPosition(glm::vec2(0.0f, 200.0f));
         resize.SetEndSize(glm::vec2(500.0f, 500.0f));
         resize.SetDuration(0.25);
         resize.SetStartTime(0.25);
 
-        game::AnimationTransformActuatorClass rotate(node.GetId());
+        game::AnimationTransformActuatorClass rotate(node.GetClassId());
         rotate.SetEndPosition(glm::vec2(0.0f, 200.0f));
         rotate.SetEndSize(glm::vec2(500.0f, 500.0f));
         rotate.SetEndRotation(math::Pi);
         rotate.SetDuration(0.25);
         rotate.SetStartTime(0.5);
 
-        game::AnimationTransformActuatorClass back(node.GetId());
+        game::AnimationTransformActuatorClass back(node.GetClassId());
         back.SetEndPosition(glm::vec2(0.0f, 0.0f));
         back.SetEndSize(glm::vec2(200.0f, 200.0f));
         back.SetEndRotation(0.0f);
@@ -120,7 +123,6 @@ public:
         auto* nptr = animation->AddNode(std::move(node));
         auto& root = animation->GetRenderTree();
         root.AppendChild(nptr);
-        animation->LoadDependentClasses(*factory);
 
         // create 2 instances of the same animation
         mAnimations[0] = std::make_unique<game::Animation>(animation);
@@ -142,6 +144,7 @@ public:
 
 private:
     std::unique_ptr<game::Animation> mAnimations[3];
+    game::Renderer mRenderer;
 };
 
 class BoundingBoxTest : public TestCase
@@ -152,7 +155,9 @@ public:
     {
         gfx::Transform transform;
         transform.Translate(500, 300);
-        mAnimation->Draw(painter, transform);
+        //mAnimation->Draw(painter, transform);
+
+        mRenderer.Draw(*mAnimation, painter, transform);
 
         for (size_t i=0; i<mAnimation->GetNumNodes(); ++i)
         {
@@ -167,8 +172,10 @@ public:
         gfx::DrawRectOutline(painter, bounds, gfx::SolidColor(gfx::Color::DarkYellow), 2.0f);
 
     }
-    virtual void Start(game::ClassLibrary* factory) override
+    virtual void Start(game::ClassLibrary* loader) override
     {
+        mRenderer.SetLoader(loader);
+
         // create new animation class type.
         game::AnimationClass animation;
         {
@@ -205,9 +212,6 @@ public:
             auto& root = animation.GetRenderTree();
             root.GetChildNode(0).GetChildNode(0).AppendChild(nptr);
         }
-
-        // using this as the gfx loader.
-        animation.LoadDependentClasses(*factory);
         // create an animation instance
         mAnimation = std::make_unique<game::Animation>(animation);
     }
@@ -230,13 +234,11 @@ public:
     }
     virtual void End() override
     {}
-
-
 private:
     std::unique_ptr<game::Animation> mAnimation;
+    game::Renderer mRenderer;
     float mTime = 0.0f;
 };
-
 
 class MyApp : public game::App, public game::ClassLibrary, public wdk::WindowListener
 {

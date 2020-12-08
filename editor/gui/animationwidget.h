@@ -34,6 +34,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "gamelib/animation.h"
+#include "gamelib/renderer.h"
 
 namespace gfx {
     class Painter;
@@ -112,6 +113,7 @@ namespace gui
         void on_nodeName_textChanged(const QString& text);
         void on_chkUpdateMaterial_stateChanged(int);
         void on_chkUpdateDrawable_stateChanged(int);
+        void on_chkRestart_stateChanged(int);
         void on_chkDoesRender_stateChanged(int);
         void on_chkOverrideAlpha_stateChanged(int);
         void on_btnNewTrack_clicked();
@@ -168,6 +170,7 @@ namespace gui
         struct State {
             // shared with the track widget.
             std::shared_ptr<game::AnimationClass> animation;
+            game::Renderer renderer;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
 

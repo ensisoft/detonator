@@ -150,6 +150,7 @@ add_executable(Editor
     graphics/text.cpp
     graphics/resource.cpp
     gamelib/animation.cpp
+    gamelib/renderer.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -397,6 +398,7 @@ add_library(gamelib_test SHARED
     graphics/resource.cpp
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
+    gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
     gamelib/test/main.cpp
@@ -437,6 +439,7 @@ add_library(invaders SHARED
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
+    gamelib/renderer.cpp
     gamelib/homedir.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp

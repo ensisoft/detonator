@@ -34,6 +34,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/app/workspace.h"
 #include "gamelib/animation.h"
+#include "gamelib/renderer.h"
 
 namespace gui
 {
@@ -177,6 +178,8 @@ namespace gui
         // Original hash (when starting to edit an existing track)
         // used to compare for changes when closing.
         std::size_t mOriginalHash = 0;
+        // Renderer for the animation
+        game::Renderer mRenderer;
     };
 
     // Functions used to share animation class objects between AnimationTrackWidget

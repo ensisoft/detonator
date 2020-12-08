@@ -45,136 +45,6 @@ namespace {
 template<typename Node>
 struct RenderTreeFunctions {
     using RenderTree = game::TreeNode<Node>;
-    using DrawHook   = game::AnimationDrawHook<Node>;
-    using DrawPacket = game::AnimationDrawPacket;
-
-    static void Draw(const RenderTree& tree, gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook)
-    {
-        // here we could apply operations that would apply to the whole
-        // animation but currently we don't need such things.
-        // if we did we could begin new transformation scope for this
-        // by pushing a new scope in the transformation stack.
-        // transfrom.Push();
-        std::vector<DrawPacket> packets;
-
-        class Visitor : public RenderTree::ConstVisitor
-        {
-        public:
-            Visitor(std::vector<DrawPacket>& packets, gfx::Transform& transform, DrawHook* hook)
-                : mPackets(packets)
-                , mTransform(transform)
-                , mHook(hook)
-            {}
-            virtual void EnterNode(const Node* node) override
-            {
-                if (!node)
-                    return;
-
-                // always push the node's transform, it might have children that
-                // do render.
-                mTransform.Push(node->GetNodeTransform());
-                // if it doesn't render then no draw packets are generated
-                if (node->TestFlag(Node::Flags::DoesRender))
-                {
-                    mTransform.Push(node->GetModelTransform());
-
-                    DrawPacket packet;
-                    packet.material  = node->GetMaterial();
-                    packet.drawable  = node->GetDrawable();
-                    packet.layer     = node->GetLayer();
-                    packet.pass      = node->GetRenderPass();
-                    packet.transform = mTransform.GetAsMatrix();
-                    if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                        mPackets.push_back(std::move(packet));
-
-                    // pop the model transform
-                    mTransform.Pop();
-                }
-
-                // append any extra packets if needed.
-                if (mHook)
-                {
-                    const auto num_transforms = mTransform.GetNumTransforms();
-
-                    std::vector<DrawPacket> packets;
-                    mHook->AppendPackets(node, mTransform, packets);
-                    for (auto& p : packets)
-                        mPackets.push_back(std::move(p));
-
-                    // make sure the stack is popped properly.
-                    ASSERT(mTransform.GetNumTransforms() == num_transforms);
-                }
-            }
-            virtual void LeaveNode(const Node* node) override
-            {
-                if (!node)
-                    return;
-
-                mTransform.Pop();
-            }
-        private:
-            std::vector<DrawPacket>& mPackets;
-            gfx::Transform& mTransform;
-            DrawHook* mHook = nullptr;
-        };
-
-        Visitor visitor(packets, transform, hook);
-        tree.PreOrderTraverse(visitor);
-
-        // the layer value is negative but for the indexing below
-        // we must have positive values only.
-        int first_layer_index = 0;
-        for (auto& packet : packets)
-        {
-            first_layer_index = std::min(first_layer_index, packet.layer);
-        }
-        // offset the layers.
-        for (auto& packet : packets)
-        {
-            packet.layer += std::abs(first_layer_index);
-        }
-
-        struct Layer {
-            std::vector<gfx::Painter::DrawShape> draw_list;
-            std::vector<gfx::Painter::MaskShape> mask_list;
-        };
-        std::vector<Layer> layers;
-
-        for (auto& packet : packets)
-        {
-            if (!packet.material || !packet.drawable)
-                continue;
-
-            const auto layer_index = packet.layer;
-            if (layer_index >= layers.size())
-                layers.resize(layer_index + 1);
-
-            Layer& layer = layers[layer_index];
-            if (packet.pass == Node::RenderPass::Draw)
-            {
-                gfx::Painter::DrawShape shape;
-                shape.transform = &packet.transform;
-                shape.drawable  = packet.drawable.get();
-                shape.material  = packet.material.get();
-                layer.draw_list.push_back(shape);
-            }
-            else if (packet.pass == Node::RenderPass::Mask)
-            {
-                gfx::Painter::MaskShape shape;
-                shape.transform = &packet.transform;
-                shape.drawable  = packet.drawable.get();
-                layer.mask_list.push_back(shape);
-            }
-        }
-        for (const auto& layer : layers)
-        {
-            if (layer.mask_list.empty())
-                painter.Draw(layer.draw_list);
-            else painter.Draw(layer.draw_list, layer.mask_list);
-        }
-        // if we used a new transformation scope pop it here.
-        //transform.Pop();
-    }
 
     static void CoarseHitTest(RenderTree& tree, float x, float y, std::vector<Node*>* hits, std::vector<glm::vec2>* hitbox_positions)
     {
@@ -515,35 +385,6 @@ AnimationNodeClass::AnimationNodeClass()
     mBitFlags.set(Flags::OverrideAlpha, false);
 }
 
-std::shared_ptr<const gfx::Drawable> AnimationNodeClass::GetDrawable() const
-{
-    return const_cast<AnimationNodeClass*>(this)->GetDrawable();
-}
-
-std::shared_ptr<const gfx::Material> AnimationNodeClass::GetMaterial() const
-{
-    return const_cast<AnimationNodeClass*>(this)->GetMaterial();
-}
-
-std::shared_ptr<gfx::Drawable> AnimationNodeClass::GetDrawable()
-{
-    if (!mDrawable)
-        mDrawable = CreateDrawableInstance();
-    if (mDrawable)
-    {
-        mDrawable->SetStyle(mRenderStyle);
-        mDrawable->SetLineWidth(mLineWidth);
-    }
-    return mDrawable;
-}
-
-std::shared_ptr<gfx::Material> AnimationNodeClass::GetMaterial()
-{
-    if (!mMaterial)
-        mMaterial = CreateMaterialInstance();
-    return mMaterial;
-}
-
 glm::mat4 AnimationNodeClass::GetNodeTransform() const
 {
     // transformation order is the order they're
@@ -563,29 +404,6 @@ glm::mat4 AnimationNodeClass::GetModelTransform() const
     // with the position parameter.
     transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
     return transform.GetAsMatrix();
-}
-
-std::unique_ptr<gfx::Drawable> AnimationNodeClass::CreateDrawableInstance() const
-{
-    if (!mDrawableClass)
-        return nullptr;
-
-    auto ret = gfx::CreateDrawableInstance(mDrawableClass);
-    // configure with the class defaults.
-    ret->SetLineWidth(mLineWidth);
-    ret->SetStyle(mRenderStyle);
-    return ret;
-}
-std::unique_ptr<gfx::Material> AnimationNodeClass::CreateMaterialInstance() const
-{
-    if (!mMaterialClass)
-        return nullptr;
-
-    auto ret = gfx::CreateMaterialInstance(mMaterialClass);
-    // configure with the class defaults.
-    if (TestFlag(Flags::OverrideAlpha))
-        ret->SetAlpha(mAlpha);
-    return ret;
 }
 
 std::size_t AnimationNodeClass::GetHash() const
@@ -610,78 +428,10 @@ std::size_t AnimationNodeClass::GetHash() const
 
 void AnimationNodeClass::Update(float time, float dt)
 {
-    if (mDrawable)
-    {
-        if (TestFlag(Flags::UpdateDrawable))
-            mDrawable->Update(dt);
-        if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
-            mDrawable->Restart();
-    }
-
-    if (mMaterial)
-    {
-        if (TestFlag(Flags::UpdateMaterial))
-            mMaterial->Update(dt);
-
-        if (TestFlag(Flags::OverrideAlpha))
-            mMaterial->SetAlpha(mAlpha);
-        else mMaterial->ResetAlpha();
-    }
 }
 
 void AnimationNodeClass::Reset()
 {
-    mMaterialClass.reset();
-    mDrawableClass.reset();
-    mMaterial.reset();
-    mDrawable.reset();
-}
-
-void AnimationNodeClass::LoadDependentClasses(const ClassLibrary& loader) const
-{
-    //            == About resource loading ==
-    // User defined resources have a combination of type and name
-    // where type is the underlying class type and name identifies
-    // the set of resources that the user edits that instances of that
-    // said type then use.
-    // Primitive / (non user defined resources) don't need a name
-    // since the name is irrelevant since the objects are stateless
-    // in this sense and don't have properties that would change between instances.
-    // For example with drawable rectangles (gfx::Rectangle) all rectangles
-    // that we might want to draw are basically the same. We don't need to
-    // configure each rectangle object with properties that would distinguish
-    // it from other rectangles.
-    // In fact there's basically even no need to create more than 1 instance
-    // of such resource and then share it between all users.
-    //
-    // User defined resources on the other hand *can be* unique.
-    // For example particle engines, the underlying object type is same for
-    // particle engine A and B, but their defining properties are completely
-    // different. To distinguish the set of properties the user gives each
-    // particle engine a "name". Then when loading such objects we must
-    // load them by name. Additionally the resources may or may not be
-    // shared. For example when a fleet of alien spaceships are rendered
-    // each spaceship might have their own particle engine (own simulation state)
-    // thus producing a unique rendering for each spaceship. However the problem
-    // is that this might be computationally heavy. For N ships we'd need to do
-    // N particle engine simulations.
-    // However it's also possible that the particle engines are shared and each
-    // ship (of the same type) just refers to the same particle engine. Then
-    // each ship will render the same particle stream.
-    if (!mDrawableId.empty())
-    {
-        mDrawableClass = loader.FindDrawableClass(mDrawableId);
-        if (mDrawableClass->GetId() != mDrawableId)
-            WARN("Animation node '%1' drawable ('%2') was not available.", mName, mDrawableId);
-        mDrawableId = mDrawableClass->GetId();
-    }
-    if (!mMaterialId.empty())
-    {
-        mMaterialClass = loader.FindMaterialClass(mMaterialId);
-        if (mMaterialClass->GetId() != mMaterialId)
-            WARN("Animation node '%1' material ('%2') was not available.", mName, mMaterialId);
-        mMaterialId = mMaterialClass->GetId();
-    }
 }
 
 AnimationNodeClass AnimationNodeClass::Clone() const
@@ -737,18 +487,6 @@ std::optional<AnimationNodeClass> AnimationNodeClass::FromJson(const nlohmann::j
     return ret;
 }
 
-std::shared_ptr<const gfx::Material> AnimationNode::GetMaterial() const
-{  return mMaterial; }
-
-std::shared_ptr<gfx::Material> AnimationNode::GetMaterial()
-{ return mMaterial; }
-
-std::shared_ptr<const gfx::Drawable> AnimationNode::GetDrawable() const
-{ return mDrawable; }
-
-std::shared_ptr<gfx::Drawable> AnimationNode::GetDrawable()
-{ return mDrawable; }
-
 void AnimationNode::Reset()
 {
     // initialize instance state based on the class's initial state.
@@ -757,30 +495,10 @@ void AnimationNode::Reset()
     mScale    = mClass->GetScale();
     mRotation = mClass->GetRotation();
     mAlpha    = mClass->GetAlpha();
-    mMaterial = mClass->CreateMaterialInstance();
-    mDrawable = mClass->CreateDrawableInstance();
 }
 
 void AnimationNode::Update(float time, float dt)
 {
-    if (mDrawable)
-    {
-        if (TestFlag(Flags::UpdateDrawable))
-            mDrawable->Update(dt);
-
-        if (TestFlag(Flags::RestartDrawable) && !mDrawable->IsAlive())
-            mDrawable->Restart();
-    }
-
-    if (mMaterial)
-    {
-        if (TestFlag(Flags::UpdateMaterial))
-            mMaterial->Update(dt);
-
-        if (TestFlag(Flags::OverrideAlpha))
-            mMaterial->SetAlpha(mAlpha);
-        else mMaterial->ResetAlpha();
-    }
 }
 
 glm::mat4 AnimationNode::GetNodeTransform() const
@@ -820,7 +538,7 @@ void AnimationTrack::Apply(AnimationNode& node) const
     // in a sorted vector and then binary search.
     for (auto& track : mTracks)
     {
-        if (track.node != node.GetId())
+        if (track.node != node.GetClassId())
             continue;
 
         const auto start = track.actuator->GetStartTime();
@@ -899,7 +617,7 @@ AnimationNodeClass* AnimationClass::AddNode(AnimationNodeClass&& node)
 #if true
     for (const auto& old : mNodes)
     {
-        ASSERT(old->GetId() != node.GetId());
+        ASSERT(old->GetClassId() != node.GetClassId());
     }
 #endif
     mNodes.push_back(std::make_shared<AnimationNodeClass>(std::move(node)));
@@ -910,7 +628,7 @@ AnimationNodeClass* AnimationClass::AddNode(const AnimationNodeClass& node)
 #if true
     for (const auto& old : mNodes)
     {
-        ASSERT(old->GetId() != node.GetId());
+        ASSERT(old->GetClassId() != node.GetClassId());
     }
 #endif
     mNodes.push_back(std::make_shared<AnimationNodeClass>(node));
@@ -922,7 +640,7 @@ AnimationNodeClass* AnimationClass::AddNode(std::unique_ptr<AnimationNodeClass> 
 #if true
     for (const auto& old : mNodes)
     {
-        ASSERT(old->GetId() != node->GetId());
+        ASSERT(old->GetClassId() != node->GetClassId());
     }
 #endif
     mNodes.push_back(std::move(node));
@@ -941,7 +659,7 @@ bool AnimationClass::DeleteNodeById(const std::string& id)
 {
     for (auto it = mNodes.begin(); it != mNodes.end(); ++it)
     {
-        if ((*it)->GetId() == id)
+        if ((*it)->GetClassId() == id)
         {
             mNodes.erase(it);
             return true;
@@ -977,7 +695,7 @@ AnimationNodeClass* AnimationClass::FindNodeByName(const std::string& name)
 AnimationNodeClass* AnimationClass::FindNodeById(const std::string& id)
 {
     for (auto& node : mNodes)
-        if (node->GetId() == id) return node.get();
+        if (node->GetClassId() == id) return node.get();
     return nullptr;
 }
 
@@ -995,7 +713,7 @@ const AnimationNodeClass* AnimationClass::FindNodeByName(const std::string& name
 const AnimationNodeClass* AnimationClass::FindNodeById(const std::string& id) const
 {
     for (const auto& node : mNodes)
-        if (node->GetId() == id) return node.get();
+        if (node->GetClassId() == id) return node.get();
     return nullptr;
 }
 
@@ -1105,17 +823,6 @@ void AnimationClass::Reset()
         node->Reset();
 }
 
-void AnimationClass::LoadDependentClasses(const ClassLibrary& loader) const
-{
-    for (auto& node : mNodes)
-        node->LoadDependentClasses(loader);
-}
-
-void AnimationClass::Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook) const
-{
-    RenderTreeFunctions<AnimationNodeClass>::Draw(mRenderTree, painter, trans, hook);
-}
-
 void AnimationClass::CoarseHitTest(float x, float y, std::vector<AnimationNodeClass*>* hits,
     std::vector<glm::vec2>* hitbox_positions)
 {
@@ -1187,7 +894,7 @@ AnimationNodeClass* AnimationClass::TreeNodeFromJson(const nlohmann::json& json)
 
     const std::string& id = json["id"];
     for (auto& it : mNodes)
-        if (it->GetId() == id) return it.get();
+        if (it->GetClassId() == id) return it.get();
 
     BUG("No such node found.");
     return nullptr;
@@ -1238,7 +945,7 @@ nlohmann::json AnimationClass::TreeNodeToJson(const AnimationNodeClass* node)
     // later on load based on the ID.
     nlohmann::json ret;
     if (node)
-        ret["id"] = node->GetId();
+        ret["id"] = node->GetClassId();
     return ret;
 }
 
@@ -1266,8 +973,8 @@ AnimationClass AnimationClass::Clone() const
     for (const auto& node : mNodes)
     {
         auto clone = std::make_unique<AnimationNodeClass>(node->Clone());
-        serializer.idmap[node->GetId()] = clone->GetId();
-        serializer.nodes[clone->GetId()] = clone.get();
+        serializer.idmap[node->GetClassId()] = clone->GetClassId();
+        serializer.nodes[clone->GetClassId()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
 
@@ -1395,11 +1102,6 @@ bool Animation::IsPlaying() const
     return !!mAnimationTrack;
 }
 
-void Animation::Draw(gfx::Painter& painter, gfx::Transform& transform, DrawHook* hook) const
-{
-    RenderTreeFunctions<AnimationNode>::Draw(mRenderTree, painter, transform, hook);
-}
-
 void Animation::CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,
     std::vector<glm::vec2>* hitbox_positions)
 {
@@ -1451,7 +1153,7 @@ AnimationNode* Animation::FindNodeByName(const std::string& name)
 AnimationNode* Animation::FindNodeById(const std::string& id)
 {
     for (auto& node : mNodes)
-        if (node->GetId() == id) return node.get();
+        if (node->GetClassId() == id) return node.get();
     return nullptr;
 }
 const AnimationNode* Animation::FindNodeByName(const std::string& name) const
@@ -1463,7 +1165,7 @@ const AnimationNode* Animation::FindNodeByName(const std::string& name) const
 const AnimationNode* Animation::FindNodeById(const std::string& id) const
 {
     for (const auto& node : mNodes)
-        if (node->GetId() == id) return node.get();
+        if (node->GetClassId() == id) return node.get();
     return nullptr;
 }
 
@@ -1473,7 +1175,7 @@ AnimationNode* Animation::TreeNodeFromJson(const nlohmann::json& json)
         return nullptr;
     const std::string& id = json["id"];
     for (auto& it : mNodes)
-        if (it->GetId() == id) return it.get();
+        if (it->GetClassId() == id) return it.get();
 
     BUG("No such node found");
     return nullptr;

@@ -34,7 +34,7 @@
 #include "audio/player.h"
 #include "audio/device.h"
 #include "gamelib/main/interface.h"
-#include "gamelib/loader.h"
+#include "gamelib/renderer.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
 #include "wdk/window_listener.h"
@@ -158,6 +158,7 @@ namespace invaders
         unsigned mRenderHeight = 0;
         game::AppRequestQueue mRequests;
         game::ClassLibrary* mClassLib = nullptr;
+        game::Renderer mRenderer;
     };
 
 } // invaders

@@ -34,6 +34,9 @@
 #include "base/test_float.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "graphics/color4f.h"
+#include "graphics/material.h"
+#include "graphics/drawable.h"
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
 
@@ -115,17 +118,17 @@ void unit_test_animation_node()
     {
         auto copy(node);
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetId()   == node.GetId());
+        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
         copy = node;
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetId()   == node.GetId());
+        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
     }
 
     // test clone
     {
         auto clone = node.Clone();
         TEST_REQUIRE(clone.GetHash() != node.GetHash());
-        TEST_REQUIRE(clone.GetId()   != node.GetId());
+        TEST_REQUIRE(clone.GetClassId() != node.GetClassId());
         TEST_REQUIRE(clone.GetName()         == "root");
         TEST_REQUIRE(clone.GetDrawableId()   == "rectangle");
         TEST_REQUIRE(clone.GetMaterialId()   == "test");
@@ -141,8 +144,6 @@ void unit_test_animation_node()
 
     // test instance state.
     {
-        node.LoadDependentClasses(*g_factory);
-
         // check initial state.
         game::AnimationNode instance(node);
         TEST_REQUIRE(instance.GetName()        == "root");
@@ -248,7 +249,6 @@ void unit_test_animation_transform_actuator()
         klass.SetSize(glm::vec2(1.0f, 1.0f));
         klass.SetRotation(0.0f);
         klass.SetScale(glm::vec2(1.0f, 1.0f));
-        klass.LoadDependentClasses(*g_factory);
 
         // create node instance
         game::AnimationNode node(klass);
@@ -286,11 +286,9 @@ void unit_test_animation_track()
     klass.SetSize(glm::vec2(1.0f, 1.0f));
     klass.SetRotation(0.0f);
     klass.SetScale(glm::vec2(1.0f, 1.0f));
-    klass.LoadDependentClasses(*g_factory);
 
     // create node instance
     game::AnimationNode node(klass);
-
 
     game::AnimationTrackClass track;
     track.SetName("test");
@@ -302,7 +300,7 @@ void unit_test_animation_track()
     TEST_REQUIRE(track.GetNumActuators() == 0);
 
     game::AnimationTransformActuatorClass act;
-    act.SetNodeId(node.GetId());
+    act.SetNodeId(node.GetClassId());
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
     act.SetInterpolation(game::AnimationTransformActuatorClass::Interpolation::Cosine);
@@ -405,8 +403,8 @@ void unit_test_animation()
     TEST_REQUIRE(animation.FindNodeByName("child_1"));
     TEST_REQUIRE(animation.FindNodeByName("child_2"));
     TEST_REQUIRE(animation.FindNodeByName("foobar") == nullptr);
-    TEST_REQUIRE(animation.FindNodeById(animation.GetNode(0).GetId()));
-    TEST_REQUIRE(animation.FindNodeById(animation.GetNode(1).GetId()));
+    TEST_REQUIRE(animation.FindNodeById(animation.GetNode(0).GetClassId()));
+    TEST_REQUIRE(animation.FindNodeById(animation.GetNode(1).GetClassId()));
     TEST_REQUIRE(animation.FindNodeById("asg") == nullptr);
     TEST_REQUIRE(animation.GetNumTracks() == 2);
     TEST_REQUIRE(animation.FindAnimationTrackByName("test1"));
@@ -462,15 +460,13 @@ void unit_test_animation()
         TEST_REQUIRE(clone.GetHash() != animation.GetHash());
     }
 
-    animation.LoadDependentClasses(*g_factory);
-
     // instance
     {
         game::Animation instance(animation);
         TEST_REQUIRE(instance.GetCurrentTime() == real::float32(0.0f));
         TEST_REQUIRE(instance.GetNumNodes() == 3);
         TEST_REQUIRE(instance.FindNodeByName("root"));
-        TEST_REQUIRE(instance.FindNodeById(animation.GetNode(0).GetId()));
+        TEST_REQUIRE(instance.FindNodeById(animation.GetNode(0).GetClassId()));
 
         instance.Update(1.0f);
         TEST_REQUIRE(instance.GetCurrentTime() == real::float32(1.0f));
@@ -482,7 +478,7 @@ void unit_test_animation()
     TEST_REQUIRE(animation.GetNumNodes() == 2);
     TEST_REQUIRE(animation.DeleteNodeByName("child_1"));
     TEST_REQUIRE(animation.GetNumNodes() == 1);
-    TEST_REQUIRE(animation.DeleteNodeById(animation.GetNode(0).GetId()));
+    TEST_REQUIRE(animation.DeleteNodeById(animation.GetNode(0).GetClassId()));
     TEST_REQUIRE(animation.GetNumNodes() == 0);
 
     animation.DeleteAnimationTrack(0);

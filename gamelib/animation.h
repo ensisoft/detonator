@@ -46,19 +46,9 @@
 #include "base/utility.h"
 #include "base/logging.h"
 #include "base/math.h"
-#include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/types.h"
-#include "tree.h"
-
-namespace gfx {
-    class Drawable;
-    class DrawableClass;
-    class Material;
-    class MaterialClass;
-    class Painter;
-    class Transform;
-} // namespace
+#include "gamelib/tree.h"
 
 namespace game
 {
@@ -96,46 +86,14 @@ namespace game
         // for drawable/material etc.
         AnimationNodeClass();
 
-        // Set the drawable object (shape) for this component.
-        // The name identifies the resource in the gfx resource loader.
-        void SetDrawable(const std::shared_ptr<const gfx::DrawableClass>& klass)
-        {
-            mDrawableId  = klass->GetId();
-            mDrawableClass = klass;
-            mDrawable.reset();
-        }
         void SetDrawable(const std::string& id)
-        {
-            mDrawableId= id;
-            mMaterialClass.reset();
-            mMaterial.reset();
-        }
+        { mDrawableId= id; }
         void ResetDrawable()
-        {
-            mDrawableId.clear();
-            mDrawableClass.reset();
-            mDrawable.reset();
-        }
+        { mDrawableId.clear(); }
         void ResetMaterial()
-        {
-            mMaterialId.clear();
-            mMaterialClass.reset();
-            mMaterial.reset();
-        }
-        // Set the material object for this component.
-        // The name identifies the runtime material resource in the gfx resource loader.
-        void SetMaterial(const std::shared_ptr<const gfx::MaterialClass>& klass)
-        {
-            mMaterialId    = klass->GetId();
-            mMaterialClass = klass;
-            mMaterial.reset();
-        }
+        { mMaterialId.clear(); }
         void SetMaterial(const std::string& id)
-        {
-            mMaterialId = id;
-            mMaterialClass.reset();
-            mMaterial.reset();
-        }
+        { mMaterialId = id; }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
         void SetName(const std::string& name)
@@ -167,16 +125,14 @@ namespace game
         { return mRenderStyle; }
         int GetLayer() const
         { return mLayer; }
-        std::string GetId() const
+        std::string GetClassId() const
+        { return mId; }
+        std::string GetInstanceId() const
         { return mId; }
         std::string GetName() const
         { return mName; }
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
-        { return mMaterialClass; }
         std::string GetMaterialId() const
         { return mMaterialId; }
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
-        { return mDrawableClass; }
         std::string GetDrawableId() const
         { return mDrawableId; }
         glm::vec2 GetTranslation() const
@@ -200,24 +156,6 @@ namespace game
         bool HasDrawable() const
         { return !mDrawableId.empty(); }
 
-        // Shim functions to support generic RenderTree draw even for the
-        // class object.
-        std::shared_ptr<const gfx::Drawable> GetDrawable() const;
-        std::shared_ptr<const gfx::Material> GetMaterial() const;
-        std::shared_ptr<gfx::Drawable> GetDrawable();
-        std::shared_ptr<gfx::Material> GetMaterial();
-
-        void SetDrawableInstance(std::unique_ptr<gfx::Drawable> drawable)
-        { mDrawable = std::move(drawable); }
-        void SetMaterialInstance(std::unique_ptr<gfx::Material> material)
-        { mMaterial = std::move(material); }
-
-        // Create new instance of drawable for this type of node.
-        std::unique_ptr<gfx::Drawable> CreateDrawableInstance() const;
-
-        // Create new instance of material for this type of node.
-        std::unique_ptr<gfx::Material> CreateMaterialInstance() const;
-
         // Get this node's transformation that applies
         // to the hierarchy of nodes.
         glm::mat4 GetNodeTransform() const;
@@ -236,10 +174,6 @@ namespace game
         // Reset runtime state to empty. If you call this you'll need to
         // call Prepare also again.
         void Reset();
-
-        // Prepare this animation node class object
-        // by loading all the needed runtime resources.
-        void LoadDependentClasses(const ClassLibrary& loader) const;
 
         // Make a new unique copy of this animation node class with
         // all the same properties but a different unique ID.
@@ -260,12 +194,10 @@ namespace game
         // this is the human readable name and can be used when for example
         // programmatically looking up an animation node.
         std::string mName;
-        // visual properties. we keep the material/drawable names
-        // around so that we we know which resources to load at runtime.
-        mutable std::string mMaterialId;
-        mutable std::string mDrawableId;
-        mutable std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
-        mutable std::shared_ptr<const gfx::DrawableClass> mDrawableClass;
+        // the material type id.
+        std::string mMaterialId;
+        // the drawable type id.
+        std::string mDrawableId;
         // transformation properties.
         // translation offset relative to the animation.
         glm::vec2 mPosition = {0.0f, 0.0f};
@@ -287,11 +219,6 @@ namespace game
         float mLineWidth = 1.0f;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
-        // cached material instance and drawable instance
-        // to avoid having to recreate new instances all the time
-        // when the *class* object is drawn.
-        mutable std::shared_ptr<gfx::Material> mMaterial;
-        mutable std::shared_ptr<gfx::Drawable> mDrawable;
     };
 
     // AnimationNode is an instance of some specific type of AnimationNodeClass
@@ -299,13 +226,15 @@ namespace game
     class AnimationNode
     {
     public:
-        using Flags = AnimationNodeClass::Flags;
-        using RenderPass = AnimationNodeClass::RenderPass;
+        using Flags       = AnimationNodeClass::Flags;
+        using RenderPass  = AnimationNodeClass::RenderPass;
+        using RenderStyle = AnimationNodeClass::RenderStyle;
 
         AnimationNode(const std::shared_ptr<const AnimationNodeClass>& klass)
             : mClass(klass)
         {
             Reset();
+            mId = base::RandomString(10);
         }
         AnimationNode(const AnimationNodeClass& klass)
             : AnimationNode(std::make_shared<AnimationNodeClass>(klass))
@@ -332,6 +261,8 @@ namespace game
         { mAlpha = value; }
 
         // getters for instance state.
+        std::string GetInstanceId() const
+        { return mId; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
         glm::vec2 GetSize() const
@@ -340,30 +271,28 @@ namespace game
         { return mScale; }
         float GetRotation() const
         { return mRotation; }
-        std::shared_ptr<const gfx::Material> GetMaterial() const;
-        std::shared_ptr<const gfx::Drawable> GetDrawable() const;
-        std::shared_ptr<gfx::Material> GetMaterial();
-        std::shared_ptr<gfx::Drawable> GetDrawable();
 
         // Getters for class object state.
         bool TestFlag(AnimationNodeClass::Flags flags) const
         { return mClass->TestFlag(flags); }
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClass() const
-        { return mClass->GetMaterialClass(); }
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClass() const
-        { return mClass->GetDrawableClass(); }
         AnimationNodeClass::RenderPass GetRenderPass() const
         { return mClass->GetRenderPass(); }
         int GetLayer() const
         { return mClass->GetLayer(); }
         std::string GetName() const
         { return mClass->GetName(); }
-        std::string GetId() const
-        { return mClass->GetId(); }
+        std::string GetClassId() const
+        { return mClass->GetClassId(); }
         float GetLineWidth() const
         { return mClass->GetLineWidth(); }
         float GetAlpha() const
         { return mAlpha; }
+        std::string GetMaterialId() const
+        { return mClass->GetMaterialId(); }
+        std::string GetDrawableId() const
+        { return mClass->GetDrawableId(); }
+        RenderStyle GetRenderStyle() const
+        { return mClass->GetRenderStyle(); }
 
         // Reset node's state to the initial state
         void Reset();
@@ -390,10 +319,8 @@ namespace game
     private:
         // the static class object.
         std::shared_ptr<const AnimationNodeClass> mClass;
-        // the material instance.
-        std::shared_ptr<gfx::Material> mMaterial;
-        // the drawable instance.
-        std::shared_ptr<gfx::Drawable> mDrawable;
+        // instance id.
+        std::string mId;
         // the instance state of this animation node.
         // transformation properties.
         // translation offset relative to the parent node.
@@ -586,10 +513,8 @@ namespace game
         float GetEndRotation() const
         { return mEndRotation; }
 
-
         void SetNodeId(const std::string& id)
         { mNodeId = id; }
-
         void SetInterpolation(Interpolation interp)
         { mInterpolation = interp; }
         void SetEndPosition(const glm::vec2& pos)
@@ -718,31 +643,15 @@ namespace game
             : mClass(std::make_shared<MaterialActuatorClass>(std::move(klass)))
         {}
         virtual void Start(AnimationNode& node) override
-        {
-            const bool has_alpha_blending = node.GetMaterialClass()->GetSurfaceType() ==
-                    gfx::MaterialClass::SurfaceType::Transparent;
-            if (!has_alpha_blending) {
-                WARN("Material doesn't enable blending.");
-            }
-
-            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
-                mStartAlpha = node.GetAlpha();
-            else mStartAlpha = node.GetMaterial()->GetAlpha();
-        }
+        { mStartAlpha = node.GetAlpha(); }
         virtual void Apply(AnimationNode& node, float t) override
         {
             const auto method = mClass->GetInterpolation();
             const float value = math::interpolate(mStartAlpha, mClass->GetEndAlpha(), t, method);
-            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
-                node.SetAlpha(value);
-            else node.GetMaterial()->SetAlpha(value);
+            node.SetAlpha(value);
         }
         virtual void Finish(AnimationNode& node) override
-        {
-            if (node.TestFlag(AnimationNode::Flags::OverrideAlpha))
-                node.SetAlpha(mClass->GetEndAlpha());
-            else node.GetMaterial()->SetAlpha(mClass->GetEndAlpha());
-        }
+        { node.SetAlpha(mClass->GetEndAlpha()); }
         virtual float GetStartTime() const override
         { return mClass->GetStartTime(); }
         virtual float GetDuration() const override
@@ -1137,37 +1046,6 @@ namespace game
         float mCurrentTime = 0.0f;
     };
 
-    struct AnimationDrawPacket {
-        // shortcut to the node's material.
-        std::shared_ptr<const gfx::Material> material;
-        // shortcut to the node's drawable.
-        std::shared_ptr<const gfx::Drawable> drawable;
-        // transform that pertains to the draw.
-        glm::mat4 transform;
-        // the animation layer this draw belongs to.
-        int layer = 0;
-        // the render pass this draw belongs to.
-        AnimationNode::RenderPass pass = AnimationNode::RenderPass::Draw;
-    };
-
-    template<typename Node>
-    class AnimationDrawHook
-    {
-    public:
-        virtual ~AnimationDrawHook() = default;
-        // This is a hook function to inspect and  modify the the draw packet produced by the
-        // given animation node. The return value can be used to indicate filtering.
-        // If the function returns false thepacket is dropped. Otherwise it's added to the
-        // current drawlist with any possible modifications.
-        virtual bool InspectPacket(const Node* node, AnimationDrawPacket& packet) { return true; }
-        // This is a hook function to append extra draw packets to the current drawlist
-        // based on the node.
-        // Transform is the combined transformation hierarchy containing the transformations
-        // from this current node to "view".
-        virtual void AppendPackets(const Node* node, gfx::Transform& trans,
-            std::vector<AnimationDrawPacket>& packets) {}
-    protected:
-    };
 
     // AnimationClass holds the data for some particular type of animation,
     // i.e. the AnimationNodes that form the visual look and the appearance
@@ -1177,8 +1055,6 @@ namespace game
     public:
         using RenderTree     = TreeNode<AnimationNodeClass>;
         using RenderTreeNode = TreeNode<AnimationNodeClass>;
-        using DrawHook   = AnimationDrawHook<AnimationNodeClass>;
-        using DrawPacket = AnimationDrawPacket;
 
         AnimationClass()
         { mId = base::RandomString(10); }
@@ -1261,20 +1137,12 @@ namespace game
         // Reset the class object state.
         void Reset();
 
-        // Prepare and load the runtime resources if not yet loaded.
-        void LoadDependentClasses(const ClassLibrary& loader) const;
-
-        // Draw a representation of the animation class instance.
-        // This functionality is mostly to support editor functionality
-        // and to simplify working with an AnimationClass instance.
-        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
-
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's drawable in the animation.
         // The testing is coarse in the sense that it's done against the node's
         // drawable shapes size box and ignores things such as transparency.
         // The hit nodes are stored in the hits vector and the positions with the
-        // nodes' hitboxes are (optionally) strored in the hitbox_positions vector.
+        // nodes' hitboxes are (optionally) stored in the hitbox_positions vector.
         void CoarseHitTest(float x, float y, std::vector<AnimationNodeClass*>* hits,
             std::vector<glm::vec2>* hitbox_positions = nullptr);
         void CoarseHitTest(float x, float y, std::vector<const AnimationNodeClass*>* hits,
@@ -1358,12 +1226,11 @@ namespace game
     public:
         using RenderTree     = TreeNode<AnimationNode>;
         using RenderTreeNode = TreeNode<AnimationNode>;
-        using DrawHook       = AnimationDrawHook<AnimationNode>;
-        using DrawPacket     = AnimationDrawPacket;
 
         // Create new animation instance based on some animation class.
         Animation(const std::shared_ptr<const AnimationClass>& klass);
         Animation(const AnimationClass& klass);
+        Animation(const Animation& other) = delete;
 
         // Update the animation and its nodes.
         // Triggers the actions and events specified on the timeline.
@@ -1377,7 +1244,7 @@ namespace game
         { Play(std::make_unique<AnimationTrack>(std::move(track))); }
         // Play a previously recorded (stored in the animation class object)
         // animation track identified by name. Note that there could be
-        // ambiquity between the names, i.e. multiple tracks with the same name.
+        // ambiguity between the names, i.e. multiple tracks with the same name.
         void PlayByName(const std::string& name);
         // Play a previously recorded (stored in the animation class object)
         // animation track identified by its track id.
@@ -1391,18 +1258,12 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
-        // Draw the animation and its nodes.
-        // Each node is transformed relative to the parent transformation "trans".
-        // Optional draw hook can be used to modify the draw packets before submission to the
-        // paint device.
-        void Draw(gfx::Painter& painter, gfx::Transform& trans, DrawHook* hook = nullptr) const;
-
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's drawable in the animation.
         // The testing is coarse in the sense that it's done against the node's
         // drawable shapes size box and ignores things such as transparency.
         // The hit nodes are stored in the hits vector and the positions with the
-        // nodes' hitboxes are (optionally) strored in the hitbox_positions vector.
+        // nodes' hitboxes are (optionally) stored in the hitbox_positions vector.
         void CoarseHitTest(float x, float y, std::vector<AnimationNode*>* hits,
             std::vector<glm::vec2>* hitbox_positions = nullptr);
         void CoarseHitTest(float x, float y, std::vector<const AnimationNode*>* hits,
@@ -1469,6 +1330,8 @@ namespace game
         { return mCurrentTime; }
 
         AnimationNode* TreeNodeFromJson(const nlohmann::json& json);
+
+        Animation& operator=(const Animation& other) = delete;
     private:
         // the class object.
         std::shared_ptr<const AnimationClass> mClass;

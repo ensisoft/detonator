@@ -76,7 +76,7 @@ public:
             virtual void EnterNode(game::AnimationNodeClass* node)
             {
                 TreeWidget::TreeItem item;
-                item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
+                item.SetId(node ? app::FromUtf8(node->GetClassId()) : "root");
                 item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
                 item.SetUserData(node);
                 item.SetLevel(mLevel);
@@ -206,18 +206,13 @@ public:
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
         game::AnimationNodeClass node;
-        node.SetMaterial(mMaterialClass);
-        node.SetDrawable(mDrawableClass);
+        node.SetMaterial(mMaterialClass->GetId());
+        node.SetDrawable(mDrawableClass->GetId());
         node.SetName(name);
         // the given object position is to be aligned with the center of the shape
         node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
         node.SetSize(glm::vec2(width, height));
         node.SetScale(glm::vec2(1.0f, 1.0f));
-        // for visual appearance only.
-        // set the drawable/material instance so that when the class node instance
-        // is drawn later it looks the same as when it was first added
-        node.SetDrawableInstance(std::move(mDrawable));
-        node.SetMaterialInstance(std::move(mMaterial));
 
         // by default we're appending to the root item.
         auto& root  = mState.animation->GetRenderTree();
@@ -225,7 +220,7 @@ public:
         root.AppendChild(child);
 
         mState.scenegraph_tree_view->Rebuild();
-        mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(child->GetId()));
+        mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(child->GetClassId()));
 
         DEBUG("Added new shape '%1'", name);
         return true;
@@ -332,7 +327,7 @@ public:
         // correctly taking into account that the hierarchy might include several rotations.
         // simplest thing to do is to map the mouse to the object's parent's coordinate space
         // and thus express/measure the object's translation delta relative to it's parent
-        // (as it is in the hiearchy).
+        // (as it is in the hierarchy).
         // todo: this could be simplified if we expressed the view transformation in the render tree's
         // root node. then the below else branch should go away(?)
         if (parent && parent->GetValue())
@@ -531,6 +526,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mState.scenegraph_tree_model = mTreeModel.get();
     mState.scenegraph_tree_view  = mUI.tree;
     mState.workspace = workspace;
+    mState.renderer.SetLoader(workspace);
 
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -662,7 +658,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                     mCurrentTool.reset(new RotateTool(mState, hit));
                 else mCurrentTool.reset(new MoveTool(mState, hit));
 
-                mUI.tree->SelectItemById(app::FromUtf8(hit->GetId()));
+                mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
             }
         }
         if (mCurrentTool)
@@ -790,19 +786,15 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
         const auto& drawable = node.GetDrawableId();
         if (!material.empty() && !workspace->IsValidMaterial(material))
         {
-            WARN("Animation node '%1' uses material '%2' that is deleted.",
-                node.GetName(), material);
-            node.SetMaterial(workspace->GetMaterialClassByName("Checkerboard"));
+            WARN("Animation node '%1' uses material '%2' that is deleted.", node.GetName(), material);
+            node.SetMaterial("_checkerboard");
         }
         if (!drawable.empty() && !workspace->IsValidDrawable(drawable))
         {
-            WARN("Animation node '%1' uses drawable '%2' that is deleted.",
-                node.GetName(), drawable);
-            node.SetDrawable(workspace->GetDrawableClassByName("Rectangle"));
+            WARN("Animation node '%1' uses drawable '%2' that is deleted.", node.GetName(), drawable);
+            node.SetDrawable("_rect");
         }
     }
-    mState.animation->LoadDependentClasses(*workspace);
-
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -931,19 +923,17 @@ bool AnimationWidget::LoadState(const Settings& settings)
         const auto& drawable = node.GetDrawableId();
         if (!material.empty() && !mState.workspace->IsValidMaterial(material))
         {
-            WARN("Animation node '%1' uses material '%2' that is deleted.",
-                node.GetName(), material);
-            node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
+            WARN("Animation node '%1' uses material '%2' that is deleted.", node.GetName(), material);
+            node.SetMaterial("_checkerboard");
         }
         if (!drawable.empty() && !mState.workspace->IsValidDrawable(drawable))
         {
             WARN("Animation node '%1' uses drawable '%2' that is deleted.",
                 node.GetName(), drawable);
-            node.SetDrawable(mState.workspace->GetDrawableClassByName("Rectangle"));
+            node.SetDrawable("_rect");
         }
     }
 
-    mState.animation->LoadDependentClasses(*mState.workspace);
     mOriginalHash = mState.animation->GetHash();
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());
@@ -998,6 +988,7 @@ void AnimationWidget::Update(double secs)
     if (mPlayState == PlayState::Playing)
     {
         mState.animation->Update(mAnimationTime, secs);
+        mState.renderer.Update(*mState.animation, mAnimationTime, secs);
 
         mAnimationTime += secs;
         mUI.time->setText(QString::number(mAnimationTime));
@@ -1182,7 +1173,7 @@ void AnimationWidget::on_actionNodeDelete_triggered()
     std::vector<Carcass> graveyard;
     node->PreOrderTraverseForEach([&](game::AnimationNodeClass* value) {
         Carcass carcass;
-        carcass.id   = value->GetId();
+        carcass.id   = value->GetClassId();
         carcass.name = value->GetName();
         graveyard.push_back(carcass);
     });
@@ -1250,7 +1241,7 @@ void AnimationWidget::on_actionNodeDuplicate_triggered()
     tree_node_parent->AppendChild(std::move(copy_root));
 
     mState.scenegraph_tree_view->Rebuild();
-    mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(copy_root->GetId()));
+    mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(copy_root->GetClassId()));
 }
 
 void AnimationWidget::on_tree_customContextMenuRequested(QPoint)
@@ -1315,7 +1306,7 @@ void AnimationWidget::on_materials_currentIndexChanged(const QString& name)
     {
         node->ResetMaterial();
         if (!name.isEmpty())
-            node->SetMaterial(mState.workspace->GetMaterialClassByName(name));
+            node->SetMaterial(mState.workspace->GetMaterialClassByName(name)->GetId());
     }
 }
 
@@ -1325,7 +1316,7 @@ void AnimationWidget::on_drawables_currentIndexChanged(const QString& name)
     {
         node->ResetDrawable();
         if (!name.isEmpty())
-            node->SetDrawable(mState.workspace->GetDrawableClassByName(name));
+            node->SetDrawable(mState.workspace->GetDrawableClassByName(name)->GetId());
     }
 }
 
@@ -1399,20 +1390,6 @@ void AnimationWidget::resourceUpdated(const app::Resource* resource)
     RebuildComboLists();
     RebuildDrawableMenus();
     DisplayCurrentNodeProperties();
-
-    if (!resource->IsMaterial())
-        return;
-    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
-    {
-        auto& node = mState.animation->GetNode(i);
-        if (node.GetMaterialId() != resource->GetIdUtf8())
-            continue;
-        if (node.TestFlag(game::AnimationNodeClass::Flags::OverrideAlpha))
-            continue;
-        auto material = node.GetMaterial();
-        if (material)
-            material->ResetAlpha();
-    }
 }
 
 void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
@@ -1422,15 +1399,13 @@ void AnimationWidget::resourceToBeDeleted(const app::Resource* resource)
         auto& node = mState.animation->GetNode(i);
         if (node.GetMaterialId() == resource->GetIdUtf8())
         {
-            WARN("Animation node '%1' uses a material '%2' that is deleted.",
-                 node.GetName(), resource->GetName());
-            node.SetMaterial(mState.workspace->GetMaterialClassByName("Checkerboard"));
+            WARN("Animation node '%1' uses a material '%2' that is deleted.", node.GetName(), resource->GetName());
+            node.SetMaterial("_checkerboard");
         }
         else if (node.GetDrawableId() == resource->GetIdUtf8())
         {
-            WARN("Animation node '%1' uses a drawable '%2' that is deleted.",
-                 node.GetName(), resource->GetName());
-            node.SetDrawable(mState.workspace->GetDrawableClassByName("Rectangle"));
+            WARN("Animation node '%1' uses a drawable '%2' that is deleted.", node.GetName(), resource->GetName());
+            node.SetDrawable("_rect");
         }
     }
 
@@ -1596,6 +1571,14 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
     }
 }
 
+void AnimationWidget::on_chkRestart_stateChanged(int state)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetFlag(game::AnimationNodeClass::Flags::RestartDrawable, state);
+    }
+}
+
 void AnimationWidget::on_chkOverrideAlpha_stateChanged(int state)
 {
     UpdateCurrentNodeAlpha();
@@ -1670,20 +1653,20 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
     // camera offset should be reflected in the translateX/Y UI components as well.
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    class DrawHook : public game::AnimationClass::DrawHook
+    class DrawHook : public game::AnimationClassDrawHook
     {
     public:
         DrawHook(game::AnimationNodeClass* selected, PlayState playstate)
           : mSelected(selected)
           , mPlayState(playstate)
         {}
-        virtual bool InspectPacket(const game::AnimationNodeClass* node, game::AnimationClass::DrawPacket&) override
+        virtual bool InspectPacket(const game::AnimationNodeClass* node, game::AnimationDrawPacket&) override
         {
             if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
                 return false;
             return true;
         }
-        virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans, std::vector<game::AnimationClass::DrawPacket>& packets) override
+        virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans, std::vector<game::AnimationDrawPacket>& packets) override
         {
             const auto is_mask     = node->GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask;
             const auto is_selected = node == mSelected;
@@ -1695,7 +1678,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
                 static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
                 // visualize it.
                 trans.Push(node->GetModelTransform());
-                    game::AnimationClass::DrawPacket box;
+                    game::AnimationDrawPacket box;
                     box.transform = trans.GetAsMatrix();
                     box.material  = yellow;
                     box.drawable  = rect; //node->GetDrawable();
@@ -1716,7 +1699,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
-                game::AnimationClass::DrawPacket selection;
+                game::AnimationDrawPacket selection;
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
@@ -1739,7 +1722,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-                game::AnimationClass::DrawPacket sizing_box;
+                game::AnimationDrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
@@ -1751,7 +1734,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                game::AnimationClass::DrawPacket rotation_circle;
+                game::AnimationDrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
@@ -1824,7 +1807,9 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // begin the animation transformation space
     view.Push();
-        mState.animation->Draw(painter, view, &hook);
+        mState.renderer.BeginFrame();
+        mState.renderer.Draw(*mState.animation, painter, view, &hook);
+        mState.renderer.EndFrame();
     view.Pop();
 
     if (mCurrentTool)
@@ -1872,16 +1857,12 @@ void AnimationWidget::UpdateCurrentNodeAlpha()
         const bool checked = GetValue(mUI.chkOverrideAlpha);
         node->SetFlag(game::AnimationNodeClass::Flags::OverrideAlpha, checked);
         node->SetAlpha(alpha);
-        auto material = node->GetMaterial();
-        if (material && checked)
-            material->SetAlpha(alpha);
-        else if (material)
-            material->ResetAlpha();
+        const auto& material = mState.workspace->FindMaterialClass(node->GetMaterialId());
 
         if (!checked || !material)
             return;
 
-        const bool has_alpha_blending = material->GetClass().GetSurfaceType() ==
+        const bool has_alpha_blending = material->GetSurfaceType() ==
                                         gfx::MaterialClass::SurfaceType::Transparent;
         if (has_alpha_blending)
             return;
@@ -1914,7 +1895,7 @@ void AnimationWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         const auto& material = mState.workspace->MapMaterialIdToName(node->GetMaterialId());
         const auto& drawable = mState.workspace->MapDrawableIdToName(node->GetDrawableId());
-        SetValue(mUI.nodeID, node->GetId());
+        SetValue(mUI.nodeID, node->GetClassId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.renderPass, node->GetRenderPass());
         SetValue(mUI.renderStyle, node->GetRenderStyle());

@@ -45,7 +45,7 @@
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
-#include "gamelib/loader.h"
+#include "gamelib/classlib.h"
 #include "gamelib/animation.h"
 #include "gamelib/homedir.h"
 #include "gamelib/settings.h"
@@ -302,14 +302,14 @@ public:
 
     // returns true if animation is still valid
     // otherwise false and the animation is expired.
-    virtual bool update(float dt) = 0;
+    virtual bool update(game::Renderer& renderer, float dt) = 0;
 
     // Paint/Draw the animation with the painter in the render target.
     // The given rect defines the sub-rectangle (the box) inside the
     // render target where the painting should occur.
-    // No scissor is set by default instead the animatiojn should
+    // No scissor is set by default instead the animation should
     // set the scissor as needed once the final transformation is done.
-    virtual void paint(gfx::Painter& painter, const IRect& rect) = 0;
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) = 0;
 
     // Get the bounds of the animation object with respect to the
     // given window rect.
@@ -341,14 +341,14 @@ public:
         mVelocity  = 0.08 + math::rand(0.0, 0.08);
         mDirection = direction;
     }
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         const auto d = mDirection * mVelocity * (dt / 1000.0f);
         mPosition.x = math::wrap(-0.2f, 1.0f, mPosition.x + d.x);
         mPosition.y = math::wrap(-0.2f, 1.0f, mPosition.y + d.y);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         // the asteroids are just in their own space which we simply map
         // to the whole of the given rectangle
@@ -360,7 +360,7 @@ public:
                                 mPosition.y * height + ypos);
         gfx::Transform t;
         t.MoveTo(pos);
-        mSprite->Draw(painter, t);
+        renderer.Draw(*mSprite, painter, t);
     }
 
     virtual FRect getBounds(const IRect& rect) const override
@@ -411,7 +411,7 @@ public:
         mSprite = gfx::CreateMaterialInstance(klass);
     }
 
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -423,7 +423,7 @@ public:
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -483,7 +483,7 @@ public:
         params.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
         mParticles = std::make_unique<ParticleEngine>(params);
     }
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum < mStartTime)
@@ -495,7 +495,7 @@ public:
         mParticles->Update(dt / 1000.0f);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -546,7 +546,7 @@ public:
         mSprite = gfx::CreateMaterialInstance(klass);
     }
 
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -557,7 +557,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -639,7 +639,7 @@ public:
             mParticles.push_back(p);
         }
     }
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTime += dt;
         if (mTime < mStartTime)
@@ -657,7 +657,7 @@ public:
 
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         if (mTime < mStartTime)
             return;
@@ -732,7 +732,7 @@ public:
       , mScale(scale)
       , mSprite(std::move(sprite))
     {}
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         const auto direction = glm::vec2(-1.0f, 0.0f);
 
@@ -744,10 +744,11 @@ public:
                 return false;
         }
         mSprite->Update(dt/1000.0f);
+        renderer.Update(*mSprite, mLifeTime/1000.0f, dt/1000.0f);
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         const auto& layout = GetGameWindowLayout(rect);
 
@@ -758,7 +759,7 @@ public:
 
         gfx::Transform t;
         t.MoveTo(position);
-        mSprite->Draw(painter, t);
+        renderer.Draw(*mSprite, painter, t);
 
         const auto* box = mSprite->FindNodeByName("Box");
         auto text = mSprite->GetBoundingBox(box);
@@ -792,10 +793,10 @@ public:
     void setViewString(const std::wstring& str)
     { mText = str; }
 
-    std::string getTextureName() const
+    std::string getTextureName(const game::ClassLibrary& loader) const
     {
         const auto* node = mSprite->FindNodeByName("Ship");
-        const auto& mat = node->GetMaterialClass();
+        const auto& mat = loader.FindMaterialClass(node->GetMaterialId());
         const auto& tex = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();
@@ -824,7 +825,7 @@ public:
         , mLifetime(lifetime)
         , mPosition(position)
     {}
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum > mLifetime)
@@ -835,7 +836,7 @@ public:
         mPosition += p;
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect)  override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         const auto& layout = GetGameWindowLayout(rect);
         const auto dim = layout.GetCellDimensions();
@@ -877,7 +878,7 @@ public:
         mDirection = glm::normalize(glm::vec2(x, y));
     }
 
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         const auto maxLifeTime = 10000.0f;
 
@@ -896,10 +897,11 @@ public:
         mPosition.x = math::wrap(0.0f, 1.0f, x);
         mPosition.y = math::wrap(0.0f, 1.0f, y);
         mSprite->Update(dt / 1000.0f);
+        renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
 
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         const auto width  = rect.GetWidth();
         const auto height = rect.GetHeight();
@@ -909,9 +911,9 @@ public:
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
 
-        gfx::Transform ufo;
-        ufo.MoveTo(pos);
-        mSprite->Draw(painter, ufo);
+        gfx::Transform t;
+        t.MoveTo(pos);
+        renderer.Draw(*mSprite, painter, t);
     }
 
     virtual FRect getBounds(const IRect& rect) const override
@@ -946,11 +948,11 @@ public:
         return false;
     }
 
-    std::string getTextureName() const
+    std::string getTextureName(const game::ClassLibrary& loader) const
     {
         // todo: simplify.
         const auto* node = mSprite->FindNodeByName("UFO");
-        const auto& mat  = node->GetMaterialClass();
+        const auto& mat  = loader.FindMaterialClass(node->GetMaterialId());
         const auto& tex  = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();
@@ -973,15 +975,16 @@ public:
         , mSprite(std::move(sprite))
     {}
 
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mRuntime += dt;
         if (mRuntime > mLifeTime)
             return false;
         mSprite->Update(dt/1000.0f);
+        renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         const auto size = std::max(rect.GetWidth(), rect.GetHeight());
         const auto explosion_size = size * 3;
@@ -989,10 +992,10 @@ public:
         const auto scalex = explosion_size / box.GetWidth();
         const auto scaley = explosion_size / box.GetHeight();
 
-        gfx::Transform bang;
-        bang.Scale(scalex, scaley);
-        bang.MoveTo(rect.GetWidth() * 0.5, rect.GetHeight() * 0.5);
-        mSprite->Draw(painter, bang);
+        gfx::Transform t;
+        t.Scale(scalex, scaley);
+        t.MoveTo(rect.GetWidth() * 0.5, rect.GetHeight() * 0.5);
+        renderer.Draw(*mSprite, painter, t);
     }
 private:
     const float mLifeTime = 0.0f;
@@ -1011,7 +1014,7 @@ public:
         , mScore(score)
     {}
 
-    virtual bool update(float dt) override
+    virtual bool update(game::Renderer& renderer, float dt) override
     {
         mTimeAccum += dt;
         if (mTimeAccum < mStartTime)
@@ -1019,7 +1022,7 @@ public:
         return mTimeAccum - mStartTime < mLifeTime;
     }
 
-    virtual void paint(gfx::Painter& painter, const IRect& rect) override
+    virtual void paint(game::Renderer& renderer, gfx::Painter& painter, const IRect& rect) override
     {
         if (mTimeAccum < mStartTime)
             return;
@@ -1310,7 +1313,7 @@ private:
 class GameWidget::GameHelp : public GameWidget::State
 {
 public:
-    virtual void update(float dt)
+    virtual void update(float dt) override
     {}
 
     virtual Action mapAction(const wdk::WindowEventKeydown& key) const override
@@ -1689,7 +1692,7 @@ GameWidget::GameWidget()
         std::unique_ptr<Animation> missile(new Missile(missileBeg, missileDir, base::ToUpper(m.string), missileFlyTime));
         std::unique_ptr<Explosion> explosion(new Explosion(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Smoke> smoke(new Smoke(missileEnd, missileFlyTime + 100, explosionTime + 500));
-        std::unique_ptr<Debris> debris(new Debris(invader->getTextureName(), missileEnd, missileFlyTime, explosionTime + 500));
+        std::unique_ptr<Debris> debris(new Debris(invader->getTextureName(*mClassLib), missileEnd, missileFlyTime, explosionTime + 500));
         std::unique_ptr<Sparks> sparks(new Sparks(missileEnd, missileFlyTime, explosionTime));
         std::unique_ptr<Animation> score(new Score(missileEnd, explosionTime, 2000, killScore));
 
@@ -2063,6 +2066,7 @@ void GameWidget::Update(double current_time, double dt)
     }
 
     mBackground->Update(time/1000.0f);
+    mRenderer.Update(*mBackground, current_time, time/1000.0f);
 
     mStates.top()->update(time);
 
@@ -2082,7 +2086,7 @@ void GameWidget::Update(double current_time, double dt)
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->update(time);
+            invader->update(mRenderer, time);
         }
     }
 
@@ -2090,7 +2094,7 @@ void GameWidget::Update(double current_time, double dt)
     for (auto it = std::begin(mAnimations); it != std::end(mAnimations);)
     {
         auto& anim = *it;
-        if (!anim->update(time))
+        if (!anim->update(mRenderer, time))
         {
             it = mAnimations.erase(it);
             continue;
@@ -2153,7 +2157,7 @@ void GameWidget::Update(double current_time, double dt)
             const auto startNow = 0.0f;
             const auto lifetime = 1000.0f;
 
-            std::unique_ptr<Debris> debris(new Debris(UFO->getTextureName(),
+            std::unique_ptr<Debris> debris(new Debris(UFO->getTextureName(*mClassLib),
                 position, startNow, lifetime + 500));
             mAnimations.push_back(std::move(debris));
 
@@ -2198,6 +2202,8 @@ void GameWidget::Draw()
     mPainter->Clear(gfx::Color4f(7, 14, 22, 255));
     mPainter->SetViewport(0, 0, w, h);
     mPainter->SetTopLeftView(w, h);
+    mRenderer.SetLoader(mClassLib);
+    mRenderer.BeginFrame();
 
     // paint the background
     {
@@ -2205,13 +2211,13 @@ void GameWidget::Draw()
         const auto& rect = (*mBackground)->GetBoundingBox(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
-        mBackground->Draw(*mPainter, view);
+        mRenderer.Draw(*mBackground, *mPainter, view);
     }
 
     // then paint the animations on top of the background
     for (auto& anim : mAnimations)
     {
-        anim->paint(*mPainter, rect);
+        anim->paint(mRenderer, *mPainter, rect);
     }
 
     const bool bIsGameRunning = mStates.top()->isGameRunning();
@@ -2224,7 +2230,7 @@ void GameWidget::Draw()
         for (auto& pair : mInvaders)
         {
             auto& invader = pair.second;
-            invader->paint(*mPainter, rect);
+            invader->paint(mRenderer, *mPainter, rect);
         }
     }
 
@@ -2241,6 +2247,7 @@ void GameWidget::Draw()
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
     }
 
+    mRenderer.EndFrame();
     mDevice->EndFrame(true);
     mDevice->CleanGarbage(120);
 }
