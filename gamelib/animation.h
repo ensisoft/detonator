@@ -49,6 +49,7 @@
 #include "graphics/drawable.h"
 #include "graphics/types.h"
 #include "gamelib/tree.h"
+#include "gamelib/enum.h"
 
 namespace game
 {
@@ -58,17 +59,15 @@ namespace game
     class AnimationNodeClass
     {
     public:
-        enum class RenderPass {
-            Draw,
-            Mask
-        };
         using RenderStyle = gfx::Drawable::Style;
+        using DrawableItemType = AnimationNodeClass;
+        using RenderPass = game::RenderPass;
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
             VisibleInEditor,
             // Whether the node should generate render packets or not.
-            DoesRender,
+            VisibleInGame,
             // Whether the node should update material or not
             UpdateMaterial,
             // Whether the node should update drawable or not
@@ -180,6 +179,11 @@ namespace game
         // serialize the component properties into JSON.
         nlohmann::json ToJson() const;
 
+        AnimationNodeClass* GetDrawable()
+        { return this; }
+        const AnimationNodeClass* GetDrawable() const
+        { return this; }
+
         // Create a new AnimationNodeClass object based on the JSON.
         // Returns std::nullopt if the deserialization failed.
         // Note that this does not yet create/load any runtime objects
@@ -227,6 +231,7 @@ namespace game
         using Flags       = AnimationNodeClass::Flags;
         using RenderPass  = AnimationNodeClass::RenderPass;
         using RenderStyle = AnimationNodeClass::RenderStyle;
+        using DrawableItemType = AnimationNode;
 
         AnimationNode(const std::shared_ptr<const AnimationNodeClass>& klass)
             : mClass(klass)
@@ -305,6 +310,11 @@ namespace game
         // Get this node's transformation that applies to this
         // node's drawable object(s).
         glm::mat4 GetModelTransform() const;
+
+        AnimationNode* GetDrawable()
+        { return this; }
+        const AnimationNode* GetDrawable() const
+        { return this; }
 
         // accessor the node's class type object.
         const AnimationNodeClass& GetClass() const

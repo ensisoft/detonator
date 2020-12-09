@@ -1248,7 +1248,7 @@ void AnimationWidget::on_chkDoesRender_stateChanged(int state)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::AnimationNodeClass::Flags::DoesRender, state);
+        node->SetFlag(game::AnimationNodeClass::Flags::VisibleInGame, state);
     }
 }
 
@@ -1341,13 +1341,13 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
           : mSelected(selected)
           , mPlayState(playstate)
         {}
-        virtual bool InspectPacket(const game::AnimationNodeClass* node, game::AnimationDrawPacket&) override
+        virtual bool InspectPacket(const game::AnimationNodeClass* node, game::DrawPacket&) override
         {
             if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
                 return false;
             return true;
         }
-        virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans, std::vector<game::AnimationDrawPacket>& packets) override
+        virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans, std::vector<game::DrawPacket>& packets) override
         {
             const auto is_mask     = node->GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask;
             const auto is_selected = node == mSelected;
@@ -1359,7 +1359,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
                 static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
                 // visualize it.
                 trans.Push(node->GetModelTransform());
-                    game::AnimationDrawPacket box;
+                    game::DrawPacket box;
                     box.transform = trans.GetAsMatrix();
                     box.material  = yellow;
                     box.drawable  = rect; //node->GetDrawable();
@@ -1380,7 +1380,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 
             // draw the selection rectangle.
             trans.Push(node->GetModelTransform());
-                game::AnimationDrawPacket selection;
+                game::DrawPacket selection;
                 selection.transform = trans.GetAsMatrix();
                 selection.material  = green;
                 selection.drawable  = rect;
@@ -1403,7 +1403,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-                game::AnimationDrawPacket sizing_box;
+                game::DrawPacket sizing_box;
                 sizing_box.transform = trans.GetAsMatrix();
                 sizing_box.material  = green;
                 sizing_box.drawable  = rect;
@@ -1415,7 +1415,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
             trans.Push();
                 trans.Scale(10.0f/scale.x, 10.0f/scale.y);
                 trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                game::AnimationDrawPacket rotation_circle;
+                game::DrawPacket rotation_circle;
                 rotation_circle.transform = trans.GetAsMatrix();
                 rotation_circle.material  = green;
                 rotation_circle.drawable  = circle;
@@ -1536,7 +1536,7 @@ void AnimationWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.alpha, NormalizedFloat(node->GetAlpha()));
         SetValue(mUI.chkUpdateMaterial, node->TestFlag(game::AnimationNodeClass::Flags::UpdateMaterial));
         SetValue(mUI.chkUpdateDrawable, node->TestFlag(game::AnimationNodeClass::Flags::UpdateDrawable));
-        SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::DoesRender));
+        SetValue(mUI.chkDoesRender, node->TestFlag(game::AnimationNodeClass::Flags::VisibleInGame));
     }
 }
 

@@ -43,7 +43,13 @@
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
 #include "gamelib/renderer.h"
+#include "gamelib/scene.h"
 #include "gamelib/main/interface.h"
+
+namespace {
+    gfx::FPoint ToPoint(const glm::vec2& vec)
+    { return gfx::FPoint(vec.x, vec.y); }
+} // namespace
 
 class TestCase
 {
@@ -55,6 +61,103 @@ public:
     virtual void End() {}
 private:
 };
+
+class SceneTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        mRenderer.Draw(*mScene, painter, transform);
+
+        // visualize a node bounding box.
+        const auto* node = mScene->FindNodeByInstanceName("box1");
+        const auto box = mScene->GetBoundingBox(node);
+        gfx::DrawLine(painter, ToPoint(box.GetTopLeft()),  ToPoint(box.GetTopRight()), gfx::Color::HotPink);
+        gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
+        gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
+        gfx::DrawLine(painter, ToPoint(box.GetBotLeft()),  ToPoint(box.GetTopLeft()), gfx::Color::HotPink);
+    }
+    virtual void Update(float dt)
+    {
+        if (!mScene)
+            return;
+
+        mTime += dt;
+        const auto angular_velocity = 0.4;
+        const auto angle = mTime * angular_velocity;
+        const float x = std::cos(angle);
+        const float y = std::sin(angle);
+
+        auto* ground = mScene->FindNodeByClassName("ground");
+        ground->SetTranslation(glm::vec2(400, 400) + glm::vec2(x*100.0f, y*100.0f));
+        auto* box0 = mScene->FindNodeByInstanceName("box0");
+        box0->SetRotation(-angle);
+        box0->SetTranslation(glm::vec2(100.0, 100.0f) + glm::vec2(x*50.0f, y*50.0f));
+        auto* box1 = mScene->FindNodeByInstanceName("box1");
+        box1->SetTranslation(glm::vec2(-100.0, -100.0f) + glm::vec2(-x*50.0f, -y*50.0f));
+        box1->SetRotation(angle);
+    }
+    virtual void Start(game::ClassLibrary* loader)
+    {
+        // this is the "static" scene class object that
+        // can be used to create scene instances.
+        game::SceneClass scene;
+
+        // create ground.
+        {
+            game::SceneNodeClass node;
+            node.SetName("ground");
+            node.SetSize(glm::vec2(200.0f, 100.0f));
+            node.SetTranslation(glm::vec2(400, 400));
+            node.SetRotation(0.2);
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("uv_test");
+            node.SetDrawable(draw);
+
+            auto* child = scene.AddNode(node);
+            auto& root  = scene.GetRenderTree();
+            root.AppendChild(child);
+            child->SetName("ground");
+        }
+
+        // create box0
+        game::SceneNodeClass box;
+        box.SetName("box");
+        box.SetSize(glm::vec2(40.0f, 40.0f));
+        game::DrawableItemClass draw;
+        draw.SetDrawableId("rectangle");
+        draw.SetMaterialId("uv_test");
+        box.SetDrawable(draw);
+
+        // create an instance of the scene.
+        mScene = game::CreateSceneInstance(scene);
+
+        // modify the instance with some new objects of type box.
+        {
+            auto* child = mScene->AddNode(game::SceneNode(box));
+            auto& root  = mScene->GetRenderTree();
+            root.GetChildNode(0).AppendChild(child);
+            child->SetName("box0");
+            child->SetTranslation(glm::vec2(100, 100));
+        }
+        // add another box object.
+        {
+            auto* child = mScene->AddNode(game::SceneNode(box));
+            auto& root  = mScene->GetRenderTree();
+            root.GetChildNode(0).AppendChild(child);
+            child->SetName("box1");
+            child->SetTranslation(glm::vec2(-100, -100));
+        }
+        mRenderer.SetLoader(loader);
+    }
+private:
+    std::unique_ptr<game::Scene> mScene;
+    game::Renderer mRenderer;
+    float mTime = 0.0f;
+};
+
 
 class AnimationTest : public TestCase
 {
@@ -264,6 +367,7 @@ public:
     {
         mTestList.emplace_back(new BoundingBoxTest);
         mTestList.emplace_back(new AnimationTest);
+        mTestList.emplace_back(new SceneTest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -345,6 +449,12 @@ public:
             return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/uv_test_512.png"));
         else if (name == "checkerboard")
             return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/Checkerboard.png"));
+        else if (name == "color")
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+        else if (name == "object")
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+        else if (name == "ground")
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::DarkGreen));
         ASSERT("No such material class.");
         return nullptr;
     }

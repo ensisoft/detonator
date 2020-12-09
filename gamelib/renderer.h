@@ -34,6 +34,7 @@
 #include <unordered_map>
 
 #include "gamelib/animation.h"
+#include "gamelib/scene.h"
 #include "gamelib/tree.h"
 
 namespace gfx {
@@ -47,9 +48,11 @@ namespace game
 {
     class Animation;
     class AnimationClass;
+    class Scene;
+    class SceneClass;
     class ClassLibrary;
 
-    struct AnimationDrawPacket {
+    struct DrawPacket {
         // shortcut to the node's material.
         std::shared_ptr<const gfx::Material> material;
         // shortcut to the node's drawable.
@@ -59,30 +62,31 @@ namespace game
         // the animation layer this draw belongs to.
         int layer = 0;
         // the render pass this draw belongs to.
-        AnimationNode::RenderPass pass = AnimationNode::RenderPass::Draw;
+        RenderPass pass = RenderPass::Draw;
     };
 
     template<typename Node>
-    class AnimationDrawHook
+    class DrawHook
     {
     public:
-        virtual ~AnimationDrawHook() = default;
+        virtual ~DrawHook() = default;
         // This is a hook function to inspect and  modify the the draw packet produced by the
         // given animation node. The return value can be used to indicate filtering.
         // If the function returns false the packet is dropped. Otherwise it's added to the
         // current drawlist with any possible modifications.
-        virtual bool InspectPacket(const Node* node, AnimationDrawPacket& packet) { return true; }
+        virtual bool InspectPacket(const Node* node, DrawPacket& packet) { return true; }
         // This is a hook function to append extra draw packets to the current drawlist
         // based on the node.
         // Transform is the combined transformation hierarchy containing the transformations
         // from this current node to "view".
-        virtual void AppendPackets(const Node* node, gfx::Transform& trans,
-                                   std::vector<AnimationDrawPacket>& packets) {}
+        virtual void AppendPackets(const Node* node, gfx::Transform& trans, std::vector<DrawPacket>& packets) {}
     protected:
     };
 
-    using AnimationClassDrawHook = AnimationDrawHook<AnimationNodeClass>;
-    using AnimationInstanceDrawHook = AnimationDrawHook<AnimationNode>;
+    using AnimationClassDrawHook    = DrawHook<AnimationNodeClass>;
+    using AnimationInstanceDrawHook = DrawHook<AnimationNode>;
+    using SceneClassDrawHook        = DrawHook<SceneNodeClass>;
+    using SceneInstanceDrawHook     = DrawHook<SceneNode>;
 
     class Renderer
     {
@@ -99,14 +103,21 @@ namespace game
         // and to simplify working with an AnimationClass instance.
         void Draw(const AnimationClass& klass,
                   gfx::Painter& painter, gfx::Transform& transform,
-                  AnimationDrawHook<AnimationNodeClass>* hook = nullptr);
+                  AnimationClassDrawHook* hook = nullptr);
         // Draw the animation and its nodes.
         // Each node is transformed relative to the parent transformation "trans".
         // Optional draw hook can be used to modify the draw packets before submission to the
         // paint device.
         void Draw(const Animation& animation,
                   gfx::Painter& painter, gfx::Transform& transform,
-                  AnimationDrawHook<AnimationNode>* hook = nullptr);
+                  AnimationInstanceDrawHook* hook = nullptr);
+
+        void Draw(const Scene& scene,
+                  gfx::Painter& painter, gfx::Transform& transform,
+                  SceneInstanceDrawHook* hook = nullptr);
+        void Draw(const SceneClass& scene,
+                  gfx::Painter& painter, gfx::Transform& transform,
+                  SceneClassDrawHook* hook = nullptr);
 
         // Update the visual representation of the renderer's paint node
         // based on the given animation node.
@@ -114,18 +125,22 @@ namespace game
         void Update(const AnimationNode& node, float time, float dt);
         void Update(const AnimationClass& klass, float time, float dt);
         void Update(const Animation& animation, float time, float dt);
+        void Update(const SceneNodeClass& node, float time, float dt);
+        void Update(const SceneClass& scene, float time, float dt);
+        void Update(const SceneNode& node, float time, float dt);
+        void Update(const Scene& scene, float time, float dt);
 
         void EndFrame();
     private:
         template<typename NodeType>
-        void Update(const NodeType& node, float time, float dt);
+        void UpdateNode(const NodeType& node, float time, float dt);
 
         template<typename NodeType>
-        void Draw(const TreeNode<NodeType>& tree,
-                  gfx::Painter& painter, gfx::Transform& transform,
-                  AnimationDrawHook<NodeType>* hook);
+        void DrawRenderTree(const TreeNode<NodeType>& tree,
+                           gfx::Painter& painter, gfx::Transform& transform,
+                           DrawHook<NodeType>* hook);
     private:
-        const ClassLibrary* mLoader;
+        const ClassLibrary* mLoader = nullptr;
         struct PaintNode {
             bool visited = false;
             std::shared_ptr<gfx::Material> material;

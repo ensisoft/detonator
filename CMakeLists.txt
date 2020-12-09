@@ -151,6 +151,7 @@ add_executable(Editor
     graphics/resource.cpp
     gamelib/animation.cpp
     gamelib/renderer.cpp
+    gamelib/scene.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -399,6 +400,7 @@ add_library(gamelib_test SHARED
     graphics/resource.cpp
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
+    gamelib/scene.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
@@ -530,12 +532,18 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     gamelib/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
+add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
+        base/assert.cpp
+        gamelib/scene.cpp)
+
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 add_test(NAME unit_test_tree COMMAND unit_test_tree)
 add_test(NAME unit_test_anim COMMAND unit_test_anim)
 add_test(NAME unit_test_settings COMMAND unit_test_settings)
+add_test(NAME unit_test_scene COMMAND unit_test_scene)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)

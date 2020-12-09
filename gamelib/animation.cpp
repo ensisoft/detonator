@@ -43,7 +43,7 @@ AnimationNodeClass::AnimationNodeClass()
 {
     mId = base::RandomString(10);
     mBitFlags.set(Flags::VisibleInEditor, true);
-    mBitFlags.set(Flags::DoesRender, true);
+    mBitFlags.set(Flags::VisibleInGame, true);
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::UpdateDrawable, true);
     mBitFlags.set(Flags::RestartDrawable, true);

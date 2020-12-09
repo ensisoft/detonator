@@ -25,12 +25,14 @@
 #include "warnpush.h"
 #include "warnpop.h"
 
+#include "base/logging.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
+#include "gamelib/scene.h"
 #include "gamelib/renderer.h"
 
 namespace game
@@ -44,31 +46,45 @@ void Renderer::BeginFrame()
 
 void Renderer::Draw(const AnimationClass& klass,
                     gfx::Painter& painter, gfx::Transform& transform,
-                    AnimationDrawHook<AnimationNodeClass>* hook)
+                    AnimationClassDrawHook* hook)
 {
-    Draw<AnimationNodeClass>(klass.GetRenderTree(), painter, transform, hook);
+    DrawRenderTree<AnimationNodeClass>(klass.GetRenderTree(), painter, transform, hook);
 }
 void Renderer::Draw(const Animation& animation,
                     gfx::Painter& painter, gfx::Transform& transform,
-                    AnimationDrawHook<AnimationNode>* hook)
+                    AnimationInstanceDrawHook* hook)
 {
-    Draw<AnimationNode>(animation.GetRenderTree(), painter, transform, hook);
+    DrawRenderTree<AnimationNode>(animation.GetRenderTree(), painter, transform, hook);
+}
+
+void Renderer::Draw(const Scene& scene,
+                    gfx::Painter& painter, gfx::Transform& transform,
+                    SceneInstanceDrawHook* hook)
+{
+    DrawRenderTree<SceneNode>(scene.GetRenderTree(), painter, transform, hook);
+}
+
+void Renderer::Draw(const SceneClass& scene,
+                    gfx::Painter& painter, gfx::Transform& transform,
+                    SceneClassDrawHook* hook)
+{
+    DrawRenderTree<SceneNodeClass>(scene.GetRenderTree(), painter, transform, hook);
 }
 
 void Renderer::Update(const AnimationNodeClass& node, float time, float dt)
 {
-    Update<AnimationNodeClass>(node, time, dt);
+    UpdateNode<AnimationNodeClass>(node, time, dt);
 }
 void Renderer::Update(const AnimationNode& node, float time, float dt)
 {
-    Update<AnimationNode>(node, time, dt);
+    UpdateNode<AnimationNode>(node, time, dt);
 }
 void Renderer::Update(const AnimationClass& klass, float time, float dt)
 {
     for (size_t i=0; i<klass.GetNumNodes(); ++i) 
     {
         const auto& node = klass.GetNode(i);
-        Update<AnimationNodeClass>(node, time, dt);
+        UpdateNode<AnimationNodeClass>(node, time, dt);
     }
 }
 void Renderer::Update(const Animation& animation, float time, float dt)
@@ -76,8 +92,36 @@ void Renderer::Update(const Animation& animation, float time, float dt)
     for (size_t i=0; i<animation.GetNumNodes(); ++i) 
     {
         const auto& node = animation.GetNode(i);
-        Update<AnimationNode>(node, time, dt);
+        UpdateNode<AnimationNode>(node, time, dt);
     }
+}
+
+void Renderer::Update(const SceneClass& scene, float time, float dt)
+{
+    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    {
+        const auto& node = scene.GetNode(i);
+        UpdateNode<SceneNodeClass>(node, time, dt);
+    }
+}
+
+void Renderer::Update(const SceneNodeClass& node, float time, float dt)
+{
+    UpdateNode<SceneNodeClass>(node, time, dt);
+}
+
+void Renderer::Update(const Scene& scene, float time, float dt)
+{
+    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    {
+        const auto& node = scene.GetNode(i);
+        UpdateNode<SceneNode>(node, time, dt);
+    }
+}
+
+void Renderer::Update(const SceneNode& node, float time, float dt)
+{
+    UpdateNode<SceneNode>(node, time, dt);
 }
 
 void Renderer::EndFrame()
@@ -95,35 +139,42 @@ void Renderer::EndFrame()
 }
 
 template<typename Node>
-void Renderer::Update(const Node& node, float time, float dt)
+void Renderer::UpdateNode(const Node& node, float time, float dt)
 {
+    const auto* drawable = node.GetDrawable();
+    if (!drawable)
+        return;
+
+    using DrawableItemType = typename Node::DrawableItemType;
+
     auto it = mPaintNodes.find(node.GetInstanceId());
     if (it == mPaintNodes.end())
         return;
     auto& paint = it->second;
     if (paint.material)
     {
-        if (node.TestFlag(Node::Flags::UpdateMaterial))
+        if (drawable->TestFlag(DrawableItemType::Flags::UpdateMaterial))
             paint.material->Update(dt);
     }
     if (paint.drawable)
     {
-        if (node.TestFlag(Node::Flags::UpdateDrawable))
+        if (drawable->TestFlag(DrawableItemType::Flags::UpdateDrawable))
             paint.drawable->Update(dt);
-        if (node.TestFlag(Node::Flags::RestartDrawable) && !paint.drawable->IsAlive())
+        if (drawable->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint.drawable->IsAlive())
             paint.drawable->Restart();
     }
 }
 
 template<typename Node>
-void Renderer::Draw(const TreeNode<Node>& tree,
-                    gfx::Painter& painter, gfx::Transform& transform,
-                    AnimationDrawHook<Node>* hook)
+void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
+                             gfx::Painter& painter, gfx::Transform& transform,
+                             DrawHook<Node>* hook)
 
 {
     using RenderTree = TreeNode<Node>;
-    using DrawPacket = AnimationDrawPacket;
-    using DrawHook   = AnimationDrawHook<Node>;
+    using DrawPacket = DrawPacket;
+    using DrawHook   = DrawHook<Node>;
+    using DrawableItemType = typename Node::DrawableItemType;
 
     // here we could apply operations that would apply to the whole
     // animation but currently we don't need such things.
@@ -148,8 +199,16 @@ void Renderer::Draw(const TreeNode<Node>& tree,
             if (!node)
                 return;
 
-            const auto& material = node->GetMaterialId();
-            const auto& drawable = node->GetDrawableId();
+            // always push the node's transform, it might have children that
+            // do render.
+            mTransform.Push(node->GetNodeTransform());
+
+            const auto* item = node->GetDrawable();
+            if (!item)
+                return;
+
+            const auto& material = item->GetMaterialId();
+            const auto& drawable = item->GetDrawableId();
             auto& paint_node = mRenderer.mPaintNodes[node->GetInstanceId()];
             paint_node.visited = true;
             if (!paint_node.material || paint_node.material_class_id != material)
@@ -158,7 +217,7 @@ void Renderer::Draw(const TreeNode<Node>& tree,
                 paint_node.material_class_id.clear();
                 if (!material.empty())
                 {
-                    auto klass = mRenderer.mLoader->FindMaterialClass(node->GetMaterialId());
+                    auto klass = mRenderer.mLoader->FindMaterialClass(item->GetMaterialId());
                     paint_node.material = gfx::CreateMaterialInstance(klass);
                     paint_node.material_class_id = material;
                 }
@@ -169,36 +228,33 @@ void Renderer::Draw(const TreeNode<Node>& tree,
                 paint_node.drawable_class_id.clear();
                 if (!drawable.empty())
                 {
-                    auto klass = mRenderer.mLoader->FindDrawableClass(node->GetDrawableId());
+                    auto klass = mRenderer.mLoader->FindDrawableClass(item->GetDrawableId());
                     paint_node.drawable = gfx::CreateDrawableInstance(klass);
                     paint_node.drawable_class_id = drawable;
                 }
             }
             if (paint_node.material)
             {
-                if (node->TestFlag(Node::Flags::OverrideAlpha))
-                    paint_node.material->SetAlpha(node->GetAlpha());
+                if (item->TestFlag(DrawableItemType::Flags::OverrideAlpha))
+                    paint_node.material->SetAlpha(item->GetAlpha());
                 else paint_node.material->ResetAlpha();
             }
             if (paint_node.drawable)
             {
-                paint_node.drawable->SetStyle(node->GetRenderStyle());
-                paint_node.drawable->SetLineWidth(node->GetLineWidth());
+                paint_node.drawable->SetStyle(item->GetRenderStyle());
+                paint_node.drawable->SetLineWidth(item->GetLineWidth());
             }
 
-            // always push the node's transform, it might have children that
-            // do render.
-            mTransform.Push(node->GetNodeTransform());
             // if it doesn't render then no draw packets are generated
-            if (node->TestFlag(Node::Flags::DoesRender))
+            if (node->TestFlag(Node::Flags::VisibleInGame))
             {
                 mTransform.Push(node->GetModelTransform());
 
                 DrawPacket packet;
                 packet.material  = paint_node.material;
                 packet.drawable  = paint_node.drawable;
-                packet.layer     = node->GetLayer();
-                packet.pass      = node->GetRenderPass();
+                packet.layer     = item->GetLayer();
+                packet.pass      = item->GetRenderPass();
                 packet.transform = mTransform.GetAsMatrix();
                 if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
                     mPackets.push_back(std::move(packet));
@@ -210,15 +266,12 @@ void Renderer::Draw(const TreeNode<Node>& tree,
             // append any extra packets if needed.
             if (mHook)
             {
-                const auto num_transforms = mTransform.GetNumTransforms();
-
-                std::vector<DrawPacket> packets;
-                mHook->AppendPackets(node, mTransform, packets);
-                for (auto &p : packets)
-                    mPackets.push_back(std::move(p));
-
-                // make sure the stack is popped properly.
-                ASSERT(mTransform.GetNumTransforms() == num_transforms);
+                // Allow the draw hook to append any extra draw packets for this node.
+                gfx::Transform t(mTransform);
+                std::vector<DrawPacket> extra;
+                mHook->AppendPackets(node, t, extra);
+                for (auto& packet : extra)
+                    mPackets.push_back(std::move(packet));
             }
         }
 
@@ -226,7 +279,6 @@ void Renderer::Draw(const TreeNode<Node>& tree,
         {
             if (!node)
                 return;
-
             mTransform.Pop();
         }
 
@@ -269,14 +321,14 @@ void Renderer::Draw(const TreeNode<Node>& tree,
             layers.resize(layer_index + 1);
 
         Layer &layer = layers[layer_index];
-        if (packet.pass == Node::RenderPass::Draw)
+        if (packet.pass == RenderPass::Draw)
         {
             gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
             shape.drawable = packet.drawable.get();
             shape.material = packet.material.get();
             layer.draw_list.push_back(shape);
-        } else if (packet.pass == Node::RenderPass::Mask)
+        } else if (packet.pass == RenderPass::Mask)
         {
             gfx::Painter::MaskShape shape;
             shape.transform = &packet.transform;
@@ -294,6 +346,5 @@ void Renderer::Draw(const TreeNode<Node>& tree,
     //transform.Pop();
 
 }
-
 
 } // namespace
