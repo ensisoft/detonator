@@ -257,7 +257,7 @@ struct RenderTreeFunctions {
         return visitor.GetResult();
     }
 
-    static gfx::FRect GetBoundingBox(const RenderTree& tree, const Node* node)
+    static gfx::FRect GetBoundingRect(const RenderTree& tree, const Node* node)
     {
         class Visitor : public RenderTree::ConstVisitor
         {
@@ -314,7 +314,7 @@ struct RenderTreeFunctions {
         return visitor.GetResult();
     }
 
-    static gfx::FRect GetBoundingBox(const RenderTree& tree)
+    static gfx::FRect GetBoundingRect(const RenderTree& tree)
     {
         class Visitor : public RenderTree::ConstVisitor
         {
@@ -843,14 +843,14 @@ glm::vec2 AnimationClass::MapCoordsToNode(float x, float y, const AnimationNodeC
     return RenderTreeFunctions<AnimationNodeClass>::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-gfx::FRect AnimationClass::GetBoundingBox(const AnimationNodeClass* node) const
+gfx::FRect AnimationClass::GetBoundingRect(const AnimationNodeClass* node) const
 {
-    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingBox(mRenderTree, node);
+    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingRect(mRenderTree, node);
 }
 
-gfx::FRect AnimationClass::GetBoundingBox() const
+gfx::FRect AnimationClass::GetBoundingRect() const
 {
-    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingBox(mRenderTree);
+    return RenderTreeFunctions<AnimationNodeClass>::GetBoundingRect(mRenderTree);
 }
 
 std::size_t AnimationClass::GetHash() const
@@ -1124,14 +1124,14 @@ glm::vec2 Animation::MapCoordsToNode(float x, float y, const AnimationNode* node
     return RenderTreeFunctions<AnimationNode>::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-gfx::FRect Animation::GetBoundingBox(const AnimationNode* node) const
+gfx::FRect Animation::GetBoundingRect(const AnimationNode* node) const
 {
-    return RenderTreeFunctions<AnimationNode>::GetBoundingBox(mRenderTree, node);
+    return RenderTreeFunctions<AnimationNode>::GetBoundingRect(mRenderTree, node);
 }
 
-gfx::FRect Animation::GetBoundingBox() const
+gfx::FRect Animation::GetBoundingRect() const
 {
-    return RenderTreeFunctions<AnimationNode>::GetBoundingBox(mRenderTree);
+    return RenderTreeFunctions<AnimationNode>::GetBoundingRect(mRenderTree);
 }
 
 void Animation::Reset()

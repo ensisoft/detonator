@@ -162,12 +162,12 @@ public:
         for (size_t i=0; i<mAnimation->GetNumNodes(); ++i)
         {
             const auto& node = mAnimation->GetNode(i);
-            auto rect = mAnimation->GetBoundingBox(&node);
+            auto rect = mAnimation->GetBoundingRect(&node);
             rect.Translate(500.0f, 300.0f);
             gfx::DrawRectOutline(painter, rect, gfx::SolidColor(gfx::Color::Green), 1.0f);
         }
 
-        auto bounds = mAnimation->GetBoundingBox();
+        auto bounds = mAnimation->GetBoundingRect();
         bounds.Translate(500.0f, 300.0f);
         gfx::DrawRectOutline(painter, bounds, gfx::SolidColor(gfx::Color::DarkYellow), 2.0f);
 

@@ -552,7 +552,7 @@ void unit_test_animation_render_tree()
 
     // whole bounding box.
     {
-        const auto& box = anim_class.GetBoundingBox();
+        const auto& box = anim_class.GetBoundingRect();
         TEST_REQUIRE(math::equals(5.0f, box.GetX()));
         TEST_REQUIRE(math::equals(5.0f, box.GetY()));
         TEST_REQUIRE(math::equals(16.0f, box.GetWidth()));
@@ -562,7 +562,7 @@ void unit_test_animation_render_tree()
     // node bounding box
     {
         const auto* node = anim_class.FindNodeByName("parent");
-        const auto& box = anim_class.GetBoundingBox(node);
+        const auto& box = anim_class.GetBoundingRect(node);
         TEST_REQUIRE(math::equals(5.0f, box.GetX()));
         TEST_REQUIRE(math::equals(5.0f, box.GetY()));
         TEST_REQUIRE(math::equals(10.0f, box.GetWidth()));
@@ -571,7 +571,7 @@ void unit_test_animation_render_tree()
     // node bounding box
     {
         const auto* node = anim_class.FindNodeByName("child");
-        const auto box = anim_class.GetBoundingBox(node);
+        const auto box = anim_class.GetBoundingRect(node);
         TEST_REQUIRE(math::equals(19.0f, box.GetX()));
         TEST_REQUIRE(math::equals(19.0f, box.GetY()));
         TEST_REQUIRE(math::equals(2.0f, box.GetWidth()));

@@ -1154,14 +1154,14 @@ namespace game
         // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const AnimationNodeClass* node) const;
 
-        // Compute the axis aligned bounding box for the give animation node
+        // Compute the axis aligned bounding rectangle for the given animation node
         // at the current time of animation.
-        gfx::FRect GetBoundingBox(const AnimationNodeClass* node) const;
-        // Compute the axis aligned bounding box for the whole animation
+        gfx::FRect GetBoundingRect(const AnimationNodeClass* node) const;
+        // Compute the axis aligned bounding rectangle for the whole animation
         // i.e. including all the nodes at the current time of animation.
-        // This is a shortcut for getting the union of all the bounding boxes
-        // of all the animation nodes.
-        gfx::FRect GetBoundingBox() const;
+        // This is a shortcut for getting the union of all the bounding
+        // rectangles of all the animation nodes.
+        gfx::FRect GetBoundingRect() const;
 
         // Get the hash value based on the current properties of the animation
         // i.e. include each node and their drawables and materials but don't
@@ -1275,14 +1275,14 @@ namespace game
         // Map coordinates in animation coordinate space into some AnimationNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const AnimationNode* node) const;
 
-        // Compute the axis aligned bounding box for the give animation node
+        // Compute the axis aligned bounding rectangle for the give animation node
         // at the current time of animation.
-        gfx::FRect GetBoundingBox(const AnimationNode* node) const;
-        // Compute the axis aligned bounding box for the whole animation
+        gfx::FRect GetBoundingRect(const AnimationNode* node) const;
+        // Compute the axis aligned bounding rectangle for the whole animation
         // i.e. including all the nodes at the current time of animation.
-        // This is a shortcut for getting the union of all the bounding boxes
+        // This is a shortcut for getting the union of all the bounding rectangles
         // of all the animation nodes.
-        gfx::FRect GetBoundingBox() const;
+        gfx::FRect GetBoundingRect() const;
 
         // Reset the state of the animation to initial state.
         void Reset();

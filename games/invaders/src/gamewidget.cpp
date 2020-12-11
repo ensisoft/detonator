@@ -372,7 +372,7 @@ public:
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
 
-        auto bounds = mSprite->GetBoundingBox();
+        auto bounds = mSprite->GetBoundingRect();
         bounds.Translate(pos);
         return bounds;
     }
@@ -762,7 +762,7 @@ public:
         renderer.Draw(*mSprite, painter, t);
 
         const auto* box = mSprite->FindNodeByName("Box");
-        auto text = mSprite->GetBoundingBox(box);
+        auto text = mSprite->GetBoundingRect(box);
         text.Translate(position);
         gfx::DrawTextRect(painter, base::ToUtf8(mText),
        "fonts/SourceHanSerifTC-SemiBold.otf", 36, text,
@@ -925,7 +925,7 @@ public:
 
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
-        auto bounds = mSprite->GetBoundingBox(mSprite->FindNodeByName("UFO"));
+        auto bounds = mSprite->GetBoundingRect(mSprite->FindNodeByName("UFO"));
         bounds.Translate(pos);
         return bounds;
     }
@@ -988,7 +988,7 @@ public:
     {
         const auto size = std::max(rect.GetWidth(), rect.GetHeight());
         const auto explosion_size = size * 3;
-        const auto box = mSprite->GetBoundingBox();
+        const auto box = mSprite->GetBoundingRect();
         const auto scalex = explosion_size / box.GetWidth();
         const auto scaley = explosion_size / box.GetHeight();
 
@@ -2208,7 +2208,7 @@ void GameWidget::Draw()
     // paint the background
     {
         const auto* node = (*mBackground)->FindNodeByName("Background");
-        const auto& rect = (*mBackground)->GetBoundingBox(node);
+        const auto& rect = (*mBackground)->GetBoundingRect(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
         mRenderer.Draw(*mBackground, *mPainter, view);
