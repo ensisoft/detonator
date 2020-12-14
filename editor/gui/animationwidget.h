@@ -49,6 +49,7 @@ namespace app {
 namespace gui
 {
     class TreeWidget;
+    class MouseTool;
 
     class AnimationWidget : public MainWidget
     {
@@ -142,12 +143,7 @@ namespace gui
         void CheckPlacementActions(QAction* selected);
     private:
         using TreeModel = RenderTreeModel<game::AnimationClass>;
-        class Tool;
         class PlaceTool;
-        class CameraTool;
-        class MoveTool;
-        class ResizeTool;
-        class RotateTool;
 
     private:
         Ui::AnimationWidget mUI;
@@ -165,7 +161,7 @@ namespace gui
             Grid100x100 = 100
         };
         // current tool (if any, can be nullptr when no tool is selected).
-        std::unique_ptr<Tool> mCurrentTool;
+        std::unique_ptr<MouseTool> mCurrentTool;
         // state shared with the tools is packed inside a single
         // struct type for convenience
         struct State {

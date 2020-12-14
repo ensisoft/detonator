@@ -45,6 +45,7 @@
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/animationwidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/tool.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -57,18 +58,7 @@
 namespace gui
 {
 
-class AnimationWidget::Tool
-{
-public:
-    virtual ~Tool() = default;
-    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const = 0;
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) = 0;
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) = 0;
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) = 0;
-private:
-};
-
-class AnimationWidget::PlaceTool : public AnimationWidget::Tool
+class AnimationWidget::PlaceTool : public MouseTool
 {
 public:
     PlaceTool(AnimationWidget::State& state, const QString& material, const QString& drawable)
@@ -185,8 +175,6 @@ public:
         }
         return true;
     }
-
-
 private:
     AnimationWidget::State& mState;
     // the starting object position in model coordinates of the placement
@@ -205,264 +193,6 @@ private:
     std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
     std::unique_ptr<gfx::Material> mMaterial;
     std::unique_ptr<gfx::Drawable> mDrawable;
-};
-
-class AnimationWidget::CameraTool : public AnimationWidget::Tool
-{
-public:
-    CameraTool(State& state) : mState(state)
-    {}
-    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
-    {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
-    {
-        if (mEngaged)
-        {
-            const auto& pos = mickey->pos();
-            const auto& delta = pos - mMousePos;
-            const float x = delta.x();
-            const float y = delta.y();
-            mState.camera_offset_x += x;
-            mState.camera_offset_y += y;
-            //DEBUG("Camera offset %1, %2", mState.camera_offset_x, mState.camera_offset_y);
-            mMousePos = pos;
-        }
-    }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
-    {
-        const auto button = mickey->button();
-        if (button == Qt::LeftButton)
-        {
-            mMousePos = mickey->pos();
-            mEngaged = true;
-        }
-    }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
-    {
-        const auto button = mickey->button();
-        if (button == Qt::LeftButton)
-        {
-            mEngaged = false;
-            return false;
-        }
-        return true;
-    }
-private:
-    AnimationWidget::State& mState;
-private:
-    QPoint mMousePos;
-    bool mEngaged = false;
-
-};
-
-class AnimationWidget::MoveTool : public AnimationWidget::Tool
-{
-public:
-    MoveTool(State& state, game::AnimationNodeClass* node)
-      : mState(state)
-      , mNode(node)
-    {}
-    virtual void Render(gfx::Painter&, gfx::Transform&) const override
-    {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-
-        const auto& tree = mState.animation->GetRenderTree();
-        const auto& tree_node = tree.FindNodeByValue(mNode);
-        const auto* parent = tree.FindParent(tree_node);
-        // if the object we're moving has a parent we need to map the mouse movement
-        // correctly taking into account that the hierarchy might include several rotations.
-        // simplest thing to do is to map the mouse to the object's parent's coordinate space
-        // and thus express/measure the object's translation delta relative to it's parent
-        // (as it is in the hierarchy).
-        // todo: this could be simplified if we expressed the view transformation in the render tree's
-        // root node. then the below else branch should go away(?)
-        if (parent && parent->GetValue())
-        {
-            const auto& mouse_pos_in_node = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
-            const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
-
-            glm::vec2 position = mNode->GetTranslation();
-            position.x += mouse_delta.x;
-            position.y += mouse_delta.y;
-            mNode->SetTranslation(position);
-            mPreviousMousePos = mouse_pos_in_node;
-        }
-        else
-        {
-            // object doesn't have a parent, movement can be expressed using the animations
-            // coordinate space.
-            const auto& mouse_delta = mouse_pos_in_view - glm::vec4(mPreviousMousePos, 0.0f, 0.0f);
-            glm::vec2 position = mNode->GetTranslation();
-            position.x += mouse_delta.x;
-            position.y += mouse_delta.y;
-            mNode->SetTranslation(position);
-            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
-        }
-    }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-
-        // see the comments in MouseMove about the branched logic.
-        const auto& tree = mState.animation->GetRenderTree();
-        const auto& tree_node = tree.FindNodeByValue(mNode);
-        const auto* parent = tree.FindParent(tree_node);
-        if (parent && parent->GetValue())
-        {
-            mPreviousMousePos = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
-        }
-        else
-        {
-            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
-        }
-    }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        // nothing to be done here.
-        return false;
-    }
-private:
-    game::AnimationNodeClass* mNode = nullptr;
-    AnimationWidget::State& mState;
-    // previous mouse position, for each mouse move we update the objects'
-    // position by the delta between previous and current mouse pos.
-    glm::vec2 mPreviousMousePos;
-
-};
-
-class AnimationWidget::ResizeTool : public AnimationWidget::Tool
-{
-public:
-    ResizeTool(State& state, game::AnimationNodeClass* node)
-      : mState(state)
-      , mNode(node)
-    {}
-    virtual void Render(gfx::Painter&, gfx::Transform&) const override
-    {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-        const auto& mouse_pos_in_node = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
-
-        // double the mouse movement so that the object's size follows the actual mouse movement.
-        // Since the object's position is with respect to the center of the shape
-        // adding some delta d to any extent (width or height i.e dx or dy) will
-        // only grow that dimension by half d on either side of the axis, thus
-        // falling behind the actual mouse movement.
-        const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos); // * 2.0f;
-
-        const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
-        if (maintain_aspect_ratio)
-        {
-            const glm::vec2& size = mNode->GetSize();
-
-            const auto aspect_ratio = size.x / size.y;
-            const auto new_height = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
-            const auto new_width  = new_height * aspect_ratio;
-            mNode->SetSize(glm::vec2(new_width, new_height));
-        }
-        else
-        {
-            glm::vec2 size = mNode->GetSize();
-            // don't allow negative sizes.
-            size.x = std::clamp(size.x + mouse_delta.x, 0.0f, size.x + mouse_delta.x);
-            size.y = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
-            mNode->SetSize(size);
-        }
-        mPreviousMousePos = mouse_pos_in_node;
-    }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-        mPreviousMousePos = mState.animation->MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
-    }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        // nothing to be done here.
-        return false;
-    }
-private:
-    game::AnimationNodeClass* mNode = nullptr;
-    AnimationWidget::State& mState;
-    // previous mouse position, for each mouse move we update the objects'
-    // position by the delta between previous and current mouse pos.
-    glm::vec2 mPreviousMousePos;
-
-};
-
-class AnimationWidget::RotateTool : public AnimationWidget::Tool
-{
-public:
-    RotateTool(State& state, game::AnimationNodeClass* node)
-      : mState(state)
-      , mNode(node)
-    {}
-    virtual void Render(gfx::Painter&, gfx::Transform&) const override
-    {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-
-        const auto& node_size = mNode->GetSize();
-        const auto& node_center_in_view = glm::vec4(mState.animation->MapCoordsFromNode(node_size.x*0.5f, node_size.y*0.5, mNode),
-            1.0f, 1.0f);
-
-        // compute the delta between the current mouse position angle and the previous mouse position angle
-        // wrt the node's center point. Then and add the angle delta increment to the node's rotation angle.
-        const auto previous_angle = GetAngleRadians(mPreviousMousePos - node_center_in_view);
-        const auto current_angle  = GetAngleRadians(mouse_pos_in_view - node_center_in_view);
-        const auto angle_delta = current_angle - previous_angle;
-
-        double angle = mNode->GetRotation();
-        angle += angle_delta;
-        // keep it in the -180 - 180 degrees [-Pi, Pi] range.
-        angle = math::wrap(-math::Pi, math::Pi, angle);
-        mNode->SetRotation(angle);
-
-        //DEBUG("Node angle %1", qRadiansToDegrees(angle));
-
-        mPreviousMousePos = mouse_pos_in_view;
-    }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        const auto& mouse_pos = mickey->pos();
-        const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-        mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-    }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
-    {
-        return false;
-    }
-private:
-    float GetAngleRadians(const glm::vec4& p) const
-    {
-        const auto hypotenuse = std::sqrt(p.x*p.x + p.y*p.y);
-        // acos returns principal angle range which is [0, Pi] radians
-        // but we want to map to a range of [0, 2*Pi] i.e. full circle.
-        // therefore we check the Y position.
-        const auto principal_angle = std::acos(p.x / hypotenuse);
-        if (p.y < 0.0f)
-            return math::Pi * 2.0 - principal_angle;
-        return principal_angle;
-    }
-private:
-    AnimationWidget::State& mState;
-    game::AnimationNodeClass* mNode = nullptr;
-    // previous mouse position, for each mouse move we update the object's
-    // position by the delta between previous and current mouse pos.
-    glm::vec4 mPreviousMousePos;
 };
 
 AnimationWidget::AnimationWidget(app::Workspace* workspace)
@@ -572,7 +302,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
             if (nodes_hit.empty())
             {
                 mUI.tree->ClearSelection();
-                mCurrentTool.reset(new CameraTool(mState));
+                mCurrentTool.reset(new MoveCameraTool(mState));
             }
             else
             {
@@ -603,10 +333,10 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
                 const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                                      hitpos.y >= 0 && hitpos.y <= 10.0f;
                 if (bottom_right_hitbox_hit)
-                    mCurrentTool.reset(new ResizeTool(mState, hit));
+                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.animation, hit));
                 else if (top_left_hitbox_hit)
-                    mCurrentTool.reset(new RotateTool(mState, hit));
-                else mCurrentTool.reset(new MoveTool(mState, hit));
+                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.animation, hit));
+                else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.animation, hit));
 
                 mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
             }

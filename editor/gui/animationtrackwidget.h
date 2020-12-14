@@ -39,6 +39,7 @@
 
 namespace gui
 {
+    class MouseTool;
     // User interface widget for editing animation tracks.
     // All edits are eventually stored in an animation class object,
     // which is shared with AnimationWidget instance. When a track is
@@ -119,11 +120,6 @@ namespace gui
     private:
         using TreeModel = RenderTreeModel<game::AnimationClass>;
         class TimelineModel;
-        class Tool;
-        class CameraTool;
-        class MoveTool;
-        class ResizeTool;
-        class RotateTool;
         // the grid display options.
         enum class GridDensity {
             Grid10x10 = 10,
@@ -137,7 +133,7 @@ namespace gui
         std::unique_ptr<TimelineModel> mTimelineModel;
         // The current tool that performs actions on user (mouse) input.
         // can be nullptr when no tool is currently being applied.
-        std::unique_ptr<Tool> mCurrentTool;
+        std::unique_ptr<MouseTool> mCurrentTool;
         // The workspace object.
         app::Workspace* mWorkspace = nullptr;
         // Current state that is accessed and modified by this widget
