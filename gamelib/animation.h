@@ -52,8 +52,6 @@
 
 namespace game
 {
-    class ClassLibrary;
-
     // AnimationNodeClass holds the data for some particular type of an animation node.
     // This includes the drawable shape and the associated material and the node's
     // transformation data (relative to its parent).
@@ -1053,8 +1051,9 @@ namespace game
     class AnimationClass
     {
     public:
-        using RenderTree     = TreeNode<AnimationNodeClass>;
-        using RenderTreeNode = TreeNode<AnimationNodeClass>;
+        using RenderTree      = TreeNode<AnimationNodeClass>;
+        using RenderTreeNode  = TreeNode<AnimationNodeClass>;
+        using RenderTreeValue = AnimationNodeClass;
 
         AnimationClass()
         { mId = base::RandomString(10); }
@@ -1224,8 +1223,9 @@ namespace game
     class Animation
     {
     public:
-        using RenderTree     = TreeNode<AnimationNode>;
-        using RenderTreeNode = TreeNode<AnimationNode>;
+        using RenderTree      = TreeNode<AnimationNode>;
+        using RenderTreeNode  = TreeNode<AnimationNode>;
+        using RenderTreeValue = AnimationNode;
 
         // Create new animation instance based on some animation class.
         Animation(const std::shared_ptr<const AnimationClass>& klass);
