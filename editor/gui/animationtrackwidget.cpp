@@ -306,55 +306,6 @@ private:
     glm::vec4 mPreviousMousePos;
 };
 
-class AnimationTrackWidget::TreeModel : public TreeWidget::TreeModel
-{
-public:
-    TreeModel(AnimationTrackWidget::State& state) : mState(state)
-    {}
-
-    virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
-    {
-        auto& root = mState.animation->GetRenderTree();
-
-        class Visitor : public game::AnimationClass::RenderTree::Visitor
-        {
-        public:
-            Visitor(std::vector<TreeWidget::TreeItem>& list)
-                : mList(list)
-            {}
-            virtual void EnterNode(game::AnimationNodeClass* node)
-            {
-                TreeWidget::TreeItem item;
-                item.SetId(node ? app::FromUtf8(node->GetClassId()) : "root");
-                item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
-                item.SetUserData(node);
-                item.SetLevel(mLevel);
-                if (node)
-                {
-                    item.SetIcon(QIcon("icons:eye.png"));
-                    if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
-                        item.SetIconMode(QIcon::Disabled);
-                    else item.SetIconMode(QIcon::Normal);
-                }
-                mList.push_back(item);
-                mLevel++;
-            }
-            virtual void LeaveNode(game::AnimationNodeClass* node)
-            {
-                mLevel--;
-            }
-
-        private:
-            unsigned mLevel = 0;
-            std::vector<TreeWidget::TreeItem>& mList;
-        };
-        Visitor visitor(list);
-        root.PreOrderTraverse(visitor);
-    }
-private:
-    AnimationTrackWidget::State& mState;
-};
-
 class AnimationTrackWidget::TimelineModel : public TimelineWidget::TimelineModel
 {
 public:
@@ -424,7 +375,6 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     : mWorkspace(workspace)
 {
     DEBUG("Create AnimationTrackWidget");
-    mTreeModel     = std::make_unique<TreeModel>(mState);
     mTimelineModel = std::make_unique<TimelineModel>(mState);
     mRenderer.SetLoader(workspace);
 
@@ -434,26 +384,24 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.actionStop->setEnabled(false);
     mUI.timeline->SetDuration(10.0f);
     mUI.timeline->SetModel(mTimelineModel.get());
-
-    {
-        QSignalBlocker shit(mUI.duration);
-        mUI.duration->setValue(10.0f);
-    }
-    {
-        QSignalBlocker shit(mUI.actuatorStartTime);
-        mUI.actuatorStartTime->setMinimum(0.0f);
-        mUI.actuatorStartTime->setMaximum(10.0f);
-        mUI.actuatorStartTime->setValue(0.0f);
-    }
-    {
-        QSignalBlocker shit(mUI.actuatorEndTime);
-        mUI.actuatorEndTime->setMinimum(0.0f);
-        mUI.actuatorEndTime->setMaximum(10.0f);
-        mUI.actuatorEndTime->setValue(10.0f);
-    }
+    mUI.actuatorStartTime->setMinimum(0.0f);
+    mUI.actuatorStartTime->setMaximum(10.0f);
+    mUI.actuatorEndTime->setMinimum(0.0f);
+    mUI.actuatorEndTime->setMaximum(10.0f);
     mUI.btnAddActuator->setEnabled(false);
-    mUI.tree->SetModel(mTreeModel.get());
+
+    PopulateFromEnum<game::AnimationActuatorClass::Type>(mUI.actuatorType);
+    PopulateFromEnum<game::AnimationTransformActuatorClass::Interpolation>(mUI.transformInterpolation);
+    PopulateFromEnum<game::MaterialActuatorClass::Interpolation>(mUI.materialInterpolation);
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+
+    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.actuatorStartTime, 0.0f);
+    SetValue(mUI.actuatorEndTime, 10.0f);
     SetValue(mUI.trackName, QString("My Track"));
+
+    setFocusPolicy(Qt::StrongFocus);
+    setWindowTitle("My Track");
 
     mUI.widget->onZoomIn  = std::bind(&AnimationTrackWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationTrackWidget::ZoomOut, this);
@@ -573,18 +521,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
         mCurrentTool->MouseRelease(mickey, view);
         mCurrentTool.reset();
     };
-
     mUI.widget->onPaintScene = std::bind(&AnimationTrackWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
-
-    setFocusPolicy(Qt::StrongFocus);
-    setWindowTitle("My Track");
-
-    PopulateFromEnum<game::AnimationActuatorClass::Type>(mUI.actuatorType);
-    PopulateFromEnum<game::AnimationTransformActuatorClass::Interpolation>(mUI.transformInterpolation);
-    PopulateFromEnum<game::MaterialActuatorClass::Interpolation>(mUI.materialInterpolation);
-    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
-    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
 
     connect(mUI.timeline, &TimelineWidget::SelectedItemChanged,
         this, &AnimationTrackWidget::SelectedItemChanged);
@@ -609,6 +547,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
         const auto& node = mState.animation->GetNode(i);
         mUI.actuatorNode->addItem(app::FromUtf8(node.GetName()));
     }
+    mTreeModel.reset(new TreeModel(*mState.animation));
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
     mUI.timeline->Rebuild();
 }
@@ -634,6 +574,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         const auto& node = mState.animation->GetNode(i);
         mUI.actuatorNode->addItem(app::FromUtf8(node.GetName()));
     }
+    mTreeModel.reset(new TreeModel(*mState.animation));
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
     mUI.timeline->SetDuration(track.GetDuration());
     mUI.timeline->Rebuild();
@@ -783,6 +725,8 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     mState.show_material_actuators  = GetValue(mUI.chkShowMaterialActuators);
     SetValue(mUI.looping, mState.track->IsLooping());
     SetValue(mUI.duration, mState.track->GetDuration());
+    mTreeModel.reset(new TreeModel(*mState.animation));
+    mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
     mUI.timeline->SetDuration(mState.track->GetDuration());
     mUI.timeline->Rebuild();

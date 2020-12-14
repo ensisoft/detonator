@@ -57,56 +57,6 @@
 namespace gui
 {
 
-class AnimationWidget::TreeModel : public TreeWidget::TreeModel
-{
-public:
-    TreeModel(game::AnimationClass& anim)  : mAnimation(anim)
-    {}
-
-    virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
-    {
-        auto& root = mAnimation.GetRenderTree();
-
-        class Visitor : public game::AnimationClass::RenderTree::Visitor
-        {
-        public:
-            Visitor(std::vector<TreeWidget::TreeItem>& list)
-                : mList(list)
-            {}
-            virtual void EnterNode(game::AnimationNodeClass* node)
-            {
-                TreeWidget::TreeItem item;
-                item.SetId(node ? app::FromUtf8(node->GetClassId()) : "root");
-                item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
-                item.SetUserData(node);
-                item.SetLevel(mLevel);
-                if (node)
-                {
-                    item.SetIcon(QIcon("icons:eye.png"));
-                    if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
-                        item.SetIconMode(QIcon::Disabled);
-                    else item.SetIconMode(QIcon::Normal);
-                }
-                mList.push_back(item);
-                mLevel++;
-            }
-            virtual void LeaveNode(game::AnimationNodeClass* node)
-            {
-                mLevel--;
-            }
-
-        private:
-            unsigned mLevel = 0;
-            std::vector<TreeWidget::TreeItem>& mList;
-        };
-        Visitor visitor(list);
-        root.PreOrderTraverse(visitor);
-    }
-private:
-    game::AnimationClass& mAnimation;
-};
-
-
 class AnimationWidget::Tool
 {
 public:

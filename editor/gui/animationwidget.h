@@ -33,6 +33,7 @@
 #include <string>
 
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/treemodel.h"
 #include "gamelib/animation.h"
 #include "gamelib/renderer.h"
 
@@ -140,7 +141,7 @@ namespace gui
         void RebuildDrawableMenus();
         void CheckPlacementActions(QAction* selected);
     private:
-        class TreeModel;
+        using TreeModel = RenderTreeModel<game::AnimationClass>;
         class Tool;
         class PlaceTool;
         class CameraTool;

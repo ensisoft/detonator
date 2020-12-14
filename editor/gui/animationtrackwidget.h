@@ -32,6 +32,7 @@
 #include <memory>
 
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/treemodel.h"
 #include "editor/app/workspace.h"
 #include "gamelib/animation.h"
 #include "gamelib/renderer.h"
@@ -116,9 +117,9 @@ namespace gui
     private:
         Ui::AnimationTrack mUI;
     private:
-        class Tool;
-        class TreeModel;
+        using TreeModel = RenderTreeModel<game::AnimationClass>;
         class TimelineModel;
+        class Tool;
         class CameraTool;
         class MoveTool;
         class ResizeTool;
