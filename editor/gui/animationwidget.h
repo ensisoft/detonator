@@ -153,13 +153,6 @@ namespace gui
         // menu for the custom shapes
         QMenu* mCustomShapes = nullptr;
     private:
-        // the grid display options.
-        enum class GridDensity {
-            Grid10x10 = 10,
-            Grid20x20 = 20,
-            Grid50x50 = 50,
-            Grid100x100 = 100
-        };
         // current tool (if any, can be nullptr when no tool is selected).
         std::unique_ptr<MouseTool> mCurrentTool;
         // state shared with the tools is packed inside a single

@@ -120,13 +120,6 @@ namespace gui
     private:
         using TreeModel = RenderTreeModel<game::AnimationClass>;
         class TimelineModel;
-        // the grid display options.
-        enum class GridDensity {
-            Grid10x10 = 10,
-            Grid20x20 = 20,
-            Grid50x50 = 50,
-            Grid100x100 = 100
-        };
         // Tree model to display the animation's render tree.
         std::unique_ptr<TreeModel> mTreeModel;
         // Timeline model to display the actuators on a timeline.

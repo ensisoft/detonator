@@ -175,6 +175,7 @@ add_executable(Editor
     editor/gui/childwindow.h
     editor/gui/childwindow.cpp
     editor/gui/childwindow.ui
+    editor/gui/drawing.cpp
     editor/gui/playwindow.h
     editor/gui/playwindow.cpp
     editor/gui/playwindow.ui

@@ -44,6 +44,7 @@
 #include "editor/gui/treewidget.h"
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/animationwidget.h"
+#include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/tool.h"
 #include "base/assert.h"
@@ -1432,57 +1433,11 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        view.Push();
-
         const float zoom = GetValue(mUI.zoom);
         const float xs = GetValue(mUI.scaleX);
         const float ys = GetValue(mUI.scaleY);
-        const int grid_size = std::max(width / xs, height / ys) / zoom;
-        // work out the scale factor for the grid. we want some convenient scale so that
-        // each grid cell maps to some convenient number of units (a multiple of 10)
         const GridDensity grid = GetValue(mUI.cmbGrid);
-        const auto cell_size_units  = static_cast<int>(grid); //50;
-        const auto num_grid_lines = (grid_size / cell_size_units) - 1;
-        const auto num_cells = num_grid_lines + 1;
-        const auto cell_size_normalized = 1.0f / (num_grid_lines + 1);
-        const auto cell_scale_factor = cell_size_units / cell_size_normalized;
-
-        // figure out what is the current coordinate of the center of the window/viewport in
-        // as expressed in the view transformation's coordinate space. (In other words
-        // figure out which combination of view basis axis puts me in the middle of the window
-        // in window space.)
-        auto world_to_model = glm::inverse(view.GetAsMatrix());
-        auto world_origin_in_model = world_to_model * glm::vec4(width / 2.0f, height / 2.0, 1.0f, 1.0f);
-
-        view.Scale(cell_scale_factor, cell_scale_factor);
-
-        // to make the grid cover the whole viewport we can easily do it by rendering
-        // the grid in each quadrant of the coordinate space aligned around the center
-        // point of the viewport. Then it doesn't matter if the view transformation
-        // includes rotation or not.
-        const auto grid_origin_x = (int)world_origin_in_model.x / cell_size_units * cell_size_units;
-        const auto grid_origin_y = (int)world_origin_in_model.y / cell_size_units * cell_size_units;
-        const auto grid_width = cell_size_units * num_cells;
-        const auto grid_height = cell_size_units * num_cells;
-
-        view.Translate(grid_origin_x, grid_origin_y);
-        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
-            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-        view.Translate(-grid_width, 0);
-        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
-            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-        view.Translate(0, -grid_height);
-        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
-            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-        view.Translate(grid_width, 0);
-        painter.Draw(gfx::Grid(num_grid_lines, num_grid_lines), view,
-            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
-
-        view.Pop();
+        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
     // begin the animation transformation space
@@ -1498,19 +1453,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
     {
-        view.Push();
-            view.Scale(100.0f, 5.0f);
-            view.Translate(0.0f, -2.5f);
-            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
-        view.Pop();
-
-        view.Push();
-            view.Scale(100.0f, 5.0f);
-            view.Translate(-50.0f, -2.5f);
-            view.Rotate(math::Pi * 0.5f);
-            view.Translate(0.0f, 50.0f);
-            painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
-        view.Pop();
+        DrawBasisVectors(painter, view);
     }
 
     // pop view transformation
