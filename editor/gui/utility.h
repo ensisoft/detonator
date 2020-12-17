@@ -101,7 +101,7 @@ void SetValue(QComboBox* combo, T value)
     {
         const std::string name(magic_enum::enum_name(value));
         const auto index = combo->findText(QString::fromStdString(name));
-        ASSERT(index != -1);
+        //ASSERT(index != -1);
         QSignalBlocker s(combo);
         combo->setCurrentIndex(index);
     }
@@ -109,7 +109,7 @@ void SetValue(QComboBox* combo, T value)
     {
         const QString& str = app::toString(value);
         const auto index = combo->findText(str);
-        ASSERT(index != -1);
+        //ASSERT(index != -1);
         QSignalBlocker s(combo);
         combo->setCurrentIndex(index);
     }
