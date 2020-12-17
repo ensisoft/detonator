@@ -404,6 +404,7 @@ add_library(gamelib_test SHARED
     graphics/resource.cpp
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
+    gamelib/physics.cpp
     gamelib/scene.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp

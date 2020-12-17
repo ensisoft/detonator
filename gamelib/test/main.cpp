@@ -44,6 +44,7 @@
 #include "gamelib/classlib.h"
 #include "gamelib/renderer.h"
 #include "gamelib/scene.h"
+#include "gamelib/physics.h"
 #include "gamelib/main/interface.h"
 
 namespace {
@@ -157,6 +158,83 @@ private:
     game::Renderer mRenderer;
     float mTime = 0.0f;
 };
+
+
+class PhysicsTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        mRenderer.Draw(*mScene, painter, transform);
+        mPhysics.DebugDrawObjects(painter, transform);
+    }
+    virtual void Update(float dt)
+    {
+        if (mPhysics.HaveWorld())
+        {
+            mPhysics.Tick();
+            mPhysics.UpdateScene(*mScene);
+        }
+    }
+    virtual void Start(game::ClassLibrary* loader)
+    {
+        game::SceneClass scene;
+
+        // create ground.
+        {
+            game::SceneNodeClass node;
+            node.SetName("ground");
+            node.SetSize(glm::vec2(200.0f, 20.0f));
+            node.SetTranslation(glm::vec2(400, 400));
+            node.SetRotation(0.2);
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("ground");
+            node.SetDrawable(draw);
+            game::RigidBodyItemClass body;
+            body.SetSimulation(game::RigidBodyItemClass::Simulation::Static);
+            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            node.SetRigidBody(body);
+
+            auto* child = scene.AddNode(node);
+            auto& root  = scene.GetRenderTree();
+            root.AppendChild(child);
+        }
+
+        mScene = game::CreateSceneInstance(scene);
+
+        game::SceneNodeClass node;
+        node.SetName("box0");
+        node.SetSize(glm::vec2(40.0f, 40.0f));
+        game::DrawableItemClass draw;
+        draw.SetDrawableId("rectangle");
+        draw.SetMaterialId("object");
+        node.SetDrawable(draw);
+        game::RigidBodyItemClass body;
+        body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
+        body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+        node.SetRigidBody(body);
+
+        for (int i=0; i<6; ++i)
+        {
+            auto* child = mScene->AddNode(game::SceneNode(node));
+            child->SetTranslation(glm::vec2(400 + ((i & 1) * 25.0f), 20 + i * 50));
+            mScene->LinkChild(nullptr, child);
+        }
+
+        mRenderer.SetLoader(loader);
+        mPhysics.SetLoader(loader);
+        mPhysics.SetGravity(glm::vec2(0.0f, 10.0f));
+        mPhysics.DeleteAll();
+        mPhysics.BuildPhysicsWorldFromScene(*mScene);
+    }
+private:
+    std::unique_ptr<game::Scene> mScene;
+    game::Renderer mRenderer;
+    game::PhysicsEngine mPhysics;
+};
+
 
 
 class AnimationTest : public TestCase
@@ -368,6 +446,7 @@ public:
         mTestList.emplace_back(new BoundingBoxTest);
         mTestList.emplace_back(new AnimationTest);
         mTestList.emplace_back(new SceneTest);
+        mTestList.emplace_back(new PhysicsTest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -452,7 +531,7 @@ public:
         else if (name == "color")
             return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
         else if (name == "object")
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::Gold));
         else if (name == "ground")
             return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::DarkGreen));
         ASSERT("No such material class.");
