@@ -39,7 +39,8 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "gamelib/animation.h"
-#include "utility.h"
+#include "gamelib/scene.h"
+#include "editor/app/utility.h"
 
 namespace app
 {
@@ -142,6 +143,8 @@ namespace app
                     return QIcon("icons:animation.png");
                 case Resource::Type::CustomShape:
                     return QIcon("icons:polygon.png");
+                case Resource::Type::Scene:
+                    return QIcon("icons:scene.png");
                 default: break;
             }
             return QIcon();
@@ -154,6 +157,8 @@ namespace app
         { return GetType() == Type::ParticleSystem; }
         inline bool IsCustomShape() const
         { return GetType() == Type::CustomShape; }
+        inline bool IsScene() const
+        { return GetType() == Type::Scene; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -252,6 +257,10 @@ namespace app
         struct ResourceTypeTraits<game::AnimationClass> {
             static constexpr auto Type = app::Resource::Type::Animation;
         };
+        template<>
+        struct ResourceTypeTraits<game::SceneClass> {
+            static constexpr auto Type = app::Resource::Type::Scene;
+        };
 
         template<>
         struct ResourceTypeTraits<gfx::PolygonClass> {
@@ -346,6 +355,8 @@ namespace app
                 json["animations"].push_back(content_json);
             else if (TypeValue == Resource::Type::CustomShape)
                 json["shapes"].push_back(content_json);
+            else if (TypeValue == Resource::Type::Scene)
+                json["scenes"].push_back(content_json);
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {
@@ -450,6 +461,7 @@ namespace app
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using AnimationResource      = GameResource<game::AnimationClass>;
+    using SceneResource          = GameResource<game::SceneClass>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;

@@ -1028,6 +1028,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);
     LoadResources<gfx::PolygonClass>("shapes", json, mResources);
     LoadResources<game::AnimationClass>("animations", json, mResources);
+    LoadResources<game::SceneClass>("scenes", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.

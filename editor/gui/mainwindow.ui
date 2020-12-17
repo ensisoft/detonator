@@ -563,7 +563,7 @@
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>New Custom Shape</string>
+    <string>New Shape</string>
    </property>
   </action>
   <action name="actionWindowPopOut">
@@ -585,6 +585,15 @@
    </property>
    <property name="text">
     <string>Duplicate</string>
+   </property>
+  </action>
+  <action name="actionNewScene">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Scene</string>
    </property>
   </action>
  </widget>

@@ -55,6 +55,7 @@
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/animationwidget.h"
+#include "editor/gui/scenewidget.h"
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
@@ -341,6 +342,8 @@ bool MainWindow::loadWorkspace(const QString& dir)
             widget = new PolygonWidget(workspace.get());
         else if (klass == AnimationTrackWidget::staticMetaObject.className())
             widget = new AnimationTrackWidget(workspace.get());
+        else if (klass == SceneWidget::staticMetaObject.className())
+            widget = new SceneWidget(workspace.get());
 
         // bug, probably forgot to modify the if/else crap above.
         ASSERT(widget);
@@ -807,6 +810,11 @@ void MainWindow::on_actionNewCustomShape_triggered()
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
     showWidget(new PolygonWidget(mWorkspace.get()), open_new_window);
 }
+void MainWindow::on_actionNewScene_triggered()
+{
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(new SceneWidget(mWorkspace.get()), open_new_window);
+}
 
 void MainWindow::on_actionEditResource_triggered()
 {
@@ -1075,6 +1083,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewParticleSystem);
     menu.addAction(mUI.actionNewAnimation);
     menu.addAction(mUI.actionNewCustomShape);
+    menu.addAction(mUI.actionNewScene);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
@@ -1123,6 +1132,9 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get(), *res), new_window);
                 break;
+            case app::Resource::Type::Scene:
+                showWidget(new SceneWidget(mWorkspace.get(), *res), new_window);
+                break;
         }
     }
 }
@@ -1146,6 +1158,9 @@ void MainWindow::on_actionNewResource_triggered()
                 break;
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get()), new_window);
+                break;
+            case app::Resource::Type::Scene:
+                showWidget(new SceneWidget(mWorkspace.get()), new_window);
                 break;
         }
     }
@@ -1717,6 +1732,9 @@ void MainWindow::editResources(bool open_new_window)
                 break;
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get(), res), open_new_window);
+                break;
+            case app::Resource::Type::Scene:
+                showWidget(new SceneWidget(mWorkspace.get(), res), open_new_window);
                 break;
         }
     }

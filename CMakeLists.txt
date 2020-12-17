@@ -221,6 +221,9 @@ add_executable(Editor
     editor/gui/materialwidget.h
     editor/gui/materialwidget.cpp
     editor/gui/materialwidget.ui
+    editor/gui/scenewidget.h
+    editor/gui/scenewidget.ui
+    editor/gui/scenewidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
     editor/gui/treewidget.h
@@ -296,6 +299,7 @@ add_executable(EditorGameHost
     graphics/text.cpp
     graphics/resource.cpp
     gamelib/animation.cpp
+    gamelib/scene.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h
@@ -482,6 +486,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         graphics/drawable.cpp
         graphics/image.cpp
         gamelib/animation.cpp
+        gamelib/scene.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -500,6 +505,7 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/workspace.cpp
         editor/app/packing.cpp
         gamelib/animation.cpp
+        gamelib/scene.cpp
         gamelib/loader.cpp
         graphics/drawable.cpp
         graphics/material.cpp

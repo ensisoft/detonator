@@ -66,6 +66,11 @@ namespace gui
             mSelection = app::Resource::Type::CustomShape;
             accept();
         }
+        void on_btnScene_clicked()
+        {
+            mSelection = app::Resource::Type::Scene;
+            accept();
+        }
         void on_btnCancel_clicked()
         {
             reject();
