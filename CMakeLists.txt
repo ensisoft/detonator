@@ -527,16 +527,7 @@ add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
 add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp  base/assert.cpp)
 add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     base/assert.cpp
-    base/logging.cpp
-    graphics/drawable.cpp
-    graphics/material.cpp
-    graphics/image.cpp
-    graphics/text.cpp
-    graphics/resource.cpp
-    gamelib/animation.cpp
-    third_party/stb/stb_image.c
-    third_party/stb/stb_image_write.c
-    third_party/base64/base64.cpp)
+    gamelib/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")

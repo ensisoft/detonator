@@ -34,38 +34,13 @@
 #include "base/test_float.h"
 #include "base/assert.h"
 #include "base/math.h"
-#include "graphics/color4f.h"
-#include "graphics/material.h"
-#include "graphics/drawable.h"
 #include "gamelib/animation.h"
-#include "gamelib/classlib.h"
 
 bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
 {
     return real::equals(lhs.x, rhs.x) &&
            real::equals(lhs.y, rhs.y);
 }
-
-class TestClassLibrary : public game::ClassLibrary
-{
-public:
-    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override
-    {
-        return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::Yellow));
-    }
-    virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override
-    {
-        return std::make_shared<gfx::CircleClass>();
-    }
-    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override
-    { return nullptr; }
-    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override
-    { return nullptr; }
-    virtual void LoadFromFile(const std::string& dir, const std::string& file) override
-    {}
-};
-
-TestClassLibrary* g_factory = nullptr;
 
 void unit_test_animation_node()
 {
@@ -660,9 +635,6 @@ void unit_test_animation_render_tree()
 
 int test_main(int argc, char* argv[])
 {
-    TestClassLibrary lib;
-    g_factory = &lib;
-
     unit_test_animation_node();
     unit_test_animation_transform_actuator();
     unit_test_animation_track();
