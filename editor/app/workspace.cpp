@@ -1513,6 +1513,7 @@ void Workspace::DuplicateResources(const QModelIndexList& list)
     std::vector<size_t> indices;
     for (const auto& i : list)
         indices.push_back(i.row());
+    DuplicateResources(indices);
 }
 
 void Workspace::DuplicateResources(std::vector<size_t> indices)
