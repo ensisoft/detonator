@@ -1403,98 +1403,6 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    class DrawHook : public game::AnimationInstanceDrawHook
-    {
-    public:
-        DrawHook(const game::AnimationNode* selected, State& state)
-          : mSelected(selected)
-          , mState(state)
-        {}
-        virtual bool InspectPacket(const game::AnimationNode* node, game::DrawPacket& packet) override
-        {
-            if (!node->TestFlag(game::AnimationNodeClass::Flags::VisibleInEditor))
-                return false;
-            return true;
-        }
-        virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans, std::vector<game::DrawPacket>& packets) override
-        {
-            const auto is_mask     = node->GetRenderPass() == game::AnimationNodeClass::RenderPass::Mask;
-            const auto is_selected = node == mSelected;
-            if (is_mask && !is_selected)
-            {
-                static const auto yellow = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::DarkYellow));
-                static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
-                // visualize it.
-                trans.Push(node->GetModelTransform());
-                    game::DrawPacket box;
-                    box.transform = trans.GetAsMatrix();
-                    box.material  = yellow;
-                    box.drawable  = rect; //node->GetDrawable();
-                    box.layer     = node->GetLayer() + 1;
-                    box.pass      = game::AnimationNodeClass::RenderPass::Draw;
-                    packets.push_back(box);
-                trans.Pop();
-            }
-
-            if (!is_selected)
-                return;
-
-            static const auto green = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::Green));
-            static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
-            static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
-            const auto& size = node->GetSize();
-            const auto layer = 255; //is_mask ? node->GetLayer() + 1 : node->GetLayer();
-
-            // draw the selection rectangle.
-            trans.Push(node->GetModelTransform());
-                game::DrawPacket selection;
-                selection.transform = trans.GetAsMatrix();
-                selection.material  = green;
-                selection.drawable  = rect;
-                selection.layer     = layer;
-                packets.push_back(selection);
-            trans.Pop();
-
-            // decompose the matrix in order to get the combined scaling component
-            // so that we can use the inverse scale to keep the resize and rotation
-            // indicators always with same size.
-            const auto& mat = trans.GetAsMatrix();
-            glm::vec3 scale;
-            glm::vec3 translation;
-            glm::vec3 skew;
-            glm::vec4 perspective;
-            glm::quat orientation;
-            glm::decompose(mat, scale, orientation, translation, skew,  perspective);
-
-            // draw the resize indicator. (lower right corner box)
-            trans.Push();
-                trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-                trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-                game::DrawPacket sizing_box;
-                sizing_box.transform = trans.GetAsMatrix();
-                sizing_box.material  = green;
-                sizing_box.drawable  = rect;
-                sizing_box.layer     = layer;
-                packets.push_back(sizing_box);
-            trans.Pop();
-
-            // draw the rotation indicator. (upper left corner circle)
-            trans.Push();
-                trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-                trans.Translate(-size.x*0.5f, -size.y*0.5f);
-                game::DrawPacket rotation_circle;
-                rotation_circle.transform = trans.GetAsMatrix();
-                rotation_circle.material  = green;
-                rotation_circle.drawable  = circle;
-                rotation_circle.layer     = layer;
-                packets.push_back(rotation_circle);
-            trans.Pop();
-        }
-    private:
-        const game::AnimationNode* mSelected = nullptr;
-        State& mState;
-    };
-
     // render endless background grid.
     if (mUI.chkShowGrid->isChecked())
     {
@@ -1520,7 +1428,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
             {
                 node = &mAnimation->GetNode(index-1);
             }
-            DrawHook hook(node, mState);
+            DrawHook<game::AnimationNode> hook(node, mPlayState == PlayState::Playing);
             mRenderer.Draw(*mAnimation, painter, view, &hook);
         }
     view.Pop();
