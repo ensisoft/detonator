@@ -72,6 +72,12 @@ inline QColor FromGfx(const gfx::Color4f& color)
     return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
+inline void SetEnabled(QWidget* widget, bool enabled)
+{
+    QSignalBlocker s(widget);
+    widget->setEnabled(enabled);
+}
+
 template<typename EnumT>
 void PopulateFromEnum(QComboBox* combo)
 {

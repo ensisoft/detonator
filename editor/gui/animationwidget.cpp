@@ -160,8 +160,8 @@ public:
         auto* child = mState.animation->AddNode(std::move(node));
         root.AppendChild(child);
 
-        mState.scenegraph_tree_view->Rebuild();
-        mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(child->GetClassId()));
+        mState.view->Rebuild();
+        mState.view->SelectItemById(app::FromUtf8(child->GetClassId()));
 
         DEBUG("Added new shape '%1'", name);
         return true;
@@ -200,207 +200,32 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationWidget");
 
-    mUI.setupUi(this);
     mState.animation = std::make_shared<game::AnimationClass>();
+
     mTreeModel.reset(new TreeModel(*mState.animation));
 
-    mState.scenegraph_tree_model = mTreeModel.get();
-    mState.scenegraph_tree_view  = mUI.tree;
-    mState.workspace = workspace;
-    mState.renderer.SetLoader(workspace);
-
+    mUI.setupUi(this);
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
-
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-
     mUI.widget->onZoomIn  = std::bind(&AnimationWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&AnimationWidget::ZoomOut, this);
-    mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
-        if (!mCameraWasLoaded) {
-            // if the camera hasn't been loaded then compute now the
-            // initial position for the camera.
-            mState.camera_offset_x = width * 0.5;
-            mState.camera_offset_y = height * 0.5;
-        }
-
-        // offset the viewport so that the origin of the 2d space is in the middle of the viewport
-        const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
-        const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
-        SetValue(mUI.translateX, dist_x);
-        SetValue(mUI.translateY, dist_y);
-    };
     mUI.widget->onPaintScene = std::bind(&AnimationWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onMouseMove = std::bind(&AnimationWidget::MouseMove, this,
+        std::placeholders::_1);
+    mUI.widget->onMousePress = std::bind(&AnimationWidget::MousePress, this,
+        std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&AnimationWidget::MouseRelease, this,
+        std::placeholders::_1);
+    mUI.widget->onKeyPress = std::bind(&AnimationWidget::KeyPress, this,
+        std::placeholders::_1);
+    mUI.widget->onInitScene = std::bind(&AnimationWidget::InitScene, this,
+        std::placeholders::_1, std::placeholders::_2);
 
-    mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
-        if (mCurrentTool) {
-            gfx::Transform view;
-            view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-            view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-            view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-            view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-            mCurrentTool->MouseMove(mickey, view);
-        }
-
-        const auto width  = mUI.widget->width();
-        const auto height = mUI.widget->height();
-
-        // update the properties that might have changed as the result of application
-        // of the current tool.
-
-        // update the distance to center.
-        const auto dist_x = mState.camera_offset_x - (width / 2.0f);
-        const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-        mUI.translateX->setValue(dist_x);
-        mUI.translateY->setValue(dist_y);
-
-        DisplayCurrentNodeProperties();
-    };
-    mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
-
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-        if (!mCurrentTool)
-        {
-            // On a mouse press start we want to select the tool based on where the pointer
-            // is and which object it interects with in the game when the press starts.
-            //
-            // If the mouse pointer doesn't intersect with an object we create a new
-            // camera tool for moving the viewport and object selection gets cleared.
-            //
-            // If the mouse pointer intersecs with an object that is the same object
-            // that was already selected:
-            // Check if the pointer intersects with one of the resizing boxes inside
-            // the object's selection box. If it does then we create a new resizing tool
-            // otherwise we create a new move tool instance for moving the object.
-            //
-            // If the mouse pointer intersects with an object that is not the same object
-            // that was previously selected:
-            // Select the object.
-            //
-
-            // take the widget space mouse coordinate and transform into view/camera space.
-            const auto mouse_widget_position_x = mickey->pos().x();
-            const auto mouse_widget_position_y = mickey->pos().y();
-
-            const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
-            const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
-                mouse_widget_position_y, 1.0f, 1.0f);
-
-            std::vector<game::AnimationNodeClass*> nodes_hit;
-            std::vector<glm::vec2> hitbox_coords;
-            mState.animation->CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
-                &nodes_hit, &hitbox_coords);
-
-            // if nothing was hit clear the selection.
-            if (nodes_hit.empty())
-            {
-                mUI.tree->ClearSelection();
-                mCurrentTool.reset(new MoveCameraTool(mState));
-            }
-            else
-            {
-                const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
-                const game::AnimationNodeClass* previous  = selected
-                    ? static_cast<const game::AnimationNodeClass*>(selected->GetUserData())
-                    : nullptr;
-
-                // if the currently selected node is among the ones being hit
-                // then retain that selection.
-                // otherwise select the last one of the list. (the rightmost child)
-                game::AnimationNodeClass* hit = nodes_hit.back();
-                glm::vec2 hitpos = hitbox_coords.back();
-                for (size_t i=0; i<nodes_hit.size(); ++i)
-                {
-                    if (nodes_hit[i] == previous)
-                    {
-                        hit = nodes_hit[i];
-                        hitpos = hitbox_coords[i];
-                        break;
-                    }
-                }
-
-                const auto& size = hit->GetSize();
-                // check if any particular special area of interest is being hit
-                const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                     hitpos.y >= size.y - 10.0f;
-                const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                     hitpos.y >= 0 && hitpos.y <= 10.0f;
-                if (bottom_right_hitbox_hit)
-                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.animation, hit));
-                else if (top_left_hitbox_hit)
-                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.animation, hit));
-                else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.animation, hit));
-
-                mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
-            }
-        }
-        if (mCurrentTool)
-            mCurrentTool->MousePress(mickey, view);
-    };
-    mUI.widget->onMouseRelease = [&](QMouseEvent* mickey) {
-        if (!mCurrentTool)
-            return;
-
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-        mCurrentTool->MouseRelease(mickey, view);
-
-        mCurrentTool.release();
-        CheckPlacementActions(nullptr);
-    };
-
-    mUI.widget->onKeyPress = [&](QKeyEvent* key) {
-        switch (key->key()) {
-            case Qt::Key_Delete:
-                on_actionNodeDelete_triggered();
-                break;
-            case Qt::Key_W:
-                mState.camera_offset_y += 20.0f;
-                break;
-            case Qt::Key_S:
-                mState.camera_offset_y -= 20.0f;
-                break;
-            case Qt::Key_A:
-                mState.camera_offset_x += 20.0f;
-                break;
-            case Qt::Key_D:
-                mState.camera_offset_x -= 20.0f;
-                break;
-            case Qt::Key_Left:
-                UpdateCurrentNodePosition(-20.0f, 0.0f);
-                break;
-            case Qt::Key_Right:
-                UpdateCurrentNodePosition(20.0f, 0.0f);
-                break;
-            case Qt::Key_Up:
-                UpdateCurrentNodePosition(0.0f, -20.0f);
-                break;
-            case Qt::Key_Down:
-                UpdateCurrentNodePosition(0.0f, 20.0f);
-                break;
-            case Qt::Key_Escape:
-                mUI.tree->ClearSelection();
-                break;
-
-            default:
-                return false;
-        }
-        return true;
-    };
-
-    // create the memu for creating instances of user defined drawables
+    // create the menu for creating instances of user defined drawables
     // since there doesn't seem to be a way to do this in the designer.
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
@@ -409,27 +234,26 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace)
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Polygon");
 
+    mState.view  = mUI.tree;
+    mState.workspace = workspace;
+    mState.renderer.SetLoader(workspace);
+
+    // connect tree widget signals
+    connect(mUI.tree, &TreeWidget::currentRowChanged,this, &AnimationWidget::CurrentNodeChanged);
+    connect(mUI.tree, &TreeWidget::dragEvent,  this, &AnimationWidget::treeDragEvent);
+    connect(mUI.tree, &TreeWidget::clickEvent, this, &AnimationWidget::treeClickEvent);
+    // connect workspace signals for resource management
+    connect(workspace, &app::Workspace::NewResourceAvailable,this, &AnimationWidget::newResourceAvailable);
+    connect(workspace, &app::Workspace::ResourceToBeDeleted, this, &AnimationWidget::resourceToBeDeleted);
+    connect(workspace, &app::Workspace::ResourceUpdated,     this, &AnimationWidget::resourceUpdated);
+
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<game::AnimationNodeClass::RenderPass>(mUI.renderPass);
     PopulateFromEnum<game::AnimationNodeClass::RenderStyle>(mUI.renderStyle);
-    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.name, QString("My Animation"));
     SetValue(mUI.ID, mState.animation->GetId());
     setWindowTitle("My Animation");
-
-    // connect tree widget signals
-    connect(mUI.tree, &TreeWidget::currentRowChanged,
-            this, &AnimationWidget::CurrentNodeChanged);
-    connect(mUI.tree, &TreeWidget::dragEvent,  this, &AnimationWidget::treeDragEvent);
-    connect(mUI.tree, &TreeWidget::clickEvent, this, &AnimationWidget::treeClickEvent);
-
-    // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::NewResourceAvailable,
-            this,      &AnimationWidget::newResourceAvailable);
-    connect(workspace, &app::Workspace::ResourceToBeDeleted,
-            this,      &AnimationWidget::resourceToBeDeleted);
-    connect(workspace, &app::Workspace::ResourceUpdated,
-            this, &AnimationWidget::resourceUpdated);
 
     RebuildDrawableMenus();
     RebuildComboLists();
@@ -441,6 +265,7 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     DEBUG("Editing animation '%1'", resource.GetName());
     const game::AnimationClass* content = nullptr;
     resource.GetContent(&content);
+
     mState.animation = std::make_shared<game::AnimationClass>(*content);
     mOriginalHash    = mState.animation->GetHash();
     mCameraWasLoaded = true;
@@ -459,23 +284,8 @@ AnimationWidget::AnimationWidget(app::Workspace* workspace, const app::Resource&
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(resource.GetName());
 
-    // if some resource has been deleted we need to replace it.
-    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
-    {
-        auto& node = mState.animation->GetNode(i);
-        const auto& material = node.GetMaterialId();
-        const auto& drawable = node.GetDrawableId();
-        if (!material.empty() && !workspace->IsValidMaterial(material))
-        {
-            WARN("Animation node '%1' uses material '%2' that is deleted.", node.GetName(), material);
-            node.SetMaterial("_checkerboard");
-        }
-        if (!drawable.empty() && !workspace->IsValidDrawable(drawable))
-        {
-            WARN("Animation node '%1' uses drawable '%2' that is deleted.", node.GetName(), drawable);
-            node.SetDrawable("_rect");
-        }
-    }
+    UpdateDeletedResourceReferences();
+
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -573,7 +383,7 @@ bool AnimationWidget::LoadState(const Settings& settings)
 
     mState.camera_offset_x = settings.getValue("Animation", "camera_offset_x", mState.camera_offset_x);
     mState.camera_offset_y = settings.getValue("Animation", "camera_offset_y", mState.camera_offset_y);
-    // set a flag to *not* adjust the camere on gfx widget init to the middle the of widget.
+    // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
     const std::string& base64 = settings.getValue("Animation", "content", std::string(""));
@@ -596,26 +406,11 @@ bool AnimationWidget::LoadState(const Settings& settings)
         ShareAnimation(mState.animation);
     }
 
-    // if some resource has been deleted we need to replace it.
-    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
-    {
-        auto& node = mState.animation->GetNode(i);
-        const auto& material = node.GetMaterialId();
-        const auto& drawable = node.GetDrawableId();
-        if (!material.empty() && !mState.workspace->IsValidMaterial(material))
-        {
-            WARN("Animation node '%1' uses material '%2' that is deleted.", node.GetName(), material);
-            node.SetMaterial("_checkerboard");
-        }
-        if (!drawable.empty() && !mState.workspace->IsValidDrawable(drawable))
-        {
-            WARN("Animation node '%1' uses drawable '%2' that is deleted.",
-                node.GetName(), drawable);
-            node.SetDrawable("_rect");
-        }
-    }
-
     mOriginalHash = mState.animation->GetHash();
+
+    // if some resource has been deleted we need to replace it.
+    UpdateDeletedResourceReferences();
+
     mTreeModel.reset(new TreeModel(*mState.animation));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -710,8 +505,9 @@ void AnimationWidget::Refresh()
         selected_item_ids.insert(app::ToUtf8(item->data(Qt::UserRole).toString()));
 
     mUI.trackList->clear();
-    mUI.btnDeleteTrack->setEnabled(false);
-    mUI.btnEditTrack->setEnabled(false);
+
+    SetEnabled(mUI.btnDeleteTrack, false);
+    SetEnabled(mUI.btnEditTrack, false);
     for (size_t i=0; i<mState.animation->GetNumTracks(); ++i)
     {
         const auto& track = mState.animation->GetAnimationTrack(i);
@@ -750,7 +546,7 @@ void AnimationWidget::on_actionStop_triggered()
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.time->setText("0");
+    mUI.time->clear();
 }
 
 void AnimationWidget::on_actionSave_triggered()
@@ -921,8 +717,8 @@ void AnimationWidget::on_actionNodeDuplicate_triggered()
     copy_root->SetTranslation(node->GetTranslation() * 1.2f);
     tree_node_parent->AppendChild(std::move(copy_root));
 
-    mState.scenegraph_tree_view->Rebuild();
-    mState.scenegraph_tree_view->SelectItemById(app::FromUtf8(copy_root->GetClassId()));
+    mState.view->Rebuild();
+    mState.view->SelectItemById(app::FromUtf8(copy_root->GetClassId()));
 }
 
 void AnimationWidget::on_tree_customContextMenuRequested(QPoint)
@@ -1024,13 +820,13 @@ void AnimationWidget::CurrentNodeChanged()
     const game::AnimationNodeClass* node = GetCurrentNode();
     if (node == nullptr)
     {
-        mUI.cProperties->setEnabled(false);
-        mUI.cTransform->setEnabled(false);
+        SetEnabled(mUI.cProperties, false);
+        SetEnabled(mUI.cTransform, false);
     }
     else
     {
-        mUI.cProperties->setEnabled(true);
-        mUI.cTransform->setEnabled(true);
+        SetEnabled(mUI.cProperties, true);
+        SetEnabled(mUI.cTransform, true);
         DisplayCurrentNodeProperties();
     }
 }
@@ -1312,28 +1108,42 @@ void AnimationWidget::on_trackList_itemSelectionChanged()
     mUI.btnDeleteTrack->setEnabled(!list.isEmpty());
 }
 
+void AnimationWidget::InitScene(unsigned width, unsigned height)
+{
+    if (!mCameraWasLoaded)
+    {
+        // if the camera hasn't been loaded then compute now the
+        // initial position for the camera.
+        mState.camera_offset_x = width * 0.5;
+        mState.camera_offset_y = height * 0.5;
+    }
+
+    // offset the viewport so that the origin of the 2d space is in the middle of the viewport
+    const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
+    const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
+    SetValue(mUI.translateX, dist_x);
+    SetValue(mUI.translateY, dist_y);
+}
+
 void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    const auto view_rotation_time = math::clamp(0.0f, 1.0f,
-        mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_time = math::clamp(0.0f, 1.0f,mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
 
-    gfx::Transform view;
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
     // and its components from the space of the animation to the global space.
+    gfx::Transform view;
     view.Push();
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    DrawHook<game::AnimationNodeClass> hook(GetCurrentNode(), mPlayState == PlayState::Playing);
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
@@ -1344,6 +1154,8 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
         const GridDensity grid = GetValue(mUI.cmbGrid);
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
+
+    DrawHook<game::AnimationNodeClass> hook(GetCurrentNode(), mPlayState == PlayState::Playing);
 
     // begin the animation transformation space
     view.Push();
@@ -1363,6 +1175,174 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // pop view transformation
     view.Pop();
+}
+
+void AnimationWidget::MouseMove(QMouseEvent* mickey)
+{
+    if (mCurrentTool)
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+        mCurrentTool->MouseMove(mickey, view);
+    }
+
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+
+    // update the properties that might have changed as the result of application
+    // of the current tool.
+
+    // update the distance to center.
+    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
+    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
+    mUI.translateX->setValue(dist_x);
+    mUI.translateY->setValue(dist_y);
+
+    DisplayCurrentNodeProperties();
+}
+void AnimationWidget::MousePress(QMouseEvent* mickey)
+{
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    if (!mCurrentTool)
+    {
+        // On a mouse press start we want to select the tool based on where the pointer
+        // is and which object it intersects with in the game when the press starts.
+        //
+        // If the mouse pointer doesn't intersect with an object we create a new
+        // camera tool for moving the viewport and object selection gets cleared.
+        //
+        // If the mouse pointer intersects with an object that is the same object
+        // that was already selected:
+        // Check if the pointer intersects with one of the resizing boxes inside
+        // the object's selection box. If it does then we create a new resizing tool
+        // otherwise we create a new move tool instance for moving the object.
+        //
+        // If the mouse pointer intersects with an object that is not the same object
+        // that was previously selected:
+        // Select the object.
+        //
+
+        // take the widget space mouse coordinate and transform into view/camera space.
+        const auto mouse_widget_position_x = mickey->pos().x();
+        const auto mouse_widget_position_y = mickey->pos().y();
+
+        const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
+        const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
+                                                                     mouse_widget_position_y, 1.0f, 1.0f);
+
+        std::vector<game::AnimationNodeClass*> nodes_hit;
+        std::vector<glm::vec2> hitbox_coords;
+        mState.animation->CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
+
+        // if nothing was hit clear the selection.
+        if (nodes_hit.empty())
+        {
+            mUI.tree->ClearSelection();
+            mCurrentTool.reset(new MoveCameraTool(mState));
+        }
+        else
+        {
+            const TreeWidget::TreeItem* selected = mUI.tree->GetSelectedItem();
+            const game::AnimationNodeClass* previous  = selected
+                ? static_cast<const game::AnimationNodeClass*>(selected->GetUserData())
+                : nullptr;
+
+            // if the currently selected node is among the ones being hit
+            // then retain that selection.
+            // otherwise select the last one of the list. (the rightmost child)
+            game::AnimationNodeClass* hit = nodes_hit.back();
+            glm::vec2 hitpos = hitbox_coords.back();
+            for (size_t i=0; i<nodes_hit.size(); ++i)
+            {
+                if (nodes_hit[i] == previous)
+                {
+                    hit = nodes_hit[i];
+                    hitpos = hitbox_coords[i];
+                    break;
+                }
+            }
+
+            const auto& size = hit->GetSize();
+            // check if any particular special area of interest is being hit
+            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
+                                                 hitpos.y >= size.y - 10.0f;
+            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
+                                             hitpos.y >= 0 && hitpos.y <= 10.0f;
+            if (bottom_right_hitbox_hit)
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.animation, hit));
+            else if (top_left_hitbox_hit)
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.animation, hit));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.animation, hit));
+
+            mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
+        }
+    }
+    if (mCurrentTool)
+        mCurrentTool->MousePress(mickey, view);
+}
+void AnimationWidget::MouseRelease(QMouseEvent* mickey)
+{
+    if (!mCurrentTool)
+        return;
+
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    mCurrentTool->MouseRelease(mickey, view);
+
+    mCurrentTool.release();
+    CheckPlacementActions(nullptr);
+}
+bool AnimationWidget::KeyPress(QKeyEvent* key)
+{
+    switch (key->key())
+    {
+        case Qt::Key_Delete:
+            on_actionNodeDelete_triggered();
+            break;
+        case Qt::Key_W:
+            mState.camera_offset_y += 20.0f;
+            break;
+        case Qt::Key_S:
+            mState.camera_offset_y -= 20.0f;
+            break;
+        case Qt::Key_A:
+            mState.camera_offset_x += 20.0f;
+            break;
+        case Qt::Key_D:
+            mState.camera_offset_x -= 20.0f;
+            break;
+        case Qt::Key_Left:
+            UpdateCurrentNodePosition(-20.0f, 0.0f);
+            break;
+        case Qt::Key_Right:
+            UpdateCurrentNodePosition(20.0f, 0.0f);
+            break;
+        case Qt::Key_Up:
+            UpdateCurrentNodePosition(0.0f, -20.0f);
+            break;
+        case Qt::Key_Down:
+            UpdateCurrentNodePosition(0.0f, 20.0f);
+            break;
+        case Qt::Key_Escape:
+            mUI.tree->ClearSelection();
+            break;
+
+        default:
+            return false;
+    }
+    return true;
 }
 
 game::AnimationNodeClass* AnimationWidget::GetCurrentNode()
@@ -1492,6 +1472,27 @@ void AnimationWidget::CheckPlacementActions(QAction* selected)
 
     if (selected)
         selected->setChecked(true);
+}
+
+void AnimationWidget::UpdateDeletedResourceReferences()
+{
+    // if some resource has been deleted we need to replace it.
+    for (size_t i=0; i<mState.animation->GetNumNodes(); ++i)
+    {
+        auto& node = mState.animation->GetNode(i);
+        const auto& material = node.GetMaterialId();
+        const auto& drawable = node.GetDrawableId();
+        if (!material.empty() && !mState.workspace->IsValidMaterial(material))
+        {
+            WARN("Animation node '%1' uses material '%2' that is deleted.", node.GetName(), material);
+            node.SetMaterial("_checkerboard");
+        }
+        if (!drawable.empty() && !mState.workspace->IsValidDrawable(drawable))
+        {
+            WARN("Animation node '%1' uses drawable '%2' that is deleted.", node.GetName(), drawable);
+            node.SetDrawable("_rect");
+        }
+    }
 }
 
 } // namespace

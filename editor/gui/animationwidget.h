@@ -134,13 +134,19 @@ namespace gui
 
     private:
         game::AnimationNodeClass* GetCurrentNode();
+        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
+        void MouseMove(QMouseEvent* mickey);
+        void MousePress(QMouseEvent* mickey);
+        void MouseRelease(QMouseEvent* mickey);
+        bool KeyPress(QKeyEvent* key);
         void UpdateCurrentNodeAlpha();
         void UpdateCurrentNodePosition(float dx, float dy);
         void DisplayCurrentNodeProperties();
         void RebuildComboLists();
         void RebuildDrawableMenus();
         void CheckPlacementActions(QAction* selected);
+        void UpdateDeletedResourceReferences();
     private:
         using TreeModel = RenderTreeModel<game::AnimationClass>;
         class PlaceTool;
@@ -161,15 +167,10 @@ namespace gui
             // shared with the track widget.
             std::shared_ptr<game::AnimationClass> animation;
             game::Renderer renderer;
+            app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
-
-            // current workspace we're editing.
-            app::Workspace* workspace = nullptr;
-            //
-            gui::TreeWidget* scenegraph_tree_view = nullptr;
-
-            TreeModel* scenegraph_tree_model = nullptr;
+            gui::TreeWidget* view = nullptr;
         } mState;
 
         // tree model for accessing the animations' render tree
