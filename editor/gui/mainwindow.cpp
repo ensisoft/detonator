@@ -123,6 +123,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.eventlist->setModel(&events);
 
     setWindowTitle(QString("%1").arg(APP_TITLE));
+    setAcceptDrops(true);
 
     QCoreApplication::postEvent(this, new IterateGameLoopEvent);
 }
@@ -1555,6 +1556,39 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
     emit aboutToClose();
 }
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* drag)
+{
+    if (!mWorkspace)
+        return;
+
+    DEBUG("dragEnterEvent");
+    drag->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+    if (!mWorkspace)
+        return;
+
+    DEBUG("dropEvent");
+
+    const auto* mime = event->mimeData();
+    if (!mime->hasUrls())
+        return;
+
+    QStringList files;
+
+    const auto& urls = mime->urls();
+    for (int i=0; i<urls.size(); ++i)
+    {
+        const auto& name = urls[i].toLocalFile();
+        DEBUG("Local file path: %1", name);
+        files.append(name);
+    }
+    mWorkspace->ImportFilesAsResource(files);
+}
+
 
 void MainWindow::BuildRecentWorkspacesMenu()
 {

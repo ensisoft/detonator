@@ -153,7 +153,9 @@ namespace gui
 
     private:
         bool event(QEvent* event)  override;
-        void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
+        void closeEvent(QCloseEvent* event) override;
+        void dragEnterEvent(QDragEnterEvent* drag) override;
+        void dropEvent(QDropEvent* event) override;
 
     private:
         Ui::MainWindow mUI;

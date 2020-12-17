@@ -217,6 +217,11 @@ namespace app
         void DuplicateResources(std::vector<size_t> indices);
         void DuplicateResource(size_t index);
 
+        // Import and create new resource based on a file.
+        // Currently supports creating material resources out of
+        // images (.jpeg and .png) files
+        void ImportFilesAsResource(const QStringList& files);
+
         // Perform periodic workspace tick for cleaning up resources
         // that are no longer used/referenced.
         void Tick();

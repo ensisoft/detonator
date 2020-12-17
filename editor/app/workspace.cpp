@@ -1551,6 +1551,45 @@ void Workspace::DuplicateResource(size_t index)
     DuplicateResources(std::vector<size_t>{index});
 }
 
+void Workspace::ImportFilesAsResource(const QStringList& files)
+{
+    // todo: given a collection of file names some of the files
+    // could belong together in a sprite/texture animation sequence.
+    // for example if we have "bird_0.png", "bird_1.png", ... "bird_N.png" 
+    // we could assume that these are all material animation frames
+    // and should go together into one material.
+    // On the other hand there are also cases like with tile sets that have
+    // tiles named tile1.png, tile2.png ... and these should be separated.
+    // not sure how to deal with this smartly. 
+
+    for (const QString& file : files)
+    {
+        const QFileInfo info(file);
+        if (!info.isFile())
+        {
+            WARN("File '%1' is not a file.", file);
+            continue;
+        }
+        const auto& name   = info.fileName();
+        const auto& suffix = info.completeSuffix().toUpper();
+        if (!(suffix == "JPEG" || suffix == "JPG" || suffix == "PNG"))
+        {
+            WARN("File '%1' doesn't seem to be a supported image file.", info.filePath());
+            continue;
+        }
+        const auto& uri = AddFileToWorkspace(file);
+
+        gfx::MaterialClass klass;
+        klass.SetType(gfx::MaterialClass::Type::Texture);
+        klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        klass.AddTexture(ToUtf8(uri));
+        MaterialResource res(klass, name);
+        SaveResource(res);
+
+        INFO("Imported new material '%1' based on image ile '%2'", name, info.filePath());
+    }
+}
+
 void Workspace::Tick()
 {
 
