@@ -116,6 +116,17 @@ namespace gui
         void on_dsRestartDrawable_stateChanged(int);
         void on_dsOverrideAlpha_stateChanged(int);
         void on_dsAlpha_valueChanged();
+        void on_rbSimulation_currentIndexChanged(const QString&);
+        void on_rbShape_currentIndexChanged(const QString&);
+        void on_rbPolygon_currentIndexChanged(const QString&);
+        void on_rbFriction_valueChanged(double value);
+        void on_rbRestitution_valueChanged(double value);
+        void on_rbAngularDamping_valueChanged(double value);
+        void on_rbLinearDamping_valueChanged(double value);
+        void on_rbDensity_valueChanged(double value);
+        void on_rbIsBullet_stateChanged(int);
+        void on_rbIsSensor_stateChanged(int);
+        void on_rbIsEnabled_stateChanged(int);
 
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);

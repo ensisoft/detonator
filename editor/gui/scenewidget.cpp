@@ -914,6 +914,123 @@ void SceneWidget::on_dsAlpha_valueChanged()
     UpdateCurrentNodeAlpha();
 }
 
+void SceneWidget::on_rbSimulation_currentIndexChanged(const QString&)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetSimulation(GetValue(mUI.rbSimulation));
+        }
+    }
+}
+
+void SceneWidget::on_rbShape_currentIndexChanged(const QString&)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetCollisionShape(GetValue(mUI.rbShape));
+            DisplayCurrentNodeProperties();
+        }
+    }
+}
+
+void SceneWidget::on_rbPolygon_currentIndexChanged(const QString&)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            const QString& poly = GetValue(mUI.rbPolygon);
+            body->SetPolygonShapeId(mState.workspace->GetDrawableClassByName(poly)->GetId());
+        }
+    }
+}
+
+void SceneWidget::on_rbFriction_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFriction(GetValue(mUI.rbFriction));
+        }
+    }
+}
+void SceneWidget::on_rbRestitution_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetRestitution(GetValue(mUI.rbRestitution));
+        }
+    }
+}
+void SceneWidget::on_rbAngularDamping_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetAngularDamping(GetValue(mUI.rbAngularDamping));
+        }
+    }
+}
+void SceneWidget::on_rbLinearDamping_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetLinearDamping(GetValue(mUI.rbLinearDamping));
+        }
+    }
+}
+void SceneWidget::on_rbDensity_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetDensity(GetValue(mUI.rbDensity));
+        }
+    }
+}
+
+void SceneWidget::on_rbIsBullet_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
+        }
+    }
+}
+void SceneWidget::on_rbIsSensor_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsBullet));
+        }
+    }
+}
+void SceneWidget::on_rbIsEnabled_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFlag(game::RigidBodyItemClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
+        }
+    }
+}
+
 void SceneWidget::on_drawableItem_toggled(bool on)
 {
     if (auto* node = GetCurrentNode())
@@ -1305,7 +1422,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbLinearDamping, 0.0f);
     SetValue(mUI.rbDensity, 0.0f);
     SetValue(mUI.rbIsBullet, false);
-    SetValue(mUI.rbIsSensorOnly, false);
+    SetValue(mUI.rbIsSensor, false);
     SetValue(mUI.rbIsEnabled, false);
 
     if (const auto* node = GetCurrentNode())
@@ -1351,8 +1468,18 @@ void SceneWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.rbLinearDamping, body->GetLinearDamping());
             SetValue(mUI.rbDensity, body->GetDensity());
             SetValue(mUI.rbIsBullet, body->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
-            SetValue(mUI.rbIsSensorOnly, body->TestFlag(game::RigidBodyItemClass::Flags::Sensor));
+            SetValue(mUI.rbIsSensor, body->TestFlag(game::RigidBodyItemClass::Flags::Sensor));
             SetValue(mUI.rbIsEnabled, body->TestFlag(game::RigidBodyItemClass::Flags::Enabled));
+            if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
+            {
+                SetEnabled(mUI.rbPolygon, true);
+                SetValue(mUI.rbPolygon, mState.workspace->MapDrawableIdToName(body->GetPolygonShapeId()));
+            }
+            else
+            {
+                SetEnabled(mUI.rbPolygon, false);
+                SetValue(mUI.rbPolygon, QString(""));
+            }
         }
     }
 }

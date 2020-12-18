@@ -134,6 +134,8 @@ namespace game
         { return mBitFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mPolygonShapeId; }
+        void ResetPolygonShapeId()
+        { mPolygonShapeId.clear(); }
 
         void SetCollisionShape(CollisionShape shape)
         { mCollisionShape = shape; }

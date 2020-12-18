@@ -1297,7 +1297,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QCheckBox" name="rbIsSensorOnly">
+                      <widget class="QCheckBox" name="rbIsSensor">
                        <property name="text">
                         <string>Sensor only</string>
                        </property>
