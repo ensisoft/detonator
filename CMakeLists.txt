@@ -450,6 +450,7 @@ add_library(invaders SHARED
     gamelib/renderer.cpp
     gamelib/homedir.cpp
     gamelib/animation.cpp
+    gamelib/scene.cpp
     gamelib/loader.cpp
     gamelib/main/gamelib.cpp
     wdk/wdk/keys.cpp
