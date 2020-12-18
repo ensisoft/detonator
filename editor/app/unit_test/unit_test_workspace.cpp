@@ -196,7 +196,8 @@ void unit_test_save_load()
     settings.multisample_sample_count = 16;
     settings.application_name = "foobar";
     settings.application_version = "1.1.1";
-    settings.application_library = "library";
+    settings.application_library_win = "library.dll";
+    settings.application_library_lin = "liblibrary.so";
     settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
     settings.default_mag_filter = gfx::Device::MagFilter::Linear;
     settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;
@@ -251,7 +252,8 @@ void unit_test_save_load()
     TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
     TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");
     TEST_REQUIRE(workspace.GetProjectSettings().application_version == "1.1.1");
-    TEST_REQUIRE(workspace.GetProjectSettings().application_library == "library");
+    TEST_REQUIRE(workspace.GetProjectSettings().application_library_win == "library.dll");
+    TEST_REQUIRE(workspace.GetProjectSettings().application_library_lin == "liblibrary.so");
     TEST_REQUIRE(workspace.GetProjectSettings().default_min_filter == gfx::Device::MinFilter::Mipmap);
     TEST_REQUIRE(workspace.GetProjectSettings().default_mag_filter == gfx::Device::MagFilter::Linear);
     TEST_REQUIRE(workspace.GetProjectSettings().window_mode == app::Workspace::ProjectSettings::WindowMode::Fullscreen);
@@ -287,7 +289,8 @@ void unit_test_packing_basic()
     settings.multisample_sample_count = 16;
     settings.application_name = "foobar";
     settings.application_version = "1.1.1";
-    settings.application_library = "library";
+    settings.application_library_lin = "libgame.so";
+    settings.application_library_win = "game.dll";
     settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
     settings.default_mag_filter = gfx::Device::MagFilter::Linear;
     settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;
@@ -353,7 +356,7 @@ void unit_test_packing_basic()
     TEST_REQUIRE(json["window"]["vsync"] == true);
     TEST_REQUIRE(json["application"]["title"] == "foobar");
     TEST_REQUIRE(json["application"]["version"] == "1.1.1");
-    TEST_REQUIRE(json["application"]["library"] == "library");
+    TEST_REQUIRE(json["application"]["library"] == "game");
     TEST_REQUIRE(json["application"]["ticks_per_second"] == 100.0);
     TEST_REQUIRE(json["application"]["updates_per_second"] == 50.0);
 

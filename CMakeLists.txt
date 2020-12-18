@@ -391,6 +391,38 @@ if (UNIX)
 endif()
 install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
+# generic game engine library.
+add_library(GameEngine SHARED
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+    graphics/drawing.cpp
+    graphics/material.cpp
+    graphics/drawable.cpp
+    graphics/painter.cpp
+    graphics/text.cpp
+    graphics/resource.cpp
+    graphics/image.cpp
+    graphics/opengl_es2_device.cpp
+    gamelib/physics.cpp
+    gamelib/scene.cpp
+    gamelib/renderer.cpp
+    gamelib/animation.cpp
+    gamelib/loader.cpp
+    gamelib/engine.cpp
+    gamelib/main/gamelib.cpp
+    third_party/stb/stb_image_write.c
+    third_party/stb/stb_image.c
+    third_party/base64/base64.cpp
+)
+target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
+target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
+install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+# hide symbols on linux
+if (CMAKE_COMPILER_IS_GNUCC)
+    target_link_options(GameEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
+endif()
+
 # gamelib test application.
 add_library(gamelib_test SHARED
     base/assert.cpp

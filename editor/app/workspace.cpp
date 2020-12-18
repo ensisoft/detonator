@@ -752,6 +752,33 @@ std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassById(co
     return GetAnimationClassById(FromUtf8(id));
 }
 
+std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Scene)
+            continue;
+        else if (resource->GetNameUtf8() != name)
+            continue;
+        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for an animation that doesn't exist: '%1'", name);
+    return nullptr;
+}
+std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Scene)
+            continue;
+        else if (resource->GetIdUtf8() != id)
+            continue;
+        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for an animation that doesn't exist: '%1'", id);
+    return nullptr;
+}
+
 std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const
 {
     // see comments in AddFile about resource path mapping.
@@ -1099,23 +1126,31 @@ bool Workspace::SaveProperties(const QString& filename) const
     QJsonObject json;
 
     QJsonObject project;
-    project["multisample_sample_count"] = (int)mSettings.multisample_sample_count;
-    project["application_name"]         = mSettings.application_name;
-    project["application_version"]      = mSettings.application_version;
-    project["application_library"]      = mSettings.application_library;
-    project["default_min_filter"]       = toString(mSettings.default_min_filter);
-    project["default_mag_filter"]       = toString(mSettings.default_mag_filter);
-    project["window_mode"]              = toString(mSettings.window_mode);
-    project["window_width"]             = (int)mSettings.window_width;
-    project["window_height"]            = (int)mSettings.window_height;
-    project["window_can_resize"]        = mSettings.window_can_resize;
-    project["window_has_border"]        = mSettings.window_has_border;
-    project["window_vsync"]             = mSettings.window_vsync;
-    project["ticks_per_second"]         = (int)mSettings.ticks_per_second;
-    project["updates_per_second"]       = (int)mSettings.updates_per_second;
-    project["working_folder"]           = mSettings.working_folder;
-    project["command_line_arguments"]   = mSettings.command_line_arguments;
-    project["use_gamehost_process"]     = mSettings.use_gamehost_process;
+    JsonWrite(project, "multisample_sample_count", mSettings.multisample_sample_count);
+    JsonWrite(project, "application_name"        , mSettings.application_name);
+    JsonWrite(project, "application_version"     , mSettings.application_version);
+    JsonWrite(project, "application_library_win" , mSettings.application_library_win);
+    JsonWrite(project, "application_library_lin" , mSettings.application_library_lin);
+    JsonWrite(project, "default_min_filter"      , mSettings.default_min_filter);
+    JsonWrite(project, "default_mag_filter"      , mSettings.default_mag_filter);
+    JsonWrite(project, "window_mode"             , mSettings.window_mode);
+    JsonWrite(project, "window_width"            , mSettings.window_width);
+    JsonWrite(project, "window_height"           , mSettings.window_height);
+    JsonWrite(project, "window_can_resize"       , mSettings.window_can_resize);
+    JsonWrite(project, "window_has_border"       , mSettings.window_has_border);
+    JsonWrite(project, "window_vsync"            , mSettings.window_vsync);
+    JsonWrite(project, "ticks_per_second"        , mSettings.ticks_per_second);
+    JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
+    JsonWrite(project, "working_folder"          , mSettings.working_folder);
+    JsonWrite(project, "command_line_arguments"  , mSettings.command_line_arguments);
+    JsonWrite(project, "use_gamehost_process"    , mSettings.use_gamehost_process);
+    JsonWrite(project, "engine"                  , mSettings.engine);
+    JsonWrite(project, "num_velocity_iterations" , mSettings.num_velocity_iterations);
+    JsonWrite(project, "num_position_iterations" , mSettings.num_position_iterations);
+    JsonWrite(project, "phys_gravity_x"          , mSettings.gravity.x);
+    JsonWrite(project, "phys_gravity_y"          , mSettings.gravity.y);
+    JsonWrite(project, "phys_scale_x"            , mSettings.physics_scale.x);
+    JsonWrite(project, "phys_scale_y"            , mSettings.physics_scale.y);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1175,26 +1210,31 @@ bool Workspace::LoadProperties(const QString& filename)
     QJsonDocument docu(QJsonDocument::fromJson(buff));
 
     const QJsonObject& project = docu["project"].toObject();
-    mSettings.multisample_sample_count = project["multisample_sample_count"].toInt();
-    mSettings.application_name       = project["application_name"].toString();
-    mSettings.application_version    = project["application_version"].toString();
-    mSettings.application_library    = project["application_library"].toString();
-    mSettings.default_min_filter     = EnumFromString(project["default_min_filter"].toString(),
-        gfx::Device::MinFilter::Nearest);
-    mSettings.default_mag_filter     = EnumFromString(project["default_mag_filter"].toString(),
-        gfx::Device::MagFilter::Nearest);
-    mSettings.window_mode            = EnumFromString(project["window_mode"].toString(),
-        ProjectSettings::WindowMode::Windowed);
-    mSettings.window_width           = project["window_width"].toInt();
-    mSettings.window_height          = project["window_height"].toInt();
-    mSettings.window_can_resize      = project["window_can_resize"].toBool();
-    mSettings.window_has_border      = project["window_has_border"].toBool();
-    mSettings.window_vsync           = project["window_vsync"].toBool();
-    mSettings.ticks_per_second       = project["ticks_per_second"].toInt();
-    mSettings.updates_per_second     = project["updates_per_second"].toInt();
-    mSettings.working_folder         = project["working_folder"].toString();
-    mSettings.command_line_arguments = project["command_line_arguments"].toString();
-    mSettings.use_gamehost_process   = project["use_gamehost_process"].toBool();
+    JsonReadSafe(project, "multisample_sample_count", &mSettings.multisample_sample_count);
+    JsonReadSafe(project, "application_name",         &mSettings.application_name);
+    JsonReadSafe(project, "application_version",      &mSettings.application_version);
+    JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
+    JsonReadSafe(project, "application_library_lin",  &mSettings.application_library_lin);
+    JsonReadSafe(project, "default_min_filter",       &mSettings.default_min_filter);
+    JsonReadSafe(project, "default_mag_filter",       &mSettings.default_mag_filter);
+    JsonReadSafe(project, "window_mode",              &mSettings.window_mode);
+    JsonReadSafe(project, "window_width",             &mSettings.window_width);
+    JsonReadSafe(project, "window_height",            &mSettings.window_height);
+    JsonReadSafe(project, "window_can_resize",        &mSettings.window_can_resize);
+    JsonReadSafe(project, "window_has_border",        &mSettings.window_has_border);
+    JsonReadSafe(project, "window_vsync",             &mSettings.window_vsync);
+    JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
+    JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
+    JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
+    JsonReadSafe(project, "command_line_arguments",   &mSettings.command_line_arguments);
+    JsonReadSafe(project, "use_gamehost_process",     &mSettings.use_gamehost_process);
+    JsonReadSafe(project, "engine",                   &mSettings.engine);
+    JsonReadSafe(project, "num_position_iterations",  &mSettings.num_position_iterations);
+    JsonReadSafe(project, "num_velocity_iterations",  &mSettings.num_velocity_iterations);
+    JsonReadSafe(project, "phys_gravity_x",           &mSettings.gravity.x);
+    JsonReadSafe(project, "phys_gravity_y",           &mSettings.gravity.y);
+    JsonReadSafe(project, "phys_scale_x",             &mSettings.physics_scale.x);
+    JsonReadSafe(project, "phys_scale_y",             &mSettings.physics_scale.y);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -1767,10 +1807,27 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             json["window"]["set_fullscreen"] = true;
         json["application"]["title"]   = ToUtf8(mSettings.application_name);
         json["application"]["version"] = ToUtf8(mSettings.application_version);
-        json["application"]["library"] = ToUtf8(mSettings.application_library);
         json["application"]["ticks_per_second"]   = (float)mSettings.ticks_per_second;
         json["application"]["updates_per_second"] = (float)mSettings.updates_per_second;
         json["application"]["content"] = "content.json";
+
+        nlohmann::json physics_settings;
+        base::JsonWrite(physics_settings, "num_velocity_iterations", mSettings.num_velocity_iterations);
+        base::JsonWrite(physics_settings, "num_position_iterations", mSettings.num_position_iterations);
+        base::JsonWrite(physics_settings, "gravity", mSettings.gravity);
+        base::JsonWrite(physics_settings, "scale",   mSettings.physics_scale);
+        json["physics"] = physics_settings;
+
+        // resolves the path.
+        const QFileInfo engine_dll(mSettings.GetApplicationLibrary());
+        QString engine_name = engine_dll.fileName();
+        if (engine_name.startsWith("lib"))
+            engine_name.remove(0, 3);
+        if (engine_name.endsWith(".so"))
+            engine_name.chop(3);
+        else if (engine_name.endsWith(".dll"))
+            engine_name.chop(4);
+        json["application"]["library"] = ToUtf8(engine_name);
 
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
@@ -1794,6 +1851,8 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     runner.append(".exe");
 #endif
     packer.CopyFile(runner, "");
+    // copy the engine dll.
+    packer.CopyFile(ToUtf8(mSettings.GetApplicationLibrary()), "");
 
     INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
     return true;

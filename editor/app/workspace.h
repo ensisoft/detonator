@@ -31,6 +31,7 @@
 #  include <QMap>
 #  include <QObject>
 #  include <QVariant>
+#  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -92,6 +93,8 @@ namespace app
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const override;
         virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override;
+        virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string&, const std::string&) override
         {}
 
@@ -349,6 +352,20 @@ namespace app
                 // border and resize settings.
                 Windowed,
             };
+            // the type of game engine to use. engines are built into
+            // libraries that are loaded by the game hosts (either EditorGameHost
+            // or GameMain) and that contain the game's logic.
+            enum class GameEngine {
+                // Default game engine provides a "out of the box" experience
+                // and combines some subsystems such as rendering, physics and scripting
+                // into a ready made engine that can be used with script based games.
+                Default,
+                // Custom game engine is a custom built engine library that implements
+                // the main game host interface.
+                Custom
+            };
+            // the selected game engine.
+            GameEngine engine = GameEngine::Default;
             // sample count when using multi-sampled render targets.
             unsigned multisample_sample_count = 4;
             // user defined name of the application.
@@ -357,7 +374,25 @@ namespace app
             QString application_version;
             // The library (.so or .dll) that contains the application
             // entry point and game::App implementation.
-            QString application_library;
+            QString application_library_lin = "app://libGameEngine.so";
+            QString application_library_win = "app://GameEngine.dll";
+            QString GetApplicationLibrary() const
+            {
+            #if defined(POSIX_OS)
+                return application_library_lin;
+            #else
+                return application_library_win;
+            #endif
+            }
+            void SetApplicationLibrary(QString library)
+            {
+            #if defined(POSIX_OS)
+                application_library_lin = library;
+            #else
+                application_library_win = library;
+            #endif
+            }
+
             // default texture minification filter.
             gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Nearest;
             // default texture magnification filter.
@@ -367,7 +402,7 @@ namespace app
             // the assumed window width when launching the application
             // with its own window, i.e. when window_mode is Windowed.
             unsigned window_width = 1024;
-            // the assumed window height  when lauching the application
+            // the assumed window height  when launching the application
             // with its own window.
             unsigned window_height = 768;
             // window flag to allow window to be resized.
@@ -389,6 +424,15 @@ namespace app
             // process from errors in the game app but it might
             // make debugging the game app more complicated.
             bool use_gamehost_process = true;
+            // physics settings
+            // number of velocity iterations per physics simulation step.
+            unsigned num_velocity_iterations = 8;
+            // number of position iterations per physics simulation step.
+            unsigned num_position_iterations = 3;
+            // gravity vector for physics simulation
+            glm::vec2 gravity = {0.0f, 1.0f};
+            // scaling factor for mapping game world to physics world and back
+            glm::vec2 physics_scale = {1.0f, 1.0f};
         };
 
         const ProjectSettings& GetProjectSettings() const

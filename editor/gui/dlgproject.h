@@ -37,15 +37,19 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgProject(QWidget* parent, app::Workspace::ProjectSettings& settings);
+        DlgProject(QWidget* parent, app::Workspace& workspace,
+                   app::Workspace::ProjectSettings& settings);
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnSelectEngine_clicked();
+        void on_cmbEngine_currentIndexChanged(const QString&);
 
     private:
         Ui::DlgProject mUI;
     private:
+        app::Workspace& mWorkspace;
         app::Workspace::ProjectSettings& mSettings;
     };
 } // namespace

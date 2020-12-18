@@ -34,6 +34,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <vector>
+#include <gamelib/main/interface.h>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -497,15 +498,7 @@ bool PlayWindow::LoadGame()
     TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
 
     const auto& settings = mWorkspace.GetProjectSettings();
-    QString library = settings.application_library;
-#if defined(POSIX_OS) && defined(NDEBUG)
-    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + ".so");
-#elif defined(POSIX_OS)
-    library = app::JoinPath(mCurrentWorkingDir, "lib" + library + "d.so");
-#elif defined(WINDOWS_OS)
-    library = app::JoinPath(mCurrentWorkingDir, library + ".dll");
-#endif
-
+    const auto& library  = mWorkspace.MapFileToFilesystem(settings.GetApplicationLibrary());
     mLibrary.setFileName(library);
     mLibrary.setLoadHints(QLibrary::ResolveAllSymbolsHint);
     if (!mLibrary.load())
@@ -666,6 +659,15 @@ void PlayWindow::DoAppInit()
         const auto surface_height = mSurface->height();
         mApp->Init(mWindowContext.get(), surface_width, surface_height);
 
+        game::App::EngineConfig config;
+        config.ticks_per_second   = settings.ticks_per_second;
+        config.updates_per_second = settings.updates_per_second;
+        config.physics.num_velocity_iterations = settings.num_velocity_iterations;
+        config.physics.num_position_iterations = settings.num_position_iterations;
+        config.physics.gravity = settings.gravity;
+        config.physics.scale   = settings.physics_scale;
+
+        mApp->SetEngineConfig(config);
         mApp->Load();
         mApp->Start();
 

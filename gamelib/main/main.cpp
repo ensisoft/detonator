@@ -334,13 +334,6 @@ int main(int argc, char* argv[])
 
         // setup application
         app->Init(context.get(), window.GetSurfaceWidth(), window.GetSurfaceHeight());
-        app->Load();
-        app->Start();
-
-        // there's plenty of information about different ways ot write a basic
-        // game rendering loop. here are some suggested references:
-        // https://gafferongames.com/post/fix_your_timestep/
-        // Game Engine Architecture by Jason Gregory
 
         // the times here are in the application timeline which
         // is not the same as the real wall time but can drift
@@ -349,6 +342,25 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "updates_per_second", &updates_per_second);
         base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
 
+        game::App::EngineConfig config;
+        config.updates_per_second = updates_per_second;
+        config.ticks_per_second   = ticks_per_second;
+        if (json.contains("physics"))
+        {
+            const auto& physics_settings = json["physics"];
+            base::JsonReadSafe(physics_settings, "num_velocity_iterations", &config.physics.num_velocity_iterations);
+            base::JsonReadSafe(physics_settings, "num_position_iterations", &config.physics.num_position_iterations);
+            base::JsonReadSafe(physics_settings, "gravity", &config.physics.gravity);
+            base::JsonReadSafe(physics_settings, "scale",   &config.physics.scale);
+        }
+        app->SetEngineConfig(config);
+        app->Load();
+        app->Start();
+
+        // there's plenty of information about different ways ot write a basic
+        // game rendering loop. here are some suggested references:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // Game Engine Architecture by Jason Gregory
         double time_total = 0.0; // total time so far.
         double time_step  = 1.0f / updates_per_second; // the simulation time step
         double time_accum = 0.0; // the time available for taking update steps.

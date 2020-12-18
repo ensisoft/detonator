@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QJsonObject>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -35,6 +36,8 @@
 #include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
+#include <type_traits>
+#include <string_view>
 
 #include "base/assert.h"
 
@@ -147,7 +150,98 @@ Enum EnumFromString(const QString& str, Enum backup, bool* success = nullptr)
         if (success) *success = false;
         return backup;
     }
+    if (success) *success = true;
     return enum_val.value();
+}
+
+template<typename Enum>
+QString EnumToString(Enum value)
+{
+    const std::string_view& str(magic_enum::enum_name(value));
+    return QString::fromLocal8Bit(str.data(), str.size());
+}
+
+inline void JsonWrite(QJsonObject& object, const char* name, float value)
+{
+    object[name] = value;
+}
+
+inline void JsonWrite(QJsonObject& object, const char* name, int value)
+{
+    object[name] = value;
+}
+inline void JsonWrite(QJsonObject& object, const char* name, unsigned value)
+{
+    object[name] = static_cast<int>(value);
+}
+inline void JsonWrite(QJsonObject& object, const char* name, QString value)
+{
+    object[name] = value;
+}
+inline void JsonWrite(QJsonObject& object, const char* name, bool value)
+{
+    object[name] = value;
+}
+template<typename Enum>
+inline void JsonWrite(QJsonObject& object, const char* name, Enum value)
+{
+    static_assert(std::is_enum<Enum>::value);
+    object[name] = EnumToString(value);
+}
+
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, float* out)
+{
+    if (!object.contains(name) || !object[name].isDouble())
+        return false;
+    *out = object[name].toDouble();
+    return true;
+}
+
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, int* out)
+{
+    // todo: any way to check isInteger??
+    if (!object.contains(name))
+        return false;
+    *out = object[name].toInt();
+    return true;
+}
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, unsigned* out)
+{
+    // todo: any way to check isInteger??
+    if (!object.contains(name))
+        return false;
+    *out = object[name].toInt();
+    return true;
+}
+
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, QString* out)
+{
+    if (!object.contains(name) || !object[name].isString())
+        return false;
+    *out = object[name].toString();
+    return true;
+}
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, bool* out)
+{
+    if (!object.contains(name) || !object[name].isBool())
+        return false;
+    *out = object[name].toBool();
+    return true;
+}
+template<typename Enum>
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, Enum* out)
+{
+    static_assert(std::is_enum<Enum>::value);
+    QString str;
+    if (!JsonReadSafe(object, name, &str))
+        return false;
+    bool ok = false;
+    Enum e;
+    e = EnumFromString(str, e, &ok);
+    if (!ok)
+        return false;
+    *out = e;
+    return true;
 }
 
 struct MemberRecursionGuard {

@@ -132,12 +132,14 @@
         "checked_for_packing": true
     },
     "project": {
-        "application_library": "invaders",
+        "application_library_lin": "ws://dist/libinvaders.so",
+        "application_library_win": "ws://dist/invaders.dll",
         "application_name": "Pinyin Invaders",
         "application_version": "0.4b",
         "command_line_arguments": "--debug",
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
+        "engine": "Custom",
         "multisample_sample_count": 4,
         "ticks_per_second": 1,
         "updates_per_second": 60,

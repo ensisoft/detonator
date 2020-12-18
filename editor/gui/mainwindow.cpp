@@ -1168,9 +1168,12 @@ void MainWindow::on_actionNewResource_triggered()
 
 void MainWindow::on_actionProjectSettings_triggered()
 {
+    if (!mWorkspace)
+        return;
+
     auto settings = mWorkspace->GetProjectSettings();
 
-    DlgProject dlg(QApplication::activeWindow(), settings);
+    DlgProject dlg(QApplication::activeWindow(), *mWorkspace, settings);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1194,14 +1197,13 @@ void MainWindow::on_actionProjectPlay_triggered()
         return;
 
     const auto& settings = mWorkspace->GetProjectSettings();
-    if (settings.application_library.isEmpty())
+    if (settings.GetApplicationLibrary().isEmpty())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Question);
         msg.setText("You haven't set the application library for the project.\n"
-                    "The game should be built into a library (a .dll or .so file)\n"
-                    "which is then loaded by me.\n"
+                    "The game should be built into a library (a .dll or .so file).\n"
                     "You can change the application library in the workspace settings.");
         msg.exec();
         return;

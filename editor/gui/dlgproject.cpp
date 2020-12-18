@@ -39,14 +39,17 @@
 namespace gui
 {
 
-DlgProject::DlgProject(QWidget* parent, app::Workspace::ProjectSettings& settings)
+DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspace::ProjectSettings& settings)
     : QDialog(parent)
+    , mWorkspace(workspace)
     , mSettings(settings)
 {
+    const QString& library = mSettings.GetApplicationLibrary();
     mUI.setupUi(this);
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
+    PopulateFromEnum<app::Workspace::ProjectSettings::GameEngine>(mUI.cmbEngine);
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
     SetUIValue(mUI.cmbMagFilter, mSettings.default_mag_filter);
@@ -58,12 +61,18 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace::ProjectSettings& setting
     SetUIValue(mUI.chkVsync, mSettings.window_vsync);
     SetUIValue(mUI.edtAppName, mSettings.application_name);
     SetUIValue(mUI.edtAppVersion, mSettings.application_version);
-    SetUIValue(mUI.edtAppLibrary, mSettings.application_library);
+    SetUIValue(mUI.edtAppLibrary, library);
     SetUIValue(mUI.ticksPerSecond, mSettings.ticks_per_second);
     SetUIValue(mUI.updatesPerSecond, mSettings.updates_per_second);
     SetUIValue(mUI.edtWorkingFolder, mSettings.working_folder);
     SetUIValue(mUI.edtArguments, mSettings.command_line_arguments);
     SetUIValue(mUI.chkGameProcess, mSettings.use_gamehost_process);
+    SetUIValue(mUI.numVeloIterations, mSettings.num_velocity_iterations);
+    SetUIValue(mUI.numPosIterations, mSettings.num_position_iterations);
+    SetUIValue(mUI.gravityX, mSettings.gravity.x);
+    SetUIValue(mUI.gravityY, mSettings.gravity.y);
+    SetUIValue(mUI.scaleX, mSettings.physics_scale.x);
+    SetUIValue(mUI.scaleY, mSettings.physics_scale.y);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -79,17 +88,61 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkVsync, &mSettings.window_vsync);
     GetUIValue(mUI.edtAppName, &mSettings.application_name);
     GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
-    GetUIValue(mUI.edtAppLibrary, &mSettings.application_library);
     GetUIValue(mUI.ticksPerSecond, &mSettings.ticks_per_second);
     GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
     GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
     GetUIValue(mUI.edtArguments, &mSettings.command_line_arguments);
     GetUIValue(mUI.chkGameProcess, &mSettings.use_gamehost_process);
+    GetUIValue(mUI.numVeloIterations, &mSettings.num_velocity_iterations);
+    GetUIValue(mUI.numPosIterations, &mSettings.num_position_iterations);
+    GetUIValue(mUI.gravityX, &mSettings.gravity.x);
+    GetUIValue(mUI.gravityY, &mSettings.gravity.y);
+    GetUIValue(mUI.scaleX, &mSettings.physics_scale.x);
+    GetUIValue(mUI.scaleY, &mSettings.physics_scale.y);
+    QString library;
+    GetUIValue(mUI.edtAppLibrary, &library);
+    mSettings.SetApplicationLibrary(library);
     accept();
 }
 void DlgProject::on_btnCancel_clicked()
 {
     reject();
+}
+void DlgProject::on_btnSelectEngine_clicked()
+{
+#if defined(POSIX_OS)
+    const auto& list = QFileDialog::getOpenFileNames(this,
+        tr("Select Engine Library"), "", tr("Library files (*.so)"));
+#elif defined(WINDOWS_OS)
+    const auto& list = QFileDialog::getOpenFileNames(this,
+        tr("Select Engine Library"), "", tr("Library files (*.dll)"));
+#endif
+    if (list.isEmpty())
+        return;
+    const auto& file = mWorkspace.AddFileToWorkspace(list[0]);
+    SetValue(mUI.edtAppLibrary, file);
+}
+
+void DlgProject::on_cmbEngine_currentIndexChanged(const QString&)
+{
+    QString library;
+#if defined(POSIX_OS)
+    library = "app://libGameEngine.so";
+#elif defined(WINDOWS_OS)
+    library = "app://GameEngine.dll";
+#endif
+
+    const app::Workspace::ProjectSettings::GameEngine engine = GetValue(mUI.cmbEngine);
+    if (engine == app::Workspace::ProjectSettings::GameEngine::Default)
+    {
+        SetValue(mUI.edtAppLibrary, library);
+        SetEnabled(mUI.btnSelectEngine, false);
+    }
+    else
+    {
+        SetEnabled(mUI.btnSelectEngine, true);
+    }
+
 }
 
 } // namespace

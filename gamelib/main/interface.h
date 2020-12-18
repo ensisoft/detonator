@@ -22,6 +22,12 @@
 
 #pragma once
 
+#include "config.h"
+
+#include "warnpush.h"
+#  include <glm/glm.hpp>
+#include "warnpop.h"
+
 #include <memory>
 #include <variant>
 #include <queue>
@@ -129,6 +135,32 @@ namespace game
         // The pointers will remain valid until the next call of
         // SetEnvironment.
         virtual void SetEnvironment(const Environment& env)
+        {}
+
+        // Configuration for the engine/application
+        struct EngineConfig {
+            // the current expected number of Update calls per second.
+            unsigned updates_per_second = 60;
+            // The current expected number of Tick calls per second.
+            unsigned ticks_per_second = 1;
+            // configuration data for the physics engine.
+            struct {
+                // number of velocity iterations to take per simulation step.
+                unsigned num_velocity_iterations = 8;
+                // number of position iterations to take per simulation step.
+                unsigned num_position_iterations = 3;
+                // gravity vector of the world.
+                glm::vec2 gravity = {0.0f, 1.0f};
+                // scaling vector for transforming objects from scene world units
+                // into physics world units and back.
+                // if scale is for example {100.0f, 100.0f} it means 100 scene units
+                // to a single physics world unit. 
+                glm::vec2 scale = {1.0f, 1.0f};
+            } physics;
+        };
+        // Set the game engine configuration. Called once in the beginning
+        // before Start is called.
+        virtual void SetEngineConfig(const EngineConfig& conf)
         {}
 
         // Called once on application startup. The arguments
