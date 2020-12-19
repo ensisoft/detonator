@@ -60,6 +60,8 @@ namespace game
         {
             const auto dir = glm::normalize(mTopRight - mTopLeft);
             const auto cosine = glm::dot(glm::vec2(1.0f, 0.0f), dir);
+            if (dir.y < 0.0f)
+                return -std::acos(cosine);
             return std::acos(cosine);
         }
         glm::vec2 GetTopLeft() const
