@@ -45,6 +45,13 @@ namespace game
             mBotLeft  = glm::vec2(0.0f, h);
             mBotRight = glm::vec2(w, h);
         }
+        FBox(const glm::mat4& mat, float w = 1.0f, float h = 1.0f)
+        {
+            mTopLeft  = ToVec2(mat * ToVec4(glm::vec2(0.0f, 0.0f)));
+            mTopRight = ToVec2(mat * ToVec4(glm::vec2(w, 0.0f)));
+            mBotLeft  = ToVec2(mat * ToVec4(glm::vec2(0.0f, h)));
+            mBotRight = ToVec2(mat * ToVec4(glm::vec2(w, h)));
+        }
         void Transform(const glm::mat4& mat)
         {
             mTopLeft  = ToVec2(mat * ToVec4(mTopLeft));

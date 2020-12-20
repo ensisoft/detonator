@@ -43,7 +43,9 @@ namespace gfx {
 namespace game
 {
     class ClassLibrary;
+    class SceneNode;
     class Scene;
+    class FBox;
 
     class PhysicsEngine
     {
@@ -110,6 +112,8 @@ namespace game
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
+    private:
+        void AddPhysicsNode(const glm::mat4& model_to_world, const SceneNode& node);
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mLoader = nullptr;
