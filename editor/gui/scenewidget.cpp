@@ -1016,7 +1016,7 @@ void SceneWidget::on_rbIsSensor_stateChanged(int)
     {
         if (auto* body = node->GetRigidBody())
         {
-            body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsBullet));
+            body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsSensor));
         }
     }
 }
