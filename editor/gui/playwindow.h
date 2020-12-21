@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "gamelib/main/interface.h"
+#include "editor/app/eventlog.h"
 
 namespace app {
     class Workspace;
@@ -91,6 +92,12 @@ namespace gui
         void DoAppInit();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
+        void on_actionClearLog_triggered();
+        void on_actionLogShowDebug_toggled(bool val);
+        void on_actionLogShowInfo_toggled(bool val);
+        void on_actionLogShowWarning_toggled(bool val);
+        void on_actionLogShowError_toggled(bool val);
+        void on_log_customContextMenuRequested(QPoint point);
 
     private:
         virtual void closeEvent(QCloseEvent* event) override;
@@ -138,6 +145,8 @@ namespace gui
         // Logger that we give to the application.
         // Note the thread safety because of for example audio threading.
         std::unique_ptr<SessionLogger> mLogger;
+        // proxy model for filtering application event log
+        app::EventLogProxy mEventLog;
         // The game/app object we've created and loaded from the library.
         std::unique_ptr<game::App> mApp;
         // rendering context implementation for the QWindow surface.
@@ -149,7 +158,7 @@ namespace gui
         // Current game/app time. Updated in time steps whenever
         // the update timer runs.
         double mTimeTotal = 0.0;
-        // time accumulator for keeping track of partial upates
+        // time accumulator for keeping track of partial updates
         double mTimeAccum = 0.0;
         // time accumulator for doing app ticks.
         double mTickAccum = 0.0;

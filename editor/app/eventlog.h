@@ -39,6 +39,7 @@
 #include "warnpush.h"
 #  include <boost/circular_buffer.hpp>
 #  include <QAbstractListModel>
+#  include <QSortFilterProxyModel>
 #  include <QEvent>
 #  include <QTime>
 #  include <QString>
@@ -47,6 +48,7 @@
 #include <functional>
 
 #include "base/logging.h"
+#include "base/bitflag.h"
 #include "editor/app/format.h"
 #include "editor/app/event.h"
 
@@ -90,6 +92,14 @@ namespace app
         using NewEventCallback = std::function<void(const app::Event&)>;
         NewEventCallback OnNewEvent;
 
+        bool isEmpty() const
+        { return mEvents.empty(); }
+
+        const Event& getEvent(size_t index) const
+        {
+            return mEvents[index];
+        }
+
     signals:
         void newEvent(const app::Event& event);
 
@@ -98,9 +108,57 @@ namespace app
         QString mLogTag;
     };
 
+    // Filtering model proxy for event log
+    class EventLogProxy : public QSortFilterProxyModel
+    {
+    Q_OBJECT
+    public:
+        enum class Show {
+            Info, Note, Warning, Error, Debug
+        };
+        EventLogProxy()
+        {
+            mBits.set(Show::Info, true);
+            mBits.set(Show::Note, true);
+            mBits.set(Show::Warning, true);
+            mBits.set(Show::Error, true);
+            mBits.set(Show::Debug, true);
+        }
+
+        void SetModel(const EventLog* log)
+        { mLog = log; }
+        void SetVisible(Show what, bool yes_no)
+        { mBits.set(what, yes_no); }
+        bool IsShown(Show what) const
+        { return mBits.test(what); }
+        unsigned GetShowBits() const
+        { return mBits.value(); }
+        void SetShowBits(unsigned value)
+        { mBits.set_from_value(value); }
+    protected:
+        bool filterAcceptsRow(int row, const QModelIndex& parent) const override
+        {
+            const auto& event = mLog->getEvent(row);
+            if (event.type == Event::Type::Info && mBits.test(Show::Info))
+                return true;
+            else if (event.type == Event::Type::Note && mBits.test(Show::Note))
+                return true;
+            else if (event.type == Event::Type::Warning && mBits.test(Show::Warning))
+                return true;
+            else if (event.type == Event::Type::Error && mBits.test(Show::Error))
+                return true;
+            else if (event.type == Event::Type::Debug && mBits.test(Show::Debug))
+                return true;
+            return false;
+        }
+    private:
+        base::bitflag<Show> mBits;
+        const EventLog* mLog = nullptr;
+    };
+
 } // namespace
 
-// we want every log event to be tracable back to where it came from
+// we want every log event to be traceable back to where it came from
 // so thus every module should define it's own LOGTAG
 #ifndef LOGTAG
 #  if !defined(Q_MOC_OUTPUT_REVISION)

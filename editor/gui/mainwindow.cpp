@@ -119,9 +119,10 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mRefreshTimer.start();
 
     auto& events = app::EventLog::get();
-    QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),
-        this, SLOT(showNote(const app::Event&)));
-    mUI.eventlist->setModel(&events);
+    QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),this, SLOT(showNote(const app::Event&)));
+    mEventLog.SetModel(&events);
+    mEventLog.setSourceModel(&events);
+    mUI.eventlist->setModel(&mEventLog);
 
     setWindowTitle(QString("%1").arg(APP_TITLE));
     setAcceptDrops(true);
@@ -145,6 +146,7 @@ void MainWindow::loadState()
     // Load master settings.
     Settings settings("Ensisoft", APP_TITLE);
 
+    const auto log_bits       = settings.getValue("MainWindow", "log_bits", mEventLog.GetShowBits());
     const auto window_xdim    = settings.getValue("MainWindow", "width",  width());
     const auto window_ydim    = settings.getValue("MainWindow", "height", height());
     const auto window_xpos    = settings.getValue("MainWindow", "xpos", x());
@@ -185,6 +187,11 @@ void MainWindow::loadState()
             DEBUG("Application style set to '%1'", mSettings.style_name);
         }
     }
+    mEventLog.SetShowBits(log_bits);
+    mEventLog.invalidate();
+    mUI.actionLogShowInfo->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Info));
+    mUI.actionLogShowWarning->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Warning));
+    mUI.actionLogShowError->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Error));
 
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
@@ -1053,6 +1060,26 @@ void MainWindow::on_actionImagePacker_triggered()
     DlgImgPack dlg(this);
     dlg.exec();
 }
+void MainWindow::on_actionClearLog_triggered()
+{
+    app::EventLog::get().clear();
+}
+
+void MainWindow::on_actionLogShowInfo_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Info, val);
+    mEventLog.invalidate();
+}
+void MainWindow::on_actionLogShowWarning_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Warning, val);
+    mEventLog.invalidate();
+}
+void MainWindow::on_actionLogShowError_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Error, val);
+    mEventLog.invalidate();
+}
 
 void MainWindow::actionWindowFocus_triggered()
 {
@@ -1067,6 +1094,18 @@ void MainWindow::actionWindowFocus_triggered()
     action->setChecked(true);
 
     mUI.mainTab->setCurrentIndex(tab_index);
+}
+
+void MainWindow::on_eventlist_customContextMenuRequested(QPoint point)
+{
+    QMenu menu(this);
+    mUI.actionClearLog->setEnabled(!app::EventLog::get().isEmpty());
+    menu.addAction(mUI.actionClearLog);
+    menu.addSeparator();
+    menu.addAction(mUI.actionLogShowInfo);
+    menu.addAction(mUI.actionLogShowWarning);
+    menu.addAction(mUI.actionLogShowError);
+    menu.exec(QCursor::pos());
 }
 
 void MainWindow::on_workspace_customContextMenuRequested(QPoint)
@@ -1205,8 +1244,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         msg.setText("You haven't set the application library for the project.\n"
                     "The game should be built into a library (a .dll or .so file).\n"
                     "You can change the application library in the workspace settings.");
-        msg.exec();
-        return;
+        msg.exec();        return;
     }
 
     if (settings.use_gamehost_process)
@@ -1622,6 +1660,7 @@ bool MainWindow::saveState()
 {
     // persist the properties of the mainwindow itself.
     Settings settings("Ensisoft", APP_TITLE);
+    settings.setValue("MainWindow", "log_bits", mEventLog.GetShowBits());
     settings.setValue("MainWindow", "width", width());
     settings.setValue("MainWindow", "height", height());
     settings.setValue("MainWindow", "xpos", x());

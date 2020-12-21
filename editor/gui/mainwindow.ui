@@ -66,11 +66,21 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menuEvent_log">
+     <property name="title">
+      <string>Event log</string>
+     </property>
+     <addaction name="actionLogShowInfo"/>
+     <addaction name="actionLogShowWarning"/>
+     <addaction name="actionLogShowError"/>
+    </widget>
     <addaction name="actionViewToolbar"/>
     <addaction name="actionViewStatusbar"/>
     <addaction name="actionViewEventlog"/>
     <addaction name="actionViewWorkspace"/>
     <addaction name="separator"/>
+    <addaction name="menuEvent_log"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuTemp">
     <property name="enabled">
@@ -163,6 +173,9 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QListView" name="eventlist">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAsNeeded</enum>
        </property>
@@ -594,6 +607,59 @@
    </property>
    <property name="text">
     <string>New Scene</string>
+   </property>
+  </action>
+  <action name="actionClearLog">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/clear.png</normaloff>:/16x16_ico_png/clear.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Log</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear log events</string>
+   </property>
+  </action>
+  <action name="actionLogShowInfo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/log_info.png</normaloff>:/16x16_ico_png/log_info.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Info</string>
+   </property>
+  </action>
+  <action name="actionLogShowWarning">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/log_warning.png</normaloff>:/16x16_ico_png/log_warning.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Warnings</string>
+   </property>
+  </action>
+  <action name="actionLogShowError">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/log_error.png</normaloff>:/16x16_ico_png/log_error.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Errors</string>
+   </property>
+  </action>
+  <action name="actionsdgs">
+   <property name="text">
+    <string>sdgs</string>
    </property>
   </action>
  </widget>

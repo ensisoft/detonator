@@ -301,11 +301,17 @@ public:
         }
         mBuffer.clear();
     }
+    void Clear()
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+        mBuffer.clear();
+        mLogger.clear();
+    }
 
     void SetLogTag(const QString& tag)
     { mLogTag = tag; }
 
-    QAbstractListModel* GetModel()
+    app::EventLog* GetModel()
     { return &mLogger; }
 private:
     struct LogEvent {
@@ -324,9 +330,12 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     DEBUG("Create PlayWindow");
     mLogger = std::make_unique<SessionLogger>();
 
+    mEventLog.SetModel(mLogger->GetModel());
+    mEventLog.setSourceModel(mLogger->GetModel());
+
     mUI.setupUi(this);
     mUI.actionClose->setShortcut(QKeySequence::Close);
-    mUI.log->setModel(mLogger->GetModel());
+    mUI.log->setModel(&mEventLog);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
 
     const auto& settings = mWorkspace.GetProjectSettings();
@@ -578,6 +587,14 @@ void PlayWindow::LoadState()
     const auto& project = mWorkspace.GetProjectSettings();
     const auto& window_geometry = mWorkspace.GetUserProperty("play_window_geometry", QByteArray());
     const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty("play_window_toolbar_and_dock_state", QByteArray());
+    const unsigned log_bits = mWorkspace.GetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
+
+    mEventLog.SetShowBits(log_bits);
+    mEventLog.invalidate();
+    mUI.actionLogShowDebug->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Debug));
+    mUI.actionLogShowInfo->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Info));
+    mUI.actionLogShowWarning->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Warning));
+    mUI.actionLogShowError->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Error));
 
     if (!window_geometry.isEmpty())
         restoreGeometry(window_geometry);
@@ -620,6 +637,7 @@ void PlayWindow::SaveState()
     mWorkspace.SetUserProperty("play_window_show_eventlog", mUI.dockWidget->isVisible());
     mWorkspace.SetUserProperty("play_window_geometry", saveGeometry());
     mWorkspace.SetUserProperty("play_window_toolbar_and_dock_state", saveState());
+    mWorkspace.SetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
 }
 
 void PlayWindow::DoAppInit()
@@ -691,6 +709,42 @@ void PlayWindow::on_actionPause_triggered()
 void PlayWindow::on_actionClose_triggered()
 {
     mClosed = true;
+}
+
+void PlayWindow::on_actionClearLog_triggered()
+{
+    mLogger->Clear();
+}
+void PlayWindow::on_actionLogShowDebug_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Debug, val);
+    mEventLog.invalidate();
+}
+void PlayWindow::on_actionLogShowInfo_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Info, val);
+    mEventLog.invalidate();
+}
+void PlayWindow::on_actionLogShowWarning_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Warning, val);
+    mEventLog.invalidate();
+}
+void PlayWindow::on_actionLogShowError_toggled(bool val)
+{
+    mEventLog.SetVisible(app::EventLogProxy::Show::Error, val);
+    mEventLog.invalidate();
+}
+void PlayWindow::on_log_customContextMenuRequested(QPoint point)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionClearLog);
+    menu.addSeparator();
+    menu.addAction(mUI.actionLogShowDebug);
+    menu.addAction(mUI.actionLogShowInfo);
+    menu.addAction(mUI.actionLogShowWarning);
+    menu.addAction(mUI.actionLogShowError);
+    menu.exec(QCursor::pos());
 }
 
 void PlayWindow::closeEvent(QCloseEvent* event)

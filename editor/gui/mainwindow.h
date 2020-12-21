@@ -38,6 +38,7 @@
 
 #include "editor/app/workspace.h"
 #include "editor/app/process.h"
+#include "editor/app/eventlog.h"
 #include "editor/app/ipc.h"
 #include "editor/gui/appsettings.h"
 
@@ -128,6 +129,11 @@ namespace gui
         void on_actionCloseWorkspace_triggered();
         void on_actionSettings_triggered();
         void on_actionImagePacker_triggered();
+        void on_actionClearLog_triggered();
+        void on_actionLogShowInfo_toggled(bool val);
+        void on_actionLogShowWarning_toggled(bool val);
+        void on_actionLogShowError_toggled(bool val);
+        void on_eventlist_customContextMenuRequested(QPoint point);
         void on_workspace_customContextMenuRequested(QPoint);
         void on_workspace_doubleClicked();
         void on_actionPackageResources_triggered();
@@ -195,6 +201,9 @@ namespace gui
         // events to the child (client) game process over
         // ICP messaging.
         std::unique_ptr<app::IPCHost> mIPCHost;
+        // proxy model for filtering application event log
+        app::EventLogProxy mEventLog;
+
     };
 
 } // namespace
