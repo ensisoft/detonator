@@ -1612,7 +1612,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             WARN("File '%1' is not a file.", file);
             continue;
         }
-        const auto& name   = info.fileName();
+        const auto& name   = info.baseName();
         const auto& suffix = info.completeSuffix().toUpper();
         if (!(suffix == "JPEG" || suffix == "JPG" || suffix == "PNG"))
         {
@@ -1621,10 +1621,14 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         const auto& uri = AddFileToWorkspace(file);
 
+        gfx::detail::TextureFileSource texture;
+        texture.SetFileName(ToUtf8(uri));
+        texture.SetName(ToUtf8(name));
+
         gfx::MaterialClass klass;
         klass.SetType(gfx::MaterialClass::Type::Texture);
         klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        klass.AddTexture(ToUtf8(uri));
+        klass.AddTexture(std::move(texture));
         MaterialResource res(klass, name);
         SaveResource(res);
 
