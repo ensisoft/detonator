@@ -43,20 +43,69 @@ PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
 
 void PhysicsEngine::UpdateScene(Scene& scene)
 {
-    for (auto it = mNodes.begin(); it != mNodes.end(); )
+    using RenderTree = Scene::RenderTree;
+
+    class Visitor : public RenderTree::Visitor
     {
-        const auto& physics_node = it->second;
-        auto* node = scene.FindNodeByInstanceId(physics_node.instance);
-        if (node == nullptr) {
-            it = mNodes.erase(it);
-            continue;
+    public:
+        Visitor(PhysicsEngine& engine) : mEngine(engine)
+        {
+            mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
         }
-        const b2Vec2& pos = physics_node.world_body->GetPosition();
-        const float angle = physics_node.world_body->GetAngle();
-        node->SetTranslation(glm::vec2(pos.x, pos.y) * mScale);
-        node->SetRotation(angle);
-        ++it;
-    }
+        virtual void EnterNode(SceneNode* node) override
+        {
+            if (!node)
+                return;
+
+            const auto node_to_world = mTransform.GetAsMatrix();
+
+            mTransform.Push(node->GetNodeTransform());
+
+            auto it = mEngine.mNodes.find(node->GetInstanceId());
+            if (it == mEngine.mNodes.end())
+                return;
+
+            if (!node->HasRigidBody())
+            {
+                mEngine.mNodes.erase(it);
+                return;
+            }
+
+            const auto& physics_node = it->second;
+            const auto physics_world_pos   = physics_node.world_body->GetPosition();
+            const auto physics_world_angle = physics_node.world_body->GetAngle();
+
+            glm::mat4 mat;
+            gfx::Transform transform;
+            transform.Rotate(physics_world_angle);
+            transform.Translate(physics_world_pos.x, physics_world_pos.y);
+            transform.Push();
+                transform.Scale(physics_node.world_extents);
+                transform.Translate(physics_node.world_extents * -0.5f);
+                mat = transform.GetAsMatrix();
+            transform.Pop();
+
+            FBox box(mat);
+            box.Transform(glm::inverse(node_to_world));
+
+            node->SetTranslation(box.GetPosition());
+            node->SetRotation(box.GetRotation());
+        }
+        virtual void LeaveNode(SceneNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        PhysicsEngine& mEngine;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor(*this);
+
+    auto& tree = scene.GetRenderTree();
+    tree.PreOrderTraverse(visitor);
 }
 
 void PhysicsEngine::Tick()
