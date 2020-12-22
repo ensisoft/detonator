@@ -752,28 +752,28 @@ std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassById(co
     return GetAnimationClassById(FromUtf8(id));
 }
 
-std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
+std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
 {
     for (const auto& resource : mResources)
     {
-        if (resource->GetType() != Resource::Type::Scene)
+        if (resource->GetType() != Resource::Type::Entity)
             continue;
         else if (resource->GetNameUtf8() != name)
             continue;
-        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
     ERROR("Request for an animation that doesn't exist: '%1'", name);
     return nullptr;
 }
-std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
+std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
 {
     for (const auto& resource : mResources)
     {
-        if (resource->GetType() != Resource::Type::Scene)
+        if (resource->GetType() != Resource::Type::Entity)
             continue;
         else if (resource->GetIdUtf8() != id)
             continue;
-        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
     ERROR("Request for an animation that doesn't exist: '%1'", id);
     return nullptr;
@@ -1055,7 +1055,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);
     LoadResources<gfx::PolygonClass>("shapes", json, mResources);
     LoadResources<game::AnimationClass>("animations", json, mResources);
-    LoadResources<game::SceneClass>("scenes", json, mResources);
+    LoadResources<game::EntityClass>("entities", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.

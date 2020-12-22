@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SceneWidget</class>
- <widget class="QWidget" name="SceneWidget">
+ <class>EntityWidget</class>
+ <widget class="QWidget" name="EntityWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,17 +11,17 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Scene</string>
+   <string>Entity</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/resource.qrc">
-    <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
+    <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_7">
    <item>
     <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
-      <string>Scene</string>
+      <string>Entity</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_11">
       <item>
@@ -1089,26 +1089,13 @@
                   </item>
                  </layout>
                 </widget>
-                <widget class="QWidget" name="animation">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>371</width>
-                   <height>469</height>
-                  </rect>
-                 </property>
-                 <attribute name="label">
-                  <string>Animation</string>
-                 </attribute>
-                </widget>
                 <widget class="QWidget" name="rigidbody">
                  <property name="geometry">
                   <rect>
                    <x>0</x>
                    <y>0</y>
                    <width>371</width>
-                   <height>469</height>
+                   <height>531</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1331,26 +1318,13 @@
                   </item>
                  </layout>
                 </widget>
-                <widget class="QWidget" name="trigger">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>371</width>
-                   <height>469</height>
-                  </rect>
-                 </property>
-                 <attribute name="label">
-                  <string>Trigger box</string>
-                 </attribute>
-                </widget>
                 <widget class="QWidget" name="data">
                  <property name="geometry">
                   <rect>
                    <x>0</x>
                    <y>0</y>
                    <width>371</width>
-                   <height>469</height>
+                   <height>531</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1607,11 +1581,48 @@
   <tabstop>plus90</tabstop>
   <tabstop>minus90</tabstop>
   <tabstop>resetTransform</tabstop>
-  <tabstop>time</tabstop>
-  <tabstop>zoom</tabstop>
-  <tabstop>cmbGrid</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>nodeID</tabstop>
+  <tabstop>nodeName</tabstop>
+  <tabstop>nodeIsVisible</tabstop>
+  <tabstop>nodeTranslateX</tabstop>
+  <tabstop>nodeTranslateY</tabstop>
+  <tabstop>nodeSizeX</tabstop>
+  <tabstop>nodeSizeY</tabstop>
+  <tabstop>nodeScaleX</tabstop>
+  <tabstop>nodeScaleY</tabstop>
+  <tabstop>nodeRotation</tabstop>
+  <tabstop>nodePlus90</tabstop>
+  <tabstop>nodeMinus90</tabstop>
+  <tabstop>drawableItem</tabstop>
+  <tabstop>dsDrawable</tabstop>
+  <tabstop>dsMaterial</tabstop>
+  <tabstop>dsRenderPass</tabstop>
+  <tabstop>dsLayer</tabstop>
+  <tabstop>dsRenderStyle</tabstop>
+  <tabstop>dsLineWidth</tabstop>
+  <tabstop>dsAlpha</tabstop>
+  <tabstop>dsUpdateDrawable</tabstop>
+  <tabstop>dsUpdateMaterial</tabstop>
+  <tabstop>dsRestartDrawable</tabstop>
+  <tabstop>dsOverrideAlpha</tabstop>
+  <tabstop>rigidBodyItem</tabstop>
+  <tabstop>rbSimulation</tabstop>
+  <tabstop>rbShape</tabstop>
+  <tabstop>rbPolygon</tabstop>
+  <tabstop>rbFriction</tabstop>
+  <tabstop>rbRestitution</tabstop>
+  <tabstop>rbAngularDamping</tabstop>
+  <tabstop>rbLinearDamping</tabstop>
+  <tabstop>rbDensity</tabstop>
+  <tabstop>rbIsBullet</tabstop>
+  <tabstop>rbIsSensor</tabstop>
+  <tabstop>rbIsEnabled</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowOrigin</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>time</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

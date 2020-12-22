@@ -151,7 +151,7 @@ add_executable(Editor
     graphics/resource.cpp
     gamelib/animation.cpp
     gamelib/renderer.cpp
-    gamelib/scene.cpp
+    gamelib/entity.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -221,9 +221,9 @@ add_executable(Editor
     editor/gui/materialwidget.h
     editor/gui/materialwidget.cpp
     editor/gui/materialwidget.ui
-    editor/gui/scenewidget.h
-    editor/gui/scenewidget.ui
-    editor/gui/scenewidget.cpp
+    editor/gui/entitywidget.h
+    editor/gui/entitywidget.ui
+    editor/gui/entitywidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
     editor/gui/treewidget.h
@@ -299,7 +299,7 @@ add_executable(EditorGameHost
     graphics/text.cpp
     graphics/resource.cpp
     gamelib/animation.cpp
-    gamelib/scene.cpp
+    gamelib/entity.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h
@@ -405,7 +405,7 @@ add_library(GameEngine SHARED
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
     gamelib/physics.cpp
-    gamelib/scene.cpp
+    gamelib/entity.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
@@ -437,7 +437,7 @@ add_library(gamelib_test SHARED
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
     gamelib/physics.cpp
-    gamelib/scene.cpp
+    gamelib/entity.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
@@ -482,7 +482,7 @@ add_library(invaders SHARED
     gamelib/renderer.cpp
     gamelib/homedir.cpp
     gamelib/animation.cpp
-    gamelib/scene.cpp
+    gamelib/entity.cpp
     gamelib/loader.cpp
     gamelib/main/gamelib.cpp
     wdk/wdk/keys.cpp
@@ -520,7 +520,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         graphics/drawable.cpp
         graphics/image.cpp
         gamelib/animation.cpp
-        gamelib/scene.cpp
+        gamelib/entity.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -539,7 +539,7 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/workspace.cpp
         editor/app/packing.cpp
         gamelib/animation.cpp
-        gamelib/scene.cpp
+        gamelib/entity.cpp
         gamelib/loader.cpp
         graphics/drawable.cpp
         graphics/material.cpp
@@ -572,18 +572,18 @@ add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     gamelib/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
-add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
+add_executable(unit_test_entity gamelib/unit_test/unit_test_entity.cpp
         base/assert.cpp
-        gamelib/scene.cpp)
+        gamelib/entity.cpp)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 add_test(NAME unit_test_tree COMMAND unit_test_tree)
 add_test(NAME unit_test_anim COMMAND unit_test_anim)
 add_test(NAME unit_test_settings COMMAND unit_test_settings)
-add_test(NAME unit_test_scene COMMAND unit_test_scene)
+add_test(NAME unit_test_entity COMMAND unit_test_entity)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)

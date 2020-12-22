@@ -35,7 +35,7 @@
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "gamelib/animation.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "gamelib/loader.h"
 
 namespace game
@@ -159,7 +159,7 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, nullptr);
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
     game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, &mAnimationNameTable);
-    game::LoadResources<SceneClass, SceneClass>(json, "scenes", mScenes, &mSceneNameTable);
+    game::LoadResources<EntityClass, EntityClass>(json, "entities", mEntities, &mEntityNameTable);
 
     mResourceDir  = dir;
     mResourceFile = file;
@@ -185,18 +185,18 @@ std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassByName(co
     return nullptr;
 }
 
-std::shared_ptr<const game::SceneClass> ContentLoader::FindSceneClassByName(const std::string& name) const
+std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassByName(const std::string& name) const
 {
-    auto it = mSceneNameTable.find(name);
-    if (it != mSceneNameTable.end())
-        return FindSceneClassById(it->second);
+    auto it = mEntityNameTable.find(name);
+    if (it != mEntityNameTable.end())
+        return FindEntityClassById(it->second);
     ERROR("No such scene class: '%1'", name);
     return nullptr;
 }
-std::shared_ptr<const game::SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
+std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
 {
-    auto it = mScenes.find(id);
-    if (it != std::end(mScenes))
+    auto it = mEntities.find(id);
+    if (it != std::end(mEntities))
         return it->second;
 
     ERROR("No such scene class '%1'", id);

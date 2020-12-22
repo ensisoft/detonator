@@ -32,7 +32,7 @@
 #include "graphics/transform.h"
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "gamelib/renderer.h"
 
 namespace game
@@ -57,18 +57,18 @@ void Renderer::Draw(const Animation& animation,
     DrawRenderTree<AnimationNode>(animation.GetRenderTree(), painter, transform, hook);
 }
 
-void Renderer::Draw(const Scene& scene,
+void Renderer::Draw(const Entity& entity,
                     gfx::Painter& painter, gfx::Transform& transform,
-                    SceneInstanceDrawHook* hook)
+                    EntityInstanceDrawHook* hook)
 {
-    DrawRenderTree<SceneNode>(scene.GetRenderTree(), painter, transform, hook);
+    DrawRenderTree<EntityNode>(entity.GetRenderTree(), painter, transform, hook);
 }
 
-void Renderer::Draw(const SceneClass& scene,
+void Renderer::Draw(const EntityClass& entity,
                     gfx::Painter& painter, gfx::Transform& transform,
-                    SceneClassDrawHook* hook)
+                    EntityClassDrawHook* hook)
 {
-    DrawRenderTree<SceneNodeClass>(scene.GetRenderTree(), painter, transform, hook);
+    DrawRenderTree<EntityNodeClass>(entity.GetRenderTree(), painter, transform, hook);
 }
 
 void Renderer::Update(const AnimationNodeClass& node, float time, float dt)
@@ -96,32 +96,32 @@ void Renderer::Update(const Animation& animation, float time, float dt)
     }
 }
 
-void Renderer::Update(const SceneClass& scene, float time, float dt)
+void Renderer::Update(const EntityClass& entity, float time, float dt)
 {
-    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        const auto& node = scene.GetNode(i);
-        UpdateNode<SceneNodeClass>(node, time, dt);
+        const auto& node = entity.GetNode(i);
+        UpdateNode<EntityNodeClass>(node, time, dt);
     }
 }
 
-void Renderer::Update(const SceneNodeClass& node, float time, float dt)
+void Renderer::Update(const EntityNodeClass& node, float time, float dt)
 {
-    UpdateNode<SceneNodeClass>(node, time, dt);
+    UpdateNode<EntityNodeClass>(node, time, dt);
 }
 
-void Renderer::Update(const Scene& scene, float time, float dt)
+void Renderer::Update(const Entity& entity, float time, float dt)
 {
-    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        const auto& node = scene.GetNode(i);
-        UpdateNode<SceneNode>(node, time, dt);
+        const auto& node = entity.GetNode(i);
+        UpdateNode<EntityNode>(node, time, dt);
     }
 }
 
-void Renderer::Update(const SceneNode& node, float time, float dt)
+void Renderer::Update(const EntityNode& node, float time, float dt)
 {
-    UpdateNode<SceneNode>(node, time, dt);
+    UpdateNode<EntityNode>(node, time, dt);
 }
 
 void Renderer::EndFrame()

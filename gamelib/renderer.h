@@ -34,7 +34,7 @@
 #include <unordered_map>
 
 #include "gamelib/animation.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "gamelib/tree.h"
 
 namespace gfx {
@@ -48,8 +48,8 @@ namespace game
 {
     class Animation;
     class AnimationClass;
-    class Scene;
-    class SceneClass;
+    class Entity;
+    class EntityClass;
     class ClassLibrary;
 
     struct DrawPacket {
@@ -85,8 +85,8 @@ namespace game
 
     using AnimationClassDrawHook    = DrawHook<AnimationNodeClass>;
     using AnimationInstanceDrawHook = DrawHook<AnimationNode>;
-    using SceneClassDrawHook        = DrawHook<SceneNodeClass>;
-    using SceneInstanceDrawHook     = DrawHook<SceneNode>;
+    using EntityClassDrawHook       = DrawHook<EntityNodeClass>;
+    using EntityInstanceDrawHook    = DrawHook<EntityNode>;
 
     class Renderer
     {
@@ -112,12 +112,12 @@ namespace game
                   gfx::Painter& painter, gfx::Transform& transform,
                   AnimationInstanceDrawHook* hook = nullptr);
 
-        void Draw(const Scene& scene,
+        void Draw(const Entity& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
-                  SceneInstanceDrawHook* hook = nullptr);
-        void Draw(const SceneClass& scene,
+                  EntityInstanceDrawHook* hook = nullptr);
+        void Draw(const EntityClass& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
-                  SceneClassDrawHook* hook = nullptr);
+                  EntityClassDrawHook* hook = nullptr);
 
         // Update the visual representation of the renderer's paint node
         // based on the given animation node.
@@ -125,10 +125,10 @@ namespace game
         void Update(const AnimationNode& node, float time, float dt);
         void Update(const AnimationClass& klass, float time, float dt);
         void Update(const Animation& animation, float time, float dt);
-        void Update(const SceneNodeClass& node, float time, float dt);
-        void Update(const SceneClass& scene, float time, float dt);
-        void Update(const SceneNode& node, float time, float dt);
-        void Update(const Scene& scene, float time, float dt);
+        void Update(const EntityNodeClass& node, float time, float dt);
+        void Update(const EntityClass& entity, float time, float dt);
+        void Update(const EntityNode& node, float time, float dt);
+        void Update(const Entity& entity, float time, float dt);
 
         void EndFrame();
     private:

@@ -34,7 +34,7 @@ namespace gfx {
 namespace game
 {
     class AnimationClass;
-    class SceneClass;
+    class EntityClass;
 
     // Interface for looking up game resource class objects such as materials, drawables etc.
     // Every call to find any particular class object will always return the same single
@@ -58,12 +58,12 @@ namespace game
         // Find an animation class object by it's unique class object identifier.
         // If not found will return a nullptr.
         virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const = 0;
-        // Find a scene class object by the given name.
+        // Find a entity class object by the given name.
         // If not found will return a nullptr.
-        virtual std::shared_ptr<const SceneClass> FindSceneClassByName(const std::string& name) const = 0;
-        // Find a scene class object by the given id.
+        virtual std::shared_ptr<const EntityClass> FindEntityClassByName(const std::string& name) const = 0;
+        // Find a entity class object by the given id.
         // if not found will return a nullptr.
-        virtual std::shared_ptr<const SceneClass> FindSceneClassById(const std::string& id) const = 0;
+        virtual std::shared_ptr<const EntityClass> FindEntityClassById(const std::string& id) const = 0;
         // Load content from a JSON file. Expects the file to be well formed, on
         // an ill-formed JSON file an exception is thrown.
         // No validation is done regarding the completeness of the loaded content,

@@ -37,7 +37,7 @@
 #include "graphics/color4f.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 
 
 bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
@@ -46,7 +46,7 @@ bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
            real::equals(lhs.y, rhs.y);
 }
 
-void unit_test_scene_node()
+void unit_test_entity_node()
 {
     game::DrawableItemClass draw;
     draw.SetDrawableId("rectangle");
@@ -68,7 +68,7 @@ void unit_test_scene_node()
     body.SetDensity(-1.0f);
     body.SetPolygonShapeId("shape");
 
-    game::SceneNodeClass node;
+    game::EntityNodeClass node;
     node.SetName("root");
     node.SetSize(glm::vec2(100.0f, 100.0f));
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
@@ -103,7 +103,7 @@ void unit_test_scene_node()
 
     // to/from json
     {
-        auto ret = game::SceneNodeClass::FromJson(node.ToJson());
+        auto ret = game::EntityNodeClass::FromJson(node.ToJson());
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->HasDrawable());
         TEST_REQUIRE(ret->HasRigidBody());
@@ -161,7 +161,7 @@ void unit_test_scene_node()
     // test instance state.
     {
         // check initial state.
-        game::SceneNode instance(node);
+        game::EntityNode instance(node);
         instance.SetName("foobar");
         TEST_REQUIRE(instance.GetInstanceId()   != node.GetClassId());
         TEST_REQUIRE(instance.GetInstanceName() == "foobar");
@@ -187,89 +187,89 @@ void unit_test_scene_node()
     }
 }
 
-void unit_test_scene()
+void unit_test_entity()
 {
-    game::SceneClass scene;
+    game::EntityClass entity;
     {
-        game::SceneNodeClass node;
+        game::EntityNodeClass node;
         node.SetName("root");
-        scene.AddNode(std::move(node));
+        entity.AddNode(std::move(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityNodeClass node;
         node.SetName("child_1");
-        scene.AddNode(std::move(node));
+        entity.AddNode(std::move(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityNodeClass node;
         node.SetName("child_2");
-        scene.AddNode(std::move(node));
+        entity.AddNode(std::move(node));
     }
 
-    TEST_REQUIRE(scene.GetNumNodes() == 3);
-    TEST_REQUIRE(scene.GetNode(0).GetName() == "root");
-    TEST_REQUIRE(scene.GetNode(1).GetName() == "child_1");
-    TEST_REQUIRE(scene.GetNode(2).GetName() == "child_2");
-    TEST_REQUIRE(scene.FindNodeByName("root"));
-    TEST_REQUIRE(scene.FindNodeByName("child_1"));
-    TEST_REQUIRE(scene.FindNodeByName("child_2"));
-    TEST_REQUIRE(scene.FindNodeByName("foobar") == nullptr);
-    TEST_REQUIRE(scene.FindNodeById(scene.GetNode(0).GetClassId()));
-    TEST_REQUIRE(scene.FindNodeById(scene.GetNode(1).GetClassId()));
-    TEST_REQUIRE(scene.FindNodeById("asg") == nullptr);
+    TEST_REQUIRE(entity.GetNumNodes() == 3);
+    TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
+    TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");
+    TEST_REQUIRE(entity.GetNode(2).GetName() == "child_2");
+    TEST_REQUIRE(entity.FindNodeByName("root"));
+    TEST_REQUIRE(entity.FindNodeByName("child_1"));
+    TEST_REQUIRE(entity.FindNodeByName("child_2"));
+    TEST_REQUIRE(entity.FindNodeByName("foobar") == nullptr);
+    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetClassId()));
+    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetClassId()));
+    TEST_REQUIRE(entity.FindNodeById("asg") == nullptr);
 
     // serialization
     {
-        auto ret = game::SceneClass::FromJson(scene.ToJson());
+        auto ret = game::EntityClass::FromJson(entity.ToJson());
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetNumNodes() == 3);
         TEST_REQUIRE(ret->GetNode(0).GetName() == "root");
         TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(ret->GetId()   == scene.GetId());
-        TEST_REQUIRE(ret->GetHash() == scene.GetHash());
+        TEST_REQUIRE(ret->GetId() == entity.GetId());
+        TEST_REQUIRE(ret->GetHash() == entity.GetHash());
     }
 
     // copy construction and assignment
     {
-        auto copy(scene);
+        auto copy(entity);
         TEST_REQUIRE(copy.GetNumNodes() == 3);
         TEST_REQUIRE(copy.GetNode(0).GetName() == "root");
         TEST_REQUIRE(copy.GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(copy.GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(copy.GetId()   == scene.GetId());
-        TEST_REQUIRE(copy.GetHash() == scene.GetHash());
+        TEST_REQUIRE(copy.GetId() == entity.GetId());
+        TEST_REQUIRE(copy.GetHash() == entity.GetHash());
 
-        copy = scene;
+        copy = entity;
         TEST_REQUIRE(copy.GetNumNodes() == 3);
         TEST_REQUIRE(copy.GetNode(0).GetName() == "root");
         TEST_REQUIRE(copy.GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(copy.GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(copy.GetId()   == scene.GetId());
-        TEST_REQUIRE(copy.GetHash() == scene.GetHash());
+        TEST_REQUIRE(copy.GetId() == entity.GetId());
+        TEST_REQUIRE(copy.GetHash() == entity.GetHash());
     }
 
     // clone
     {
-        auto clone(scene.Clone());
+        auto clone(entity.Clone());
         TEST_REQUIRE(clone.GetNumNodes() == 3);
         TEST_REQUIRE(clone.GetNode(0).GetName() == "root");
         TEST_REQUIRE(clone.GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(clone.GetId()   != scene.GetId());
-        TEST_REQUIRE(clone.GetHash() != scene.GetHash());
+        TEST_REQUIRE(clone.GetId() != entity.GetId());
+        TEST_REQUIRE(clone.GetHash() != entity.GetHash());
     }
 
     // instance
     {
-        game::Scene instance(scene);
+        game::Entity instance(entity);
         TEST_REQUIRE(instance.GetNumNodes() == 3);
         TEST_REQUIRE(instance.FindNodeByClassName("root"));
-        TEST_REQUIRE(instance.FindNodeByClassId(scene.GetNode(0).GetClassId()));
+        TEST_REQUIRE(instance.FindNodeByClassId(entity.GetNode(0).GetClassId()));
 
-        game::SceneNodeClass klass;
+        game::EntityNodeClass klass;
         klass.SetName("keke");
-        game::SceneNode node(klass);
+        game::EntityNode node(klass);
         node.SetName("my node");
         instance.AddNode(node);
         TEST_REQUIRE(instance.FindNodeByInstanceName("my node"));
@@ -279,43 +279,43 @@ void unit_test_scene()
         TEST_REQUIRE(instance.FindNodeByInstanceId(node.GetInstanceId()) == nullptr);
     }
 
-    scene.DeleteNode(0);
-    TEST_REQUIRE(scene.GetNumNodes() == 2);
-    TEST_REQUIRE(scene.DeleteNodeByName("child_1"));
-    TEST_REQUIRE(scene.GetNumNodes() == 1);
-    TEST_REQUIRE(scene.DeleteNodeById(scene.GetNode(0).GetClassId()));
-    TEST_REQUIRE(scene.GetNumNodes() == 0);
+    entity.DeleteNode(0);
+    TEST_REQUIRE(entity.GetNumNodes() == 2);
+    TEST_REQUIRE(entity.DeleteNodeByName("child_1"));
+    TEST_REQUIRE(entity.GetNumNodes() == 1);
+    TEST_REQUIRE(entity.DeleteNodeById(entity.GetNode(0).GetClassId()));
+    TEST_REQUIRE(entity.GetNumNodes() == 0);
 }
 
-void unit_test_scene_render_tree()
+void unit_test_entity_render_tree()
 {
-    game::SceneClass scene_class;
+    game::EntityClass entity_class;
 
     // todo: rotational component in transform
     // todo: scaling component in transform
 
     {
-        game::SceneNodeClass node_class;
+        game::EntityNodeClass node_class;
         node_class.SetName("parent");
         node_class.SetTranslation(glm::vec2(10.0f, 10.0f));
         node_class.SetSize(glm::vec2(10.0f, 10.0f));
         node_class.SetRotation(0.0f);
         node_class.SetScale(glm::vec2(1.0f, 1.0f));
-        auto* ret = scene_class.AddNode(node_class);
-        auto& tree = scene_class.GetRenderTree();
+        auto* ret = entity_class.AddNode(node_class);
+        auto& tree = entity_class.GetRenderTree();
         tree.AppendChild(ret);
     }
 
     // transforms relative to the parent
     {
-        game::SceneNodeClass node_class;
+        game::EntityNodeClass node_class;
         node_class.SetName("child");
         node_class.SetTranslation(glm::vec2(10.0f, 10.0f));
         node_class.SetSize(glm::vec2(2.0f, 2.0f));
         node_class.SetRotation(0.0f);
         node_class.SetScale(glm::vec2(1.0f, 1.0f));
-        auto* ret = scene_class.AddNode(node_class);
-        auto& tree = scene_class.GetRenderTree();
+        auto* ret = entity_class.AddNode(node_class);
+        auto& tree = entity_class.GetRenderTree();
         tree.GetChildNode(0).AppendChild(ret);
     }
 
@@ -323,13 +323,13 @@ void unit_test_scene_render_tree()
 
     // hit testing
     {
-        std::vector<game::SceneNodeClass*> hits;
+        std::vector<game::EntityNodeClass*> hits;
         std::vector<glm::vec2> hitpos;
-        scene_class.CoarseHitTest(0.0f, 0.0f, &hits, &hitpos);
+        entity_class.CoarseHitTest(0.0f, 0.0f, &hits, &hitpos);
         TEST_REQUIRE(hits.empty());
         TEST_REQUIRE(hitpos.empty());
 
-        scene_class.CoarseHitTest(6.0f, 6.0f, &hits, &hitpos);
+        entity_class.CoarseHitTest(6.0f, 6.0f, &hits, &hitpos);
         TEST_REQUIRE(hits.size() == 1);
         TEST_REQUIRE(hitpos.size() == 1);
         TEST_REQUIRE(hits[0]->GetName() == "parent");
@@ -338,7 +338,7 @@ void unit_test_scene_render_tree()
 
         hits.clear();
         hitpos.clear();
-        scene_class.CoarseHitTest(20.0f, 20.0f, &hits, &hitpos);
+        entity_class.CoarseHitTest(20.0f, 20.0f, &hits, &hitpos);
         TEST_REQUIRE(hits.size() == 1);
         TEST_REQUIRE(hitpos.size() == 1);
         TEST_REQUIRE(hits[0]->GetName() == "child");
@@ -348,7 +348,7 @@ void unit_test_scene_render_tree()
 
     // whole bounding box.
     {
-        const auto& box = scene_class.GetBoundingRect();
+        const auto& box = entity_class.GetBoundingRect();
         TEST_REQUIRE(math::equals(5.0f, box.GetX()));
         TEST_REQUIRE(math::equals(5.0f, box.GetY()));
         TEST_REQUIRE(math::equals(16.0f, box.GetWidth()));
@@ -357,8 +357,8 @@ void unit_test_scene_render_tree()
 
     // node bounding box
     {
-        const auto* node = scene_class.FindNodeByName("parent");
-        const auto& box = scene_class.GetBoundingRect(node);
+        const auto* node = entity_class.FindNodeByName("parent");
+        const auto& box = entity_class.GetBoundingRect(node);
         TEST_REQUIRE(math::equals(5.0f, box.GetX()));
         TEST_REQUIRE(math::equals(5.0f, box.GetY()));
         TEST_REQUIRE(math::equals(10.0f, box.GetWidth()));
@@ -366,8 +366,8 @@ void unit_test_scene_render_tree()
     }
     // node bounding box
     {
-        const auto* node = scene_class.FindNodeByName("child");
-        const auto box = scene_class.GetBoundingRect(node);
+        const auto* node = entity_class.FindNodeByName("child");
+        const auto box = entity_class.GetBoundingRect(node);
         TEST_REQUIRE(math::equals(19.0f, box.GetX()));
         TEST_REQUIRE(math::equals(19.0f, box.GetY()));
         TEST_REQUIRE(math::equals(2.0f, box.GetWidth()));
@@ -376,24 +376,24 @@ void unit_test_scene_render_tree()
 
     // coordinate mapping
     {
-        const auto* node = scene_class.FindNodeByName("child");
-        auto vec = scene_class.MapCoordsFromNode(1.0f, 1.0f, node);
+        const auto* node = entity_class.FindNodeByName("child");
+        auto vec = entity_class.MapCoordsFromNode(1.0f, 1.0f, node);
         TEST_REQUIRE(math::equals(20.0f, vec.x));
         TEST_REQUIRE(math::equals(20.0f, vec.y));
 
         // inverse operation to MapCoordsFromNode
-        vec = scene_class.MapCoordsToNode(20.0f, 20.0f, node);
+        vec = entity_class.MapCoordsToNode(20.0f, 20.0f, node);
         TEST_REQUIRE(math::equals(1.0f, vec.x));
         TEST_REQUIRE(math::equals(1.0f, vec.y));
     }
 
     // copying preserves the render tree.
     {
-        game::SceneClass klass;
-        game::SceneNodeClass parent;
-        game::SceneNodeClass child0;
-        game::SceneNodeClass child1;
-        game::SceneNodeClass child2;
+        game::EntityClass klass;
+        game::EntityNodeClass parent;
+        game::EntityNodeClass child0;
+        game::EntityNodeClass child1;
+        game::EntityNodeClass child2;
         parent.SetName("parent");
         child0.SetName("child0");
         child1.SetName("child1");
@@ -454,11 +454,11 @@ void unit_test_scene_render_tree()
 
     // instance has the same render tree.
     {
-        game::SceneClass klass;
-        game::SceneNodeClass parent;
-        game::SceneNodeClass child0;
-        game::SceneNodeClass child1;
-        game::SceneNodeClass child2;
+        game::EntityClass klass;
+        game::EntityNodeClass parent;
+        game::EntityNodeClass child0;
+        game::EntityNodeClass child1;
+        game::EntityNodeClass child2;
         parent.SetName("parent");
         child0.SetName("child0");
         child1.SetName("child1");
@@ -487,7 +487,7 @@ void unit_test_scene_render_tree()
         TEST_REQUIRE(names == "parent child0 child2 child1 ");
 
         std::string test;
-        game::Scene instance(klass);
+        game::Entity instance(klass);
         instance.GetRenderTree().PreOrderTraverseForEach([&test](const auto* node) {
             if (node) {
                 test.append(node->GetClassName());
@@ -500,8 +500,8 @@ void unit_test_scene_render_tree()
 
 int test_main(int argc, char* argv[])
 {
-    unit_test_scene_node();
-    unit_test_scene();
-    unit_test_scene_render_tree();
+    unit_test_entity_node();
+    unit_test_entity();
+    unit_test_entity_render_tree();
     return 0;
 }

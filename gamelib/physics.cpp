@@ -32,7 +32,7 @@
 #include "gamelib/physics.h"
 #include "gamelib/loader.h"
 #include "gamelib/types.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 
 namespace game
 {
@@ -41,9 +41,9 @@ PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
   : mLoader(loader)
 {}
 
-void PhysicsEngine::UpdateScene(Scene& scene)
+void PhysicsEngine::UpdateScene(Entity& scene)
 {
-    using RenderTree = Scene::RenderTree;
+    using RenderTree = Entity::RenderTree;
 
     class Visitor : public RenderTree::Visitor
     {
@@ -52,7 +52,7 @@ void PhysicsEngine::UpdateScene(Scene& scene)
         {
             mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
         }
-        virtual void EnterNode(SceneNode* node) override
+        virtual void EnterNode(EntityNode* node) override
         {
             if (!node)
                 return;
@@ -91,7 +91,7 @@ void PhysicsEngine::UpdateScene(Scene& scene)
             node->SetTranslation(box.GetPosition());
             node->SetRotation(box.GetRotation());
         }
-        virtual void LeaveNode(SceneNode* node) override
+        virtual void LeaveNode(EntityNode* node) override
         {
             if (!node)
                 return;
@@ -132,7 +132,7 @@ void PhysicsEngine::DeleteBody(const std::string& id)
     mNodes.erase(it);
 }
 
-void PhysicsEngine::BuildPhysicsWorldFromScene(const Scene& scene)
+void PhysicsEngine::BuildPhysicsWorldFromScene(const Entity& scene)
 {
     const b2Vec2 gravity(mGravity.x, mGravity.y);
 
@@ -140,7 +140,7 @@ void PhysicsEngine::BuildPhysicsWorldFromScene(const Scene& scene)
     mWorld.reset();
     mWorld = std::make_unique<b2World>(gravity);
 
-    using RenderTree = Scene::RenderTree;
+    using RenderTree = Entity::RenderTree;
 
     class Visitor : public RenderTree::ConstVisitor
     {
@@ -149,7 +149,7 @@ void PhysicsEngine::BuildPhysicsWorldFromScene(const Scene& scene)
         {
             mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
         }
-        virtual void EnterNode(const SceneNode* node) override
+        virtual void EnterNode(const EntityNode* node) override
         {
             if (!node)
                 return;
@@ -166,7 +166,7 @@ void PhysicsEngine::BuildPhysicsWorldFromScene(const Scene& scene)
             mEngine.AddPhysicsNode(mTransform.GetAsMatrix(), *node);
             mTransform.Pop();
         }
-        virtual void LeaveNode(const SceneNode* node) override
+        virtual void LeaveNode(const EntityNode* node) override
         {
             if (!node)
                 return;
@@ -209,7 +209,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
 }
 #endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 
-void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const SceneNode& node)
+void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node)
 {
     const FBox box(model_to_world);
     const auto* body = node.GetRigidBody();

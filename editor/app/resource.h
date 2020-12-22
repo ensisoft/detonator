@@ -39,7 +39,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "gamelib/animation.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "editor/app/utility.h"
 
 namespace app
@@ -47,7 +47,7 @@ namespace app
     // Editor app resource object. These are objects that the user
     // manipulates and manages through the Editor application's UI.
     // Each resource contains the actual underlying resource object
-    // that is for example a gfx::Material or scene::Animation.
+    // that is for example a gfx::Material or game::Animation.
     // Normally these types are not related in any hierarchy yet in
     // the editor we want to manage/view/list/edit/delete generic
     // "resources" that the user has created/imported. This interface
@@ -68,8 +68,8 @@ namespace app
             Animation,
             // It's a custom shape (drawable)
             CustomShape,
-            // It's a scene description
-            Scene,
+            // It's an entity description
+            Entity,
             // It's an audio track
             AudioTrack,
             // It's a generic drawable.
@@ -143,8 +143,8 @@ namespace app
                     return QIcon("icons:animation.png");
                 case Resource::Type::CustomShape:
                     return QIcon("icons:polygon.png");
-                case Resource::Type::Scene:
-                    return QIcon("icons:scene.png");
+                case Resource::Type::Entity:
+                    return QIcon("icons:entity.png");
                 default: break;
             }
             return QIcon();
@@ -157,8 +157,8 @@ namespace app
         { return GetType() == Type::ParticleSystem; }
         inline bool IsCustomShape() const
         { return GetType() == Type::CustomShape; }
-        inline bool IsScene() const
-        { return GetType() == Type::Scene; }
+        inline bool IsEntity() const
+        { return GetType() == Type::Entity; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -258,8 +258,8 @@ namespace app
             static constexpr auto Type = app::Resource::Type::Animation;
         };
         template<>
-        struct ResourceTypeTraits<game::SceneClass> {
-            static constexpr auto Type = app::Resource::Type::Scene;
+        struct ResourceTypeTraits<game::EntityClass> {
+            static constexpr auto Type = app::Resource::Type::Entity;
         };
 
         template<>
@@ -355,8 +355,8 @@ namespace app
                 json["animations"].push_back(content_json);
             else if (TypeValue == Resource::Type::CustomShape)
                 json["shapes"].push_back(content_json);
-            else if (TypeValue == Resource::Type::Scene)
-                json["scenes"].push_back(content_json);
+            else if (TypeValue == Resource::Type::Entity)
+                json["entities"].push_back(content_json);
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {
@@ -461,7 +461,7 @@ namespace app
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using AnimationResource      = GameResource<game::AnimationClass>;
-    using SceneResource          = GameResource<game::SceneClass>;
+    using EntityResource         = GameResource<game::EntityClass>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;

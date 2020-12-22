@@ -35,12 +35,12 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "gamelib/treeop.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 
 namespace game
 {
 
-SceneNodeClass::SceneNodeClass(const SceneNodeClass& other)
+EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
 {
     mClassId  = other.mClassId;
     mName     = other.mName;
@@ -55,7 +55,7 @@ SceneNodeClass::SceneNodeClass(const SceneNodeClass& other)
         mDrawable = std::make_shared<DrawableItemClass>(*other.mDrawable);
 }
 
-SceneNodeClass::SceneNodeClass(SceneNodeClass&& other)
+EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
 {
     mClassId   = std::move(other.mClassId);
     mName      = std::move(other.mName);
@@ -68,7 +68,7 @@ SceneNodeClass::SceneNodeClass(SceneNodeClass&& other)
     mBitFlags  = std::move(other.mBitFlags);
 }
 
-std::size_t SceneNodeClass::GetHash() const
+std::size_t EntityNodeClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
@@ -85,17 +85,17 @@ std::size_t SceneNodeClass::GetHash() const
     return hash;
 }
 
-void SceneNodeClass::SetRigidBody(const RigidBodyItemClass &body)
+void EntityNodeClass::SetRigidBody(const RigidBodyItemClass &body)
 {
     mRigidBody = std::make_shared<RigidBodyItemClass>(body);
 }
 
-void SceneNodeClass::SetDrawable(const DrawableItemClass &drawable)
+void EntityNodeClass::SetDrawable(const DrawableItemClass &drawable)
 {
     mDrawable = std::make_shared<DrawableItemClass>(drawable);
 }
 
-glm::mat4 SceneNodeClass::GetNodeTransform() const
+glm::mat4 EntityNodeClass::GetNodeTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mScale);
@@ -103,7 +103,7 @@ glm::mat4 SceneNodeClass::GetNodeTransform() const
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }
-glm::mat4 SceneNodeClass::GetModelTransform() const
+glm::mat4 EntityNodeClass::GetModelTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mSize);
@@ -113,11 +113,11 @@ glm::mat4 SceneNodeClass::GetModelTransform() const
     return transform.GetAsMatrix();
 }
 
-void SceneNodeClass::Update(float time, float dt)
+void EntityNodeClass::Update(float time, float dt)
 {
 }
 
-nlohmann::json SceneNodeClass::ToJson() const
+nlohmann::json EntityNodeClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "class",    mClassId);
@@ -126,6 +126,7 @@ nlohmann::json SceneNodeClass::ToJson() const
     base::JsonWrite(json, "scale",    mScale);
     base::JsonWrite(json, "size",     mSize);
     base::JsonWrite(json, "rotation", mRotation);
+    base::JsonWrite(json, "flags", mBitFlags.value());
     if (mRigidBody)
         json["rigid_body"] = mRigidBody->ToJson();
     if (mDrawable)
@@ -134,16 +135,18 @@ nlohmann::json SceneNodeClass::ToJson() const
     return json;
 }
 
-// statid
-std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json &json)
+// static
+std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &json)
 {
-    SceneNodeClass ret;
+    unsigned flags = 0;
+    EntityNodeClass ret;
     if (!base::JsonReadSafe(json, "class",    &ret.mClassId) ||
         !base::JsonReadSafe(json, "name",     &ret.mName) ||
         !base::JsonReadSafe(json, "position", &ret.mPosition) ||
         !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
         !base::JsonReadSafe(json, "size",     &ret.mSize) ||
-        !base::JsonReadSafe(json, "rotation", &ret.mRotation))
+        !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
+        !base::JsonReadSafe(json, "flags",    &flags))
         return std::nullopt;
 
     if (json.contains("rigid_body"))
@@ -161,21 +164,22 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json &jso
             return std::nullopt;
         ret.mDrawable = std::make_shared<DrawableItemClass>(std::move(draw.value()));
     }
+    ret.mBitFlags.set_from_value(flags);
     return ret;
 }
 
-SceneNodeClass SceneNodeClass::Clone() const
+EntityNodeClass EntityNodeClass::Clone() const
 {
-    SceneNodeClass ret(*this);
+    EntityNodeClass ret(*this);
     ret.mClassId = base::RandomString(10);
     return ret;
 }
 
-SceneNodeClass& SceneNodeClass::operator=(const SceneNodeClass& other)
+EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
 {
     if (this == &other)
         return *this;
-    SceneNodeClass tmp(other);
+    EntityNodeClass tmp(other);
     mClassId   = std::move(tmp.mClassId);
     mName      = std::move(tmp.mName);
     mPosition  = std::move(tmp.mPosition);
@@ -188,14 +192,14 @@ SceneNodeClass& SceneNodeClass::operator=(const SceneNodeClass& other)
     return *this;
 }
 
-SceneNode::SceneNode(std::shared_ptr<const SceneNodeClass> klass)
+EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
     : mClass(klass)
 {
     mInstId = base::RandomString(10);
     Reset();
 }
 
-SceneNode::SceneNode(const SceneNode& other)
+EntityNode::EntityNode(const EntityNode& other)
 {
     mClass    = other.mClass;
     mInstId   = other.mInstId;
@@ -210,7 +214,7 @@ SceneNode::SceneNode(const SceneNode& other)
         mDrawable = std::make_unique<DrawableItem>(*other.GetDrawable());
 }
 
-SceneNode::SceneNode(SceneNode&& other)
+EntityNode::EntityNode(EntityNode&& other)
 {
     mClass     = std::move(other.mClass);
     mInstId    = std::move(other.mInstId);
@@ -223,22 +227,22 @@ SceneNode::SceneNode(SceneNode&& other)
     mDrawable  = std::move(other.mDrawable);
 }
 
-SceneNode::SceneNode(const SceneNodeClass& klass) : SceneNode(std::make_shared<SceneNodeClass>(klass))
+EntityNode::EntityNode(const EntityNodeClass& klass) : EntityNode(std::make_shared<EntityNodeClass>(klass))
 {}
 
-DrawableItem* SceneNode::GetDrawable()
+DrawableItem* EntityNode::GetDrawable()
 { return mDrawable.get(); }
 
-RigidBodyItem* SceneNode::GetRigidBody()
+RigidBodyItem* EntityNode::GetRigidBody()
 { return mRigidBody.get(); }
 
-const DrawableItem* SceneNode::GetDrawable() const
+const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
-const RigidBodyItem* SceneNode::GetRigidBody() const
+const RigidBodyItem* EntityNode::GetRigidBody() const
 { return mRigidBody.get(); }
 
-void SceneNode::Reset()
+void EntityNode::Reset()
 {
     mPosition = mClass->GetTranslation();
     mScale    = mClass->GetScale();
@@ -250,7 +254,7 @@ void SceneNode::Reset()
         mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
 }
 
-glm::mat4 SceneNode::GetNodeTransform() const
+glm::mat4 EntityNode::GetNodeTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mScale);
@@ -259,7 +263,7 @@ glm::mat4 SceneNode::GetNodeTransform() const
     return transform.GetAsMatrix();
 }
 
-glm::mat4 SceneNode::GetModelTransform() const
+glm::mat4 EntityNode::GetModelTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mSize);
@@ -269,14 +273,14 @@ glm::mat4 SceneNode::GetModelTransform() const
     return transform.GetAsMatrix();
 }
 
-SceneClass::SceneClass(const SceneClass& other)
+EntityClass::EntityClass(const EntityClass& other)
 {
     mClassId = other.mClassId;
 
     // make a deep copy of the nodes.
     for (const auto& node : other.mNodes)
     {
-        mNodes.emplace_back(new SceneNodeClass(*node));
+        mNodes.emplace_back(new EntityNodeClass(*node));
     }
 
     // use JSON serialization to create a copy of the render tree.
@@ -285,54 +289,54 @@ SceneClass::SceneClass(const SceneClass& other)
     mRenderTree = RenderTree::FromJson(json, *this).value();
 }
 
-SceneNodeClass* SceneClass::AddNode(const SceneNodeClass& node)
+EntityNodeClass* EntityClass::AddNode(const EntityNodeClass& node)
 {
-    mNodes.emplace_back(new SceneNodeClass(node));
+    mNodes.emplace_back(new EntityNodeClass(node));
     return mNodes.back().get();
 }
-SceneNodeClass* SceneClass::AddNode(SceneNodeClass&& node)
+EntityNodeClass* EntityClass::AddNode(EntityNodeClass&& node)
 {
-    mNodes.emplace_back(new SceneNodeClass(std::move(node)));
+    mNodes.emplace_back(new EntityNodeClass(std::move(node)));
     return mNodes.back().get();
 }
-SceneNodeClass* SceneClass::AddNode(std::unique_ptr<SceneNodeClass> node)
+EntityNodeClass* EntityClass::AddNode(std::unique_ptr<EntityNodeClass> node)
 {
     mNodes.push_back(std::move(node));
     return mNodes.back().get();
 }
 
-SceneNodeClass& SceneClass::GetNode(size_t index)
+EntityNodeClass& EntityClass::GetNode(size_t index)
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-SceneNodeClass* SceneClass::FindNodeByName(const std::string& name)
+EntityNodeClass* EntityClass::FindNodeByName(const std::string& name)
 {
     for (const auto& node : mNodes)
         if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
-SceneNodeClass* SceneClass::FindNodeById(const std::string& id)
+EntityNodeClass* EntityClass::FindNodeById(const std::string& id)
 {
     for (const auto& node : mNodes)
         if (node->GetClassId() == id)
             return node.get();
     return nullptr;
 }
-const SceneNodeClass& SceneClass::GetNode(size_t index) const
+const EntityNodeClass& EntityClass::GetNode(size_t index) const
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-const SceneNodeClass* SceneClass::FindNodeByName(const std::string& name) const
+const EntityNodeClass* EntityClass::FindNodeByName(const std::string& name) const
 {
     for (const auto& node : mNodes)
         if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
-const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
+const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
 {
     for (const auto& node : mNodes)
         if (node->GetClassId() == id)
@@ -340,230 +344,7 @@ const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
     return nullptr;
 }
 
-void SceneClass::DeleteNode(size_t index)
-{
-    ASSERT(index < mNodes.size());
-    mNodes.erase(mNodes.begin() + index);
-}
-
-bool SceneClass::DeleteNodeById(const std::string& id)
-{
-    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&id](const auto& node) {
-        return node->GetClassId() == id;
-    });
-    if (it == mNodes.end())
-        return false;
-    mNodes.erase(it);
-    return true;
-}
-
-bool SceneClass::DeleteNodeByName(const std::string& name)
-{
-    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&name](const auto& node) {
-        return node->GetName() == name;
-    });
-    if (it == mNodes.end())
-        return false;
-    mNodes.erase(it);
-    return true;
-}
-
-void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
-{
-    RenderTreeFunctions<SceneNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
-}
-void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
-{
-    RenderTreeFunctions<SceneNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
-}
-glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const
-{
-    return RenderTreeFunctions<SceneNodeClass>::MapCoordsFromNode(mRenderTree, x, y, node);
-}
-glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* node) const
-{
-    return RenderTreeFunctions<SceneNodeClass>::MapCoordsToNode(mRenderTree, x, y, node);
-}
-gfx::FRect SceneClass::GetBoundingRect(const SceneNodeClass* node) const
-{
-    return RenderTreeFunctions<SceneNodeClass>::GetBoundingRect(mRenderTree, node);
-}
-gfx::FRect SceneClass::GetBoundingRect() const
-{
-    return RenderTreeFunctions<SceneNodeClass>::GetBoundingRect(mRenderTree);
-}
-
-std::size_t SceneClass::GetHash() const
-{
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mClassId);
-    // include the node hashes in the animation hash
-    // this covers both the node values and their traversal order
-    mRenderTree.PreOrderTraverseForEach([&](const SceneNodeClass* node) {
-        if (node == nullptr)
-            return;
-        hash = base::hash_combine(hash, node->GetHash());
-    });
-    return hash;
-}
-
-SceneNodeClass* SceneClass::TreeNodeFromJson(const nlohmann::json &json)
-{
-    if (!json.contains("id")) // root node has no id
-        return nullptr;
-
-    const std::string& id = json["id"];
-    for (auto& it : mNodes)
-        if (it->GetClassId() == id) return it.get();
-
-    BUG("No such node found.");
-}
-
-nlohmann::json SceneClass::ToJson() const
-{
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mClassId);
-    for (const auto& node : mNodes)
-    {
-        json["nodes"].push_back(node->ToJson());
-    }
-    using Serializer = SceneClass;
-    json["render_tree"] = mRenderTree.ToJson<Serializer>();
-    return json;
-}
-
-// static
-nlohmann::json SceneClass::TreeNodeToJson(const SceneNodeClass *node)
-{
-    // do only shallow serialization of the animation node,
-    // i.e. only record the id so that we can restore the node
-    // later on load based on the ID.
-    nlohmann::json ret;
-    if (node)
-        ret["id"] = node->GetClassId();
-    return ret;
-}
-
-// static
-std::optional<SceneClass> SceneClass::FromJson(const nlohmann::json& json)
-{
-    SceneClass ret;
-    if (!base::JsonReadSafe(json, "id", &ret.mClassId))
-        return std::nullopt;
-    if (json.contains("nodes"))
-    {
-        for (const auto& json : json["nodes"].items())
-        {
-            std::optional<SceneNodeClass> node = SceneNodeClass::FromJson(json.value());
-            if (!node.has_value())
-                return std::nullopt;
-            ret.mNodes.push_back(std::make_shared<SceneNodeClass>(std::move(node.value())));
-        }
-    }
-    auto& serializer = ret;
-
-    auto render_tree = RenderTree::FromJson(json["render_tree"], serializer);
-    if (!render_tree.has_value())
-        return std::nullopt;
-    ret.mRenderTree = std::move(render_tree.value());
-    return ret;
-}
-
-SceneClass SceneClass::Clone() const
-{
-    SceneClass ret;
-
-    struct Serializer {
-        SceneNodeClass* TreeNodeFromJson(const nlohmann::json& json)
-        {
-            if (!json.contains("id")) // root node has no id
-                return nullptr;
-            const std::string& old_id = json["id"];
-            const std::string& new_id = idmap[old_id];
-            auto* ret = nodes[new_id];
-            ASSERT(ret != nullptr && "No such node found.");
-            return ret;
-        }
-        std::unordered_map<std::string, std::string> idmap;
-        std::unordered_map<std::string, SceneNodeClass*> nodes;
-    };
-    Serializer serializer;
-
-    // make a deep copy of the nodes.
-    for (const auto& node : mNodes)
-    {
-        auto clone = std::make_unique<SceneNodeClass>(node->Clone());
-        serializer.idmap[node->GetClassId()]  = clone->GetClassId();
-        serializer.nodes[clone->GetClassId()] = clone.get();
-        ret.mNodes.push_back(std::move(clone));
-    }
-
-    // use the json serialization setup the copy of the
-    // render tree.
-    nlohmann::json json = mRenderTree.ToJson(*this);
-    // build our render tree.
-    ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
-    return ret;
-}
-
-SceneClass& SceneClass::operator=(const SceneClass& other)
-{
-    if (this == &other)
-        return *this;
-
-    SceneClass tmp(other);
-    mClassId    = std::move(tmp.mClassId);
-    mNodes      = std::move(tmp.mNodes);
-    mRenderTree = tmp.mRenderTree;
-    return *this;
-}
-
-Scene::Scene(std::shared_ptr<const SceneClass> klass)
-    : mClass(klass)
-{
-    // build render tree, first create instances of all node classes
-    // then build the render tree based on the node instances
-    for (size_t i=0; i<mClass->GetNumNodes(); ++i)
-    {
-        auto node = CreateSceneNodeInstance(mClass->GetSharedSceneNodeClass(i));
-        mInstanceIdMap[node->GetInstanceId()] = node.get();
-        mNodes.push_back(std::move(node));
-    }
-
-    // rebuild the render tree through JSON serialization
-    nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
-
-    mRenderTree = RenderTree::FromJson(json, *this).value();
-}
-
-Scene::Scene(const SceneClass& klass)
-  : Scene(std::make_shared<SceneClass>(klass))
-{}
-
-SceneNode* Scene::AddNode(const SceneNode& node)
-{
-    mNodes.emplace_back(new SceneNode(node));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
-}
-SceneNode* Scene::AddNode(SceneNode&& node)
-{
-    mNodes.emplace_back(new SceneNode(std::move(node)));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
-}
-
-SceneNode* Scene::AddNode(std::unique_ptr<SceneNode> node)
-{
-    mNodes.push_back(std::move(node));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
-}
-
-void Scene::LinkChild(SceneNode* parent, SceneNode* child)
+void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
 {
     ASSERT(child);
     ASSERT(child != parent);
@@ -579,33 +360,277 @@ void Scene::LinkChild(SceneNode* parent, SceneNode* child)
     tree_node->AppendChild(child);
 }
 
-SceneNode& Scene::GetNode(size_t index)
+void EntityClass::DeleteNode(size_t index)
+{
+    ASSERT(index < mNodes.size());
+    mNodes.erase(mNodes.begin() + index);
+}
+
+bool EntityClass::DeleteNodeById(const std::string& id)
+{
+    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&id](const auto& node) {
+        return node->GetClassId() == id;
+    });
+    if (it == mNodes.end())
+        return false;
+    mNodes.erase(it);
+    return true;
+}
+
+bool EntityClass::DeleteNodeByName(const std::string& name)
+{
+    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&name](const auto& node) {
+        return node->GetName() == name;
+    });
+    if (it == mNodes.end())
+        return false;
+    mNodes.erase(it);
+    return true;
+}
+
+void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
+{
+    RenderTreeFunctions<EntityNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
+{
+    RenderTreeFunctions<EntityNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+}
+glm::vec2 EntityClass::MapCoordsFromNode(float x, float y, const EntityNodeClass* node) const
+{
+    return RenderTreeFunctions<EntityNodeClass>::MapCoordsFromNode(mRenderTree, x, y, node);
+}
+glm::vec2 EntityClass::MapCoordsToNode(float x, float y, const EntityNodeClass* node) const
+{
+    return RenderTreeFunctions<EntityNodeClass>::MapCoordsToNode(mRenderTree, x, y, node);
+}
+gfx::FRect EntityClass::GetBoundingRect(const EntityNodeClass* node) const
+{
+    return RenderTreeFunctions<EntityNodeClass>::GetBoundingRect(mRenderTree, node);
+}
+gfx::FRect EntityClass::GetBoundingRect() const
+{
+    return RenderTreeFunctions<EntityNodeClass>::GetBoundingRect(mRenderTree);
+}
+
+FBox EntityClass::GetBoundingBox(const EntityNodeClass* node) const
+{
+    return RenderTreeFunctions<EntityNodeClass>::GetBoundingBox(mRenderTree, node);
+}
+
+std::size_t EntityClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mClassId);
+    // include the node hashes in the animation hash
+    // this covers both the node values and their traversal order
+    mRenderTree.PreOrderTraverseForEach([&](const EntityNodeClass* node) {
+        if (node == nullptr)
+            return;
+        hash = base::hash_combine(hash, node->GetHash());
+    });
+    return hash;
+}
+
+EntityNodeClass* EntityClass::TreeNodeFromJson(const nlohmann::json &json)
+{
+    if (!json.contains("id")) // root node has no id
+        return nullptr;
+
+    const std::string& id = json["id"];
+    for (auto& it : mNodes)
+        if (it->GetClassId() == id) return it.get();
+
+    BUG("No such node found.");
+}
+
+nlohmann::json EntityClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mClassId);
+    for (const auto& node : mNodes)
+    {
+        json["nodes"].push_back(node->ToJson());
+    }
+    using Serializer = EntityClass;
+    json["render_tree"] = mRenderTree.ToJson<Serializer>();
+    return json;
+}
+
+// static
+nlohmann::json EntityClass::TreeNodeToJson(const EntityNodeClass *node)
+{
+    // do only shallow serialization of the animation node,
+    // i.e. only record the id so that we can restore the node
+    // later on load based on the ID.
+    nlohmann::json ret;
+    if (node)
+        ret["id"] = node->GetClassId();
+    return ret;
+}
+
+// static
+std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
+{
+    EntityClass ret;
+    if (!base::JsonReadSafe(json, "id", &ret.mClassId))
+        return std::nullopt;
+    if (json.contains("nodes"))
+    {
+        for (const auto& json : json["nodes"].items())
+        {
+            std::optional<EntityNodeClass> node = EntityNodeClass::FromJson(json.value());
+            if (!node.has_value())
+                return std::nullopt;
+            ret.mNodes.push_back(std::make_shared<EntityNodeClass>(std::move(node.value())));
+        }
+    }
+    auto& serializer = ret;
+
+    auto render_tree = RenderTree::FromJson(json["render_tree"], serializer);
+    if (!render_tree.has_value())
+        return std::nullopt;
+    ret.mRenderTree = std::move(render_tree.value());
+    return ret;
+}
+
+EntityClass EntityClass::Clone() const
+{
+    EntityClass ret;
+
+    struct Serializer {
+        EntityNodeClass* TreeNodeFromJson(const nlohmann::json& json)
+        {
+            if (!json.contains("id")) // root node has no id
+                return nullptr;
+            const std::string& old_id = json["id"];
+            const std::string& new_id = idmap[old_id];
+            auto* ret = nodes[new_id];
+            ASSERT(ret != nullptr && "No such node found.");
+            return ret;
+        }
+        std::unordered_map<std::string, std::string> idmap;
+        std::unordered_map<std::string, EntityNodeClass*> nodes;
+    };
+    Serializer serializer;
+
+    // make a deep copy of the nodes.
+    for (const auto& node : mNodes)
+    {
+        auto clone = std::make_unique<EntityNodeClass>(node->Clone());
+        serializer.idmap[node->GetClassId()]  = clone->GetClassId();
+        serializer.nodes[clone->GetClassId()] = clone.get();
+        ret.mNodes.push_back(std::move(clone));
+    }
+
+    // use the json serialization setup the copy of the
+    // render tree.
+    nlohmann::json json = mRenderTree.ToJson(*this);
+    // build our render tree.
+    ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
+    return ret;
+}
+
+EntityClass& EntityClass::operator=(const EntityClass& other)
+{
+    if (this == &other)
+        return *this;
+
+    EntityClass tmp(other);
+    mClassId    = std::move(tmp.mClassId);
+    mNodes      = std::move(tmp.mNodes);
+    mRenderTree = tmp.mRenderTree;
+    return *this;
+}
+
+Entity::Entity(std::shared_ptr<const EntityClass> klass)
+    : mClass(klass)
+{
+    // build render tree, first create instances of all node classes
+    // then build the render tree based on the node instances
+    for (size_t i=0; i<mClass->GetNumNodes(); ++i)
+    {
+        auto node = CreateEntityNodeInstance(mClass->GetSharedEntityNodeClass(i));
+        mInstanceIdMap[node->GetInstanceId()] = node.get();
+        mNodes.push_back(std::move(node));
+    }
+
+    // rebuild the render tree through JSON serialization
+    nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
+
+    mRenderTree = RenderTree::FromJson(json, *this).value();
+}
+
+Entity::Entity(const EntityClass& klass)
+  : Entity(std::make_shared<EntityClass>(klass))
+{}
+
+EntityNode* Entity::AddNode(const EntityNode& node)
+{
+    mNodes.emplace_back(new EntityNode(node));
+    auto* back = mNodes.back().get();
+    mInstanceIdMap[back->GetInstanceId()] = back;
+    return back;
+}
+EntityNode* Entity::AddNode(EntityNode&& node)
+{
+    mNodes.emplace_back(new EntityNode(std::move(node)));
+    auto* back = mNodes.back().get();
+    mInstanceIdMap[back->GetInstanceId()] = back;
+    return back;
+}
+
+EntityNode* Entity::AddNode(std::unique_ptr<EntityNode> node)
+{
+    mNodes.push_back(std::move(node));
+    auto* back = mNodes.back().get();
+    mInstanceIdMap[back->GetInstanceId()] = back;
+    return back;
+}
+
+void Entity::LinkChild(EntityNode* parent, EntityNode* child)
+{
+    ASSERT(child);
+    ASSERT(child != parent);
+
+    if (parent == nullptr)
+    {
+        mRenderTree.AppendChild(child);
+        return;
+    }
+    auto* tree_node = mRenderTree.FindNodeByValue(parent);
+    ASSERT(tree_node);
+    ASSERT(mRenderTree.FindNodeByValue(child) == nullptr);
+    tree_node->AppendChild(child);
+}
+
+EntityNode& Entity::GetNode(size_t index)
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-SceneNode* Scene::FindNodeByClassName(const std::string& name)
+EntityNode* Entity::FindNodeByClassName(const std::string& name)
 {
     for (auto& node : mNodes)
         if (node->GetClassName() == name)
             return node.get();
     return nullptr;
 }
-SceneNode* Scene::FindNodeByClassId(const std::string& id)
+EntityNode* Entity::FindNodeByClassId(const std::string& id)
 {
     for (auto& node : mNodes)
         if (node->GetClassId() == id)
             return node.get();
     return nullptr;
 }
-SceneNode* Scene::FindNodeByInstanceId(const std::string& id)
+EntityNode* Entity::FindNodeByInstanceId(const std::string& id)
 {
     auto it = mInstanceIdMap.find(id);
     if (it == mInstanceIdMap.end())
         return nullptr;
     return it->second;
 }
-SceneNode* Scene::FindNodeByInstanceName(const std::string& name)
+EntityNode* Entity::FindNodeByInstanceName(const std::string& name)
 {
     for (auto& node : mNodes)
         if (node->GetInstanceName() == name)
@@ -613,33 +638,33 @@ SceneNode* Scene::FindNodeByInstanceName(const std::string& name)
     return nullptr;
 }
 
-const SceneNode& Scene::GetNode(size_t index) const
+const EntityNode& Entity::GetNode(size_t index) const
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-const SceneNode* Scene::FindNodeByClassName(const std::string& name) const
+const EntityNode* Entity::FindNodeByClassName(const std::string& name) const
 {
     for (auto& node : mNodes)
         if (node->GetClassName() == name)
             return node.get();
     return nullptr;
 }
-const SceneNode* Scene::FindNodeByClassId(const std::string& id) const
+const EntityNode* Entity::FindNodeByClassId(const std::string& id) const
 {
     for (auto& node : mNodes)
         if (node->GetClassId() == id)
             return node.get();
     return nullptr;
 }
-const SceneNode* Scene::FindNodeByInstanceId(const std::string& id) const
+const EntityNode* Entity::FindNodeByInstanceId(const std::string& id) const
 {
     auto it = mInstanceIdMap.find(id);
     if (it == mInstanceIdMap.end())
         return nullptr;
     return it->second;
 }
-const SceneNode* Scene::FindNodeByInstanceName(const std::string& name) const
+const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
 {
     for (const auto& node : mNodes)
         if (node->GetInstanceName() == name)
@@ -647,7 +672,7 @@ const SceneNode* Scene::FindNodeByInstanceName(const std::string& name) const
     return nullptr;
 }
 
-void Scene::DeleteNode(size_t index)
+void Entity::DeleteNode(size_t index)
 {
     ASSERT(index < mNodes.size());
 
@@ -655,22 +680,22 @@ void Scene::DeleteNode(size_t index)
     DeleteNodeByInstanceId(node->GetInstanceId());
 }
 
-bool Scene::DeleteNodeByInstanceId(const std::string& id)
+bool Entity::DeleteNodeByInstanceId(const std::string& id)
 {
     auto it = mInstanceIdMap.find(id);
     if (it == mInstanceIdMap.end())
         return false;
 
-    auto* scene_node = it->second;
-    scene_node->mKilled = true;
+    auto* node = it->second;
+    node->mKilled = true;
     // if the node is in the render tree then  find the render tree node
     // that contains the node to be deleted.
-    if (auto* tree_node = mRenderTree.FindNodeByValue(scene_node))
+    if (auto* tree_node = mRenderTree.FindNodeByValue(node))
     {
         // traverse the tree starting from the node to be deleted
         // and capture the ids of the animation nodes that are part
         // of this hierarchy.
-        tree_node->PreOrderTraverseForEach([](SceneNode *value) {
+        tree_node->PreOrderTraverseForEach([](EntityNode *value) {
             value->mKilled = true;
         });
 
@@ -701,42 +726,42 @@ bool Scene::DeleteNodeByInstanceId(const std::string& id)
     return true;
 }
 
-void Scene::CoarseHitTest(float x, float y, std::vector<SceneNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
+void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
 {
-    RenderTreeFunctions<SceneNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    RenderTreeFunctions<EntityNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
-void Scene::CoarseHitTest(float x, float y, std::vector<const SceneNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
+void Entity::CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    RenderTreeFunctions<SceneNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    RenderTreeFunctions<EntityNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
-glm::vec2 Scene::MapCoordsFromNode(float x, float y, const SceneNode* node) const
+glm::vec2 Entity::MapCoordsFromNode(float x, float y, const EntityNode* node) const
 {
-    return RenderTreeFunctions<SceneNode>::MapCoordsFromNode(mRenderTree, x, y, node);
+    return RenderTreeFunctions<EntityNode>::MapCoordsFromNode(mRenderTree, x, y, node);
 }
 
-glm::vec2 Scene::MapCoordsToNode(float x, float y, const SceneNode* node) const
+glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) const
 {
-    return RenderTreeFunctions<SceneNode>::MapCoordsToNode(mRenderTree, x, y, node);
+    return RenderTreeFunctions<EntityNode>::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-gfx::FRect Scene::GetBoundingRect(const SceneNode* node) const
+gfx::FRect Entity::GetBoundingRect(const EntityNode* node) const
 {
-    return RenderTreeFunctions<SceneNode>::GetBoundingRect(mRenderTree, node);
+    return RenderTreeFunctions<EntityNode>::GetBoundingRect(mRenderTree, node);
 }
 
-gfx::FRect Scene::GetBoundingRect() const
+gfx::FRect Entity::GetBoundingRect() const
 {
-    return RenderTreeFunctions<SceneNode>::GetBoundingRect(mRenderTree);
+    return RenderTreeFunctions<EntityNode>::GetBoundingRect(mRenderTree);
 }
 
-FBox Scene::GetBoundingBox(const SceneNode* node) const
+FBox Entity::GetBoundingBox(const EntityNode* node) const
 {
-    return RenderTreeFunctions<SceneNode>::GetBoundingBox(mRenderTree, node);
+    return RenderTreeFunctions<EntityNode>::GetBoundingBox(mRenderTree, node);
 }
 
-SceneNode* Scene::TreeNodeFromJson(const nlohmann::json &json)
+EntityNode* Entity::TreeNodeFromJson(const nlohmann::json &json)
 {
     if (!json.contains("id")) // root node has no id
         return nullptr;
@@ -748,13 +773,13 @@ SceneNode* Scene::TreeNodeFromJson(const nlohmann::json &json)
     return nullptr;
 }
 
-std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass)
-{ return std::make_unique<Scene>(klass); }
+std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)
+{ return std::make_unique<Entity>(klass); }
 
-std::unique_ptr<Scene> CreateSceneInstance(const SceneClass& klass)
-{ return CreateSceneInstance(std::make_shared<const SceneClass>(klass)); }
+std::unique_ptr<Entity> CreateEntityInstance(const EntityClass& klass)
+{ return CreateEntityInstance(std::make_shared<const EntityClass>(klass)); }
 
-std::unique_ptr<SceneNode> CreateSceneNodeInstance(std::shared_ptr<const SceneNodeClass> klass)
-{ return std::make_unique<SceneNode>(klass); }
+std::unique_ptr<EntityNode> CreateEntityNodeInstance(std::shared_ptr<const EntityNodeClass> klass)
+{ return std::make_unique<EntityNode>(klass); }
 
 } // namespace

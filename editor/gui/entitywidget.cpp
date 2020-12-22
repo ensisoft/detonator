@@ -20,7 +20,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#define LOGTAG "scene"
+#define LOGTAG "entity"
 
 #include "config.h"
 
@@ -44,7 +44,7 @@
 #include "editor/gui/treewidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/gui/tool.h"
-#include "editor/gui/scenewidget.h"
+#include "editor/gui/entitywidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "base/assert.h"
@@ -59,10 +59,10 @@
 namespace gui
 {
 
-class SceneWidget::PlaceShapeTool : public MouseTool
+class EntityWidget::PlaceShapeTool : public MouseTool
 {
 public:
-    PlaceShapeTool(SceneWidget::State& state, const QString& material, const QString& drawable)
+    PlaceShapeTool(EntityWidget::State& state, const QString& material, const QString& drawable)
             : mState(state)
             , mMaterialName(material)
             , mDrawableName(drawable)
@@ -149,7 +149,7 @@ public:
         game::DrawableItemClass item;
         item.SetMaterialId(mMaterialClass->GetId());
         item.SetDrawableId(mDrawableClass->GetId());
-        game::SceneNodeClass node;
+        game::EntityNodeClass node;
         node.SetDrawable(item);
         node.SetName(name);
         node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
@@ -157,8 +157,8 @@ public:
         node.SetScale(glm::vec2(1.0f, 1.0f));
 
         // by default we're appending to the root item.
-        auto& root  = mState.scene.GetRenderTree();
-        auto* child = mState.scene.AddNode(std::move(node));
+        auto& root  = mState.entity.GetRenderTree();
+        auto* child = mState.entity.AddNode(std::move(node));
         root.AppendChild(child);
 
         mState.view->Rebuild();
@@ -168,16 +168,16 @@ public:
     }
     bool CheckNameAvailability(const std::string& name) const
     {
-        for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+        for (size_t i=0; i<mState.entity.GetNumNodes(); ++i)
         {
-            const auto& node = mState.scene.GetNode(i);
+            const auto& node = mState.entity.GetNode(i);
             if (node.GetName() == name)
                 return false;
         }
         return true;
     }
 private:
-    SceneWidget::State& mState;
+    EntityWidget::State& mState;
     // the starting object position in model coordinates of the placement
     // based on the mouse position at the time.
     glm::vec4 mStart;
@@ -197,32 +197,32 @@ private:
 };
 
 
-SceneWidget::SceneWidget(app::Workspace* workspace)
+EntityWidget::EntityWidget(app::Workspace* workspace)
 {
-    DEBUG("Create SceneWidget");
+    DEBUG("Create EntityWidget");
 
-    mSceneTree.reset(new TreeModel(mState.scene));
+    mRenderTree.reset(new TreeModel(mState.entity));
 
     mUI.setupUi(this);
-    mUI.tree->SetModel(mSceneTree.get());
+    mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.widget->onZoomIn  = std::bind(&SceneWidget::ZoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&SceneWidget::ZoomOut, this);
-    mUI.widget->onPaintScene = std::bind(&SceneWidget::PaintScene, this,
-        std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onMouseMove = std::bind(&SceneWidget::MouseMove, this,
-        std::placeholders::_1);
-    mUI.widget->onMousePress = std::bind(&SceneWidget::MousePress, this,
-        std::placeholders::_1);
-    mUI.widget->onMouseRelease = std::bind(&SceneWidget::MouseRelease, this,
-        std::placeholders::_1);
-    mUI.widget->onKeyPress = std::bind(&SceneWidget::KeyPress, this,
-        std::placeholders::_1);
-    mUI.widget->onInitScene = std::bind(&SceneWidget::InitScene, this,
-        std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn  = std::bind(&EntityWidget::ZoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&EntityWidget::ZoomOut, this);
+    mUI.widget->onPaintScene = std::bind(&EntityWidget::PaintScene, this,
+                                         std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onMouseMove = std::bind(&EntityWidget::MouseMove, this,
+                                        std::placeholders::_1);
+    mUI.widget->onMousePress = std::bind(&EntityWidget::MousePress, this,
+                                         std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this,
+                                           std::placeholders::_1);
+    mUI.widget->onKeyPress = std::bind(&EntityWidget::KeyPress, this,
+                                       std::placeholders::_1);
+    mUI.widget->onInitScene = std::bind(&EntityWidget::InitScene, this,
+                                        std::placeholders::_1, std::placeholders::_2);
 
     // create the menu for creating instances of user defined drawables
     // since there doesn't seem to be a way to do this in the designer.
@@ -238,13 +238,13 @@ SceneWidget::SceneWidget(app::Workspace* workspace)
     mState.view = mUI.tree;
 
     // connect tree widget signals
-    connect(mUI.tree, &TreeWidget::currentRowChanged, this, &SceneWidget::TreeCurrentNodeChangedEvent);
-    connect(mUI.tree, &TreeWidget::dragEvent,  this, &SceneWidget::TreeDragEvent);
-    connect(mUI.tree, &TreeWidget::clickEvent, this, &SceneWidget::TreeClickEvent);
+    connect(mUI.tree, &TreeWidget::currentRowChanged, this, &EntityWidget::TreeCurrentNodeChangedEvent);
+    connect(mUI.tree, &TreeWidget::dragEvent,  this, &EntityWidget::TreeDragEvent);
+    connect(mUI.tree, &TreeWidget::clickEvent, this, &EntityWidget::TreeClickEvent);
     // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::NewResourceAvailable, this, &SceneWidget::NewResourceAvailable);
-    connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &SceneWidget::ResourceToBeDeleted);
-    connect(workspace, &app::Workspace::ResourceUpdated,      this, &SceneWidget::ResourceUpdated);
+    connect(workspace, &app::Workspace::NewResourceAvailable, this, &EntityWidget::NewResourceAvailable);
+    connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &EntityWidget::ResourceToBeDeleted);
+    connect(workspace, &app::Workspace::ResourceUpdated,      this, &EntityWidget::ResourceUpdated);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
@@ -252,23 +252,23 @@ SceneWidget::SceneWidget(app::Workspace* workspace)
     PopulateFromEnum<game::RigidBodyItemClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.name, QString("My Scene"));
-    SetValue(mUI.ID, mState.scene.GetId());
-    setWindowTitle("My Scene");
+    SetValue(mUI.name, QString("My Entity"));
+    SetValue(mUI.ID, mState.entity.GetId());
+    setWindowTitle("My Entity");
 
     RebuildMenus();
     RebuildCombos();
 }
 
-SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resource)
-  : SceneWidget(workspace)
+EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
+  : EntityWidget(workspace)
 {
-    DEBUG("Editing scene '%1'", resource.GetName());
-    const game::SceneClass* content = nullptr;
+    DEBUG("Editing entity '%1'", resource.GetName());
+    const game::EntityClass* content = nullptr;
     resource.GetContent(&content);
 
-    mState.scene = *content;
-    mOriginalHash = mState.scene.GetHash();
+    mState.entity = *content;
+    mOriginalHash = mState.entity.GetHash();
     mCameraWasLoaded = true;
 
     SetValue(mUI.name, resource.GetName());
@@ -287,17 +287,17 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
 
     UpdateDeletedResourceReferences();
 
-    mSceneTree.reset(new TreeModel(mState.scene));
-    mUI.tree->SetModel(mSceneTree.get());
+    mRenderTree.reset(new TreeModel(mState.entity));
+    mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
 }
 
-SceneWidget::~SceneWidget()
+EntityWidget::~EntityWidget()
 {
-    DEBUG("Destroy SceneWidget");
+    DEBUG("Destroy EntityWidget");
 }
 
-void SceneWidget::AddActions(QToolBar& bar)
+void EntityWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -319,7 +319,7 @@ void SceneWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mParticleSystems->menuAction());
 }
-void SceneWidget::AddActions(QMenu& menu)
+void EntityWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -342,120 +342,120 @@ void SceneWidget::AddActions(QMenu& menu)
     menu.addAction(mParticleSystems->menuAction());
 }
 
-bool SceneWidget::SaveState(Settings& settings) const
+bool EntityWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Scene", mUI.name);
-    settings.saveWidget("Scene", mUI.ID);
-    settings.saveWidget("Scene", mUI.scaleX);
-    settings.saveWidget("Scene", mUI.scaleY);
-    settings.saveWidget("Scene", mUI.rotation);
-    settings.saveWidget("Scene", mUI.chkShowOrigin);
-    settings.saveWidget("Scene", mUI.chkShowGrid);
-    settings.saveWidget("Scene", mUI.cmbGrid);
-    settings.saveWidget("Scene", mUI.zoom);
-    settings.saveWidget("Scene", mUI.widget);
-    settings.setValue("Scene", "camera_offset_x", mState.camera_offset_x);
-    settings.setValue("Scene", "camera_offset_y", mState.camera_offset_y);
-    // the scene can already serialize into JSON.
-    // so let's use the JSON serialization in the animation
+    settings.saveWidget("Entity", mUI.name);
+    settings.saveWidget("Entity", mUI.ID);
+    settings.saveWidget("Entity", mUI.scaleX);
+    settings.saveWidget("Entity", mUI.scaleY);
+    settings.saveWidget("Entity", mUI.rotation);
+    settings.saveWidget("Entity", mUI.chkShowOrigin);
+    settings.saveWidget("Entity", mUI.chkShowGrid);
+    settings.saveWidget("Entity", mUI.cmbGrid);
+    settings.saveWidget("Entity", mUI.zoom);
+    settings.saveWidget("Entity", mUI.widget);
+    settings.setValue("Entity", "camera_offset_x", mState.camera_offset_x);
+    settings.setValue("Entity", "camera_offset_y", mState.camera_offset_y);
+    // the entity can already serialize into JSON.
+    // so let's use the JSON serialization in the entity
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mState.scene.ToJson();
+    const auto& json = mState.entity.ToJson();
     const auto& base64 = base64::Encode(json.dump(2));
-    settings.setValue("Scene", "content", base64);
+    settings.setValue("Entity", "content", base64);
     return true;
 }
-bool SceneWidget::LoadState(const Settings& settings)
+bool EntityWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Scene", mUI.name);
-    settings.loadWidget("Scene", mUI.ID);
-    settings.loadWidget("Scene", mUI.scaleX);
-    settings.loadWidget("Scene", mUI.scaleY);
-    settings.loadWidget("Scene", mUI.rotation);
-    settings.loadWidget("Scene", mUI.chkShowOrigin);
-    settings.loadWidget("Scene", mUI.chkShowGrid);
-    settings.loadWidget("Scene", mUI.cmbGrid);
-    settings.loadWidget("Scene", mUI.zoom);
-    settings.loadWidget("Scene", mUI.widget);
+    settings.loadWidget("Entity", mUI.name);
+    settings.loadWidget("Entity", mUI.ID);
+    settings.loadWidget("Entity", mUI.scaleX);
+    settings.loadWidget("Entity", mUI.scaleY);
+    settings.loadWidget("Entity", mUI.rotation);
+    settings.loadWidget("Entity", mUI.chkShowOrigin);
+    settings.loadWidget("Entity", mUI.chkShowGrid);
+    settings.loadWidget("Entity", mUI.cmbGrid);
+    settings.loadWidget("Entity", mUI.zoom);
+    settings.loadWidget("Entity", mUI.widget);
     setWindowTitle(mUI.name->text());
-    mState.camera_offset_x = settings.getValue("Scene", "camera_offset_x", mState.camera_offset_x);
-    mState.camera_offset_y = settings.getValue("Scene", "camera_offset_y", mState.camera_offset_y);
+    mState.camera_offset_x = settings.getValue("Entity", "camera_offset_x", mState.camera_offset_x);
+    mState.camera_offset_y = settings.getValue("Entity", "camera_offset_y", mState.camera_offset_y);
     // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
-    const std::string& base64 = settings.getValue("Scene", "content", std::string(""));
+    const std::string& base64 = settings.getValue("Entity", "content", std::string(""));
     if (base64.empty())
         return true;
 
     const auto& json = nlohmann::json::parse(base64::Decode(base64));
-    auto ret  = game::SceneClass::FromJson(json);
+    auto ret  = game::EntityClass::FromJson(json);
     if (!ret.has_value())
     {
-        ERROR("Failed to load animation widget state.");
+        ERROR("Failed to load entity widget state.");
         return false;
     }
-    mState.scene  = std::move(ret.value());
-    mOriginalHash = mState.scene.GetHash();
+    mState.entity  = std::move(ret.value());
+    mOriginalHash = mState.entity.GetHash();
 
     UpdateDeletedResourceReferences();
 
-    mSceneTree.reset(new TreeModel(mState.scene));
-    mUI.tree->SetModel(mSceneTree.get());
+    mRenderTree.reset(new TreeModel(mState.entity));
+    mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     return true;
 }
-bool SceneWidget::CanZoomIn() const
+bool EntityWidget::CanZoomIn() const
 {
     const auto max = mUI.zoom->maximum();
     const auto val = mUI.zoom->value();
     return val < max;
 }
-bool SceneWidget::CanZoomOut() const
+bool EntityWidget::CanZoomOut() const
 {
     const auto min = mUI.zoom->minimum();
     const auto val = mUI.zoom->value();
     return val > min;
 }
-void SceneWidget::ZoomIn()
+void EntityWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
     mUI.zoom->setValue(value + 0.1);
 }
-void SceneWidget::ZoomOut()
+void EntityWidget::ZoomOut()
 {
     const auto value = mUI.zoom->value();
     mUI.zoom->setValue(value - 0.1);
 }
-void SceneWidget::ReloadShaders()
+void EntityWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
-void SceneWidget::ReloadTextures()
+void EntityWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
-void SceneWidget::Shutdown()
+void EntityWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
-void SceneWidget::Update(double secs)
+void EntityWidget::Update(double secs)
 {
     if (mPlayState == PlayState::Playing)
     {
         // todo: update scene?
-        mState.renderer.Update(mState.scene, mSceneTime, secs);
-        mSceneTime += secs;
-        mUI.time->setText(QString::number(mSceneTime));
+        mState.renderer.Update(mState.entity, mEntityTime, secs);
+        mEntityTime += secs;
+        mUI.time->setText(QString::number(mEntityTime));
     }
     mCurrentTime += secs;
 }
-void SceneWidget::Render()
+void EntityWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
-bool SceneWidget::ConfirmClose()
+bool EntityWidget::ConfirmClose()
 {
-    const auto hash = mState.scene.GetHash();
+    const auto hash = mState.entity.GetHash();
     if (hash == mOriginalHash)
         return true;
 
@@ -472,40 +472,40 @@ bool SceneWidget::ConfirmClose()
     on_actionSave_triggered();
     return true;
 }
-void SceneWidget::Refresh()
+void EntityWidget::Refresh()
 {
 
 }
 
-void SceneWidget::on_actionPlay_triggered()
+void EntityWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
 }
-void SceneWidget::on_actionPause_triggered()
+void EntityWidget::on_actionPause_triggered()
 {
     mPlayState = PlayState::Paused;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(true);
 }
-void SceneWidget::on_actionStop_triggered()
+void EntityWidget::on_actionStop_triggered()
 {
-    mSceneTime = 0.0f;
+    mEntityTime = 0.0f;
     mPlayState = PlayState::Stopped;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mUI.time->clear();
 }
-void SceneWidget::on_actionSave_triggered()
+void EntityWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.name))
         return;
     const QString& name = GetValue(mUI.name);
-    app::SceneResource resource(mState.scene, name);
+    app::EntityResource resource(mState.entity, name);
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -518,62 +518,62 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "widget", mUI.widget);
 
     mState.workspace->SaveResource(resource);
-    mOriginalHash = mState.scene.GetHash();
+    mOriginalHash = mState.entity.GetHash();
 
-    INFO("Saved scene '%1'", name);
-    NOTE("Saved scene '%1'", name);
+    INFO("Saved entity '%1'", name);
+    NOTE("Saved entity '%1'", name);
     setWindowTitle(name);
 }
-void SceneWidget::on_actionNewRect_triggered()
+void EntityWidget::on_actionNewRect_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Rectangle"));
 
     UncheckPlacementActions();
     mUI.actionNewRect->setChecked(true);
 }
-void SceneWidget::on_actionNewCircle_triggered()
+void EntityWidget::on_actionNewCircle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Circle"));
 
     UncheckPlacementActions();
     mUI.actionNewCircle->setChecked(true);
 }
-void SceneWidget::on_actionNewIsoscelesTriangle_triggered()
+void EntityWidget::on_actionNewIsoscelesTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "IsoscelesTriangle"));
 
     UncheckPlacementActions();
     mUI.actionNewIsoscelesTriangle->setChecked(true);
 }
-void SceneWidget::on_actionNewRightTriangle_triggered()
+void EntityWidget::on_actionNewRightTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "RightTriangle"));
 
     UncheckPlacementActions();
     mUI.actionNewRightTriangle->setChecked(true);
 }
-void SceneWidget::on_actionNewRoundRect_triggered()
+void EntityWidget::on_actionNewRoundRect_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "RoundRect"));
 
     UncheckPlacementActions();
     mUI.actionNewRoundRect->setChecked(true);
 }
-void SceneWidget::on_actionNewTrapezoid_triggered()
+void EntityWidget::on_actionNewTrapezoid_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Trapezoid"));
 
     UncheckPlacementActions();
     mUI.actionNewTrapezoid->setChecked(true);
 }
-void SceneWidget::on_actionNewCapsule_triggered()
+void EntityWidget::on_actionNewCapsule_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Capsule"));
 
     UncheckPlacementActions();
     mUI.actionNewCapsule->setChecked(true);
 }
-void SceneWidget::on_actionNewParallelogram_triggered()
+void EntityWidget::on_actionNewParallelogram_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Parallelogram"));
 
@@ -581,13 +581,13 @@ void SceneWidget::on_actionNewParallelogram_triggered()
     mUI.actionNewParallelogram->setChecked(true);
 }
 
-void SceneWidget::on_actionNodeDelete_triggered()
+void EntityWidget::on_actionNodeDelete_triggered()
 {
-    const game::SceneNodeClass* item = GetCurrentNode();
+    const game::EntityNodeClass* item = GetCurrentNode();
     if (item == nullptr)
         return;
 
-    auto& tree = mState.scene.GetRenderTree();
+    auto& tree = mState.entity.GetRenderTree();
 
     // find the game graph node that contains this AnimationNode.
     auto* node = tree.FindNodeByValue(item);
@@ -600,7 +600,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
         std::string name;
     };
     std::vector<Carcass> graveyard;
-    node->PreOrderTraverseForEach([&](game::SceneNodeClass* value) {
+    node->PreOrderTraverseForEach([&](game::EntityNodeClass* value) {
         Carcass carcass;
         carcass.id   = value->GetClassId();
         carcass.name = value->GetName();
@@ -610,7 +610,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
     for (auto& carcass : graveyard)
     {
         DEBUG("Deleting child '%1', %2", carcass.name, carcass.id);
-        mState.scene.DeleteNodeById(carcass.id);
+        mState.entity.DeleteNodeById(carcass.id);
     }
 
     // find the parent node
@@ -620,7 +620,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
 
     mUI.tree->Rebuild();
 }
-void SceneWidget::on_actionNodeMoveUpLayer_triggered()
+void EntityWidget::on_actionNodeMoveUpLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -632,7 +632,7 @@ void SceneWidget::on_actionNodeMoveUpLayer_triggered()
     }
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::on_actionNodeMoveDownLayer_triggered()
+void EntityWidget::on_actionNodeMoveDownLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -645,9 +645,9 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
     DisplayCurrentNodeProperties();
 }
 
-void SceneWidget::on_actionNodeDuplicate_triggered()
+void EntityWidget::on_actionNodeDuplicate_triggered()
 {
-    game::SceneNodeClass* node = GetCurrentNode();
+    game::EntityNodeClass* node = GetCurrentNode();
     if (node == nullptr)
         return;
 
@@ -655,15 +655,15 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
     // the selected node and add the new hierarchy as a new
     // child of the selected node's parent
 
-    auto& tree = mState.scene.GetRenderTree();
+    auto& tree = mState.entity.GetRenderTree();
     auto* tree_node = tree.FindNodeByValue(node);
     auto* tree_node_parent = tree.FindParent(tree_node);
 
     // deep copy of the node.
     auto copy_root = tree_node->Clone();
     // replace all node references with copies of the nodes.
-    copy_root.PreOrderTraverseForEachTreeNode([&](game::SceneClass::RenderTreeNode* node) {
-        game::SceneNodeClass* child = mState.scene.AddNode((*node)->Clone());
+    copy_root.PreOrderTraverseForEachTreeNode([&](game::EntityClass::RenderTreeNode* node) {
+        game::EntityNodeClass* child = mState.entity.AddNode((*node)->Clone());
         child->SetName(base::FormatString("Copy of %1", (*node)->GetName()));
         node->SetValue(child);
     });
@@ -676,7 +676,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
     mState.view->SelectItemById(app::FromUtf8(copy_root->GetClassId()));
 }
 
-void SceneWidget::on_plus90_clicked()
+void EntityWidget::on_plus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
@@ -684,7 +684,7 @@ void SceneWidget::on_plus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void SceneWidget::on_minus90_clicked()
+void EntityWidget::on_minus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
@@ -692,7 +692,7 @@ void SceneWidget::on_minus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void SceneWidget::on_resetTransform_clicked()
+void EntityWidget::on_resetTransform_clicked()
 {
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
@@ -709,28 +709,28 @@ void SceneWidget::on_resetTransform_clicked()
     mUI.rotation->setValue(0);
 }
 
-void SceneWidget::on_nodeName_textChanged(const QString& text)
+void EntityWidget::on_nodeName_textChanged(const QString& text)
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return;
     else if (!item->GetUserData())
         return;
-    auto* node = static_cast<game::SceneNodeClass*>(item->GetUserData());
+    auto* node = static_cast<game::EntityNodeClass*>(item->GetUserData());
     node->SetName(app::ToUtf8(text));
     item->SetText(text);
     mUI.tree->Update();
 }
 
-void SceneWidget::on_nodeIsVisible_stateChanged(int)
+void EntityWidget::on_nodeIsVisible_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInGame, GetValue(mUI.nodeIsVisible));
+        node->SetFlag(game::EntityNodeClass::Flags::VisibleInGame, GetValue(mUI.nodeIsVisible));
     }
 }
 
-void SceneWidget::on_nodeSizeX_valueChanged(double value)
+void EntityWidget::on_nodeSizeX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -739,7 +739,7 @@ void SceneWidget::on_nodeSizeX_valueChanged(double value)
         node->SetSize(size);
     }
 }
-void SceneWidget::on_nodeSizeY_valueChanged(double value)
+void EntityWidget::on_nodeSizeY_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -748,7 +748,7 @@ void SceneWidget::on_nodeSizeY_valueChanged(double value)
         node->SetSize(size);
     }
 }
-void SceneWidget::on_nodeTranslateX_valueChanged(double value)
+void EntityWidget::on_nodeTranslateX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -757,7 +757,7 @@ void SceneWidget::on_nodeTranslateX_valueChanged(double value)
         node->SetTranslation(translate);
     }
 }
-void SceneWidget::on_nodeTranslateY_valueChanged(double value)
+void EntityWidget::on_nodeTranslateY_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -766,7 +766,7 @@ void SceneWidget::on_nodeTranslateY_valueChanged(double value)
         node->SetTranslation(translate);
     }
 }
-void SceneWidget::on_nodeScaleX_valueChanged(double value)
+void EntityWidget::on_nodeScaleX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -775,7 +775,7 @@ void SceneWidget::on_nodeScaleX_valueChanged(double value)
         node->SetScale(scale);
     }
 }
-void SceneWidget::on_nodeScaleY_valueChanged(double value)
+void EntityWidget::on_nodeScaleY_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -784,7 +784,7 @@ void SceneWidget::on_nodeScaleY_valueChanged(double value)
         node->SetScale(scale);
     }
 }
-void SceneWidget::on_nodeRotation_valueChanged(double value)
+void EntityWidget::on_nodeRotation_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -792,7 +792,7 @@ void SceneWidget::on_nodeRotation_valueChanged(double value)
     }
 }
 
-void SceneWidget::on_nodePlus90_clicked()
+void EntityWidget::on_nodePlus90_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -801,7 +801,7 @@ void SceneWidget::on_nodePlus90_clicked()
         mUI.nodeRotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
     }
 }
-void SceneWidget::on_nodeMinus90_clicked()
+void EntityWidget::on_nodeMinus90_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -811,7 +811,7 @@ void SceneWidget::on_nodeMinus90_clicked()
     }
 }
 
-void SceneWidget::on_dsDrawable_currentIndexChanged(const QString& name)
+void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -821,7 +821,7 @@ void SceneWidget::on_dsDrawable_currentIndexChanged(const QString& name)
         }
     }
 }
-void SceneWidget::on_dsMaterial_currentIndexChanged(const QString& name)
+void EntityWidget::on_dsMaterial_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -831,7 +831,7 @@ void SceneWidget::on_dsMaterial_currentIndexChanged(const QString& name)
         }
     }
 }
-void SceneWidget::on_dsRenderPass_currentIndexChanged(const QString&)
+void EntityWidget::on_dsRenderPass_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -841,7 +841,7 @@ void SceneWidget::on_dsRenderPass_currentIndexChanged(const QString&)
         }
     }
 }
-void SceneWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
+void EntityWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -852,7 +852,7 @@ void SceneWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
     }
 }
 
-void SceneWidget::on_dsLayer_valueChanged(int value)
+void EntityWidget::on_dsLayer_valueChanged(int value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -863,7 +863,7 @@ void SceneWidget::on_dsLayer_valueChanged(int value)
     }
 }
 
-void SceneWidget::on_dsLineWidth_valueChanged(double value)
+void EntityWidget::on_dsLineWidth_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -874,7 +874,7 @@ void SceneWidget::on_dsLineWidth_valueChanged(double value)
     }
 }
 
-void SceneWidget::on_dsUpdateDrawable_stateChanged(int)
+void EntityWidget::on_dsUpdateDrawable_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -884,7 +884,7 @@ void SceneWidget::on_dsUpdateDrawable_stateChanged(int)
         }
     }
 }
-void SceneWidget::on_dsUpdateMaterial_stateChanged(int)
+void EntityWidget::on_dsUpdateMaterial_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -894,7 +894,7 @@ void SceneWidget::on_dsUpdateMaterial_stateChanged(int)
         }
     }
 }
-void SceneWidget::on_dsRestartDrawable_stateChanged(int)
+void EntityWidget::on_dsRestartDrawable_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -904,17 +904,17 @@ void SceneWidget::on_dsRestartDrawable_stateChanged(int)
         }
     }
 }
-void SceneWidget::on_dsOverrideAlpha_stateChanged(int)
+void EntityWidget::on_dsOverrideAlpha_stateChanged(int)
 {
     UpdateCurrentNodeAlpha();
 }
 
-void SceneWidget::on_dsAlpha_valueChanged()
+void EntityWidget::on_dsAlpha_valueChanged()
 {
     UpdateCurrentNodeAlpha();
 }
 
-void SceneWidget::on_rbSimulation_currentIndexChanged(const QString&)
+void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -925,7 +925,7 @@ void SceneWidget::on_rbSimulation_currentIndexChanged(const QString&)
     }
 }
 
-void SceneWidget::on_rbShape_currentIndexChanged(const QString&)
+void EntityWidget::on_rbShape_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -937,7 +937,7 @@ void SceneWidget::on_rbShape_currentIndexChanged(const QString&)
     }
 }
 
-void SceneWidget::on_rbPolygon_currentIndexChanged(const QString&)
+void EntityWidget::on_rbPolygon_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -949,7 +949,7 @@ void SceneWidget::on_rbPolygon_currentIndexChanged(const QString&)
     }
 }
 
-void SceneWidget::on_rbFriction_valueChanged(double value)
+void EntityWidget::on_rbFriction_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -959,7 +959,7 @@ void SceneWidget::on_rbFriction_valueChanged(double value)
         }
     }
 }
-void SceneWidget::on_rbRestitution_valueChanged(double value)
+void EntityWidget::on_rbRestitution_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -969,7 +969,7 @@ void SceneWidget::on_rbRestitution_valueChanged(double value)
         }
     }
 }
-void SceneWidget::on_rbAngularDamping_valueChanged(double value)
+void EntityWidget::on_rbAngularDamping_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -979,7 +979,7 @@ void SceneWidget::on_rbAngularDamping_valueChanged(double value)
         }
     }
 }
-void SceneWidget::on_rbLinearDamping_valueChanged(double value)
+void EntityWidget::on_rbLinearDamping_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -989,7 +989,7 @@ void SceneWidget::on_rbLinearDamping_valueChanged(double value)
         }
     }
 }
-void SceneWidget::on_rbDensity_valueChanged(double value)
+void EntityWidget::on_rbDensity_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1000,7 +1000,7 @@ void SceneWidget::on_rbDensity_valueChanged(double value)
     }
 }
 
-void SceneWidget::on_rbIsBullet_stateChanged(int)
+void EntityWidget::on_rbIsBullet_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1010,7 +1010,7 @@ void SceneWidget::on_rbIsBullet_stateChanged(int)
         }
     }
 }
-void SceneWidget::on_rbIsSensor_stateChanged(int)
+void EntityWidget::on_rbIsSensor_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1020,7 +1020,7 @@ void SceneWidget::on_rbIsSensor_stateChanged(int)
         }
     }
 }
-void SceneWidget::on_rbIsEnabled_stateChanged(int)
+void EntityWidget::on_rbIsEnabled_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1031,7 +1031,7 @@ void SceneWidget::on_rbIsEnabled_stateChanged(int)
     }
 }
 
-void SceneWidget::on_drawableItem_toggled(bool on)
+void EntityWidget::on_drawableItem_toggled(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1054,7 +1054,7 @@ void SceneWidget::on_drawableItem_toggled(bool on)
     }
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::on_rigidBodyItem_toggled(bool on)
+void EntityWidget::on_rigidBodyItem_toggled(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1076,7 +1076,7 @@ void SceneWidget::on_rigidBodyItem_toggled(bool on)
     DisplayCurrentNodeProperties();
 }
 
-void SceneWidget::on_tree_customContextMenuRequested(QPoint)
+void EntityWidget::on_tree_customContextMenuRequested(QPoint)
 {
     const auto* node = GetCurrentNode();
     const auto* item = node ? node->GetDrawable() : nullptr;
@@ -1096,7 +1096,7 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     menu.exec(QCursor::pos());
 }
 
-void SceneWidget::TreeCurrentNodeChangedEvent()
+void EntityWidget::TreeCurrentNodeChangedEvent()
 {
     if (const auto* node = GetCurrentNode())
     {
@@ -1112,11 +1112,11 @@ void SceneWidget::TreeCurrentNodeChangedEvent()
     }
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
+void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
-    auto& tree = mState.scene.GetRenderTree();
-    auto* src_value = static_cast<game::SceneNodeClass*>(item->GetUserData());
-    auto* dst_value = static_cast<game::SceneNodeClass*>(target->GetUserData());
+    auto& tree = mState.entity.GetRenderTree();
+    auto* src_value = static_cast<game::EntityNodeClass*>(item->GetUserData());
+    auto* dst_value = static_cast<game::EntityNodeClass*>(target->GetUserData());
 
     // find the game graph node that contains this AnimationNode.
     auto* src_node   = tree.FindNodeByValue(src_value);
@@ -1126,43 +1126,43 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
     if (src_node->FindNodeByValue(dst_value))
         return;
 
-    game::SceneClass::RenderTreeNode branch = *src_node;
+    game::EntityClass::RenderTreeNode branch = *src_node;
     src_parent->DeleteChild(src_node);
 
     auto* dst_node  = tree.FindNodeByValue(dst_value);
     dst_node->AppendChild(std::move(branch));
 }
-void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
+void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
     //DEBUG("Tree click event: %1", item->GetId());
-    auto* node = static_cast<game::SceneNodeClass*>(item->GetUserData());
+    auto* node = static_cast<game::EntityNodeClass*>(item->GetUserData());
     if (node == nullptr)
         return;
 
-    const bool visibility = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
-    node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, !visibility);
+    const bool visibility = node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
+    node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, !visibility);
     item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
 }
 
-void SceneWidget::NewResourceAvailable(const app::Resource* resource)
+void EntityWidget::NewResourceAvailable(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
 }
-void SceneWidget::ResourceToBeDeleted(const app::Resource* resource)
+void EntityWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
     UpdateDeletedResourceReferences();
     RebuildCombos();
     RebuildMenus();
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::ResourceUpdated(const app::Resource* resource)
+void EntityWidget::ResourceUpdated(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
 }
 
-void SceneWidget::PlaceNewParticleSystem()
+void EntityWidget::PlaceNewParticleSystem()
 {
     const auto* action = qobject_cast<QAction*>(sender());
     // using the text in the action as the name of the drawable.
@@ -1174,7 +1174,7 @@ void SceneWidget::PlaceNewParticleSystem()
     const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
 }
-void SceneWidget::PlaceNewCustomShape()
+void EntityWidget::PlaceNewCustomShape()
 {
     const auto* action = qobject_cast<QAction*>(sender());
     // using the text in the action as the name of the drawable.
@@ -1186,7 +1186,7 @@ void SceneWidget::PlaceNewCustomShape()
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
 }
 
-void SceneWidget::InitScene(unsigned width, unsigned height)
+void EntityWidget::InitScene(unsigned width, unsigned height)
 {
     if (!mCameraWasLoaded)
     {
@@ -1198,7 +1198,7 @@ void SceneWidget::InitScene(unsigned width, unsigned height)
     DisplayCurrentCameraLocation();
 }
 
-void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
+void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
@@ -1228,12 +1228,12 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
-    DrawHook<game::SceneNodeClass> hook(GetCurrentNode(), mPlayState == PlayState::Playing);
+    DrawHook<game::EntityNodeClass> hook(GetCurrentNode(), mPlayState == PlayState::Playing);
 
     // begin the animation transformation space
     view.Push();
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(mState.scene, painter, view, &hook);
+        mState.renderer.Draw(mState.entity, painter, view, &hook);
         mState.renderer.EndFrame();
     view.Pop();
 
@@ -1250,7 +1250,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     view.Pop();
 }
 
-void SceneWidget::MouseMove(QMouseEvent* mickey)
+void EntityWidget::MouseMove(QMouseEvent* mickey)
 {
     if (mCurrentTool)
     {
@@ -1266,7 +1266,7 @@ void SceneWidget::MouseMove(QMouseEvent* mickey)
     DisplayCurrentCameraLocation();
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::MousePress(QMouseEvent* mickey)
+void EntityWidget::MousePress(QMouseEvent* mickey)
 {
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
@@ -1300,9 +1300,9 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
         const auto &mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
                                                                      mouse_widget_position_y, 1.0f, 1.0f);
 
-        std::vector<game::SceneNodeClass *> nodes_hit;
+        std::vector<game::EntityNodeClass *> nodes_hit;
         std::vector<glm::vec2> hitbox_coords;
-        mState.scene.CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
+        mState.entity.CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
 
         // if nothing was hit clear the selection.
         if (nodes_hit.empty())
@@ -1313,14 +1313,14 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
         else
         {
             const TreeWidget::TreeItem *selected = mUI.tree->GetSelectedItem();
-            const game::SceneNodeClass *previous = selected
-                ? static_cast<const game::SceneNodeClass *>(selected->GetUserData())
+            const game::EntityNodeClass *previous = selected
+                ? static_cast<const game::EntityNodeClass *>(selected->GetUserData())
                 : nullptr;
 
             // if the currently selected node is among the ones being hit
             // then retain that selection.
             // otherwise select the last one of the list. (the rightmost child)
-            game::SceneNodeClass *hit = nodes_hit.back();
+            game::EntityNodeClass *hit = nodes_hit.back();
             glm::vec2 hitpos = hitbox_coords.back();
             for (size_t i = 0; i < nodes_hit.size(); ++i)
             {
@@ -1339,10 +1339,10 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
             const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                              hitpos.y >= 0 && hitpos.y <= 10.0f;
             if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(mState.scene, hit));
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(mState.entity, hit));
             else if (top_left_hitbox_hit)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(mState.scene, hit));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, hit));
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(mState.entity, hit));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.entity, hit));
 
             mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
         }
@@ -1350,7 +1350,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
     if (mCurrentTool)
         mCurrentTool->MousePress(mickey, view);
 }
-void SceneWidget::MouseRelease(QMouseEvent* mickey)
+void EntityWidget::MouseRelease(QMouseEvent* mickey)
 {
     if (!mCurrentTool)
         return;
@@ -1367,7 +1367,7 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     UncheckPlacementActions();
 }
 
-bool SceneWidget::KeyPress(QKeyEvent* key)
+bool EntityWidget::KeyPress(QKeyEvent* key)
 {
     switch (key->key()) {
         case Qt::Key_Delete:
@@ -1406,7 +1406,7 @@ bool SceneWidget::KeyPress(QKeyEvent* key)
     return true;
 }
 
-void SceneWidget::DisplayCurrentNodeProperties()
+void EntityWidget::DisplayCurrentNodeProperties()
 {
     SetValue(mUI.drawableItem, false);
     SetValue(mUI.rigidBodyItem, false);
@@ -1432,7 +1432,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetClassId());
         SetValue(mUI.nodeName, node->GetName());
-        SetValue(mUI.nodeIsVisible, node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame));
+        SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityNodeClass::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
         SetValue(mUI.nodeSizeX, size.x);
@@ -1484,7 +1484,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     }
 }
 
-void SceneWidget::DisplayCurrentCameraLocation()
+void EntityWidget::DisplayCurrentCameraLocation()
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
@@ -1494,7 +1494,7 @@ void SceneWidget::DisplayCurrentCameraLocation()
     SetValue(mUI.translateY, dist_y);
 }
 
-void SceneWidget::UncheckPlacementActions()
+void EntityWidget::UncheckPlacementActions()
 {
     mUI.actionNewRect->setChecked(false);
     mUI.actionNewCircle->setChecked(false);
@@ -1506,7 +1506,7 @@ void SceneWidget::UncheckPlacementActions()
     mUI.actionNewCapsule->setChecked(false);
 }
 
-void SceneWidget::UpdateCurrentNodePosition(float dx, float dy)
+void EntityWidget::UpdateCurrentNodePosition(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1517,7 +1517,7 @@ void SceneWidget::UpdateCurrentNodePosition(float dx, float dy)
     }
 }
 
-void SceneWidget::UpdateCurrentNodeAlpha()
+void EntityWidget::UpdateCurrentNodeAlpha()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1547,7 +1547,7 @@ void SceneWidget::UpdateCurrentNodeAlpha()
     }
 }
 
-void SceneWidget::RebuildMenus()
+void EntityWidget::RebuildMenus()
 {
     // rebuild the drawable menus for custom shapes
     // and particle systems.
@@ -1560,17 +1560,17 @@ void SceneWidget::RebuildMenus()
         if (resource.GetType() == app::Resource::Type::ParticleSystem)
         {
             QAction *action = mParticleSystems->addAction(name);
-            connect(action, &QAction::triggered, this, &SceneWidget::PlaceNewParticleSystem);
+            connect(action, &QAction::triggered, this, &EntityWidget::PlaceNewParticleSystem);
         }
         else if (resource.GetType() == app::Resource::Type::CustomShape)
         {
             QAction *action = mCustomShapes->addAction(name);
-            connect(action, &QAction::triggered,this, &SceneWidget::PlaceNewCustomShape);
+            connect(action, &QAction::triggered,this, &EntityWidget::PlaceNewCustomShape);
         }
     }
 }
 
-void SceneWidget::RebuildCombos()
+void EntityWidget::RebuildCombos()
 {
     SetList(mUI.dsMaterial, mState.workspace->ListAllMaterials());
     SetList(mUI.dsDrawable, mState.workspace->ListAllDrawables());
@@ -1589,11 +1589,11 @@ void SceneWidget::RebuildCombos()
     SetList(mUI.rbPolygon, polygons);
 }
 
-void SceneWidget::UpdateDeletedResourceReferences()
+void EntityWidget::UpdateDeletedResourceReferences()
 {
-    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.entity.GetNumNodes(); ++i)
     {
-        auto& node = mState.scene.GetNode(i);
+        auto& node = mState.entity.GetNode(i);
         if (!node.HasDrawable())
             continue;
         auto* draw = node.GetDrawable();
@@ -1601,27 +1601,27 @@ void SceneWidget::UpdateDeletedResourceReferences()
         const auto material = draw->GetMaterialId();
         if (!mState.workspace->IsValidMaterial(material))
         {
-            WARN("Scene node '%1' uses material that is no longer available.", node.GetName());
+            WARN("Entity node '%1' uses material that is no longer available.", node.GetName());
             draw->ResetMaterial();
             draw->SetMaterialId("_checkerboard");
         }
         if (!mState.workspace->IsValidDrawable(drawable))
         {
-            WARN("Scene node '%1' uses drawable that is no longer available.", node.GetName());
+            WARN("Entity node '%1' uses drawable that is no longer available.", node.GetName());
             draw->ResetDrawable();
             draw->SetDrawableId("_rect");
         }
     }
 }
 
-game::SceneNodeClass* SceneWidget::GetCurrentNode()
+game::EntityNodeClass* EntityWidget::GetCurrentNode()
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return nullptr;
     else if (!item->GetUserData())
         return nullptr;
-    return static_cast<game::SceneNodeClass*>(item->GetUserData());
+    return static_cast<game::EntityNodeClass*>(item->GetUserData());
 }
 
 } // bui

@@ -66,9 +66,9 @@ namespace gui
             mSelection = app::Resource::Type::CustomShape;
             accept();
         }
-        void on_btnScene_clicked()
+        void on_btnEntity_clicked()
         {
-            mSelection = app::Resource::Type::Scene;
+            mSelection = app::Resource::Type::Entity;
             accept();
         }
         void on_btnCancel_clicked()

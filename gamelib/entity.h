@@ -200,41 +200,8 @@ namespace game
         float mDensity = 1.0f;
     };
 
-    // AnimationItem holds an animation object
-    class AnimationItemClass
-    {
-    public:
-        std::size_t GetHash() const
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mAnimationId);
-            return hash;
-        }
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "animation", mAnimationId);
-            return json;
-        }
-        bool FromJson(const nlohmann::json& json)
-        {
-            if (!base::JsonReadSafe(json, "animation", &mAnimationId))
-                return false;
-            return true;
-        }
-
-        void SetAnimationId(const std::string& id)
-        { mAnimationId = id; }
-        void ResetAnimation()
-        { mAnimationId.clear(); }
-    private:
-        std::string mAnimationId;
-    };
-
-    // Drawble item defines a static (not animated) drawable item
-    // and its material and properties that affect the rendering
-    // of the item.
-    // todo: this is very similar to AnimationNode, maybe these should converge.
+    // Drawable item defines a drawable item and its material and
+    // properties that affect the rendering of the entity node
     class DrawableItemClass
     {
     public:
@@ -442,7 +409,7 @@ namespace game
         std::shared_ptr<const RigidBodyItemClass> mClass;
     };
 
-    class SceneNodeClass
+    class EntityNodeClass
     {
     public:
         using DrawableItemType = DrawableItemClass;
@@ -457,14 +424,14 @@ namespace game
             VisibleInGame
         };
 
-        SceneNodeClass()
+        EntityNodeClass()
         {
             mClassId = base::RandomString(10);
             mBitFlags.set(Flags::VisibleInEditor, true);
             mBitFlags.set(Flags::VisibleInGame, true);
         }
-        SceneNodeClass(const SceneNodeClass& other);
-        SceneNodeClass(SceneNodeClass&& other);
+        EntityNodeClass(const EntityNodeClass& other);
+        EntityNodeClass(EntityNodeClass&& other);
 
         // Get the class id.
         std::string GetClassId() const
@@ -499,7 +466,7 @@ namespace game
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
         // Set the node's translation relative to the parent
-        // of the this scene node.
+        // of the this node.
         void SetTranslation(const glm::vec2& vec)
         { mPosition = vec; }
         // Set the node's containing box size.
@@ -569,12 +536,12 @@ namespace game
         // Serialize the node into JSON.
         nlohmann::json ToJson() const;
         // Load the node's properties from the given JSON object.
-        static std::optional<SceneNodeClass> FromJson(const nlohmann::json& json);
-        // Make a new unique copy of this scene node class object
+        static std::optional<EntityNodeClass> FromJson(const nlohmann::json& json);
+        // Make a new unique copy of this node class object
         // with all the same properties but with a different/unique ID.
-        SceneNodeClass Clone() const;
+        EntityNodeClass Clone() const;
 
-        SceneNodeClass& operator=(const SceneNodeClass& other);
+        EntityNodeClass& operator=(const EntityNodeClass& other);
     private:
         // the resource id.
         std::string mClassId;
@@ -597,16 +564,16 @@ namespace game
     };
 
 
-    class SceneNode
+    class EntityNode
     {
     public:
-        using Flags = SceneNodeClass::Flags;
+        using Flags = EntityNodeClass::Flags;
         using DrawableItemType = DrawableItem;
 
-        SceneNode(std::shared_ptr<const SceneNodeClass> klass);
-        SceneNode(const SceneNodeClass& klass);
-        SceneNode(const SceneNode& other);
-        SceneNode(SceneNode&& other);
+        EntityNode(std::shared_ptr<const EntityNodeClass> klass);
+        EntityNode(const EntityNodeClass& klass);
+        EntityNode(const EntityNode& other);
+        EntityNode(EntityNode&& other);
 
         // instance setters.
         void SetScale(const glm::vec2& scale)
@@ -676,13 +643,13 @@ namespace game
         // and rigid bodies.
         glm::mat4 GetModelTransform() const;
 
-        const SceneNodeClass& GetClass() const
+        const EntityNodeClass& GetClass() const
         { return *mClass.get(); }
-        const SceneNodeClass* operator->() const
+        const EntityNodeClass* operator->() const
         { return mClass.get(); }
     private:
         // the class object.
-        std::shared_ptr<const SceneNodeClass> mClass;
+        std::shared_ptr<const EntityNodeClass> mClass;
         // the instance id.
         std::string mInstId;
         // the instance name.
@@ -702,48 +669,56 @@ namespace game
         // drawable if any.
         std::unique_ptr<DrawableItem> mDrawable;
     private:
-        friend class Scene;
+        friend class Entity;
         bool mKilled = false;
     };
 
 
-    class SceneClass
+    class EntityClass
     {
     public:
-        using RenderTree      = TreeNode<SceneNodeClass>;
-        using RenderTreeNode  = TreeNode<SceneNodeClass>;
-        using RenderTreeValue = SceneNodeClass;
+        using RenderTree      = TreeNode<EntityNodeClass>;
+        using RenderTreeNode  = TreeNode<EntityNodeClass>;
+        using RenderTreeValue = EntityNodeClass;
 
-        SceneClass()
+        EntityClass()
         { mClassId = base::RandomString(10); }
-        SceneClass(const SceneClass& other);
+        EntityClass(const EntityClass& other);
 
-        // Add a new scene node to the scene.
-        // Returns a pointer to the node that was added to the scene.
-        SceneNodeClass* AddNode(const SceneNodeClass& node);
-        // Add a new scene node to the scene.
-        // Returns a pointer to the node that was added to the scene.
-        SceneNodeClass* AddNode(SceneNodeClass&& node);
-        // Add a new scene node to the scene.
-        // Returns a pointer to the node that was added to the scene.
-        SceneNodeClass* AddNode(std::unique_ptr<SceneNodeClass> node);
-        // Get the scene node by index.
+        // Add a new node to the entity.
+        // Returns a pointer to the node that was added to the entity.
+        EntityNodeClass* AddNode(const EntityNodeClass& node);
+        // Add a new node to the entity.
+        // Returns a pointer to the node that was added to the entity.
+        EntityNodeClass* AddNode(EntityNodeClass&& node);
+        // Add a new node to the entity.
+        // Returns a pointer to the node that was added to the entity.
+        EntityNodeClass* AddNode(std::unique_ptr<EntityNodeClass> node);
+        // Get the node by index.
         // The index must be valid.
-        SceneNodeClass& GetNode(size_t index);
-        // Find scene node by name. Returns nullptr if
+        EntityNodeClass& GetNode(size_t index);
+        // Find entity node by name. Returns nullptr if
         // no such node could be found.
-        SceneNodeClass* FindNodeByName(const std::string& name);
-        // Find scene node by id. Returns nullptr if
+        EntityNodeClass* FindNodeByName(const std::string& name);
+        // Find entity node by id. Returns nullptr if
         // no such node could be found.
-        SceneNodeClass* FindNodeById(const std::string& id);
-        // Get the scene node by index. The index must be valid.
-        const SceneNodeClass& GetNode(size_t index) const;
-        // Find scene node by name. Returns nullptr if
+        EntityNodeClass* FindNodeById(const std::string& id);
+        // Get the entity node by index. The index must be valid.
+        const EntityNodeClass& GetNode(size_t index) const;
+        // Find entity node by name. Returns nullptr if
         // no such node could be found.
-        const SceneNodeClass* FindNodeByName(const std::string& name) const;
-        // Find scene node by id. Returns nullptr if
+        const EntityNodeClass* FindNodeByName(const std::string& name) const;
+        // Find entity node by id. Returns nullptr if
         // no such node could be found.
-        const SceneNodeClass* FindNodeById(const std::string& id)const;
+        const EntityNodeClass* FindNodeById(const std::string& id) const;
+
+        // Link the given child node with the parent.
+        // The parent may be a nullptr in which case the child
+        // is added to the root of the entity. The child node needs
+        // to be a valid node and needs to point to node that is not
+        // yet any part of the render tree and is a node that belongs
+        // to this entity.
+        void LinkChild(EntityNodeClass* parent, EntityNodeClass* child);
 
         // Delete a node by the given index.
         void DeleteNode(size_t index);
@@ -755,30 +730,32 @@ namespace game
         bool DeleteNodeByName(const std::string& name);
 
         // Perform coarse hit test to see if the given x,y point
-        // intersects with any node's box in the scene.
+        // intersects with any node's box in the entity.
         // The testing is coarse in the sense that it's done against the node's
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some SceneNode's (see SceneNode::GetNodeTransform) space
-        // into scene coordinate space.
-        glm::vec2 MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const;
-        // Map coordinates in scene coordinate space into some SceneNode's coordinate space.
-        glm::vec2 MapCoordsToNode(float x, float y, const SceneNodeClass* node) const;
+        // Map coordinates in some node's (see EntityNode::GetNodeTransform) space
+        // into entity coordinate space.
+        glm::vec2 MapCoordsFromNode(float x, float y, const EntityNodeClass* node) const;
+        // Map coordinates in entity coordinate space into some node's coordinate space.
+        glm::vec2 MapCoordsToNode(float x, float y, const EntityNodeClass* node) const;
 
-        // Compute the axis aligned bounding rectangle for the give scene node
-        // at the current time of the scene.
-        gfx::FRect GetBoundingRect(const SceneNodeClass* node) const;
-        // Compute the axis aligned bounding rectangle for the whole scene.
-        // i.e. including all the nodes at the current time of scene.
+        // Compute the axis aligned bounding rectangle for the given node
+        // at the current time.
+        gfx::FRect GetBoundingRect(const EntityNodeClass* node) const;
+        // Compute the axis aligned bounding rectangle for the whole entity.
+        // i.e. including all the nodes at the current time.
         // This is a shortcut for getting the union of all the bounding rectangles
-        // of all the scene nodes.
+        // of all the entity nodes.
         gfx::FRect GetBoundingRect() const;
+
+        FBox GetBoundingBox(const EntityNodeClass* node) const;
 
         RenderTree& GetRenderTree()
         { return mRenderTree; }
@@ -791,97 +768,95 @@ namespace game
         std::string GetId() const
         { return mClassId; }
 
-        std::shared_ptr<const SceneNodeClass> GetSharedSceneNodeClass(size_t index) const
+        std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
 
-        // Lookup a SceneNode based on the serialized ID in the JSON.
-        SceneNodeClass* TreeNodeFromJson(const nlohmann::json& json);
+        // Lookup a EntityNode based on the serialized ID in the JSON.
+        EntityNodeClass* TreeNodeFromJson(const nlohmann::json& json);
 
-        // Serialize the scene into JSON.
+        // Serialize the entity into JSON.
         nlohmann::json ToJson() const;
 
         // Serialize an animation node contained in the RenderTree to JSON by doing
         // a shallow (id only) based serialization.
         // Later in TreeNodeFromJson when reading back the render tree we simply
         // look up the node based on the ID.
-        static nlohmann::json TreeNodeToJson(const SceneNodeClass* node);
+        static nlohmann::json TreeNodeToJson(const EntityNodeClass* node);
 
-        static std::optional<SceneClass> FromJson(const nlohmann::json& json);
+        static std::optional<EntityClass> FromJson(const nlohmann::json& json);
 
-        SceneClass Clone() const;
+        EntityClass Clone() const;
 
-        SceneClass& operator=(const SceneClass& other);
+        EntityClass& operator=(const EntityClass& other);
     private:
         // The class/resource id of this class.
         std::string mClassId;
-        // the list of scene nodes that belong to this scene.
-        std::vector<std::shared_ptr<SceneNodeClass>> mNodes;
+        // the list of nodes that belong to this entity.
+        std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // The render tree for hierarchical traversal and
-        // transformation of the scene and its nodes.
+        // transformation of the entity and its nodes.
         RenderTree mRenderTree;
     };
 
-    class Scene
+    class Entity
     {
     public:
-        using RenderTree      = TreeNode<SceneNode>;
-        using RenderTreeNode  = TreeNode<SceneNode>;
-        using RenderTreeValue = SceneNode;
+        using RenderTree      = TreeNode<EntityNode>;
+        using RenderTreeNode  = TreeNode<EntityNode>;
+        using RenderTreeValue = EntityNode;
 
-        // Construct a new scene with the initial state based
-        // on the scene class object's state. During the lifetime
-        // of the scene objects (nodes) can be dynamically added
-        // and removed.
-        Scene(std::shared_ptr<const SceneClass> klass);
-        Scene(const SceneClass& klass);
-        Scene(const Scene& other) = delete;
+        // Construct a new entity with the initial state based
+        // on the entity class object's state.
+        Entity(std::shared_ptr<const EntityClass> klass);
+        Entity(const EntityClass& klass);
+        Entity(const Entity& other) = delete;
 
-        // Add a new node to the scene. Note that this doesn't yet insert the
-        // node into the scene graph hierarchy. You can either use the render
-        // tree directly to find a place where to insert the node or then
-        // use some of the provided scene functions.
-        // The return value is the pointer of the new node that exists in the scene
+        // Add a new node to the entity. Note that this doesn't yet insert the
+        // node into the render tree. You can either use the render tree directly
+        // to find a place where to insert the node or then use some of the
+        // provided functions such as LinkChild.
+        // The return value is the pointer of the new node that exists in the entity
         // after the call returns.
-        SceneNode* AddNode(const SceneNode& node);
-        SceneNode* AddNode(SceneNode&& node);
-        SceneNode* AddNode(std::unique_ptr<SceneNode> node);
+        EntityNode* AddNode(const EntityNode& node);
+        EntityNode* AddNode(EntityNode&& node);
+        EntityNode* AddNode(std::unique_ptr<EntityNode> node);
 
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
-        // is added to the root of the scene. The child node needs
-        // to be a valid node and needs to point to node a node
-        // that is not yet any part of the render tree and is a
-        // node added to the scene. (see AddNode)
-        void LinkChild(SceneNode* parent, SceneNode* child);
+        // is added to the root of the entity. The child node needs
+        // to be a valid node and needs to point to node that is not
+        // yet any part of the render tree and is a node that belongs
+        // to this entity.
+        void LinkChild(EntityNode* parent, EntityNode* child);
 
-        // Get the scene node by index. The index must be valid.
-        SceneNode& GetNode(size_t index);
-        // Find scene node by class name. Returns nullptr if no such node could be found.
+        // Get the entity node by index. The index must be valid.
+        EntityNode& GetNode(size_t index);
+        // Find entity node by class name. Returns nullptr if no such node could be found.
         // Note that there could be multiple nodes with the same name. In this
         // case it's undefined which of the nodes would be returned.
-        SceneNode* FindNodeByClassName(const std::string& name);
-        // Find scene node by class id. Returns nullptr if no such node could be found.
+        EntityNode* FindNodeByClassName(const std::string& name);
+        // Find entity node by class id. Returns nullptr if no such node could be found.
         // Note that there could be multiple nodes with the same class id. In this
         // case it's undefined which of the nodes would be returned.
-        SceneNode* FindNodeByClassId(const std::string& id);
-        // Find a scene node by node's instance id. Returns nullptr if no such node could be found.
-        SceneNode* FindNodeByInstanceId(const std::string& id);
-        // Find a scene node by it's instance name. Returns nullptr if no such node could be found.
-        SceneNode* FindNodeByInstanceName(const std::string& name);
-        // Get the scene node by index. The index must be valid.
-        const SceneNode& GetNode(size_t index) const;
-        // Find scene node by name. Returns nullptr if no such node could be found.
+        EntityNode* FindNodeByClassId(const std::string& id);
+        // Find a entity node by node's instance id. Returns nullptr if no such node could be found.
+        EntityNode* FindNodeByInstanceId(const std::string& id);
+        // Find a entity node by it's instance name. Returns nullptr if no such node could be found.
+        EntityNode* FindNodeByInstanceName(const std::string& name);
+        // Get the entity node by index. The index must be valid.
+        const EntityNode& GetNode(size_t index) const;
+        // Find entity node by name. Returns nullptr if no such node could be found.
         // Note that there could be multiple nodes with the same name. In this
         // case it's undefined which of the nodes would be returned.
-        const SceneNode* FindNodeByClassName(const std::string& name) const;
-        // Find scene node by class id. Returns nullptr if no such node could be found.
+        const EntityNode* FindNodeByClassName(const std::string& name) const;
+        // Find entity node by class id. Returns nullptr if no such node could be found.
         // Note that there could be multiple nodes with the same class id. In this
         // case it's undefined which of the nodes would be returned.
-        const SceneNode* FindNodeByClassId(const std::string& id) const;
-        // Find scene node by node's instance id. Returns nullptr if no such node could be found.
-        const SceneNode* FindNodeByInstanceId(const std::string& id) const;
-        // Find a scene node by it's instance name. Returns nullptr if no such node could be found.
-        const SceneNode* FindNodeByInstanceName(const std::string& name) const;
+        const EntityNode* FindNodeByClassId(const std::string& id) const;
+        // Find entity node by node's instance id. Returns nullptr if no such node could be found.
+        const EntityNode* FindNodeByInstanceId(const std::string& id) const;
+        // Find a entity node by it's instance name. Returns nullptr if no such node could be found.
+        const EntityNode* FindNodeByInstanceName(const std::string& name) const;
         // Delete the node at the given index. This will also delete any
         // child nodes this node might have by recursing the render tree.
         void DeleteNode(size_t index);
@@ -891,32 +866,32 @@ namespace game
         bool DeleteNodeByInstanceId(const std::string& id);
 
         // Perform coarse hit test to see if the given x,y point
-        // intersects with any node's box in the scene.
+        // intersects with any node's box in the entity.
         // The testing is coarse in the sense that it's done against the node's
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<SceneNode*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const SceneNode*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some SceneNode's (see SceneNode::GetNodeTransform) space
-        // into scene coordinate space.
-        glm::vec2 MapCoordsFromNode(float x, float y, const SceneNode* node) const;
-        // Map coordinates in scene coordinate space into some SceneNode's coordinate space.
-        glm::vec2 MapCoordsToNode(float x, float y, const SceneNode* node) const;
+        // Map coordinates in some EntityNode's (see EntityNode::GetNodeTransform) space
+        // into entity coordinate space.
+        glm::vec2 MapCoordsFromNode(float x, float y, const EntityNode* node) const;
+        // Map coordinates in entity coordinate space into some EntityNode's coordinate space.
+        glm::vec2 MapCoordsToNode(float x, float y, const EntityNode* node) const;
 
-        // Compute the axis aligned bounding rectangle for the give scene node
-        // at the current time of the scene.
-        gfx::FRect GetBoundingRect(const SceneNode* node) const;
-        // Compute the axis aligned bounding rectangle for the whole scene.
-        // i.e. including all the nodes at the current time of scene.
+        // Compute the axis aligned bounding rectangle for the give entity node
+        // at the current time of the entity.
+        gfx::FRect GetBoundingRect(const EntityNode* node) const;
+        // Compute the axis aligned bounding rectangle for the whole entity
+        // i.e. including all the nodes at the current time of entity.
         // This is a shortcut for getting the union of all the bounding rectangles
-        // of all the scene nodes.
+        // of all the entity nodes.
         gfx::FRect GetBoundingRect() const;
 
-        FBox GetBoundingBox(const SceneNode* node) const;
+        FBox GetBoundingBox(const EntityNode* node) const;
 
         size_t GetNumNodes() const
         { return mNodes.size(); }
@@ -926,30 +901,30 @@ namespace game
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
 
-        const SceneClass& GetClass() const
+        const EntityClass& GetClass() const
         { return *mClass.get(); }
-        const SceneClass* operator->() const
+        const EntityClass* operator->() const
         { return mClass.get(); }
 
-        Scene& operator=(const Scene&) = delete;
+        Entity& operator=(const Entity&) = delete;
 
-        SceneNode* TreeNodeFromJson(const nlohmann::json& json) ;
+        EntityNode* TreeNodeFromJson(const nlohmann::json& json) ;
     private:
         // the class object.
-        std::shared_ptr<const SceneClass> mClass;
-        // the list of nodes that are in the scene.
-        std::vector<std::unique_ptr<SceneNode>> mNodes;
+        std::shared_ptr<const EntityClass> mClass;
+        // the list of nodes that are in the entity.
+        std::vector<std::unique_ptr<EntityNode>> mNodes;
         // map for fast lookup based on the node's instance id.
-        std::unordered_map<std::string, SceneNode*> mInstanceIdMap;
+        std::unordered_map<std::string, EntityNode*> mInstanceIdMap;
         // the render tree for hierarchical traversal and transformation
-        // of the scene and its nodes.
+        // of the entity and its nodes.
         RenderTree mRenderTree;
-        // Current scene time.
+        // Current entity time.
         double mCurrentTime = 0.0;
     };
 
-    std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);
-    std::unique_ptr<Scene> CreateSceneInstance(const SceneClass& klass);
-    std::unique_ptr<SceneNode> CreateSceneNodeInstance(std::shared_ptr<const SceneNodeClass> klass);
+    std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);
+    std::unique_ptr<Entity> CreateEntityInstance(const EntityClass& klass);
+    std::unique_ptr<EntityNode> CreateEntityNodeInstance(std::shared_ptr<const EntityNodeClass> klass);
 
 } // namespace

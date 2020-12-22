@@ -38,7 +38,7 @@ namespace game
     class AnimationClass;
     class AnimationNode;
     class AnimationNodeClass;
-    class SceneClass;
+    class EntityClass;
 
     // Game content (assets + gfx resources) loader.
     // Provides access to high level game content, i.e. game assets such as
@@ -56,8 +56,8 @@ namespace game
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override;
         virtual std::shared_ptr<const AnimationClass> FindAnimationClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string& dir, const std::string& file) override;
         // gfx::ResourceLoader implementation. Provides access to the
         // low level byte buffer / file system file resources such as
@@ -85,12 +85,12 @@ namespace game
             std::shared_ptr<AnimationClass>> mAnimations;
         // These are the scenes that have been loaded from
         // the resource file.
-        std::unordered_map<std::string, std::shared_ptr<SceneClass>> mScenes;
+        std::unordered_map<std::string, std::shared_ptr<EntityClass>> mEntities;
 
         // name table. maps animation names to ids.
         std::unordered_map<std::string, std::string> mAnimationNameTable;
-        // name table maps scene names to ids.
-        std::unordered_map<std::string, std::string> mSceneNameTable;
+        // name table maps entity names to ids.
+        std::unordered_map<std::string, std::string> mEntityNameTable;
 
         // cache of URIs that have been resolved to file
         // names already.

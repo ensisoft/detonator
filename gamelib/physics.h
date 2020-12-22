@@ -43,8 +43,8 @@ namespace gfx {
 namespace game
 {
     class ClassLibrary;
-    class SceneNode;
-    class Scene;
+    class EntityNode;
+    class Entity;
     class FBox;
 
     class PhysicsEngine
@@ -89,7 +89,7 @@ namespace game
         { return !!mWorld; }
 
         // Update the scene with the changes from the physics simulation.
-        void UpdateScene(Scene& scene);
+        void UpdateScene(Entity& scene);
 
         // Tick the physics simulation forward by one time step.
         void Tick();
@@ -106,14 +106,14 @@ namespace game
         // create a new physics world object. So you should make
         // sure to set all the desired parameters (such as gravity)
         // before calling this.
-        void BuildPhysicsWorldFromScene(const Scene& scene);
+        void BuildPhysicsWorldFromScene(const Entity& scene);
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
     private:
-        void AddPhysicsNode(const glm::mat4& model_to_world, const SceneNode& node);
+        void AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node);
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mLoader = nullptr;
@@ -123,7 +123,7 @@ namespace game
             std::string instance;
             // the extents (box) of the scene node.
             glm::vec2 world_extents;
-            // the corresponding box2d physics body for this node.
+              // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
         };
         // The nodes represented in the physics simulation.

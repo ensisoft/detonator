@@ -93,8 +93,8 @@ namespace app
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const override;
         virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string&, const std::string&) override
         {}
 

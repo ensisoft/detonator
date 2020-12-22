@@ -25,7 +25,7 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include "ui_scenewidget.h"
+#  include "ui_entitywidget.h"
 #  include <QMenu>
 #include "warnpop.h"
 
@@ -34,7 +34,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "gamelib/renderer.h"
 
 namespace gfx {
@@ -51,13 +51,13 @@ namespace gui
     class TreeWidget;
     class MouseTool;
 
-    class SceneWidget : public MainWidget
+    class EntityWidget : public MainWidget
     {
         Q_OBJECT
     public:
-        SceneWidget(app::Workspace* workspace);
-        SceneWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~SceneWidget();
+        EntityWidget(app::Workspace* workspace);
+        EntityWidget(app::Workspace* workspace, const app::Resource& resource);
+       ~EntityWidget();
 
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
@@ -156,9 +156,9 @@ namespace gui
         void RebuildMenus();
         void RebuildCombos();
         void UpdateDeletedResourceReferences();
-        game::SceneNodeClass* GetCurrentNode();
+        game::EntityNodeClass* GetCurrentNode();
     private:
-        Ui::SceneWidget mUI;
+        Ui::EntityWidget mUI;
         // there doesn't seem to be a way to do this in the designer
         // so we create our menu for user defined drawables
         QMenu* mParticleSystems = nullptr;
@@ -170,7 +170,7 @@ namespace gui
             Playing, Paused, Stopped
         };
         struct State {
-            game::SceneClass scene;
+            game::EntityClass entity;
             game::Renderer renderer;
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
@@ -180,13 +180,13 @@ namespace gui
 
         // Tree model impl for displaying scene's render tree
         // in the tree widget.
-        using TreeModel = RenderTreeModel<game::SceneClass>;
+        using TreeModel = RenderTreeModel<game::EntityClass>;
         std::size_t mOriginalHash = 0;
-        std::unique_ptr<TreeModel> mSceneTree;
+        std::unique_ptr<TreeModel> mRenderTree;
         std::unique_ptr<MouseTool> mCurrentTool;
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
-        double mSceneTime   = 0.0;
+        double mEntityTime   = 0.0;
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
         bool mCameraWasLoaded = false;

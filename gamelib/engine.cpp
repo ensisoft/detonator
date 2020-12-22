@@ -45,7 +45,7 @@
 #include "gamelib/animation.h"
 #include "gamelib/classlib.h"
 #include "gamelib/renderer.h"
-#include "gamelib/scene.h"
+#include "gamelib/entity.h"
 #include "gamelib/physics.h"
 #include "gamelib/main/interface.h"
 
@@ -89,12 +89,12 @@ public:
     {
         DEBUG("Engine starting.");
         // todo:
-        auto klass = mClasslib->FindSceneClassByName("My Scene");
+        auto klass = mClasslib->FindEntityClassByName("My Scene");
         if (!klass)
             return;
 
-        mScene = game::CreateSceneInstance(klass);
-        mPhysics.BuildPhysicsWorldFromScene(*mScene);
+        mEntity = game::CreateEntityInstance(klass);
+        mPhysics.BuildPhysicsWorldFromScene(*mEntity);
         DEBUG("Have scene!");
     }
     virtual void Init(gfx::Device::Context* context, unsigned surface_width, unsigned surface_height) override
@@ -132,7 +132,7 @@ public:
 
         gfx::Transform transform;
         transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
-        mRenderer.Draw(*mScene, *mPainter, transform);
+        mRenderer.Draw(*mEntity, *mPainter, transform);
         mRenderer.EndFrame();
 
         if (mDebugDrawing && mPhysics.HaveWorld())
@@ -150,15 +150,15 @@ public:
 
     virtual void Update(double time, double dt) override
     {
-        if (!mScene)
+        if (!mEntity)
             return;
 
         if (mPhysics.HaveWorld())
         {
             mPhysics.Tick();
-            mPhysics.UpdateScene(*mScene);
+            mPhysics.UpdateScene(*mEntity);
         }
-        mRenderer.Update(*mScene, time, dt);
+        mRenderer.Update(*mEntity, time, dt);
     }
     virtual void Shutdown() override
     {
@@ -225,8 +225,9 @@ private:
     game::Renderer mRenderer;
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
-    // Current scene
-    std::unique_ptr<game::Scene> mScene;
+
+    // Current entity.
+    std::unique_ptr<game::Entity> mEntity;
 
     double mGameTime = 0.0;
     double mWallTime = 0.0;

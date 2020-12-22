@@ -80,7 +80,6 @@
     <addaction name="actionViewWorkspace"/>
     <addaction name="separator"/>
     <addaction name="menuEvent_log"/>
-    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuTemp">
     <property name="enabled">
@@ -600,13 +599,16 @@
     <string>Duplicate</string>
    </property>
   </action>
-  <action name="actionNewScene">
+  <action name="actionNewEntity">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>New Scene</string>
+    <string>New Entity</string>
+   </property>
+   <property name="toolTip">
+    <string> New entity</string>
    </property>
   </action>
   <action name="actionClearLog">
