@@ -133,9 +133,13 @@ void PhysicsEngine::BuildPhysicsWorldFromScene(const Scene& scene)
     tree.PreOrderTraverse(visitor);
 }
 
-#if defined(GAMELIB_ENABLE_PHYSICS_TEST)
+#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
 {
+    view.Push();
+    view.Scale(mScale);
+
+    // todo: use the box2d debug draw interface.
     for (const auto& p : mNodes)
     {
         const auto& physics_node = p.second;
@@ -151,8 +155,10 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             view.Pop();
         view.Pop();
     }
+
+    view.Pop();
 }
-#endif // GAMELIB_ENABLE_PHYSICS_TEST
+#endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 
 void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const SceneNode& node)
 {

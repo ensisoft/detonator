@@ -108,7 +108,7 @@ namespace game
         // before calling this.
         void BuildPhysicsWorldFromScene(const Scene& scene);
 
-#if defined(GAMELIB_ENABLE_PHYSICS_TEST)
+#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif

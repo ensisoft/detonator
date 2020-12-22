@@ -10,3 +10,4 @@
 
 // see interface.h
 #define GAMESTUDIO_IMPORT_APP_LIBRARY
+#define GAMESTUDIO_ENABLE_PHYSICS_DEBUG

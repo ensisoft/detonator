@@ -64,14 +64,21 @@ public:
     {
         DEBUG("Parsing cmd line args.");
 
-        bool debug = false;
         for (int i = 1; i < argc; ++i)
         {
             if (!std::strcmp("--debug", argv[i]))
-                debug = true;
+            {
+                mDebugLogging = true;
+                mDebugDrawing = true;
+            }
+            else if (!std::strcmp("--debug-log", argv[i]))
+                mDebugLogging = true;
+            else if (!std::strcmp("--debug-draw", argv[i]))
+                mDebugDrawing = true;
         }
-        base::EnableDebugLog(debug);
-        INFO("Debug is %1'", debug ? "ON" : "OFF");
+        base::EnableDebugLog(mDebugLogging);
+        INFO("Debug logging is '%1'", mDebugLogging ? "ON" : "OFF");
+        INFO("Debug drawing is '%1'", mDebugDrawing ? "ON" : "OFF");
         return true;
     }
     virtual bool GetNextRequest(Request* out) override
@@ -127,6 +134,11 @@ public:
         transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
         mRenderer.Draw(*mScene, *mPainter, transform);
         mRenderer.EndFrame();
+
+        if (mDebugDrawing && mPhysics.HaveWorld())
+        {
+            mPhysics.DebugDrawObjects(*mPainter, transform);
+        }
 
         mDevice->EndFrame(true);
         mDevice->CleanGarbage(120);
@@ -218,8 +230,9 @@ private:
 
     double mGameTime = 0.0;
     double mWallTime = 0.0;
-    bool mDebug   = false;
     bool mRunning = true;
+    bool mDebugLogging = false;
+    bool mDebugDrawing = false;
 };
 
 } //namespace
