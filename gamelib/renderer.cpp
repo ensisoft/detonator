@@ -334,7 +334,15 @@ void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
 
             const auto* item = node->GetDrawable();
             if (!item)
+            {
+                if (mHook)
+                {
+                    // Allow the draw hook to append any extra draw packets for this node.
+                    gfx::Transform t(mTransform);
+                    mHook->AppendPackets(node, t, mPackets);
+                }
                 return;
+            }
 
             const auto& material = item->GetMaterialId();
             const auto& drawable = item->GetDrawableId();
@@ -397,10 +405,7 @@ void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
             {
                 // Allow the draw hook to append any extra draw packets for this node.
                 gfx::Transform t(mTransform);
-                std::vector<DrawPacket> extra;
-                mHook->AppendPackets(node, t, extra);
-                for (auto& packet : extra)
-                    mPackets.push_back(std::move(packet));
+                mHook->AppendPackets(node, t, mPackets);
             }
         }
 
