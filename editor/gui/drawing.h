@@ -130,10 +130,12 @@ private:
     {
         const auto* drawable   = node->GetDrawable();
         const auto is_selected = mDrawSelection || node == mSelectedItem;
-        const auto is_mask     = drawable->GetRenderPass() == game::RenderPass::Mask;
+        const auto is_mask     = drawable && drawable->GetRenderPass() == game::RenderPass::Mask;
         const auto is_playing  = mPlaying;
 
-        if (is_mask && !is_selected && !is_playing)
+        // add a visualization for a mask item when not playing and when
+        // the mask object is not selected or when there's no drawable item.
+        if ((is_mask || !drawable) && !is_selected && !is_playing)
         {
             static const auto yellow = std::make_shared<gfx::Material>(gfx::SolidColor(gfx::Color::DarkYellow));
             static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
@@ -143,7 +145,7 @@ private:
                 box.transform = trans.GetAsMatrix();
                 box.material  = yellow;
                 box.drawable  = rect;
-                box.layer     = drawable->GetLayer() + 1;
+                box.layer     = 250;
                 box.pass      = game::AnimationNodeClass::RenderPass::Draw;
                 packets.push_back(box);
             trans.Pop();
@@ -156,7 +158,7 @@ private:
         static const auto rect   = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
         static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
         const auto& size = node->GetSize();
-        const auto layer = is_mask ? drawable->GetLayer() + 1 : drawable->GetLayer();
+        const auto layer = 250;
 
         // draw the selection rectangle.
         trans.Push(node->GetModelTransform());
