@@ -1155,7 +1155,7 @@ void AnimationWidget::PaintScene(gfx::Painter& painter, double secs)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
-    DrawHook<game::AnimationNodeClass> hook(GetCurrentNode(), mPlayState == PlayState::Playing);
+    DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing);
 
     // begin the animation transformation space
     view.Push();

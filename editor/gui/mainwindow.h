@@ -118,6 +118,7 @@ namespace gui
         void on_actionNewAnimation_triggered();
         void on_actionNewCustomShape_triggered();
         void on_actionNewEntity_triggered();
+        void on_actionNewScene_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();

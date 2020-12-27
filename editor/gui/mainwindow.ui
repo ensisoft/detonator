@@ -659,9 +659,16 @@
     <string>Show Errors</string>
    </property>
   </action>
-  <action name="actionsdgs">
+  <action name="actionNewScene">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
    <property name="text">
-    <string>sdgs</string>
+    <string>New Scene</string>
+   </property>
+   <property name="toolTip">
+    <string>New scene</string>
    </property>
   </action>
  </widget>

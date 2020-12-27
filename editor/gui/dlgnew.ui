@@ -138,7 +138,7 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Create a new custom shape out of draw primitives</string>
+           <string>Create a new custom shape using draw primitives.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -169,7 +169,7 @@
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Display kinematic particles in motion based on velocity, motion etc.</string>
+           <string>Display kinematic particles in motion based on velocity etc parameters.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -201,6 +201,37 @@
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Combine shapes into a hierarchy of nodes with various properties</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QPushButton" name="btnScene">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Scene</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Build a new game world.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -244,6 +275,7 @@
   <tabstop>btnAnimation</tabstop>
   <tabstop>btnCustomShape</tabstop>
   <tabstop>btnEntity</tabstop>
+  <tabstop>btnScene</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources>

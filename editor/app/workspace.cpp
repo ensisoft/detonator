@@ -680,6 +680,31 @@ std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassById(con
     return nullptr;
 }
 
+std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const QString& name) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Entity)
+            continue;
+        else if (resource->GetName() != name)
+            continue;
+        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
+    }
+    return nullptr;
+}
+std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Entity)
+            continue;
+        else if (resource->GetId() != id)
+            continue;
+        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
+    }
+    return nullptr;
+}
+
 std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClass(const std::string& klass) const
 {
     for (const auto& resource : mResources)
@@ -762,7 +787,7 @@ std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassByName(const 
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for an animation that doesn't exist: '%1'", name);
+    ERROR("Request for an entity that doesn't exist: '%1'", name);
     return nullptr;
 }
 std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
@@ -775,7 +800,56 @@ std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassById(const st
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for an animation that doesn't exist: '%1'", id);
+    ERROR("Request for an entity that doesn't exist: '%1'", id);
+    return nullptr;
+}
+
+std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
+{
+    std::shared_ptr<game::SceneClass> ret;
+    for (auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Scene)
+            continue;
+        else if (resource->GetNameUtf8() != name)
+            continue;
+        ret = ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+        break;
+    }
+    if (!ret)
+    {
+        ERROR("Request for a scene that doesn't exist: '%1'", name);
+        return nullptr;
+    }
+
+    for (size_t i=0; i<ret->GetNumNodes(); ++i)
+    {
+        auto& node = ret->GetNode(i);
+        auto klass = FindEntityClassById(node.GetEntityId());
+        if (!klass)
+        {
+            const auto& node_name  = node.GetName();
+            const auto& node_entity_id = node.GetEntityId();
+            ERROR("Scene node '%1/'%2'' refers to entity '%3' that is not found.", name, node_name, node_entity_id);
+        }
+        else
+        {
+            node.SetEntity(klass);
+        }
+    }
+    return ret;
+}
+std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Scene)
+            continue;
+        else if (resource->GetIdUtf8() != id)
+            continue;
+        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+    }
+    ERROR("Request for a scene that doesn't exist: '%1'", id);
     return nullptr;
 }
 
@@ -1056,6 +1130,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::PolygonClass>("shapes", json, mResources);
     LoadResources<game::AnimationClass>("animations", json, mResources);
     LoadResources<game::EntityClass>("entities", json, mResources);
+    LoadResources<game::SceneClass>("scenes", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
@@ -1342,6 +1417,19 @@ QStringList Workspace::ListUserDefinedDrawables() const
     return list;
 }
 
+QStringList Workspace::ListUserDefinedEntities() const
+{
+    QStringList list;
+    for (const auto& resource : mResources)
+    {
+        if (!resource->IsEntity())
+            continue;
+        list.append(resource->GetName());
+    }
+    list.sort();
+    return list;
+}
+
 void Workspace::SaveResource(const Resource& resource)
 {
     RECURSION_GUARD(this, "ResourceList");
@@ -1371,15 +1459,20 @@ void Workspace::SaveResource(const Resource& resource)
 
 QString Workspace::MapDrawableIdToName(const QString& id) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetId() == id)
-            return resource->GetName();
-    }
-    return "";
+    return MapResourceIdToName(id);
 }
 
 QString Workspace::MapMaterialIdToName(const QString& id) const
+{
+    return MapResourceIdToName(id);
+}
+
+QString Workspace::MapEntityIdToName(const QString &id) const
+{
+    return MapResourceIdToName(id);
+}
+
+QString Workspace::MapResourceIdToName(const QString &id) const
 {
     for (const auto& resource : mResources)
     {

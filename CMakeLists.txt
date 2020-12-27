@@ -152,6 +152,7 @@ add_executable(Editor
     gamelib/animation.cpp
     gamelib/renderer.cpp
     gamelib/entity.cpp
+    gamelib/scene.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -224,6 +225,9 @@ add_executable(Editor
     editor/gui/entitywidget.h
     editor/gui/entitywidget.ui
     editor/gui/entitywidget.cpp
+    editor/gui/scenewidget.h
+    editor/gui/scenewidget.ui
+    editor/gui/scenewidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
     editor/gui/treewidget.h
@@ -300,6 +304,7 @@ add_executable(EditorGameHost
     graphics/resource.cpp
     gamelib/animation.cpp
     gamelib/entity.cpp
+    gamelib/scene.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h
@@ -408,6 +413,7 @@ add_library(GameEngine SHARED
     gamelib/entity.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
+    gamelib/scene.cpp
     gamelib/loader.cpp
     gamelib/engine.cpp
     gamelib/main/gamelib.cpp
@@ -522,6 +528,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         graphics/image.cpp
         gamelib/animation.cpp
         gamelib/entity.cpp
+        gamelib/scene.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -541,6 +548,7 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/packing.cpp
         gamelib/animation.cpp
         gamelib/entity.cpp
+        gamelib/scene.cpp
         gamelib/loader.cpp
         graphics/drawable.cpp
         graphics/material.cpp

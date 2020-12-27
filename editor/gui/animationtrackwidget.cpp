@@ -1428,7 +1428,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
             {
                 node = &mAnimation->GetNode(index-1);
             }
-            DrawHook<game::AnimationNode> hook(node, mPlayState == PlayState::Playing);
+            DrawHook hook(node, mPlayState == PlayState::Playing);
             mRenderer.Draw(*mAnimation, painter, view, &hook);
         }
     view.Pop();

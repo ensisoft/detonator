@@ -87,6 +87,8 @@ namespace app
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
         std::shared_ptr<const game::AnimationClass> GetAnimationClassByName(const QString& name) const;
         std::shared_ptr<const game::AnimationClass> GetAnimationClassById(const QString& id) const;
+        std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
+        std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
 
         // ClassLibrary implementation
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const override;
@@ -95,6 +97,8 @@ namespace app
         virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override;
         virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+        virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string&, const std::string&) override
         {}
 
@@ -151,6 +155,8 @@ namespace app
         QStringList ListPrimitiveDrawables() const;
         // Get a list of user defined drawables.
         QStringList ListUserDefinedDrawables() const;
+        // Get a list of user defined entities.
+        QStringList ListUserDefinedEntities() const;
 
         // Map material id to its human readable name.
         QString MapMaterialIdToName(const QString& id) const;
@@ -160,6 +166,13 @@ namespace app
         QString MapDrawableIdToName(const QString& id) const;
         QString MapDrawableIdToName(const std::string& id) const
         { return MapDrawableIdToName(FromUtf8(id)); }
+        QString MapEntityIdToName(const QString& id) const;
+        QString MapEntityIdToName(const std::string& id) const
+        { return MapEntityIdToName(FromUtf8(id)); }
+
+        QString MapResourceIdToName(const QString& id) const;
+        QString MapResourceIdToName(const std::string& id) const
+        { return MapResourceIdToName(FromUtf8(id)); }
 
         // Checks whether the material class id is a valid material class.
         // Includes primitives and user defined materials.

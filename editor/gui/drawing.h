@@ -57,24 +57,79 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.
-template<typename Node>
-class DrawHook : public game::DrawHook<Node>
+class DrawHook : public game::AnimationInstanceDrawHook,
+                 public game::AnimationClassDrawHook,
+                 public game::EntityClassDrawHook,
+                 public game::SceneClassDrawHook
 {
 public:
+    template<typename Node>
     DrawHook(const Node* selected, bool playing)
-            : mSelected(selected)
-            , mPlaying(playing)
+      : mSelectedItem(selected)
+      , mPlaying(playing)
     {}
-    virtual bool InspectPacket(const Node* node, game::DrawPacket&) override
+
+    // AniamtionNode
+    virtual bool InspectPacket(const game::AnimationNode* node, game::DrawPacket& packet) override
+    {
+        return FilterPacket(node, packet);
+    }
+    virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans,
+                               std::vector<game::DrawPacket>& packets) override
+    {
+        GenericAppendPackets(node, trans, packets);
+    }
+
+    // AnimationNodeClass
+    virtual bool InspectPacket(const game::AnimationNodeClass* node, game::DrawPacket& packet) override
+    {
+        return FilterPacket(node, packet);
+    }
+    virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans,
+                               std::vector<game::DrawPacket>& packets) override
+    {
+        GenericAppendPackets(node, trans, packets);
+    }
+
+    // EntityNodeClass
+    virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& packet) override
+    {
+        return FilterPacket(node, packet);
+    }
+    virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& trans,
+                               std::vector<game::DrawPacket>& packets) override
+    {
+        GenericAppendPackets(node, trans, packets);
+    }
+
+    // SceneClassDrawHook
+    virtual void BeginDrawEntity(const game::SceneNodeClass& entity, gfx::Painter& painter, gfx::Transform& trans) override
+    {
+        mDrawSelection  = (&entity == mSelectedItem);
+        mDrawIndicators = false;
+    }
+    virtual void EndDrawEntity(const game::SceneNodeClass& entity, gfx::Painter& painter, gfx::Transform& trans) override
+    {
+        if (mDrawSelection)
+        {
+            DrawBasisVectors(painter, trans);
+        }
+        mDrawSelection = false;
+    }
+private:
+    template<typename Node>
+    bool FilterPacket(const Node* node, game::DrawPacket& packet)
     {
         if (!node->TestFlag(Node::Flags::VisibleInEditor))
             return false;
         return true;
     }
-    virtual void AppendPackets(const Node* node, gfx::Transform& trans, std::vector<game::DrawPacket>& packets) override
+
+    template<typename Node>
+    void GenericAppendPackets(const Node* node, gfx::Transform& trans, std::vector<game::DrawPacket>& packets)
     {
         const auto* drawable   = node->GetDrawable();
-        const auto is_selected = node == mSelected;
+        const auto is_selected = mDrawSelection || node == mSelectedItem;
         const auto is_mask     = drawable->GetRenderPass() == game::RenderPass::Mask;
         const auto is_playing  = mPlaying;
 
@@ -113,6 +168,9 @@ public:
             packets.push_back(selection);
         trans.Pop();
 
+        if (!mDrawIndicators)
+            return;
+
         // decompose the matrix in order to get the combined scaling component
         // so that we can use the inverse scale to keep the resize and rotation
         // indicators always with same size.
@@ -149,8 +207,10 @@ public:
         trans.Pop();
     }
 private:
-    const Node* mSelected = nullptr;
+    const void* mSelectedItem = nullptr;
     const bool mPlaying   = false;
+    bool mDrawSelection  = false;
+    bool mDrawIndicators = true;
 };
 
 
