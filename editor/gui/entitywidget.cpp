@@ -583,42 +583,12 @@ void EntityWidget::on_actionNewParallelogram_triggered()
 
 void EntityWidget::on_actionNodeDelete_triggered()
 {
-    const game::EntityNodeClass* item = GetCurrentNode();
-    if (item == nullptr)
-        return;
-
-    auto& tree = mState.entity.GetRenderTree();
-
-    // find the game graph node that contains this AnimationNode.
-    auto* node = tree.FindNodeByValue(item);
-
-    // traverse the tree starting from the node to be deleted
-    // and capture the ids of the animation nodes that are part
-    // of this hierarchy.
-    struct Carcass {
-        std::string id;
-        std::string name;
-    };
-    std::vector<Carcass> graveyard;
-    node->PreOrderTraverseForEach([&](game::EntityNodeClass* value) {
-        Carcass carcass;
-        carcass.id   = value->GetClassId();
-        carcass.name = value->GetName();
-        graveyard.push_back(carcass);
-    });
-
-    for (auto& carcass : graveyard)
+    if (auto* node = GetCurrentNode())
     {
-        DEBUG("Deleting child '%1', %2", carcass.name, carcass.id);
-        mState.entity.DeleteNodeById(carcass.id);
+        mState.entity.DeleteNode(node);
+
+        mUI.tree->Rebuild();
     }
-
-    // find the parent node
-    auto* parent = tree.FindParent(node);
-
-    parent->DeleteChild(node);
-
-    mUI.tree->Rebuild();
 }
 void EntityWidget::on_actionNodeMoveUpLayer_triggered()
 {
@@ -647,33 +617,16 @@ void EntityWidget::on_actionNodeMoveDownLayer_triggered()
 
 void EntityWidget::on_actionNodeDuplicate_triggered()
 {
-    game::EntityNodeClass* node = GetCurrentNode();
-    if (node == nullptr)
-        return;
+    if (const auto* node = GetCurrentNode())
+    {
+        auto* dupe = mState.entity.DuplicateNode(node);
+        // update the the translation for the parent of the new hierarchy
+        // so that it's possible to tell it apart from the source of the copy.
+        dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
-    // do a deep copy of a hierarchy of nodes starting from
-    // the selected node and add the new hierarchy as a new
-    // child of the selected node's parent
-
-    auto& tree = mState.entity.GetRenderTree();
-    auto* tree_node = tree.FindNodeByValue(node);
-    auto* tree_node_parent = tree.FindParent(tree_node);
-
-    // deep copy of the node.
-    auto copy_root = tree_node->Clone();
-    // replace all node references with copies of the nodes.
-    copy_root.PreOrderTraverseForEachTreeNode([&](game::EntityClass::RenderTreeNode* node) {
-        game::EntityNodeClass* child = mState.entity.AddNode((*node)->Clone());
-        child->SetName(base::FormatString("Copy of %1", (*node)->GetName()));
-        node->SetValue(child);
-    });
-    // update the the translation for the parent of the new hierarchy
-    // so that it's possible to tell it apart from the source of the copy.
-    copy_root->SetTranslation(node->GetTranslation() * 1.2f);
-    tree_node_parent->AppendChild(std::move(copy_root));
-
-    mState.view->Rebuild();
-    mState.view->SelectItemById(app::FromUtf8(copy_root->GetClassId()));
+        mState.view->Rebuild();
+        mState.view->SelectItemById(app::FromUtf8(dupe->GetClassId()));
+    }
 }
 
 void EntityWidget::on_plus90_clicked()

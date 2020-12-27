@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <map>
 #include <cmath>
+#include <unordered_set>
 
 #include "base/logging.h"
 #include "base/assert.h"
@@ -196,6 +197,7 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
     : mClass(klass)
 {
     mInstId = base::RandomString(10);
+    mName   = klass->GetName();
     Reset();
 }
 
@@ -284,7 +286,8 @@ EntityClass::EntityClass(const EntityClass& other)
     }
 
     // use JSON serialization to create a copy of the render tree.
-    nlohmann::json json = other.mRenderTree.ToJson(other);
+    using Serializer = RenderTreeFunctions<EntityNodeClass>;
+    nlohmann::json json = other.mRenderTree.ToJson<Serializer>();
 
     mRenderTree = RenderTree::FromJson(json, *this).value();
 }
@@ -346,46 +349,40 @@ const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
 
 void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
 {
-    ASSERT(child);
-    ASSERT(child != parent);
-
-    if (parent == nullptr)
-    {
-        mRenderTree.AppendChild(child);
-        return;
-    }
-    auto* tree_node = mRenderTree.FindNodeByValue(parent);
-    ASSERT(tree_node);
-    ASSERT(mRenderTree.FindNodeByValue(child) == nullptr);
-    tree_node->AppendChild(child);
+    RenderTreeFunctions<EntityNodeClass>::LinkChild(mRenderTree, parent, child);
 }
 
-void EntityClass::DeleteNode(size_t index)
+void EntityClass::BreakChild(EntityNodeClass* child)
 {
-    ASSERT(index < mNodes.size());
-    mNodes.erase(mNodes.begin() + index);
+    RenderTreeFunctions<EntityNodeClass>::BreakChild(mRenderTree, child);
 }
 
-bool EntityClass::DeleteNodeById(const std::string& id)
+void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child)
 {
-    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&id](const auto& node) {
-        return node->GetClassId() == id;
-    });
-    if (it == mNodes.end())
-        return false;
-    mNodes.erase(it);
-    return true;
+    RenderTreeFunctions<EntityNodeClass>::ReparentChild(mRenderTree, parent, child);
 }
 
-bool EntityClass::DeleteNodeByName(const std::string& name)
+void EntityClass::DeleteNode(EntityNodeClass* node)
 {
-    auto it = std::find_if(mNodes.begin(), mNodes.end(), [&name](const auto& node) {
-        return node->GetName() == name;
-    });
-    if (it == mNodes.end())
-        return false;
-    mNodes.erase(it);
-    return true;
+    std::unordered_set<std::string> graveyard;
+
+    RenderTreeFunctions<EntityNodeClass>::DeleteNode(mRenderTree, node, &graveyard);
+
+    // remove each node from the node container
+    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
+        return graveyard.find(node->GetClassId()) != graveyard.end();
+    }), mNodes.end());
+}
+
+EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
+{
+    std::vector<std::unique_ptr<EntityNodeClass>> clones;
+
+    auto* ret = RenderTreeFunctions<EntityNodeClass>::DuplicateNode(mRenderTree, node, &clones);
+    for (auto& clone : clones)
+        mNodes.push_back(std::move(clone));
+    return ret;
+
 }
 
 void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
@@ -452,22 +449,11 @@ nlohmann::json EntityClass::ToJson() const
     {
         json["nodes"].push_back(node->ToJson());
     }
-    using Serializer = EntityClass;
+    using Serializer = RenderTreeFunctions<EntityNodeClass>; 
     json["render_tree"] = mRenderTree.ToJson<Serializer>();
     return json;
 }
 
-// static
-nlohmann::json EntityClass::TreeNodeToJson(const EntityNodeClass *node)
-{
-    // do only shallow serialization of the animation node,
-    // i.e. only record the id so that we can restore the node
-    // later on load based on the ID.
-    nlohmann::json ret;
-    if (node)
-        ret["id"] = node->GetClassId();
-    return ret;
-}
 
 // static
 std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
@@ -525,7 +511,8 @@ EntityClass EntityClass::Clone() const
 
     // use the json serialization setup the copy of the
     // render tree.
-    nlohmann::json json = mRenderTree.ToJson(*this);
+    using Serializer2 = RenderTreeFunctions<EntityNodeClass>;
+    nlohmann::json json = mRenderTree.ToJson<Serializer2>();
     // build our render tree.
     ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
     return ret;
@@ -551,12 +538,12 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     for (size_t i=0; i<mClass->GetNumNodes(); ++i)
     {
         auto node = CreateEntityNodeInstance(mClass->GetSharedEntityNodeClass(i));
-        mInstanceIdMap[node->GetInstanceId()] = node.get();
         mNodes.push_back(std::move(node));
     }
 
     // rebuild the render tree through JSON serialization
-    nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
+    using Serializer =  RenderTreeFunctions<EntityNodeClass>;
+    nlohmann::json json = mClass->GetRenderTree().ToJson<Serializer>();
 
     mRenderTree = RenderTree::FromJson(json, *this).value();
     mInstanceId = base::RandomString(10);
@@ -579,40 +566,23 @@ Entity::Entity(const EntityClass& klass)
 EntityNode* Entity::AddNode(const EntityNode& node)
 {
     mNodes.emplace_back(new EntityNode(node));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
+    return mNodes.back().get();
 }
 EntityNode* Entity::AddNode(EntityNode&& node)
 {
     mNodes.emplace_back(new EntityNode(std::move(node)));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
+    return mNodes.back().get();
 }
 
 EntityNode* Entity::AddNode(std::unique_ptr<EntityNode> node)
 {
     mNodes.push_back(std::move(node));
-    auto* back = mNodes.back().get();
-    mInstanceIdMap[back->GetInstanceId()] = back;
-    return back;
+    return mNodes.back().get();
 }
 
 void Entity::LinkChild(EntityNode* parent, EntityNode* child)
 {
-    ASSERT(child);
-    ASSERT(child != parent);
-
-    if (parent == nullptr)
-    {
-        mRenderTree.AppendChild(child);
-        return;
-    }
-    auto* tree_node = mRenderTree.FindNodeByValue(parent);
-    ASSERT(tree_node);
-    ASSERT(mRenderTree.FindNodeByValue(child) == nullptr);
-    tree_node->AppendChild(child);
+    RenderTreeFunctions<EntityNode>::LinkChild(mRenderTree, parent, child);
 }
 
 EntityNode& Entity::GetNode(size_t index)
@@ -636,10 +606,10 @@ EntityNode* Entity::FindNodeByClassId(const std::string& id)
 }
 EntityNode* Entity::FindNodeByInstanceId(const std::string& id)
 {
-    auto it = mInstanceIdMap.find(id);
-    if (it == mInstanceIdMap.end())
-        return nullptr;
-    return it->second;
+    for (auto& node : mNodes)
+        if (node->GetInstanceId() == id)
+            return node.get();
+    return nullptr;
 }
 EntityNode* Entity::FindNodeByInstanceName(const std::string& name)
 {
@@ -670,10 +640,10 @@ const EntityNode* Entity::FindNodeByClassId(const std::string& id) const
 }
 const EntityNode* Entity::FindNodeByInstanceId(const std::string& id) const
 {
-    auto it = mInstanceIdMap.find(id);
-    if (it == mInstanceIdMap.end())
-        return nullptr;
-    return it->second;
+    for (auto& node : mNodes)
+        if (node->GetInstanceId() == id)
+            return node.get();
+    return nullptr;
 }
 const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
 {
@@ -683,58 +653,16 @@ const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
     return nullptr;
 }
 
-void Entity::DeleteNode(size_t index)
+void Entity::DeleteNode(EntityNode* node)
 {
-    ASSERT(index < mNodes.size());
+    std::unordered_set<std::string> graveyard;
 
-    const auto& node = mNodes[index];
-    DeleteNodeByInstanceId(node->GetInstanceId());
-}
-
-bool Entity::DeleteNodeByInstanceId(const std::string& id)
-{
-    auto it = mInstanceIdMap.find(id);
-    if (it == mInstanceIdMap.end())
-        return false;
-
-    auto* node = it->second;
-    node->mKilled = true;
-    // if the node is in the render tree then  find the render tree node
-    // that contains the node to be deleted.
-    if (auto* tree_node = mRenderTree.FindNodeByValue(node))
-    {
-        // traverse the tree starting from the node to be deleted
-        // and capture the ids of the animation nodes that are part
-        // of this hierarchy.
-        tree_node->PreOrderTraverseForEach([](EntityNode *value) {
-            value->mKilled = true;
-        });
-
-        // find the parent node and remove the node from the render tree.
-        // this will remove all the render tree node's children too.
-        auto *tree_parent = mRenderTree.FindParent(tree_node);
-        tree_parent->DeleteChild(tree_node);
-    }
-
-    // mark each node for removal and and remove from the instance id map.
-    for (auto it = mInstanceIdMap.begin(); it != mInstanceIdMap.end();)
-    {
-        auto* node = it->second;
-        if (node->mKilled)
-        {
-            it = mInstanceIdMap.erase(it);
-            continue;
-        }
-        ++it;
-    }
+    RenderTreeFunctions<EntityNode>::DeleteNode(mRenderTree, node, &graveyard);
 
     // remove each node from the node container
-    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const auto& node) {
-        return node->mKilled;
+    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
+        return graveyard.find(node->GetInstanceId()) != graveyard.end();
     }), mNodes.end());
-
-    // some nodes were removed.
-    return true;
 }
 
 void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)

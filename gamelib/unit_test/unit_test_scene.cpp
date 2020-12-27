@@ -332,6 +332,8 @@ void unit_test_scene_instance()
     TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetClassId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
+
+    // todo: test more of the instance api.
 }
 
 int test_main(int argc, char* argv[])

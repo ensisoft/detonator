@@ -94,6 +94,8 @@ namespace game
         { return mName; }
         std::string GetClassId() const
         { return mClassId; }
+        std::string GetInstanceId() const
+        {return mClassId; }
         std::string GetEntityId() const
         { return mEntityId; }
         std::shared_ptr<const EntityClass> GetEntityClass() const
@@ -138,9 +140,6 @@ namespace game
         // a scene instance it's important that this entity
         // reference is resolved to a class object instance.
         std::shared_ptr<const EntityClass> mEntity;
-    private:
-        friend class SceneClass;
-        bool mKilled = false;
     };
 
     // SceneClass provides the initial structure of the scene with 
@@ -193,7 +192,7 @@ namespace game
         void LinkChild(SceneNodeClass* parent, SceneNodeClass* child);
         // Break a child node away from its parent. The child node needs
         // to be a valid node and needs to point to a node that is added
-        // to the render tree and belongs to this entity class object.
+        // to the render tree and belongs to this scene class object.
         // The child (and all of its children) that has been broken still
         // exists in the entity but is removed from the render tree.
         // You can then either DeleteNode to completely delete it or
@@ -202,7 +201,8 @@ namespace game
         // Re-parent a child node from its current parent to another parent.
         // Both the child node and the parent node to be a valid nodes and
         // need to point to nodes that are part of the render tree and belong
-        // to this entity class object.
+        // to this entity class object. This will move the whole hierarchy of
+        // nodes starting from child under the new parent.
         void ReparentChild(SceneNodeClass* parent, SceneNodeClass* child);
 
         // Delete a node from the scene. The given node and all of its

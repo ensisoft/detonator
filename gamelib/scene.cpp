@@ -22,9 +22,12 @@
 
 #include "config.h"
 
+#include <unordered_set>
+
 #include "base/format.h"
 #include "gamelib/scene.h"
 #include "gamelib/entity.h"
+#include "gamelib/treeop.h"
 #include "graphics/transform.h"
 
 namespace game
@@ -98,7 +101,8 @@ SceneClass::SceneClass(const SceneClass& other)
         mNodes.push_back(std::move(copy));
     }
     // use JSON serialization to create a copy of the render tree.
-    nlohmann::json json = other.mRenderTree.ToJson(other);
+    using Serializer = RenderTreeFunctions<SceneNodeClass>;
+    nlohmann::json json = other.mRenderTree.ToJson<Serializer>();
 
     mRenderTree = RenderTree::FromJson(json, *this).value();
 }
@@ -158,95 +162,34 @@ const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
 
 void SceneClass::LinkChild(SceneNodeClass* parent, SceneNodeClass* child)
 {
-    ASSERT(child != parent);
-
-    if (parent == nullptr)
-    {
-        ASSERT(mRenderTree.FindChild(child) == nullptr);
-        mRenderTree.AppendChild(child);
-        return;
-    }
-    auto* tree_node = mRenderTree.FindNodeByValue(parent);
-    ASSERT(tree_node);
-    ASSERT(mRenderTree.FindNodeByValue(child) == nullptr);
-    tree_node->AppendChild(child);
+    RenderTreeFunctions<SceneNodeClass>::LinkChild(mRenderTree, parent, child);
 }
 
 void SceneClass::BreakChild(SceneNodeClass* child)
 {
-    auto* node = mRenderTree.FindNodeByValue(child);
-    ASSERT(node);
-    auto* parent = mRenderTree.FindParent(node);
-    ASSERT(parent);
-
-    parent->DeleteChild(node);
+    RenderTreeFunctions<SceneNodeClass>::BreakChild(mRenderTree, child);
 }
 
 void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child)
 {
-    ASSERT(parent != child);
-
-    auto* src_node = mRenderTree.FindNodeByValue(child);
-    auto* dst_node = mRenderTree.FindNodeByValue(parent);
-    ASSERT(src_node && dst_node);
-    auto* src_parent = mRenderTree.FindParent(src_node);
-
-    // parent cannot become the child of its child
-    ASSERT(src_node->FindNodeByValue(parent) == nullptr);
-
-    RenderTreeNode branch = *src_node;
-
-    src_parent->DeleteChild(src_node);
-    dst_node->AppendChild(std::move(branch));
+    RenderTreeFunctions<SceneNodeClass>::ReparentChild(mRenderTree, parent, child);
 }
 
 void SceneClass::DeleteNode(SceneNodeClass* node)
 {
-    if (auto* tree_node = mRenderTree.FindNodeByValue(node))
-    {
-        // traverse the tree starting from the node to be deleted
-        // and capture the ids of the scene nodes that are part
-        // of this hierarchy.
-        tree_node->PreOrderTraverseForEach([](SceneNodeClass *value) {
-            value->mKilled = true;
-        });
-        // find the parent node and remove the node from the render tree.
-        // this will remove all the render tree node's children too.
-        auto *tree_parent = mRenderTree.FindParent(tree_node);
-        tree_parent->DeleteChild(tree_node);
-    }
+    std::unordered_set<std::string> graveyard;
+
+    RenderTreeFunctions<SceneNodeClass>::DeleteNode(mRenderTree, node, &graveyard);
+
     // remove each node from the node container
-    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const auto& node) {
-        return node->mKilled;
+    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
+        return graveyard.find(node->GetClassId()) != graveyard.end();
     }), mNodes.end());
 }
 
 SceneNodeClass* SceneClass::DuplicateNode(const SceneNodeClass* node)
 {
-    SceneNodeClass* ret = nullptr;
-    // do a deep copy of a hierarchy of nodes starting from
-    // the selected node and add the new hierarchy as a new
-    // child of the selected node's parent
-    if (auto* tree_node = mRenderTree.FindNodeByValue(node))
-    {
-        auto* tree_node_parent = mRenderTree.FindParent(tree_node);
-        // deep copy of the tree hierarchy
-        auto copy_root = tree_node->Clone();
-        // replace all node references with clones of the nodes.
-        copy_root.PreOrderTraverseForEachTreeNode([&](RenderTreeNode* node) {
-            auto* clone = AddNode((*node)->Clone());
-            clone->SetName(base::FormatString("Copy of %1", (*node)->GetName()));
-            node->SetValue(clone);
-        });
-        ret = copy_root.GetValue();
-        tree_node_parent->AppendChild(std::move(copy_root));
-    }
-    else
-    {
-        mNodes.emplace_back(new SceneNodeClass(node->Clone()));
-        ret = mNodes.back().get();
-    }
-    return ret;
+    return RenderTreeFunctions<SceneNodeClass>::DuplicateNode(mRenderTree, node, &mNodes);
 }
 
 void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
@@ -469,21 +412,9 @@ nlohmann::json SceneClass::ToJson() const
     {
         json["nodes"].push_back(node->ToJson());
     }
-    using Serializer = SceneClass;
+    using Serializer = RenderTreeFunctions<SceneNodeClass>;
     json["render_tree"] = mRenderTree.ToJson<Serializer>();
     return json;
-}
-
-// static
-nlohmann::json SceneClass::TreeNodeToJson(const SceneNodeClass* node)
-{
-    // do only shallow serialization of the animation node,
-    // i.e. only record the id so that we can restore the node
-    // later on load based on the ID.
-    nlohmann::json ret;
-    if (node)
-        ret["id"] = node->GetClassId();
-    return ret;
 }
 
 // static
@@ -541,7 +472,8 @@ SceneClass SceneClass::Clone() const
 
     // use the json serialization setup the copy of the
     // render tree.
-    nlohmann::json json = mRenderTree.ToJson(*this);
+    using Serializer2 = RenderTreeFunctions<SceneNodeClass>;
+    nlohmann::json json = mRenderTree.ToJson<Serializer2>();
     // build our render tree.
     ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
     return ret;
@@ -577,7 +509,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         mEntities.push_back(std::move(entity));
     }
     // rebuild the render tree through JSON serialization
-    nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
+    using Serializer2 = RenderTreeFunctions<SceneNodeClass>;
+    nlohmann::json json = mClass->GetRenderTree().ToJson<Serializer2>();
 
     struct Serializer {
         Entity* TreeNodeFromJson(const nlohmann::json& json)

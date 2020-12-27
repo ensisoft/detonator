@@ -26,11 +26,15 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp> // for glm::inverse
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <vector>
 #include <algorithm> // for min/max
+#include <unordered_set>
 
+#include "base/assert.h"
+#include "base/format.h"
 #include "graphics/types.h"
 #include "graphics/transform.h"
 #include "gamelib/tree.h"
@@ -41,6 +45,101 @@ namespace game
     template<typename Node>
     struct RenderTreeFunctions {
         using RenderTree = game::TreeNode<Node>;
+
+        static nlohmann::json TreeNodeToJson(const Node* node)
+        {
+            // do only shallow serialization of the animation node,
+            // i.e. only record the id so that we can restore the node
+            // later on load based on the ID.
+            nlohmann::json ret;
+            if (node)
+                ret["id"] = node->GetClassId();
+            return ret;
+        }
+
+        static void LinkChild(RenderTree& tree, Node* parent, Node* child)
+        {
+            ASSERT(child != parent);
+
+            if (parent == nullptr)
+            {
+                tree.AppendChild(child);
+                return;
+            }
+            auto* tree_node = tree.FindNodeByValue(parent);
+            ASSERT(tree_node);
+            ASSERT(tree.FindNodeByValue(child) == nullptr);
+            tree_node->AppendChild(child);
+        }
+        static void BreakChild(RenderTree& tree, Node* child)
+        {
+            auto* node = tree.FindNodeByValue(child);
+            ASSERT(node);
+            auto* parent = tree.FindParent(node);
+            ASSERT(parent);
+            parent->DeleteChild(node);
+        }
+
+        static void ReparentChild(RenderTree& tree, Node* parent, Node* child)
+        {
+            ASSERT(parent != child);
+
+            auto* src_node = tree.FindNodeByValue(child);
+            auto* dst_node = tree.FindNodeByValue(parent);
+            ASSERT(src_node && dst_node);
+            auto* src_parent = tree.FindParent(src_node);
+
+            // parent cannot become the child of its child
+            ASSERT(src_node->FindNodeByValue(parent) == nullptr);
+
+            RenderTree branch = *src_node;
+
+            src_parent->DeleteChild(src_node);
+            dst_node->AppendChild(std::move(branch));
+        }
+
+        static void DeleteNode(RenderTree& tree, Node* node, std::unordered_set<std::string>* graveyard)
+        {
+            if (auto* tree_node = tree.FindNodeByValue(node))
+            {
+                // traverse the tree starting from the node to be deleted
+                // and capture the ids of the scene nodes that are part
+                // of this hierarchy.
+                tree_node->PreOrderTraverseForEach([&graveyard](Node* value) {
+                    graveyard->insert(value->GetInstanceId());
+                });
+                // find the parent node and remove the node from the render tree.
+                // this will remove all the render tree node's children too.
+                auto *tree_parent = tree.FindParent(tree_node);
+                tree_parent->DeleteChild(tree_node);
+            }
+        }
+        static Node* DuplicateNode(RenderTree& tree, const Node* node, std::vector<std::unique_ptr<Node>>* clones)
+        {
+            // do a deep copy of a hierarchy of nodes starting from
+            // the selected node and add the new hierarchy as a new
+            // child of the selected node's parent
+            if (auto* tree_node = tree.FindNodeByValue(node))
+            {
+                auto* tree_node_parent = tree.FindParent(tree_node);
+                // deep copy of the tree hierarchy
+                auto copy_root = tree_node->Clone();
+                // replace all node references with clones of the nodes.
+                copy_root.PreOrderTraverseForEachTreeNode([&clones](RenderTree* node) {
+                    auto clone = std::make_unique<Node>((*node)->Clone());
+                    clone->SetName(base::FormatString("Copy of %1", (*node)->GetName()));
+                    clones->push_back(std::move(clone));
+                    auto* ptr = clones->back().get();
+                    node->SetValue(ptr);
+                });
+                tree_node_parent->AppendChild(std::move(copy_root));
+            }
+            else
+            {
+                clones->emplace_back(new Node(node->Clone()));
+            }
+            return clones->front().get();
+        }
 
         static void CoarseHitTest(RenderTree& tree, float x, float y, std::vector<Node*>* hits, std::vector<glm::vec2>* hitbox_positions)
         {

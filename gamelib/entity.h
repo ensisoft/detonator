@@ -668,11 +668,7 @@ namespace game
         std::unique_ptr<RigidBodyItem> mRigidBody;
         // drawable if any.
         std::unique_ptr<DrawableItem> mDrawable;
-    private:
-        friend class Entity;
-        bool mKilled = false;
     };
-
 
     class EntityClass
     {
@@ -688,14 +684,10 @@ namespace game
         // Add a new node to the entity.
         // Returns a pointer to the node that was added to the entity.
         EntityNodeClass* AddNode(const EntityNodeClass& node);
-        // Add a new node to the entity.
-        // Returns a pointer to the node that was added to the entity.
         EntityNodeClass* AddNode(EntityNodeClass&& node);
-        // Add a new node to the entity.
-        // Returns a pointer to the node that was added to the entity.
         EntityNodeClass* AddNode(std::unique_ptr<EntityNodeClass> node);
-        // Get the node by index.
-        // The index must be valid.
+
+        // Get the node by index. The index must be valid.
         EntityNodeClass& GetNode(size_t index);
         // Find entity node by name. Returns nullptr if
         // no such node could be found.
@@ -720,14 +712,30 @@ namespace game
         // to this entity.
         void LinkChild(EntityNodeClass* parent, EntityNodeClass* child);
 
-        // Delete a node by the given index.
-        void DeleteNode(size_t index);
-        // Delete a node by the given id. Returns tre if the node
-        // was found and deleted otherwise false.
-        bool DeleteNodeById(const std::string& id);
-        // Delete a node by the given name. Returns true if the node
-        // was found and deleted otherwise false.
-        bool DeleteNodeByName(const std::string& name);
+        // Break a child node away from its parent. The child node needs
+        // to be a valid node and needs to point to a node that is added
+        // to the render tree and belongs to this entity class object.
+        // The child (and all of its children) that has been broken still
+        // exists in the entity but is removed from the render tree.
+        // You can then either DeleteNode to completely delete it or
+        // LinkChild to insert it into another part of the render tree.
+        void BreakChild(EntityNodeClass* child);
+
+        // Re-parent a child node from its current parent to another parent.
+        // Both the child node and the parent node to be a valid nodes and
+        // need to point to nodes that are part of the render tree and belong
+        // to this entity class object. This will move the whole hierarchy of
+        // nodes starting from child under the new parent.
+        void ReparentChild(EntityNodeClass* parent, EntityNodeClass* child);
+
+        // Delete a node from the entity. The given node and all of its
+        // children will be removed from the entity render tree and then deleted.
+        void DeleteNode(EntityNodeClass* node);
+
+        // Duplicate an entire node hierarchy starting at the given node
+        // and add the resulting hierarchy to node's parent.
+        // Returns the root node of the new node hierarchy.
+        EntityNodeClass* DuplicateNode(const EntityNodeClass* node);
 
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's box in the entity.
@@ -776,12 +784,6 @@ namespace game
 
         // Serialize the entity into JSON.
         nlohmann::json ToJson() const;
-
-        // Serialize an animation node contained in the RenderTree to JSON by doing
-        // a shallow (id only) based serialization.
-        // Later in TreeNodeFromJson when reading back the render tree we simply
-        // look up the node based on the ID.
-        static nlohmann::json TreeNodeToJson(const EntityNodeClass* node);
 
         static std::optional<EntityClass> FromJson(const nlohmann::json& json);
 
@@ -896,11 +898,7 @@ namespace game
         const EntityNode* FindNodeByInstanceName(const std::string& name) const;
         // Delete the node at the given index. This will also delete any
         // child nodes this node might have by recursing the render tree.
-        void DeleteNode(size_t index);
-        // Delete the node with the given instance id. This will also
-        // delete any child nodes this node might have.
-        // Returns true if any nodes were deleted otherwise false.
-        bool DeleteNodeByInstanceId(const std::string& id);
+        void DeleteNode(EntityNode* node);
 
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's box in the entity.
@@ -970,8 +968,6 @@ namespace game
         std::string mInstanceName;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
-        // map for fast lookup based on the node's instance id.
-        std::unordered_map<std::string, EntityNode*> mInstanceIdMap;
         // the render tree for hierarchical traversal and transformation
         // of the entity and its nodes.
         RenderTree mRenderTree;
