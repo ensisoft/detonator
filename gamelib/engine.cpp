@@ -89,12 +89,12 @@ public:
     {
         DEBUG("Engine starting.");
         // todo:
-        auto klass = mClasslib->FindEntityClassByName("My Scene");
+        auto klass = mClasslib->FindSceneClassByName("My Scene");
         if (!klass)
             return;
 
-        mEntity = game::CreateEntityInstance(klass);
-        mPhysics.BuildPhysicsWorldFromScene(*mEntity);
+        mScene = game::CreateSceneInstance(klass);
+        mPhysics.CreateWorld(*mScene);
         DEBUG("Have scene!");
     }
     virtual void Init(gfx::Device::Context* context, unsigned surface_width, unsigned surface_height) override
@@ -132,7 +132,7 @@ public:
 
         gfx::Transform transform;
         transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
-        mRenderer.Draw(*mEntity, *mPainter, transform);
+        mRenderer.Draw(*mScene, *mPainter, transform);
         mRenderer.EndFrame();
 
         if (mDebugDrawing && mPhysics.HaveWorld())
@@ -150,15 +150,15 @@ public:
 
     virtual void Update(double time, double dt) override
     {
-        if (!mEntity)
+        if (!mScene)
             return;
 
         if (mPhysics.HaveWorld())
         {
             mPhysics.Tick();
-            mPhysics.UpdateScene(*mEntity);
+            mPhysics.UpdateScene(*mScene);
         }
-        mRenderer.Update(*mEntity, time, dt);
+        mRenderer.Update(*mScene, time, dt);
     }
     virtual void Shutdown() override
     {
@@ -226,8 +226,8 @@ private:
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
 
-    // Current entity.
-    std::unique_ptr<game::Entity> mEntity;
+    // Current scene.
+    std::unique_ptr<game::Scene> mScene;
 
     double mGameTime = 0.0;
     double mWallTime = 0.0;

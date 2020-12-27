@@ -45,6 +45,7 @@
 #include "gamelib/renderer.h"
 #include "gamelib/entity.h"
 #include "gamelib/physics.h"
+#include "gamelib/scene.h"
 #include "gamelib/main/interface.h"
 
 namespace {
@@ -62,6 +63,49 @@ public:
     virtual void End() {}
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) {}
 private:
+};
+
+class SceneTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        transform.Translate(400.0f, 400.0f);
+        mRenderer.Draw(*mScene, painter, transform);
+    }
+    virtual void Update(float dt) override
+    {}
+    virtual void Start(game::ClassLibrary* loader) override
+    {
+        auto klass = std::make_shared<game::SceneClass>();
+
+        {
+            game::SceneNodeClass robot;
+            robot.SetEntityId("robot");
+            robot.SetTranslation(glm::vec2(100.0f, 100.0f));
+            robot.SetScale(glm::vec2(0.8, 0.8));
+            robot.SetName("robot 1");
+            robot.SetEntity(loader->FindEntityClassByName("robot"));
+            klass->LinkChild(nullptr, klass->AddNode(robot));
+        }
+
+        {
+            game::SceneNodeClass robot;
+            robot.SetEntityId("robot");
+            robot.SetTranslation(glm::vec2(300.0f, 100.0f));
+            robot.SetScale(glm::vec2(1.0, 1.0));
+            robot.SetName("robot 2");
+            robot.SetEntity(loader->FindEntityClassByName("robot"));
+            klass->LinkChild(nullptr, klass->AddNode(robot));
+        }
+
+        mScene = game::CreateSceneInstance(klass);
+        mRenderer.SetLoader(loader);
+    }
+private:
+    std::unique_ptr<game::Scene> mScene;
+    game::Renderer mRenderer;
 };
 
 class EntityTest : public TestCase
@@ -150,58 +194,60 @@ public:
     }
     virtual void Start(game::ClassLibrary* loader)
     {
-        game::EntityClass scene;
-
+        auto klass = std::make_shared<game::SceneClass>();
         // create ground.
         {
-            game::EntityNodeClass node;
-            node.SetName("ground");
-            node.SetSize(glm::vec2(200.0f, 20.0f));
-            node.SetTranslation(glm::vec2(400, 400));
-            node.SetRotation(0.2);
-            game::DrawableItemClass draw;
-            draw.SetDrawableId("rectangle");
-            draw.SetMaterialId("ground");
-            node.SetDrawable(draw);
-            game::RigidBodyItemClass body;
-            body.SetSimulation(game::RigidBodyItemClass::Simulation::Static);
-            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
-            node.SetRigidBody(body);
-
-            auto* child = scene.AddNode(node);
-            auto& root  = scene.GetRenderTree();
-            root.AppendChild(child);
+            game::SceneNodeClass ground;
+            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
+            ground.SetRotation(0.1f);
+            ground.SetEntity(loader->FindEntityClassByName("ground"));
+            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
         }
-
-        mScene = game::CreateEntityInstance(scene);
-
-        game::EntityNodeClass node;
-        node.SetName("box0");
-        node.SetSize(glm::vec2(40.0f, 40.0f));
-        game::DrawableItemClass draw;
-        draw.SetDrawableId("rectangle");
-        draw.SetMaterialId("object");
-        node.SetDrawable(draw);
-        game::RigidBodyItemClass body;
-        body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
-        body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
-        node.SetRigidBody(body);
-
-        for (int i=0; i<6; ++i)
         {
-            auto* child = mScene->AddNode(game::EntityNode(node));
-            child->SetTranslation(glm::vec2(400 + ((i & 1) * 25.0f), 20 + i * 50));
-            mScene->LinkChild(nullptr, child);
+            game::SceneNodeClass ground;
+            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
+            ground.SetRotation(-0.4f);
+            ground.SetTranslation(glm::vec2(500.0f, 650.0f));
+            ground.SetEntity(loader->FindEntityClassByName("ground"));
+            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
         }
 
+        // create some boxes.
+        {
+            for (int i=0; i<3; ++i)
+            {
+                game::SceneNodeClass node;
+                const auto x = 400.0f + (i & 1) * 25.0f;
+                const auto y = 300 + i * 50.0f;
+                node.SetTranslation(glm::vec2(x, y));
+                node.SetEntity(loader->FindEntityClassByName("box"));
+                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+            }
+        }
+
+        // create a few circle shapes.
+        {
+            for (int i=0; i<3; ++i)
+            {
+                game::SceneNodeClass node;
+                const auto x = 300.0f + (i & 1) * 25.0f;
+                const auto y = 300 + i * 50.0f;
+                node.SetTranslation(glm::vec2(x, y));
+                node.SetEntity(loader->FindEntityClassByName("circle"));
+                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+            }
+        }
+
+        mScene = game::CreateSceneInstance(klass);
         mRenderer.SetLoader(loader);
         mPhysics.SetLoader(loader);
         mPhysics.SetGravity(glm::vec2(0.0f, 10.0f));
+        mPhysics.SetScale(glm::vec2(10.0f, 10.0f));
         mPhysics.DeleteAll();
-        mPhysics.BuildPhysicsWorldFromScene(*mScene);
+        mPhysics.CreateWorld(*mScene);
     }
 private:
-    std::unique_ptr<game::Entity> mScene;
+    std::unique_ptr<game::Scene>  mScene;
     game::Renderer mRenderer;
     game::PhysicsEngine mPhysics;
 };
@@ -418,6 +464,7 @@ public:
         mTestList.emplace_back(new AnimationTest);
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new PhysicsTest);
+        mTestList.emplace_back(new SceneTest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -526,7 +573,65 @@ public:
     { return nullptr; }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
-        if (name == "robot")
+        if (name == "box")
+        {
+            auto klass = std::make_shared<game::EntityClass>();
+
+            game::EntityNodeClass box;
+            box.SetSize(glm::vec2(40.0f, 40.0f));
+            box.SetName("box");
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("uv_test");
+            box.SetDrawable(draw);
+            game::RigidBodyItemClass body;
+            body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
+            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            box.SetRigidBody(body);
+
+            klass->LinkChild(nullptr, klass->AddNode(std::move(box)));
+            return klass;
+        }
+        if (name == "circle")
+        {
+            auto klass = std::make_shared<game::EntityClass>();
+            game::EntityNodeClass circle;
+            circle.SetSize(glm::vec2(50.0f, 50.0f));
+            circle.SetName("circle");
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("circle");
+            draw.SetMaterialId("uv_test");
+            circle.SetDrawable(draw);
+            game::RigidBodyItemClass body;
+            body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
+            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
+            circle.SetRigidBody(body);
+
+            klass->LinkChild(nullptr, klass->AddNode(std::move(circle)));
+            return klass;
+
+        }
+        else if (name == "ground")
+        {
+            auto klass = std::make_shared<game::EntityClass>();
+
+            game::EntityNodeClass node;
+            node.SetName("ground");
+            node.SetSize(glm::vec2(400.0f, 20.0f));
+            node.SetRotation(0.2);
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("ground");
+            node.SetDrawable(draw);
+            game::RigidBodyItemClass body;
+            body.SetSimulation(game::RigidBodyItemClass::Simulation::Static);
+            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            node.SetRigidBody(body);
+
+            klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+            return klass;
+        }
+        else if (name == "robot")
         {
             auto klass = std::make_shared<game::EntityClass>();
             {
@@ -597,6 +702,10 @@ public:
         return nullptr;
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override
+    { return nullptr; }
+    virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string&) const override
+    { return nullptr; }
+    virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string&) const override
     { return nullptr; }
     virtual void LoadFromFile(const std::string& dir, const std::string& file) override
     {}

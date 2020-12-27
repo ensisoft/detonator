@@ -45,6 +45,8 @@ namespace game
     class ClassLibrary;
     class EntityNode;
     class Entity;
+    class SceneNode;
+    class Scene;
     class FBox;
 
     class PhysicsEngine
@@ -89,7 +91,7 @@ namespace game
         { return !!mWorld; }
 
         // Update the scene with the changes from the physics simulation.
-        void UpdateScene(Entity& scene);
+        void UpdateScene(Scene& scene);
 
         // Tick the physics simulation forward by one time step.
         void Tick();
@@ -100,19 +102,21 @@ namespace game
         void DeleteBody(const std::string& id);
 
         // Initialize the physics world based on the scene.
-        // The scene is traversed and then for each scene node
-        // that has a rigid body a physics simulation body is
+        // The scene is traversed and then for each scene entity
+        // that has a rigid bodies a physics simulation body is
         // created based on the rigid body definition. This will
         // create a new physics world object. So you should make
         // sure to set all the desired parameters (such as gravity)
         // before calling this.
-        void BuildPhysicsWorldFromScene(const Entity& scene);
+        void CreateWorld(const Scene& scene);
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
     private:
+        void UpdateEntity(const glm::mat4& model_to_world, Entity& scene);
+        void AddEntity(const glm::mat4& model_to_world, const Entity& entity);
         void AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node);
     private:
         // The class loader instance for loading resources.

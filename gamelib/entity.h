@@ -798,15 +798,52 @@ namespace game
         RenderTree mRenderTree;
     };
 
+    // Collection of arguments for creating a new entity
+    // with some initial state. 
+    struct EntityArgs {
+        // the class object that defines the type of the entity.
+        std::shared_ptr<const EntityClass> klass;
+        // the entity instance id that is to be used.
+        std::string id;
+        // the entity instance name that is to be used.
+        std::string name;
+        // the transformation parents are relative to the parent
+        // of the entity.
+        // the instance scale to be used. note that if the entity
+        // has rigid body changing the scaele dynamically later on 
+        // after the physics simulation object has been created may
+        // not work correctly. therefore it's important to use the 
+        // scaling factor here to set the scale when creating a new 
+        // entity.
+        glm::vec2  scale    = {1.0f, 1.0f};
+        // the entity position relative to parent.
+        glm::vec2  position = {0.0f, 0.0f};
+        // the entity rotation relative to parent
+        float      rotation = 0.0f;
+        EntityArgs() {
+            id = base::RandomString(10);
+        }
+    };
+
     class Entity
     {
     public:
+        enum class Flags {
+            // Only pertains to editor (todo: maybe this flag should be removed)
+            VisibleInEditor,
+            // node is visible in the game or not.
+            // Even if this is true the node will still need to have some
+            // renderable items attached to it such as a shape or
+            // animation item.
+            VisibleInGame
+        };
         using RenderTree      = TreeNode<EntityNode>;
         using RenderTreeNode  = TreeNode<EntityNode>;
         using RenderTreeValue = EntityNode;
 
         // Construct a new entity with the initial state based
         // on the entity class object's state.
+        Entity(const EntityArgs& args);
         Entity(std::shared_ptr<const EntityClass> klass);
         Entity(const EntityClass& klass);
         Entity(const Entity& other) = delete;
@@ -882,6 +919,10 @@ namespace game
         // Map coordinates in entity coordinate space into some EntityNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const EntityNode* node) const;
 
+        // Get entity's transform (relative to its parent) expressed as
+        // transformation matrix.
+        glm::mat4 GetTransform() const;
+
         // Compute the axis aligned bounding rectangle for the give entity node
         // at the current time of the entity.
         gfx::FRect GetBoundingRect(const EntityNode* node) const;
@@ -893,25 +934,40 @@ namespace game
 
         FBox GetBoundingBox(const EntityNode* node) const;
 
-        size_t GetNumNodes() const
-        { return mNodes.size(); }
+        void SetTranslation(const glm::vec2& position)
+        { mPosition = position; }
+        void SetRotation(float angle)
+        { mRotation = angle; }
+        void SetScale(const glm::vec2& scale);
 
+        std::size_t GetNumNodes() const
+        { return mNodes.size(); }
+        std::string GetInstanceName() const
+        { return mInstanceName; }
+        std::string GetInstanceId() const
+        { return mInstanceId; }
+        glm::vec2 GetTranslation() const
+        { return mPosition; }
+        glm::vec2 GetScale() const
+        { return mScale; }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
-
         const EntityClass& GetClass() const
         { return *mClass.get(); }
         const EntityClass* operator->() const
         { return mClass.get(); }
-
         Entity& operator=(const Entity&) = delete;
 
         EntityNode* TreeNodeFromJson(const nlohmann::json& json) ;
     private:
         // the class object.
         std::shared_ptr<const EntityClass> mClass;
+        // The entity instance id.
+        std::string mInstanceId;
+        // the entity instance name (if any)
+        std::string mInstanceName;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
         // map for fast lookup based on the node's instance id.
@@ -921,10 +977,18 @@ namespace game
         RenderTree mRenderTree;
         // Current entity time.
         double mCurrentTime = 0.0;
+        // Current entity position in it's parent frame.
+        glm::vec2 mPosition = {0.0f, 0.0f};
+        // Current entity scaling factor that applies to
+        // all of its nodes.
+        glm::vec2 mScale = {1.0f, 1.0f};
+        // Current entity rotation angle relative to its parent.
+        float mRotation = 0.0f;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);
     std::unique_ptr<Entity> CreateEntityInstance(const EntityClass& klass);
+    std::unique_ptr<Entity> CreateEntityInstance(const EntityArgs& args);
     std::unique_ptr<EntityNode> CreateEntityNodeInstance(std::shared_ptr<const EntityNodeClass> klass);
 
 } // namespace

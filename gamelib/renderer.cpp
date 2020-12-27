@@ -71,6 +71,115 @@ void Renderer::Draw(const EntityClass& entity,
     DrawRenderTree<EntityNodeClass>(entity.GetRenderTree(), painter, transform, hook);
 }
 
+void Renderer::Draw(const Scene& scene,
+                    gfx::Painter& painter, gfx::Transform& transform,
+                    SceneInstanceDrawHook* scene_hook,
+                    EntityInstanceDrawHook* entity_hook)
+{
+    using SceneGraph = TreeNode<Entity>;
+
+    class Visitor : public SceneGraph::ConstVisitor
+    {
+    public:
+        Visitor(Renderer& renderer, gfx::Transform& transform, gfx::Painter& painter,
+                SceneInstanceDrawHook* scene_hook,
+                EntityInstanceDrawHook* entity_hook)
+          : mRenderer(renderer)
+          , mTransform(transform)
+          , mPainter(painter)
+          , mSceneHook(scene_hook)
+          , mEntityHook(entity_hook)
+        {}
+        virtual void EnterNode(const Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetTransform());
+
+            if (mSceneHook)
+                mSceneHook->BeginDrawEntity(*node, mPainter, mTransform);
+
+            mRenderer.Draw(*node, mPainter, mTransform, mEntityHook);
+
+            if (mSceneHook)
+                mSceneHook->EndDrawEntity(*node, mPainter, mTransform);
+        }
+        virtual void LeaveNode(const Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        Renderer& mRenderer;
+        gfx::Transform& mTransform;
+        gfx::Painter& mPainter;
+        SceneInstanceDrawHook*  mSceneHook  = nullptr;
+        EntityInstanceDrawHook* mEntityHook = nullptr;
+    };
+
+    Visitor visitor(*this, transform, painter, scene_hook, entity_hook);
+    const auto& tree = scene.GetRenderTree();
+
+    tree.PreOrderTraverse(visitor);
+}
+
+void Renderer::Draw(const SceneClass& scene,
+                    gfx::Painter& painter, gfx::Transform& transform,
+                    SceneClassDrawHook* scene_hook,
+                    EntityClassDrawHook* entity_hook)
+{
+    using SceneGraph = TreeNode<SceneNodeClass>;
+
+    class Visitor : public SceneGraph::ConstVisitor
+    {
+    public:
+        Visitor(Renderer& renderer, gfx::Transform& transform, gfx::Painter& painter,
+                SceneClassDrawHook* scene_hook,
+                EntityClassDrawHook* entity_hook)
+                : mRenderer(renderer)
+                , mTransform(transform)
+                , mPainter(painter)
+                , mSceneHook(scene_hook)
+                , mEntityHook(entity_hook)
+        {}
+        virtual void EnterNode(const SceneNodeClass* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+
+            if (mSceneHook)
+                mSceneHook->BeginDrawEntity(*node, mPainter, mTransform);
+
+            auto klass = node->GetEntityClass();
+            if (klass)
+                mRenderer.Draw(*klass, mPainter, mTransform, mEntityHook);
+
+            if (mSceneHook)
+                mSceneHook->EndDrawEntity(*node, mPainter, mTransform);
+        }
+        virtual void LeaveNode(const SceneNodeClass* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        Renderer& mRenderer;
+        gfx::Transform& mTransform;
+        gfx::Painter& mPainter;
+        SceneClassDrawHook* mSceneHook = nullptr;
+        EntityClassDrawHook* mEntityHook = nullptr;
+    };
+
+    Visitor visitor(*this, transform, painter, scene_hook, entity_hook);
+    const auto& tree = scene.GetRenderTree();
+
+    tree.PreOrderTraverse(visitor);
+
+}
+
 void Renderer::Update(const AnimationNodeClass& node, float time, float dt)
 {
     UpdateNode<AnimationNodeClass>(node, time, dt);
@@ -122,6 +231,26 @@ void Renderer::Update(const Entity& entity, float time, float dt)
 void Renderer::Update(const EntityNode& node, float time, float dt)
 {
     UpdateNode<EntityNode>(node, time, dt);
+}
+
+void Renderer::Update(const SceneClass& scene, float time, float dt)
+{
+    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    {
+        const auto& node = scene.GetNode(i);
+        const auto& klass = node.GetEntityClass();
+        if (!klass)
+            continue;
+        Update(*klass, time, dt);
+    }
+}
+void Renderer::Update(const Scene& scene, float time, float dt)
+{
+    for (size_t i=0; i<scene.GetNumEntities(); ++i)
+    {
+        const auto& entity = scene.GetEntity(i);
+        Update(entity, time, dt);
+    }
 }
 
 void Renderer::EndFrame()

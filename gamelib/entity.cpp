@@ -559,6 +559,17 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     nlohmann::json json = mClass->GetRenderTree().ToJson(*mClass);
 
     mRenderTree = RenderTree::FromJson(json, *this).value();
+    mInstanceId = base::RandomString(10);
+}
+
+Entity::Entity(const EntityArgs& args)
+  : Entity(args.klass)
+{
+    mInstanceName = args.name;
+    mInstanceId   = args.id;
+    mScale        = args.scale;
+    mPosition     = args.position;
+    mRotation     = args.rotation;
 }
 
 Entity::Entity(const EntityClass& klass)
@@ -746,6 +757,15 @@ glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) cons
     return RenderTreeFunctions<EntityNode>::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
+glm::mat4 Entity::GetTransform() const
+{
+    gfx::Transform transform;
+    transform.Scale(mScale);
+    transform.Rotate(mRotation);
+    transform.Translate(mPosition);
+    return transform.GetAsMatrix();
+}
+
 gfx::FRect Entity::GetBoundingRect(const EntityNode* node) const
 {
     return RenderTreeFunctions<EntityNode>::GetBoundingRect(mRenderTree, node);
@@ -759,6 +779,19 @@ gfx::FRect Entity::GetBoundingRect() const
 FBox Entity::GetBoundingBox(const EntityNode* node) const
 {
     return RenderTreeFunctions<EntityNode>::GetBoundingBox(mRenderTree, node);
+}
+
+void Entity::SetScale(const glm::vec2& scale)
+{
+    for (const auto& node : mNodes)
+    {
+        if (node->HasRigidBody())
+        {
+            WARN("Scaling an entity with rigid bodies won't work correctly.");
+            break;
+        }
+    }
+    mScale = scale;
 }
 
 EntityNode* Entity::TreeNodeFromJson(const nlohmann::json &json)
@@ -778,6 +811,9 @@ std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> 
 
 std::unique_ptr<Entity> CreateEntityInstance(const EntityClass& klass)
 { return CreateEntityInstance(std::make_shared<const EntityClass>(klass)); }
+
+std::unique_ptr<Entity> CreateEntityInstance(const EntityArgs& args)
+{ return std::make_unique<Entity>(args); }
 
 std::unique_ptr<EntityNode> CreateEntityNodeInstance(std::shared_ptr<const EntityNodeClass> klass)
 { return std::make_unique<EntityNode>(klass); }

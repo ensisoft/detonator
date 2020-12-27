@@ -204,11 +204,29 @@ namespace game
             ASSERT(i < mChildren.size());
             return mChildren[i];
         }
+        TreeNode* FindChild(const T* value)
+        {
+            for (auto& child : mChildren)
+            {
+                if (child.mNodeValue == value)
+                    return &child;
+            }
+            return nullptr;
+        }
         // Get a reference to a child node by index.
         const TreeNode& GetChildNode(size_t i) const
         {
             ASSERT(i < mChildren.size());
             return mChildren[i];
+        }
+        const TreeNode* FindChild(const T* value) const
+        {
+            for (const auto& child : mChildren)
+            {
+                if (child.mNodeValue == value)
+                    return &child;
+            }
+            return nullptr;
         }
 
         TreeNode* FindNodeByValue(const T* value)

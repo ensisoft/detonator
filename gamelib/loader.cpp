@@ -36,6 +36,7 @@
 #include "graphics/drawable.h"
 #include "gamelib/animation.h"
 #include "gamelib/entity.h"
+#include "gamelib/scene.h"
 #include "gamelib/loader.h"
 
 namespace game
@@ -160,6 +161,30 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
     game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, &mAnimationNameTable);
     game::LoadResources<EntityClass, EntityClass>(json, "entities", mEntities, &mEntityNameTable);
+    game::LoadResources<SceneClass, SceneClass>(json, "scenes", mScenes, &mSceneNameTable);
+
+    // need to resolve the entity references.
+    for (auto& p : mScenes)
+    {
+        auto& scene = p.second;
+        for (size_t i=0; i<scene->GetNumNodes(); ++i)
+        {
+            auto& node = scene->GetNode(i);
+            auto klass = FindEntityClassById(node.GetEntityId());
+            if (!klass)
+            {
+                const auto& scene_name = mSceneNameTable[scene->GetId()];
+                const auto& node_name  = node.GetName();
+                const auto& node_entity_id = node.GetEntityId();
+                ERROR("Scene node '%1/'%2'' refers to entity '%3' that is not found.",
+                      scene_name, node_name, node_entity_id);
+            }
+            else
+            {
+                node.SetEntity(klass);
+            }
+        }
+    }
 
     mResourceDir  = dir;
     mResourceFile = file;
@@ -190,13 +215,33 @@ std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassByName(co
     auto it = mEntityNameTable.find(name);
     if (it != mEntityNameTable.end())
         return FindEntityClassById(it->second);
-    ERROR("No such scene class: '%1'", name);
+
+    ERROR("No such entity class: '%1'", name);
     return nullptr;
 }
 std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
 {
     auto it = mEntities.find(id);
     if (it != std::end(mEntities))
+        return it->second;
+
+    ERROR("No such entity class '%1'", id);
+    return nullptr;
+}
+
+std::shared_ptr<const SceneClass> ContentLoader::FindSceneClassByName(const std::string& name) const
+{
+    auto it = mSceneNameTable.find(name);
+    if (it != mSceneNameTable.end())
+        return FindSceneClassById(it->second);
+
+    ERROR("No such scene class '%1'", name);
+    return nullptr;
+}
+std::shared_ptr<const SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
+{
+    auto it = mScenes.find(id);
+    if (it != mScenes.end())
         return it->second;
 
     ERROR("No such scene class '%1'", id);

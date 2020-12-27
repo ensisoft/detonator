@@ -32,7 +32,7 @@
 #include "gamelib/physics.h"
 #include "gamelib/loader.h"
 #include "gamelib/types.h"
-#include "gamelib/entity.h"
+#include "gamelib/scene.h"
 
 namespace game
 {
@@ -41,9 +41,10 @@ PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
   : mLoader(loader)
 {}
 
-void PhysicsEngine::UpdateScene(Entity& scene)
+
+void PhysicsEngine::UpdateScene(Scene& scene)
 {
-    using RenderTree = Entity::RenderTree;
+    using RenderTree = Scene::RenderTree ;
 
     class Visitor : public RenderTree::Visitor
     {
@@ -52,6 +53,132 @@ void PhysicsEngine::UpdateScene(Entity& scene)
         {
             mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
         }
+        virtual void EnterNode(Entity* entity) override
+        {
+            if (!entity)
+                return;
+            mTransform.Push(entity->GetTransform());
+            mEngine.UpdateEntity(mTransform.GetAsMatrix(), *entity);
+        }
+        virtual void LeaveNode(Entity* entity) override
+        {
+            if (!entity)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        PhysicsEngine& mEngine;
+        gfx::Transform mTransform;
+    };
+    Visitor visitor(*this);
+    auto& tree = scene.GetRenderTree();
+    tree.PreOrderTraverse(visitor);
+}
+
+void PhysicsEngine::Tick()
+{
+    mWorld->Step(mTimestep, mNumVelocityIterations, mNumPositionIterations);
+}
+
+void PhysicsEngine::DeleteAll()
+{
+    for (auto& node : mNodes)
+    {
+        mWorld->DestroyBody(node.second.world_body);
+    }
+    mNodes.clear();
+}
+
+void PhysicsEngine::DeleteBody(const std::string& id)
+{
+    auto it = mNodes.find(id);
+    if (it == mNodes.end())
+        return;
+    auto& node = it->second;
+    mWorld->DestroyBody(node.world_body);
+    mNodes.erase(it);
+}
+
+void PhysicsEngine::CreateWorld(const Scene& scene)
+{
+    const b2Vec2 gravity(mGravity.x, mGravity.y);
+
+    mNodes.clear();
+    mWorld.reset();
+    mWorld = std::make_unique<b2World>(gravity);
+
+    using RenderTree = Scene::RenderTree;
+
+    class Visitor : public RenderTree::ConstVisitor
+    {
+    public:
+        Visitor(PhysicsEngine& engine) : mEngine(engine)
+        {
+            mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
+        }
+        virtual void EnterNode(const Entity* entity) override
+        {
+            if (!entity)
+                return;
+            mTransform.Push(entity->GetTransform());
+            mEngine.AddEntity(mTransform.GetAsMatrix(), *entity);
+        }
+        virtual void LeaveNode(const Entity* entity) override
+        {
+            if (!entity)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        PhysicsEngine& mEngine;
+        gfx::Transform mTransform;
+    };
+
+    Visitor visitor(*this);
+    const auto& tree = scene.GetRenderTree();
+    tree.PreOrderTraverse(visitor);
+}
+
+
+#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
+void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
+{
+    view.Push();
+    view.Scale(mScale);
+
+    // todo: use the box2d debug draw interface.
+    for (const auto& p : mNodes)
+    {
+        const auto& physics_node = p.second;
+        const float angle = physics_node.world_body->GetAngle();
+        const b2Vec2& pos = physics_node.world_body->GetPosition();
+        view.Push();
+            view.Rotate(angle);
+            view.Translate(pos.x, pos.y);
+            view.Push();
+                view.Scale(physics_node.world_extents);
+                view.Translate(physics_node.world_extents * -0.5f);
+                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, gfx::SolidColor(gfx::Color::HotPink));
+            view.Pop();
+        view.Pop();
+    }
+
+    view.Pop();
+}
+#endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
+
+void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
+{
+    using RenderTree = Entity::RenderTree;
+
+    class Visitor : public RenderTree::Visitor
+    {
+    public:
+        Visitor(const glm::mat4& model_to_world, PhysicsEngine& engine)
+          : mEngine(engine)
+          , mTransform(model_to_world)
+        {}
+
         virtual void EnterNode(EntityNode* node) override
         {
             if (!node)
@@ -102,53 +229,25 @@ void PhysicsEngine::UpdateScene(Entity& scene)
         gfx::Transform mTransform;
     };
 
-    Visitor visitor(*this);
+    Visitor visitor(model_to_world, *this);
 
     auto& tree = scene.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 }
 
-void PhysicsEngine::Tick()
+
+void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& entity)
 {
-    mWorld->Step(mTimestep, mNumVelocityIterations, mNumPositionIterations);
-}
-
-void PhysicsEngine::DeleteAll()
-{
-    for (auto& node : mNodes)
-    {
-        mWorld->DestroyBody(node.second.world_body);
-    }
-    mNodes.clear();
-}
-
-void PhysicsEngine::DeleteBody(const std::string& id)
-{
-    auto it = mNodes.find(id);
-    if (it == mNodes.end())
-        return;
-    auto& node = it->second;
-    mWorld->DestroyBody(node.world_body);
-    mNodes.erase(it);
-}
-
-void PhysicsEngine::BuildPhysicsWorldFromScene(const Entity& scene)
-{
-    const b2Vec2 gravity(mGravity.x, mGravity.y);
-
-    mNodes.clear();
-    mWorld.reset();
-    mWorld = std::make_unique<b2World>(gravity);
-
     using RenderTree = Entity::RenderTree;
 
     class Visitor : public RenderTree::ConstVisitor
     {
     public:
-        Visitor(PhysicsEngine& engine) : mEngine(engine)
-        {
-            mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
-        }
+        Visitor(const glm::mat4& mat, PhysicsEngine& engine)
+          : mEngine(engine)
+          , mTransform(mat)
+        {}
+
         virtual void EnterNode(const EntityNode* node) override
         {
             if (!node)
@@ -176,38 +275,11 @@ void PhysicsEngine::BuildPhysicsWorldFromScene(const Entity& scene)
         PhysicsEngine& mEngine;
         gfx::Transform mTransform;
     };
-    Visitor visitor(*this);
+    Visitor visitor(model_to_world, *this);
 
-    const auto& tree = scene.GetRenderTree();
+    const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 }
-
-#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
-void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
-{
-    view.Push();
-    view.Scale(mScale);
-
-    // todo: use the box2d debug draw interface.
-    for (const auto& p : mNodes)
-    {
-        const auto& physics_node = p.second;
-        const float angle = physics_node.world_body->GetAngle();
-        const b2Vec2& pos = physics_node.world_body->GetPosition();
-        view.Push();
-            view.Rotate(angle);
-            view.Translate(pos.x, pos.y);
-            view.Push();
-                view.Scale(physics_node.world_extents);
-                view.Translate(physics_node.world_extents * -0.5f);
-                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, gfx::SolidColor(gfx::Color::HotPink));
-            view.Pop();
-        view.Pop();
-    }
-
-    view.Pop();
-}
-#endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 
 void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node)
 {
