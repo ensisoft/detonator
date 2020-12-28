@@ -38,7 +38,6 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "gamelib/animation.h"
 #include "gamelib/entity.h"
 #include "gamelib/scene.h"
 #include "editor/app/utility.h"
@@ -48,7 +47,7 @@ namespace app
     // Editor app resource object. These are objects that the user
     // manipulates and manages through the Editor application's UI.
     // Each resource contains the actual underlying resource object
-    // that is for example a gfx::Material or game::Animation.
+    // that is for example a gfx::Material or game::Entity.
     // Normally these types are not related in any hierarchy yet in
     // the editor we want to manage/view/list/edit/delete generic
     // "resources" that the user has created/imported. This interface
@@ -65,8 +64,6 @@ namespace app
             Material,
             // It's a particle system
             ParticleSystem,
-            // It's an animation
-            Animation,
             // It's a custom shape (drawable)
             CustomShape,
             // It's a generic drawable.
@@ -142,8 +139,6 @@ namespace app
                     return QIcon("icons:material.png");
                 case Resource::Type::ParticleSystem:
                     return QIcon("icons:particle.png");
-                case Resource::Type::Animation:
-                    return QIcon("icons:animation.png");
                 case Resource::Type::CustomShape:
                     return QIcon("icons:polygon.png");
                 case Resource::Type::Entity:
@@ -259,11 +254,6 @@ namespace app
         struct ResourceTypeTraits<gfx::MaterialClass> {
             static constexpr auto Type = app::Resource::Type::Material;
         };
-
-        template<>
-        struct ResourceTypeTraits<game::AnimationClass> {
-            static constexpr auto Type = app::Resource::Type::Animation;
-        };
         template<>
         struct ResourceTypeTraits<game::EntityClass> {
             static constexpr auto Type = app::Resource::Type::Entity;
@@ -363,8 +353,6 @@ namespace app
                 json["materials"].push_back(content_json);
             else if (TypeValue == Resource::Type::ParticleSystem)
                 json["particles"].push_back(content_json);
-            else if (TypeValue == Resource::Type::Animation)
-                json["animations"].push_back(content_json);
             else if (TypeValue == Resource::Type::CustomShape)
                 json["shapes"].push_back(content_json);
             else if (TypeValue == Resource::Type::Entity)
@@ -476,7 +464,6 @@ namespace app
     using MaterialResource       = GameResource<gfx::MaterialClass>;
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
-    using AnimationResource      = GameResource<game::AnimationClass>;
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;
 

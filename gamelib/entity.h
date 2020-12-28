@@ -37,16 +37,15 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
-#include "base/logging.h"
 #include "base/math.h"
 #include "graphics/types.h"
 #include "graphics/drawable.h"
 #include "gamelib/tree.h"
 #include "gamelib/types.h"
 #include "gamelib/enum.h"
+#include "gamelib/animation.h"
 
 namespace game
 {
@@ -704,6 +703,35 @@ namespace game
         // no such node could be found.
         const EntityNodeClass* FindNodeById(const std::string& id) const;
 
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(AnimationTrackClass&& track);
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(const AnimationTrackClass& track);
+        // Add a new animation track class object. Returns a pointer to the node that
+        // was added to the animation.
+        AnimationTrackClass* AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track);
+        // Delete an animation track by the given index.
+        void DeleteAnimationTrack(size_t i);
+        // Delete an animation track by the given name.
+        bool DeleteAnimationTrackByName(const std::string& name);
+        // Delete an animation track by the given id.
+        bool DeleteAnimationTrackById(const std::string& id);
+        // Get the animation track class object by index.
+        // The index must be valid.
+        AnimationTrackClass& GetAnimationTrack(size_t i);
+        // Find animation track class object by name. Returns nullptr if no such
+        // track could be found.
+        AnimationTrackClass* FindAnimationTrackByName(const std::string& name);
+        // Get the animation track class object by index.
+        // The index must be valid.
+        const AnimationTrackClass& GetAnimationTrack(size_t i) const;
+        // Find animation track class object by name. Returns nullptr if no such
+        // track could be found.
+        const AnimationTrackClass* FindAnimationTrackByName(const std::string& name) const;
+
+
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
         // is added to the root of the entity. The child node needs
@@ -773,11 +801,15 @@ namespace game
         std::size_t GetHash() const;
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
+        std::size_t GetNumTracks() const
+        { return mAnimationTracks.size(); }
         std::string GetId() const
         { return mClassId; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
+        std::shared_ptr<const AnimationTrackClass> GetSharedAnimationTrackClass(size_t index) const
+        { return mAnimationTracks[index]; }
 
         // Lookup a EntityNode based on the serialized ID in the JSON.
         EntityNodeClass* TreeNodeFromJson(const nlohmann::json& json);
@@ -793,6 +825,9 @@ namespace game
     private:
         // The class/resource id of this class.
         std::string mClassId;
+        // the list of animation tracks that are pre-defined with this
+        // type of animation.
+        std::vector<std::shared_ptr<AnimationTrackClass>> mAnimationTracks;
         // the list of nodes that belong to this entity.
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // The render tree for hierarchical traversal and
@@ -932,7 +967,30 @@ namespace game
 
         FBox GetBoundingBox(const EntityNode* node) const;
 
-        void Update(double time, float dt);
+        void Update(float dt);
+
+        // Play the given animation track.
+        void Play(std::unique_ptr<AnimationTrack> track);
+        void Play(const AnimationTrack& track)
+        { Play(std::make_unique<AnimationTrack>(track)); }
+        void Play(AnimationTrack&& track)
+        { Play(std::make_unique<AnimationTrack>(std::move(track))); }
+        // Play a previously recorded (stored in the animation class object)
+        // animation track identified by name. Note that there could be
+        // ambiguity between the names, i.e. multiple tracks with the same name.
+        void PlayAnimationByName(const std::string& name);
+        // Play a previously recorded (stored in the animation class object)
+        // animation track identified by its track id.
+        void PlayAnimationById(const std::string& id);
+
+        // Returns true if an animation track is still playing.
+        bool IsPlaying() const;
+        // Get the current track if any. (when IsPlaying is true)
+        AnimationTrack* GetCurrentTrack()
+        { return mAnimationTrack.get(); }
+        const AnimationTrack* GetCurrentTrack() const
+        { return mAnimationTrack.get(); }
+
 
         void SetTranslation(const glm::vec2& position)
         { mPosition = position; }
@@ -968,6 +1026,8 @@ namespace game
         std::string mInstanceId;
         // the entity instance name (if any)
         std::string mInstanceName;
+        // The current animation track if any.
+        std::unique_ptr<AnimationTrack> mAnimationTrack;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
         // the render tree for hierarchical traversal and transformation

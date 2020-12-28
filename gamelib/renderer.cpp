@@ -30,9 +30,9 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
-#include "gamelib/animation.h"
 #include "gamelib/classlib.h"
 #include "gamelib/entity.h"
+#include "gamelib/scene.h"
 #include "gamelib/renderer.h"
 
 namespace game
@@ -42,19 +42,6 @@ void Renderer::BeginFrame()
 {
     for (auto& p : mPaintNodes)
         p.second.visited = false;
-}
-
-void Renderer::Draw(const AnimationClass& klass,
-                    gfx::Painter& painter, gfx::Transform& transform,
-                    AnimationClassDrawHook* hook)
-{
-    DrawRenderTree<AnimationNodeClass>(klass.GetRenderTree(), painter, transform, hook);
-}
-void Renderer::Draw(const Animation& animation,
-                    gfx::Painter& painter, gfx::Transform& transform,
-                    AnimationInstanceDrawHook* hook)
-{
-    DrawRenderTree<AnimationNode>(animation.GetRenderTree(), painter, transform, hook);
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -178,31 +165,6 @@ void Renderer::Draw(const SceneClass& scene,
 
     tree.PreOrderTraverse(visitor);
 
-}
-
-void Renderer::Update(const AnimationNodeClass& node, float time, float dt)
-{
-    UpdateNode<AnimationNodeClass>(node, time, dt);
-}
-void Renderer::Update(const AnimationNode& node, float time, float dt)
-{
-    UpdateNode<AnimationNode>(node, time, dt);
-}
-void Renderer::Update(const AnimationClass& klass, float time, float dt)
-{
-    for (size_t i=0; i<klass.GetNumNodes(); ++i) 
-    {
-        const auto& node = klass.GetNode(i);
-        UpdateNode<AnimationNodeClass>(node, time, dt);
-    }
-}
-void Renderer::Update(const Animation& animation, float time, float dt)
-{
-    for (size_t i=0; i<animation.GetNumNodes(); ++i) 
-    {
-        const auto& node = animation.GetNode(i);
-        UpdateNode<AnimationNode>(node, time, dt);
-    }
 }
 
 void Renderer::Update(const EntityClass& entity, float time, float dt)
@@ -462,7 +424,8 @@ void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
             shape.drawable = packet.drawable.get();
             shape.material = packet.material.get();
             layer.draw_list.push_back(shape);
-        } else if (packet.pass == RenderPass::Mask)
+        } 
+        else if (packet.pass == RenderPass::Mask)
         {
             gfx::Painter::MaskShape shape;
             shape.transform = &packet.transform;

@@ -57,9 +57,8 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.
-class DrawHook : public game::AnimationInstanceDrawHook,
-                 public game::AnimationClassDrawHook,
-                 public game::EntityClassDrawHook,
+class DrawHook : public game::EntityClassDrawHook,
+                 public game::EntityInstanceDrawHook,
                  public game::SceneClassDrawHook
 {
 public:
@@ -69,27 +68,17 @@ public:
       , mPlaying(playing)
     {}
 
-    // AniamtionNode
-    virtual bool InspectPacket(const game::AnimationNode* node, game::DrawPacket& packet) override
+    // EntityNode
+    virtual bool InspectPacket(const game::EntityNode* node, game::DrawPacket& packet) override
     {
         return FilterPacket(node, packet);
     }
-    virtual void AppendPackets(const game::AnimationNode* node, gfx::Transform& trans,
-                               std::vector<game::DrawPacket>& packets) override
+    virtual void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
+    std::vector<game::DrawPacket>& packets) override
     {
         GenericAppendPackets(node, trans, packets);
     }
 
-    // AnimationNodeClass
-    virtual bool InspectPacket(const game::AnimationNodeClass* node, game::DrawPacket& packet) override
-    {
-        return FilterPacket(node, packet);
-    }
-    virtual void AppendPackets(const game::AnimationNodeClass* node, gfx::Transform& trans,
-                               std::vector<game::DrawPacket>& packets) override
-    {
-        GenericAppendPackets(node, trans, packets);
-    }
 
     // EntityNodeClass
     virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& packet) override
@@ -146,7 +135,7 @@ private:
                 box.material  = yellow;
                 box.drawable  = rect;
                 box.layer     = 250;
-                box.pass      = game::AnimationNodeClass::RenderPass::Draw;
+                box.pass      = game::RenderPass::Draw;
                 packets.push_back(box);
             trans.Pop();
         }

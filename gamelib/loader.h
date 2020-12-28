@@ -34,10 +34,6 @@
 
 namespace game
 {
-    class Animation;
-    class AnimationClass;
-    class AnimationNode;
-    class AnimationNodeClass;
     class EntityClass;
 
     // Game content (assets + gfx resources) loader.
@@ -54,8 +50,6 @@ namespace game
         // resource creation for the game level subsystem.
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override;
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override;
-        virtual std::shared_ptr<const AnimationClass> FindAnimationClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const override;
         virtual std::shared_ptr<const EntityClass> FindEntityClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual std::shared_ptr<const SceneClass> FindSceneClassByName(const std::string& name) const override;
@@ -81,19 +75,12 @@ namespace game
         // from the resource file.
         std::unordered_map<std::string,
             std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
-        // These are the animations that have been loaded
-        // from the resource file.
-        std::unordered_map<std::string,
-            std::shared_ptr<AnimationClass>> mAnimations;
         // These are the entities that have been loaded from
         // the resource file.
         std::unordered_map<std::string, std::shared_ptr<EntityClass>> mEntities;
         // These are the scenes that have been loaded from
         // the resource file.
         std::unordered_map<std::string, std::shared_ptr<SceneClass>> mScenes;
-
-        // name table. maps animation names to ids.
-        std::unordered_map<std::string, std::string> mAnimationNameTable;
         // name table maps entity names to ids.
         std::unordered_map<std::string, std::string> mEntityNameTable;
         // name table maps scene names to ids.

@@ -34,6 +34,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/app/workspace.h"
+#include "gamelib/entity.h"
 #include "gamelib/animation.h"
 #include "gamelib/renderer.h"
 
@@ -51,9 +52,9 @@ namespace gui
     public:
         // constructors.
         AnimationTrackWidget(app::Workspace* workspace);
-        AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::AnimationClass>& anim);
+        AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::EntityClass>& entity);
         AnimationTrackWidget(app::Workspace* workspace,
-                const std::shared_ptr<game::AnimationClass>& anim,
+                const std::shared_ptr<game::EntityClass>& entity,
                 const game::AnimationTrackClass& track);
        ~AnimationTrackWidget();
 
@@ -118,7 +119,7 @@ namespace gui
     private:
         Ui::AnimationTrack mUI;
     private:
-        using TreeModel = RenderTreeModel<game::AnimationClass>;
+        using TreeModel = RenderTreeModel<game::EntityClass>;
         class TimelineModel;
         // Tree model to display the animation's render tree.
         std::unique_ptr<TreeModel> mTreeModel;
@@ -134,7 +135,7 @@ namespace gui
         struct State {
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
-            std::shared_ptr<game::AnimationClass> animation;
+            std::shared_ptr<game::EntityClass> entity;
             std::shared_ptr<game::AnimationTrackClass> track;
             bool show_material_actuators = true;
             bool show_transform_actuators = true;
@@ -144,12 +145,12 @@ namespace gui
         // Interpolation variables for smoothing view rotations.
         float mViewTransformStartTime = 0.0f;
         float mViewTransformRotation = 0.0f;
-        // Animation object is used render the animation track
-        // while it's being edited. We use an animation object
-        // instead of the animation class object is because there
-        // should be no changes to the animation class object's
+        // Entity object is used render the animation track
+        // while it's being edited. We use an entity object
+        // instead of the entity class object is because there
+        // should be no changes to the entity class object's
         // render tree. (i.e. node transformations)
-        std::unique_ptr<game::Animation> mAnimation;
+        std::unique_ptr<game::Entity> mEntity;
         // State enumeration for the playback state.
         enum class PlayState {
             // Currently playing back an animation track.
@@ -162,9 +163,8 @@ namespace gui
         };
         // The current playback/editing state.
         PlayState mPlayState = PlayState::Stopped;
-        // Animation object that exists when playing back the
-        // animation track.
-        std::unique_ptr<game::Animation> mPlaybackAnimation;
+        // Entity object that exists when playing back the animation track.
+        std::unique_ptr<game::Entity> mPlaybackAnimation;
         // Original hash (when starting to edit an existing track)
         // used to compare for changes when closing.
         std::size_t mOriginalHash = 0;
@@ -173,8 +173,8 @@ namespace gui
     };
 
     // Functions used to share animation class objects between AnimationTrackWidget
-    // and AnimationWidget instances.
-    std::shared_ptr<game::AnimationClass> FindSharedAnimation(size_t hash);
-    void ShareAnimation(const std::shared_ptr<game::AnimationClass>& klass);
+    // and EntityWidget instances.
+    std::shared_ptr<game::EntityClass> FindSharedEntity(size_t hash);
+    void ShareEntity(const std::shared_ptr<game::EntityClass>& klass);
 
 } // namespace

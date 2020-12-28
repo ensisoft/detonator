@@ -115,7 +115,6 @@ namespace gui
         void on_actionReloadTextures_triggered();
         void on_actionNewMaterial_triggered();
         void on_actionNewParticleSystem_triggered();
-        void on_actionNewAnimation_triggered();
         void on_actionNewCustomShape_triggered();
         void on_actionNewEntity_triggered();
         void on_actionNewScene_triggered();

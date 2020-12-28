@@ -56,11 +56,6 @@ namespace gui
             mSelection = app::Resource::Type::ParticleSystem;
             accept();
         }
-        void on_btnAnimation_clicked()
-        {
-            mSelection = app::Resource::Type::Animation;
-            accept();
-        }
         void on_btnCustomShape_clicked()
         {
             mSelection = app::Resource::Type::CustomShape;

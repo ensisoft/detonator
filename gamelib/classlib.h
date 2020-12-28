@@ -33,7 +33,6 @@ namespace gfx {
 
 namespace game
 {
-    class AnimationClass;
     class EntityClass;
     class SceneClass;
 
@@ -43,7 +42,7 @@ namespace game
     // resources created by the asset pipeline and loaded from the descriptor file(s).
     // Note about user defined resource names:
     // If a resource has it's name changed you will need to remember to update your code that
-    // calls some method to look up the resource by its name such as FindAnimationClassByName.
+    // calls some method to look up the resource by its name such as FindEntityClassByName.
     // For robustness against name changes a better option is to use the class object IDs which
     // are immutable.
     class ClassLibrary
@@ -53,12 +52,6 @@ namespace game
 
         virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const = 0;
         virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const = 0;
-        // Find an animation class by the given name.
-        // If not found will return a nullptr.
-        virtual std::shared_ptr<const AnimationClass> FindAnimationClassByName(const std::string& name) const = 0;
-        // Find an animation class object by it's unique class object identifier.
-        // If not found will return a nullptr.
-        virtual std::shared_ptr<const AnimationClass> FindAnimationClassById(const std::string& id) const = 0;
         // Find a entity class object by the given name.
         // If not found will return a nullptr.
         virtual std::shared_ptr<const EntityClass> FindEntityClassByName(const std::string& name) const = 0;

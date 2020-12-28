@@ -652,34 +652,6 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
     return GetDrawableClassByName(QString::fromUtf8(name));
 }
 
-std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassByName(const QString& name) const
-{
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::Animation)
-            continue;
-        else if (resource->GetName() != name)
-            continue;
-        return ResourceCast<game::AnimationClass>(*resource).GetSharedResource();
-    }
-    ERROR("Request for an animation that doesn't exist: '%1'", name);
-    return nullptr;
-}
-
-std::shared_ptr<const game::AnimationClass> Workspace::GetAnimationClassById(const QString& id) const
-{
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::Animation)
-            continue;
-        else if (resource->GetId() != id)
-            continue;
-        return ResourceCast<game::AnimationClass>(*resource).GetSharedResource();
-    }
-    ERROR("Request for an animation that doesn't exist: '%1'", id);
-    return nullptr;
-}
-
 std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const QString& name) const
 {
     for (const auto& resource : mResources)
@@ -766,15 +738,6 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClass(const std
     }
     ERROR("Request for a drawable that doesn't exist: '%1'", klass);
     return std::make_shared<gfx::RectangleClass>();
-}
-
-std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassByName(const std::string& name) const
-{
-    return GetAnimationClassByName(FromUtf8(name));
-}
-std::shared_ptr<const game::AnimationClass> Workspace::FindAnimationClassById(const std::string& id) const
-{
-    return GetAnimationClassById(FromUtf8(id));
 }
 
 std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
@@ -1128,7 +1091,6 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::MaterialClass>("materials", json, mResources);
     LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);
     LoadResources<gfx::PolygonClass>("shapes", json, mResources);
-    LoadResources<game::AnimationClass>("animations", json, mResources);
     LoadResources<game::EntityClass>("entities", json, mResources);
     LoadResources<game::SceneClass>("scenes", json, mResources);
 

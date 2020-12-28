@@ -278,6 +278,53 @@
            </widget>
           </item>
           <item>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="title">
+             <string>Animation tracks</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_16">
+             <item>
+              <widget class="QListWidget" name="trackList">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
+                <widget class="QPushButton" name="btnNewTrack">
+                 <property name="text">
+                  <string>New ...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnEditTrack">
+                 <property name="text">
+                  <string>Edit ...</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnDeleteTrack">
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to maintain aspect ratio when resizing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1323,8 +1370,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>371</width>
-                   <height>531</height>
+                   <width>100</width>
+                   <height>30</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1581,6 +1628,10 @@
   <tabstop>plus90</tabstop>
   <tabstop>minus90</tabstop>
   <tabstop>resetTransform</tabstop>
+  <tabstop>trackList</tabstop>
+  <tabstop>btnNewTrack</tabstop>
+  <tabstop>btnEditTrack</tabstop>
+  <tabstop>btnDeleteTrack</tabstop>
   <tabstop>scrollArea_2</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>

@@ -54,7 +54,6 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
-#include "editor/gui/animationwidget.h"
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/polygonwidget.h"
@@ -344,8 +343,6 @@ bool MainWindow::loadWorkspace(const QString& dir)
             widget = new MaterialWidget(workspace.get());
         else if (klass == ParticleEditorWidget::staticMetaObject.className())
             widget = new ParticleEditorWidget(workspace.get());
-        else if (klass == AnimationWidget::staticMetaObject.className())
-            widget = new AnimationWidget(workspace.get());
         else if (klass == PolygonWidget::staticMetaObject.className())
             widget = new PolygonWidget(workspace.get());
         else if (klass == AnimationTrackWidget::staticMetaObject.className())
@@ -809,12 +806,6 @@ void MainWindow::on_actionNewParticleSystem_triggered()
     showWidget(new ParticleEditorWidget(mWorkspace.get()), open_new_window);
 }
 
-void MainWindow::on_actionNewAnimation_triggered()
-{
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new AnimationWidget(mWorkspace.get()), open_new_window);
-}
-
 void MainWindow::on_actionNewCustomShape_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1128,7 +1119,6 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
     menu.addAction(mUI.actionNewParticleSystem);
-    menu.addAction(mUI.actionNewAnimation);
     menu.addAction(mUI.actionNewCustomShape);
     menu.addAction(mUI.actionNewEntity);
     menu.addAction(mUI.actionNewScene);
@@ -1174,9 +1164,6 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), new_window);
                 break;
-            case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(mWorkspace.get(), *res), new_window);
-                break;
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get(), *res), new_window);
                 break;
@@ -1203,9 +1190,6 @@ void MainWindow::on_actionNewResource_triggered()
                 break;
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get()), new_window);
-                break;
-            case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(mWorkspace.get()), new_window);
                 break;
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get()), new_window);
@@ -1782,9 +1766,6 @@ void MainWindow::editResources(bool open_new_window)
                 break;
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get(), res), open_new_window);
-                break;
-            case app::Resource::Type::Animation:
-                showWidget(new AnimationWidget(mWorkspace.get(), res), open_new_window);
                 break;
             case app::Resource::Type::CustomShape:
                 showWidget(new PolygonWidget(mWorkspace.get(), res), open_new_window);

@@ -34,7 +34,6 @@
 #include "base/utility.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
-#include "gamelib/animation.h"
 #include "gamelib/entity.h"
 #include "gamelib/scene.h"
 #include "gamelib/loader.h"
@@ -159,7 +158,6 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials, nullptr);
     game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, nullptr);
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
-    game::LoadResources<AnimationClass, AnimationClass>(json, "animations", mAnimations, &mAnimationNameTable);
     game::LoadResources<EntityClass, EntityClass>(json, "entities", mEntities, &mEntityNameTable);
     game::LoadResources<SceneClass, SceneClass>(json, "scenes", mScenes, &mSceneNameTable);
 
@@ -188,26 +186,6 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
 
     mResourceDir  = dir;
     mResourceFile = file;
-}
-
-std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassById(const std::string& id) const
-{
-    auto it = mAnimations.find(id);
-    if (it != std::end(mAnimations))
-        return it->second;
-
-    ERROR("No such animation class '%1'", id);
-    return nullptr;
-}
-
-std::shared_ptr<const AnimationClass> ContentLoader::FindAnimationClassByName(const std::string& name) const
-{
-    auto it = mAnimationNameTable.find(name);
-    if (it != mAnimationNameTable.end())
-        return FindAnimationClassById(it->second);
-
-    ERROR("No such animation class: '%1'", name);
-    return nullptr;
 }
 
 std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassByName(const std::string& name) const

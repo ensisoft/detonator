@@ -252,6 +252,17 @@ void unit_test_entity_class()
         entity.AddNode(std::move(node));
     }
 
+    {
+        game::AnimationTrackClass track;
+        track.SetName("test1");
+        entity.AddAnimationTrack(track);
+    }
+    {
+        game::AnimationTrackClass track;
+        track.SetName("test2");
+        entity.AddAnimationTrack(track);
+    }
+
     TEST_REQUIRE(entity.GetNumNodes() == 3);
     TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
     TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");
@@ -263,6 +274,9 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetClassId()));
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetClassId()));
     TEST_REQUIRE(entity.FindNodeById("asg") == nullptr);
+    TEST_REQUIRE(entity.GetNumTracks() == 2);
+    TEST_REQUIRE(entity.FindAnimationTrackByName("test1"));
+    TEST_REQUIRE(entity.FindAnimationTrackByName("sdgasg") == nullptr);
 
     // test linking.
     entity.LinkChild(nullptr, entity.FindNodeByName("root"));
@@ -280,6 +294,8 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(ret->GetId() == entity.GetId());
         TEST_REQUIRE(ret->GetHash() == entity.GetHash());
+        TEST_REQUIRE(ret->GetNumTracks() == 2);
+        TEST_REQUIRE(ret->FindAnimationTrackByName("test1"));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 
@@ -288,11 +304,15 @@ void unit_test_entity_class()
         auto copy(entity);
         TEST_REQUIRE(copy.GetId() == entity.GetId());
         TEST_REQUIRE(copy.GetHash() == entity.GetHash());
+        TEST_REQUIRE(copy.GetNumTracks() == 2);
+        TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
 
         copy = entity;
         TEST_REQUIRE(copy.GetId() == entity.GetId());
         TEST_REQUIRE(copy.GetHash() == entity.GetHash());
+        TEST_REQUIRE(copy.GetNumTracks() == 2);
+        TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
     }
 
@@ -305,6 +325,8 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(clone.GetId() != entity.GetId());
         TEST_REQUIRE(clone.GetHash() != entity.GetHash());
+        TEST_REQUIRE(clone.GetNumTracks() == 2);
+        TEST_REQUIRE(clone.FindAnimationTrackByName("test1"));
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
     }
 

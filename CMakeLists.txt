@@ -168,9 +168,6 @@ add_executable(Editor
     editor/app/process.h
     editor/app/process.cpp
     editor/app/ipc.cpp
-    editor/gui/animationwidget.h
-    editor/gui/animationwidget.ui
-    editor/gui/animationwidget.cpp
     editor/gui/animationtrackwidget.h
     editor/gui/animationtrackwidget.ui
     editor/gui/animationtrackwidget.cpp
@@ -579,15 +576,18 @@ add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
 add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp  base/assert.cpp)
 add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     base/assert.cpp
+    gamelib/entity.cpp
     gamelib/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
 add_executable(unit_test_entity gamelib/unit_test/unit_test_entity.cpp
         base/assert.cpp
+        gamelib/animation.cpp
         gamelib/entity.cpp)
 add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
         base/assert.cpp
         gamelib/scene.cpp
+        gamelib/animation.cpp
         gamelib/entity.cpp)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")

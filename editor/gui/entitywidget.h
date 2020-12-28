@@ -94,6 +94,10 @@ namespace gui
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_resetTransform_clicked();
+        void on_btnNewTrack_clicked();
+        void on_btnEditTrack_clicked();
+        void on_btnDeleteTrack_clicked();
+        void on_trackList_itemSelectionChanged();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeIsVisible_stateChanged(int);
         void on_nodeSizeX_valueChanged(double value);
@@ -127,10 +131,8 @@ namespace gui
         void on_rbIsBullet_stateChanged(int);
         void on_rbIsSensor_stateChanged(int);
         void on_rbIsEnabled_stateChanged(int);
-
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
-
         void on_tree_customContextMenuRequested(QPoint);
 
         void TreeCurrentNodeChangedEvent();
@@ -170,7 +172,8 @@ namespace gui
             Playing, Paused, Stopped
         };
         struct State {
-            game::EntityClass entity;
+            // shared with the animation trackw widget.
+            std::shared_ptr<game::EntityClass> entity;
             game::Renderer renderer;
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;

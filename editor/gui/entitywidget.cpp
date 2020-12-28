@@ -45,6 +45,7 @@
 #include "editor/gui/treemodel.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/entitywidget.h"
+#include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "base/assert.h"
@@ -157,8 +158,8 @@ public:
         node.SetScale(glm::vec2(1.0f, 1.0f));
 
         // by default we're appending to the root item.
-        auto& root  = mState.entity.GetRenderTree();
-        auto* child = mState.entity.AddNode(std::move(node));
+        auto& root  = mState.entity->GetRenderTree();
+        auto* child = mState.entity->AddNode(std::move(node));
         root.AppendChild(child);
 
         mState.view->Rebuild();
@@ -168,9 +169,9 @@ public:
     }
     bool CheckNameAvailability(const std::string& name) const
     {
-        for (size_t i=0; i<mState.entity.GetNumNodes(); ++i)
+        for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
         {
-            const auto& node = mState.entity.GetNode(i);
+            const auto& node = mState.entity->GetNode(i);
             if (node.GetName() == name)
                 return false;
         }
@@ -201,7 +202,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
 {
     DEBUG("Create EntityWidget");
 
-    mRenderTree.reset(new TreeModel(mState.entity));
+    mState.entity = std::make_shared<game::EntityClass>();
+
+    mRenderTree.reset(new TreeModel(*mState.entity));
 
     mUI.setupUi(this);
     mUI.tree->SetModel(mRenderTree.get());
@@ -253,7 +256,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.name, QString("My Entity"));
-    SetValue(mUI.ID, mState.entity.GetId());
+    SetValue(mUI.ID, mState.entity->GetId());
     setWindowTitle("My Entity");
 
     RebuildMenus();
@@ -267,8 +270,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     const game::EntityClass* content = nullptr;
     resource.GetContent(&content);
 
-    mState.entity = *content;
-    mOriginalHash = mState.entity.GetHash();
+    mState.entity = std::make_shared<game::EntityClass>(*content);
+    mOriginalHash = mState.entity->GetHash();
     mCameraWasLoaded = true;
 
     SetValue(mUI.name, resource.GetName());
@@ -287,7 +290,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
 
     UpdateDeletedResourceReferences();
 
-    mRenderTree.reset(new TreeModel(mState.entity));
+    mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
 }
@@ -360,7 +363,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     // so let's use the JSON serialization in the entity
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mState.entity.ToJson();
+    const auto& json = mState.entity->ToJson();
     const auto& base64 = base64::Encode(json.dump(2));
     settings.setValue("Entity", "content", base64);
     return true;
@@ -394,12 +397,20 @@ bool EntityWidget::LoadState(const Settings& settings)
         ERROR("Failed to load entity widget state.");
         return false;
     }
-    mState.entity  = std::move(ret.value());
-    mOriginalHash = mState.entity.GetHash();
+    auto klass = std::move(ret.value());
+    auto hash  = klass.GetHash();
+    mState.entity = FindSharedEntity(hash);
+    if (!mState.entity)
+    {
+        mState.entity = std::make_shared<game::EntityClass>(std::move(klass));
+        ShareEntity(mState.entity);
+    }
+
+    mOriginalHash = mState.entity->GetHash();
 
     UpdateDeletedResourceReferences();
 
-    mRenderTree.reset(new TreeModel(mState.entity));
+    mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     return true;
@@ -442,8 +453,7 @@ void EntityWidget::Update(double secs)
 {
     if (mPlayState == PlayState::Playing)
     {
-        // todo: update scene?
-        mState.renderer.Update(mState.entity, mEntityTime, secs);
+        mState.renderer.Update(*mState.entity, mEntityTime, secs);
         mEntityTime += secs;
         mUI.time->setText(QString::number(mEntityTime));
     }
@@ -455,7 +465,7 @@ void EntityWidget::Render()
 }
 bool EntityWidget::ConfirmClose()
 {
-    const auto hash = mState.entity.GetHash();
+    const auto hash = mState.entity->GetHash();
     if (hash == mOriginalHash)
         return true;
 
@@ -474,7 +484,28 @@ bool EntityWidget::ConfirmClose()
 }
 void EntityWidget::Refresh()
 {
+    auto selected = mUI.trackList->selectedItems();
+    std::unordered_set<std::string> selected_item_ids;
+    for (const auto* item : selected)
+        selected_item_ids.insert(app::ToUtf8(item->data(Qt::UserRole).toString()));
 
+    mUI.trackList->clear();
+
+    SetEnabled(mUI.btnDeleteTrack, false);
+    SetEnabled(mUI.btnEditTrack, false);
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& name  = app::FromUtf8(track.GetName());
+        const auto& id    = app::FromUtf8(track.GetId());
+        QListWidgetItem* item = new QListWidgetItem;
+        item->setText(name);
+        item->setData(Qt::UserRole, id);
+        item->setIcon(QIcon("icons:animation_track.png"));
+        mUI.trackList->addItem(item);
+        if (selected_item_ids.find(track.GetId()) != selected_item_ids.end())
+            item->setSelected(true);
+    }
 }
 
 void EntityWidget::on_actionPlay_triggered()
@@ -505,7 +536,7 @@ void EntityWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
     const QString& name = GetValue(mUI.name);
-    app::EntityResource resource(mState.entity, name);
+    app::EntityResource resource(*mState.entity, name);
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -518,7 +549,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "widget", mUI.widget);
 
     mState.workspace->SaveResource(resource);
-    mOriginalHash = mState.entity.GetHash();
+    mOriginalHash = mState.entity->GetHash();
 
     INFO("Saved entity '%1'", name);
     NOTE("Saved entity '%1'", name);
@@ -585,7 +616,7 @@ void EntityWidget::on_actionNodeDelete_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        mState.entity.DeleteNode(node);
+        mState.entity->DeleteNode(node);
 
         mUI.tree->Rebuild();
     }
@@ -619,7 +650,7 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
 {
     if (const auto* node = GetCurrentNode())
     {
-        auto* dupe = mState.entity.DuplicateNode(node);
+        auto* dupe = mState.entity->DuplicateNode(node);
         // update the the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
@@ -660,6 +691,52 @@ void EntityWidget::on_resetTransform_clicked()
     mUI.scaleX->setValue(1.0f);
     mUI.scaleY->setValue(1.0f);
     mUI.rotation->setValue(0);
+}
+
+void EntityWidget::on_btnNewTrack_clicked()
+{
+    // sharing the animation class object with the new animation
+    // track widget.
+    AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity);
+    emit OpenNewWidget(widget);
+}
+void EntityWidget::on_btnEditTrack_clicked()
+{
+    auto items = mUI.trackList->selectedItems();
+    if (items.isEmpty())
+        return;
+    QListWidgetItem* item = items[0];
+    QString id = item->data(Qt::UserRole).toString();
+
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        const auto& klass = mState.entity->GetAnimationTrack(i);
+        if (klass.GetId() != app::ToUtf8(id))
+            continue;
+
+        AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass);
+        emit OpenNewWidget(widget);
+    }
+}
+void EntityWidget::on_btnDeleteTrack_clicked()
+{
+    auto items = mUI.trackList->selectedItems();
+    if (items.isEmpty())
+        return;
+    QListWidgetItem* item = items[0];
+    QString id = item->data(Qt::UserRole).toString();
+
+    mState.entity->DeleteAnimationTrackById(app::ToUtf8(id));
+
+    // this will remove it from the widget.
+    delete item;
+}
+
+void EntityWidget::on_trackList_itemSelectionChanged()
+{
+    auto list = mUI.trackList->selectedItems();
+    mUI.btnEditTrack->setEnabled(!list.isEmpty());
+    mUI.btnDeleteTrack->setEnabled(!list.isEmpty());
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -1067,7 +1144,7 @@ void EntityWidget::TreeCurrentNodeChangedEvent()
 }
 void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
-    auto& tree = mState.entity.GetRenderTree();
+    auto& tree = mState.entity->GetRenderTree();
     auto* src_value = static_cast<game::EntityNodeClass*>(item->GetUserData());
     auto* dst_value = static_cast<game::EntityNodeClass*>(target->GetUserData());
 
@@ -1186,7 +1263,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // begin the animation transformation space
     view.Push();
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(mState.entity, painter, view, &hook);
+        mState.renderer.Draw(*mState.entity, painter, view, &hook);
         mState.renderer.EndFrame();
     view.Pop();
 
@@ -1255,7 +1332,7 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
 
         std::vector<game::EntityNodeClass *> nodes_hit;
         std::vector<glm::vec2> hitbox_coords;
-        mState.entity.CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
+        mState.entity->CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
 
         // if nothing was hit clear the selection.
         if (nodes_hit.empty())
@@ -1292,10 +1369,10 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
             const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                              hitpos.y >= 0 && hitpos.y <= 10.0f;
             if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(mState.entity, hit));
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hit));
             else if (top_left_hitbox_hit)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(mState.entity, hit));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.entity, hit));
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hit));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hit));
 
             mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
         }
@@ -1544,9 +1621,9 @@ void EntityWidget::RebuildCombos()
 
 void EntityWidget::UpdateDeletedResourceReferences()
 {
-    for (size_t i=0; i<mState.entity.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
-        auto& node = mState.entity.GetNode(i);
+        auto& node = mState.entity->GetNode(i);
         if (!node.HasDrawable())
             continue;
         auto* draw = node.GetDrawable();

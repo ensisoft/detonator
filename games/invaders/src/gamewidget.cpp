@@ -743,7 +743,7 @@ public:
             if (mLifeTime > mMaxLifeTime)
                 return false;
         }
-        mSprite->Update(mLifeTime/1000.0f, dt/1000.0f);
+        mSprite->Update(dt/1000.0f);
         renderer.Update(*mSprite, mLifeTime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -893,7 +893,7 @@ public:
         const auto y = mPosition.y;
         mPosition.x = math::wrap(0.0f, 1.0f, x);
         mPosition.y = math::wrap(0.0f, 1.0f, y);
-        mSprite->Update(mRuntime / 1000.0f, dt / 1000.0f);
+        mSprite->Update(dt / 1000.0f);
         renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -978,7 +978,7 @@ public:
         mRuntime += dt;
         if (mRuntime > mLifeTime)
             return false;
-        mSprite->Update(mRuntime/1000.0f, dt/1000.0f);
+        mSprite->Update(dt/1000.0f);
         renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -2063,7 +2063,7 @@ void GameWidget::Update(double current_time, double dt)
         mAnimations.emplace_back(new UFO(CreateEntityByName("UFO")));
     }
 
-    mBackground->Update(current_time, time/1000.0f);
+    mBackground->Update(time/1000.0f);
     mRenderer.Update(*mBackground, current_time, time/1000.0f);
 
     mStates.top()->update(time);

@@ -320,6 +320,8 @@ namespace game
         // name it's undefined which one is returned.
         const Entity* FindEntityByInstanceName(const std::string& name) const;
 
+        void Update(float dt);
+
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
@@ -347,6 +349,8 @@ namespace game
         // The scene graph/render tree for hierarchical traversal
         // of the scene.
         RenderTree mRenderTree;
+        // the current scene time.
+        double mCurrentTime = 0.0;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);

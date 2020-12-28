@@ -80,11 +80,6 @@ namespace game
     protected:
     };
 
-    using AnimationClassDrawHook    = DrawHook<AnimationNodeClass>;
-    using AnimationInstanceDrawHook = DrawHook<AnimationNode>;
-    using EntityClassDrawHook       = DrawHook<EntityNodeClass>;
-    using EntityInstanceDrawHook    = DrawHook<EntityNode>;
-
     template<typename EntityType>
     class SceneDrawHook
     {
@@ -95,8 +90,10 @@ namespace game
     private:
     };
 
-    using SceneClassDrawHook    = SceneDrawHook<SceneNodeClass>;
-    using SceneInstanceDrawHook = SceneDrawHook<Entity>;
+    using EntityClassDrawHook     = DrawHook<EntityNodeClass>;
+    using EntityInstanceDrawHook  = DrawHook<EntityNode>;
+    using SceneClassDrawHook      = SceneDrawHook<SceneNodeClass>;
+    using SceneInstanceDrawHook   = SceneDrawHook<Entity>;
 
     class Renderer
     {
@@ -108,23 +105,16 @@ namespace game
 
         void BeginFrame();
 
-        // Draw a representation of the animation class instance.
-        // This functionality is mostly to support editor functionality
-        // and to simplify working with an AnimationClass instance.
-        void Draw(const AnimationClass& klass,
-                  gfx::Painter& painter, gfx::Transform& transform,
-                  AnimationClassDrawHook* hook = nullptr);
-        // Draw the animation and its nodes.
+        // Draw the entity and its nodes.
         // Each node is transformed relative to the parent transformation "trans".
         // Optional draw hook can be used to modify the draw packets before submission to the
         // paint device.
-        void Draw(const Animation& animation,
-                  gfx::Painter& painter, gfx::Transform& transform,
-                  AnimationInstanceDrawHook* hook = nullptr);
-
         void Draw(const Entity& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityInstanceDrawHook* hook = nullptr);
+        // Draw a representation of the entity class instance.
+        // This functionality is mostly to support editor functionality
+        // and to simplify working with an AnimationClass instance.
         void Draw(const EntityClass& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityClassDrawHook* hook = nullptr);
@@ -140,10 +130,6 @@ namespace game
 
         // Update the visual representation of the renderer's paint node
         // based on the given animation node.
-        void Update(const AnimationNodeClass& node, float time, float dt);
-        void Update(const AnimationNode& node, float time, float dt);
-        void Update(const AnimationClass& klass, float time, float dt);
-        void Update(const Animation& animation, float time, float dt);
         void Update(const EntityNodeClass& node, float time, float dt);
         void Update(const EntityClass& entity, float time, float dt);
         void Update(const EntityNode& node, float time, float dt);

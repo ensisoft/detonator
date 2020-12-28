@@ -277,16 +277,17 @@ void IPCClient::ReadMessage()
         Resource::Type type;
         base::JsonReadSafe(json, "__type", &type);
         base::JsonReadSafe(json, "__name", &name);
-        if (type == Resource::Type::Animation)
-            resource = CreateResource<game::AnimationClass>("animations", json, name);
+        if (type == Resource::Type::Entity)
+            resource = CreateResource<game::EntityClass>("entities", json, name);
+        else if (type == Resource::Type::Scene)
+            resource = CreateResource<game::SceneClass>("scenes", json, name);
         else if (type == Resource::Type::Material)
             resource = CreateResource<gfx::MaterialClass>("materials", json, name);
         else if (type == Resource::Type::CustomShape)
             resource = CreateResource<gfx::PolygonClass>("shapes", json, name);
         else if (type == Resource::Type::ParticleSystem)
             resource = CreateResource<gfx::KinematicsParticleEngineClass>("particles", json, name);
-        else
-            BUG("Unhandled resource type.");
+        else BUG("Unhandled resource type.");
 
         if (!resource)
         {

@@ -25,6 +25,7 @@
 #include <unordered_set>
 
 #include "base/format.h"
+#include "base/logging.h"
 #include "gamelib/scene.h"
 #include "gamelib/entity.h"
 #include "gamelib/treeop.h"
@@ -573,6 +574,17 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
         if (e->GetInstanceName() == name)
             return e.get();
     return nullptr;
+}
+
+void Scene::Update(float dt)
+{
+    mCurrentTime += dt;
+
+    // todo: limit which entities are getting updated.
+    for (auto& entity : mEntities)
+    {
+        entity->Update(dt);
+    }
 }
 
 std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass)

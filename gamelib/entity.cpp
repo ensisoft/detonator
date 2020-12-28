@@ -285,6 +285,13 @@ EntityClass::EntityClass(const EntityClass& other)
         mNodes.emplace_back(new EntityNodeClass(*node));
     }
 
+    // make a deep copy of the animation tracks
+    for (const auto& track : other.mAnimationTracks)
+    {
+        mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
+    }
+
+
     // use JSON serialization to create a copy of the render tree.
     using Serializer = RenderTreeFunctions<EntityNodeClass>;
     nlohmann::json json = other.mRenderTree.ToJson<Serializer>();
@@ -344,6 +351,80 @@ const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
     for (const auto& node : mNodes)
         if (node->GetClassId() == id)
             return node.get();
+    return nullptr;
+}
+
+
+AnimationTrackClass* EntityClass::AddAnimationTrack(AnimationTrackClass&& track)
+{
+    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track)));
+    return mAnimationTracks.back().get();
+}
+AnimationTrackClass* EntityClass::AddAnimationTrack(const AnimationTrackClass& track)
+{
+    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(track));
+    return mAnimationTracks.back().get();
+}
+AnimationTrackClass* EntityClass::AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track)
+{
+    mAnimationTracks.push_back(std::move(track));
+    return mAnimationTracks.back().get();
+}
+void EntityClass::DeleteAnimationTrack(size_t i)
+{
+    ASSERT(i < mAnimationTracks.size());
+    auto it = mAnimationTracks.begin();
+    std::advance(it, i);
+    mAnimationTracks.erase(it);
+}
+bool EntityClass::DeleteAnimationTrackByName(const std::string& name)
+{
+    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    {
+        if ((*it)->GetName() == name) {
+            mAnimationTracks.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+bool EntityClass::DeleteAnimationTrackById(const std::string& id)
+{
+    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    {
+        if ((*it)->GetId() == id) {
+            mAnimationTracks.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+AnimationTrackClass& EntityClass::GetAnimationTrack(size_t i)
+{
+    ASSERT(i < mAnimationTracks.size());
+    return *mAnimationTracks[i].get();
+}
+AnimationTrackClass* EntityClass::FindAnimationTrackByName(const std::string& name)
+{
+    for (const auto& klass : mAnimationTracks)
+    {
+        if (klass->GetName() == name)
+            return klass.get();
+    }
+    return nullptr;
+}
+const AnimationTrackClass& EntityClass::GetAnimationTrack(size_t i) const
+{
+    ASSERT(i < mAnimationTracks.size());
+    return *mAnimationTracks[i].get();
+}
+const AnimationTrackClass* EntityClass::FindAnimationTrackByName(const std::string& name) const
+{
+    for (const auto& klass : mAnimationTracks)
+    {
+        if (klass->GetName() == name)
+            return klass.get();
+    }
     return nullptr;
 }
 
@@ -426,6 +507,9 @@ std::size_t EntityClass::GetHash() const
             return;
         hash = base::hash_combine(hash, node->GetHash());
     });
+
+    for (const auto& track : mAnimationTracks)
+        hash = base::hash_combine(hash, track->GetHash());
     return hash;
 }
 
@@ -449,6 +533,12 @@ nlohmann::json EntityClass::ToJson() const
     {
         json["nodes"].push_back(node->ToJson());
     }
+
+    for (const auto& track : mAnimationTracks)
+    {
+        json["tracks"].push_back(track->ToJson());
+    }
+
     using Serializer = RenderTreeFunctions<EntityNodeClass>; 
     json["render_tree"] = mRenderTree.ToJson<Serializer>();
     return json;
@@ -471,6 +561,18 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
             ret.mNodes.push_back(std::make_shared<EntityNodeClass>(std::move(node.value())));
         }
     }
+    if (json.contains("tracks"))
+    {
+        for (const auto& js : json["tracks"].items())
+        {
+            std::optional<AnimationTrackClass> track = AnimationTrackClass::FromJson(js.value());
+            if (!track.has_value())
+                return std::nullopt;
+            ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
+        }
+    }
+
+
     auto& serializer = ret;
 
     auto render_tree = RenderTree::FromJson(json["render_tree"], serializer);
@@ -509,6 +611,12 @@ EntityClass EntityClass::Clone() const
         ret.mNodes.push_back(std::move(clone));
     }
 
+    // make a deep copy of the animation tracks
+    for (const auto& track : mAnimationTracks)
+    {
+        ret.mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(track->Clone()));
+    }
+
     // use the json serialization setup the copy of the
     // render tree.
     using Serializer2 = RenderTreeFunctions<EntityNodeClass>;
@@ -526,6 +634,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     EntityClass tmp(other);
     mClassId    = std::move(tmp.mClassId);
     mNodes      = std::move(tmp.mNodes);
+    mAnimationTracks = std::move(tmp.mAnimationTracks);
     mRenderTree = tmp.mRenderTree;
     return *this;
 }
@@ -709,9 +818,69 @@ FBox Entity::GetBoundingBox(const EntityNode* node) const
     return RenderTreeFunctions<EntityNode>::GetBoundingBox(mRenderTree, node);
 }
 
-void Entity::Update(double time, float dt)
+void Entity::Update(float dt)
 {
-    // placeholder.
+    mCurrentTime += dt;
+
+    if (!mAnimationTrack)
+        return;
+
+    mAnimationTrack->Update(dt);
+    for (auto& node : mNodes)
+    {
+        mAnimationTrack->Apply(*node);
+    }
+
+    if (!mAnimationTrack->IsComplete())
+        return;
+
+    DEBUG("AnimationTrack '%1' completed.", mAnimationTrack->GetName());
+
+    if (mAnimationTrack->IsLooping())
+    {
+        mAnimationTrack->Restart();
+        for (auto& node : mNodes)
+        {
+            node->Reset();
+        }
+        return;
+    }
+    mAnimationTrack.reset();
+}
+
+void Entity::Play(std::unique_ptr<AnimationTrack> track)
+{
+    // todo: what to do if there's a previous track ?
+    // possibilities: reset or queue?
+    mAnimationTrack = std::move(track);
+}
+void Entity::PlayAnimationByName(const std::string& name)
+{
+    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
+        if (klass->GetName() != name)
+            continue;
+        auto track = std::make_unique<AnimationTrack>(klass);
+        Play(std::move(track));
+        return;
+    }
+}
+void Entity::PlayAnimationById(const std::string& id)
+{
+    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
+        if (klass->GetId() != id)
+            continue;
+        auto track = std::make_unique<AnimationTrack>(klass);
+        Play(std::move(track));
+        return;
+    }
+}
+bool Entity::IsPlaying() const
+{
+    return !!mAnimationTrack;
 }
 
 void Entity::SetScale(const glm::vec2& scale)

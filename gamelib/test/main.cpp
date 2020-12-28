@@ -40,7 +40,6 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
-#include "gamelib/animation.h"
 #include "gamelib/classlib.h"
 #include "gamelib/renderer.h"
 #include "gamelib/entity.h"
@@ -71,11 +70,14 @@ public:
     virtual void Render(gfx::Painter& painter) override
     {
         gfx::Transform transform;
-        transform.Translate(400.0f, 400.0f);
+        transform.Translate(300.0f, 400.0f);
         mRenderer.Draw(*mScene, painter, transform);
     }
     virtual void Update(float dt) override
-    {}
+    {
+        if (mScene)
+            mScene->Update(dt);
+    }
     virtual void Start(game::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
@@ -101,6 +103,8 @@ public:
         }
 
         mScene = game::CreateSceneInstance(klass);
+        mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
+        mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
         mRenderer.SetLoader(loader);
     }
 private:
@@ -143,21 +147,13 @@ public:
             return;
 
         mTime += dt;
-        const auto angular_velocity = 2.4;
-        const auto angle = mTime * angular_velocity;
-        const auto R = sin(angle) * 0.5 + 0.5  * -math::Pi;
-        const auto L = cos(angle) * 0.5 + 0.5 * math::Pi;
-
-        auto* node = mEntity->FindNodeByClassName("shoulder joint R");
-        node->SetRotation(R);
-
-        node = mEntity->FindNodeByClassName("shoulder joint L");
-        node->SetRotation(L);
+        mEntity->Update(dt);
     }
     virtual void Start(game::ClassLibrary* loader)
     {
         auto klass = loader->FindEntityClassByName("robot");
         mEntity = game::CreateEntityInstance(klass);
+        mEntity->PlayAnimationByName("idle");
         mRenderer.SetLoader(loader);
     }
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
@@ -252,192 +248,6 @@ private:
     game::PhysicsEngine mPhysics;
 };
 
-
-
-class AnimationTest : public TestCase
-{
-public:
-    virtual void Render(gfx::Painter& painter) override
-    {
-        gfx::Transform transform;
-        transform.Translate(200, 200);
-        mRenderer.Draw(*mAnimations[0], painter, transform);
-
-        transform.Reset();
-        transform.MoveTo(500,200);
-        mRenderer.Draw(*mAnimations[1], painter, transform);
-
-        transform.Reset();
-        transform.MoveTo(800, 200);
-        mRenderer.Draw(*mAnimations[2], painter, transform);
-    }
-
-    virtual void Start(game::ClassLibrary* loader) override
-    {
-        mRenderer.SetLoader(loader);
-
-        game::AnimationNodeClass node;
-        node.SetDrawable("rectangle");
-        node.SetMaterial("uv_test");
-        node.SetSize(glm::vec2(200.0f, 200.0f));
-        node.SetName("Root");
-
-        game::AnimationTransformActuatorClass move(node.GetClassId());
-        move.SetEndPosition(glm::vec2(0.0f, 200.0f));
-        move.SetEndSize(glm::vec2(200.0f, 200.0f));
-        move.SetDuration(0.25);
-        move.SetStartTime(0.0f);
-
-        game::AnimationTransformActuatorClass resize(node.GetClassId());
-        resize.SetEndPosition(glm::vec2(0.0f, 200.0f));
-        resize.SetEndSize(glm::vec2(500.0f, 500.0f));
-        resize.SetDuration(0.25);
-        resize.SetStartTime(0.25);
-
-        game::AnimationTransformActuatorClass rotate(node.GetClassId());
-        rotate.SetEndPosition(glm::vec2(0.0f, 200.0f));
-        rotate.SetEndSize(glm::vec2(500.0f, 500.0f));
-        rotate.SetEndRotation(math::Pi);
-        rotate.SetDuration(0.25);
-        rotate.SetStartTime(0.5);
-
-        game::AnimationTransformActuatorClass back(node.GetClassId());
-        back.SetEndPosition(glm::vec2(0.0f, 0.0f));
-        back.SetEndSize(glm::vec2(200.0f, 200.0f));
-        back.SetEndRotation(0.0f);
-        back.SetDuration(0.25);
-        back.SetStartTime(0.75);
-
-        auto track = std::make_shared<game::AnimationTrackClass>();
-        track->AddActuator(move);
-        track->AddActuator(resize);
-        track->AddActuator(rotate);
-        track->AddActuator(back);
-        track->SetDuration(10.0f); // 10 seconds
-        track->SetLooping(true);
-        track->SetName("testing");
-
-        auto animation = std::make_shared<game::AnimationClass>();
-        auto* nptr = animation->AddNode(std::move(node));
-        auto& root = animation->GetRenderTree();
-        root.AppendChild(nptr);
-
-        // create 2 instances of the same animation
-        mAnimations[0] = std::make_unique<game::Animation>(animation);
-        mAnimations[1] = std::make_unique<game::Animation>(animation);
-        mAnimations[2] = std::make_unique<game::Animation>(animation);
-        mAnimations[0]->Play(game::AnimationTrack(track));
-        mAnimations[1]->Play(game::AnimationTrack(track));
-        mAnimations[2]->Play(game::AnimationTrack(track));
-    }
-    virtual void Update(float dt) override
-    {
-        if (mAnimations[0])
-            mAnimations[0]->Update(dt);
-        if (mAnimations[1])
-            mAnimations[1]->Update(dt);
-        if (mAnimations[2])
-            mAnimations[2]->Update(dt);
-    }
-
-private:
-    std::unique_ptr<game::Animation> mAnimations[3];
-    game::Renderer mRenderer;
-};
-
-class BoundingBoxTest : public TestCase
-{
-public:
-    // TestCase
-    virtual void Render(gfx::Painter& painter) override
-    {
-        gfx::Transform transform;
-        transform.Translate(500, 300);
-        //mAnimation->Draw(painter, transform);
-
-        mRenderer.Draw(*mAnimation, painter, transform);
-
-        for (size_t i=0; i<mAnimation->GetNumNodes(); ++i)
-        {
-            const auto& node = mAnimation->GetNode(i);
-            auto rect = mAnimation->GetBoundingRect(&node);
-            rect.Translate(500.0f, 300.0f);
-            gfx::DrawRectOutline(painter, rect, gfx::SolidColor(gfx::Color::Green), 1.0f);
-        }
-
-        auto bounds = mAnimation->GetBoundingRect();
-        bounds.Translate(500.0f, 300.0f);
-        gfx::DrawRectOutline(painter, bounds, gfx::SolidColor(gfx::Color::DarkYellow), 2.0f);
-
-    }
-    virtual void Start(game::ClassLibrary* loader) override
-    {
-        mRenderer.SetLoader(loader);
-
-        // create new animation class type.
-        game::AnimationClass animation;
-        {
-            game::AnimationNodeClass node;
-            node.SetDrawable("rectangle");
-            node.SetMaterial("uv_test");
-            node.SetSize(glm::vec2(200.0f, 200.0f));
-            node.SetName("Root");
-            auto* nptr = animation.AddNode(std::move(node));
-            auto& root = animation.GetRenderTree();
-            root.AppendChild(nptr);
-        }
-
-        {
-            game::AnimationNodeClass node;
-            node.SetDrawable("rectangle");
-            node.SetMaterial("uv_test");
-            node.SetSize(glm::vec2(100.0f, 100.0f));
-            node.SetTranslation(glm::vec2(150.0f, 150.0f));
-            node.SetName("Child 0");
-            auto* nptr = animation.AddNode(std::move(node));
-            auto& root = animation.GetRenderTree();
-            root.GetChildNode(0).AppendChild(nptr);
-        }
-
-        {
-            game::AnimationNodeClass node;
-            node.SetDrawable("rectangle");
-            node.SetMaterial("uv_test");
-            node.SetSize(glm::vec2(50.0f, 50.0f));
-            node.SetTranslation(glm::vec2(75.0f, 75.0f));
-            node.SetName("Child 1");
-            auto* nptr = animation.AddNode(std::move(node));
-            auto& root = animation.GetRenderTree();
-            root.GetChildNode(0).GetChildNode(0).AppendChild(nptr);
-        }
-        // create an animation instance
-        mAnimation = std::make_unique<game::Animation>(animation);
-    }
-    virtual void Update(float dts) override
-    {
-        mAnimation->Update(dts);
-
-        const auto velocity = 1.245;
-        mTime += dts * velocity;
-
-        //auto& tree = mAnimation->GetRenderTree();
-        auto* node = mAnimation->FindNodeByName("Child 0"); //tree.GetChildNode(0).GetChildNode(0);
-        node->SetScale(std::sin(mTime) + 1.0f);
-
-        for (size_t i=0; i<mAnimation->GetNumNodes(); ++i)
-        {
-            auto& node = mAnimation->GetNode(i);
-            node.SetRotation(mTime);
-        }
-    }
-    virtual void End() override
-    {}
-private:
-    std::unique_ptr<game::Animation> mAnimation;
-    game::Renderer mRenderer;
-    float mTime = 0.0f;
-};
-
 class MyApp : public game::App, public game::ClassLibrary, public wdk::WindowListener
 {
 public:
@@ -460,8 +270,6 @@ public:
     // Application implementation
     virtual void Start()
     {
-        mTestList.emplace_back(new BoundingBoxTest);
-        mTestList.emplace_back(new AnimationTest);
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new SceneTest);
@@ -567,10 +375,6 @@ public:
         ASSERT(!"No such drawable class.");
         return nullptr;
     }
-    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassById(const std::string& id) const override
-    { return nullptr; }
-    virtual std::shared_ptr<const game::AnimationClass> FindAnimationClassByName(const std::string& name) const override
-    { return nullptr; }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
         if (name == "box")
@@ -697,6 +501,29 @@ public:
                 arm.SetDrawable(draw);
                 klass->LinkChild(klass->FindNodeByName("shoulder joint L"), klass->AddNode(arm));
             }
+
+            game::TransformActuatorClass right_arm_up;
+            right_arm_up.SetDuration(0.5f);
+            right_arm_up.SetStartTime(0.0f);
+            right_arm_up.SetEndRotation(-math::Pi);
+            right_arm_up.SetEndPosition(klass->FindNodeByName("shoulder joint R")->GetTranslation());
+            right_arm_up.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
+            right_arm_up.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetClassId());
+            game::TransformActuatorClass right_arm_down;
+            right_arm_down.SetDuration(0.5f);
+            right_arm_down.SetStartTime(0.5f);
+            right_arm_down.SetEndRotation(0);
+            right_arm_down.SetEndPosition(klass->FindNodeByName("shoulder joint R")->GetTranslation());
+            right_arm_down.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
+            right_arm_down.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetClassId());
+
+            auto track = std::make_unique<game::AnimationTrackClass>();
+            track->SetDuration(2.0f);
+            track->SetName("idle");
+            track->SetLooping(true);
+            track->AddActuator(std::move(right_arm_up));
+            track->AddActuator(std::move(right_arm_down));
+            klass->AddAnimationTrack(std::move(track));
             return klass;
         }
         return nullptr;

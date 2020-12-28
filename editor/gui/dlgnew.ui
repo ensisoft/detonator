@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>554</width>
-    <height>553</height>
+    <width>448</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,11 +29,17 @@
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="QPushButton" name="btnAnimation">
+         <widget class="QPushButton" name="btnParticle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>150</width>
@@ -41,18 +47,18 @@
            </size>
           </property>
           <property name="text">
-           <string>Animation</string>
+           <string>Particle Engine</string>
           </property>
           <property name="icon">
            <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/animation.png</normaloff>:/16x16_ico_png/animation.png</iconset>
+            <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Combine shapes into an hierarchy of nodes and define their visual properties.</string>
+           <string>Display kinematic particles in motion based on velocity etc parameters.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -61,8 +67,8 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QPushButton" name="btnMaterial">
           <property name="sizePolicy">
@@ -116,10 +122,16 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QPushButton" name="btnCustomShape">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>150</width>
@@ -147,41 +159,16 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="1">
+      <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPushButton" name="btnParticle">
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Particle Engine</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Display kinematic particles in motion based on velocity etc parameters.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
          <widget class="QPushButton" name="btnEntity">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>150</width>
@@ -209,10 +196,16 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QPushButton" name="btnScene">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>150</width>
@@ -270,9 +263,8 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>btnMaterial</tabstop>
   <tabstop>btnParticle</tabstop>
-  <tabstop>btnAnimation</tabstop>
+  <tabstop>btnMaterial</tabstop>
   <tabstop>btnCustomShape</tabstop>
   <tabstop>btnEntity</tabstop>
   <tabstop>btnScene</tabstop>
