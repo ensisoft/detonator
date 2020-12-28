@@ -684,6 +684,8 @@ void PlayWindow::DoAppInit()
         config.physics.num_position_iterations = settings.num_position_iterations;
         config.physics.gravity = settings.gravity;
         config.physics.scale   = settings.physics_scale;
+        config.default_mag_filter = settings.default_mag_filter;
+        config.default_min_filter = settings.default_min_filter;
 
         mApp->SetEngineConfig(config);
         mApp->Load();

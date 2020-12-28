@@ -343,6 +343,8 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
 
         game::App::EngineConfig config;
+        base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
+        base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
         config.updates_per_second = updates_per_second;
         config.ticks_per_second   = ticks_per_second;
         if (json.contains("physics"))

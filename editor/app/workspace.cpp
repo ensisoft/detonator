@@ -1864,18 +1864,18 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             json["window"]["set_fullscreen"] = false;
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
             json["window"]["set_fullscreen"] = true;
-        json["application"]["title"]   = ToUtf8(mSettings.application_name);
-        json["application"]["version"] = ToUtf8(mSettings.application_version);
-        json["application"]["ticks_per_second"]   = (float)mSettings.ticks_per_second;
-        json["application"]["updates_per_second"] = (float)mSettings.updates_per_second;
-        json["application"]["content"] = "content.json";
 
-        nlohmann::json physics_settings;
-        base::JsonWrite(physics_settings, "num_velocity_iterations", mSettings.num_velocity_iterations);
-        base::JsonWrite(physics_settings, "num_position_iterations", mSettings.num_position_iterations);
-        base::JsonWrite(physics_settings, "gravity", mSettings.gravity);
-        base::JsonWrite(physics_settings, "scale",   mSettings.physics_scale);
-        json["physics"] = physics_settings;
+        base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
+        base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
+        base::JsonWrite(json["application"], "ticks_per_second",   (float)mSettings.ticks_per_second);
+        base::JsonWrite(json["application"], "updates_per_second", (float)mSettings.updates_per_second);
+        base::JsonWrite(json["application"], "content", "content.json");
+        base::JsonWrite(json["application"], "default_min_filter", mSettings.default_min_filter);
+        base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_min_filter);
+        base::JsonWrite(json["physics"], "num_velocity_iterations", mSettings.num_velocity_iterations);
+        base::JsonWrite(json["physics"], "num_position_iterations", mSettings.num_position_iterations);
+        base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
+        base::JsonWrite(json["physics"], "scale",   mSettings.physics_scale);
 
         // resolves the path.
         const QFileInfo engine_dll(mSettings.GetApplicationLibrary());

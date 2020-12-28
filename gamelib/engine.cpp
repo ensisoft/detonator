@@ -120,6 +120,8 @@ public:
         mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
         mPhysics.SetNumVelocityIterations(conf.physics.num_velocity_iterations);
         mPhysics.SetTimestep(1.0f / conf.updates_per_second);
+        mDevice->SetDefaultTextureFilter(conf.default_min_filter);
+        mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
     }
 
     virtual void Draw() override

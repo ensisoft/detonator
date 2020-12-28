@@ -139,6 +139,11 @@ namespace game
 
         // Configuration for the engine/application
         struct EngineConfig {
+            // The default texture minification filter setting.
+            gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Bilinear;
+            // the default texture magnification filter setting.
+            gfx::Device::MagFilter default_mag_filter = gfx::Device::MagFilter::Linear;
+
             // the current expected number of Update calls per second.
             unsigned updates_per_second = 60;
             // The current expected number of Tick calls per second.
