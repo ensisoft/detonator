@@ -119,9 +119,11 @@ namespace gui
     class MoveRenderTreeNodeTool : public MouseTool
     {
     public:
-        MoveRenderTreeNodeTool(TreeModel& model, TreeNode* selected)
-                : mModel(model)
-                , mNode(selected)
+        MoveRenderTreeNodeTool(TreeModel& model, TreeNode* selected, bool snap = false, unsigned grid = 0)
+            : mModel(model)
+            , mNode(selected)
+            , mSnapToGrid(snap)
+            , mGridSize(grid)
         {}
         virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -183,7 +185,13 @@ namespace gui
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
-            // nothing to be done here.
+            if (mSnapToGrid)
+            {
+                glm::vec2 position = mNode->GetTranslation();
+                position.x = std::round(position.x / mGridSize) * mGridSize;
+                position.y = std::round(position.y / mGridSize) * mGridSize;
+                mNode->SetTranslation(position);
+            }
             return false;
         }
     private:
@@ -192,6 +200,9 @@ namespace gui
         // previous mouse position, for each mouse move we update the objects'
         // position by the delta between previous and current mouse pos.
         glm::vec2 mPreviousMousePos;
+        // true if we want the x,y coords to be aligned on grid size units.
+        bool mSnapToGrid = false;
+        unsigned mGridSize = 0;
     };
 
     template<typename TreeModel, typename TreeNode>

@@ -237,11 +237,15 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
                                                      hitpos.y >= size.y - 10.0f;
                 const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                                      hitpos.y >= 0 && hitpos.y <= 10.0f;
+                const auto snap = (bool)GetValue(mUI.chkSnap);
+                const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+                const auto grid_size = (unsigned)grid;
+
                 if (bottom_right_hitbox_hit)
                     mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mEntity, hitnode));
                 else if (top_left_hitbox_hit)
                     mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
-                else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode));
+                else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
             }
             else if (!mUI.timeline->GetSelectedItem() && !nodes_hit.empty())
             {
@@ -386,6 +390,7 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.materialEndAlpha);
     settings.saveWidget("TrackWidget", mUI.chkShowOrigin);
     settings.saveWidget("TrackWidget", mUI.chkShowGrid);
+    settings.saveWidget("TrackWidget", mUI.chkSnap);
     settings.saveWidget("TrackWidget", mUI.chkShowTransformActuators);
     settings.saveWidget("TrackWidget", mUI.chkShowMaterialActuators);
     settings.setValue("TrackWidget", "original_hash", mOriginalHash);
@@ -429,6 +434,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.materialEndAlpha);
     settings.loadWidget("TrackWidget", mUI.chkShowOrigin);
     settings.loadWidget("TrackWidget", mUI.chkShowGrid);
+    settings.loadWidget("TrackWidget", mUI.chkSnap);
     settings.loadWidget("TrackWidget", mUI.chkShowTransformActuators);
     settings.loadWidget("TrackWidget", mUI.chkShowMaterialActuators);
     settings.getValue("TrackWidget", "original_hash", &mOriginalHash);

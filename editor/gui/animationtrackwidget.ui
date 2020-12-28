@@ -454,6 +454,13 @@
              </spacer>
             </item>
             <item>
+             <widget class="QCheckBox" name="chkSnap">
+              <property name="text">
+               <string>Snap to grid</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QCheckBox" name="chkShowOrigin">
               <property name="text">
                <string>Show origin</string>
@@ -1203,6 +1210,7 @@
   <tabstop>cmbGrid</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkSnap</tabstop>
   <tabstop>chkShowMaterialActuators</tabstop>
   <tabstop>chkShowTransformActuators</tabstop>
   <tabstop>actuatorNode</tabstop>

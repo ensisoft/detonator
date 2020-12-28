@@ -278,6 +278,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     SetValue(mUI.ID, content->GetId());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "widget", mUI.widget);
@@ -354,6 +355,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.saveWidget("Entity", mUI.rotation);
     settings.saveWidget("Entity", mUI.chkShowOrigin);
     settings.saveWidget("Entity", mUI.chkShowGrid);
+    settings.saveWidget("Entity", mUI.chkSnap);
     settings.saveWidget("Entity", mUI.cmbGrid);
     settings.saveWidget("Entity", mUI.zoom);
     settings.saveWidget("Entity", mUI.widget);
@@ -377,6 +379,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.loadWidget("Entity", mUI.rotation);
     settings.loadWidget("Entity", mUI.chkShowOrigin);
     settings.loadWidget("Entity", mUI.chkShowGrid);
+    settings.loadWidget("Entity", mUI.chkSnap);
     settings.loadWidget("Entity", mUI.cmbGrid);
     settings.loadWidget("Entity", mUI.zoom);
     settings.loadWidget("Entity", mUI.widget);
@@ -544,6 +547,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "camera_rotation", mUI.rotation);
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
+    SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
@@ -1368,11 +1372,16 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
                                                  hitpos.y >= size.y - 10.0f;
             const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                              hitpos.y >= 0 && hitpos.y <= 10.0f;
+
+            const auto snap = (bool)GetValue(mUI.chkSnap);
+            const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+            const auto grid_size = (unsigned)grid;
+
             if (bottom_right_hitbox_hit)
                 mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hit));
             else if (top_left_hitbox_hit)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hit));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hit));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hit, snap, grid_size));
 
             mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
         }

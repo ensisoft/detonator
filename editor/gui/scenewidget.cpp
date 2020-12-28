@@ -67,9 +67,11 @@ namespace gui
 class SceneWidget::PlaceEntityTool : public MouseTool
 {
 public:
-    PlaceEntityTool(SceneWidget::State& state, std::shared_ptr<const game::EntityClass> klass)
+    PlaceEntityTool(SceneWidget::State& state, std::shared_ptr<const game::EntityClass> klass, bool snap, unsigned grid)
       : mState(state)
       , mClass(klass)
+      , mSnapToGrid(snap)
+      , mGridSize(grid)
     {}
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
@@ -93,6 +95,12 @@ public:
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
             return false;
+
+        if (mSnapToGrid)
+        {
+            mWorldPos.x = std::round(mWorldPos.x / mGridSize) * mGridSize;
+            mWorldPos.y = std::round(mWorldPos.y / mGridSize) * mGridSize;
+        }
 
         const auto name = CreateName();
         game::SceneNodeClass node;
@@ -126,6 +134,9 @@ private:
     glm::vec4 mWorldPos;
     // entity class for the item we're going to add to scene.
     std::shared_ptr<const game::EntityClass> mClass;
+    // true if we want the x,y coords to be aligned on grid size units.
+    bool mSnapToGrid = false;
+    unsigned mGridSize = 0;
 };
 
 SceneWidget::SceneWidget(app::Workspace* workspace)
@@ -193,6 +204,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.ID, content->GetId());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "widget", mUI.widget);
@@ -247,6 +259,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.saveWidget("Scene", mUI.rotation);
     settings.saveWidget("Scene", mUI.chkShowOrigin);
     settings.saveWidget("Scene", mUI.chkShowGrid);
+    settings.saveWidget("Scene", mUI.chkSnap);
     settings.saveWidget("Scene", mUI.cmbGrid);
     settings.saveWidget("Scene", mUI.zoom);
     settings.saveWidget("Scene", mUI.widget);
@@ -270,6 +283,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.loadWidget("Scene", mUI.rotation);
     settings.loadWidget("Scene", mUI.chkShowOrigin);
     settings.loadWidget("Scene", mUI.chkShowGrid);
+    settings.loadWidget("Scene", mUI.chkSnap);
     settings.loadWidget("Scene", mUI.cmbGrid);
     settings.loadWidget("Scene", mUI.zoom);
     settings.loadWidget("Scene", mUI.widget);
@@ -408,6 +422,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "camera_rotation", mUI.rotation);
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
+    SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
@@ -584,7 +599,11 @@ void SceneWidget::PlaceNewEntity()
     const auto* action = qobject_cast<QAction*>(sender());
     const auto klassid = action->data().toString();
     auto entity = mState.workspace->GetEntityClassById(klassid);
-    mCurrentTool = std::make_unique<PlaceEntityTool>(mState, entity);
+
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto grid_size = (unsigned)grid;
+    mCurrentTool = std::make_unique<PlaceEntityTool>(mState, entity, snap, grid_size);
 }
 
 void SceneWidget::TreeCurrentNodeChangedEvent()
@@ -788,8 +807,11 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
                 }
             }
             // todo: figure out how to rotate or scale a node
+            const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+            const auto snap = (bool)GetValue(mUI.chkSnap);
+            const unsigned grid_size = static_cast<unsigned>(grid);
 
-            mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, hit));
+            mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, hit, snap, grid_size));
             mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
         }
     }
