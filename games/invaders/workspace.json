@@ -3,13 +3,10 @@
         "checked_for_packing": true,
         "material": "Scarab"
     },
-    "0ryFZH376L": {
+    "0q5xgI7aXU": {
         "checked_for_packing": true
     },
     "46yvmCSzSL": {
-        "checked_for_packing": true
-    },
-    "4sXzaaFmvE": {
         "checked_for_packing": true
     },
     "5OtYNGYEi5": {
@@ -34,10 +31,13 @@
         "use_lifetime": true,
         "use_size_derivatives": false
     },
+    "AGpwFLniqi": {
+        "checked_for_packing": true
+    },
     "AqPWpeetnB": {
         "checked_for_packing": true
     },
-    "AsK76ObHJo": {
+    "D57sl8JCQS": {
         "checked_for_packing": true
     },
     "E6ZHdAHRBY": {
@@ -71,15 +71,18 @@
     "Kt7KKux9mo": {
         "checked_for_packing": true
     },
-    "Q9LbPJnta0": {
+    "LeNxoNvQbn": {
         "checked_for_packing": true
     },
-    "ZlFaftPBiF": {
+    "PTsZrCTnM0": {
         "checked_for_packing": true
     },
     "ZxF4YiTJ0d": {
         "checked_for_packing": true,
         "material": "Mantis"
+    },
+    "b18SpfABQ5": {
+        "checked_for_packing": true
     },
     "d8CDbfETmY": {
         "checked_for_packing": true,
@@ -123,13 +126,13 @@
     "lIO2x5dmry": {
         "checked_for_packing": true
     },
+    "lQDnzkH9Ky": {
+        "checked_for_packing": true
+    },
     "n6I4hvN8l1": {
         "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
-    },
-    "nf6vDCSp3f": {
-        "checked_for_packing": true
     },
     "project": {
         "application_library_lin": "ws://dist/libinvaders.so",
@@ -141,6 +144,12 @@
         "default_min_filter": "Trilinear",
         "engine": "Custom",
         "multisample_sample_count": 4,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 1,
+        "phys_scale_x": 1,
+        "phys_scale_y": 1,
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
@@ -152,13 +161,10 @@
         "window_width": 1024,
         "working_folder": "${workspace}/dist"
     },
-    "qFf44e10n1": {
+    "sPJ5mHTwAg": {
         "checked_for_packing": true
     },
     "tl86yqbmeJ": {
-        "checked_for_packing": true
-    },
-    "uXIb9I3vik": {
         "checked_for_packing": true
     },
     "wE5I5Tg7p0": {

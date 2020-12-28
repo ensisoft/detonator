@@ -709,6 +709,11 @@ FBox Entity::GetBoundingBox(const EntityNode* node) const
     return RenderTreeFunctions<EntityNode>::GetBoundingBox(mRenderTree, node);
 }
 
+void Entity::Update(double time, float dt)
+{
+    // placeholder.
+}
+
 void Entity::SetScale(const glm::vec2& scale)
 {
     for (const auto& node : mNodes)

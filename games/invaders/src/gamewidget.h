@@ -97,7 +97,7 @@ namespace invaders
         virtual void OnWantClose(const wdk::WindowEventWantClose& close) override;
     private:
         void PlayMusic();
-        std::unique_ptr<game::Animation> CreateAnimationByName(const std::string& name) const;
+        std::unique_ptr<game::Entity> CreateEntityByName(const std::string& name) const;
 
     private:
         class State;
@@ -128,7 +128,7 @@ namespace invaders
         std::vector<LevelInfo> mLevelInfos;
         std::vector<Profile> mProfiles;
         std::list<std::unique_ptr<Animation>> mAnimations;
-        std::unique_ptr<game::Animation> mBackground;
+        std::unique_ptr<game::Entity> mBackground;
 
         std::unique_ptr<Game> mGame;
         unsigned mCurrentLevel   = 0;

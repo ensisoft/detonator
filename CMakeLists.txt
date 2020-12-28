@@ -486,9 +486,10 @@ add_library(invaders SHARED
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
+    gamelib/animation.cpp
     gamelib/renderer.cpp
     gamelib/homedir.cpp
-    gamelib/animation.cpp
+    gamelib/scene.cpp
     gamelib/entity.cpp
     gamelib/loader.cpp
     gamelib/main/gamelib.cpp

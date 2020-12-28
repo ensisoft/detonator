@@ -932,6 +932,8 @@ namespace game
 
         FBox GetBoundingBox(const EntityNode* node) const;
 
+        void Update(double time, float dt);
+
         void SetTranslation(const glm::vec2& position)
         { mPosition = position; }
         void SetRotation(float angle)

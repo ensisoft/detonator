@@ -1,23 +1,16 @@
 {
-  "animations": [
+  "entities": [
     {
-      "id": "Q9LbPJnta0",
+      "id": "sPJ5mHTwAg",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 3,
-          "drawable": "",
-          "id": "eqyyTFgoPX",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "",
+          "class": "NhoWavKXqw",
+          "flags": 3,
           "name": "Background",
           "position": {
             "x": 600.0,
             "y": 450.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 3.1415927410125732,
           "scale": {
             "x": 1.0,
@@ -29,20 +22,23 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 11,
-          "drawable": "hR9OWOACQy",
-          "id": "eQzT1fIZxY",
-          "layer": 2,
-          "linewidth": 1.0,
-          "material": "46yvmCSzSL",
+          "class": "SoSkgeeR8F",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "hR9OWOACQy",
+            "flags": 7,
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "46yvmCSzSL",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Stars0",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -54,20 +50,23 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 11,
-          "drawable": "9D2vt3ioun",
-          "id": "4fLtRil2lL",
-          "layer": 2,
-          "linewidth": 1.0,
-          "material": "46yvmCSzSL",
+          "class": "1BeQ5vXv5j",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "9D2vt3ioun",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "46yvmCSzSL",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Stars1",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -79,20 +78,23 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 11,
-          "drawable": "d8CDbfETmY",
-          "id": "9SZAeUshtX",
-          "layer": 3,
-          "linewidth": 1.0,
-          "material": "46yvmCSzSL",
+          "class": "IBoRolWXD9",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "d8CDbfETmY",
+            "flags": 7,
+            "layer": 3,
+            "linewidth": 1.0,
+            "material": "46yvmCSzSL",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Stars2",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -104,28 +106,31 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 7,
-          "drawable": "_rect",
-          "id": "wChFz6luAG",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "zQGgrkSE8i",
-          "name": "Nebula 1",
-          "position": {
-            "x": -8.892822265625,
-            "y": 3.107177734375
+          "class": "lOKReCY1Z6",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "zQGgrkSE8i",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
+          "flags": 3,
+          "name": "Nebula",
+          "position": {
+            "x": -9.0,
+            "y": 3.0
+          },
           "rotation": 3.1415927410125732,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 1362.85693359375,
-            "y": 1037.85693359375
+            "x": 1400.0,
+            "y": 1040.0
           }
         }
       ],
@@ -135,53 +140,56 @@
             "children": [
               {
                 "node": {
-                  "id": "eQzT1fIZxY"
+                  "id": "SoSkgeeR8F"
                 }
               },
               {
                 "node": {
-                  "id": "4fLtRil2lL"
+                  "id": "1BeQ5vXv5j"
                 }
               },
               {
                 "node": {
-                  "id": "9SZAeUshtX"
+                  "id": "IBoRolWXD9"
                 }
               },
               {
                 "node": {
-                  "id": "wChFz6luAG"
+                  "id": "lOKReCY1Z6"
                 }
               }
             ],
             "node": {
-              "id": "eqyyTFgoPX"
+              "id": "NhoWavKXqw"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "Q9LbPJnta0",
+      "resource_id": "sPJ5mHTwAg",
       "resource_name": "Space"
     },
     {
-      "id": "uXIb9I3vik",
+      "id": "D57sl8JCQS",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "_circle",
-          "id": "ZaeblRyDUe",
-          "layer": 1,
-          "linewidth": 1.0,
-          "material": "EMBqY9KWth",
+          "class": "ezqFD2JsTP",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": 7,
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EMBqY9KWth",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "UFO",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -193,20 +201,23 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "_circle",
-          "id": "sZo946elWu",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "HMQvdCNPy4",
+          "class": "FCoR29Dqvj",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HMQvdCNPy4",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Rings",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -221,41 +232,42 @@
       "render_tree": {
         "children": [
           {
-            "children": [
-              {
-                "node": {
-                  "id": "sZo946elWu"
-                }
-              }
-            ],
             "node": {
-              "id": "ZaeblRyDUe"
+              "id": "ezqFD2JsTP"
+            }
+          },
+          {
+            "node": {
+              "id": "FCoR29Dqvj"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "uXIb9I3vik",
+      "resource_id": "D57sl8JCQS",
       "resource_name": "UFO"
     },
     {
-      "id": "4sXzaaFmvE",
+      "id": "b18SpfABQ5",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "_circle",
-          "id": "3WZHGH1CkN",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "lIO2x5dmry",
+          "class": "SMTO5s3IL8",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "lIO2x5dmry",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Node 0",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -271,33 +283,36 @@
         "children": [
           {
             "node": {
-              "id": "3WZHGH1CkN"
+              "id": "SMTO5s3IL8"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "4sXzaaFmvE",
+      "resource_id": "b18SpfABQ5",
       "resource_name": "Asteroid"
     },
     {
-      "id": "ZlFaftPBiF",
+      "id": "PTsZrCTnM0",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "k0uqQHtPFX",
-          "id": "T5sOrkrCKJ",
-          "layer": 1,
-          "linewidth": 1.0,
-          "material": "n6I4hvN8l1",
+          "class": "M9ahxR397d",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "k0uqQHtPFX",
+            "flags": 7,
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "n6I4hvN8l1",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Ship",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -309,52 +324,48 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "wE5I5Tg7p0",
-          "id": "giuSiRuPPX",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "Kt7KKux9mo",
+          "class": "lg5HTrUsXS",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "wE5I5Tg7p0",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Kt7KKux9mo",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Smoke",
           "position": {
             "x": 132.0,
             "y": -2.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 140.87771606445313,
-            "y": 88.9730224609375
+            "x": 140.0,
+            "y": 90.0
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 29,
-          "drawable": "_rect",
-          "id": "wSzxrM5UGn",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "",
+          "class": "W65Ke0j1fn",
+          "flags": 3,
           "name": "Box",
           "position": {
-            "x": 9.5,
-            "y": 105.5
+            "x": 10.0,
+            "y": 105.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 191.2532958984375,
+            "x": 190.0,
             "y": 30.0
           }
         }
@@ -365,93 +376,92 @@
             "children": [
               {
                 "node": {
-                  "id": "giuSiRuPPX"
+                  "id": "lg5HTrUsXS"
                 }
               }
             ],
             "node": {
-              "id": "T5sOrkrCKJ"
+              "id": "M9ahxR397d"
             }
           },
           {
             "node": {
-              "id": "wSzxrM5UGn"
+              "id": "W65Ke0j1fn"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "ZlFaftPBiF",
+      "resource_id": "PTsZrCTnM0",
       "resource_name": "Cricket"
     },
     {
-      "id": "nf6vDCSp3f",
+      "id": "0q5xgI7aXU",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "ZxF4YiTJ0d",
-          "id": "XwCzqDzsgi",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "tl86yqbmeJ",
+          "class": "vzQgnYtLgS",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "ZxF4YiTJ0d",
+            "flags": 7,
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "tl86yqbmeJ",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Ship",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 131.0,
-            "y": 102.0
+            "x": 130.0,
+            "y": 100.0
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "wE5I5Tg7p0",
-          "id": "3lmRxAbReC",
-          "layer": -1,
-          "linewidth": 1.0,
-          "material": "Kt7KKux9mo",
-          "name": "Node 1",
+          "class": "2Jhper397H",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "wE5I5Tg7p0",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Kt7KKux9mo",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
+          "name": "Node 0",
           "position": {
-            "x": 119.25,
-            "y": 0.5
+            "x": 120.0,
+            "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 117.5,
-            "y": 15.5
+            "x": 120.0,
+            "y": 15.0
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 29,
-          "drawable": "_rect",
-          "id": "xD9OseJa8G",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "",
+          "class": "lpEaDhw2ZB",
+          "flags": 3,
           "name": "Box",
           "position": {
             "x": 11.0,
             "y": 67.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -469,100 +479,99 @@
             "children": [
               {
                 "node": {
-                  "id": "3lmRxAbReC"
+                  "id": "2Jhper397H"
                 }
               }
             ],
             "node": {
-              "id": "XwCzqDzsgi"
+              "id": "vzQgnYtLgS"
             }
           },
           {
             "node": {
-              "id": "xD9OseJa8G"
+              "id": "lpEaDhw2ZB"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "nf6vDCSp3f",
+      "resource_id": "0q5xgI7aXU",
       "resource_name": "Mantis"
     },
     {
-      "id": "qFf44e10n1",
+      "id": "AGpwFLniqi",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "0LQtJeq8Dl",
-          "id": "ik1EaSPw7Q",
-          "layer": 1,
-          "linewidth": 1.0,
-          "material": "gLRYUQObGy",
+          "class": "69l7juLOjb",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "0LQtJeq8Dl",
+            "flags": 7,
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "gLRYUQObGy",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Ship",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 165.0,
-            "y": 131.0
+            "x": 160.0,
+            "y": 130.0
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "wE5I5Tg7p0",
-          "id": "oBJdOYEv4S",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "Kt7KKux9mo",
+          "class": "YuA4EhrqAn",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "wE5I5Tg7p0",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Kt7KKux9mo",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Node 1",
           "position": {
-            "x": 181.35711669921875,
-            "y": 0.0714263916015625
+            "x": 180.0,
+            "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 204.9704132080078,
-            "y": 12.776798248291016
+            "x": 205.0,
+            "y": 12.0
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 29,
-          "drawable": "_rect",
-          "id": "aHZbBN0DAx",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "",
+          "class": "6GR8iZRFE1",
+          "flags": 3,
           "name": "Box",
           "position": {
-            "x": -0.23810577392578125,
-            "y": 85.71429443359375
+            "x": 0.0,
+            "y": 85.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 177.61907958984375,
+            "x": 180.0,
             "y": 30.0
           }
         }
@@ -573,43 +582,46 @@
             "children": [
               {
                 "node": {
-                  "id": "oBJdOYEv4S"
+                  "id": "YuA4EhrqAn"
                 }
               }
             ],
             "node": {
-              "id": "ik1EaSPw7Q"
+              "id": "69l7juLOjb"
             }
           },
           {
             "node": {
-              "id": "aHZbBN0DAx"
+              "id": "6GR8iZRFE1"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "qFf44e10n1",
+      "resource_id": "AGpwFLniqi",
       "resource_name": "Scarab"
     },
     {
-      "id": "AsK76ObHJo",
+      "id": "LeNxoNvQbn",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "5OtYNGYEi5",
-          "id": "vMYqa9mbGv",
-          "layer": 1,
-          "linewidth": 1.0,
-          "material": "AqPWpeetnB",
+          "class": "Doku2oJRT8",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "5OtYNGYEi5",
+            "flags": 7,
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "AqPWpeetnB",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Ship",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -621,20 +633,41 @@
           }
         },
         {
-          "alpha": 1.0,
-          "bitflags": 29,
-          "drawable": "_rect",
-          "id": "FFGOZdMa07",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "",
+          "class": "WnbZPhQWeC",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "wE5I5Tg7p0",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Kt7KKux9mo",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
+          "name": "Node 0",
+          "position": {
+            "x": 270.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 280.0,
+            "y": 40.0
+          }
+        },
+        {
+          "class": "izid3Aa9WR",
+          "flags": 3,
           "name": "Box",
           "position": {
             "x": 0.0,
-            "y": 160.5
+            "y": 160.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -644,31 +677,6 @@
             "x": 296.0,
             "y": 35.0
           }
-        },
-        {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "wE5I5Tg7p0",
-          "id": "PJHSjHwzqR",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "Kt7KKux9mo",
-          "name": "Node 1",
-          "position": {
-            "x": 269.5,
-            "y": 0.5
-          },
-          "render_pass": "Draw",
-          "render_style": "Solid",
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 282.74127197265625,
-            "y": 39.785194396972656
-          }
         }
       ],
       "render_tree": {
@@ -677,43 +685,46 @@
             "children": [
               {
                 "node": {
-                  "id": "PJHSjHwzqR"
+                  "id": "WnbZPhQWeC"
                 }
               }
             ],
             "node": {
-              "id": "vMYqa9mbGv"
+              "id": "Doku2oJRT8"
             }
           },
           {
             "node": {
-              "id": "FFGOZdMa07"
+              "id": "izid3Aa9WR"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "AsK76ObHJo",
+      "resource_id": "LeNxoNvQbn",
       "resource_name": "Locust"
     },
     {
-      "id": "0ryFZH376L",
+      "id": "lQDnzkH9Ky",
       "nodes": [
         {
-          "alpha": 1.0,
-          "bitflags": 31,
-          "drawable": "_circle",
-          "id": "QWJTEC8x4S",
-          "layer": 0,
-          "linewidth": 1.0,
-          "material": "E6ZHdAHRBY",
+          "class": "wUZNCbqKPj",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": 7,
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "E6ZHdAHRBY",
+            "renderpass": "Draw",
+            "renderstyle": "Solid"
+          },
+          "flags": 3,
           "name": "Node 0",
           "position": {
-            "x": -2.5,
-            "y": 6.0
+            "x": 0.0,
+            "y": 0.0
           },
-          "render_pass": "Draw",
-          "render_style": "Solid",
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -729,13 +740,13 @@
         "children": [
           {
             "node": {
-              "id": "QWJTEC8x4S"
+              "id": "wUZNCbqKPj"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "0ryFZH376L",
+      "resource_id": "lQDnzkH9Ky",
       "resource_name": "Big Explosion"
     }
   ],

@@ -46,7 +46,7 @@
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "gamelib/classlib.h"
-#include "gamelib/animation.h"
+#include "gamelib/entity.h"
 #include "gamelib/homedir.h"
 #include "gamelib/settings.h"
 #include "wdk/opengl/config.h"
@@ -333,7 +333,7 @@ private:
 class GameWidget::Asteroid : public GameWidget::Animation
 {
 public:
-    Asteroid(const glm::vec2& direction, std::unique_ptr<game::Animation> sprite)
+    Asteroid(const glm::vec2& direction, std::unique_ptr<game::Entity> sprite)
        : mSprite(std::move(sprite))
     {
         mPosition.x = math::rand(0.0f, 1.0f);
@@ -382,7 +382,7 @@ private:
     float mVelocity = 0.0f;
     glm::vec2 mPosition;
     glm::vec2 mDirection;
-    std::unique_ptr<game::Animation> mSprite;
+    std::unique_ptr<game::Entity> mSprite;
 };
 
 // Flame/Smoke emitter
@@ -725,7 +725,7 @@ class GameWidget::Invader : public GameWidget::Animation
 {
 public:
     Invader(const glm::vec2& position, const std::wstring& str, float velocity, float scale,
-            std::unique_ptr<game::Animation> sprite)
+            std::unique_ptr<game::Entity> sprite)
       : mPosition(position)
       , mText(str)
       , mVelocity(velocity)
@@ -743,7 +743,7 @@ public:
             if (mLifeTime > mMaxLifeTime)
                 return false;
         }
-        mSprite->Update(dt/1000.0f);
+        mSprite->Update(mLifeTime/1000.0f, dt/1000.0f);
         renderer.Update(*mSprite, mLifeTime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -761,14 +761,11 @@ public:
         t.MoveTo(position);
         renderer.Draw(*mSprite, painter, t);
 
-        const auto* box = mSprite->FindNodeByName("Box");
+        const auto* box = mSprite->FindNodeByClassName("Box");
         auto text = mSprite->GetBoundingRect(box);
         text.Translate(position);
         gfx::DrawTextRect(painter, base::ToUtf8(mText),
-       "fonts/SourceHanSerifTC-SemiBold.otf", 36, text,
-             gfx::Color::Gray);
-        return;
-
+                          "fonts/SourceHanSerifTC-SemiBold.otf", 36, text, gfx::Color::Gray);
     }
 
     float getScale() const
@@ -795,8 +792,9 @@ public:
 
     std::string getTextureName(const game::ClassLibrary& loader) const
     {
-        const auto* node = mSprite->FindNodeByName("Ship");
-        const auto& mat = loader.FindMaterialClass(node->GetMaterialId());
+        const auto* node = mSprite->FindNodeByClassName("Ship");
+        const auto* draw = node->GetDrawable();
+        const auto& mat = loader.FindMaterialClass(draw->GetMaterialId());
         const auto& tex = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();
@@ -810,7 +808,7 @@ private:
     float mMaxLifeTime = 0.0f;
     float mVelocity    = 0.0f;
     float mScale       = 0.0f;
-    std::unique_ptr<game::Animation> mSprite;
+    std::unique_ptr<game::Entity> mSprite;
 };
 
 class GameWidget::Missile : public GameWidget::Animation
@@ -867,8 +865,7 @@ private:
 class GameWidget::UFO : public GameWidget::Animation
 {
 public:
-    UFO(std::unique_ptr<game::Animation> ufo)
-        : mSprite(std::move(ufo))
+    UFO(std::unique_ptr<game::Entity> ufo) : mSprite(std::move(ufo))
     {
         mPosition.x = math::rand(0.0, 1.0);
         mPosition.y = math::rand(0.0, 1.0);
@@ -896,7 +893,7 @@ public:
         const auto y = mPosition.y;
         mPosition.x = math::wrap(0.0f, 1.0f, x);
         mPosition.y = math::wrap(0.0f, 1.0f, y);
-        mSprite->Update(dt / 1000.0f);
+        mSprite->Update(mRuntime / 1000.0f, dt / 1000.0f);
         renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -925,7 +922,7 @@ public:
 
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
-        auto bounds = mSprite->GetBoundingRect(mSprite->FindNodeByName("UFO"));
+        auto bounds = mSprite->GetBoundingRect(mSprite->FindNodeByClassName("UFO"));
         bounds.Translate(pos);
         return bounds;
     }
@@ -951,8 +948,9 @@ public:
     std::string getTextureName(const game::ClassLibrary& loader) const
     {
         // todo: simplify.
-        const auto* node = mSprite->FindNodeByName("UFO");
-        const auto& mat  = loader.FindMaterialClass(node->GetMaterialId());
+        const auto* node = mSprite->FindNodeByClassName("UFO");
+        const auto* draw = node->GetDrawable();
+        const auto& mat  = loader.FindMaterialClass(draw->GetMaterialId());
         const auto& tex  = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();
@@ -963,14 +961,14 @@ private:
     glm::vec2 mDirection;
     glm::vec2 mPosition;
 private:
-    std::unique_ptr<game::Animation> mSprite;
+    std::unique_ptr<game::Entity> mSprite;
 };
 
 
 class GameWidget::BigExplosion : public GameWidget::Animation
 {
 public:
-    BigExplosion(std::unique_ptr<game::Animation> sprite, float lifetime)
+    BigExplosion(std::unique_ptr<game::Entity> sprite, float lifetime)
         : mLifeTime(lifetime)
         , mSprite(std::move(sprite))
     {}
@@ -980,7 +978,7 @@ public:
         mRuntime += dt;
         if (mRuntime > mLifeTime)
             return false;
-        mSprite->Update(dt/1000.0f);
+        mSprite->Update(mRuntime/1000.0f, dt/1000.0f);
         renderer.Update(*mSprite, mRuntime/1000.0f, dt/1000.0f);
         return true;
     }
@@ -1001,7 +999,7 @@ private:
     const float mLifeTime = 0.0f;
     float mRuntime = 0.0f;
 private:
-    std::unique_ptr<game::Animation> mSprite;
+    std::unique_ptr<game::Entity> mSprite;
 };
 
 class GameWidget::Score : public GameWidget::Animation
@@ -1772,7 +1770,7 @@ GameWidget::GameWidget()
 
     mGame->onBomb = [&](const Game::Bomb& b)
     {
-        std::unique_ptr<Animation> explosion(new BigExplosion(CreateAnimationByName(("Big Explosion")), 800));
+        std::unique_ptr<Animation> explosion(new BigExplosion(CreateEntityByName(("Big Explosion")), 800));
         mAnimations.push_back(std::move(explosion));
     };
 
@@ -1792,26 +1790,26 @@ GameWidget::GameWidget()
 
     mGame->onInvaderSpawn = [&](const Game::Invader& inv)
     {
-        std::unique_ptr<game::Animation> sprite;
+        std::unique_ptr<game::Entity> sprite;
         float scale = 1.0f;
         if (inv.type == Game::InvaderType::Boss)
         {
-            sprite = CreateAnimationByName("Locust");
+            sprite = CreateEntityByName("Locust");
             scale = 6.5f;
         }
         else if (inv.speed == 1 && inv.killList.size() == 1)
         {
-            sprite = CreateAnimationByName("Cricket");
+            sprite = CreateEntityByName("Cricket");
             scale = 5.0f;
         }
         else if (inv.speed == 1)
         {
-            sprite = CreateAnimationByName("Mantis");
+            sprite = CreateEntityByName("Mantis");
             scale = 4.0f;
         }
         else
         {
-            sprite = CreateAnimationByName("Scarab");
+            sprite = CreateEntityByName("Scarab");
             scale = 3.5f;
         }
 
@@ -2021,14 +2019,14 @@ void GameWidget::Save()
 
 void GameWidget::Start()
 {
-    mBackground = CreateAnimationByName("Space");
+    mBackground = CreateEntityByName("Space");
 
     // in this space all the background objects travel to the same direction
     for (size_t i=0; i<20; ++i)
     {
         const glm::vec2 spaceJunkDirection(-1, 0);
-        auto anim = CreateAnimationByName("Asteroid");
-        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection), std::move(anim)));
+        auto entity = CreateEntityByName("Asteroid");
+        mAnimations.emplace_back(new Asteroid(glm::normalize(spaceJunkDirection), std::move(entity)));
     }
 
     // initialize the input/state stack with the main menu.
@@ -2062,10 +2060,10 @@ void GameWidget::Update(double current_time, double dt)
 
     if (UFO::shouldMakeRandomAppearance())
     {
-        mAnimations.emplace_back(new UFO(CreateAnimationByName("UFO")));
+        mAnimations.emplace_back(new UFO(CreateEntityByName("UFO")));
     }
 
-    mBackground->Update(time/1000.0f);
+    mBackground->Update(current_time, time/1000.0f);
     mRenderer.Update(*mBackground, current_time, time/1000.0f);
 
     mStates.top()->update(time);
@@ -2394,9 +2392,9 @@ void GameWidget::PlayMusic()
     }
 }
 
-std::unique_ptr<game::Animation> GameWidget::CreateAnimationByName(const std::string &name) const
+std::unique_ptr<game::Entity> GameWidget::CreateEntityByName(const std::string& name) const
 {
-    return game::CreateAnimationInstance(mClassLib->FindAnimationClassByName(name));
+    return game::CreateEntityInstance(mClassLib->FindEntityClassByName(name));
 }
 
 } // invaders
