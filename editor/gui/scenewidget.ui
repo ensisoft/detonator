@@ -542,13 +542,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_14">
-                     <property name="text">
-                      <string>Node ID</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="1" column="0">
                     <widget class="QLabel" name="label_3">
                      <property name="sizePolicy">
@@ -559,6 +552,23 @@
                      </property>
                      <property name="text">
                       <string>Name</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
+                    <widget class="QComboBox" name="nodeEntity"/>
+                   </item>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_14">
+                     <property name="text">
+                      <string>Node ID</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_4">
+                     <property name="text">
+                      <string>Entity</string>
                      </property>
                     </widget>
                    </item>
@@ -575,15 +585,22 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="label_4">
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_2">
                      <property name="text">
-                      <string>Entity</string>
+                      <string>Layer</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
-                    <widget class="QComboBox" name="nodeEntity"/>
+                   <item row="3" column="1">
+                    <widget class="QSpinBox" name="nodeLayer">
+                     <property name="minimum">
+                      <number>-100</number>
+                     </property>
+                     <property name="maximum">
+                      <number>100</number>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </item>
@@ -875,6 +892,30 @@
     <string>Duplicate</string>
    </property>
   </action>
+  <action name="actionNodeMoveDownLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/layer_down.png</normaloff>:/16x16_ico_png/layer_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Down</string>
+   </property>
+   <property name="toolTip">
+    <string>Move node down one layer</string>
+   </property>
+  </action>
+  <action name="actionNodeMoveUpLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/layer_up.png</normaloff>:/16x16_ico_png/layer_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Up</string>
+   </property>
+   <property name="toolTip">
+    <string>Move node up one layer</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -905,6 +946,7 @@
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeEntity</tabstop>
+  <tabstop>nodeLayer</tabstop>
   <tabstop>nodeIsVisible</tabstop>
   <tabstop>nodeTranslateX</tabstop>
   <tabstop>nodeTranslateY</tabstop>

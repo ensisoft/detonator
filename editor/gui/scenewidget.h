@@ -81,11 +81,14 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeDuplicate_triggered();
+        void on_actionNodeMoveUpLayer_triggered();
+        void on_actionNodeMoveDownLayer_triggered();
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_resetTransform_clicked();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeEntity_currentIndexChanged(const QString& name);
+        void on_nodeLayer_valueChanged(int layer);
         void on_nodeIsVisible_stateChanged(int);
         void on_nodeTranslateX_valueChanged(double value);
         void on_nodeTranslateY_valueChanged(double value);

@@ -666,6 +666,7 @@ Entity::Entity(const EntityArgs& args)
     mScale        = args.scale;
     mPosition     = args.position;
     mRotation     = args.rotation;
+    mLayer        = args.layer;
 }
 
 Entity::Entity(const EntityClass& klass)
@@ -794,7 +795,7 @@ glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) cons
     return RenderTreeFunctions<EntityNode>::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-glm::mat4 Entity::GetTransform() const
+glm::mat4 Entity::GetNodeTransform() const
 {
     gfx::Transform transform;
     transform.Scale(mScale);

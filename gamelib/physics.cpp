@@ -57,7 +57,7 @@ void PhysicsEngine::UpdateScene(Scene& scene)
         {
             if (!entity)
                 return;
-            mTransform.Push(entity->GetTransform());
+            mTransform.Push(entity->GetNodeTransform());
             mEngine.UpdateEntity(mTransform.GetAsMatrix(), *entity);
         }
         virtual void LeaveNode(Entity* entity) override
@@ -120,7 +120,7 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
         {
             if (!entity)
                 return;
-            mTransform.Push(entity->GetTransform());
+            mTransform.Push(entity->GetNodeTransform());
             mEngine.AddEntity(mTransform.GetAsMatrix(), *entity);
         }
         virtual void LeaveNode(const Entity* entity) override

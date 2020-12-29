@@ -25,6 +25,9 @@
 #include "warnpush.h"
 #include "warnpop.h"
 
+#include <type_traits>
+#include <algorithm>
+
 #include "base/logging.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
@@ -63,52 +66,8 @@ void Renderer::Draw(const Scene& scene,
                     SceneInstanceDrawHook* scene_hook,
                     EntityInstanceDrawHook* entity_hook)
 {
-    using SceneGraph = TreeNode<Entity>;
-
-    class Visitor : public SceneGraph::ConstVisitor
-    {
-    public:
-        Visitor(Renderer& renderer, gfx::Transform& transform, gfx::Painter& painter,
-                SceneInstanceDrawHook* scene_hook,
-                EntityInstanceDrawHook* entity_hook)
-          : mRenderer(renderer)
-          , mTransform(transform)
-          , mPainter(painter)
-          , mSceneHook(scene_hook)
-          , mEntityHook(entity_hook)
-        {}
-        virtual void EnterNode(const Entity* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetTransform());
-
-            if (mSceneHook)
-                mSceneHook->BeginDrawEntity(*node, mPainter, mTransform);
-
-            mRenderer.Draw(*node, mPainter, mTransform, mEntityHook);
-
-            if (mSceneHook)
-                mSceneHook->EndDrawEntity(*node, mPainter, mTransform);
-        }
-        virtual void LeaveNode(const Entity* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-    private:
-        Renderer& mRenderer;
-        gfx::Transform& mTransform;
-        gfx::Painter& mPainter;
-        SceneInstanceDrawHook*  mSceneHook  = nullptr;
-        EntityInstanceDrawHook* mEntityHook = nullptr;
-    };
-
-    Visitor visitor(*this, transform, painter, scene_hook, entity_hook);
-    const auto& tree = scene.GetRenderTree();
-
-    tree.PreOrderTraverse(visitor);
+    DrawRenderTree<Entity, EntityNode>(scene.GetRenderTree(),
+        painter, transform, scene_hook, entity_hook);
 }
 
 void Renderer::Draw(const SceneClass& scene,
@@ -116,55 +75,8 @@ void Renderer::Draw(const SceneClass& scene,
                     SceneClassDrawHook* scene_hook,
                     EntityClassDrawHook* entity_hook)
 {
-    using SceneGraph = TreeNode<SceneNodeClass>;
-
-    class Visitor : public SceneGraph::ConstVisitor
-    {
-    public:
-        Visitor(Renderer& renderer, gfx::Transform& transform, gfx::Painter& painter,
-                SceneClassDrawHook* scene_hook,
-                EntityClassDrawHook* entity_hook)
-                : mRenderer(renderer)
-                , mTransform(transform)
-                , mPainter(painter)
-                , mSceneHook(scene_hook)
-                , mEntityHook(entity_hook)
-        {}
-        virtual void EnterNode(const SceneNodeClass* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-
-            if (mSceneHook)
-                mSceneHook->BeginDrawEntity(*node, mPainter, mTransform);
-
-            auto klass = node->GetEntityClass();
-            if (klass)
-                mRenderer.Draw(*klass, mPainter, mTransform, mEntityHook);
-
-            if (mSceneHook)
-                mSceneHook->EndDrawEntity(*node, mPainter, mTransform);
-        }
-        virtual void LeaveNode(const SceneNodeClass* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-    private:
-        Renderer& mRenderer;
-        gfx::Transform& mTransform;
-        gfx::Painter& mPainter;
-        SceneClassDrawHook* mSceneHook = nullptr;
-        EntityClassDrawHook* mEntityHook = nullptr;
-    };
-
-    Visitor visitor(*this, transform, painter, scene_hook, entity_hook);
-    const auto& tree = scene.GetRenderTree();
-
-    tree.PreOrderTraverse(visitor);
-
+    DrawRenderTree<SceneNodeClass, EntityNodeClass>(scene.GetRenderTree(),
+        painter, transform, scene_hook, entity_hook);
 }
 
 void Renderer::Update(const EntityClass& entity, float time, float dt)
@@ -256,15 +168,81 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
     }
 }
 
+template<typename EntityType, typename NodeType>
+void Renderer::DrawRenderTree(const TreeNode<EntityType>& tree,
+                              gfx::Painter& painter, gfx::Transform& transform,
+                              SceneDrawHook<EntityType>* scene_hook,
+                              EntityDrawHook<NodeType>* entity_hook)
+{
+    using SceneGraph = TreeNode<EntityType>;
+    struct EntityDrawPair {
+        glm::mat4 transform;
+        const EntityType* node = nullptr;
+    };
+    class Visitor : public SceneGraph::ConstVisitor
+    {
+    public:
+        Visitor(gfx::Transform& transform) : mTransform(transform)
+        {}
+        virtual void EnterNode(const EntityType* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+
+            EntityDrawPair pair;
+            pair.node      = node;
+            pair.transform = mTransform.GetAsMatrix();
+            mDrawPairs.push_back(pair);
+        }
+        virtual void LeaveNode(const EntityType* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+        std::vector<EntityDrawPair>& GetDrawPairs()
+        { return mDrawPairs; }
+    private:
+        gfx::Transform& mTransform;
+        std::vector<EntityDrawPair> mDrawPairs;
+    };
+
+    Visitor visitor(transform);
+    tree.PreOrderTraverse(visitor);
+
+    auto& pairs = visitor.GetDrawPairs();
+    // todo: use a faster sorting. (see the entity draw)
+    std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
+        return a.node->GetLayer() < b.node->GetLayer();
+    });
+    for (const auto& p : pairs)
+    {
+        gfx::Transform transform(p.transform);
+        if (scene_hook)
+            scene_hook->BeginDrawEntity(*p.node, painter, transform);
+        if constexpr (std::is_same_v<EntityType, Entity>)
+            Draw(*p.node, painter, transform, entity_hook);
+        else
+        {
+            auto klass = p.node->GetEntityClass();
+            if (klass)
+                Draw(*klass, painter, transform, entity_hook);
+        }
+        if (scene_hook)
+            scene_hook->EndDrawEntity(*p.node, painter, transform);
+    }
+}
+
 template<typename Node>
 void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
-                             gfx::Painter& painter, gfx::Transform& transform,
-                             DrawHook<Node>* hook)
+                              gfx::Painter& painter, gfx::Transform& transform,
+                              EntityDrawHook<Node>* hook)
 
 {
     using RenderTree = TreeNode<Node>;
     using DrawPacket = DrawPacket;
-    using DrawHook   = DrawHook<Node>;
+    using DrawHook   = EntityDrawHook<Node>;
     using DrawableItemType = typename Node::DrawableItemType;
 
     // here we could apply operations that would apply to the whole

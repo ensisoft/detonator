@@ -459,6 +459,25 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
     }
 }
 
+void SceneWidget::on_actionNodeMoveUpLayer_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const int layer = node->GetLayer();
+        node->SetLayer(layer + 1);
+    }
+    DisplayCurrentNodeProperties();
+}
+void SceneWidget::on_actionNodeMoveDownLayer_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const int layer = node->GetLayer();
+        node->SetLayer(layer - 1);
+    }
+    DisplayCurrentNodeProperties();
+}
+
 void SceneWidget::on_plus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
@@ -511,6 +530,14 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
     {
         auto klass = mState.workspace->GetEntityClassByName(name);
         node->SetEntity(klass);
+    }
+}
+
+void SceneWidget::on_nodeLayer_valueChanged(int layer)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetLayer(layer);
     }
 }
 
@@ -587,7 +614,14 @@ void SceneWidget::on_nodeMinus90_clicked()
 void SceneWidget::on_tree_customContextMenuRequested(QPoint)
 {
     const auto* node = GetCurrentNode();
+    mUI.actionNodeDuplicate->setEnabled(node != nullptr);
+    mUI.actionNodeDelete->setEnabled(node != nullptr);
+    mUI.actionNodeMoveDownLayer->setEnabled(node != nullptr);
+    mUI.actionNodeMoveUpLayer->setEnabled(node != nullptr);
+
     QMenu menu(this);
+    menu.addAction(mUI.actionNodeMoveUpLayer);
+    menu.addAction(mUI.actionNodeMoveDownLayer);
     menu.addAction(mUI.actionNodeDuplicate);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
@@ -886,6 +920,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeScaleY, 1.0f);
     SetValue(mUI.nodeRotation, 0.0f);
     SetValue(mUI.nodeEntity, "");
+    SetValue(mUI.nodeLayer, 0);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -894,6 +929,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeID, node->GetClassId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeEntity, mState.workspace->MapEntityIdToName(node->GetEntityId()));
+        SetValue(mUI.nodeLayer, node->GetLayer());
         SetValue(mUI.nodeIsVisible, node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);

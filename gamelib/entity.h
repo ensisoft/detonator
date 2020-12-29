@@ -847,7 +847,7 @@ namespace game
         // the transformation parents are relative to the parent
         // of the entity.
         // the instance scale to be used. note that if the entity
-        // has rigid body changing the scaele dynamically later on 
+        // has rigid body changing the scale dynamically later on
         // after the physics simulation object has been created may
         // not work correctly. therefore it's important to use the 
         // scaling factor here to set the scale when creating a new 
@@ -857,6 +857,8 @@ namespace game
         glm::vec2  position = {0.0f, 0.0f};
         // the entity rotation relative to parent
         float      rotation = 0.0f;
+        // the render layer index.
+        int        layer = 0;
         EntityArgs() {
             id = base::RandomString(10);
         }
@@ -953,8 +955,9 @@ namespace game
         glm::vec2 MapCoordsToNode(float x, float y, const EntityNode* node) const;
 
         // Get entity's transform (relative to its parent) expressed as
-        // transformation matrix.
-        glm::mat4 GetTransform() const;
+        // transformation matrix. (Called node transform because it makes
+        // generic code easier in other parts of the system)
+        glm::mat4 GetNodeTransform() const;
 
         // Compute the axis aligned bounding rectangle for the give entity node
         // at the current time of the entity.
@@ -1008,6 +1011,8 @@ namespace game
         { return mPosition; }
         glm::vec2 GetScale() const
         { return mScale; }
+        int GetLayer() const
+        { return mLayer; }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -1042,6 +1047,8 @@ namespace game
         glm::vec2 mScale = {1.0f, 1.0f};
         // Current entity rotation angle relative to its parent.
         float mRotation = 0.0f;
+        // the render layer index.
+        int mLayer = 0;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

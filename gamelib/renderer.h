@@ -63,10 +63,10 @@ namespace game
     };
 
     template<typename Node>
-    class DrawHook
+    class EntityDrawHook
     {
     public:
-        virtual ~DrawHook() = default;
+        virtual ~EntityDrawHook() = default;
         // This is a hook function to inspect and  modify the the draw packet produced by the
         // given animation node. The return value can be used to indicate filtering.
         // If the function returns false the packet is dropped. Otherwise it's added to the
@@ -90,8 +90,8 @@ namespace game
     private:
     };
 
-    using EntityClassDrawHook     = DrawHook<EntityNodeClass>;
-    using EntityInstanceDrawHook  = DrawHook<EntityNode>;
+    using EntityClassDrawHook     = EntityDrawHook<EntityNodeClass>;
+    using EntityInstanceDrawHook  = EntityDrawHook<EntityNode>;
     using SceneClassDrawHook      = SceneDrawHook<SceneNodeClass>;
     using SceneInstanceDrawHook   = SceneDrawHook<Entity>;
 
@@ -142,10 +142,16 @@ namespace game
         template<typename NodeType>
         void UpdateNode(const NodeType& node, float time, float dt);
 
+        template<typename EntityType, typename NodeType>
+        void DrawRenderTree(const TreeNode<EntityType>& tree,
+                            gfx::Painter& painter, gfx::Transform& transform,
+                            SceneDrawHook<EntityType>* scene_hook,
+                            EntityDrawHook<NodeType>* entity_hook);
+
         template<typename NodeType>
         void DrawRenderTree(const TreeNode<NodeType>& tree,
-                           gfx::Painter& painter, gfx::Transform& transform,
-                           DrawHook<NodeType>* hook);
+                            gfx::Painter& painter, gfx::Transform& transform,
+                            EntityDrawHook<NodeType>* hook);
     private:
         const ClassLibrary* mLoader = nullptr;
         struct PaintNode {

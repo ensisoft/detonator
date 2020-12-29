@@ -44,6 +44,7 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mRotation);
     hash = base::hash_combine(hash, mFlags.value());
+    hash = base::hash_combine(hash, mLayer);
     return hash;
 }
 
@@ -73,6 +74,7 @@ nlohmann::json SceneNodeClass::ToJson() const
     base::JsonWrite(json, "scale",    mScale);
     base::JsonWrite(json, "rotation", mRotation);
     base::JsonWrite(json, "flags", mFlags.value());
+    base::JsonWrite(json, "layer",    mLayer);
     return json;
 }
 
@@ -87,7 +89,8 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& jso
         !base::JsonReadSafe(json, "position", &ret.mPosition) ||
         !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
         !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
-        !base::JsonReadSafe(json, "flags",    &flags))
+        !base::JsonReadSafe(json, "flags",    &flags) ||
+        !base::JsonReadSafe(json, "layer",    &ret.mLayer))
         return std::nullopt;
     ret.mFlags.set_from_value(flags);
     return ret;
@@ -505,6 +508,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.scale    = node.GetScale();
         args.name     = node.GetName();
         args.id       = node.GetClassId();
+        args.layer    = node.GetLayer();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
         mEntities.push_back(std::move(entity));

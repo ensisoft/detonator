@@ -73,6 +73,8 @@ namespace game
         { mEntityId = id; }
         void SetName(const std::string& name)
         { mName = name; }
+        void SetLayer(int layer)
+        { mLayer = layer; }
         void SetEntity(std::shared_ptr<const EntityClass> klass)
         {
             mEntityId = klass->GetId();
@@ -102,6 +104,8 @@ namespace game
         { return mEntity; }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        int GetLayer() const
+        { return mLayer; }
 
         // Get the node hash value based on the properties.
         std::size_t GetHash() const;
@@ -134,6 +138,8 @@ namespace game
         float mRotation = 0.0f;
         // Node bitflags.
         base::bitflag<Flags> mFlags;
+        // the relative render order (layer index)
+        int mLayer = 0;
     private:
         // This is the runtime class reference to the
         // entity class that this node uses. Before creating
