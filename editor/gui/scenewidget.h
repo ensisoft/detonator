@@ -79,7 +79,11 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionNodeMoveTool_triggered();
+        void on_actionNodeScaleTool_triggered();
+        void on_actionNodeRotateTool_triggered();
         void on_actionNodeDelete_triggered();
+        void on_actionNodePlace_triggered();
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
@@ -113,6 +117,7 @@ namespace gui
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);
+        void MouseWheel(QWheelEvent* wheel);
         bool KeyPress(QKeyEvent* key);
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
@@ -139,6 +144,7 @@ namespace gui
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
             TreeWidget* view = nullptr;
+            QString last_placed_entity;
         } mState;
 
         // Tree model impl for displaying scene's render tree

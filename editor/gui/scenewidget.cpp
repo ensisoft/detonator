@@ -72,7 +72,31 @@ public:
       , mClass(klass)
       , mSnapToGrid(snap)
       , mGridSize(grid)
-    {}
+    {
+        mEntityIds = mState.workspace->ListUserDefinedEntityIds();
+        for (mCurrentEntityIdIndex=0; mCurrentEntityIdIndex<mEntityIds.size(); ++mCurrentEntityIdIndex)
+        {
+            if (mEntityIds[mCurrentEntityIdIndex] == app::FromUtf8(klass->GetId()))
+                break;
+        }
+    }
+    PlaceEntityTool(SceneWidget::State& state, bool snap, unsigned grid)
+        : mState(state)
+        , mSnapToGrid(snap)
+        , mGridSize(grid)
+    {
+        mEntityIds = mState.workspace->ListUserDefinedEntityIds();
+        mClass = mState.workspace->GetEntityClassById(mEntityIds[0]);
+        for (unsigned i=0; i<mEntityIds.size(); ++i)
+        {
+            if (mEntityIds[i] == mState.last_placed_entity)
+            {
+                mCurrentEntityIdIndex = i;
+                mClass = mState.workspace->GetEntityClassById(mEntityIds[i]);
+                break;
+            }
+        }
+    }
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
         view.Push();
@@ -95,6 +119,8 @@ public:
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
             return false;
+        else if (mCancelled)
+            return false;
 
         if (mSnapToGrid)
         {
@@ -110,11 +136,39 @@ public:
         node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
         auto* child = mState.scene.AddNode(std::move(node));
         mState.scene.LinkChild(nullptr, child);
-
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(child->GetClassId()));
+        mState.last_placed_entity = app::FromUtf8(mClass->GetId());
         DEBUG("Added new entity '%1'", name);
         return true;
+    }
+    virtual bool KeyPress(QKeyEvent* key) override
+    {
+        if (key->key() == Qt::Key_Escape)
+        {
+            mCancelled = true;
+            return true;
+        }
+        return false;
+    }
+    virtual bool IsCancelled() const override
+    { return mCancelled; }
+    void SelectNextEntity()
+    {
+        mCurrentEntityIdIndex = (mCurrentEntityIdIndex + 1) % mEntityIds.size();
+        mClass = mState.workspace->GetEntityClassById(mEntityIds[mCurrentEntityIdIndex]);
+    }
+    void SelectPrevEntity()
+    {
+        mCurrentEntityIdIndex = mCurrentEntityIdIndex > 0 ? mCurrentEntityIdIndex - 1 : mEntityIds.size() - 1;
+        mClass = mState.workspace->GetEntityClassById(mEntityIds[mCurrentEntityIdIndex]);
+    }
+    void AdjustPlacementPosition(const QPoint& mouse_pos, gfx::Transform& view)
+    {
+        const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
+        const auto& mouse_pos_view  = ToVec4(mouse_pos);
+        const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
+        mWorldPos = mouse_pos_scene;
     }
 private:
     std::string CreateName() const
@@ -134,9 +188,16 @@ private:
     glm::vec4 mWorldPos;
     // entity class for the item we're going to add to scene.
     std::shared_ptr<const game::EntityClass> mClass;
+    // true if the tool was cancelled.
+    bool mCancelled = false;
     // true if we want the x,y coords to be aligned on grid size units.
     bool mSnapToGrid = false;
+    // the grid size in scene units to align the object onto.
     unsigned mGridSize = 0;
+    // the list of of entity ids currently available for cycling through.
+    QStringList mEntityIds;
+    // the current index into the mEntityIds list.
+    unsigned mCurrentEntityIdIndex = 0;
 };
 
 SceneWidget::SceneWidget(app::Workspace* workspace)
@@ -156,6 +217,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace)
     mUI.widget->onMouseMove     = std::bind(&SceneWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress    = std::bind(&SceneWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease  = std::bind(&SceneWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.widget->onMouseWheel    = std::bind(&SceneWidget::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onKeyPress      = std::bind(&SceneWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onPaintScene    = std::bind(&SceneWidget::PaintScene, this, std::placeholders::_1,
                                             std::placeholders::_2);
@@ -236,6 +298,12 @@ void SceneWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionNodeMoveTool);
+    bar.addAction(mUI.actionNodeScaleTool);
+    bar.addAction(mUI.actionNodeRotateTool);
+    bar.addSeparator();
+    bar.addAction(mUI.actionNodePlace);
+    bar.addSeparator();
     bar.addAction(mEntities->menuAction());
 }
 void SceneWidget::AddActions(QMenu& menu)
@@ -246,6 +314,12 @@ void SceneWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeMoveTool);
+    menu.addAction(mUI.actionNodeScaleTool);
+    menu.addAction(mUI.actionNodeRotateTool);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodePlace);
     menu.addSeparator();
     menu.addAction(mEntities->menuAction());
 }
@@ -435,6 +509,19 @@ void SceneWidget::on_actionSave_triggered()
     setWindowTitle(name);
 }
 
+void SceneWidget::on_actionNodeMoveTool_triggered()
+{
+
+}
+void SceneWidget::on_actionNodeScaleTool_triggered()
+{
+
+}
+void SceneWidget::on_actionNodeRotateTool_triggered()
+{
+
+}
+
 void SceneWidget::on_actionNodeDelete_triggered()
 {
     if (auto* node = GetCurrentNode())
@@ -443,6 +530,24 @@ void SceneWidget::on_actionNodeDelete_triggered()
 
         mUI.tree->Rebuild();
     }
+}
+
+void SceneWidget::on_actionNodePlace_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto grid_size = (unsigned)grid;
+    auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
+
+    gfx::Transform view;
+    view.Push();
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    tool->AdjustPlacementPosition(mUI.widget->mapFromGlobal(QCursor::pos()), view);
+
+    mCurrentTool = std::move(tool);
 }
 
 void SceneWidget::on_actionNodeDuplicate_triggered()
@@ -833,8 +938,37 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     UncheckPlacementActions();
 }
 
+void SceneWidget::MouseWheel(QWheelEvent* wheel)
+{
+    if (!mCurrentTool)
+        return;
+    if (auto* place = dynamic_cast<PlaceEntityTool*>(mCurrentTool.get()))
+    {
+        const QPoint &num_degrees = wheel->angleDelta() / 8;
+        const QPoint &num_steps = num_degrees / 15;
+        // only consider the wheel scroll steps on the vertical axis.
+        // if steps are positive the wheel is scrolled away from the user
+        // and if steps are negative the wheel is scrolled towards the user.
+        const int num_vertical_steps = num_steps.y();
+        for (int i=0; i<std::abs(num_vertical_steps); ++i)
+        {
+            if (num_vertical_steps > 0)
+                place->SelectNextEntity();
+            else place->SelectPrevEntity();
+        }
+    }
+}
+
 bool SceneWidget::KeyPress(QKeyEvent* key)
 {
+    if (mCurrentTool)
+    {
+        const auto ret = mCurrentTool->KeyPress(key);
+        if (mCurrentTool->IsCancelled())
+            mCurrentTool.reset();
+        return ret;
+    }
+
     switch (key->key()) {
         case Qt::Key_Delete:
             on_actionNodeDelete_triggered();

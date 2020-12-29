@@ -189,6 +189,7 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseMove;
         std::function<void (QMouseEvent* mickey)> onMousePress;
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
+        std::function<void (QWheelEvent* wheel)>  onMouseWheel;
         std::function<void (QMouseEvent* mickey)> onMouseDoubleClick;
         // keyboard callbacks.
         std::function<bool (QKeyEvent* key)>      onKeyPress;

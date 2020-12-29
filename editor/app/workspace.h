@@ -153,6 +153,8 @@ namespace app
         QStringList ListUserDefinedDrawables() const;
         // Get a list of user defined entities.
         QStringList ListUserDefinedEntities() const;
+        // Get a list of user defined entity ids
+        QStringList ListUserDefinedEntityIds() const;
 
         // Map material id to its human readable name.
         QString MapMaterialIdToName(const QString& id) const;

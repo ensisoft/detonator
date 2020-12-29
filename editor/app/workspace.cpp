@@ -1392,6 +1392,19 @@ QStringList Workspace::ListUserDefinedEntities() const
     return list;
 }
 
+QStringList Workspace::ListUserDefinedEntityIds() const
+{
+    QStringList list;
+    for (const auto& resource : mResources)
+    {
+        if (!resource->IsEntity())
+            continue;
+        list.append(resource->GetId());
+    }
+    list.sort();
+    return list;
+}
+
 void Workspace::SaveResource(const Resource& resource)
 {
     RECURSION_GUARD(this, "ResourceList");

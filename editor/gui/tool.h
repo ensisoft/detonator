@@ -63,6 +63,11 @@ namespace gui
         // in any state change. If any state was changed then true is returned.
         // If the tool application was cancelled then false is returned.
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) = 0;
+        // Act on a key press. Returns true if the key was consumed otherwise false
+        // an the key is passed on to the next handler.
+        virtual bool KeyPress(QKeyEvent* key) { return false; }
+        // Return true if the tool was cancelled as a result of some input action.
+        virtual bool IsCancelled() const { return false; }
     private:
     };
 

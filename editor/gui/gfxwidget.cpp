@@ -405,6 +405,8 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
     };
     mWindow->onMouseWheel = [&](QWheelEvent* wheel) {
         translateZoomInOut(wheel);
+        if (mWindow && onMouseWheel)
+            onMouseWheel(wheel);
     };
     mWindow->onMouseDoubleClick = [&](QMouseEvent* mickey) {
         if (mWindow && onMouseDoubleClick)
