@@ -116,6 +116,9 @@ namespace game
         }
         static Node* DuplicateNode(RenderTree& tree, const Node* node, std::vector<std::unique_ptr<Node>>* clones)
         {
+            // mark the index of the item that will be the first dupe we create
+            // we'll return this later since it's the root of the new hierarchy.
+            const size_t first = clones->size();
             // do a deep copy of a hierarchy of nodes starting from
             // the selected node and add the new hierarchy as a new
             // child of the selected node's parent
@@ -138,7 +141,7 @@ namespace game
             {
                 clones->emplace_back(new Node(node->Clone()));
             }
-            return clones->front().get();
+            return (*clones)[first].get();
         }
 
         static void CoarseHitTest(RenderTree& tree, float x, float y, std::vector<Node*>* hits, std::vector<glm::vec2>* hitbox_positions)
