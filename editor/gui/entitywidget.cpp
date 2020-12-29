@@ -1302,6 +1302,10 @@ void EntityWidget::MouseMove(QMouseEvent* mickey)
 }
 void EntityWidget::MousePress(QMouseEvent* mickey)
 {
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto grid_size = (unsigned)grid;
+
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
@@ -1310,80 +1314,27 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
 
     if (!mCurrentTool)
     {
-        // On a mouse press start we want to select the tool based on where the pointer
-        // is and which object it interacts with in the game when mouse press starts.
-        //
-        // If the mouse pointer doesn't intersect with an object we create a new
-        // camera tool for moving the viewport and object selection gets cleared.
-        //
-        // If the mouse pointer intersects with an object that is the same object
-        // that was already selected:
-        // Check if the pointer intersects with one of the resizing boxes inside
-        // the object's selection box. If it does then we create a new resizing tool
-        // otherwise we create a new move tool instance for moving the object.
-        //
-        // If the mouse pointer intersects with an object that is not the same object
-        // that was previously selected:
-        // Select the object.
-        //
-
-        // take the widget space mouse coordinate and transform into view/camera space.
-        const auto mouse_widget_position_x = mickey->pos().x();
-        const auto mouse_widget_position_y = mickey->pos().y();
-        const auto &widget_to_view = glm::inverse(view.GetAsMatrix());
-        const auto &mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
-                                                                     mouse_widget_position_y, 1.0f, 1.0f);
-
-        std::vector<game::EntityNodeClass *> nodes_hit;
-        std::vector<glm::vec2> hitbox_coords;
-        mState.entity->CoarseHitTest(mouse_view_position.x, mouse_view_position.y, &nodes_hit, &hitbox_coords);
-
-        // if nothing was hit clear the selection.
-        if (nodes_hit.empty())
+        auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
+        if (hitnode)
         {
-            mUI.tree->ClearSelection();
-            mCurrentTool.reset(new MoveCameraTool(mState));
-        }
-        else
-        {
-            const TreeWidget::TreeItem *selected = mUI.tree->GetSelectedItem();
-            const game::EntityNodeClass *previous = selected
-                ? static_cast<const game::EntityNodeClass *>(selected->GetUserData())
-                : nullptr;
-
-            // if the currently selected node is among the ones being hit
-            // then retain that selection.
-            // otherwise select the last one of the list. (the rightmost child)
-            game::EntityNodeClass *hit = nodes_hit.back();
-            glm::vec2 hitpos = hitbox_coords.back();
-            for (size_t i = 0; i < nodes_hit.size(); ++i)
-            {
-                if (nodes_hit[i] == previous)
-                {
-                    hit = nodes_hit[i];
-                    hitpos = hitbox_coords[i];
-                    break;
-                }
-            }
-
-            const auto &size = hit->GetSize();
+            const auto& size = hitnode->GetSize();
             // check if any particular special area of interest is being hit
             const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
                                                  hitpos.y >= size.y - 10.0f;
             const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
                                              hitpos.y >= 0 && hitpos.y <= 10.0f;
-
-            const auto snap = (bool)GetValue(mUI.chkSnap);
-            const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-            const auto grid_size = (unsigned)grid;
-
             if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hit));
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode));
             else if (top_left_hitbox_hit)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hit));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hit, snap, grid_size));
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
 
-            mUI.tree->SelectItemById(app::FromUtf8(hit->GetClassId()));
+            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetClassId()));
+        }
+        else
+        {
+            mUI.tree->ClearSelection();
+            mCurrentTool.reset(new MoveCameraTool(mState));
         }
     }
     if (mCurrentTool)

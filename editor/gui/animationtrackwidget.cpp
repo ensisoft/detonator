@@ -1361,32 +1361,9 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
     if (!mCurrentTool && mPlayState == PlayState::Stopped)
     {
-        // take the widget space mouse coordinate and transform into view/camera space.
-        const auto mouse_widget_position_x = mickey->pos().x();
-        const auto mouse_widget_position_y = mickey->pos().y();
-
-        const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
-        const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
-                                                                     mouse_widget_position_y, 1.0f, 1.0f);
-        std::vector<game::EntityNode*> nodes_hit;
-        std::vector<glm::vec2> hitbox_coords;
-        mEntity->CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
-                               &nodes_hit, &hitbox_coords);
-
-        // if the currently selected node is in the hit list
-        const game::EntityNode* selected = GetCurrentNode();
-
-        game::EntityNode* hitnode = nullptr;
-        glm::vec2 hitpos;
-        for (size_t i=0; i<nodes_hit.size(); ++i)
-        {
-            if (nodes_hit[i] == selected)
-            {
-                hitnode = nodes_hit[i];
-                hitpos  = hitbox_coords[i];
-            }
-        }
-        if (hitnode)
+        auto* current = GetCurrentNode();
+        auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mEntity, current);
+        if (hitnode && hitnode == current)
         {
             const auto& size = hitnode->GetSize();
             // check if any particular special area of interest is being hit
@@ -1404,11 +1381,10 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
             else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
         }
-        else if (!mUI.timeline->GetSelectedItem() && !nodes_hit.empty())
+        else if (!mUI.timeline->GetSelectedItem() && hitnode)
         {
             // pick a new node as the selected actuator node
-            const auto* node = nodes_hit.back();
-            const auto& name = node->GetClassName();
+            const auto& name = hitnode->GetClassName();
             const auto index = mUI.actuatorNode->findText(app::FromUtf8(name));
             SetValue(mUI.actuatorNode, app::FromUtf8(name));
             on_actuatorNode_currentIndexChanged(index);

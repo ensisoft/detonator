@@ -531,6 +531,9 @@ namespace game
         // and rigid bodies.
         glm::mat4 GetModelTransform() const;
 
+        int GetLayer() const
+        { return mDrawable ? mDrawable->GetLayer() : 0; }
+
         void Update(float time, float dt);
         // Serialize the node into JSON.
         nlohmann::json ToJson() const;
@@ -631,6 +634,8 @@ namespace game
         { return mClass->GetClassId(); }
         std::string GetClassName() const
         { return mClass->GetName(); }
+        int GetLayer() const
+        { return mClass->GetLayer(); }
 
         // Reset node's state to initial class state.
         void Reset();

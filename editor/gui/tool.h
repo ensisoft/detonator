@@ -33,6 +33,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <tuple>
 #include <cmath>
 
 #include "graphics/painter.h"
@@ -319,5 +320,48 @@ namespace gui
         glm::vec4 mPreviousMousePos;
     };
 
+    template<typename EntityType, typename NodeType>
+    std::tuple<NodeType*, glm::vec2> SelectNode(const QPoint& mouse_click_point,
+                                                const gfx::Transform& view,
+                                                EntityType& entity,
+                                                NodeType* currently_selected = nullptr)
+
+    {
+        const auto& view_to_entity = glm::inverse(view.GetAsMatrix());
+        const auto click_pos_in_view = glm::vec4(mouse_click_point.x(),
+                                                 mouse_click_point.y(), 1.0f, 1.0f);
+        const auto click_pos_in_entity = view_to_entity * click_pos_in_view;
+
+        std::vector<NodeType*> hit_nodes;
+        std::vector<glm::vec2> hit_boxes;
+        entity.CoarseHitTest(click_pos_in_entity.x, click_pos_in_entity.y, &hit_nodes, &hit_boxes);
+
+        // if nothing was hit then return early.
+        if (hit_nodes.empty())
+            return std::make_tuple(nullptr, glm::vec2{});
+
+        // if the currently selected node is among those that were hit
+        // then retain that, otherwise select the node that is at the
+        // topmost layer. (biggest layer value)
+        NodeType* hit = hit_nodes[0];
+        glm::vec2 box;
+        int layer = hit->GetLayer();
+        for (size_t i=0; i<hit_nodes.size(); ++i)
+        {
+            if (currently_selected == hit_nodes[i])
+            {
+                hit = hit_nodes[i];
+                box = hit_boxes[i];
+                break;
+            }
+            else if (hit_nodes[i]->GetLayer() >= layer)
+            {
+                hit = hit_nodes[i];
+                box = hit_boxes[i];
+                layer = hit->GetLayer();
+            }
+        }
+        return std::make_tuple(hit, box);
+    }
 
 } // namespace
