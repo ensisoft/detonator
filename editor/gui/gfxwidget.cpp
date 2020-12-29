@@ -173,6 +173,20 @@ void GfxWindow::dispose()
 
     mCustomGraphicsDevice.reset();
     mCustomGraphicsPainter.reset();
+    // release the underlying native resources.
+    // The Qt documentation https://doc.qt.io/qt-5/qwindow.html#destroy
+    // doesn't say whether this would be called automatically by the QWindow
+    // implementation or not.
+    // However there seems to be a problem that something is leaking some
+    // resources. I've experienced an issue several times where the rendering
+    // gets slower and slower until at some point X server crashes and the X11
+    // session is killed. I'm assuming that this issue is caused by some
+    // resource leakage that happens. Maybe adding this explicit call to
+    // destroy will help with this.
+    // The nvidia-settings application can be used to quickly inspect the
+    // memory consumption.
+    destroy();
+
     DEBUG("Released GfxWindow device and painter.");
 }
 
