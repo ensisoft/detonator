@@ -733,7 +733,7 @@ void AnimationTrackWidget::on_actuatorEndTime_valueChanged(double value)
 
 void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
 {
-    if (index == 0)
+    if (index == -1)
     {
         mUI.actuatorType->setEnabled(false);
         mUI.actuatorStartTime->setEnabled(false);
@@ -758,7 +758,7 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
     {
         // using the node's current transformation data
         // as the default end transformation. I.e. "no transformation"
-        const auto& node    = mEntity->GetNode(index - 1);
+        const auto& node    = mEntity->GetNode(index);
         const auto& pos     = node.GetTranslation();
         const auto& size    = node.GetSize();
         const auto& scale   = node.GetScale();
@@ -871,101 +871,86 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
 void AnimationTrackWidget::on_transformEndPosX_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto pos = node.GetTranslation();
-    pos.x = value;
-    node.SetTranslation(pos);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto pos = node->GetTranslation();
+        pos.x = value;
+        node->SetTranslation(pos);
+        SetSelectedActuatorProperties();
+    }
 }
 
 void AnimationTrackWidget::on_transformEndPosY_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto pos = node.GetTranslation();
-    pos.y = value;
-    node.SetTranslation(pos);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto pos = node->GetTranslation();
+        pos.y = value;
+        node->SetTranslation(pos);
+        SetSelectedActuatorProperties();
+    }
 }
 void AnimationTrackWidget::on_transformEndSizeX_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto size = node.GetSize();
-    size.x = value;
-    node.SetSize(size);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto size = node->GetSize();
+        size.x = value;
+        node->SetSize(size);
+        SetSelectedActuatorProperties();
+    }
 }
 void AnimationTrackWidget::on_transformEndSizeY_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto size = node.GetSize();
-    size.y = value;
-    node.SetSize(size);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto size = node->GetSize();
+        size.y = value;
+        node->SetSize(size);
+        SetSelectedActuatorProperties();
+    }
 }
 void AnimationTrackWidget::on_transformEndScaleX_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto scale = node.GetScale();
-    scale.x = value;
-    node.SetScale(scale);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto scale = node->GetScale();
+        scale.x = value;
+        node->SetScale(scale);
+        SetSelectedActuatorProperties();
+    }
 }
 
 void AnimationTrackWidget::on_transformEndScaleY_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    auto scale = node.GetScale();
-    scale.y = value;
-    node.SetScale(scale);
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        auto scale = node->GetScale();
+        scale.y = value;
+        node->SetScale(scale);
+        SetSelectedActuatorProperties();
+    }
 }
 
 void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    node.SetRotation(qDegreesToRadians(value));
-
-    SetSelectedActuatorProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetRotation(qDegreesToRadians(value));
+        SetSelectedActuatorProperties();
+    }
 }
 
 void AnimationTrackWidget::on_materialEndAlpha_valueChanged(double value)
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    auto& node = mEntity->GetNode(index-1);
-    if (auto* draw = node.GetDrawable())
+    if (auto* node = GetCurrentNode())
     {
-        draw->SetAlpha(value);
+        if (auto* draw = node->GetDrawable())
+        {
+            draw->SetAlpha(value);
+            SetSelectedActuatorProperties();
+        }
     }
-    SetSelectedActuatorProperties();
 }
 
 void AnimationTrackWidget::on_chkShowMaterialActuators_stateChanged(int)
@@ -983,7 +968,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
 {
     const auto& name = app::ToUtf8(GetValue(mUI.actuatorNode));
     const auto* node = mState.entity->FindNodeByName(name);
-    // get the animation duration in seconds and normlize the actuator times.
+    // get the animation duration in seconds and normalize the actuator times.
     const float animation_duration = GetValue(mUI.duration);
     const float actuator_start = GetValue(mUI.actuatorStartTime);
     const float actuator_end   = GetValue(mUI.actuatorEndTime);
@@ -1088,9 +1073,9 @@ void AnimationTrackWidget::on_btnTransformMinus90_clicked()
 void AnimationTrackWidget::on_btnTransformReset_clicked()
 {
     const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
+    if (index == -1)
         return;
-    const auto& klass   = mState.entity->GetNode(index-1);
+    const auto& klass   = mState.entity->GetNode(index);
     const auto& pos     = klass.GetTranslation();
     const auto& size    = klass.GetSize();
     const auto& scale   = klass.GetScale();
@@ -1103,7 +1088,7 @@ void AnimationTrackWidget::on_btnTransformReset_clicked()
     SetValue(mUI.transformEndScaleY, scale.y);
     SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
 
-    auto &node = mEntity->GetNode(index - 1);
+    auto& node = mEntity->GetNode(index);
     node.SetTranslation(pos);
     node.SetSize(size);
     node.SetScale(scale);
@@ -1166,7 +1151,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.transformEndRotation, 0.0f);
         SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
         SetValue(mUI.materialEndAlpha, 0.0f);
-        mUI.actuatorNode->setCurrentIndex(0);
+        mUI.actuatorNode->setCurrentIndex(-1);
         mUI.actuatorGroup->setTitle("Actuator");
         mUI.actuatorNode->setEnabled(true);
         mUI.actuatorType->setEnabled(false);
@@ -1201,8 +1186,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
             if (end <= actuator->GetStartTime())
                 lo_bound = std::max(lo_bound, end);
         }
-        QSignalBlocker shit(mUI.actuatorStartTime);
-        QSignalBlocker piss(mUI.actuatorEndTime);
+        QSignalBlocker foo(mUI.actuatorStartTime);
+        QSignalBlocker bar(mUI.actuatorEndTime);
         mUI.actuatorStartTime->setMinimum(lo_bound * duration);
         mUI.actuatorStartTime->setMaximum(hi_bound * duration);
         mUI.actuatorEndTime->setMinimum(lo_bound * duration);
@@ -1263,8 +1248,6 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
 {
-    QSignalBlocker blocker(this);
-
     auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
     actuator->SetStartTime(item->starttime);
     actuator->SetDuration(item->duration);
@@ -1328,14 +1311,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         }
         else
         {
-            // highlight the current node that is selected in the node
-            const game::EntityNode* node = nullptr;
-            const auto index = mUI.actuatorNode->currentIndex();
-            if (index > 0)
-            {
-                node = &mEntity->GetNode(index-1);
-            }
-            DrawHook hook(node, mPlayState == PlayState::Playing);
+            DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing);
             mRenderer.Draw(*mEntity, painter, view, &hook);
         }
         mRenderer.EndFrame();
@@ -1398,10 +1374,7 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
                                &nodes_hit, &hitbox_coords);
 
         // if the currently selected node is in the hit list
-        const game::EntityNode* selected = nullptr;
-        const auto index = mUI.actuatorNode->currentIndex();
-        if (index > 0)
-            selected = &mEntity->GetNode(index-1);
+        const game::EntityNode* selected = GetCurrentNode();
 
         game::EntityNode* hitnode = nullptr;
         glm::vec2 hitpos;
@@ -1442,8 +1415,8 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
         }
         else if (!mUI.timeline->GetSelectedItem())
         {
-            SetValue(mUI.actuatorNode, mUI.actuatorNode->itemText(0));
-            on_actuatorNode_currentIndexChanged(0);
+            SetValue(mUI.actuatorNode, QString(""));
+            on_actuatorNode_currentIndexChanged(-1);
         }
     }
     if (!mCurrentTool)
@@ -1473,18 +1446,28 @@ void AnimationTrackWidget::UpdateTransformActuatorUI()
 {
     if (mPlayState != PlayState::Stopped)
         return;
+    if (const auto* node = GetCurrentNode())
+    {
+        const auto& pos      = node->GetTranslation();
+        const auto& size     = node->GetSize();
+        const auto& rotation = node->GetRotation();
+        const auto& scale    = node->GetScale();
+        SetValue(mUI.transformEndPosX, pos.x);
+        SetValue(mUI.transformEndPosY, pos.y);
+        SetValue(mUI.transformEndSizeX, size.x);
+        SetValue(mUI.transformEndSizeY, size.y);
+        SetValue(mUI.transformEndScaleX, scale.x);
+        SetValue(mUI.transformEndScaleY, scale.y);
+        SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+    }
+}
+
+game::EntityNode* AnimationTrackWidget::GetCurrentNode()
+{
     const auto index = mUI.actuatorNode->currentIndex();
-    if (index == 0)
-        return;
-    const auto& selected = mEntity->GetNode(index-1);
-    const auto& pos      = selected.GetTranslation();
-    const auto& size     = selected.GetSize();
-    const auto& rotation = selected.GetRotation();
-    SetValue(mUI.transformEndPosX, pos.x);
-    SetValue(mUI.transformEndPosY, pos.y);
-    SetValue(mUI.transformEndSizeX, size.x);
-    SetValue(mUI.transformEndSizeY, size.y);
-    SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+    if (index == -1)
+        return nullptr;
+    return &mEntity->GetNode(index);
 }
 
 std::shared_ptr<game::EntityClass> FindSharedEntity(size_t hash)

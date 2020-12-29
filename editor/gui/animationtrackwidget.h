@@ -121,6 +121,7 @@ namespace gui
         bool KeyPress(QKeyEvent* key);
         void UpdateTransformActuatorUI();
         void SetSelectedActuatorProperties();
+        game::EntityNode* GetCurrentNode();
     private:
         Ui::AnimationTrack mUI;
     private:

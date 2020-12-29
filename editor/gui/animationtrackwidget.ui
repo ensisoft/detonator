@@ -642,11 +642,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <item>
-                <property name="text">
-                 <string>Select node ...</string>
-                </property>
-               </item>
+               <property name="placeholderText">
+                <string>Select node ...</string>
+               </property>
               </widget>
              </item>
              <item row="1" column="0">
