@@ -157,130 +157,15 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     setFocusPolicy(Qt::StrongFocus);
     setWindowTitle("My Track");
 
-    mUI.widget->onZoomIn  = std::bind(&AnimationTrackWidget::ZoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&AnimationTrackWidget::ZoomOut, this);
-    mUI.widget->onInitScene  = [&](unsigned width, unsigned height) {
-        mState.camera_offset_x = width * 0.5;
-        mState.camera_offset_y = height * 0.5;
-
-        // offset the viewport so that the origin of the 2d space is in the middle of the viewport
-        const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
-        const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
-        mUI.viewPosX->setValue(dist_x);
-        mUI.viewPosY->setValue(dist_y);
-    };
-    mUI.widget->onMouseMove = [&](QMouseEvent* mickey) {
-        if (mCurrentTool) {
-            gfx::Transform view;
-            view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-            view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-            view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
-            view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-            mCurrentTool->MouseMove(mickey, view);
-        }
-        const auto width  = mUI.widget->width();
-        const auto height = mUI.widget->height();
-
-        // update the properties that might have changed as the result of application
-        // of the current tool.
-
-        // update the distance to center.
-        const auto dist_x = mState.camera_offset_x - (width / 2.0f);
-        const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-        mUI.viewPosX->setValue(dist_x);
-        mUI.viewPosY->setValue(dist_y);
-
-        UpdateTransformActuatorUI();
-        SetSelectedActuatorProperties();
-    };
-    mUI.widget->onMousePress = [&](QMouseEvent* mickey) {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-        if (!mCurrentTool && mPlayState == PlayState::Stopped)
-        {
-            // take the widget space mouse coordinate and transform into view/camera space.
-            const auto mouse_widget_position_x = mickey->pos().x();
-            const auto mouse_widget_position_y = mickey->pos().y();
-
-            const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
-            const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
-                                                                         mouse_widget_position_y, 1.0f, 1.0f);
-            std::vector<game::EntityNode*> nodes_hit;
-            std::vector<glm::vec2> hitbox_coords;
-            mEntity->CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
-                                      &nodes_hit, &hitbox_coords);
-
-            // if the currently selected node is in the hit list
-            const game::EntityNode* selected = nullptr;
-            const auto index = mUI.actuatorNode->currentIndex();
-            if (index > 0)
-                selected = &mEntity->GetNode(index-1);
-
-            game::EntityNode* hitnode = nullptr;
-            glm::vec2 hitpos;
-            for (size_t i=0; i<nodes_hit.size(); ++i)
-            {
-                if (nodes_hit[i] == selected)
-                {
-                    hitnode = nodes_hit[i];
-                    hitpos  = hitbox_coords[i];
-                }
-            }
-            if (hitnode)
-            {
-                const auto& size = hitnode->GetSize();
-                // check if any particular special area of interest is being hit
-                const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                     hitpos.y >= size.y - 10.0f;
-                const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                     hitpos.y >= 0 && hitpos.y <= 10.0f;
-                const auto snap = (bool)GetValue(mUI.chkSnap);
-                const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-                const auto grid_size = (unsigned)grid;
-
-                if (bottom_right_hitbox_hit)
-                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mEntity, hitnode));
-                else if (top_left_hitbox_hit)
-                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
-                else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
-            }
-            else if (!mUI.timeline->GetSelectedItem() && !nodes_hit.empty())
-            {
-                // pick a new node as the selected actuator node
-                const auto* node = nodes_hit.back();
-                const auto& name = node->GetClassName();
-                const auto index = mUI.actuatorNode->findText(app::FromUtf8(name));
-                SetValue(mUI.actuatorNode, app::FromUtf8(name));
-                on_actuatorNode_currentIndexChanged(index);
-            }
-            else if (!mUI.timeline->GetSelectedItem())
-            {
-                SetValue(mUI.actuatorNode, mUI.actuatorNode->itemText(0));
-                on_actuatorNode_currentIndexChanged(0);
-            }
-        }
-        if (!mCurrentTool)
-            mCurrentTool.reset(new MoveCameraTool(mState));
-
-        mCurrentTool->MousePress(mickey, view);
-    };
-    mUI.widget->onMouseRelease = [&](QMouseEvent* mickey) {
-        if (!mCurrentTool)
-            return;
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-        mCurrentTool->MouseRelease(mickey, view);
-        mCurrentTool.reset();
-    };
-    mUI.widget->onPaintScene = std::bind(&AnimationTrackWidget::PaintScene,
-        this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn       = std::bind(&AnimationTrackWidget::ZoomIn, this);
+    mUI.widget->onZoomOut      = std::bind(&AnimationTrackWidget::ZoomOut, this);
+    mUI.widget->onMouseMove    = std::bind(&AnimationTrackWidget::MouseMove, this, std::placeholders::_1);
+    mUI.widget->onMousePress   = std::bind(&AnimationTrackWidget::MousePress, this, std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&AnimationTrackWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.widget->onInitScene    = std::bind(&AnimationTrackWidget::InitScene, this,
+                                           std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onPaintScene   = std::bind(&AnimationTrackWidget::PaintScene, this,
+                                           std::placeholders::_1, std::placeholders::_2);
 
     connect(mUI.timeline, &TimelineWidget::SelectedItemChanged,
         this, &AnimationTrackWidget::SelectedItemChanged);
@@ -1391,6 +1276,18 @@ void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineIte
     SetValue(mUI.actuatorEndTime, end);
 }
 
+void AnimationTrackWidget::InitScene(unsigned int width, unsigned int height)
+{
+    mState.camera_offset_x = width * 0.5;
+    mState.camera_offset_y = height * 0.5;
+
+    // offset the viewport so that the origin of the 2d space is in the middle of the viewport
+    const auto dist_x = mState.camera_offset_x  - (width / 2.0f);
+    const auto dist_y = mState.camera_offset_y  - (height / 2.0f);
+    mUI.viewPosX->setValue(dist_x);
+    mUI.viewPosY->setValue(dist_y);
+}
+
 void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
@@ -1452,6 +1349,124 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // pop view transformation
     view.Pop();
+}
+
+void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
+{
+    if (mCurrentTool) {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
+        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+        mCurrentTool->MouseMove(mickey, view);
+    }
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+
+    // update the properties that might have changed as the result of application
+    // of the current tool.
+
+    // update the distance to center.
+    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
+    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
+    mUI.viewPosX->setValue(dist_x);
+    mUI.viewPosY->setValue(dist_y);
+
+    UpdateTransformActuatorUI();
+    SetSelectedActuatorProperties();
+}
+void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
+{
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    if (!mCurrentTool && mPlayState == PlayState::Stopped)
+    {
+        // take the widget space mouse coordinate and transform into view/camera space.
+        const auto mouse_widget_position_x = mickey->pos().x();
+        const auto mouse_widget_position_y = mickey->pos().y();
+
+        const auto& widget_to_view = glm::inverse(view.GetAsMatrix());
+        const auto& mouse_view_position = widget_to_view * glm::vec4(mouse_widget_position_x,
+                                                                     mouse_widget_position_y, 1.0f, 1.0f);
+        std::vector<game::EntityNode*> nodes_hit;
+        std::vector<glm::vec2> hitbox_coords;
+        mEntity->CoarseHitTest(mouse_view_position.x, mouse_view_position.y,
+                               &nodes_hit, &hitbox_coords);
+
+        // if the currently selected node is in the hit list
+        const game::EntityNode* selected = nullptr;
+        const auto index = mUI.actuatorNode->currentIndex();
+        if (index > 0)
+            selected = &mEntity->GetNode(index-1);
+
+        game::EntityNode* hitnode = nullptr;
+        glm::vec2 hitpos;
+        for (size_t i=0; i<nodes_hit.size(); ++i)
+        {
+            if (nodes_hit[i] == selected)
+            {
+                hitnode = nodes_hit[i];
+                hitpos  = hitbox_coords[i];
+            }
+        }
+        if (hitnode)
+        {
+            const auto& size = hitnode->GetSize();
+            // check if any particular special area of interest is being hit
+            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
+                                                 hitpos.y >= size.y - 10.0f;
+            const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
+                                                 hitpos.y >= 0 && hitpos.y <= 10.0f;
+            const auto snap = (bool)GetValue(mUI.chkSnap);
+            const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+            const auto grid_size = (unsigned)grid;
+
+            if (bottom_right_hitbox_hit)
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mEntity, hitnode));
+            else if (top_left_hitbox_hit)
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
+            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
+        }
+        else if (!mUI.timeline->GetSelectedItem() && !nodes_hit.empty())
+        {
+            // pick a new node as the selected actuator node
+            const auto* node = nodes_hit.back();
+            const auto& name = node->GetClassName();
+            const auto index = mUI.actuatorNode->findText(app::FromUtf8(name));
+            SetValue(mUI.actuatorNode, app::FromUtf8(name));
+            on_actuatorNode_currentIndexChanged(index);
+        }
+        else if (!mUI.timeline->GetSelectedItem())
+        {
+            SetValue(mUI.actuatorNode, mUI.actuatorNode->itemText(0));
+            on_actuatorNode_currentIndexChanged(0);
+        }
+    }
+    if (!mCurrentTool)
+        mCurrentTool.reset(new MoveCameraTool(mState));
+
+    mCurrentTool->MousePress(mickey, view);
+}
+void AnimationTrackWidget::MouseRelease(QMouseEvent* mickey)
+{
+    if (!mCurrentTool)
+        return;
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    mCurrentTool->MouseRelease(mickey, view);
+    mCurrentTool.reset();
+}
+bool AnimationTrackWidget::KeyPress(QKeyEvent* key)
+{
+    return false;
 }
 
 void AnimationTrackWidget::UpdateTransformActuatorUI()

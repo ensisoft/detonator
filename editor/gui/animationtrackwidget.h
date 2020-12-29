@@ -113,7 +113,12 @@ namespace gui
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
     private:
+        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
+        void MouseMove(QMouseEvent* mickey);
+        void MousePress(QMouseEvent* mickey);
+        void MouseRelease(QMouseEvent* mickey);
+        bool KeyPress(QKeyEvent* key);
         void UpdateTransformActuatorUI();
         void SetSelectedActuatorProperties();
     private:
