@@ -85,6 +85,7 @@ namespace game
     {
     public:
         virtual ~SceneDrawHook() = default;
+        virtual bool FilterEntity(const EntityType& entity) { return true; }
         virtual void BeginDrawEntity(const EntityType& entity, gfx::Painter& painter, gfx::Transform& trans) {}
         virtual void EndDrawEntity(const EntityType& entity, gfx::Painter& painter, gfx::Transform& trans) {}
     private:

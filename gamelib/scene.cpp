@@ -511,6 +511,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.layer    = node.GetLayer();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
+        entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
         mEntities.push_back(std::move(entity));
     }
     // rebuild the render tree through JSON serialization

@@ -92,6 +92,12 @@ public:
     }
 
     // SceneClassDrawHook
+    virtual bool FilterEntity(const game::SceneNodeClass& entity) override
+    {
+        if (!entity.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+            return false;
+        return true;
+    }
     virtual void BeginDrawEntity(const game::SceneNodeClass& entity, gfx::Painter& painter, gfx::Transform& trans) override
     {
         mDrawSelection  = (&entity == mSelectedItem);

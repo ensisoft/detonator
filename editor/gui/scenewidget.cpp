@@ -677,14 +677,13 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
 }
 void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
-    //DEBUG("Tree click event: %1", item->GetId());
-    auto* node = static_cast<game::EntityNodeClass*>(item->GetUserData());
-    if (node == nullptr)
-        return;
-
-    const bool visibility = node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
-    node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, !visibility);
-    item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+    if (auto* node = GetCurrentNode())
+    {
+        const bool visibility = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
+        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, !visibility);
+        item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+        mUI.tree->Update();
+    }
 }
 
 void SceneWidget::NewResourceAvailable(const app::Resource* resource)

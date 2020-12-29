@@ -1004,6 +1004,8 @@ namespace game
         { mPosition = position; }
         void SetRotation(float angle)
         { mRotation = angle; }
+        void SetFlag(Flags flag, bool on_off)
+        { mFlags.set(flag, on_off); }
         void SetScale(const glm::vec2& scale);
 
         std::size_t GetNumNodes() const
@@ -1018,6 +1020,8 @@ namespace game
         { return mScale; }
         int GetLayer() const
         { return mLayer; }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -1054,6 +1058,8 @@ namespace game
         float mRotation = 0.0f;
         // the render layer index.
         int mLayer = 0;
+        // entity bit flags
+        base::bitflag<Flags> mFlags;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

@@ -218,15 +218,22 @@ void Renderer::DrawRenderTree(const TreeNode<EntityType>& tree,
     });
     for (const auto& p : pairs)
     {
+        if (scene_hook && !scene_hook->FilterEntity(*p.node))
+            continue;
+
         gfx::Transform transform(p.transform);
+
         if (scene_hook)
             scene_hook->BeginDrawEntity(*p.node, painter, transform);
         if constexpr (std::is_same_v<EntityType, Entity>)
-            Draw(*p.node, painter, transform, entity_hook);
+        {
+            if (p.node->TestFlag(EntityType::Flags::VisibleInGame))
+                Draw(*p.node, painter, transform, entity_hook);
+        }
         else
         {
             auto klass = p.node->GetEntityClass();
-            if (klass)
+            if (klass && p.node->TestFlag(EntityType::Flags::VisibleInGame))
                 Draw(*klass, painter, transform, entity_hook);
         }
         if (scene_hook)

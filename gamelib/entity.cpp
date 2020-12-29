@@ -656,6 +656,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 
     mRenderTree = RenderTree::FromJson(json, *this).value();
     mInstanceId = base::RandomString(10);
+    mFlags.set(Flags::VisibleInGame, true);
 }
 
 Entity::Entity(const EntityArgs& args)
