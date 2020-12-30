@@ -87,8 +87,15 @@ namespace game
         class Visitor
         {
         public:
+            // Called when the tree traversal algorithm enters a node.
             virtual void EnterNode(T* node) {}
+            // Called when the tree traversal algorithm leaves a node.
             virtual void LeaveNode(T* node) {}
+            // Called to check whether the tree traversal can finish early
+            // without visiting the remainder of the nodes. When true is
+            // returned the rest of the nodes are skipped and the algorithm
+            // returns early. On false the tree traversal continues.
+            virtual bool IsDone() const { return false; }
         protected:
             ~Visitor() = default;
         };
@@ -96,8 +103,15 @@ namespace game
         class ConstVisitor
         {
         public:
+            // Called when the tree traversal algorithm enters a node.
             virtual void EnterNode(const T* node) {}
+            // Called when the tree traversal algorithm leaves a node.
             virtual void LeaveNode(const T* node) {}
+            // Called to check whether the tree traversal can finish early
+            // without visiting the remainder of the nodes. When true is
+            // returned the rest of the nodes are skipped and the algorithm
+            // returns early. On false the tree traversal continues.
+            virtual bool IsDone() const { return false; }
         protected:
             ~ConstVisitor() = default;
         };
@@ -110,6 +124,8 @@ namespace game
             for (auto& child : mChildren)
             {
                 child.PreOrderTraverse(visitor);
+                if (visitor.IsDone())
+                    break;
             }
             visitor.LeaveNode(mNodeValue);
         }
@@ -119,6 +135,8 @@ namespace game
             for (const auto& child : mChildren)
             {
                 child.PreOrderTraverse(visitor);
+                if (visitor.IsDone())
+                    break;
             }
             visitor.LeaveNode(const_cast<const T*>(mNodeValue));
         }

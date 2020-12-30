@@ -285,6 +285,7 @@ namespace game
                         const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
                         mResult = glm::vec2(vec.x, vec.y);
                         mTransform.Pop();
+                        mFound = true;
                     }
                 }
                 virtual void LeaveNode(const Node* node) override
@@ -293,6 +294,9 @@ namespace game
                         return;
                     mTransform.Pop();
                 }
+                virtual bool IsDone() const override
+                { return mFound; }
+                
                 glm::vec2 GetResult() const
                 { return mResult; }
             private:
@@ -301,6 +305,7 @@ namespace game
                 const Node* mNode = nullptr;
                 glm::vec2 mResult;
                 gfx::Transform mTransform;
+                bool mFound = false;
             };
 
             Visitor visitor(x, y, node);
@@ -334,6 +339,7 @@ namespace game
                         const auto& vec = animation_to_node * mCoords;
                         mResult = glm::vec2(vec.x, vec.y);
                         mTransform.Pop();
+                        mFound = true;
                     }
                 }
                 virtual void LeaveNode(const Node* node) override
@@ -342,6 +348,9 @@ namespace game
                         return;
                     mTransform.Pop();
                 }
+                virtual bool IsDone() const override
+                { return mFound; }
+
                 glm::vec2 GetResult() const
                 { return mResult; }
 
@@ -350,6 +359,7 @@ namespace game
                 const Node* mNode = nullptr;
                 glm::vec2 mResult;
                 gfx::Transform mTransform;
+                bool mFound = false;
             };
 
             Visitor visitor(x, y, node);
@@ -374,6 +384,7 @@ namespace game
                         mTransform.Push(node->GetModelTransform());
                         mBox.Transform(mTransform.GetAsMatrix());
                         mTransform.Pop();
+                        mFound = true;
                     }
                 }
                 virtual void LeaveNode(const Node* node) override
@@ -382,12 +393,16 @@ namespace game
 
                     mTransform.Pop();
                 }
+                virtual bool IsDone() const override
+                { return mFound; }
+
                 FBox GetResult() const
                 { return mBox; }
             private:
                 const Node* const mNode = nullptr;
                 gfx::Transform mTransform;
                 FBox mBox;
+                bool mFound = false;
             };
             Visitor visitor(node);
             tree.PreOrderTraverse(visitor);
@@ -430,6 +445,7 @@ namespace game
                         mResult = gfx::FRect(left, top, right - left, bottom - top);
 
                         mTransform.Pop();
+                        mFound = true;
                     }
                 }
                 virtual void LeaveNode(const Node* node) override
@@ -438,12 +454,15 @@ namespace game
                         return;
                     mTransform.Pop();
                 }
+                virtual bool IsDone() const override
+                { return mFound; }
                 gfx::FRect GetResult() const
                 { return mResult; }
             private:
                 const Node* mNode = nullptr;
                 gfx::FRect mResult;
                 gfx::Transform mTransform;
+                bool mFound = false;
             };
 
             Visitor visitor(node);

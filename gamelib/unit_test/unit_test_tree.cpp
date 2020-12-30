@@ -212,5 +212,43 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(visitor.nodes[4]->s == "child 1");
     }
 
+    // traversal early exit.
+    {
+        MyNode root("root", 123);
+        MyNode child0("child 0", 1);
+        MyNode child1("child 1", 2);
+        MyNode grand_child0("grand child 0", 4);
+        MyNode grand_child1("grand child 1", 5);
+
+        MyTree tree;
+        tree.SetValue(&root);
+        tree.AppendChild(&child0);
+        tree.AppendChild(&child1);
+        tree.GetChildNode(0).AppendChild(&grand_child0);
+        tree.GetChildNode(0).AppendChild(&grand_child1);
+
+        class Visitor : public MyTree::Visitor
+        {
+        public:
+            virtual void EnterNode(MyNode* node) override
+            {
+                nodes.push_back(node);
+                if (node->s == "grand child 0")
+                    done = true;
+            }
+            virtual bool IsDone() const override
+            { return done; }
+            // flat list of nodes in the order they're traversed.
+            std::vector<MyNode*> nodes;
+            bool done = false;
+        };
+        Visitor visitor;
+        tree.PreOrderTraverse(visitor);
+        TEST_REQUIRE(visitor.nodes.size() == 3);
+        TEST_REQUIRE(visitor.nodes[0]->s == "root");
+        TEST_REQUIRE(visitor.nodes[1]->s == "child 0");
+        TEST_REQUIRE(visitor.nodes[2]->s == "grand child 0");
+    }
+
     return 0;
 }
