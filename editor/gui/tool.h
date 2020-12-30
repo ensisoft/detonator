@@ -191,6 +191,9 @@ namespace gui
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
+            if (mickey->modifiers() & Qt::ControlModifier)
+                mSnapToGrid = !mSnapToGrid;
+
             if (mSnapToGrid)
             {
                 glm::vec2 position = mNode->GetTranslation();
