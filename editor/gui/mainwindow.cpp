@@ -524,7 +524,15 @@ void MainWindow::closeWorkspace()
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
         widget->Shutdown();
-        widget->setParent(nullptr);
+        //               !!!!! WARNING !!!!!
+        // setParent(nullptr) will cause an OpenGL memory leak
+        //
+        // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+        // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+        // https://bugreports.qt.io/browse/QTBUG-69429
+        //
+        // widget->setParent(nullptr);
+
         // cleverly enough this will remove the tab. so the loop
         // here must be carefully done to access the tab at index 0
         delete widget;
@@ -691,7 +699,16 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     mUI.mainTab->removeTab(index);
 
     widget->Shutdown();
-    widget->setParent(nullptr);
+
+    //               !!!!! WARNING !!!!!
+    // setParent(nullptr) will cause an OpenGL memory leak
+    //
+    // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+    // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+    // https://bugreports.qt.io/browse/QTBUG-69429
+    //
+    //widget->setParent(nullptr);
+
     delete widget;
 
     // rebuild window menu.

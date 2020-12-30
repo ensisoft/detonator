@@ -122,7 +122,14 @@ void ChildWindow::Shutdown()
         DEBUG("Shutdown child window (widget=%1) '%2'", klass, text);
 
         mUI.verticalLayout->removeWidget(mWidget);
-        mWidget->setParent(nullptr);
+        //               !!!!! WARNING !!!!!
+        // setParent(nullptr) will cause an OpenGL memory leak
+        //
+        // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+        // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+        // https://bugreports.qt.io/browse/QTBUG-69429
+        //
+        //mWidget->setParent(nullptr);
 
         // make sure we cleanup properly while all the resources
         // such as the OpenGL contexts (and the window) are still
