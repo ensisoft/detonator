@@ -131,7 +131,7 @@ public:
         mEngaged = false;
         const auto& diff = mCurrent - mStart;
         if (diff.x <= 0.0f || diff.y <= 0.0f)
-            return false;
+            return true;
 
         std::string name;
         for (size_t i=0; i<666666; ++i)
@@ -1351,10 +1351,11 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
     view.Rotate(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    mCurrentTool->MouseRelease(mickey, view);
-    mCurrentTool.release();
-
-    UncheckPlacementActions();
+    if (mCurrentTool->MouseRelease(mickey, view))
+    {
+        mCurrentTool.release();
+        UncheckPlacementActions();
+    }
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)

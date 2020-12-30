@@ -59,9 +59,8 @@ namespace gui
         virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) = 0;
         // Act on mouse release event. Typically this completes the tool i.e.
         // the use and application of this tool.
-        // The return value indicates whether the application of tool resulted
-        // in any state change. If any state was changed then true is returned.
-        // If the tool application was cancelled then false is returned.
+        // If the tool is now "done" returns true, otherwise returns false to
+        // indicate that the tool can continue operation.
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) = 0;
         // Act on a key press. Returns true if the key was consumed otherwise false
         // an the key is passed on to the next handler.
@@ -110,9 +109,9 @@ namespace gui
             if (button == Qt::LeftButton)
             {
                 mEngaged = false;
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     private:
         CameraState& mState;
@@ -201,7 +200,8 @@ namespace gui
                 position.y = std::round(position.y / mGridSize) * mGridSize;
                 mNode->SetTranslation(position);
             }
-            return false;
+            // we're done.
+            return true;
         }
     private:
         TreeModel& mModel;
@@ -260,7 +260,7 @@ namespace gui
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
             // nothing to be done here.
-            return false;
+            return true;
         }
     private:
         TreeModel& mModel;
@@ -306,7 +306,7 @@ namespace gui
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
-            return false;
+            return true;
         }
     private:
         float GetAngleRadians(const glm::vec4& p) const

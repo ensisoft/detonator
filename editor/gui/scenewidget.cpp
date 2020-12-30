@@ -120,9 +120,16 @@ public:
         if (button != Qt::LeftButton)
             return false;
         else if (mCancelled)
-            return false;
+            return true;
 
-        if (mSnapToGrid)
+        bool snap = mSnapToGrid;
+
+        // allow control modifier to be used to toggle
+        // snap to grid for this placement.
+        if (mickey->modifiers() & Qt::ControlModifier)
+            snap = !snap;
+
+        if (snap)
         {
             mWorldPos.x = std::round(mWorldPos.x / mGridSize) * mGridSize;
             mWorldPos.y = std::round(mWorldPos.y / mGridSize) * mGridSize;
@@ -140,7 +147,11 @@ public:
         mState.view->SelectItemById(app::FromUtf8(child->GetClassId()));
         mState.last_placed_entity = app::FromUtf8(mClass->GetId());
         DEBUG("Added new entity '%1'", name);
-        return true;
+        // return false to indicate that another object can be placed.
+        // in fact object placement continues until it's cancelled.
+        // this makes it quite convenient to place multiple objects
+        // in rapid succession.
+        return false;
     }
     virtual bool KeyPress(QKeyEvent* key) override
     {
@@ -932,10 +943,11 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     view.Rotate(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    mCurrentTool->MouseRelease(mickey, view);
-    mCurrentTool.release();
-
-    UncheckPlacementActions();
+    if (mCurrentTool->MouseRelease(mickey, view))
+    {
+        mCurrentTool.release();
+        UncheckPlacementActions();
+    }
 }
 
 void SceneWidget::MouseWheel(QWheelEvent* wheel)

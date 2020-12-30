@@ -1410,8 +1410,8 @@ void AnimationTrackWidget::MouseRelease(QMouseEvent* mickey)
     view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    mCurrentTool->MouseRelease(mickey, view);
-    mCurrentTool.reset();
+    if (mCurrentTool->MouseRelease(mickey, view))
+        mCurrentTool.reset();
 }
 bool AnimationTrackWidget::KeyPress(QKeyEvent* key)
 {
