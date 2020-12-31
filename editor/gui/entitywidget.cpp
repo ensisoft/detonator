@@ -56,6 +56,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "gamelib/treeop.h"
 
 namespace gui
 {
@@ -158,12 +159,10 @@ public:
         node.SetScale(glm::vec2(1.0f, 1.0f));
 
         // by default we're appending to the root item.
-        auto& root  = mState.entity->GetRenderTree();
         auto* child = mState.entity->AddNode(std::move(node));
-        root.AppendChild(child);
-
+        mState.entity->LinkChild(nullptr, child);
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(child->GetClassId()));
+        mState.view->SelectItemById(app::FromUtf8(child->GetId()));
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -660,7 +659,7 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(dupe->GetClassId()));
+        mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
     }
 }
 
@@ -1152,19 +1151,11 @@ void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeIte
     auto* src_value = static_cast<game::EntityNodeClass*>(item->GetUserData());
     auto* dst_value = static_cast<game::EntityNodeClass*>(target->GetUserData());
 
-    // find the game graph node that contains this AnimationNode.
-    auto* src_node   = tree.FindNodeByValue(src_value);
-    auto* src_parent = tree.FindParent(src_node);
-
     // check if we're trying to drag a parent onto its own child
-    if (src_node->FindNodeByValue(dst_value))
+    if (game::SearchChild(tree, dst_value, src_value))
         return;
 
-    game::EntityClass::RenderTreeNode branch = *src_node;
-    src_parent->DeleteChild(src_node);
-
-    auto* dst_node  = tree.FindNodeByValue(dst_value);
-    dst_node->AppendChild(std::move(branch));
+    mState.entity->ReparentChild(dst_value, src_value);
 }
 void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
@@ -1329,7 +1320,7 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
             else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
 
-            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetClassId()));
+            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetId()));
         }
         else
         {
@@ -1421,7 +1412,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         const auto& scale = node->GetScale();
-        SetValue(mUI.nodeID, node->GetClassId());
+        SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityNodeClass::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);

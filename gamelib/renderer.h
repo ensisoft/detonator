@@ -144,13 +144,13 @@ namespace game
         void UpdateNode(const NodeType& node, float time, float dt);
 
         template<typename EntityType, typename NodeType>
-        void DrawRenderTree(const TreeNode<EntityType>& tree,
+        void DrawRenderTree(const RenderTree<EntityType>& tree,
                             gfx::Painter& painter, gfx::Transform& transform,
                             SceneDrawHook<EntityType>* scene_hook,
                             EntityDrawHook<NodeType>* entity_hook);
 
         template<typename NodeType>
-        void DrawRenderTree(const TreeNode<NodeType>& tree,
+        void DrawRenderTree(const RenderTree<NodeType>& tree,
                             gfx::Painter& painter, gfx::Transform& transform,
                             EntityDrawHook<NodeType>* hook);
     private:

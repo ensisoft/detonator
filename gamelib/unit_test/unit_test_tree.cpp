@@ -32,6 +32,7 @@
 
 #include "base/test_minimal.h"
 #include "gamelib/tree.h"
+#include "gamelib/treeop.h"
 
 struct MyNode {
     std::string s;
@@ -41,9 +42,22 @@ struct MyNode {
       , i(i)
     {}
     MyNode() = default;
+
+    static nlohmann::json TreeNodeToJson(const MyNode* node)
+    {
+        nlohmann::json ret;
+        if (node)
+        {
+            ret["s"] = node->s;
+            ret["i"] = node->i;
+        }
+        return ret;
+    }
     static MyNode* TreeNodeFromJson(const nlohmann::json& json)
     {
         static std::vector<std::unique_ptr<MyNode>> nodes;
+        if (json.empty())
+            return nullptr;
 
         auto ret = std::make_unique<MyNode>();
         ret->s = json["s"];
@@ -61,194 +75,233 @@ nlohmann::json TreeNodeToJson(const MyNode* node)
     return ret;
 }
 
-int test_main(int argc, char* argv[])
+std::string WalkTree(game::RenderTree<MyNode>& tree)
 {
-    using MyTree = game::TreeNode<MyNode>;
-
+    std::string names;
+    tree.PreOrderTraverseForEach([&names](const auto* node) {
+        if (node) {
+            names.append(node->s);
+            names.append(" ");
+        }
+    });
+    if (!names.empty())
+        names.pop_back();
+    return names;
+}
+void unit_test_tree()
+{
+    // test link child
     {
-        MyTree tree;
-        TEST_REQUIRE(tree.GetNumChildren() == 0);
-        TEST_REQUIRE(tree.GetNumNodes() == 1);
-        TEST_REQUIRE(tree.FindParent(&tree) == nullptr);
-
+        using MyTree = game::RenderTree<MyNode>;
         MyNode foo("foo", 123);
         MyNode bar("bar", 222);
-
-        tree.AppendChild(&foo);
-        tree.AppendChild(&bar);
-        TEST_REQUIRE(tree.GetNumChildren() == 2);
-        TEST_REQUIRE(tree.GetNumNodes() == 3);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "foo");
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->i == 123);
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "bar");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->i == 222);
-        TEST_REQUIRE(tree.FindNodeByValue(&foo) == &tree.GetChildNode(0));
-        TEST_REQUIRE(tree.FindNodeByValue(&bar) == &tree.GetChildNode(1));
-
-        tree.TakeChild(0);
-        TEST_REQUIRE(tree.GetNumChildren() == 1);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "bar");
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->i == 222);
-        tree.TakeChild(0);
-        TEST_REQUIRE(tree.GetNumChildren() == 0);
-
         MyNode child0("child 0", 1);
         MyNode child1("child 1", 2);
-
-        tree.InsertChild(&child0, 0);
-        tree.InsertChild(&child1, 1);
-        TEST_REQUIRE(tree.GetNumChildren() == 2);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "child 0");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "child 1");
-
         MyNode child2("child 2", 3);
-        // insert at the start.
-        tree.InsertChild(&child2, 0);
-        TEST_REQUIRE(tree.GetNumChildren() == 3);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "child 2");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "child 0");
-        TEST_REQUIRE(tree.GetChildNode(2).GetValue()->s == "child 1");
-
         MyNode child3("child 3", 3);
-        // insert in the middle
-        tree.InsertChild(&child3, 1);
-        TEST_REQUIRE(tree.GetNumChildren() == 4);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "child 2");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "child 3");
-        TEST_REQUIRE(tree.GetChildNode(2).GetValue()->s == "child 0");
-        TEST_REQUIRE(tree.GetChildNode(3).GetValue()->s == "child 1");
 
-        // take from the middle
-        tree.TakeChild(1);
-        TEST_REQUIRE(tree.GetNumChildren() == 3);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "child 2");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "child 0");
-        TEST_REQUIRE(tree.GetChildNode(2).GetValue()->s == "child 1");
+        MyTree tree;
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
+        TEST_REQUIRE(tree.GetParent(&foo) == nullptr);
+        TEST_REQUIRE(tree.GetParent(&bar) == nullptr);
+        TEST_REQUIRE(tree.GetParent(&child0) == &foo);
+        TEST_REQUIRE(tree.GetParent(&child2) == &bar);
+        TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");
+    }
+
+    // test traversal.
+    {
+        using MyTree = game::RenderTree<MyNode>;
+        MyNode foo("foo", 123);
+        MyNode bar("bar", 222);
+        MyNode child0("child 0", 1);
+        MyNode child1("child 1", 2);
+        MyNode child2("child 2", 3);
+        MyNode child3("child 3", 3);
+
+        MyTree tree;
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
+
+        class Visitor : public MyTree::Visitor {
+        public:
+            virtual void EnterNode(MyNode* node) override
+            {
+                if (node)
+                {
+                    names.append(node->s);
+                    names.append(" ");
+                }
+            }
+            std::string names;
+        private:
+        };
+        Visitor visitor;
+        tree.PreOrderTraverse(visitor);
+        TEST_REQUIRE(visitor.names == "foo child 0 child 1 bar child 2 child 3 ");
+        visitor.names.clear();
+        tree.PreOrderTraverse(visitor, &bar);
+        TEST_REQUIRE(visitor.names == "bar child 2 child 3 ");
+
+        class ConstVisitor : public MyTree::ConstVisitor {
+        public:
+            virtual void EnterNode(const MyNode* node) override
+            {
+                if (node)
+                {
+                    names.append(node->s);
+                    names.append(" ");
+                }
+            }
+            std::string names;
+        private:
+        };
+        ConstVisitor const_visitor;
+        tree.PreOrderTraverse(const_visitor);
+        TEST_REQUIRE(const_visitor.names == "foo child 0 child 1 bar child 2 child 3 ");
+    }
+
+    // test reparenting
+    {
+        using MyTree = game::RenderTree<MyNode>;
+        MyNode foo("foo", 123);
+        MyNode bar("bar", 222);
+        MyNode child0("child 0", 1);
+        MyNode child1("child 1", 2);
+        MyNode child2("child 2", 3);
+        MyNode child3("child 3", 3);
+
+        MyTree tree;
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
+
+        tree.ReparentChild(&foo, &bar);
+        TEST_REQUIRE(tree.GetParent(&bar) == &foo);
+        TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");
+        tree.ReparentChild(nullptr, &bar);
+        TEST_REQUIRE(tree.GetParent(&bar) == nullptr);
+        TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");
+        tree.ReparentChild(&bar, &foo);
+        TEST_REQUIRE(WalkTree(tree) == "bar child 2 child 3 foo child 0 child 1");
+        tree.ReparentChild(nullptr, &foo);
+        TEST_REQUIRE(WalkTree(tree) == "bar child 2 child 3 foo child 0 child 1");
+
+        tree.ReparentChild(&child0, &child2);
+        TEST_REQUIRE(WalkTree(tree) == "bar child 3 foo child 0 child 2 child 1");
+        tree.ReparentChild(&bar, &child2);
+        TEST_REQUIRE(WalkTree(tree) == "bar child 3 child 2 foo child 0 child 1");
     }
 
     {
-        MyNode root("root", 123);
+        using MyTree = game::RenderTree<MyNode>;
+        MyNode foo("foo", 123);
+        MyNode bar("bar", 222);
         MyNode child0("child 0", 1);
         MyNode child1("child 1", 2);
-        MyNode grand_child0("grand child 0", 4);
-        MyNode grand_child1("grand child 1", 5);
+        MyNode child2("child 2", 3);
+        MyNode child3("child 3", 3);
 
         MyTree tree;
-        tree.SetValue(&root);
-        tree.AppendChild(&child0);
-        tree.AppendChild(&child1);
-        tree.GetChildNode(0).AppendChild(&grand_child0);
-        tree.GetChildNode(0).AppendChild(&grand_child1);
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
 
-        TEST_REQUIRE(tree.GetNumNodes() == 5);
-        TEST_REQUIRE(tree.FindNodeByValue(&grand_child0) == &tree.GetChildNode(0).GetChildNode(0));
-        TEST_REQUIRE(tree.FindNodeByValue(&grand_child1) == &tree.GetChildNode(0).GetChildNode(1));
-        TEST_REQUIRE(tree.FindParent(&tree.GetChildNode(0).GetChildNode(0)) == &tree.GetChildNode(0));
-        TEST_REQUIRE(tree.FindParent(&tree.GetChildNode(0).GetChildNode(1)) == &tree.GetChildNode(0));
+        tree.DeleteNode(&foo);
+        TEST_REQUIRE(tree.HasNode(&foo) == false);
+        TEST_REQUIRE(WalkTree(tree) == "bar child 2 child 3");
+        tree.DeleteNode(&child3);
+        TEST_REQUIRE(tree.HasNode(&child3) == false);
+        std::cout << WalkTree(tree) << std::endl;
+        TEST_REQUIRE(WalkTree(tree) == "bar child 2");
     }
 
-    // serialization
+    // JSON serialization
     {
-        MyNode root("root", 123);
+        using MyTree = game::RenderTree<MyNode>;
+        MyNode foo("foo", 123);
+        MyNode bar("bar", 222);
         MyNode child0("child 0", 1);
         MyNode child1("child 1", 2);
-        MyNode grand_child0("grand child 0", 4);
-        MyNode grand_child1("grand child 1", 5);
+        MyNode child2("child 2", 3);
+        MyNode child3("child 3", 3);
 
         MyTree tree;
-        tree.SetValue(&root);
-        tree.AppendChild(&child0);
-        tree.AppendChild(&child1);
-        tree.GetChildNode(0).AppendChild(&grand_child0);
-        tree.GetChildNode(0).AppendChild(&grand_child1);
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
 
-        auto json = tree.ToJson();
+        auto json = tree.ToJson(&MyNode::TreeNodeToJson);
         std::cout << json.dump(2) << std::endl;
 
         tree.Clear();
+        tree.FromJson(json, &MyNode::TreeNodeFromJson);
+        std::cout << std::endl;
+        std::cout << WalkTree(tree);
+        TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");
 
-        tree = MyTree::FromJson(json).value();
-        TEST_REQUIRE(tree.GetNumNodes() == 5);
-        TEST_REQUIRE(tree.GetValue()->s == "root");
-        TEST_REQUIRE(tree.GetValue()->i == 123);
-        TEST_REQUIRE(tree.GetChildNode(0).GetValue()->s == "child 0");
-        TEST_REQUIRE(tree.GetChildNode(1).GetValue()->s == "child 1");
-        TEST_REQUIRE(tree.GetChildNode(0).GetChildNode(0).GetValue()->s == "grand child 0");
-        TEST_REQUIRE(tree.GetChildNode(0).GetChildNode(1).GetValue()->s == "grand child 1");
     }
+}
 
-    // traversal
+void unit_test_treeop()
+{
     {
-        MyNode root("root", 123);
+        using MyTree = game::RenderTree<MyNode>;
+        MyNode foo("foo", 123);
+        MyNode bar("bar", 222);
         MyNode child0("child 0", 1);
         MyNode child1("child 1", 2);
-        MyNode grand_child0("grand child 0", 4);
-        MyNode grand_child1("grand child 1", 5);
+        MyNode child2("child 2", 3);
+        MyNode child3("child 3", 3);
 
         MyTree tree;
-        tree.SetValue(&root);
-        tree.AppendChild(&child0);
-        tree.AppendChild(&child1);
-        tree.GetChildNode(0).AppendChild(&grand_child0);
-        tree.GetChildNode(0).AppendChild(&grand_child1);
+        tree.LinkChild(nullptr, &foo);
+        tree.LinkChild(nullptr, &bar);
+        tree.LinkChild(&foo, &child0);
+        tree.LinkChild(&foo, &child1);
+        tree.LinkChild(&bar, &child2);
+        tree.LinkChild(&bar, &child3);
 
-        class Visitor : public MyTree::Visitor
-        {
-        public:
-            virtual void EnterNode(MyNode* node) override
-            {
-                nodes.push_back(node);
-            }
-            // flat list of nodes in the order they're traversed.
-            std::vector<MyNode*> nodes;
-        };
-        Visitor visitor;
-        tree.PreOrderTraverse(visitor);
-        TEST_REQUIRE(visitor.nodes.size() == 5);
-        TEST_REQUIRE(visitor.nodes[0]->s == "root");
-        TEST_REQUIRE(visitor.nodes[1]->s == "child 0");
-        TEST_REQUIRE(visitor.nodes[2]->s == "grand child 0");
-        TEST_REQUIRE(visitor.nodes[3]->s == "grand child 1");
-        TEST_REQUIRE(visitor.nodes[4]->s == "child 1");
+        std::vector<const MyNode*> path;
+        // root to root is just one hop, i.e. root
+        TEST_REQUIRE(game::SearchChild<MyNode>(tree, nullptr, nullptr, &path));
+        TEST_REQUIRE(path.size() == 1);
+        TEST_REQUIRE(path[0] == nullptr);
+
+        path.clear();
+        TEST_REQUIRE(game::SearchChild<MyNode>(tree, &child3, nullptr, &path));
+        TEST_REQUIRE(path.size() == 3);
+        TEST_REQUIRE(path[0] == nullptr);
+        TEST_REQUIRE(path[1] == &bar);
+        TEST_REQUIRE(path[2] == &child3);
+
+        // the node is not a child of the given parent.
+        path.clear();
+        TEST_REQUIRE(game::SearchChild<MyNode>(tree, &child3, &foo, &path) == false);
     }
+}
 
-    // traversal early exit.
-    {
-        MyNode root("root", 123);
-        MyNode child0("child 0", 1);
-        MyNode child1("child 1", 2);
-        MyNode grand_child0("grand child 0", 4);
-        MyNode grand_child1("grand child 1", 5);
-
-        MyTree tree;
-        tree.SetValue(&root);
-        tree.AppendChild(&child0);
-        tree.AppendChild(&child1);
-        tree.GetChildNode(0).AppendChild(&grand_child0);
-        tree.GetChildNode(0).AppendChild(&grand_child1);
-
-        class Visitor : public MyTree::Visitor
-        {
-        public:
-            virtual void EnterNode(MyNode* node) override
-            {
-                nodes.push_back(node);
-                if (node->s == "grand child 0")
-                    done = true;
-            }
-            virtual bool IsDone() const override
-            { return done; }
-            // flat list of nodes in the order they're traversed.
-            std::vector<MyNode*> nodes;
-            bool done = false;
-        };
-        Visitor visitor;
-        tree.PreOrderTraverse(visitor);
-        TEST_REQUIRE(visitor.nodes.size() == 3);
-        TEST_REQUIRE(visitor.nodes[0]->s == "root");
-        TEST_REQUIRE(visitor.nodes[1]->s == "child 0");
-        TEST_REQUIRE(visitor.nodes[2]->s == "grand child 0");
-    }
-
+int test_main(int argc, char* argv[])
+{
+    unit_test_tree();
+    unit_test_treeop();
     return 0;
 }

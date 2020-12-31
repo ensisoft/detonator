@@ -279,10 +279,14 @@ EntityClass::EntityClass(const EntityClass& other)
 {
     mClassId = other.mClassId;
 
+    std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
+
     // make a deep copy of the nodes.
     for (const auto& node : other.mNodes)
     {
-        mNodes.emplace_back(new EntityNodeClass(*node));
+        auto copy = std::make_unique<EntityNodeClass>(*node);
+        map[node.get()] = copy.get();
+        mNodes.push_back(std::move(copy));
     }
 
     // make a deep copy of the animation tracks
@@ -291,12 +295,9 @@ EntityClass::EntityClass(const EntityClass& other)
         mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
     }
 
-
-    // use JSON serialization to create a copy of the render tree.
-    using Serializer = RenderTreeFunctions<EntityNodeClass>;
-    nlohmann::json json = other.mRenderTree.ToJson<Serializer>();
-
-    mRenderTree = RenderTree::FromJson(json, *this).value();
+    mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
+            return map[node];
+        });
 }
 
 EntityNodeClass* EntityClass::AddNode(const EntityNodeClass& node)
@@ -330,7 +331,7 @@ EntityNodeClass* EntityClass::FindNodeByName(const std::string& name)
 EntityNodeClass* EntityClass::FindNodeById(const std::string& id)
 {
     for (const auto& node : mNodes)
-        if (node->GetClassId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
@@ -349,7 +350,7 @@ const EntityNodeClass* EntityClass::FindNodeByName(const std::string& name) cons
 const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
 {
     for (const auto& node : mNodes)
-        if (node->GetClassId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
@@ -430,36 +431,29 @@ const AnimationTrackClass* EntityClass::FindAnimationTrackByName(const std::stri
 
 void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
 {
-    RenderTreeFunctions<EntityNodeClass>::LinkChild(mRenderTree, parent, child);
+    game::LinkChild(mRenderTree, parent, child);
 }
 
 void EntityClass::BreakChild(EntityNodeClass* child)
 {
-    RenderTreeFunctions<EntityNodeClass>::BreakChild(mRenderTree, child);
+    game::BreakChild(mRenderTree, child);
 }
 
 void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child)
 {
-    RenderTreeFunctions<EntityNodeClass>::ReparentChild(mRenderTree, parent, child);
+    game::ReparentChild(mRenderTree, parent, child);
 }
 
 void EntityClass::DeleteNode(EntityNodeClass* node)
 {
-    std::unordered_set<std::string> graveyard;
-
-    RenderTreeFunctions<EntityNodeClass>::DeleteNode(mRenderTree, node, &graveyard);
-
-    // remove each node from the node container
-    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
-        return graveyard.find(node->GetClassId()) != graveyard.end();
-    }), mNodes.end());
+    game::DeleteNode(mRenderTree, node, mNodes);
 }
 
 EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
 {
     std::vector<std::unique_ptr<EntityNodeClass>> clones;
 
-    auto* ret = RenderTreeFunctions<EntityNodeClass>::DuplicateNode(mRenderTree, node, &clones);
+    auto* ret = game::DuplicateNode(mRenderTree, node, &clones);
     for (auto& clone : clones)
         mNodes.push_back(std::move(clone));
     return ret;
@@ -468,32 +462,32 @@ EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
 
 void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
 {
-    RenderTreeFunctions<EntityNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    RenderTreeFunctions<EntityNodeClass>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 glm::vec2 EntityClass::MapCoordsFromNode(float x, float y, const EntityNodeClass* node) const
 {
-    return RenderTreeFunctions<EntityNodeClass>::MapCoordsFromNode(mRenderTree, x, y, node);
+    return game::MapCoordsFromNode(mRenderTree, x, y, node);
 }
 glm::vec2 EntityClass::MapCoordsToNode(float x, float y, const EntityNodeClass* node) const
 {
-    return RenderTreeFunctions<EntityNodeClass>::MapCoordsToNode(mRenderTree, x, y, node);
+    return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
 gfx::FRect EntityClass::GetBoundingRect(const EntityNodeClass* node) const
 {
-    return RenderTreeFunctions<EntityNodeClass>::GetBoundingRect(mRenderTree, node);
+    return game::GetBoundingRect(mRenderTree, node);
 }
 gfx::FRect EntityClass::GetBoundingRect() const
 {
-    return RenderTreeFunctions<EntityNodeClass>::GetBoundingRect(mRenderTree);
+    return game::GetBoundingRect(mRenderTree);
 }
 
 FBox EntityClass::GetBoundingBox(const EntityNodeClass* node) const
 {
-    return RenderTreeFunctions<EntityNodeClass>::GetBoundingBox(mRenderTree, node);
+    return game::GetBoundingBox(mRenderTree, node);
 }
 
 std::size_t EntityClass::GetHash() const
@@ -513,18 +507,6 @@ std::size_t EntityClass::GetHash() const
     return hash;
 }
 
-EntityNodeClass* EntityClass::TreeNodeFromJson(const nlohmann::json &json)
-{
-    if (!json.contains("id")) // root node has no id
-        return nullptr;
-
-    const std::string& id = json["id"];
-    for (auto& it : mNodes)
-        if (it->GetClassId() == id) return it.get();
-
-    BUG("No such node found.");
-}
-
 nlohmann::json EntityClass::ToJson() const
 {
     nlohmann::json json;
@@ -538,9 +520,7 @@ nlohmann::json EntityClass::ToJson() const
     {
         json["tracks"].push_back(track->ToJson());
     }
-
-    using Serializer = RenderTreeFunctions<EntityNodeClass>; 
-    json["render_tree"] = mRenderTree.ToJson<Serializer>();
+    json["render_tree"] = mRenderTree.ToJson(game::TreeNodeToJson<EntityNodeClass>);
     return json;
 }
 
@@ -571,14 +551,7 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
             ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
         }
     }
-
-
-    auto& serializer = ret;
-
-    auto render_tree = RenderTree::FromJson(json["render_tree"], serializer);
-    if (!render_tree.has_value())
-        return std::nullopt;
-    ret.mRenderTree = std::move(render_tree.value());
+    ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
 
@@ -586,28 +559,13 @@ EntityClass EntityClass::Clone() const
 {
     EntityClass ret;
 
-    struct Serializer {
-        EntityNodeClass* TreeNodeFromJson(const nlohmann::json& json)
-        {
-            if (!json.contains("id")) // root node has no id
-                return nullptr;
-            const std::string& old_id = json["id"];
-            const std::string& new_id = idmap[old_id];
-            auto* ret = nodes[new_id];
-            ASSERT(ret != nullptr && "No such node found.");
-            return ret;
-        }
-        std::unordered_map<std::string, std::string> idmap;
-        std::unordered_map<std::string, EntityNodeClass*> nodes;
-    };
-    Serializer serializer;
+    std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
     // make a deep copy of the nodes.
     for (const auto& node : mNodes)
     {
         auto clone = std::make_unique<EntityNodeClass>(node->Clone());
-        serializer.idmap[node->GetClassId()]  = clone->GetClassId();
-        serializer.nodes[clone->GetClassId()] = clone.get();
+        map[node.get()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
 
@@ -617,12 +575,9 @@ EntityClass EntityClass::Clone() const
         ret.mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(track->Clone()));
     }
 
-    // use the json serialization setup the copy of the
-    // render tree.
-    using Serializer2 = RenderTreeFunctions<EntityNodeClass>;
-    nlohmann::json json = mRenderTree.ToJson<Serializer2>();
-    // build our render tree.
-    ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
+    ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityNodeClass* node) {
+        return map[node];
+    });
     return ret;
 }
 
@@ -642,19 +597,22 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
 Entity::Entity(std::shared_ptr<const EntityClass> klass)
     : mClass(klass)
 {
+    std::unordered_map<const EntityNodeClass*, const EntityNode*> map;
+
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
     for (size_t i=0; i<mClass->GetNumNodes(); ++i)
     {
-        auto node = CreateEntityNodeInstance(mClass->GetSharedEntityNodeClass(i));
-        mNodes.push_back(std::move(node));
+        auto node_klass = mClass->GetSharedEntityNodeClass(i);
+        auto node_inst  = CreateEntityNodeInstance(node_klass);
+        map[node_klass.get()] = node_inst.get();
+        mNodes.push_back(std::move(node_inst));
     }
 
-    // rebuild the render tree through JSON serialization
-    using Serializer =  RenderTreeFunctions<EntityNodeClass>;
-    nlohmann::json json = mClass->GetRenderTree().ToJson<Serializer>();
+    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const EntityNodeClass* node) {
+            return map[node];
+        });
 
-    mRenderTree = RenderTree::FromJson(json, *this).value();
     mInstanceId = base::RandomString(10);
     mFlags.set(Flags::VisibleInGame, true);
 }
@@ -693,7 +651,7 @@ EntityNode* Entity::AddNode(std::unique_ptr<EntityNode> node)
 
 void Entity::LinkChild(EntityNode* parent, EntityNode* child)
 {
-    RenderTreeFunctions<EntityNode>::LinkChild(mRenderTree, parent, child);
+    game::LinkChild(mRenderTree, parent, child);
 }
 
 EntityNode& Entity::GetNode(size_t index)
@@ -718,14 +676,14 @@ EntityNode* Entity::FindNodeByClassId(const std::string& id)
 EntityNode* Entity::FindNodeByInstanceId(const std::string& id)
 {
     for (auto& node : mNodes)
-        if (node->GetInstanceId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
 EntityNode* Entity::FindNodeByInstanceName(const std::string& name)
 {
     for (auto& node : mNodes)
-        if (node->GetInstanceName() == name)
+        if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
@@ -752,48 +710,41 @@ const EntityNode* Entity::FindNodeByClassId(const std::string& id) const
 const EntityNode* Entity::FindNodeByInstanceId(const std::string& id) const
 {
     for (auto& node : mNodes)
-        if (node->GetInstanceId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
 const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
 {
     for (const auto& node : mNodes)
-        if (node->GetInstanceName() == name)
+        if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
 
 void Entity::DeleteNode(EntityNode* node)
 {
-    std::unordered_set<std::string> graveyard;
-
-    RenderTreeFunctions<EntityNode>::DeleteNode(mRenderTree, node, &graveyard);
-
-    // remove each node from the node container
-    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
-        return graveyard.find(node->GetInstanceId()) != graveyard.end();
-    }), mNodes.end());
+    game::DeleteNode(mRenderTree, node, mNodes);
 }
 
 void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
 {
-    RenderTreeFunctions<EntityNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
 void Entity::CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    RenderTreeFunctions<EntityNode>::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
 glm::vec2 Entity::MapCoordsFromNode(float x, float y, const EntityNode* node) const
 {
-    return RenderTreeFunctions<EntityNode>::MapCoordsFromNode(mRenderTree, x, y, node);
+    return game::MapCoordsFromNode(mRenderTree, x, y, node);
 }
 
 glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) const
 {
-    return RenderTreeFunctions<EntityNode>::MapCoordsToNode(mRenderTree, x, y, node);
+    return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
 glm::mat4 Entity::GetNodeTransform() const
@@ -807,17 +758,17 @@ glm::mat4 Entity::GetNodeTransform() const
 
 gfx::FRect Entity::GetBoundingRect(const EntityNode* node) const
 {
-    return RenderTreeFunctions<EntityNode>::GetBoundingRect(mRenderTree, node);
+    return game::GetBoundingRect(mRenderTree, node);
 }
 
 gfx::FRect Entity::GetBoundingRect() const
 {
-    return RenderTreeFunctions<EntityNode>::GetBoundingRect(mRenderTree);
+    return game::GetBoundingRect(mRenderTree);
 }
 
 FBox Entity::GetBoundingBox(const EntityNode* node) const
 {
-    return RenderTreeFunctions<EntityNode>::GetBoundingBox(mRenderTree, node);
+    return game::GetBoundingBox(mRenderTree, node);
 }
 
 void Entity::Update(float dt)
@@ -896,18 +847,6 @@ void Entity::SetScale(const glm::vec2& scale)
         }
     }
     mScale = scale;
-}
-
-EntityNode* Entity::TreeNodeFromJson(const nlohmann::json &json)
-{
-    if (!json.contains("id")) // root node has no id
-        return nullptr;
-    const std::string& id = json["id"];
-    for (auto& it : mNodes)
-        if (it->GetClassId() == id) return it.get();
-
-    BUG("No such node found");
-    return nullptr;
 }
 
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)

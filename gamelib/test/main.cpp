@@ -508,14 +508,14 @@ public:
             right_arm_up.SetEndRotation(-math::Pi);
             right_arm_up.SetEndPosition(klass->FindNodeByName("shoulder joint R")->GetTranslation());
             right_arm_up.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
-            right_arm_up.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetClassId());
+            right_arm_up.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetId());
             game::TransformActuatorClass right_arm_down;
             right_arm_down.SetDuration(0.5f);
             right_arm_down.SetStartTime(0.5f);
             right_arm_down.SetEndRotation(0);
             right_arm_down.SetEndPosition(klass->FindNodeByName("shoulder joint R")->GetTranslation());
             right_arm_down.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
-            right_arm_down.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetClassId());
+            right_arm_down.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetId());
 
             auto track = std::make_unique<game::AnimationTrackClass>();
             track->SetDuration(2.0f);

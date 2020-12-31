@@ -121,13 +121,13 @@ void MaterialActuator::Start(EntityNode& node)
         mStartAlpha = draw->GetAlpha();
         if (!draw->TestFlag(DrawableItemClass::Flags::OverrideAlpha))
         {
-            WARN("EntityNode '%1' doesn't set OverrideAlpha flag. ", node.GetInstanceName());
+            WARN("EntityNode '%1' doesn't set OverrideAlpha flag. ", node.GetName());
             WARN("Material actuator will have no effect.");
         }
     }
     else
     {
-        WARN("EntityNode '%1' doesn't have a drawable item.", node.GetInstanceName());
+        WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
         WARN("Material actuator will have no effect.");
     }
 }

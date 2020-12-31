@@ -136,9 +136,7 @@ namespace gui
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
-            const auto& tree      = mModel.GetRenderTree();
-            const auto& tree_node = tree.FindNodeByValue(mNode);
-            const auto* parent    = tree.FindParent(tree_node);
+            const auto& tree = mModel.GetRenderTree();
             // if the object we're moving has a parent we need to map the mouse movement
             // correctly taking into account that the hierarchy might include several rotations.
             // simplest thing to do is to map the mouse to the object's parent's coordinate space
@@ -146,9 +144,10 @@ namespace gui
             // (as it is in the hierarchy).
             // todo: this could be simplified if we expressed the view transformation in the render tree's
             // root node. then the below else branch should go away(?)
-            if (parent && parent->GetValue())
+            if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
-                const auto& mouse_pos_in_node = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+                const auto* parent = tree.GetParent(mNode);
+                const auto& mouse_pos_in_node = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent);
                 const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
                 glm::vec2 position = mNode->GetTranslation();
@@ -176,12 +175,12 @@ namespace gui
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
 
             // see the comments in MouseMove about the branched logic.
-            const auto& tree      = mModel.GetRenderTree();
-            const auto& tree_node = tree.FindNodeByValue(mNode);
-            const auto* parent    = tree.FindParent(tree_node);
-            if (parent && parent->GetValue())
+            const auto& tree = mModel.GetRenderTree();
+            // parent could be nullptr which is the implicit root.
+            if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
-                mPreviousMousePos = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent->GetValue());
+                const auto* parent = tree.GetParent(mNode);
+                mPreviousMousePos = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent);
             }
             else
             {

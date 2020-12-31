@@ -70,7 +70,7 @@ std::string WalkTree(const game::Entity& entity)
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverseForEach([&names](const auto* node)  {
         if (node) {
-            names.append(node->GetInstanceName());
+            names.append(node->GetName());
             names.append(" ");
         }
     });
@@ -167,17 +167,17 @@ void unit_test_entity_node()
     {
         auto copy(node);
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
+        TEST_REQUIRE(copy.GetId() == node.GetId());
         copy = node;
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
+        TEST_REQUIRE(copy.GetId() == node.GetId());
     }
 
     // test clone
     {
         auto clone = node.Clone();
         TEST_REQUIRE(clone.GetHash() != node.GetHash());
-        TEST_REQUIRE(clone.GetClassId() != node.GetClassId());
+        TEST_REQUIRE(clone.GetId() != node.GetId());
         TEST_REQUIRE(clone.GetName()         == "root");
         TEST_REQUIRE(clone.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(clone.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -195,8 +195,8 @@ void unit_test_entity_node()
     {
         // check initial state.
         game::EntityNode instance(node);
-        TEST_REQUIRE(instance.GetInstanceId()   != node.GetClassId());
-        TEST_REQUIRE(instance.GetInstanceName() == "root");
+        TEST_REQUIRE(instance.GetId() != node.GetId());
+        TEST_REQUIRE(instance.GetName()         == "root");
         TEST_REQUIRE(instance.GetClassName()    == "root");
         TEST_REQUIRE(instance.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(instance.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -213,7 +213,7 @@ void unit_test_entity_node()
         instance.SetTranslation(glm::vec2(350.0f, -350.0f));
         instance.SetScale(glm::vec2(1.0f, 1.0f));
         instance.SetRotation(2.5f);
-        TEST_REQUIRE(instance.GetInstanceName()     == "foobar");
+        TEST_REQUIRE(instance.GetName()        == "foobar");
         TEST_REQUIRE(instance.GetSize()        == glm::vec2(200.0f, 200.0f));
         TEST_REQUIRE(instance.GetTranslation() == glm::vec2(350.0f, -350.0f));
         TEST_REQUIRE(instance.GetScale()       == glm::vec2(1.0f, 1.0f));
@@ -271,8 +271,8 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindNodeByName("child_1"));
     TEST_REQUIRE(entity.FindNodeByName("child_2"));
     TEST_REQUIRE(entity.FindNodeByName("foobar") == nullptr);
-    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetClassId()));
-    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetClassId()));
+    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetId()));
+    TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetId()));
     TEST_REQUIRE(entity.FindNodeById("asg") == nullptr);
     TEST_REQUIRE(entity.GetNumTracks() == 2);
     TEST_REQUIRE(entity.FindAnimationTrackByName("test1"));
@@ -461,10 +461,10 @@ void unit_test_entity_instance()
     // test initial state.
     game::Entity instance(klass);
     TEST_REQUIRE(instance.GetNumNodes() == 4);
-    TEST_REQUIRE(instance.GetNode(0).GetInstanceName() == "root");
-    TEST_REQUIRE(instance.GetNode(1).GetInstanceName() == "child_1");
-    TEST_REQUIRE(instance.GetNode(2).GetInstanceName() == "child_2");
-    TEST_REQUIRE(instance.GetNode(3).GetInstanceName() == "child_3");
+    TEST_REQUIRE(instance.GetNode(0).GetName() == "root");
+    TEST_REQUIRE(instance.GetNode(1).GetName() == "child_1");
+    TEST_REQUIRE(instance.GetNode(2).GetName() == "child_2");
+    TEST_REQUIRE(instance.GetNode(3).GetName() == "child_3");
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_3 child_2");
 
     // todo: test more of the instance api

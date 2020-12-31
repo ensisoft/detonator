@@ -150,7 +150,7 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
 
     using DrawableItemType = typename Node::DrawableItemType;
 
-    auto it = mPaintNodes.find(node.GetInstanceId());
+    auto it = mPaintNodes.find(node.GetId());
     if (it == mPaintNodes.end())
         return;
     auto& paint = it->second;
@@ -169,12 +169,12 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
 }
 
 template<typename EntityType, typename NodeType>
-void Renderer::DrawRenderTree(const TreeNode<EntityType>& tree,
+void Renderer::DrawRenderTree(const RenderTree<EntityType>& tree,
                               gfx::Painter& painter, gfx::Transform& transform,
                               SceneDrawHook<EntityType>* scene_hook,
                               EntityDrawHook<NodeType>* entity_hook)
 {
-    using SceneGraph = TreeNode<EntityType>;
+    using SceneGraph = RenderTree<EntityType>;
     struct EntityDrawPair {
         glm::mat4 transform;
         const EntityType* node = nullptr;
@@ -242,12 +242,12 @@ void Renderer::DrawRenderTree(const TreeNode<EntityType>& tree,
 }
 
 template<typename Node>
-void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
+void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                               gfx::Painter& painter, gfx::Transform& transform,
                               EntityDrawHook<Node>* hook)
 
 {
-    using RenderTree = TreeNode<Node>;
+    using RenderTree = game::RenderTree<Node>;
     using DrawPacket = DrawPacket;
     using DrawHook   = EntityDrawHook<Node>;
     using DrawableItemType = typename Node::DrawableItemType;
@@ -293,7 +293,7 @@ void Renderer::DrawRenderTree(const TreeNode<Node>& tree,
 
             const auto& material = item->GetMaterialId();
             const auto& drawable = item->GetDrawableId();
-            auto& paint_node = mRenderer.mPaintNodes[node->GetInstanceId()];
+            auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
             paint_node.visited = true;
             if (!paint_node.material || paint_node.material_class_id != material)
             {

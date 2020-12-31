@@ -433,9 +433,7 @@ namespace game
         EntityNodeClass(EntityNodeClass&& other);
 
         // Get the class id.
-        std::string GetClassId() const
-        { return mClassId; }
-        std::string GetInstanceId() const
+        std::string GetId() const
         { return mClassId; }
         // Get the human readable name for this class.
         std::string GetName() const
@@ -596,9 +594,9 @@ namespace game
         { mRotation += dr; }
 
         // instance getters.
-        std::string GetInstanceId() const
+        std::string GetId() const
         { return mInstId; }
-        std::string GetInstanceName() const
+        std::string GetName() const
         { return mName; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -631,7 +629,7 @@ namespace game
 
         // shortcut for class getters.
         std::string GetClassId() const
-        { return mClass->GetClassId(); }
+        { return mClass->GetId(); }
         std::string GetClassName() const
         { return mClass->GetName(); }
         int GetLayer() const
@@ -677,8 +675,8 @@ namespace game
     class EntityClass
     {
     public:
-        using RenderTree      = TreeNode<EntityNodeClass>;
-        using RenderTreeNode  = TreeNode<EntityNodeClass>;
+        using RenderTree      = game::RenderTree<EntityNodeClass>;
+        using RenderTreeNode  = EntityNodeClass;
         using RenderTreeValue = EntityNodeClass;
 
         EntityClass()
@@ -816,9 +814,6 @@ namespace game
         std::shared_ptr<const AnimationTrackClass> GetSharedAnimationTrackClass(size_t index) const
         { return mAnimationTracks[index]; }
 
-        // Lookup a EntityNode based on the serialized ID in the JSON.
-        EntityNodeClass* TreeNodeFromJson(const nlohmann::json& json);
-
         // Serialize the entity into JSON.
         nlohmann::json ToJson() const;
 
@@ -881,8 +876,8 @@ namespace game
             // animation item.
             VisibleInGame
         };
-        using RenderTree      = TreeNode<EntityNode>;
-        using RenderTreeNode  = TreeNode<EntityNode>;
+        using RenderTree      = game::RenderTree<EntityNode>;
+        using RenderTreeNode  = EntityNode;
         using RenderTreeValue = EntityNode;
 
         // Construct a new entity with the initial state based
@@ -1010,9 +1005,9 @@ namespace game
 
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
-        std::string GetInstanceName() const
+        std::string GetName() const
         { return mInstanceName; }
-        std::string GetInstanceId() const
+        std::string GetId() const
         { return mInstanceId; }
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -1031,8 +1026,6 @@ namespace game
         const EntityClass* operator->() const
         { return mClass.get(); }
         Entity& operator=(const Entity&) = delete;
-
-        EntityNode* TreeNodeFromJson(const nlohmann::json& json) ;
     private:
         // the class object.
         std::shared_ptr<const EntityClass> mClass;

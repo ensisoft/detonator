@@ -98,17 +98,18 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& jso
 
 SceneClass::SceneClass(const SceneClass& other)
 {
+    std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
+
     mClassId = other.mClassId;
     for (const auto& node : other.mNodes)
     {
         auto copy = std::make_unique<SceneNodeClass>(*node);
+        map[node.get()] = copy.get();
         mNodes.push_back(std::move(copy));
     }
-    // use JSON serialization to create a copy of the render tree.
-    using Serializer = RenderTreeFunctions<SceneNodeClass>;
-    nlohmann::json json = other.mRenderTree.ToJson<Serializer>();
-
-    mRenderTree = RenderTree::FromJson(json, *this).value();
+    mRenderTree.FromTree(other.mRenderTree, [&map](const SceneNodeClass* node) {
+        return map[node];
+    });
 }
 SceneNodeClass* SceneClass::AddNode(const SceneNodeClass& node)
 {
@@ -140,7 +141,7 @@ SceneNodeClass* SceneClass::FindNodeByName(const std::string& name)
 SceneNodeClass* SceneClass::FindNodeById(const std::string& id)
 {
     for (const auto& node : mNodes)
-        if (node->GetClassId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
@@ -159,49 +160,41 @@ const SceneNodeClass* SceneClass::FindNodeByName(const std::string& name) const
 const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
 {
     for (const auto& node : mNodes)
-        if (node->GetClassId() == id)
+        if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
 
 void SceneClass::LinkChild(SceneNodeClass* parent, SceneNodeClass* child)
 {
-    RenderTreeFunctions<SceneNodeClass>::LinkChild(mRenderTree, parent, child);
+    game::LinkChild(mRenderTree, parent, child);
 }
 
 void SceneClass::BreakChild(SceneNodeClass* child)
 {
-    RenderTreeFunctions<SceneNodeClass>::BreakChild(mRenderTree, child);
+    game::BreakChild(mRenderTree, child);
 }
 
 void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child)
 {
-    RenderTreeFunctions<SceneNodeClass>::ReparentChild(mRenderTree, parent, child);
+    game::ReparentChild(mRenderTree, parent, child);
 }
 
 void SceneClass::DeleteNode(SceneNodeClass* node)
 {
-    std::unordered_set<std::string> graveyard;
-
-    RenderTreeFunctions<SceneNodeClass>::DeleteNode(mRenderTree, node, &graveyard);
-
-    // remove each node from the node container
-    mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [&graveyard](const auto& node) {
-        return graveyard.find(node->GetClassId()) != graveyard.end();
-    }), mNodes.end());
+    game::DeleteNode(mRenderTree, node, mNodes);
 }
 
 SceneNodeClass* SceneClass::DuplicateNode(const SceneNodeClass* node)
 {
-    return RenderTreeFunctions<SceneNodeClass>::DuplicateNode(mRenderTree, node, &mNodes);
+    return game::DuplicateNode(mRenderTree, node, &mNodes);
 }
 
 void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
                    std::vector<glm::vec2>* hitbox_positions)
 {
     // todo: improve the implementation with some form of space partitioning.
-    class Visitor : public RenderTree::Visitor
-    {
+    class Visitor : public RenderTree::Visitor {
     public:
         Visitor(float x, float y,
                 std::vector<SceneNodeClass*>& hit_nodes,
@@ -251,8 +244,7 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
                        std::vector<glm::vec2>* hitbox_positions) const
 {
     // todo: improve the implementation with some form of space partitioning.
-    class Visitor : public RenderTree::ConstVisitor
-    {
+    class Visitor : public RenderTree::ConstVisitor {
     public:
         Visitor(float x, float y,
                 std::vector<const SceneNodeClass*>& hit_nodes,
@@ -302,8 +294,7 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
 
 glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const
 {
-    class Visitor : public RenderTree::ConstVisitor
-    {
+    class Visitor : public RenderTree::ConstVisitor {
     public:
         Visitor(float x, float y, const SceneNodeClass* node)
           : mPos(x, y, 1.0f, 1.0f)
@@ -397,17 +388,6 @@ size_t SceneClass::GetHash() const
     return hash;
 }
 
-SceneNodeClass* SceneClass::TreeNodeFromJson(const nlohmann::json& json)
-{
-    if (!json.contains("id")) // root node has no id
-        return nullptr;
-
-    const std::string& id = json["id"];
-    for (auto& it : mNodes)
-        if (it->GetClassId() == id) return it.get();
-
-    BUG("No such node found.");
-}
 nlohmann::json SceneClass::ToJson() const
 {
     nlohmann::json json;
@@ -416,8 +396,7 @@ nlohmann::json SceneClass::ToJson() const
     {
         json["nodes"].push_back(node->ToJson());
     }
-    using Serializer = RenderTreeFunctions<SceneNodeClass>;
-    json["render_tree"] = mRenderTree.ToJson<Serializer>();
+    json["render_tree"] = mRenderTree.ToJson(&game::TreeNodeToJson<SceneNodeClass>);
     return json;
 }
 
@@ -437,49 +416,26 @@ std::optional<SceneClass> SceneClass::FromJson(const nlohmann::json& json)
             ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
         }
     }
-    auto& serializer = ret;
 
-    auto render_tree = RenderTree::FromJson(json["render_tree"], serializer);
-    if (!render_tree.has_value())
-        return std::nullopt;
-    ret.mRenderTree = std::move(render_tree.value());
+    ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
 SceneClass SceneClass::Clone() const
 {
     SceneClass ret;
 
-    struct Serializer {
-        SceneNodeClass* TreeNodeFromJson(const nlohmann::json& json)
-        {
-            if (!json.contains("id")) // root node has no id
-                return nullptr;
-            const std::string& old_id = json["id"];
-            const std::string& new_id = idmap[old_id];
-            auto* ret = nodes[new_id];
-            ASSERT(ret != nullptr && "No such node found.");
-            return ret;
-        }
-        std::unordered_map<std::string, std::string> idmap;
-        std::unordered_map<std::string, SceneNodeClass*> nodes;
-    };
-    Serializer serializer;
+    std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
 
     // make a deep copy of the nodes.
     for (const auto& node : mNodes)
     {
         auto clone = std::make_unique<SceneNodeClass>(*node);
-        serializer.idmap[node->GetClassId()]  = clone->GetClassId();
-        serializer.nodes[clone->GetClassId()] = clone.get();
+        map[node.get()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
-
-    // use the json serialization setup the copy of the
-    // render tree.
-    using Serializer2 = RenderTreeFunctions<SceneNodeClass>;
-    nlohmann::json json = mRenderTree.ToJson<Serializer2>();
-    // build our render tree.
-    ret.mRenderTree = RenderTree::FromJson(json, serializer).value();
+    ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
+        return map[node];
+    });
     return ret;
 }
 
@@ -498,6 +454,8 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
 Scene::Scene(std::shared_ptr<const SceneClass> klass)
   : mClass(klass)
 {
+    std::unordered_map<const SceneNodeClass*, const Entity*> map;
+
     for (size_t i=0; i<klass->GetNumNodes(); ++i)
     {
         const auto& node = klass->GetNode(i);
@@ -507,35 +465,17 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.position = node.GetTranslation();
         args.scale    = node.GetScale();
         args.name     = node.GetName();
-        args.id       = node.GetClassId();
+        args.id       = node.GetId();
         args.layer    = node.GetLayer();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
         entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
+        map[&node] = entity.get();
         mEntities.push_back(std::move(entity));
     }
-    // rebuild the render tree through JSON serialization
-    using Serializer2 = RenderTreeFunctions<SceneNodeClass>;
-    nlohmann::json json = mClass->GetRenderTree().ToJson<Serializer2>();
-
-    struct Serializer {
-        Entity* TreeNodeFromJson(const nlohmann::json& json)
-        {
-            if (!json.contains("id")) // root node has no id
-                return nullptr;
-            const std::string& id = json["id"];
-            for (auto& it : mScene->mEntities)
-            {
-                if (it->GetInstanceId() == id)
-                    return it.get();
-            }
-            return nullptr;
-        }
-        Scene* mScene = nullptr;
-    };
-    Serializer serializer;
-    serializer.mScene = this;
-    mRenderTree = RenderTree::FromJson(json, serializer).value();
+    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const SceneNodeClass* node) {
+        return map[node];
+    });
 }
 
 Scene::Scene(const SceneClass& klass) : Scene(std::make_shared<SceneClass>(klass))
@@ -549,14 +489,14 @@ Entity& Scene::GetEntity(size_t index)
 Entity* Scene::FindEntityByInstanceId(const std::string& id)
 {
     for (auto& e : mEntities)
-        if (e->GetInstanceId() == id)
+        if (e->GetId() == id)
             return e.get();
     return nullptr;
 }
 Entity* Scene::FindEntityByInstanceName(const std::string& name)
 {
     for (auto& e : mEntities)
-        if (e->GetInstanceName() == name)
+        if (e->GetName() == name)
             return e.get();
     return nullptr;
 }
@@ -569,14 +509,14 @@ const Entity& Scene::GetEntity(size_t index) const
 const Entity* Scene::FindEntityByInstanceId(const std::string& id) const
 {
     for (const auto& e : mEntities)
-        if (e->GetInstanceId() == id)
+        if (e->GetId() == id)
             return e.get();
     return nullptr;
 }
 const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 {
     for (const auto& e : mEntities)
-        if (e->GetInstanceName() == name)
+        if (e->GetName() == name)
             return e.get();
     return nullptr;
 }

@@ -48,7 +48,7 @@ namespace gui
                 virtual void EnterNode(TreeNode* node)
                 {
                     TreeWidget::TreeItem item;
-                    item.SetId(node ? app::FromUtf8(node->GetClassId()) : "root");
+                    item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
                     item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
                     item.SetUserData(node);
                     item.SetLevel(mLevel);

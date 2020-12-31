@@ -55,6 +55,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "gamelib/treeop.h"
 
 namespace {
     inline glm::vec4 ToVec4(const QPoint& point)
@@ -144,7 +145,7 @@ public:
         auto* child = mState.scene.AddNode(std::move(node));
         mState.scene.LinkChild(nullptr, child);
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(child->GetClassId()));
+        mState.view->SelectItemById(app::FromUtf8(child->GetId()));
         mState.last_placed_entity = app::FromUtf8(mClass->GetId());
         DEBUG("Added new entity '%1'", name);
         // return false to indicate that another object can be placed.
@@ -571,7 +572,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(dupe->GetClassId()));
+        mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
     }
 }
 
@@ -776,19 +777,11 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
     auto* src_value = static_cast<game::SceneNodeClass*>(item->GetUserData());
     auto* dst_value = static_cast<game::SceneNodeClass*>(target->GetUserData());
 
-    // find the game graph node that contains this AnimationNode.
-    auto* src_node   = tree.FindNodeByValue(src_value);
-    auto* src_parent = tree.FindParent(src_node);
-
     // check if we're trying to drag a parent onto its own child
-    if (src_node->FindNodeByValue(dst_value))
+    if (game::SearchChild(tree, dst_value, src_value))
         return;
 
-    game::SceneClass::RenderTreeNode branch = *src_node;
-    src_parent->DeleteChild(src_node);
-
-    auto* dst_node  = tree.FindNodeByValue(dst_value);
-    dst_node->AppendChild(std::move(branch));
+    mState.scene.ReparentChild(dst_value, src_value);
 
 }
 void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
@@ -920,7 +913,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
             // todo: figure out how to scale/rotate an entity node.
             mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, hitnode, snap, grid_size));
 
-            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetClassId()));
+            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetId()));
         }
         else
         {
@@ -1035,7 +1028,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     {
         const auto& translate = node->GetTranslation();
         const auto& scale = node->GetScale();
-        SetValue(mUI.nodeID, node->GetClassId());
+        SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeEntity, mState.workspace->MapEntityIdToName(node->GetEntityId()));
         SetValue(mUI.nodeLayer, node->GetLayer());

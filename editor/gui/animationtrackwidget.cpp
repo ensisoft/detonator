@@ -77,7 +77,7 @@ public:
         {
             const auto& node = anim.GetNode(i);
             const auto& name = node.GetName();
-            const auto& id   = node.GetClassId();
+            const auto& id   = node.GetId();
             id_to_index_map[id] = list->size();
             TimelineWidget::Timeline line;
             line.SetName(app::FromUtf8(name));
@@ -596,7 +596,7 @@ void AnimationTrackWidget::on_actionAddTransformActuator_triggered()
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != node.GetClassId())
+        if (klass.GetNodeId() != node.GetId())
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -607,7 +607,7 @@ void AnimationTrackWidget::on_actionAddTransformActuator_triggered()
     }
 
     game::TransformActuatorClass klass;
-    klass.SetNodeId(node.GetClassId());
+    klass.SetNodeId(node.GetId());
     klass.SetStartTime(lo_bound);
     klass.SetDuration(hi_bound - lo_bound);
     klass.SetEndPosition(node.GetTranslation());
@@ -647,7 +647,7 @@ void AnimationTrackWidget::on_actionAddMaterialActuator_triggered()
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != node.GetClassId())
+        if (klass.GetNodeId() != node.GetId())
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -657,7 +657,7 @@ void AnimationTrackWidget::on_actionAddMaterialActuator_triggered()
             lo_bound = std::max(lo_bound, end);
     }
     game::MaterialActuatorClass klass;
-    klass.SetNodeId(node.GetClassId());
+    klass.SetNodeId(node.GetId());
     klass.SetStartTime(lo_bound);
     klass.SetDuration(hi_bound - lo_bound);
     klass.SetEndAlpha(GetValue(mUI.materialEndAlpha));
@@ -981,7 +981,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     const auto norm_start = actuator_start / animation_duration;
     const auto norm_end   = actuator_end / animation_duration;
 
-    const auto& id = node->GetClassId();
+    const auto& id = node->GetId();
     float lo_bound = 0.0f;
     float hi_bound = 1.0f;
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
@@ -1005,7 +1005,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     if (type == game::AnimationActuatorClass::Type::Transform)
     {
         game::TransformActuatorClass klass;
-        klass.SetNodeId(node->GetClassId());
+        klass.SetNodeId(node->GetId());
         klass.SetStartTime(start);
         klass.SetDuration(end - start);
         klass.SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1018,7 +1018,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     else if (type == game::AnimationActuatorClass::Type::Material)
     {
         game::MaterialActuatorClass klass;
-        klass.SetNodeId(node->GetClassId());
+        klass.SetNodeId(node->GetId());
         klass.SetStartTime(start);
         klass.SetDuration(end - start);
         klass.SetEndAlpha(GetValue(mUI.materialEndAlpha));

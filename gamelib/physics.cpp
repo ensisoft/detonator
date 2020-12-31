@@ -188,7 +188,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
 
             mTransform.Push(node->GetNodeTransform());
 
-            auto it = mEngine.mNodes.find(node->GetInstanceId());
+            auto it = mEngine.mNodes.find(node->GetId());
             if (it == mEngine.mNodes.end())
                 return;
 
@@ -255,7 +255,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
 
             mTransform.Push(node->GetNodeTransform());
 
-            auto it = mEngine.mNodes.find(node->GetInstanceId());
+            auto it = mEngine.mNodes.find(node->GetId());
             if (it != mEngine.mNodes.end())
                 return;
             if (!node->HasRigidBody())
@@ -324,12 +324,12 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
     {
         const auto& polygonid = body->GetPolygonShapeId();
         if (polygonid.empty()) {
-            WARN("Rigid body for node '%1' ('%2') has no polygon shape id set.", node.GetInstanceId(), node.GetInstanceName());
+            WARN("Rigid body for node '%1' ('%2') has no polygon shape id set.", node.GetId(), node.GetName());
             return;
         }
         const auto& drawable = mLoader->FindDrawableClass(polygonid);
         if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
-            WARN("No polygon class found for node '%1' ('%2')", node.GetInstanceId(), node.GetInstanceName());
+            WARN("No polygon class found for node '%1' ('%2')", node.GetId(), node.GetName());
             return;
         }
         const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
@@ -373,12 +373,12 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
 
     PhysicsNode physics_node;
     physics_node.world_body = world_body;
-    physics_node.instance   = node.GetInstanceId();
+    physics_node.instance   = node.GetId();
     physics_node.world_extents = node_size_in_world;
-    mNodes[node.GetInstanceId()] = physics_node;
+    mNodes[node.GetId()] = physics_node;
 
     DEBUG("Created new physics body for scene node '%1' ('%2')",
-          node.GetInstanceId(), node.GetInstanceName());
+          node.GetId(), node.GetName());
 }
 
 } // namespace

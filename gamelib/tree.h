@@ -30,67 +30,31 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/utility.h"
 
 namespace game
 {
-    // Non-owning treenode template for tree structure and traversal.
-    // Useful for example rendering (scene graph) tree.
-    template<typename T>
-    class TreeNode
+    // Non-intrusive, non-owning tree structure for maintaining
+    // parent-child relationships. This can be used to defined
+    // things such as the scene's render hierarchy (i.e. the
+    // scene graph)
+    // The root of the tree can be denoted by using a special
+    // pointer value, the nullptr.
+    template<typename Element>
+    class RenderTree
     {
     public:
-        TreeNode() = default;
-        TreeNode(T* value) : mNodeValue(value)
-        {}
-
-        // A tree visitor but with the ability to visit
-        // (and possibly mutate) the tree nodes itself.
-        class TreeVisitor
-        {
-        public:
-            virtual void EnterNode(TreeNode* node) {};
-            virtual void LeaveNode(TreeNode* node) {};
-        protected:
-            ~TreeVisitor() = default;
-        };
-        void PreOrderTraverse(TreeVisitor& visitor)
-        {
-            visitor.EnterNode(this);
-            for (auto& child : mChildren)
-            {
-                child.PreOrderTraverse(visitor);
-            }
-            visitor.LeaveNode(this);
-        }
-        template<typename Function>
-        void PreOrderTraverseForEachTreeNode(Function callback)
-        {
-            class PrivateTreeVisitor : public TreeVisitor
-            {
-            public:
-                PrivateTreeVisitor(Function callback) : mCallback(std::move(callback))
-                {}
-                virtual void EnterNode(TreeNode* node)
-                {
-                    mCallback(node);
-                }
-            private:
-                Function mCallback;
-            } visitor(std::move(callback));
-
-            PreOrderTraverse(visitor);
-        }
-
+        // Mutating visitor for visiting nodes in the tree.
         class Visitor
         {
         public:
             // Called when the tree traversal algorithm enters a node.
-            virtual void EnterNode(T* node) {}
+            virtual void EnterNode(Element* node) {}
             // Called when the tree traversal algorithm leaves a node.
-            virtual void LeaveNode(T* node) {}
+            virtual void LeaveNode(Element* node) {}
             // Called to check whether the tree traversal can finish early
             // without visiting the remainder of the nodes. When true is
             // returned the rest of the nodes are skipped and the algorithm
@@ -100,13 +64,14 @@ namespace game
             ~Visitor() = default;
         };
 
+        // Non-mutating visitor for visiting nodes in the tree.
         class ConstVisitor
         {
         public:
             // Called when the tree traversal algorithm enters a node.
-            virtual void EnterNode(const T* node) {}
+            virtual void EnterNode(const Element* node) {}
             // Called when the tree traversal algorithm leaves a node.
-            virtual void LeaveNode(const T* node) {}
+            virtual void LeaveNode(const Element* node) {}
             // Called to check whether the tree traversal can finish early
             // without visiting the remainder of the nodes. When true is
             // returned the rest of the nodes are skipped and the algorithm
@@ -115,371 +80,251 @@ namespace game
         protected:
             ~ConstVisitor() = default;
         };
-        // Pre-order traverse the tree. Pre-order means
-        // entering the current node first and then ascending to the
-        // children starting from the leftmost (0th child).
-        void PreOrderTraverse(Visitor& visitor)
+        // Clear the tree. After this the tree is empty
+        // and contains no nodes.
+        void Clear()
         {
-            visitor.EnterNode(mNodeValue);
-            for (auto& child : mChildren)
-            {
-                child.PreOrderTraverse(visitor);
-                if (visitor.IsDone())
-                    break;
-            }
-            visitor.LeaveNode(mNodeValue);
-        }
-        void PreOrderTraverse(ConstVisitor& visitor) const
-        {
-            visitor.EnterNode(const_cast<const T*>(mNodeValue));
-            for (const auto& child : mChildren)
-            {
-                child.PreOrderTraverse(visitor);
-                if (visitor.IsDone())
-                    break;
-            }
-            visitor.LeaveNode(const_cast<const T*>(mNodeValue));
+            mParents.clear();
+            mChildren.clear();
         }
 
-        template<typename Function>
-        void PreOrderTraverseForEach(Function callback)
+        void PreOrderTraverse(Visitor& visitor, Element* parent = nullptr)
         {
-            class PrivateVisitor : public Visitor
+            visitor.EnterNode(parent);
+            auto it = mChildren.find(parent);
+            if (it != mChildren.end())
             {
-            public:
-                PrivateVisitor(Function callback) : mCallback(callback)
-                {}
-                virtual void EnterNode(T* node) override
+                const auto& children = it->second;
+                for (auto *child : children)
                 {
-                    mCallback(node);
+                    PreOrderTraverse(visitor, const_cast<Element*>(child));
+                    if (visitor.IsDone())
+                        break;
                 }
-            private:
-                Function mCallback;
-            };
-            PrivateVisitor visitor(std::move(callback));
-            PreOrderTraverse(visitor);
+            }
+            visitor.LeaveNode(parent);
         }
-
-        template<typename Function>
-        void PreOrderTraverseForEach(Function callback) const
+        void PreOrderTraverse(ConstVisitor& visitor, const Element* parent = nullptr) const
         {
-            class PrivateVisitor : public ConstVisitor
+            visitor.EnterNode(parent);
+            auto it = mChildren.find(parent);
+            if (it != mChildren.end())
             {
+                const auto& children = it->second;
+                for (const auto *child : children)
+                {
+                    PreOrderTraverse(visitor, child);
+                    if (visitor.IsDone())
+                        break;
+                }
+            }
+            visitor.LeaveNode(parent);
+        }
+        template<typename Function>
+        void PreOrderTraverseForEach(Function callback, Element* parent = nullptr)
+        {
+            class PrivateVisitor : public Visitor {
             public:
                 PrivateVisitor(Function callback) : mCallback(std::move(callback))
                 {}
-                virtual void EnterNode(const T* node) override
-                {
-                    mCallback(node);
-                }
+                virtual void EnterNode(Element* node) override
+                { mCallback(node); }
             private:
                 Function mCallback;
             };
             PrivateVisitor visitor(std::move(callback));
-            PreOrderTraverse(visitor);
+            PreOrderTraverse(visitor, parent);
+        }
+        template<typename Function>
+        void PreOrderTraverseForEach(Function callback, const Element* parent = nullptr) const
+        {
+            class PrivateVisitor : public ConstVisitor {
+            public:
+                PrivateVisitor(Function callback) : mCallback(std::move(callback))
+                {}
+                virtual void EnterNode(const Element* node) override
+                { mCallback(node); }
+            private:
+                Function mCallback;
+            };
+            PrivateVisitor visitor(std::move(callback));
+            PreOrderTraverse(visitor, parent);
         }
 
-        // Get the value contained within this node if any.
-        // For example the root node might not have any value.
-        T* GetValue()
-        { return mNodeValue; }
-        const T* GetValue() const
-        { return mNodeValue; }
-
-        T* operator->()
-        { return mNodeValue; }
-        const T* operator->() const
-        { return mNodeValue; }
-
-        // Set the value referred to by this treenode.
-        void SetValue(T* value)
-        { mNodeValue = value; }
-
-        // Get the number of child nodes this node has.
-        size_t GetNumChildren() const
-        { return mChildren.size(); }
-
-        // Make a deep copy of this tree node.
-        TreeNode Clone() const
+        // Convenience operation for moving a child node to a new parent.
+        void ReparentChild(const Element* parent, const Element* child)
         {
-            return TreeNode(*this);
+            BreakChild(child);
+            LinkChild(parent, child);
         }
+        // Delete the node and all of its ascendants from the tree.
+        // If the child doesn't exist in the tree then nothing is done.
+        void DeleteNode(const Element* child)
+        {
+            auto it = mParents.find(child);
+            if (it == mParents.end())
+                return;
 
-        // get the number of nodes in the tree starting from this
-        // node *including* this node itself.
-        // I.e. if this node has no children then the num of nodes is 1.
-        size_t GetNumNodes() const
-        {
-            size_t ret = 1;
-            for (const auto& child : mChildren)
-                ret += child.GetNumNodes();
-            return ret;
-        }
-
-        // Get a reference to a child node by index.
-        TreeNode& GetChildNode(size_t i)
-        {
-            ASSERT(i < mChildren.size());
-            return mChildren[i];
-        }
-        TreeNode* FindChild(const T* value)
-        {
-            for (auto& child : mChildren)
+            auto& children = mChildren[it->second];
+            for (auto it = children.begin(); it != children.end(); ++it)
             {
-                if (child.mNodeValue == value)
-                    return &child;
-            }
-            return nullptr;
-        }
-        // Get a reference to a child node by index.
-        const TreeNode& GetChildNode(size_t i) const
-        {
-            ASSERT(i < mChildren.size());
-            return mChildren[i];
-        }
-        const TreeNode* FindChild(const T* value) const
-        {
-            for (const auto& child : mChildren)
-            {
-                if (child.mNodeValue == value)
-                    return &child;
-            }
-            return nullptr;
-        }
-
-        TreeNode* FindNodeByValue(const T* value)
-        {
-            if (mNodeValue == value)
-                return this;
-            for (auto& child : mChildren)
-            {
-                if (TreeNode* ret = child.FindNodeByValue(value))
-                    return ret;
-            }
-            return nullptr;
-        }
-        const TreeNode* FindNodeByValue(const T* value) const
-        {
-            if (mNodeValue == value)
-                return this;
-            for (const auto& child : mChildren)
-            {
-                if (const TreeNode* ret = child.FindNodeByValue(value))
-                    return ret;
-            }
-            return nullptr;
-        }
-
-        TreeNode* FindParent(TreeNode* child)
-        {
-            for (auto& maybe : mChildren)
-            {
-                if (&maybe == child)
-                    return this;
-            }
-            for (auto& maybe : mChildren)
-            {
-                if (TreeNode* ret = maybe.FindParent(child))
-                    return ret;
-            }
-            return nullptr;
-        }
-        const TreeNode* FindParent(const TreeNode* child) const
-        {
-            for (const auto& maybe : mChildren)
-            {
-                if (&maybe == child)
-                    return this;
-            }
-            for (const auto&  maybe : mChildren)
-            {
-                if (const TreeNode* ret = maybe.FindParent(child))
-                    return ret;
-            }
-            return nullptr;
-        }
-
-        // Append a new child node without any value to the list of children.
-        TreeNode& AppendChild()
-        {
-            return AppendChild(TreeNode());
-        }
-        // Append a new child node to the list of children.
-        // The new node is creaetd with the given value.
-        TreeNode& AppendChild(T* value)
-        {
-            return AppendChild(TreeNode(value));
-        }
-        // Append the existing child node to the list of children.
-        TreeNode& AppendChild(const TreeNode& node)
-        {
-            mChildren.push_back(node);
-            return mChildren.back();
-        }
-        TreeNode& AppendChild(TreeNode&& node)
-        {
-            mChildren.push_back(std::move(node));
-            return mChildren.back();
-        }
-
-        // Insert an existing child node to the list of children at a specific
-        // loccation where the location is between 0 and N (N being the current
-        // count of children). If the insertion index is equal to current count
-        // of children the node is appended. Otherwise it's inserted into the
-        // specific position. For example if the list of children is as follows.
-        // A, B, C, D then A has index 0, B has index 1 etc.
-        // inserting child E at index 1 creates the following list of children:
-        // A, E, B, C, D
-        // Function returns a reference to the new TreeNode that was created.
-        TreeNode& InsertChild(const TreeNode& child, size_t i)
-        {
-            ASSERT(i <= mChildren.size());
-
-            if (i == mChildren.size())
-            {
-                mChildren.push_back(child);
-                return mChildren.back();
-            }
-
-            auto it = mChildren.begin();
-            it += i;
-            mChildren.insert(it, child);
-            return mChildren[i];
-        }
-        TreeNode& InsertChild(size_t i)
-        {
-            return InsertChild(TreeNode(), i);
-        }
-        TreeNode& InsertChild(T* value, size_t i)
-        {
-            return InsertChild(TreeNode(value), i);
-        }
-
-        void DeleteChild(size_t i)
-        {
-            ASSERT(i < mChildren.size());
-            auto it = mChildren.begin();
-            std::advance(it, i);
-            mChildren.erase(it);
-        }
-        void DeleteChild(TreeNode* child)
-        {
-            for (auto it = mChildren.begin(); it != mChildren.end(); ++it)
-            {
-                auto& maybe = *it;
-                if (&maybe == child)
+                const Element* value = *it;
+                if (value == child)
                 {
-                    mChildren.erase(it);
-                    return;
+                    DeleteChildren(value);
+                    children.erase(it);
+                    break;
                 }
             }
+            mParents.erase(child);
         }
 
-        TreeNode TakeChild(size_t i)
+        // Delete all the children of a parent.
+        // If the parent doesn't exist in the tree nothing is done.
+        void DeleteChildren(const Element* parent)
         {
-            ASSERT(i < mChildren.size());
-            auto ret = std::move(mChildren[i]);
-            auto it = mChildren.begin();
-            it += i;
-            mChildren.erase(it);
-            return ret;
+            auto it = mChildren.find(parent);
+            if (it == mChildren.end())
+                return;
+            auto& children = it->second;
+            for (auto* child : children)
+            {
+                DeleteChildren(child);
+                mParents.erase(child);
+            }
+            children.clear();
         }
 
-        void Clear()
+        // Link a child node to a parent node.
+        // The child must not be linked to any parent. It'd be
+        // illegal to have a child with two parents nodes.
+        // If the child should be moved from one parent to another
+        // use ReparentChild or BreakChild followed by LinkChild.
+        void LinkChild(const Element* parent, const Element* child)
         {
-            mNodeValue = nullptr;
-            mChildren.resize(0);
+            ASSERT(mParents.find(child) == mParents.end());
+            mChildren[parent].push_back(child);
+            mParents[child] = parent;
+        }
+        // Break a child node away from its parent. The descendants
+        // of child are still retained as node's children.
+        // If the child node is currently not linked to any parent
+        // nothing is done.
+        void BreakChild(const Element* child)
+        {
+            auto it = mParents.find(child);
+            if (it == mParents.end())
+                return;
+
+            const auto* parent = it->second;
+            auto& children = mChildren[parent];
+            for (auto it = children.begin(); it != children.end(); ++it)
+            {
+                const Element* value = *it;
+                if (value == child)
+                {
+                    children.erase(it);
+                    break;
+                }
+            }
+            mParents.erase(it);
+        }
+
+        // Get the parent node of a child node.
+        // The child node must exist in the tree.
+        Element* GetParent(const Element* child)
+        {
+            auto it = mParents.find(child);
+            ASSERT(it != mParents.end());
+            return const_cast<Element*>(it->second);
+        }
+        const Element* GetParent(const Element* child) const
+        {
+            auto it = mParents.find(child);
+            ASSERT(it != mParents.end());
+            return it->second;
+        }
+
+        // Returns true if this node exists in this tree.
+        bool HasNode(const Element* node) const
+        {
+            // all nodes have a parent, thus if the node exists
+            // in the tree it also exists in the child->Parent map
+            return mParents.find(node) != mParents.end();
+        }
+
+        // Returns true if the node has a parent. All nodes except
+        // for the *Root* node have a parent.
+        bool HasParent(const Element* node) const
+        {
+            return mParents.find(node) != mParents.end();
         }
 
         template<typename Serializer>
-        nlohmann::json ToJson(const Serializer& serializer) const
+        nlohmann::json ToJson(const Serializer& to_json, const Element* parent = nullptr) const
         {
             nlohmann::json json;
-            json["node"] = serializer.TreeNodeToJson(mNodeValue);
-            for (const auto& child : mChildren)
+            json["node"] = to_json(parent);
+            auto it = mChildren.find(parent);
+            if (it != mChildren.end())
             {
-                // recurse
-                json["children"].push_back(child.ToJson(serializer));
+                const auto& children = it->second;
+                for (auto *child : children)
+                {
+                    json["children"].push_back(ToJson(to_json, child));
+                }
             }
             return json;
         }
-
+        // Build render tree from a JSON object. The serializer object
+        // should create a new Element instance and return the pointer to it.
         template<typename Serializer>
-        nlohmann::json ToJson() const
+        void FromJson(const nlohmann::json& json, const Serializer& from_json)
         {
-            nlohmann::json json;
-            json["node"] = Serializer::TreeNodeToJson(mNodeValue);
-            for (const auto& child : mChildren)
-            {
-                // recurse
-                json["children"].push_back(child.template ToJson<Serializer>());
-            }
-            return json;
-        }
-
-
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            json["node"] = TreeNodeToJson(mNodeValue);
-            for (const auto& child : mChildren)
-            {
-                // recurse
-                json["children"].push_back(child.ToJson());
-            }
-            return json;
-        }
-
-        static std::optional<TreeNode> FromJson(const nlohmann::json& json)
-        {
-            // using the type T as the serializer
-            return TreeNode::FromJson<T>(json);
-        }
-
-        template<typename Serializer>
-        static std::optional<TreeNode> FromJson(const nlohmann::json& json)
-        {
-            TreeNode ret;
-            ret.mNodeValue = Serializer::TreeNodeFromJson(json["node"]);
-
+            const Element* root = from_json(json["node"]);
             if (!json.contains("children"))
-                return ret;
-
-            for (const auto& json_c : json["children"].items())
-            {
-                auto child = TreeNode::FromJson<Serializer>(json_c.value());
-                if (!child.has_value())
-                    return std::nullopt;
-                ret.mChildren.push_back(std::move(child.value()));
-            }
-            return ret;
+                return;
+            for (const auto& js : json["children"].items())
+                FromJson(js.value(), from_json, root);
         }
 
-        template<typename Serializer>
-        static std::optional<TreeNode> FromJson(const nlohmann::json& json, Serializer& serializer)
+        // Build an equivalent tree (in terms of topology) based on the
+        // source tree while remapping nodes from one instance to another
+        // through the map function.
+        template<typename T, typename MapFunction>
+        void FromTree(const RenderTree<T>& tree, const MapFunction& map_node)
         {
-            TreeNode ret;
-            ret.mNodeValue = serializer.TreeNodeFromJson(json["node"]);
-
-            if (!json.contains("children"))
-                return ret;
-
-            for (const auto& json_c : json["children"].items())
+            for (const auto& pair : tree.mChildren)
             {
-                auto child = TreeNode::FromJson(json_c.value(), serializer);
-                if (!child.has_value())
-                    return std::nullopt;
-                ret.mChildren.push_back(std::move(child.value()));
+                const auto* parent   = pair.first;
+                const auto& children = pair.second;
+                for (const auto* child : children)
+                    LinkChild(map_node(parent), map_node(child));
             }
-            return ret;
         }
     private:
-        // this is the actual value we refer to.
-        // can be nullptr (for example for the root node).
-        // we don't retain any ownership.
-        T* mNodeValue = nullptr;
-        // the child nodes.
-        std::vector<TreeNode> mChildren;
+        template<typename Serializer>
+        void FromJson(const nlohmann::json& json, const Serializer& from_json, const Element* parent)
+        {
+            const Element* node = from_json(json["node"]);
+            mChildren[parent].push_back(node);
+            mParents[node] = parent;
+            if (!json.contains("children"))
+                return;
 
+            for (const auto& js : json["children"].items())
+            {
+                FromJson(js.value(), from_json, node);
+            }
+        }
+    private:
+        using ChildList = std::vector<const Element*>;
+        // lookup table for mapping parents to their children
+        std::unordered_map<const Element*, ChildList> mChildren;
+        // lookup table for mapping children to their parents
+        std::unordered_map<const Element*, const Element*> mParents;
+
+        template<typename T> friend class RenderTree;
     };
+
 } // namespace

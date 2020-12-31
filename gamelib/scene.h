@@ -94,10 +94,8 @@ namespace game
         { return mRotation; }
         std::string GetName() const
         { return mName; }
-        std::string GetClassId() const
+        std::string GetId() const
         { return mClassId; }
-        std::string GetInstanceId() const
-        {return mClassId; }
         std::string GetEntityId() const
         { return mEntityId; }
         std::shared_ptr<const EntityClass> GetEntityClass() const
@@ -153,8 +151,8 @@ namespace game
     class SceneClass
     {
     public:
-        using RenderTree      = TreeNode<SceneNodeClass>;
-        using RenderTreeNode  = TreeNode<SceneNodeClass>;
+        using RenderTree      = game::RenderTree<SceneNodeClass>;
+        using RenderTreeNode  = SceneNodeClass;
         using RenderTreeValue = SceneNodeClass;
 
         SceneClass()
@@ -300,8 +298,8 @@ namespace game
     class Scene
     {
     public:
-        using RenderTree      = TreeNode<Entity>;
-        using RenderTreeNode  = TreeNode<Entity>;
+        using RenderTree      = game::RenderTree<Entity>;
+        using RenderTreeNode  = Entity;
         using RenderTreeValue = Entity;
 
         Scene(std::shared_ptr<const SceneClass> klass);

@@ -67,7 +67,7 @@ std::string WalkTree(const game::Scene& scene)
     const auto& tree = scene.GetRenderTree();
     tree.PreOrderTraverseForEach([&names](const auto* entity)  {
         if (entity) {
-            names.append(entity->GetInstanceName());
+            names.append(entity->GetName());
             names.append(" ");
         }
     });
@@ -101,17 +101,17 @@ void unit_test_node()
     {
         auto copy(node);
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
+        TEST_REQUIRE(copy.GetId() == node.GetId());
         copy = node;
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetClassId() == node.GetClassId());
+        TEST_REQUIRE(copy.GetId() == node.GetId());
     }
 
     // test clone
     {
         auto clone = node.Clone();
         TEST_REQUIRE(clone.GetHash() != node.GetHash());
-        TEST_REQUIRE(clone.GetClassId() != node.GetClassId());
+        TEST_REQUIRE(clone.GetId() != node.GetId());
         TEST_REQUIRE(clone.GetName()         == "root");
         TEST_REQUIRE(clone.GetTranslation()  == glm::vec2(150.0f, -150.0f));
         TEST_REQUIRE(clone.GetScale()        == glm::vec2(4.0f, 5.0f));
@@ -161,7 +161,7 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
     TEST_REQUIRE(klass.GetNode(2).GetName() == "child_2");
     TEST_REQUIRE(klass.FindNodeByName("root"));
-    TEST_REQUIRE(klass.FindNodeById(klass.GetNode(0).GetClassId()));
+    TEST_REQUIRE(klass.FindNodeById(klass.GetNode(0).GetId()));
     TEST_REQUIRE(klass.FindNodeById("asgas") == nullptr);
     TEST_REQUIRE(klass.FindNodeByName("foasg") == nullptr);
 
@@ -178,7 +178,7 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(ret->FindNodeByName("root"));
-        TEST_REQUIRE(ret->FindNodeById(klass.GetNode(0).GetClassId()));
+        TEST_REQUIRE(ret->FindNodeById(klass.GetNode(0).GetId()));
         TEST_REQUIRE(ret->FindNodeById("asgas") == nullptr);
         TEST_REQUIRE(ret->FindNodeByName("foasg") == nullptr);
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
@@ -211,8 +211,9 @@ void unit_test_scene_class()
 
     // test breaking node away from the render tree.
     {
-        klass.BreakChild(klass.FindNodeByName("child_1"));
         klass.BreakChild(klass.FindNodeByName("root"));
+        klass.BreakChild(klass.FindNodeByName("child_1"));
+        klass.BreakChild(klass.FindNodeByName("child_2"));
         TEST_REQUIRE(klass.GetNumNodes() == 3);
         TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
         TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
@@ -321,15 +322,15 @@ void unit_test_scene_instance()
     // their properties.
     game::Scene instance(klass);
     TEST_REQUIRE(instance.GetNumEntities() == 3);
-    TEST_REQUIRE(instance.GetEntity(0).GetInstanceName() == "root");
-    TEST_REQUIRE(instance.GetEntity(1).GetInstanceName() == "child_1");
-    TEST_REQUIRE(instance.GetEntity(2).GetInstanceName() == "child_2");
-    TEST_REQUIRE(instance.GetEntity(0).GetInstanceId() == klass.GetNode(0).GetClassId());
-    TEST_REQUIRE(instance.GetEntity(1).GetInstanceId() == klass.GetNode(1).GetClassId());
-    TEST_REQUIRE(instance.GetEntity(2).GetInstanceId() == klass.GetNode(2).GetClassId());
+    TEST_REQUIRE(instance.GetEntity(0).GetName() == "root");
+    TEST_REQUIRE(instance.GetEntity(1).GetName() == "child_1");
+    TEST_REQUIRE(instance.GetEntity(2).GetName() == "child_2");
+    TEST_REQUIRE(instance.GetEntity(0).GetId() == klass.GetNode(0).GetId());
+    TEST_REQUIRE(instance.GetEntity(1).GetId() == klass.GetNode(1).GetId());
+    TEST_REQUIRE(instance.GetEntity(2).GetId() == klass.GetNode(2).GetId());
     TEST_REQUIRE(instance.FindEntityByInstanceName("root"));
     TEST_REQUIRE(instance.FindEntityByInstanceName("blaal") == nullptr);
-    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetClassId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
 
