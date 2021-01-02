@@ -757,7 +757,10 @@ namespace game
         // need to point to nodes that are part of the render tree and belong
         // to this entity class object. This will move the whole hierarchy of
         // nodes starting from child under the new parent.
-        void ReparentChild(EntityNodeClass* parent, EntityNodeClass* child);
+        // If keep_world_transform is true the child will be transformed such
+        // that it's current world transformation remains the same. I.e  it's
+        // position and rotation in the world don't change.
+        void ReparentChild(EntityNodeClass* parent, EntityNodeClass* child, bool keep_world_transform = true);
 
         // Delete a node from the entity. The given node and all of its
         // children will be removed from the entity render tree and then deleted.

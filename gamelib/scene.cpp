@@ -175,9 +175,9 @@ void SceneClass::BreakChild(SceneNodeClass* child)
     game::BreakChild(mRenderTree, child);
 }
 
-void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child)
+void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child, bool keep_world_transform)
 {
-    game::ReparentChild(mRenderTree, parent, child);
+    game::ReparentChild(mRenderTree, parent, child, keep_world_transform);
 }
 
 void SceneClass::DeleteNode(SceneNodeClass* node)

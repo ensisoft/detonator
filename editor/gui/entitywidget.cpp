@@ -1154,8 +1154,8 @@ void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeIte
     // check if we're trying to drag a parent onto its own child
     if (game::SearchChild(tree, dst_value, src_value))
         return;
-
-    mState.entity->ReparentChild(dst_value, src_value);
+    const bool retain_world_transform = true;
+    mState.entity->ReparentChild(dst_value, src_value, retain_world_transform);
 }
 void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {

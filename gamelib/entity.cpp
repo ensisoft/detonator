@@ -439,9 +439,9 @@ void EntityClass::BreakChild(EntityNodeClass* child)
     game::BreakChild(mRenderTree, child);
 }
 
-void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child)
+void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child, bool keep_world_transform)
 {
-    game::ReparentChild(mRenderTree, parent, child);
+    game::ReparentChild(mRenderTree, parent, child, keep_world_transform);
 }
 
 void EntityClass::DeleteNode(EntityNodeClass* node)

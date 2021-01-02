@@ -157,6 +157,70 @@ bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* pa
     return false;
 }
 
+template<typename Node>
+glm::mat4 FindUnscaledNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
+{
+    constexpr Node* root = nullptr;
+    std::vector<const Node*> path;
+    SearchParent(tree, node, root, &path);
+
+    gfx::Transform transform;
+    for (auto it = path.rbegin(); it != path.rend(); ++it)
+    {
+        const auto* node = *it;
+        if (node == nullptr)
+            continue;
+        transform.Push(node->GetNodeTransform());
+    }
+
+    transform.Push();
+    // offset the drawable size, don't use the scale operation
+    // because then the input would need to be in the model space (i.e. [0.0f, 1.0f])
+    const auto& size = node->GetSize();
+    transform.Translate(-size.x*0.5f, -size.y*0.5f);
+
+    // transform stack cleanup (pop) is not done
+    // because it's meaningless.
+    return transform.GetAsMatrix();
+}
+
+template<typename Node>
+glm::mat4 FindNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
+{
+    constexpr Node* root = nullptr;
+    std::vector<const Node*> path;
+    SearchParent(tree, node, root, &path);
+
+    gfx::Transform transform;
+    for (auto it = path.rbegin(); it != path.rend(); ++it)
+    {
+        const auto* node = *it;
+        if (node == nullptr)
+            continue;
+        transform.Push(node->GetNodeTransform());
+    }
+    transform.Push(node->GetModelTransform());
+    return transform.GetAsMatrix();
+}
+
+template<typename Node>
+glm::mat4 FindNodeTransform(const RenderTree<Node>& tree, const Node* node)
+{
+    constexpr Node* root = nullptr;
+    std::vector<const Node*> path;
+    SearchParent(tree, node, root, &path);
+
+    gfx::Transform transform;
+    for (auto it = path.rbegin(); it != path.rend(); ++it)
+    {
+        const auto* node = *it;
+        if (node == nullptr)
+            continue;
+        transform.Push(node->GetNodeTransform());
+    }
+    return transform.GetAsMatrix();
+}
+
 template<typename Node> inline
 void LinkChild(RenderTree<Node>& tree, const Node* parent, const Node* child)
 {
@@ -170,8 +234,23 @@ void BreakChild(RenderTree<Node>& tree, const Node* child)
 }
 
 template<typename Node> inline
-void ReparentChild(RenderTree<Node>& tree, const Node* parent, const Node* child)
+void ReparentChild(RenderTree<Node>& tree, const Node* parent, Node* child, bool retain_world_transform = true)
 {
+    // compute a new node transform that expresses the node's
+    // current world transform relative to its new parent.
+    // i.e figure out which transform gives the node the same
+    // world position/rotation related to the new parent.
+    if (retain_world_transform)
+    {
+        const auto& child_to_world  = FindNodeTransform(tree, child);
+        const auto& parent_to_world = FindNodeTransform(tree, parent);
+        FBox box;
+        box.Transform(child_to_world);
+        box.Transform(glm::inverse(parent_to_world));
+        child->SetTranslation(box.GetPosition());
+        child->SetRotation(box.GetRotation());
+    }
+
     tree.ReparentChild(parent, child);
 }
 
@@ -253,51 +332,7 @@ Node* DuplicateNode(RenderTree<Node>& tree, const Node* node, std::vector<std::u
     return (*clones)[first].get();
 }
 
-template<typename Node>
-glm::mat4 FindUnscaledNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
-{
-    constexpr Node* root = nullptr;
-    std::vector<const Node*> path;
-    SearchParent(tree, node, root, &path);
 
-    gfx::Transform transform;
-    for (auto it = path.rbegin(); it != path.rend(); ++it)
-    {
-        const auto* node = *it;
-        if (node == nullptr)
-            continue;
-        transform.Push(node->GetNodeTransform());
-    }
-
-    transform.Push();
-    // offset the drawable size, don't use the scale operation
-    // because then the input would need to be in the model space (i.e. [0.0f, 1.0f])
-    const auto& size = node->GetSize();
-    transform.Translate(-size.x*0.5f, -size.y*0.5f);
-
-    // transform stack cleanup (pop) is not done
-    // because it's meaningless.
-    return transform.GetAsMatrix();
-}
-
-template<typename Node>
-glm::mat4 FindNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
-{
-    constexpr Node* root = nullptr;
-    std::vector<const Node*> path;
-    SearchParent(tree, node, root, &path);
-
-    gfx::Transform transform;
-    for (auto it = path.rbegin(); it != path.rend(); ++it)
-    {
-        const auto* node = *it;
-        if (node == nullptr)
-            continue;
-        transform.Push(node->GetNodeTransform());
-    }
-    transform.Push(node->GetModelTransform());
-    return transform.GetAsMatrix();
-}
 
 template<typename Node>
 void CoarseHitTest(RenderTree<Node>& tree, float x, float y,

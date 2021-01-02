@@ -781,7 +781,8 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
     if (game::SearchChild(tree, dst_value, src_value))
         return;
 
-    mState.scene.ReparentChild(dst_value, src_value);
+    const bool retain_world_transform = true;
+    mState.scene.ReparentChild(dst_value, src_value, retain_world_transform);
 
 }
 void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
