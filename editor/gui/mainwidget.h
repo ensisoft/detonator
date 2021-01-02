@@ -126,6 +126,14 @@ namespace gui
         virtual bool ConfirmClose() // const
         { return true; }
 
+        struct Stats {
+            double time = 0.0;
+            float  fps  = 0.0f;
+            bool vsync  = false;
+        };
+        virtual bool GetStats(Stats* stats) const
+        { return false; }
+
     signals:
         // Request to open the given image file in an external
         // image editor.

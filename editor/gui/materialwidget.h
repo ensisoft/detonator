@@ -67,7 +67,7 @@ namespace gui
         virtual void Update(double dt) override;
         virtual void Render() override;
         virtual bool ConfirmClose() override;
-
+        virtual bool GetStats(Stats* stats) const override;
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();

@@ -457,7 +457,6 @@ void EntityWidget::Update(double secs)
     {
         mState.renderer.Update(*mState.entity, mEntityTime, secs);
         mEntityTime += secs;
-        mUI.time->setText(QString::number(mEntityTime));
     }
     mCurrentTime += secs;
 }
@@ -510,6 +509,14 @@ void EntityWidget::Refresh()
     }
 }
 
+bool EntityWidget::GetStats(Stats* stats) const
+{
+    stats->time  = mEntityTime;
+    stats->fps   = mUI.widget->getCurrentFPS();
+    stats->vsync = mUI.widget->haveVSYNC();
+    return true;
+}
+
 void EntityWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -531,7 +538,6 @@ void EntityWidget::on_actionStop_triggered()
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.time->clear();
 }
 void EntityWidget::on_actionSave_triggered()
 {

@@ -106,6 +106,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.actionWindowClose->setShortcut(QKeySequence::Close);
     mUI.actionWindowNext->setShortcut(QKeySequence::Forward);
     mUI.actionWindowPrev->setShortcut(QKeySequence::Back);
+    mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
     mUI.statusbar->setVisible(true);
     mUI.mainToolBar->setVisible(true);
     mUI.actionViewToolbar->setChecked(true);
@@ -634,6 +635,17 @@ void MainWindow::iterateGameLoop()
         mPlayWindow->Render();
     }
 
+    if (mCurrentWidget)
+    {
+        MainWidget::Stats stats;
+        if (mCurrentWidget->GetStats(&stats))
+        {
+            SetValue(mUI.statTime, QString::number(stats.time));
+            SetValue(mUI.statFps,  QString::number((int)stats.fps));
+            SetValue(mUI.statVsync, stats.vsync ? QString("ON") : QString("OFF"));
+        }
+    }
+
     GfxWindow::CleanGarbage();
 }
 
@@ -652,6 +664,10 @@ void MainWindow::on_mainTab_currentChanged(int index)
     mCurrentWidget = nullptr;
     mUI.mainToolBar->clear();
     mUI.menuTemp->clear();
+
+    SetValue(mUI.statTime, QString(""));
+    SetValue(mUI.statFps,  QString(""));
+    SetValue(mUI.statVsync, QString(""));
 
     if (index != -1)
     {

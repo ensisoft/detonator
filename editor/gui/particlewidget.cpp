@@ -310,7 +310,6 @@ void ParticleEditorWidget::Update(double secs)
             mMaterialName = material_name;
         }
         mMaterial->SetRuntime(mTime);
-        mUI.curTime->setText(QString("%1s").arg(mTime));
     }
 
     if (!mEngine->IsAlive())
@@ -353,6 +352,14 @@ bool ParticleEditorWidget::ConfirmClose()
         return true;
 
     on_actionSave_triggered();
+    return true;
+}
+
+bool ParticleEditorWidget::GetStats(Stats* stats) const
+{
+    stats->time  = mTime;
+    stats->vsync = mUI.widget->haveVSYNC();
+    stats->fps   = mUI.widget->getCurrentFPS();
     return true;
 }
 

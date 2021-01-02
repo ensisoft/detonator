@@ -379,26 +379,6 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Time</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="time">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QLabel" name="label_9">
               <property name="text">
                <string>Zoom</string>
@@ -1148,8 +1128,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>371</width>
-                   <height>531</height>
+                   <width>287</width>
+                   <height>404</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1377,8 +1357,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>371</width>
-                   <height>531</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1681,7 +1661,6 @@
   <tabstop>chkSnap</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
-  <tabstop>time</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

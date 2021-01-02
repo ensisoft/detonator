@@ -82,6 +82,11 @@ namespace gui
         void setClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
 
+        bool haveVSYNC() const;
+
+        float getCurrentFPS() const
+        { return mCurrentFps; }
+
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
@@ -108,7 +113,6 @@ namespace gui
 
     public slots:
         void clearColorChanged(QColor color);
-        void toggleShowFps();
     private slots:
         void doInit();
 
@@ -133,7 +137,6 @@ namespace gui
         bool mVsync       = false;
     private:
         quint64 mNumFrames = 0;
-        bool  mShowFps     = false;
         float mCurrentFps  = 0.0f;
 
     private:
@@ -170,6 +173,10 @@ namespace gui
         {
             mWindow->triggerPaint();
         }
+        bool haveVSYNC() const
+        { return mWindow->haveVSYNC(); }
+        float getCurrentFPS() const
+        { return mWindow->getCurrentFPS(); }
 
         gfx::Color4f getClearColor() const
         { return mWindow->getClearColor(); }

@@ -440,7 +440,6 @@ void AnimationTrackWidget::Update(double secs)
         mUI.actionPause->setEnabled(false);
         mUI.actionStop->setEnabled(false);
         mUI.actionReset->setEnabled(true);
-        mUI.time->clear();
         mUI.actuatorGroup->setEnabled(true);
         mUI.baseGroup->setEnabled(true);
         mPlayState = PlayState::Stopped;
@@ -453,7 +452,6 @@ void AnimationTrackWidget::Update(double secs)
         const auto time = track->GetCurrentTime();
         mUI.timeline->SetCurrentTime(time);
         mUI.timeline->Repaint();
-        mUI.time->setText(QString::number(time));
     }
 }
 bool AnimationTrackWidget::ConfirmClose()
@@ -475,7 +473,17 @@ bool AnimationTrackWidget::ConfirmClose()
     on_actionSave_triggered();
     return true;
 }
-
+ bool AnimationTrackWidget::GetStats(Stats* stats) const
+ {
+    if (mPlaybackAnimation)
+    {
+        const auto* track = mPlaybackAnimation->GetCurrentTrack();
+        stats->time = track->GetCurrentTime();
+    }
+    stats->fps  = mUI.widget->getCurrentFPS();
+    stats->vsync = mUI.widget->haveVSYNC();
+    return true;
+ }
 void AnimationTrackWidget::on_actionPlay_triggered()
 {
     if (mPlayState == PlayState::Paused)
@@ -515,7 +523,6 @@ void AnimationTrackWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mUI.actionReset->setEnabled(true);
-    mUI.time->clear();
     mUI.timeline->SetFreezeItems(false);
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->Update();

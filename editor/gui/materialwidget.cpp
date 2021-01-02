@@ -380,7 +380,6 @@ void MaterialWidget::Update(double secs)
     {
         mTime += secs;
     }
-    mUI.time->setText(QString::number(mTime));
 }
 
 bool MaterialWidget::ConfirmClose()
@@ -401,6 +400,13 @@ bool MaterialWidget::ConfirmClose()
         return true;
 
     on_actionSave_triggered();
+    return true;
+}
+bool MaterialWidget::GetStats(Stats* stats) const
+{
+    stats->time  = mTime;
+    stats->fps   = mUI.widget->getCurrentFPS();
+    stats->vsync = mUI.widget->haveVSYNC();
     return true;
 }
 
@@ -432,7 +438,6 @@ void MaterialWidget::on_actionStop_triggered()
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
     mTime = 0.0f;
-    mUI.time->clear();
 }
 
 void MaterialWidget::on_actionSave_triggered()

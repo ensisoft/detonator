@@ -440,7 +440,6 @@ void SceneWidget::Update(double secs)
     {
         mState.renderer.Update(mState.scene, mSceneTime, secs);
         mSceneTime += secs;
-        mUI.time->setText(QString::number(mSceneTime));
     }
     mCurrentTime += secs;
 }
@@ -472,6 +471,14 @@ void SceneWidget::Refresh()
 
 }
 
+bool SceneWidget::GetStats(Stats* stats) const
+{
+    stats->time  = mSceneTime;
+    stats->fps   = mUI.widget->getCurrentFPS();
+    stats->vsync = mUI.widget->haveVSYNC();
+    return true;
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -493,7 +500,6 @@ void SceneWidget::on_actionStop_triggered()
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.time->clear();
 }
 void SceneWidget::on_actionSave_triggered()
 {

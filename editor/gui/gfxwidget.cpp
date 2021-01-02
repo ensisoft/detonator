@@ -152,6 +152,11 @@ GfxWindow::GfxWindow()
     QTimer::singleShot(10, this, &GfxWindow::doInit);
 }
 
+bool GfxWindow::haveVSYNC() const
+{
+    return have_vsync;
+}
+
 void GfxWindow::dispose()
 {
     // Make sure this window's context is current when releasing the graphics
@@ -263,25 +268,17 @@ void GfxWindow::paintGL()
         onPaintScene(*mCustomGraphicsPainter, 0.0);
     }
 
-    if (mShowFps)
+    mNumFrames++;
+    const auto elapsed = mClock.elapsed();
+    if (elapsed >= 1000)
     {
-        mNumFrames++;
-        const auto elapsed = mClock.elapsed();
-        if (elapsed >= 1000)
-        {
-            // how many frames did get to display in the last period
-            const auto secs = elapsed / 1000.0;
-            mCurrentFps = mNumFrames / secs;
-            mNumFrames  = 0;
-            mClock.restart();
-        }
-        gfx::DrawTextRect(*mCustomGraphicsPainter,
-            base::FormatString("%1 FPS", (unsigned)mCurrentFps),
-            "app://fonts/ARCADE.TTF", 28,
-            gfx::FRect(10, 20, 150, 100),
-            gfx::Color::HotPink,
-            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
+        // how many frames did get to display in the last period
+        const auto secs = elapsed / 1000.0;
+        mCurrentFps = mNumFrames / secs;
+        mNumFrames  = 0;
+        mClock.restart();
     }
+
     mCustomGraphicsDevice->EndFrame(false /*display*/);
     //mCustomGraphicsDevice->CleanGarbage(60);
     mContext->swapBuffers(this);
@@ -340,12 +337,6 @@ void GfxWindow::mouseDoubleClickEvent(QMouseEvent* mickey)
     onMouseDoubleClick(mickey);
 }
 
-void GfxWindow::toggleShowFps()
-{
-    mShowFps = !mShowFps;
-    mNumFrames = 0;
-}
-
 void GfxWindow::clearColorChanged(QColor color)
 {
     mClearColor = ToGfx(color);
@@ -392,9 +383,7 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
         // window then renders on top obscuring the context menu (?)
         // TODO: Ultimately some better UI means are needed for these
         // options.
-        if (key->key() == Qt::Key_F1)
-            mWindow->toggleShowFps();
-        else if (key->key() == Qt::Key_F2)
+        if (key->key() == Qt::Key_F2)
             showColorDialog();
         else if (key->key() == Qt::Key_F3)
             toggleVSync();

@@ -268,6 +268,14 @@ bool PolygonWidget::ConfirmClose()
     return true;
 }
 
+bool PolygonWidget::GetStats(Stats* stats) const
+{
+    stats->time  = mTime;
+    stats->vsync = mUI.widget->haveVSYNC();
+    stats->fps   = mUI.widget->getCurrentFPS();
+    return true;
+}
+
 void PolygonWidget::on_actionPlay_triggered()
 {
     if (mPaused)

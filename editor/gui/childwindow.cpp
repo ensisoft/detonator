@@ -32,6 +32,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/gui/childwindow.h"
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -48,6 +49,7 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
     setWindowIcon(icon);
 
     mUI.verticalLayout->addWidget(widget);
+    mUI.statusBar->insertPermanentWidget(0, mUI.statusBarFrame);
     QString menu_name = klass;
     menu_name.remove("gui::");
     menu_name.remove("Widget");
@@ -106,6 +108,14 @@ void ChildWindow::Render()
     else if (!mWidget)
         return;
     mWidget->Render();
+
+    MainWidget::Stats stats;
+    if (mWidget->GetStats(&stats))
+    {
+        SetValue(mUI.statTime, QString::number(stats.time));
+        SetValue(mUI.statFps,  QString::number((int)stats.fps));
+        SetValue(mUI.statVsync, stats.vsync ? QString("ON") : QString("OFF"));
+    }
 }
 
 void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)

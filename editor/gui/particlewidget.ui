@@ -294,26 +294,6 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Time</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="curTime">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Particles</string>
@@ -1039,7 +1019,6 @@
   <tabstop>timeAlphaDerivative</tabstop>
   <tabstop>distAlphaDerivative</tabstop>
   <tabstop>curNumParticles</tabstop>
-  <tabstop>curTime</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
