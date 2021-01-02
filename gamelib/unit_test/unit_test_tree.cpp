@@ -287,6 +287,11 @@ void unit_test_treeop()
         TEST_REQUIRE(path[0] == nullptr);
 
         path.clear();
+        TEST_REQUIRE(game::SearchChild<MyNode>(tree, &child3, &child3, &path));
+        TEST_REQUIRE(path.size() == 1);
+        TEST_REQUIRE(path[0] == &child3);
+
+        path.clear();
         TEST_REQUIRE(game::SearchChild<MyNode>(tree, &child3, nullptr, &path));
         TEST_REQUIRE(path.size() == 3);
         TEST_REQUIRE(path[0] == nullptr);
@@ -296,6 +301,21 @@ void unit_test_treeop()
         // the node is not a child of the given parent.
         path.clear();
         TEST_REQUIRE(game::SearchChild<MyNode>(tree, &child3, &foo, &path) == false);
+
+        path.clear();
+        TEST_REQUIRE(game::SearchParent<MyNode>(tree, &child3, nullptr, &path));
+        TEST_REQUIRE(path.size() == 3);
+        TEST_REQUIRE(path[0] == &child3);
+        TEST_REQUIRE(path[1] == &bar);
+        TEST_REQUIRE(path[2] == nullptr);
+
+        path.clear();
+        TEST_REQUIRE(game::SearchParent<MyNode>(tree, &child3, &child3, &path));
+        TEST_REQUIRE(path.size() == 1);
+        TEST_REQUIRE(path[0] == &child3);
+
+        path.clear();
+        TEST_REQUIRE(game::SearchParent<MyNode>(tree, &child3, &foo, &path) == false);
     }
 }
 

@@ -135,6 +135,28 @@ bool SearchChild(const RenderTree<Node>& tree, const Node* node, const Node* par
     return visitor.GetResult();
 }
 
+template<typename Node>
+bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* parent = nullptr,
+                  std::vector<const Node*>* path = nullptr)
+{
+    if (path)
+        path->push_back(node);
+    if (node == parent)
+        return true;
+    while (tree.HasParent(node))
+    {
+        const Node* p = tree.GetParent(node);
+        if (path)
+            path->push_back(p);
+        if (p == parent)
+            return true;
+        node = p;
+    }
+    if (path)
+        path->clear();
+    return false;
+}
+
 template<typename Node> inline
 void LinkChild(RenderTree<Node>& tree, const Node* parent, const Node* child)
 {
@@ -229,6 +251,52 @@ Node* DuplicateNode(RenderTree<Node>& tree, const Node* node, std::vector<std::u
         clones->emplace_back(new Node(node->Clone()));
     }
     return (*clones)[first].get();
+}
+
+template<typename Node>
+glm::mat4 FindUnscaledNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
+{
+    constexpr Node* root = nullptr;
+    std::vector<const Node*> path;
+    SearchParent(tree, node, root, &path);
+
+    gfx::Transform transform;
+    for (auto it = path.rbegin(); it != path.rend(); ++it)
+    {
+        const auto* node = *it;
+        if (node == nullptr)
+            continue;
+        transform.Push(node->GetNodeTransform());
+    }
+
+    transform.Push();
+    // offset the drawable size, don't use the scale operation
+    // because then the input would need to be in the model space (i.e. [0.0f, 1.0f])
+    const auto& size = node->GetSize();
+    transform.Translate(-size.x*0.5f, -size.y*0.5f);
+
+    // transform stack cleanup (pop) is not done
+    // because it's meaningless.
+    return transform.GetAsMatrix();
+}
+
+template<typename Node>
+glm::mat4 FindNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
+{
+    constexpr Node* root = nullptr;
+    std::vector<const Node*> path;
+    SearchParent(tree, node, root, &path);
+
+    gfx::Transform transform;
+    for (auto it = path.rbegin(); it != path.rend(); ++it)
+    {
+        const auto* node = *it;
+        if (node == nullptr)
+            continue;
+        transform.Push(node->GetNodeTransform());
+    }
+    transform.Push(node->GetModelTransform());
+    return transform.GetAsMatrix();
 }
 
 template<typename Node>
@@ -342,215 +410,48 @@ void CoarseHitTest(const RenderTree<Node>& tree, float x, float y,
 template<typename Node>
 glm::vec2 MapCoordsFromNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
 {
-    class Visitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        Visitor(float x, float y, const Node* node)
-                : mX(x)
-                , mY(y)
-                , mNode(node)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Push(node->GetNodeTransform());
-
-            // if it's the node we're interested in
-            if (node == mNode)
-            {
-                const auto& size = mNode->GetSize();
-                mTransform.Push();
-                // offset the drawable size, don't use the scale operation
-                // because then the input would need to be in the model space (i.e. [0.0f, 1.0f])
-                mTransform.Translate(-size.x*0.5f, -size.y*0.5f);
-                const auto& mat = mTransform.GetAsMatrix();
-                const auto& vec = mat * glm::vec4(mX, mY, 1.0f, 1.0f);
-                mResult = glm::vec2(vec.x, vec.y);
-                mTransform.Pop();
-                mFound = true;
-            }
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        virtual bool IsDone() const override
-        { return mFound; }
-
-        glm::vec2 GetResult() const
-        { return mResult; }
-    private:
-        const float mX = 0.0f;
-        const float mY = 0.0f;
-        const Node* mNode = nullptr;
-        glm::vec2 mResult;
-        gfx::Transform mTransform;
-        bool mFound = false;
-    };
-
-    Visitor visitor(x, y, node);
-    tree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    const auto& mat = FindUnscaledNodeModelTransform(tree, node);
+    const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
+    return glm::vec2(ret.x, ret.y);
 }
 
 template<typename Node>
 glm::vec2 MapCoordsToNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
 {
-    class Visitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        Visitor(float x, float y, const Node* node)
-                : mCoords(x, y, 1.0f, 1.0f)
-                , mNode(node)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-
-            if (node == mNode)
-            {
-                const auto& size = mNode->GetSize();
-                mTransform.Push();
-                // offset the drawable size, don't use the scale operation
-                // because then the output would be in the model space (i.e. [0.0f, 1.0f])
-                mTransform.Translate(-size.x*0.5f, -size.y*0.5f);
-                const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-                const auto& vec = animation_to_node * mCoords;
-                mResult = glm::vec2(vec.x, vec.y);
-                mTransform.Pop();
-                mFound = true;
-            }
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        virtual bool IsDone() const override
-        { return mFound; }
-
-        glm::vec2 GetResult() const
-        { return mResult; }
-
-    private:
-        const glm::vec4 mCoords;
-        const Node* mNode = nullptr;
-        glm::vec2 mResult;
-        gfx::Transform mTransform;
-        bool mFound = false;
-    };
-
-    Visitor visitor(x, y, node);
-    tree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    const auto& mat = glm::inverse(FindUnscaledNodeModelTransform(tree, node));
+    const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
+    return glm::vec2(ret.x, ret.y);
 }
 
 template<typename Node>
 FBox GetBoundingBox(const RenderTree<Node>& tree, const Node* node)
 {
-    class Visitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        Visitor(const Node* node) : mNode(node)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!node) return;
-
-            mTransform.Push(node->GetNodeTransform());
-            if (node == mNode)
-            {
-                mTransform.Push(node->GetModelTransform());
-                mBox.Transform(mTransform.GetAsMatrix());
-                mTransform.Pop();
-                mFound = true;
-            }
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!node) return;
-
-            mTransform.Pop();
-        }
-        virtual bool IsDone() const override
-        { return mFound; }
-
-        FBox GetResult() const
-        { return mBox; }
-    private:
-        const Node* const mNode = nullptr;
-        gfx::Transform mTransform;
-        FBox mBox;
-        bool mFound = false;
-    };
-    Visitor visitor(node);
-    tree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    return FBox(FindNodeModelTransform(tree, node));
 }
+
 template<typename Node>
 gfx::FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
 {
-    class Visitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        Visitor(const Node* node) : mNode(node)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            if (node == mNode)
-            {
-                mTransform.Push(node->GetModelTransform());
-                // node to animation matrix
-                // for each corner of a bounding volume compute new positions per
-                // the transformation matrix and then choose the min/max on each axis.
-                const auto& mat = mTransform.GetAsMatrix();
-                const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-                const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-                const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-                const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    const auto& mat = FindNodeModelTransform(tree, node);
+    // for each corner of a bounding volume compute new positions per
+    // the transformation matrix and then choose the min/max on each axis.
+    const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+    const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+    const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-                // choose min/max on each axis.
-                const auto left = std::min(std::min(top_left.x, top_right.x),
-                                           std::min(bot_left.x, bot_right.x));
-                const auto right = std::max(std::max(top_left.x, top_right.x),
-                                            std::max(bot_left.x, bot_right.x));
-                const auto top = std::min(std::min(top_left.y, top_right.y),
-                                          std::min(bot_left.y, bot_right.y));
-                const auto bottom = std::max(std::max(top_left.y, top_right.y),
-                                             std::max(bot_left.y, bot_right.y));
-                mResult = gfx::FRect(left, top, right - left, bottom - top);
-
-                mTransform.Pop();
-                mFound = true;
-            }
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        virtual bool IsDone() const override
-        { return mFound; }
-        gfx::FRect GetResult() const
-        { return mResult; }
-    private:
-        const Node* mNode = nullptr;
-        gfx::FRect mResult;
-        gfx::Transform mTransform;
-        bool mFound = false;
-    };
-
-    Visitor visitor(node);
-    tree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    // choose min/max on each axis.
+    const auto left = std::min(std::min(top_left.x, top_right.x),
+                               std::min(bot_left.x, bot_right.x));
+    const auto right = std::max(std::max(top_left.x, top_right.x),
+                                std::max(bot_left.x, bot_right.x));
+    const auto top = std::min(std::min(top_left.y, top_right.y),
+                              std::min(bot_left.y, bot_right.y));
+    const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                                 std::max(bot_left.y, bot_right.y));
+    return gfx::FRect(left, top, right - left, bottom - top);
 }
+
 template<typename Node>
 gfx::FRect GetBoundingRect(const RenderTree<Node>& tree)
 {
