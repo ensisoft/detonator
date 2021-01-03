@@ -86,10 +86,28 @@ QVariant EventLog::data(const QModelIndex& index, int role) const
     const auto row = index.row();
     const auto& ev = mEvents[row];
 
-    const QString text = QString("[%1] [%2] %3")
+    QString text;
+    if (mIncludeTime && mIncludeTag)
+    {
+        text = QString("[%1] [%2] %3")
             .arg(ev.time.toString("hh:mm:ss:zzz"))
             .arg(ev.logtag)
             .arg(ev.message);
+    }
+    else if (mIncludeTime)
+    {
+        text = QString("[%1] %2")
+                .arg(ev.time.toString("hh:mm:ss:zzz"))
+                .arg(ev.message);
+    }
+    else if (mIncludeTag)
+    {
+        text = QString("[%1] %2").arg(ev.logtag).arg(ev.message);
+    }
+    else
+    {
+        text = ev.message;
+    }
     if (role == Qt::DisplayRole)
         return text;
     else if (role == Qt::SizeHintRole)

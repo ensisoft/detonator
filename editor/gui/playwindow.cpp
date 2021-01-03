@@ -260,6 +260,15 @@ private:
 class PlayWindow::SessionLogger : public base::Logger
 {
 public:
+    SessionLogger()
+    {
+        // we already have a time-stamp baked in, in the log
+        // data coming from the game.
+        mLogger.setShowTime(false);
+        // the base/logger doesn't use log tags unfortunately
+        // so it's useless.
+        mLogger.setShowTag(false);
+    }
     // base::Logger implementation
     virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
     {

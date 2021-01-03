@@ -100,12 +100,19 @@ namespace app
             return mEvents[index];
         }
 
+        void setShowTime(bool on_off)
+        { mIncludeTime = on_off; }
+        void setShowTag(bool on_off)
+        { mIncludeTag = on_off; }
+
     signals:
         void newEvent(const app::Event& event);
 
     private:
         boost::circular_buffer<Event> mEvents;
         QString mLogTag;
+        bool mIncludeTime = true;
+        bool mIncludeTag  = true;
     };
 
     // Filtering model proxy for event log
