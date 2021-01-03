@@ -288,6 +288,14 @@ public:
             event.type = app::Event::Type::Error;
 
         event.msg = QString::fromUtf8(msg);
+        // make sure the log event doesn't end with carriage return/new line
+        // characters since these can create confusing output in the listview.
+        // i.e. if there's not enough space to dispay multiple rows of text
+        // (see size hint role in eventlog) the text will be elided with ellipses
+        if (event.msg.endsWith('\n'))
+            event.msg.chop(1);
+        if (event.msg.endsWith('\r'))
+            event.msg.chop(1);
 
         // this write could be called by some other thread in the
         // application such as the audio thread.
