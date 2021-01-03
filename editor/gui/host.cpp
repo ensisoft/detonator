@@ -109,7 +109,7 @@ private:
 void Main(int argc, char* argv[])
 {
     base::CommandLineOptions options;
-    options.Add("--style", "Name of the style to apply.", std::string(GAMESTUDIO_DEFAULT_STYLE_NAME));
+    options.Add("--app-style", "Name of the style to apply.", std::string(GAMESTUDIO_DEFAULT_STYLE_NAME));
     options.Add("--no-term-colors", "Turn off terminal colors.");
     options.Add("--standalone", "Run as a standalone executable.");
     options.Add("--workspace", "Path to workspace content dir.", std::string(""));
@@ -128,13 +128,12 @@ void Main(int argc, char* argv[])
         options.Print(std::cout);
         return;
     }
-    const bool dark_style  = !options.WasGiven("--no-dark-style");
     const bool term_colors = !options.WasGiven("--no-term-colors");
     const bool standalone  =  options.WasGiven("--standalone");
     std::string wsdir;
     std::string socket;
     std::string style;
-    options.GetValue("--style", &style);
+    options.GetValue("--app-style", &style);
     options.GetValue("--workspace", &wsdir);
     if (!options.GetValue("--socket-name", &socket))
         socket = "gamestudio-local-socket";

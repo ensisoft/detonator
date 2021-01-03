@@ -1303,7 +1303,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         game_host_args << "--no-term-colors";
         game_host_args << "--workspace";
         game_host_args << mWorkspace->GetDir();
-        game_host_args << "--style";
+        game_host_args << "--app-style";
         game_host_args << mSettings.style_name;
 
         QString game_host_name = "EditorGameHost";
@@ -1330,16 +1330,16 @@ void MainWindow::on_actionProjectPlay_triggered()
             // source file and line from the message itself by parsing the message.
             // for the time being this is skipped.
             if (msg[0] == "E")
-                app::EventLog::get().write(app::Event::Type::Error, msg, "game");
+                app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
             else if (msg[0] == "W")
-                app::EventLog::get().write(app::Event::Type::Warning, msg, "game");
+                app::EventLog::get().write(app::Event::Type::Warning, msg, "game-host");
             else if (msg[0] == "I")
-                app::EventLog::get().write(app::Event::Type::Info, msg, "game");
+                app::EventLog::get().write(app::Event::Type::Info, msg, "game-host");
             else if (msg[0] == "D")
                 base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(msg));
         };
         mGameProcess.onStdErr = [](const QString& msg) {
-            app::EventLog::get().write(app::Event::Type::Error, msg, "game");
+            app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
         };
         mGameProcess.Start(game_host_file, game_host_args, game_host_log, game_host_cwd);
         mIPCHost = std::move(ipc);
