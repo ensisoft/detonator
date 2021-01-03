@@ -1336,7 +1336,7 @@ void MainWindow::on_actionProjectPlay_triggered()
             else if (msg[0] == "I")
                 app::EventLog::get().write(app::Event::Type::Info, msg, "game-host");
             else if (msg[0] == "D")
-                base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(msg));
+                base::WriteLog(base::LogEvent::Debug, "game-host", 0, app::ToUtf8(msg));
         };
         mGameProcess.onStdErr = [](const QString& msg) {
             app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
