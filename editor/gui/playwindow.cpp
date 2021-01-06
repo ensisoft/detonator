@@ -715,7 +715,8 @@ void PlayWindow::DoAppInit()
         mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
 
         game::App::Environment env;
-        env.classlib = &mWorkspace;
+        env.classlib  = &mWorkspace;
+        env.directory = app::ToUtf8(mCurrentWorkingDir);
         mApp->SetEnvironment(env);
 
         const auto surface_width  = mSurface->width();

@@ -123,6 +123,10 @@ namespace game
             // Interface for accessing resources (content) implemented
             // by the graphics subsystem, i.e. drawable shapes and materials.
             game::ClassLibrary* classlib = nullptr;
+            // Path to the top level directory where the app/game is
+            // I.e. where the GameMain, config.json, content.json etc. files
+            // are. UTF-8 encoded.
+            std::string directory;
         };
 
         // Called whenever there are changes to the current environment

@@ -36,6 +36,7 @@
 #if defined(LINUX_OS)
 #  include <fenv.h>
 #  include <dlfcn.h>
+#  include <unistd.h>
 #elif defined(WINDOWS_OS)
 #  include <Windows.h>
 #endif
@@ -91,6 +92,21 @@ void* LoadFunction(const char* name)
     return ret;
 }
 
+// try to figure out the location of the currently running
+// executable.
+std::string GetPath()
+{
+    std::string buffer;
+    buffer.resize(2048);
+    // todo: this might not be utf-8 if the system encoding is not utf-8
+    const int bytes = readlink("/proc/self/exe", &buffer[0], buffer.size());
+    if (bytes == -1)
+        throw std::runtime_error("readlink failed. cannot discover executable location.");
+    DEBUG("Executable path: '%1'", buffer);
+    buffer.resize(bytes);
+    return buffer;
+}
+
 #elif defined(WINDOWS_OS)
 HMODULE application_library;
 void LoadAppLibrary(const std::string& lib)
@@ -107,6 +123,15 @@ void* LoadFunction(const char* name)
         throw std::runtime_error(std::string("No such entry point: ") + name);
     DEBUG("Resolved '%1' (%2)", name, ret);
     return ret;
+}
+
+std::string GetPath()
+{
+    std::wstring buffer;
+    buffer.resize(2048);
+    const auto ret = ::GetModuleFileNameW(NULL, &buffer[0], buffer.size());
+    buffer.resize(ret);
+    return base::ToUtf8(buffer);
 }
 #endif
 
@@ -277,7 +302,8 @@ int main(int argc, char* argv[])
             return 0;
 
         game::App::Environment env;
-        env.classlib = classlib;
+        env.classlib  = classlib;
+        env.directory = GetPath();
         app->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
