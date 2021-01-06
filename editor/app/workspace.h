@@ -89,8 +89,8 @@ namespace app
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
 
         // ClassLibrary implementation
-        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const override;
+        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
         virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
         virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;

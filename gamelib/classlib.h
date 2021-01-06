@@ -36,6 +36,13 @@ namespace game
     class EntityClass;
     class SceneClass;
 
+    // tiny abstraction around the fact that the class objects
+    // are passed around as shared_ptrs which should be an
+    // implementation detail. Todo: maybe write a proper handle
+    // class to fully hide this.
+    template<typename T>
+    using ClassHandle = std::shared_ptr<const T>;
+
     // Interface for looking up game resource class objects such as materials, drawables etc.
     // Every call to find any particular class object will always return the same single
     // instance of the class object. The class objects should be treated as immutable
@@ -50,20 +57,20 @@ namespace game
     public:
         virtual ~ClassLibrary() = default;
 
-        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& id) const = 0;
-        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& id) const = 0;
+        virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const = 0;
+        virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const = 0;
         // Find a entity class object by the given name.
         // If not found will return a nullptr.
-        virtual std::shared_ptr<const EntityClass> FindEntityClassByName(const std::string& name) const = 0;
+        virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const = 0;
         // Find a entity class object by the given id.
         // if not found will return a nullptr.
-        virtual std::shared_ptr<const EntityClass> FindEntityClassById(const std::string& id) const = 0;
+        virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const = 0;
         // Find a scene class object by the given name.
         // If not found will return a nullptr.
-        virtual std::shared_ptr<const SceneClass> FindSceneClassByName(const std::string& name) const = 0;
+        virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const = 0;
         // Find a scene class object by the given id.
         // if not found will return a nullptr.
-        virtual std::shared_ptr<const SceneClass> FindSceneClassById(const std::string& id) const = 0;
+        virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const = 0;
         // Load content from a JSON file. Expects the file to be well formed, on
         // an ill-formed JSON file an exception is thrown.
         // No validation is done regarding the completeness of the loaded content,

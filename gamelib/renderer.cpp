@@ -301,7 +301,7 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                 paint_node.material_class_id.clear();
                 if (!material.empty())
                 {
-                    auto klass = mRenderer.mLoader->FindMaterialClass(item->GetMaterialId());
+                    auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
                     paint_node.material = gfx::CreateMaterialInstance(klass);
                     paint_node.material_class_id = material;
                 }
@@ -312,7 +312,7 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                 paint_node.drawable_class_id.clear();
                 if (!drawable.empty())
                 {
-                    auto klass = mRenderer.mLoader->FindDrawableClass(item->GetDrawableId());
+                    auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
                     paint_node.drawable = gfx::CreateDrawableInstance(klass);
                     paint_node.drawable_class_id = drawable;
                 }

@@ -327,7 +327,7 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
             WARN("Rigid body for node '%1' ('%2') has no polygon shape id set.", node.GetId(), node.GetName());
             return;
         }
-        const auto& drawable = mLoader->FindDrawableClass(polygonid);
+        const auto& drawable = mLoader->FindDrawableClassById(polygonid);
         if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
             WARN("No polygon class found for node '%1' ('%2')", node.GetId(), node.GetName());
             return;

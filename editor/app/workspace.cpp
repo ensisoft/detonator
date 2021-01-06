@@ -677,7 +677,7 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClass(const std::string& klass) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
     for (const auto& resource : mResources)
     {
@@ -688,10 +688,10 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClass(const std
         return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
     }
     ERROR("Request for a material that doesn't exist: '%1'", klass);
-    return FindMaterialClass(std::string("_checkerboard"));
+    return FindMaterialClassById(std::string("_checkerboard"));
 }
 
-std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClass(const std::string& klass) const
+std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
 {
     //            == About resource loading ==
     // User defined resources have a combination of type and name

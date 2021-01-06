@@ -349,7 +349,7 @@ public:
     }
 
     // ClassLibrary
-    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
     {
         if (name == "uv_test")
             return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/uv_test_512.png"));
@@ -364,7 +364,7 @@ public:
         ASSERT("No such material class.");
         return nullptr;
     }
-    virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override
+    virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override
     {
         if (name == "circle")
             return std::make_shared<gfx::CircleClass>();

@@ -48,12 +48,12 @@ namespace game
     public:
         // ClassLibrary implementation.
         // resource creation for the game level subsystem.
-        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClass(const std::string& name) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClass(const std::string& name) const override;
-        virtual std::shared_ptr<const EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const SceneClass> FindSceneClassById(const std::string& id) const override;
+        virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
+        virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
+        virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const override;
+        virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string& dir, const std::string& file) override;
         // gfx::ResourceLoader implementation. Provides access to the
         // low level byte buffer / file system file resources such as

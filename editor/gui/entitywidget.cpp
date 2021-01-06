@@ -1517,7 +1517,7 @@ void EntityWidget::UpdateCurrentNodeAlpha()
             const bool checked = GetValue(mUI.dsOverrideAlpha);
             item->SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, checked);
             item->SetAlpha(alpha);
-            const auto &material = mState.workspace->FindMaterialClass(item->GetMaterialId());
+            const auto &material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
 
             if (!checked || !material)
                 return;

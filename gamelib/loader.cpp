@@ -41,7 +41,7 @@
 namespace game
 {
 
-std::shared_ptr<const gfx::MaterialClass> ContentLoader::FindMaterialClass(const std::string& name) const
+ClassHandle<const gfx::MaterialClass> ContentLoader::FindMaterialClassById(const std::string& name) const
 {
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
@@ -64,7 +64,7 @@ std::shared_ptr<const gfx::MaterialClass> ContentLoader::FindMaterialClass(const
     return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
 }
 
-std::shared_ptr<const gfx::DrawableClass> ContentLoader::FindDrawableClass(const std::string& name) const
+ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const std::string& name) const
 {
     // these are the current primitive cases that are not packed as part of the resources
     if (name == "_rect")
@@ -188,7 +188,7 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
     mResourceFile = file;
 }
 
-std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassByName(const std::string& name) const
+ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassByName(const std::string& name) const
 {
     auto it = mEntityNameTable.find(name);
     if (it != mEntityNameTable.end())
@@ -197,7 +197,7 @@ std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassByName(co
     ERROR("No such entity class: '%1'", name);
     return nullptr;
 }
-std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
+ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
 {
     auto it = mEntities.find(id);
     if (it != std::end(mEntities))
@@ -207,7 +207,7 @@ std::shared_ptr<const game::EntityClass> ContentLoader::FindEntityClassById(cons
     return nullptr;
 }
 
-std::shared_ptr<const SceneClass> ContentLoader::FindSceneClassByName(const std::string& name) const
+ClassHandle<const SceneClass> ContentLoader::FindSceneClassByName(const std::string& name) const
 {
     auto it = mSceneNameTable.find(name);
     if (it != mSceneNameTable.end())
@@ -216,7 +216,7 @@ std::shared_ptr<const SceneClass> ContentLoader::FindSceneClassByName(const std:
     ERROR("No such scene class '%1'", name);
     return nullptr;
 }
-std::shared_ptr<const SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
+ClassHandle<const SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
 {
     auto it = mScenes.find(id);
     if (it != mScenes.end())

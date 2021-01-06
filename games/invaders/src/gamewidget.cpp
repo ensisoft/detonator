@@ -794,7 +794,7 @@ public:
     {
         const auto* node = mSprite->FindNodeByClassName("Ship");
         const auto* draw = node->GetDrawable();
-        const auto& mat = loader.FindMaterialClass(draw->GetMaterialId());
+        const auto& mat = loader.FindMaterialClassById(draw->GetMaterialId());
         const auto& tex = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();
@@ -950,7 +950,7 @@ public:
         // todo: simplify.
         const auto* node = mSprite->FindNodeByClassName("UFO");
         const auto* draw = node->GetDrawable();
-        const auto& mat  = loader.FindMaterialClass(draw->GetMaterialId());
+        const auto& mat  = loader.FindMaterialClassById(draw->GetMaterialId());
         const auto& tex  = mat->GetTextureSource(0);
         if (const auto* p = dynamic_cast<const gfx::detail::TextureFileSource*>(&tex))
             return p->GetFilename();

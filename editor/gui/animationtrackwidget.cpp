@@ -786,7 +786,7 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
             const auto &material_id = draw->GetMaterialId();
             if (!material_id.empty())
             {
-                const auto &material = mWorkspace->FindMaterialClass(material_id);
+                const auto &material = mWorkspace->FindMaterialClassById(material_id);
                 SetValue(mUI.materialEndAlpha, material->GetBaseAlpha());
             }
             if (draw->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
