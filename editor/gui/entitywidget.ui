@@ -854,38 +854,21 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolBox" name="nodeItems">
+               <widget class="QTabWidget" name="nodeItems">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                <property name="currentIndex">
+                 <number>0</number>
                 </property>
-                <property name="tabSpacing">
-                 <number>6</number>
-                </property>
-                <widget class="QWidget" name="drawable">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>371</width>
-                   <height>433</height>
-                  </rect>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <attribute name="label">
+                <widget class="QWidget" name="tabDrawable" native="true">
+                 <attribute name="title">
                   <string>Drawable</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1123,17 +1106,9 @@
                   </item>
                  </layout>
                 </widget>
-                <widget class="QWidget" name="rigidbody">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>287</width>
-                   <height>404</height>
-                  </rect>
-                 </property>
-                 <attribute name="label">
-                  <string>Rigid body</string>
+                <widget class="QWidget" name="tabRigidBody" native="true">
+                 <attribute name="title">
+                  <string>Rigid Body</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_12">
                   <item>
@@ -1351,19 +1326,6 @@
                    </widget>
                   </item>
                  </layout>
-                </widget>
-                <widget class="QWidget" name="data">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
-                  </rect>
-                 </property>
-                 <attribute name="label">
-                  <string>Node data</string>
-                 </attribute>
                 </widget>
                </widget>
               </item>
