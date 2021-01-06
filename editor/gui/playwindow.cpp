@@ -103,6 +103,34 @@ private:
     const QString mPrevious;
 };
 
+wdk::MouseButton MapMouseButton(Qt::MouseButton button)
+{
+    if (button == Qt::MouseButton::NoButton)
+        return wdk::MouseButton::None;
+    else if (button == Qt::MouseButton::LeftButton)
+        return wdk::MouseButton::Left;
+    else if (button == Qt::MouseButton::RightButton)
+        return wdk::MouseButton::Right;
+    else if (button == Qt::MouseButton::MiddleButton)
+        return wdk::MouseButton::Wheel;
+    else if (button == Qt::MouseButton::BackButton)
+        return wdk::MouseButton::Thumb1;
+    WARN("Unmapped mouse button '%1'", button);
+    return wdk::MouseButton::None;
+}
+
+wdk::bitflag<wdk::Keymod> MapKeyModifiers(int mods)
+{
+    wdk::bitflag<wdk::Keymod> modifiers;
+    if (mods & Qt::ShiftModifier)
+        modifiers |= wdk::Keymod::Shift;
+    if (mods & Qt::ControlModifier)
+        modifiers |= wdk::Keymod::Control;
+    if (mods & Qt::AltModifier)
+        modifiers |= wdk::Keymod::Alt;
+    return modifiers;
+}
+
     // table mapping Qt key identifiers to WDK key identifiers.
     // Qt doesn't provide a way to separate in virtual keys between
     // between Left and Right Control or Left and Right shift key.
@@ -803,43 +831,65 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     {
         if (event->type() == QEvent::KeyPress)
         {
-            const auto *key_event = static_cast<const QKeyEvent *>(event);
-            const auto mods = key_event->modifiers();
+            const auto* key_event = static_cast<const QKeyEvent *>(event);
 
             wdk::WindowEventKeydown key;
-            key.symbol = MapVirtualKey(key_event->key());
-
-            //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
-
-            if (mods & Qt::ShiftModifier)
-                key.modifiers |= wdk::Keymod::Shift;
-            if (mods & Qt::ControlModifier)
-                key.modifiers |= wdk::Keymod::Control;
-            if (mods & Qt::AltModifier)
-                key.modifiers |= wdk::Keymod::Alt;
+            key.symbol    = MapVirtualKey(key_event->key());
+            key.modifiers = MapKeyModifiers(key_event->modifiers());
             listener->OnKeydown(key);
+            //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
             return true;
         }
         else if (event->type() == QEvent::KeyRelease)
         {
-            const auto *key_event = static_cast<const QKeyEvent *>(event);
-            const auto mods = key_event->modifiers();
+            const auto* key_event = static_cast<const QKeyEvent *>(event);
 
             wdk::WindowEventKeyup key;
-            key.symbol = MapVirtualKey(key_event->key());
-
-            //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
-
-            if (mods & Qt::ShiftModifier)
-                key.modifiers |= wdk::Keymod::Shift;
-            if (mods & Qt::ControlModifier)
-                key.modifiers |= wdk::Keymod::Control;
-            if (mods & Qt::AltModifier)
-                key.modifiers |= wdk::Keymod::Alt;
+            key.symbol    = MapVirtualKey(key_event->key());
+            key.modifiers = MapKeyModifiers(key_event->modifiers());
             listener->OnKeyup(key);
+            //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
             return true;
+        }
+        else if (event->type() == QEvent::MouseMove)
+        {
+            const auto* mouse = static_cast<const QMouseEvent*>(event);
 
-        } 
+            wdk::WindowEventMouseMove m;
+            m.window_x = mouse->x();
+            m.window_y = mouse->y();
+            m.global_x = mouse->globalX();
+            m.global_y = mouse->globalY();
+            m.modifiers = MapKeyModifiers(mouse->modifiers());
+            m.btn       = MapMouseButton(mouse->button());
+            listener->OnMouseMove(m);
+        }
+        else if (event->type() == QEvent::MouseButtonPress)
+        {
+            const auto* mouse = static_cast<const QMouseEvent*>(event);
+
+            wdk::WindowEventMousePress press;
+            press.window_x = mouse->x();
+            press.window_y = mouse->y();
+            press.global_x = mouse->globalX();
+            press.global_y = mouse->globalY();
+            press.modifiers = MapKeyModifiers(mouse->modifiers());
+            press.btn       = MapMouseButton(mouse->button());
+            listener->OnMousePress(press);
+        }
+        else if (event->type() == QEvent::MouseButtonRelease)
+        {
+            const auto* mouse = static_cast<const QMouseEvent*>(event);
+
+            wdk::WindowEventMouseRelease release;
+            release.window_x = mouse->x();
+            release.window_y = mouse->y();
+            release.global_x = mouse->globalX();
+            release.global_y = mouse->globalY();
+            release.modifiers = MapKeyModifiers(mouse->modifiers());
+            release.btn       = MapMouseButton(mouse->button());
+            listener->OnMouseRelease(release);
+        }
         if (event->type() == QEvent::Resize)
         {
             const auto width = mSurface->width();
