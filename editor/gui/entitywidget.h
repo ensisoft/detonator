@@ -132,6 +132,8 @@ namespace gui
         void on_rbIsBullet_stateChanged(int);
         void on_rbIsSensor_stateChanged(int);
         void on_rbIsEnabled_stateChanged(int);
+        void on_rbCanSleep_stateChanged(int);
+        void on_rbDiscardRotation_stateChanged(int);
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);

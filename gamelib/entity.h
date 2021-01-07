@@ -94,11 +94,18 @@ namespace game
             Sensor,
             // Whether the rigid body simulation is enabled or not
             // for this body.
-            Enabled
+            Enabled,
+            // Whether the rigid body can go to sleep (i.e. simulation stops)
+            // when the body comes to a halt
+            CanSleep,
+            // Discard rotational component of physics simulation for this body.
+            // Useful for things such as player character that should stay "upright
+            DiscardRotation
         };
         RigidBodyItemClass()
         {
             mBitFlags.set(Flags::Enabled, true);
+            mBitFlags.set(Flags::CanSleep, true);
         }
 
         std::size_t GetHash() const
@@ -997,7 +1004,6 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
-
         void SetTranslation(const glm::vec2& position)
         { mPosition = position; }
         void SetRotation(float angle)
@@ -1005,6 +1011,9 @@ namespace game
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
         void SetScale(const glm::vec2& scale);
+
+        std::string GetClassId() const
+        { return mClass->GetId(); }
 
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
@@ -1018,6 +1027,8 @@ namespace game
         { return mScale; }
         int GetLayer() const
         { return mLayer; }
+        float GetRotation() const
+        { return mRotation; }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
         RenderTree& GetRenderTree()

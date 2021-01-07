@@ -1070,6 +1070,27 @@ void EntityWidget::on_rbIsEnabled_stateChanged(int)
     }
 }
 
+void EntityWidget::on_rbCanSleep_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFlag(game::RigidBodyItemClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
+        }
+    }
+}
+void EntityWidget::on_rbDiscardRotation_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* body = node->GetRigidBody())
+        {
+            body->SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
+        }
+    }
+}
+
 void EntityWidget::on_drawableItem_toggled(bool on)
 {
     if (auto* node = GetCurrentNode())
@@ -1412,6 +1433,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbIsBullet, false);
     SetValue(mUI.rbIsSensor, false);
     SetValue(mUI.rbIsEnabled, false);
+    SetValue(mUI.rbCanSleep, false);
+    SetValue(mUI.rbDiscardRotation, false);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -1458,6 +1481,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.rbIsBullet, body->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
             SetValue(mUI.rbIsSensor, body->TestFlag(game::RigidBodyItemClass::Flags::Sensor));
             SetValue(mUI.rbIsEnabled, body->TestFlag(game::RigidBodyItemClass::Flags::Enabled));
+            SetValue(mUI.rbCanSleep, body->TestFlag(game::RigidBodyItemClass::Flags::CanSleep));
+            SetValue(mUI.rbDiscardRotation, body->TestFlag(game::RigidBodyItemClass::Flags::DiscardRotation));
             if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
             {
                 SetEnabled(mUI.rbPolygon, true);

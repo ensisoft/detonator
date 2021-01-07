@@ -1307,6 +1307,20 @@
                       </widget>
                      </item>
                      <item>
+                      <widget class="QCheckBox" name="rbCanSleep">
+                       <property name="text">
+                        <string>Can sleep</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="rbDiscardRotation">
+                       <property name="text">
+                        <string>Discard rotation</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <spacer name="verticalSpacer_3">
                        <property name="orientation">
                         <enum>Qt::Vertical</enum>
@@ -1618,11 +1632,14 @@
   <tabstop>rbIsBullet</tabstop>
   <tabstop>rbIsSensor</tabstop>
   <tabstop>rbIsEnabled</tabstop>
+  <tabstop>rbCanSleep</tabstop>
+  <tabstop>rbDiscardRotation</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
+  <tabstop>nodeItems</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
