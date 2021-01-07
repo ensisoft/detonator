@@ -28,7 +28,7 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
-#  include <nlohmann/json.hpp>
+#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -108,20 +108,8 @@ namespace game
             mBitFlags.set(Flags::CanSleep, true);
         }
 
-        std::size_t GetHash() const
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mSimulation);
-            hash = base::hash_combine(hash, mCollisionShape);
-            hash = base::hash_combine(hash, mBitFlags.value());
-            hash = base::hash_combine(hash, mPolygonShapeId);
-            hash = base::hash_combine(hash, mFriction);
-            hash = base::hash_combine(hash, mRestitution);
-            hash = base::hash_combine(hash, mAngularDamping);
-            hash = base::hash_combine(hash, mLinearDamping);
-            hash = base::hash_combine(hash, mDensity);
-            return hash;
-        }
+        std::size_t GetHash() const;
+
         Simulation GetSimulation() const
         { return mSimulation; }
         CollisionShape GetCollisionShape() const
@@ -162,38 +150,9 @@ namespace game
         void SetPolygonShapeId(const std::string& id)
         { mPolygonShapeId = id; }
 
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "simulation",      mSimulation);
-            base::JsonWrite(json, "shape",           mCollisionShape);
-            base::JsonWrite(json, "flags",     mBitFlags.value());
-            base::JsonWrite(json, "polygon",         mPolygonShapeId);
-            base::JsonWrite(json, "friction",        mFriction);
-            base::JsonWrite(json, "restitution",     mRestitution);
-            base::JsonWrite(json, "angular_damping", mAngularDamping);
-            base::JsonWrite(json, "linear_damping",  mLinearDamping);
-            base::JsonWrite(json, "density",         mDensity);
-            return json;
-        }
-        static std::optional<RigidBodyItemClass> FromJson(const nlohmann::json& json)
-        {
-            unsigned bitflag = 0;
-            RigidBodyItemClass ret;
-            if (!base::JsonReadSafe(json, "simulation",      &ret.mSimulation)  ||
-                !base::JsonReadSafe(json, "shape",           &ret.mCollisionShape)  ||
-                !base::JsonReadSafe(json, "flags",           &bitflag)  ||
-                !base::JsonReadSafe(json, "polygon",         &ret.mPolygonShapeId)  ||
-                !base::JsonReadSafe(json, "friction",        &ret.mFriction)  ||
-                !base::JsonReadSafe(json, "restitution",     &ret.mRestitution)  ||
-                !base::JsonReadSafe(json, "angular_damping", &ret.mAngularDamping)  ||
-                !base::JsonReadSafe(json, "linear_damping",  &ret.mLinearDamping)  ||
-                !base::JsonReadSafe(json, "density",         &ret.mDensity))
-                return std::nullopt;
-            ret.mBitFlags.set_from_value(bitflag);
-            return ret;
-        }
+        nlohmann::json ToJson() const;
 
+        static std::optional<RigidBodyItemClass> FromJson(const nlohmann::json& json);
     private:
         Simulation mSimulation = Simulation::Dynamic;
         CollisionShape mCollisionShape = CollisionShape::Box;
@@ -233,49 +192,7 @@ namespace game
             mBitFlags.set(Flags::OverrideAlpha, false);
         }
 
-        std::size_t GetHash() const
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mBitFlags.value());
-            hash = base::hash_combine(hash, mMaterialId);
-            hash = base::hash_combine(hash, mDrawableId);
-            hash = base::hash_combine(hash, mLayer);
-            hash = base::hash_combine(hash, mAlpha);
-            hash = base::hash_combine(hash, mLineWidth);
-            hash = base::hash_combine(hash, mRenderPass);
-            hash = base::hash_combine(hash, mRenderStyle);
-            return hash;
-        }
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "flags", mBitFlags.value());
-            base::JsonWrite(json, "material",    mMaterialId);
-            base::JsonWrite(json, "drawable",    mDrawableId);
-            base::JsonWrite(json, "layer",       mLayer);
-            base::JsonWrite(json, "alpha",       mAlpha);
-            base::JsonWrite(json, "linewidth",   mLineWidth);
-            base::JsonWrite(json, "renderpass",  mRenderPass);
-            base::JsonWrite(json, "renderstyle", mRenderStyle);
-            return json;
-        }
-        static
-        std::optional<DrawableItemClass> FromJson(const nlohmann::json& json)
-        {
-            unsigned bitflags = 0;
-            DrawableItemClass ret;
-            if (!base::JsonReadSafe(json, "flags",       &bitflags) ||
-                !base::JsonReadSafe(json, "material",    &ret.mMaterialId) ||
-                !base::JsonReadSafe(json, "drawable",    &ret.mDrawableId) ||
-                !base::JsonReadSafe(json, "layer",       &ret.mLayer) ||
-                !base::JsonReadSafe(json, "alpha",       &ret.mAlpha) ||
-                !base::JsonReadSafe(json, "linewidth",   &ret.mLineWidth) ||
-                !base::JsonReadSafe(json, "renderpass",  &ret.mRenderPass) ||
-                !base::JsonReadSafe(json, "renderstyle", &ret.mRenderStyle))
-                return std::nullopt;
-            ret.mBitFlags.set_from_value(bitflags);
-            return ret;
-        }
+        std::size_t GetHash() const;
 
         // class setters.
         void SetDrawableId(const std::string& klass)
@@ -317,6 +234,9 @@ namespace game
         RenderStyle GetRenderStyle() const
         { return mRenderStyle; }
 
+        nlohmann::json ToJson() const;
+
+        static std::optional<DrawableItemClass> FromJson(const nlohmann::json& json);
     private:
         // item's bit flags.
         base::bitflag<Flags> mBitFlags;

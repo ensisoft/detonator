@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include "warnpush.h"
-
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <cmath>

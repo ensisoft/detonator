@@ -26,7 +26,7 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
-#  include <nlohmann/json.hpp>
+#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <string>

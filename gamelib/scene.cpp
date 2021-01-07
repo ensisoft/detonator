@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include <unordered_set>
 
 #include "base/format.h"
