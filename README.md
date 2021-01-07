@@ -78,8 +78,8 @@ These build instructions are for MSVS 2019 Community Edition and for 64bit build
 - Install Microsoft Visual Studio 2019 Community  
 https://www.visualstudio.com/downloads/
 
-- Install prebuilt Qt 5.12.6  
-http://download.qt.io/official_releases/qt/5.12/5.12.6/qt-opensource-windows-x86-5.12.6.exe
+- Install prebuilt Qt 5.15.2
+http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
 
 - Install prebuilt Boost 1.72  
 https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
