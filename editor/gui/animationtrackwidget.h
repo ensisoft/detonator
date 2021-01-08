@@ -82,7 +82,7 @@ namespace gui
         void on_actionReset_triggered();
         void on_actionDeleteActuator_triggered();
         void on_actionClearActuators_triggered();
-        void on_actionAddTransformActuator_triggered();
+        void on_actionAddAnimaticActuator_triggered();
         void on_actionAddMaterialActuator_triggered();
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();

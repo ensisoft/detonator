@@ -119,7 +119,7 @@ void unit_test_animation_transform_actuator()
 
     // instance
     {
-        game::TransformActuator instance(act);
+        game::AnimaticActuator instance(act);
         game::EntityNodeClass klass;
         klass.SetTranslation(glm::vec2(5.0f, 5.0f));
         klass.SetSize(glm::vec2(1.0f, 1.0f));

@@ -573,7 +573,7 @@
            <item>
             <widget class="QCheckBox" name="chkShowTransformActuators">
              <property name="text">
-              <string>Show transform actuators</string>
+              <string>Show animatic actuators</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -1132,9 +1132,12 @@
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionAddTransformActuator">
+  <action name="actionAddAnimaticActuator">
    <property name="text">
-    <string>Transform</string>
+    <string>Animatic</string>
+   </property>
+   <property name="toolTip">
+    <string>Add an animatic actuator</string>
    </property>
   </action>
   <action name="actionAddMaterialActuator">

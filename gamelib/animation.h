@@ -44,25 +44,24 @@ namespace game
 {
     class EntityNode;
 
-    // AnimationActuatorClass defines an interface for classes of
-    // animation actuators. Animation actuators are objects that
-    // modify the state of some render tree nodes possibly over time
-    // by for example doing interpolation between different nodes states
-    // or by toggling some state flags at specific points in time.
-    class AnimationActuatorClass
+    // ActuatorClass defines an interface for classes of actuators.
+    // Actuators are objects that modify the state of some render
+    // tree node over time. For example a Kinematic actuator will
+    // perform linear interpolation of the node's transform over time.
+    class ActuatorClass
     {
     public:
         // The type of the actuator class.
         enum class Type {
-            // Transform actuators modify the transform state of the node
-            // i.e. the translation, scale and rotation variables.
-            Transform,
+            // Animatic actuators modify the transform state of the node
+            // i.e. the translation, scale and rotation variables directly.
+            Animatic,
             // Material actuators modify the material instance state/parameters
             // of some particular animation node.
             Material
         };
         // dtor.
-        virtual ~AnimationActuatorClass() = default;
+        virtual ~ActuatorClass() = default;
         // Get the id of this actuator
         virtual std::string GetId() const = 0;
         // Get the ID of the node affected by this actuator.
@@ -70,10 +69,10 @@ namespace game
         // Get the hash of the object state.
         virtual std::size_t GetHash() const = 0;
         // Create an exact copy of this actuator class object.
-        virtual std::unique_ptr<AnimationActuatorClass> Copy() const = 0;
+        virtual std::unique_ptr<ActuatorClass> Copy() const = 0;
         // Create a new actuator class instance with same property values
         // with this object but with a unique id.
-        virtual std::unique_ptr<AnimationActuatorClass> Clone() const = 0;
+        virtual std::unique_ptr<ActuatorClass> Clone() const = 0;
         // Get the type of the represented actuator.
         virtual Type GetType() const = 0;
         // Get the normalized start time when this actuator starts.
@@ -95,7 +94,7 @@ namespace game
     // MaterialActuatorClass holds the data to change a node's
     // material in some particular way. The changeable parameters
     // are the possible material instance parameters.
-    class MaterialActuatorClass : public AnimationActuatorClass
+    class MaterialActuatorClass : public ActuatorClass
     {
     public:
         // The interpolation method.
@@ -118,9 +117,9 @@ namespace game
         virtual std::string GetNodeId() const override
         { return mNodeId; }
         virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<AnimationActuatorClass> Copy() const override
+        virtual std::unique_ptr<ActuatorClass> Copy() const override
         { return std::make_unique<MaterialActuatorClass>(*this); }
-        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        virtual std::unique_ptr<ActuatorClass> Clone() const override
         {
             auto ret = std::make_unique<MaterialActuatorClass>(*this);
             ret->mId = base::RandomString(10);
@@ -156,7 +155,7 @@ namespace game
 
     // TransformActuatorClass holds the transform data for some
     // particular type of linear transform of a node.
-    class TransformActuatorClass : public AnimationActuatorClass
+    class TransformActuatorClass : public ActuatorClass
     {
     public:
         // The interpolation method.
@@ -167,7 +166,7 @@ namespace game
         TransformActuatorClass(const std::string& node) : mNodeId(node)
         { mId = base::RandomString(10); }
         virtual Type GetType() const override
-        { return Type::Transform; }
+        { return Type::Animatic; }
         virtual std::string GetNodeId() const
         { return mNodeId; }
         virtual float GetStartTime() const override
@@ -214,9 +213,9 @@ namespace game
         virtual bool FromJson(const nlohmann::json& json) override;
         virtual std::size_t GetHash() const override;
 
-        virtual std::unique_ptr<AnimationActuatorClass> Copy() const override
+        virtual std::unique_ptr<ActuatorClass> Copy() const override
         { return std::make_unique<TransformActuatorClass>(*this); }
-        virtual std::unique_ptr<AnimationActuatorClass> Clone() const override
+        virtual std::unique_ptr<ActuatorClass> Clone() const override
         {
             auto ret = std::make_unique<TransformActuatorClass>(*this);
             ret->mId = base::RandomString(10);
@@ -245,13 +244,11 @@ namespace game
         float mEndRotation = 0.0f;
     };
 
-    // Apply action/transformation or some other change on an animation node
-    // possibly by using an interpolation between the starting and the ending
-    // state.
-    class AnimationActuator
+    // An instance of ActuatorClass object.
+    class Actuator
     {
     public:
-        using Type = AnimationActuatorClass::Type;
+        using Type = ActuatorClass::Type;
         // Start the action/transition to be applied by this actuator.
         // The node is the node in question that the changes will be applied to.
         virtual void Start(EntityNode& node) = 0;
@@ -267,7 +264,7 @@ namespace game
         // Get the id of the node that will be modified by this actuator.
         virtual std::string GetNodeId() const = 0;
         // Create an exact copy of this actuator object.
-        virtual std::unique_ptr<AnimationActuator> Copy() const = 0;
+        virtual std::unique_ptr<Actuator> Copy() const = 0;
     private:
     };
 
@@ -276,7 +273,7 @@ namespace game
     // change is applied on a gfx::Material. The material lives
     // inside the renderer, so this needs to be worked somehow
     // into Renderer::Update
-    class MaterialActuator : public AnimationActuator
+    class MaterialActuator : public Actuator
     {
     public:
         MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
@@ -298,22 +295,21 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::unique_ptr<AnimationActuator> Copy() const override
+        virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<MaterialActuator>(*this); }
     private:
         std::shared_ptr<const MaterialActuatorClass> mClass;
         float mStartAlpha = 1.0f;
     };
 
-    // Apply a change to node's transformation, i.e. one of the following
-    // properties: size, position or translation.
-    class TransformActuator : public AnimationActuator
+    // Animatic actuator instance.
+    class AnimaticActuator : public Actuator
     {
     public:
-        TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
+        AnimaticActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
             : mClass(klass)
         {}
-        TransformActuator(const TransformActuatorClass& klass)
+        AnimaticActuator(const TransformActuatorClass& klass)
             : mClass(std::make_shared<TransformActuatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
@@ -326,8 +322,8 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::unique_ptr<AnimationActuator> Copy() const override
-        { return std::make_unique<TransformActuator>(*this); }
+        virtual std::unique_ptr<Actuator> Copy() const override
+        { return std::make_unique<AnimaticActuator>(*this); }
     private:
         std::shared_ptr<const TransformActuatorClass> mClass;
         // The starting state for the transformation.
@@ -386,20 +382,20 @@ namespace game
         template<typename Actuator>
         void AddActuator(const Actuator& actuator)
         {
-            std::shared_ptr<AnimationActuatorClass> foo(new Actuator(actuator));
+            std::shared_ptr<ActuatorClass> foo(new Actuator(actuator));
             mActuators.push_back(std::move(foo));
         }
         // Add a new actuator that applies state update/action on some animation node.
-        void AddActuator(std::shared_ptr<AnimationActuatorClass> actuator)
+        void AddActuator(std::shared_ptr<ActuatorClass> actuator)
         { mActuators.push_back(std::move(actuator)); }
 
         void DeleteActuator(size_t index);
 
         bool DeleteActuatorById(const std::string& id);
 
-        AnimationActuatorClass* FindActuatorById(const std::string& id);
+        ActuatorClass* FindActuatorById(const std::string& id);
 
-        const AnimationActuatorClass* FindActuatorById(const std::string& id) const;
+        const ActuatorClass* FindActuatorById(const std::string& id) const;
 
         void Clear()
         { mActuators.clear(); }
@@ -410,14 +406,14 @@ namespace game
         { return mActuators.size(); }
 
         // Get the animation actuator class object at index i.
-        const AnimationActuatorClass& GetActuatorClass(size_t i) const
+        const ActuatorClass& GetActuatorClass(size_t i) const
         { return *mActuators[i]; }
 
         // Create an instance of some actuator class type at the given index.
         // For example if the type of actuator class at index N is
         // TransformActuatorClass then the returned object will be an
         // instance of TransformActuator.
-        std::unique_ptr<AnimationActuator> CreateActuatorInstance(size_t i) const;
+        std::unique_ptr<Actuator> CreateActuatorInstance(size_t i) const;
 
         // Get the hash value based on the static data.
         std::size_t GetHash() const;
@@ -436,7 +432,7 @@ namespace game
     private:
         std::string mId;
         // The list of animation actuators that apply transforms
-        std::vector<std::shared_ptr<AnimationActuatorClass>> mActuators;
+        std::vector<std::shared_ptr<ActuatorClass>> mActuators;
         // Human readable name of the track.
         std::string mName;
         // the duration of this track.
@@ -495,7 +491,7 @@ namespace game
         // at specific times.
         struct NodeTrack {
             std::string node;
-            std::unique_ptr<AnimationActuator> actuator;
+            std::unique_ptr<Actuator> actuator;
             mutable bool started = false;
             mutable bool ended   = false;
         };

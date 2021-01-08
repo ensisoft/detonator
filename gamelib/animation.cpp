@@ -149,14 +149,14 @@ void MaterialActuator::Finish(EntityNode& node)
     }
 }
 
-void TransformActuator::Start(EntityNode& node)
+void AnimaticActuator::Start(EntityNode& node)
 {
     mStartPosition = node.GetTranslation();
     mStartSize     = node.GetSize();
     mStartScale    = node.GetScale();
     mStartRotation = node.GetRotation();
 }
-void TransformActuator::Apply(EntityNode& node, float t)
+void AnimaticActuator::Apply(EntityNode& node, float t)
 {
     // apply interpolated state on the node.
     const auto method = mClass->GetInterpolation();
@@ -169,7 +169,7 @@ void TransformActuator::Apply(EntityNode& node, float t)
     node.SetRotation(r);
     node.SetScale(f);
 }
-void TransformActuator::Finish(EntityNode& node)
+void AnimaticActuator::Finish(EntityNode& node)
 {
     node.SetTranslation(mClass->GetEndPosition());
     node.SetRotation(mClass->GetEndRotation());
@@ -216,7 +216,7 @@ bool AnimationTrackClass::DeleteActuatorById(const std::string& id)
     }
     return false;
 }
-AnimationActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id)
+ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id)
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -224,7 +224,7 @@ AnimationActuatorClass* AnimationTrackClass::FindActuatorById(const std::string&
     }
     return nullptr;
 }
-const AnimationActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id) const
+const ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id) const
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -233,12 +233,12 @@ const AnimationActuatorClass* AnimationTrackClass::FindActuatorById(const std::s
     return nullptr;
 }
 
-std::unique_ptr<AnimationActuator> AnimationTrackClass::CreateActuatorInstance(size_t i) const
+std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) const
 {
     const auto& klass = mActuators[i];
-    if (klass->GetType() == AnimationActuatorClass::Type::Transform)
-        return std::make_unique<TransformActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
-    else if (klass->GetType() == AnimationActuatorClass::Type::Material)
+    if (klass->GetType() == ActuatorClass::Type::Animatic)
+        return std::make_unique<AnimaticActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
+    else if (klass->GetType() == ActuatorClass::Type::Material)
         return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
     BUG("Unknown actuator type");
     return {};
@@ -287,13 +287,13 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
     for (const auto& json_actuator : json["actuators"].items())
     {
         const auto& obj = json_actuator.value();
-        AnimationActuatorClass::Type type;
+        ActuatorClass::Type type;
         if (!base::JsonReadSafe(obj, "type", &type))
             return std::nullopt;
-        std::shared_ptr<AnimationActuatorClass> actuator;
-        if (type == AnimationActuatorClass::Type::Transform)
+        std::shared_ptr<ActuatorClass> actuator;
+        if (type == ActuatorClass::Type::Animatic)
             actuator = std::make_shared<TransformActuatorClass>();
-        else if (type == AnimationActuatorClass::Type::Material)
+        else if (type == ActuatorClass::Type::Material)
             actuator = std::make_shared<MaterialActuatorClass>();
         else BUG("Unknown actuator type.");
 
