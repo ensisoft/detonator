@@ -518,7 +518,7 @@ void MainWindow::closeWorkspace()
     // and the child windows if any are open.
 
     // make sure we're not getting nasty unwanted recursion
-    QSignalBlocker cockblocker(mUI.mainTab);
+    QSignalBlocker blocker(mUI.mainTab);
 
     // delete widget objects in the main tab.
     while (mUI.mainTab->count())
@@ -601,10 +601,9 @@ void MainWindow::iterateGameLoop()
 
     while (mTimeAccum >= time_step)
     {
-        for (int i=0; i<GetCount(mUI.mainTab); ++i)
+        if (mCurrentWidget)
         {
-            auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-            widget->Update(time_step);
+            mCurrentWidget->Update(time_step);
         }
         for (auto* child : mChildWindows)
         {
@@ -619,11 +618,12 @@ void MainWindow::iterateGameLoop()
         mTimeAccum -= time_step;
     }
 
+    GfxWindow::BeginFrame();
+
     // render all widgets
-    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    if (mCurrentWidget)
     {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        widget->Render();
+        mCurrentWidget->Render();
     }
     for (auto* child : mChildWindows)
     {
@@ -635,6 +635,7 @@ void MainWindow::iterateGameLoop()
         mPlayWindow->Render();
     }
 
+    // show stats for the current tab if any
     if (mCurrentWidget)
     {
         MainWidget::Stats stats;
@@ -646,6 +647,7 @@ void MainWindow::iterateGameLoop()
         }
     }
 
+    GfxWindow::EndFrame();
     GfxWindow::CleanGarbage();
 }
 

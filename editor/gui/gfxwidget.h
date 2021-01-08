@@ -111,6 +111,9 @@ namespace gui
         { DefaultMagFilter = filter; }
         static void CleanGarbage();
 
+        static void BeginFrame();
+        static void EndFrame();
+
     public slots:
         void clearColorChanged(QColor color);
     private slots:

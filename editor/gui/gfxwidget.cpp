@@ -91,9 +91,13 @@ namespace {
     bool have_vsync = false;
     // a global flag for toggling vsync on/off.
     bool should_have_vsync = true;
-
+    // global flag to indicate whether on this iteration over all gfx widgets
+    // the synced surface was swapped or not.
+    bool did_vsync_on_this_frame = false;
     std::weak_ptr<QOpenGLContext> shared_context;
     std::weak_ptr<gfx::Device> shared_device;
+    // current surfaces ugh.
+    std::unordered_set<gui::GfxWindow*> surfaces;
 }// namespace
 
 namespace gui
@@ -108,6 +112,7 @@ gfx::Device::MagFilter GfxWindow::DefaultMagFilter =
 
 GfxWindow::~GfxWindow()
 {
+    surfaces.erase(this);
     ASSERT(!mCustomGraphicsDevice);
     ASSERT(!mCustomGraphicsPainter);
     DEBUG("Destroy GfxWindow");
@@ -115,6 +120,8 @@ GfxWindow::~GfxWindow()
 
 GfxWindow::GfxWindow()
 {
+    surfaces.insert(this);
+
     // if we need a vsynced rendering surface but don't
     // have any yet then this window should become one that is
     // synced.
@@ -280,8 +287,14 @@ void GfxWindow::paintGL()
     }
 
     mCustomGraphicsDevice->EndFrame(false /*display*/);
+    // using a shared device means that this must be done now
+    // centrally once per render iteration, not once per GfxWidget.
     //mCustomGraphicsDevice->CleanGarbage(60);
+
     mContext->swapBuffers(this);
+
+    if (mVsync)
+        did_vsync_on_this_frame = true;
 }
 
 void GfxWindow::recreateRenderingSurface(bool vsync)
@@ -349,6 +362,30 @@ void GfxWindow::CleanGarbage()
     if (!device)
         return;
     device->CleanGarbage(120);
+}
+
+// static
+void GfxWindow::BeginFrame()
+{
+    did_vsync_on_this_frame = false;
+}
+// static
+void GfxWindow::EndFrame()
+{
+    if (!should_have_vsync)
+        return;
+    else if (did_vsync_on_this_frame)
+        return;
+
+    // which surface has vsync ?
+    for (GfxWindow* surface : surfaces)
+    {
+        if (surface->mVsync)
+        {
+            surface->mContext->swapBuffers(surface);
+            return;
+        }
+    }
 }
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
