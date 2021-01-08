@@ -90,6 +90,7 @@ namespace gui
         void SaveState();
     private slots:
         void DoAppInit();
+        void ActivateWindow();
         void on_actionPause_triggered();
         void on_actionClose_triggered();
         void on_actionClearLog_triggered();

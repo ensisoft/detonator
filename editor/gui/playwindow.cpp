@@ -703,7 +703,7 @@ void PlayWindow::DoAppInit()
         std::vector<const char*> arg_pointers;
         args.push_back(app::ToUtf8(host_app_path));
         // todo: deal with arguments in quotes and with spaces for example "foo bar"
-        const QStringList& list = settings.command_line_arguments.split(" ", QString::SkipEmptyParts);
+        const QStringList& list = settings.command_line_arguments.split(" ", Qt::SplitBehaviorFlags::KeepEmptyParts);
         for (const auto& arg : list)
         {
             args.push_back(app::ToUtf8(arg));
@@ -738,7 +738,14 @@ void PlayWindow::DoAppInit()
         mApp->Start();
 
         // try to give the keyboard focus to the window
+        // looks like this has to be done through a timer again.
+        // calling the functions below directly don't achieve the
+        // desired effect.
+        //mSurface->setKeyboardGrabEnabled(true);
+        //mSurface->raise();
         //mSurface->requestActivate();
+        // set a timer to try to activate for keyboard input after some delay.
+        QTimer::singleShot(100, this, &PlayWindow::ActivateWindow);
 
         mFrameTimer.start();
         mInitDone = true;
@@ -747,6 +754,13 @@ void PlayWindow::DoAppInit()
     {
         ERROR("Exception in app init: '%1'", e.what());
     }
+}
+
+void PlayWindow::ActivateWindow()
+{
+    mSurface->setKeyboardGrabEnabled(true);
+    mSurface->raise();
+    mSurface->requestActivate();
 }
 
 void PlayWindow::on_actionPause_triggered()
