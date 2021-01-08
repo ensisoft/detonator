@@ -533,6 +533,10 @@ void Scene::Update(float dt)
     for (auto& entity : mEntities)
     {
         entity->Update(dt);
+        if (entity->IsPlaying())
+            continue;
+        if (entity->HasIdleTrack())
+            entity->PlayIdle();
     }
 }
 

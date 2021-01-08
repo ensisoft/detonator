@@ -591,13 +591,36 @@ bool EntityWidget::ConfirmClose()
 }
 void EntityWidget::Refresh()
 {
+    bool changes = false;
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        if (i >= mUI.trackList->count())
+        {
+            changes = true;
+            break;
+        }
+        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& name  = app::FromUtf8(track.GetName());
+        const auto& id    = app::FromUtf8(track.GetId());
+        const auto* item  = mUI.trackList->item(i);
+        if (item->text() != name || item->data(Qt::UserRole).toString() != id)
+        {
+            changes = true;
+            break;
+        }
+    }
+    if (!changes)
+        return;
+
     auto selected = mUI.trackList->selectedItems();
     std::unordered_set<std::string> selected_item_ids;
     for (const auto* item : selected)
         selected_item_ids.insert(app::ToUtf8(item->data(Qt::UserRole).toString()));
 
+    QSignalBlocker s(mUI.idleTrack);
     mUI.trackList->clear();
-
+    mUI.idleTrack->clear();
+    int selected_idle_track_index = -1;
     SetEnabled(mUI.btnDeleteTrack, false);
     SetEnabled(mUI.btnEditTrack, false);
     for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
@@ -610,9 +633,16 @@ void EntityWidget::Refresh()
         item->setData(Qt::UserRole, id);
         item->setIcon(QIcon("icons:animation_track.png"));
         mUI.trackList->addItem(item);
+        mUI.idleTrack->addItem(name, QVariant(id)); // track id as user data
         if (selected_item_ids.find(track.GetId()) != selected_item_ids.end())
             item->setSelected(true);
+        if (mState.entity->HasIdleTrack())
+        {
+            if (id == app::FromUtf8(mState.entity->GetIdleTrackId()))
+                selected_idle_track_index = i;
+        }
     }
+    SetValue(mUI.idleTrack, selected_idle_track_index);
 }
 
 bool EntityWidget::GetStats(Stats* stats) const
@@ -841,8 +871,22 @@ void EntityWidget::on_btnDeleteTrack_clicked()
     QListWidgetItem* item = items[0];
     QString id = item->data(Qt::UserRole).toString();
 
+    if (mState.entity->HasIdleTrack())
+    {
+        if (mState.entity->GetIdleTrackId() == app::ToUtf8(id))
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setIcon(QMessageBox::Question);
+            msg.setText(tr("The selected track is the current entity idle track.\n"
+                           "Are you sure you want to delete it?"));
+            if (msg.exec() == QMessageBox::No)
+                return;
+            mState.entity->ResetIdleTrack();
+            SetValue(mUI.idleTrack, -1);
+        }
+    }
     mState.entity->DeleteAnimationTrackById(app::ToUtf8(id));
-
     // this will remove it from the widget.
     delete item;
 }
@@ -893,6 +937,19 @@ void EntityWidget::on_trackList_itemSelectionChanged()
     auto list = mUI.trackList->selectedItems();
     mUI.btnEditTrack->setEnabled(!list.isEmpty());
     mUI.btnDeleteTrack->setEnabled(!list.isEmpty());
+}
+
+void EntityWidget::on_idleTrack_currentIndexChanged(int index)
+{
+    if (index == -1)
+    {
+        mState.entity->ResetIdleTrack();
+        return;
+    }
+    const auto id   = mUI.idleTrack->currentData().toString();
+    const auto name = mUI.idleTrack->currentText();
+    mState.entity->SetIdleTrackId(app::ToUtf8(id));
+    DEBUG("Entity idle track set to '%1' ('%2')", name, id);
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)

@@ -120,6 +120,11 @@ void SetValue(QComboBox* combo, T value)
         combo->setCurrentIndex(index);
     }
 }
+inline void SetValue(QComboBox* combo, int index)
+{
+    QSignalBlocker s(combo);
+    combo->setCurrentIndex(index);
+}
 
 inline void SetList(QComboBox* combo, const QStringList& list)
 {

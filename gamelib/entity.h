@@ -735,6 +735,13 @@ namespace game
         const ScriptVar& GetScriptVar(size_t index) const;
         const ScriptVar* FindScriptVar(const std::string& name) const;
 
+        void SetIdleTrackId(const std::string& id)
+        { mIdleTrackId = id; }
+        void ResetIdleTrack()
+        { mIdleTrackId.clear(); }
+        bool HasIdleTrack() const
+        { return !mIdleTrackId.empty(); }
+
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -749,6 +756,8 @@ namespace game
         { return mScriptVars.size(); }
         std::string GetId() const
         { return mClassId; }
+        std::string GetIdleTrackId() const
+        { return mIdleTrackId; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
@@ -768,6 +777,9 @@ namespace game
     private:
         // The class/resource id of this class.
         std::string mClassId;
+        // the track ID of the idle track that gets played when nothing
+        // else is going on. can be empty in which case no animation plays.
+        std::string mIdleTrackId;
         // the list of animation tracks that are pre-defined with this
         // type of animation.
         std::vector<std::shared_ptr<AnimationTrackClass>> mAnimationTracks;
@@ -927,10 +939,14 @@ namespace game
         // Play a previously recorded (stored in the animation class object)
         // animation track identified by name. Note that there could be
         // ambiguity between the names, i.e. multiple tracks with the same name.
-        void PlayAnimationByName(const std::string& name);
+        // Returns true if playback started or false when there's no such track.
+        bool PlayAnimationByName(const std::string& name);
         // Play a previously recorded (stored in the animation class object)
         // animation track identified by its track id.
-        void PlayAnimationById(const std::string& id);
+        // Returns true if playback started or false when there's no such track.
+        bool PlayAnimationById(const std::string& id);
+        // Play the designated idle track if any and if there's no current animation.
+        bool PlayIdle();
         // Returns true if an animation track is still playing.
         bool IsPlaying() const;
 
@@ -973,6 +989,8 @@ namespace game
         { return mRotation; }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        bool HasIdleTrack() const
+        { return mClass->HasIdleTrack(); }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const

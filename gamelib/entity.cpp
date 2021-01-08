@@ -374,6 +374,7 @@ glm::mat4 EntityNode::GetModelTransform() const
 EntityClass::EntityClass(const EntityClass& other)
 {
     mClassId = other.mClassId;
+    mIdleTrackId = other.mIdleTrackId;
 
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
@@ -644,6 +645,7 @@ std::size_t EntityClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mIdleTrackId);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const EntityNodeClass* node) {
@@ -664,6 +666,7 @@ nlohmann::json EntityClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "id", mClassId);
+    base::JsonWrite(json, "idle_track", mIdleTrackId);
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
@@ -688,7 +691,8 @@ nlohmann::json EntityClass::ToJson() const
 std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
 {
     EntityClass ret;
-    if (!base::JsonReadSafe(json, "id", &ret.mClassId))
+    if (!base::JsonReadSafe(json, "id", &ret.mClassId) ||
+        !base::JsonReadSafe(json, "idle_track", &ret.mIdleTrackId))
         return std::nullopt;
     if (json.contains("nodes"))
     {
@@ -728,7 +732,7 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
 EntityClass EntityClass::Clone() const
 {
     EntityClass ret;
-
+    ret.mIdleTrackId = mIdleTrackId;
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
     // make a deep copy of the nodes.
@@ -762,10 +766,11 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
         return *this;
 
     EntityClass tmp(other);
-    mClassId    = std::move(tmp.mClassId);
-    mNodes      = std::move(tmp.mNodes);
-    mScriptVars = std::move(tmp.mScriptVars);
-    mRenderTree = tmp.mRenderTree;
+    mClassId     = std::move(tmp.mClassId);
+    mIdleTrackId = std::move(tmp.mIdleTrackId);
+    mNodes       = std::move(tmp.mNodes);
+    mScriptVars  = std::move(tmp.mScriptVars);
+    mRenderTree  = tmp.mRenderTree;
     mAnimationTracks = std::move(tmp.mAnimationTracks);
     return *this;
 }
@@ -991,7 +996,7 @@ void Entity::Play(std::unique_ptr<AnimationTrack> track)
     // possibilities: reset or queue?
     mAnimationTrack = std::move(track);
 }
-void Entity::PlayAnimationByName(const std::string& name)
+bool Entity::PlayAnimationByName(const std::string& name)
 {
     for (size_t i=0; i<mClass->GetNumTracks(); ++i)
     {
@@ -1000,10 +1005,11 @@ void Entity::PlayAnimationByName(const std::string& name)
             continue;
         auto track = std::make_unique<AnimationTrack>(klass);
         Play(std::move(track));
-        return;
+        return true;
     }
+    return false;
 }
-void Entity::PlayAnimationById(const std::string& id)
+bool Entity::PlayAnimationById(const std::string& id)
 {
     for (size_t i=0; i<mClass->GetNumTracks(); ++i)
     {
@@ -1012,8 +1018,27 @@ void Entity::PlayAnimationById(const std::string& id)
             continue;
         auto track = std::make_unique<AnimationTrack>(klass);
         Play(std::move(track));
-        return;
+        return true;
     }
+    return false;
+}
+
+bool Entity::PlayIdle()
+{
+    if (mAnimationTrack)
+        return false;
+
+    if (!mClass->HasIdleTrack())
+        return false;
+
+    if (!PlayAnimationById(mClass->GetIdleTrackId()))
+    {
+        // might spam the log.
+        // WARN("Idle track '%1' was not found.", mClass->GetIdleTrackId());
+        return false;
+    }
+    DEBUG("Started idle track '%1'", mAnimationTrack->GetName());
+    return true;
 }
 
 bool Entity::IsPlaying() const
