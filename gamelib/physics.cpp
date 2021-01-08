@@ -113,6 +113,33 @@ void PhysicsEngine::DeleteBody(const std::string& id)
     mWorld->DestroyBody(node.world_body);
     mNodes.erase(it);
 }
+void PhysicsEngine::DeleteBody(const EntityNode& node)
+{
+    DeleteBody(node->GetId());
+}
+
+void PhysicsEngine::ApplyImpulseToCenter(const std::string& id, const glm::vec2& impulse) const
+{
+    auto it = mNodes.find(id);
+    if (it == mNodes.end())
+    {
+        WARN("Applying impulse to a physics body that doesn't exist: '%1'", id);
+        return;
+    }
+    auto& node = it->second;
+    auto* body = node.world_body;
+    if (body->GetType() != b2_dynamicBody)
+    {
+        WARN("Applying impulse to non dynamic body ('%1') will have no effect.", id);
+        return;
+    }
+    body->ApplyLinearImpulseToCenter(b2Vec2(impulse.x, impulse.y), true /*wake */);
+}
+
+void PhysicsEngine::ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse) const
+{
+    ApplyImpulseToCenter(node.GetId(), impulse);
+}
 
 void PhysicsEngine::CreateWorld(const Scene& scene)
 {

@@ -99,7 +99,14 @@ namespace game
         // Delete all physics bodies currently in the system.
         void DeleteAll();
         // Delete a physics body with the given node id.
-        void DeleteBody(const std::string& id);
+        void DeleteBody(const std::string& node);
+        void DeleteBody(const EntityNode& node);
+
+        // Apply an impulse (defined as a vector with magnitude and direction) to
+        // the center of the node's rigid body. The body must be dynamic in order for
+        // this to work. Newtons per seconds or Kgs per meters per second.
+        void ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse) const;
+        void ApplyImpulseToCenter(const std::string& node, const glm::vec2& impulse) const;
 
         // Initialize the physics world based on the scene.
         // The scene is traversed and then for each scene entity
