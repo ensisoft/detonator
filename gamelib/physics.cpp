@@ -304,6 +304,8 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
     body_def.linearDamping  = body->GetLinearDamping();
     body_def.enabled        = body->TestFlag(RigidBodyItem::Flags::Enabled);
     body_def.bullet         = body->TestFlag(RigidBodyItem::Flags::Bullet);
+    body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
+    body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
     b2Body* world_body = mWorld->CreateBody(&body_def);
 
     // collision shape used for collision resolver for the body.
