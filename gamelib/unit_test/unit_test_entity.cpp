@@ -99,6 +99,8 @@ void unit_test_entity_node()
     body.SetAngularDamping(4.0f);
     body.SetLinearDamping(5.0f);
     body.SetDensity(-1.0f);
+    body.SetAngularVelocity(5.0f);
+    body.SetLinearVelocity(glm::vec2(-1.0f, -2.0f));
     body.SetPolygonShapeId("shape");
 
     game::EntityNodeClass node;
@@ -132,6 +134,8 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetRigidBody()->GetAngularDamping() == real::float32(4.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetLinearDamping()  == real::float32(5.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetDensity()        == real::float32(-1.0));
+    TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity()== real::float32(5.0f));
+    TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(-1.0f, -2.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetPolygonShapeId() == "shape");
 
     // to/from json

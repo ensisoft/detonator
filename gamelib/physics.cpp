@@ -267,6 +267,16 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
                     body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
                 mTransform.Pop();
             }
+            else if (physics_node.world_body->GetType() == b2BodyType::b2_kinematicBody)
+            {
+                // set the instantaneous velocities from the animation system
+                // to the physics system in order to drive objects physically.
+                // the velocities are expressed relative to the world.
+                const auto* body = node->GetRigidBody();
+                const auto& velo = body->GetLinearVelocity();
+                physics_node.world_body->SetAngularVelocity(body->GetAngularVelocity());
+                physics_node.world_body->SetLinearVelocity(b2Vec2(velo.x, velo.y));
+            }
             else
             {
                 // get the object's transform properties in the physics world.
@@ -290,6 +300,11 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
                 box.Transform(glm::inverse(node_to_world));
                 node->SetTranslation(box.GetPosition());
                 node->SetRotation(box.GetRotation());
+                auto* body = node->GetRigidBody();
+                const auto& linear_velocity = physics_node.world_body->GetLinearVelocity();
+                const auto angular_velocity = physics_node.world_body->GetAngularVelocity();
+                body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
+                body->SetAngularVelocity(angular_velocity);
             }
         }
         virtual void LeaveNode(EntityNode* node) override
@@ -381,6 +396,10 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
     body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
     body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
     b2Body* world_body = mWorld->CreateBody(&body_def);
+    const auto& velo = body->GetLinearVelocity();
+    // set initial velocities.
+    world_body->SetLinearVelocity(b2Vec2(velo.x, velo.y));
+    world_body->SetAngularVelocity(body->GetAngularVelocity());
 
     // collision shape used for collision resolver for the body.
     std::unique_ptr<b2Shape> collision_shape;

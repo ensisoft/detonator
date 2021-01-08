@@ -127,6 +127,10 @@ namespace game
         { return mBitFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mPolygonShapeId; }
+        glm::vec2 GetLinearVelocity() const
+        { return mLinearVelocity; }
+        float GetAngularVelocity() const
+        { return mAngularVelocity; }
         void ResetPolygonShapeId()
         { mPolygonShapeId.clear(); }
 
@@ -146,8 +150,12 @@ namespace game
         { mLinearDamping = value; }
         void SetDensity(float value)
         { mDensity = value; }
+        void SetAngularVelocity(float value)
+        { mAngularVelocity = value; }
         void SetPolygonShapeId(const std::string& id)
         { mPolygonShapeId = id; }
+        void SetLinearVelocity(const glm::vec2& velocity)
+        { mLinearVelocity = velocity; }
 
         nlohmann::json ToJson() const;
 
@@ -162,6 +170,12 @@ namespace game
         float mAngularDamping = 0.5f;
         float mLinearDamping = 0.5f;
         float mDensity = 1.0f;
+        // Initial linear velocity vector in meters per second.
+        // Pertains to kinematic bodies.
+        glm::vec2 mLinearVelocity = {0.0f, 0.0f};
+        // Initial angular velocity of rotation around the
+        // center of mass. Pertains to kinematic bodies.
+        float mAngularVelocity = 0.0f;
     };
 
     // Drawable item defines a drawable item and its material and
@@ -305,7 +319,10 @@ namespace game
 
         RigidBodyItem(std::shared_ptr<const RigidBodyItemClass> klass)
             : mClass(klass)
-        {}
+        {
+            mLinearVelocity = mClass->GetLinearVelocity();
+            mAngularVelocity = mClass->GetAngularVelocity();
+        }
 
         Simulation GetSimulation() const
         { return mClass->GetSimulation(); }
@@ -326,12 +343,44 @@ namespace game
         std::string GetPolygonShapeId() const
         { return mClass->GetPolygonShapeId(); }
 
+        // Get the instantaneous current velocities of the
+        // rigid body under the simulation.
+        // linear velocity is expressed in meters per second
+        // and angular velocity is radians per second.
+        // ! The velocities are expressed in the world coordinate space !
+        glm::vec2 GetLinearVelocity() const
+        { return mLinearVelocity; }
+        float GetAngularVelocity() const
+        { return mAngularVelocity; }
+
+        // Set the instantaneous current velocities of the
+        // rigid body under the simulation.
+        // linear velocity is expressed in meters per second
+        // and angular velocity is radians per second.
+        // ! The velocities are expressed in the world coordinate space !
+        void SetLinearVelocity(const glm::vec2& velocity)
+        { mLinearVelocity = velocity; }
+        void SetAngularVelocity(float velocity)
+        { mAngularVelocity = velocity; }
+
         const RigidBodyItemClass& GetClass() const
         { return *mClass.get(); }
         const RigidBodyItemClass* operator->() const
         { return mClass.get(); }
     private:
         std::shared_ptr<const RigidBodyItemClass> mClass;
+        // Current linear velocity in meters per second.
+        // For dynamically driven bodies
+        // the physics engine will update this value, whereas for
+        // kinematic bodies the animation system can set this value
+        // and the physics engine will read it.
+        glm::vec2 mLinearVelocity = {0.0f, 0.0f};
+        // Current angular velocity in radians per second.
+        // For dynamically driven bodies the physics engine
+        // will update this value, whereas for kinematic bodies
+        // the animation system can provide a new value which will
+        // then be set in the physics engine.
+        float mAngularVelocity = 0.0f;
     };
 
     class EntityNodeClass

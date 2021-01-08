@@ -54,6 +54,8 @@ std::size_t RigidBodyItemClass::GetHash() const
     hash = base::hash_combine(hash, mAngularDamping);
     hash = base::hash_combine(hash, mLinearDamping);
     hash = base::hash_combine(hash, mDensity);
+    hash = base::hash_combine(hash, mLinearVelocity);
+    hash = base::hash_combine(hash, mAngularVelocity);
     return hash;
 }
 
@@ -69,6 +71,8 @@ nlohmann::json RigidBodyItemClass::ToJson() const
     base::JsonWrite(json, "angular_damping", mAngularDamping);
     base::JsonWrite(json, "linear_damping",  mLinearDamping);
     base::JsonWrite(json, "density",         mDensity);
+    base::JsonWrite(json, "linear_velocity", mLinearVelocity);
+    base::JsonWrite(json, "angular_velocity", mAngularVelocity);
     return json;
 }
 // static
@@ -84,7 +88,9 @@ std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::j
         !base::JsonReadSafe(json, "restitution",     &ret.mRestitution)  ||
         !base::JsonReadSafe(json, "angular_damping", &ret.mAngularDamping)  ||
         !base::JsonReadSafe(json, "linear_damping",  &ret.mLinearDamping)  ||
-        !base::JsonReadSafe(json, "density",         &ret.mDensity))
+        !base::JsonReadSafe(json, "density",         &ret.mDensity) ||
+        !base::JsonReadSafe(json, "linear_velocity", &ret.mLinearVelocity) ||
+        !base::JsonReadSafe(json, "angular_velocity",&ret.mAngularVelocity))
         return std::nullopt;
     ret.mBitFlags.set_from_value(bitflag);
     return ret;
