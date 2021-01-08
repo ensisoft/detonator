@@ -46,6 +46,21 @@ void PhysicsEngine::UpdateScene(Scene& scene)
 {
     using RenderTree = Scene::RenderTree ;
 
+    // two options here for updating entity nodes based on the
+    // physics simulation.
+    // 1. traverse the whole scene and look which entity nodes
+    //    also exist in the physics world.
+    //    a) use the render tree to traverse the scene.
+    //    b) use the entity list to iterate over the scene and then
+    //       see which entity's nodes have physics nodes.
+    // 2. iterate over the physics nodes and find them in the scene
+    //    and then update.
+    // Currently i'm not sure which strategy is more efficient. It'd seem
+    // that if a lot of the entity nodes in the scene have physics bodies
+    // then traversing the whole scene is a viable alternative. However if
+    // only a few nodes have physics bodies then likely only iterating over
+    // the physics bodies and then looking up their transforms in the scene
+    // is more efficient.
     class Visitor : public RenderTree::Visitor
     {
     public:
@@ -188,35 +203,67 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
 
             mTransform.Push(node->GetNodeTransform());
 
+            // look if we have a physics node for this entity node.
             auto it = mEngine.mNodes.find(node->GetId());
             if (it == mEngine.mNodes.end())
-                return;
-
-            if (!node->HasRigidBody())
             {
-                mEngine.mNodes.erase(it);
-                return;
+                // no node, no rigid body, nothing to do.
+                if (!node->HasRigidBody())
+                    return;
+                // add a new rigid body based on this node.
+                mTransform.Push(node->GetModelTransform());
+                    mEngine.AddPhysicsNode(mTransform.GetAsMatrix(), *node);
+                mTransform.Pop();
+            }
+            else
+            {
+                // physics node has been created before but the rigid body
+                // was removed from the node. erase the physics node.
+                if (!node->HasRigidBody())
+                {
+                    mEngine.mWorld->DestroyBody(it->second.world_body);
+                    mEngine.mNodes.erase(it);
+                    return;
+                }
             }
 
             const auto& physics_node = it->second;
-            const auto physics_world_pos   = physics_node.world_body->GetPosition();
-            const auto physics_world_angle = physics_node.world_body->GetAngle();
+            if (physics_node.world_body->GetType() == b2BodyType::b2_staticBody)
+            {
+                auto* body = physics_node.world_body;
+                // static bodies are not moved by the physics engine but they
+                // may be moved by the user.
+                // update the world transform from the scene to the physics world.
+                mTransform.Push(node->GetModelTransform());
+                    const FBox box(mTransform.GetAsMatrix());
+                    const auto& node_pos_in_world   = box.GetPosition();
+                    body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
+                mTransform.Pop();
+            }
+            else
+            {
+                // get the object's transform properties in the physics world.
+                const auto physics_world_pos = physics_node.world_body->GetPosition();
+                const auto physics_world_angle = physics_node.world_body->GetAngle();
 
-            glm::mat4 mat;
-            gfx::Transform transform;
-            transform.Rotate(physics_world_angle);
-            transform.Translate(physics_world_pos.x, physics_world_pos.y);
-            transform.Push();
-                transform.Scale(physics_node.world_extents);
-                transform.Translate(physics_node.world_extents * -0.5f);
-                mat = transform.GetAsMatrix();
-            transform.Pop();
+                // transform back into scene relative to the node's parent.
+                // i.e. the world transform of the node is expressed as a transform
+                // relative to its parent node.
+                glm::mat4 mat;
+                gfx::Transform transform;
+                transform.Rotate(physics_world_angle);
+                transform.Translate(physics_world_pos.x, physics_world_pos.y);
+                transform.Push();
+                    transform.Scale(physics_node.world_extents);
+                    transform.Translate(physics_node.world_extents * -0.5f);
+                    mat = transform.GetAsMatrix();
+                transform.Pop();
 
-            FBox box(mat);
-            box.Transform(glm::inverse(node_to_world));
-
-            node->SetTranslation(box.GetPosition());
-            node->SetRotation(box.GetRotation());
+                FBox box(mat);
+                box.Transform(glm::inverse(node_to_world));
+                node->SetTranslation(box.GetPosition());
+                node->SetRotation(box.GetRotation());
+            }
         }
         virtual void LeaveNode(EntityNode* node) override
         {
