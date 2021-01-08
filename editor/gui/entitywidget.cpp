@@ -326,10 +326,10 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
     // since there doesn't seem to be a way to do this in the designer.
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
-    mParticleSystems->menuAction()->setText("Particle");
+    mParticleSystems->menuAction()->setText("Particles");
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
-    mCustomShapes->menuAction()->setText("Polygon");
+    mCustomShapes->menuAction()->setText("Shapes");
 
     mState.workspace = workspace;
     mState.renderer.SetLoader(workspace);
@@ -1380,7 +1380,7 @@ void EntityWidget::PlaceNewCustomShape()
     const auto drawable = action->text();
     // check the resource in order to get the default material name set in the
     // particle editor.
-    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::CustomShape);
+    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::Shape);
     const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
 }
@@ -1722,7 +1722,7 @@ void EntityWidget::RebuildMenus()
             QAction *action = mParticleSystems->addAction(name);
             connect(action, &QAction::triggered, this, &EntityWidget::PlaceNewParticleSystem);
         }
-        else if (resource.GetType() == app::Resource::Type::CustomShape)
+        else if (resource.GetType() == app::Resource::Type::Shape)
         {
             QAction *action = mCustomShapes->addAction(name);
             connect(action, &QAction::triggered,this, &EntityWidget::PlaceNewCustomShape);
@@ -1742,7 +1742,7 @@ void EntityWidget::RebuildCombos()
     for (size_t i=0; i<mState.workspace->GetNumUserDefinedResources(); ++i)
     {
         const auto& res = mState.workspace->GetUserDefinedResource(i);
-        if (res.GetType() != app::Resource::Type::CustomShape)
+        if (res.GetType() != app::Resource::Type::Shape)
             continue;
         polygons.append(res.GetName());
     }

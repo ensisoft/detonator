@@ -64,8 +64,8 @@ namespace app
             Material,
             // It's a particle system
             ParticleSystem,
-            // It's a custom shape (drawable)
-            CustomShape,
+            // It's a (custom) shape (drawable)
+            Shape,
             // It's a generic drawable.
             Drawable,
             // It's an entity description
@@ -139,7 +139,7 @@ namespace app
                     return QIcon("icons:material.png");
                 case Resource::Type::ParticleSystem:
                     return QIcon("icons:particle.png");
-                case Resource::Type::CustomShape:
+                case Resource::Type::Shape:
                     return QIcon("icons:polygon.png");
                 case Resource::Type::Entity:
                     return QIcon("icons:entity.png");
@@ -156,7 +156,7 @@ namespace app
         inline bool IsParticleEngine() const
         { return GetType() == Type::ParticleSystem; }
         inline bool IsCustomShape() const
-        { return GetType() == Type::CustomShape; }
+        { return GetType() == Type::Shape; }
         inline bool IsEntity() const
         { return GetType() == Type::Entity; }
         inline bool IsScene() const
@@ -265,7 +265,7 @@ namespace app
 
         template<>
         struct ResourceTypeTraits<gfx::PolygonClass> {
-            static constexpr auto Type = app::Resource::Type::CustomShape;
+            static constexpr auto Type = app::Resource::Type::Shape;
         };
         template <>
         struct ResourceTypeTraits<gfx::DrawableClass> {
@@ -353,7 +353,7 @@ namespace app
                 json["materials"].push_back(content_json);
             else if (TypeValue == Resource::Type::ParticleSystem)
                 json["particles"].push_back(content_json);
-            else if (TypeValue == Resource::Type::CustomShape)
+            else if (TypeValue == Resource::Type::Shape)
                 json["shapes"].push_back(content_json);
             else if (TypeValue == Resource::Type::Entity)
                 json["entities"].push_back(content_json);

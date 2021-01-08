@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PolygonWidget</class>
- <widget class="QWidget" name="PolygonWidget">
+ <class>ShapeWidget</class>
+ <widget class="QWidget" name="ShapeWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1222</width>
-    <height>769</height>
+    <width>1221</width>
+    <height>759</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Polygon</string>
+   <string>Shape</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/resource.qrc">
@@ -21,7 +21,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Polygon editor</string>
+      <string>Shape editor</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -87,6 +87,22 @@
             </layout>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Polygon (triangle) winding order is the order in which the vertices (points) of the polygon are traversed.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;The winding order is used to determine between front and back faces. By default back faces are not drawn.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;The current expected winding order is counter clockwise. Make sure to wind your triangles in the right order or they will not be drawn.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>

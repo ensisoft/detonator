@@ -283,7 +283,7 @@ void IPCClient::ReadMessage()
             resource = CreateResource<game::SceneClass>("scenes", json, name);
         else if (type == Resource::Type::Material)
             resource = CreateResource<gfx::MaterialClass>("materials", json, name);
-        else if (type == Resource::Type::CustomShape)
+        else if (type == Resource::Type::Shape)
             resource = CreateResource<gfx::PolygonClass>("shapes", json, name);
         else if (type == Resource::Type::ParticleSystem)
             resource = CreateResource<gfx::KinematicsParticleEngineClass>("particles", json, name);

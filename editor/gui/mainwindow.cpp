@@ -344,8 +344,8 @@ bool MainWindow::loadWorkspace(const QString& dir)
             widget = new MaterialWidget(workspace.get());
         else if (klass == ParticleEditorWidget::staticMetaObject.className())
             widget = new ParticleEditorWidget(workspace.get());
-        else if (klass == PolygonWidget::staticMetaObject.className())
-            widget = new PolygonWidget(workspace.get());
+        else if (klass == ShapeWidget::staticMetaObject.className())
+            widget = new ShapeWidget(workspace.get());
         else if (klass == AnimationTrackWidget::staticMetaObject.className())
             widget = new AnimationTrackWidget(workspace.get());
         else if (klass == EntityWidget::staticMetaObject.className())
@@ -844,7 +844,7 @@ void MainWindow::on_actionNewParticleSystem_triggered()
 void MainWindow::on_actionNewCustomShape_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new PolygonWidget(mWorkspace.get()), open_new_window);
+    showWidget(new ShapeWidget(mWorkspace.get()), open_new_window);
 }
 void MainWindow::on_actionNewEntity_triggered()
 {
@@ -1199,8 +1199,8 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), new_window);
                 break;
-            case app::Resource::Type::CustomShape:
-                showWidget(new PolygonWidget(mWorkspace.get(), *res), new_window);
+            case app::Resource::Type::Shape:
+                showWidget(new ShapeWidget(mWorkspace.get(), *res), new_window);
                 break;
             case app::Resource::Type::Entity:
                 showWidget(new EntityWidget(mWorkspace.get(), *res), new_window);
@@ -1226,8 +1226,8 @@ void MainWindow::on_actionNewResource_triggered()
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get()), new_window);
                 break;
-            case app::Resource::Type::CustomShape:
-                showWidget(new PolygonWidget(mWorkspace.get()), new_window);
+            case app::Resource::Type::Shape:
+                showWidget(new ShapeWidget(mWorkspace.get()), new_window);
                 break;
             case app::Resource::Type::Entity:
                 showWidget(new EntityWidget(mWorkspace.get()), new_window);
@@ -1801,8 +1801,8 @@ void MainWindow::editResources(bool open_new_window)
             case app::Resource::Type::ParticleSystem:
                 showWidget(new ParticleEditorWidget(mWorkspace.get(), res), open_new_window);
                 break;
-            case app::Resource::Type::CustomShape:
-                showWidget(new PolygonWidget(mWorkspace.get(), res), open_new_window);
+            case app::Resource::Type::Shape:
+                showWidget(new ShapeWidget(mWorkspace.get(), res), open_new_window);
                 break;
             case app::Resource::Type::Entity:
                 showWidget(new EntityWidget(mWorkspace.get(), res), open_new_window);

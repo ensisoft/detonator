@@ -74,47 +74,47 @@ float PointDist(const QPoint& a, const QPoint& b)
 namespace gui
 {
 
-PolygonWidget::PolygonWidget(app::Workspace* workspace) : mWorkspace(workspace)
+ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 {
     DEBUG("Create PolygonWidget");
 
     mUI.setupUi(this);
 
-    mUI.widget->onPaintScene = std::bind(&PolygonWidget::PaintScene,
+    mUI.widget->onPaintScene = std::bind(&ShapeWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onMousePress  = std::bind(&PolygonWidget::OnMousePress,
+    mUI.widget->onMousePress  = std::bind(&ShapeWidget::OnMousePress,
         this, std::placeholders::_1);
-    mUI.widget->onMouseRelease = std::bind(&PolygonWidget::OnMouseRelease,
+    mUI.widget->onMouseRelease = std::bind(&ShapeWidget::OnMouseRelease,
         this, std::placeholders::_1);
-    mUI.widget->onMouseMove = std::bind(&PolygonWidget::OnMouseMove,
+    mUI.widget->onMouseMove = std::bind(&ShapeWidget::OnMouseMove,
         this, std::placeholders::_1);
-    mUI.widget->onMouseDoubleClick = std::bind(&PolygonWidget::OnMouseDoubleClick,
+    mUI.widget->onMouseDoubleClick = std::bind(&ShapeWidget::OnMouseDoubleClick,
         this, std::placeholders::_1);
-    mUI.widget->onKeyPress = std::bind(&PolygonWidget::OnKeyPressEvent,
+    mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
         this, std::placeholders::_1);
 
     mUI.blueprints->addItems(QStringList(""));
     mUI.blueprints->addItems(workspace->ListUserDefinedMaterials());
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    SetValue(mUI.name, QString("My Custom Shape"));
+    SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mPolygon.GetId());
 
-    setWindowTitle("My Custom Shape");
+    setWindowTitle("My Shape");
     setFocusPolicy(Qt::StrongFocus);
 
     connect(workspace, &app::Workspace::NewResourceAvailable,
-        this, &PolygonWidget::NewResourceAvailable);
+        this, &ShapeWidget::NewResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,
-        this, &PolygonWidget::ResourceToBeDeleted);
+        this, &ShapeWidget::ResourceToBeDeleted);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
 }
 
-PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& resource) : PolygonWidget(workspace)
+ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
 {
-    DEBUG("Editing custom shape '%1'", resource.GetName());
+    DEBUG("Editing shape '%1'", resource.GetName());
     mPolygon = *resource.GetContent<gfx::PolygonClass>();
     mOriginalHash = mPolygon.GetHash();
 
@@ -129,12 +129,12 @@ PolygonWidget::PolygonWidget(app::Workspace* workspace, const app::Resource& res
     setWindowTitle(mUI.name->text());
 }
 
-PolygonWidget::~PolygonWidget()
+ShapeWidget::~ShapeWidget()
 {
     DEBUG("Destroy PolygonWidget");
 }
 
-void PolygonWidget::AddActions(QToolBar& bar)
+void ShapeWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
@@ -147,7 +147,7 @@ void PolygonWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionClear);
 }
-void PolygonWidget::AddActions(QMenu& menu)
+void ShapeWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
@@ -161,7 +161,7 @@ void PolygonWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionClear);
 }
 
-bool PolygonWidget::SaveState(Settings& settings) const
+bool ShapeWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Polygon", mUI.name);
     settings.saveWidget("Polygon", mUI.blueprints);
@@ -181,7 +181,7 @@ bool PolygonWidget::SaveState(Settings& settings) const
     settings.setValue("Polygon", "content", base64);
     return true;
 }
-bool PolygonWidget::LoadState(const Settings& settings)
+bool ShapeWidget::LoadState(const Settings& settings)
 {
     settings.loadWidget("Polygon", mUI.name);
     settings.loadWidget("Polygon", mUI.blueprints);
@@ -207,24 +207,24 @@ bool PolygonWidget::LoadState(const Settings& settings)
     return true;
 }
 
-void PolygonWidget::ReloadShaders()
+void ShapeWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
 }
-void PolygonWidget::ReloadTextures()
+void ShapeWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
 }
-void PolygonWidget::Shutdown()
+void ShapeWidget::Shutdown()
 {
     mUI.widget->dispose();
 }
-void PolygonWidget::Render()
+void ShapeWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
 
-void PolygonWidget::Update(double secs)
+void ShapeWidget::Update(double secs)
 {
     if (mPaused || !mPlaying)
         return;
@@ -248,7 +248,7 @@ void PolygonWidget::Update(double secs)
     }
 }
 
-bool PolygonWidget::ConfirmClose()
+bool ShapeWidget::ConfirmClose()
 {
     const auto hash = mPolygon.GetHash();
     if (hash == mOriginalHash)
@@ -268,7 +268,7 @@ bool PolygonWidget::ConfirmClose()
     return true;
 }
 
-bool PolygonWidget::GetStats(Stats* stats) const
+bool ShapeWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
     stats->vsync = mUI.widget->haveVSYNC();
@@ -276,7 +276,7 @@ bool PolygonWidget::GetStats(Stats* stats) const
     return true;
 }
 
-void PolygonWidget::on_actionPlay_triggered()
+void ShapeWidget::on_actionPlay_triggered()
 {
     if (mPaused)
     {
@@ -293,13 +293,13 @@ void PolygonWidget::on_actionPlay_triggered()
         mPlaying = true;
     }
 }
-void PolygonWidget::on_actionPause_triggered()
+void ShapeWidget::on_actionPause_triggered()
 {
     mPaused = true;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
 }
-void PolygonWidget::on_actionStop_triggered()
+void ShapeWidget::on_actionStop_triggered()
 {
     mUI.actionStop->setEnabled(false);
     mUI.actionPause->setEnabled(false);
@@ -308,7 +308,7 @@ void PolygonWidget::on_actionStop_triggered()
     mPlaying = false;
 }
 
-void PolygonWidget::on_actionSave_triggered()
+void ShapeWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.name))
         return;
@@ -336,7 +336,7 @@ void PolygonWidget::on_actionSave_triggered()
     setWindowTitle(name);
 }
 
-void PolygonWidget::on_actionNewTriangleFan_toggled(bool checked)
+void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)
 {
     if (checked)
     {
@@ -349,14 +349,14 @@ void PolygonWidget::on_actionNewTriangleFan_toggled(bool checked)
     }
 }
 
-void PolygonWidget::on_actionClear_triggered()
+void ShapeWidget::on_actionClear_triggered()
 {
     mPolygon.ClearVertices();
     mPolygon.ClearDrawCommands();
     mUI.actionClear->setEnabled(false);
 }
 
-void PolygonWidget::NewResourceAvailable(const app::Resource* resource)
+void ShapeWidget::NewResourceAvailable(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
@@ -371,7 +371,7 @@ void PolygonWidget::NewResourceAvailable(const app::Resource* resource)
     mUI.blueprints->setCurrentIndex(index);
 }
 
-void PolygonWidget::ResourceToBeDeleted(const app::Resource* resource)
+void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
@@ -394,7 +394,7 @@ void PolygonWidget::ResourceToBeDeleted(const app::Resource* resource)
     }
 }
 
-void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
+void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
@@ -496,7 +496,7 @@ void PolygonWidget::PaintScene(gfx::Painter& painter, double secs)
             .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 }
 
-void PolygonWidget::OnMousePress(QMouseEvent* mickey)
+void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 {
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
@@ -524,7 +524,7 @@ void PolygonWidget::OnMousePress(QMouseEvent* mickey)
     }
 }
 
-void PolygonWidget::OnMouseRelease(QMouseEvent* mickey)
+void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 {
     mDragging = false;
 
@@ -558,7 +558,7 @@ void PolygonWidget::OnMouseRelease(QMouseEvent* mickey)
     }
 }
 
-void PolygonWidget::OnMouseMove(QMouseEvent* mickey)
+void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
 {
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
@@ -610,7 +610,7 @@ void PolygonWidget::OnMouseMove(QMouseEvent* mickey)
     }
 }
 
-void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
+void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 {
     // find the vertex closes to the click point
     // use polygon winding order to figure out whether
@@ -696,7 +696,7 @@ void PolygonWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     else mPolygon.InsertVertex(vertex, cmd_index, cmd_vertex_index);
 }
 
-bool PolygonWidget::OnKeyPressEvent(QKeyEvent* key)
+bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 {
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();

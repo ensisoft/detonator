@@ -629,7 +629,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
 {
     for (const auto& resource : mResources)
     {
-        if (!(resource->GetType() == Resource::Type::CustomShape ||
+        if (!(resource->GetType() == Resource::Type::Shape ||
               resource->GetType() == Resource::Type::ParticleSystem ||
               resource->GetType() == Resource::Type::Drawable))
             continue;
@@ -640,7 +640,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
             return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
         if (resource->GetType() == Resource::Type::ParticleSystem)
             return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
-        else if (resource->GetType() == Resource::Type::CustomShape)
+        else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
     ERROR("Request for a drawable that doesn't exist: '%1'", name);
@@ -733,7 +733,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClassById(const
             return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::ParticleSystem)
             return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
-        else if (resource->GetType() == Resource::Type::CustomShape)
+        else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
     ERROR("Request for a drawable that doesn't exist: '%1'", klass);
@@ -1356,7 +1356,7 @@ QStringList Workspace::ListPrimitiveDrawables() const
     {
         if (resource->IsPrimitive() &&
             (resource->GetType() == Resource::Type::ParticleSystem ||
-             resource->GetType() == Resource::Type::CustomShape ||
+             resource->GetType() == Resource::Type::Shape ||
              resource->GetType() == Resource::Type::Drawable))
             list.append(resource->GetName());
     }
@@ -1371,7 +1371,7 @@ QStringList Workspace::ListUserDefinedDrawables() const
     {
         if (!resource->IsPrimitive() &&
                 (resource->GetType() == Resource::Type::ParticleSystem ||
-                 resource->GetType() == Resource::Type::CustomShape ||
+                 resource->GetType() == Resource::Type::Shape ||
                  resource->GetType() == Resource::Type::Drawable))
             list.append(resource->GetName());
     }
@@ -1474,7 +1474,7 @@ bool Workspace::IsValidDrawable(const QString& klass) const
     {
         if (resource->GetId() == klass &&
             (resource->GetType() == Resource::Type::ParticleSystem ||
-             resource->GetType() == Resource::Type::CustomShape ||
+             resource->GetType() == Resource::Type::Shape ||
              resource->GetType() == Resource::Type::Drawable))
             return true;
     }

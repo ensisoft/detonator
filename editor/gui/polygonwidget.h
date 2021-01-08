@@ -38,14 +38,14 @@
 
 namespace gui
 {
-    class PolygonWidget : public MainWidget
+    class ShapeWidget : public MainWidget
     {
         Q_OBJECT
 
     public:
-        PolygonWidget(app::Workspace* workspace);
-        PolygonWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~PolygonWidget();
+        ShapeWidget(app::Workspace* workspace);
+        ShapeWidget(app::Workspace* workspace, const app::Resource& resource);
+       ~ShapeWidget();
 
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
@@ -78,7 +78,7 @@ namespace gui
         bool OnKeyPressEvent(QKeyEvent* key);
 
     private:
-        Ui::PolygonWidget mUI;
+        Ui::ShapeWidget mUI;
     private:
         enum class GridDensity {
             Grid10x10 = 10,
