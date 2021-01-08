@@ -48,6 +48,7 @@
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/dlgscriptvar.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -60,6 +61,96 @@
 
 namespace gui
 {
+
+class EntityWidget::ScriptVarModel : public QAbstractTableModel
+{
+public:
+    ScriptVarModel(EntityWidget::State& state) : mState(state)
+    {}
+    virtual QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto& var = mState.entity->GetScriptVar(index.row());
+        if (role == Qt::DisplayRole)
+        {
+            switch (index.column()) {
+                case 0: return app::toString(var.GetType());
+                case 1: return app::FromUtf8(var.GetName());
+                case 2: return GetScriptVarData(var);
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            switch (section) {
+                case 0: return "Type";
+                case 1: return "Name";
+                case 2: return "Data";
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual int rowCount(const QModelIndex&) const override
+    {
+        return static_cast<int>(mState.entity->GetNumScriptVars());
+    }
+    virtual int columnCount(const QModelIndex&) const override
+    {
+        return 3;
+    }
+    void AddVariable(game::ScriptVar&& var)
+    {
+        const auto count = static_cast<int>(mState.entity->GetNumScriptVars());
+        beginInsertRows(QModelIndex(), count, count);
+        mState.entity->AddScriptVar(std::move(var));
+        endInsertRows();
+    }
+    void EditVariable(size_t row, game::ScriptVar&& var)
+    {
+        mState.entity->SetScriptVar(row, std::move(var));
+        emit dataChanged(index(row, 0), index(row, 3));
+    }
+    void DeleteVariable(size_t row)
+    {
+        beginRemoveRows(QModelIndex(), row, row);
+        mState.entity->DeleteScriptVar(row);
+        endRemoveRows();
+    }
+    void Reset()
+    {
+        beginResetModel();
+        endResetModel();
+    }
+
+private:
+    static QVariant GetScriptVarData(const game::ScriptVar& var)
+    {
+        switch (var.GetType())
+        {
+            case game::ScriptVar::Type::Boolean:
+                return var.GetValue<bool>();
+            case game::ScriptVar::Type::String:
+                return app::FromUtf8(var.GetValue<std::string>());
+            case game::ScriptVar::Type::Float:
+                return var.GetValue<float>();
+            case game::ScriptVar::Type::Integer:
+                return var.GetValue<int>();
+            case game::ScriptVar::Type::Vec2: {
+                const auto& val = var.GetValue<glm::vec2>();
+                return QString("%1,%2").arg(QString::number(val.x, 'f', 2))
+                        .arg(QString::number(val.y, 'f', 2));
+            }
+        }
+        BUG("Unknown ScriptVar type.");
+        return QVariant();
+    }
+private:
+    EntityWidget::State& mState;
+};
 
 class EntityWidget::PlaceShapeTool : public MouseTool
 {
@@ -204,8 +295,13 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
     mState.entity = std::make_shared<game::EntityClass>();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
+    mScriptVarModel.reset(new ScriptVarModel(mState));
 
     mUI.setupUi(this);
+    mUI.scriptVarList->setModel(mScriptVarModel.get());
+    QHeaderView* verticalHeader = mUI.scriptVarList->verticalHeader();
+    verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+    verticalHeader->setDefaultSectionSize(16);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     mUI.actionPlay->setEnabled(true);
@@ -272,6 +368,11 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     mState.entity = std::make_shared<game::EntityClass>(*content);
     mOriginalHash = mState.entity->GetHash();
     mCameraWasLoaded = true;
+    mScriptVarModel->Reset();
+
+    const auto vars = mState.entity->GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, content->GetId());
@@ -411,6 +512,11 @@ bool EntityWidget::LoadState(const Settings& settings)
     mOriginalHash = mState.entity->GetHash();
 
     UpdateDeletedResourceReferences();
+
+    const auto vars = mState.entity->GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+    mScriptVarModel->Reset();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
@@ -739,6 +845,47 @@ void EntityWidget::on_btnDeleteTrack_clicked()
 
     // this will remove it from the widget.
     delete item;
+}
+
+void EntityWidget::on_btnNewScriptVar_clicked()
+{
+    game::ScriptVar var("My Var", std::string(""));
+    DlgScriptVar dlg(this, var);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mScriptVarModel->AddVariable(std::move(var));
+    SetEnabled(mUI.btnEditScriptVar, true);
+    SetEnabled(mUI.btnDeleteScriptVar, true);
+}
+void EntityWidget::on_btnEditScriptVar_clicked()
+{
+    auto items = mUI.scriptVarList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    game::ScriptVar var = mState.entity->GetScriptVar(index.row());
+    DlgScriptVar dlg(this, var);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mScriptVarModel->EditVariable(index.row(), std::move(var));
+}
+
+void EntityWidget::on_btnDeleteScriptVar_clicked()
+{
+    auto items = mUI.scriptVarList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    mScriptVarModel->DeleteVariable(index.row());
+    const auto vars = mState.entity->GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 }
 
 void EntityWidget::on_trackList_itemSelectionChanged()

@@ -391,6 +391,11 @@ EntityClass::EntityClass(const EntityClass& other)
         mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
     }
 
+    for (const auto& var : other.mScriptVars)
+    {
+        mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
+    }
+
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
             return map[node];
         });
@@ -586,6 +591,55 @@ FBox EntityClass::GetBoundingBox(const EntityNodeClass* node) const
     return game::GetBoundingBox(mRenderTree, node);
 }
 
+void EntityClass::AddScriptVar(const ScriptVar& var)
+{
+    mScriptVars.push_back(std::make_shared<ScriptVar>(var));
+}
+void EntityClass::AddScriptVar(ScriptVar&& var)
+{
+    mScriptVars.push_back(std::make_shared<ScriptVar>(std::move(var)));
+}
+void EntityClass::DeleteScriptVar(size_t index)
+{
+    ASSERT(index <mScriptVars.size());
+    auto it = mScriptVars.begin();
+    mScriptVars.erase(it + index);
+}
+void EntityClass::SetScriptVar(size_t index, const ScriptVar& var)
+{
+    ASSERT(index <mScriptVars.size());
+    *mScriptVars[index] = var;
+}
+void EntityClass::SetScriptVar(size_t index, ScriptVar&& var)
+{
+    ASSERT(index <mScriptVars.size());
+    *mScriptVars[index] = std::move(var);
+}
+ScriptVar& EntityClass::GetScriptVar(size_t index)
+{
+    ASSERT(index <mScriptVars.size());
+    return *mScriptVars[index];
+}
+ScriptVar* EntityClass::FindScriptVar(const std::string& name)
+{
+    for (auto& var : mScriptVars)
+        if (var->GetName() == name)
+            return var.get();
+    return nullptr;
+}
+const ScriptVar& EntityClass::GetScriptVar(size_t index) const
+{
+    ASSERT(index <mScriptVars.size());
+    return *mScriptVars[index];
+}
+const ScriptVar* EntityClass::FindScriptVar(const std::string& name) const
+{
+    for (auto& var : mScriptVars)
+        if (var->GetName() == name)
+            return var.get();
+    return nullptr;
+}
+
 std::size_t EntityClass::GetHash() const
 {
     size_t hash = 0;
@@ -600,6 +654,9 @@ std::size_t EntityClass::GetHash() const
 
     for (const auto& track : mAnimationTracks)
         hash = base::hash_combine(hash, track->GetHash());
+
+    for (const auto& var : mScriptVars)
+        hash = base::hash_combine(hash, var->GetHash());
     return hash;
 }
 
@@ -616,6 +673,12 @@ nlohmann::json EntityClass::ToJson() const
     {
         json["tracks"].push_back(track->ToJson());
     }
+
+    for (const auto& var : mScriptVars)
+    {
+        json["vars"].push_back(var->ToJson());
+    }
+
     json["render_tree"] = mRenderTree.ToJson(game::TreeNodeToJson<EntityNodeClass>);
     return json;
 }
@@ -647,6 +710,17 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
             ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
         }
     }
+    if (json.contains("vars"))
+    {
+        for (const auto& js : json["vars"].items())
+        {
+            std::optional<ScriptVar> var = ScriptVar::FromJson(js.value());
+            if (!var.has_value())
+                return std::nullopt;
+            ret.mScriptVars.push_back(std::make_shared<ScriptVar>(var.value()));
+        }
+    }
+
     ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
@@ -671,6 +745,11 @@ EntityClass EntityClass::Clone() const
         ret.mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(track->Clone()));
     }
 
+    for (const auto& var : mScriptVars)
+    {
+        ret.mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
+    }
+
     ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityNodeClass* node) {
         return map[node];
     });
@@ -685,8 +764,9 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     EntityClass tmp(other);
     mClassId    = std::move(tmp.mClassId);
     mNodes      = std::move(tmp.mNodes);
-    mAnimationTracks = std::move(tmp.mAnimationTracks);
+    mScriptVars = std::move(tmp.mScriptVars);
     mRenderTree = tmp.mRenderTree;
+    mAnimationTracks = std::move(tmp.mAnimationTracks);
     return *this;
 }
 
@@ -708,6 +788,14 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const EntityNodeClass* node) {
             return map[node];
         });
+
+    // assign the script variables.
+    for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+    {
+        auto var = klass->GetSharedScriptVar(i);
+        if (!var->IsReadOnly())
+            mScriptVars.push_back(*var);
+    }
 
     mInstanceId = base::RandomString(10);
     mFlags.set(Flags::VisibleInGame, true);
@@ -927,9 +1015,21 @@ void Entity::PlayAnimationById(const std::string& id)
         return;
     }
 }
+
 bool Entity::IsPlaying() const
 {
     return !!mAnimationTrack;
+}
+
+const ScriptVar* Entity::FindScriptVar(const std::string& name) const
+{
+    // first check the mutable variables per this instance then check the class.
+    for (const auto& var : mScriptVars)
+    {
+        if (var.GetName() == name)
+            return &var;
+    }
+    return mClass->FindScriptVar(name);
 }
 
 void Entity::SetScale(const glm::vec2& scale)

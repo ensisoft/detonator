@@ -153,6 +153,7 @@ add_executable(Editor
     gamelib/renderer.cpp
     gamelib/entity.cpp
     gamelib/scene.cpp
+    gamelib/types.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -201,6 +202,9 @@ add_executable(Editor
     editor/gui/dlgopen.h
     editor/gui/dlgopen.ui
     editor/gui/dlgopen.cpp
+    editor/gui/dlgscriptvar.h
+    editor/gui/dlgscriptvar.ui
+    editor/gui/dlgscriptvar.cpp
     editor/gui/dlgnew.h
     editor/gui/dlgnew.ui
     editor/gui/gfxwidget.h
@@ -302,6 +306,7 @@ add_executable(EditorGameHost
     gamelib/animation.cpp
     gamelib/entity.cpp
     gamelib/scene.cpp
+    gamelib/types.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h
@@ -408,6 +413,7 @@ add_library(GameEngine SHARED
     graphics/opengl_es2_device.cpp
     gamelib/physics.cpp
     gamelib/entity.cpp
+    gamelib/types.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/scene.cpp
@@ -441,6 +447,7 @@ add_library(gamelib_test SHARED
     graphics/opengl_es2_device.cpp
     gamelib/physics.cpp
     gamelib/entity.cpp
+    gamelib/types.cpp
     gamelib/renderer.cpp
     gamelib/animation.cpp
     gamelib/loader.cpp
@@ -488,6 +495,7 @@ add_library(invaders SHARED
     gamelib/homedir.cpp
     gamelib/scene.cpp
     gamelib/entity.cpp
+    gamelib/types.cpp
     gamelib/loader.cpp
     gamelib/main/gamelib.cpp
     wdk/wdk/keys.cpp
@@ -527,6 +535,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         gamelib/animation.cpp
         gamelib/entity.cpp
         gamelib/scene.cpp
+        gamelib/types.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -546,6 +555,7 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/packing.cpp
         gamelib/animation.cpp
         gamelib/entity.cpp
+        gamelib/types.cpp
         gamelib/scene.cpp
         gamelib/loader.cpp
         graphics/drawable.cpp
@@ -577,17 +587,20 @@ add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp  base/ass
 add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
     base/assert.cpp
     gamelib/entity.cpp
+    gamelib/types.cpp
     gamelib/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
 add_executable(unit_test_entity gamelib/unit_test/unit_test_entity.cpp
         base/assert.cpp
         gamelib/animation.cpp
+        gamelib/types.cpp
         gamelib/entity.cpp)
 add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
         base/assert.cpp
         gamelib/scene.cpp
         gamelib/animation.cpp
+        gamelib/types.cpp
         gamelib/entity.cpp)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")

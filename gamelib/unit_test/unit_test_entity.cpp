@@ -263,6 +263,13 @@ void unit_test_entity_class()
         entity.AddAnimationTrack(track);
     }
 
+    {
+        game::ScriptVar something("something", 123, game::ScriptVar::ReadOnly);
+        game::ScriptVar otherthing("other_thing", "jallukola", game::ScriptVar::ReadWrite);
+        entity.AddScriptVar(something);
+        entity.AddScriptVar(otherthing);
+    }
+
     TEST_REQUIRE(entity.GetNumNodes() == 3);
     TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
     TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");
@@ -277,6 +284,10 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetNumTracks() == 2);
     TEST_REQUIRE(entity.FindAnimationTrackByName("test1"));
     TEST_REQUIRE(entity.FindAnimationTrackByName("sdgasg") == nullptr);
+    TEST_REQUIRE(entity.GetNumScriptVars() == 2);
+    TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
+    TEST_REQUIRE(entity.FindScriptVar("foobar") == nullptr);
+    TEST_REQUIRE(entity.FindScriptVar("something"));
 
     // test linking.
     entity.LinkChild(nullptr, entity.FindNodeByName("root"));
@@ -296,6 +307,7 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetHash() == entity.GetHash());
         TEST_REQUIRE(ret->GetNumTracks() == 2);
         TEST_REQUIRE(ret->FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(ret->GetNumScriptVars() == 2);
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 

@@ -49,7 +49,6 @@
 
 namespace game
 {
-
     class RigidBodyItemClass
     {
     public:
@@ -726,6 +725,16 @@ namespace game
 
         FBox GetBoundingBox(const EntityNodeClass* node) const;
 
+        void AddScriptVar(const ScriptVar& var);
+        void AddScriptVar(ScriptVar&& var);
+        void DeleteScriptVar(size_t index);
+        void SetScriptVar(size_t index, const ScriptVar& var);
+        void SetScriptVar(size_t index, ScriptVar&& var);
+        ScriptVar& GetScriptVar(size_t index);
+        ScriptVar* FindScriptVar(const std::string& name);
+        const ScriptVar& GetScriptVar(size_t index) const;
+        const ScriptVar* FindScriptVar(const std::string& name) const;
+
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -736,6 +745,8 @@ namespace game
         { return mNodes.size(); }
         std::size_t GetNumTracks() const
         { return mAnimationTracks.size(); }
+        std::size_t GetNumScriptVars() const
+        { return mScriptVars.size(); }
         std::string GetId() const
         { return mClassId; }
 
@@ -743,6 +754,8 @@ namespace game
         { return mNodes[index]; }
         std::shared_ptr<const AnimationTrackClass> GetSharedAnimationTrackClass(size_t index) const
         { return mAnimationTracks[index]; }
+        std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const
+        { return mScriptVars[index]; }
 
         // Serialize the entity into JSON.
         nlohmann::json ToJson() const;
@@ -763,6 +776,9 @@ namespace game
         // The render tree for hierarchical traversal and
         // transformation of the entity and its nodes.
         RenderTree mRenderTree;
+        // Scripting variables. read-only variables are
+        // shareable with each entity instance.
+        std::vector<std::shared_ptr<ScriptVar>> mScriptVars;
     };
 
     // Collection of arguments for creating a new entity
@@ -915,14 +931,15 @@ namespace game
         // Play a previously recorded (stored in the animation class object)
         // animation track identified by its track id.
         void PlayAnimationById(const std::string& id);
-
         // Returns true if an animation track is still playing.
         bool IsPlaying() const;
-        // Get the current track if any. (when IsPlaying is true)
-        AnimationTrack* GetCurrentTrack()
-        { return mAnimationTrack.get(); }
-        const AnimationTrack* GetCurrentTrack() const
-        { return mAnimationTrack.get(); }
+
+        // Find a scripting variable for read-only access.
+        // Returns nullptr if there was no variable by this name.
+        // Note that the const here only implies that the object
+        // may not change in terms of c++ semantics. The actual *value*
+        // can still be changed as long as the variable is not read only.
+        const ScriptVar* FindScriptVar(const std::string& name) const;
 
         void SetTranslation(const glm::vec2& position)
         { mPosition = position; }
@@ -932,9 +949,14 @@ namespace game
         { mFlags.set(flag, on_off); }
         void SetScale(const glm::vec2& scale);
 
+        // Get the current track if any. (when IsPlaying is true)
+        AnimationTrack* GetCurrentTrack()
+        { return mAnimationTrack.get(); }
+        const AnimationTrack* GetCurrentTrack() const
+        { return mAnimationTrack.get(); }
+
         std::string GetClassId() const
         { return mClass->GetId(); }
-
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
         std::string GetName() const
@@ -971,6 +993,9 @@ namespace game
         std::unique_ptr<AnimationTrack> mAnimationTrack;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
+        // the list of script variables. read-only ones can
+        // be shared between all instances and the EntityClass.
+        std::vector<ScriptVar> mScriptVars;
         // the render tree for hierarchical traversal and transformation
         // of the entity and its nodes.
         RenderTree mRenderTree;

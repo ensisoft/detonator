@@ -98,6 +98,9 @@ namespace gui
         void on_btnNewTrack_clicked();
         void on_btnEditTrack_clicked();
         void on_btnDeleteTrack_clicked();
+        void on_btnNewScriptVar_clicked();
+        void on_btnEditScriptVar_clicked();
+        void on_btnDeleteScriptVar_clicked();
         void on_trackList_itemSelectionChanged();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeIsVisible_stateChanged(int);
@@ -171,6 +174,7 @@ namespace gui
         QMenu* mCustomShapes = nullptr;
     private:
         class PlaceShapeTool;
+        class ScriptVarModel;
         enum class PlayState {
             Playing, Paused, Stopped
         };
@@ -190,6 +194,7 @@ namespace gui
         std::size_t mOriginalHash = 0;
         std::unique_ptr<TreeModel> mRenderTree;
         std::unique_ptr<MouseTool> mCurrentTool;
+        std::unique_ptr<ScriptVarModel> mScriptVarModel;
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mEntityTime   = 0.0;

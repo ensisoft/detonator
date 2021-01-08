@@ -128,6 +128,12 @@ inline void SetList(QComboBox* combo, const QStringList& list)
     combo->addItems(list);
 }
 
+inline void SetValue(QRadioButton* btn, bool value)
+{
+    QSignalBlocker s(btn);
+    btn->setChecked(value);
+}
+
 inline void SetValue(QGroupBox* group, bool on_off)
 {
     QSignalBlocker s(group);
@@ -339,6 +345,13 @@ struct CheckboxGetter
     const QCheckBox* check = nullptr;
 };
 
+struct RadiobuttonGetter
+{
+    operator bool() const
+    { return button->isChecked(); }
+    const QRadioButton* button = nullptr;
+};
+
 struct SpinBoxValueGetter
 {
     operator int() const
@@ -369,6 +382,8 @@ inline SpinBoxValueGetter GetValue(const QSpinBox* spin)
 { return SpinBoxValueGetter { spin }; }
 inline GroupboxValueGetter GetValue(const QGroupBox* box)
 { return GroupboxValueGetter { box }; }
+inline RadiobuttonGetter GetValue(const QRadioButton* button)
+{ return RadiobuttonGetter { button }; }
 
 template<typename Widget, typename Value>
 void GetUIValue(Widget* widget, Value* out)
