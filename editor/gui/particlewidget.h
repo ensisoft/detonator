@@ -86,7 +86,7 @@ namespace gui
         app::Workspace* mWorkspace = nullptr;
         gfx::KinematicsParticleEngineClass mClass;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
-        std::shared_ptr<gfx::Material> mMaterial;
+        std::unique_ptr<gfx::Material> mMaterial;
         bool mPaused = false;
         float mTime  = 0.0f;
     private:

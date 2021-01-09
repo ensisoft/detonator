@@ -92,7 +92,7 @@ namespace gui
         // the current polygon we're editing.
         gfx::PolygonClass mPolygon;
         // the current material for the blueprint (the background image)
-        std::shared_ptr<gfx::Material> mBlueprint;
+        std::unique_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.
         std::vector<QPoint> mPoints;
         // the most current (latest) point is where the mouse

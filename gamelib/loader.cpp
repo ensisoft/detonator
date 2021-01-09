@@ -59,9 +59,7 @@ ClassHandle<const gfx::MaterialClass> ContentLoader::FindMaterialClassById(const
     if (it != std::end(mMaterials))
         return it->second;
 
-    ERROR("No such material class: '%1'", name);
-    // for development purposes return some kind of valid object.
-    return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+    return nullptr;
 }
 
 ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const std::string& name) const
@@ -100,9 +98,7 @@ ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const
             return it->second;
     }
 
-    ERROR("No such drawable: '%1'", name);
-    // for development purposes return some kind of valid object.
-    return std::make_shared<gfx::RectangleClass>();
+    return nullptr;
 }
 
 std::string ContentLoader::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const
@@ -194,7 +190,6 @@ ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassByName(const 
     if (it != mEntityNameTable.end())
         return FindEntityClassById(it->second);
 
-    ERROR("No such entity class: '%1'", name);
     return nullptr;
 }
 ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
@@ -203,7 +198,6 @@ ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassById(const st
     if (it != std::end(mEntities))
         return it->second;
 
-    ERROR("No such entity class '%1'", id);
     return nullptr;
 }
 
@@ -213,7 +207,6 @@ ClassHandle<const SceneClass> ContentLoader::FindSceneClassByName(const std::str
     if (it != mSceneNameTable.end())
         return FindSceneClassById(it->second);
 
-    ERROR("No such scene class '%1'", name);
     return nullptr;
 }
 ClassHandle<const SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
@@ -222,7 +215,6 @@ ClassHandle<const SceneClass> ContentLoader::FindSceneClassById(const std::strin
     if (it != mScenes.end())
         return it->second;
 
-    ERROR("No such scene class '%1'", id);
     return nullptr;
 }
 

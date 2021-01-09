@@ -79,8 +79,14 @@ namespace app
         // QAbstractFileEngineHandler implementation
         virtual QAbstractFileEngine* create(const QString& file) const override;
 
-        std::shared_ptr<gfx::Material> MakeMaterialByName(const QString& name) const;
-        std::shared_ptr<gfx::Drawable> MakeDrawableByName(const QString& name) const;
+        // These are for internal use in the editor and they have different semantics
+        // from the similar functions in the ClassLibrary API. Basically trying to access
+        // an object that doesn't exist is considered a *bug*. Whereas the ClassLibrary methods
+        // allow for access to an object that doesn't exist and simply return nullptr. It's
+        // then the responsibility of the caller to determine whether that is a bug or okay
+        // condition or what.
+        std::unique_ptr<gfx::Material> MakeMaterialByName(const QString& name) const;
+        std::unique_ptr<gfx::Drawable> MakeDrawableByName(const QString& name) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const QString& name) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const char* name) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const QString& name) const;
@@ -89,12 +95,14 @@ namespace app
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
 
         // ClassLibrary implementation
-        virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        // The methods here allow requests for resources that don't exist and return
+        // nullptr as specified in the ClassLibrary API.
+        virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual game::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual game::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
         virtual void LoadFromFile(const std::string&, const std::string&) override
         {}
 

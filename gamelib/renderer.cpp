@@ -295,27 +295,26 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
             const auto& drawable = item->GetDrawableId();
             auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
             paint_node.visited = true;
-            if (!paint_node.material || paint_node.material_class_id != material)
+            if (paint_node.material_class_id != material)
             {
                 paint_node.material.reset();
-                paint_node.material_class_id.clear();
-                if (!material.empty())
-                {
-                    auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
+                paint_node.material_class_id = material;
+                auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
+                if (klass)
                     paint_node.material = gfx::CreateMaterialInstance(klass);
-                    paint_node.material_class_id = material;
-                }
+                if (!paint_node.material)
+                    WARN("No such material class '%1' found for node '%2' ('%3')", material, node->GetId(), node->GetName());
             }
-            if (!paint_node.drawable || paint_node.drawable_class_id != drawable)
+            if (paint_node.drawable_class_id != drawable)
             {
                 paint_node.drawable.reset();
-                paint_node.drawable_class_id.clear();
-                if (!drawable.empty())
-                {
-                    auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
+                paint_node.drawable_class_id = drawable;
+
+                auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
+                if (klass)
                     paint_node.drawable = gfx::CreateDrawableInstance(klass);
-                    paint_node.drawable_class_id = drawable;
-                }
+                if (!paint_node.drawable)
+                    WARN("No such drawable class '%1' found for node '%2' ('%3')", drawable, node->GetId(), node->GetName());
             }
             if (paint_node.material)
             {

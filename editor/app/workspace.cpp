@@ -596,12 +596,12 @@ QAbstractFileEngine* Workspace::create(const QString& file) const
     return new QFSFileEngine(ret);
 }
 
-std::shared_ptr<gfx::Material> Workspace::MakeMaterialByName(const QString& name) const
+std::unique_ptr<gfx::Material> Workspace::MakeMaterialByName(const QString& name) const
 {
     return gfx::CreateMaterialInstance(GetMaterialClassByName(name));
 
 }
-std::shared_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const QString& name) const
+std::unique_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const QString& name) const
 {
     return gfx::CreateDrawableInstance(GetDrawableClassByName(name));
 }
@@ -616,8 +616,8 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(cons
             continue;
         return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for a material that doesn't exist: '%1'", name);
-    return GetMaterialClassByName(QString("Checkerboard"));
+    BUG("No such material class.");
+    return nullptr;
 }
 
 std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const char* name) const
@@ -643,8 +643,8 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
         else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for a drawable that doesn't exist: '%1'", name);
-    return std::make_shared<gfx::RectangleClass>();
+    BUG("No such drawable class.");
+    return nullptr;
 }
 std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const char* name) const
 {
@@ -662,6 +662,7 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const Q
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
+    BUG("No such entity class.");
     return nullptr;
 }
 std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QString& id) const
@@ -674,10 +675,11 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
+    BUG("No such entity class.");
     return nullptr;
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
+game::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
     for (const auto& resource : mResources)
     {
@@ -687,43 +689,11 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::FindMaterialClassById(const
             continue;
         return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for a material that doesn't exist: '%1'", klass);
-    return FindMaterialClassById(std::string("_checkerboard"));
+    return nullptr;
 }
 
-std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
+game::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
 {
-    //            == About resource loading ==
-    // User defined resources have a combination of type and name
-    // where type is the underlying class type and name identifies
-    // the set of resources that the user edits that instances of that
-    // said type then use.
-    // Primitive / (non user defined resources) don't need a name
-    // since the name is irrelevant since the objects are stateless
-    // in this sense and don't have properties that would change between instances.
-    // For example with drawable rectangles (gfx::Rectangle) all rectangles
-    // that we might want to draw are basically the same. We don't need to
-    // configure each rectangle object with properties that would distinguish
-    // it from other rectangles.
-    // In fact there's basically even no need to create more than 1 instance
-    // of such resource and then share it between all users.
-    //
-    // User defined resources on the other hand *can be* unique.
-    // For example particle engines, the underlying object type is same for
-    // particle engine A and B, but their defining properties are completely
-    // different. To distinguish the set of properties the system gives each
-    // particle engine a unique "class id". The class is then used to identify
-    // the class object instance.
-    // Additionally the resources may or may not be
-    // shared. For example when a fleet of alien spaceships are rendered
-    // each spaceship might have their own particle engine (own simulation state)
-    // thus producing a unique rendering for each spaceship. However the problem
-    // is that this might be computationally heavy. For N ships we'd need to do
-    // N particle engine simulations.
-    // However it's also possible that the particle engines are shared and each
-    // ship (of the same type) just refers to the same particle engine. Then
-    // each ship will render the same particle stream.
-
     for (const auto& resource : mResources)
     {
         if (resource->GetIdUtf8() != klass)
@@ -736,11 +706,10 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::FindDrawableClassById(const
         else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for a drawable that doesn't exist: '%1'", klass);
-    return std::make_shared<gfx::RectangleClass>();
+    return nullptr;
 }
 
-std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
+game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
 {
     for (const auto& resource : mResources)
     {
@@ -750,10 +719,9 @@ std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassByName(const 
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for an entity that doesn't exist: '%1'", name);
     return nullptr;
 }
-std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
+game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -763,11 +731,10 @@ std::shared_ptr<const game::EntityClass> Workspace::FindEntityClassById(const st
             continue;
         return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for an entity that doesn't exist: '%1'", id);
     return nullptr;
 }
 
-std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
+game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
 {
     std::shared_ptr<game::SceneClass> ret;
     for (auto& resource : mResources)
@@ -780,20 +747,20 @@ std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const st
         break;
     }
     if (!ret)
-    {
-        ERROR("Request for a scene that doesn't exist: '%1'", name);
         return nullptr;
-    }
 
+    // resolve entity references.
     for (size_t i=0; i<ret->GetNumNodes(); ++i)
     {
         auto& node = ret->GetNode(i);
         auto klass = FindEntityClassById(node.GetEntityId());
         if (!klass)
         {
+            const auto& node_id    = node.GetId();
             const auto& node_name  = node.GetName();
             const auto& node_entity_id = node.GetEntityId();
-            ERROR("Scene node '%1/'%2'' refers to entity '%3' that is not found.", name, node_name, node_entity_id);
+            WARN("Scene '%1' node '%2' ('%2') refers to entity '%3' that is not found.",
+                 name, node_id, node_name, node_entity_id);
         }
         else
         {
@@ -802,18 +769,39 @@ std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassByName(const st
     }
     return ret;
 }
-std::shared_ptr<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
+game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
 {
+    std::shared_ptr<game::SceneClass> ret;
     for (const auto& resource : mResources)
     {
         if (resource->GetType() != Resource::Type::Scene)
             continue;
         else if (resource->GetIdUtf8() != id)
             continue;
-        return ResourceCast<game::SceneClass>(*resource).GetSharedResource();
+        ret = ResourceCast<game::SceneClass>(*resource).GetSharedResource();
     }
-    ERROR("Request for a scene that doesn't exist: '%1'", id);
-    return nullptr;
+    if (!ret)
+        return nullptr;
+
+    // resolve entity references.
+    for (size_t i=0; i<ret->GetNumNodes(); ++i)
+    {
+        auto& node = ret->GetNode(i);
+        auto klass = FindEntityClassById(node.GetEntityId());
+        if (!klass)
+        {
+            const auto& node_id    = node.GetId();
+            const auto& node_name  = node.GetName();
+            const auto& node_entity_id = node.GetEntityId();
+            WARN("Scene '%1' node '%2' ('%3') refers to entity '%3' that is not found.",
+                 id, node_id, node_name, node_entity_id);
+        }
+        else
+        {
+            node.SetEntity(klass);
+        }
+    }
+    return ret;
 }
 
 std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const
