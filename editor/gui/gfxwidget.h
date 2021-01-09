@@ -161,21 +161,6 @@ namespace gui
         GfxWidget(QWidget* parent);
        ~GfxWidget();
 
-        void dispose();
-
-        void reloadShaders()
-        {
-            mWindow->reloadShaders();
-        }
-        void reloadTextures()
-        {
-            mWindow->reloadTextures();
-        }
-
-        void triggerPaint()
-        {
-            mWindow->triggerPaint();
-        }
         bool haveVSYNC() const
         { return mWindow->haveVSYNC(); }
         float getCurrentFPS() const
@@ -207,6 +192,13 @@ namespace gui
         // zoom in/out callbacks
         std::function<void ()> onZoomIn;
         std::function<void ()> onZoomOut;
+
+    public slots:
+        void dispose();
+        void reloadShaders();
+        void reloadTextures();
+        void triggerPaint();
+
     private:
         void showColorDialog();
         void translateZoomInOut(QWheelEvent* event);

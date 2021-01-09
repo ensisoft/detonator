@@ -54,8 +54,6 @@ namespace gui
         void on_noiseAmplitude_valueChanged();
         void on_noiseFrequency_valueChanged();
         void on_cmbNoiseLayers_currentIndexChanged(int);
-        void finished();
-        void timer();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
     private:

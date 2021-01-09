@@ -48,9 +48,9 @@ DlgBitmap::DlgBitmap(QWidget* parent, std::unique_ptr<gfx::IBitmapGenerator> gen
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, this, &DlgBitmap::finished);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
     // render on timer
-    connect(&mTimer, &QTimer::timeout, this, &DlgBitmap::timer);
+    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
 
     mUI.widget->onPaintScene = std::bind(&DlgBitmap::PaintScene,
                                          this, std::placeholders::_1, std::placeholders::_2);
@@ -77,16 +77,6 @@ DlgBitmap::DlgBitmap(QWidget* parent, std::unique_ptr<gfx::IBitmapGenerator> gen
 
         on_cmbNoiseLayers_currentIndexChanged(mUI.cmbNoiseLayers->currentIndex());
     }
-}
-
-void DlgBitmap::finished()
-{
-    mUI.widget->dispose();
-}
-
-void DlgBitmap::timer()
-{
-    mUI.widget->triggerPaint();
 }
 
 void DlgBitmap::on_btnAccept_clicked()

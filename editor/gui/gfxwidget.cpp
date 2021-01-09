@@ -452,6 +452,20 @@ void GfxWidget::dispose()
     DEBUG("Disposed GfxWindow.");
 }
 
+void GfxWidget::reloadShaders()
+{
+    mWindow->reloadShaders();
+}
+void GfxWidget::reloadTextures()
+{
+    mWindow->reloadTextures();
+}
+void GfxWidget::triggerPaint()
+{
+    mWindow->triggerPaint();
+}
+
+
 void GfxWidget::resizeEvent(QResizeEvent* resize)
 {
     // resize the container to be same size as this shim

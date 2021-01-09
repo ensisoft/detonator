@@ -50,9 +50,9 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, this, &DlgText::finished);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
     // render on timer
-    connect(&mTimer, &QTimer::timeout, this, &DlgText::timer);
+    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
 
     mUI.widget->onPaintScene = std::bind(&DlgText::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -111,16 +111,6 @@ void DlgText::on_btnFont_clicked()
 void DlgText::on_btnAdjust_clicked()
 {
     mAdjustOnce = true;
-}
-
-void DlgText::finished()
-{
-    mUI.widget->dispose();
-}
-
-void DlgText::timer()
-{
-    mUI.widget->triggerPaint();
 }
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)
