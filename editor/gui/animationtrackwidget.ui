@@ -561,9 +561,16 @@
             </spacer>
            </item>
            <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Show actuators: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="chkShowMaterialActuators">
              <property name="text">
-              <string>Show material actuators</string>
+              <string>Material</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -573,7 +580,17 @@
            <item>
             <widget class="QCheckBox" name="chkShowTransformActuators">
              <property name="text">
-              <string>Show animatic actuators</string>
+              <string>Animatic</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkShowKinematicActuators">
+             <property name="text">
+              <string>Kinematic</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -704,7 +721,7 @@
               <enum>QFrame::Plain</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>2</number>
              </property>
              <widget class="QWidget" name="transformActuator">
               <layout class="QGridLayout" name="gridLayout_5">
@@ -1007,6 +1024,115 @@
                </item>
               </layout>
              </widget>
+             <widget class="QWidget" name="kinematicActuator">
+              <layout class="QGridLayout" name="gridLayout_6">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_27">
+                 <property name="text">
+                  <string>Interpolation</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" colspan="2">
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QDoubleSpinBox" name="kinematicEndVeloX">
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.100000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="kinematicEndVeloY">
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.100000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Linear velocity (m/2)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Angular velocity (rad/s)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="2" colspan="2">
+                <widget class="QDoubleSpinBox" name="kinematicEndVeloZ">
+                 <property name="minimum">
+                  <double>-1000.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000.000000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="stepType">
+                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                 </property>
+                 <property name="value">
+                  <double>0.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2" colspan="2">
+                <widget class="QComboBox" name="kinematicInterpolation">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </widget>
            </item>
           </layout>
@@ -1145,6 +1271,11 @@
     <string>Material</string>
    </property>
   </action>
+  <action name="actionAddKinematicActuator">
+   <property name="text">
+    <string>Kinematic</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1187,6 +1318,7 @@
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowMaterialActuators</tabstop>
   <tabstop>chkShowTransformActuators</tabstop>
+  <tabstop>chkShowKinematicActuators</tabstop>
   <tabstop>actuatorNode</tabstop>
   <tabstop>actuatorType</tabstop>
   <tabstop>actuatorStartTime</tabstop>
@@ -1204,6 +1336,10 @@
   <tabstop>btnTransformReset</tabstop>
   <tabstop>materialInterpolation</tabstop>
   <tabstop>materialEndAlpha</tabstop>
+  <tabstop>kinematicInterpolation</tabstop>
+  <tabstop>kinematicEndVeloX</tabstop>
+  <tabstop>kinematicEndVeloY</tabstop>
+  <tabstop>kinematicEndVeloZ</tabstop>
   <tabstop>btnAddActuator</tabstop>
  </tabstops>
  <resources>

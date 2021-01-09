@@ -37,6 +37,43 @@
 namespace game
 {
 
+std::size_t KinematicActuatorClass::GetHash() const
+{
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mInterpolation);
+    hash = base::hash_combine(hash, mStartTime);
+    hash = base::hash_combine(hash, mDuration);
+    hash = base::hash_combine(hash, mEndLinearVelocity);
+    hash = base::hash_combine(hash, mEndAngularVelocity);
+    return hash;
+}
+
+nlohmann::json KinematicActuatorClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "node", mNodeId);
+    base::JsonWrite(json, "method", mInterpolation);
+    base::JsonWrite(json, "starttime", mStartTime);
+    base::JsonWrite(json, "duration", mDuration);
+    base::JsonWrite(json, "linear_velocity", mEndLinearVelocity);
+    base::JsonWrite(json, "angular_velocity", mEndAngularVelocity);
+    return json;
+}
+
+bool KinematicActuatorClass::FromJson(const nlohmann::json &json)
+{
+    return base::JsonReadSafe(json, "id", &mId) &&
+           base::JsonReadSafe(json, "node", &mNodeId) &&
+           base::JsonReadSafe(json, "method", &mInterpolation) &&
+           base::JsonReadSafe(json, "starttime", &mStartTime) &&
+           base::JsonReadSafe(json, "duration", &mDuration) &&
+           base::JsonReadSafe(json, "linear_velocity", &mEndLinearVelocity) &&
+           base::JsonReadSafe(json, "angular_velocity", &mEndAngularVelocity);
+}
+
 size_t MaterialActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
@@ -71,7 +108,7 @@ bool MaterialActuatorClass::FromJson(const nlohmann::json &json)
            base::JsonReadSafe(json, "alpha", &mEndAlpha);
 }
 
-nlohmann::json TransformActuatorClass::ToJson() const
+nlohmann::json AnimaticActuatorClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "id", mId);
@@ -86,7 +123,7 @@ nlohmann::json TransformActuatorClass::ToJson() const
     return json;
 }
 
-bool TransformActuatorClass::FromJson(const nlohmann::json& json)
+bool AnimaticActuatorClass::FromJson(const nlohmann::json& json)
 {
     return base::JsonReadSafe(json, "id", &mId) &&
            base::JsonReadSafe(json, "node", &mNodeId) &&
@@ -99,7 +136,7 @@ bool TransformActuatorClass::FromJson(const nlohmann::json& json)
            base::JsonReadSafe(json, "method",    &mInterpolation);
 }
 
-std::size_t TransformActuatorClass::GetHash() const
+std::size_t AnimaticActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -112,6 +149,45 @@ std::size_t TransformActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mEndScale);
     hash = base::hash_combine(hash, mEndRotation);
     return hash;
+}
+
+void KinematicActuator::Start(EntityNode& node)
+{
+    if (const auto* body = node.GetRigidBody())
+    {
+        mStartLinearVelocity  = body->GetLinearVelocity();
+        mStartAngularVelocity = body->GetAngularVelocity();
+        if (body->GetSimulation() != RigidBodyItemClass::Simulation::Kinematic)
+        {
+            WARN("EntityNode '%1' is not kinematically simulated.", node.GetName());
+            WARN("Kinematic actuator will have no effect.");
+        }
+    }
+    else
+    {
+        WARN("EntityNode '%1' doesn't have a rigid body item.", node.GetName());
+        WARN("Kinematic actuator will have no effect.");
+    }
+}
+void KinematicActuator::Apply(EntityNode& node, float t)
+{
+    if (auto* body = node.GetRigidBody())
+    {
+        const auto method = mClass->GetInterpolation();
+        const auto linear_velocity = math::interpolate(mStartLinearVelocity, mClass->GetEndLinearVelocity(), t, method);
+        const auto angular_velocity = math::interpolate(mStartAngularVelocity, mClass->GetEndAngularVelocity(), t, method);
+        body->SetLinearVelocity(linear_velocity);
+        body->SetAngularVelocity(angular_velocity);
+    }
+}
+
+void KinematicActuator::Finish(EntityNode& node)
+{
+    if (auto* body = node.GetRigidBody())
+    {
+        body->SetLinearVelocity(mClass->GetEndLinearVelocity());
+        body->SetAngularVelocity(mClass->GetEndAngularVelocity());
+    }
 }
 
 void MaterialActuator::Start(EntityNode& node)
@@ -237,10 +313,12 @@ std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) 
 {
     const auto& klass = mActuators[i];
     if (klass->GetType() == ActuatorClass::Type::Animatic)
-        return std::make_unique<AnimaticActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
+        return std::make_unique<AnimaticActuator>(std::static_pointer_cast<AnimaticActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::Material)
         return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
-    BUG("Unknown actuator type");
+    else if (klass->GetType() == ActuatorClass::Type::Kinematic)
+        return std::make_unique<KinematicActuator>(std::static_pointer_cast<KinematicActuatorClass>(klass));
+    else BUG("Unknown actuator type");
     return {};
 }
 
@@ -292,9 +370,11 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
             return std::nullopt;
         std::shared_ptr<ActuatorClass> actuator;
         if (type == ActuatorClass::Type::Animatic)
-            actuator = std::make_shared<TransformActuatorClass>();
+            actuator = std::make_shared<AnimaticActuatorClass>();
         else if (type == ActuatorClass::Type::Material)
             actuator = std::make_shared<MaterialActuatorClass>();
+        else if (type == ActuatorClass::Type::Kinematic)
+            actuator = std::make_shared<KinematicActuatorClass>();
         else BUG("Unknown actuator type.");
 
         if (!actuator->FromJson(obj["actuator"]))

@@ -84,6 +84,8 @@ namespace gui
         void on_actionClearActuators_triggered();
         void on_actionAddAnimaticActuator_triggered();
         void on_actionAddMaterialActuator_triggered();
+        void on_actionAddKinematicActuator_triggered();
+
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
@@ -100,6 +102,7 @@ namespace gui
         void on_actuatorType_currentIndexChanged(int index);
         void on_transformInterpolation_currentIndexChanged(int index);
         void on_materialInterpolation_currentIndexChanged(int index);
+        void on_kinematicInterpolation_currentIndexChanged(int index);
         void on_transformEndPosX_valueChanged(double value);
         void on_transformEndPosY_valueChanged(double value);
         void on_transformEndSizeX_valueChanged(double value);
@@ -108,8 +111,12 @@ namespace gui
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
         void on_materialEndAlpha_valueChanged(double value);
+        void on_kinematicEndVeloX_valueChanged(double value);
+        void on_kinematicEndVeloY_valueChanged(double value);
+        void on_kinematicEndVeloZ_valueChanged(double value);
         void on_chkShowMaterialActuators_stateChanged(int);
         void on_chkShowTransformActuators_stateChanged(int);
+        void on_chkShowKinematicActuators_stateChanged(int);
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
     private:
@@ -121,6 +128,9 @@ namespace gui
         bool KeyPress(QKeyEvent* key);
         void UpdateTransformActuatorUI();
         void SetSelectedActuatorProperties();
+        void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
+        void AddActuator(const game::EntityNodeClass& node, game::ActuatorClass::Type type,
+                         float start_time, float duration);
         game::EntityNode* GetCurrentNode();
     private:
         Ui::AnimationTrack mUI;
@@ -145,6 +155,7 @@ namespace gui
             std::shared_ptr<game::AnimationTrackClass> track;
             bool show_material_actuators = true;
             bool show_transform_actuators = true;
+            bool show_kinematic_actuators = true;
         } mState;
         // Current time accumulator.
         float mCurrentTime = 0.0f;

@@ -43,19 +43,103 @@ bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
            real::equals(lhs.y, rhs.y);
 }
 
-void unit_test_animation_transform_actuator()
+void unit_test_kinematic_actuator()
 {
-    game::TransformActuatorClass act;
+    game::KinematicActuatorClass klass;
+    klass.SetNodeId("1234");
+    klass.SetStartTime(0.1f);
+    klass.SetDuration(0.5f);
+    klass.SetInterpolation(game::AnimaticActuatorClass::Interpolation::Cosine);
+    klass.SetEndAngularVelocity(3.0f);
+    klass.SetEndLinearVelocity(glm::vec2(1.0f, 2.0f));
+
+    TEST_REQUIRE(klass.GetInterpolation()       == game::AnimaticActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(klass.GetNodeId()              == "1234");
+    TEST_REQUIRE(klass.GetStartTime()           == real::float32(0.1f));
+    TEST_REQUIRE(klass.GetDuration()            == real::float32(0.5f));
+    TEST_REQUIRE(klass.GetEndLinearVelocity()   == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(klass.GetEndAngularVelocity()  == real::float32(3.0f));
+
+    // serialize
+    {
+        game::KinematicActuatorClass copy;
+        TEST_REQUIRE(copy.FromJson(klass.ToJson()));
+        TEST_REQUIRE(copy.GetInterpolation()       == game::AnimaticActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetNodeId()              == "1234");
+        TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetEndLinearVelocity()   == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(copy.GetEndAngularVelocity()  == real::float32(3.0f));
+        TEST_REQUIRE(copy.GetId()   == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+    }
+
+    // copy assignment and copy ctor
+    {
+        game::KinematicActuatorClass copy(klass);
+        TEST_REQUIRE(copy.GetInterpolation()       == game::AnimaticActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetNodeId()              == "1234");
+        TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetEndLinearVelocity()   == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(copy.GetEndAngularVelocity()  == real::float32(3.0f));
+        TEST_REQUIRE(copy.GetId()   == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        copy = klass;
+        TEST_REQUIRE(copy.GetId()   == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+    }
+
+    // copy and clone
+    {
+        auto copy = klass.Copy();
+        TEST_REQUIRE(copy->GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy->GetId()   == klass.GetId());
+        auto clone = klass.Clone();
+        TEST_REQUIRE(clone->GetHash()  != klass.GetHash());
+        TEST_REQUIRE(clone->GetId()    != klass.GetId());
+    }
+
+    // instance
+    {
+        game::KinematicActuator instance(klass);
+
+        game::EntityNodeClass klass;
+        game::RigidBodyItemClass body;
+        body.SetLinearVelocity(glm::vec2(0.0f, 1.0f));
+        body.SetAngularVelocity(5.0f);
+        klass.SetRigidBody(body);
+
+        // create node instance
+        game::EntityNode node(klass);
+
+        // start based on the node.
+        instance.Start(node);
+
+        instance.Apply(node, 1.0f);
+        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity() == real::float32(3.0f));
+
+        instance.Apply(node, 0.0f);
+        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(0.0f, 1.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity() == real::float32(5.0f));
+
+    }
+}
+
+void unit_test_animatic_actuator()
+{
+    game::AnimaticActuatorClass act;
     act.SetNodeId("123");
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
-    act.SetInterpolation(game::TransformActuatorClass::Interpolation::Cosine);
+    act.SetInterpolation(game::AnimaticActuatorClass::Interpolation::Cosine);
     act.SetEndPosition(glm::vec2(100.0f, 50.0f));
     act.SetEndSize(glm::vec2(5.0f, 6.0f));
     act.SetEndScale(glm::vec2(3.0f, 8.0f));
     act.SetEndRotation(1.5f);
 
-    TEST_REQUIRE(act.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(act.GetInterpolation() == game::AnimaticActuatorClass::Interpolation::Cosine);
     TEST_REQUIRE(act.GetNodeId()        == "123");
     TEST_REQUIRE(act.GetStartTime()     == real::float32(0.1f));
     TEST_REQUIRE(act.GetDuration()      == real::float32(0.5f));
@@ -66,9 +150,9 @@ void unit_test_animation_transform_actuator()
 
     // serialize
     {
-        game::TransformActuatorClass copy;
+        game::AnimaticActuatorClass copy;
         copy.FromJson(act.ToJson());
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::AnimaticActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -85,7 +169,7 @@ void unit_test_animation_transform_actuator()
         auto copy(act);
         TEST_REQUIRE(copy.GetHash() == act.GetHash());
         TEST_REQUIRE(copy.GetId()   == act.GetId());
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::AnimaticActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -173,11 +257,11 @@ void unit_test_animation_track()
     TEST_REQUIRE(track.GetDuration() == real::float32(10.0f));
     TEST_REQUIRE(track.GetNumActuators() == 0);
 
-    game::TransformActuatorClass act;
+    game::AnimaticActuatorClass act;
     act.SetNodeId(node.GetClassId());
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
-    act.SetInterpolation(game::TransformActuatorClass::Interpolation::Cosine);
+    act.SetInterpolation(game::AnimaticActuatorClass::Interpolation::Cosine);
     act.SetEndPosition(glm::vec2(100.0f, 50.0f));
     act.SetEndSize(glm::vec2(5.0f, 6.0f));
     act.SetEndScale(glm::vec2(3.0f, 8.0f));
@@ -241,7 +325,8 @@ void unit_test_animation_track()
 
 int test_main(int argc, char* argv[])
 {
-    unit_test_animation_transform_actuator();
+    unit_test_animatic_actuator();
+    unit_test_kinematic_actuator();
     unit_test_animation_track();
     return 0;
 }

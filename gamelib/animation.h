@@ -56,6 +56,11 @@ namespace game
             // Animatic actuators modify the transform state of the node
             // i.e. the translation, scale and rotation variables directly.
             Animatic,
+            // Kinematic actuators modify the kinematic physics properties
+            // for example, linear or angular velocity, of the node's rigid body.
+            // This will result in a kinematically driven change in the nodes
+            // transform.
+            Kinematic,
             // Material actuators modify the material instance state/parameters
             // of some particular animation node.
             Material
@@ -89,6 +94,73 @@ namespace game
         // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const nlohmann::json& object) = 0;
     private:
+    };
+
+    // Modify the kinematic physics body properties, i.e.
+    // the instantaneous linear and angular velocities.
+    class KinematicActuatorClass : public ActuatorClass
+    {
+    public:
+        // The interpolation method.
+        using Interpolation = math::Interpolation;
+
+        KinematicActuatorClass()
+        { mId = base::RandomString(10); }
+        Interpolation GetInterpolation() const
+        { return mInterpolation; }
+        void SetInterpolation(Interpolation method)
+        { mInterpolation = method; }
+        glm::vec2 GetEndLinearVelocity() const
+        { return mEndLinearVelocity; }
+        float GetEndAngularVelocity() const
+        { return mEndAngularVelocity;}
+        void SetEndLinearVelocity(const glm::vec2 velocity)
+        { mEndLinearVelocity = velocity; }
+        void SetEndAngularVelocity(float velocity)
+        { mEndAngularVelocity = velocity; }
+        void SetNodeId(const std::string& id)
+        { mNodeId = id; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetNodeId() const override
+        { return mNodeId; }
+        virtual std::size_t GetHash() const override;
+        virtual std::unique_ptr<ActuatorClass> Copy() const override
+        { return std::make_unique<KinematicActuatorClass>(*this); }
+        virtual std::unique_ptr<ActuatorClass> Clone() const override
+        {
+            auto ret = std::make_unique<KinematicActuatorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual Type GetType() const override
+        { return Type::Kinematic; }
+        virtual float GetStartTime() const override
+        { return mStartTime; }
+        virtual float GetDuration() const override
+        { return mDuration; }
+        virtual void SetStartTime(float start) override
+        { mStartTime = start; }
+        virtual void SetDuration(float duration) override
+        { mDuration = duration; }
+        virtual nlohmann::json ToJson() const override;
+        virtual bool FromJson(const nlohmann::json& json) override;
+
+    private:
+        // id of the actuator.
+        std::string mId;
+        // id of the node that the action will be applied on.
+        std::string mNodeId;
+        // the interpolation method to be used.
+        Interpolation mInterpolation = Interpolation::Linear;
+        // Normalized start time of the action
+        float mStartTime = 0.0f;
+        // Normalized duration of the action.
+        float mDuration = 1.0f;
+        // The ending linear velocity in meters per second.
+        glm::vec2 mEndLinearVelocity = {0.0f, 0.0f};
+        // The ending angular velocity in radians per second.
+        float mEndAngularVelocity = 0.0f;
     };
 
     // MaterialActuatorClass holds the data to change a node's
@@ -155,15 +227,15 @@ namespace game
 
     // TransformActuatorClass holds the transform data for some
     // particular type of linear transform of a node.
-    class TransformActuatorClass : public ActuatorClass
+    class AnimaticActuatorClass : public ActuatorClass
     {
     public:
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        TransformActuatorClass()
+        AnimaticActuatorClass()
         { mId = base::RandomString(10); }
-        TransformActuatorClass(const std::string& node) : mNodeId(node)
+        AnimaticActuatorClass(const std::string& node) : mNodeId(node)
         { mId = base::RandomString(10); }
         virtual Type GetType() const override
         { return Type::Animatic; }
@@ -214,10 +286,10 @@ namespace game
         virtual std::size_t GetHash() const override;
 
         virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<TransformActuatorClass>(*this); }
+        { return std::make_unique<AnimaticActuatorClass>(*this); }
         virtual std::unique_ptr<ActuatorClass> Clone() const override
         {
-            auto ret = std::make_unique<TransformActuatorClass>(*this);
+            auto ret = std::make_unique<AnimaticActuatorClass>(*this);
             ret->mId = base::RandomString(10);
             return ret;
         }
@@ -268,6 +340,36 @@ namespace game
     private:
     };
 
+    class KinematicActuator : public Actuator
+    {
+    public:
+        KinematicActuator(const std::shared_ptr<const KinematicActuatorClass>& klass)
+          : mClass(klass)
+        {}
+        KinematicActuator(const KinematicActuatorClass& klass)
+          : mClass(std::make_shared<KinematicActuatorClass>(klass))
+        {}
+        KinematicActuator(KinematicActuatorClass&& klass)
+          : mClass(std::make_shared<KinematicActuatorClass>(std::move(klass)))
+        {}
+        virtual void Start(EntityNode& node) override;
+        virtual void Apply(EntityNode& node, float t) override;
+        virtual void Finish(EntityNode& node) override;
+
+        virtual float GetStartTime() const override
+        { return mClass->GetStartTime(); }
+        virtual float GetDuration() const override
+        { return mClass->GetDuration(); }
+        virtual std::string GetNodeId() const override
+        { return mClass->GetNodeId(); }
+        virtual std::unique_ptr<Actuator> Copy() const override
+        { return std::make_unique<KinematicActuator>(*this); }
+    private:
+        std::shared_ptr<const KinematicActuatorClass> mClass;
+        glm::vec2 mStartLinearVelocity = {0.0f, 0.0f};
+        float mStartAngularVelocity = 0.0f;
+    };
+
     // Apply a material change on a node's material instance.
     // todo: refactor the API for material actuator so that the
     // change is applied on a gfx::Material. The material lives
@@ -306,11 +408,11 @@ namespace game
     class AnimaticActuator : public Actuator
     {
     public:
-        AnimaticActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
+        AnimaticActuator(const std::shared_ptr<const AnimaticActuatorClass>& klass)
             : mClass(klass)
         {}
-        AnimaticActuator(const TransformActuatorClass& klass)
-            : mClass(std::make_shared<TransformActuatorClass>(klass))
+        AnimaticActuator(const AnimaticActuatorClass& klass)
+            : mClass(std::make_shared<AnimaticActuatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -325,7 +427,7 @@ namespace game
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<AnimaticActuator>(*this); }
     private:
-        std::shared_ptr<const TransformActuatorClass> mClass;
+        std::shared_ptr<const AnimaticActuatorClass> mClass;
         // The starting state for the transformation.
         // the transform actuator will then interpolate between the
         // current starting and expected ending state.
