@@ -912,7 +912,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             mApp->OnRenderingSurfaceResized(width, height);
 
             // try to give the keyboard focus to the window
-            //mSurface->requestActivate();
+            QTimer::singleShot(100, this, &PlayWindow::ActivateWindow);
             return true;
         }
     }
