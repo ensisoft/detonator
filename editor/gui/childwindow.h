@@ -68,7 +68,7 @@ namespace gui
         void RefreshUI();
         // Animate/update the underlying widget and it's simulations
         // if any.
-        void Animate(double dt);
+        void Update(double dt);
 
         void Render();
 

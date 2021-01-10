@@ -92,7 +92,7 @@ void ChildWindow::RefreshUI()
     mUI.actionZoomOut->setEnabled(mWidget->CanZoomOut());
 }
 
-void ChildWindow::Animate(double secs)
+void ChildWindow::Update(double secs)
 {
     if (mPopInRequested || mClosed)
         return;

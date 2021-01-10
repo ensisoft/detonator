@@ -607,7 +607,7 @@ void MainWindow::iterateGameLoop()
         }
         for (auto* child : mChildWindows)
         {
-            child->Animate(time_step);
+            child->Update(time_step);
         }
 
         if (mPlayWindow)
