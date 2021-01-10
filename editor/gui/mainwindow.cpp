@@ -594,8 +594,12 @@ void MainWindow::showWindow()
 
 void MainWindow::iterateGameLoop()
 {
+    if (!mWorkspace)
+        return;
+
     const auto elapsed_since = ElapsedSeconds();
-    const auto time_step = 1.0/60.0;
+    const auto& settings = mWorkspace->GetProjectSettings();
+    const auto time_step = 1.0 / settings.updates_per_second;
 
     mTimeAccum += elapsed_since;
 
