@@ -982,7 +982,8 @@ void Entity::Update(float dt)
     if (!mAnimationTrack->IsComplete())
         return;
 
-    DEBUG("AnimationTrack '%1' completed.", mAnimationTrack->GetName());
+    // spams the log.
+    //DEBUG("AnimationTrack '%1' completed.", mAnimationTrack->GetName());
 
     if (mAnimationTrack->IsLooping())
     {
@@ -1043,7 +1044,8 @@ bool Entity::PlayIdle()
         // WARN("Idle track '%1' was not found.", mClass->GetIdleTrackId());
         return false;
     }
-    DEBUG("Started idle track '%1'", mAnimationTrack->GetName());
+    // spams the log.
+    //DEBUG("Started idle track '%1'", mAnimationTrack->GetName());
     return true;
 }
 
