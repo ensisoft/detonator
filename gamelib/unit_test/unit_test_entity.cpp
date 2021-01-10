@@ -486,10 +486,37 @@ void unit_test_entity_instance()
     // todo: test more of the instance api
 }
 
+void unit_test_entity_clone_track_bug()
+{
+    // cloning an entity class with animation track requires
+    // remapping the node ids.
+    game::EntityNodeClass node;
+    node.SetName("root");
+
+    game::AnimaticActuatorClass actuator;
+    actuator.SetNodeId(node.GetId());
+
+    game::AnimationTrackClass track;
+    track.SetName("test1");
+    track.AddActuator(actuator);
+
+    game::EntityClass klass;
+    klass.AddNode(std::move(node));
+    klass.AddAnimationTrack(track);
+
+    {
+        auto clone = klass.Clone();
+        const auto& cloned_node = clone.GetNode(0);
+        const auto& cloned_track = clone.GetAnimationTrack(0);
+        TEST_REQUIRE(cloned_track.GetActuatorClass(0).GetNodeId() == cloned_node.GetId());
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_entity_node();
     unit_test_entity_class();
     unit_test_entity_instance();
+    unit_test_entity_clone_track_bug();
     return 0;
 }

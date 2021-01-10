@@ -738,7 +738,6 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
 EntityClass EntityClass::Clone() const
 {
     EntityClass ret;
-    ret.mIdleTrackId = mIdleTrackId;
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
     // make a deep copy of the nodes.
@@ -752,7 +751,23 @@ EntityClass EntityClass::Clone() const
     // make a deep copy of the animation tracks
     for (const auto& track : mAnimationTracks)
     {
-        ret.mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(track->Clone()));
+        auto clone = std::make_unique<AnimationTrackClass>(track->Clone());
+        if (track->GetId() == mIdleTrackId)
+            ret.mIdleTrackId = clone->GetId();
+        ret.mAnimationTracks.push_back(std::move(clone));
+    }
+    // remap the actuator node ids.
+    for (auto& track : ret.mAnimationTracks)
+    {
+        for (size_t i=0; i<track->GetNumActuators(); ++i)
+        {
+            auto& actuator = track->GetActuatorClass(i);
+            const auto* source_node = FindNodeById(actuator.GetNodeId());
+            if (source_node == nullptr)
+                continue;
+            const auto* cloned_node = map[source_node];
+            actuator.SetNodeId(cloned_node->GetId());
+        }
     }
 
     for (const auto& var : mScriptVars)

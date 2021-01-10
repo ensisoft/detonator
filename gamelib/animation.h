@@ -88,6 +88,8 @@ namespace game
         virtual void SetStartTime(float start) = 0;
         // Set the new duration value for the actuator.
         virtual void SetDuration(float duration) = 0;
+        // Set the ID of the node affected by this actuator.
+        virtual void SetNodeId(const std::string& id) = 0;
         // Serialize the actuator class object into JSON.
         virtual nlohmann::json ToJson() const = 0;
         // Load the actuator class object state from JSON. Returns true
@@ -118,7 +120,7 @@ namespace game
         { mEndLinearVelocity = velocity; }
         void SetEndAngularVelocity(float velocity)
         { mEndAngularVelocity = velocity; }
-        void SetNodeId(const std::string& id)
+        virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
         virtual std::string GetId() const override
         { return mId; }
@@ -182,7 +184,7 @@ namespace game
         { return mEndAlpha; }
         void SetEndAlpha(float alpha)
         { mEndAlpha = alpha; }
-        void SetNodeId(const std::string& id)
+        virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
         virtual std::string GetId() const override
         { return mId; }
@@ -249,6 +251,8 @@ namespace game
         { mStartTime = math::clamp(0.0f, 1.0f, start); }
         virtual void SetDuration(float duration) override
         { mDuration = math::clamp(0.0f, 1.0f, duration); }
+        virtual void SetNodeId(const std::string& id) override
+        { mNodeId = id; }
         virtual std::string GetId() const override
         { return mId; }
         Interpolation GetInterpolation() const
@@ -262,8 +266,6 @@ namespace game
         float GetEndRotation() const
         { return mEndRotation; }
 
-        void SetNodeId(const std::string& id)
-        { mNodeId = id; }
         void SetInterpolation(Interpolation interp)
         { mInterpolation = interp; }
         void SetEndPosition(const glm::vec2& pos)
@@ -507,6 +509,8 @@ namespace game
         size_t GetNumActuators() const
         { return mActuators.size(); }
 
+        ActuatorClass& GetActuatorClass(size_t i)
+        { return *mActuators[i]; }
         // Get the animation actuator class object at index i.
         const ActuatorClass& GetActuatorClass(size_t i) const
         { return *mActuators[i]; }
