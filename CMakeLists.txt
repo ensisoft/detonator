@@ -193,6 +193,9 @@ add_executable(Editor
     editor/gui/dlgimgpack.ui
     editor/gui/dlgimgpack.h
     editor/gui/dlgimgpack.cpp
+    editor/gui/dlgmaterial.h
+    editor/gui/dlgmaterial.ui
+    editor/gui/dlgmaterial.cpp
     editor/gui/dlgpackage.h
     editor/gui/dlgpackage.ui
     editor/gui/dlgpackage.cpp

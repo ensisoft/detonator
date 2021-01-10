@@ -1117,16 +1117,6 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="1" column="1">
-                        <widget class="QComboBox" name="dsMaterial">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="1" column="0">
                         <widget class="QLabel" name="label_6">
                          <property name="sizePolicy">
@@ -1184,6 +1174,30 @@
                           <string>Layer</string>
                          </property>
                         </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <layout class="QHBoxLayout" name="horizontalLayout_3">
+                         <item>
+                          <widget class="QComboBox" name="dsMaterial">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QToolButton" name="btnSelectMaterial">
+                           <property name="text">
+                            <string>...</string>
+                           </property>
+                           <property name="arrowType">
+                            <enum>Qt::NoArrow</enum>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
                        </item>
                       </layout>
                      </item>
@@ -1827,6 +1841,7 @@
   <tabstop>drawableItem</tabstop>
   <tabstop>dsDrawable</tabstop>
   <tabstop>dsMaterial</tabstop>
+  <tabstop>btnSelectMaterial</tabstop>
   <tabstop>dsRenderPass</tabstop>
   <tabstop>dsLayer</tabstop>
   <tabstop>dsRenderStyle</tabstop>

@@ -49,6 +49,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
+#include "editor/gui/dlgmaterial.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -930,6 +931,21 @@ void EntityWidget::on_btnDeleteScriptVar_clicked()
     const auto vars = mState.entity->GetNumScriptVars();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+}
+
+void EntityWidget::on_btnSelectMaterial_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* drawable = node->GetDrawable())
+        {
+            QString material = app::FromUtf8(drawable->GetMaterialId());
+            DlgMaterial dlg(this, mState.workspace, material);
+            if (dlg.exec() == QDialog::Rejected)
+                return;
+            drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
+        }
+    }
 }
 
 void EntityWidget::on_trackList_itemSelectionChanged()

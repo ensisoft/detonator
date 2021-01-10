@@ -101,6 +101,7 @@ namespace gui
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
+        void on_btnSelectMaterial_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
