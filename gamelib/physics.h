@@ -93,6 +93,11 @@ namespace game
         // Update the scene with the changes from the physics simulation.
         void UpdateScene(Scene& scene);
 
+        // Update a single entity with the changes from the physics simulation.
+        // This is intended to be used when the world is created with a
+        // single entity instance.
+        void UpdateEntity(Entity& entity);
+
         // Tick the physics simulation forward by one time step.
         void Tick();
 
@@ -116,6 +121,17 @@ namespace game
         // sure to set all the desired parameters (such as gravity)
         // before calling this.
         void CreateWorld(const Scene& scene);
+
+        // Initialize the physics world based on a single entity.
+        // This is mostly useful when visualizing the effect of
+        // rigid bodies on the entity and their interaction when
+        // combined with joints. The world is created relative
+        // to the entity's coordinate space, i.e. entity's origin
+        // is the physics world origin.
+        // This will create a new physics world, so you should make
+        // sure to set all the desired physics parameters (such as gravity)
+        // before calling this.
+        void CreateWorld(const Entity& entity);
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.

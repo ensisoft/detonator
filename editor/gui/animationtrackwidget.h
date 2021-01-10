@@ -37,6 +37,7 @@
 #include "gamelib/entity.h"
 #include "gamelib/animation.h"
 #include "gamelib/renderer.h"
+#include "gamelib/physics.h"
 
 namespace gui
 {
@@ -187,6 +188,8 @@ namespace gui
         std::size_t mOriginalHash = 0;
         // Renderer for the animation
         game::Renderer mRenderer;
+        // Physics engine for the animation
+        game::PhysicsEngine mPhysics;
     };
 
     // Functions used to share animation class objects between AnimationTrackWidget

@@ -441,10 +441,13 @@ void AnimationTrackWidget::Update(double secs)
         return;
 
     mPlaybackAnimation->Update(secs);
+    mPhysics.Tick();
+    mPhysics.UpdateEntity(*mPlaybackAnimation);
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
     if (!mPlaybackAnimation->IsPlaying())
     {
+        mPhysics.DeleteAll();
         mPlaybackAnimation.reset();
         mUI.timeline->SetCurrentTime(0.0f);
         mUI.timeline->Update();
@@ -506,10 +509,18 @@ void AnimationTrackWidget::on_actionPlay_triggered()
         return;
     }
 
+    const auto& settings = mWorkspace->GetProjectSettings();
+
     // create new animation instance and play the animation track.
     auto track = game::CreateAnimationTrackInstance(mState.track);
     mPlaybackAnimation = game::CreateEntityInstance(mState.entity);
     mPlaybackAnimation->Play(std::move(track));
+    mPhysics.SetScale(settings.physics_scale);
+    mPhysics.SetGravity(settings.gravity);
+    mPhysics.SetNumVelocityIterations(settings.num_velocity_iterations);
+    mPhysics.SetNumPositionIterations(settings.num_position_iterations);
+    mPhysics.SetTimestep(1.0f / settings.updates_per_second);
+    mPhysics.CreateWorld(*mPlaybackAnimation);
     mPlayState = PlayState::Playing;
 
     mUI.actionPlay->setEnabled(false);

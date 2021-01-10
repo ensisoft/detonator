@@ -90,6 +90,14 @@ void PhysicsEngine::UpdateScene(Scene& scene)
     tree.PreOrderTraverse(visitor);
 }
 
+void PhysicsEngine::UpdateEntity(Entity& entity)
+{
+    gfx::Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
+    transform.Push(entity.GetNodeTransform());
+    UpdateEntity(transform.GetAsMatrix(), entity);
+}
+
 void PhysicsEngine::Tick()
 {
     mWorld->Step(mTimestep, mNumVelocityIterations, mNumPositionIterations);
@@ -181,6 +189,19 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
     tree.PreOrderTraverse(visitor);
 }
 
+void PhysicsEngine::CreateWorld(const Entity& entity)
+{
+    const b2Vec2 gravity(mGravity.x, mGravity.y);
+
+    mNodes.clear();
+    mWorld.reset();
+    mWorld = std::make_unique<b2World>(gravity);
+
+    gfx::Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
+    transform.Push(entity.GetNodeTransform());
+    AddEntity(transform.GetAsMatrix(), entity);
+}
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)

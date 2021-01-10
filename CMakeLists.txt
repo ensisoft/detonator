@@ -154,6 +154,7 @@ add_executable(Editor
     gamelib/entity.cpp
     gamelib/scene.cpp
     gamelib/types.cpp
+    gamelib/physics.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
