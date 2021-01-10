@@ -999,7 +999,7 @@
                  </sizepolicy>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tabDrawable" native="true">
                  <attribute name="title">
@@ -1273,77 +1273,6 @@
                     <layout class="QVBoxLayout" name="verticalLayout_13">
                      <item>
                       <layout class="QGridLayout" name="gridLayout_6">
-                       <item row="2" column="1">
-                        <widget class="QComboBox" name="rbPolygon"/>
-                       </item>
-                       <item row="3" column="1">
-                        <widget class="QDoubleSpinBox" name="rbFriction">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximum">
-                          <double>1.000000000000000</double>
-                         </property>
-                         <property name="singleStep">
-                          <double>0.010000000000000</double>
-                         </property>
-                         <property name="stepType">
-                          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="6" column="0">
-                        <widget class="QLabel" name="label_17">
-                         <property name="text">
-                          <string>Linear damping</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="8" column="1">
-                        <layout class="QHBoxLayout" name="horizontalLayout_4">
-                         <item>
-                          <widget class="QDoubleSpinBox" name="rbLinearVeloX">
-                           <property name="minimum">
-                            <double>-1000.000000000000000</double>
-                           </property>
-                           <property name="maximum">
-                            <double>1000.000000000000000</double>
-                           </property>
-                           <property name="singleStep">
-                            <double>0.100000000000000</double>
-                           </property>
-                           <property name="stepType">
-                            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                           </property>
-                           <property name="value">
-                            <double>0.000000000000000</double>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QDoubleSpinBox" name="rbLinearVeloY">
-                           <property name="minimum">
-                            <double>-1000.000000000000000</double>
-                           </property>
-                           <property name="maximum">
-                            <double>1000.000000000000000</double>
-                           </property>
-                           <property name="singleStep">
-                            <double>0.100000000000000</double>
-                           </property>
-                           <property name="stepType">
-                            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                           </property>
-                           <property name="value">
-                            <double>0.000000000000000</double>
-                           </property>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
                        <item row="0" column="0">
                         <widget class="QLabel" name="label_15">
                          <property name="text">
@@ -1351,39 +1280,36 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="2" column="0">
-                        <widget class="QLabel" name="label_34">
-                         <property name="text">
-                          <string>Polygon</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="7" column="1">
-                        <widget class="QDoubleSpinBox" name="rbDensity">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="6" column="1">
-                        <widget class="QDoubleSpinBox" name="rbLinearDamping">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
+                       <item row="11" column="1">
+                        <widget class="QDoubleSpinBox" name="rbAngularVelo">
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
                          </property>
                          <property name="maximum">
-                          <double>1.000000000000000</double>
+                          <double>1000.000000000000000</double>
                          </property>
                          <property name="singleStep">
-                          <double>0.010000000000000</double>
+                          <double>0.100000000000000</double>
                          </property>
                          <property name="stepType">
                           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                         </property>
+                         <property name="value">
+                          <double>0.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="0">
+                        <widget class="QLabel" name="label_32">
+                         <property name="text">
+                          <string>Restitution</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_30">
+                         <property name="text">
+                          <string>Shape</string>
                          </property>
                         </widget>
                        </item>
@@ -1406,31 +1332,45 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="3" column="0">
-                        <widget class="QLabel" name="label_31">
-                         <property name="text">
-                          <string>Friction</string>
+                       <item row="8" column="1">
+                        <widget class="QDoubleSpinBox" name="rbLinearVeloX">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimum">
+                          <double>-1000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>1000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.100000000000000</double>
+                         </property>
+                         <property name="stepType">
+                          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                         </property>
+                         <property name="value">
+                          <double>0.000000000000000</double>
                          </property>
                         </widget>
                        </item>
-                       <item row="1" column="0">
-                        <widget class="QLabel" name="label_30">
+                       <item row="5" column="0">
+                        <widget class="QLabel" name="label_16">
                          <property name="text">
-                          <string>Shape</string>
+                          <string>Angular damping</string>
                          </property>
                         </widget>
                        </item>
-                       <item row="8" column="0">
-                        <widget class="QLabel" name="label_35">
-                         <property name="text">
-                          <string>Linear velocity (m/s)</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
-                        <widget class="QLabel" name="label_32">
-                         <property name="text">
-                          <string>Restitution</string>
+                       <item row="7" column="1">
+                        <widget class="QDoubleSpinBox" name="rbDensity">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
                          </property>
                         </widget>
                        </item>
@@ -1456,6 +1396,32 @@
                        <item row="1" column="1">
                         <widget class="QComboBox" name="rbShape"/>
                        </item>
+                       <item row="6" column="1">
+                        <widget class="QDoubleSpinBox" name="rbLinearDamping">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximum">
+                          <double>1.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.010000000000000</double>
+                         </property>
+                         <property name="stepType">
+                          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="label_34">
+                         <property name="text">
+                          <string>Polygon</string>
+                         </property>
+                        </widget>
+                       </item>
                        <item row="0" column="1">
                         <widget class="QComboBox" name="rbSimulation">
                          <property name="sizePolicy">
@@ -1466,10 +1432,29 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="5" column="0">
-                        <widget class="QLabel" name="label_16">
+                       <item row="11" column="0">
+                        <widget class="QLabel" name="label_38">
                          <property name="text">
-                          <string>Angular damping</string>
+                          <string>Angular velocity (rad/s)</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QDoubleSpinBox" name="rbFriction">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximum">
+                          <double>1.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.010000000000000</double>
+                         </property>
+                         <property name="stepType">
+                          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                          </property>
                         </widget>
                        </item>
@@ -1480,15 +1465,31 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="9" column="0">
-                        <widget class="QLabel" name="label_38">
+                       <item row="6" column="0">
+                        <widget class="QLabel" name="label_17">
                          <property name="text">
-                          <string>Angular velocity (rad/s)</string>
+                          <string>Linear damping</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QComboBox" name="rbPolygon"/>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QLabel" name="label_31">
+                         <property name="text">
+                          <string>Friction</string>
                          </property>
                         </widget>
                        </item>
                        <item row="9" column="1">
-                        <widget class="QDoubleSpinBox" name="rbAngularVelo">
+                        <widget class="QDoubleSpinBox" name="rbLinearVeloY">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
                          <property name="minimum">
                           <double>-1000.000000000000000</double>
                          </property>
@@ -1503,6 +1504,20 @@
                          </property>
                          <property name="value">
                           <double>0.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="8" column="0">
+                        <widget class="QLabel" name="label_35">
+                         <property name="text">
+                          <string>Linear velocity (m/s) X</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="9" column="0">
+                        <widget class="QLabel" name="label_36">
+                         <property name="text">
+                          <string>Linear velocity (m/s) Y</string>
                          </property>
                         </widget>
                        </item>
