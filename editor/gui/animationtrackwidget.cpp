@@ -560,10 +560,14 @@ void AnimationTrackWidget::on_actionSave_triggered()
 
         // copy it over.
         track = *mState.track;
+        INFO("Saved animation track '%1'", GetValue(mUI.trackName));
+        NOTE("Saved animation track '%1'", GetValue(mUI.trackName));
         return;
     }
     // add a copy
     mState.entity->AddAnimationTrack(*mState.track);
+    INFO("Saved animation track '%1'", GetValue(mUI.trackName));
+    NOTE("Saved animation track '%1'", GetValue(mUI.trackName));
 }
 
 void AnimationTrackWidget::on_actionReset_triggered()
