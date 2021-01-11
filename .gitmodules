@@ -1,3 +1,6 @@
 [submodule "wdk"]
 	path = wdk
 	url = https://github.com/ensisoft/wdk
+[submodule "third_party/QSourceHighlight"]
+	path = third_party/QSourceHighlight
+	url = https://github.com/ensisoft/QSourceHighlite
