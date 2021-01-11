@@ -657,7 +657,21 @@ void MainWindow::iterateGameLoop()
 
 bool MainWindow::haveAcceleratedWindows() const
 {
-    return mUI.mainTab->count() || mChildWindows.size() || mPlayWindow;
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->IsAccelerated())
+            return true;
+    }
+    for (const auto* child : mChildWindows)
+    {
+        if (!child->IsClosed() && child->IsAccelerated())
+            return true;
+    }
+    if (mPlayWindow)
+        return true;
+
+    return false;
 }
 
 void MainWindow::on_mainTab_currentChanged(int index)
@@ -665,7 +679,10 @@ void MainWindow::on_mainTab_currentChanged(int index)
     DEBUG("Main tab current changed %1", index);
 
     if (mCurrentWidget)
+    {
         mCurrentWidget->Deactivate();
+        mUI.statusBarFrame->setVisible(false);
+    }
 
     mCurrentWidget = nullptr;
     mUI.mainToolBar->clear();
@@ -692,6 +709,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mCurrentWidget = widget;
         mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
         mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
+        mUI.statusBarFrame->setVisible(widget->IsAccelerated());
     }
     else
     {
@@ -1769,9 +1787,11 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
         child->show();
 
         mChildWindows.push_back(child);
-
-        emit newAcceleratedWindowOpen();
-        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+        if (child->IsAccelerated())
+        {
+            emit newAcceleratedWindowOpen();
+            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+        }
         return child;
     }
 
@@ -1785,8 +1805,11 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     // rebuild window menu and shortcuts
     prepareWindowMenu();
 
-    emit newAcceleratedWindowOpen();
-    QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+    if (widget->IsAccelerated())
+    {
+        emit newAcceleratedWindowOpen();
+        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
+    }
     // no child window
     return nullptr;
 }

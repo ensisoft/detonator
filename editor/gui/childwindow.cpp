@@ -49,6 +49,7 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
     setWindowIcon(icon);
 
     mUI.verticalLayout->addWidget(widget);
+    mUI.statusBarFrame->setVisible(widget->IsAccelerated());
     mUI.statusBar->insertPermanentWidget(0, mUI.statusBarFrame);
     QString menu_name = klass;
     menu_name.remove("gui::");
@@ -67,6 +68,13 @@ ChildWindow::~ChildWindow()
     Shutdown();
 
     DEBUG("Destroy ChildWindow");
+}
+
+bool ChildWindow::IsAccelerated() const
+{
+    if (!mWidget || mClosed)
+        return false;
+    return mWidget->IsAccelerated();
 }
 
 void ChildWindow::ShowNote(const QString& note) const

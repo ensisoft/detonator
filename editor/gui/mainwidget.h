@@ -23,6 +23,11 @@ namespace gui
     public:
         virtual ~MainWidget() = default;
 
+        // Returns whether the widget does accelerated rendering and needs to
+        // run in an accelerated "game style" loop.
+        virtual bool IsAccelerated() const
+        { return true; }
+
         // Load the widget and the underlying resource state.
         // This is invoked when then the application restores
         // windows/widgets that were open the last time application

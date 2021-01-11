@@ -51,6 +51,10 @@ namespace gui
         ChildWindow(MainWidget* widget);
        ~ChildWindow();
 
+        // Returns true if the widget requires accelerated
+        // update and render loop.
+        bool IsAccelerated() const;
+
         // Returns true if the user has closed the window.
         bool IsClosed() const
         { return mClosed; }
