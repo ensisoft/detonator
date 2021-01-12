@@ -38,19 +38,40 @@ namespace gui
         // the arguments for the image editor. The special argument ${file}
         // is expanded to contain the full native absolute path to the
         // file that user wants to work with.
-        QString image_editor_arguments;
+        QString image_editor_arguments = "${file}";
         // the path to the currently set external editor for shader (.glsl) files.
         // for example /usr/bin/gedit
         QString shader_editor_executable;
         // the arguments for the shader editor. The special argument ${file}
         // is expanded to contain the full native absolute path to the
         // file that the user wants to open.
-        QString shader_editor_arguments;
+        QString shader_editor_arguments = "${file}";
+        // the path to the currently set external editor for lua script (.lua) files.
+        // for example /usr/bin/gedit
+        QString script_editor_executable;
+        // the arguments for the shader editor. The special argument ${file}
+        // is expanded to contain the full native absolute path to the
+        // file that the user wants to open.
+        QString script_editor_arguments = "${file}";
+
         // by default open resources in a new window or new tab
-        QString default_open_win_or_tab;
+        QString default_open_win_or_tab = "Tab";
         // Name of the qt style when using some specific QStyle
         // or "GameStudio" when using our darkstyle.
         QString style_name = GAMESTUDIO_DEFAULT_STYLE_NAME;
+
+        AppSettings()
+        {
+#if defined(POSIX_OS)
+            image_editor_executable  = "/usr/bin/gimp";
+            shader_editor_executable = "/usr/bin/gedit";
+            script_editor_executable = "/usr/bin/gedit";
+#elif defined(WINDOWS_OS)
+            image_editor_executable  = "mspaint.exe";
+            shader_editor_executable = "notepad.exe";
+            script_editor_executable = "notepad.exe";
+#endif
+        }
     };
 
 } // namespace

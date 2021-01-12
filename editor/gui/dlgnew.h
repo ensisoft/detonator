@@ -71,6 +71,11 @@ namespace gui
             mSelection = app::Resource::Type::Scene;
             accept();
         }
+        void on_btnScript_clicked()
+        {
+            mSelection = app::Resource::Type::Script;
+            accept();
+        }
         void on_btnCancel_clicked()
         {
             reject();

@@ -140,11 +140,11 @@ namespace gui
         { return false; }
 
     signals:
-        // Request to open the given image file in an external
-        // image editor.
+        // Request to open the given script file in an external script editor.
+        void OpenExternalScript(const QString& file);
+        // Request to open the given image file in an external image editor.
         void OpenExternalImage(const QString& file);
-        // Request to open the given shader file in an external
-        // text/shader editor.
+        // Request to open the given shader file in an external text/shader editor.
         void OpenExternalShader(const QString& file);
         // Request to display the new widget. Will transfer
         // ownership of the widget the mainwindow.

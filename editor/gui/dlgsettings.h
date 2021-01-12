@@ -29,7 +29,8 @@
 #  include <QDialog>
 #include "warnpop.h"
 
-#include "appsettings.h"
+#include "editor/gui/appsettings.h"
+#include "editor/gui/codewidget.h"
 
 namespace gui
 {
@@ -37,18 +38,20 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgSettings(QWidget* parent, AppSettings& settings);
+        DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Settings& editor);
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnSelectImageEditor_clicked();
         void on_btnSelectShaderEditor_clicked();
+        void on_btnSelectScriptEditor_clicked();
 
     private:
         Ui::DlgSettings mUI;
     private:
         AppSettings& mSettings;
+        TextEditor::Settings& mEditorSettings;
     };
 } // namespace
 

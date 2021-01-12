@@ -176,6 +176,8 @@ add_executable(Editor
     editor/gui/childwindow.h
     editor/gui/childwindow.cpp
     editor/gui/childwindow.ui
+    editor/gui/codewidget.h
+    editor/gui/codewidget.cpp
     editor/gui/drawing.cpp
     editor/gui/playwindow.h
     editor/gui/playwindow.cpp
@@ -233,6 +235,9 @@ add_executable(Editor
     editor/gui/scenewidget.h
     editor/gui/scenewidget.ui
     editor/gui/scenewidget.cpp
+    editor/gui/scriptwidget.h
+    editor/gui/scriptwidget.ui
+    editor/gui/scriptwidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
     editor/gui/treewidget.h
@@ -241,6 +246,9 @@ add_executable(Editor
     editor/gui/timelinewidget.cpp
     editor/resource/resource.qrc
     editor/resource/qdarkstyle/style.qrc
+    third_party/QSourceHighlight/languagedata.cpp
+    third_party/QSourceHighlight/qsourcehighliter.cpp
+    third_party/QSourceHighlight/qsourcehighliterthemes.cpp
     third_party/stb/stb_image.c
     third_party/base64/base64.cpp
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp

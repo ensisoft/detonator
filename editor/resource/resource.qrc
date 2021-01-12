@@ -39,6 +39,7 @@
     <file>16x16_ico_png/layer_up.png</file>
     <file>16x16_ico_png/entity.png</file>
     <file>16x16_ico_png/scene.png</file>
+    <file>16x16_ico_png/script.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
@@ -63,6 +64,8 @@
     <file>32x32_ico_png/parallelogram.png</file>
     <file>32x32_ico_png/capsule.png</file>
     <file>32x32_ico_png/reset.png</file>
+    <file>32x32_ico_png/find.png</file>
+    <file>32x32_ico_png/text_replace.png</file>
 
     <file>texture.png</file>
   </qresource>

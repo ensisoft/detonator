@@ -233,6 +233,9 @@
     <addaction name="actionNewMaterial"/>
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewCustomShape"/>
+    <addaction name="actionNewEntity"/>
+    <addaction name="actionNewScene"/>
+    <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
@@ -780,6 +783,15 @@
    </property>
    <property name="toolTip">
     <string>New scene</string>
+   </property>
+  </action>
+  <action name="actionNewScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Script</string>
    </property>
   </action>
  </widget>

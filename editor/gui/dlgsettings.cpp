@@ -41,15 +41,18 @@
 namespace gui
 {
 
-DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
+DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Settings& editor)
     : QDialog(parent)
     , mSettings(settings)
+    , mEditorSettings(editor)
 {
     mUI.setupUi(this);
     SetUIValue(mUI.edtImageEditorExecutable, settings.image_editor_executable);
     SetUIValue(mUI.edtImageEditorArguments, settings.image_editor_arguments);
     SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
     SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
+    SetUIValue(mUI.edtScriptEditorExecutable, settings.script_editor_executable);
+    SetUIValue(mUI.edtScriptEditorArguments, settings.script_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
 
     // add our own style.
@@ -61,19 +64,46 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings)
     {
         mUI.cmbStyle->addItem(style);
     }
-    const auto index = mUI.cmbStyle->findText(settings.style_name);
-    if (index != -1)
-        mUI.cmbStyle->setCurrentIndex(index);
+    SetValue(mUI.cmbStyle, settings.style_name);
+
+    mUI.editorTheme->addItem("Monokai");
+    QFont font;
+    if (font.fromString(mEditorSettings.font_description)) {
+        QSignalBlocker b(mUI.editorFont);
+        mUI.editorFont->setCurrentFont(font);
+    }
+
+    const auto font_sizes = QFontDatabase::standardSizes();
+    for (int size : font_sizes)
+        mUI.editorFontSize->addItem(QString::number(size));
+    SetValue(mUI.editorFontSize, QString::number(mEditorSettings.font_size));
+    SetValue(mUI.editorTheme, mEditorSettings.theme);
+    SetValue(mUI.editorShowLineNumbers, mEditorSettings.show_line_numbers);
+    SetValue(mUI.editorHightlightCurrentLine, mEditorSettings.highlight_current_line);
+    SetValue(mUI.editorHightlightSyntax, mEditorSettings.highlight_syntax);
+    SetValue(mUI.editorInsertSpaces, mEditorSettings.insert_spaces);
+    SetValue(mUI.editorShowLineNumbers, mEditorSettings.show_line_numbers);
 }
 
 void DlgSettings::on_btnAccept_clicked()
 {
-    GetUIValue(mUI.edtImageEditorExecutable, &mSettings.image_editor_executable);
-    GetUIValue(mUI.edtImageEditorArguments, &mSettings.image_editor_arguments);
+    GetUIValue(mUI.edtImageEditorExecutable,  &mSettings.image_editor_executable);
+    GetUIValue(mUI.edtImageEditorArguments,   &mSettings.image_editor_arguments);
     GetUIValue(mUI.edtShaderEditorExecutable, &mSettings.shader_editor_executable);
-    GetUIValue(mUI.edtShaderEditorArguments, &mSettings.shader_editor_arguments);
+    GetUIValue(mUI.edtShaderEditorArguments,  &mSettings.shader_editor_arguments);
+    GetUIValue(mUI.edtScriptEditorExecutable, &mSettings.script_editor_executable);
+    GetUIValue(mUI.edtScriptEditorArguments,  &mSettings.script_editor_arguments);
     GetUIValue(mUI.cmbWinOrTab, &mSettings.default_open_win_or_tab);
     GetUIValue(mUI.cmbStyle, &mSettings.style_name);
+    // text editor settings.
+    GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
+    GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
+    GetUIValue(mUI.editorHightlightCurrentLine, &mEditorSettings.highlight_current_line);
+    GetUIValue(mUI.editorHightlightSyntax,      &mEditorSettings.highlight_syntax);
+    GetUIValue(mUI.editorInsertSpaces,          &mEditorSettings.insert_spaces);
+    GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
+    GetUIValue(mUI.editorFontSize,              &mEditorSettings.font_size);
+    mEditorSettings.font_description = mUI.editorFont->currentFont().toString();
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()
@@ -115,6 +145,24 @@ void DlgSettings::on_btnSelectShaderEditor_clicked()
     const QFileInfo info(executable);
     mUI.edtShaderEditorExecutable->setText(QDir::toNativeSeparators(executable));
     mUI.edtShaderEditorExecutable->setCursorPosition(0);
+}
+
+void DlgSettings::on_btnSelectScriptEditor_clicked()
+{
+    QString filter;
+
+#if defined(WINDOWS_OS)
+    filter = "Executables (*.exe)";
+#endif
+
+    const QString& executable = QFileDialog::getOpenFileName(this,
+      tr("Select Application"), QString(), filter);
+    if (executable.isEmpty())
+        return;
+
+    const QFileInfo info(executable);
+    mUI.edtScriptEditorExecutable->setText(QDir::toNativeSeparators(executable));
+    mUI.edtScriptEditorExecutable->setCursorPosition(0);
 }
 
 } // namespace

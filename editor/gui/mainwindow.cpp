@@ -56,6 +56,7 @@
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/scenewidget.h"
+#include "editor/gui/scriptwidget.h"
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
@@ -66,6 +67,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
+#include "editor/gui/codewidget.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -93,6 +95,38 @@ public:
     }
 private:
 };
+
+gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
+{
+    switch (type) {
+        case app::Resource::Type::Material:
+            if (resource)
+                return new gui::MaterialWidget(workspace, *resource);
+            return new gui::MaterialWidget(workspace);
+        case app::Resource::Type::ParticleSystem:
+            if (resource)
+                return new gui::ParticleEditorWidget(workspace, *resource);
+            return new gui::ParticleEditorWidget(workspace);
+        case app::Resource::Type::Shape:
+            if (resource)
+                return new gui::ShapeWidget(workspace, *resource);
+            return new gui::ShapeWidget(workspace);
+        case app::Resource::Type::Entity:
+            if (resource)
+                return new gui::EntityWidget(workspace, *resource);
+            return new gui::EntityWidget(workspace);
+        case app::Resource::Type::Scene:
+            if (resource)
+                return new gui::SceneWidget(workspace, *resource);
+            return new gui::SceneWidget(workspace);
+        case app::Resource::Type::Script:
+            if (resource)
+                return new gui::ScriptWidget(workspace, *resource);
+            return new gui::ScriptWidget(workspace);
+    }
+    BUG("Unhandled widget type.");
+    return nullptr;
+}
 
 } // namespace
 
@@ -158,19 +192,24 @@ void MainWindow::loadState()
     const auto show_workspace = settings.getValue("MainWindow", "show_workspace", true);
     const auto& dock_state    = settings.getValue("MainWindow", "toolbar_and_dock_state", QByteArray());
     settings.getValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
-#if defined(POSIX_OS)
-    mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("/usr/bin/gimp"));
-    mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
-    mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("/usr/bin/gedit"));
-    mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
-#elif defined(WINDOWS_OS)
-    mSettings.image_editor_executable = settings.getValue("Settings", "image_editor_executable", QString("mspaint.exe"));
-    mSettings.image_editor_arguments  = settings.getValue("Settings", "image_editor_arguments", QString("${file}"));
-    mSettings.shader_editor_executable = settings.getValue("Settings", "shader_editor_executable", QString("notepad.exe"));
-    mSettings.shader_editor_arguments  = settings.getValue("Settings", "shader_editor_arguments", QString("${file}"));
-#endif
-    mSettings.default_open_win_or_tab = settings.getValue("Settings", "default_open_win_or_tab", QString("Tab"));
-    mSettings.style_name = settings.getValue("Settings", "style_name", mSettings.style_name);
+    settings.getValue("Settings", "image_editor_executable",  &mSettings.image_editor_executable);
+    settings.getValue("Settings", "image_editor_arguments",   &mSettings.image_editor_arguments);
+    settings.getValue("Settings", "shader_editor_executable", &mSettings.shader_editor_executable);
+    settings.getValue("Settings", "shader_editor_arguments",  &mSettings.shader_editor_arguments);
+    settings.getValue("Settings", "default_open_win_or_tab",  &mSettings.default_open_win_or_tab);
+    settings.getValue("Settings", "style_name", &mSettings.style_name);
+
+    TextEditor::Settings editor_settings;
+    settings.getValue("TextEditor", "font",                   &editor_settings.font_description);
+    settings.getValue("TextEditor", "font_size",              &editor_settings.font_size);
+    settings.getValue("TextEditor", "theme",                  &editor_settings.theme);
+    settings.getValue("TextEditor", "show_line_numbers",      &editor_settings.show_line_numbers);
+    settings.getValue("TextEditor", "highlight_syntax",       &editor_settings.highlight_syntax);
+    settings.getValue("TextEditor", "highlight_current_line", &editor_settings.highlight_current_line);
+    settings.getValue("TextEditor", "insert_spaces",          &editor_settings.insert_spaces);
+    settings.getValue("TextEditor", "tab_spaces",             &editor_settings.tab_spaces);
+    TextEditor::SetDefaultSettings(editor_settings);
+
     if (mSettings.style_name == GAMESTUDIO_DEFAULT_STYLE_NAME)
     {
         QFile style(":qdarkstyle/style.qss");
@@ -328,8 +367,9 @@ bool MainWindow::loadWorkspace(const QString& dir)
     // Load workspace windows and their content.
     bool success = true;
 
-    const auto& session_files = workspace->GetUserProperty("session_files", QStringList());
-    for (const auto& file : session_files)
+    QStringList session;
+    workspace->GetUserProperty("session_files", &session);
+    for (const auto& file : session)
     {
         Settings settings(file);
         if (!settings.Load())
@@ -352,9 +392,9 @@ bool MainWindow::loadWorkspace(const QString& dir)
             widget = new EntityWidget(workspace.get());
         else if (klass == SceneWidget::staticMetaObject.className())
             widget = new SceneWidget(workspace.get());
-
-        // bug, probably forgot to modify the if/else crap above.
-        ASSERT(widget);
+        else if (klass == ScriptWidget::staticMetaObject.className())
+            widget = new ScriptWidget(workspace.get());
+        else BUG("Unhandled widget type.");
 
         if (!widget->LoadState(settings))
         {
@@ -879,6 +919,12 @@ void MainWindow::on_actionNewScene_triggered()
     showWidget(new SceneWidget(mWorkspace.get()), open_new_window);
 }
 
+void MainWindow::on_actionNewScript_triggered()
+{
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
+}
+
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1084,9 +1130,14 @@ void MainWindow::on_actionCloseWorkspace_triggered()
 void MainWindow::on_actionSettings_triggered()
 {
     const QString current_style = mSettings.style_name;
-    DlgSettings dlg(this, mSettings);
+    TextEditor::Settings editor_settings;
+    TextEditor::GetDefaultSettings(&editor_settings);
+
+    DlgSettings dlg(this, mSettings, editor_settings);
     if (dlg.exec() == QDialog::Rejected)
         return;
+
+    TextEditor::SetDefaultSettings(editor_settings);
 
     if (current_style == mSettings.style_name)
         return;
@@ -1179,6 +1230,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewCustomShape);
     menu.addAction(mUI.actionNewEntity);
     menu.addAction(mUI.actionNewScene);
+    menu.addAction(mUI.actionNewScript);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
@@ -1207,58 +1259,27 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
         return;
 
     DlgOpen dlg(QApplication::activeWindow(), *mWorkspace);
-    if (dlg.exec() == QDialog::Accepted)
-    {
-        app::Resource* res = dlg.GetSelected();
-        if (res == nullptr)
-            return;
-        const auto new_window = mSettings.default_open_win_or_tab == "Window";
-        switch (res->GetType())
-        {
-            case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(mWorkspace.get(), *res), new_window);
-                break;
-            case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(mWorkspace.get(), *res), new_window);
-                break;
-            case app::Resource::Type::Shape:
-                showWidget(new ShapeWidget(mWorkspace.get(), *res), new_window);
-                break;
-            case app::Resource::Type::Entity:
-                showWidget(new EntityWidget(mWorkspace.get(), *res), new_window);
-                break;
-            case app::Resource::Type::Scene:
-                showWidget(new SceneWidget(mWorkspace.get(), *res), new_window);
-                break;
-        }
-    }
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    app::Resource* resource = dlg.GetSelected();
+    if (resource == nullptr)
+        return;
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(MakeWidget(resource->GetType(), mWorkspace.get(), resource), new_window);
 }
 
 void MainWindow::on_actionNewResource_triggered()
 {
+    if (!mWorkspace)
+        return;
+
     DlgNew dlg(QApplication::activeWindow());
-    if (dlg.exec() == QDialog::Accepted)
-    {
-        const auto new_window = mSettings.default_open_win_or_tab == "Window";
-        switch (dlg.GetType())
-        {
-            case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(mWorkspace.get()), new_window);
-                break;
-            case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(mWorkspace.get()), new_window);
-                break;
-            case app::Resource::Type::Shape:
-                showWidget(new ShapeWidget(mWorkspace.get()), new_window);
-                break;
-            case app::Resource::Type::Entity:
-                showWidget(new EntityWidget(mWorkspace.get()), new_window);
-                break;
-            case app::Resource::Type::Scene:
-                showWidget(new SceneWidget(mWorkspace.get()), new_window);
-                break;
-        }
-    }
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    showWidget(MakeWidget(dlg.GetType(), mWorkspace.get()), new_window);
 }
 
 void MainWindow::on_actionProjectSettings_triggered()
@@ -1558,6 +1579,45 @@ void MainWindow::OpenExternalShader(const QString& file)
     DEBUG("Start application '%1'", mSettings.shader_editor_executable);
 }
 
+void MainWindow::OpenExternalScript(const QString& file)
+{
+    if (mSettings.script_editor_executable.isEmpty())
+    {
+        QMessageBox msg;
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't configured any external application for script files.\n"
+                    "Would you like to set one now?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+        on_actionSettings_triggered();
+        if (mSettings.script_editor_executable.isEmpty())
+        {
+            ERROR("No shader editor has been configured.");
+            return;
+        }
+    }
+    if (MissingFile(file))
+    {
+        WARN("Could not find '%1'", file);
+    }
+
+    QStringList args;
+    QStringList list = mSettings.script_editor_arguments.split(" ", QString::SkipEmptyParts);
+    for (const auto& item : list)
+    {
+        if (item == "${file}")
+            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+        else args << item;
+    }
+    if (!QProcess::startDetached(mSettings.script_editor_executable, args))
+    {
+        ERROR("Failed to start application '%1'", mSettings.script_editor_executable);
+
+    }
+    DEBUG("Start application '%1'", mSettings.script_editor_executable);
+}
+
 void MainWindow::OpenNewWidget(MainWidget* widget)
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1729,10 +1789,23 @@ bool MainWindow::saveState()
     settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
     settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
+    settings.setValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
+    settings.setValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
     settings.setValue("Settings", "style_name", mSettings.style_name);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.setValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
+
+    TextEditor::Settings editor_settings;
+    TextEditor::GetDefaultSettings(&editor_settings);
+    settings.setValue("TextEditor", "font",                   editor_settings.font_description);
+    settings.setValue("TextEditor", "font_size",              editor_settings.font_size);
+    settings.setValue("TextEditor", "theme",                  editor_settings.theme);
+    settings.setValue("TextEditor", "show_line_numbers",      editor_settings.show_line_numbers);
+    settings.setValue("TextEditor", "highlight_syntax",       editor_settings.highlight_syntax);
+    settings.setValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
+    settings.setValue("TextEditor", "insert_spaces",          editor_settings.insert_spaces);
+    settings.setValue("TextEditor", "tab_spaces",             editor_settings.tab_spaces);
 
     // QMainWindow::SaveState saves the current state of the mainwindow toolbars
     // and dockwidgets.
@@ -1749,20 +1822,15 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     // moved from main tab to a window or vice versa.
     // without disconnect the connections are duped and problems
     // will happen.
-    disconnect(widget, &MainWidget::OpenExternalImage,
-            this,   &MainWindow::OpenExternalImage);
-    disconnect(widget, &MainWidget::OpenExternalShader,
-            this,   &MainWindow::OpenExternalShader);
-    disconnect(widget, &MainWidget::OpenNewWidget,
-            this, &MainWindow::OpenNewWidget);
-
+    disconnect(widget, &MainWidget::OpenExternalImage,  this, &MainWindow::OpenExternalImage);
+    disconnect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
+    disconnect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
+    disconnect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
     // connect the important signals here.
-    connect(widget, &MainWidget::OpenExternalImage,
-            this,   &MainWindow::OpenExternalImage);
-    connect(widget, &MainWidget::OpenExternalShader,
-            this,   &MainWindow::OpenExternalShader);
-    connect(widget, &MainWidget::OpenNewWidget,
-            this, &MainWindow::OpenNewWidget);
+    connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
+    connect(widget, &MainWidget::OpenExternalShader,this, &MainWindow::OpenExternalShader);
+    connect(widget, &MainWidget::OpenExternalScript,this, &MainWindow::OpenExternalScript);
+    connect(widget, &MainWidget::OpenNewWidget,     this, &MainWindow::OpenNewWidget);
 
     if (new_window)
     {
@@ -1819,25 +1887,8 @@ void MainWindow::editResources(bool open_new_window)
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     for (int i=0; i<indices.size(); ++i)
     {
-        const auto& res = mWorkspace->GetResource(indices[i].row());
-        switch (res.GetType())
-        {
-            case app::Resource::Type::Material:
-                showWidget(new MaterialWidget(mWorkspace.get(), res), open_new_window);
-                break;
-            case app::Resource::Type::ParticleSystem:
-                showWidget(new ParticleEditorWidget(mWorkspace.get(), res), open_new_window);
-                break;
-            case app::Resource::Type::Shape:
-                showWidget(new ShapeWidget(mWorkspace.get(), res), open_new_window);
-                break;
-            case app::Resource::Type::Entity:
-                showWidget(new EntityWidget(mWorkspace.get(), res), open_new_window);
-                break;
-            case app::Resource::Type::Scene:
-                showWidget(new SceneWidget(mWorkspace.get(), res), open_new_window);
-                break;
-        }
+        const auto& resource = mWorkspace->GetResource(indices[i].row());
+        showWidget(MakeWidget(resource.GetType(), mWorkspace.get(), &resource), open_new_window);
     }
 }
 

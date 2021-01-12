@@ -41,6 +41,7 @@
 #include "gamelib/entity.h"
 #include "gamelib/scene.h"
 #include "editor/app/utility.h"
+#include "editor/app/script.h"
 
 namespace app
 {
@@ -73,7 +74,9 @@ namespace app
             // It's an audio track
             AudioTrack,
             // It's a scene description
-            Scene
+            Scene,
+            // it's a script file.
+            Script
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -145,6 +148,8 @@ namespace app
                     return QIcon("icons:entity.png");
                 case Resource::Type::Scene:
                     return QIcon("icons:scene.png");
+                case Resource::Type::Script:
+                    return QIcon("icons:script.png");
                 default: break;
             }
             return QIcon();
@@ -161,6 +166,8 @@ namespace app
         { return GetType() == Type::Entity; }
         inline bool IsScene() const
         { return GetType() == Type::Scene; }
+        inline bool IsScript() const
+        { return GetType() == Type::Script; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -271,6 +278,10 @@ namespace app
         struct ResourceTypeTraits<gfx::DrawableClass> {
             static constexpr auto Type = app::Resource::Type::Drawable;
         };
+        template<>
+        struct ResourceTypeTraits<Script> {
+            static constexpr auto Type = app::Resource::Type::Script;
+        };
     } // detail
 
     template<typename BaseTypeContent>
@@ -359,6 +370,8 @@ namespace app
                 json["entities"].push_back(content_json);
             else if (TypeValue == Resource::Type::Scene)
                 json["scenes"].push_back(content_json);
+            else if (TypeValue == Resource::Type::Script)
+                json["scripts"].push_back(content_json);
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {
@@ -466,6 +479,7 @@ namespace app
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;
+    using ScriptResource         = GameResource<Script>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;

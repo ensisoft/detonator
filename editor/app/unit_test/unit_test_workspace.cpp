@@ -278,9 +278,12 @@ void unit_test_packing_basic()
     QDir d;
     // setup dummy shaders.
     TEST_REQUIRE(d.mkpath("shaders/es2"));
+    TEST_REQUIRE(d.mkpath("lua"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/solid_color.glsl", "solid_color.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/vertex_array.glsl", "vertex_array.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/particles.glsl", "particles.glsl"));
+    // setup dummy scripts this one is global (outside the workspace tree)
+    TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua", "game_script.lua"));
 
     app::Workspace workspace;
     workspace.MakeWorkspace("TestWorkspace");
@@ -314,9 +317,14 @@ void unit_test_packing_basic()
     gfx::KinematicsParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
 
+    app::Script script;
+    script.SetFileURI(workspace.AddFileToWorkspace(std::string("lua/game_script.lua")));
+    app::ScriptResource  script_resource(script, "GameScript");
+
     workspace.SaveResource(material_resource);
     workspace.SaveResource(shape_resource);
     workspace.SaveResource(particle_resource);
+    workspace.SaveResource(script_resource);
 
     app::Workspace::ContentPackingOptions options;
     options.directory    = "TestPackage";
@@ -331,6 +339,7 @@ void unit_test_packing_basic()
     resources.push_back(&workspace.GetUserDefinedResource(0));
     resources.push_back(&workspace.GetUserDefinedResource(1));
     resources.push_back(&workspace.GetUserDefinedResource(2));
+    resources.push_back(&workspace.GetUserDefinedResource(3));
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // in the output folder we should have content.json, config.json
@@ -338,6 +347,8 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/solid_color.glsl") == "solid_color.glsl");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/vertex_array.glsl") == "vertex_array.glsl");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/particles.glsl") == "particles.glsl");
+    // Lua scripts should be copied into lua/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/game_script.lua") == "game_script.lua");
 
     game::ContentLoader loader;
     loader.LoadFromFile("TestPackage/test", "TestPackage/test/content.json");

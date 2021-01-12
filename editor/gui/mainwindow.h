@@ -118,6 +118,7 @@ namespace gui
         void on_actionNewCustomShape_triggered();
         void on_actionNewEntity_triggered();
         void on_actionNewScene_triggered();
+        void on_actionNewScript_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();
@@ -146,6 +147,7 @@ namespace gui
         void showNote(const app::Event& event);
         void OpenExternalImage(const QString& file);
         void OpenExternalShader(const QString& file);
+        void OpenExternalScript(const QString& file);
         void OpenNewWidget(MainWidget* widget);
         void OpenRecentWorkspace();
 

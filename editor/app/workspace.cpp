@@ -1081,6 +1081,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::PolygonClass>("shapes", json, mResources);
     LoadResources<game::EntityClass>("entities", json, mResources);
     LoadResources<game::SceneClass>("scenes", json, mResources);
+    LoadResources<Script>("scripts", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
@@ -1665,30 +1666,39 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         const QFileInfo info(file);
         if (!info.isFile())
         {
-            WARN("File '%1' is not a file.", file);
+            WARN("File '%1' is not actually a file.", file);
             continue;
         }
         const auto& name   = info.baseName();
         const auto& suffix = info.completeSuffix().toUpper();
-        if (!(suffix == "JPEG" || suffix == "JPG" || suffix == "PNG"))
+        if (suffix == "LUA")
         {
-            WARN("File '%1' doesn't seem to be a supported image file.", info.filePath());
-            continue;
+            const auto& uri = AddFileToWorkspace(file);
+            Script script;
+            script.SetFileURI(ToUtf8(uri));
+            ScriptResource res(script, name);
+            SaveResource(res);
+            INFO("Imported new script file '%1' based on file '%2'", name, info.filePath());
         }
-        const auto& uri = AddFileToWorkspace(file);
+        else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG")
+        {
+            const auto& uri = AddFileToWorkspace(file);
+            gfx::detail::TextureFileSource texture;
+            texture.SetFileName(ToUtf8(uri));
+            texture.SetName(ToUtf8(name));
 
-        gfx::detail::TextureFileSource texture;
-        texture.SetFileName(ToUtf8(uri));
-        texture.SetName(ToUtf8(name));
-
-        gfx::MaterialClass klass;
-        klass.SetType(gfx::MaterialClass::Type::Texture);
-        klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        klass.AddTexture(std::move(texture));
-        MaterialResource res(klass, name);
-        SaveResource(res);
-
-        INFO("Imported new material '%1' based on image ile '%2'", name, info.filePath());
+            gfx::MaterialClass klass;
+            klass.SetType(gfx::MaterialClass::Type::Texture);
+            klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            klass.AddTexture(std::move(texture));
+            MaterialResource res(klass, name);
+            SaveResource(res);
+            INFO("Imported new material '%1' based on image file '%2'", name, info.filePath());
+        }
+        else
+        {
+            WARN("File '%1' doesn't seem to be a supported file type.", info.filePath());
+        }
     }
 }
 
@@ -1770,6 +1780,18 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
+    // perform the packing step.
+    for (int i=0; i<mutable_copies.size(); ++i)
+    {
+        const auto& resource = mutable_copies[i];
+        if (resource->IsScript())
+        {
+            const Script* script = nullptr;
+            resource->GetContent(&script);
+            packer.CopyFile(script->GetFileURI(), "lua/");
+        }
+    }
+
     packer.PackTextures([this](const std::string& action, int step, int max) {
         emit ResourcePackingUpdate(FromLatin(action), step, max);
     });
@@ -1777,7 +1799,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     for (int i=0; i<mutable_copies.size(); ++i)
     {
         const auto& resource = mutable_copies[i];
-        emit ResourcePackingUpdate("Updating resources...", i, mutable_copies.size());
+        emit ResourcePackingUpdate("Updating resources references...", i, mutable_copies.size());
         if (resource->IsMaterial())
         {
             // todo: maybe move to resource interface ?

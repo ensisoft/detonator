@@ -145,6 +145,12 @@ inline void SetValue(QGroupBox* group, bool on_off)
     group->setChecked(on_off);
 }
 
+inline void SetValue(QGroupBox* group, const QString& text)
+{
+    QSignalBlocker s(group);
+    group->setTitle(text);
+}
+
 inline void SetValue(QLineEdit* line, const std::string& val)
 {
     QSignalBlocker s(line);
@@ -216,6 +222,12 @@ inline void SetValue(QSlider* slider, int value)
 {
     QSignalBlocker s(slider);
     slider->setValue(value);
+}
+
+inline void SetValue(QLabel* label, const QString& str)
+{
+    QSignalBlocker s(label);
+    label->setText(str);
 }
 
 struct NormalizedFloat {
