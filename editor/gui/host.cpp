@@ -181,9 +181,12 @@ void Main(int argc, char* argv[])
             logger->Write(type, msg.c_str());
         }
     };
-
+/*
 #if defined(LINUX_OS)
     // SIGFPE on floating point exception
+    // todo: investigate the floating point exceptions that
+    // started happening after integrating box2D. Is bo2D causing
+    // them or just exposing some bugs in the other parts of the code?
     feenableexcept(FE_INVALID  |
                    FE_DIVBYZERO |
                    FE_OVERFLOW|
@@ -191,6 +194,7 @@ void Main(int argc, char* argv[])
     );
     DEBUG("Enabled floating point exceptions");
 #endif
+ */
 
     // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
     // turns out this attribute is needed in order to make Qt

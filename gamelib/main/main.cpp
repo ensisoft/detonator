@@ -218,12 +218,17 @@ int main(int argc, char* argv[])
 {
 #if defined(LINUX_OS)
     // SIGFPE on floating point exception
+    // todo: investigate the floating point exceptions that
+    // started happening after integrating box2D. Is bo2D causing
+    // them or just exposing some bugs in the other parts of the code?
+    /*
     feenableexcept(FE_INVALID  |
                    FE_DIVBYZERO |
                    FE_OVERFLOW|
                    FE_UNDERFLOW
                    );
     DEBUG("Enabled floating point exceptions");
+     */
 #endif
 
     try
