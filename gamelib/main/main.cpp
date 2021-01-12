@@ -102,9 +102,13 @@ std::string GetPath()
     const int bytes = readlink("/proc/self/exe", &buffer[0], buffer.size());
     if (bytes == -1)
         throw std::runtime_error("readlink failed. cannot discover executable location.");
-    DEBUG("Executable path: '%1'", buffer);
+
     buffer.resize(bytes);
-    return buffer;
+    DEBUG("Executable path: '%1'", buffer);
+    auto last = buffer.find_last_of('/');
+    if (last == std::string::npos)
+        return buffer;
+    return buffer.substr(0, last);
 }
 
 #elif defined(WINDOWS_OS)
