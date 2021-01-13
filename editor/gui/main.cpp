@@ -36,6 +36,10 @@
 #  include <QEventLoop>
 #  include <QObject>
 #  include <boost/version.hpp>
+#  include <box2d/box2d.h>
+#  include <nlohmann/json.hpp>
+#  include <hb.h> // harfbuzz
+#  include <sol/sol.hpp>
 #include "warnpop.h"
 
 #include <sstream>
@@ -52,13 +56,6 @@ void copyright()
     const auto boost_major    = BOOST_VERSION / 100000;
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
-
-    INFO("http://www.ensisoft.com");
-    INFO("https://www.github.com/ensisoft/pinyin-invaders");
-    INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
-    INFO("Compiled: " __DATE__ ", " __TIME__);
-    INFO("Copyright (c) Sami Väisänen 2020");
-    INFO(APP_TITLE " " APP_VERSION);
 
     INFO("http://www.boost.org");
     INFO("Boost software library %1.%2.%3", boost_major, boost_minor, boost_revision);
@@ -81,6 +78,62 @@ void copyright()
     INFO("Copyright (c) 2013-2019 Colin Duquesnoy");
     INFO("https://github.com/ColinDuquesnoy/QDarkStyleSheet");
     INFO("QDarkStyleSheet Dark Qt style 2.8");
+
+    INFO("Copyright (c) 2019-2020 Waqar Ahmed -- <waqar.17a@gmail.com>");
+    INFO("https://github.com/Waqar144/QSourceHighlite");
+    INFO("Qt syntax highlighter");
+
+    INFO("Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)");
+    INFO("https://github.com/g-truc/glm");
+    INFO("OpenGL Mathematics (GLM) 0.9.9.8");
+
+    INFO("Copyright (c) 2019 Erin Catto");
+    INFO("https://box2d.org/");
+    INFO("Box2D a 2D Physics Engine for Games %1.%2.%3", b2_version.major, b2_version.minor, b2_version.revision);
+
+    INFO("Copyright (C) 2005-2017 Erik de Castro Lopo <erikd@mega-nerd.com>");
+    INFO("http://libsndfile.github.io/libsndfile/");
+    INFO("libsndfile C library for sampled audio data. 1.0.30");
+
+    INFO("Copyright (c) 2013-2019 Niels Lohmann <http://nlohmann.me>");
+    INFO("https://github.com/nlohmann/json");
+    INFO("JSON for Modern C++ %1.%2.%3", NLOHMANN_JSON_VERSION_MAJOR,
+         NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_MINOR);
+
+    INFO("Copyright (c) 2019 Daniil Goncharov <neargye@gmail.com>");
+    INFO("https://github.com/Neargye/magic_enum");
+    INFO("Magic Enum C++ 0.6.4");
+
+    INFO("Copyright (c) 2017 Sean Barrett");
+    INFO("http://nothings.org/stb");
+    INFO("Public domain image loader v2.23");
+
+    INFO("Copyright (c) 2017 Sean Barrett");
+    INFO("http://nothings.org/stb");
+    INFO("Public domain image writer v1.13");
+
+    INFO("Copyright © 2011  Google, Inc.");
+    INFO("Harfbuzz text shaping library %1", HB_VERSION_STRING);
+
+    INFO("Copyright (C) 1996-2020 by David Turner, Robert Wilhelm, and Werner Lemberg.");
+    INFO("Freetype text rendering library 2.10.4");
+
+    INFO("Copyright (C) 1994-2020 Lua.org, PUC-Rio.");
+    INFO("Lua.org, PUC-Rio, Brazil (http://www.lua.org)");
+    INFO("https://github.com/lua/lua");
+    INFO("Lua %1.%2.%3", LUA_VERSION_MAJOR, LUA_VERSION_MINOR, LUA_VERSION_RELEASE);
+
+    INFO("Copyright (c) 2013-2020 Rapptz, ThePhD, and contributors");
+    INFO("https://github.com/ThePhD/sol2");
+    INFO("https://sol2.rtfd.io");
+    INFO("sol2 C++ Lua library binding. %1", SOL_VERSION_STRING);
+
+    INFO("http://www.ensisoft.com");
+    INFO("https://www.github.com/ensisoft/gamestudio");
+    INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
+    INFO("Compiled: " __DATE__ ", " __TIME__);
+    INFO("Copyright (c) Sami Väisänen 2020");
+    INFO(APP_TITLE " " APP_VERSION);
 }
 
 class ForwardingLogger : public base::Logger
