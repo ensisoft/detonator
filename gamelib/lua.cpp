@@ -77,8 +77,6 @@ LuaGame::LuaGame(const std::string& lua_path)
 
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");
-
-    INFO("Created new Lua state: '%1", (std::string)(*mLuaState)["_G"]["_VERSION"]);
 }
 
 void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
