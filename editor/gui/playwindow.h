@@ -98,6 +98,8 @@ namespace gui
         void on_actionLogShowInfo_toggled(bool val);
         void on_actionLogShowWarning_toggled(bool val);
         void on_actionLogShowError_toggled(bool val);
+        void on_actionToggleDebugDraw_toggled();
+        void on_actionToggleDebugLog_toggled();
         void on_log_customContextMenuRequested(QPoint point);
 
     private:

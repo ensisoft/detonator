@@ -107,6 +107,13 @@ public:
         mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
     }
+    virtual void SetDebugOptions(const DebugOptions& debug) override
+    {
+        mDebugLogging = debug.debug_log;
+        mDebugDrawing = debug.debug_draw_physics;
+        base::EnableDebugLog(mDebugLogging);
+    }
+
     virtual void SetEnvironment(const Environment& env) override
     {
         mClasslib  = env.classlib;

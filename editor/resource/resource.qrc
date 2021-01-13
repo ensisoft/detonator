@@ -66,6 +66,7 @@
     <file>32x32_ico_png/reset.png</file>
     <file>32x32_ico_png/find.png</file>
     <file>32x32_ico_png/text_replace.png</file>
+    <file>32x32_ico_png/cog.png</file>
 
     <file>texture.png</file>
   </qresource>

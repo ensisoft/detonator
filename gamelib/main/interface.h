@@ -118,6 +118,17 @@ namespace game
         virtual bool GetNextRequest(Request* out)
         { return false;}
 
+        // Debugging options that might be set through some interface.
+        // It's up to the application whether any of these will be
+        // supported in anyway.
+        struct DebugOptions {
+            bool debug_draw_physics = true;
+            bool debug_log = true;
+        };
+        // Set the debug options.
+        virtual void SetDebugOptions(const DebugOptions& debug)
+        {}
+
         // Parameters pertaining to the environment of the application.
         struct Environment {
             // Interface for accessing resources (content) implemented

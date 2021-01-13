@@ -100,6 +100,12 @@ EnumT EnumFromCombo(const QComboBox* combo)
     return val.value();
 }
 
+inline void SetValue(QAction* action, bool on_off)
+{
+    QSignalBlocker s(action);
+    action->setChecked(on_off);
+}
+
 template<typename T>
 void SetValue(QComboBox* combo, T value)
 {
@@ -383,6 +389,14 @@ struct GroupboxValueGetter
     const QGroupBox* box = nullptr;
 };
 
+struct ActionValueGetter
+{
+    operator bool() const
+    { return action->isChecked(); }
+    const QAction* action = nullptr;
+};
+inline ActionValueGetter GetValue(const QAction* action)
+{ return ActionValueGetter { action }; }
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)

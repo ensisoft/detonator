@@ -668,6 +668,12 @@ void PlayWindow::LoadState()
                                                             mUI.statusbar->isVisible());
     const bool show_eventlog = mWorkspace.GetUserProperty("play_window_show_eventlog",
                                                           mUI.dockWidget->isVisible());
+    const bool debug_draw = mWorkspace.GetUserProperty("play_window_debug_draw",
+                                                       mUI.actionToggleDebugDraw->isChecked());
+    const bool debug_log = mWorkspace.GetUserProperty("play_window_debug_log",
+                                                      mUI.actionToggleDebugLog->isChecked());
+    SetValue(mUI.actionToggleDebugLog, debug_log);
+    SetValue(mUI.actionToggleDebugDraw, debug_draw);
     QSignalBlocker foo(mUI.actionViewEventlog);
     QSignalBlocker bar(mUI.actionViewStatusbar);
     mUI.actionViewEventlog->setChecked(show_eventlog);
@@ -683,6 +689,8 @@ void PlayWindow::SaveState()
     mWorkspace.SetUserProperty("play_window_geometry", saveGeometry());
     mWorkspace.SetUserProperty("play_window_toolbar_and_dock_state", saveState());
     mWorkspace.SetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
+    mWorkspace.SetUserProperty("play_window_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
+    mWorkspace.SetUserProperty("play_window_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
 }
 
 void PlayWindow::DoAppInit()
@@ -713,6 +721,12 @@ void PlayWindow::DoAppInit()
             arg_pointers.push_back(str.c_str());
         }
         mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
+
+        // set the debug options.
+        game::App::DebugOptions debug;
+        debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
+        debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
+        mApp->SetDebugOptions(debug);
 
         game::App::Environment env;
         env.classlib  = &mWorkspace;
@@ -797,6 +811,22 @@ void PlayWindow::on_actionLogShowError_toggled(bool val)
     mEventLog.SetVisible(app::EventLogProxy::Show::Error, val);
     mEventLog.invalidate();
 }
+
+void PlayWindow::on_actionToggleDebugDraw_toggled()
+{
+    game::App::DebugOptions debug;
+    debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
+    debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
+    mApp->SetDebugOptions(debug);
+}
+void PlayWindow::on_actionToggleDebugLog_toggled()
+{
+    game::App::DebugOptions debug;
+    debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
+    debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
+    mApp->SetDebugOptions(debug);
+}
+
 void PlayWindow::on_log_customContextMenuRequested(QPoint point)
 {
     QMenu menu(this);

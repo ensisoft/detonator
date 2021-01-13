@@ -147,6 +147,9 @@
      <string>Application</string>
     </property>
     <addaction name="actionPause"/>
+    <addaction name="separator"/>
+    <addaction name="actionToggleDebugDraw"/>
+    <addaction name="actionToggleDebugLog"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -186,6 +189,9 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPause"/>
+   <addaction name="separator"/>
+   <addaction name="actionToggleDebugDraw"/>
+   <addaction name="actionToggleDebugLog"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="features">
@@ -346,6 +352,36 @@
    </property>
    <property name="text">
     <string>Show Debug</string>
+   </property>
+  </action>
+  <action name="actionToggleDebugDraw">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Debug Draw</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle debug drawing</string>
+   </property>
+  </action>
+  <action name="actionToggleDebugLog">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Debug Log</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle debug logging</string>
    </property>
   </action>
  </widget>
