@@ -25,6 +25,10 @@
 // this translation unit implements the gamelib library interface.
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 
+#include "warnpush.h"
+#  include <neargye/magic_enum.hpp>
+#include "warnpop.h"
+
 #include <memory>
 #include <vector>
 #include <cstring>
@@ -47,14 +51,16 @@
 #include "gamelib/renderer.h"
 #include "gamelib/entity.h"
 #include "gamelib/physics.h"
+#include "gamelib/game.h"
+#include "gamelib/lua.h"
 #include "gamelib/main/interface.h"
 
 namespace
 {
 
-// Our game engine implementation. Implements the main App interface
+// Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
-// with the application/game implementation in order to update/tick etc.
+// with the application/game implementation in order to update/tick/etc.
 // the game and also to handle input from keyboard and mouse.
 class DefaultGameEngine : public game::App,
                           public wdk::WindowListener
@@ -88,28 +94,23 @@ public:
     virtual void Start()
     {
         DEBUG("Engine starting.");
-        // todo:
-        auto klass = mClasslib->FindSceneClassByName("My Scene");
-        if (!klass)
-            return;
-
-        mScene = game::CreateSceneInstance(klass);
-        mPhysics.CreateWorld(*mScene);
-        DEBUG("Have scene!");
+        mGame->LoadGame(mClasslib);
     }
     virtual void Init(gfx::Device::Context* context, unsigned surface_width, unsigned surface_height) override
     {
         DEBUG("Engine initializing. Surface %1x%2", surface_width, surface_height);
-
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(surface_width, surface_height);
         mSurfaceWidth  = surface_width;
         mSurfaceHeight = surface_height;
+        mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
+        mGame->SetPhysicsEngine(&mPhysics);
     }
     virtual void SetEnvironment(const Environment& env) override
     {
-        mClasslib = env.classlib;
+        mClasslib  = env.classlib;
+        mDirectory = env.directory;
         mRenderer.SetLoader(mClasslib);
         mPhysics.SetLoader(mClasslib);
     }
@@ -132,14 +133,17 @@ public:
         mPainter->SetTopLeftView(mSurfaceWidth, mSurfaceHeight);
         mRenderer.BeginFrame();
 
-        gfx::Transform transform;
-        transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
-        mRenderer.Draw(*mScene, *mPainter, transform);
-        mRenderer.EndFrame();
-
-        if (mDebugDrawing && mPhysics.HaveWorld())
+        if (mScene)
         {
-            mPhysics.DebugDrawObjects(*mPainter, transform);
+            gfx::Transform transform;
+            transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
+            mRenderer.Draw(*mScene, *mPainter, transform);
+            mRenderer.EndFrame();
+
+            if (mDebugDrawing && mPhysics.HaveWorld())
+            {
+                mPhysics.DebugDrawObjects(*mPainter, transform);
+            }
         }
 
         mDevice->EndFrame(true);
@@ -148,12 +152,24 @@ public:
 
     virtual void Tick(double time) override
     {
+        mGame->Tick(time);
     }
 
     virtual void Update(double time, double dt) override
     {
+        // process the game actions.
+        game::Game::Action action;
+        while (mGame->GetNextAction(&action))
+        {
+            if (auto* ptr = std::get_if<game::Game::PlaySceneAction>(&action))
+                LoadScene(ptr->klass);
+        }
+
         if (!mScene)
             return;
+
+        mScene->Update(dt);
+        mGame->Update(time, dt);
 
         if (mPhysics.HaveWorld())
         {
@@ -188,6 +204,7 @@ public:
     // WindowListener
     virtual void OnWantClose(const wdk::WindowEventWantClose&) override
     {
+        // todo: handle ending play, saving game etc.
         mRunning = false;
     }
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
@@ -198,10 +215,57 @@ public:
         {
             TakeScreenshot();
         }
-
-        // todo:
+        //DEBUG("OnKeyDown: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
+        mGame->OnKeyDown(key);
+    }
+    virtual void OnKeyup(const wdk::WindowEventKeyup& key) override
+    {
+        //DEBUG("OnKeyUp: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
+        mGame->OnKeyUp(key);
+    }
+    virtual void OnChar(const wdk::WindowEventChar& text) override
+    {
+        mGame->OnChar(text);
+    }
+    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
+    {
+        mGame->OnMouseMove(mouse);
+    }
+    virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
+    {
+        mGame->OnMousePress(mouse);
+    }
+    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
+    {
+        mGame->OnMouseRelease(mouse);
     }
 private:
+    void LoadScene(game::ClassHandle<game::SceneClass> klass)
+    {
+        if (mScene)
+        {
+            mGame->EndPlay();
+            mPhysics.DeleteAll();
+            mScene.reset();
+        }
+        mScene = game::CreateSceneInstance(klass);
+        mPhysics.CreateWorld(*mScene);
+        mGame->BeginPlay(mScene.get());
+    }
+
+    static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
+    {
+        std::string ret;
+        if (mods.test(wdk::Keymod::Control))
+            ret += "Ctrl+";
+        if (mods.test(wdk::Keymod::Shift))
+            ret += "Shift+";
+        if (mods.test(wdk::Keymod::Alt))
+            ret += "Alt+";
+        if (!ret.empty())
+            ret.pop_back();
+        return ret;
+    }
     void TakeScreenshot()
     {
         const auto& rgba = mDevice->ReadColorBuffer(mSurfaceWidth, mSurfaceHeight);
@@ -211,7 +275,8 @@ private:
 private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
-
+    // game dir where the executable is.
+    std::string mDirectory;
     // queue of outgoing requests regarding the environment
     // such as the window size/position etc that the game host
     // may/may not support.
@@ -227,19 +292,19 @@ private:
     game::Renderer mRenderer;
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
-
-    // Current scene.
+    // Current scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
-
-    double mGameTime = 0.0;
-    double mWallTime = 0.0;
+    // Game logic implementation.
+    std::unique_ptr<game::Game> mGame;
+    // flag to indicate whether the app is still running or not.
     bool mRunning = true;
+    // flag for debug level logging.
     bool mDebugLogging = false;
+    // flag for debug drawing.
     bool mDebugDrawing = false;
 };
 
 } //namespace
-
 
 extern "C" {
 GAMESTUDIO_EXPORT game::App* MakeApp()

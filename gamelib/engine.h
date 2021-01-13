@@ -27,27 +27,35 @@
 // Engine is the top level generic game engine that combines
 // various components and subsystems into a single component
 // called the "engine".
-// By default this includes the following subsystems:
-// renderer, physics engine, audio engine and scripting.
-// And the following components:
-// scene, animation, loader, gfx resources/classes.
-// Your game logic should be written in the scripting (Lua code).
 //
-// By default the engine is built into a shared library and implements
-// the main game host process interface. This means that under normal
-// operation the game host (GameMain) is the executable process which
-// loads the game library which is the engine library which has the
-// top level generic game engine implementation orchestrating all the
-// various subsystems and running the scripts which contain the actual
-// game logic. The game host takes care of dealing with the windowing
-// context creation and keyboard/mouse input.
+// By default this includes subsystems such as:
+//   renderer, physics engine and audio engine.
 //
+// And components such as:
+//   scene, loader, gfx resources/classes.
 //
-// It's entirely possible to replace this (or modify this) implementation
-// to write a customized engine with some different type of behaviour.
-// In that case the project will be more complicated requiring the use
-// of a compiler to compile the custom engine. Then in workspace/project
-// settings (in the Editor application) one can configure the name of the
-// shared which contains the game implementation.
+// The engine is built into a shared library and implements
+// the main app interface for game host compatibility.. This means
+// that under normal operation the game host (GameMain) is the
+// executable process which loads the game library which is the engine
+// library which has the top level generic game engine implementation
+// that manages and orchestrates all the various subsystems. The actual
+// game logic is encapsulated behind the Game interface. The game engine
+// then in turns calls the Game functions in order to invoke the game
+// logic. The provided LuaGame will embed a Lua environment and invoke
+// Lua scripts for running the game. (See game.h and lua.cpp)
 
-// this header is currently empty since everything is in engine.cpp
+// Note that the game engine does not deal with Window system integration.
+// This is done by the game host since it's very specific to the platform,
+// i.e. dependent on whether the running platforms is Windows, Linux, Android
+// or even inside the Editor. All window management/rendering context creation
+// and input handling happens inside these host executables/processes.
+
+// Regarding this engine implementation it's entirely possible to replace
+// this (or modify this) implementation to write a customized engine with
+// some different functionality. In that case the project will be more
+// complicated requiring the use of a compiler to compile the custom engine.
+// Then in workspace/project settings (in the Editor application) one must
+// configure the name of the shared library to use as the game's engine.
+
+// This file is currently intentionally empty since everything is in engine.cpp

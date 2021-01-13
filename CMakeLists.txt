@@ -431,6 +431,7 @@ add_library(GameEngine SHARED
     gamelib/scene.cpp
     gamelib/loader.cpp
     gamelib/engine.cpp
+    gamelib/lua.cpp
     gamelib/main/gamelib.cpp
     third_party/stb/stb_image_write.c
     third_party/stb/stb_image.c
@@ -480,6 +481,11 @@ if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(gamelib_test PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
+# simple standalone executable to play with lua and sol
+# for testing c++/lua integration strategies.
+add_executable(lua-test gamelib/test/luatest.cpp)
+target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
+target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
 
 # game project
 add_library(invaders SHARED
@@ -614,17 +620,28 @@ add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
         gamelib/animation.cpp
         gamelib/types.cpp
         gamelib/entity.cpp)
+add_executable(unit_test_lua gamelib/unit_test/unit_test_lua.cpp
+        base/assert.cpp
+        gamelib/lua.cpp
+        gamelib/animation.cpp
+        gamelib/scene.cpp
+        gamelib/entity.cpp
+        gamelib/types.cpp
+        gamelib/physics.cpp)
+target_link_libraries(unit_test_lua ${CONAN_LIBS})
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_lua      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
 add_test(NAME unit_test_tree COMMAND unit_test_tree)
 add_test(NAME unit_test_anim COMMAND unit_test_anim)
 add_test(NAME unit_test_settings COMMAND unit_test_settings)
 add_test(NAME unit_test_entity COMMAND unit_test_entity)
 add_test(NAME unit_test_scene COMMAND unit_test_scene)
+add_test(NAME unit_test_lua COMMAND unit_test_lua)
 
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
