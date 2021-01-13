@@ -67,22 +67,22 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(logger.GetBufferMsgCount() == 4);
         TEST_REQUIRE(logger.GetMessage(0).msg == "debug");
         TEST_REQUIRE(logger.GetMessage(0).line != 0);
-        TEST_REQUIRE(logger.GetMessage(0).file.find("unit_test_log.cpp"));
+        TEST_REQUIRE(logger.GetMessage(0).file.find("unit_test_log.cpp") != std::string::npos);
         TEST_REQUIRE(logger.GetMessage(0).type == base::LogEvent::Debug);
 
         TEST_REQUIRE(logger.GetMessage(1).msg == "information");
         TEST_REQUIRE(logger.GetMessage(1).line != 0);
-        TEST_REQUIRE(logger.GetMessage(1).file.find("unit_test_log.cpp"));
+        TEST_REQUIRE(logger.GetMessage(1).file.find("unit_test_log.cpp") != std::string::npos);
         TEST_REQUIRE(logger.GetMessage(1).type == base::LogEvent::Info);
 
         TEST_REQUIRE(logger.GetMessage(2).msg == "warning");
         TEST_REQUIRE(logger.GetMessage(2).line != 0);
-        TEST_REQUIRE(logger.GetMessage(2).file.find("unit_test_log.cpp"));
+        TEST_REQUIRE(logger.GetMessage(2).file.find("unit_test_log.cpp") != std::string::npos);
         TEST_REQUIRE(logger.GetMessage(2).type == base::LogEvent::Warning);
 
         TEST_REQUIRE(logger.GetMessage(3).msg == "error");
         TEST_REQUIRE(logger.GetMessage(3).line != 0);
-        TEST_REQUIRE(logger.GetMessage(3).file.find("unit_test_log.cpp"));
+        TEST_REQUIRE(logger.GetMessage(3).file.find("unit_test_log.cpp") != std::string::npos);
         TEST_REQUIRE(logger.GetMessage(3).type == base::LogEvent::Error);
 
         logger.Dispatch();

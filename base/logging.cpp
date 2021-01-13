@@ -261,6 +261,25 @@ void EnableDebugLog(bool on_off)
 
 void WriteLogMessage(LogEvent type, const char* file, int line, const std::string& message)
 {
+    // strip the path from the file name.
+#if defined(POSIX_OS)
+    const char* p = file;
+    while (*file) {
+        if (*file == '/')
+            p = file + 1;
+        ++file;
+    }
+    file = p;
+#elif defined(WINDOWS_OS)
+    const char* p = file;
+    while (*file) {
+        if (*file == '\\')
+            p = file + 1;
+        ++file;
+    }
+    file = p;
+#endif
+
     using steady_clock = std::chrono::steady_clock;
     // magic static is thread safe.
     static const auto first_event_time = steady_clock::now();
