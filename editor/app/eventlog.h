@@ -142,25 +142,38 @@ namespace app
         { return mBits.value(); }
         void SetShowBits(unsigned value)
         { mBits.set_from_value(value); }
+        void SetFilterStr(QString str, bool case_sensitive)
+        {
+            mFilterStr = str;
+            mFilterCaseSensitive = case_sensitive;
+        }
     protected:
         bool filterAcceptsRow(int row, const QModelIndex& parent) const override
         {
             const auto& event = mLog->getEvent(row);
-            if (event.type == Event::Type::Info && mBits.test(Show::Info))
+            if (event.type == Event::Type::Info && !mBits.test(Show::Info))
+                return false;
+            else if (event.type == Event::Type::Note && !mBits.test(Show::Note))
+                return false;
+            else if (event.type == Event::Type::Warning && !mBits.test(Show::Warning))
+                return false;
+            else if (event.type == Event::Type::Error && !mBits.test(Show::Error))
+                return false;
+            else if (event.type == Event::Type::Debug && !mBits.test(Show::Debug))
+                return false;
+
+            if (mFilterStr.isEmpty())
                 return true;
-            else if (event.type == Event::Type::Note && mBits.test(Show::Note))
-                return true;
-            else if (event.type == Event::Type::Warning && mBits.test(Show::Warning))
-                return true;
-            else if (event.type == Event::Type::Error && mBits.test(Show::Error))
-                return true;
-            else if (event.type == Event::Type::Debug && mBits.test(Show::Debug))
-                return true;
-            return false;
+            return event.message.contains(mFilterStr,
+                                          mFilterCaseSensitive
+                                          ? Qt::CaseSensitive
+                                          : Qt::CaseInsensitive);
         }
     private:
         base::bitflag<Show> mBits;
         const EventLog* mLog = nullptr;
+        QString mFilterStr;
+        bool mFilterCaseSensitive = true;
     };
 
 } // namespace

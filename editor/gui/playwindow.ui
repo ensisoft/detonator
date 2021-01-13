@@ -215,6 +215,37 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="logFilterCaseSensitive">
+            <property name="text">
+             <string>Case sensitive</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Filter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="logFilter"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnApplyFilter">
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QListView" name="log">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -385,6 +416,15 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>time</tabstop>
+  <tabstop>frames</tabstop>
+  <tabstop>fps</tabstop>
+  <tabstop>logFilterCaseSensitive</tabstop>
+  <tabstop>logFilter</tabstop>
+  <tabstop>btnApplyFilter</tabstop>
+  <tabstop>log</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
@@ -418,6 +458,22 @@
     <hint type="destinationlabel">
      <x>529</x>
      <y>742</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logFilter</sender>
+   <signal>returnPressed()</signal>
+   <receiver>btnApplyFilter</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>612</x>
+     <y>499</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>997</x>
+     <y>499</y>
     </hint>
    </hints>
   </connection>

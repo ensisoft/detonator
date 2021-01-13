@@ -100,6 +100,7 @@ namespace gui
         void on_actionLogShowError_toggled(bool val);
         void on_actionToggleDebugDraw_toggled();
         void on_actionToggleDebugLog_toggled();
+        void on_btnApplyFilter_clicked();
         void on_log_customContextMenuRequested(QPoint point);
 
     private:

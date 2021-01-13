@@ -633,7 +633,9 @@ void PlayWindow::LoadState()
     const auto& window_geometry = mWorkspace.GetUserProperty("play_window_geometry", QByteArray());
     const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty("play_window_toolbar_and_dock_state", QByteArray());
     const unsigned log_bits = mWorkspace.GetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
-
+    const QString log_filter = mWorkspace.GetUserProperty("play_window_log_filter", QString());
+    const bool log_filter_case_sens = mWorkspace.GetUserProperty("play_window_log_filter_case_sensitive", true);
+    mEventLog.SetFilterStr(log_filter, log_filter_case_sens);
     mEventLog.SetShowBits(log_bits);
     mEventLog.invalidate();
     mUI.actionLogShowDebug->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Debug));
@@ -674,6 +676,8 @@ void PlayWindow::LoadState()
                                                       mUI.actionToggleDebugLog->isChecked());
     SetValue(mUI.actionToggleDebugLog, debug_log);
     SetValue(mUI.actionToggleDebugDraw, debug_draw);
+    SetValue(mUI.logFilter, log_filter);
+    SetValue(mUI.logFilterCaseSensitive, log_filter_case_sens);
     QSignalBlocker foo(mUI.actionViewEventlog);
     QSignalBlocker bar(mUI.actionViewStatusbar);
     mUI.actionViewEventlog->setChecked(show_eventlog);
@@ -691,6 +695,8 @@ void PlayWindow::SaveState()
     mWorkspace.SetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
     mWorkspace.SetUserProperty("play_window_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
     mWorkspace.SetUserProperty("play_window_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
+    mWorkspace.SetUserProperty("play_window_log_filter", (QString)GetValue(mUI.logFilter));
+    mWorkspace.SetUserProperty("play_window_log_filter_case_sensitive", (bool)GetValue(mUI.logFilterCaseSensitive));
 }
 
 void PlayWindow::DoAppInit()
@@ -825,6 +831,12 @@ void PlayWindow::on_actionToggleDebugLog_toggled()
     debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
     mApp->SetDebugOptions(debug);
+}
+
+void PlayWindow::on_btnApplyFilter_clicked()
+{
+    mEventLog.SetFilterStr(GetValue(mUI.logFilter),GetValue(mUI.logFilterCaseSensitive));
+    mEventLog.invalidate();
 }
 
 void PlayWindow::on_log_customContextMenuRequested(QPoint point)
