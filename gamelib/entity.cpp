@@ -38,6 +38,7 @@
 #include "base/utility.h"
 #include "gamelib/treeop.h"
 #include "gamelib/entity.h"
+#include "gamelib/transform.h"
 
 namespace game
 {
@@ -200,7 +201,7 @@ void EntityNodeClass::SetDrawable(const DrawableItemClass &drawable)
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
@@ -208,7 +209,7 @@ glm::mat4 EntityNodeClass::GetNodeTransform() const
 }
 glm::mat4 EntityNodeClass::GetModelTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mSize);
     // offset the object so that the center of the shape is aligned
     // with the position parameter.
@@ -360,7 +361,7 @@ void EntityNode::Reset()
 
 glm::mat4 EntityNode::GetNodeTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
@@ -369,7 +370,7 @@ glm::mat4 EntityNode::GetNodeTransform() const
 
 glm::mat4 EntityNode::GetModelTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mSize);
     // offset the object so that the center of the shape is aligned
     // with the position parameter.
@@ -584,11 +585,11 @@ glm::vec2 EntityClass::MapCoordsToNode(float x, float y, const EntityNodeClass* 
 {
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
-gfx::FRect EntityClass::GetBoundingRect(const EntityNodeClass* node) const
+FRect EntityClass::GetBoundingRect(const EntityNodeClass* node) const
 {
     return game::GetBoundingRect(mRenderTree, node);
 }
-gfx::FRect EntityClass::GetBoundingRect() const
+FRect EntityClass::GetBoundingRect() const
 {
     return game::GetBoundingRect(mRenderTree);
 }
@@ -959,19 +960,19 @@ glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) cons
 
 glm::mat4 Entity::GetNodeTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }
 
-gfx::FRect Entity::GetBoundingRect(const EntityNode* node) const
+FRect Entity::GetBoundingRect(const EntityNode* node) const
 {
     return game::GetBoundingRect(mRenderTree, node);
 }
 
-gfx::FRect Entity::GetBoundingRect() const
+FRect Entity::GetBoundingRect() const
 {
     return game::GetBoundingRect(mRenderTree);
 }

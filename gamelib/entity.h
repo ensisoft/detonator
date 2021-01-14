@@ -40,7 +40,6 @@
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "base/math.h"
-#include "graphics/types.h"
 #include "graphics/drawable.h"
 #include "gamelib/tree.h"
 #include "gamelib/types.h"
@@ -765,12 +764,12 @@ namespace game
 
         // Compute the axis aligned bounding rectangle for the given node
         // at the current time.
-        gfx::FRect GetBoundingRect(const EntityNodeClass* node) const;
+        FRect GetBoundingRect(const EntityNodeClass* node) const;
         // Compute the axis aligned bounding rectangle for the whole entity.
         // i.e. including all the nodes at the current time.
         // This is a shortcut for getting the union of all the bounding rectangles
         // of all the entity nodes.
-        gfx::FRect GetBoundingRect() const;
+        FRect GetBoundingRect() const;
 
         FBox GetBoundingBox(const EntityNodeClass* node) const;
 

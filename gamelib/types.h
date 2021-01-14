@@ -35,9 +35,23 @@
 #include <optional>
 
 #include "base/assert.h"
+// todo: refactor the include away.
+#include "graphics/types.h"
 
 namespace game
 {
+    // provide type aliases for now for these types so that we can
+    // use them as if they weren't in graphics where they shouldn't
+    // be for most of the use in gamelib code. (i.e. not related to
+    // graphics in any way)
+    // todo: eventually should refactor them out of graphics/ into base/
+    using FRect = gfx::FRect;
+    using IRect = gfx::IRect;
+    using IPoint = gfx::IPoint;
+    using FPoint = gfx::FPoint;
+    using FSize  = gfx::FSize;
+    using ISize  = gfx::ISize;
+
     // Value supporting "arbitrary" values for scripting environments
     // such as Lua.
     class ScriptVar

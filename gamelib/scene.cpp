@@ -33,7 +33,7 @@
 #include "gamelib/scene.h"
 #include "gamelib/entity.h"
 #include "gamelib/treeop.h"
-#include "graphics/transform.h"
+#include "gamelib/transform.h"
 
 namespace game
 {
@@ -54,7 +54,7 @@ std::size_t SceneNodeClass::GetHash() const
 
 glm::mat4 SceneNodeClass::GetNodeTransform() const
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(mScale);
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
@@ -240,7 +240,7 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
         const glm::vec4 mHitPos;
         std::vector<SceneNodeClass*>& mHitNodes;
         std::vector<glm::vec2>* mHitPositions = nullptr;
-        gfx::Transform mTransform;
+        Transform mTransform;
     };
     Visitor visitor(x, y, *hits, hitbox_positions);
     mRenderTree.PreOrderTraverse(visitor);
@@ -290,7 +290,7 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
         const glm::vec4 mHitPos;
         std::vector<const SceneNodeClass*>& mHitNodes;
         std::vector<glm::vec2>* mHitPositions = nullptr;
-        gfx::Transform mTransform;
+        Transform mTransform;
     };
     Visitor visitor(x, y, *hits, hitbox_positions);
     mRenderTree.PreOrderTraverse(visitor);
@@ -329,7 +329,7 @@ glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* 
     private:
         const glm::vec4 mPos;
         const SceneNodeClass* mNode = nullptr;
-        gfx::Transform mTransform;
+        Transform mTransform;
         glm::vec2 mResult;
     };
 
@@ -370,7 +370,7 @@ glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* no
     private:
         const glm::vec4 mPos;
         const SceneNodeClass* mNode = nullptr;
-        gfx::Transform mTransform;
+        Transform mTransform;
         glm::vec2 mResult;
     };
 

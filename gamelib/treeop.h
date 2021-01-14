@@ -36,8 +36,8 @@
 
 #include "base/assert.h"
 #include "base/format.h"
-#include "graphics/types.h"
-#include "graphics/transform.h"
+#include "gamelib/types.h"
+#include "gamelib/transform.h"
 #include "gamelib/tree.h"
 #include "gamelib/types.h"
 
@@ -164,7 +164,7 @@ glm::mat4 FindUnscaledNodeModelTransform(const RenderTree<Node>& tree, const Nod
     std::vector<const Node*> path;
     SearchParent(tree, node, root, &path);
 
-    gfx::Transform transform;
+    Transform transform;
     for (auto it = path.rbegin(); it != path.rend(); ++it)
     {
         const auto* node = *it;
@@ -191,7 +191,7 @@ glm::mat4 FindNodeModelTransform(const RenderTree<Node>& tree, const Node* node)
     std::vector<const Node*> path;
     SearchParent(tree, node, root, &path);
 
-    gfx::Transform transform;
+    Transform transform;
     for (auto it = path.rbegin(); it != path.rend(); ++it)
     {
         const auto* node = *it;
@@ -210,7 +210,7 @@ glm::mat4 FindNodeTransform(const RenderTree<Node>& tree, const Node* node)
     std::vector<const Node*> path;
     SearchParent(tree, node, root, &path);
 
-    gfx::Transform transform;
+    Transform transform;
     for (auto it = path.rbegin(); it != path.rend(); ++it)
     {
         const auto* node = *it;
@@ -380,7 +380,7 @@ void CoarseHitTest(RenderTree<Node>& tree, float x, float y,
         }
     private:
         const glm::vec4 mHitPoint;
-        gfx::Transform mTransform;
+        Transform mTransform;
         std::vector<Node*>* mHits = nullptr;
         std::vector<glm::vec2>* mBoxes = nullptr;
     };
@@ -434,7 +434,7 @@ void CoarseHitTest(const RenderTree<Node>& tree, float x, float y,
         }
     private:
         const glm::vec4 mHitPoint;
-        gfx::Transform mTransform;
+        Transform mTransform;
         std::vector<const Node*>* mHits = nullptr;
         std::vector<glm::vec2>* mBoxes = nullptr;
     };
@@ -465,7 +465,7 @@ FBox GetBoundingBox(const RenderTree<Node>& tree, const Node* node)
 }
 
 template<typename Node>
-gfx::FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
+FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
 {
     const auto& mat = FindNodeModelTransform(tree, node);
     // for each corner of a bounding volume compute new positions per
@@ -484,11 +484,11 @@ gfx::FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
                               std::min(bot_left.y, bot_right.y));
     const auto bottom = std::max(std::max(top_left.y, top_right.y),
                                  std::max(bot_left.y, bot_right.y));
-    return gfx::FRect(left, top, right - left, bottom - top);
+    return FRect(left, top, right - left, bottom - top);
 }
 
 template<typename Node>
-gfx::FRect GetBoundingRect(const RenderTree<Node>& tree)
+FRect GetBoundingRect(const RenderTree<Node>& tree)
 {
     class Visitor : public RenderTree<Node>::ConstVisitor {
     public:
@@ -516,7 +516,7 @@ gfx::FRect GetBoundingRect(const RenderTree<Node>& tree)
                                       std::min(bot_left.y, bot_right.y));
             const auto bottom = std::max(std::max(top_left.y, top_right.y),
                                          std::max(bot_left.y, bot_right.y));
-            const auto box = gfx::FRect(left, top, right - left, bottom - top);
+            const auto box = FRect(left, top, right - left, bottom - top);
             if (mResult.IsEmpty())
                 mResult = box;
             else mResult = Union(mResult, box);
@@ -529,11 +529,11 @@ gfx::FRect GetBoundingRect(const RenderTree<Node>& tree)
                 return;
             mTransform.Pop();
         }
-        gfx::FRect GetResult() const
+        FRect GetResult() const
         { return mResult; }
     private:
-        gfx::FRect mResult;
-        gfx::Transform mTransform;
+        FRect mResult;
+        Transform mTransform;
     };
 
     Visitor visitor;
