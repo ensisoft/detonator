@@ -278,11 +278,12 @@ public:
 private:
     std::string CreateName() const
     {
+        QString name = mState.workspace->MapResourceIdToName(mEntityIds[mCurrentEntityIdIndex]);
         for (size_t i=0; i<10000; ++i)
         {
-            std::string name = "Entity " + std::to_string(i);
-            if (mState.scene.FindNodeByName(name) == nullptr)
-                return name;
+            QString suggestion = QString("%1_%2").arg(name).arg(i);
+            if (mState.scene.FindNodeByName(app::ToUtf8(suggestion)) == nullptr)
+                return app::ToUtf8(suggestion);
         }
         return "???";
     }
