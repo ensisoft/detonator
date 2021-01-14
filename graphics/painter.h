@@ -32,6 +32,8 @@
 #include <memory>
 #include <vector>
 
+#include "graphics/types.h"
+
 namespace gfx
 {
     // fwd declarations
@@ -83,6 +85,7 @@ namespace gfx
         // of the rendering surface where the pixels of the rendered scene are
         // placed in the surface.
         virtual void SetView(float left, float top, float width, float height) = 0;
+        virtual void SetView(const FRect& view) = 0;
         // Set the logical viewport for "top left" origin based drawing.
         inline void SetTopLeftView(float width, float height)
         { SetView(0.0f, 0.0f, width, height); }

@@ -224,6 +224,15 @@ namespace gfx
         {
             Resize(size.GetWidth(), size.GetHeight());
         }
+        void Grow(T some_width, T some_height)
+        {
+            mWidth += some_width;
+            mHeight += some_height;
+        }
+        void Grow(const Size<T>& some_size)
+        {
+            Grow(some_size.GetWidth(), some_size.GetHeight());
+        }
         void Move(T x, T y)
         {
             mX = x;

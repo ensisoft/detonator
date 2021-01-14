@@ -77,6 +77,10 @@ public:
     {
         mView = FRect(left, top, width, height);
     }
+    virtual void SetView(const FRect& view) override
+    {
+        mView = view;
+    }
 
     virtual void Clear(const Color4f& color) override
     {

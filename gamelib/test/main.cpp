@@ -45,6 +45,7 @@
 #include "gamelib/entity.h"
 #include "gamelib/physics.h"
 #include "gamelib/scene.h"
+#include "gamelib/format.h"
 #include "gamelib/main/interface.h"
 
 namespace {
@@ -61,7 +62,121 @@ public:
     virtual void Start(game::ClassLibrary* loader) {}
     virtual void End() {}
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) {}
+    virtual void SetSurfaceSize(unsigned width, unsigned height)  {}
 private:
+};
+
+class ViewportTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        // visualize the logical viewport.
+        painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float width       = mViewport.GetWidth();
+        const float height      = mViewport.GetHeight();
+        const float surf_width  = (float)mSurfaceWidth;
+        const float surf_height = (float)mSurfaceHeight;
+        const float scale = std::min(surf_width / width, surf_height / height);
+        const float device_viewport_width = width * scale;
+        const float device_viewport_height = height * scale;
+        const float device_viewport_x = (surf_width - device_viewport_width) / 2;
+        const float device_viewport_y = (surf_height - device_viewport_height) / 2;
+        gfx::DrawRectOutline(painter, gfx::FRect(device_viewport_x, device_viewport_y,
+                                                 device_viewport_width, device_viewport_height),
+                             gfx::Color::Green, 1.0f);
+        // set the actual viewport for proper clipping.
+        painter.SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
+        // set the logical game view
+        painter.SetView(mViewport);
+
+        //gfx::FRect test(0.0f, 0.0f, 100.0f, 100.0f);
+        //gfx::FillRect(painter, test, gfx::Color::Yellow);
+
+        gfx::Transform transform;
+        mRenderer.Draw(*mScene, painter, transform);
+    }
+    virtual void Update(float dt) override
+    {
+        if (mScene)
+            mScene->Update(dt);
+    }
+    virtual void Start(game::ClassLibrary* loader) override
+    {
+        auto klass = std::make_shared<game::SceneClass>();
+        {
+            game::SceneNodeClass robot;
+            robot.SetEntityId("robot");
+            robot.SetTranslation(glm::vec2(100.0f, 100.0f));
+            robot.SetScale(glm::vec2(0.8, 0.8));
+            robot.SetName("robot 1");
+            robot.SetEntity(loader->FindEntityClassByName("robot"));
+            klass->LinkChild(nullptr, klass->AddNode(robot));
+        }
+
+        {
+            game::SceneNodeClass robot;
+            robot.SetEntityId("robot");
+            robot.SetTranslation(glm::vec2(300.0f, 100.0f));
+            robot.SetScale(glm::vec2(1.0, 1.0));
+            robot.SetName("robot 2");
+            robot.SetEntity(loader->FindEntityClassByName("robot"));
+            klass->LinkChild(nullptr, klass->AddNode(robot));
+        }
+
+        // landmark box at 0,0
+        {
+            game::SceneNodeClass box;
+            box.SetEntityId("unit_box");
+            box.SetTranslation(glm::vec2(50.0f, 50.0f));
+            box.SetScale(glm::vec2(100.0f, 100.0f));
+            box.SetName("unit_box");
+            box.SetEntity(loader->FindEntityClassByName("unit_box"));
+            klass->LinkChild(nullptr, klass->AddNode(box));
+        }
+
+        mScene = game::CreateSceneInstance(klass);
+        mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
+        mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
+        mRenderer.SetLoader(loader);
+        mViewport = gfx::FRect(0.0f, 0.0f, 200.0f, 200.0f);
+    }
+    virtual void SetSurfaceSize(unsigned width, unsigned height) override
+    {
+        mSurfaceWidth  = width;
+        mSurfaceHeight = height;
+    }
+    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Key1)
+            mViewport.Grow(0.0f, -10.0f);
+        else if (key.symbol == wdk::Keysym::Key2)
+            mViewport.Grow(0.0f, 10.0f);
+        else if (key.symbol == wdk::Keysym::Key3)
+            mViewport.Grow(-10.0f, 0.0f);
+        else if (key.symbol == wdk::Keysym::Key4)
+            mViewport.Grow(10.0f, 0.0f);
+        else if (key.symbol == wdk::Keysym::KeyA)
+            mViewport.Translate(-10.0f, 0.0f);
+        else if (key.symbol == wdk::Keysym::KeyD)
+            mViewport.Translate(10.0f, 0.0f);
+        else if (key.symbol == wdk::Keysym::KeyW)
+            mViewport.Translate(0.0f, -10.0f);
+        else if (key.symbol == wdk::Keysym::KeyS)
+            mViewport.Translate(0.0f, 10.0f);
+
+        DEBUG("viewport: %1", mViewport);
+    }
+private:
+    std::unique_ptr<game::Scene> mScene;
+    game::Renderer mRenderer;
+    gfx::FRect  mViewport;
+    unsigned mSurfaceWidth = 0;
+    unsigned mSurfaceHeight = 0;
 };
 
 class SceneTest : public TestCase
@@ -273,6 +388,7 @@ public:
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new SceneTest);
+        mTestList.emplace_back(new ViewportTest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -282,14 +398,17 @@ public:
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(surface_width, surface_height);
+        mSurfaceWidth  = surface_width;
+        mSurfaceHeight = surface_height;
     }
 
     virtual void Draw() override
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
-        mPainter->SetViewport(0, 0, 1027, 768);
-        mPainter->SetTopLeftView(1027.0f, 768.0f);
+        mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        mPainter->SetTopLeftView(mSurfaceWidth, mSurfaceHeight);
+        mTestList[mTestIndex]->SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);
 
@@ -298,7 +417,6 @@ public:
 
     virtual void Tick(double time) override
     {
-        DEBUG("Tick!");
     }
 
     virtual void Update(double time, double dt) override
@@ -347,6 +465,13 @@ public:
         DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
             stats.current_fps, stats.total_wall_time, stats.total_game_time, stats.num_frames_rendered);
     }
+    virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
+    {
+        DEBUG("Rendering surface resized to %1x%2", width, height);
+        mSurfaceWidth  = width;
+        mSurfaceHeight = height;
+        mPainter->SetSurfaceSize(width, height);
+    }
 
     // ClassLibrary
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
@@ -377,6 +502,21 @@ public:
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
+        if (name == "unit_box")
+        {
+            auto klass = std::make_shared<game::EntityClass>();
+
+            game::EntityNodeClass box;
+            box.SetSize(glm::vec2(1.0f, 1.0f));
+            box.SetName("box");
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("uv_test");
+            box.SetDrawable(draw);
+            klass->LinkChild(nullptr, klass->AddNode(std::move(box)));
+            return klass;
+        }
+
         if (name == "box")
         {
             auto klass = std::make_shared<game::EntityClass>();
@@ -551,6 +691,8 @@ private:
     std::shared_ptr<gfx::Device> mDevice;
     bool mRunning = true;
     game::AppRequestQueue mRequests;
+    unsigned mSurfaceWidth  = 0;
+    unsigned mSurfaceHeight = 0;
 };
 
 extern "C" {

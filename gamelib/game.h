@@ -29,6 +29,7 @@
 
 #include "wdk/events.h"
 #include "gamelib/classlib.h"
+#include "gamelib/types.h"
 
 namespace game
 {
@@ -98,6 +99,16 @@ namespace game
         // and the action should be copied into out.
         virtual bool GetNextAction(Action* out)
         { return false; }
+
+        // Get the game's logical viewport into the game world.
+        // The viewport is defined in the same units as the game itself
+        // and has no direct relation to pixels or to a graphics device
+        // viewport. Instead it's completely logical and is managed by
+        // the game. The engine will then use the viewport information to
+        // render the contents within the game's viewport into some area
+        // in some rendering surface such as a window. If your game returns
+        // an empty viewport (width and height are 0) *nothing* will be shown.
+        virtual FRect GetViewport() const = 0;
 
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) {}

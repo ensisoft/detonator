@@ -34,6 +34,7 @@
 #include <queue>
 
 #include "gamelib/game.h"
+#include "gamelib/types.h"
 
 namespace game
 {
@@ -51,6 +52,8 @@ namespace game
         virtual void EndPlay() override;
         virtual void SaveGame() override;
         virtual bool GetNextAction(Action* out) override;
+        virtual FRect GetViewport() const override
+        { return mView; }
 
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
@@ -63,6 +66,7 @@ namespace game
         const PhysicsEngine* mPhysicsEngine = nullptr;
         std::shared_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
+        FRect mView;
     };
 
     void BindBase(sol::state& L);

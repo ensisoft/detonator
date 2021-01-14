@@ -53,6 +53,7 @@
 #include "gamelib/physics.h"
 #include "gamelib/game.h"
 #include "gamelib/lua.h"
+#include "gamelib/format.h"
 #include "gamelib/main/interface.h"
 
 namespace
@@ -136,14 +137,39 @@ public:
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
-        mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-        mPainter->SetTopLeftView(mSurfaceWidth, mSurfaceHeight);
-        mRenderer.BeginFrame();
+
+        // get the game's logical viewport into the game world.
+        const auto& view = mGame->GetViewport();
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float width       = view.GetWidth();
+        const float height      = view.GetHeight();
+        const float surf_width  = (float)mSurfaceWidth;
+        const float surf_height = (float)mSurfaceHeight;
+        const float scale = std::min(surf_width / width, surf_height / height);
+        const float device_viewport_width = width * scale;
+        const float device_viewport_height = height * scale;
+        const float device_viewport_x = (surf_width - device_viewport_width) / 2;
+        const float device_viewport_y = (surf_height - device_viewport_height) / 2;
+        if (mDebugDrawing)
+        {
+            mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+            mPainter->SetView(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
+            gfx::DrawRectOutline(*mPainter, gfx::FRect(device_viewport_x, device_viewport_y,
+                                                     device_viewport_width, device_viewport_height),
+                                 gfx::Color::Green, 1.0f);
+        }
+
+        // set the actual viewport for proper clipping.
+        mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
+        // set the logical viewport.
+        mPainter->SetView(view);
 
         if (mScene)
         {
             gfx::Transform transform;
-            transform.MoveTo(mSurfaceWidth * 0.5, mSurfaceHeight * 0.5);
+            mRenderer.BeginFrame();
             mRenderer.Draw(*mScene, *mPainter, transform);
             mRenderer.EndFrame();
 

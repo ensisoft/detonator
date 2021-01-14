@@ -74,6 +74,9 @@ LuaGame::LuaGame(const std::string& lua_path)
         play.klass = klass;
         self.mActionQueue.push(play);
     };
+    engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
+        self.mView = view;
+    };
 
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");
@@ -322,6 +325,23 @@ void BindWDK(sol::state& L)
 void BindGameLib(sol::state& L)
 {
     auto table = L["game"].get_or_create<sol::table>();
+    {
+        sol::constructors<FRect(), FRect(float, float, float, float)> ctors;
+        auto rect = table.new_usertype<FRect>("FRect", ctors);
+        rect["GetHeight"] = &FRect::GetHeight;
+        rect["GetWidth"]  = &FRect::GetWidth;
+        rect["GetX"]      = &FRect::GetX;
+        rect["GetY"]      = &FRect::GetY;
+        rect["SetX"]      = &FRect::SetX;
+        rect["SetY"]      = &FRect::SetY;
+        rect["SetWidth"]  = &FRect::SetWidth;
+        rect["SetHeight"] = &FRect::SetHeight;
+        rect["Resize"]    = (void(FRect::*)(float, float))&FRect::Resize;
+        rect["Grow"]      = (void(FRect::*)(float, float))&FRect::Grow;
+        rect["Move"]      = (void(FRect::*)(float, float))&FRect::Move;
+        rect["Translate"] = (void(FRect::*)(float, float))&FRect::Translate;
+        rect["IsEmpty"]   = &FRect::IsEmpty;
+    }
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"] = &ClassLibrary::FindEntityClassByName;
