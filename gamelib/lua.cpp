@@ -385,7 +385,46 @@ void BindGameLib(sol::state& L)
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
     entity["FindNodeByInstanceId"] = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByInstanceId;
 
-    auto scene = table.new_usertype<Scene>("Scene");
+    // todo: cleanup the copy pasta regarding script vars index/newindex
+    auto scene = table.new_usertype<Scene>("Scene",
+       sol::meta_function::index, [&L](const Scene* scene, const char* key) {
+                sol::state_view lua(L);
+                const ScriptVar* var = scene->FindScriptVar(key);
+                if (var && var->GetType() == ScriptVar::Type::Boolean)
+                    return sol::make_object(lua, var->GetValue<bool>());
+                else if (var && var->GetType() == ScriptVar::Type::Float)
+                    return sol::make_object(lua, var->GetValue<float>());
+                else if (var && var->GetType() == ScriptVar::Type::String)
+                    return sol::make_object(lua, var->GetValue<std::string>());
+                else if (var && var->GetType() == ScriptVar::Type::Integer)
+                    return sol::make_object(lua, var->GetValue<int>());
+                else if (var && var->GetType() == ScriptVar::Type::Vec2)
+                    return sol::make_object(lua, var->GetValue<glm::vec2>());
+                else if (var) BUG("Unhandled ScriptVar type.");
+                WARN("No such script variable: '%1'", key);
+                return sol::make_object(lua, sol::lua_nil);
+            },
+       sol::meta_function::new_index, [](const Scene* scene, const char* key, sol::object value) {
+                const ScriptVar* var = scene->FindScriptVar(key);
+                if (var == nullptr) {
+                    WARN("No such script variable: '%1'", key);
+                    return;
+                } else if (var->IsReadOnly()) {
+                    WARN("Trying to write to a read only variable: '%1'", key);
+                    return;
+                }
+                if (value.is<int>() && var->HasType<int>())
+                    var->SetValue(value.as<int>());
+                else if (value.is<float>() && var->HasType<float>())
+                    var->SetValue(value.as<float>());
+                else if (value.is<bool>() && var->HasType<bool>())
+                    var->SetValue(value.as<bool>());
+                else if (value.is<std::string>() && var->HasType<std::string>())
+                    var->SetValue(value.as<std::string>());
+                else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
+                    var->SetValue(value.as<glm::vec2>());
+                else WARN("Script value type mismatch. '%1' expects: '%2'", key, var->GetType());
+            });
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
     scene["GetEntity"]                = (Entity&(Scene::*)(size_t))&Scene::GetEntity;

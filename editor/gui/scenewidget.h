@@ -88,6 +88,9 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
+        void on_btnNewScriptVar_clicked();
+        void on_btnEditScriptVar_clicked();
+        void on_btnDeleteScriptVar_clicked();
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_resetTransform_clicked();
@@ -135,6 +138,7 @@ namespace gui
         QMenu* mEntities = nullptr;
     private:
         class PlaceEntityTool;
+        class ScriptVarModel;
         enum class PlayState {
             Playing, Paused, Stopped
         };
@@ -154,6 +158,7 @@ namespace gui
         std::size_t mOriginalHash = 0;
         std::unique_ptr<TreeModel> mRenderTree;
         std::unique_ptr<MouseTool> mCurrentTool;
+        std::unique_ptr<ScriptVarModel> mScriptVarModel;
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mSceneTime   = 0.0;

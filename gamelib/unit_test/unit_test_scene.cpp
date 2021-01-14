@@ -156,6 +156,14 @@ void unit_test_scene_class()
         node.SetTranslation(glm::vec2(200.0f, 200.0f));
         klass.AddNode(node);
     }
+
+    {
+        game::ScriptVar foo("foo", 123, game::ScriptVar::ReadOnly);
+        game::ScriptVar bar("bar", 1.0f, game::ScriptVar::ReadWrite);
+        klass.AddScriptVar(foo);
+        klass.AddScriptVar(std::move(bar));
+    }
+
     TEST_REQUIRE(klass.GetNumNodes() == 3);
     TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
     TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
@@ -164,6 +172,9 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.FindNodeById(klass.GetNode(0).GetId()));
     TEST_REQUIRE(klass.FindNodeById("asgas") == nullptr);
     TEST_REQUIRE(klass.FindNodeByName("foasg") == nullptr);
+    TEST_REQUIRE(klass.GetNumScriptVars() == 2);
+    TEST_REQUIRE(klass.GetScriptVar(0).GetName() == "foo");
+    TEST_REQUIRE(klass.GetScriptVar(1).GetName() == "bar");
 
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
@@ -182,6 +193,8 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->FindNodeById("asgas") == nullptr);
         TEST_REQUIRE(ret->FindNodeByName("foasg") == nullptr);
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
+        TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "foo");
+        TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "bar");
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 
@@ -312,6 +325,14 @@ void unit_test_scene_instance()
         node.SetEntity(entity);
         klass.AddNode(node);
     }
+
+    {
+        game::ScriptVar foo("foo", 123, game::ScriptVar::ReadWrite);
+        game::ScriptVar bar("bar", 1.0f, game::ScriptVar::ReadOnly);
+        klass.AddScriptVar(foo);
+        klass.AddScriptVar(std::move(bar));
+    }
+
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
@@ -333,6 +354,13 @@ void unit_test_scene_instance()
     TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
+
+    TEST_REQUIRE(instance.FindScriptVar("foo"));
+    TEST_REQUIRE(instance.FindScriptVar("bar"));
+    TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
+    TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
+    instance.FindScriptVar("foo")->SetValue(444);
+    TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
 
     // todo: test more of the instance api.
 }

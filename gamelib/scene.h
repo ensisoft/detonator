@@ -238,11 +238,38 @@ namespace game
         // Map coordinates in scene's coordinate space into some node's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const SceneNodeClass* node) const;
 
+        // Add a new scripting variable to the list of variables.
+        // No checks are made to whether a variable by that name
+        // already exists.
+        void AddScriptVar(const ScriptVar& var);
+        void AddScriptVar(ScriptVar&& var);
+        // Delete the scripting variable at the given index.
+        // The index must be a valid index.
+        void DeleteScriptVar(size_t index);
+        // Set the properties (copy over) the scripting variable at the given index.
+        // The index must be a valid index.
+        void SetScriptVar(size_t index, const ScriptVar& var);
+        void SetScriptVar(size_t index, ScriptVar&& var);
+        // Get the scripting variable at the given index.
+        // The index must be a valid index.
+        ScriptVar& GetScriptVar(size_t index);
+        // Find a scripting variable with the given name. If no such variable
+        // exists then nullptr is returned.
+        ScriptVar* FindScriptVar(const std::string& name);
+        // Get the scripting variable at the given index.
+        // The index must be a valid index.
+        const ScriptVar& GetScriptVar(size_t index) const;
+        // Find a scripting variable with the given name. If no such variable
+        // exists then nullptr is returned.
+        const ScriptVar* FindScriptVar(const std::string& name) const;
+
         // Get the object hash value based on the property values.
         std::size_t GetHash() const;
         // Return number of scene nodes contained in the scene.
         std::size_t GetNumNodes() const
         { return mNodes.size();}
+        std::size_t GetNumScriptVars() const
+        { return mScriptVars.size(); }
         // Get the scene class object id.
         std::string GetId() const
         { return mClassId; }
@@ -289,6 +316,8 @@ namespace game
         // and transformation of the animation nodes. the tree defines
         // the parent-child transformation hierarchy.
         RenderTree mRenderTree;
+        // Scripting variables.
+        std::vector<ScriptVar> mScriptVars;
     };
 
     // Scene is the runtime representation of a scene based on some scene class
@@ -327,6 +356,13 @@ namespace game
         // name it's undefined which one is returned.
         const Entity* FindEntityByInstanceName(const std::string& name) const;
 
+        // Find a scripting variable. 
+        // Returns nullptr if there was no variable by this name.
+        // Note that the const here only implies that the object
+        // may not change in terms of c++ semantics. The actual *value*
+        // can still be changed as long as the variable is not read only.
+        const ScriptVar* FindScriptVar(const std::string& name) const;
+
         void Update(float dt);
 
         // Get the scene's render tree (scene graph). The render tree defines
@@ -353,6 +389,8 @@ namespace game
         std::shared_ptr<const SceneClass> mClass;
         // Entities currently in the scene.
         std::vector<std::unique_ptr<Entity>> mEntities;
+        // The list of script variables.
+        std::vector<ScriptVar> mScriptVars;
         // The scene graph/render tree for hierarchical traversal
         // of the scene.
         RenderTree mRenderTree;

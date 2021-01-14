@@ -104,7 +104,8 @@ SceneClass::SceneClass(const SceneClass& other)
 {
     std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
 
-    mClassId = other.mClassId;
+    mClassId    = other.mClassId;
+    mScriptVars = other.mScriptVars;
     for (const auto& node : other.mNodes)
     {
         auto copy = std::make_unique<SceneNodeClass>(*node);
@@ -378,6 +379,55 @@ glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* no
     return visitor.GetResult();
 }
 
+void SceneClass::AddScriptVar(const ScriptVar& var)
+{
+    mScriptVars.push_back(var);
+}
+void SceneClass::AddScriptVar(ScriptVar&& var)
+{
+    mScriptVars.push_back(var);
+}
+void SceneClass::DeleteScriptVar(size_t index)
+{
+    ASSERT(index <mScriptVars.size());
+    auto it = mScriptVars.begin();
+    mScriptVars.erase(it + index);
+}
+void SceneClass::SetScriptVar(size_t index, const ScriptVar& var)
+{
+    ASSERT(index <mScriptVars.size());
+    mScriptVars[index] = var;
+}
+void SceneClass::SetScriptVar(size_t index, ScriptVar&& var)
+{
+    ASSERT(index <mScriptVars.size());
+    mScriptVars[index] = std::move(var);
+}
+ScriptVar& SceneClass::GetScriptVar(size_t index)
+{
+    ASSERT(index <mScriptVars.size());
+    return mScriptVars[index];
+}
+ScriptVar* SceneClass::FindScriptVar(const std::string& name)
+{
+    for (auto& var : mScriptVars)
+        if (var.GetName() == name)
+            return &var;
+    return nullptr;
+}
+const ScriptVar& SceneClass::GetScriptVar(size_t index) const
+{
+    ASSERT(index <mScriptVars.size());
+    return mScriptVars[index];
+}
+const ScriptVar* SceneClass::FindScriptVar(const std::string& name) const
+{
+    for (auto& var : mScriptVars)
+        if (var.GetName() == name)
+            return &var;
+    return nullptr;
+}
+
 size_t SceneClass::GetHash() const
 {
     size_t hash = 0;
@@ -389,6 +439,8 @@ size_t SceneClass::GetHash() const
             return;
         hash = base::hash_combine(hash, node->GetHash());
     });
+    for (const auto& var : mScriptVars)
+        hash = base::hash_combine(hash, var.GetHash());
     return hash;
 }
 
@@ -399,6 +451,10 @@ nlohmann::json SceneClass::ToJson() const
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
+    }
+    for (const auto& var : mScriptVars)
+    {
+        json["vars"].push_back(var.ToJson());
     }
     json["render_tree"] = mRenderTree.ToJson(&game::TreeNodeToJson<SceneNodeClass>);
     return json;
@@ -420,6 +476,16 @@ std::optional<SceneClass> SceneClass::FromJson(const nlohmann::json& json)
             ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
         }
     }
+    if (json.contains("vars"))
+    {
+        for (const auto& js : json["vars"].items())
+        {
+            std::optional<ScriptVar> var = ScriptVar::FromJson(js.value());
+            if (!var.has_value())
+                return std::nullopt;
+            ret.mScriptVars.push_back(std::move(var.value()));
+        }
+    }
 
     ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
     return ret;
@@ -437,6 +503,8 @@ SceneClass SceneClass::Clone() const
         map[node.get()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
+    ret.mScriptVars = mScriptVars;
+
     ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
         return map[node];
     });
@@ -451,6 +519,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     SceneClass tmp(other);
     mClassId    = std::move(tmp.mClassId);
     mNodes      = std::move(tmp.mNodes);
+    mScriptVars = std::move(tmp.mScriptVars);
     mRenderTree = tmp.mRenderTree;
     return *this;
 }
@@ -480,6 +549,14 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
     mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const SceneNodeClass* node) {
         return map[node];
     });
+
+    // make copies of mutable script variables.
+    for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+    {
+        auto var = klass->GetScriptVar(i);
+        if (!var.IsReadOnly())
+            mScriptVars.push_back(std::move(var));
+    }
 }
 
 Scene::Scene(const SceneClass& klass) : Scene(std::make_shared<SceneClass>(klass))
@@ -523,6 +600,17 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
         if (e->GetName() == name)
             return e.get();
     return nullptr;
+}
+
+const ScriptVar* Scene::FindScriptVar(const std::string& name) const
+{
+    // first check the mutable variables per this instance then check the class.
+    for (const auto& var : mScriptVars)
+    {
+        if (var.GetName() == name)
+            return &var;
+    }
+    return mClass->FindScriptVar(name);
 }
 
 void Scene::Update(float dt)

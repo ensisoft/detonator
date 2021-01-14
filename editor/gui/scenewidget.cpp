@@ -47,6 +47,7 @@
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/dlgscriptvar.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -64,6 +65,98 @@ namespace {
 
 namespace gui
 {
+
+// todo: refactor this and the similar model from EntityWidget into
+// some reusable class
+class SceneWidget::ScriptVarModel : public QAbstractTableModel
+{
+public:
+    ScriptVarModel(game::SceneClass& klass) : mClass(klass)
+    {}
+    virtual QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto& var = mClass.GetScriptVar(index.row());
+        if (role == Qt::DisplayRole)
+        {
+            switch (index.column()) {
+                case 0: return app::toString(var.GetType());
+                case 1: return app::FromUtf8(var.GetName());
+                case 2: return GetScriptVarData(var);
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            switch (section) {
+                case 0: return "Type";
+                case 1: return "Name";
+                case 2: return "Data";
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual int rowCount(const QModelIndex&) const override
+    {
+        return static_cast<int>(mClass.GetNumScriptVars());
+    }
+    virtual int columnCount(const QModelIndex&) const override
+    {
+        return 3;
+    }
+    void AddVariable(game::ScriptVar&& var)
+    {
+        const auto count = static_cast<int>(mClass.GetNumScriptVars());
+        beginInsertRows(QModelIndex(), count, count);
+        mClass.AddScriptVar(std::move(var));
+        endInsertRows();
+    }
+    void EditVariable(size_t row, game::ScriptVar&& var)
+    {
+        mClass.SetScriptVar(row, std::move(var));
+        emit dataChanged(index(row, 0), index(row, 3));
+    }
+    void DeleteVariable(size_t row)
+    {
+        beginRemoveRows(QModelIndex(), row, row);
+        mClass.DeleteScriptVar(row);
+        endRemoveRows();
+    }
+    void Reset()
+    {
+        beginResetModel();
+        endResetModel();
+    }
+
+private:
+    static QVariant GetScriptVarData(const game::ScriptVar& var)
+    {
+        switch (var.GetType())
+        {
+            case game::ScriptVar::Type::Boolean:
+                return var.GetValue<bool>();
+            case game::ScriptVar::Type::String:
+                return app::FromUtf8(var.GetValue<std::string>());
+            case game::ScriptVar::Type::Float:
+                return var.GetValue<float>();
+            case game::ScriptVar::Type::Integer:
+                return var.GetValue<int>();
+            case game::ScriptVar::Type::Vec2: {
+                const auto& val = var.GetValue<glm::vec2>();
+                return QString("%1,%2").arg(QString::number(val.x, 'f', 2))
+                        .arg(QString::number(val.y, 'f', 2));
+            }
+        }
+        BUG("Unknown ScriptVar type.");
+        return QVariant();
+    }
+private:
+    game::SceneClass& mClass;
+};
 
 class SceneWidget::PlaceEntityTool : public MouseTool
 {
@@ -217,8 +310,13 @@ SceneWidget::SceneWidget(app::Workspace* workspace)
     DEBUG("Create SceneWidget");
 
     mRenderTree.reset(new TreeModel(mState.scene));
+    mScriptVarModel.reset(new ScriptVarModel(mState.scene));
 
     mUI.setupUi(this);
+    mUI.scriptVarList->setModel(mScriptVarModel.get());
+    QHeaderView* verticalHeader = mUI.scriptVarList->verticalHeader();
+    verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+    verticalHeader->setDefaultSectionSize(16);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     mUI.actionPlay->setEnabled(true);
@@ -273,6 +371,11 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     mState.scene = *content;
     mOriginalHash = mState.scene.GetHash();
     mCameraWasLoaded = true;
+    mScriptVarModel->Reset();
+
+    const auto vars = mState.scene.GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, content->GetId());
@@ -373,9 +476,10 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.loadWidget("Scene", mUI.cmbGrid);
     settings.loadWidget("Scene", mUI.zoom);
     settings.loadWidget("Scene", mUI.widget);
+    settings.getValue("Scene", "camera_offset_x", &mState.camera_offset_x);
+    settings.getValue("Scene", "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(mUI.name->text());
-    mState.camera_offset_x = settings.getValue("Scene", "camera_offset_x", mState.camera_offset_x);
-    mState.camera_offset_y = settings.getValue("Scene", "camera_offset_y", mState.camera_offset_y);
+
     // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
@@ -394,6 +498,11 @@ bool SceneWidget::LoadState(const Settings& settings)
     mOriginalHash = mState.scene.GetHash();
 
     UpdateResourceReferences();
+
+    const auto vars = mState.scene.GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+    mScriptVarModel->Reset();
 
     mRenderTree.reset(new TreeModel(mState.scene));
     mUI.tree->SetModel(mRenderTree.get());
@@ -599,6 +708,46 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
         node->SetLayer(layer - 1);
     }
     DisplayCurrentNodeProperties();
+}
+
+void SceneWidget::on_btnNewScriptVar_clicked()
+{
+    game::ScriptVar var("My_Var", std::string(""));
+    DlgScriptVar dlg(this, var);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mScriptVarModel->AddVariable(std::move(var));
+    SetEnabled(mUI.btnEditScriptVar, true);
+    SetEnabled(mUI.btnDeleteScriptVar, true);
+}
+void SceneWidget::on_btnEditScriptVar_clicked()
+{
+    auto items = mUI.scriptVarList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    game::ScriptVar var = mState.scene.GetScriptVar(index.row());
+    DlgScriptVar dlg(this, var);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mScriptVarModel->EditVariable(index.row(), std::move(var));
+}
+void SceneWidget::on_btnDeleteScriptVar_clicked()
+{
+    auto items = mUI.scriptVarList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    mScriptVarModel->DeleteVariable(index.row());
+    const auto vars = mState.scene.GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 }
 
 void SceneWidget::on_plus90_clicked()

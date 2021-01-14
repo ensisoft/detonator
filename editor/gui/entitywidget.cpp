@@ -308,20 +308,16 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.widget->onZoomIn  = std::bind(&EntityWidget::ZoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&EntityWidget::ZoomOut, this);
-    mUI.widget->onPaintScene = std::bind(&EntityWidget::PaintScene, this,
-                                         std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onMouseMove = std::bind(&EntityWidget::MouseMove, this,
-                                        std::placeholders::_1);
-    mUI.widget->onMousePress = std::bind(&EntityWidget::MousePress, this,
-                                         std::placeholders::_1);
-    mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this,
-                                           std::placeholders::_1);
-    mUI.widget->onKeyPress = std::bind(&EntityWidget::KeyPress, this,
-                                       std::placeholders::_1);
-    mUI.widget->onInitScene = std::bind(&EntityWidget::InitScene, this,
-                                        std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn       = std::bind(&EntityWidget::ZoomIn, this);
+    mUI.widget->onZoomOut      = std::bind(&EntityWidget::ZoomOut, this);
+    mUI.widget->onMouseMove    = std::bind(&EntityWidget::MouseMove, this, std::placeholders::_1);
+    mUI.widget->onMousePress   = std::bind(&EntityWidget::MousePress, this, std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.widget->onKeyPress     = std::bind(&EntityWidget::KeyPress, this, std::placeholders::_1);
+    mUI.widget->onPaintScene   = std::bind(&EntityWidget::PaintScene, this, std::placeholders::_1,
+                                           std::placeholders::_2);
+    mUI.widget->onInitScene    = std::bind(&EntityWidget::InitScene, this, std::placeholders::_1,
+                                           std::placeholders::_2);
 
     // create the menu for creating instances of user defined drawables
     // since there doesn't seem to be a way to do this in the designer.
@@ -484,9 +480,10 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.loadWidget("Entity", mUI.cmbGrid);
     settings.loadWidget("Entity", mUI.zoom);
     settings.loadWidget("Entity", mUI.widget);
+    settings.getValue("Entity", "camera_offset_x", &mState.camera_offset_x);
+    settings.getValue("Entity", "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(mUI.name->text());
-    mState.camera_offset_x = settings.getValue("Entity", "camera_offset_x", mState.camera_offset_x);
-    mState.camera_offset_y = settings.getValue("Entity", "camera_offset_y", mState.camera_offset_y);
+
     // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
@@ -894,7 +891,7 @@ void EntityWidget::on_btnDeleteTrack_clicked()
 
 void EntityWidget::on_btnNewScriptVar_clicked()
 {
-    game::ScriptVar var("My Var", std::string(""));
+    game::ScriptVar var("My_Var", std::string(""));
     DlgScriptVar dlg(this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;

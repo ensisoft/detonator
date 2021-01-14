@@ -465,6 +465,13 @@ void unit_test_entity_instance()
         node.SetRotation(0.0f);
         klass.AddNode(std::move(node));
     }
+    {
+        game::ScriptVar foo("foo", 123, game::ScriptVar::ReadWrite);
+        game::ScriptVar bar("bar", 1.0f, game::ScriptVar::ReadOnly);
+        klass.AddScriptVar(foo);
+        klass.AddScriptVar(std::move(bar));
+    }
+
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
@@ -482,6 +489,13 @@ void unit_test_entity_instance()
     TEST_REQUIRE(instance.GetNode(2).GetName() == "child_2");
     TEST_REQUIRE(instance.GetNode(3).GetName() == "child_3");
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_3 child_2");
+
+    TEST_REQUIRE(instance.FindScriptVar("foo"));
+    TEST_REQUIRE(instance.FindScriptVar("bar"));
+    TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
+    TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
+    instance.FindScriptVar("foo")->SetValue(444);
+    TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
 
     // todo: test more of the instance api
 }
