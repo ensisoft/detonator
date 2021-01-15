@@ -385,6 +385,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -449,6 +450,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.saveWidget("Scene", mUI.rotation);
     settings.saveWidget("Scene", mUI.chkShowOrigin);
     settings.saveWidget("Scene", mUI.chkShowGrid);
+    settings.saveWidget("Scene", mUI.chkShowViewport);
     settings.saveWidget("Scene", mUI.chkSnap);
     settings.saveWidget("Scene", mUI.cmbGrid);
     settings.saveWidget("Scene", mUI.zoom);
@@ -473,6 +475,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.loadWidget("Scene", mUI.rotation);
     settings.loadWidget("Scene", mUI.chkShowOrigin);
     settings.loadWidget("Scene", mUI.chkShowGrid);
+    settings.loadWidget("Scene", mUI.chkShowViewport);
     settings.loadWidget("Scene", mUI.chkSnap);
     settings.loadWidget("Scene", mUI.cmbGrid);
     settings.loadWidget("Scene", mUI.zoom);
@@ -627,6 +630,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
     SetUserProperty(resource, "widget", mUI.widget);
 
     mState.workspace->SaveResource(resource);
@@ -1028,6 +1032,14 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     if (GetValue(mUI.chkShowOrigin))
     {
         DrawBasisVectors(painter, view);
+    }
+
+    if (GetValue(mUI.chkShowViewport))
+    {
+        const auto& settings = mState.workspace->GetProjectSettings();
+        const float game_width = settings.viewport_width;
+        const float game_height = settings.viewport_height;
+        DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
     // pop view transformation

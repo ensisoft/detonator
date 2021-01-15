@@ -452,6 +452,14 @@ namespace app
             glm::vec2 gravity = {0.0f, 10.0f};
             // scaling factor for mapping game world to physics world and back
             glm::vec2 physics_scale = {100.0f, 100.0f};
+            // game's logical viewport width. this is *not* the final
+            // viewport (game decides that) but only for visualization
+            // in the editor.
+            unsigned viewport_width = 1024;
+            // game's logical viewport height. this is *not* the final
+            // viewport (game decides that) but only for visualization
+            // in the editor.
+            unsigned viewport_height = 768;
         };
 
         const ProjectSettings& GetProjectSettings() const

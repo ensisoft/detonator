@@ -53,6 +53,14 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     float xs, float ys, // scaling factors for the axis
     unsigned width, unsigned height); // viewport (widget) size
 
+// Draw an overlay of viewport illustration. The viewport is the logical
+// game viewport that the game can adjust in order to define the view
+// into the game world.
+void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
+    float game_view_width,
+    float game_view_height,
+    unsigned widget_width,
+    unsigned widget_height);
 
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually

@@ -1177,6 +1177,8 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "phys_gravity_y"          , mSettings.gravity.y);
     JsonWrite(project, "phys_scale_x"            , mSettings.physics_scale.x);
     JsonWrite(project, "phys_scale_y"            , mSettings.physics_scale.y);
+    JsonWrite(project, "game_viewport_width"     , mSettings.viewport_width);
+    JsonWrite(project, "game_viewport_height"    , mSettings.viewport_height);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1261,6 +1263,8 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "phys_gravity_y",           &mSettings.gravity.y);
     JsonReadSafe(project, "phys_scale_x",             &mSettings.physics_scale.x);
     JsonReadSafe(project, "phys_scale_y",             &mSettings.physics_scale.y);
+    JsonReadSafe(project, "game_viewport_width",      &mSettings.viewport_width);
+    JsonReadSafe(project, "game_viewport_height",     &mSettings.viewport_height);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();

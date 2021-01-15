@@ -33,6 +33,8 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
+#include "graphics/drawing.h"
+#include "gamelib/types.h"
 #include "base/math.h"
 
 namespace gui
@@ -108,6 +110,25 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     painter.Draw(drawable, view, material);
 
     view.Pop();
+}
+
+void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
+                         float game_viewport_width,
+                         float game_viewport_height,
+                         unsigned widget_width,
+                         unsigned widget_height)
+{
+    game::FBox viewport(game_viewport_width, game_viewport_height);
+    viewport.Transform(view.GetAsMatrix());
+    // this now the width and height of the game's viewport in the window.
+    const auto game_viewport_width_in_window  = viewport.GetWidth();
+    const auto game_viewport_height_in_window = viewport.GetHeight();
+    const auto game_viewport_x_in_window = (widget_width - game_viewport_width_in_window) / 2;
+    const auto game_viewport_y_in_window = (widget_height - game_viewport_height_in_window) / 2;
+
+    const gfx::FRect rect(game_viewport_x_in_window, game_viewport_y_in_window,
+                    game_viewport_width_in_window, game_viewport_height_in_window);
+    gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
 }
 
 } // namespace
