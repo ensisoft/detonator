@@ -76,11 +76,17 @@ namespace gui
             paintGL();
         }
 
+        bool hasInputFocus() const;
+
         gfx::Color4f getClearColor() const
         { return mClearColor; }
+        gfx::Color4f getFocusColor() const
+        { return mFocusColor; }
 
         void setClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
+        void setFocusColor(const gfx::Color4f& color)
+        { mFocusColor = color; }
 
         bool haveVSYNC() const;
 
@@ -129,15 +135,19 @@ namespace gui
         virtual void mouseDoubleClickEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
+        virtual void focusInEvent(QFocusEvent* event) override;
+        virtual void focusOutEvent(QFocusEvent* event) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
         gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
+        gfx::Color4f mFocusColor = {1.0f, 1.0f, 1.0f, 1.0f};
     private:
         QElapsedTimer mClock;
         bool mInitialized = false;
         bool mVsync       = false;
+        bool mHasFocus    = false;
     private:
         quint64 mNumFrames = 0;
         float mCurrentFps  = 0.0f;
@@ -161,6 +171,8 @@ namespace gui
         GfxWidget(QWidget* parent);
        ~GfxWidget();
 
+        bool hasInputFocus() const
+        { return mWindow->hasInputFocus(); }
         bool haveVSYNC() const
         { return mWindow->haveVSYNC(); }
         float getCurrentFPS() const

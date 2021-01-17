@@ -34,6 +34,7 @@
 
 #include "editor/app/eventlog.h"
 #include "graphics/drawing.h"
+#include "graphics/transform.h"
 #include "utility.h"
 #include "gfxwidget.h"
 
@@ -202,6 +203,11 @@ void GfxWindow::dispose()
     DEBUG("Released GfxWindow device and painter.");
 }
 
+bool GfxWindow::hasInputFocus() const
+{
+    return mHasFocus;
+}
+
 void GfxWindow::initializeGL()
 {
     class WindowContext : public gfx::Device::Context
@@ -285,6 +291,20 @@ void GfxWindow::paintGL()
         mNumFrames  = 0;
         mClock.restart();
     }
+    if (mHasFocus)
+    {
+        static std::shared_ptr<gfx::MaterialClass> material;
+        if (!material)
+        {
+            material = std::make_shared<gfx::MaterialClass>();
+            material->SetType(gfx::MaterialClass::Type::Color);
+            material->SetBaseColor(mFocusColor);
+        }
+        gfx::Rectangle rect(gfx::Drawable::Style::Outline, 2.0f);
+        gfx::Transform transform;
+        transform.Resize(width(), height());
+        mCustomGraphicsPainter->Draw(rect, transform, *material);
+    }
 
     mCustomGraphicsDevice->EndFrame(false /*display*/);
     // using a shared device means that this must be done now
@@ -345,6 +365,17 @@ void GfxWindow::wheelEvent(QWheelEvent* wheel)
     onMouseWheel(wheel);
 }
 
+void GfxWindow::focusInEvent(QFocusEvent* event)
+{
+    //DEBUG("GfxWindow gain focus");
+    mHasFocus = true;
+}
+void GfxWindow::focusOutEvent(QFocusEvent* event)
+{
+    //DEBUG("GfxWindow lost focus.");
+    mHasFocus = false;
+}
+
 void GfxWindow::mouseDoubleClickEvent(QMouseEvent* mickey)
 {
     onMouseDoubleClick(mickey);
@@ -391,6 +422,20 @@ void GfxWindow::EndFrame()
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
 {
     mWindow = new GfxWindow();
+
+    // okay, so we've got a QWindow which means it doesn't get the normal
+    // QWidget functionality out of the box. For example the Focus rectangle
+    // doesn't simply just work.
+    // It's possible that we draw that ourselves as a visual goodie but figuring out the
+    // color is a little bit too difficult.. The focus rect is drawn by the style
+    // engine and doesn't seem actually use any of the palette colors!
+    // https://github.com/ensisoft/qt-palette-colors is a tool to display palette colors
+    // for all combinations of color group and role.
+    // Testing on Linux with kvantum as the theme the focus rect is blue but there's
+    // no such blue in any of the palette color combinations.
+    // going to use some hardcoded blue here for now.
+    mWindow->setFocusColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
+
     // the container takes ownership of the window.
     mContainer = QWidget::createWindowContainer(mWindow, this);
     mWindow->onPaintScene = [&] (gfx::Painter& painter, double secs){
