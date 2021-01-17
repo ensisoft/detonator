@@ -58,6 +58,9 @@ namespace gui
         TextEditor(QWidget *parent = nullptr);
        ~TextEditor();
 
+        bool CanCopy() const
+        { return mCanCopy; }
+
         void SetDocument(QTextDocument* document);
 
         void PaintLineNumbers(const QRect& rect);
@@ -75,6 +78,7 @@ namespace gui
         void UpdateLineNumberAreaWidth(int newBlockCount);
         void UpdateLineNumberArea(const QRect &rect, int dy);
         void HighlightCurrentLine();
+        void CopyAvailable(bool yes_no);
     private:
         void ApplySettings();
 
@@ -83,6 +87,7 @@ namespace gui
         QSyntaxHighlighter* mHighlighter = nullptr;
         QTextDocument* mDocument = nullptr;
         static Settings mSettings;
+        bool mCanCopy = false;
     };
 
 } // namespace

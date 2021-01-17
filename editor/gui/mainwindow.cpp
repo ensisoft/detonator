@@ -145,6 +145,9 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.mainToolBar->setVisible(true);
     mUI.actionViewToolbar->setChecked(true);
     mUI.actionViewStatusbar->setChecked(true);
+    mUI.actionCut->setShortcut(QKeySequence::Cut);
+    mUI.actionCopy->setShortcut(QKeySequence::Copy);
+    mUI.actionPaste->setShortcut(QKeySequence::Paste);
 
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
@@ -714,6 +717,36 @@ bool MainWindow::haveAcceleratedWindows() const
     return false;
 }
 
+void MainWindow::on_menuEdit_aboutToShow()
+{
+    DEBUG("Edit menu about to show.");
+
+    if (!mCurrentWidget)
+    {
+        mUI.actionCut->setEnabled(false);
+        mUI.actionCopy->setEnabled(false);
+        mUI.actionPaste->setEnabled(false);
+        return;
+    }
+    // Paste won't work correctly when invoked through the menu.
+    // The problem is that we're using QWindow inside GfxWidget and that
+    // means that when the menu opens the widget loses keyboard focus.
+    // If the widget checks inside MainWidget::Paste whether the GfxWidget actually
+    // is focused or not this won't work correctly. And it kinda needs to do this
+    // inorder to implement the paste only when the window is actually in focus.
+    // As in it'd be weird if something was pasted into the gfx widget while some
+    // other widget actually had the focus.
+
+    // instead of having some complicated signal system on window activation to indicate
+    // whether something can be copy/pasted we enable/disable these on last minute
+    // menu activation. Then if the user wants to invoke the actions throuhg the keyboard
+    // shortcuts the widget implementations will actually need to check for the
+    // right state before implementing the action.
+    mUI.actionCut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanCut, &mClipboard));
+    mUI.actionCopy->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanCopy, &mClipboard));
+    mUI.actionPaste->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanPaste, &mClipboard));
+}
+
 void MainWindow::on_mainTab_currentChanged(int index)
 {
     DEBUG("Main tab current changed %1", index);
@@ -858,6 +891,28 @@ void MainWindow::on_actionWindowPopOut_triggered()
     // somewhat fucked up in its appearance. (Layout is off)
     QTimer::singleShot(10, window, &QWidget::updateGeometry);
     QTimer::singleShot(10, widget, &QWidget::updateGeometry);
+}
+
+void MainWindow::on_actionCut_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+
+    mCurrentWidget->Cut(mClipboard);
+}
+void MainWindow::on_actionCopy_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+
+    mCurrentWidget->Copy(mClipboard);
+}
+void MainWindow::on_actionPaste_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+
+    mCurrentWidget->Paste(mClipboard);
 }
 
 void MainWindow::on_actionZoomIn_triggered()
@@ -1835,7 +1890,7 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     if (new_window)
     {
         // create a new child window that will hold the widget.
-        ChildWindow* child = new ChildWindow(widget);
+        ChildWindow* child = new ChildWindow(widget, &mClipboard);
         child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
 
         // resize and relocate on the desktop, by default the window seems

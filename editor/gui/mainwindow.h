@@ -41,6 +41,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/ipc.h"
 #include "editor/gui/appsettings.h"
+#include "editor/gui/clipboard.h"
 
 namespace gui
 {
@@ -102,6 +103,7 @@ namespace gui
         void aboutToClose();
 
     private slots:
+        void on_menuEdit_aboutToShow();
         void on_mainTab_currentChanged(int index);
         void on_mainTab_tabCloseRequested(int index);
         void on_actionExit_triggered();
@@ -109,6 +111,9 @@ namespace gui
         void on_actionWindowNext_triggered();
         void on_actionWindowPrev_triggered();
         void on_actionWindowPopOut_triggered();
+        void on_actionCut_triggered();
+        void on_actionCopy_triggered();
+        void on_actionPaste_triggered();
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();
@@ -205,7 +210,8 @@ namespace gui
         std::unique_ptr<app::IPCHost> mIPCHost;
         // proxy model for filtering application event log
         app::EventLogProxy mEventLog;
-
+        // the application's main clipboard.
+        Clipboard mClipboard;
     };
 
 } // namespace

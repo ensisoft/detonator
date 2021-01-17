@@ -37,6 +37,7 @@ namespace app {
 namespace gui
 {
     class MainWidget;
+    class Clipboard;
 
     // ChildWindow is a "container" window for MainWidgets that
     // are opened in their own windows. We need this to provide
@@ -48,7 +49,7 @@ namespace gui
 
     public:
         // takes ownership of the widget.
-        ChildWindow(MainWidget* widget);
+        ChildWindow(MainWidget* widget, Clipboard* clipboard);
        ~ChildWindow();
 
         // Returns true if the widget requires accelerated
@@ -88,8 +89,12 @@ namespace gui
         MainWidget* TakeWidget();
 
     private slots:
+        void on_menuEdit_aboutToShow();
         void on_actionClose_triggered();
         void on_actionPopIn_triggered();
+        void on_actionCut_triggered();
+        void on_actionCopy_triggered();
+        void on_actionPaste_triggered();
         void on_actionReloadShaders_triggered();
         void on_actionReloadTextures_triggered();
         void on_actionZoomIn_triggered();
@@ -101,6 +106,7 @@ namespace gui
         Ui::ChildWindow mUI;
     private:
         MainWidget* mWidget = nullptr;
+        Clipboard* mClipboard = nullptr;
         bool mClosed = false;
         bool mPopInRequested = false;
     };

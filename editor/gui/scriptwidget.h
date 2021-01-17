@@ -50,8 +50,12 @@ namespace gui
 
         virtual bool IsAccelerated() const override
         { return false; }
+        virtual bool CanTakeAction(Actions action, const Clipboard*) const override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
+        virtual void Cut(Clipboard& clipboard) override;
+        virtual void Copy(Clipboard& clipboard) const override;
+        virtual void Paste(const Clipboard& clipboard) override;
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
         virtual bool ConfirmClose() override;

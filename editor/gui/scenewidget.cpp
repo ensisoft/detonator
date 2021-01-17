@@ -48,6 +48,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
+#include "editor/gui/clipboard.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -513,6 +514,47 @@ bool SceneWidget::LoadState(const Settings& settings)
     mUI.tree->Rebuild();
     return true;
 }
+
+bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
+{
+    switch (action)
+    {
+        case Actions::CanPaste:
+            if (!mUI.widget->hasInputFocus())
+                return false;
+            else if (clipboard->IsEmpty())
+                return false;
+            else if (clipboard->GetType() != "application/json/scene_node")
+                return false;
+            return true;
+        case Actions::CanCopy:
+        case Actions::CanCut:
+            if (!mUI.widget->hasInputFocus())
+                return false;
+            else if (!GetCurrentNode())
+                return false;
+            return true;
+        case Actions::CanZoomIn:
+            {
+                const auto max = mUI.zoom->maximum();
+                const auto val = mUI.zoom->value();
+                return val < max;
+            }
+            break;
+        case Actions::CanZoomOut:
+            {
+                const auto min = mUI.zoom->minimum();
+                const auto val = mUI.zoom->value();
+                return val > min;
+            }
+            break;
+        case Actions::CanReloadShaders:
+        case Actions::CanReloadTextures:
+            return true;
+    }
+    return false;
+}
+
 bool SceneWidget::CanZoomIn() const
 {
     const auto max = mUI.zoom->maximum();
@@ -525,6 +567,118 @@ bool SceneWidget::CanZoomOut() const
     const auto val = mUI.zoom->value();
     return val > min;
 }
+
+void SceneWidget::Cut(Clipboard& clipboard)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& tree = mState.scene.GetRenderTree();
+        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        clipboard.SetType("application/json/scene_node");
+        clipboard.SetText(json.dump(2));
+
+        NOTE("Copied JSON to application clipboard.");
+        DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
+
+        mState.scene.DeleteNode(node);
+        mUI.tree->Rebuild();
+    }
+}
+void SceneWidget::Copy(Clipboard& clipboard) const
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        const auto& tree = mState.scene.GetRenderTree();
+        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        clipboard.SetType("application/json/scene_node");
+        clipboard.SetText(json.dump(2));
+
+        NOTE("Copied JSON to application clipboard.");
+        DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
+    }
+}
+void SceneWidget::Paste(const Clipboard& clipboard)
+{
+    if (!mUI.widget->hasInputFocus())
+        return;
+
+    if (clipboard.GetType() != "application/json/scene_node")
+    {
+        NOTE("No entity JSON data found in clipboard.");
+        return;
+    }
+
+    const auto& str = clipboard.GetText();
+    auto [success, json, _] = base::JsonParse(str.begin(), str.end());
+    if (!success)
+    {
+        NOTE("Clipboard JSON parse failed.");
+        return;
+    }
+
+    // use a temporary vector in case there's a problem
+    std::vector<std::unique_ptr<game::SceneNodeClass>> nodes;
+    bool error = false;
+    game::SceneClass::RenderTree tree;
+    tree.FromJson(json, [&nodes, &error](const nlohmann::json& json) {
+        auto ret = game::SceneNodeClass::FromJson(json);
+        if (ret.has_value()) {
+            auto node = std::make_unique<game::SceneNodeClass>(ret->Clone());
+            node->SetName(base::FormatString("Copy of %1", ret->GetName()));
+            nodes.push_back(std::move(node));
+            return nodes.back().get();
+        }
+        error = true;
+        return (game::SceneNodeClass*)nullptr;
+    });
+    if (error || nodes.empty())
+    {
+        NOTE("No render tree JSON found.");
+        return;
+    }
+
+    // if the mouse pointer is not within the widget then adjust
+    // the paste location to the center of the widget.
+    QPoint mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    if (mickey.x() < 0 || mickey.x() > mUI.widget->width() ||
+        mickey.y() < 0 || mickey.y() > mUI.widget->height())
+        mickey = QPoint(mUI.widget->width() * 0.5, mUI.widget->height() * 0.5);
+
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
+    const auto& mouse_pos_view  = ToVec4(mickey);
+    const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
+
+    auto* paste_root = nodes[0].get();
+    paste_root->SetTranslation(glm::vec2(mouse_pos_scene.x, mouse_pos_scene.y));
+    tree.LinkChild(nullptr, paste_root);
+
+    // if we got this far, nodes should contain the nodes to be added
+    // into the scene and tree should contain their hierarchy.
+    for (auto& node : nodes)
+    {
+        // moving the unique ptr means that node address stays the same
+        // thus the tree is still valid!
+        node->SetEntity(mState.workspace->FindEntityClassById(node->GetEntityId()));
+        mState.scene.AddNode(std::move(node));
+    }
+    nodes.clear();
+    // walk the tree and link the nodes into the scene.
+    tree.PreOrderTraverseForEach([&nodes, this, &tree](game::SceneNodeClass* node) {
+        if (node == nullptr)
+            return;
+        auto* parent = tree.GetParent(node);
+        mState.scene.LinkChild(parent, node);
+    });
+
+    mUI.tree->Rebuild();
+    mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
+}
+
 void SceneWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
@@ -1283,6 +1437,16 @@ game::SceneNodeClass* SceneWidget::GetCurrentNode()
     else if (!item->GetUserData())
         return nullptr;
     return static_cast<game::SceneNodeClass*>(item->GetUserData());
+}
+
+const game::SceneNodeClass* SceneWidget::GetCurrentNode() const
+{
+    const TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
+    if (item == nullptr)
+        return nullptr;
+    else if (!item->GetUserData())
+        return nullptr;
+    return static_cast<const game::SceneNodeClass*>(item->GetUserData());
 }
 
 } // bui

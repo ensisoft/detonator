@@ -10,6 +10,7 @@
 namespace gui
 {
     class Settings;
+    class Clipboard;
 
     // MainWidget interface is an abstraction for extending the
     // application functionality vertically starting from
@@ -22,6 +23,16 @@ namespace gui
 
     public:
         virtual ~MainWidget() = default;
+
+        enum class Actions {
+            CanZoomIn  = 0x1,
+            CanZoomOut = 0x2,
+            CanCut     = 0x4,
+            CanCopy    = 0x8,
+            CanPaste   = 0x10,
+            CanReloadTextures = 0x20,
+            CanReloadShaders  = 0x40
+        };
 
         // Returns whether the widget does accelerated rendering and needs to
         // run in an accelerated "game style" loop.
@@ -94,6 +105,9 @@ namespace gui
         // returns the widget will be deleted.
         virtual void Shutdown() {}
 
+        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard = nullptr) const
+        { return false; }
+
         // Should return true if widget supports zoom in. It's possible
         // that widget doesn't support zoom at all or has already reached
         // the maximum zoom.
@@ -120,6 +134,18 @@ namespace gui
         // If the widget uses graphics resources (textures) ask
         // them to be reloaded.
         virtual void ReloadTextures() {};
+
+        // Cut the currently selected object and place into the clipboard.
+        virtual void Cut(Clipboard& clipboard)
+        {}
+
+        // Copy the currently selected object and place into the clipboard.
+        virtual void Copy(Clipboard& clipboard) const
+        {}
+
+        // Paste the current object from the clipboard into the widget.
+        virtual void Paste(const Clipboard& clipboard)
+        {}
 
         // Called before the widget is being closed by the user.
         // If there are any pending/unsaved changes the widget
@@ -149,7 +175,11 @@ namespace gui
         // Request to display the new widget. Will transfer
         // ownership of the widget the mainwindow.
         void OpenNewWidget(MainWidget* widget);
-
+        // Emitted when the widget's state regarding possible actions that
+        // can take place has changed. The MainWindow will then query the
+        // widget again to see which actions (cut,copy, paste, zoom etc)
+        // can or cannot take place.
+        void ActionStateChanged();
     private:
     };
 

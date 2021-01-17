@@ -33,11 +33,14 @@
 #include "editor/gui/childwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/clipboard.h"
 
 namespace gui
 {
 
-ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
+ChildWindow::ChildWindow(MainWidget* widget, Clipboard* clipboard)
+  : mWidget(widget)
+  , mClipboard(clipboard)
 {
     const auto& icon = mWidget->windowIcon();
     const auto& text = mWidget->windowTitle();
@@ -57,6 +60,9 @@ ChildWindow::ChildWindow(MainWidget* widget) : mWidget(widget)
     mUI.menuTemp->setTitle(menu_name);
     mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
     mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
+    mUI.actionCut->setShortcut(QKeySequence::Cut);
+    mUI.actionCopy->setShortcut(QKeySequence::Copy);
+    mUI.actionPaste->setShortcut(QKeySequence::Paste);
 
     mWidget->Activate();
     mWidget->AddActions(*mUI.toolBar);
@@ -168,6 +174,27 @@ MainWidget* ChildWindow::TakeWidget()
     return ret;
 }
 
+void ChildWindow::on_menuEdit_aboutToShow()
+{
+    DEBUG("Edit menu about to show.");
+
+    if (!mWidget)
+    {
+        mUI.actionCut->setEnabled(false);
+        mUI.actionCopy->setEnabled(false);
+        mUI.actionPaste->setEnabled(false);
+        return;
+    }
+
+    // see comments in MainWindow::on_menuEdit about this
+    // problems related to paste functionality
+    // and why we enable/disable the actions here.
+
+    mUI.actionCut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanCut, mClipboard));
+    mUI.actionCopy->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanCopy, mClipboard));
+    mUI.actionPaste->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanPaste, mClipboard));
+}
+
 void ChildWindow::on_actionClose_triggered()
 {
     if (!mWidget->ConfirmClose())
@@ -184,6 +211,26 @@ void ChildWindow::on_actionPopIn_triggered()
 {
     mPopInRequested = true;
 }
+
+void ChildWindow::on_actionCut_triggered()
+{
+    if (!mWidget)
+        return;
+    mWidget->Cut(*mClipboard);
+}
+void ChildWindow::on_actionCopy_triggered()
+{
+    if (!mWidget)
+        return;
+    mWidget->Copy(*mClipboard);
+}
+void ChildWindow::on_actionPaste_triggered()
+{
+    if (!mWidget)
+        return;
+    mWidget->Paste(*mClipboard);
+}
+
 void ChildWindow::on_actionReloadShaders_triggered()
 {
     mWidget->ReloadShaders();

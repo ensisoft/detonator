@@ -79,6 +79,26 @@ ScriptWidget::~ScriptWidget()
     DEBUG("Destroy ScriptWidget");
 }
 
+bool ScriptWidget::CanTakeAction(Actions action, const Clipboard*) const
+{
+    // canPaste seems to be broken??
+    switch (action)
+    {
+        case Actions::CanZoomOut:
+        case Actions::CanZoomIn:
+            return false;
+        case Actions::CanReloadShaders:
+        case Actions::CanReloadTextures:
+            return false;
+        case Actions::CanCut:
+        case Actions::CanCopy:
+            return mUI.code->hasFocus() &&  mUI.code->CanCopy();
+        case Actions::CanPaste:
+            return mUI.code->hasFocus() && mUI.code->canPaste();
+    }
+    return  false;
+}
+
 void ScriptWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionSave);
@@ -92,6 +112,25 @@ void ScriptWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionReplace);
     menu.addSeparator();
     menu.addAction(mUI.actionOpen);
+}
+
+void ScriptWidget::Cut(Clipboard&)
+{
+    // uses the global QClipboard which is fine here 
+    // because that allows cutting/pasting between apps
+    mUI.code->cut();
+}
+void ScriptWidget::Copy(Clipboard&) const
+{
+    // uses the global QClipboard which is fine here 
+    // because that allows cutting/pasting between apps
+    mUI.code->copy();
+}
+void ScriptWidget::Paste(const Clipboard&)
+{
+    // uses the global QClipboard which is fine here 
+    // because that allows cutting/pasting between apps
+    mUI.code->paste();
 }
 
 bool ScriptWidget::SaveState(Settings& settings) const

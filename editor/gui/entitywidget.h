@@ -63,8 +63,12 @@ namespace gui
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
+        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
         virtual bool CanZoomIn() const override;
         virtual bool CanZoomOut() const override;
+        virtual void Cut(Clipboard& clipboard) override;
+        virtual void Copy(Clipboard& clipboard) const override;
+        virtual void Paste(const Clipboard& clipboard) override;
         virtual void ZoomIn() override;
         virtual void ZoomOut() override;
         virtual void ReloadShaders() override;
@@ -170,6 +174,7 @@ namespace gui
         void RebuildCombos();
         void UpdateDeletedResourceReferences();
         game::EntityNodeClass* GetCurrentNode();
+        const game::EntityNodeClass* GetCurrentNode() const;
     private:
         Ui::EntityWidget mUI;
         // there doesn't seem to be a way to do this in the designer
