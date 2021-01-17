@@ -167,6 +167,10 @@ namespace gui
                 mNode->SetTranslation(position);
                 mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
             }
+            // set a flag that it was moved only if it actually was.
+            // otherwise simply selecting a node will snap it to the
+            // new place if snap to grid was on.
+            mWasMoved = true;
         }
         virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -189,6 +193,9 @@ namespace gui
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
+            if (!mWasMoved)
+                return true;
+
             if (mickey->modifiers() & Qt::ControlModifier)
                 mSnapToGrid = !mSnapToGrid;
 
@@ -210,6 +217,7 @@ namespace gui
         glm::vec2 mPreviousMousePos;
         // true if we want the x,y coords to be aligned on grid size units.
         bool mSnapToGrid = false;
+        bool mWasMoved = false;
         unsigned mGridSize = 0;
     };
 
