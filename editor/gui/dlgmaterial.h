@@ -55,6 +55,7 @@ namespace gui
     private:
         void PaintScene(gfx::Painter& painter, double secs);
         void MousePress(QMouseEvent* mickey);
+        void MouseDoubleClick(QMouseEvent* mickey);
         void MouseWheel(QWheelEvent* wheel);
         bool KeyPress(QKeyEvent* key);
     private:

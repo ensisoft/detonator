@@ -68,6 +68,7 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
     mUI.widget->onKeyPress = std::bind(&DlgMaterial::KeyPress, this, std::placeholders::_1);
     mUI.widget->onMousePress = std::bind(&DlgMaterial::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseWheel = std::bind(&DlgMaterial::MouseWheel, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&DlgMaterial::MouseDoubleClick, this, std::placeholders::_1);
 }
 
 void DlgMaterial::on_btnAccept_clicked()
@@ -161,6 +162,12 @@ void DlgMaterial::MousePress(QMouseEvent* mickey)
     if (index >= mMaterialIds.size())
         return;
     mSelectedMaterialId = mMaterialIds[index];
+}
+
+void DlgMaterial::MouseDoubleClick(QMouseEvent* mickey)
+{
+    MousePress(mickey);
+    accept();
 }
 
 void DlgMaterial::MouseWheel(QWheelEvent* wheel)

@@ -164,6 +164,7 @@ namespace gui
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);
+        void MouseDoubleClick(QMouseEvent* mickey);
         bool KeyPress(QKeyEvent* key);
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();

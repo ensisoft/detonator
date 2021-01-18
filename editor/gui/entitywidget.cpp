@@ -320,6 +320,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace)
     mUI.widget->onMousePress   = std::bind(&EntityWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&EntityWidget::KeyPress, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&EntityWidget::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&EntityWidget::PaintScene, this, std::placeholders::_1,
                                            std::placeholders::_2);
     mUI.widget->onInitScene    = std::bind(&EntityWidget::InitScene, this, std::placeholders::_1,
@@ -1783,6 +1784,33 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
         mCurrentTool.release();
         UncheckPlacementActions();
     }
+}
+
+void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
+{
+    // double click is preceded by a regular click event and quick
+    // googling suggests that there's really no way to filter out
+    // single click when trying to react only to double click other
+    // than to set a timer (which adds latency).
+    // Going to simply discard any tool selection here on double click.
+    mCurrentTool.release();
+
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate((float)qDegreesToRadians(mUI.rotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
+    if (!hitnode  || !hitnode->GetDrawable())
+        return;
+
+    auto* drawable = hitnode->GetDrawable();
+    QString material = app::FromUtf8(drawable->GetMaterialId());
+    DlgMaterial dlg(this, mState.workspace, material);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+    drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
