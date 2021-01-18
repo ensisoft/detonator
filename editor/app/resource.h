@@ -71,8 +71,6 @@ namespace app
             Drawable,
             // It's an entity description
             Entity,
-            // It's an audio track
-            AudioTrack,
             // It's a scene description
             Scene,
             // it's a script file.

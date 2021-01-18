@@ -1559,6 +1559,19 @@ const Resource& Workspace::GetResource(size_t index) const
     return *mResources[index];
 }
 
+const Resource& Workspace::GetUserDefinedResource(size_t index) const
+{
+    ASSERT(index < mVisibleCount);
+    return *mResources[index];
+}
+const Resource& Workspace::GetPrimitiveResource(size_t index) const
+{
+    const auto num_primitives = mResources.size() - mVisibleCount;
+
+    ASSERT(index < num_primitives);
+    return *mResources[mVisibleCount + index];
+}
+
 void Workspace::DeleteResources(const QModelIndexList& list)
 {
     std::vector<size_t> indices;

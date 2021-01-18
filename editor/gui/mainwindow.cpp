@@ -265,6 +265,8 @@ void MainWindow::loadState()
     mUI.menuEdit->setEnabled(false);
     mUI.menuTemp->setEnabled(false);
     mUI.workspace->setModel(nullptr);
+    mWorkspaceProxy.SetModel(nullptr);
+    mWorkspaceProxy.setSourceModel(nullptr);
 
     BuildRecentWorkspacesMenu();
 
@@ -370,8 +372,10 @@ bool MainWindow::loadWorkspace(const QString& dir)
     // Load workspace windows and their content.
     bool success = true;
 
+    unsigned show_resource_bits = ~0u;
     QStringList session;
     workspace->GetUserProperty("session_files", &session);
+    workspace->GetUserProperty("show_resource_bits", &show_resource_bits);
     for (const auto& file : session)
     {
         Settings settings(file);
@@ -429,12 +433,16 @@ bool MainWindow::loadWorkspace(const QString& dir)
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
 
     mUI.mainTab->setCurrentIndex(workspace->GetUserProperty("focused_widget_index", 0));
-    mUI.workspace->setModel(workspace->GetResourceModel());
+    mUI.workspace->setModel(&mWorkspaceProxy);
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
     mUI.actionSelectResourceForEditing->setEnabled(true);
     mUI.menuWorkspace->setEnabled(true);
     mWorkspace = std::move(workspace);
+    mWorkspaceProxy.SetModel(mWorkspace.get());
+    mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
+    mWorkspaceProxy.SetShowBits(show_resource_bits);
+    mWorkspaceProxy.invalidate();
     return success;
 }
 
@@ -527,8 +535,7 @@ bool MainWindow::saveWorkspace()
         session_file_list << file;
         DEBUG("Saved widget '%1'", widget->windowTitle());
     }
-    // save the list of temp windows for session widgets in
-    // the current workspace
+    mWorkspace->SetUserProperty("show_resource_bits", mWorkspaceProxy.GetShowBits());
     mWorkspace->SetUserProperty("session_files", session_file_list);
     if (mCurrentWidget)
     {
@@ -622,6 +629,8 @@ void MainWindow::closeWorkspace()
     mUI.menuEdit->setEnabled(false);
     mUI.menuTemp->setEnabled(false);
     mUI.workspace->setModel(nullptr);
+    mWorkspaceProxy.SetModel(nullptr);
+    mWorkspaceProxy.setSourceModel(nullptr);
 
     setWindowTitle(QString("%1").arg(APP_TITLE));
 
@@ -1154,13 +1163,15 @@ void MainWindow::on_actionNewWorkspace_triggered()
         return;
     }
 
-    mUI.workspace->setModel(workspace.get());
+    mUI.workspace->setModel(&mWorkspaceProxy);
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
     mUI.actionSelectResourceForEditing->setEnabled(true);
     mUI.menuWorkspace->setEnabled(true);
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
     mWorkspace = std::move(workspace);
+    mWorkspaceProxy.SetModel(mWorkspace.get());
+    mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
     gfx::SetResourceLoader(mWorkspace.get());
     NOTE("New workspace created.");
 }
@@ -1279,6 +1290,23 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
 
+    QMenu show;
+    show.setTitle("Show ...");
+    for (const auto val : magic_enum::enum_values<app::Resource::Type>())
+    {
+        // skip drawable it's a superclass type and not directly relevant
+        // to the user.
+        if (val == app::Resource::Type::Drawable)
+            continue;
+
+        const std::string name(magic_enum::enum_name(val));
+        QAction* action = show.addAction(app::FromUtf8(name));
+        connect(action, &QAction::toggled, this, &MainWindow::ToggleShowResource);
+        action->setData(magic_enum::enum_integer(val));
+        action->setCheckable(true);
+        action->setChecked(mWorkspaceProxy.IsShow(val));
+    }
+
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
     menu.addAction(mUI.actionNewParticleSystem);
@@ -1290,6 +1318,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
+    menu.addSeparator();
+    menu.addMenu(&show);
     menu.addSeparator();
     menu.addAction(mUI.actionDuplicateResource);
     menu.addSeparator();
@@ -1736,6 +1766,17 @@ void MainWindow::OpenRecentWorkspace()
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
 
     NOTE("Loaded workspace.");
+}
+
+void MainWindow::ToggleShowResource()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+
+    const auto payload = action->data().toInt();
+    const auto type = magic_enum::enum_cast<app::Resource::Type>(payload);
+    ASSERT(type.has_value());
+    mWorkspaceProxy.SetVisible(type.value(), action->isChecked());
+    mWorkspaceProxy.invalidate();
 }
 
 bool MainWindow::event(QEvent* event)

@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QAbstractTableModel>
+#  include <QSortFilterProxyModel>
 #  include <private/qabstractfileengine_p.h> // private (deprecated) in Qt5
 #  include <QString>
 #  include <QMap>
@@ -227,6 +228,8 @@ namespace app
         const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.
         const Resource& GetResource(size_t i) const;
+        const Resource& GetUserDefinedResource(size_t index) const;
+        const Resource& GetPrimitiveResource(size_t index) const;
         // Delete the resources identified by the selection list.
         // The list can contain multiple items and can be discontinuous
         // and unsorted. Afterwards it will be sorted (ascending) based
@@ -561,5 +564,39 @@ namespace app
         ProjectSettings mSettings;
         bool mIsOpen = false;
     };
+
+    class WorkspaceProxy : public QSortFilterProxyModel
+    {
+    public:
+        using Show = Resource::Type;
+        WorkspaceProxy()
+        {
+            mBits.set_from_value(~0u);
+        }
+        void SetModel(const Workspace* workspace)
+        { mWorkspace = workspace; }
+        void SetVisible(Show what, bool yes_no)
+        { mBits.set(what, yes_no); }
+        bool IsShow(Show what) const
+        { return mBits.test(what); }
+        void SetShowBits(unsigned value)
+        { mBits.set_from_value(value); }
+        unsigned GetShowBits() const
+        { return mBits.value(); }
+    protected:
+        bool filterAcceptsRow(int row, const QModelIndex& parent) const override
+        {
+            if (!mWorkspace)
+                return false;
+            const auto& resource = mWorkspace->GetUserDefinedResource(row);
+            if (!mBits.test(resource.GetType()))
+                return false;
+            return true;
+        }
+    private:
+        base::bitflag<Show> mBits;
+        const Workspace* mWorkspace = nullptr;
+    };
+
 
 } // namespace

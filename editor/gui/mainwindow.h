@@ -155,6 +155,7 @@ namespace gui
         void OpenExternalScript(const QString& file);
         void OpenNewWidget(MainWidget* widget);
         void OpenRecentWorkspace();
+        void ToggleShowResource();
 
     private:
         void BuildRecentWorkspacesMenu();
@@ -183,6 +184,8 @@ namespace gui
         AppSettings mSettings;
         // currently focused (current) widget in the main tab.
         MainWidget* mCurrentWidget = nullptr;
+        // Filtering proxy for workspace.
+        app::WorkspaceProxy mWorkspaceProxy;
         // workspace object.
         std::unique_ptr<app::Workspace> mWorkspace;
         // the list of child windows that are opened to show mainwidgets.

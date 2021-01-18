@@ -107,11 +107,11 @@ namespace app {
         };
         template<>
         struct ResourceTypeTraits<TestResource1> {
-            static constexpr auto Type = app::Resource::Type::AudioTrack;
+            static constexpr auto Type = app::Resource::Type::ParticleSystem;
         };
         template<>
         struct ResourceTypeTraits<BaseResource> {
-            static constexpr auto Type = app::Resource::Type::AudioTrack;
+            static constexpr auto Type = app::Resource::Type::Drawable;
         };
     }
 }
