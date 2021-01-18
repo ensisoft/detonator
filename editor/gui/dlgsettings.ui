@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>512</height>
+    <width>485</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -237,9 +237,22 @@
          <property name="title">
           <string>Text editor</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <layout class="QGridLayout" name="gridLayout_5">
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="editorShowLineNumbers">
+              <property name="text">
+               <string>Show line numbers</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="editorTheme"/>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_9">
               <property name="sizePolicy">
@@ -253,11 +266,11 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QFontComboBox" name="editorFont"/>
-            </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="editorFontSize"/>
+            </item>
+            <item row="0" column="1">
+             <widget class="QFontComboBox" name="editorFont"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_10">
@@ -272,24 +285,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="editorTheme"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <widget class="QCheckBox" name="editorShowLineNumbers">
-              <property name="text">
-               <string>Show line numbers</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
+            <item row="3" column="1">
              <widget class="QCheckBox" name="editorHightlightCurrentLine">
               <property name="text">
                <string>Highlight current line</string>
@@ -299,7 +295,7 @@
               </property>
              </widget>
             </item>
-            <item>
+            <item row="4" column="1">
              <widget class="QCheckBox" name="editorHightlightSyntax">
               <property name="text">
                <string>Highlight syntax</string>
@@ -309,7 +305,7 @@
               </property>
              </widget>
             </item>
-            <item>
+            <item row="5" column="1">
              <widget class="QCheckBox" name="editorInsertSpaces">
               <property name="text">
                <string>Insert spaces on Tab</string>
@@ -387,6 +383,13 @@
   <tabstop>edtScriptEditorExecutable</tabstop>
   <tabstop>btnSelectScriptEditor</tabstop>
   <tabstop>edtScriptEditorArguments</tabstop>
+  <tabstop>editorFont</tabstop>
+  <tabstop>editorFontSize</tabstop>
+  <tabstop>editorTheme</tabstop>
+  <tabstop>editorShowLineNumbers</tabstop>
+  <tabstop>editorHightlightCurrentLine</tabstop>
+  <tabstop>editorHightlightSyntax</tabstop>
+  <tabstop>editorInsertSpaces</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
