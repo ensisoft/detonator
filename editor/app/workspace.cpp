@@ -1695,6 +1695,8 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             klass.SetType(gfx::MaterialClass::Type::Texture);
             klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             klass.AddTexture(std::move(texture));
+            klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Default);
+            klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter ::Default);
             MaterialResource res(klass, name);
             SaveResource(res);
             INFO("Imported new material '%1' based on image file '%2'", name, info.filePath());
