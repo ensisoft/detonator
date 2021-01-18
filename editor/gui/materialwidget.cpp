@@ -334,17 +334,32 @@ bool MaterialWidget::SaveState(Settings& settings) const
     return true;
 }
 
-bool MaterialWidget::CanZoomIn() const
+bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
 {
-    const auto max = mUI.zoom->maximum();
-    const auto val = mUI.zoom->value();
-    return val < max;
-}
-bool MaterialWidget::CanZoomOut() const
-{
-    const auto min = mUI.zoom->minimum();
-    const auto val = mUI.zoom->value();
-    return val > min;
+    switch (action)
+    {
+        case Actions::CanCut:
+        case Actions::CanCopy:
+        case Actions::CanPaste:
+            return false;
+        case Actions::CanReloadTextures:
+        case Actions::CanReloadShaders:
+            return true;
+        case Actions::CanZoomIn: {
+            const auto max = mUI.zoom->maximum();
+            const auto val = mUI.zoom->value();
+            return val < max;
+        }
+        break;
+        case Actions::CanZoomOut: {
+            const auto min = mUI.zoom->minimum();
+            const auto val = mUI.zoom->value();
+            return val > min;
+        }
+        break;
+    }
+    BUG("Unhandled action query.");
+    return false;
 }
 
 void MaterialWidget::ZoomIn()

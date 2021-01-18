@@ -58,8 +58,10 @@ ChildWindow::ChildWindow(MainWidget* widget, Clipboard* clipboard)
     menu_name.remove("gui::");
     menu_name.remove("Widget");
     mUI.menuTemp->setTitle(menu_name);
-    mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
-    mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
+    mUI.actionZoomIn->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomIn));
+    mUI.actionZoomOut->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomOut));
+    mUI.actionReloadTextures->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadTextures));
+    mUI.actionReloadShaders->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadShaders));
     mUI.actionCut->setShortcut(QKeySequence::Cut);
     mUI.actionCopy->setShortcut(QKeySequence::Copy);
     mUI.actionPaste->setShortcut(QKeySequence::Paste);
@@ -102,8 +104,8 @@ void ChildWindow::RefreshUI()
     setWindowTitle(text);
     setWindowIcon(icon);
 
-    mUI.actionZoomIn->setEnabled(mWidget->CanZoomIn());
-    mUI.actionZoomOut->setEnabled(mWidget->CanZoomOut());
+    mUI.actionZoomIn->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
+    mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 }
 
 void ChildWindow::Update(double secs)
@@ -246,12 +248,12 @@ void ChildWindow::on_actionReloadTextures_triggered()
 void ChildWindow::on_actionZoomIn_triggered()
 {
     mWidget->ZoomIn();
-    mUI.actionZoomIn->setEnabled(mWidget->CanZoomIn());
+    mUI.actionZoomIn->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
 }
 void ChildWindow::on_actionZoomOut_triggered()
 {
     mWidget->ZoomOut();
-    mUI.actionZoomOut->setEnabled(mWidget->CanZoomOut());
+    mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 }
 
 void ChildWindow::closeEvent(QCloseEvent* event)

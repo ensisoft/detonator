@@ -84,6 +84,7 @@ bool ScriptWidget::CanTakeAction(Actions action, const Clipboard*) const
     // canPaste seems to be broken??
     switch (action)
     {
+        // todo: could increase/decrease font size on zoom in/out
         case Actions::CanZoomOut:
         case Actions::CanZoomIn:
             return false;

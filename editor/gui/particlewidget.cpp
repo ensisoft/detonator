@@ -277,6 +277,25 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     return true;
 }
 
+bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
+{
+    switch (action)
+    {
+        case Actions::CanCut:
+        case Actions::CanCopy:
+        case Actions::CanPaste:
+            return false;
+        case Actions::CanReloadTextures:
+        case Actions::CanReloadShaders:
+            return true;
+        case Actions::CanZoomIn:
+        case Actions::CanZoomOut:
+            return false;
+    }
+    BUG("Unhandled action query.");
+    return false;
+}
+
 void ParticleEditorWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();

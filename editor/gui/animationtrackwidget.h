@@ -64,8 +64,7 @@ namespace gui
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanZoomIn() const override;
-        virtual bool CanZoomOut() const override;
+        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
         virtual void ZoomIn() override;
         virtual void ZoomOut() override;
         virtual void ReloadShaders() override;

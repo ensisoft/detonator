@@ -534,38 +534,22 @@ bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
             else if (!GetCurrentNode())
                 return false;
             return true;
-        case Actions::CanZoomIn:
-            {
+        case Actions::CanZoomIn: {
                 const auto max = mUI.zoom->maximum();
                 const auto val = mUI.zoom->value();
                 return val < max;
-            }
-            break;
-        case Actions::CanZoomOut:
-            {
+            } break;
+        case Actions::CanZoomOut: {
                 const auto min = mUI.zoom->minimum();
                 const auto val = mUI.zoom->value();
                 return val > min;
-            }
-            break;
+            } break;
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
     }
+    BUG("Unhandled action query.");
     return false;
-}
-
-bool SceneWidget::CanZoomIn() const
-{
-    const auto max = mUI.zoom->maximum();
-    const auto val = mUI.zoom->value();
-    return val < max;
-}
-bool SceneWidget::CanZoomOut() const
-{
-    const auto min = mUI.zoom->minimum();
-    const auto val = mUI.zoom->value();
-    return val > min;
 }
 
 void SceneWidget::Cut(Clipboard& clipboard)

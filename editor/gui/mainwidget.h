@@ -24,6 +24,8 @@ namespace gui
     public:
         virtual ~MainWidget() = default;
 
+        // Different actions that the widget may or may not support
+        // in its current state.
         enum class Actions {
             CanZoomIn  = 0x1,
             CanZoomOut = 0x2,
@@ -105,21 +107,11 @@ namespace gui
         // returns the widget will be deleted.
         virtual void Shutdown() {}
 
+        // Check whether the widget can take some action in the current state.
+        // Returns true if the action can be taken or false to indicate that the
+        // action is currently not possible.
+        // The MainWindow will call this at different times for different actions.
         virtual bool CanTakeAction(Actions action, const Clipboard* clipboard = nullptr) const
-        { return false; }
-
-        // Should return true if widget supports zoom in. It's possible
-        // that widget doesn't support zoom at all or has already reached
-        // the maximum zoom.
-        // See ZoomIn and ZoomOut
-        virtual bool CanZoomIn() const
-        { return false; }
-
-        // Should return true if widget supports zoom in. It's possible
-        // that widget doesn't support zoom at all or has already reached
-        // the maximum zoom.
-        // See ZoomIn and ZoomOut
-        virtual bool CanZoomOut() const
         { return false; }
 
         // Ask the widget to zoom in on the content.

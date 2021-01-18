@@ -789,8 +789,10 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.menuTemp->setEnabled(true);
         mUI.menuTemp->setTitle(name);
         mCurrentWidget = widget;
-        mUI.actionZoomIn->setEnabled(widget->CanZoomIn());
-        mUI.actionZoomOut->setEnabled(widget->CanZoomOut());
+        mUI.actionZoomIn->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomIn));
+        mUI.actionZoomOut->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomOut));
+        mUI.actionReloadShaders->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadShaders));
+        mUI.actionReloadTextures->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadTextures));
         mUI.statusBarFrame->setVisible(widget->IsAccelerated());
     }
     else
@@ -929,14 +931,14 @@ void MainWindow::on_actionZoomIn_triggered()
     if (!mCurrentWidget)
         return;
     mCurrentWidget->ZoomIn();
-    mUI.actionZoomIn->setEnabled(mCurrentWidget->CanZoomIn());
+    mUI.actionZoomIn->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
 }
 void MainWindow::on_actionZoomOut_triggered()
 {
     if (!mCurrentWidget)
         return;
     mCurrentWidget->ZoomOut();
-    mUI.actionZoomOut->setEnabled(mCurrentWidget->CanZoomOut());
+    mUI.actionZoomOut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 }
 
 void MainWindow::on_actionReloadShaders_triggered()
@@ -1569,8 +1571,8 @@ void MainWindow::timerRefreshUI()
 
     if (mCurrentWidget)
     {
-        mUI.actionZoomIn->setEnabled(mCurrentWidget->CanZoomIn());
-        mUI.actionZoomOut->setEnabled(mCurrentWidget->CanZoomOut());
+        mUI.actionZoomIn->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
+        mUI.actionZoomOut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
     }
 }
 

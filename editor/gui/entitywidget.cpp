@@ -679,18 +679,6 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
 }
 
-bool EntityWidget::CanZoomIn() const
-{
-    const auto max = mUI.zoom->maximum();
-    const auto val = mUI.zoom->value();
-    return val < max;
-}
-bool EntityWidget::CanZoomOut() const
-{
-    const auto min = mUI.zoom->minimum();
-    const auto val = mUI.zoom->value();
-    return val > min;
-}
 void EntityWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();

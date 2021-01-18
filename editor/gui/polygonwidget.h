@@ -51,6 +51,7 @@ namespace gui
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
+        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
         virtual void ReloadShaders() override;
         virtual void ReloadTextures() override;
         virtual void Shutdown() override;
