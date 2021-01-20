@@ -662,7 +662,6 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
             }
             mParents.push(node);
             mTransform.Push(parent_node_transform);
-            mTransform.Push(node->GetNodeTransform());
             ConstSceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
             entity.entity        = node;
@@ -673,7 +672,6 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
         {
             if (!node)
                 return;
-            mTransform.Pop();
             mTransform.Pop();
             mParents.pop();
         }
@@ -715,7 +713,6 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
             }
             mParents.push(node);
             mTransform.Push(parent_node_transform);
-            mTransform.Push(node->GetNodeTransform());
             SceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
             entity.entity        = node;
@@ -726,7 +723,6 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
         {
             if (!node)
                 return;
-            mTransform.Pop();
             mTransform.Pop();
             mParents.pop();
         }

@@ -833,15 +833,25 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     mFlags.set(Flags::VisibleInGame, true);
 }
 
-Entity::Entity(const EntityArgs& args)
-  : Entity(args.klass)
+Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
     mInstanceId   = args.id;
-    mScale        = args.scale;
-    mPosition     = args.position;
-    mRotation     = args.rotation;
     mLayer        = args.layer;
+
+    for (auto& node : mNodes)
+    {
+        if (mRenderTree.GetParent(node.get()))
+            continue;
+        // if this is a top level node (i.e. under the root node)
+        // then bake the entity transform into this node.
+        const auto& rotation    = node->GetRotation();
+        const auto& translation = node->GetTranslation();
+        const auto& scale       = node->GetScale();
+        node->SetRotation(rotation + args.rotation);
+        node->SetTranslation(translation + args.position);
+        node->SetScale(scale * args.scale);
+    }
 }
 
 Entity::Entity(const EntityClass& klass)
@@ -963,15 +973,6 @@ glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) cons
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-glm::mat4 Entity::GetNodeTransform() const
-{
-    Transform transform;
-    transform.Scale(mScale);
-    transform.Rotate(mRotation);
-    transform.Translate(mPosition);
-    return transform.GetAsMatrix();
-}
-
 glm::mat4 Entity::GetNodeTransform(const EntityNode* node) const
 {
     return game::FindNodeTransform(mRenderTree, node);
@@ -1089,19 +1090,6 @@ const ScriptVar* Entity::FindScriptVar(const std::string& name) const
             return &var;
     }
     return mClass->FindScriptVar(name);
-}
-
-void Entity::SetScale(const glm::vec2& scale)
-{
-    for (const auto& node : mNodes)
-    {
-        if (node->HasRigidBody())
-        {
-            WARN("Scaling an entity with rigid bodies won't work correctly.");
-            break;
-        }
-    }
-    mScale = scale;
 }
 
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)

@@ -350,7 +350,10 @@ void BindGameLib(sol::state& L)
     classlib["FindSceneClassById"]    = &ClassLibrary::FindSceneClassById;
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
-    entity_node["GetId"] = &EntityNode::GetId;
+    entity_node["GetId"]          = &EntityNode::GetId;
+    entity_node["GetTranslation"] = &EntityNode::GetTranslation;
+    entity_node["GetScale"]       = &EntityNode::GetScale;
+    entity_node["GetRotation"]    = &EntityNode::GetRotation;
 
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index, [&L](const Entity* entity, const char* key) {
@@ -391,15 +394,9 @@ void BindGameLib(sol::state& L)
                     var->SetValue(value.as<glm::vec2>());
                 else WARN("Script value type mismatch. '%1' expects: '%2'", key, var->GetType());
             });
-    entity["GetTranslation"]       = &Entity::GetTranslation;
     entity["GetName"]              = &Entity::GetName;
     entity["GetId"]                = &Entity::GetId;
     entity["GetClassId"]           = &Entity::GetClassId;
-    entity["GetScale"]             = &Entity::GetScale;
-    entity["GetRotation"]          = &Entity::GetRotation;
-    entity["SetTranslation"]       = &Entity::SetTranslation;
-    entity["SetScale"]             = &Entity::SetScale;
-    entity["SetRotation"]          = &Entity::SetRotation;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;

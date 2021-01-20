@@ -78,7 +78,6 @@ void PhysicsEngine::UpdateEntity(Entity& entity)
 {
     gfx::Transform transform;
     transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
-    transform.Push(entity.GetNodeTransform());
     UpdateEntity(transform.GetAsMatrix(), entity);
 }
 
@@ -163,7 +162,6 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
 
     gfx::Transform transform;
     transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
-    transform.Push(entity.GetNodeTransform());
     AddEntity(transform.GetAsMatrix(), entity);
 }
 

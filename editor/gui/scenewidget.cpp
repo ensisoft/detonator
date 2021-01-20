@@ -1374,8 +1374,13 @@ void SceneWidget::DisplayCurrentNodeProperties()
                         link_index = static_cast<int>(i);
                 }
             }
+            SetValue(mUI.nodeLink, link_index);
+            SetEnabled(mUI.nodeLink, true);
         }
-        SetValue(mUI.nodeLink, link_index);
+        else
+        {
+            SetEnabled(mUI.nodeLink, false);
+        }
     }
 }
 

@@ -977,10 +977,6 @@ namespace game
         // Map coordinates in entity coordinate space into some EntityNode's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const EntityNode* node) const;
 
-        // Get entity's transform (relative to its parent) expressed as
-        // transformation matrix. (Called node transform because it makes
-        // generic code easier in other parts of the system)
-        glm::mat4 GetNodeTransform() const;
         glm::mat4 GetNodeTransform(const EntityNode* node) const;
 
         // Compute the axis aligned bounding rectangle for the give entity node
@@ -1023,13 +1019,8 @@ namespace game
         // can still be changed as long as the variable is not read only.
         const ScriptVar* FindScriptVar(const std::string& name) const;
 
-        void SetTranslation(const glm::vec2& position)
-        { mPosition = position; }
-        void SetRotation(float angle)
-        { mRotation = angle; }
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
-        void SetScale(const glm::vec2& scale);
         void SetParentNodeClassId(const std::string& id)
         { mParentNodeId = id; }
 
@@ -1049,14 +1040,8 @@ namespace game
         { return mInstanceName; }
         std::string GetId() const
         { return mInstanceId; }
-        glm::vec2 GetTranslation() const
-        { return mPosition; }
-        glm::vec2 GetScale() const
-        { return mScale; }
         int GetLayer() const
         { return mLayer; }
-        float GetRotation() const
-        { return mRotation; }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
         bool HasIdleTrack() const
@@ -1094,13 +1079,6 @@ namespace game
         RenderTree mRenderTree;
         // Current entity time.
         double mCurrentTime = 0.0;
-        // Current entity position in it's parent frame.
-        glm::vec2 mPosition = {0.0f, 0.0f};
-        // Current entity scaling factor that applies to
-        // all of its nodes.
-        glm::vec2 mScale = {1.0f, 1.0f};
-        // Current entity rotation angle relative to its parent.
-        float mRotation = 0.0f;
         // the render layer index.
         int mLayer = 0;
         // entity bit flags
