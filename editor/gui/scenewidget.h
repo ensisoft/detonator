@@ -99,6 +99,7 @@ namespace gui
         void on_nodeName_textChanged(const QString& text);
         void on_nodeEntity_currentIndexChanged(const QString& name);
         void on_nodeLayer_valueChanged(int layer);
+        void on_nodeLink_currentIndexChanged(const QString& text);
         void on_nodeIsVisible_stateChanged(int);
         void on_nodeTranslateX_valueChanged(double value);
         void on_nodeTranslateY_valueChanged(double value);

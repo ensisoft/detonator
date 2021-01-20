@@ -956,6 +956,15 @@ void SceneWidget::on_nodeLayer_valueChanged(int layer)
     }
 }
 
+void SceneWidget::on_nodeLink_currentIndexChanged(const QString&)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& id = mUI.nodeLink->currentData().toString();
+        node->SetParentRenderTreeNodeId(app::ToUtf8(id));
+    }
+}
+
 void SceneWidget::on_nodeIsVisible_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
@@ -1330,6 +1339,8 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeRotation, 0.0f);
     SetValue(mUI.nodeEntity, "");
     SetValue(mUI.nodeLayer, 0);
+    SetList(mUI.nodeLink, QStringList());
+    SetValue(mUI.nodeLink, QString(""));
 
     if (const auto* node = GetCurrentNode())
     {
@@ -1345,6 +1356,26 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeScaleX, scale.x);
         SetValue(mUI.nodeScaleY, scale.y);
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
+
+        int link_index = -1;
+        if (const auto* parent = mState.scene.GetRenderTree().GetParent(node))
+        {
+            const auto& klass  = parent->GetEntityClass();
+            for (size_t i=0; i<klass->GetNumNodes(); ++i) {
+                const auto& tree = klass->GetRenderTree();
+                const auto& link = klass->GetNode(i);
+                if (tree.GetParent(&link) == nullptr)
+                {
+                    const auto name = app::FromUtf8(link.GetName());
+                    const auto id   = app::FromUtf8(link.GetId());
+                    QSignalBlocker s(mUI.nodeLink);
+                    mUI.nodeLink->addItem(name, id);
+                    if (link.GetId() == node->GetParentRenderTreeNodeId())
+                        link_index = static_cast<int>(i);
+                }
+            }
+        }
+        SetValue(mUI.nodeLink, link_index);
     }
 }
 

@@ -85,6 +85,8 @@ namespace game
             mEntityId.clear();
             mEntity.reset();
         }
+        void SetParentRenderTreeNodeId(const std::string& id)
+        { mParentRenderTreeNodeId = id; }
         // class getters.
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -98,6 +100,8 @@ namespace game
         { return mClassId; }
         std::string GetEntityId() const
         { return mEntityId; }
+        std::string GetParentRenderTreeNodeId() const
+        { return mParentRenderTreeNodeId; }
         std::shared_ptr<const EntityClass> GetEntityClass() const
         { return mEntity; }
         bool TestFlag(Flags flag) const
@@ -126,6 +130,11 @@ namespace game
         std::string mClassId;
         // The id of the entity this node contains.
         std::string mEntityId;
+        // When the scene node (entity) is linked (parented)
+        // to another scene node (entity) this id is the
+        // node in the parent entity's render tree that is to
+        // be used as the parent of this entity's nodes.
+        std::string mParentRenderTreeNodeId;
         // The human readable name for the node.
         std::string mName;
         // The position of the node relative to its parent.
