@@ -143,11 +143,11 @@ namespace game
         template<typename NodeType>
         void UpdateNode(const NodeType& node, float time, float dt);
 
-        template<typename EntityType, typename NodeType>
-        void DrawRenderTree(const RenderTree<EntityType>& tree,
-                            gfx::Painter& painter, gfx::Transform& transform,
-                            SceneDrawHook<EntityType>* scene_hook,
-                            EntityDrawHook<NodeType>* entity_hook);
+        template<typename SceneType, typename EntityType, typename NodeType>
+        void DrawScene(const SceneType& scene,
+                       gfx::Painter& painter, gfx::Transform& transform,
+                       SceneDrawHook<EntityType>* scene_hook,
+                       EntityDrawHook<NodeType>* entity_hook);
 
         template<typename NodeType>
         void DrawRenderTree(const RenderTree<NodeType>& tree,

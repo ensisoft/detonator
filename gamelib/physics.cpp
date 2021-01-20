@@ -33,6 +33,7 @@
 #include "gamelib/loader.h"
 #include "gamelib/types.h"
 #include "gamelib/scene.h"
+#include "gamelib/transform.h"
 
 namespace game
 {
@@ -61,33 +62,16 @@ void PhysicsEngine::UpdateScene(Scene& scene)
     // only a few nodes have physics bodies then likely only iterating over
     // the physics bodies and then looking up their transforms in the scene
     // is more efficient.
-    class Visitor : public RenderTree::Visitor
+    Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
+
+    const auto& nodes = scene.CollectNodes();
+    for (const auto& node : nodes)
     {
-    public:
-        Visitor(PhysicsEngine& engine) : mEngine(engine)
-        {
-            mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
-        }
-        virtual void EnterNode(Entity* entity) override
-        {
-            if (!entity)
-                return;
-            mTransform.Push(entity->GetNodeTransform());
-            mEngine.UpdateEntity(mTransform.GetAsMatrix(), *entity);
-        }
-        virtual void LeaveNode(Entity* entity) override
-        {
-            if (!entity)
-                return;
-            mTransform.Pop();
-        }
-    private:
-        PhysicsEngine& mEngine;
-        gfx::Transform mTransform;
-    };
-    Visitor visitor(*this);
-    auto& tree = scene.GetRenderTree();
-    tree.PreOrderTraverse(visitor);
+        transform.Push(node.node_to_scene);
+          UpdateEntity(transform.GetAsMatrix(), *node.entity);
+        transform.Pop();
+    }
 }
 
 void PhysicsEngine::UpdateEntity(Entity& entity)
@@ -157,36 +141,16 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
     mWorld.reset();
     mWorld = std::make_unique<b2World>(gravity);
 
-    using RenderTree = Scene::RenderTree;
+    Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
 
-    class Visitor : public RenderTree::ConstVisitor
+    const auto& nodes = scene.CollectNodes();
+    for (const auto& node : nodes)
     {
-    public:
-        Visitor(PhysicsEngine& engine) : mEngine(engine)
-        {
-            mTransform.Scale(glm::vec2(1.0f, 1.0f) / mEngine.mScale);
-        }
-        virtual void EnterNode(const Entity* entity) override
-        {
-            if (!entity)
-                return;
-            mTransform.Push(entity->GetNodeTransform());
-            mEngine.AddEntity(mTransform.GetAsMatrix(), *entity);
-        }
-        virtual void LeaveNode(const Entity* entity) override
-        {
-            if (!entity)
-                return;
-            mTransform.Pop();
-        }
-    private:
-        PhysicsEngine& mEngine;
-        gfx::Transform mTransform;
-    };
-
-    Visitor visitor(*this);
-    const auto& tree = scene.GetRenderTree();
-    tree.PreOrderTraverse(visitor);
+        transform.Push(node.node_to_scene);
+          AddEntity(transform.GetAsMatrix(), *node.entity);
+        transform.Pop();
+    }
 }
 
 void PhysicsEngine::CreateWorld(const Entity& entity)

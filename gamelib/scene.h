@@ -230,6 +230,36 @@ namespace game
         // Returns the root node of the new node hierarchy.
         SceneNodeClass* DuplicateNode(const SceneNodeClass* node);
 
+        // Value aggregate for scene nodes that represent placement
+        // of entities in the scene.
+        struct ConstSceneNode {
+            // The transform matrix that applies to this entity (node)
+            // in order to transform it to the scene.
+            glm::mat4 node_to_scene;
+            // the entity representation in the scene.
+            std::shared_ptr<const EntityClass> entity;
+            // the data node that holds the placement data
+            // for placing the entity in the scene.
+            const SceneNodeClass* node = nullptr;
+        };
+        // Collect nodes from the scene into a flat list.
+        std::vector<ConstSceneNode> CollectNodes() const;
+
+        // Value aggregate for the nodes that represent placement
+        // of entities in the scene.
+        struct SceneNode {
+            // The transform matrix that applies to this entity (node)
+            // in order to transform it to the scene.
+            glm::mat4 node_to_scene;
+            // the entity representation in the scene.
+            std::shared_ptr<const EntityClass> entity;
+            // the data node that holds the placement data
+            // for placing the entity in the scene.
+            SceneNodeClass* node = nullptr;
+        };
+        // Collect nodes from the scene into a flat list.
+        std::vector<SceneNode> CollectNodes();
+
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node in the scene.
         // The testing is coarse in the sense that it's done against the node's
@@ -371,6 +401,43 @@ namespace game
         // may not change in terms of c++ semantics. The actual *value*
         // can still be changed as long as the variable is not read only.
         const ScriptVar* FindScriptVar(const std::string& name) const;
+
+        // Value aggregate for nodes (entities) in the scene.
+        struct ConstSceneNode {
+            // The transformation matrix for transforming the
+            // entity into the scene.
+            glm::mat4 node_to_scene;
+            // The actual entity.
+            const Entity* entity = nullptr;
+            // The data object for the placement of the
+            // entity. Opposed to the SceneClass the placement
+            // information for the entity is squashed into each
+            // and every entity. Theres no reason to have a separate
+            // object for this.
+            const Entity* node   = nullptr;
+        };
+        // Collect the entities in the scene into a flat list.
+        std::vector<ConstSceneNode> CollectNodes() const;
+
+        // Value aggregate for nodes (entities) in the scene.
+        // Keep in mind that mutating any entity data can invalidate
+        // the matrices. I.e. when entities are linked mutating the
+        // parent entity invalidates the child nodes' matrices.
+        struct SceneNode {
+            // The transformation matrix for transforming the
+            // entity into the scene.
+            glm::mat4 node_to_scene;
+            // The actual entity.
+            Entity* entity = nullptr;
+            // The data object for the placement of the
+            // entity. Opposed to the SceneClass the placement
+            // information for the entity is squashed into each
+            // and every entity. Theres no reason to have a separate
+            // object for this.
+            Entity* node   = nullptr;
+        };
+        // Collect the entities in the scene into a flat list.
+        std::vector<SceneNode> CollectNodes();
 
         void Update(float dt);
 

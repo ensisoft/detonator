@@ -198,40 +198,72 @@ SceneNodeClass* SceneClass::DuplicateNode(const SceneNodeClass* node)
     return game::DuplicateNode(mRenderTree, node, &mNodes);
 }
 
-void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
-                   std::vector<glm::vec2>* hitbox_positions)
+std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
 {
-    // todo: improve the implementation with some form of space partitioning.
+    std::vector<SceneClass::ConstSceneNode> ret;
+
+    // visit the entire render tree of the scene and transform every
+    // SceneNodeClass (which is basically a placement for an entity in the
+    // scene) into world.
+    // todo: this needs some kind of space partitioning which allows the
+    // collection to only consider some nodes that lie within some area
+    // of interest.
+
+    class Visitor : public RenderTree::ConstVisitor {
+    public:
+        Visitor(std::vector<SceneClass::ConstSceneNode>& result) : mResult(result)
+        {}
+        virtual void EnterNode(const SceneNodeClass* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+            ConstSceneNode entity;
+            entity.node_to_scene = mTransform.GetAsMatrix();
+            entity.entity        = node->GetEntityClass();
+            entity.node          = node;
+            mResult.push_back(std::move(entity));
+        }
+        virtual void LeaveNode(const SceneNodeClass* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        std::vector<SceneClass::ConstSceneNode>& mResult;
+        Transform mTransform;
+    };
+    Visitor visitor(ret);
+    mRenderTree.PreOrderTraverse(visitor);
+    return ret;
+}
+
+std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
+{
+    std::vector<SceneClass::SceneNode> ret;
+
+    // visit the entire render tree of the scene and transform every
+    // SceneNodeClass (which is basically a placement for an entity in the
+    // scene) into world.
+    // todo: this needs some kind of space partitioning which allows the
+    // collection to only consider some nodes that lie within some area
+    // of interest.
+
     class Visitor : public RenderTree::Visitor {
     public:
-        Visitor(float x, float y,
-                std::vector<SceneNodeClass*>& hit_nodes,
-                std::vector<glm::vec2>* hit_pos)
-          : mHitPos(x, y, 1.0f, 1.0f)
-          , mHitNodes(hit_nodes)
-          , mHitPositions(hit_pos)
+        Visitor(std::vector<SceneClass::SceneNode>& result) : mResult(result)
         {}
         virtual void EnterNode(SceneNodeClass* node) override
         {
             if (!node)
                 return;
             mTransform.Push(node->GetNodeTransform());
-            auto klass = node->GetEntityClass();
-            if (!klass) {
-                WARN("Node '%1' has no entity class object!", node->GetName());
-                return;
-            }
-
-            auto scene_to_entity = glm::inverse(mTransform.GetAsMatrix());
-            auto entity_hit_pos  = scene_to_entity * mHitPos;
-            std::vector<const EntityNodeClass*> nodes;
-            klass->CoarseHitTest(entity_hit_pos.x, entity_hit_pos.y, &nodes);
-            if (!nodes.empty())
-            {
-                mHitNodes.push_back(node);
-                if (mHitPositions)
-                    mHitPositions->push_back(glm::vec2(entity_hit_pos.x, entity_hit_pos.y));
-            }
+            SceneNode entity;
+            entity.node_to_scene = mTransform.GetAsMatrix();
+            entity.entity        = node->GetEntityClass();
+            entity.node          = node;
+            mResult.push_back(std::move(entity));
         }
         virtual void LeaveNode(SceneNodeClass* node) override
         {
@@ -240,146 +272,98 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
             mTransform.Pop();
         }
     private:
-        const glm::vec4 mHitPos;
-        std::vector<SceneNodeClass*>& mHitNodes;
-        std::vector<glm::vec2>* mHitPositions = nullptr;
+        std::vector<SceneClass::SceneNode>& mResult;
         Transform mTransform;
     };
-    Visitor visitor(x, y, *hits, hitbox_positions);
+    Visitor visitor(ret);
     mRenderTree.PreOrderTraverse(visitor);
+    return ret;
+}
+
+void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
+                   std::vector<glm::vec2>* hitbox_positions)
+{
+    const auto& entity_nodes = CollectNodes();
+    for (const auto& entity_node : entity_nodes)
+    {
+        if (!entity_node.entity)
+        {
+            WARN("Node '%1' has no entity class object!", entity_node.node->GetName());
+            continue;
+        }
+        // transform the coordinate in the scene into the entity
+        // coordinate space, then delegate the hit test to the
+        // entity to see if we hit any of the entity nodes.
+        auto scene_to_node = glm::inverse(entity_node.node_to_scene);
+        auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
+        // perform entity hit test.
+        std::vector<const EntityNodeClass*> nodes;
+        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        if (nodes.empty())
+            continue;
+
+        // hit some nodes so the entity as a whole is hit.
+        hits->push_back(entity_node.node);
+        if (hitbox_positions)
+            hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
+    }
 }
 void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
                        std::vector<glm::vec2>* hitbox_positions) const
 {
-    // todo: improve the implementation with some form of space partitioning.
-    class Visitor : public RenderTree::ConstVisitor {
-    public:
-        Visitor(float x, float y,
-                std::vector<const SceneNodeClass*>& hit_nodes,
-                std::vector<glm::vec2>* hit_pos)
-                : mHitPos(x, y, 1.0f, 1.0f)
-                , mHitNodes(hit_nodes)
-                , mHitPositions(hit_pos)
-        {}
-        virtual void EnterNode(const SceneNodeClass* node) override
+    const auto& entity_nodes = CollectNodes();
+    for (const auto& entity_node : entity_nodes)
+    {
+        if (!entity_node.entity)
         {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            auto klass = node->GetEntityClass();
-            if (!klass) {
-                WARN("Node '%1' has no entity class object!", node->GetName());
-                return;
-            }
+            WARN("Node '%1' has no entity class object!", entity_node.node->GetName());
+            continue;
+        }
+        // transform the coordinate in the scene into the entity
+        // coordinate space, then delegate the hit test to the
+        // entity to see if we hit any of the entity nodes.
+        auto scene_to_node = glm::inverse(entity_node.node_to_scene);
+        auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
+        // perform entity hit test.
+        std::vector<const EntityNodeClass*> nodes;
+        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        if (nodes.empty())
+            continue;
 
-            auto scene_to_entity = glm::inverse(mTransform.GetAsMatrix());
-            auto entity_hit_pos  = scene_to_entity * mHitPos;
-            std::vector<const EntityNodeClass*> nodes;
-            klass->CoarseHitTest(entity_hit_pos.x, entity_hit_pos.y, &nodes);
-            if (!nodes.empty())
-            {
-                mHitNodes.push_back(node);
-                if (mHitPositions)
-                    mHitPositions->push_back(glm::vec2(entity_hit_pos.x, entity_hit_pos.y));
-            }
-        }
-        virtual void LeaveNode(const SceneNodeClass* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-    private:
-        const glm::vec4 mHitPos;
-        std::vector<const SceneNodeClass*>& mHitNodes;
-        std::vector<glm::vec2>* mHitPositions = nullptr;
-        Transform mTransform;
-    };
-    Visitor visitor(x, y, *hits, hitbox_positions);
-    mRenderTree.PreOrderTraverse(visitor);
+        // hit some nodes so the entity as a whole is hit.
+        hits->push_back(entity_node.node);
+        if (hitbox_positions)
+            hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
+    }
 }
-
 
 glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const
 {
-    class Visitor : public RenderTree::ConstVisitor {
-    public:
-        Visitor(float x, float y, const SceneNodeClass* node)
-          : mPos(x, y, 1.0f, 1.0f)
-          , mNode(node)
-        {}
-        virtual void EnterNode(const SceneNodeClass* node) override
+    const auto& entity_nodes = CollectNodes();
+    for (const auto& entity_node : entity_nodes)
+    {
+        if (entity_node.node == node)
         {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            if (node == mNode)
-            {
-                auto mat = mTransform.GetAsMatrix();
-                auto ret = mat * mPos;
-                mResult.x = ret.x;
-                mResult.y = ret.y;
-            }
+            const auto ret = entity_node.node_to_scene * glm::vec4(x, y, 1.0f, 1.0f);
+            return glm::vec2(ret.x, ret.y);
         }
-        virtual void LeaveNode(const SceneNodeClass* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        glm::vec2 GetResult() const
-        { return mResult; }
-    private:
-        const glm::vec4 mPos;
-        const SceneNodeClass* mNode = nullptr;
-        Transform mTransform;
-        glm::vec2 mResult;
-    };
-
-    Visitor visitor(x, y, node);
-    mRenderTree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    }
+    // todo: should we return something else maybe ?
+    return glm::vec2(0.0f, 0.0f);
 }
 glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* node) const
 {
-    class Visitor : public RenderTree::ConstVisitor
+    const auto& entity_nodes = CollectNodes();
+    for (const auto& entity_node : entity_nodes)
     {
-    public:
-        Visitor(float x, float y, const SceneNodeClass* node)
-                : mPos(x, y, 1.0f, 1.0f)
-                , mNode(node)
-        {}
-        virtual void EnterNode(const SceneNodeClass* node) override
+        if (entity_node.node == node)
         {
-            if (!node)
-                return;
-            mTransform.Push(node->GetNodeTransform());
-            if (node == mNode)
-            {
-                auto mat = glm::inverse(mTransform.GetAsMatrix());
-                auto ret = mat * mPos;
-                mResult.x = ret.x;
-                mResult.y = ret.y;
-            }
+            const auto ret = glm::inverse(entity_node.node_to_scene) * glm::vec4(x, y, 1.0f, 1.0f);
+            return glm::vec2(ret.x, ret.y);
         }
-        virtual void LeaveNode(const SceneNodeClass* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-        }
-        glm::vec2 GetResult() const
-        { return mResult; }
-    private:
-        const glm::vec4 mPos;
-        const SceneNodeClass* mNode = nullptr;
-        Transform mTransform;
-        glm::vec2 mResult;
-    };
-
-    Visitor visitor(x, y, node);
-    mRenderTree.PreOrderTraverse(visitor);
-    return visitor.GetResult();
+    }
+    // todo: should we return something else maybe ?
+    return glm::vec2(0.0f, 0.0f);
 }
 
 void SceneClass::AddScriptVar(const ScriptVar& var)
@@ -603,6 +587,74 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
         if (e->GetName() == name)
             return e.get();
     return nullptr;
+}
+
+std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
+{
+    std::vector<Scene::ConstSceneNode> ret;
+
+    class Visitor : public RenderTree::ConstVisitor {
+    public:
+        Visitor(std::vector<Scene::ConstSceneNode>& result) : mResult(result)
+        {}
+        virtual void EnterNode(const Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+            ConstSceneNode entity;
+            entity.node_to_scene = mTransform.GetAsMatrix();
+            entity.entity        = node;
+            entity.node          = node;
+            mResult.push_back(std::move(entity));
+        }
+        virtual void LeaveNode(const Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        std::vector<Scene::ConstSceneNode>& mResult;
+        Transform mTransform;
+    };
+    Visitor visitor(ret);
+    mRenderTree.PreOrderTraverse(visitor);
+    return ret;
+}
+
+std::vector<Scene::SceneNode> Scene::CollectNodes()
+{
+    std::vector<Scene::SceneNode> ret;
+
+    class Visitor : public RenderTree::Visitor {
+    public:
+        Visitor(std::vector<Scene::SceneNode>& result) : mResult(result)
+        {}
+        virtual void EnterNode(Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Push(node->GetNodeTransform());
+            SceneNode entity;
+            entity.node_to_scene = mTransform.GetAsMatrix();
+            entity.entity        = node;
+            entity.node          = node;
+            mResult.push_back(std::move(entity));
+        }
+        virtual void LeaveNode(Entity* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        std::vector<Scene::SceneNode>& mResult;
+        Transform mTransform;
+    };
+    Visitor visitor(ret);
+    mRenderTree.PreOrderTraverse(visitor);
+    return ret;
 }
 
 const ScriptVar* Scene::FindScriptVar(const std::string& name) const
