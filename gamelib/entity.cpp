@@ -599,6 +599,11 @@ FBox EntityClass::GetBoundingBox(const EntityNodeClass* node) const
     return game::GetBoundingBox(mRenderTree, node);
 }
 
+glm::mat4 EntityClass::GetNodeTransform(const EntityNodeClass* node) const
+{
+    return game::FindNodeTransform(mRenderTree, node);
+}
+
 void EntityClass::AddScriptVar(const ScriptVar& var)
 {
     mScriptVars.push_back(std::make_shared<ScriptVar>(var));
@@ -965,6 +970,11 @@ glm::mat4 Entity::GetNodeTransform() const
     transform.Rotate(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
+}
+
+glm::mat4 Entity::GetNodeTransform(const EntityNode* node) const
+{
+    return game::FindNodeTransform(mRenderTree, node);
 }
 
 FRect Entity::GetBoundingRect(const EntityNode* node) const

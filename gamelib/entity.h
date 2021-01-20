@@ -773,6 +773,8 @@ namespace game
 
         FBox GetBoundingBox(const EntityNodeClass* node) const;
 
+        glm::mat4 GetNodeTransform(const EntityNodeClass* node) const;
+
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
         // already exists.
@@ -979,6 +981,7 @@ namespace game
         // transformation matrix. (Called node transform because it makes
         // generic code easier in other parts of the system)
         glm::mat4 GetNodeTransform() const;
+        glm::mat4 GetNodeTransform(const EntityNode* node) const;
 
         // Compute the axis aligned bounding rectangle for the give entity node
         // at the current time of the entity.
@@ -1027,6 +1030,8 @@ namespace game
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
         void SetScale(const glm::vec2& scale);
+        void SetParentNodeClassId(const std::string& id)
+        { mParentNodeId = id; }
 
         // Get the current track if any. (when IsPlaying is true)
         AnimationTrack* GetCurrentTrack()
@@ -1034,6 +1039,8 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
+        std::string GetParentNodeClassId() const
+        { return mParentNodeId; }
         std::string GetClassId() const
         { return mClass->GetId(); }
         std::size_t GetNumNodes() const
@@ -1070,6 +1077,11 @@ namespace game
         std::string mInstanceId;
         // the entity instance name (if any)
         std::string mInstanceName;
+        // When the entity is linked (parented)
+        // to another entity this id is the node in the parent
+        // entity's render tree that is to be used as the parent
+        // of this entity's nodes.
+        std::string mParentNodeId;
         // The current animation track if any.
         std::unique_ptr<AnimationTrack> mAnimationTrack;
         // the list of nodes that are in the entity.

@@ -27,6 +27,7 @@
 #include "warnpop.h"
 
 #include <unordered_set>
+#include <stack>
 
 #include "base/format.h"
 #include "base/logging.h"
@@ -217,6 +218,20 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
         {
             if (!node)
                 return;
+
+            // When entities are linked together the child entity refers
+            // to a specific node in the parent entity. This node is the
+            // parent node of the child entity's render tree.
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent = GetParent())
+            {
+                const auto& klass = parent->GetEntityClass();
+                const auto* parent_node = klass->FindNodeById(node->GetParentRenderTreeNodeId());
+                parent_node_transform   = klass->GetNodeTransform(parent_node);
+            }
+
+            mParents.push(node);
+            mTransform.Push(parent_node_transform);
             mTransform.Push(node->GetNodeTransform());
             ConstSceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
@@ -228,9 +243,21 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
         {
             if (!node)
                 return;
+            // pop once the parent transform
             mTransform.Pop();
+            // pop once the node transform.
+            mTransform.Pop();
+            mParents.pop();
         }
     private:
+        const SceneNodeClass* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        std::stack<const SceneNodeClass*> mParents;
         std::vector<SceneClass::ConstSceneNode>& mResult;
         Transform mTransform;
     };
@@ -258,6 +285,19 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
         {
             if (!node)
                 return;
+
+            // When entities are linked together the child entity refers
+            // to a specific node in the parent entity. This node is the
+            // parent node of the child entity's render tree.
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent = GetParent())
+            {
+                const auto& klass = parent->GetEntityClass();
+                const auto* parent_node = klass->FindNodeById(node->GetParentRenderTreeNodeId());
+                parent_node_transform   = klass->GetNodeTransform(parent_node);
+            }
+            mParents.push(node);
+            mTransform.Push(parent_node_transform);
             mTransform.Push(node->GetNodeTransform());
             SceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
@@ -270,8 +310,18 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
             if (!node)
                 return;
             mTransform.Pop();
+            mTransform.Pop();
+            mParents.pop();
         }
     private:
+        SceneNodeClass* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        std::stack<SceneNodeClass*> mParents;
         std::vector<SceneClass::SceneNode>& mResult;
         Transform mTransform;
     };
@@ -530,6 +580,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
         entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
+        entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
+
         map[&node] = entity.get();
         mEntities.push_back(std::move(entity));
     }
@@ -601,6 +653,15 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
         {
             if (!node)
                 return;
+
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent = GetParent())
+            {
+                const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
+                parent_node_transform   = parent->GetNodeTransform(parent_node);
+            }
+            mParents.push(node);
+            mTransform.Push(parent_node_transform);
             mTransform.Push(node->GetNodeTransform());
             ConstSceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
@@ -613,8 +674,18 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
             if (!node)
                 return;
             mTransform.Pop();
+            mTransform.Pop();
+            mParents.pop();
         }
     private:
+        const Entity* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        std::stack<const Entity*> mParents;
         std::vector<Scene::ConstSceneNode>& mResult;
         Transform mTransform;
     };
@@ -635,6 +706,15 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
         {
             if (!node)
                 return;
+
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent = GetParent())
+            {
+                const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
+                parent_node_transform   = parent->GetNodeTransform(parent_node);
+            }
+            mParents.push(node);
+            mTransform.Push(parent_node_transform);
             mTransform.Push(node->GetNodeTransform());
             SceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
@@ -647,8 +727,18 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
             if (!node)
                 return;
             mTransform.Pop();
+            mTransform.Pop();
+            mParents.pop();
         }
     private:
+        Entity* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        std::stack<Entity*> mParents;
         std::vector<Scene::SceneNode>& mResult;
         Transform mTransform;
     };

@@ -108,6 +108,8 @@ namespace game
         { return mFlags.test(flag); }
         int GetLayer() const
         { return mLayer; }
+        bool HasSpecifiedParentNode() const
+        { return !mParentRenderTreeNodeId.empty(); }
 
         // Get the node hash value based on the properties.
         std::size_t GetHash() const;
