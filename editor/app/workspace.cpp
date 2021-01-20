@@ -1418,11 +1418,17 @@ void Workspace::SaveResource(const Resource& resource)
     beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
     // insert at the end of the visible range which is from [0, mVisibleCount)
     mResources.insert(mResources.begin() + mVisibleCount, resource.Copy());
+
+    // careful! endInsertRows will trigger the view proxy to refetch the contents.
+    // make sure to update this property before endInsertRows or otherwise
+    // we'll hit an assert incorrectly in GetUserDefinedProperty.
+    mVisibleCount++;
+
     endInsertRows();
 
     auto& back = mResources[mVisibleCount];
     emit NewResourceAvailable(back.get());
-    mVisibleCount++;
+
 }
 
 QString Workspace::MapDrawableIdToName(const QString& id) const
