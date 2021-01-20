@@ -1017,6 +1017,18 @@
     <string>Ctrl+A</string>
    </property>
   </action>
+  <action name="actionNodeBreakLink">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/link_break.png</normaloff>:/16x16_ico_png/link_break.png</iconset>
+   </property>
+   <property name="text">
+    <string>Break Link</string>
+   </property>
+   <property name="toolTip">
+    <string>Break node away from its parent</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

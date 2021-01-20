@@ -802,6 +802,17 @@ void SceneWidget::on_actionNodeDelete_triggered()
     }
 }
 
+void SceneWidget::on_actionNodeBreakLink_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetParentRenderTreeNodeId("");
+        mState.scene.BreakChild(node);
+        mState.scene.LinkChild(nullptr, node);
+        mUI.tree->Rebuild();
+    }
+}
+
 void SceneWidget::on_actionNodePlace_triggered()
 {
     const auto snap = (bool)GetValue(mUI.chkSnap);
@@ -1037,16 +1048,19 @@ void SceneWidget::on_nodeMinus90_clicked()
 
 void SceneWidget::on_tree_customContextMenuRequested(QPoint)
 {
+    const auto& tree = mState.scene.GetRenderTree();
     const auto* node = GetCurrentNode();
     mUI.actionNodeDuplicate->setEnabled(node != nullptr);
     mUI.actionNodeDelete->setEnabled(node != nullptr);
     mUI.actionNodeMoveDownLayer->setEnabled(node != nullptr);
     mUI.actionNodeMoveUpLayer->setEnabled(node != nullptr);
+    mUI.actionNodeBreakLink->setEnabled(node != nullptr && tree.GetParent(node));
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
     menu.addAction(mUI.actionNodeMoveDownLayer);
     menu.addAction(mUI.actionNodeDuplicate);
+    menu.addAction(mUI.actionNodeBreakLink);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
     menu.exec(QCursor::pos());

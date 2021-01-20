@@ -86,6 +86,7 @@ namespace gui
         void on_actionNodeScaleTool_triggered();
         void on_actionNodeRotateTool_triggered();
         void on_actionNodeDelete_triggered();
+        void on_actionNodeBreakLink_triggered();
         void on_actionNodePlace_triggered();
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
