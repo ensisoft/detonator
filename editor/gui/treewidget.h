@@ -166,7 +166,8 @@ namespace gui
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void resizeEvent(QResizeEvent* resize) override;
         virtual void scrollContentsBy(int dx, int dy) override;
-
+    private:
+        QPoint MapPoint(const QPoint& widget) const;
     private:
         // the provider of the tree widget data i.e. TreeItems
         TreeModel* mModel = nullptr;

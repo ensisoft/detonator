@@ -127,6 +127,21 @@ void TreeWidget::Rebuild()
         }
     }
 
+    const auto num_rows = mItems.size();
+    const auto num_rows_visible = viewport()->height() / mItemHeight;
+    if (num_rows > num_rows_visible)
+    {
+        const auto num_scroll_steps = num_rows - num_rows_visible;
+        verticalScrollBar()->setVisible(true);
+        verticalScrollBar()->setMaximum(num_scroll_steps);
+    }
+    else
+    {
+        verticalScrollBar()->setVisible(false);
+        mYOffset = 0;
+    }
+    // not used right now
+    horizontalScrollBar()->setVisible(false);
     viewport()->update();
 }
 
@@ -164,41 +179,19 @@ void TreeWidget::paintEvent(QPaintEvent* event)
 {
     const QPalette& palette = this->palette();
 
-    const unsigned kBaseLevel = 1;
-    const unsigned kLevelOffset = 15; // px
-
+    const unsigned kBaseLevel    = 1;
+    const unsigned kLevelOffset  = 15; // px
     const unsigned window_width  = viewport()->width();
     const unsigned window_height = viewport()->height();
 
-    QFont font;
-    QFontMetrics fm(font);
-
-    // compute the extents of the whole tree.
-    unsigned render_width  = 0;
-    unsigned render_height = mItems.size() * mItemHeight;
-    // compute maximum width
-    for (const auto& item : mItems)
-    {
-        const unsigned text_width = fm.width(item.GetText());
-        const unsigned text_offset = item.GetLevel() * kLevelOffset + kBaseLevel * kLevelOffset;
-        render_width = std::max(text_width + text_offset, render_width);
-    }
-    render_width  = std::max(window_width, render_width);
-    render_height = std::max(window_height, render_height);
-
-    QPixmap buffer(render_width, render_height);
-
-    buffer.fill(palette.color(QPalette::Base));
-
-    // render to this offscreen buffer.
-    QPainter painter(&buffer);
+    QPainter painter(viewport());
+    painter.fillRect(viewport()->rect(), palette.color(QPalette::Base));
 
     for (size_t i=0; i<mItems.size(); ++i)
     {
         const auto& item = mItems[i];
-
-        const int ypos = i * mItemHeight;
-        const int xpos = item.GetLevel() * kLevelOffset + kBaseLevel * kLevelOffset;
+        const int ypos   = mYOffset * mItemHeight + i * mItemHeight;
+        const int xpos   = mXOffset + item.GetLevel() * kLevelOffset + kBaseLevel * kLevelOffset;
         const bool selected = &item == mSelected;
         const bool hovered  = &item == mHovered;
         const QRect box(0, ypos, window_width, mItemHeight);
@@ -222,20 +215,20 @@ void TreeWidget::paintEvent(QPaintEvent* event)
     // directly in the backbuffer space
     const auto& drag_offset = mDragPoint - mDragStart;
 
+    // filter out some unwanted accidental mouse moves when clicking
+    // on an item.
     if (mDragging && std::abs(drag_offset.y()) >= 1)
     {
-        for (size_t i=0; i<mItems.size(); ++i)
+        for (size_t i = 0; i < mItems.size(); ++i)
         {
-            const auto& item = mItems[i];
+            const auto &item = mItems[i];
             if (&item != mSelected)
                 continue;
 
-            // compute the original position for the item's row in the backbuffer.
-            // then translate that to the viewport and offset by the current
-            // drag amount in order to have the position of the drag item
-            // in the widgdet's coordinate space.
-            const int ypos  = drag_offset.y() + i * mItemHeight;
-            const int xpos  = 0; //drag_offset.x(); looks silly since we're clipping the item visually so limit to y axis
+            // compute the ypos of the item being dragged in widget coordinate
+            // offset by the drag offset
+            const int ypos = mYOffset * mItemHeight + i * mItemHeight + drag_offset.y();
+            const int xpos = 0; //drag_offset.x(); looks silly since we're clipping the item visually so limit to y axis
 
             // figure out where the item being dragged to would land
             // and then indicate it.
@@ -247,7 +240,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
                 line.setColor(QColor(0xff, 0xff, 0xff)); // QColorConstants::White);
 
                 // hightlight the potential new parent
-                const auto& parent = mItems[landing_index];
+                const auto &parent = mItems[landing_index];
                 const int ypos = landing_index * mItemHeight;
                 const int xpos = 0;
                 const QRect rc(xpos, ypos, window_width, mItemHeight);
@@ -256,28 +249,10 @@ void TreeWidget::paintEvent(QPaintEvent* event)
                 painter.drawRect(rc);
             }
             painter.setOpacity(0.5f);
-            RenderTreeItem(item, QRect (xpos, ypos, window_width, mItemHeight),
-                palette, painter, true, false);
+            // render the item being dragged.
+            RenderTreeItem(item, QRect(xpos, ypos, window_width, mItemHeight),
+                           palette, painter, true, false);
         }
-
-    }
-
-    // blit the offscreen buffer to the actual viewport widget
-    // offset by the current scroll delta.
-    {
-        QPainter painter(viewport());
-        const QRect dst(viewport()->rect());
-        const QRect src(-mXOffset, -mYOffset, window_width, window_height);
-        painter.drawPixmap(dst, buffer, src);
-
-        // todo: this should probably be done elsewhere..
-        const auto vertical_excess = render_height - window_height;
-        const auto horizontal_excess = render_width - window_width;
-
-        verticalScrollBar()->setRange(0, vertical_excess);
-        verticalScrollBar()->setPageStep(window_height);
-        horizontalScrollBar()->setRange(0, horizontal_excess);
-        horizontalScrollBar()->setPageStep(window_width);
     }
 }
 
@@ -285,13 +260,13 @@ void TreeWidget::mouseMoveEvent(QMouseEvent* mickey)
 {
     if (mDragging)
     {
-        mDragPoint = mickey->pos();
+        mDragPoint = MapPoint(mickey->pos());
         viewport()->update();
         return;
     }
 
-    const auto mouse_y = mickey->pos().y() - mYOffset;
-    const auto index   = mouse_y / mItemHeight;
+    const auto point = MapPoint(mickey->pos());
+    const auto index = point.y() / mItemHeight;
 
     mHovered = nullptr;
 
@@ -311,13 +286,12 @@ void TreeWidget::mousePressEvent(QMouseEvent* mickey)
           mickey->button() == Qt::RightButton))
         return;
 
-    const auto mouse_y = mickey->pos().y() - mYOffset;
-    const auto mouse_x = mickey->pos().x() - mXOffset;
+    const auto point = MapPoint(mickey->pos());
     //DEBUG("Mouse press ət %1,%2", mouse_x, mouse_y);
 
     // every row item has the same fixed height
     // so to determine the row that is clicked is easy
-    const auto index = mouse_y / mItemHeight;
+    const auto index = point.y() / mItemHeight;
     if (index >= mItems.size())
     {
         // select nada.
@@ -329,8 +303,8 @@ void TreeWidget::mousePressEvent(QMouseEvent* mickey)
         if (mickey->button() == Qt::LeftButton)
         {
             mDragging  = true;
-            mDragStart = mickey->pos();
-            mDragPoint = mickey->pos();
+            mDragStart = MapPoint(mickey->pos());
+            mDragPoint = MapPoint(mickey->pos());
         }
     }
 
@@ -347,8 +321,9 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent* mickey)
 
     if (!was_dragging)
     {
-        const auto xpos = mickey->pos().x();
-        const auto ypos = mickey->pos().y();
+        const auto pos  = MapPoint(mickey->pos());
+        const auto xpos = pos.x();
+        const auto ypos = pos.y();
         if (xpos >= 16)
             return;
 
@@ -433,20 +408,25 @@ void TreeWidget::keyPressEvent(QKeyEvent* press)
 
 void TreeWidget::resizeEvent(QResizeEvent* resize)
 {
-    const QSize& size = resize->size();
-
-    DEBUG("Resize event: %1x%2", size.width(), size.height());
-
-    // todo: compute the scroll bars again
+    // rebuild the tree and re-compute the extents for the
+    // scroll bars.
+    Rebuild();
 }
 
 void TreeWidget::scrollContentsBy(int dx, int dy)
 {
-    DEBUG("Scroll event dx=%1 dy=%2", dx,dy);
+    //DEBUG("Scroll event dx=%1 dy=%2", dx,dy);
     mXOffset += dx;
     mYOffset += dy;
 
     viewport()->update();
+}
+
+QPoint TreeWidget::MapPoint(const QPoint& widget) const
+{
+    // go from widget coordinate to a coordinate in the data
+    // buffer (still in pixels)
+    return QPoint(widget.x(), widget.y() - mItemHeight * mYOffset);
 }
 
 } // namespace
