@@ -134,6 +134,7 @@ namespace gui
         void RebuildMenus();
         void RebuildCombos();
         void UpdateResourceReferences();
+        game::SceneNodeClass* SelectNode(const QPoint& click_point);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;
     private:

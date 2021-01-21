@@ -1237,7 +1237,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
 
     if (!mCurrentTool)
     {
-        auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, mState.scene, GetCurrentNode());
+        auto hitnode = SelectNode(mickey->pos());
         if (hitnode)
         {
             // todo: figure out how to scale/rotate an entity node.
@@ -1461,6 +1461,120 @@ void SceneWidget::UpdateResourceReferences()
         }
         node.SetEntity(klass);
     }
+}
+
+game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
+{
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
+    const auto click_pos_in_view = glm::vec4(click_point.x(),
+                                             click_point.y(), 1.0f, 1.0f);
+    const auto click_pos_in_scene = view_to_scene * click_pos_in_view;
+
+    std::vector<game::SceneNodeClass*> hit_nodes;
+    std::vector<glm::vec2> hit_boxes;
+    mState.scene.CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_boxes);
+    if (hit_nodes.empty())
+        return nullptr;
+
+    // per pixel selection based on the idea that we re-render the
+    // objects returned by the coarse hit test with different colors
+    // and then read back the color of the pixel under the click point
+    // and see which object/node the color maps back to.
+    class DrawHook : public game::SceneClassDrawHook,
+                     public game::EntityClassDrawHook
+    {
+    public:
+        DrawHook(const std::vector<game::SceneNodeClass*>& hits) : mHits(hits)
+        {
+            for (unsigned i=0; i<hits.size(); ++i)
+            {
+                const unsigned rgb = i * 100 + 100;
+                const unsigned r = (rgb >> 16) & 0xff;
+                const unsigned g = (rgb >> 8)  & 0xff;
+                const unsigned b = (rgb >> 0)  & 0xff;
+                mColors.push_back(gfx::Color4f(r, g, b, 0xff));
+            }
+        }
+        virtual bool FilterEntity(const game::SceneNodeClass& node) override
+        {
+            for (const auto* n : mHits)
+                if (n == &node) return true;
+            return false;
+        }
+        virtual void BeginDrawEntity(const game::SceneNodeClass& node, gfx::Painter&, gfx::Transform&) override
+        {
+            for (size_t i=0; i<mHits.size(); ++i)
+            {
+                if (mHits[i] == &node) {
+                    mColorIndex = i;
+                    return;
+                }
+            }
+        }
+        virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& draw) override
+        {
+            ASSERT(mColorIndex < mColors.size());
+            draw.material = gfx::CreateMaterialInstance(gfx::SolidColor(mColors[mColorIndex]));
+            return true;
+        }
+
+    private:
+        const std::vector<game::SceneNodeClass*>& mHits;
+        std::vector<gfx::Color4f> mColors;
+        std::size_t mColorIndex = 0;
+    };
+
+    auto& painter = mUI.widget->getPainter();
+    auto& device = mUI.widget->getDevice();
+    DrawHook hook(hit_nodes);
+    mState.renderer.Draw(mState.scene, painter, view, &hook, &hook);
+
+    {
+        // for debugging.
+        //auto bitmap = device.ReadColorBuffer(mUI.widget->width(), mUI.widget->height());
+        //gfx::WritePNG(bitmap, "/tmp/click-test-debug.png");
+    }
+    const auto surface_width  = mUI.widget->width();
+    const auto surface_height = mUI.widget->height();
+    auto bitmap = device.ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
+    auto pixel = bitmap.GetPixel(0, 0);
+    for (unsigned i=0; i<hit_nodes.size(); ++i)
+    {
+        const unsigned rgb = i * 100 + 100;
+        const unsigned r = (rgb >> 16) & 0xff;
+        const unsigned g = (rgb >> 8) & 0xff;
+        const unsigned b = (rgb >> 0) & 0xff;
+        if ((pixel.r == r) && (pixel.g == g) && (pixel.b == b))
+            return hit_nodes[i];
+    }
+    const auto* currently_selected = GetCurrentNode();
+    // if the currently selected node is among those that were hit
+    // then retain that, otherwise select the node that is at the
+    // topmost layer. (biggest layer value)
+    auto* hit = hit_nodes[0];
+    int layer = hit->GetLayer();
+    for (size_t i=0; i<hit_nodes.size(); ++i)
+    {
+        if (currently_selected == hit_nodes[i])
+        {
+            hit = hit_nodes[i];
+            //box = hit_boxes[i];
+            break;
+        }
+        else if (hit_nodes[i]->GetLayer() >= layer)
+        {
+            hit = hit_nodes[i];
+            //box = hit_boxes[i];
+            layer = hit->GetLayer();
+        }
+    }
+    return hit;
 }
 
 game::SceneNodeClass* SceneWidget::GetCurrentNode()

@@ -82,6 +82,10 @@ namespace gui
         { return mClearColor; }
         gfx::Color4f getFocusColor() const
         { return mFocusColor; }
+        gfx::Device& getDevice() const
+        { return *mCustomGraphicsDevice; }
+        gfx::Painter& getPainter() const
+        { return *mCustomGraphicsPainter; }
 
         void setClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
@@ -180,6 +184,10 @@ namespace gui
 
         gfx::Color4f getClearColor() const
         { return mWindow->getClearColor(); }
+        gfx::Device& getDevice() const
+        { return mWindow->getDevice(); }
+        gfx::Painter& getPainter() const
+        { return mWindow->getPainter(); }
 
         void setClearColor(const gfx::Color4f& color)
         { mWindow->setClearColor(color); }

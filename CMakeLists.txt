@@ -250,6 +250,7 @@ add_executable(Editor
     third_party/QSourceHighlight/qsourcehighliter.cpp
     third_party/QSourceHighlight/qsourcehighliterthemes.cpp
     third_party/stb/stb_image.c
+    third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp
     third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
     third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
