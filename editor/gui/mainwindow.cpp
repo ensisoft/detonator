@@ -1307,6 +1307,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
         action->setData(magic_enum::enum_integer(val));
         action->setCheckable(true);
         action->setChecked(mWorkspaceProxy.IsShow(val));
+        action->setIcon(app::Resource::GetIcon(val));
     }
 
     QMenu menu(this);

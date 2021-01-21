@@ -134,8 +134,10 @@ namespace app
 
         // helper to map the type to an icon in the application.
         QIcon GetIcon() const
+        { return GetIcon(GetType()); }
+        static QIcon GetIcon(Resource::Type type)
         {
-            switch (GetType()) {
+            switch (type) {
                 case Resource::Type::Material:
                     return QIcon("icons:material.png");
                 case Resource::Type::ParticleSystem:
