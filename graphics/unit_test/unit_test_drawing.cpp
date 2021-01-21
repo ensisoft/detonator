@@ -328,6 +328,14 @@ public:
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;
     }
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y,
+                                                   unsigned width, unsigned height) const override
+    {
+        gfx::Bitmap<gfx::RGBA> bitmap;
+        bitmap.Resize(width, height);
+        bitmap.Fill(gfx::Color::DarkGreen);
+        return bitmap;
+    }
 
     const TestTexture& GetTexture(size_t index) const
     {

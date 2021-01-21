@@ -520,6 +520,17 @@ public:
         return bmp;
     }
 
+    virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y,
+                                         unsigned width, unsigned height) const override
+    {
+        Bitmap<RGBA> bmp(width, height);
+        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+        GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                (void*)bmp.GetDataPtr()));
+        bmp.FlipHorizontally();
+        return bmp;
+    }
+
 private:
     bool EnableIf(GLenum flag, bool on_off)
     {

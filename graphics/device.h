@@ -188,7 +188,7 @@ namespace gfx
 
         // Prepare the device for the next frame.
         virtual void BeginFrame() = 0;
-        // End redering a frame. If display is true then this will call
+        // End rendering a frame. If display is true then this will call
         // Context::Display as well as a convenience. If you're still
         // planning to do further rendering/drawing in the same render
         // surface then you should probably pass false for display.
@@ -196,10 +196,11 @@ namespace gfx
 
         // Read the contents of the current render target's color
         // buffer into a bitmap.
-        // Width and heigth specify the dimensions of the data to read.
+        // Width and height specify the dimensions of the data to read.
         // If the dimensions exceed the dimensions of the current render
         // target's color surface then those pixels contents are undefined.
         virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const = 0;
+        virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height) const = 0;
 
         // Create a rendering device of the requested type.
         // Context should be a valid non null context object with the
