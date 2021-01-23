@@ -966,42 +966,6 @@
     <string>Move node up one layer</string>
    </property>
   </action>
-  <action name="actionNodeMoveTool">
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/tool_move.png</normaloff>:/32x32_ico_png/tool_move.png</iconset>
-   </property>
-   <property name="text">
-    <string>Move</string>
-   </property>
-   <property name="toolTip">
-    <string>Move an entity in the scene</string>
-   </property>
-  </action>
-  <action name="actionNodeScaleTool">
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/tool_scale.png</normaloff>:/32x32_ico_png/tool_scale.png</iconset>
-   </property>
-   <property name="text">
-    <string>Scale</string>
-   </property>
-   <property name="toolTip">
-    <string>Scale an entity node</string>
-   </property>
-  </action>
-  <action name="actionNodeRotateTool">
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/tool_rotate.png</normaloff>:/32x32_ico_png/tool_rotate.png</iconset>
-   </property>
-   <property name="text">
-    <string>Rotate</string>
-   </property>
-   <property name="toolTip">
-    <string>Rotate an entity node</string>
-   </property>
-  </action>
   <action name="actionNodePlace">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">

@@ -279,6 +279,8 @@ namespace game
         // Map coordinates in scene's coordinate space into some node's coordinate space.
         glm::vec2 MapCoordsToNode(float x, float y, const SceneNodeClass* node) const;
 
+        glm::mat4 GetNodeTransform(const SceneNodeClass* node) const;
+
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
         // already exists.

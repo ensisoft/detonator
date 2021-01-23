@@ -416,6 +416,11 @@ glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* no
     return glm::vec2(0.0f, 0.0f);
 }
 
+glm::mat4 SceneClass::GetNodeTransform(const SceneNodeClass* node) const
+{
+    return game::FindNodeTransform(mRenderTree, node);
+}
+
 void SceneClass::AddScriptVar(const ScriptVar& var)
 {
     mScriptVars.push_back(var);

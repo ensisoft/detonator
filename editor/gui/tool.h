@@ -222,6 +222,56 @@ namespace gui
     };
 
     template<typename TreeModel, typename TreeNode>
+    class ScaleRenderTreeNodeTool : public MouseTool
+    {
+    public:
+        ScaleRenderTreeNodeTool(TreeModel& model, TreeNode* selected)
+          : mModel(model)
+          , mNode(selected)
+        {
+            mScale = mNode->GetScale();
+        }
+        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+        {
+            const auto& tree = mModel.GetRenderTree();
+            const auto& mouse_pos = mickey->pos();
+            trans.Push();
+                trans.Rotate(mNode->GetRotation());
+                trans.Translate(mNode->GetTranslation());
+                const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+                const auto& new_mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            trans.Pop();
+
+            const auto scale = (glm::vec2(new_mouse_pos_in_view.x, new_mouse_pos_in_view.y)) / mPreviousMousePos;
+
+            mNode->SetScale(scale * mScale);
+        }
+        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+        {
+            const auto& tree = mModel.GetRenderTree();
+            const auto& mouse_pos = mickey->pos();
+            trans.Push();
+                trans.Rotate(mNode->GetRotation());
+                trans.Translate(mNode->GetTranslation());
+                const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
+                const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            trans.Pop();
+
+            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+        }
+        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+        {
+            // we're done
+            return true;
+        }
+    private:
+        TreeModel& mModel;
+        TreeNode*  mNode = nullptr;
+        glm::vec2 mPreviousMousePos;
+        glm::vec2 mScale;
+    };
+
+    template<typename TreeModel, typename TreeNode>
     class ResizeRenderTreeNodeTool : public MouseTool
     {
     public:
@@ -282,20 +332,29 @@ namespace gui
     {
     public:
         RotateRenderTreeNodeTool(TreeModel& model, TreeNode* selected)
-                : mModel(model)
-                , mNode(selected)
-        {}
+            : mModel(model)
+            , mNode(selected)
+        {
+            if constexpr (std::is_same_v<TreeNode, game::SceneNodeClass>)
+            {
+                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNode(0.0f, 0.0f, mNode), 1.0f, 1.0f);
+            }
+            else
+            {
+                const auto &node_size = mNode->GetSize();
+                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNode(node_size.x * 0.5f, node_size.y * 0.5, mNode),
+                                              1.0f, 1.0f);
+            }
+        }
         virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            const auto& node_size = mNode->GetSize();
-            const auto& node_center_in_view = glm::vec4(mModel.MapCoordsFromNode(node_size.x*0.5f, node_size.y*0.5, mNode),1.0f, 1.0f);
             // compute the delta between the current mouse position angle and the previous mouse position angle
             // wrt the node's center point. Then and add the angle delta increment to the node's rotation angle.
-            const auto previous_angle = GetAngleRadians(mPreviousMousePos - node_center_in_view);
-            const auto current_angle  = GetAngleRadians(mouse_pos_in_view - node_center_in_view);
+            const auto previous_angle = GetAngleRadians(mPreviousMousePos - mNodeCenterInView);
+            const auto current_angle  = GetAngleRadians(mouse_pos_in_view - mNodeCenterInView);
             const auto angle_delta = current_angle - previous_angle;
 
             double angle = mNode->GetRotation();
@@ -310,6 +369,7 @@ namespace gui
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            mRadius = glm::length(mPreviousMousePos - mNodeCenterInView);
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -333,6 +393,8 @@ namespace gui
         // previous mouse position, for each mouse move we update the object's
         // position by the delta between previous and current mouse pos.
         glm::vec4 mPreviousMousePos;
+        glm::vec4 mNodeCenterInView;
+        float mRadius = 0.0f;
     };
 
     template<typename EntityType, typename NodeType>

@@ -416,10 +416,6 @@ void SceneWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
-    bar.addAction(mUI.actionNodeMoveTool);
-    bar.addAction(mUI.actionNodeScaleTool);
-    bar.addAction(mUI.actionNodeRotateTool);
-    bar.addSeparator();
     bar.addAction(mUI.actionNodePlace);
     bar.addSeparator();
     bar.addAction(mEntities->menuAction());
@@ -432,10 +428,6 @@ void SceneWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
-    menu.addSeparator();
-    menu.addAction(mUI.actionNodeMoveTool);
-    menu.addAction(mUI.actionNodeScaleTool);
-    menu.addAction(mUI.actionNodeRotateTool);
     menu.addSeparator();
     menu.addAction(mUI.actionNodePlace);
     menu.addSeparator();
@@ -777,19 +769,6 @@ void SceneWidget::on_actionSave_triggered()
     INFO("Saved scene '%1'", name);
     NOTE("Saved scene '%1'", name);
     setWindowTitle(name);
-}
-
-void SceneWidget::on_actionNodeMoveTool_triggered()
-{
-
-}
-void SceneWidget::on_actionNodeScaleTool_triggered()
-{
-
-}
-void SceneWidget::on_actionNodeRotateTool_triggered()
-{
-
 }
 
 void SceneWidget::on_actionNodeDelete_triggered()
@@ -1237,13 +1216,35 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
 
     if (!mCurrentTool)
     {
-        auto hitnode = SelectNode(mickey->pos());
-        if (hitnode)
+        glm::vec2 scene_node_hitpos;
+        auto scene_node = SelectNode(mickey->pos(), &scene_node_hitpos);
+        if (scene_node)
         {
-            // todo: figure out how to scale/rotate an entity node.
-            mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, hitnode, snap, grid_size));
-
-            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetId()));
+            auto klass = scene_node->GetEntityClass();
+            std::vector<const game::EntityNodeClass*> hit_entity_nodes;
+            std::vector<glm::vec2> hit_entity_node_positions;
+            klass->CoarseHitTest(scene_node_hitpos.x, scene_node_hitpos.y, &hit_entity_nodes, &hit_entity_node_positions);
+            if (!hit_entity_nodes.empty())
+            {
+                const auto* hitnode = hit_entity_nodes[0];
+                const auto& hitpos  = hit_entity_node_positions[0];
+                const auto& size = hitnode->GetSize();
+                // check if any particular special area of interest is being hit
+                const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
+                                                     hitpos.y >= size.y - 10.0f;
+                const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
+                                                 hitpos.y >= 0 && hitpos.y <= 10.0f;
+                if (bottom_right_hitbox_hit)
+                    mCurrentTool.reset(new ScaleRenderTreeNodeTool(mState.scene, scene_node));
+                else if (top_left_hitbox_hit)
+                    mCurrentTool.reset(new RotateRenderTreeNodeTool<game::SceneClass, game::SceneNodeClass>(mState.scene, scene_node));
+                else mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, scene_node, snap, grid_size));
+            }
+            else
+            {
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, scene_node, snap, grid_size));
+            }
+            mUI.tree->SelectItemById(app::FromUtf8(scene_node->GetId()));
         }
         else
         {
@@ -1463,7 +1464,7 @@ void SceneWidget::UpdateResourceReferences()
     }
 }
 
-game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
+game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::vec2* hitpos)
 {
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
@@ -1477,8 +1478,8 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
     const auto click_pos_in_scene = view_to_scene * click_pos_in_view;
 
     std::vector<game::SceneNodeClass*> hit_nodes;
-    std::vector<glm::vec2> hit_boxes;
-    mState.scene.CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_boxes);
+    std::vector<glm::vec2> hit_positions;
+    mState.scene.CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_positions);
     if (hit_nodes.empty())
         return nullptr;
 
@@ -1551,29 +1552,34 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
         const unsigned g = (rgb >> 8) & 0xff;
         const unsigned b = (rgb >> 0) & 0xff;
         if ((pixel.r == r) && (pixel.g == g) && (pixel.b == b))
+        {
+            *hitpos = hit_positions[i];
             return hit_nodes[i];
+        }
     }
     const auto* currently_selected = GetCurrentNode();
     // if the currently selected node is among those that were hit
     // then retain that, otherwise select the node that is at the
     // topmost layer. (biggest layer value)
     auto* hit = hit_nodes[0];
+    auto  pos = hit_positions[0];
     int layer = hit->GetLayer();
     for (size_t i=0; i<hit_nodes.size(); ++i)
     {
         if (currently_selected == hit_nodes[i])
         {
             hit = hit_nodes[i];
-            //box = hit_boxes[i];
+            pos = hit_positions[i];
             break;
         }
         else if (hit_nodes[i]->GetLayer() >= layer)
         {
             hit = hit_nodes[i];
-            //box = hit_boxes[i];
+            pos = hit_positions[i];
             layer = hit->GetLayer();
         }
     }
+    *hitpos = pos;
     return hit;
 }
 

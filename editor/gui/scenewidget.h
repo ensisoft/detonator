@@ -82,9 +82,6 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
-        void on_actionNodeMoveTool_triggered();
-        void on_actionNodeScaleTool_triggered();
-        void on_actionNodeRotateTool_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeBreakLink_triggered();
         void on_actionNodePlace_triggered();
@@ -134,7 +131,7 @@ namespace gui
         void RebuildMenus();
         void RebuildCombos();
         void UpdateResourceReferences();
-        game::SceneNodeClass* SelectNode(const QPoint& click_point);
+        game::SceneNodeClass* SelectNode(const QPoint& click_point, glm::vec2* hitpos);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;
     private:

@@ -173,8 +173,8 @@ private:
             packets.push_back(selection);
         trans.Pop();
 
-        if (!mDrawIndicators)
-            return;
+       //if (!mDrawIndicators)
+       //     return;
 
         // decompose the matrix in order to get the combined scaling component
         // so that we can use the inverse scale to keep the resize and rotation
