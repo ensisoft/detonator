@@ -74,12 +74,12 @@ namespace gui
         void on_plus90_clicked();
         void on_minus90_clicked();
         void on_motion_currentIndexChanged(int);
-        void paintScene(gfx::Painter& painter, double secs);
-        void newResourceAvailable(const app::Resource* resource);
-        void resourceToBeDeleted(const app::Resource* resource);
+        void PaintScene(gfx::Painter& painter, double secs);
+        void NewResourceAvailable(const app::Resource* resource);
+        void ResourceToBeDeleted(const app::Resource* resource);
 
     private:
-        void fillParams(gfx::KinematicsParticleEngineClass::Params& params) const;
+        void FillParams(gfx::KinematicsParticleEngineClass::Params& params) const;
 
     private:
         Ui::ParticleWidget mUI;

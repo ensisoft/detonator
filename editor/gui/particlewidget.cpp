@@ -44,6 +44,7 @@
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/drawing.h"
 #include "particlewidget.h"
 #include "utility.h"
 
@@ -56,7 +57,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 
     DEBUG("Create ParticleEditorWidget");
     mUI.setupUi(this);
-    mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::paintScene,
+    mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
 
     // get the current list of materials from the workspace
@@ -76,14 +77,13 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
+    PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     on_motion_currentIndexChanged(0);
 
     // connect workspace signals for resource management
-    connect(mWorkspace, &app::Workspace::NewResourceAvailable,
-            this,       &ParticleEditorWidget::newResourceAvailable);
-    connect(mWorkspace, &app::Workspace::ResourceToBeDeleted,
-            this,       &ParticleEditorWidget::resourceToBeDeleted);
-
+    connect(mWorkspace, &app::Workspace::NewResourceAvailable,this, &ParticleEditorWidget::NewResourceAvailable);
+    connect(mWorkspace, &app::Workspace::ResourceToBeDeleted, this, &ParticleEditorWidget::ResourceToBeDeleted);
     setWindowTitle("My Particle System");
 }
 
@@ -95,9 +95,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     DEBUG("Editing particle system: '%1'", name);
 
     GetProperty(resource, "material", mUI.materials);
-    GetProperty(resource, "transform_enabled", mUI.transform);
-    GetProperty(resource, "transform_xpos", mUI.translateX);
-    GetProperty(resource, "transform_ypos", mUI.translateY);
     GetProperty(resource, "transform_width", mUI.scaleX);
     GetProperty(resource, "transform_height", mUI.scaleY);
     GetProperty(resource, "transform_rotation", mUI.rotation);
@@ -106,6 +103,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "use_size_derivatives", mUI.sizeDerivatives);
     GetProperty(resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
+    GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
 
     SetValue(mUI.name, name);
     SetValue(mUI.ID, engine->GetId());
@@ -175,9 +175,6 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.name);
     settings.saveWidget("Particle", mUI.ID);
     settings.saveWidget("Particle", mUI.materials);
-    settings.saveWidget("Particle", mUI.transform);
-    settings.saveWidget("Particle", mUI.translateX);
-    settings.saveWidget("Particle", mUI.translateY);
     settings.saveWidget("Particle", mUI.scaleX);
     settings.saveWidget("Particle", mUI.scaleY);
     settings.saveWidget("Particle", mUI.rotation);
@@ -212,6 +209,9 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.alphaDerivatives);
     settings.saveWidget("Particle", mUI.timeAlphaDerivative);
     settings.saveWidget("Particle", mUI.distAlphaDerivative);
+    settings.saveWidget("Particle", mUI.chkShowGrid);
+    settings.saveWidget("Particle", mUI.chkShowBounds);
+    settings.saveWidget("Particle", mUI.cmbGrid);
     return true;
 }
 
@@ -236,9 +236,6 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.name);
     settings.loadWidget("Particle", mUI.ID);
     settings.loadWidget("Particle", mUI.materials);
-    settings.loadWidget("Particle", mUI.transform);
-    settings.loadWidget("Particle", mUI.translateX);
-    settings.loadWidget("Particle", mUI.translateY);
     settings.loadWidget("Particle", mUI.scaleX);
     settings.loadWidget("Particle", mUI.scaleY);
     settings.loadWidget("Particle", mUI.rotation);
@@ -273,6 +270,9 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.alphaDerivatives);
     settings.loadWidget("Particle", mUI.timeAlphaDerivative);
     settings.loadWidget("Particle", mUI.distAlphaDerivative);
+    settings.loadWidget("Particle", mUI.chkShowGrid);
+    settings.loadWidget("Particle", mUI.chkShowBounds);
+    settings.loadWidget("Particle", mUI.cmbGrid);
     on_motion_currentIndexChanged(0);
     return true;
 }
@@ -355,7 +355,7 @@ void ParticleEditorWidget::Render()
 bool ParticleEditorWidget::ConfirmClose()
 {
     gfx::KinematicsParticleEngineClass::Params params;
-    fillParams(params);
+    FillParams(params);
     mClass.SetParams(params);
 
     const auto hash = mClass.GetHash();
@@ -399,15 +399,12 @@ void ParticleEditorWidget::on_actionSave_triggered()
     const QString& name = GetValue(mUI.name);
 
     gfx::KinematicsParticleEngineClass::Params params;
-    fillParams(params);
+    FillParams(params);
     mClass.SetParams(params);
 
     // setup the resource with the current auxiliary params
     app::ParticleSystemResource particle_resource(mClass, name);
     SetProperty(particle_resource, "material", mUI.materials);
-    SetProperty(particle_resource, "transform_enabled", mUI.transform);
-    SetProperty(particle_resource, "transform_xpos", mUI.translateX);
-    SetProperty(particle_resource, "transform_ypos", mUI.translateY);
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
@@ -416,6 +413,9 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_size_derivatives", mUI.sizeDerivatives);
     SetProperty(particle_resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
+    SetUserProperty(particle_resource, "grid", mUI.cmbGrid);
+    SetUserProperty(particle_resource, "show_grid", mUI.chkShowGrid);
+    SetUserProperty(particle_resource, "show_bounds", mUI.chkShowBounds);
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass.GetHash();
 
@@ -424,7 +424,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     setWindowTitle(name);
 }
 
-void ParticleEditorWidget::fillParams(gfx::KinematicsParticleEngineClass::Params& params) const
+void ParticleEditorWidget::FillParams(gfx::KinematicsParticleEngineClass::Params& params) const
 {
     params.motion         = GetValue(mUI.motion);
     params.mode           = GetValue(mUI.when);
@@ -509,7 +509,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     }
 
     gfx::KinematicsParticleEngineClass::Params p;
-    fillParams(p);
+    FillParams(p);
     mEngine.reset(new gfx::KinematicsParticleEngine(p));
 
     mUI.actionPause->setEnabled(true);
@@ -533,8 +533,6 @@ void ParticleEditorWidget::on_resetTransform_clicked()
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
-    mUI.translateX->setValue(0);
-    mUI.translateY->setValue(0);
     mUI.scaleX->setValue(width);
     mUI.scaleY->setValue(height);
     mUI.rotation->setValue(0);
@@ -566,35 +564,14 @@ void ParticleEditorWidget::on_motion_currentIndexChanged(int)
     }
 }
 
-void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
+void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    if (!mEngine)
-        return;
-
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    gfx::Transform tr;
-    if (mUI.transform->isChecked())
-    {
-        const float angle = qDegreesToRadians(mUI.rotation->value());
-        const auto tx = mUI.translateX->value();
-        const auto ty = mUI.translateY->value();
-        const auto sx = mUI.scaleX->value();
-        const auto sy = mUI.scaleY->value();
-        tr.Resize(sx, sy);
-        tr.Translate(-sx * 0.5, -sy * 0.5);
-        tr.Rotate(angle);
-        tr.Translate(sx * 0.5 + tx, sy * 0.5 + ty);
-        gfx::DrawRectOutline(painter, gfx::FRect(tx, ty, sx, sy),
-            gfx::Color::DarkGreen, 3, angle);
-    }
-    else
-    {
-        tr.Resize(width, height);
-        tr.MoveTo(0, 0);
-    }
+    gfx::Transform view;
+    view.Translate(width*0.5, height*0.5);
 
     // get the material based on the selection in the materials combobox
     const auto& material_name = mUI.materials->currentText();
@@ -604,11 +581,34 @@ void ParticleEditorWidget::paintScene(gfx::Painter& painter, double secs)
         mMaterialName = material_name;
     }
 
-    // render the particle engine
-    painter.Draw(*mEngine, tr, *mMaterial);
+    if (GetValue(mUI.chkShowGrid))
+    {
+        const float zoom = 1.0f;
+        const float xs = 1.0f;
+        const float ys = 1.0f;
+        const GridDensity grid = GetValue(mUI.cmbGrid);
+        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
+    }
+
+    const float simulation_width  = GetValue(mUI.scaleX);
+    const float simulation_height = GetValue(mUI.scaleY);
+    view.Push();
+    view.Scale(simulation_width, simulation_height);
+    view.Translate(-simulation_width*0.5, -simulation_height*0.5);
+    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+
+    if (GetValue(mUI.chkShowBounds))
+    {
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, gfx::SolidColor(gfx::Color::Green));
+    }
+
+    if (mEngine)
+    {
+        painter.Draw(*mEngine, view, *mMaterial);
+    }
 }
 
-void ParticleEditorWidget::newResourceAvailable(const app::Resource* resource)
+void ParticleEditorWidget::NewResourceAvailable(const app::Resource* resource)
 {
     // this is simple, just add new resources in the appropriate UI objects.
     if (resource->GetType() == app::Resource::Type::Material)
@@ -617,7 +617,7 @@ void ParticleEditorWidget::newResourceAvailable(const app::Resource* resource)
     }
 }
 
-void ParticleEditorWidget::resourceToBeDeleted(const app::Resource* resource)
+void ParticleEditorWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {

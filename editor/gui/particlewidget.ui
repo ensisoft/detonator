@@ -100,57 +100,17 @@
         <item>
          <widget class="QGroupBox" name="transform">
           <property name="title">
-           <string>View transform</string>
+           <string>Visualization</string>
           </property>
           <property name="checkable">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
             <layout class="QGridLayout" name="gridLayout_7">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="text">
-                <string>X pos</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_21">
-               <property name="text">
-                <string>Y pos</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="translateX">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <double>-1000.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>1000.000000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="label_20">
-               <property name="text">
-                <string>Width</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_22">
                <property name="text">
@@ -174,26 +134,28 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="translateY">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <double>-1000.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>1000.000000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="plus90">
+               <property name="text">
+                <string>+ 90°</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="3">
+             <item row="2" column="3">
+              <widget class="QPushButton" name="minus90">
+               <property name="text">
+                <string>- 90°</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>Width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
               <widget class="QDoubleSpinBox" name="scaleX">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -209,34 +171,20 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
+             <item row="0" column="2">
               <widget class="QLabel" name="label_19">
                <property name="text">
                 <string>Height</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="3">
+             <item row="0" column="3">
               <widget class="QDoubleSpinBox" name="scaleY">
                <property name="maximum">
                 <double>1000.000000000000000</double>
                </property>
                <property name="stepType">
                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QPushButton" name="plus90">
-               <property name="text">
-                <string>+ 90°</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="3">
-              <widget class="QPushButton" name="minus90">
-               <property name="text">
-                <string>- 90°</string>
                </property>
               </widget>
              </item>
@@ -314,6 +262,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Grid</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmbGrid"/>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -326,6 +284,23 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowBounds">
+            <property name="text">
+             <string>Show bounds</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowGrid">
+            <property name="text">
+             <string>Show grid</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -335,7 +310,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_5">
           <property name="title">
-           <string>Simulation</string>
+           <string>Simulation space</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="3" column="0">
@@ -642,7 +617,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_6">
           <property name="title">
-           <string>Per particle initial properties (min/max)</string>
+           <string>Initial particle properties (min/max)</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
@@ -797,7 +772,7 @@
         <item>
          <widget class="QGroupBox" name="sizeDerivatives">
           <property name="title">
-           <string>Rate of change in size</string>
+           <string>Particle rate of change in size</string>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -846,7 +821,7 @@
         <item>
          <widget class="QGroupBox" name="alphaDerivatives">
           <property name="title">
-           <string>Rate of change in alpha</string>
+           <string>Particle rate of change in alpha</string>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -978,9 +953,6 @@
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
   <tabstop>materials</tabstop>
-  <tabstop>transform</tabstop>
-  <tabstop>translateX</tabstop>
-  <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>rotation</tabstop>
@@ -1018,6 +990,9 @@
   <tabstop>alphaDerivatives</tabstop>
   <tabstop>timeAlphaDerivative</tabstop>
   <tabstop>distAlphaDerivative</tabstop>
+  <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowBounds</tabstop>
+  <tabstop>cmbGrid</tabstop>
   <tabstop>curNumParticles</tabstop>
  </tabstops>
  <resources>
