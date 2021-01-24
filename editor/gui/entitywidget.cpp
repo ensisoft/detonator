@@ -295,7 +295,7 @@ private:
 };
 
 
-EntityWidget::EntityWidget(app::Workspace* workspace)
+EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 {
     DEBUG("Create EntityWidget");
 
@@ -548,6 +548,8 @@ bool EntityWidget::CanTakeAction(Actions action, const Clipboard* clipboard) con
             else if (!GetCurrentNode())
                 return false;
             return true;
+        case Actions::CanUndo:
+            return mUndoStack.size() > 1;
         case Actions::CanZoomIn:
         {
             const auto max = mUI.zoom->maximum();
@@ -679,6 +681,30 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
 }
 
+void EntityWidget::Undo()
+{
+    if (mUndoStack.size() <= 1)
+    {
+        NOTE("No undo available.");
+        return;
+    }
+
+    // if the timer has run the top of the undo stack
+    // is the same copy as the actual scene object.
+    if (mUndoStack.back().GetHash() == mState.entity->GetHash())
+        mUndoStack.pop_back();
+
+    // todo: how to deal with entity being changed when the
+    // animation track widget is open?
+
+    *mState.entity = mUndoStack.back();
+    mState.view->Rebuild();
+    mUndoStack.pop_back();
+    mScriptVarModel->Reset();
+    DisplayCurrentNodeProperties();
+    NOTE("Undo!");
+}
+
 void EntityWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
@@ -735,6 +761,28 @@ bool EntityWidget::ConfirmClose()
 }
 void EntityWidget::Refresh()
 {
+    // don't take an undo snapshot while the mouse tool is in
+    // action.
+    if (mCurrentTool)
+        return;
+    // don't take an undo snapshot while the node name is being
+    // edited.
+    if (mUI.nodeName->hasFocus())
+        return;
+
+    if (mUndoStack.empty())
+    {
+        mUndoStack.push_back(*mState.entity);
+    }
+
+    const auto curr_hash = mState.entity->GetHash();
+    const auto undo_hash = mUndoStack.back().GetHash();
+    if (curr_hash != undo_hash)
+    {
+        mUndoStack.push_back(*mState.entity);
+        DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
+    }
+
     bool changes = false;
     for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
     {

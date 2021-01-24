@@ -96,8 +96,10 @@ bool ScriptWidget::CanTakeAction(Actions action, const Clipboard*) const
             return mUI.code->hasFocus() &&  mUI.code->CanCopy();
         case Actions::CanPaste:
             return mUI.code->hasFocus() && mUI.code->canPaste();
+        case Actions::CanUndo:
+            return mUI.code->hasFocus() && mUI.code->CanUndo();
     }
-    return  false;
+    return false;
 }
 
 void ScriptWidget::AddActions(QToolBar& bar)

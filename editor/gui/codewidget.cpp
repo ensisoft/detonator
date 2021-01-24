@@ -88,6 +88,7 @@ TextEditor::TextEditor(QWidget *parent) : QPlainTextEdit(parent)
     connect(this, &TextEditor::updateRequest, this, &TextEditor::UpdateLineNumberArea);
     connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::HighlightCurrentLine);
     connect(this, &TextEditor::copyAvailable, this, &TextEditor::CopyAvailable);
+    connect(this, &TextEditor::undoAvailable, this, &TextEditor::UndoAvailable);
 
     open_editors.insert(this);
 }
@@ -143,6 +144,11 @@ void TextEditor::UpdateLineNumberArea(const QRect &rect, int dy)
 void TextEditor::CopyAvailable(bool yes_no)
 {
     mCanCopy = yes_no;
+}
+
+void TextEditor::UndoAvailable(bool yes_no)
+{
+    mCanUndo = yes_no;
 }
 
 void TextEditor::resizeEvent(QResizeEvent *e)

@@ -148,6 +148,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.actionCut->setShortcut(QKeySequence::Cut);
     mUI.actionCopy->setShortcut(QKeySequence::Copy);
     mUI.actionPaste->setShortcut(QKeySequence::Paste);
+    mUI.actionUndo->setShortcut(QKeySequence::Undo);
 
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
@@ -735,6 +736,7 @@ void MainWindow::on_menuEdit_aboutToShow()
         mUI.actionCut->setEnabled(false);
         mUI.actionCopy->setEnabled(false);
         mUI.actionPaste->setEnabled(false);
+        mUI.actionUndo->setEnabled(false);
         return;
     }
     // Paste won't work correctly when invoked through the menu.
@@ -754,6 +756,7 @@ void MainWindow::on_menuEdit_aboutToShow()
     mUI.actionCut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanCut, &mClipboard));
     mUI.actionCopy->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanCopy, &mClipboard));
     mUI.actionPaste->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanPaste, &mClipboard));
+    mUI.actionUndo->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanUndo));
 }
 
 void MainWindow::on_mainTab_currentChanged(int index)
@@ -924,6 +927,14 @@ void MainWindow::on_actionPaste_triggered()
         return;
 
     mCurrentWidget->Paste(mClipboard);
+}
+
+void MainWindow::on_actionUndo_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+
+    mCurrentWidget->Undo();
 }
 
 void MainWindow::on_actionZoomIn_triggered()

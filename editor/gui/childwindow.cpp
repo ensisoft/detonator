@@ -65,6 +65,7 @@ ChildWindow::ChildWindow(MainWidget* widget, Clipboard* clipboard)
     mUI.actionCut->setShortcut(QKeySequence::Cut);
     mUI.actionCopy->setShortcut(QKeySequence::Copy);
     mUI.actionPaste->setShortcut(QKeySequence::Paste);
+    mUI.actionUndo->setShortcut(QKeySequence::Undo);
 
     mWidget->Activate();
     mWidget->AddActions(*mUI.toolBar);
@@ -185,6 +186,7 @@ void ChildWindow::on_menuEdit_aboutToShow()
         mUI.actionCut->setEnabled(false);
         mUI.actionCopy->setEnabled(false);
         mUI.actionPaste->setEnabled(false);
+        mUI.actionUndo->setEnabled(false);
         return;
     }
 
@@ -195,6 +197,7 @@ void ChildWindow::on_menuEdit_aboutToShow()
     mUI.actionCut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanCut, mClipboard));
     mUI.actionCopy->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanCopy, mClipboard));
     mUI.actionPaste->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanPaste, mClipboard));
+    mUI.actionUndo->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanUndo));
 }
 
 void ChildWindow::on_actionClose_triggered()
@@ -231,6 +234,13 @@ void ChildWindow::on_actionPaste_triggered()
     if (!mWidget)
         return;
     mWidget->Paste(*mClipboard);
+}
+
+void ChildWindow::on_actionUndo_triggered()
+{
+    if (!mWidget)
+        return;
+    mWidget->Undo();
 }
 
 void ChildWindow::on_actionReloadShaders_triggered()

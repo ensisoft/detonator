@@ -307,7 +307,7 @@ private:
     unsigned mCurrentEntityIdIndex = 0;
 };
 
-SceneWidget::SceneWidget(app::Workspace* workspace)
+SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 {
     DEBUG("Create SceneWidget");
 
@@ -526,6 +526,8 @@ bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
             else if (!GetCurrentNode())
                 return false;
             return true;
+        case Actions::CanUndo:
+            return mUndoStack.size() > 1;
         case Actions::CanZoomIn: {
                 const auto max = mUI.zoom->maximum();
                 const auto val = mUI.zoom->value();
@@ -655,6 +657,26 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
 }
 
+void SceneWidget::Undo()
+{
+    if (mUndoStack.size() <= 1)
+    {
+        NOTE("No undo available.");
+        return;
+    }
+    // if the timer has run the top of the undo stack
+    // is the same copy as the actual scene object.
+    if (mUndoStack.back().GetHash() == mState.scene.GetHash())
+        mUndoStack.pop_back();
+
+    mState.scene = mUndoStack.back();
+    mState.view->Rebuild();
+    mUndoStack.pop_back();
+    mScriptVarModel->Reset();
+    DisplayCurrentNodeProperties();
+    NOTE("Undo!");
+}
+
 void SceneWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
@@ -711,7 +733,26 @@ bool SceneWidget::ConfirmClose()
 }
 void SceneWidget::Refresh()
 {
+    // don't take an undo snapshot while the mouse tool is in
+    // action.
+    if (mCurrentTool)
+        return;
+    // don't take an undo snapshot while the node name is being
+    // edited.
+    if (mUI.nodeName->hasFocus())
+        return;
 
+    if (mUndoStack.empty())
+    {
+        mUndoStack.push_back(mState.scene);
+    }
+    const auto curr_hash = mState.scene.GetHash();
+    const auto undo_hash = mUndoStack.back().GetHash();
+    if (curr_hash != undo_hash)
+    {
+        mUndoStack.push_back(mState.scene);
+        DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
+    }
 }
 
 bool SceneWidget::GetStats(Stats* stats) const

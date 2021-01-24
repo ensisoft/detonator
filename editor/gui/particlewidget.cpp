@@ -291,6 +291,8 @@ bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipbo
         case Actions::CanZoomIn:
         case Actions::CanZoomOut:
             return false;
+        case Actions::CanUndo:
+            return false;
     }
     BUG("Unhandled action query.");
     return false;

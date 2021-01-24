@@ -221,6 +221,8 @@ bool ShapeWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
         case Actions::CanZoomIn:
         case Actions::CanZoomOut:
             return false;
+        case Actions::CanUndo:
+            return false;
     }
     BUG("Unhandled action query.");
     return false;

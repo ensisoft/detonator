@@ -60,6 +60,8 @@ namespace gui
 
         bool CanCopy() const
         { return mCanCopy; }
+        bool CanUndo() const
+        { return mCanUndo;}
 
         void SetDocument(QTextDocument* document);
 
@@ -79,6 +81,7 @@ namespace gui
         void UpdateLineNumberArea(const QRect &rect, int dy);
         void HighlightCurrentLine();
         void CopyAvailable(bool yes_no);
+        void UndoAvailable(bool yes_no);
     private:
         void ApplySettings();
 
@@ -88,6 +91,7 @@ namespace gui
         QTextDocument* mDocument = nullptr;
         static Settings mSettings;
         bool mCanCopy = false;
+        bool mCanUndo = false;
     };
 
 } // namespace

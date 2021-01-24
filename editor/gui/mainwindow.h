@@ -114,6 +114,7 @@ namespace gui
         void on_actionCut_triggered();
         void on_actionCopy_triggered();
         void on_actionPaste_triggered();
+        void on_actionUndo_triggered();
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionReloadShaders_triggered();

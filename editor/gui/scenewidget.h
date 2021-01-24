@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include "ui_scenewidget.h"
 #  include <QMenu>
+#  include <boost/circular_buffer.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -67,6 +68,7 @@ namespace gui
         virtual void Cut(Clipboard& clipboard) override;
         virtual void Copy(Clipboard& clipboard) const override;
         virtual void Paste(const Clipboard& clipboard) override;
+        virtual void Undo() override;
         virtual void ZoomIn() override;
         virtual void ZoomOut() override;
         virtual void ReloadShaders() override;
@@ -168,5 +170,9 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
         bool mCameraWasLoaded = false;
+
+        // Undo "stack" with fixed capacity that begins
+        // overwrite old items when space is exceeded
+        boost::circular_buffer<game::SceneClass> mUndoStack;
     };
 }

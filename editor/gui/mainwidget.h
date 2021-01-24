@@ -32,8 +32,9 @@ namespace gui
             CanCut     = 0x4,
             CanCopy    = 0x8,
             CanPaste   = 0x10,
-            CanReloadTextures = 0x20,
-            CanReloadShaders  = 0x40
+            CanUndo    = 0x20,
+            CanReloadTextures = 0x40,
+            CanReloadShaders  = 0x80
         };
 
         // Returns whether the widget does accelerated rendering and needs to
@@ -137,6 +138,10 @@ namespace gui
 
         // Paste the current object from the clipboard into the widget.
         virtual void Paste(const Clipboard& clipboard)
+        {}
+
+        // Undo the last action on the undo stack.
+        virtual void Undo()
         {}
 
         // Called before the widget is being closed by the user.
