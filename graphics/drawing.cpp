@@ -26,13 +26,13 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
-#include "bitmap.h"
-#include "drawing.h"
-#include "painter.h"
-#include "material.h"
-#include "drawable.h"
-#include "transform.h"
-#include "text.h"
+#include "graphics/bitmap.h"
+#include "graphics/drawing.h"
+#include "graphics/painter.h"
+#include "graphics/material.h"
+#include "graphics/drawable.h"
+#include "graphics/transform.h"
+#include "graphics/text.h"
 
 namespace gfx
 {
@@ -109,24 +109,18 @@ void DrawTextRect(Painter& painter,
     painter.Draw(Rectangle(), t, Material(klass));
 }
 
-void FillRect(Painter& painter,
-    const FRect& rect,
-    const Color4f& color,
-    float rotation)
+void FillRect(Painter& painter, const FRect& rect, const Color4f& color)
 {
     const float alpha = color.Alpha();
 
     FillRect(painter, rect,
         SolidColor(color).SetSurfaceType(alpha == 1.0f
             ? MaterialClass::SurfaceType::Opaque
-            : MaterialClass::SurfaceType::Transparent),
-        rotation);
+            : MaterialClass::SurfaceType::Transparent));
+
 }
 
-void FillRect(Painter& painter,
-    const FRect& rect,
-    const Material& material,
-    float rotation)
+void FillRect(Painter& painter, const FRect& rect, const Material& material)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -135,21 +129,11 @@ void FillRect(Painter& painter,
 
     Transform trans;
     trans.Resize(width, height);
-    if (rotation > 0.0f)
-    {
-        trans.Translate(-width*0.5f, -height*0.5f);
-        trans.Rotate(rotation);
-        trans.Translate(width*0.5f, height*0.5f);
-    }
     trans.Translate(x, y);
     painter.Draw(Rectangle(), trans, material);
 }
 
-void DrawRectOutline(Painter& painter,
-    const FRect& rect,
-    const Color4f& color,
-    float line_width,
-    float rotation)
+void DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
     const float alpha = color.Alpha();
 
@@ -157,14 +141,10 @@ void DrawRectOutline(Painter& painter,
         SolidColor(color).SetSurfaceType(alpha == 1.0f
             ? MaterialClass::SurfaceType::Opaque
             : MaterialClass::SurfaceType::Transparent),
-        line_width, rotation);
+        line_width);
 }
 
-void DrawRectOutline(Painter& painter,
-    const FRect& rect,
-    const Material& material,
-    float line_width,
-    float rotation)
+void DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -173,26 +153,12 @@ void DrawRectOutline(Painter& painter,
 
     Transform outline_transform;
     outline_transform.Resize(width, height);
-    if (rotation > 0.0f)  // todo: some delta value ?
-    {
-        outline_transform.Translate(-width*0.5f, -height*0.5f);
-        outline_transform.Rotate(rotation);
-        outline_transform.Translate(width*0.5f, height*0.5f);
-    }
-
     outline_transform.Translate(x, y);
 
     Transform mask_transform;
     const auto mask_width  = width - 2 * line_width;
     const auto mask_height = height - 2 * line_width;
     mask_transform.Resize(mask_width, mask_height);
-    if (rotation > 0.0f) // todo: some delta value check ?
-    {
-        mask_transform.Translate(-mask_width *0.5f, -mask_height * 0.5f);
-        mask_transform.Rotate(rotation);
-        mask_transform.Translate(mask_width * 0.5f, mask_height * 0.5f);
-    }
-
     mask_transform.Translate(x + line_width, y + line_width);
 
     // todo: if the stencil buffer is not multisampled this
@@ -204,25 +170,17 @@ void DrawRectOutline(Painter& painter,
     // line widths. One possible solution could be to use
     // NV_path_rendering (when available) or then manually fill
     // the line gaps with quads.
-
-    painter.Draw(
-            Rectangle(), outline_transform,
-            Rectangle(), mask_transform,
-            material);
+    painter.Draw(Rectangle(), outline_transform,
+                 Rectangle(), mask_transform,
+                 material);
 }
 
-void DrawLine(Painter& painter,
-    const FPoint& a, const FPoint& b,
-    const Color4f& color,
-    float line_width)
+void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
 {
     DrawLine(painter, a, b, SolidColor(color), line_width);
 }
 
-void DrawLine(Painter& painter,
-    const FPoint& a, const FPoint& b,
-    const Material& material,
-    float line_width)
+void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
 {
     // The line shape defines a horizonal line so in order to
     // support lines with arbitrary directions we need to figure

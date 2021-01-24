@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "types.h"
+#include "graphics/types.h"
 
 // helper functionality to simplify common operations
 // into one-liners in the application
@@ -45,7 +45,7 @@ enum TextAlign {
     AlignTop     = 0x1,
     AlignVCenter = 0x2,
     AlignBottom  = 0x4,
-    // Horizontal text aligment
+    // Horizontal text alignment
     AlignLeft    = 0x10,
     AlignHCenter = 0x20,
     AlignRight   = 0x40
@@ -69,42 +69,22 @@ void DrawTextRect(Painter& painter,
     unsigned properties = 0x0);
 
 // Draw a retangle filled with the desired color.
-void FillRect(Painter& painter,
-    const FRect& rect,
-    const Color4f& color,
-    float rotation = 0.0f);
+void FillRect(Painter& painter, const FRect& rect, const Color4f& color);
 // Draw a rectangle filled with the given material.
-void FillRect(Painter& painter,
-    const FRect& rect,
-    const Material& material,
-    float rotation = 0.0f);
+void FillRect(Painter& painter, const FRect& rect, const Material& material);
 
 // Draw the outline of a rectangle. the rectangle is defined in pixels
 // and positioned relative to the top left corer of the render target/surface.
 // If rotation is non-zero the rect is first rotated *then* translated.
-void DrawRectOutline(Painter& painter,
-    const FRect& rect,
-    const Color4f& color,
-    float line_width,
-    float rotation = 0.0f);
-void DrawRectOutline(Painter&,
-    const FRect& rect,
-    const Material& material,
-    float line_width,
-    float rotation = 0.0f);
+void DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+void DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
 
 // Draw a line from the center of point A to the center of point B
 // using the given line width (if possible) and with the given color.
 // Points A and B are relative to the top left corner of the rendering
 // target (e.g the window surface).
-void DrawLine(Painter& painter,
-    const FPoint& a, const FPoint& b,
-    const Color4f& color,
-    float line_width = 1.0f);
+void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width = 1.0f);
 // Like above but instead use a material for rasterizing the line fragments.
-void DrawLine(Painter& painter,
-    const FPoint& a, const FPoint& b,
-    const Material& material,
-    float line_width = 1.0f);
+void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
 
 } // namespace
