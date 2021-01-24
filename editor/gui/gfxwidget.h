@@ -206,7 +206,9 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseRelease;
         std::function<void (QWheelEvent* wheel)>  onMouseWheel;
         std::function<void (QMouseEvent* mickey)> onMouseDoubleClick;
-        // keyboard callbacks.
+        // keyboard callbacks. Returns true if the key press event
+        // was consumed. This will stop further processing of the
+        // keypress.
         std::function<bool (QKeyEvent* key)>      onKeyPress;
 
         // zoom in/out callbacks

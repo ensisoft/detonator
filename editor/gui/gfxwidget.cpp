@@ -357,7 +357,16 @@ void GfxWindow::mouseReleaseEvent(QMouseEvent* mickey)
 
 void GfxWindow::keyPressEvent(QKeyEvent* key)
 {
-    onKeyPress(key);
+    // the Qt documents don't say anything regarding QWindow::keyPressEvent
+    // whether the base class implementation should be called or not.
+    // However there seems to be some occasional hiccups with keyboard
+    // shortcuts not working. I'm guessing the issue is the lack of
+    // QWindow::keyPressEvent call.
+    // The QWidget documentation however stresses how important it is
+    // to call QWidget::keyPressEvent if the derived class implementation
+    // doesn't act upon the key.
+    if (!onKeyPress(key))
+        QWindow::keyPressEvent(key);
 }
 
 void GfxWindow::wheelEvent(QWheelEvent* wheel)
