@@ -400,6 +400,8 @@ bool AnimationTrackWidget::CanTakeAction(Actions action, const Clipboard* clipbo
         case Actions::CanCopy:
         case Actions::CanPaste:
             return false;
+        case Actions::CanUndo:
+            return false;
         case Actions::CanReloadTextures:
         case Actions::CanReloadShaders:
             return true;
