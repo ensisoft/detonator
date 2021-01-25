@@ -85,6 +85,9 @@ namespace gui
         void on_actionAddAnimaticActuator_triggered();
         void on_actionAddMaterialActuator_triggered();
         void on_actionAddKinematicActuator_triggered();
+        void on_actionShowAnimaticActuators_toggled();
+        void on_actionShowKinematicActuators_toggled();
+        void on_actionShowMaterialActuators_toggled();
 
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
@@ -114,9 +117,6 @@ namespace gui
         void on_kinematicEndVeloX_valueChanged(double value);
         void on_kinematicEndVeloY_valueChanged(double value);
         void on_kinematicEndVeloZ_valueChanged(double value);
-        void on_chkShowMaterialActuators_stateChanged(int);
-        void on_chkShowTransformActuators_stateChanged(int);
-        void on_chkShowKinematicActuators_stateChanged(int);
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
     private:

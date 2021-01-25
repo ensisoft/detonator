@@ -474,6 +474,9 @@
             <layout class="QVBoxLayout" name="verticalLayout">
              <item>
               <widget class="gui::TreeWidget" name="tree" native="true">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -544,60 +547,6 @@
             <enum>Qt::CustomContextMenu</enum>
            </property>
           </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>Show actuators: </string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkShowMaterialActuators">
-             <property name="text">
-              <string>Material</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkShowTransformActuators">
-             <property name="text">
-              <string>Animatic</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkShowKinematicActuators">
-             <property name="text">
-              <string>Kinematic</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
         </layout>
        </widget>
@@ -721,7 +670,7 @@
               <enum>QFrame::Plain</enum>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="transformActuator">
               <layout class="QGridLayout" name="gridLayout_5">
@@ -1276,6 +1225,48 @@
     <string>Kinematic</string>
    </property>
   </action>
+  <action name="actionShowMaterialActuators">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Material</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle show material actuators</string>
+   </property>
+  </action>
+  <action name="actionShowKinematicActuators">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Kinematic</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle show kinematic actuators</string>
+   </property>
+  </action>
+  <action name="actionShowAnimaticActuators">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Animatic</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle show animatic actuators</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1313,12 +1304,9 @@
   <tabstop>btnViewReset</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
+  <tabstop>chkSnap</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowMaterialActuators</tabstop>
-  <tabstop>chkShowTransformActuators</tabstop>
-  <tabstop>chkShowKinematicActuators</tabstop>
   <tabstop>actuatorNode</tabstop>
   <tabstop>actuatorType</tabstop>
   <tabstop>actuatorStartTime</tabstop>

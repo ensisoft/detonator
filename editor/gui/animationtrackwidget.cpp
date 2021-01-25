@@ -283,9 +283,9 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.chkShowOrigin);
     settings.saveWidget("TrackWidget", mUI.chkShowGrid);
     settings.saveWidget("TrackWidget", mUI.chkSnap);
-    settings.saveWidget("TrackWidget", mUI.chkShowTransformActuators);
-    settings.saveWidget("TrackWidget", mUI.chkShowMaterialActuators);
-    settings.saveWidget("TrackWidget", mUI.chkShowKinematicActuators);
+    settings.setValue("TrackWidget", "show_kinematic_actuators", mState.show_kinematic_actuators);
+    settings.setValue("TrackWidget", "show_animatic_actuators", mState.show_transform_actuators);
+    settings.setValue("TrackWidget", "show_material_actuators", mState.show_material_actuators);
     settings.setValue("TrackWidget", "original_hash", mOriginalHash);
 
     // use the animation's JSON serialization to save the state.
@@ -332,10 +332,13 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.chkShowOrigin);
     settings.loadWidget("TrackWidget", mUI.chkShowGrid);
     settings.loadWidget("TrackWidget", mUI.chkSnap);
-    settings.loadWidget("TrackWidget", mUI.chkShowTransformActuators);
-    settings.loadWidget("TrackWidget", mUI.chkShowMaterialActuators);
-    settings.loadWidget("TrackWidget", mUI.chkShowKinematicActuators);
     settings.getValue("TrackWidget", "original_hash", &mOriginalHash);
+    settings.getValue("TrackWidget", "show_kinematic_actuators", &mState.show_kinematic_actuators);
+    settings.getValue("TrackWidget", "show_animatic_actuators",  &mState.show_transform_actuators);
+    settings.getValue("TrackWidget", "show_material_actuators",  &mState.show_material_actuators);
+    SetValue(mUI.actionShowKinematicActuators, mState.show_kinematic_actuators);
+    SetValue(mUI.actionShowAnimaticActuators,  mState.show_transform_actuators);
+    SetValue(mUI.actionShowMaterialActuators,   mState.show_material_actuators);
 
     // try to restore the shared animation class object
     {
@@ -379,8 +382,6 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     mEntity = game::CreateEntityInstance(mState.entity);
 
-    mState.show_transform_actuators = GetValue(mUI.chkShowTransformActuators);
-    mState.show_material_actuators  = GetValue(mUI.chkShowMaterialActuators);
     SetValue(mUI.looping, mState.track->IsLooping());
     SetValue(mUI.duration, mState.track->GetDuration());
     mTreeModel.reset(new TreeModel(*mState.entity));
@@ -644,6 +645,22 @@ void AnimationTrackWidget::on_actionAddKinematicActuator_triggered()
     AddActuatorFromTimeline(game::ActuatorClass::Type::Kinematic, seconds);
 }
 
+void AnimationTrackWidget::on_actionShowAnimaticActuators_toggled()
+{
+     mState.show_transform_actuators = GetValue(mUI.actionShowAnimaticActuators);
+     mUI.timeline->Rebuild();
+}
+void AnimationTrackWidget::on_actionShowKinematicActuators_toggled()
+{
+    mState.show_kinematic_actuators = GetValue(mUI.actionShowKinematicActuators);
+    mUI.timeline->Rebuild();
+}
+void AnimationTrackWidget::on_actionShowMaterialActuators_toggled()
+{
+    mState.show_material_actuators = GetValue(mUI.actionShowMaterialActuators);
+    mUI.timeline->Rebuild();
+}
+
 void AnimationTrackWidget::on_duration_valueChanged(double value)
 {
     QSignalBlocker s(mUI.actuatorStartTime);
@@ -858,15 +875,24 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         mUI.actionAddKinematicActuator->setData(seconds);
     }
 
-    QMenu menu(this);
     QMenu add(this);
     add.setIcon(QIcon("icons:add.png"));
     add.setTitle(tr("Add Actuator..."));
     add.addAction(mUI.actionAddAnimaticActuator);
-    add.addAction(mUI.actionAddMaterialActuator);
     add.addAction(mUI.actionAddKinematicActuator);
+    add.addAction(mUI.actionAddMaterialActuator);
     add.setEnabled(timeline != nullptr);
+
+    QMenu show(this);
+    show.setTitle(tr("Show ..."));
+    show.addAction(mUI.actionShowAnimaticActuators);
+    show.addAction(mUI.actionShowKinematicActuators);
+    show.addAction(mUI.actionShowMaterialActuators);
+
+    QMenu menu(this);
     menu.addMenu(&add);
+    menu.addSeparator();
+    menu.addMenu(&show);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteActuator);
     menu.addAction(mUI.actionClearActuators);
@@ -993,23 +1019,6 @@ void AnimationTrackWidget::on_kinematicEndVeloZ_valueChanged(double value)
             SetSelectedActuatorProperties();
         }
     }
-}
-
-void AnimationTrackWidget::on_chkShowMaterialActuators_stateChanged(int)
-{
-    mState.show_material_actuators = GetValue(mUI.chkShowMaterialActuators);
-    mUI.timeline->Rebuild();
-}
-void AnimationTrackWidget::on_chkShowTransformActuators_stateChanged(int)
-{
-    mState.show_transform_actuators = GetValue(mUI.chkShowTransformActuators);
-    mUI.timeline->Rebuild();
-}
-
-void AnimationTrackWidget::on_chkShowKinematicActuators_stateChanged(int)
-{
-    mState.show_kinematic_actuators = GetValue(mUI.chkShowKinematicActuators);
-    mUI.timeline->Rebuild();
 }
 
 void AnimationTrackWidget::on_btnAddActuator_clicked()
