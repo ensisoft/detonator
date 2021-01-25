@@ -25,10 +25,8 @@
 // incoming vertex attributes.
 // position is the vertex position in model space
 attribute vec2 aPosition;
-// texture coordinate for the vertex
-attribute vec2 aTexCoord;
 // per particle data.
-attribute vec2 aData;
+attribute vec4 aData;
 // transform vertex from view space into NDC
 // we're using orthographic projection
 uniform mat4 kProjectionMatrix;
@@ -41,6 +39,8 @@ varying float vRandomValue;
 // per particle alpha
 varying float vAlpha;
 
+// actuall we don't write tex coords here to the fragment stage
+// because gl_PointCoord must be used instead.
 varying vec2 vTexCoord;
 void main()
 {
@@ -50,23 +50,10 @@ void main()
     // NDC (normalied device coordinates) (x grows right to 1.0 and
     // y grows up to 1.0 to the top of the screen)
     vec4 vertex = vec4(aPosition.x, aPosition.y * -1.0, 1.0, 1.0);
-
-    // we don't write tex coords here to the fragment stage because:
-    // * gl_PointCoord must be used instead.
-    // * we're using aTexCoord to provide the particle size  and the random value.
-    vRandomValue = aTexCoord.y;
-
-    // grab the particle alpha value from the data attribute.
-    vAlpha = aData.x;
-
+    // take the per particle data.
+    gl_PointSize = aData.x;
+    vRandomValue = aData.y;
+    vAlpha       = aData.z;
     // outgoing vertex position.
     gl_Position = kProjectionMatrix * kViewMatrix * vertex;
-
-    // we're abusing the vertex type here and packing
-    // the pointsize in the texture coordinate field.
-    // if the rendering is points the texture coord
-    // is irrelevant since the fragment shader needs to
-    // sample from gl_PointCoord
-    gl_PointSize = aTexCoord.x;
-
 }

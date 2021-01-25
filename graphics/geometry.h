@@ -68,10 +68,6 @@ namespace gfx
         // the *top* row of pixels and 1.0f is the *bottom* row of
         // pixels).
         Vec2 aTexCoord;
-        // Arbitrary data that is accompanied by the vertex. Used for
-        // example by the particle system to provide particle sizes/alphas
-        // to the shader programs.
-        Vec2 aData;
     };
 
     struct VertexLayout {
@@ -220,8 +216,7 @@ namespace gfx
             // the divisors properly.
             static VertexLayout layout(sizeof(Vertex), {
                {"aPosition", 0, 2, 0, offsetof(Vertex, aPosition)},
-               {"aTexCoord", 0, 2, 0, offsetof(Vertex, aTexCoord)},
-               {"aData",     0, 2, 0, offsetof(Vertex, aData)}
+               {"aTexCoord", 0, 2, 0, offsetof(Vertex, aTexCoord)}
             });
             return layout;
         }

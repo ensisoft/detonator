@@ -1060,8 +1060,6 @@ std::size_t PolygonClass::GetHash() const
         hash = base::hash_combine(hash, vertex.aTexCoord.y);
         hash = base::hash_combine(hash, vertex.aPosition.x);
         hash = base::hash_combine(hash, vertex.aPosition.y);
-        hash = base::hash_combine(hash, vertex.aData.x);
-        hash = base::hash_combine(hash, vertex.aData.y);
     }
     for (const auto& draw : mDrawCommands)
     {
@@ -1256,27 +1254,36 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
     // based sizes
     const auto pixel_scaler = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
-    std::vector<Vertex> verts;
+    struct ParticleVertex {
+        Vec2 aPosition;
+        Vec4 aData;
+    };
+    static VertexLayout layout(sizeof(ParticleVertex), {
+        {"aPosition", 0, 2, 0, offsetof(ParticleVertex, aPosition)},
+        {"aData",     0, 4, 0, offsetof(ParticleVertex, aData)}
+    });
+
+    std::vector<ParticleVertex> verts;
     for (const auto& p : state.particles)
     {
         // Convert the particle coordinates to lower right
         // quadrant coordinates.
-        Vertex v;
+        ParticleVertex v;
         v.aPosition.x = p.position.x / mParams.max_xpos;
         v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
-        // abusing texcoord here to pass per particle point size
-        // to the fragment shader.
-        v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
+        // copy the per particle data into the data vector for the fragment shader.
+        v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
         // abusing texcoord here to provide per particle random value.
         // we can use this to simulate particle rotation for example
         // (if the material supports it)
-        v.aTexCoord.y = p.randomizer;
+        v.aData.y = p.randomizer;
         // Use the particle data to pass the per particle alpha.
-        v.aData.x = p.alpha;
+        v.aData.z = p.alpha;
         verts.push_back(v);
     }
 
     geom->SetVertexBuffer(std::move(verts));
+    geom->SetVertexLayout(layout);
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Points);
     return geom;
