@@ -232,11 +232,9 @@ public:
     {}
     virtual void SetLineWidth(float width) override
     {}
-    virtual void Update(const gfx::Vertex* vertices, std::size_t count) override
+    virtual void SetVertexBuffer(std::unique_ptr<gfx::VertexBuffer> buffer) override
     {}
-    virtual void Update(const std::vector<gfx::Vertex>& vertices) override
-    {}
-    virtual void Update(std::vector<gfx::Vertex>&& vertices) override
+    virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
     {}
 private:
 };

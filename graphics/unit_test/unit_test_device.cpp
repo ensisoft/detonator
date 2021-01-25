@@ -309,7 +309,7 @@ void unit_test_render_color_only()
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -386,7 +386,7 @@ void unit_test_render_with_single_texture()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -466,7 +466,7 @@ void unit_test_render_with_multiple_textures()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -545,7 +545,7 @@ void unit_test_render_set_float_uniforms()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -667,7 +667,7 @@ void unit_test_render_set_int_uniforms()
             {{1,  -1}, {1, 0}},
             {{1,  1},  {1, 1}}
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -752,7 +752,7 @@ void unit_test_render_set_matrix2x2_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -819,7 +819,7 @@ void unit_test_render_set_matrix3x3_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =
@@ -886,7 +886,7 @@ void unit_test_render_set_matrix4x4_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->Update(verts, 6);
+    geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     const std::string& fssrc =

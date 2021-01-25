@@ -67,7 +67,7 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
                 {{0.7f, -0.25f}, {0.7f, 0.25f}},
             };
             geom = device.MakeGeometry("ArrowOutline");
-            geom->Update(verts, 7);
+            geom->SetVertexBuffer(verts, 7);
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
@@ -92,7 +92,7 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
                 {{1.0f, -0.5f}, {1.0f, 0.5f}},
             };
             geom = device.MakeGeometry("Arrow");
-            geom->Update(verts, 9);
+            geom->SetVertexBuffer(verts, 9);
             geom->AddDrawCmd(Geometry::DrawType::Triangles);
         }
     }
@@ -125,7 +125,7 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
                 {{0.7f, -0.0f}, {0.7f, 0.0f}},
             };
             geom = device.MakeGeometry("ArrowWireframe");
-            geom->Update(verts, 16);
+            geom->SetVertexBuffer(verts, 16);
             geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
@@ -154,7 +154,7 @@ Geometry* Line::Upload(const Environment& env, Device& device) const
             {{1.0f,  -0.5f}, {1.0f, 0.5f}}
         };
         geom = device.MakeGeometry("LineSegment");
-        geom->Update(verts, 2);
+        geom->SetVertexBuffer(verts, 2);
         geom->AddDrawCmd(Geometry::DrawType::Lines);
     }
     geom->SetLineWidth(mLineWidth);
@@ -312,7 +312,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
         if (mStyle == Style::Outline)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
 
-        geom->Update(std::move(vs));
+        geom->SetVertexBuffer(std::move(vs));
     }
     geom->SetLineWidth(mLineWidth);
     return geom;
@@ -386,7 +386,7 @@ Geometry* Circle::Upload(const Environment& env, Device& device) const
             }
         }
         geom = device.MakeGeometry(name);
-        geom->Update(&vs[0], vs.size());
+        geom->SetVertexBuffer(&vs[0], vs.size());
 
     }
     geom->ClearDraws();
@@ -431,7 +431,7 @@ Geometry* Rectangle::Upload(const Environment& env, Device& device) const
                 { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
             geom = device.MakeGeometry("RectangleOutline");
-            geom->Update(verts, 4);
+            geom->SetVertexBuffer(verts, 4);
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
@@ -450,7 +450,7 @@ Geometry* Rectangle::Upload(const Environment& env, Device& device) const
                 { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
             geom = device.MakeGeometry("Rectangle");
-            geom->Update(verts, 6);
+            geom->SetVertexBuffer(verts, 6);
         }
         geom->ClearDraws();
         if (mStyle == Style::Solid)
@@ -545,7 +545,7 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                 }
             }
             geom = device.MakeGeometry("RoundRectOutline");
-            geom->Update(std::move(vs));
+            geom->SetVertexBuffer(std::move(vs));
             geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
@@ -649,7 +649,7 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                     geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
                 }
             }
-            geom->Update(std::move(vs));
+            geom->SetVertexBuffer(std::move(vs));
         }
     }
     return geom;
@@ -702,7 +702,7 @@ Geometry* IsocelesTriangle::Upload(const Environment& env, Device& device) const
             { {1.0f, -1.0f}, {1.0f, 1.0f} }
         };
         geom = device.MakeGeometry("IsocelesTriangle");
-        geom->Update(verts, 3);
+        geom->SetVertexBuffer(verts, 3);
     }
     geom->SetLineWidth(mLineWidth);
     geom->ClearDraws();
@@ -742,7 +742,7 @@ Geometry* RightTriangle::Upload(const Environment& env, Device& device) const
             { {1.0f, -1.0f}, {1.0f, 1.0f} }
         };
         geom = device.MakeGeometry("RightTriangle");
-        geom->Update(verts, 3);
+        geom->SetVertexBuffer(verts, 3);
     }
     geom->SetLineWidth(mLineWidth);
     geom->ClearDraws();
@@ -787,7 +787,7 @@ Geometry* Trapezoid::Upload(const Environment& env, Device& device) const
             };
 
             geom = device.MakeGeometry("TrapezoidOutline");
-            geom->Update(verts, 4);
+            geom->SetVertexBuffer(verts, 4);
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
@@ -814,7 +814,7 @@ Geometry* Trapezoid::Upload(const Environment& env, Device& device) const
                 {{1.0f, -1.0f}, {1.0f, 1.0f}}
             };
             geom = device.MakeGeometry("Trapezoid");
-            geom->Update(verts, 12);
+            geom->SetVertexBuffer(verts, 12);
         }
         geom->ClearDraws();
         if (mStyle == Style::Solid)
@@ -862,7 +862,7 @@ Geometry* Parallelogram::Upload(const Environment& env, Device& device) const
                 { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
             geom = device.MakeGeometry("ParallelogramOutline");
-            geom->Update(verts, 4);
+            geom->SetVertexBuffer(verts, 4);
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
@@ -881,7 +881,7 @@ Geometry* Parallelogram::Upload(const Environment& env, Device& device) const
                 {{0.2f,  0.0f}, {0.2f, 0.0f}}
             };
             geom = device.MakeGeometry("Parallelogram");
-            geom->Update(verts, 6);
+            geom->SetVertexBuffer(verts, 6);
         }
         geom->ClearDraws();
         if (mStyle == Style::Solid)
@@ -967,7 +967,7 @@ Geometry* GridClass::Upload(Device& device) const
             verts.push_back(corners[3]);
         }
         geom = device.MakeGeometry(name);
-        geom->Update(std::move(verts));
+        geom->SetVertexBuffer(std::move(verts));
         geom->AddDrawCmd(Geometry::DrawType::Lines);
     }
     return geom;
@@ -1018,7 +1018,7 @@ Geometry* PolygonClass::Upload(const InstanceState& state, Device& device) const
         if (!geom)
         {
             geom = device.MakeGeometry(GetName());
-            geom->Update(mVertices);
+            geom->SetVertexBuffer(mVertices);
             for (const auto& cmd : mDrawCommands)
             {
                 geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
@@ -1032,7 +1032,7 @@ Geometry* PolygonClass::Upload(const InstanceState& state, Device& device) const
         {
             geom = device.MakeGeometry("DynamicPolygon");
         }
-        geom->Update(mVertices);
+        geom->SetVertexBuffer(mVertices);
         geom->ClearDraws();
         for (const auto& cmd : mDrawCommands)
         {
@@ -1276,7 +1276,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
         verts.push_back(v);
     }
 
-    geom->Update(std::move(verts));
+    geom->SetVertexBuffer(std::move(verts));
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Points);
     return geom;

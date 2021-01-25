@@ -800,52 +800,28 @@ private:
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
 
-        virtual void Update(const Vertex* verts, std::size_t count) override
-        {
-            mData.clear();
-            mData.resize(count);
-            for (size_t i=0; i<count; ++i)
-            {
-               mData[i] = verts[i];
-            }
-        }
-        virtual void Update(const std::vector<Vertex>& verts) override
-        {
-            mData = verts;
-        }
-        virtual void Update(std::vector<Vertex>&& verts) override
-        {
-            mData = std::move(verts);
-        }
+        virtual void SetVertexBuffer(std::unique_ptr<VertexBuffer> buffer) override
+        { mBuffer = std::move(buffer); }
+        virtual void SetVertexLayout(const VertexLayout& layout) override
+        { mLayout = layout; }
 
         void Draw(GLuint program)
         {
-            const GLint aPosition = mGL.glGetAttribLocation(program, "aPosition");
-            const GLint aTexCoord = mGL.glGetAttribLocation(program, "aTexCoord");
-            const GLint aData     = mGL.glGetAttribLocation(program, "aData");
-            const uint8_t* base = reinterpret_cast<const uint8_t*>(&mData[0]);
-            if (aPosition != -1)
+            ASSERT(mBuffer && mBuffer->GetCount());
+            for (const auto& attr : mLayout.attributes)
             {
-                GL_CALL(glVertexAttribPointer(aPosition, 2, GL_FLOAT, GL_FALSE,
-                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aPosition))));
-                GL_CALL(glEnableVertexAttribArray(aPosition));
-            }
-            if (aTexCoord != -1)
-            {
-                GL_CALL(glVertexAttribPointer(aTexCoord, 2, GL_FLOAT, GL_FALSE,
-                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aTexCoord))));
-                GL_CALL(glEnableVertexAttribArray(aTexCoord));
-            }
-            if (aData != -1)
-            {
-                GL_CALL(glVertexAttribPointer(aData, 2, GL_FLOAT, GL_FALSE,
-                    sizeof(Vertex), (void*)(base + offsetof(Vertex, aData))));
-                GL_CALL(glEnableVertexAttribArray(aData));
+                const uint8_t* base = reinterpret_cast<const uint8_t*>(mBuffer->GetRawPtr());
+                const GLint location = mGL.glGetAttribLocation(program, attr.name.c_str());
+                if (location == -1)
+                    continue;
+                GL_CALL(glVertexAttribPointer(location, attr.num_vector_components, GL_FLOAT, GL_FALSE,
+                    mLayout.vertex_struct_size, base + attr.offset));
+                GL_CALL(glEnableVertexAttribArray(location));
             }
 
             for (const auto& draw : mDrawCommands)
             {
-                const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? mData.size() : draw.count;
+                const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? mBuffer->GetCount() : draw.count;
                 const auto type   = draw.type;
                 const auto offset = (GLsizei)draw.offset;
 
@@ -880,7 +856,8 @@ private:
         const OpenGLFunctions& mGL;
         std::size_t mFrameNumber = 0;
         std::vector<DrawCommand> mDrawCommands;
-        std::vector<Vertex> mData;
+        std::unique_ptr<VertexBuffer> mBuffer;
+        VertexLayout mLayout;
         float mLineWidth = 1.0f;
     };
 
