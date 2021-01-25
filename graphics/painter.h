@@ -49,6 +49,8 @@ namespace gfx
     {
     public:
         virtual ~Painter() = default;
+        // Set the ratio of rendering surface pixels to game units.
+        virtual void SetPixelRatio(const glm::vec2& ratio) = 0;
         // Set the size of the target rendering surface. (The surface that
         // is the backing surface of the device context).
         // The surface size is needed for viewport and scissor settings.

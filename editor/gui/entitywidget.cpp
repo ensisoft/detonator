@@ -1700,29 +1700,30 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
-    painter.SetViewport(0, 0, width, height);
-
+    const auto zoom   = (float)GetValue(mUI.zoom);
+    const auto xs     = (float)GetValue(mUI.scaleX);
+    const auto ys     = (float)GetValue(mUI.scaleY);
+    const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
+
+    painter.SetViewport(0, 0, width, height);
+    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
 
     // apply the view transformation. The view transformation is not part of the
     // animation per-se but it's the transformation that transforms the animation
     // and its components from the space of the animation to the global space.
     gfx::Transform view;
     view.Push();
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Scale(xs, ys);
+    view.Scale(zoom, zoom);
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        const float zoom = GetValue(mUI.zoom);
-        const float xs = GetValue(mUI.scaleX);
-        const float ys = GetValue(mUI.scaleY);
-        const GridDensity grid = GetValue(mUI.cmbGrid);
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 

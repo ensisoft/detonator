@@ -59,6 +59,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.setupUi(this);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn  = std::bind(&ParticleEditorWidget::ZoomIn, this);
+    mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
     // get the current list of materials from the workspace
     mUI.materials->addItems(workspace->ListAllMaterials());
@@ -104,6 +106,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
 
@@ -212,6 +215,7 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.saveWidget("Particle", mUI.chkShowGrid);
     settings.saveWidget("Particle", mUI.chkShowBounds);
     settings.saveWidget("Particle", mUI.cmbGrid);
+    settings.saveWidget("Particle", mUI.zoom);
     return true;
 }
 
@@ -273,6 +277,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.loadWidget("Particle", mUI.chkShowGrid);
     settings.loadWidget("Particle", mUI.chkShowBounds);
     settings.loadWidget("Particle", mUI.cmbGrid);
+    settings.loadWidget("Particle", mUI.zoom);
     on_motion_currentIndexChanged(0);
     return true;
 }
@@ -288,14 +293,32 @@ bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipbo
         case Actions::CanReloadTextures:
         case Actions::CanReloadShaders:
             return true;
-        case Actions::CanZoomIn:
-        case Actions::CanZoomOut:
-            return false;
+        case Actions::CanZoomIn: {
+            const auto max = mUI.zoom->maximum();
+            const auto val = mUI.zoom->value();
+            return val < max;
+        } break;
+        case Actions::CanZoomOut: {
+            const auto min = mUI.zoom->minimum();
+            const auto val = mUI.zoom->value();
+            return val > min;
+        } break;
         case Actions::CanUndo:
             return false;
     }
     BUG("Unhandled action query.");
     return false;
+}
+
+void ParticleEditorWidget::ZoomIn()
+{
+    const auto value = mUI.zoom->value();
+    mUI.zoom->setValue(value + 0.1);
+}
+void ParticleEditorWidget::ZoomOut()
+{
+    const auto value = mUI.zoom->value();
+    mUI.zoom->setValue(value - 0.1);
 }
 
 void ParticleEditorWidget::ReloadShaders()
@@ -414,6 +437,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     SetUserProperty(particle_resource, "grid", mUI.cmbGrid);
+    SetUserProperty(particle_resource, "zoom", mUI.zoom);
     SetUserProperty(particle_resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(particle_resource, "show_bounds", mUI.chkShowBounds);
     mWorkspace->SaveResource(particle_resource);
@@ -568,9 +592,12 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
+    const auto zoom   = (float)GetValue(mUI.zoom);
     painter.SetViewport(0, 0, width, height);
+    painter.SetPixelRatio(glm::vec2(zoom, zoom));
 
     gfx::Transform view;
+    view.Scale(zoom, zoom);
     view.Translate(width*0.5, height*0.5);
 
     // get the material based on the selection in the materials combobox
@@ -583,7 +610,6 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (GetValue(mUI.chkShowGrid))
     {
-        const float zoom = 1.0f;
         const float xs = 1.0f;
         const float ys = 1.0f;
         const GridDensity grid = GetValue(mUI.cmbGrid);

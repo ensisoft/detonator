@@ -58,14 +58,26 @@ namespace gfx
             // Rasterize the outline of the shape as lines.
             // Only the fragments that are within the line are shaded.
             // Line width setting is applied to determine the width
-            // of the lins.
+            // of the lines.
             Outline,
             // Rasterize the individual triangles as lines.
             Wireframe,
             // Rasterize the interior of the drawable. This is the default
             Solid,
-            // Rasterizez the shape's vertices as individual points.
+            // Rasterize the shape's vertices as individual points.
             Points
+        };
+
+        struct Environment {
+            // how many render surface units (pixels, texels if rendering to a texture)
+            // to a game unit.
+            glm::vec2 pixel_ratio = {1.0f, 1.0f};
+            // the current projection matrix that will be used to project the
+            // vertices from the view space into Normalized Device Coordinates.
+            const glm::mat4* proj_matrix = nullptr;
+            // The current view matrix that will be used to transform the
+            // vertices to the game camera/view space.
+            const glm::mat4* view_matrix = nullptr;
         };
 
         virtual ~Drawable() = default;
@@ -77,7 +89,7 @@ namespace gfx
         // does not yet exist on the device it's created and the
         // contents from this drawable object are uploaded in some
         // device specific data format.
-        virtual Geometry* Upload(Device& device) const = 0;
+        virtual Geometry* Upload(const Environment& env, Device& device) const = 0;
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(float dt) {}
@@ -154,7 +166,7 @@ namespace gfx
         Arrow(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -173,7 +185,7 @@ namespace gfx
         Line(float line_width) : mLineWidth(line_width)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
 
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
@@ -192,7 +204,7 @@ namespace gfx
         Capsule(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -213,7 +225,7 @@ namespace gfx
         Circle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -235,7 +247,7 @@ namespace gfx
         Rectangle(Style style, float linewidth)  : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual void SetLineWidth(float width) override
@@ -312,7 +324,7 @@ namespace gfx
 
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
-        virtual Geometry* Upload(Device& device) const override
+        virtual Geometry* Upload(const Environment& env, Device& device) const override
         {
             Geometry* geom = mClass->Upload(mStyle, device);
             if (geom)
@@ -341,7 +353,7 @@ namespace gfx
         IsocelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -362,7 +374,7 @@ namespace gfx
         RightTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -384,7 +396,7 @@ namespace gfx
         Trapezoid(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -405,7 +417,7 @@ namespace gfx
         Parallelogram(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -489,7 +501,7 @@ namespace gfx
         }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
-        virtual Geometry* Upload(Device& device) const override
+        virtual Geometry* Upload(const Environment& env, Device& device) const override
         {
             Geometry* geom = mClass->Upload(device);
             if (geom)
@@ -696,7 +708,7 @@ namespace gfx
         {
             return mClass->GetShader(device);
         }
-        virtual Geometry* Upload(Device& device) const override
+        virtual Geometry* Upload(const Environment& env, Device& device) const override
         {
             return mClass->Upload(mState, device);
         }
@@ -867,7 +879,7 @@ namespace gfx
         { mId = base::RandomString(10); }
 
         Shader* GetShader(Device& device) const;
-        Geometry* Upload(const InstanceState& state, Device& device) const;
+        Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
 
         void Update(InstanceState& state, float dt) const;
         void Restart(InstanceState& state) const;
@@ -943,9 +955,9 @@ namespace gfx
             return mClass->GetShader(device);
         }
         // Drawable implementation. Upload particles to the device.
-        virtual Geometry* Upload(Device& device) const override
+        virtual Geometry* Upload(const Environment& env, Device& device) const override
         {
-            return mClass->Upload(mState, device);
+            return mClass->Upload(env, mState, device);
         }
         virtual Style GetStyle() const override
         {

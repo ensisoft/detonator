@@ -57,6 +57,10 @@ public:
     StandardPainter(Device* device)
       : mDevice(device)
     {}
+    virtual void SetPixelRatio(const glm::vec2& ratio) override
+    {
+        mPixelRatio = ratio;
+    }
     virtual void SetSurfaceSize(unsigned width, unsigned height) override
     {
         mSurfacesize = ISize((int)width, (int)height);
@@ -89,23 +93,27 @@ public:
 
     virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) override
     {
-        Geometry* geom = shape.Upload(*mDevice);
+        // create simple orthographic projection matrix.
+        // 0,0 is the window top left, x grows left and y grows down
+        const auto& kProjMatrix = MakeOrtho();
+        const auto& kViewMatrix = transform.GetAsMatrix();
+        const auto style = shape.GetStyle();
+
+        Drawable::Environment draw_env;
+        draw_env.pixel_ratio = mPixelRatio;
+        draw_env.proj_matrix = &kProjMatrix;
+        draw_env.view_matrix = &kViewMatrix;
+
+        Geometry* geom = shape.Upload(draw_env, *mDevice);
         Program* prog = GetProgram(shape, mat);
         if (!prog || !geom)
             return;
-
-        // create simple orthographic projection matrix.
-        // 0,0 is the window top left, x grows left and y grows down
-        const auto& kProjectionMatrix = MakeOrtho();
-        const auto& kViewMatrix = transform.GetAsMatrix();
-
-        const auto style = shape.GetStyle();
 
         MaterialClass::RasterState raster;
         MaterialClass::Environment env;
         env.render_points = style == Drawable::Style::Points;
 
-        prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+        prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
         mat.ApplyDynamicState(env, *mDevice, *prog, raster);
 
@@ -143,7 +151,7 @@ public:
     {
         mDevice->ClearStencil(1);
 
-        const auto& kProjectionMatrix = MakeOrtho();
+        const auto& kProjMatrix = MakeOrtho();
 
         Device::State state;
         state.viewport      = MapToDevice(mViewport);
@@ -158,14 +166,18 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
-            Geometry* geom = mask.drawable->Upload(*mDevice);
+            Drawable::Environment draw_env;
+            draw_env.pixel_ratio = mPixelRatio;
+            draw_env.view_matrix = mask.transform;
+            draw_env.proj_matrix = &kProjMatrix;
+            Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* prog = GetProgram(*mask.drawable, mask_material);
             if (prog == nullptr)
                 continue;
 
-            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*mask.transform));
 
             MaterialClass::RasterState raster;
@@ -184,14 +196,18 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
-            Geometry* geom = draw.drawable->Upload(*mDevice);
+            Drawable::Environment draw_env;
+            draw_env.pixel_ratio = mPixelRatio;
+            draw_env.view_matrix = draw.transform;
+            draw_env.proj_matrix = &kProjMatrix;
+            Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* prog = GetProgram(*draw.drawable, *draw.material);
             if (prog == nullptr)
                 continue;
 
-            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*draw.transform));
             MaterialClass::RasterState raster;
             MaterialClass::Environment env;
@@ -205,11 +221,15 @@ public:
 
     virtual void Draw(const std::vector<DrawShape>& shapes) override
     {
-        const auto& kProjectionMatrix = MakeOrtho();
+        const auto& kProjMatrix = MakeOrtho();
 
         for (const auto& draw : shapes)
         {
-            Geometry* geom = draw.drawable->Upload(*mDevice);
+            Drawable::Environment draw_env;
+            draw_env.pixel_ratio = mPixelRatio;
+            draw_env.proj_matrix = &kProjMatrix;
+            draw_env.view_matrix = draw.transform;
+            Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* program = GetProgram(*draw.drawable, *draw.material);
@@ -217,7 +237,7 @@ public:
                 continue;
 
             program->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjMatrix));
             program->SetUniform("kViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(*draw.transform));
 
@@ -297,6 +317,8 @@ private:
     IRect mScissor;
     // logical viewport for the orthographic projection.
     FRect mView;
+    // the ratio of rendering surface pixels to game units.
+    glm::vec2 mPixelRatio = {1.0f, 1.0f};
 };
 
 // static

@@ -165,6 +165,8 @@ public:
         mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
         // set the logical viewport.
         mPainter->SetView(view);
+        // set the pixel ratio for mapping game units to rendering surface units.
+        mPainter->SetPixelRatio(glm::vec2(scale, scale));
 
         if (mScene)
         {

@@ -45,7 +45,7 @@ Shader* Arrow::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* Arrow::Upload(Device& device) const
+Geometry* Arrow::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -143,7 +143,7 @@ Shader* Line::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* Line::Upload(Device& device) const
+Geometry* Line::Upload(const Environment& env, Device& device) const
 {
     Geometry* geom = device.FindGeometry("LineSegment");
     if (geom == nullptr)
@@ -172,7 +172,7 @@ Shader* Capsule::GetShader(Device &device) const
     return shader;
 }
 
-Geometry* Capsule::Upload(Device &device) const
+Geometry* Capsule::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -328,7 +328,7 @@ Shader* Circle::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* Circle::Upload(Device& device) const
+Geometry* Circle::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -412,7 +412,7 @@ Shader* Rectangle::GetShader(Device& device) const
     return shader;
 }
 
-Geometry* Rectangle::Upload(Device& device) const
+Geometry* Rectangle::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -688,7 +688,7 @@ Shader* IsocelesTriangle::GetShader(Device& device) const
     return s;
 }
 
-Geometry* IsocelesTriangle::Upload(Device& device) const
+Geometry* IsocelesTriangle::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -728,7 +728,7 @@ Shader* RightTriangle::GetShader(Device& device) const
     return s;
 }
 
-Geometry* RightTriangle::Upload(Device& device) const
+Geometry* RightTriangle::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -768,7 +768,7 @@ Shader* Trapezoid::GetShader(Device& device) const
     return s;
 }
 
-Geometry* Trapezoid::Upload(Device& device) const
+Geometry* Trapezoid::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -844,7 +844,7 @@ Shader* Parallelogram::GetShader(Device& device) const
     return s;
 }
 
-Geometry* Parallelogram::Upload(Device& device) const
+Geometry* Parallelogram::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -1242,13 +1242,20 @@ Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
     return shader;
 }
 
-Geometry* KinematicsParticleEngineClass::Upload(const InstanceState& state, Device& device) const
+Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const
 {
     Geometry* geom = device.FindGeometry("particle-buffer");
     if (!geom)
     {
         geom = device.MakeGeometry("particle-buffer");
     }
+    // the point rasterization doesn't support non-uniform
+    // sizes for the points, i.e. they're always square
+    // so therefore we must choose one of the pixel ratio values
+    // as the scaler for converting particle sizes to pixel/fragment
+    // based sizes
+    const auto pixel_scaler = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
+
     std::vector<Vertex> verts;
     for (const auto& p : state.particles)
     {
@@ -1259,7 +1266,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const InstanceState& state, Devi
         v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
         // abusing texcoord here to pass per particle point size
         // to the fragment shader.
-        v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize : 0.0f;
+        v.aTexCoord.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
         // abusing texcoord here to provide per particle random value.
         // we can use this to simulate particle rotation for example
         // (if the material supports it)
