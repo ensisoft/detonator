@@ -185,6 +185,9 @@ add_executable(Editor
     editor/gui/dlgsettings.h
     editor/gui/dlgsettings.ui
     editor/gui/dlgsettings.cpp
+    editor/gui/dlgentity.h
+    editor/gui/dlgentity.ui
+    editor/gui/dlgentity.cpp
     editor/gui/dlgbitmap.h
     editor/gui/dlgbitmap.cpp
     editor/gui/dlgtext.h

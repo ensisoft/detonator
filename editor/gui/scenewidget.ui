@@ -256,14 +256,14 @@
                 </widget>
                </item>
                <item row="2" column="2">
-                <widget class="QPushButton" name="plus90">
+                <widget class="QPushButton" name="btnViewPlus90">
                  <property name="text">
                   <string>+ 90°</string>
                  </property>
                 </widget>
                </item>
                <item row="2" column="3">
-                <widget class="QPushButton" name="minus90">
+                <widget class="QPushButton" name="btnViewMinus90">
                  <property name="text">
                   <string>- 90°</string>
                  </property>
@@ -346,7 +346,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="resetTransform">
+              <widget class="QPushButton" name="btnViewReset">
                <property name="text">
                 <string>Reset</string>
                </property>
@@ -568,14 +568,22 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_2">
                <item row="2" column="1">
-                <widget class="QComboBox" name="nodeEntity"/>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Layer</string>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                 <item>
+                  <widget class="QComboBox" name="nodeEntity"/>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="btnEntityParams">
+                   <property name="text">
+                    <string>...</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../resource/resource.qrc">
+                     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_4">
@@ -584,7 +592,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
+               <item row="4" column="1">
                 <widget class="QSpinBox" name="nodeLayer">
                  <property name="minimum">
                   <number>-100</number>
@@ -594,16 +602,10 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
+               <item row="6" column="1">
+                <widget class="QCheckBox" name="nodeIsVisible">
                  <property name="text">
-                  <string>Name</string>
+                  <string>Visible</string>
                  </property>
                 </widget>
                </item>
@@ -643,24 +645,41 @@
                  </property>
                 </widget>
                </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_5">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
-                  <string>Link node</string>
+                  <string>Name</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="1">
-                <widget class="QComboBox" name="nodeLink"/>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>Layer</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QComboBox" name="nodeLink">
+                 <property name="placeholderText">
+                  <string>Scene Root</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>Parent node</string>
+                 </property>
+                </widget>
                </item>
               </layout>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="nodeIsVisible">
-               <property name="text">
-                <string>Visible</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -706,7 +725,7 @@
                 </widget>
                </item>
                <item row="4" column="4">
-                <widget class="QPushButton" name="nodePlus90">
+                <widget class="QPushButton" name="btnNodePlus90">
                  <property name="text">
                   <string>+ 90°</string>
                  </property>
@@ -822,7 +841,13 @@
                 </widget>
                </item>
                <item row="4" column="5">
-                <widget class="QPushButton" name="nodeMinus90">
+                <widget class="QPushButton" name="btnNodeMinus90">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>- 90°</string>
                  </property>
@@ -849,24 +874,24 @@
                </item>
               </layout>
              </item>
-             <item>
-              <spacer name="verticalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Preferred</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
             </layout>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -1020,28 +1045,30 @@
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>rotation</tabstop>
-  <tabstop>plus90</tabstop>
-  <tabstop>minus90</tabstop>
-  <tabstop>resetTransform</tabstop>
+  <tabstop>btnViewPlus90</tabstop>
+  <tabstop>btnViewMinus90</tabstop>
+  <tabstop>btnViewReset</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeEntity</tabstop>
-  <tabstop>nodeLayer</tabstop>
+  <tabstop>btnEntityParams</tabstop>
   <tabstop>nodeLink</tabstop>
+  <tabstop>nodeLayer</tabstop>
   <tabstop>nodeIsVisible</tabstop>
   <tabstop>nodeTranslateX</tabstop>
   <tabstop>nodeTranslateY</tabstop>
   <tabstop>nodeScaleX</tabstop>
   <tabstop>nodeScaleY</tabstop>
   <tabstop>nodeRotation</tabstop>
-  <tabstop>nodePlus90</tabstop>
-  <tabstop>nodeMinus90</tabstop>
+  <tabstop>btnNodePlus90</tabstop>
+  <tabstop>btnNodeMinus90</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
+  <tabstop>pushButton</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

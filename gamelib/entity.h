@@ -859,7 +859,9 @@ namespace game
     };
 
     // Collection of arguments for creating a new entity
-    // with some initial state. 
+    // with some initial state. The immutable arguments must
+    // go here (i.e. the ones that cannot be changed after
+    // the entity has been created).
     struct EntityArgs {
         // the class object that defines the type of the entity.
         std::shared_ptr<const EntityClass> klass;
@@ -880,8 +882,6 @@ namespace game
         glm::vec2  position = {0.0f, 0.0f};
         // the entity rotation relative to parent
         float      rotation = 0.0f;
-        // the render layer index.
-        int        layer = 0;
         EntityArgs() {
             id = base::RandomString(10);
         }
@@ -1023,6 +1023,10 @@ namespace game
         { mFlags.set(flag, on_off); }
         void SetParentNodeClassId(const std::string& id)
         { mParentNodeId = id; }
+        void SetIdleTrackId(const std::string& id)
+        { mIdleTrackId = id; }
+        void SetLayer(int layer)
+        { mLayer = layer; }
 
         // Get the current track if any. (when IsPlaying is true)
         AnimationTrack* GetCurrentTrack()
@@ -1030,6 +1034,8 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
+        std::string GetIdleTrackId() const
+        { return mIdleTrackId; }
         std::string GetParentNodeClassId() const
         { return mParentNodeId; }
         std::string GetClassId() const
@@ -1045,7 +1051,7 @@ namespace game
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
         bool HasIdleTrack() const
-        { return mClass->HasIdleTrack(); }
+        { return !mIdleTrackId.empty(); }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
@@ -1083,6 +1089,8 @@ namespace game
         int mLayer = 0;
         // entity bit flags
         base::bitflag<Flags> mFlags;
+        // id of the idle animation track.
+        std::string mIdleTrackId;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

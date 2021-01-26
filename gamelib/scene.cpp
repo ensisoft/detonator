@@ -51,6 +51,7 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mFlags.value());
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
+    hash = base::hash_combine(hash, mIdleAnimationId);
     return hash;
 }
 
@@ -82,6 +83,7 @@ nlohmann::json SceneNodeClass::ToJson() const
     base::JsonWrite(json, "flags", mFlags.value());
     base::JsonWrite(json, "layer",    mLayer);
     base::JsonWrite(json, "parent_render_tree_node", mParentRenderTreeNodeId);
+    base::JsonWrite(json, "idle_animation_id", mIdleAnimationId);
     return json;
 }
 
@@ -98,7 +100,8 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& jso
         !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
         !base::JsonReadSafe(json, "flags",    &flags) ||
         !base::JsonReadSafe(json, "layer",    &ret.mLayer) ||
-        !base::JsonReadSafe(json, "parent_render_tree_node", &ret.mParentRenderTreeNodeId))
+        !base::JsonReadSafe(json, "parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
+        !base::JsonReadSafe(json, "idle_animation_id", &ret.mIdleAnimationId))
         return std::nullopt;
     ret.mFlags.set_from_value(flags);
     return ret;
@@ -581,11 +584,12 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.scale    = node.GetScale();
         args.name     = node.GetName();
         args.id       = node.GetId();
-        args.layer    = node.GetLayer();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
         entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
         entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
+        entity->SetIdleTrackId(node.GetIdleAnimationId());
+        entity->SetLayer(node.GetLayer());
 
         map[&node] = entity.get();
         mEntities.push_back(std::move(entity));

@@ -830,6 +830,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     }
 
     mInstanceId = base::RandomString(10);
+    mIdleTrackId = mClass->GetIdleTrackId();
     mFlags.set(Flags::VisibleInGame, true);
 }
 
@@ -837,8 +838,6 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
     mInstanceId   = args.id;
-    mLayer        = args.layer;
-
     for (auto& node : mNodes)
     {
         if (mRenderTree.GetParent(node.get()))
@@ -1062,13 +1061,13 @@ bool Entity::PlayIdle()
     if (mAnimationTrack)
         return false;
 
-    if (!mClass->HasIdleTrack())
+    if (!HasIdleTrack())
         return false;
 
-    if (!PlayAnimationById(mClass->GetIdleTrackId()))
+    if (!PlayAnimationById(mIdleTrackId))
     {
         // might spam the log.
-        // WARN("Idle track '%1' was not found.", mClass->GetIdleTrackId());
+        //WARN("Idle track '%1' was not found.", mClass->GetIdleTrackId());
         return false;
     }
     // spams the log.

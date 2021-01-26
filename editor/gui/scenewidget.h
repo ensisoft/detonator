@@ -93,9 +93,9 @@ namespace gui
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
-        void on_plus90_clicked();
-        void on_minus90_clicked();
-        void on_resetTransform_clicked();
+        void on_btnViewPlus90_clicked();
+        void on_btnViewMinus90_clicked();
+        void on_btnViewReset_clicked();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeEntity_currentIndexChanged(const QString& name);
         void on_nodeLayer_valueChanged(int layer);
@@ -107,8 +107,9 @@ namespace gui
         void on_nodeScaleY_valueChanged(double value);
         void on_nodeRotation_valueChanged(double value);
 
-        void on_nodePlus90_clicked();
-        void on_nodeMinus90_clicked();
+        void on_btnEntityParams_clicked();
+        void on_btnNodePlus90_clicked();
+        void on_btnNodeMinus90_clicked();
         void on_tree_customContextMenuRequested(QPoint);
 
         void PlaceNewEntity();

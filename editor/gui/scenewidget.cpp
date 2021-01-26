@@ -48,6 +48,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
+#include "editor/gui/dlgentity.h"
 #include "editor/gui/clipboard.h"
 #include "base/assert.h"
 #include "base/format.h"
@@ -236,6 +237,7 @@ public:
         node.SetName(name);
         node.SetScale(glm::vec2(1.0f, 1.0f));
         node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
+        node.SetIdleAnimationId(mClass->GetIdleTrackId());
         auto* child = mState.scene.AddNode(std::move(node));
         mState.scene.LinkChild(nullptr, child);
         mState.view->Rebuild();
@@ -924,7 +926,7 @@ void SceneWidget::on_btnDeleteScriptVar_clicked()
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 }
 
-void SceneWidget::on_plus90_clicked()
+void SceneWidget::on_btnViewPlus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
@@ -932,7 +934,7 @@ void SceneWidget::on_plus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void SceneWidget::on_minus90_clicked()
+void SceneWidget::on_btnViewMinus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
@@ -940,7 +942,7 @@ void SceneWidget::on_minus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void SceneWidget::on_resetTransform_clicked()
+void SceneWidget::on_btnViewReset_clicked()
 {
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
@@ -976,6 +978,8 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
     {
         auto klass = mState.workspace->GetEntityClassByName(name);
         node->SetEntity(klass);
+        node->ResetEntityParams();
+        NOTE("Entity parameters were reset to default.");
     }
 }
 
@@ -1047,7 +1051,22 @@ void SceneWidget::on_nodeRotation_valueChanged(double value)
     }
 }
 
-void SceneWidget::on_nodePlus90_clicked()
+void SceneWidget::on_btnEntityParams_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto klass = node->GetEntityClass();
+        if (!klass)
+        {
+            NOTE("Node has no entity klass set.");
+            return;
+        }
+        DlgEntity dlg(this, *klass, *node);
+        dlg.exec();
+    }
+}
+
+void SceneWidget::on_btnNodePlus90_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1056,7 +1075,7 @@ void SceneWidget::on_nodePlus90_clicked()
         mUI.nodeRotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
     }
 }
-void SceneWidget::on_nodeMinus90_clicked()
+void SceneWidget::on_btnNodeMinus90_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1500,8 +1519,10 @@ void SceneWidget::UpdateResourceReferences()
             WARN("Scene node '%1' refers to an entity ('%2') that is no longer available.",
                  node.GetName(), node.GetEntityId());
             node.ResetEntity();
+            node.ResetEntityParams();
             continue;
         }
+        // resolve the runtime entity klass object reference.
         node.SetEntity(klass);
     }
 }

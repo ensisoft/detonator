@@ -75,6 +75,10 @@ namespace game
         { mName = name; }
         void SetLayer(int layer)
         { mLayer = layer; }
+        void SetIdleAnimationId(const std::string& id)
+        { mIdleAnimationId = id; }
+        void SetParentRenderTreeNodeId(const std::string& id)
+        { mParentRenderTreeNodeId = id; }
         void SetEntity(std::shared_ptr<const EntityClass> klass)
         {
             mEntityId = klass->GetId();
@@ -85,8 +89,10 @@ namespace game
             mEntityId.clear();
             mEntity.reset();
         }
-        void SetParentRenderTreeNodeId(const std::string& id)
-        { mParentRenderTreeNodeId = id; }
+        void ResetEntityParams()
+        {
+            mIdleAnimationId.clear();
+        }
         // class getters.
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -100,6 +106,8 @@ namespace game
         { return mClassId; }
         std::string GetEntityId() const
         { return mEntityId; }
+        std::string GetIdleAnimationId() const
+        { return mIdleAnimationId; }
         std::string GetParentRenderTreeNodeId() const
         { return mParentRenderTreeNodeId; }
         std::shared_ptr<const EntityClass> GetEntityClass() const
@@ -149,6 +157,10 @@ namespace game
         base::bitflag<Flags> mFlags;
         // the relative render order (layer index)
         int mLayer = 0;
+        // the track id of the idle animation if any.
+        // this setting will override the entity class idle
+        // track designation if set.
+        std::string mIdleAnimationId;
     private:
         // This is the runtime class reference to the
         // entity class that this node uses. Before creating
