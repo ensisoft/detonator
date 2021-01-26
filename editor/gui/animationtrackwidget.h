@@ -97,6 +97,7 @@ namespace gui
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
         void on_duration_valueChanged(double value);
+        void on_delay_valueChanged(double value);
         void on_looping_stateChanged(int);
         void on_timeline_customContextMenuRequested(QPoint);
         void on_actuatorStartTime_valueChanged(double value);

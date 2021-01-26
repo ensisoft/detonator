@@ -20,16 +20,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#define LOGTAG "gui"
+#define LOGTAG "entity"
 
 #include "warnpush.h"
 #  include <QMessageBox>
 #  include <QVector2D>
 #  include <QMenu>
-#  include <QMessageBox>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
-#  include <glm/gtx/matrix_decompose.hpp>
 #include "warnpop.h"
 
 #include <unordered_map>
@@ -211,6 +209,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     SetValue(mUI.trackName, track.GetName());
     SetValue(mUI.looping, track.IsLooping());
     SetValue(mUI.duration, track.GetDuration());
+    SetValue(mUI.delay, track.GetDelay());
     mEntity = game::CreateEntityInstance(mState.entity);
     mOriginalHash = track.GetHash();
 
@@ -384,6 +383,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     SetValue(mUI.looping, mState.track->IsLooping());
     SetValue(mUI.duration, mState.track->GetDuration());
+    SetValue(mUI.delay, mState.track->GetDelay());
     mTreeModel.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -482,8 +482,11 @@ void AnimationTrackWidget::Update(double secs)
     {
         const auto* track = mPlaybackAnimation->GetCurrentTrack();
         const auto time = track->GetCurrentTime();
-        mUI.timeline->SetCurrentTime(time);
-        mUI.timeline->Repaint();
+        if (time >= 0)
+        {
+            mUI.timeline->SetCurrentTime(time);
+            mUI.timeline->Repaint();
+        }
     }
 }
 bool AnimationTrackWidget::ConfirmClose()
@@ -688,6 +691,11 @@ void AnimationTrackWidget::on_duration_valueChanged(double value)
     mUI.timeline->SetDuration(value);
     mUI.timeline->Update();
     mState.track->SetDuration(value);
+}
+
+void AnimationTrackWidget::on_delay_valueChanged(double value)
+{
+    mState.track->SetDelay(value);
 }
 
 void AnimationTrackWidget::on_looping_stateChanged(int)

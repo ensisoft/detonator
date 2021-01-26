@@ -459,6 +459,9 @@ namespace game
         // real world meaning of the units in question.
         void SetDuration(float duration)
         { mDuration = duration; }
+        // Set one time delay that takes place at the start of the animation.
+        void SetDelay(float delay)
+        { mDelay = delay; }
         // Enable/disable looping flag. A looping animation will never end
         // and will reset after the reaching the end. I.e. all the actuators
         // involved will have their states reset to the initial state which
@@ -478,6 +481,8 @@ namespace game
         // Get the normalized duration of the animation track.
         float GetDuration() const
         { return mDuration; }
+        float GetDelay() const
+        { return mDelay; }
         // Returns true if the animation track is looping or not.
         bool IsLooping() const
         { return mLooping; }
@@ -541,6 +546,8 @@ namespace game
         std::vector<std::shared_ptr<ActuatorClass>> mActuators;
         // Human readable name of the track.
         std::string mName;
+        // One time delay before starting the playback.
+        float mDelay = 0.0f;
         // the duration of this track.
         float mDuration = 1.0f;
         // Loop animation or not. If looping then never completes.
@@ -575,6 +582,10 @@ namespace game
         // actions have been performed.
         bool IsComplete() const;
 
+        // Set one time animation delay that takes place
+        // before the animation starts.
+        void SetDelay(float delay)
+        { mDelay = delay; }
         // Returns whether the animation is looping or not.
         bool IsLooping() const
         { return mClass->IsLooping(); }
@@ -584,6 +595,8 @@ namespace game
         // get the current time.
         float GetCurrentTime() const
         { return mCurrentTime; }
+        float GetDelay() const
+        { return mDelay; }
         // Access for the tracks class object.
         const AnimationTrackClass& GetClass() const
         { return *mClass; }
@@ -602,7 +615,8 @@ namespace game
             mutable bool ended   = false;
         };
         std::vector<NodeTrack> mTracks;
-
+        // One time delay before starting the animation.
+        float mDelay = 0.0f;
         // current play back time for this track.
         float mCurrentTime = 0.0f;
     };

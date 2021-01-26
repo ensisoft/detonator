@@ -263,6 +263,7 @@ AnimationTrackClass::AnimationTrackClass(const AnimationTrackClass& other)
     mName     = other.mName;
     mDuration = other.mDuration;
     mLooping  = other.mLooping;
+    mDelay    = other.mDelay;
 }
 AnimationTrackClass::AnimationTrackClass(AnimationTrackClass&& other)
 {
@@ -271,6 +272,7 @@ AnimationTrackClass::AnimationTrackClass(AnimationTrackClass&& other)
     mName      = std::move(other.mName);
     mDuration  = other.mDuration;
     mLooping   = other.mLooping;
+    mDelay     = other.mDelay;
 }
 
 void AnimationTrackClass::DeleteActuator(size_t index)
@@ -329,6 +331,7 @@ std::size_t AnimationTrackClass::GetHash() const
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mLooping);
+    hash = base::hash_combine(hash, mDelay);
     for (const auto& actuator : mActuators)
         hash = base::hash_combine(hash, actuator->GetHash());
     return hash;
@@ -340,6 +343,7 @@ nlohmann::json AnimationTrackClass::ToJson() const
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "duration", mDuration);
+    base::JsonWrite(json, "delay", mDelay);
     base::JsonWrite(json, "looping", mLooping);
     for (const auto &actuator : mActuators)
     {
@@ -358,6 +362,7 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
     if (!base::JsonReadSafe(json, "id", &ret.mId) ||
         !base::JsonReadSafe(json, "name", &ret.mName) ||
         !base::JsonReadSafe(json, "duration", &ret.mDuration) ||
+        !base::JsonReadSafe(json, "delay", &ret.mDelay) ||
         !base::JsonReadSafe(json, "looping", &ret.mLooping))
         return std::nullopt;
     if (!json.contains("actuators"))
@@ -390,6 +395,7 @@ AnimationTrackClass AnimationTrackClass::Clone() const
     ret.mName     = mName;
     ret.mDuration = mDuration;
     ret.mLooping  = mLooping;
+    ret.mDelay    = mDelay;
     for (const auto& klass : mActuators)
         ret.mActuators.push_back(klass->Clone());
     return ret;
@@ -405,6 +411,7 @@ AnimationTrackClass& AnimationTrackClass::operator=(const AnimationTrackClass& o
     std::swap(mName, copy.mName);
     std::swap(mDuration, copy.mDuration);
     std::swap(mLooping, copy.mLooping);
+    std::swap(mDelay, copy.mDelay);
     return *this;
 }
 
@@ -420,6 +427,11 @@ AnimationTrack::AnimationTrack(const std::shared_ptr<const AnimationTrackClass>&
         track.started  = false;
         mTracks.push_back(std::move(track));
     }
+    mDelay = klass->GetDelay();
+    // start at negative delay time, then the actual animation playback
+    // starts after the current time reaches 0 and all of the delay
+    // has been "consumed".
+    mCurrentTime = -mDelay;
 }
 AnimationTrack::AnimationTrack(const AnimationTrackClass& klass)
     : AnimationTrack(std::make_shared<AnimationTrackClass>(klass))
@@ -437,24 +449,29 @@ AnimationTrack::AnimationTrack(const AnimationTrack& other) : mClass(other.mClas
         mTracks.push_back(std::move(track));
     }
     mCurrentTime = other.mCurrentTime;
+    mDelay       = other.mDelay;
 }
     // Move ctor.
 AnimationTrack::AnimationTrack(AnimationTrack&& other)
 {
     mClass       = other.mClass;
-    mTracks      = std::move(other.mTracks);
     mCurrentTime = other.mCurrentTime;
+    mDelay       = other.mDelay;
+    mTracks      = std::move(other.mTracks);
 }
 
 void AnimationTrack::Update(float dt)
 {
     const auto duration = mClass->GetDuration();
 
-    mCurrentTime = math::clamp(0.0f, duration, mCurrentTime + dt);
+    mCurrentTime = math::clamp(-mDelay, duration, mCurrentTime + dt);
 }
 
 void AnimationTrack::Apply(EntityNode& node) const
 {
+    // if we're delaying then skip until delay is consumed.
+    if (mCurrentTime < 0)
+        return;
     const auto duration = mClass->GetDuration();
     const auto pos = mCurrentTime / duration;
 
@@ -498,7 +515,7 @@ void AnimationTrack::Restart()
         track.started = false;
         track.ended   = false;
     }
-    mCurrentTime = 0.0f;
+    mCurrentTime = -mDelay;
 }
 
 bool AnimationTrack::IsComplete() const
