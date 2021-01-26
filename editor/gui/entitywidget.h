@@ -96,9 +96,10 @@ namespace gui
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
         void on_actionNodeDuplicate_triggered();
-        void on_plus90_clicked();
-        void on_minus90_clicked();
-        void on_resetTransform_clicked();
+        void on_btnResetIdleTrack_clicked();
+        void on_btnViewPlus90_clicked();
+        void on_btnViewMinus90_clicked();
+        void on_btnResetTransform_clicked();
         void on_btnNewTrack_clicked();
         void on_btnEditTrack_clicked();
         void on_btnDeleteTrack_clicked();

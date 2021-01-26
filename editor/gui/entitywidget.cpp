@@ -997,7 +997,16 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
     }
 }
 
-void EntityWidget::on_plus90_clicked()
+void EntityWidget::on_btnResetIdleTrack_clicked()
+{
+    if (mState.entity->HasIdleTrack())
+    {
+        mState.entity->ResetIdleTrack();
+        SetValue(mUI.idleTrack, -1);
+    }
+}
+
+void EntityWidget::on_btnViewPlus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
@@ -1005,7 +1014,7 @@ void EntityWidget::on_plus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void EntityWidget::on_minus90_clicked()
+void EntityWidget::on_btnViewMinus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
@@ -1013,7 +1022,7 @@ void EntityWidget::on_minus90_clicked()
     mViewTransformStartTime = mCurrentTime;
 }
 
-void EntityWidget::on_resetTransform_clicked()
+void EntityWidget::on_btnResetTransform_clicked()
 {
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
