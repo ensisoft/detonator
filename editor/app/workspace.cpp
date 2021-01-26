@@ -57,8 +57,18 @@
 #include "editor/app/packing.h"
 #include "editor/app/utility.h"
 #include "graphics/resource.h"
+#include "graphics/color4f.h"
 
 namespace {
+
+gfx::Color4f ToGfx(const QColor& color)
+{
+    const float a  = color.alphaF();
+    const float r  = color.redF();
+    const float g  = color.greenF();
+    const float b  = color.blueF();
+    return gfx::Color4f(r, g, b, a);
+}
 
 QString GetAppDir()
 {
@@ -1179,6 +1189,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "phys_scale_y"            , mSettings.physics_scale.y);
     JsonWrite(project, "game_viewport_width"     , mSettings.viewport_width);
     JsonWrite(project, "game_viewport_height"    , mSettings.viewport_height);
+    JsonWrite(project, "clear_color"             , mSettings.clear_color);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1265,6 +1276,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "phys_scale_y",             &mSettings.physics_scale.y);
     JsonReadSafe(project, "game_viewport_width",      &mSettings.viewport_width);
     JsonReadSafe(project, "game_viewport_height",     &mSettings.viewport_height);
+    JsonReadSafe(project, "clear_color",              &mSettings.clear_color);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -1886,32 +1898,32 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             return false;
         }
         nlohmann:: json json;
-        json["json_version"]  = 1;
-        json["made_with_app"] = APP_TITLE;
-        json["made_with_ver"] = APP_VERSION;
-        json["config"]["red_size"]     = 8;
-        json["config"]["green_size"]   = 8;
-        json["config"]["blue_size"]    = 8;
-        json["config"]["alpha_size"]   = 8;
-        json["config"]["stencil_size"] = 8;
-        json["config"]["depth_size"]   = 0;
+        base::JsonWrite(json, "json_version",   1);
+        base::JsonWrite(json, "made_with_app",  APP_TITLE);
+        base::JsonWrite(json, "made_with_ver",  APP_VERSION);
+        base::JsonWrite(json["config"], "red_size",     8);
+        base::JsonWrite(json["config"], "green_size",   8);
+        base::JsonWrite(json["config"], "blue_size",    8);
+        base::JsonWrite(json["config"], "alpha_size",   8);
+        base::JsonWrite(json["config"], "stencil_size", 8);
+        base::JsonWrite(json["config"], "depth_size",   0);
         if (mSettings.multisample_sample_count == 0)
-            json["config"]["sampling"] = "None";
+            base::JsonWrite(json["config"], "sampling", "None");
         else if (mSettings.multisample_sample_count == 4)
-            json["config"]["sampling"] = "MSAA4";
+            base::JsonWrite(json["config"], "sampling", "MSAA4");
         else if (mSettings.multisample_sample_count == 8)
-            json["config"]["sampling"] = "MSAA8";
+            base::JsonWrite(json["config"], "sampling", "MSAA8");
         else if (mSettings.multisample_sample_count == 16)
-            json["config"]["sampling"] = "MSAA16";
-        json["window"]["width"]  = mSettings.window_width;
-        json["window"]["height"] = mSettings.window_height;
-        json["window"]["can_resize"] = mSettings.window_can_resize;
-        json["window"]["has_border"] = mSettings.window_has_border;
-        json["window"]["vsync"]      = mSettings.window_vsync;
+            base::JsonWrite(json["config"], "sampling", "MSAA16");
+        base::JsonWrite(json["window"], "width",      mSettings.window_width);
+        base::JsonWrite(json["window"], "height",     mSettings.window_height);
+        base::JsonWrite(json["window"], "can_resize", mSettings.window_can_resize);
+        base::JsonWrite(json["window"], "has_border", mSettings.window_has_border);
+        base::JsonWrite(json["window"], "vsync",      mSettings.window_vsync);
         if (mSettings.window_mode == ProjectSettings::WindowMode::Windowed)
-            json["window"]["set_fullscreen"] = false;
+            base::JsonWrite(json["window"], "set_fullscreen", false);
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
-            json["window"]["set_fullscreen"] = true;
+            base::JsonWrite(json["window"], "set_fullscreen", true);
 
         base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
@@ -1924,6 +1936,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["physics"], "num_position_iterations", mSettings.num_position_iterations);
         base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
         base::JsonWrite(json["physics"], "scale",   mSettings.physics_scale);
+        base::JsonWrite(json["engine"], "clear_color", ToGfx(mSettings.clear_color));
 
         // resolves the path.
         const QFileInfo engine_dll(mSettings.GetApplicationLibrary());

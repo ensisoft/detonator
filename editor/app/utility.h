@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QColor>
 #  include <QJsonObject>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
@@ -161,6 +162,11 @@ QString EnumToString(Enum value)
     return QString::fromLocal8Bit(str.data(), str.size());
 }
 
+inline void JsonWrite(QJsonObject& object, const char* name, QColor color)
+{
+    object[name] = QString::number(color.rgba());
+}
+
 inline void JsonWrite(QJsonObject& object, const char* name, float value)
 {
     object[name] = value;
@@ -187,6 +193,15 @@ inline void JsonWrite(QJsonObject& object, const char* name, Enum value)
 {
     static_assert(std::is_enum<Enum>::value);
     object[name] = EnumToString(value);
+}
+
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, QColor* out)
+{
+    if (!object.contains(name) || !object[name].isString())
+        return false;
+    QString value = object[name].toString();
+    out->setRgba(value.toUInt());
+    return true;
 }
 
 inline bool JsonReadSafe(const QJsonObject& object, const char* name, float* out)

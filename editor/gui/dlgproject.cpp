@@ -75,6 +75,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.scaleY, mSettings.physics_scale.y);
     SetUIValue(mUI.viewportWidth, mSettings.viewport_width);
     SetUIValue(mUI.viewportHeight, mSettings.viewport_height);
+    SetUIValue(mUI.clearColor, mSettings.clear_color);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -103,6 +104,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.scaleY, &mSettings.physics_scale.y);
     GetUIValue(mUI.viewportWidth, &mSettings.viewport_width);
     GetUIValue(mUI.viewportHeight, &mSettings.viewport_height);
+    GetUIValue(mUI.clearColor, &mSettings.clear_color);
     QString library;
     GetUIValue(mUI.edtAppLibrary, &library);
     mSettings.SetApplicationLibrary(library);

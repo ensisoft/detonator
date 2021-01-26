@@ -390,6 +390,11 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(physics_settings, "gravity", &config.physics.gravity);
             base::JsonReadSafe(physics_settings, "scale",   &config.physics.scale);
         }
+        if (json.contains("engine"))
+        {
+            const auto& engine_settings = json["engine"];
+            base::JsonReadSafe(engine_settings, "clear_color", &config.clear_color);
+        }
         app->SetEngineConfig(config);
         app->Load();
         app->Start();

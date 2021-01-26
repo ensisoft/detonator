@@ -131,12 +131,13 @@ public:
         mPhysics.SetTimestep(1.0f / conf.updates_per_second);
         mDevice->SetDefaultTextureFilter(conf.default_min_filter);
         mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
+        mClearColor = conf.clear_color;
     }
 
     virtual void Draw() override
     {
         mDevice->BeginFrame();
-        mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
+        mDevice->ClearColor(mClearColor);
 
         // get the game's logical viewport into the game world.
         const auto& view = mGame->GetViewport();
@@ -310,6 +311,7 @@ private:
 private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
+    gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
     // game dir where the executable is.
     std::string mDirectory;
     // queue of outgoing requests regarding the environment

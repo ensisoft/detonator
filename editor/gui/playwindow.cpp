@@ -752,6 +752,7 @@ void PlayWindow::DoAppInit()
         config.physics.scale   = settings.physics_scale;
         config.default_mag_filter = settings.default_mag_filter;
         config.default_min_filter = settings.default_min_filter;
+        config.clear_color = ToGfx(settings.clear_color);
 
         mApp->SetEngineConfig(config);
         mApp->Load();

@@ -37,6 +37,7 @@
 #include "gamelib/classlib.h"
 #include "graphics/device.h"
 #include "graphics/resource.h"
+#include "graphics/color4f.h"
 #include "wdk/events.h"
 #include "wdk/window_listener.h"
 
@@ -177,6 +178,8 @@ namespace game
                 // to a single physics world unit. 
                 glm::vec2 scale = {1.0f, 1.0f};
             } physics;
+            // the default clear color.
+            gfx::Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
         };
         // Set the game engine configuration. Called once in the beginning
         // before Start is called.

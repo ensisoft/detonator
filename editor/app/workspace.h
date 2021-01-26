@@ -463,6 +463,8 @@ namespace app
             // viewport (game decides that) but only for visualization
             // in the editor.
             unsigned viewport_height = 768;
+            // The default engine clear color.
+            QColor clear_color = {50, 77, 100, 255};
         };
 
         const ProjectSettings& GetProjectSettings() const

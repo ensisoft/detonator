@@ -212,6 +212,11 @@ inline void SetValue(color_widgets::ColorSelector* color, const gfx::Color4f& co
     QSignalBlocker s(color);
     color->setColor(FromGfx(col));
 }
+inline void SetValue(color_widgets::ColorSelector* color, QColor value)
+{
+    QSignalBlocker s(color);
+    color->setColor(value);
+}
 
 inline void SetValue(QCheckBox* check, bool val)
 {
