@@ -807,7 +807,9 @@ private:
 
         void Draw(GLuint program)
         {
-            ASSERT(mBuffer && mBuffer->GetCount());
+            ASSERT(mBuffer);
+            if (!mBuffer->GetCount())
+                return;
             for (const auto& attr : mLayout.attributes)
             {
                 const uint8_t* base = reinterpret_cast<const uint8_t*>(mBuffer->GetRawPtr());
