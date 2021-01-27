@@ -507,7 +507,7 @@ void unit_test_entity_clone_track_bug()
     game::EntityNodeClass node;
     node.SetName("root");
 
-    game::AnimaticActuatorClass actuator;
+    game::TransformActuatorClass actuator;
     actuator.SetNodeId(node.GetId());
 
     game::AnimationTrackClass track;

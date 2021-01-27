@@ -108,7 +108,7 @@ bool MaterialActuatorClass::FromJson(const nlohmann::json &json)
            base::JsonReadSafe(json, "alpha", &mEndAlpha);
 }
 
-nlohmann::json AnimaticActuatorClass::ToJson() const
+nlohmann::json TransformActuatorClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "id", mId);
@@ -123,7 +123,7 @@ nlohmann::json AnimaticActuatorClass::ToJson() const
     return json;
 }
 
-bool AnimaticActuatorClass::FromJson(const nlohmann::json& json)
+bool TransformActuatorClass::FromJson(const nlohmann::json& json)
 {
     return base::JsonReadSafe(json, "id", &mId) &&
            base::JsonReadSafe(json, "node", &mNodeId) &&
@@ -136,7 +136,7 @@ bool AnimaticActuatorClass::FromJson(const nlohmann::json& json)
            base::JsonReadSafe(json, "method",    &mInterpolation);
 }
 
-std::size_t AnimaticActuatorClass::GetHash() const
+std::size_t TransformActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -225,14 +225,14 @@ void MaterialActuator::Finish(EntityNode& node)
     }
 }
 
-void AnimaticActuator::Start(EntityNode& node)
+void TransformActuator::Start(EntityNode& node)
 {
     mStartPosition = node.GetTranslation();
     mStartSize     = node.GetSize();
     mStartScale    = node.GetScale();
     mStartRotation = node.GetRotation();
 }
-void AnimaticActuator::Apply(EntityNode& node, float t)
+void TransformActuator::Apply(EntityNode& node, float t)
 {
     // apply interpolated state on the node.
     const auto method = mClass->GetInterpolation();
@@ -245,7 +245,7 @@ void AnimaticActuator::Apply(EntityNode& node, float t)
     node.SetRotation(r);
     node.SetScale(f);
 }
-void AnimaticActuator::Finish(EntityNode& node)
+void TransformActuator::Finish(EntityNode& node)
 {
     node.SetTranslation(mClass->GetEndPosition());
     node.SetRotation(mClass->GetEndRotation());
@@ -314,8 +314,8 @@ const ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id
 std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) const
 {
     const auto& klass = mActuators[i];
-    if (klass->GetType() == ActuatorClass::Type::Animatic)
-        return std::make_unique<AnimaticActuator>(std::static_pointer_cast<AnimaticActuatorClass>(klass));
+    if (klass->GetType() == ActuatorClass::Type::Transform)
+        return std::make_unique<TransformActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::Material)
         return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::Kinematic)
@@ -374,8 +374,8 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
         if (!base::JsonReadSafe(obj, "type", &type))
             return std::nullopt;
         std::shared_ptr<ActuatorClass> actuator;
-        if (type == ActuatorClass::Type::Animatic)
-            actuator = std::make_shared<AnimaticActuatorClass>();
+        if (type == ActuatorClass::Type::Transform)
+            actuator = std::make_shared<TransformActuatorClass>();
         else if (type == ActuatorClass::Type::Material)
             actuator = std::make_shared<MaterialActuatorClass>();
         else if (type == ActuatorClass::Type::Kinematic)

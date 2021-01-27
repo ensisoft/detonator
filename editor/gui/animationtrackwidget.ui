@@ -1207,9 +1207,9 @@
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionAddAnimaticActuator">
+  <action name="actionAddTransformActuator">
    <property name="text">
-    <string>Animatic</string>
+    <string>Transform</string>
    </property>
    <property name="toolTip">
     <string>Add an animatic actuator</string>
@@ -1253,7 +1253,7 @@
     <string>Toggle show kinematic actuators</string>
    </property>
   </action>
-  <action name="actionShowAnimaticActuators">
+  <action name="actionShowTransformActuators">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -1261,10 +1261,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Animatic</string>
+    <string>Transform</string>
    </property>
    <property name="toolTip">
-    <string>Toggle show animatic actuators</string>
+    <string>Toggle show transform actuators</string>
    </property>
   </action>
   <action name="actionUsePhysics">

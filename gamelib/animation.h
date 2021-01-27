@@ -46,16 +46,16 @@ namespace game
 
     // ActuatorClass defines an interface for classes of actuators.
     // Actuators are objects that modify the state of some render
-    // tree node over time. For example a Kinematic actuator will
+    // tree node over time. For example a transform actuator will
     // perform linear interpolation of the node's transform over time.
     class ActuatorClass
     {
     public:
         // The type of the actuator class.
         enum class Type {
-            // Animatic actuators modify the transform state of the node
+            // Transform actuators modify the transform state of the node
             // i.e. the translation, scale and rotation variables directly.
-            Animatic,
+            Transform,
             // Kinematic actuators modify the kinematic physics properties
             // for example, linear or angular velocity, of the node's rigid body.
             // This will result in a kinematically driven change in the nodes
@@ -229,18 +229,18 @@ namespace game
 
     // TransformActuatorClass holds the transform data for some
     // particular type of linear transform of a node.
-    class AnimaticActuatorClass : public ActuatorClass
+    class TransformActuatorClass : public ActuatorClass
     {
     public:
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        AnimaticActuatorClass()
+        TransformActuatorClass()
         { mId = base::RandomString(10); }
-        AnimaticActuatorClass(const std::string& node) : mNodeId(node)
+        TransformActuatorClass(const std::string& node) : mNodeId(node)
         { mId = base::RandomString(10); }
         virtual Type GetType() const override
-        { return Type::Animatic; }
+        { return Type::Transform; }
         virtual std::string GetNodeId() const
         { return mNodeId; }
         virtual float GetStartTime() const override
@@ -288,10 +288,10 @@ namespace game
         virtual std::size_t GetHash() const override;
 
         virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<AnimaticActuatorClass>(*this); }
+        { return std::make_unique<TransformActuatorClass>(*this); }
         virtual std::unique_ptr<ActuatorClass> Clone() const override
         {
-            auto ret = std::make_unique<AnimaticActuatorClass>(*this);
+            auto ret = std::make_unique<TransformActuatorClass>(*this);
             ret->mId = base::RandomString(10);
             return ret;
         }
@@ -342,6 +342,7 @@ namespace game
     private:
     };
 
+    // Apply a kinematic change to a rigid body's linear or angular velocity.
     class KinematicActuator : public Actuator
     {
     public:
@@ -406,15 +407,15 @@ namespace game
         float mStartAlpha = 1.0f;
     };
 
-    // Animatic actuator instance.
-    class AnimaticActuator : public Actuator
+    // Appply change to the target nodes' transform.
+    class TransformActuator : public Actuator
     {
     public:
-        AnimaticActuator(const std::shared_ptr<const AnimaticActuatorClass>& klass)
+        TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
             : mClass(klass)
         {}
-        AnimaticActuator(const AnimaticActuatorClass& klass)
-            : mClass(std::make_shared<AnimaticActuatorClass>(klass))
+        TransformActuator(const TransformActuatorClass& klass)
+            : mClass(std::make_shared<TransformActuatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -427,9 +428,9 @@ namespace game
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
         virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<AnimaticActuator>(*this); }
+        { return std::make_unique<TransformActuator>(*this); }
     private:
-        std::shared_ptr<const AnimaticActuatorClass> mClass;
+        std::shared_ptr<const TransformActuatorClass> mClass;
         // The starting state for the transformation.
         // the transform actuator will then interpolate between the
         // current starting and expected ending state.

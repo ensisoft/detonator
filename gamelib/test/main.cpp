@@ -642,14 +642,14 @@ public:
                 klass->LinkChild(klass->FindNodeByName("shoulder joint L"), klass->AddNode(arm));
             }
 
-            game::AnimaticActuatorClass right_arm_up;
+            game::TransformActuatorClass right_arm_up;
             right_arm_up.SetDuration(0.5f);
             right_arm_up.SetStartTime(0.0f);
             right_arm_up.SetEndRotation(-math::Pi);
             right_arm_up.SetEndPosition(klass->FindNodeByName("shoulder joint R")->GetTranslation());
             right_arm_up.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
             right_arm_up.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetId());
-            game::AnimaticActuatorClass right_arm_down;
+            game::TransformActuatorClass right_arm_down;
             right_arm_down.SetDuration(0.5f);
             right_arm_down.SetStartTime(0.5f);
             right_arm_down.SetEndRotation(0);
