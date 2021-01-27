@@ -7,8 +7,7 @@
         {
           "class": "NhoWavKXqw",
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Background",
           "position": {
@@ -34,7 +33,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 2,
             "linewidth": 1.0,
@@ -43,8 +43,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Stars0",
           "position": {
@@ -70,7 +69,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -79,8 +79,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Stars1",
           "position": {
@@ -106,7 +105,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 3,
             "linewidth": 1.0,
@@ -115,8 +115,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Stars2",
           "position": {
@@ -142,7 +141,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -151,8 +151,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Nebula",
           "position": {
@@ -218,7 +217,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 1,
             "linewidth": 1.0,
@@ -227,8 +227,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "UFO",
           "position": {
@@ -254,7 +253,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -263,8 +263,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Rings",
           "position": {
@@ -313,7 +312,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -322,8 +322,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Node 0",
           "position": {
@@ -367,7 +366,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 1,
             "linewidth": 1.0,
@@ -376,8 +376,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Ship",
           "position": {
@@ -403,7 +402,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -412,8 +412,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Smoke",
           "position": {
@@ -433,8 +432,7 @@
         {
           "class": "W65Ke0j1fn",
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Box",
           "position": {
@@ -490,7 +488,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 1,
             "linewidth": 1.0,
@@ -499,8 +498,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Ship",
           "position": {
@@ -526,7 +524,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -535,8 +534,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Node 0",
           "position": {
@@ -556,8 +554,7 @@
         {
           "class": "lpEaDhw2ZB",
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Box",
           "position": {
@@ -613,7 +610,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 1,
             "linewidth": 1.0,
@@ -622,8 +620,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Ship",
           "position": {
@@ -649,7 +646,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -658,8 +656,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Node 1",
           "position": {
@@ -679,8 +676,7 @@
         {
           "class": "6GR8iZRFE1",
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Box",
           "position": {
@@ -736,7 +732,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 1,
             "linewidth": 1.0,
@@ -745,8 +742,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Ship",
           "position": {
@@ -772,7 +768,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -781,8 +778,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Node 0",
           "position": {
@@ -802,8 +798,7 @@
         {
           "class": "izid3Aa9WR",
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Box",
           "position": {
@@ -859,7 +854,8 @@
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
-              "UpdateMaterial": true
+              "UpdateMaterial": true,
+              "VisibleInGame": true
             },
             "layer": 0,
             "linewidth": 1.0,
@@ -868,8 +864,7 @@
             "renderstyle": "Solid"
           },
           "flags": {
-            "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInEditor": true
           },
           "name": "Node 0",
           "position": {

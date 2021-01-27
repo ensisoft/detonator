@@ -110,7 +110,6 @@ namespace gui
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
-        void on_nodeIsVisible_stateChanged(int);
         void on_nodeSizeX_valueChanged(double value);
         void on_nodeSizeY_valueChanged(double value);
         void on_nodeTranslateX_valueChanged(double value);
@@ -126,6 +125,7 @@ namespace gui
         void on_dsRenderStyle_currentIndexChanged(const QString&);
         void on_dsLayer_valueChanged(int layer);
         void on_dsLineWidth_valueChanged(double value);
+        void on_dsVisible_stateChanged(int);
         void on_dsUpdateDrawable_stateChanged(int);
         void on_dsUpdateMaterial_stateChanged(int);
         void on_dsRestartDrawable_stateChanged(int);

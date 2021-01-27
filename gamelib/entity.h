@@ -184,8 +184,9 @@ namespace game
     public:
         using RenderPass = game::RenderPass;
         using RenderStyle = gfx::Drawable::Style;
-
         enum class Flags {
+            // Whether the item is currently visible or not.
+            VisibleInGame,
             // Whether the item should update material or not
             UpdateMaterial,
             // Whether the item should update drawable or not
@@ -198,6 +199,7 @@ namespace game
         };
         DrawableItemClass()
         {
+            mBitFlags.set(Flags::VisibleInGame, true);
             mBitFlags.set(Flags::UpdateDrawable, true);
             mBitFlags.set(Flags::UpdateMaterial, true);
             mBitFlags.set(Flags::RestartDrawable, true);
@@ -389,19 +391,13 @@ namespace game
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
-            VisibleInEditor,
-            // node is visible in the game or not.
-            // Even if this is true the node will still need to have some
-            // renderable items attached to it such as a shape or
-            // animation item.
-            VisibleInGame
+            VisibleInEditor
         };
 
         EntityNodeClass()
         {
             mClassId = base::RandomString(10);
             mBitFlags.set(Flags::VisibleInEditor, true);
-            mBitFlags.set(Flags::VisibleInGame, true);
         }
         EntityNodeClass(const EntityNodeClass& other);
         EntityNodeClass(EntityNodeClass&& other);

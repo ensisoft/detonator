@@ -1181,14 +1181,6 @@ void EntityWidget::on_nodeName_textChanged(const QString& text)
     mUI.tree->Update();
 }
 
-void EntityWidget::on_nodeIsVisible_stateChanged(int)
-{
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetFlag(game::EntityNodeClass::Flags::VisibleInGame, GetValue(mUI.nodeIsVisible));
-    }
-}
-
 void EntityWidget::on_nodeSizeX_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
@@ -1329,6 +1321,17 @@ void EntityWidget::on_dsLineWidth_valueChanged(double value)
         if (auto* item = node->GetDrawable())
         {
             item->SetLineWidth(value);
+        }
+    }
+}
+
+void EntityWidget::on_dsVisible_stateChanged(int)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* item = node->GetDrawable())
+        {
+            item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
         }
     }
 }
@@ -1929,7 +1932,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
-        SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityNodeClass::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
         SetValue(mUI.nodeSizeX, size.x);
@@ -1949,6 +1951,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsAlpha, NormalizedFloat(item->GetAlpha()));
+            SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
             SetValue(mUI.dsUpdateDrawable, item->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable));
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));

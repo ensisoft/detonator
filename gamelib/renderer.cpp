@@ -289,7 +289,7 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
             }
 
             // if it doesn't render then no draw packets are generated
-            if (node->TestFlag(Node::Flags::VisibleInGame))
+            if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
             {
                 mTransform.Push(node->GetModelTransform());
 
