@@ -97,6 +97,10 @@ namespace gfx
         // It's possible to sample multiple textures in the program by setting each
         // texture to a different texture unit.
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) = 0;
+        // Set the number of textures used by the next draw.
+        // Todo: this api and the SetTexture are potentially bug prone, it'd be better to
+        // combine both into a single api call that takes the whole array of textures.
+        virtual void SetTextureCount(unsigned count) = 0;
     private:
     };
 

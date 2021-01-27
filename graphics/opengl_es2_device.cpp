@@ -1145,6 +1145,10 @@ private:
             mTextures[unit].texture  = const_cast<TextureImpl*>(impl);
             mTextures[unit].location = ret.location;
         }
+        virtual void SetTextureCount(unsigned count) override
+        {
+            mTextures.resize(count);
+        }
 
         void SetState(TextureUnits& units,
             GLenum default_texture_min_filter, GLenum default_texture_mag_filter) //const

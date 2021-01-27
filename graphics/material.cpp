@@ -282,6 +282,7 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const InstanceStat
             prog.SetUniform(kTextureBox.c_str(), x, y, sx, sy);
             prog.SetUniform("kBlendCoeff", mBlendFrames ? frame_blend_coeff : 0.0f);
         }
+        prog.SetTextureCount(texture_count);
         // set software wrap/clamp. 0 = disabled.
         if (need_software_wrap)
         {

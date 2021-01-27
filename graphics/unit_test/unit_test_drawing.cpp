@@ -178,6 +178,10 @@ public:
         binding.texture = static_cast<const TestTexture*>(&texture);
         mTextures.push_back(binding);
     }
+    virtual void SetTextureCount(unsigned count) override
+    {
+        mTextures.resize(count);
+    }
 
     template<typename T>
     bool GetUniform(const char* name, T* out) const
