@@ -208,6 +208,17 @@ namespace gui
         {
             setValue(module, splitter->objectName(), splitter->saveState());
         }
+        void saveAction(const QString& module, const QAction* action)
+        {
+            setValue(module, action->objectName(), action->isChecked());
+        }
+        void loadAction(const QString& module, QAction* action) const
+        {
+            QSignalBlocker s(action);
+            const auto name = action->objectName();
+            const auto val  = getValue(module, name, action->isChecked());
+            action->setChecked(action);
+        }
         // Load the UI state of a widget.
         void loadWidget(const QString& module, gui::GfxWidget* widget) const
         {
@@ -248,8 +259,8 @@ namespace gui
         // Load the UI state of a widget.
         void loadWidget(const QString& module, QComboBox* cmb) const
         {
-            const auto& text = getValue(module, cmb->objectName(),
-                cmb->currentText());
+            QSignalBlocker s(cmb);
+            const auto& text = getValue(module, cmb->objectName(), cmb->currentText());
             const auto index = cmb->findText(text);
             if (index != -1)
                 cmb->setCurrentIndex(index);

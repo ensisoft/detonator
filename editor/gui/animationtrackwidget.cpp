@@ -239,6 +239,8 @@ void AnimationTrackWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionUsePhysics);
+    bar.addSeparator();
     bar.addAction(mUI.actionReset);
 }
 void AnimationTrackWidget::AddActions(QMenu& menu)
@@ -249,6 +251,8 @@ void AnimationTrackWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionUsePhysics);
     menu.addSeparator();
     menu.addAction(mUI.actionReset);
 }
@@ -282,6 +286,7 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.chkShowOrigin);
     settings.saveWidget("TrackWidget", mUI.chkShowGrid);
     settings.saveWidget("TrackWidget", mUI.chkSnap);
+    settings.saveAction("TrackWidget", mUI.actionUsePhysics);
     settings.setValue("TrackWidget", "show_kinematic_actuators", mState.show_kinematic_actuators);
     settings.setValue("TrackWidget", "show_animatic_actuators", mState.show_transform_actuators);
     settings.setValue("TrackWidget", "show_material_actuators", mState.show_material_actuators);
@@ -331,6 +336,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.chkShowOrigin);
     settings.loadWidget("TrackWidget", mUI.chkShowGrid);
     settings.loadWidget("TrackWidget", mUI.chkSnap);
+    settings.loadAction("TrackWidget", mUI.actionUsePhysics);
     settings.getValue("TrackWidget", "original_hash", &mOriginalHash);
     settings.getValue("TrackWidget", "show_kinematic_actuators", &mState.show_kinematic_actuators);
     settings.getValue("TrackWidget", "show_animatic_actuators",  &mState.show_transform_actuators);
@@ -457,8 +463,11 @@ void AnimationTrackWidget::Update(double secs)
         return;
 
     mPlaybackAnimation->Update(secs);
-    mPhysics.Tick();
-    mPhysics.UpdateEntity(*mPlaybackAnimation);
+    if (GetValue(mUI.actionUsePhysics))
+    {
+        mPhysics.Tick();
+        mPhysics.UpdateEntity(*mPlaybackAnimation);
+    }
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
     if (!mPlaybackAnimation->IsPlaying())

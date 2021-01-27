@@ -1267,6 +1267,24 @@
     <string>Toggle show animatic actuators</string>
    </property>
   </action>
+  <action name="actionUsePhysics">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Physics</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle physics simulation on/off</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
