@@ -65,7 +65,7 @@ nlohmann::json RigidBodyItemClass::ToJson() const
     nlohmann::json json;
     base::JsonWrite(json, "simulation",      mSimulation);
     base::JsonWrite(json, "shape",           mCollisionShape);
-    base::JsonWrite(json, "flags",     mBitFlags.value());
+    base::JsonWrite(json, "flags",           mBitFlags);
     base::JsonWrite(json, "polygon",         mPolygonShapeId);
     base::JsonWrite(json, "friction",        mFriction);
     base::JsonWrite(json, "restitution",     mRestitution);
@@ -79,11 +79,10 @@ nlohmann::json RigidBodyItemClass::ToJson() const
 // static
 std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::json& json)
 {
-    unsigned bitflag = 0;
     RigidBodyItemClass ret;
     if (!base::JsonReadSafe(json, "simulation",      &ret.mSimulation)  ||
         !base::JsonReadSafe(json, "shape",           &ret.mCollisionShape)  ||
-        !base::JsonReadSafe(json, "flags",           &bitflag)  ||
+        !base::JsonReadSafe(json, "flags",           &ret.mBitFlags)  ||
         !base::JsonReadSafe(json, "polygon",         &ret.mPolygonShapeId)  ||
         !base::JsonReadSafe(json, "friction",        &ret.mFriction)  ||
         !base::JsonReadSafe(json, "restitution",     &ret.mRestitution)  ||
@@ -93,7 +92,6 @@ std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::j
         !base::JsonReadSafe(json, "linear_velocity", &ret.mLinearVelocity) ||
         !base::JsonReadSafe(json, "angular_velocity",&ret.mAngularVelocity))
         return std::nullopt;
-    ret.mBitFlags.set_from_value(bitflag);
     return ret;
 }
 
@@ -114,7 +112,7 @@ std::size_t DrawableItemClass::GetHash() const
 nlohmann::json DrawableItemClass::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "flags", mBitFlags.value());
+    base::JsonWrite(json, "flags",       mBitFlags);
     base::JsonWrite(json, "material",    mMaterialId);
     base::JsonWrite(json, "drawable",    mDrawableId);
     base::JsonWrite(json, "layer",       mLayer);
@@ -128,9 +126,8 @@ nlohmann::json DrawableItemClass::ToJson() const
 // static
 std::optional<DrawableItemClass> DrawableItemClass::FromJson(const nlohmann::json& json)
 {
-    unsigned bitflags = 0;
     DrawableItemClass ret;
-    if (!base::JsonReadSafe(json, "flags",       &bitflags) ||
+    if (!base::JsonReadSafe(json, "flags",       &ret.mBitFlags) ||
         !base::JsonReadSafe(json, "material",    &ret.mMaterialId) ||
         !base::JsonReadSafe(json, "drawable",    &ret.mDrawableId) ||
         !base::JsonReadSafe(json, "layer",       &ret.mLayer) ||
@@ -139,7 +136,6 @@ std::optional<DrawableItemClass> DrawableItemClass::FromJson(const nlohmann::jso
         !base::JsonReadSafe(json, "renderpass",  &ret.mRenderPass) ||
         !base::JsonReadSafe(json, "renderstyle", &ret.mRenderStyle))
         return std::nullopt;
-    ret.mBitFlags.set_from_value(bitflags);
     return ret;
 }
 
@@ -230,7 +226,7 @@ nlohmann::json EntityNodeClass::ToJson() const
     base::JsonWrite(json, "scale",    mScale);
     base::JsonWrite(json, "size",     mSize);
     base::JsonWrite(json, "rotation", mRotation);
-    base::JsonWrite(json, "flags", mBitFlags.value());
+    base::JsonWrite(json, "flags",    mBitFlags);
     if (mRigidBody)
         json["rigid_body"] = mRigidBody->ToJson();
     if (mDrawable)
@@ -242,7 +238,6 @@ nlohmann::json EntityNodeClass::ToJson() const
 // static
 std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &json)
 {
-    unsigned flags = 0;
     EntityNodeClass ret;
     if (!base::JsonReadSafe(json, "class",    &ret.mClassId) ||
         !base::JsonReadSafe(json, "name",     &ret.mName) ||
@@ -250,7 +245,7 @@ std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &j
         !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
         !base::JsonReadSafe(json, "size",     &ret.mSize) ||
         !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
-        !base::JsonReadSafe(json, "flags",    &flags))
+        !base::JsonReadSafe(json, "flags",    &ret.mBitFlags))
         return std::nullopt;
 
     if (json.contains("rigid_body"))
@@ -268,7 +263,6 @@ std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &j
             return std::nullopt;
         ret.mDrawable = std::make_shared<DrawableItemClass>(std::move(draw.value()));
     }
-    ret.mBitFlags.set_from_value(flags);
     return ret;
 }
 

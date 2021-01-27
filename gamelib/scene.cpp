@@ -80,7 +80,7 @@ nlohmann::json SceneNodeClass::ToJson() const
     base::JsonWrite(json, "position", mPosition);
     base::JsonWrite(json, "scale",    mScale);
     base::JsonWrite(json, "rotation", mRotation);
-    base::JsonWrite(json, "flags", mFlags.value());
+    base::JsonWrite(json, "flags",    mFlags);
     base::JsonWrite(json, "layer",    mLayer);
     base::JsonWrite(json, "parent_render_tree_node", mParentRenderTreeNodeId);
     base::JsonWrite(json, "idle_animation_id", mIdleAnimationId);
@@ -90,7 +90,6 @@ nlohmann::json SceneNodeClass::ToJson() const
 // static
 std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& json)
 {
-    unsigned flags = 0;
     SceneNodeClass ret;
     if (!base::JsonReadSafe(json, "id",       &ret.mClassId)||
         !base::JsonReadSafe(json, "entity",   &ret.mEntityId) ||
@@ -98,12 +97,11 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& jso
         !base::JsonReadSafe(json, "position", &ret.mPosition) ||
         !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
         !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
-        !base::JsonReadSafe(json, "flags",    &flags) ||
+        !base::JsonReadSafe(json, "flags",    &ret.mFlags) ||
         !base::JsonReadSafe(json, "layer",    &ret.mLayer) ||
         !base::JsonReadSafe(json, "parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
         !base::JsonReadSafe(json, "idle_animation_id", &ret.mIdleAnimationId))
         return std::nullopt;
-    ret.mFlags.set_from_value(flags);
     return ret;
 }
 

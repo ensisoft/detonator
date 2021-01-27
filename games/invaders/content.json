@@ -6,7 +6,10 @@
       "nodes": [
         {
           "class": "NhoWavKXqw",
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Background",
           "position": {
             "x": 600.0,
@@ -27,14 +30,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "hR9OWOACQy",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 2,
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Stars0",
           "position": {
             "x": 0.0,
@@ -55,14 +66,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "9D2vt3ioun",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Stars1",
           "position": {
             "x": 0.0,
@@ -83,14 +102,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "d8CDbfETmY",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 3,
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Stars2",
           "position": {
             "x": 0.0,
@@ -111,14 +138,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "_rect",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "zQGgrkSE8i",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Nebula",
           "position": {
             "x": -9.0,
@@ -179,14 +214,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "_circle",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 1,
             "linewidth": 1.0,
             "material": "EMBqY9KWth",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "UFO",
           "position": {
             "x": 0.0,
@@ -207,14 +250,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "_circle",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "HMQvdCNPy4",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Rings",
           "position": {
             "x": 0.0,
@@ -258,14 +309,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "_circle",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "lIO2x5dmry",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Node 0",
           "position": {
             "x": 0.0,
@@ -304,14 +363,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "k0uqQHtPFX",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 1,
             "linewidth": 1.0,
             "material": "n6I4hvN8l1",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Ship",
           "position": {
             "x": 0.0,
@@ -332,14 +399,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Smoke",
           "position": {
             "x": 132.0,
@@ -357,7 +432,10 @@
         },
         {
           "class": "W65Ke0j1fn",
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Box",
           "position": {
             "x": 10.0,
@@ -408,14 +486,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "ZxF4YiTJ0d",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 1,
             "linewidth": 1.0,
             "material": "tl86yqbmeJ",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Ship",
           "position": {
             "x": 0.0,
@@ -436,14 +522,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Node 0",
           "position": {
             "x": 120.0,
@@ -461,7 +555,10 @@
         },
         {
           "class": "lpEaDhw2ZB",
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Box",
           "position": {
             "x": 11.0,
@@ -512,14 +609,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "0LQtJeq8Dl",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 1,
             "linewidth": 1.0,
             "material": "gLRYUQObGy",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Ship",
           "position": {
             "x": 0.0,
@@ -540,14 +645,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Node 1",
           "position": {
             "x": 180.0,
@@ -565,7 +678,10 @@
         },
         {
           "class": "6GR8iZRFE1",
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Box",
           "position": {
             "x": 0.0,
@@ -616,14 +732,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "5OtYNGYEi5",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 1,
             "linewidth": 1.0,
             "material": "AqPWpeetnB",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Ship",
           "position": {
             "x": 0.0,
@@ -644,14 +768,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Node 0",
           "position": {
             "x": 270.0,
@@ -669,7 +801,10 @@
         },
         {
           "class": "izid3Aa9WR",
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Box",
           "position": {
             "x": 0.0,
@@ -720,14 +855,22 @@
           "drawable_item": {
             "alpha": 1.0,
             "drawable": "_circle",
-            "flags": 7,
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true
+            },
             "layer": 0,
             "linewidth": 1.0,
             "material": "E6ZHdAHRBY",
             "renderpass": "Draw",
             "renderstyle": "Solid"
           },
-          "flags": 3,
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
           "name": "Node 0",
           "position": {
             "x": 0.0,

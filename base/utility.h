@@ -48,6 +48,7 @@
 #include "base/math.h"
 #include "base/assert.h"
 #include "base/platform.h"
+#include "base/bitflag.h"
 
 #if defined(__MSVC__)
 #  pragma warning(push)
@@ -499,6 +500,47 @@ bool JsonReadSafe(const JsonValue& value, glm::vec4* out)
     return true;
 }
 
+template<typename JsonObject, typename Enum, typename Bits>
+bool JsonReadSafe(const JsonObject& object, const char* name, base::bitflag<Enum, Bits>* bitflag)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const auto& value = object[name];
+    for (const auto& flag : magic_enum::enum_values<Enum>())
+    {
+        // for easy versioning of bits in the flag don't require
+        // that all the flags exist in the object
+        const std::string flag_name(magic_enum::enum_name(flag));
+        if (!value.contains(flag_name))
+            continue;
+        bool on_off = false;
+        if (!JsonReadSafe(value, flag_name.c_str(), &on_off))
+            return false;
+        bitflag->set(flag, on_off);
+    }
+    return true;
+}
+
+template<typename JsonValue, typename Enum, typename Bits>
+bool JsonReadSafe(const JsonValue& value, base::bitflag<Enum, Bits>* bitflag)
+{
+    if (!value.is_object())
+        return false;
+    for (const auto& flag : magic_enum::enum_values<Enum>())
+    {
+        // for easy versioning of bits in the flag don't require
+        // that all the flags exist in the object
+        const std::string flag_name(magic_enum::enum_name(flag));
+        if (!value.contains(flag_name))
+            continue;
+        bool on_off = false;
+        if (!JsonReadSafe(value, flag_name.c_str(), &on_off))
+            return false;
+        bitflag->set(flag, on_off);
+    }
+    return true;
+}
+
 template<typename JsonValue, typename T> inline
 void JsonAppendObject(JsonValue& json, const T& value)
 {
@@ -655,6 +697,18 @@ void JsonWrite(JsonObject& object, const char* name, const glm::vec4& vec)
     JsonWrite(json, "y", vec.y);
     JsonWrite(json, "z", vec.z);
     JsonWrite(json, "w", vec.w);
+    object[name] = std::move(json);
+}
+
+template<typename JsonObject, typename Enum, typename Bits>
+void JsonWrite(JsonObject& object, const char* name, base::bitflag<Enum, Bits> bitflag)
+{
+    JsonObject json;
+    for (const auto& flag : magic_enum::enum_values<Enum>())
+    {
+        const std::string flag_name(magic_enum::enum_name(flag));
+        JsonWrite(json, flag_name.c_str(), bitflag.test(flag));
+    }
     object[name] = std::move(json);
 }
 
