@@ -31,6 +31,7 @@
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/utility.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -69,6 +70,8 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
     mUI.widget->onMousePress = std::bind(&DlgMaterial::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseWheel = std::bind(&DlgMaterial::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onMouseDoubleClick = std::bind(&DlgMaterial::MouseDoubleClick, this, std::placeholders::_1);
+
+    mElapsedTimer.start();
 }
 
 void DlgMaterial::on_btnAccept_clicked()
@@ -87,6 +90,7 @@ void DlgMaterial::on_vScroll_valueChanged()
 
 void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
 {
+    const auto time_milliseconds = mElapsedTimer.elapsed();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
@@ -98,6 +102,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
     unsigned index = 0;
 
     mMaterialIds.clear();
+    SetValue(mUI.groupBox, "Material Library");
 
     for (size_t i=0; i<mWorkspace->GetNumResources(); ++i)
     {
@@ -116,11 +121,14 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
         rect.Resize(BoxSize, BoxSize);
         rect.Move(xpos, ypos);
         rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
-        gfx::FillRect(painter, rect, klass);
+        gfx::Material material(klass);
+        material.SetRuntime(time_milliseconds / 1000.0);
+        gfx::FillRect(painter, rect, material);
 
         if (resource.GetId() == mSelectedMaterialId)
         {
             gfx::DrawRectOutline(painter, rect, gfx::Color::Green, 2.0f);
+            SetValue(mUI.groupBox, tr("Material Library - %1").arg(resource.GetName()));
         }
         ++index;
     }

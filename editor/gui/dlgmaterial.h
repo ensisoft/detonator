@@ -26,6 +26,7 @@
 
 #include "warnpush.h"
 #  include "ui_dlgmaterial.h"
+#  include <QElapsedTimer>
 #  include <QTimer>
 #  include <QDialog>
 #include "warnpop.h"
@@ -62,6 +63,7 @@ namespace gui
         Ui::DlgMaterial mUI;
     private:
         QTimer mTimer;
+        QElapsedTimer mElapsedTimer;
         const app::Workspace* mWorkspace = nullptr;
         unsigned mScrollOffsetRow = 0;
         unsigned mNumVisibleRows = 0;
