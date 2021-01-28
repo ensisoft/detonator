@@ -561,19 +561,6 @@
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Node</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="actuatorNode">
                <property name="sizePolicy">
@@ -584,13 +571,6 @@
                </property>
                <property name="placeholderText">
                 <string>Select node ...</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>Type</string>
                </property>
               </widget>
              </item>
@@ -614,8 +594,28 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="actuatorStartTime">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Node</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Type</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="actuatorEndTime">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -637,8 +637,8 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QDoubleSpinBox" name="actuatorEndTime">
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="actuatorStartTime">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -1082,6 +1082,63 @@
                </item>
               </layout>
              </widget>
+             <widget class="QWidget" name="setflagActuator">
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>161</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Set flag</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="itemFlags">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_30">
+                 <property name="text">
+                  <string>To</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="flagAction"/>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>161</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
             </widget>
            </item>
           </layout>
@@ -1207,66 +1264,6 @@
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionAddTransformActuator">
-   <property name="text">
-    <string>Transform</string>
-   </property>
-   <property name="toolTip">
-    <string>Add an animatic actuator</string>
-   </property>
-  </action>
-  <action name="actionAddMaterialActuator">
-   <property name="text">
-    <string>Material</string>
-   </property>
-  </action>
-  <action name="actionAddKinematicActuator">
-   <property name="text">
-    <string>Kinematic</string>
-   </property>
-  </action>
-  <action name="actionShowMaterialActuators">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Material</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle show material actuators</string>
-   </property>
-  </action>
-  <action name="actionShowKinematicActuators">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Kinematic</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle show kinematic actuators</string>
-   </property>
-  </action>
-  <action name="actionShowTransformActuators">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Transform</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle show transform actuators</string>
-   </property>
-  </action>
   <action name="actionUsePhysics">
    <property name="checkable">
     <bool>true</bool>
@@ -1346,6 +1343,8 @@
   <tabstop>kinematicEndVeloX</tabstop>
   <tabstop>kinematicEndVeloY</tabstop>
   <tabstop>kinematicEndVeloZ</tabstop>
+  <tabstop>itemFlags</tabstop>
+  <tabstop>flagAction</tabstop>
   <tabstop>btnAddActuator</tabstop>
  </tabstops>
  <resources>

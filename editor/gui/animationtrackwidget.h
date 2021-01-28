@@ -31,6 +31,7 @@
 
 #include <memory>
 
+#include "base/bitflag.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/gui/drawing.h"
@@ -89,13 +90,6 @@ namespace gui
         void on_actionReset_triggered();
         void on_actionDeleteActuator_triggered();
         void on_actionClearActuators_triggered();
-        void on_actionAddTransformActuator_triggered();
-        void on_actionAddMaterialActuator_triggered();
-        void on_actionAddKinematicActuator_triggered();
-        void on_actionShowTransformActuators_toggled();
-        void on_actionShowKinematicActuators_toggled();
-        void on_actionShowMaterialActuators_toggled();
-
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
@@ -125,8 +119,12 @@ namespace gui
         void on_kinematicEndVeloX_valueChanged(double value);
         void on_kinematicEndVeloY_valueChanged(double value);
         void on_kinematicEndVeloZ_valueChanged(double value);
+        void on_itemFlags_currentIndexChanged(int);
+        void on_flagAction_currentIndexChanged();
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
+        void ToggleShowResource();
+        void AddActuatorAction();
     private:
         void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
@@ -161,9 +159,7 @@ namespace gui
             float camera_offset_y = 0.0f;
             std::shared_ptr<game::EntityClass> entity;
             std::shared_ptr<game::AnimationTrackClass> track;
-            bool show_material_actuators = true;
-            bool show_transform_actuators = true;
-            bool show_kinematic_actuators = true;
+            base::bitflag<game::ActuatorClass::Type> show_flags = {~0u};
         } mState;
         // Current time accumulator.
         float mCurrentTime = 0.0f;

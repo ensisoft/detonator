@@ -79,9 +79,11 @@ inline void SetEnabled(QWidget* widget, bool enabled)
 }
 
 template<typename EnumT>
-void PopulateFromEnum(QComboBox* combo)
+void PopulateFromEnum(QComboBox* combo, bool clear = true)
 {
-    combo->clear();
+    QSignalBlocker s(combo);
+    if (clear)
+        combo->clear();
     constexpr auto& values = magic_enum::enum_values<EnumT>();
     for (const auto& val : values)
     {
@@ -304,6 +306,10 @@ struct ComboBoxValueGetter
             // arbitrary conversion from QSTring to T
             ASSERT(!"not implemented");
         }
+    }
+    operator std::string() const
+    {
+        return app::ToUtf8(cmb->currentText().trimmed());
     }
     operator QString() const
     {
