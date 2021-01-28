@@ -33,6 +33,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
+#include "editor/gui/drawing.h"
 #include "editor/app/workspace.h"
 #include "gamelib/entity.h"
 #include "gamelib/animation.h"
@@ -74,6 +75,12 @@ namespace gui
         virtual void Update(double secs) override;
         virtual bool ConfirmClose() override;
         virtual bool GetStats(Stats* stats) const override;
+
+        void SetZoom(float zoom);
+        void SetShowGrid(bool on_off);
+        void SetShowOrigin(bool on_off);
+        void SetSnapGrid(bool on_off);
+        void SetGrid(GridDensity grid);
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();

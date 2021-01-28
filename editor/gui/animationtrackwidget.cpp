@@ -528,6 +528,28 @@ bool AnimationTrackWidget::ConfirmClose()
     stats->vsync = mUI.widget->haveVSYNC();
     return true;
  }
+
+void AnimationTrackWidget::SetZoom(float zoom)
+{
+    SetValue(mUI.zoom, zoom);
+}
+void AnimationTrackWidget::SetShowGrid(bool on_off)
+{
+    SetValue(mUI.chkShowGrid, on_off);
+}
+void AnimationTrackWidget::SetShowOrigin(bool on_off)
+{
+    SetValue(mUI.chkShowOrigin, on_off);
+}
+void AnimationTrackWidget::SetSnapGrid(bool on_off)
+{
+    SetValue(mUI.chkSnap, on_off);
+}
+void AnimationTrackWidget::SetGrid(GridDensity grid)
+{
+    SetValue(mUI.cmbGrid, grid);
+}
+
 void AnimationTrackWidget::on_actionPlay_triggered()
 {
     if (mPlayState == PlayState::Paused)

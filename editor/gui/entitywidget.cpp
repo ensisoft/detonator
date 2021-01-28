@@ -1044,6 +1044,11 @@ void EntityWidget::on_btnNewTrack_clicked()
     // sharing the animation class object with the new animation
     // track widget.
     AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity);
+    widget->SetZoom(GetValue(mUI.zoom));
+    widget->SetShowGrid(GetValue(mUI.chkShowGrid));
+    widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
+    widget->SetSnapGrid(GetValue(mUI.chkSnap));
+    widget->SetGrid(GetValue(mUI.cmbGrid));
     emit OpenNewWidget(widget);
 }
 void EntityWidget::on_btnEditTrack_clicked()
@@ -1061,6 +1066,11 @@ void EntityWidget::on_btnEditTrack_clicked()
             continue;
 
         AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass);
+        widget->SetZoom(GetValue(mUI.zoom));
+        widget->SetShowGrid(GetValue(mUI.chkShowGrid));
+        widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
+        widget->SetSnapGrid(GetValue(mUI.chkSnap));
+        widget->SetGrid(GetValue(mUI.cmbGrid));
         emit OpenNewWidget(widget);
     }
 }
