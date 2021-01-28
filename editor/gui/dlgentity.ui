@@ -42,7 +42,7 @@
            </sizepolicy>
           </property>
           <property name="placeholderText">
-           <string>Select Track ...</string>
+           <string>Class Default</string>
           </property>
          </widget>
         </item>

@@ -237,7 +237,8 @@ public:
         node.SetName(name);
         node.SetScale(glm::vec2(1.0f, 1.0f));
         node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
-        node.SetIdleAnimationId(mClass->GetIdleTrackId());
+        // leave this empty for the class default to take place.
+        // node.SetIdleAnimationId(mClass->GetIdleTrackId());
         auto* child = mState.scene.AddNode(std::move(node));
         mState.scene.LinkChild(nullptr, child);
         mState.view->Rebuild();

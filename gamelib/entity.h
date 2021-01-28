@@ -1059,7 +1059,7 @@ namespace game
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
         bool HasIdleTrack() const
-        { return !mIdleTrackId.empty(); }
+        { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
         RenderTree& GetRenderTree()
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const

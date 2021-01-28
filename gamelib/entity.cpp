@@ -1055,18 +1055,12 @@ bool Entity::PlayIdle()
     if (mAnimationTrack)
         return false;
 
-    if (!HasIdleTrack())
-        return false;
+    if (!mIdleTrackId.empty())
+        return PlayAnimationById(mIdleTrackId);
+    else if(mClass->HasIdleTrack())
+        return PlayAnimationById(mClass->GetIdleTrackId());
 
-    if (!PlayAnimationById(mIdleTrackId))
-    {
-        // might spam the log.
-        //WARN("Idle track '%1' was not found.", mClass->GetIdleTrackId());
-        return false;
-    }
-    // spams the log.
-    //DEBUG("Started idle track '%1'", mAnimationTrack->GetName());
-    return true;
+    return false;
 }
 
 bool Entity::IsPlaying() const
