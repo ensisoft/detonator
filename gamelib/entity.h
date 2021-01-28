@@ -132,6 +132,8 @@ namespace game
         { return mAngularVelocity; }
         void ResetPolygonShapeId()
         { mPolygonShapeId.clear(); }
+        base::bitflag<Flags> GetFlags() const
+        { return mBitFlags; }
 
         void SetCollisionShape(CollisionShape shape)
         { mCollisionShape = shape; }
@@ -247,6 +249,8 @@ namespace game
         { return mRenderPass; }
         RenderStyle GetRenderStyle() const
         { return mRenderStyle; }
+        base::bitflag<Flags> GetFlags() const
+        { return mBitFlags; }
 
         nlohmann::json ToJson() const;
 
@@ -280,6 +284,7 @@ namespace game
           : mClass(klass)
         {
             mInstanceAlpha = mClass->GetAlpha();
+            mInstanceFlags = mClass->GetFlags();
         }
         std::string GetMaterialId() const
         { return mClass->GetMaterialId(); }
@@ -294,10 +299,12 @@ namespace game
         RenderStyle GetRenderStyle() const
         { return mClass->GetRenderStyle(); }
         bool TestFlag(Flags flag) const
-        { return mClass->TestFlag(flag); }
+        { return mInstanceFlags.test(flag); }
         float GetAlpha() const
         { return mInstanceAlpha; }
 
+        void SetFlag(Flags flag, bool on_off)
+        { mInstanceFlags.set(flag, on_off); }
         void SetAlpha(float alpha)
         { mInstanceAlpha = alpha; }
 
@@ -307,7 +314,7 @@ namespace game
         { return mClass.get(); }
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
-
+        base::bitflag<Flags> mInstanceFlags;
         float mInstanceAlpha = 1.0f;
     };
 
@@ -323,6 +330,7 @@ namespace game
         {
             mLinearVelocity = mClass->GetLinearVelocity();
             mAngularVelocity = mClass->GetAngularVelocity();
+            mInstanceFlags = mClass->GetFlags();
         }
 
         Simulation GetSimulation() const
@@ -340,7 +348,7 @@ namespace game
         float GetDensity() const
         { return mClass->GetDensity(); }
         bool TestFlag(Flags flag) const
-        { return mClass->TestFlag(flag); }
+        { return mInstanceFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mClass->GetPolygonShapeId(); }
 
@@ -363,6 +371,8 @@ namespace game
         { mLinearVelocity = velocity; }
         void SetAngularVelocity(float velocity)
         { mAngularVelocity = velocity; }
+        void SetFlag(Flags flag, bool on_off)
+        { mInstanceFlags.set(flag, on_off); }
 
         const RigidBodyItemClass& GetClass() const
         { return *mClass.get(); }
@@ -382,6 +392,8 @@ namespace game
         // the animation system can provide a new value which will
         // then be set in the physics engine.
         float mAngularVelocity = 0.0f;
+        // Flags specific to this instance.
+        base::bitflag<Flags> mInstanceFlags;
     };
 
     class EntityNodeClass
