@@ -162,6 +162,11 @@ namespace gui
         virtual bool GetStats(Stats* stats) const
         { return false; }
 
+        void SetId(QString id)
+        { mId = id;}
+        QString GetId() const
+        { return mId; }
+
     signals:
         // Request to open the given script file in an external script editor.
         void OpenExternalScript(const QString& file);
@@ -178,6 +183,7 @@ namespace gui
         // can or cannot take place.
         void ActionStateChanged();
     private:
+        QString mId;
     };
 
 } // namespace

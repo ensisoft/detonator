@@ -177,6 +177,12 @@ MainWidget* ChildWindow::TakeWidget()
     return ret;
 }
 
+void ChildWindow::ActivateWindow()
+{
+    this->activateWindow();
+    this->raise();
+}
+
 void ChildWindow::on_menuEdit_aboutToShow()
 {
     DEBUG("Edit menu about to show.");

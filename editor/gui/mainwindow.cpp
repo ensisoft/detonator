@@ -96,7 +96,7 @@ public:
 private:
 };
 
-gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
+gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
 {
     switch (type) {
         case app::Resource::Type::Material:
@@ -126,6 +126,14 @@ gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace,
     }
     BUG("Unhandled widget type.");
     return nullptr;
+}
+
+gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
+{
+    auto* widget = CreateWidget(type, workspace, resource);
+    if (resource)
+        widget->SetId(resource->GetId());
+    return widget;
 }
 
 } // namespace
@@ -1364,8 +1372,11 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     app::Resource* resource = dlg.GetSelected();
     if (resource == nullptr)
         return;
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(MakeWidget(resource->GetType(), mWorkspace.get(), resource), new_window);
+    if (!FocusWidget(resource->GetId()))
+    {
+        const auto new_window = mSettings.default_open_win_or_tab == "Window";
+        showWidget(MakeWidget(resource->GetType() , mWorkspace.get() , resource) , new_window);
+    }
 }
 
 void MainWindow::on_actionNewResource_triggered()
@@ -1998,8 +2009,32 @@ void MainWindow::editResources(bool open_new_window)
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
-        showWidget(MakeWidget(resource.GetType(), mWorkspace.get(), &resource), open_new_window);
+        if (!FocusWidget(resource.GetId()))
+            showWidget(MakeWidget(resource.GetType(), mWorkspace.get(), &resource), open_new_window);
     }
+}
+
+bool MainWindow::FocusWidget(const QString& id)
+{
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        const auto* widget = static_cast<const MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->GetId() == id)
+        {
+            mUI.mainTab->setCurrentIndex(i);
+            return true;
+        }
+    }
+    for (auto* child : mChildWindows)
+    {
+        const auto* widget = child->GetWidget();
+        if (widget->GetId() == id)
+        {
+            QTimer::singleShot(10, child, &ChildWindow::ActivateWindow);
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace

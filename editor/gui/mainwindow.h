@@ -166,6 +166,7 @@ namespace gui
         void closeWorkspace();
         ChildWindow* showWidget(MainWidget* widget, bool new_window);
         void editResources(bool open_new_window);
+        bool FocusWidget(const QString& id);
 
     private:
         bool event(QEvent* event)  override;

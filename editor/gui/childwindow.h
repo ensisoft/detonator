@@ -87,7 +87,8 @@ namespace gui
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!
         MainWidget* TakeWidget();
-
+    public slots:
+        void ActivateWindow();
     private slots:
         void on_menuEdit_aboutToShow();
         void on_actionClose_triggered();
