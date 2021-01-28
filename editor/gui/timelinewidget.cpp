@@ -186,7 +186,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         const QRect box(x, y, render_width, TimelineHeight);
 
         if (i == mHoveredTimeline)
-            p.fillRect(box, QColor(50, 50, 50));
+            p.fillRect(box, QColor(70, 70, 70));
 
         p.drawText(box, Qt::AlignVCenter | Qt::AlignHCenter, timeline.GetName());
 

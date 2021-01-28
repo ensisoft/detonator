@@ -93,21 +93,27 @@ public:
             const auto& id   = actuator.GetNodeId();
             const auto& node = anim.FindNodeById(id);
             const auto& name = app::FromUtf8(node->GetName());
-            const auto id_hash = base::hash_combine(0, id);
-            const auto type_hash = base::hash_combine(0, (int)type*7575);
             const auto index = id_to_index_map[id];
-            const auto num = (*list)[index].GetNumItems();
+            const auto num   = (*list)[index].GetNumItems();
+
+            // pastel color palette.
+            // https://colorhunt.co/palette/226038
 
             TimelineWidget::TimelineItem item;
             item.text      = QString("%1 (%2)").arg(name).arg(num+1);
             item.id        = app::FromUtf8(actuator.GetId());
             item.starttime = actuator.GetStartTime();
             item.duration  = actuator.GetDuration();
-            item.color = QColor(
-                    (id_hash >> 24) & 0xff,
-                    (id_hash >> 16) & 0xff,
-                    (type_hash) & 0xff,
-                    200);
+            if (type == game::ActuatorClass::Type::SetFlag)
+                item.color = QColor(0xa3, 0xdd, 0xcb, 150);
+            else if (type == game::ActuatorClass::Type::Transform)
+                item.color = QColor(0xe8, 0xe9, 0xa1, 150);
+            else if (type == game::ActuatorClass::Type::Kinematic)
+                item.color = QColor(0xe6, 0xb5, 0x66, 150);
+            else if (type == game::ActuatorClass::Type::Material)
+                item.color = QColor(0xe5, 0x70, 0x7e, 150);
+            else BUG("Unhandled type for item colorization.");
+
             (*list)[index].AddItem(item);
         }
         for (auto& timeline : (*list))
