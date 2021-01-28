@@ -43,6 +43,73 @@ bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
            real::equals(lhs.y, rhs.y);
 }
 
+void unit_test_setflag_actuator()
+{
+    game::SetFlagActuatorClass klass;
+    klass.SetNodeId("1234");
+    klass.SetStartTime(0.1f);
+    klass.SetDuration(0.5f);
+    klass.SetFlagName("OverrideAlpha");
+    klass.SetFlagAction(game::SetFlagActuatorClass::FlagAction::Off);
+
+    TEST_REQUIRE(klass.GetNodeId() == "1234");
+    TEST_REQUIRE(klass.GetStartTime() == real::float32(0.1f));
+    TEST_REQUIRE(klass.GetDuration()  == real::float32(0.5f));
+    TEST_REQUIRE(klass.GetFlagName() == "OverrideAlpha");
+    TEST_REQUIRE(klass.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
+
+    // serialize
+    {
+        game::SetFlagActuatorClass copy;
+        TEST_REQUIRE(copy.FromJson(klass.ToJson()));
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetNodeId() == "1234");
+        TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetFlagName() == "OverrideAlpha");
+        TEST_REQUIRE(copy.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
+    }
+
+    // copy assignment
+    {
+        game::SetFlagActuatorClass copy(klass);
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        copy = klass;
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+    }
+
+    // copy and clone
+    {
+        auto copy = klass.Copy();
+        TEST_REQUIRE(copy->GetId() == klass.GetId());
+        TEST_REQUIRE(copy->GetHash() == klass.GetHash());
+        auto clone = klass.Clone();
+        TEST_REQUIRE(clone->GetHash()  != klass.GetHash());
+        TEST_REQUIRE(clone->GetId()    != klass.GetId());
+    }
+
+    // instance
+    {
+        game::SetFlagActuator instance(klass);
+
+        game::EntityNodeClass node_klass;
+        game::DrawableItemClass draw_class;
+        draw_class.SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, true);
+        node_klass.SetDrawable(draw_class);
+
+        // create node instance
+        game::EntityNode node(node_klass);
+        // start based on the node.
+        instance.Start(node);
+        instance.Finish(node);
+        TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha) == false);
+    }
+
+}
+
 void unit_test_kinematic_actuator()
 {
     game::KinematicActuatorClass klass;
@@ -325,6 +392,7 @@ void unit_test_animation_track()
 
 int test_main(int argc, char* argv[])
 {
+    unit_test_setflag_actuator();
     unit_test_transform_actuator();
     unit_test_kinematic_actuator();
     unit_test_animation_track();

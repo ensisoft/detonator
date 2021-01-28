@@ -24,6 +24,7 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
 #include <cmath>
@@ -36,6 +37,40 @@
 
 namespace game
 {
+
+std::size_t SetFlagActuatorClass::GetHash() const
+{
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mFlagName);
+    hash = base::hash_combine(hash, mStartTime);
+    hash = base::hash_combine(hash, mDuration);
+    hash = base::hash_combine(hash, mFlagAction);
+    return hash;
+}
+
+nlohmann::json SetFlagActuatorClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id",        mId);
+    base::JsonWrite(json, "node",      mNodeId);
+    base::JsonWrite(json, "flag",      mFlagName);
+    base::JsonWrite(json, "starttime", mStartTime);
+    base::JsonWrite(json, "duration",  mDuration);
+    base::JsonWrite(json, "action",    mFlagAction);
+    return json;
+}
+
+bool SetFlagActuatorClass::FromJson(const nlohmann::json& json)
+{
+    return base::JsonReadSafe(json, "id",        &mId) &&
+           base::JsonReadSafe(json, "node",      &mNodeId) &&
+           base::JsonReadSafe(json, "flag",      &mFlagName) &&
+           base::JsonReadSafe(json, "starttime", &mStartTime) &&
+           base::JsonReadSafe(json, "duration",  &mDuration) &&
+           base::JsonReadSafe(json, "action",    &mFlagAction);
+}
 
 std::size_t KinematicActuatorClass::GetHash() const
 {
@@ -190,6 +225,64 @@ void KinematicActuator::Finish(EntityNode& node)
     }
 }
 
+void SetFlagActuator::Start(EntityNode& node)
+{
+    if (const auto* item = node.GetDrawable())
+    {
+        const auto flag = magic_enum::enum_cast<DrawableItemClass::Flags>(mClass->GetFlagName());
+        if (flag.has_value())
+        {
+            mStartState = item->TestFlag(flag.value());
+            return;
+        }
+    }
+    if (const auto* item = node.GetRigidBody())
+    {
+        const auto flag = magic_enum::enum_cast<RigidBodyItemClass::Flags>(mClass->GetFlagName());
+        if (flag.has_value())
+        {
+            mStartState = item->TestFlag(flag.value());
+            return;
+        }
+    }
+    WARN("Unidentified node flag '%1'", mClass->GetFlagName());
+}
+void SetFlagActuator::Apply(EntityNode& node, float t)
+{
+    // no op.
+}
+void SetFlagActuator::Finish(EntityNode& node)
+{
+    bool next_value = false;
+    const auto action = mClass->GetFlagAction();
+    if (action == FlagAction::Toggle)
+        next_value = !mStartState;
+    else if (action == FlagAction::On)
+        next_value = true;
+    else if (action == FlagAction::Off)
+        next_value = false;
+
+    if (auto* item = node.GetDrawable())
+    {
+        const auto flag = magic_enum::enum_cast<DrawableItemClass::Flags>(mClass->GetFlagName());
+        if (flag.has_value())
+        {
+            item->SetFlag(flag.value(), next_value);
+            return;
+        }
+    }
+    if (auto* item = node.GetRigidBody())
+    {
+        const auto flag = magic_enum::enum_cast<RigidBodyItemClass::Flags>(mClass->GetFlagName());
+        if (flag.has_value())
+        {
+            item->SetFlag(flag.value(), next_value);
+            return;
+        }
+    }
+    WARN("Unidentified node flag '%1'", mClass->GetFlagName());
+}
+
 void MaterialActuator::Start(EntityNode& node)
 {
     if (const auto* draw = node.GetDrawable())
@@ -320,6 +413,8 @@ std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) 
         return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::Kinematic)
         return std::make_unique<KinematicActuator>(std::static_pointer_cast<KinematicActuatorClass>(klass));
+    else if (klass->GetType() == ActuatorClass::Type::SetFlag)
+        return std::make_unique<SetFlagActuator>(std::static_pointer_cast<SetFlagActuatorClass>(klass));
     else BUG("Unknown actuator type");
     return {};
 }
@@ -380,6 +475,8 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
             actuator = std::make_shared<MaterialActuatorClass>();
         else if (type == ActuatorClass::Type::Kinematic)
             actuator = std::make_shared<KinematicActuatorClass>();
+        else if (type == ActuatorClass::Type::SetFlag)
+            actuator = std::make_shared<SetFlagActuatorClass>();
         else BUG("Unknown actuator type.");
 
         if (!actuator->FromJson(obj["actuator"]))

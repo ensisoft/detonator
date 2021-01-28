@@ -63,7 +63,9 @@ namespace game
             Kinematic,
             // Material actuators modify the material instance state/parameters
             // of some particular animation node.
-            Material
+            Material,
+            // SetFlat actuator sets a a binary flag to the specific value on the node.
+            SetFlag
         };
         // dtor.
         virtual ~ActuatorClass() = default;
@@ -96,6 +98,68 @@ namespace game
         // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const nlohmann::json& object) = 0;
     private:
+    };
+
+    class SetFlagActuatorClass : public ActuatorClass
+    {
+    public:
+        enum class FlagAction {
+            On, Off, Toggle
+        };
+
+        SetFlagActuatorClass()
+        { mId = base::RandomString(10); }
+        SetFlagActuatorClass(const std::string& node) : mNodeId(node)
+        { mId = base::RandomString(10); }
+        virtual Type GetType() const override
+        { return Type::SetFlag;}
+        virtual void SetNodeId(const std::string& id) override
+        { mNodeId = id; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetNodeId() const override
+        { return mNodeId; }
+        virtual std::size_t GetHash() const override;
+        virtual std::unique_ptr<ActuatorClass> Copy() const override
+        { return std::make_unique<SetFlagActuatorClass>(*this); }
+        virtual std::unique_ptr<ActuatorClass> Clone() const override
+        {
+            auto ret = std::make_unique<SetFlagActuatorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual float GetStartTime() const override
+        { return mStartTime; }
+        virtual float GetDuration() const override
+        { return mDuration; }
+        virtual void SetStartTime(float start) override
+        { mStartTime = start; }
+        virtual void SetDuration(float duration) override
+        { mDuration = duration; }
+        virtual nlohmann::json ToJson() const override;
+        virtual bool FromJson(const nlohmann::json& json) override;
+
+        FlagAction GetFlagAction() const
+        { return mFlagAction; }
+        std::string GetFlagName() const
+        { return mFlagName; }
+        void SetFlagName(const std::string& name)
+        { mFlagName = name; }
+        void SetFlagAction(FlagAction action)
+        { mFlagAction = action; }
+
+    private:
+        // id of the actuator.
+        std::string mId;
+        // id of the node that the action will be applied onto
+        std::string mNodeId;
+        // the name of the flag to set.
+        std::string mFlagName;
+        // Normalized start time.
+        float mStartTime = 0.0f;
+        // Normalized duration.
+        float mDuration = 1.0f;
+        FlagAction mFlagAction = FlagAction::Off;
     };
 
     // Modify the kinematic physics body properties, i.e.
@@ -371,6 +435,36 @@ namespace game
         std::shared_ptr<const KinematicActuatorClass> mClass;
         glm::vec2 mStartLinearVelocity = {0.0f, 0.0f};
         float mStartAngularVelocity = 0.0f;
+    };
+
+    class SetFlagActuator : public Actuator
+    {
+    public:
+        using FlagAction = SetFlagActuatorClass::FlagAction;
+
+        SetFlagActuator(const std::shared_ptr<const SetFlagActuatorClass>& klass)
+            : mClass(klass)
+        {}
+        SetFlagActuator(const SetFlagActuatorClass& klass)
+            : mClass(std::make_shared<SetFlagActuatorClass>(klass))
+        {}
+        SetFlagActuator(SetFlagActuatorClass&& klass)
+            : mClass(std::make_shared<SetFlagActuatorClass>(std::move(klass)))
+        {}
+        virtual void Start(EntityNode& node) override;
+        virtual void Apply(EntityNode& node, float t) override;
+        virtual void Finish(EntityNode& node) override;
+        virtual float GetStartTime() const override
+        { return mClass->GetStartTime(); }
+        virtual float GetDuration() const override
+        { return mClass->GetDuration(); }
+        virtual std::string GetNodeId() const override
+        { return mClass->GetNodeId(); }
+        virtual std::unique_ptr<Actuator> Copy() const override
+        { return std::make_unique<SetFlagActuator>(*this); }
+    private:
+        std::shared_ptr<const SetFlagActuatorClass> mClass;
+        bool mStartState = false;
     };
 
     // Apply a material change on a node's material instance.
