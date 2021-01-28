@@ -228,8 +228,16 @@ void LinkChild(RenderTree<Node>& tree, const Node* parent, const Node* child)
 }
 
 template<typename Node> inline
-void BreakChild(RenderTree<Node>& tree, const Node* child)
+void BreakChild(RenderTree<Node>& tree, Node* child, bool retain_world_transform = true)
 {
+    if (retain_world_transform)
+    {
+        const auto& child_to_world = FindNodeTransform(tree, child);
+        FBox box;
+        box.Transform(child_to_world);
+        child->SetTranslation(box.GetPosition());
+        child->SetRotation(box.GetRotation());
+    }
     tree.BreakChild(child);
 }
 

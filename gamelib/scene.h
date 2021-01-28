@@ -224,7 +224,7 @@ namespace game
         // exists in the entity but is removed from the render tree.
         // You can then either DeleteNode to completely delete it or
         // LinkChild to insert it into another part of the render tree.
-        void BreakChild(SceneNodeClass* child);
+        void BreakChild(SceneNodeClass* child, bool keep_world_transform = true);
         // Re-parent a child node from its current parent to another parent.
         // Both the child node and the parent node to be a valid nodes and
         // need to point to nodes that are part of the render tree and belong

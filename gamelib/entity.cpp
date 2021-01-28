@@ -537,9 +537,9 @@ void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
     game::LinkChild(mRenderTree, parent, child);
 }
 
-void EntityClass::BreakChild(EntityNodeClass* child)
+void EntityClass::BreakChild(EntityNodeClass* child, bool keep_world_transform)
 {
-    game::BreakChild(mRenderTree, child);
+    game::BreakChild(mRenderTree, child, keep_world_transform);
 }
 
 void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child, bool keep_world_transform)

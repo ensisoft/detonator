@@ -180,9 +180,9 @@ void SceneClass::LinkChild(SceneNodeClass* parent, SceneNodeClass* child)
     game::LinkChild(mRenderTree, parent, child);
 }
 
-void SceneClass::BreakChild(SceneNodeClass* child)
+void SceneClass::BreakChild(SceneNodeClass* child, bool keep_world_transform)
 {
-    game::BreakChild(mRenderTree, child);
+    game::BreakChild(mRenderTree, child, keep_world_transform);
 }
 
 void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child, bool keep_world_transform)

@@ -224,9 +224,9 @@ void unit_test_scene_class()
 
     // test breaking node away from the render tree.
     {
-        klass.BreakChild(klass.FindNodeByName("root"));
-        klass.BreakChild(klass.FindNodeByName("child_1"));
-        klass.BreakChild(klass.FindNodeByName("child_2"));
+        klass.BreakChild(klass.FindNodeByName("root"), false);
+        klass.BreakChild(klass.FindNodeByName("child_1"), false);
+        klass.BreakChild(klass.FindNodeByName("child_2"), false);
         TEST_REQUIRE(klass.GetNumNodes() == 3);
         TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
         TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
