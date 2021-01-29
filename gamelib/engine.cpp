@@ -164,24 +164,36 @@ public:
 
         // set the actual viewport for proper clipping.
         mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
-        // set the logical viewport.
-        mPainter->SetView(view);
         // set the pixel ratio for mapping game units to rendering surface units.
         mPainter->SetPixelRatio(glm::vec2(scale, scale));
 
-        if (mScene)
-        {
-            gfx::Transform transform;
-            mRenderer.BeginFrame();
-            mRenderer.Draw(*mScene, *mPainter, transform);
-            mRenderer.EndFrame();
+        mRenderer.BeginFrame();
 
+        if (mBackground)
+        {
+            // use an adjusted viewport so that the center of the
+            // background scene is always at the center of the window.
+            mPainter->SetView(width*-0.5, height*-0.5, width, height);
+
+            gfx::Transform transform;
+            mRenderer.Draw(*mBackground, *mPainter, transform);
+        }
+
+        if (mForeground)
+        {
+            // set the logical viewport to whatever the game
+            // has set it.
+            mPainter->SetView(view);
+
+            gfx::Transform transform;
+            mRenderer.Draw(*mForeground , *mPainter , transform);
             if (mDebugDrawing && mPhysics.HaveWorld())
             {
-                mPhysics.DebugDrawObjects(*mPainter, transform);
+                mPhysics.DebugDrawObjects(*mPainter , transform);
             }
         }
 
+        mRenderer.EndFrame();
         mDevice->EndFrame(true);
         mDevice->CleanGarbage(120);
     }
@@ -198,21 +210,28 @@ public:
         while (mGame->GetNextAction(&action))
         {
             if (auto* ptr = std::get_if<game::Game::PlaySceneAction>(&action))
-                LoadScene(ptr->klass);
+                LoadForegroundScene(ptr->klass);
+            else if (auto* ptr = std::get_if<game::Game::LoadBackgroundAction>(&action))
+                LoadBackgroundScene(ptr->klass);
         }
 
-        if (!mScene)
-            return;
-
-        mScene->Update(dt);
-        mGame->Update(time, dt);
-
-        if (mPhysics.HaveWorld())
+        if (mBackground)
         {
-            mPhysics.Tick();
-            mPhysics.UpdateScene(*mScene);
+            mBackground->Update(dt);
+            mRenderer.Update(*mBackground, time, dt);
         }
-        mRenderer.Update(*mScene, time, dt);
+
+        if (mForeground)
+        {
+            mForeground->Update(dt);
+            if (mPhysics.HaveWorld())
+            {
+                mPhysics.Tick();
+                mPhysics.UpdateScene(*mForeground);
+            }
+            mRenderer.Update(*mForeground, time, dt);
+        }
+        mGame->Update(time, dt);
     }
     virtual void Shutdown() override
     {
@@ -276,17 +295,22 @@ public:
         mGame->OnMouseRelease(mouse);
     }
 private:
-    void LoadScene(game::ClassHandle<game::SceneClass> klass)
+    void LoadForegroundScene(game::ClassHandle<game::SceneClass> klass)
     {
-        if (mScene)
+        if (mForeground)
         {
             mGame->EndPlay();
             mPhysics.DeleteAll();
-            mScene.reset();
+            mForeground.reset();
         }
-        mScene = game::CreateSceneInstance(klass);
-        mPhysics.CreateWorld(*mScene);
-        mGame->BeginPlay(mScene.get());
+        mForeground = game::CreateSceneInstance(klass);
+        mPhysics.CreateWorld(*mForeground);
+        mGame->BeginPlay(mForeground.get());
+    }
+    void LoadBackgroundScene(game::ClassHandle<game::SceneClass> klass)
+    {
+        mBackground = game::CreateSceneInstance(klass);
+        mGame->LoadBackgroundDone(mBackground.get());
     }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
@@ -329,8 +353,10 @@ private:
     game::Renderer mRenderer;
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
-    // Current scene or nullptr if no scene.
-    std::unique_ptr<game::Scene> mScene;
+    // Current backdrop scene or nullptr if no scene.
+    std::unique_ptr<game::Scene> mBackground;
+    // Current game scene or nullptr if no scene.
+    std::unique_ptr<game::Scene> mForeground;
     // Game logic implementation.
     std::unique_ptr<game::Game> mGame;
     // flag to indicate whether the app is still running or not.

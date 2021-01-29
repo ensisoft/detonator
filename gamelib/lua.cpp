@@ -77,6 +77,13 @@ LuaGame::LuaGame(const std::string& lua_path)
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
     };
+    engine["LoadBackground"] = [](LuaGame* self, ClassHandle<SceneClass> klass) {
+        if (!klass)
+            throw std::runtime_error("nil scene class");
+        LoadBackgroundAction action;
+        action.klass = klass;
+        self->mActionQueue.push(action);
+    };
 
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");
@@ -103,6 +110,19 @@ void LuaGame::LoadGame(const ClassLibrary* loader)
         ERROR(err.what());
     }
 }
+void LuaGame::LoadBackgroundDone(Scene* background)
+{
+    sol::protected_function func = (*mLuaState)["LoadBackgroundDone"];
+    if (!func.valid())
+        return;
+    auto result = func(background);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        ERROR(err.what());
+    }
+}
+
 void LuaGame::Tick(double current_time)
 {
     sol::protected_function func = (*mLuaState)["Tick"];
@@ -349,11 +369,43 @@ void BindGameLib(sol::state& L)
     classlib["FindSceneClassByName"]  = &ClassLibrary::FindSceneClassByName;
     classlib["FindSceneClassById"]    = &ClassLibrary::FindSceneClassById;
 
+    auto drawable = table.new_usertype<DrawableItem>("Drawable");
+    drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
+    drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;
+    drawable["GetLayer"]      = &DrawableItem::GetLayer;
+    drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;
+    drawable["GetAlpha"]      = &DrawableItem::GetAlpha;
+    drawable["SetAlpha"]      = &DrawableItem::SetAlpha;
+    drawable["TestFlag"]      = [](const DrawableItem* item, const std::string& str) {
+        const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
+        if (!enum_val.has_value())
+            throw std::runtime_error("no such drawable item flag:" + str);
+        return item->TestFlag(enum_val.value());
+    };
+    drawable["SetFlag"]       = [](DrawableItem* item, const std::string& str, bool on_off) {
+        const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
+        if (!enum_val.has_value())
+            throw std::runtime_error("no such drawable item flag: " + str);
+        item->SetFlag(enum_val.value(), on_off);
+    };
+
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
+    entity_node["GetName"]        = &EntityNode::GetName;
+    entity_node["GetClassId"]     = &EntityNode::GetClassId;
+    entity_node["GetClassName"]   = &EntityNode::GetClassName;
     entity_node["GetTranslation"] = &EntityNode::GetTranslation;
     entity_node["GetScale"]       = &EntityNode::GetScale;
     entity_node["GetRotation"]    = &EntityNode::GetRotation;
+    entity_node["HasRigidBody"]   = &EntityNode::HasRigidBody;
+    entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
+    entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
+    entity_node["SetScale"]       = &EntityNode::SetScale;
+    entity_node["SetSize"]        = &EntityNode::SetSize;
+    entity_node["SetTranslation"] = &EntityNode::SetTranslation;
+    entity_node["SetName"]        = &EntityNode::SetName;
+    entity_node["Translate"]      = (void(EntityNode::*)(const glm::vec2&))&EntityNode::Translate;
+    entity_node["Rotate"]         = (void(EntityNode::*)(float))&EntityNode::Rotate;
 
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index, [&L](const Entity* entity, const char* key) {
@@ -401,6 +453,9 @@ void BindGameLib(sol::state& L)
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
     entity["FindNodeByInstanceId"] = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByInstanceId;
+    entity["PlayIdle"]             = &Entity::PlayIdle;
+    entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
+    entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
 
     // todo: cleanup the copy pasta regarding script vars index/newindex
     auto scene = table.new_usertype<Scene>("Scene",

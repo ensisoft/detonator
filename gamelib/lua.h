@@ -44,8 +44,8 @@ namespace game
         LuaGame(std::shared_ptr<sol::state> state);
         LuaGame(const std::string& lua_path);
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
-
         virtual void LoadGame(const ClassLibrary* loader) override;
+        virtual void LoadBackgroundDone(Scene* background) override;
         virtual void Tick(double current_time) override;
         virtual void Update(double current_time,  double dt) override;
         virtual void BeginPlay(Scene* scene) override;

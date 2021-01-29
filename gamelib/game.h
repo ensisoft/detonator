@@ -57,12 +57,16 @@ namespace game
             // creation. This may not be nullptr.
             ClassHandle<SceneClass> klass;
         };
+        struct LoadBackgroundAction {
+            ClassHandle<SceneClass> klass;
+        };
         struct EndPlay {
             // todo: any params ?
         };
         // Actions express some want the game wants to take
         // such as opening a menu, playing a scene and so on.
-        using Action = std::variant<PlaySceneAction>;
+        using Action = std::variant<PlaySceneAction,
+                LoadBackgroundAction>;
 
         virtual ~Game() = default;
         // Set physics engine instance.
@@ -72,6 +76,11 @@ namespace game
         // start with some initial game state and possibly request some
         // action to take place such as loading the main menu.
         virtual void LoadGame(const ClassLibrary* loader) = 0;
+        // LoadBackgroundDone is called as a response to LoadBackgroundAction.
+        // When the action is processed the engine creates and instance of the
+        // background scene and then calls LoadBackgroundDone. The engine will
+        // maintain the ownership of the scene.
+        virtual void LoadBackgroundDone(Scene* background) = 0;
         // BeginPlay is called as a response to PlaySceneAction. When the
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
