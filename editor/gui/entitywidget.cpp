@@ -769,6 +769,9 @@ void EntityWidget::Refresh()
     // edited.
     if (mUI.nodeName->hasFocus())
         return;
+    // don't take undo snapshot while the node alpha is being slid
+    if (mUI.dsAlpha->isSliderDown())
+        return;
 
     if (mUndoStack.empty())
     {
