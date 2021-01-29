@@ -40,7 +40,8 @@
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -76,7 +77,8 @@
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -112,7 +114,8 @@
             "linewidth": 1.0,
             "material": "46yvmCSzSL",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -148,7 +151,8 @@
             "linewidth": 1.0,
             "material": "zQGgrkSE8i",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -224,7 +228,8 @@
             "linewidth": 1.0,
             "material": "EMBqY9KWth",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -260,7 +265,8 @@
             "linewidth": 1.0,
             "material": "HMQvdCNPy4",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -319,7 +325,8 @@
             "linewidth": 1.0,
             "material": "lIO2x5dmry",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -373,7 +380,8 @@
             "linewidth": 1.0,
             "material": "n6I4hvN8l1",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -409,7 +417,8 @@
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -495,7 +504,8 @@
             "linewidth": 1.0,
             "material": "tl86yqbmeJ",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -531,7 +541,8 @@
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -617,7 +628,8 @@
             "linewidth": 1.0,
             "material": "gLRYUQObGy",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -653,7 +665,8 @@
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -739,7 +752,8 @@
             "linewidth": 1.0,
             "material": "AqPWpeetnB",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -775,7 +789,8 @@
             "linewidth": 1.0,
             "material": "Kt7KKux9mo",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -861,7 +876,8 @@
             "linewidth": 1.0,
             "material": "E6ZHdAHRBY",
             "renderpass": "Draw",
-            "renderstyle": "Solid"
+            "renderstyle": "Solid",
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true

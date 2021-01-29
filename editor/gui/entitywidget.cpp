@@ -1338,6 +1338,17 @@ void EntityWidget::on_dsLineWidth_valueChanged(double value)
     }
 }
 
+void EntityWidget::on_dsTimeScale_valueChanged(double value)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* item = node->GetDrawable())
+        {
+            item->SetTimeScale(value);
+        }
+    }
+}
+
 void EntityWidget::on_dsVisible_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
@@ -1923,6 +1934,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsLayer, 0);
     SetValue(mUI.dsRenderPass, game::DrawableItemClass::RenderPass::Draw);
     SetValue(mUI.dsRenderStyle, game::DrawableItemClass::RenderStyle::Solid);
+    SetValue(mUI.dsLineWidth, 1.0f);
+    SetValue(mUI.dsTimeScale, 1.0f);
     SetValue(mUI.dsAlpha, NormalizedFloat(1.0f));
     SetValue(mUI.rbFriction, 0.0f);
     SetValue(mUI.rbRestitution, 0.0f);
@@ -1963,6 +1976,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
+            SetValue(mUI.dsTimeScale, item->GetTimeScale());
             SetValue(mUI.dsAlpha, NormalizedFloat(item->GetAlpha()));
             SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
             SetValue(mUI.dsUpdateDrawable, item->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable));

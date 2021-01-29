@@ -106,6 +106,7 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mLineWidth);
     hash = base::hash_combine(hash, mRenderPass);
     hash = base::hash_combine(hash, mRenderStyle);
+    hash = base::hash_combine(hash, mTimeScale);
     return hash;
 }
 
@@ -120,6 +121,7 @@ nlohmann::json DrawableItemClass::ToJson() const
     base::JsonWrite(json, "linewidth",   mLineWidth);
     base::JsonWrite(json, "renderpass",  mRenderPass);
     base::JsonWrite(json, "renderstyle", mRenderStyle);
+    base::JsonWrite(json, "timescale",   mTimeScale);
     return json;
 }
 
@@ -134,7 +136,8 @@ std::optional<DrawableItemClass> DrawableItemClass::FromJson(const nlohmann::jso
         !base::JsonReadSafe(json, "alpha",       &ret.mAlpha) ||
         !base::JsonReadSafe(json, "linewidth",   &ret.mLineWidth) ||
         !base::JsonReadSafe(json, "renderpass",  &ret.mRenderPass) ||
-        !base::JsonReadSafe(json, "renderstyle", &ret.mRenderStyle))
+        !base::JsonReadSafe(json, "renderstyle", &ret.mRenderStyle) ||
+        !base::JsonReadSafe(json, "timescale",   &ret.mTimeScale))
         return std::nullopt;
     return ret;
 }

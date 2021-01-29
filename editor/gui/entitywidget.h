@@ -125,6 +125,7 @@ namespace gui
         void on_dsRenderStyle_currentIndexChanged(const QString&);
         void on_dsLayer_valueChanged(int layer);
         void on_dsLineWidth_valueChanged(double value);
+        void on_dsTimeScale_valueChanged(double value);
         void on_dsVisible_stateChanged(int);
         void on_dsUpdateDrawable_stateChanged(int);
         void on_dsUpdateMaterial_stateChanged(int);

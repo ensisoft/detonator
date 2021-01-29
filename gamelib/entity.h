@@ -231,6 +231,8 @@ namespace game
         { mRenderPass = pass; }
         void SetRenderStyle(RenderStyle style)
         { mRenderStyle = style; }
+        void SetTimeScale(float scale)
+        { mTimeScale = scale; }
 
         // class getters.
         std::string GetDrawableId() const
@@ -243,6 +245,8 @@ namespace game
         {return mAlpha; }
         float GetLineWidth() const
         { return mLineWidth; }
+        float GetTimeScale() const
+        { return mTimeScale; }
         bool TestFlag(Flags flag) const
         { return mBitFlags.test(flag); }
         RenderPass GetRenderPass() const
@@ -269,6 +273,9 @@ namespace game
         float mAlpha = 1.0f;
         // linewidth for rasterizing the shape with lines.
         float mLineWidth = 1.0f;
+        // scaler value for changing the time delta values
+        // applied to the drawable (material)
+        float mTimeScale = 1.0f;
         RenderPass mRenderPass = RenderPass::Draw;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
     };
@@ -285,6 +292,7 @@ namespace game
         {
             mInstanceAlpha = mClass->GetAlpha();
             mInstanceFlags = mClass->GetFlags();
+            mInstanceTimeScale = mClass->GetTimeScale();
         }
         std::string GetMaterialId() const
         { return mClass->GetMaterialId(); }
@@ -302,11 +310,15 @@ namespace game
         { return mInstanceFlags.test(flag); }
         float GetAlpha() const
         { return mInstanceAlpha; }
+        float GetTimeScale() const
+        { return mInstanceTimeScale; }
 
         void SetFlag(Flags flag, bool on_off)
         { mInstanceFlags.set(flag, on_off); }
         void SetAlpha(float alpha)
         { mInstanceAlpha = alpha; }
+        void SetTimeScale(float scale)
+        { mInstanceTimeScale = scale; }
 
         const DrawableItemClass& GetClass() const
         { return *mClass.get(); }
@@ -316,6 +328,7 @@ namespace game
         std::shared_ptr<const DrawableItemClass> mClass;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceAlpha = 1.0f;
+        float mInstanceTimeScale = 1.0f;
     };
 
     class RigidBodyItem

@@ -156,13 +156,15 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
     auto& paint = it->second;
     if (paint.material)
     {
+        const auto time_scale = drawable->GetTimeScale();
         if (drawable->TestFlag(DrawableItemType::Flags::UpdateMaterial))
-            paint.material->Update(dt);
+            paint.material->Update(dt * time_scale);
     }
     if (paint.drawable)
     {
+        const auto time_scale = drawable->GetTimeScale();
         if (drawable->TestFlag(DrawableItemType::Flags::UpdateDrawable))
-            paint.drawable->Update(dt);
+            paint.drawable->Update(dt * time_scale);
         if (drawable->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint.drawable->IsAlive())
             paint.drawable->Restart();
     }
