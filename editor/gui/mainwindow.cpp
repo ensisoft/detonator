@@ -2028,6 +2028,10 @@ bool MainWindow::FocusWidget(const QString& id)
     for (auto* child : mChildWindows)
     {
         const auto* widget = child->GetWidget();
+        // if the window is being closed but has not yet been removed
+        // the widget can be nullptr, in which case skip the check.
+        if (!widget)
+            continue;
         if (widget->GetId() == id)
         {
             QTimer::singleShot(10, child, &ChildWindow::ActivateWindow);
