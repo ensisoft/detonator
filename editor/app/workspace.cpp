@@ -825,20 +825,7 @@ std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const 
     else if (ret.startsWith("app://"))
         ret.replace("app://", GetAppDir());
     else if (ret.startsWith("fs://"))
-        ret.remove(0, 5);
-
-    // special case for resources that are hard coded in the engine without
-    // any resource location identifier. (such as shaders)
-    // if it's just relative we expect it's relative to the application's
-    // installation folder.
-    const QFileInfo info(ret);
-    if (info.isRelative())
-    {
-        // assuming it's a resource deployed as part of this application.
-        // so we resolve the path based on the applications's
-        // installation location. (for example a shader file)
-        ret = JoinPath(GetAppDir(), ret);
-    }
+        ret.remove(0 , 5);
 
     DEBUG("Mapping gfx resource '%1' => '%2'", file, ret);
 

@@ -80,9 +80,9 @@ double CurrentRuntime()
 class TemporaryCurrentDirChange
 {
 public:
-    TemporaryCurrentDirChange(const QString&  current, const QString& prev)
-        : mCurrent(QDir::cleanPath(current))
-        , mPrevious(QDir::cleanPath(prev))
+    TemporaryCurrentDirChange(const QString& current)
+        : mCurrent(current)
+        , mPrevious(QDir::currentPath())
     {
         if (mCurrent == mPrevious)
             return;
@@ -246,9 +246,10 @@ private:
 class PlayWindow::ResourceLoader : public gfx::ResourceLoader
 {
 public:
-    ResourceLoader(const app::Workspace& workspace, const QString& gamedir)
+    ResourceLoader(const app::Workspace& workspace, const QString& gamedir, const QString& hostdir)
         : mWorkspace(workspace)
         , mGameDir(gamedir)
+        , mHostDir(hostdir)
     {}
     // Resource loader implementation
     virtual std::string ResolveURI(ResourceType type, const std::string& URI) const override
@@ -270,7 +271,20 @@ public:
         // the application expects this to be relative and to be resolved
         // based on the current working directory when the application
         // is launched.
-        const auto& resolved = app::JoinPath(mGameDir, app::FromUtf8(URI));
+        //
+        // currently there's a little problem withe shaders also having
+        // non-resolve hard coded paths. When playing the game we somehow
+        // need to resolve those shaders to the shaders under the editor
+        // instead. note that if the game resources use custom shaders
+        // when they are added to the materials their paths are properly
+        // encoded.
+        QString dir = mGameDir;
+
+        // todo: somehow remove and fix this hack related to the shaders
+        if (base::StartsWith(URI, "shaders/"))
+            dir = mHostDir;
+
+        const auto& resolved = app::JoinPath(dir, app::FromUtf8(URI));
         const auto& ret = app::ToUtf8(resolved);
         mFileMaps[URI] = ret;
         DEBUG("Mapping gfx resource '%1' => '%2'", URI, resolved);
@@ -280,6 +294,7 @@ public:
 private:
     const app::Workspace& mWorkspace;
     const QString mGameDir;
+    const QString mHostDir;
     mutable std::unordered_map<std::string, std::string> mFileMaps;
 };
 
@@ -387,10 +402,11 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     setWindowTitle(settings.application_name);
     mLogger->SetLogTag(settings.application_name);
 
-    mPreviousWorkingDir = QDir::currentPath();
-    mCurrentWorkingDir  = settings.working_folder;
-    mCurrentWorkingDir.replace("${workspace}", mWorkspace.GetDir());
-    DEBUG("Changing current directory to '%1'", mCurrentWorkingDir);
+    mHostWorkingDir = QDir::currentPath();
+    mGameWorkingDir = settings.working_folder;
+    mGameWorkingDir.replace("${workspace}", mWorkspace.GetDir());
+    DEBUG("Host working directory set to '%1'", mHostWorkingDir);
+    DEBUG("Game working directory set to '%1'", mGameWorkingDir);
 
     mSurface = new QWindow();
     mSurface->setSurfaceType(QWindow::OpenGLSurface);
@@ -407,14 +423,14 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
 
     // create new resource loader based on the current workspace
     // and its content.
-    mResourceLoader = std::make_unique<ResourceLoader>(mWorkspace, mCurrentWorkingDir);
+    mResourceLoader = std::make_unique<ResourceLoader>(mWorkspace, mGameWorkingDir, mHostWorkingDir);
 }
 
 PlayWindow::~PlayWindow()
 {
     Shutdown();
 
-    QDir::setCurrent(mPreviousWorkingDir);
+    QDir::setCurrent(mHostWorkingDir);
 
     DEBUG("Destroy PlayWindow");
 }
@@ -424,7 +440,7 @@ void PlayWindow::Update(double dt)
     if (!mApp || !mInitDone)
         return;
 
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
 
@@ -504,7 +520,7 @@ void PlayWindow::Render()
     if (!mApp || !mInitDone)
         return;
 
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
     try
@@ -549,7 +565,7 @@ void PlayWindow::Tick()
 
 bool PlayWindow::LoadGame()
 {
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     const auto& settings = mWorkspace.GetProjectSettings();
     const auto& library  = mWorkspace.MapFileToFilesystem(settings.GetApplicationLibrary());
@@ -598,7 +614,7 @@ void PlayWindow::Shutdown()
         if (mApp)
         {
             DEBUG("Shutting down game...");
-            TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+            TemporaryCurrentDirChange cwd(mGameWorkingDir);
             mApp->Save();
             mApp->Shutdown();
         }
@@ -707,7 +723,7 @@ void PlayWindow::DoAppInit()
     // assumes that the current working directory has not been changed!
     const auto& host_app_path = QCoreApplication::applicationFilePath();
 
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
     try
     {
         mContext.makeCurrent(mSurface);
@@ -736,7 +752,7 @@ void PlayWindow::DoAppInit()
 
         game::App::Environment env;
         env.classlib  = &mWorkspace;
-        env.directory = app::ToUtf8(mCurrentWorkingDir);
+        env.directory = app::ToUtf8(mGameWorkingDir);
         mApp->SetEnvironment(env);
 
         const auto surface_width  = mSurface->width();
@@ -884,7 +900,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     if (!listener)
         return QMainWindow::event(event);
 
-    TemporaryCurrentDirChange cwd(mCurrentWorkingDir, mPreviousWorkingDir);
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
     try
     {
         if (event->type() == QEvent::KeyPress)

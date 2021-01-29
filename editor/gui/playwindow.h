@@ -119,12 +119,12 @@ namespace gui
     private:
         // our current workspace.
         app::Workspace& mWorkspace;
-        // Previous working directory.
-        QString mPreviousWorkingDir;
-        // Current working directory that we have to change
+        // This process's working directory.
+        QString mHostWorkingDir;
+        // the working directory that we have to change
         // to before calling into app in case it refers to
         // data/resources relative to the working directory.
-        QString mCurrentWorkingDir;
+        QString mGameWorkingDir;
         // loader for the game/app library.
         QLibrary mLibrary;
         // entry point functions into the game/app library.

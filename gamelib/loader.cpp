@@ -112,6 +112,8 @@ std::string ContentLoader::ResolveURI(gfx::ResourceLoader::ResourceType type, co
         str = mResourceDir + "/" + str.substr(6);
     else if (str.find("ws://", 0) == 0)
         str = str.substr(5);
+    else if (str.find("fs://", 0) == 0)
+        str = str.substr(5);
 
     DEBUG("Mapped %1 to %2", URI, str);
     mUriCache[URI] = str;

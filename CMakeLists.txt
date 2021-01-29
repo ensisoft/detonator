@@ -532,9 +532,11 @@ if (UNIX)
   target_link_libraries(invaders PRIVATE pthread)
 endif()
 install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
+install(FILES games/invaders/assets/shaders/es2/sliding_glint_effect.glsl
+        DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist/shaders/es2/")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
-    target_link_options(invaders PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
+    target_link_options(invaders PRIVATE  "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
 # unit tests
