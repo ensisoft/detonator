@@ -135,6 +135,11 @@ std::string GetPath()
     buffer.resize(2048);
     const auto ret = ::GetModuleFileNameW(NULL, &buffer[0], buffer.size());
     buffer.resize(ret);
+    DEBUG("Executable path: '%1'", buffer);
+    auto last = buffer.find_last_of(L'\\');
+    if (last == std::string::npos)
+        return base::ToUtf8(buffer);
+    buffer = buffer.substr(0, last);
     return base::ToUtf8(buffer);
 }
 #endif
