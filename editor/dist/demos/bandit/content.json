@@ -4143,61 +4143,6 @@
       },
       "resource_id": "gwm3bTflRn",
       "resource_name": "Background"
-    },
-    {
-      "id": "DXIUanoCQJ",
-      "idle_track": "",
-      "nodes": [
-        {
-          "class": "xSYpdzCHy2",
-          "drawable_item": {
-            "alpha": 1.0,
-            "drawable": "dfSLfae4tU",
-            "flags": {
-              "OverrideAlpha": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "_White",
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": -3.5,
-            "y": -7.5
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 496.0,
-            "y": 467.0
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "xSYpdzCHy2"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "DXIUanoCQJ",
-      "resource_name": "My Entity"
     }
   ],
   "materials": [
