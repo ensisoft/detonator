@@ -566,6 +566,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     auto track = game::CreateAnimationTrackInstance(mState.track);
     mPlaybackAnimation = game::CreateEntityInstance(mState.entity);
     mPlaybackAnimation->Play(std::move(track));
+    mPhysics.SetLoader(mWorkspace);
     mPhysics.SetScale(settings.physics_scale);
     mPhysics.SetGravity(settings.gravity);
     mPhysics.SetNumVelocityIterations(settings.num_velocity_iterations);
