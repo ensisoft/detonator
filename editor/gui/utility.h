@@ -636,13 +636,13 @@ inline void GetProperty(const Resource& res, const QString& name, color_widgets:
 
 
 template<typename Resource, typename T> inline
-void GetUserProperty(const Resource& res, const QString& name, T* out)
+bool GetUserProperty(const Resource& res, const QString& name, T* out)
 {
-    res.GetUserProperty(name, out);
+    return res.GetUserProperty(name, out);
 }
 
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QComboBox* cmb)
+inline bool GetUserProperty(const Resource& res, const QString& name, QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
 
@@ -657,71 +657,100 @@ inline void GetUserProperty(const Resource& res, const QString& name, QComboBox*
         const auto index = cmb->findText(text);
         if (index != -1)
             cmb->setCurrentIndex(index);
+        return true;
     }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QLineEdit* edit)
+inline bool GetUserProperty(const Resource& res, const QString& name, QLineEdit* edit)
 {
     QSignalBlocker s(edit);
 
     QString text;
     if (res.GetUserProperty(name, &text))
+    {
         edit->setText(text);
+        return true;
+    }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QDoubleSpinBox* spin)
+inline bool GetUserProperty(const Resource& res, const QString& name, QDoubleSpinBox* spin)
 {
     QSignalBlocker s(spin);
 
     double value = 0.0f;
     if (res.GetUserProperty(name, &value))
+    {
         spin->setValue(value);
-
+        return true;
+    }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QSpinBox* spin)
+inline bool GetUserProperty(const Resource& res, const QString& name, QSpinBox* spin)
 {
     QSignalBlocker s(spin);
 
     int value = 0;
     if (res.GetUserProperty(name, &value))
+    {
         spin->setValue(value);
+        return true;
+    }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QCheckBox* chk)
+inline bool GetUserProperty(const Resource& res, const QString& name, QCheckBox* chk)
 {
     QSignalBlocker s(chk);
 
     bool value = false;
     if (res.GetUserProperty(name, &value))
+    {
         chk->setChecked(value);
+        return true;
+    }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, QGroupBox* chk)
+inline bool GetUserProperty(const Resource& res, const QString& name, QGroupBox* chk)
 {
     QSignalBlocker s(chk);
 
     bool value = false;
     if (res.GetUserProperty(name, &value))
+    {
         chk->setChecked(value);
+        return true;
+    }
+    return false;
 }
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, color_widgets::ColorSelector* color)
+inline bool GetUserProperty(const Resource& res, const QString& name, color_widgets::ColorSelector* color)
 {
     QSignalBlocker s(color);
 
     QColor value;
     if (res.GetUserProperty(name, &value))
+    {
         color->setColor(value);
+        return true;
+    }
+    return false;
 }
 
 template<typename Resource>
-inline void GetUserProperty(const Resource& res, const QString& name, gui::GfxWidget* widget)
+inline bool GetUserProperty(const Resource& res, const QString& name, gui::GfxWidget* widget)
 {
     QSignalBlocker s(widget);
     QColor color = FromGfx(widget->getClearColor());
     if (res.GetUserProperty(name + "_clear_color", &color))
+    {
         widget->setClearColor(ToGfx(color));
+        return true;
+    }
+    return false;
 }
 
 template<typename Widget>

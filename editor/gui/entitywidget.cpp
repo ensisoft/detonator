@@ -371,7 +371,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
 
     mState.entity = std::make_shared<game::EntityClass>(*content);
     mOriginalHash = mState.entity->GetHash();
-    mCameraWasLoaded = true;
     mScriptVarModel->Reset();
 
     const auto vars = mState.entity->GetNumScriptVars();
@@ -389,8 +388,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
-    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
-    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
+                       GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+
     setWindowTitle(resource.GetName());
 
     UpdateDeletedResourceReferences();
