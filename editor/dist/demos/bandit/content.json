@@ -9299,7 +9299,8 @@
   ],
   "scripts": [
     {
-      "resource_id": "8kXFHIo3Dt",
+      "id": "SId1upp3XQ",
+      "resource_id": "SId1upp3XQ",
       "resource_name": "game",
       "uri": "ws://lua/game.lua"
     }

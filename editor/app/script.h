@@ -53,6 +53,7 @@ namespace app
         nlohmann::json ToJson()
         {
             nlohmann::json json;
+            base::JsonWrite(json, "id", mScriptId);
             base::JsonWrite(json, "uri", mFileURI);
             return json;
         }
@@ -65,7 +66,8 @@ namespace app
         static std::optional<Script> FromJson(const nlohmann::json& json)
         {
             Script ret;
-            if (!base::JsonReadSafe(json, "uri", &ret.mFileURI))
+            if (!base::JsonReadSafe(json, "id", &ret.mScriptId) ||
+                !base::JsonReadSafe(json, "uri", &ret.mFileURI))
                 return std::nullopt;
             return ret;
         }
