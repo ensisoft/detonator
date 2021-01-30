@@ -49,7 +49,6 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
-    PopulateFromEnum<app::Workspace::ProjectSettings::GameEngine>(mUI.cmbEngine);
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
     SetUIValue(mUI.cmbMagFilter, mSettings.default_mag_filter);
@@ -127,28 +126,6 @@ void DlgProject::on_btnSelectEngine_clicked()
         return;
     const auto& file = mWorkspace.AddFileToWorkspace(list[0]);
     SetValue(mUI.edtAppLibrary, file);
-}
-
-void DlgProject::on_cmbEngine_currentIndexChanged(const QString&)
-{
-    QString library;
-#if defined(POSIX_OS)
-    library = "app://libGameEngine.so";
-#elif defined(WINDOWS_OS)
-    library = "app://GameEngine.dll";
-#endif
-
-    const app::Workspace::ProjectSettings::GameEngine engine = GetValue(mUI.cmbEngine);
-    if (engine == app::Workspace::ProjectSettings::GameEngine::Default)
-    {
-        SetValue(mUI.edtAppLibrary, library);
-        SetEnabled(mUI.btnSelectEngine, false);
-    }
-    else
-    {
-        SetEnabled(mUI.btnSelectEngine, true);
-    }
-
 }
 
 } // namespace

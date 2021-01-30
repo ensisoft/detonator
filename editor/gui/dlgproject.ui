@@ -240,21 +240,7 @@
           <string>Engine settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Engine library</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Engine type</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
+          <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QLineEdit" name="edtAppLibrary"/>
@@ -268,30 +254,7 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbEngine"/>
-          </item>
-          <item row="3" column="0">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string>Clear color</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="color_widgets::ColorSelector" name="clearColor">
             <property name="color">
              <color>
@@ -311,6 +274,33 @@
                <blue>128</blue>
               </color>
              </brush>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Engine library</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Clear color</string>
             </property>
            </widget>
           </item>
@@ -780,7 +770,6 @@
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>
   <tabstop>edtAppVersion</tabstop>
-  <tabstop>cmbEngine</tabstop>
   <tabstop>edtAppLibrary</tabstop>
   <tabstop>btnSelectEngine</tabstop>
   <tabstop>numVeloIterations</tabstop>

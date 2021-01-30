@@ -374,20 +374,6 @@ namespace app
                 // border and resize settings.
                 Windowed,
             };
-            // the type of game engine to use. engines are built into
-            // libraries that are loaded by the game hosts (either EditorGameHost
-            // or GameMain) and that contain the game's logic.
-            enum class GameEngine {
-                // Default game engine provides a "out of the box" experience
-                // and combines some subsystems such as rendering, physics and scripting
-                // into a ready made engine that can be used with script based games.
-                Default,
-                // Custom game engine is a custom built engine library that implements
-                // the main game host interface.
-                Custom
-            };
-            // the selected game engine.
-            GameEngine engine = GameEngine::Default;
             // sample count when using multi-sampled render targets.
             unsigned multisample_sample_count = 4;
             // user defined name of the application.

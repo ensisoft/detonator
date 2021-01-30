@@ -44,8 +44,6 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnSelectEngine_clicked();
-        void on_cmbEngine_currentIndexChanged(const QString&);
-
     private:
         Ui::DlgProject mUI;
     private:

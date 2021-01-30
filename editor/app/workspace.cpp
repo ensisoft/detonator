@@ -1167,7 +1167,6 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
     JsonWrite(project, "command_line_arguments"  , mSettings.command_line_arguments);
     JsonWrite(project, "use_gamehost_process"    , mSettings.use_gamehost_process);
-    JsonWrite(project, "engine"                  , mSettings.engine);
     JsonWrite(project, "num_velocity_iterations" , mSettings.num_velocity_iterations);
     JsonWrite(project, "num_position_iterations" , mSettings.num_position_iterations);
     JsonWrite(project, "phys_gravity_x"          , mSettings.gravity.x);
@@ -1254,7 +1253,6 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
     JsonReadSafe(project, "command_line_arguments",   &mSettings.command_line_arguments);
     JsonReadSafe(project, "use_gamehost_process",     &mSettings.use_gamehost_process);
-    JsonReadSafe(project, "engine",                   &mSettings.engine);
     JsonReadSafe(project, "num_position_iterations",  &mSettings.num_position_iterations);
     JsonReadSafe(project, "num_velocity_iterations",  &mSettings.num_velocity_iterations);
     JsonReadSafe(project, "phys_gravity_x",           &mSettings.gravity.x);
