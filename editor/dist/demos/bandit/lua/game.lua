@@ -21,6 +21,12 @@ Viewport = game.FRect:new(0.0, 0.0, 1200, 800.0)
 WorldUp    = glm.vec2:new(0.0, -1.0)
 WorldRight = glm.vec2:new(1.0, 0.0)
 
+function SetTimeScale(entity, node_name, scale)
+    local node = entity:FindNodeByClassName(node_name)
+    local draw = node:GetDrawable()
+    draw:SetTimeScale(scale)
+end
+
 -- main game callbacks
 
 -- This is called when the game is first loaded when
@@ -57,8 +63,17 @@ function Update(current_time, delta)
         return
     end
 
-    local body = Player:FindNodeByClassName('Body')
-    local pos  = body:GetTranslation() - glm.vec2:new(200, 600)
+    local node = Player:FindNodeByClassName('Body')
+    local pos  = node:GetTranslation() - glm.vec2:new(200, 600)
+    local body = node:GetRigidBody()
+    local velo = body:GetLinearVelocity()
+
+    -- adjust the scrolling speed of the background layers by
+    -- adjusting the time scale of the background layer drawables
+    SetTimeScale(Background, 'Layer0', velo.x * 1.0)
+    SetTimeScale(Background, 'Layer1', velo.x * 1.0)
+    SetTimeScale(Background, 'Layer2', velo.x * 1.0)
+
     Viewport:Move(pos.x, pos.y)
     Game:SetViewport(Viewport)
 end

@@ -4110,15 +4110,109 @@
             "material": "AgxrO05Kqg",
             "renderpass": "Draw",
             "renderstyle": "Solid",
-            "timescale": 0.0
+            "timescale": 1.0
           },
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 1",
+          "name": "Layer0",
           "position": {
-            "x": 0.0,
-            "y": 0.0
+            "x": 3.3333740234375,
+            "y": -132.2222900390625
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1237.57373046875,
+            "y": 598.6389770507813
+          }
+        },
+        {
+          "class": "UIbYC5M3Iq",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "l6vR7abMmW",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Layer1",
+          "position": {
+            "x": 2.22222900390625,
+            "y": 145.5555419921875
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1245.7242431640625,
+            "y": 126.71227264404297
+          }
+        },
+        {
+          "class": "l2p8ir9ZhN",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "X6Q2aN3uWm",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Layer2",
+          "position": {
+            "x": 4.44439697265625,
+            "y": 232.22219848632813
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1239.0245361328125,
+            "y": 353.5948791503906
+          }
+        },
+        {
+          "class": "KIiKgUK0Dg",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Box",
+          "position": {
+            "x": 0.5,
+            "y": -0.61114501953125
           },
           "rotation": 0.0,
           "scale": {
@@ -4136,6 +4230,21 @@
           {
             "node": {
               "id": "Y0gBBtChIX"
+            }
+          },
+          {
+            "node": {
+              "id": "UIbYC5M3Iq"
+            }
+          },
+          {
+            "node": {
+              "id": "l2p8ir9ZhN"
+            }
+          },
+          {
+            "node": {
+              "id": "KIiKgUK0Dg"
             }
           }
         ],
@@ -6358,9 +6467,9 @@
       },
       "color_map2": {
         "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
+        "b": 0.9960784316062927,
+        "g": 0.9058823585510254,
+        "r": 0.8117647171020508
       },
       "color_map3": {
         "a": 1.0,
@@ -6373,7 +6482,7 @@
       "id": "AgxrO05Kqg",
       "particle_action": "None",
       "resource_id": "AgxrO05Kqg",
-      "resource_name": "BG",
+      "resource_name": "BG_Layer_0",
       "samplers": [
         {
           "box": {
@@ -6384,9 +6493,9 @@
           },
           "enable_gc": false,
           "source": {
-            "file": "ws://textures/desert tile set/BG.png",
-            "id": "bq8ll7OI6P",
-            "name": "BG"
+            "file": "ws://textures/desert tile set/BG_layer_0.png",
+            "id": "9yS3kdi9J3",
+            "name": "BG_layer_0"
           },
           "type": "Filesystem"
         }
@@ -7714,6 +7823,152 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Sprite"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 0.69514000415802,
+        "g": 0.7633325457572937,
+        "r": 0.8315404057502747
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "l6vR7abMmW",
+      "particle_action": "None",
+      "resource_id": "l6vR7abMmW",
+      "resource_name": "BG_Layer_1",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/desert tile set/BG_layer_1.png",
+            "id": "SYZHe7Liu6",
+            "name": "BG_layer_1"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.019999999552965164,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Repeat",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 0.5149157047271729,
+        "g": 0.5149157047271729,
+        "r": 0.5149157047271729
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "X6Q2aN3uWm",
+      "particle_action": "None",
+      "resource_id": "X6Q2aN3uWm",
+      "resource_name": "BG_Layer_2",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/desert tile set/BG_layer_2.png",
+            "id": "Q43kDjRqE9",
+            "name": "BG_layer_2"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Linear",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.029999999329447746,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Repeat",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "scenes": [

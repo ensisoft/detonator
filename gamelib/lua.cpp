@@ -374,8 +374,10 @@ void BindGameLib(sol::state& L)
     drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;
     drawable["GetLayer"]      = &DrawableItem::GetLayer;
     drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;
+    drawable["GetTimeScale"]  = &DrawableItem::GetTimeScale;
     drawable["GetAlpha"]      = &DrawableItem::GetAlpha;
     drawable["SetAlpha"]      = &DrawableItem::SetAlpha;
+    drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
     drawable["TestFlag"]      = [](const DrawableItem* item, const std::string& str) {
         const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
         if (!enum_val.has_value())
@@ -389,6 +391,36 @@ void BindGameLib(sol::state& L)
         item->SetFlag(enum_val.value(), on_off);
     };
 
+    auto body = table.new_usertype<RigidBodyItem>("RigidBody");
+    body["GetFriction"]        = &RigidBodyItem::GetFriction;
+    body["GetRestitution"]     = &RigidBodyItem::GetRestitution;
+    body["GetAngularDamping"]  = &RigidBodyItem::GetAngularDamping;
+    body["GetLinearDamping"]   = &RigidBodyItem::GetLinearDamping;
+    body["GetDensity"]         = &RigidBodyItem::GetDensity;
+    body["GetPolygonShapeId"]  = &RigidBodyItem::GetPolygonShapeId;
+    body["GetLinearVelocity"]  = &RigidBodyItem::GetLinearVelocity;
+    body["GetAngularVelocity"] = &RigidBodyItem::GetAngularVelocity;
+    body["SetLinearVelocity"]  = &RigidBodyItem::SetLinearVelocity;
+    body["SetAngularVelocity"] = &RigidBodyItem::SetAngularVelocity;
+    body["TestFlag"] = [](const RigidBodyItem* item, const std::string& str) {
+        const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
+        if (!enum_val.has_value())
+            throw std::runtime_error("no such rigid body flag:" + str);
+        return item->TestFlag(enum_val.value());
+    };
+    body["SetFlag"] = [](RigidBodyItem* item, const std::string& str, bool on_off) {
+        const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
+        if (!enum_val.has_value())
+            throw std::runtime_error("no such rigid body flag: " + str);
+        item->SetFlag(enum_val.value(), on_off);
+    };
+    body["GetSimulationType"] = [](const RigidBodyItem* item) {
+        return magic_enum::enum_name(item->GetSimulation());
+    };
+    body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
+        return magic_enum::enum_name(item->GetCollisionShape());
+    };
+
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
     entity_node["GetName"]        = &EntityNode::GetName;
@@ -400,6 +432,7 @@ void BindGameLib(sol::state& L)
     entity_node["HasRigidBody"]   = &EntityNode::HasRigidBody;
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
     entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
+    entity_node["GetRigidBody"]   = (RigidBodyItem*(EntityNode::*)(void))&EntityNode::GetRigidBody;
     entity_node["SetScale"]       = &EntityNode::SetScale;
     entity_node["SetSize"]        = &EntityNode::SetSize;
     entity_node["SetTranslation"] = &EntityNode::SetTranslation;
