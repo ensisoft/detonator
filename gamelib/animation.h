@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <variant>
 
 #include "base/utility.h"
 #include "base/math.h"
@@ -61,10 +62,9 @@ namespace game
             // This will result in a kinematically driven change in the nodes
             // transform.
             Kinematic,
-            // Material actuators modify the material instance state/parameters
-            // of some particular animation node.
-            Material,
-            // SetFlat actuator sets a a binary flag to the specific value on the node.
+            // SetValue actuators sets some parameter to the specific value on the node.
+            SetValue,
+            // SetFlag actuator sets a a binary flag to the specific state on the node.
             SetFlag
         };
         // dtor.
@@ -229,25 +229,36 @@ namespace game
         float mEndAngularVelocity = 0.0f;
     };
 
-    // MaterialActuatorClass holds the data to change a node's
-    // material in some particular way. The changeable parameters
-    // are the possible material instance parameters.
-    class MaterialActuatorClass : public ActuatorClass
+    // Modify node parameter value over time.
+    class SetValueActuatorClass : public ActuatorClass
     {
     public:
+        // Enumeration of support node parameters that can be changed.
+        enum class ParamName {
+            AlphaOverride,
+            DrawableTimeScale,
+            LinearVelocityX,
+            LinearVelocityY,
+            AngularVelocity
+        };
+
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        MaterialActuatorClass()
+        SetValueActuatorClass()
         { mId = base::RandomString(10); }
         Interpolation GetInterpolation() const
         { return mInterpolation; }
+        ParamName GetParamName() const
+        { return mParamName; }
+        void SetParamName(ParamName name)
+        { mParamName = name; }
         void SetInterpolation(Interpolation method)
         { mInterpolation = method; }
-        float GetEndAlpha() const
-        { return mEndAlpha; }
-        void SetEndAlpha(float alpha)
-        { mEndAlpha = alpha; }
+        float GetEndValue() const
+        { return mEndValue; }
+        void SetEndValue(float alpha)
+        { mEndValue = alpha; }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
         virtual std::string GetId() const override
@@ -256,15 +267,15 @@ namespace game
         { return mNodeId; }
         virtual std::size_t GetHash() const override;
         virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<MaterialActuatorClass>(*this); }
+        { return std::make_unique<SetValueActuatorClass>(*this); }
         virtual std::unique_ptr<ActuatorClass> Clone() const override
         {
-            auto ret = std::make_unique<MaterialActuatorClass>(*this);
+            auto ret = std::make_unique<SetValueActuatorClass>(*this);
             ret->mId = base::RandomString(10);
             return ret;
         }
         virtual Type GetType() const override
-        { return Type::Material; }
+        { return Type::SetValue; }
         virtual float GetStartTime() const override
         { return mStartTime; }
         virtual float GetDuration() const override
@@ -282,13 +293,14 @@ namespace game
         std::string mNodeId;
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
+        // which parameter to adjust
+        ParamName mParamName = ParamName::AlphaOverride;
         // Normalized start time of the action
         float mStartTime = 0.0f;
         // Normalized duration of the action.
         float mDuration = 1.0f;
-        // Material parameters to change over time.
-        // The ending alpha value.
-        float mEndAlpha = 1.0f;
+        // the end value
+        float mEndValue = 1.0f;
     };
 
     // TransformActuatorClass holds the transform data for some
@@ -467,22 +479,20 @@ namespace game
         bool mStartState = false;
     };
 
-    // Apply a material change on a node's material instance.
-    // todo: refactor the API for material actuator so that the
-    // change is applied on a gfx::Material. The material lives
-    // inside the renderer, so this needs to be worked somehow
-    // into Renderer::Update
-    class MaterialActuator : public Actuator
+    // Modify node parameter over time.
+    class SetValueActuator : public Actuator
     {
     public:
-        MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
+        using ParamName = SetValueActuatorClass::ParamName;
+        using Inteprolation = SetValueActuatorClass::Interpolation;
+        SetValueActuator(const std::shared_ptr<const SetValueActuatorClass>& klass)
            : mClass(klass)
         {}
-        MaterialActuator(const MaterialActuatorClass& klass)
-            : mClass(std::make_shared<MaterialActuatorClass>(klass))
+        SetValueActuator(const SetValueActuatorClass& klass)
+            : mClass(std::make_shared<SetValueActuatorClass>(klass))
         {}
-        MaterialActuator(MaterialActuatorClass&& klass)
-            : mClass(std::make_shared<MaterialActuatorClass>(std::move(klass)))
+        SetValueActuator(SetValueActuatorClass&& klass)
+            : mClass(std::make_shared<SetValueActuatorClass>(std::move(klass)))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -495,13 +505,13 @@ namespace game
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
         virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<MaterialActuator>(*this); }
+        { return std::make_unique<SetValueActuator>(*this); }
     private:
-        std::shared_ptr<const MaterialActuatorClass> mClass;
-        float mStartAlpha = 1.0f;
+        std::shared_ptr<const SetValueActuatorClass> mClass;
+        float mStartValue = 1.0f;
     };
 
-    // Appply change to the target nodes' transform.
+    // Apply change to the target nodes' transform.
     class TransformActuator : public Actuator
     {
     public:

@@ -88,65 +88,68 @@ std::size_t KinematicActuatorClass::GetHash() const
 nlohmann::json KinematicActuatorClass::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "node", mNodeId);
-    base::JsonWrite(json, "method", mInterpolation);
-    base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "duration", mDuration);
-    base::JsonWrite(json, "linear_velocity", mEndLinearVelocity);
+    base::JsonWrite(json, "id",               mId);
+    base::JsonWrite(json, "node",             mNodeId);
+    base::JsonWrite(json, "method",           mInterpolation);
+    base::JsonWrite(json, "starttime",        mStartTime);
+    base::JsonWrite(json, "duration",         mDuration);
+    base::JsonWrite(json, "linear_velocity",  mEndLinearVelocity);
     base::JsonWrite(json, "angular_velocity", mEndAngularVelocity);
     return json;
 }
 
 bool KinematicActuatorClass::FromJson(const nlohmann::json &json)
 {
-    return base::JsonReadSafe(json, "id", &mId) &&
-           base::JsonReadSafe(json, "node", &mNodeId) &&
-           base::JsonReadSafe(json, "method", &mInterpolation) &&
-           base::JsonReadSafe(json, "starttime", &mStartTime) &&
-           base::JsonReadSafe(json, "duration", &mDuration) &&
-           base::JsonReadSafe(json, "linear_velocity", &mEndLinearVelocity) &&
+    return base::JsonReadSafe(json, "id",               &mId) &&
+           base::JsonReadSafe(json, "node",             &mNodeId) &&
+           base::JsonReadSafe(json, "method",           &mInterpolation) &&
+           base::JsonReadSafe(json, "starttime",        &mStartTime) &&
+           base::JsonReadSafe(json, "duration",         &mDuration) &&
+           base::JsonReadSafe(json, "linear_velocity",  &mEndLinearVelocity) &&
            base::JsonReadSafe(json, "angular_velocity", &mEndAngularVelocity);
 }
 
-size_t MaterialActuatorClass::GetHash() const
+size_t SetValueActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mInterpolation);
+    hash = base::hash_combine(hash, mParamName);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
-    hash = base::hash_combine(hash, mEndAlpha);
+    hash = base::hash_combine(hash, mEndValue);
     return hash;
 }
 
-nlohmann::json MaterialActuatorClass::ToJson() const
+nlohmann::json SetValueActuatorClass::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "node", mNodeId);
-    base::JsonWrite(json, "method", mInterpolation);
+    base::JsonWrite(json, "id",        mId);
+    base::JsonWrite(json, "node",      mNodeId);
+    base::JsonWrite(json, "method",    mInterpolation);
+    base::JsonWrite(json, "name",      mParamName);
     base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "duration", mDuration);
-    base::JsonWrite(json, "alpha", mEndAlpha);
+    base::JsonWrite(json, "duration",  mDuration);
+    base::JsonWrite(json, "value",     mEndValue);
     return json;
 }
 
-bool MaterialActuatorClass::FromJson(const nlohmann::json &json)
+bool SetValueActuatorClass::FromJson(const nlohmann::json &json)
 {
-    return base::JsonReadSafe(json, "id", &mId) &&
-           base::JsonReadSafe(json, "node", &mNodeId) &&
-           base::JsonReadSafe(json, "method", &mInterpolation) &&
+    return base::JsonReadSafe(json, "id",        &mId) &&
+           base::JsonReadSafe(json, "node",      &mNodeId) &&
+           base::JsonReadSafe(json, "method",    &mInterpolation) &&
+           base::JsonReadSafe(json, "name",      &mParamName) &&
            base::JsonReadSafe(json, "starttime", &mStartTime) &&
-           base::JsonReadSafe(json, "duration", &mDuration) &&
-           base::JsonReadSafe(json, "alpha", &mEndAlpha);
+           base::JsonReadSafe(json, "duration",  &mDuration) &&
+           base::JsonReadSafe(json, "value",     &mEndValue);
 }
 
 nlohmann::json TransformActuatorClass::ToJson() const
 {
     nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "id",        mId);
     base::JsonWrite(json, "node",      mNodeId);
     base::JsonWrite(json, "method",    mInterpolation);
     base::JsonWrite(json, "starttime", mStartTime);
@@ -160,8 +163,8 @@ nlohmann::json TransformActuatorClass::ToJson() const
 
 bool TransformActuatorClass::FromJson(const nlohmann::json& json)
 {
-    return base::JsonReadSafe(json, "id", &mId) &&
-           base::JsonReadSafe(json, "node", &mNodeId) &&
+    return base::JsonReadSafe(json, "id",        &mId) &&
+           base::JsonReadSafe(json, "node",      &mNodeId) &&
            base::JsonReadSafe(json, "starttime", &mStartTime) &&
            base::JsonReadSafe(json, "duration",  &mDuration) &&
            base::JsonReadSafe(json, "position",  &mEndPosition) &&
@@ -283,38 +286,83 @@ void SetFlagActuator::Finish(EntityNode& node)
     WARN("Unidentified node flag '%1'", mClass->GetFlagName());
 }
 
-void MaterialActuator::Start(EntityNode& node)
+void SetValueActuator::Start(EntityNode& node)
 {
-    if (const auto* draw = node.GetDrawable())
+    const auto param  = mClass->GetParamName();
+    const auto* draw  = node.GetDrawable();
+    const auto* body  = node.GetRigidBody();
+    if (param == ParamName::AlphaOverride || param == ParamName::DrawableTimeScale)
     {
-        mStartAlpha = draw->GetAlpha();
-        if (!draw->TestFlag(DrawableItemClass::Flags::OverrideAlpha))
+        if (!draw)
         {
-            WARN("EntityNode '%1' doesn't set OverrideAlpha flag. ", node.GetName());
-            WARN("Material actuator will have no effect.");
+            WARN("EntityNode '%1' doesn't have a drawable item." , node.GetName());
+            WARN("Setting '%1' will have no effect.", param);
+            return;
         }
     }
-    else
+    else if (param == ParamName::LinearVelocityY || param == ParamName::LinearVelocityX ||
+             param == ParamName::AngularVelocity)
     {
-        WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
-        WARN("Material actuator will have no effect.");
+        if (!body)
+        {
+            WARN("EntityNode '%1' doesn't have a rigid body ." , node.GetName());
+            WARN("Setting '%1' will have no effect.", param);
+            return;
+        }
     }
-}
-void MaterialActuator::Apply(EntityNode& node, float t)
-{
-    if (auto* draw = node.GetDrawable())
+
+    if (param == ParamName::AlphaOverride)
     {
-        const auto method = mClass->GetInterpolation();
-        const float value = math::interpolate(mStartAlpha, mClass->GetEndAlpha(), t, method);
+        if (!draw->TestFlag(DrawableItemClass::Flags::OverrideAlpha))
+        {
+            WARN("EntityNode '%1' doesn't set OverrideAlpha flag. " , node.GetName());
+            WARN("Setting '%1' value will have no effect.", param);
+        }
+        mStartValue = draw->GetAlpha();
+    }
+    else if (param == ParamName::DrawableTimeScale)
+        mStartValue = draw->GetTimeScale();
+    else if (param == ParamName::AngularVelocity)
+        mStartValue = body->GetAngularVelocity();
+    else if (param == ParamName::LinearVelocityX)
+        mStartValue = body->GetLinearVelocity().x;
+    else if (param == ParamName::LinearVelocityY)
+        mStartValue = body->GetLinearVelocity().y;
+
+}
+void SetValueActuator::Apply(EntityNode& node, float t)
+{
+    const auto method = mClass->GetInterpolation();
+    const auto param  = mClass->GetParamName();
+    const float value = math::interpolate(mStartValue, mClass->GetEndValue(), t, method);
+    auto* draw = node.GetDrawable();
+    auto* body = node.GetRigidBody();
+
+    if (param == ParamName::AlphaOverride && draw)
         draw->SetAlpha(value);
+    else if (param == ParamName::DrawableTimeScale && draw)
+        draw->SetTimeScale(value);
+    else if (param == ParamName::AngularVelocity && body)
+        body->SetAngularVelocity(value);
+    else if (param == ParamName::LinearVelocityX && body)
+    {
+        auto velocity = body->GetLinearVelocity();
+        velocity.x = value;
+        body->SetLinearVelocity(velocity);
+    }
+    else if (param == ParamName::LinearVelocityY && body)
+    {
+        auto velocity = body->GetLinearVelocity();
+        velocity.y = value;
+        body->SetLinearVelocity(velocity);
     }
 }
 
-void MaterialActuator::Finish(EntityNode& node)
+void SetValueActuator::Finish(EntityNode& node)
 {
     if (auto* draw = node.GetDrawable())
     {
-        draw->SetAlpha(mClass->GetEndAlpha());
+        draw->SetAlpha(mClass->GetEndValue());
     }
 }
 
@@ -409,8 +457,8 @@ std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) 
     const auto& klass = mActuators[i];
     if (klass->GetType() == ActuatorClass::Type::Transform)
         return std::make_unique<TransformActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
-    else if (klass->GetType() == ActuatorClass::Type::Material)
-        return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
+    else if (klass->GetType() == ActuatorClass::Type::SetValue)
+        return std::make_unique<SetValueActuator>(std::static_pointer_cast<SetValueActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::Kinematic)
         return std::make_unique<KinematicActuator>(std::static_pointer_cast<KinematicActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::SetFlag)
@@ -471,8 +519,8 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
         std::shared_ptr<ActuatorClass> actuator;
         if (type == ActuatorClass::Type::Transform)
             actuator = std::make_shared<TransformActuatorClass>();
-        else if (type == ActuatorClass::Type::Material)
-            actuator = std::make_shared<MaterialActuatorClass>();
+        else if (type == ActuatorClass::Type::SetValue)
+            actuator = std::make_shared<SetValueActuatorClass>();
         else if (type == ActuatorClass::Type::Kinematic)
             actuator = std::make_shared<KinematicActuatorClass>();
         else if (type == ActuatorClass::Type::SetFlag)

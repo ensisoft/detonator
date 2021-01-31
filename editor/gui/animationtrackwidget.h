@@ -106,7 +106,8 @@ namespace gui
         void on_actuatorNode_currentIndexChanged(int index);
         void on_actuatorType_currentIndexChanged(int index);
         void on_transformInterpolation_currentIndexChanged(int index);
-        void on_materialInterpolation_currentIndexChanged(int index);
+        void on_setvalInterpolation_currentIndexChanged(int index);
+        void on_setvalParamName_currentIndexChanged(int index);
         void on_kinematicInterpolation_currentIndexChanged(int index);
         void on_transformEndPosX_valueChanged(double value);
         void on_transformEndPosY_valueChanged(double value);
@@ -115,7 +116,7 @@ namespace gui
         void on_transformEndScaleX_valueChanged(double value);
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
-        void on_materialEndAlpha_valueChanged(double value);
+        void on_setvalEndValue_valueChanged(double value);
         void on_kinematicEndVeloX_valueChanged(double value);
         void on_kinematicEndVeloY_valueChanged(double value);
         void on_kinematicEndVeloZ_valueChanged(double value);

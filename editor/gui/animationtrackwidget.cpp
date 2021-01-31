@@ -43,8 +43,6 @@
 #include "editor/gui/tool.h"
 #include "gamelib/animation.h"
 #include "graphics/transform.h"
-#include "graphics/drawable.h"
-#include "graphics/material.h"
 #include "graphics/painter.h"
 
 namespace {
@@ -110,7 +108,7 @@ public:
                 item.color = QColor(0xe8, 0xe9, 0xa1, 150);
             else if (type == game::ActuatorClass::Type::Kinematic)
                 item.color = QColor(0xe6, 0xb5, 0x66, 150);
-            else if (type == game::ActuatorClass::Type::Material)
+            else if (type == game::ActuatorClass::Type::SetValue)
                 item.color = QColor(0xe5, 0x70, 0x7e, 150);
             else BUG("Unhandled type for item colorization.");
 
@@ -148,7 +146,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
 
     PopulateFromEnum<game::ActuatorClass::Type>(mUI.actuatorType);
     PopulateFromEnum<game::TransformActuatorClass::Interpolation>(mUI.transformInterpolation);
-    PopulateFromEnum<game::MaterialActuatorClass::Interpolation>(mUI.materialInterpolation);
+    PopulateFromEnum<game::SetValueActuatorClass::Interpolation>(mUI.setvalInterpolation);
+    PopulateFromEnum<game::SetValueActuatorClass::ParamName>(mUI.setvalName);
     PopulateFromEnum<game::KinematicActuatorClass::Interpolation>(mUI.kinematicInterpolation);
     PopulateFromEnum<game::DrawableItemClass::Flags>(mUI.itemFlags, false);
     PopulateFromEnum<game::RigidBodyItemClass::Flags>(mUI.itemFlags, false);
@@ -282,8 +281,9 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.transformEndScaleX);
     settings.saveWidget("TrackWidget", mUI.transformEndScaleY);
     settings.saveWidget("TrackWidget", mUI.transformEndRotation);
-    settings.saveWidget("TrackWidget", mUI.materialInterpolation);
-    settings.saveWidget("TrackWidget", mUI.materialEndAlpha);
+    settings.saveWidget("TrackWidget", mUI.setvalInterpolation);
+    settings.saveWidget("TrackWidget", mUI.setvalName);
+    settings.saveWidget("TrackWidget", mUI.setvalEndValue);
     settings.saveWidget("TrackWidget", mUI.kinematicInterpolation);
     settings.saveWidget("TrackWidget", mUI.kinematicEndVeloX);
     settings.saveWidget("TrackWidget", mUI.kinematicEndVeloY);
@@ -330,8 +330,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.transformEndScaleX);
     settings.loadWidget("TrackWidget", mUI.transformEndScaleY);
     settings.loadWidget("TrackWidget", mUI.transformEndRotation);
-    settings.loadWidget("TrackWidget", mUI.materialInterpolation);
-    settings.loadWidget("TrackWidget", mUI.materialEndAlpha);
+    settings.loadWidget("TrackWidget", mUI.setvalInterpolation);
+    settings.loadWidget("TrackWidget", mUI.setvalName);
+    settings.loadWidget("TrackWidget", mUI.setvalEndValue);
     settings.loadWidget("TrackWidget", mUI.kinematicInterpolation);
     settings.loadWidget("TrackWidget", mUI.kinematicEndVeloX);
     settings.loadWidget("TrackWidget", mUI.kinematicEndVeloY);
@@ -743,8 +744,9 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         SetValue(mUI.transformEndScaleX, 0.0f);
         SetValue(mUI.transformEndScaleY, 0.0f);
         SetValue(mUI.transformEndRotation, 0.0f);
-        SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.materialEndAlpha, 0.0f);
+        SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
+        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::AlphaOverride);
+        SetValue(mUI.setvalEndValue, 0.0f);
         SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
         SetValue(mUI.kinematicEndVeloX, 0.0f);
         SetValue(mUI.kinematicEndVeloY, 0.0f);
@@ -770,19 +772,12 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         SetValue(mUI.transformEndScaleX, scale.x);
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
-        SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
+        SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
+        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::AlphaOverride);
         SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
-
         if (const auto* draw = node.GetDrawable())
         {
-            const auto &material_id = draw->GetMaterialId();
-            if (!material_id.empty())
-            {
-                const auto &material = mWorkspace->FindMaterialClassById(material_id);
-                SetValue(mUI.materialEndAlpha, material->GetBaseAlpha());
-            }
-            if (draw->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
-                SetValue(mUI.materialEndAlpha, draw->GetAlpha());
+            SetValue(mUI.setvalEndValue, draw->GetAlpha());
         }
         if (const auto* body = node.GetRigidBody())
         {
@@ -815,7 +810,7 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
 void AnimationTrackWidget::on_actuatorType_currentIndexChanged(int index)
 {
     SetEnabled(mUI.transformActuator, false);
-    SetEnabled(mUI.materialActuator,  false);
+    SetEnabled(mUI.setvalActuator,  false);
     SetEnabled(mUI.kinematicActuator, false);
     SetEnabled(mUI.setflagActuator,   false);
 
@@ -825,9 +820,9 @@ void AnimationTrackWidget::on_actuatorType_currentIndexChanged(int index)
         SetEnabled(mUI.transformActuator, true);
         mUI.actuatorProperties->setCurrentIndex(0);
     }
-    else if (type == game::Actuator::Type::Material)
+    else if (type == game::Actuator::Type::SetValue)
     {
-        SetEnabled(mUI.materialActuator,  true);
+        SetEnabled(mUI.setvalActuator,  true);
         mUI.actuatorProperties->setCurrentIndex(1);
     }
     else if (type == game::Actuator::Type::Kinematic)
@@ -846,7 +841,11 @@ void AnimationTrackWidget::on_transformInterpolation_currentIndexChanged(int ind
 {
     SetSelectedActuatorProperties();
 }
-void AnimationTrackWidget::on_materialInterpolation_currentIndexChanged(int index)
+void AnimationTrackWidget::on_setvalInterpolation_currentIndexChanged(int index)
+{
+    SetSelectedActuatorProperties();
+}
+void AnimationTrackWidget::on_setvalParamName_currentIndexChanged(int index)
 {
     SetSelectedActuatorProperties();
 }
@@ -982,15 +981,11 @@ void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
     }
 }
 
-void AnimationTrackWidget::on_materialEndAlpha_valueChanged(double value)
+void AnimationTrackWidget::on_setvalEndValue_valueChanged(double value)
 {
     if (auto* node = GetCurrentNode())
     {
-        if (auto* draw = node->GetDrawable())
-        {
-            draw->SetAlpha(value);
-            SetSelectedActuatorProperties();
-        }
+        SetSelectedActuatorProperties();
     }
 }
 
@@ -1109,10 +1104,11 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         transform->SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
         transform->SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
     }
-    else if (auto* material = dynamic_cast<game::MaterialActuatorClass*>(klass))
+    else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(klass))
     {
-        material->SetInterpolation(GetValue(mUI.materialInterpolation));
-        material->SetEndAlpha(GetValue(mUI.materialEndAlpha));
+        setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
+        setter->SetParamName(GetValue(mUI.setvalName));
+        setter->SetEndValue(GetValue(mUI.setvalEndValue));
     }
     else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(klass))
     {
@@ -1205,7 +1201,7 @@ void AnimationTrackWidget::on_btnViewReset_clicked()
 void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineItem* item)
 {
     SetEnabled(mUI.transformActuator, false);
-    SetEnabled(mUI.materialActuator,  false);
+    SetEnabled(mUI.setvalActuator,  false);
     SetEnabled(mUI.kinematicActuator, false);
     SetEnabled(mUI.setflagActuator,   false);
 
@@ -1227,8 +1223,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.transformEndScaleX, 0.0f);
         SetValue(mUI.transformEndScaleY, 0.0f);
         SetValue(mUI.transformEndRotation, 0.0f);
-        SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.materialEndAlpha, 0.0f);
+        SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
+        SetValue(mUI.setvalEndValue, 0.0f);
         SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
         SetValue(mUI.kinematicEndVeloX, 0.0f);
         SetValue(mUI.kinematicEndVeloY, 0.0f);
@@ -1302,12 +1298,13 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
             node->SetScale(scale);
             node->SetRotation(rotation);
         }
-        else if (const auto* ptr = dynamic_cast<const game::MaterialActuatorClass*>(actuator))
+        else if (const auto* ptr = dynamic_cast<const game::SetValueActuatorClass*>(actuator))
         {
-            SetValue(mUI.materialInterpolation, ptr->GetInterpolation());
-            SetValue(mUI.materialEndAlpha, ptr->GetEndAlpha());
+            SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
+            SetValue(mUI.setvalName, ptr->GetParamName());
+            SetValue(mUI.setvalEndValue, ptr->GetEndValue());
             SetEnabled(mUI.actuatorProperties, true);
-            SetEnabled(mUI.materialActuator, true);
+            SetEnabled(mUI.setvalActuator, true);
             mUI.actuatorProperties->setCurrentIndex(1);
         }
         else if (const auto* ptr = dynamic_cast<const game::KinematicActuatorClass*>(actuator))
@@ -1608,14 +1605,15 @@ void AnimationTrackWidget::AddActuator(const game::EntityNodeClass& node, game::
         klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
         mState.track->AddActuator(klass);
     }
-    else if (type == game::ActuatorClass::Type::Material)
+    else if (type == game::ActuatorClass::Type::SetValue)
     {
-        game::MaterialActuatorClass klass;
+        game::SetValueActuatorClass klass;
         klass.SetNodeId(node.GetId());
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
-        klass.SetEndAlpha(GetValue(mUI.materialEndAlpha));
-        klass.SetInterpolation(GetValue(mUI.materialInterpolation));
+        klass.SetEndValue(GetValue(mUI.setvalEndValue));
+        klass.SetParamName(GetValue(mUI.setvalName));
+        klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::Kinematic)
