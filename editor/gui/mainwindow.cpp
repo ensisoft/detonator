@@ -161,12 +161,12 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
     // and tick the workspace for periodic cleanup and stuff.
-    QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &MainWindow::timerRefreshUI);
+    QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &MainWindow::RefreshUI);
     mRefreshTimer.setInterval(500);
     mRefreshTimer.start();
 
     auto& events = app::EventLog::get();
-    QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),this, SLOT(showNote(const app::Event&)));
+    QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),this, SLOT(ShowNote(const app::Event&)));
     mEventLog.SetModel(&events);
     mEventLog.setSourceModel(&events);
     mUI.eventlist->setModel(&mEventLog);
@@ -294,7 +294,7 @@ void MainWindow::loadState()
     if (workspace.isEmpty())
         return;
 
-    if (!loadWorkspace(workspace))
+    if (!LoadWorkspace(workspace))
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
@@ -353,7 +353,7 @@ void MainWindow::prepareMainTab()
 
 }
 
-bool MainWindow::loadWorkspace(const QString& dir)
+bool MainWindow::LoadWorkspace(const QString& dir)
 {
     auto workspace = std::make_unique<app::Workspace>();
 
@@ -420,7 +420,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
         const bool has_own_window = settings.getValue("MainWindow", "has_own_window", false);
         if (has_own_window)
         {
-            ChildWindow* window = showWidget(widget, true);
+            ChildWindow* window = ShowWidget(widget , true);
             const auto xpos  = settings.getValue("MainWindow", "window_xpos", window->x());
             const auto ypos  = settings.getValue("MainWindow", "window_ypos", window->y());
             const auto width = settings.getValue("MainWindow", "window_width", window->width());
@@ -432,7 +432,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
         }
         else
         {
-            showWidget(widget, false);
+            ShowWidget(widget, false);
         }
         // remove the file, no longer needed.
         QFile::remove(file);
@@ -455,7 +455,7 @@ bool MainWindow::loadWorkspace(const QString& dir)
     return success;
 }
 
-bool MainWindow::saveWorkspace()
+bool MainWindow::SaveWorkspace()
 {
     // if no workspace, the nothing to do.
     if (!mWorkspace)
@@ -562,7 +562,7 @@ bool MainWindow::saveWorkspace()
     return true;
 }
 
-void MainWindow::closeWorkspace()
+void MainWindow::CloseWorkspace()
 {
     if (!mWorkspace)
     {
@@ -903,7 +903,7 @@ void MainWindow::on_actionWindowPopOut_triggered()
     mUI.mainTab->removeTab(index);
     widget->setParent(nullptr);
 
-    ChildWindow* window = showWidget(widget, true);
+    ChildWindow* window = ShowWidget(widget, true);
     widget->show();
     widget->updateGeometry();
     window->updateGeometry();
@@ -979,55 +979,55 @@ void MainWindow::on_actionReloadTextures_triggered()
 void MainWindow::on_actionNewMaterial_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new MaterialWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new MaterialWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new ParticleEditorWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new ParticleEditorWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionNewCustomShape_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new ShapeWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new ShapeWidget(mWorkspace.get()), open_new_window);
 }
 void MainWindow::on_actionNewEntity_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new EntityWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new EntityWidget(mWorkspace.get()), open_new_window);
 }
 void MainWindow::on_actionNewScene_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new SceneWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new SceneWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionNewScript_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
+    ShowWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
 }
 
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    editResources(open_new_window);
+    EditResources(open_new_window);
 }
 
 void MainWindow::on_actionEditResourceNewWindow_triggered()
 {
     const auto open_new_window = true;
 
-    editResources(open_new_window);
+    EditResources(open_new_window);
 }
 
 void MainWindow::on_actionEditResourceNewTab_triggered()
 {
     const auto open_new_window = false;
 
-    editResources(open_new_window);
+    EditResources(open_new_window);
 }
 
 
@@ -1065,10 +1065,14 @@ void MainWindow::on_actionSaveWorkspace_triggered()
 
 void MainWindow::on_actionLoadWorkspace_triggered()
 {
-    const auto& dir = QFileDialog::getExistingDirectory(this,
-        tr("Select Workspace Directory"));
-    if (dir.isEmpty())
+
+    const auto& file = QFileDialog::getOpenFileName(this, tr("Select Workspace"),
+        QString(), QString("workspace.json"));
+    if (file.isEmpty())
         return;
+
+    const QFileInfo info(file);
+    const QString dir = info.path();
 
     // check here whether the files actually exist.
     // todo: maybe move into workspace to validate folder
@@ -1088,7 +1092,7 @@ void MainWindow::on_actionLoadWorkspace_triggered()
 
     // todo: should/could ask about saving. the current workspace if we have any.
 
-    if (!saveWorkspace())
+    if (!SaveWorkspace())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1099,10 +1103,10 @@ void MainWindow::on_actionLoadWorkspace_triggered()
             return;
     }
     // close existing workspace if any.
-    closeWorkspace();
+    CloseWorkspace();
 
     // load new workspace.
-    if (!loadWorkspace(dir))
+    if (!LoadWorkspace(dir))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1147,7 +1151,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
         return;
 
     // todo: should/could ask about saving. the current workspace if we have any.
-    if (!saveWorkspace())
+    if (!SaveWorkspace())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1158,7 +1162,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
             return;
     }
     // close existing workspace if any.
-    closeWorkspace();
+    CloseWorkspace();
 
     if (!MissingFile(app::JoinPath(dir, "content.json")) ||
         !MissingFile(app::JoinPath(dir, "workspace.json")))
@@ -1200,7 +1204,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
 void MainWindow::on_actionCloseWorkspace_triggered()
 {
     // todo: should/could ask about saving. the current workspace if we have any.
-    if (!saveWorkspace())
+    if (!SaveWorkspace())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1211,7 +1215,7 @@ void MainWindow::on_actionCloseWorkspace_triggered()
             return;
     }
     // close existing workspace if any.
-    closeWorkspace();
+    CloseWorkspace();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -1375,7 +1379,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     if (!FocusWidget(resource->GetId()))
     {
         const auto new_window = mSettings.default_open_win_or_tab == "Window";
-        showWidget(MakeWidget(resource->GetType() , mWorkspace.get() , resource) , new_window);
+        ShowWidget(MakeWidget(resource->GetType(), mWorkspace.get(), resource), new_window);
     }
 }
 
@@ -1389,7 +1393,7 @@ void MainWindow::on_actionNewResource_triggered()
         return;
 
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(MakeWidget(dlg.GetType(), mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(dlg.GetType(), mWorkspace.get()), new_window);
 }
 
 void MainWindow::on_actionProjectSettings_triggered()
@@ -1520,7 +1524,7 @@ void MainWindow::on_actionProjectPlay_triggered()
     }
 }
 
-void MainWindow::timerRefreshUI()
+void MainWindow::RefreshUI()
 {
     if (mPlayWindow)
     {
@@ -1557,7 +1561,7 @@ void MainWindow::timerRefreshUI()
             // careful about not fucking up the iteration of this loop
             // however we're going to add as a tab so the widget will
             // go into the main tab not into mChildWindows.
-            showWidget(widget, false /* new window */);
+            ShowWidget(widget, false /* new window */);
             // seems that we need some delay (presumaly to allow some
             // event processing to take place) on Windows before
             // calling the update geometry. Without this the window is  
@@ -1599,7 +1603,7 @@ void MainWindow::timerRefreshUI()
     }
 }
 
-void MainWindow::showNote(const app::Event& event)
+void MainWindow::ShowNote(const app::Event& event)
 {
     if (event.type == app::Event::Type::Note)
     {
@@ -1731,7 +1735,7 @@ void MainWindow::OpenExternalScript(const QString& file)
 void MainWindow::OpenNewWidget(MainWidget* widget)
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    showWidget(widget, open_new_window);
+    ShowWidget(widget, open_new_window);
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -1762,7 +1766,7 @@ void MainWindow::OpenRecentWorkspace()
     }
 
     // todo: should/could ask about saving. the current workspace if we have any changes.
-    if (!saveWorkspace())
+    if (!SaveWorkspace())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1773,10 +1777,10 @@ void MainWindow::OpenRecentWorkspace()
             return;
     }
     // close existing workspace if any.
-    closeWorkspace();
+    CloseWorkspace();
 
     // load new workspace.
-    if (!loadWorkspace(dir))
+    if (!LoadWorkspace(dir))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1826,7 +1830,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     // first save everything and only if that is succesful
     // (or the user don't care) we then close the workspace
     // and exit the application.
-    if (!saveWorkspace() || !saveState())
+    if (!SaveWorkspace() || !SaveState())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1838,7 +1842,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 
     // close workspace (if any is open)
-    closeWorkspace();
+    CloseWorkspace();
 
     // accept the event, will quit the application
     event->accept();
@@ -1892,7 +1896,7 @@ void MainWindow::BuildRecentWorkspacesMenu()
     }
 }
 
-bool MainWindow::saveState()
+bool MainWindow::SaveState()
 {
     // persist the properties of the mainwindow itself.
     Settings settings("Ensisoft", APP_TITLE);
@@ -1934,7 +1938,7 @@ bool MainWindow::saveState()
     return settings.Save();
 }
 
-ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
+ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 {
     ASSERT(widget->parent() == nullptr);
 
@@ -2003,14 +2007,14 @@ ChildWindow* MainWindow::showWidget(MainWidget* widget, bool new_window)
     return nullptr;
 }
 
-void MainWindow::editResources(bool open_new_window)
+void MainWindow::EditResources(bool open_new_window)
 {
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
         if (!FocusWidget(resource.GetId()))
-            showWidget(MakeWidget(resource.GetType(), mWorkspace.get(), &resource), open_new_window);
+            ShowWidget(MakeWidget(resource.GetType() , mWorkspace.get() , &resource) , open_new_window);
     }
 }
 

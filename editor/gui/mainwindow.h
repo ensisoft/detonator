@@ -149,8 +149,8 @@ namespace gui
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
         void actionWindowFocus_triggered();
-        void timerRefreshUI();
-        void showNote(const app::Event& event);
+        void RefreshUI();
+        void ShowNote(const app::Event& event);
         void OpenExternalImage(const QString& file);
         void OpenExternalShader(const QString& file);
         void OpenExternalScript(const QString& file);
@@ -160,13 +160,13 @@ namespace gui
 
     private:
         void BuildRecentWorkspacesMenu();
-        bool saveState();
-        bool loadWorkspace(const QString& dir);
-        bool saveWorkspace();
-        void closeWorkspace();
-        ChildWindow* showWidget(MainWidget* widget, bool new_window);
-        void editResources(bool open_new_window);
+        bool SaveState();
+        bool LoadWorkspace(const QString& dir);
+        bool SaveWorkspace();
+        void CloseWorkspace();
+        void EditResources(bool open_new_window);
         bool FocusWidget(const QString& id);
+        ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
 
     private:
         bool event(QEvent* event)  override;
@@ -179,7 +179,7 @@ namespace gui
 
     private:
         QApplication& mApplication;
-        // the refesh timer to do low frequency UI updates.
+        // the refresh timer to do low frequency UI updates.
         QTimer mRefreshTimer;
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.
