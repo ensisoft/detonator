@@ -238,19 +238,59 @@ int main(int argc, char* argv[])
 
     try
     {
+        game::App::DebugOptions debug;
+
         std::string config_file;
+        std::string cmdline_error;
         // skip arg 0 since that's the executable name
         base::CommandLineArgumentStack args(argc-1, (const char**)&argv[1]);
         base::CommandLineOptions opt;
-        opt.Add("--config", "Application configuration JSON file path.", std::string("config.json"));
+        opt.Add("--config", "Application configuration JSON file.", std::string("config.json"));
         opt.Add("--help", "Print this help and exit.");
-        opt.Add("--debug", "Enable debug log output.");
-        opt.Parse(args, true);
-        if (opt.WasGiven("--help"))
+        opt.Add("--debug", "Enable all debug features.");
+        opt.Add("--debug-log", "Enable debug logging.");
+        opt.Add("--debug-draw", "Enable debug drawing.");
+        opt.Add("--debug-font", "Debug font for debug messages.", std::string(""));
+        opt.Add("--debug-show-fps", "Show FPS counter and stats. You'll need to use --debug-font.");
+        opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
+        opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
+        if (!opt.Parse(args, &cmdline_error, true))
+        {
+            std::cerr << "Error parsing args: " << cmdline_error;
+            std::cerr << std::endl;
+            return 0;
+        }
+        else if (opt.WasGiven("--help"))
         {
             opt.Print(std::cout);
             return 0;
         }
+
+        if (opt.WasGiven("--debug"))
+        {
+            debug.debug_log  = true;
+            debug.debug_draw = true;
+            debug.debug_show_fps = true;
+            debug.debug_show_msg = true;
+            debug.debug_print_fps = true;
+        }
+        else
+        {
+            debug.debug_print_fps = opt.WasGiven("--debug-print-fps");
+            debug.debug_show_fps  = opt.WasGiven("--debug-show-fps");
+            debug.debug_log       = opt.WasGiven("--debug-log");
+            debug.debug_draw      = opt.WasGiven("--debug-draw");
+            debug.debug_show_msg  = opt.WasGiven("--debug-show-msg");
+        }
+
+        debug.debug_font = opt.GetValue<std::string>("--debug-font");
+        if ((debug.debug_show_msg || debug.debug_show_fps) && debug.debug_font.empty())
+        {
+            std::cerr << "No debug font was given. Use --debug-font.";
+            std::cerr << std::endl;
+            return 0;
+        }
+
         config_file = opt.GetValue<std::string>("--config");
 
         // setting the logger is a bit dangerous here since the current
@@ -265,7 +305,7 @@ int main(int argc, char* argv[])
         //  - change the locking mechanism and put it into the logger.
         base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
         base::SetGlobalLog(&logger);
-        base::EnableDebugLog(opt.WasGiven("--debug"));
+        base::EnableDebugLog(debug.debug_log);
         DEBUG("It's alive!");
         INFO("Copyright (c) 2010-2020 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
@@ -314,6 +354,8 @@ int main(int argc, char* argv[])
         std::unique_ptr<game::App> app(GameLibMakeApp());
         if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
+
+        app->SetDebugOptions(debug);
 
         game::App::Environment env;
         env.classlib  = classlib;

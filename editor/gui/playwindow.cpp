@@ -738,11 +738,7 @@ void PlayWindow::DoAppInit()
         }
         mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
 
-        // set the debug options.
-        game::App::DebugOptions debug;
-        debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
-        debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
-        mApp->SetDebugOptions(debug);
+        SetDebugOptions();
 
         game::App::Environment env;
         env.classlib  = &mWorkspace;
@@ -831,17 +827,11 @@ void PlayWindow::on_actionLogShowError_toggled(bool val)
 
 void PlayWindow::on_actionToggleDebugDraw_toggled()
 {
-    game::App::DebugOptions debug;
-    debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
-    debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
-    mApp->SetDebugOptions(debug);
+    SetDebugOptions();
 }
 void PlayWindow::on_actionToggleDebugLog_toggled()
 {
-    game::App::DebugOptions debug;
-    debug.debug_draw_physics = GetValue(mUI.actionToggleDebugDraw);
-    debug.debug_log          = GetValue(mUI.actionToggleDebugLog);
-    mApp->SetDebugOptions(debug);
+    SetDebugOptions();
 }
 
 void PlayWindow::on_actionFullscreen_triggered()
@@ -1056,6 +1046,8 @@ void PlayWindow::SetFullScreen(bool fullscreen)
         // event is detected indicating that the window did in fact go into
         // full screen mode.
         mApp->OnEnterFullScreen();
+
+        mApp->DebugPrintString("Press F11 to return to windowed mode.");
     }
     else if (!fullscreen && InFullScreen())
     {
@@ -1087,6 +1079,20 @@ void PlayWindow::SetFullScreen(bool fullscreen)
     mFullScreen = fullscreen;
 
     ActivateWindow();
+
+    SetDebugOptions();
+}
+
+void PlayWindow::SetDebugOptions() const
+{
+    game::App::DebugOptions debug;
+    debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
+    debug.debug_log       = GetValue(mUI.actionToggleDebugLog);
+    debug.debug_font      = "app://fonts/orbitron-medium.otf";
+    debug.debug_show_fps  = InFullScreen();
+    debug.debug_show_msg  = true;
+    debug.debug_print_fps = false;
+    mApp->SetDebugOptions(debug);
 }
 
 } // namespace

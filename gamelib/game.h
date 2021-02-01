@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <variant>
+#include <string>
 
 #include "wdk/events.h"
 #include "gamelib/classlib.h"
@@ -63,10 +64,15 @@ namespace game
         struct EndPlay {
             // todo: any params ?
         };
+        struct PrintDebugStrAction {
+            std::string message;
+        };
         // Actions express some want the game wants to take
         // such as opening a menu, playing a scene and so on.
-        using Action = std::variant<PlaySceneAction,
-                LoadBackgroundAction>;
+        using Action = std::variant<
+                PlaySceneAction,
+                LoadBackgroundAction,
+                PrintDebugStrAction>;
 
         virtual ~Game() = default;
         // Set physics engine instance.

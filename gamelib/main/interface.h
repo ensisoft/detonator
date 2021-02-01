@@ -133,11 +133,18 @@ namespace game
         // It's up to the application whether any of these will be
         // supported in anyway.
         struct DebugOptions {
-            bool debug_draw_physics = true;
-            bool debug_log = true;
+            bool debug_draw = false;
+            bool debug_log  = false;
+            bool debug_show_fps = false;
+            bool debug_print_fps = false;
+            bool debug_show_msg = false;
+            std::string debug_font;
         };
         // Set the debug options.
         virtual void SetDebugOptions(const DebugOptions& debug)
+        {}
+
+        virtual void DebugPrintString(const std::string& str)
         {}
 
         // Parameters pertaining to the environment of the application.

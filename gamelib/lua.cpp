@@ -84,6 +84,11 @@ LuaGame::LuaGame(const std::string& lua_path)
         action.klass = klass;
         self->mActionQueue.push(action);
     };
+    engine["DebugPrint"] = [](LuaGame* self, std::string message) {
+        PrintDebugStrAction action;
+        action.message = std::move(message);
+        self->mActionQueue.push(std::move(action));
+    };
 
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");

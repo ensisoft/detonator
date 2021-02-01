@@ -27,6 +27,7 @@
 
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
+#  include <boost/circular_buffer.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -67,27 +68,9 @@ class DefaultGameEngine : public game::App,
                           public wdk::WindowListener
 {
 public:
-    virtual bool ParseArgs(int argc, const char* argv[]) override
-    {
-        DEBUG("Parsing cmd line args.");
+    DefaultGameEngine() : mDebugPrints(10)
+    {}
 
-        for (int i = 1; i < argc; ++i)
-        {
-            if (!std::strcmp("--debug", argv[i]))
-            {
-                mDebugLogging = true;
-                mDebugDrawing = true;
-            }
-            else if (!std::strcmp("--debug-log", argv[i]))
-                mDebugLogging = true;
-            else if (!std::strcmp("--debug-draw", argv[i]))
-                mDebugDrawing = true;
-        }
-        base::EnableDebugLog(mDebugLogging);
-        INFO("Debug logging is '%1'", mDebugLogging ? "ON" : "OFF");
-        INFO("Debug drawing is '%1'", mDebugDrawing ? "ON" : "OFF");
-        return true;
-    }
     virtual bool GetNextRequest(Request* out) override
     { return mRequests.GetNext(out); }
 
@@ -110,9 +93,14 @@ public:
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
-        mDebugLogging = debug.debug_log;
-        mDebugDrawing = debug.debug_draw_physics;
-        base::EnableDebugLog(mDebugLogging);
+        mDebug = debug;
+        base::EnableDebugLog(mDebug.debug_log);
+    }
+    virtual void DebugPrintString(const std::string& message) override
+    {
+        DebugPrint print;
+        print.message = message;
+        mDebugPrints.push_back(std::move(print));
     }
 
     virtual void SetEnvironment(const Environment& env) override
@@ -153,7 +141,7 @@ public:
         const float device_viewport_height = height * scale;
         const float device_viewport_x = (surf_width - device_viewport_width) / 2;
         const float device_viewport_y = (surf_height - device_viewport_height) / 2;
-        if (mDebugDrawing)
+        if (mDebug.debug_draw)
         {
             mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
             mPainter->SetView(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
@@ -187,9 +175,41 @@ public:
 
             gfx::Transform transform;
             mRenderer.Draw(*mForeground , *mPainter , transform);
-            if (mDebugDrawing && mPhysics.HaveWorld())
+            if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
                 mPhysics.DebugDrawObjects(*mPainter , transform);
+            }
+        }
+
+        if (mDebug.debug_show_fps || mDebug.debug_show_msg)
+        {
+            mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            mPainter->SetView(0, 0, surf_width, surf_height);
+            mPainter->SetViewport(0,0, surf_width, surf_height);
+        }
+        if (mDebug.debug_show_fps)
+        {
+            char hallelujah[512] = {0};
+            std::snprintf(hallelujah, sizeof(hallelujah) - 1,
+            "FPS: %.2f wall time: %.2f game time: %.2f",
+                mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.total_game_time, mLastStats.num_frames_rendered);
+
+            const gfx::FRect rect(10, 10, 500, 20);
+            gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+            gfx::DrawTextRect(*mPainter, hallelujah,
+                mDebug.debug_font, 14, rect, gfx::Color::HotPink,
+                gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+        }
+        if (mDebug.debug_show_msg)
+        {
+            gfx::FRect rect(10, 30, 500, 20);
+            for (const auto& print : mDebugPrints)
+            {
+                gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+                gfx::DrawTextRect(*mPainter, print.message,
+                    mDebug.debug_font, 14, rect, gfx::Color::HotPink,
+                   gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+                rect.Translate(0, 20);
             }
         }
 
@@ -213,6 +233,8 @@ public:
                 LoadForegroundScene(ptr->klass);
             else if (auto* ptr = std::get_if<game::Game::LoadBackgroundAction>(&action))
                 LoadBackgroundScene(ptr->klass);
+            else if (auto* ptr = std::get_if<game::Game::PrintDebugStrAction>(&action))
+                DebugPrintString(ptr->message);
         }
 
         if (mBackground)
@@ -245,10 +267,25 @@ public:
 
     virtual void UpdateStats(const Stats& stats) override
     {
-        //DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
-        //      stats.current_fps, stats.total_wall_time, stats.total_game_time, stats.num_frames_rendered);
+        if (mDebug.debug_show_fps)
+        {
+            mLastStats = stats;
+        }
+        if (mDebug.debug_print_fps)
+        {
+            DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4" ,
+                  stats.current_fps , stats.total_wall_time , stats.total_game_time , stats.num_frames_rendered);
+        }
+
+        for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
+        {
+            auto& print = *it;
+            if (--print.lifetime < 0) {
+                it = mDebugPrints.erase(it);
+            } else ++it;
+        }
     }
-    virtual void OnRenderingSurfaceResized(unsigned width, unsigned height)
+    virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
         DEBUG("Rendering surface resized to %1x%2", width, height);
         mSurfaceWidth = width;
@@ -374,10 +411,17 @@ private:
     bool mRunning = true;
     // a flag to indicate whether currently in fullscreen or not.
     bool mFullScreen = false;
-    // flag for debug level logging.
-    bool mDebugLogging = false;
-    // flag for debug drawing.
-    bool mDebugDrawing = false;
+    // current debug options.
+    game::App::DebugOptions mDebug;
+    // last statistics about the rendering rate etc.
+    game::App::Stats mLastStats;
+    // list of current debug print messages that
+    // get printed to the display.
+    struct DebugPrint {
+        std::string message;
+        short lifetime = 3;
+    };
+    boost::circular_buffer<DebugPrint> mDebugPrints;
 };
 
 } //namespace
