@@ -317,7 +317,7 @@ namespace base
 
             }
         }
-        void Parse(CommandLineArgumentStack&& cmd, bool allow_unexpected)
+        void Parse(CommandLineArgumentStack&& cmd, bool allow_unexpected = false)
         {
             CommandLineArgumentStack temp = std::move(cmd);
             Parse(temp, allow_unexpected);
@@ -326,11 +326,11 @@ namespace base
         // Convenience wrapper for converting a parse failure into boolean
         // result for simplicity. if the error string pointer is non nullptr
         // then on error the error message is copied into this string.
-        bool Parse(CommandLineArgumentStack& cmd, std::string* error)
+        bool Parse(CommandLineArgumentStack& cmd, std::string* error, bool allow_unexpected = false)
         {
             try
             {
-                Parse(cmd);
+                Parse(cmd, allow_unexpected);
             }
             catch (const std::exception& e)
             {
@@ -339,10 +339,18 @@ namespace base
             }
             return true;
         }
-        bool Parse(CommandLineArgumentStack&& cmd, std::string* error)
+        bool Parse(CommandLineArgumentStack&& cmd, std::string* error, bool allow_unexpected = false)
         {
-            CommandLineArgumentStack temp = std::move(cmd);
-            return Parse(temp, error);
+            try
+            {
+                Parse(std::move(cmd), allow_unexpected);
+            }
+            catch (const std::exception& e)
+            {
+                if (error) *error = e.what();
+                return false;
+            }
+            return true;
         }
 
         const CommandLineArg& Get(const char* name) const
