@@ -416,6 +416,10 @@ int main(int argc, char* argv[])
         DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
 
         bool quit = false;
+        // initialize to false, so that if the window was requested to go into full screen
+        // after being created we'll already do the state transition properly and
+        // invoke the application handlers.
+        bool fullscreen = false;
 
         while (app->IsRunning() && !quit)
         {
@@ -428,6 +432,14 @@ int main(int argc, char* argv[])
                 // surface has been resized.
                 if (event.identity() == wdk::native_event_t::type::window_resize)
                     app->OnRenderingSurfaceResized(window.GetSurfaceWidth(), window.GetSurfaceHeight());
+
+                if (fullscreen != window.IsFullscreen())
+                {
+                    if (window.IsFullscreen())
+                        app->OnEnterFullScreen();
+                    else app->OnLeaveFullScreen();
+                    fullscreen = window.IsFullscreen();
+                }
             }
 
             // Process pending application requests if any.
@@ -438,9 +450,9 @@ int main(int argc, char* argv[])
                     window.SetSize(ptr->width, ptr->height);
                 else if (auto* ptr = std::get_if<game::App::MoveWindow>(&request))
                     window.Move(ptr->xpos, ptr->ypos);
-                else if (auto* ptr = std::get_if<game::App::SetFullscreen>(&request))
+                else if (auto* ptr = std::get_if<game::App::SetFullScreen>(&request))
                     window.SetFullscreen(ptr->fullscreen);
-                else if (auto* ptr = std::get_if<game::App::ToggleFullscreen>(&request))
+                else if (auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
                     window.SetFullscreen(!window.IsFullscreen());
                 else if (auto* ptr = std::get_if<game::App::QuitApp>(&request))
                     quit = true;

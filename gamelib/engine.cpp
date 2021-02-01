@@ -255,6 +255,17 @@ public:
         mSurfaceHeight = height;
         mPainter->SetSurfaceSize(width, height);
     }
+    virtual void OnEnterFullScreen() override
+    {
+        DEBUG("Enter full screen mode.");
+        mFullScreen = true;
+    }
+    virtual void OnLeaveFullScreen() override
+    {
+        DEBUG("Leave full screen mode.");
+        mFullScreen = false;
+    }
+
 
     // WindowListener
     virtual void OnWantClose(const wdk::WindowEventWantClose&) override
@@ -361,6 +372,8 @@ private:
     std::unique_ptr<game::Game> mGame;
     // flag to indicate whether the app is still running or not.
     bool mRunning = true;
+    // a flag to indicate whether currently in fullscreen or not.
+    bool mFullScreen = false;
     // flag for debug level logging.
     bool mDebugLogging = false;
     // flag for debug drawing.

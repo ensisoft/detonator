@@ -81,12 +81,16 @@ namespace invaders
         virtual void Draw() override;
         virtual bool IsRunning() const override
         { return mRunning; }
-        virtual void OnRenderingSurfaceResized(unsigned width, unsigned height)
+        virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
         {
             mRenderWidth  = width;
             mRenderHeight = height;
             mPainter->SetSurfaceSize(width, height);
         }
+        virtual void OnEnterFullScreen() override
+        { mFullscreen = true; }
+        virtual void OnLeaveFullScreen() override
+        { mFullscreen = false; }
         virtual wdk::WindowListener* GetWindowListener() override
         { return this; }
         virtual void UpdateStats(const game::App::Stats& stats) override

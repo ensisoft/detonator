@@ -226,7 +226,10 @@ public:
     {}
     virtual void Display() override
     {
-        mContext->swapBuffers(mSurface);
+        // Try to avoid Qt error about calling swap buffers on non-exposed window
+        // resulting in undefined behavior
+        if (mSurface->isExposed())
+            mContext->swapBuffers(mSurface);
     }
     virtual void MakeCurrent() override
     {
@@ -236,6 +239,8 @@ public:
     {
         return (void*)mContext->getProcAddress(name);
     }
+    void SetSurface(QWindow* surface)
+    { mSurface = surface; }
 private:
     QOpenGLContext* mContext = nullptr;
     QWindow* mSurface = nullptr;
@@ -470,10 +475,10 @@ void PlayWindow::Update(double dt)
                 ResizeSurface(ptr->width, ptr->height);
             else if (const auto* ptr = std::get_if<game::App::MoveWindow>(&request))
                 this->move(ptr->xpos, ptr->ypos);
-            else if (const auto* ptr = std::get_if<game::App::SetFullscreen>(&request))
-                SetFullscreen(ptr->fullscreen);
-            else if (const auto* ptr = std::get_if<game::App::ToggleFullscreen>(&request))
-                ToggleFullscreen();
+            else if (const auto* ptr = std::get_if<game::App::SetFullScreen>(&request))
+                AskSetFullScreen(ptr->fullscreen);
+            else if (const auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
+                AskToggleFullScreen();
             else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request))
                 quit = true;
         }
@@ -639,10 +644,10 @@ void PlayWindow::Shutdown()
 
 void PlayWindow::LoadState()
 {
-    // if this is the first the project is launched resize
-    // the rendering surface to the initial size specified
-    // in the project settings. otherwise use the size
-    // from the previous run.
+    // if this is the first time the project is launched then
+    // resize the rendering surface to the initial size specified
+    // in the project settings. otherwise use the size saved from
+    // the previous run.
     // note that the application is later able to request
     // a different size however. (See the requests processing)
     const auto& project = mWorkspace.GetProjectSettings();
@@ -669,17 +674,6 @@ void PlayWindow::LoadState()
     if (window_geometry.isEmpty())
     {
         ResizeSurface(project.window_width, project.window_height);
-    }
-
-    // try to disable the resizing of the rendering surface.
-    // probably won't work as expected.
-    if (!project.window_can_resize)
-    {
-        const auto w = project.window_width;
-        const auto h = project.window_height;
-        mSurface->setMaximumSize(QSize(w, h));
-        mSurface->setMinimumSize(QSize(w, h));
-        mSurface->setBaseSize(QSize(w, h));
     }
 
     const bool show_status_bar = mWorkspace.GetUserProperty("play_window_show_statusbar",
@@ -850,6 +844,18 @@ void PlayWindow::on_actionToggleDebugLog_toggled()
     mApp->SetDebugOptions(debug);
 }
 
+void PlayWindow::on_actionFullscreen_triggered()
+{
+    if (!InFullScreen())
+    {
+        SetFullScreen(true);
+    }
+    else
+    {
+        SetFullScreen(false);
+    }
+}
+
 void PlayWindow::on_btnApplyFilter_clicked()
 {
     mEventLog.SetFilterStr(GetValue(mUI.logFilter),GetValue(mUI.logFilterCaseSensitive));
@@ -905,7 +911,11 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     {
         if (event->type() == QEvent::KeyPress)
         {
+            // this will collide with the application if the app wants to also use
+            // the F11 key for something. But there aren't a lot of possibilities here..
             const auto* key_event = static_cast<const QKeyEvent *>(event);
+            if (key_event->key() == Qt::Key_F11 && InFullScreen())
+                SetFullScreen(false);
 
             wdk::WindowEventKeydown key;
             key.symbol    = MapVirtualKey(key_event->key());
@@ -1008,21 +1018,75 @@ void PlayWindow::ResizeSurface(unsigned width, unsigned height)
     this->resize(width + width_extra, height + height_extra);
 }
 
-void PlayWindow::SetFullscreen(bool fullscreen)
+void PlayWindow::AskSetFullScreen(bool fullscreen)
 {
-    if (fullscreen)
-        showFullScreen();
-    else showNormal();
-
-    mSurface->requestActivate();
+    if (fullscreen && !InFullScreen())
+    {
+        QMessageBox msg(this);
+        msg.setWindowTitle(tr("Enable Full Screen?"));
+        msg.setText(tr("The application has requested to go into full screen mode. \n"
+                       "Do you want to accept this?"));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    SetFullScreen(fullscreen);
 }
-void PlayWindow::ToggleFullscreen()
+void PlayWindow::AskToggleFullScreen()
 {
-    if (isFullScreen())
-        showNormal();
-    else showFullScreen();
+    AskSetFullScreen(!InFullScreen());
+}
 
-    mSurface->requestActivate();
+bool PlayWindow::InFullScreen() const
+{
+    return mFullScreen;
+}
+
+void PlayWindow::SetFullScreen(bool fullscreen)
+{
+    if (fullscreen && !InFullScreen())
+    {
+        // the QWindow cannot be set into full screen if it's managed by the
+        // container, the way to get it out of the container is to re-parent to nullptr.
+        mSurface->setParent(nullptr);
+        // now try to go into full screen.
+        mSurface->showFullScreen();
+        // todo: this should probably only be called after some transition
+        // event is detected indicating that the window did in fact go into
+        // full screen mode.
+        mApp->OnEnterFullScreen();
+    }
+    else if (!fullscreen && InFullScreen())
+    {
+        // seems there aren't any other ways to go back into embedding the
+        // QWindow inside this window and its widgets other than re-create
+        // everything.
+        // WARNING, deleting the container deletes the QWindow!
+        // https://stackoverflow.com/questions/46003395/getting-qwindow-back-into-parent-qwidget-from-the-fullscreen
+
+        // re-create a new rendering surface.
+        QWindow* surface = new QWindow();
+        surface->setSurfaceType(QWindow::OpenGLSurface);
+        surface->installEventFilter(this);
+        mContext.makeCurrent(surface);
+        mWindowContext->SetSurface(surface);
+
+        // re-create the window container widget and place into the layout.
+        delete mContainer;
+        mContainer = QWidget::createWindowContainer(surface, this);
+        mContainer->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::MinimumExpanding);
+        mUI.verticalLayout->addWidget(mContainer);
+        mSurface = surface;
+
+        // todo: this can be wrong if the window never did go into fullscreen mode.
+        mApp->OnLeaveFullScreen();
+    }
+    // todo: should really only set this flag when the window *did* go into
+    // fullscreen mode.
+    mFullScreen = fullscreen;
+
+    ActivateWindow();
 }
 
 } // namespace

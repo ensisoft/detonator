@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1060</width>
-    <height>754</height>
+    <height>732</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -150,6 +150,8 @@
     <addaction name="separator"/>
     <addaction name="actionToggleDebugDraw"/>
     <addaction name="actionToggleDebugLog"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullscreen"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -192,6 +194,8 @@
    <addaction name="separator"/>
    <addaction name="actionToggleDebugDraw"/>
    <addaction name="actionToggleDebugLog"/>
+   <addaction name="separator"/>
+   <addaction name="actionFullscreen"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="features">
@@ -413,6 +417,21 @@
    </property>
    <property name="toolTip">
     <string>Toggle debug logging</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/arrow_out.png</normaloff>:/32x32_ico_png/arrow_out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="toolTip">
+    <string>Go into fullscreen mode</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>

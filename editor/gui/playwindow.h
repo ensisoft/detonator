@@ -100,6 +100,7 @@ namespace gui
         void on_actionLogShowError_toggled(bool val);
         void on_actionToggleDebugDraw_toggled();
         void on_actionToggleDebugLog_toggled();
+        void on_actionFullscreen_triggered();
         void on_btnApplyFilter_clicked();
         void on_log_customContextMenuRequested(QPoint point);
 
@@ -107,8 +108,11 @@ namespace gui
         virtual void closeEvent(QCloseEvent* event) override;
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
         void ResizeSurface(unsigned width, unsigned height);
-        void SetFullscreen(bool fullscreen);
-        void ToggleFullscreen();
+        void AskSetFullScreen(bool fullscreen);
+        void AskToggleFullScreen();
+        bool InFullScreen() const;
+        void SetFullScreen(bool fullscreen);
+        void SetDebugOptions() const;
 
     private:
         class WindowContext;
@@ -139,6 +143,9 @@ namespace gui
         QWindow* mSurface = nullptr;
         // The widget container for the QWindow (mSurface)
         QWidget* mContainer = nullptr;
+        // A crappy flag for trying to distinguish between full screen
+        // and windowed mode.
+        bool mFullScreen = false;
         // Flag to indicate when the window has been closed or not.
         bool mClosed = false;
         // Flag to indicate if the app is currently "paused".

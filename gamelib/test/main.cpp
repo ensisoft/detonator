@@ -451,7 +451,7 @@ public:
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
             TakeScreenshot();
         else if (key.symbol == wdk::Keysym::Space)
-            mRequests.ToggleFullscreen();
+            mRequests.ToggleFullScreen();
 
         if (mTestIndex != current_test_index)
         {

@@ -1343,11 +1343,11 @@ public:
     std::function<void (bool)> onToggleFullscreen;
     std::function<void (bool)> onTogglePlayMusic;
     std::function<void (bool)> onTogglePlaySounds;
+    std::function<bool ()> isFullscreen;
 
-    Settings(bool music, bool sounds, bool fullscreen)
+    Settings(bool music, bool sounds)
       : mPlayMusic(music)
       , mPlaySounds(sounds)
-      , mFullscreen(fullscreen)
     {}
 
     virtual void paint(gfx::Painter& painter, const IRect& rect) const override
@@ -1355,6 +1355,7 @@ public:
         const GridLayout layout(rect, 1, 7);
 
         const auto font_size = layout.GetFontSize() * 0.3;
+        const auto fullscreen = isFullscreen();
 
         gfx::DrawTextRect(painter,
             "Press space to toggle a setting.",
@@ -1374,7 +1375,7 @@ public:
             mSettingIndex == 1 ? gfx::Color::Green : gfx::Color::White);
 
         gfx::DrawTextRect(painter,
-            base::FormatString("Fullscreen: %1", mFullscreen ? "On" : "Off"),
+            base::FormatString("Fullscreen: %1", fullscreen ? "On" : "Off"),
             "fonts/ARCADE.TTF", font_size,
             layout.MapGfxRect(IPoint(0, 4), IPoint(1, 5)),
             mSettingIndex == 2 ? gfx::Color::Green : gfx::Color::White);
@@ -1411,8 +1412,8 @@ public:
             }
             else if (mSettingIndex == 2)
             {
-                mFullscreen = !mFullscreen;
-                onToggleFullscreen(mFullscreen);
+                bool fullscreen = isFullscreen();
+                onToggleFullscreen(!fullscreen);
             }
         }
         else if (sym == wdk::Keysym::ArrowUp)
@@ -1428,7 +1429,6 @@ public:
 private:
     bool mPlayMusic  = false;
     bool mPlaySounds = false;
-    bool mFullscreen = false;
 private:
     int mSettingIndex = 0;
 };
@@ -1967,7 +1967,7 @@ void GameWidget::Load()
     // adjust window based on settings.
     if (fullscreen)
     {
-        mRequests.SetFullscreen(true);
+        mRequests.SetFullScreen(true);
     }
     else
     {
@@ -1981,7 +1981,6 @@ void GameWidget::Load()
 
     mPlayMusic  = play_music;
     mPlaySounds = play_sound;
-    mFullscreen = fullscreen;
 }
 
 void GameWidget::Save()
@@ -2275,10 +2274,12 @@ void GameWidget::OnKeydown(const wdk::WindowEventKeydown& key)
             break;
         case State::Action::OpenSettings:
             {
-                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds, mFullscreen);
+                auto settings = std::make_unique<Settings>(mPlayMusic, mPlaySounds);
+                settings->isFullscreen = [this]() {
+                    return mFullscreen;
+                };
                 settings->onToggleFullscreen = [this](bool fullscreen) {
-                    mFullscreen = !mFullscreen;
-                    mRequests.SetFullscreen(mFullscreen);
+                    mRequests.SetFullScreen(fullscreen);
                 };
                 settings->onTogglePlayMusic = [this](bool play) {
                     mPlayMusic = play;

@@ -85,14 +85,24 @@ namespace game
             int ypos = 0;
         };
         // Request to have the window put to the full-screen
-        // mode or back into windowed mode.
-        struct SetFullscreen {
+        // mode or back into windowed mode. In full-screen mode
+        // the window has no borders, no title bar or any kind
+        // of window decoration and it covers the whole screen.
+        // Note that this is only a *request* which means it's
+        // possible that for whatever reason the transition does
+        // not take place. (For example the user rejected the request
+        // or the the platform doesn't support the concept of
+        // full screen windows). In order to understand whether the
+        // transition *did* happen the application should listen for
+        // OnEnterFullScreen (and OnLeaveFullScreen) events.
+        struct SetFullScreen {
             // Request the window to be to put into full-screen mode
             // when true, or back to window mode when false.
             bool fullscreen = false;
         };
         // Request to toggle the current window full-screen mode.
-        struct ToggleFullscreen {};
+        // See comments in @SetFullScreen about possible limitations.
+        struct ToggleFullScreen {};
 
         // Request to quit.
         struct QuitApp {};
@@ -101,8 +111,8 @@ namespace game
         using Request = std::variant<
             ResizeWindow,
             MoveWindow,
-            SetFullscreen,
-            ToggleFullscreen,
+            SetFullScreen,
+            ToggleFullScreen,
             QuitApp>;
 
         // During the runtime of the application the application may request
@@ -263,7 +273,16 @@ namespace game
         // This is called once on application startup and then every time when
         // the rendering surface size changes.
         virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) {}
-
+        // Called when the application enters full screen mode. This can be as a
+        // response to the application's request to enter full screen mode or
+        // the mode change can be initiated through the host application.
+        // Either way the application should not assume anything about the current
+        // full screen state unless these 2 callbacks are invoked.
+        virtual void OnEnterFullScreen() {}
+        // Called when the application leaves the full screen mode and goes back
+        // into windowed mode. See the notes in OnEnterFullScreen about how this
+        // transition can take place.
+        virtual void OnLeaveFullScreen() {}
     protected:
     private:
     };
@@ -286,10 +305,10 @@ namespace game
         { mQueue.push(game::App::MoveWindow { x, y }); }
         inline void ResizeWindow(unsigned width, unsigned height)
         { mQueue.push(game::App::ResizeWindow{width, height}); }
-        inline void SetFullscreen(bool fullscreen)
-        { mQueue.push(game::App::SetFullscreen{fullscreen}); }
-        inline void ToggleFullscreen()
-        { mQueue.push(game::App::ToggleFullscreen{}); }
+        inline void SetFullScreen(bool fullscreen)
+        { mQueue.push(game::App::SetFullScreen{fullscreen}); }
+        inline void ToggleFullScreen()
+        { mQueue.push(game::App::ToggleFullScreen{}); }
         inline void Quit()
         { mQueue.push(game::App::QuitApp{}); }
     private:
