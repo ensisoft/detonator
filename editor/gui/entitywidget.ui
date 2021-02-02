@@ -41,7 +41,7 @@
             </property>
             <layout class="QGridLayout" name="gridLayout">
              <item row="1" column="1">
-              <widget class="QLineEdit" name="ID">
+              <widget class="QLineEdit" name="entityID">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -54,7 +54,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="name">
+              <widget class="QLineEdit" name="entityName">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -589,6 +589,9 @@
              <widget class="QCheckBox" name="chkSnap">
               <property name="text">
                <string>Snap to grid</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -1882,8 +1885,8 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>name</tabstop>
-  <tabstop>ID</tabstop>
+  <tabstop>entityName</tabstop>
+  <tabstop>entityID</tabstop>
   <tabstop>idleTrack</tabstop>
   <tabstop>btnResetIdleTrack</tabstop>
   <tabstop>tabWidget</tabstop>

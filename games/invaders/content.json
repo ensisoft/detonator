@@ -3,6 +3,7 @@
     {
       "id": "sPJ5mHTwAg",
       "idle_track": "",
+      "name": "Space",
       "nodes": [
         {
           "class": "NhoWavKXqw",
@@ -211,6 +212,7 @@
     {
       "id": "D57sl8JCQS",
       "idle_track": "",
+      "name": "UFO",
       "nodes": [
         {
           "class": "ezqFD2JsTP",
@@ -308,6 +310,7 @@
     {
       "id": "b18SpfABQ5",
       "idle_track": "",
+      "name": "Asteroid",
       "nodes": [
         {
           "class": "SMTO5s3IL8",
@@ -363,6 +366,7 @@
     {
       "id": "PTsZrCTnM0",
       "idle_track": "",
+      "name": "Cricket",
       "nodes": [
         {
           "class": "M9ahxR397d",
@@ -487,6 +491,7 @@
     {
       "id": "0q5xgI7aXU",
       "idle_track": "",
+      "name": "Mantis",
       "nodes": [
         {
           "class": "vzQgnYtLgS",
@@ -611,6 +616,7 @@
     {
       "id": "AGpwFLniqi",
       "idle_track": "",
+      "name": "Scarab",
       "nodes": [
         {
           "class": "69l7juLOjb",
@@ -735,6 +741,7 @@
     {
       "id": "LeNxoNvQbn",
       "idle_track": "",
+      "name": "Locust",
       "nodes": [
         {
           "class": "Doku2oJRT8",
@@ -859,6 +866,7 @@
     {
       "id": "lQDnzkH9Ky",
       "idle_track": "",
+      "name": "Big Explosion",
       "nodes": [
         {
           "class": "wUZNCbqKPj",

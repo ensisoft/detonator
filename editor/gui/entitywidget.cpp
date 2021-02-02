@@ -300,6 +300,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     DEBUG("Create EntityWidget");
 
     mState.entity = std::make_shared<game::EntityClass>();
+    mState.entity->SetName("My Entity");
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mScriptVarModel.reset(new ScriptVarModel(mState));
@@ -354,8 +355,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::RigidBodyItemClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.name, QString("My Entity"));
-    SetValue(mUI.ID, mState.entity->GetId());
+    SetValue(mUI.entityName, mState.entity->GetName());
+    SetValue(mUI.entityID,   mState.entity->GetId());
     setWindowTitle("My Entity");
 
     RebuildMenus();
@@ -377,8 +378,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 
-    SetValue(mUI.name, resource.GetName());
-    SetValue(mUI.ID, content->GetId());
+    SetValue(mUI.entityName, content->GetName());
+    SetValue(mUI.entityID, content->GetId());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -452,8 +453,8 @@ void EntityWidget::AddActions(QMenu& menu)
 
 bool EntityWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Entity", mUI.name);
-    settings.saveWidget("Entity", mUI.ID);
+    settings.saveWidget("Entity", mUI.entityName);
+    settings.saveWidget("Entity", mUI.entityID);
     settings.saveWidget("Entity", mUI.scaleX);
     settings.saveWidget("Entity", mUI.scaleY);
     settings.saveWidget("Entity", mUI.rotation);
@@ -476,8 +477,8 @@ bool EntityWidget::SaveState(Settings& settings) const
 }
 bool EntityWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Entity", mUI.name);
-    settings.loadWidget("Entity", mUI.ID);
+    settings.loadWidget("Entity", mUI.entityName);
+    settings.loadWidget("Entity", mUI.entityID);
     settings.loadWidget("Entity", mUI.scaleX);
     settings.loadWidget("Entity", mUI.scaleY);
     settings.loadWidget("Entity", mUI.rotation);
@@ -489,7 +490,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.loadWidget("Entity", mUI.widget);
     settings.getValue("Entity", "camera_offset_x", &mState.camera_offset_x);
     settings.getValue("Entity", "camera_offset_y", &mState.camera_offset_y);
-    setWindowTitle(mUI.name->text());
+    setWindowTitle(mUI.entityName->text());
 
     // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
@@ -872,9 +873,10 @@ void EntityWidget::on_actionStop_triggered()
 }
 void EntityWidget::on_actionSave_triggered()
 {
-    if (!MustHaveInput(mUI.name))
+    if (!MustHaveInput(mUI.entityName))
         return;
-    const QString& name = GetValue(mUI.name);
+    const QString& name = GetValue(mUI.entityName);
+    mState.entity->SetName(GetValue(mUI.entityName));
     app::EntityResource resource(*mState.entity, name);
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
@@ -998,6 +1000,11 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
     }
+}
+
+void EntityWidget::on_entityName_textChanged(const QString& text)
+{
+    mState.entity->SetName(GetValue(mUI.entityName));
 }
 
 void EntityWidget::on_btnResetIdleTrack_clicked()

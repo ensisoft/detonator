@@ -96,6 +96,7 @@ namespace gui
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
         void on_actionNodeDuplicate_triggered();
+        void on_entityName_textChanged(const QString& text);
         void on_btnResetIdleTrack_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();

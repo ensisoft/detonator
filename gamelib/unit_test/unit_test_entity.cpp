@@ -172,9 +172,10 @@ void unit_test_entity_node()
         auto copy(node);
         TEST_REQUIRE(copy.GetHash() == node.GetHash());
         TEST_REQUIRE(copy.GetId() == node.GetId());
-        copy = node;
-        TEST_REQUIRE(copy.GetHash() == node.GetHash());
-        TEST_REQUIRE(copy.GetId() == node.GetId());
+        game::EntityNodeClass temp;
+        temp = copy;
+        TEST_REQUIRE(temp.GetHash() == node.GetHash());
+        TEST_REQUIRE(temp.GetId() == node.GetId());
     }
 
     // test clone
@@ -228,6 +229,7 @@ void unit_test_entity_node()
 void unit_test_entity_class()
 {
     game::EntityClass entity;
+    entity.SetName("TestEntityClass");
     {
         game::EntityNodeClass node;
         node.SetName("root");
@@ -303,6 +305,7 @@ void unit_test_entity_class()
     {
         auto ret = game::EntityClass::FromJson(entity.ToJson());
         TEST_REQUIRE(ret.has_value());
+        TEST_REQUIRE(ret->GetName() == "TestEntityClass");
         TEST_REQUIRE(ret->GetNumNodes() == 3);
         TEST_REQUIRE(ret->GetNode(0).GetName() == "root");
         TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");
@@ -324,12 +327,13 @@ void unit_test_entity_class()
         TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
 
-        copy = entity;
-        TEST_REQUIRE(copy.GetId() == entity.GetId());
-        TEST_REQUIRE(copy.GetHash() == entity.GetHash());
-        TEST_REQUIRE(copy.GetNumTracks() == 2);
-        TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
-        TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
+        game::EntityClass temp;
+        temp = entity;
+        TEST_REQUIRE(temp.GetId() == entity.GetId());
+        TEST_REQUIRE(temp.GetHash() == entity.GetHash());
+        TEST_REQUIRE(temp.GetNumTracks() == 2);
+        TEST_REQUIRE(temp.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(WalkTree(temp) == "root child_1 child_2");
     }
 
     // clone

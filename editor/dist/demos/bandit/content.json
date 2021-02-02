@@ -3,6 +3,7 @@
     {
       "id": "HFSA8Yezdr",
       "idle_track": "",
+      "name": "StoneBlock",
       "nodes": [
         {
           "class": "WyKYhKjCKB",
@@ -80,6 +81,7 @@
     {
       "id": "DOzd15fNMX",
       "idle_track": "",
+      "name": "Tile1",
       "nodes": [
         {
           "class": "C8Zo9jLx2t",
@@ -157,6 +159,7 @@
     {
       "id": "7WjAKJb7hY",
       "idle_track": "",
+      "name": "Tile2",
       "nodes": [
         {
           "class": "z91WmstalU",
@@ -234,6 +237,7 @@
     {
       "id": "SFrJwO771l",
       "idle_track": "",
+      "name": "Tile4",
       "nodes": [
         {
           "class": "gLEkpUMPMY",
@@ -311,6 +315,7 @@
     {
       "id": "Fm5ByqI6xo",
       "idle_track": "",
+      "name": "Tile3",
       "nodes": [
         {
           "class": "2X1vo3R61U",
@@ -388,6 +393,7 @@
     {
       "id": "y7bWvFuoie",
       "idle_track": "",
+      "name": "Tree",
       "nodes": [
         {
           "class": "2n7nlbnAPk",
@@ -443,6 +449,7 @@
     {
       "id": "b2lU3gYIwf",
       "idle_track": "",
+      "name": "Tile8",
       "nodes": [
         {
           "class": "pbStBifQYT",
@@ -520,6 +527,7 @@
     {
       "id": "ImTnUuKMDu",
       "idle_track": "",
+      "name": "Tile7",
       "nodes": [
         {
           "class": "r2t3TrFkvU",
@@ -597,6 +605,7 @@
     {
       "id": "GaQT22N3OL",
       "idle_track": "",
+      "name": "Tile6",
       "nodes": [
         {
           "class": "066mSwAYNb",
@@ -674,6 +683,7 @@
     {
       "id": "9LU4RC9DH0",
       "idle_track": "",
+      "name": "Tile15",
       "nodes": [
         {
           "class": "RaWnULHEHq",
@@ -751,6 +761,7 @@
     {
       "id": "d8ZPi5y9Ps",
       "idle_track": "",
+      "name": "Tile14",
       "nodes": [
         {
           "class": "aky1XfEBAy",
@@ -828,6 +839,7 @@
     {
       "id": "bOtC7Fnmmp",
       "idle_track": "",
+      "name": "Tile13",
       "nodes": [
         {
           "class": "WxXttNKwyJ",
@@ -905,6 +917,7 @@
     {
       "id": "g3TRakI9ob",
       "idle_track": "",
+      "name": "Tile12",
       "nodes": [
         {
           "class": "nyU7LB2bT7",
@@ -982,6 +995,7 @@
     {
       "id": "8Prh114uxP",
       "idle_track": "",
+      "name": "Tile11",
       "nodes": [
         {
           "class": "KTWTPjswtn",
@@ -1059,6 +1073,7 @@
     {
       "id": "dJKagvO0jM",
       "idle_track": "",
+      "name": "Tile10",
       "nodes": [
         {
           "class": "DmMR4O2G87",
@@ -1136,6 +1151,7 @@
     {
       "id": "nR73zKx341",
       "idle_track": "",
+      "name": "Tile9",
       "nodes": [
         {
           "class": "BeQmNI8QiC",
@@ -1213,6 +1229,7 @@
     {
       "id": "vYm7CMPRrJ",
       "idle_track": "",
+      "name": "Tile5",
       "nodes": [
         {
           "class": "nPGxaHayQR",
@@ -1290,6 +1307,7 @@
     {
       "id": "bEAIWd3ESl",
       "idle_track": "",
+      "name": "Bush (1)",
       "nodes": [
         {
           "class": "qjYux7bo6E",
@@ -1345,6 +1363,7 @@
     {
       "id": "2Q2vkLGDEg",
       "idle_track": "",
+      "name": "Crate",
       "nodes": [
         {
           "class": "zuTdSa5Lgw",
@@ -1422,6 +1441,7 @@
     {
       "id": "HpAo2l11sT",
       "idle_track": "",
+      "name": "Cactus (1)",
       "nodes": [
         {
           "class": "uZd3FvpM9D",
@@ -1477,6 +1497,7 @@
     {
       "id": "2sWxF1jCqU",
       "idle_track": "",
+      "name": "Cactus (2)",
       "nodes": [
         {
           "class": "S17SJNDFPG",
@@ -1532,6 +1553,7 @@
     {
       "id": "Y3nvZp6DaX",
       "idle_track": "",
+      "name": "Cactus (3)",
       "nodes": [
         {
           "class": "alg3H187iN",
@@ -1587,6 +1609,7 @@
     {
       "id": "WKsCpHkbNw",
       "idle_track": "",
+      "name": "Billboard",
       "nodes": [
         {
           "class": "xvyFXQZnfr",
@@ -1642,6 +1665,7 @@
     {
       "id": "FNUUxWSBTe",
       "idle_track": "R0MIshyT60",
+      "name": "Player",
       "nodes": [
         {
           "class": "xEXRxAU680",
@@ -2118,6 +2142,7 @@
     {
       "id": "MiA8FWNEaF",
       "idle_track": "0nrM22fbCl",
+      "name": "Horizontal Elevator",
       "nodes": [
         {
           "class": "93WF45z7i9",
@@ -2419,6 +2444,7 @@
     {
       "id": "Jn0SpbgGSY",
       "idle_track": "",
+      "name": "Vertical Elevator",
       "nodes": [
         {
           "class": "YSKiINjHyw",
@@ -2789,6 +2815,7 @@
     {
       "id": "te9JjLzdlp",
       "idle_track": "",
+      "name": "Tile16",
       "nodes": [
         {
           "class": "pm2yoCXW5N",
@@ -2866,6 +2893,7 @@
     {
       "id": "z3qBPdpAGa",
       "idle_track": "",
+      "name": "Small Island",
       "nodes": [
         {
           "class": "LxdujTwPFT",
@@ -3180,6 +3208,7 @@
     {
       "id": "O5QefURbEM",
       "idle_track": "",
+      "name": "Grass (2)",
       "nodes": [
         {
           "class": "eWGWJAZIMO",
@@ -3235,6 +3264,7 @@
     {
       "id": "TyE5N8JWlx",
       "idle_track": "",
+      "name": "Grass (1)",
       "nodes": [
         {
           "class": "simUyPhpXK",
@@ -3290,6 +3320,7 @@
     {
       "id": "ZNaUsmn31R",
       "idle_track": "",
+      "name": "Plateu",
       "nodes": [
         {
           "class": "Im3L9TD9NG",
@@ -3982,6 +4013,7 @@
     {
       "id": "WtCkGlPDwf",
       "idle_track": "",
+      "name": "Skeleton",
       "nodes": [
         {
           "class": "hHxxMDUpsE",
@@ -4037,6 +4069,7 @@
     {
       "id": "tqF7brLL08",
       "idle_track": "",
+      "name": "Stone",
       "nodes": [
         {
           "class": "GRBemQtTuY",
@@ -4092,6 +4125,7 @@
     {
       "id": "gwm3bTflRn",
       "idle_track": "",
+      "name": "Background",
       "nodes": [
         {
           "class": "Y0gBBtChIX",

@@ -821,6 +821,8 @@ namespace game
         // exists then nullptr is returned.
         const ScriptVar* FindScriptVar(const std::string& name) const;
 
+        void SetName(const std::string& name)
+        { mName = name; }
         void SetIdleTrackId(const std::string& id)
         { mIdleTrackId = id; }
         void ResetIdleTrack()
@@ -844,6 +846,8 @@ namespace game
         { return mClassId; }
         std::string GetIdleTrackId() const
         { return mIdleTrackId; }
+        std::string GetName() const
+        { return mName; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
@@ -863,6 +867,8 @@ namespace game
     private:
         // The class/resource id of this class.
         std::string mClassId;
+        // the human readable name of the class.
+        std::string mName;
         // the track ID of the idle track that gets played when nothing
         // else is going on. can be empty in which case no animation plays.
         std::string mIdleTrackId;
@@ -1061,6 +1067,8 @@ namespace game
         { return mParentNodeId; }
         std::string GetClassId() const
         { return mClass->GetId(); }
+        std::string GetClassName() const
+        { return mClass->GetName(); }
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
         std::string GetName() const

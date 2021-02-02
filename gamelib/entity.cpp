@@ -378,6 +378,7 @@ glm::mat4 EntityNode::GetModelTransform() const
 EntityClass::EntityClass(const EntityClass& other)
 {
     mClassId = other.mClassId;
+    mName    = other.mName;
     mIdleTrackId = other.mIdleTrackId;
 
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
@@ -654,6 +655,7 @@ std::size_t EntityClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mIdleTrackId);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
@@ -675,6 +677,7 @@ nlohmann::json EntityClass::ToJson() const
 {
     nlohmann::json json;
     base::JsonWrite(json, "id", mClassId);
+    base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "idle_track", mIdleTrackId);
     for (const auto& node : mNodes)
     {
@@ -701,6 +704,7 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
 {
     EntityClass ret;
     if (!base::JsonReadSafe(json, "id", &ret.mClassId) ||
+        !base::JsonReadSafe(json, "name", &ret.mName) ||
         !base::JsonReadSafe(json, "idle_track", &ret.mIdleTrackId))
         return std::nullopt;
     if (json.contains("nodes"))
@@ -791,6 +795,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
 
     EntityClass tmp(other);
     mClassId     = std::move(tmp.mClassId);
+    mName        = std::move(tmp.mName);
     mIdleTrackId = std::move(tmp.mIdleTrackId);
     mNodes       = std::move(tmp.mNodes);
     mScriptVars  = std::move(tmp.mScriptVars);
