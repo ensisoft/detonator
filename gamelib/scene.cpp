@@ -590,6 +590,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         entity->SetLayer(node.GetLayer());
 
         map[&node] = entity.get();
+        mEntityMap[entity->GetId()] = entity.get();
         mEntities.push_back(std::move(entity));
     }
     mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const SceneNodeClass* node) {
@@ -615,10 +616,10 @@ Entity& Scene::GetEntity(size_t index)
 }
 Entity* Scene::FindEntityByInstanceId(const std::string& id)
 {
-    for (auto& e : mEntities)
-        if (e->GetId() == id)
-            return e.get();
-    return nullptr;
+    auto it = mEntityMap.find(id);
+    if (it == mEntityMap.end())
+        return nullptr;
+    return it->second;
 }
 Entity* Scene::FindEntityByInstanceName(const std::string& name)
 {
@@ -635,10 +636,10 @@ const Entity& Scene::GetEntity(size_t index) const
 }
 const Entity* Scene::FindEntityByInstanceId(const std::string& id) const
 {
-    for (const auto& e : mEntities)
-        if (e->GetId() == id)
-            return e.get();
-    return nullptr;
+    auto it = mEntityMap.find(id);
+    if (it == mEntityMap.end())
+        return nullptr;
+    return it->second;
 }
 const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 {
@@ -646,6 +647,32 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
         if (e->GetName() == name)
             return e.get();
     return nullptr;
+}
+
+void Scene::DeleteEntity(Entity* entity)
+{
+    std::unordered_set<const Entity*> graveyard;
+
+    // traverse the tree starting from the node to be deleted
+    // and capture the ids of the scene nodes that are part
+    // of this hierarchy.
+    mRenderTree.PreOrderTraverseForEach([&graveyard](const Entity* value) {
+        graveyard.insert(value);
+    }, entity);
+
+    for (const auto* entity : graveyard)
+    {
+        DEBUG("Deleting entity '%1'", entity->GetName());
+        mEntityMap.erase(entity->GetId());
+    }
+
+    // delete from the tree.
+    mRenderTree.DeleteNode(entity);
+
+    // delete from the container.
+    mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [&graveyard](const auto& node) {
+        return graveyard.find(node.get()) != graveyard.end();
+    }), mEntities.end());
 }
 
 std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const

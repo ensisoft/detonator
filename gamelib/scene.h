@@ -410,6 +410,9 @@ namespace game
         // Note that if there are multiple entities with the same instance
         // name it's undefined which one is returned.
         const Entity* FindEntityByInstanceName(const std::string& name) const;
+        // Delete the entity from the scene. The given entity and all entities
+        // linked to it will be removed from the scene's render tree and deleted.
+        void DeleteEntity(Entity* entity);
 
         // Find a scripting variable. 
         // Returns nullptr if there was no variable by this name.
@@ -481,6 +484,8 @@ namespace game
         std::shared_ptr<const SceneClass> mClass;
         // Entities currently in the scene.
         std::vector<std::unique_ptr<Entity>> mEntities;
+        // lookup table for mapping entity ids to entities.
+        std::unordered_map<std::string, Entity*> mEntityMap;
         // The list of script variables.
         std::vector<ScriptVar> mScriptVars;
         // The scene graph/render tree for hierarchical traversal

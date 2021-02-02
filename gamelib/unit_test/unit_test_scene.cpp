@@ -337,7 +337,6 @@ void unit_test_scene_instance()
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
 
-
     // the scene instance has the initial state based on the scene class object.
     // i.e. the initial entities are created based on the scene class nodes and
     // their properties.
@@ -361,6 +360,11 @@ void unit_test_scene_instance()
     TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
     instance.FindScriptVar("foo")->SetValue(444);
     TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
+
+    instance.DeleteEntity(instance.FindEntityByInstanceName("child_1"));
+    TEST_REQUIRE(instance.GetNumEntities() == 2);
+    instance.DeleteEntity(instance.FindEntityByInstanceName("root"));
+    TEST_REQUIRE(instance.GetNumEntities() == 0);
 
     // todo: test more of the instance api.
 }
