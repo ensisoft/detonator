@@ -37,6 +37,7 @@ namespace game
     class Scene;
     class SceneClass;
     class PhysicsEngine;
+    struct ContactEvent;
 
     // This is the main interface for the game engine to interface
     // with the actual game logic. I.e. implementations of this
@@ -124,6 +125,10 @@ namespace game
         // in some rendering surface such as a window. If your game returns
         // an empty viewport (width and height are 0) *nothing* will be shown.
         virtual FRect GetViewport() const = 0;
+
+        // Act on a contact event when 2 physics bodies have come into
+        // contact or have come out of contact.
+        virtual void OnContactEvent(const ContactEvent& contact) = 0;
 
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) {}

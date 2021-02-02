@@ -248,8 +248,11 @@ public:
             mForeground->Update(dt);
             if (mPhysics.HaveWorld())
             {
-                mPhysics.Tick();
+                std::vector<game::ContactEvent> contacts;
+                mPhysics.Tick(&contacts);
                 mPhysics.UpdateScene(*mForeground);
+                for (const auto& contact : contacts)
+                    mGame->OnContactEvent(contact);
             }
             mRenderer.Update(*mForeground, time, dt);
         }

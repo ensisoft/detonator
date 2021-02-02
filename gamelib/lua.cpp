@@ -154,6 +154,8 @@ void LuaGame::Update(double current_time, double dt)
 }
 void LuaGame::BeginPlay(Scene* scene)
 {
+    mScene = scene;
+
     sol::protected_function func = (*mLuaState)["BeginPlay"];
     if (!func.valid())
         return;
@@ -166,6 +168,8 @@ void LuaGame::BeginPlay(Scene* scene)
 }
 void LuaGame::EndPlay()
 {
+    mScene = nullptr;
+
     sol::protected_function func = (*mLuaState)["EndPlay"];
     if (!func.valid())
         return;
@@ -189,6 +193,50 @@ bool LuaGame::GetNextAction(Action* out)
     *out = mActionQueue.front();
     mActionQueue.pop();
     return true;
+}
+
+FRect LuaGame::GetViewport() const
+{ return mView; }
+
+void LuaGame::OnContactEvent(const ContactEvent& contact)
+{
+    Entity* entityA = mScene->FindEntityByInstanceId(contact.entityA);
+    Entity* entityB = mScene->FindEntityByInstanceId(contact.entityB);
+    if (entityA == nullptr || entityB == nullptr)  {
+        WARN("Contact event ignored, entity was not be found.");
+        return;
+    }
+    EntityNode* nodeA = entityA->FindNodeByInstanceId(contact.nodeA);
+    EntityNode* nodeB = entityB->FindNodeByInstanceId(contact.nodeB);
+    if (nodeA == nullptr || nodeB == nullptr) {
+        WARN("Contact event ignored, entity node was found.");
+        return;
+    }
+
+    if (contact.type == ContactEvent::Type::BeginContact)
+    {
+        sol::protected_function func = (*mLuaState)["OnBeginContact"];
+        if (!func.valid())
+            return;
+        auto result = func(entityA, entityB, nodeA, nodeB);
+        if (!result.valid())
+        {
+            const sol::error err = result;
+            ERROR(err.what());
+        }
+    }
+    else if (contact.type == ContactEvent::Type::EndContact)
+    {
+        sol::protected_function func = (*mLuaState)["OnEndContact"];
+        if (!func.valid())
+            return;
+        auto result = func(entityA, entityB, nodeA, nodeB);
+        if (!result.valid())
+        {
+            const sol::error err = result;
+            ERROR(err.what());
+        }
+    }
 }
 
 void LuaGame::OnKeyDown(const wdk::WindowEventKeydown& key)
@@ -486,6 +534,7 @@ void BindGameLib(sol::state& L)
             });
     entity["GetName"]              = &Entity::GetName;
     entity["GetId"]                = &Entity::GetId;
+    entity["GetClassName"]         = &Entity::GetClassName;
     entity["GetClassId"]           = &Entity::GetClassId;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
@@ -538,6 +587,7 @@ void BindGameLib(sol::state& L)
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
     scene["GetEntity"]                = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
+    scene["DeleteEntity"]             = &Scene::DeleteEntity;
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;

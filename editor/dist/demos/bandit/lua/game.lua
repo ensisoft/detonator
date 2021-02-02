@@ -83,6 +83,38 @@ function EndPlay()
 
 end
 
+function OnBeginContact(entityA, entityB, nodeA, nodeB)
+    local class_a = entityA:GetClassName()
+    local class_b = entityB:GetClassName()
+    --Game:DebugPrint(class_a .. '  ' .. class_b)
+
+    local player = nil
+    local coin   = nil
+
+    if class_a == 'Player' then
+        player = entityA
+    elseif class_b == 'Player' then
+        player = entityB
+    end
+
+    if class_a == 'Coin' then
+        coin = entityA
+    elseif class_b == 'Coin' then
+        coin = entityB
+    end
+
+    if player == nil or coin == nil then
+        return
+    end
+
+    Game:DebugPrint('Coin collected!')
+    Scene:DeleteEntity(coin)
+end
+
+function OnEndContact(entityA, entityB, nodeA, nodeB)
+
+end
+
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     local body  = Player:FindNodeByClassName('Body')

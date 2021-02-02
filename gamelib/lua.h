@@ -52,9 +52,8 @@ namespace game
         virtual void EndPlay() override;
         virtual void SaveGame() override;
         virtual bool GetNextAction(Action* out) override;
-        virtual FRect GetViewport() const override
-        { return mView; }
-
+        virtual FRect GetViewport() const override;
+        virtual void OnContactEvent(const ContactEvent& contact) override;
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
         virtual void OnChar(const wdk::WindowEventChar& text) override;
@@ -67,6 +66,7 @@ namespace game
         std::shared_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
         FRect mView;
+        Scene* mScene = nullptr;
     };
 
     void BindBase(sol::state& L);

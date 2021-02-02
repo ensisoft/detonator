@@ -47,6 +47,9 @@ void PhysicsEngine::UpdateScene(Scene& scene)
 {
     using RenderTree = Scene::RenderTree ;
 
+    for (auto& pair : mNodes)
+        pair.second.alive = false;
+
     // two options here for updating entity nodes based on the
     // physics simulation.
     // 1. traverse the whole scene and look which entity nodes
@@ -72,18 +75,106 @@ void PhysicsEngine::UpdateScene(Scene& scene)
           UpdateEntity(transform.GetAsMatrix(), *node.entity);
         transform.Pop();
     }
+    // cull physics nodes that were not touched.
+    for (auto it = mNodes.begin(); it != mNodes.end();)
+    {
+        auto& node = it->second;
+        if (node.alive)
+        {
+            ++it;
+            continue;
+        }
+        DEBUG("Deleting physics node '%1'", node.debug_name);
+
+        b2Fixture* fixture_list_head = node.world_body->GetFixtureList();
+        while (fixture_list_head) {
+            mFixtures.erase(fixture_list_head);
+            fixture_list_head = fixture_list_head->GetNext();
+        }
+        mWorld->DestroyBody(node.world_body);
+
+        it = mNodes.erase(it);
+    }
 }
 
 void PhysicsEngine::UpdateEntity(Entity& entity)
 {
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
     UpdateEntity(transform.GetAsMatrix(), entity);
 }
 
-void PhysicsEngine::Tick()
+void PhysicsEngine::Tick(std::vector<ContactEvent>* contacts)
 {
+    class ContactListener : public b2ContactListener
+    {
+    public:
+        ContactListener(PhysicsEngine& engine, std::vector<ContactEvent>* contacts)
+            : mEngine(engine)
+            , mContacts(contacts)
+        {}
+        // This is called when two fixtures begin to overlap.
+        // This is called for sensors and non-sensors.
+        // This event can only occur inside the time step.
+        virtual void BeginContact(b2Contact* contact) override
+        {
+            //DEBUG("BeginContact");
+            auto* A = contact->GetFixtureA();
+            auto* B = contact->GetFixtureB();
+            ASSERT(mEngine.mFixtures.find(A) != mEngine.mFixtures.end());
+            ASSERT(mEngine.mFixtures.find(B) != mEngine.mFixtures.end());
+            ContactEvent event;
+            event.type = ContactEvent::Type::BeginContact;
+            event.nodeA = mEngine.mFixtures[A];
+            event.nodeB = mEngine.mFixtures[B];
+            event.entityA = mEngine.mNodes[event.nodeA].entity;
+            event.entityB = mEngine.mNodes[event.nodeB].entity;
+            mContacts->push_back(std::move(event));
+        }
+
+        // This is called when two fixtures cease to overlap.
+        // This is called for sensors and non-sensors.
+        // This may be called when a body is destroyed,
+        // so this event can occur outside the time step.
+        virtual void EndContact(b2Contact* contact) override
+        {
+            //DEBUG("EndContact");
+            auto* A = contact->GetFixtureA();
+            auto* B = contact->GetFixtureB();
+            ASSERT(mEngine.mFixtures.find(A) != mEngine.mFixtures.end());
+            ASSERT(mEngine.mFixtures.find(B) != mEngine.mFixtures.end());
+            ContactEvent event;
+            event.type = ContactEvent::Type::EndContact;
+            event.nodeA = mEngine.mFixtures[A];
+            event.nodeB = mEngine.mFixtures[B];
+            event.entityA = mEngine.mNodes[event.nodeA].entity;
+            event.entityB = mEngine.mNodes[event.nodeB].entity;
+            mContacts->push_back(std::move(event));
+        }
+
+        // This is called after collision detection, but before collision resolution.
+        // This gives you a chance to disable the contact based on the current configuration.
+        // For example, you can implement a one-sided platform using this callback and
+        // calling b2Contact::SetEnabled(false). The contact will be re-enabled each
+        // time through collision processing, so you will need to disable the contact
+        // every time-step. The pre-solve event may be fired multiple times per time step
+        // per contact due to continuous collision detection.
+        virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
+        { }
+
+        // The post solve event is where you can gather collision impulse results.
+        // If you don't care about the impulses, you should probably just implement the pre-solve event.
+        virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override
+        { }
+    private:
+        PhysicsEngine& mEngine;
+        std::vector<ContactEvent>* mContacts = nullptr;
+    };
+    ContactListener listener(*this, contacts);
+
+    mWorld->SetContactListener(contacts ? &listener : (b2ContactListener*)nullptr);
     mWorld->Step(mTimestep, mNumVelocityIterations, mNumPositionIterations);
+    mWorld->SetContactListener(nullptr);
 }
 
 void PhysicsEngine::DeleteAll()
@@ -93,6 +184,7 @@ void PhysicsEngine::DeleteAll()
         mWorld->DestroyBody(node.second.world_body);
     }
     mNodes.clear();
+    mFixtures.clear();
 }
 
 void PhysicsEngine::DeleteBody(const std::string& id)
@@ -101,7 +193,15 @@ void PhysicsEngine::DeleteBody(const std::string& id)
     if (it == mNodes.end())
         return;
     auto& node = it->second;
+
+    b2Fixture* fixture = node.world_body->GetFixtureList();
+    while (fixture)
+    {
+        mFixtures.erase(fixture);
+        fixture = fixture->GetNext();
+    }
     mWorld->DestroyBody(node.world_body);
+
     mNodes.erase(it);
 }
 void PhysicsEngine::DeleteBody(const EntityNode& node)
@@ -160,7 +260,7 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
     mWorld.reset();
     mWorld = std::make_unique<b2World>(gravity);
 
-    gfx::Transform transform;
+    Transform transform;
     transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
     AddEntity(transform.GetAsMatrix(), entity);
 }
@@ -192,15 +292,16 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
 }
 #endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 
-void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
+void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity)
 {
     using RenderTree = Entity::RenderTree;
 
     class Visitor : public RenderTree::Visitor
     {
     public:
-        Visitor(const glm::mat4& model_to_world, PhysicsEngine& engine)
-          : mEngine(engine)
+        Visitor(const glm::mat4& model_to_world, const Entity& entity, PhysicsEngine& engine)
+          : mEntity(entity)
+          , mEngine(engine)
           , mTransform(model_to_world)
         {}
 
@@ -222,7 +323,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
                     return;
                 // add a new rigid body based on this node.
                 mTransform.Push(node->GetModelTransform());
-                    mEngine.AddPhysicsNode(mTransform.GetAsMatrix(), *node);
+                    mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
                 mTransform.Pop();
             }
             else
@@ -237,7 +338,8 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
                 }
             }
 
-            const auto& physics_node = it->second;
+            auto& physics_node = it->second;
+            physics_node.alive = true;
             if (physics_node.world_body->GetType() == b2BodyType::b2_staticBody)
             {
                 auto* body = physics_node.world_body;
@@ -271,7 +373,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
                 // i.e. the world transform of the node is expressed as a transform
                 // relative to its parent node.
                 glm::mat4 mat;
-                gfx::Transform transform;
+                Transform transform;
                 transform.Rotate(physics_world_angle);
                 transform.Translate(physics_world_pos.x, physics_world_pos.y);
                 transform.Push();
@@ -298,13 +400,14 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& scene)
             mTransform.Pop();
         }
     private:
+        const Entity& mEntity;
         PhysicsEngine& mEngine;
-        gfx::Transform mTransform;
+        Transform mTransform;
     };
 
-    Visitor visitor(model_to_world, *this);
+    Visitor visitor(model_to_world,  entity,*this);
 
-    auto& tree = scene.GetRenderTree();
+    auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 }
 
@@ -316,8 +419,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
     class Visitor : public RenderTree::ConstVisitor
     {
     public:
-        Visitor(const glm::mat4& mat, PhysicsEngine& engine)
-          : mEngine(engine)
+        Visitor(const glm::mat4& mat, const Entity& entity, PhysicsEngine& engine)
+          : mEntity(entity)
+          , mEngine(engine)
           , mTransform(mat)
         {}
 
@@ -335,7 +439,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
                 return;
 
             mTransform.Push(node->GetModelTransform());
-            mEngine.AddPhysicsNode(mTransform.GetAsMatrix(), *node);
+            mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
             mTransform.Pop();
         }
         virtual void LeaveNode(const EntityNode* node) override
@@ -345,16 +449,17 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
             mTransform.Pop();
         }
     private:
+        const Entity& mEntity;
         PhysicsEngine& mEngine;
-        gfx::Transform mTransform;
+        Transform mTransform;
     };
-    Visitor visitor(model_to_world, *this);
+    Visitor visitor(model_to_world, entity, *this);
 
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 }
 
-void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node)
+void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node)
 {
     const FBox box(model_to_world);
     const auto* body = node.GetRigidBody();
@@ -448,16 +553,17 @@ void PhysicsEngine::AddPhysicsNode(const glm::mat4& model_to_world, const Entity
     fixture.friction    = body->GetFriction();
     fixture.restitution = body->GetRestitution();
     fixture.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
-    world_body->CreateFixture(&fixture);
+    b2Fixture* fixture_ptr = world_body->CreateFixture(&fixture);
 
     PhysicsNode physics_node;
+    physics_node.debug_name = entity.GetName() + "/" + node.GetName();
     physics_node.world_body = world_body;
-    physics_node.instance   = node.GetId();
+    physics_node.entity     = entity.GetId();
+    physics_node.node       = node.GetId();
     physics_node.world_extents = node_size_in_world;
-    mNodes[node.GetId()] = physics_node;
-
-    DEBUG("Created new physics body for scene node '%1' ('%2')",
-          node.GetId(), node.GetName());
+    mNodes[node.GetId()]   = physics_node;
+    mFixtures[fixture_ptr] = node.GetId();
+    DEBUG("Created new physics body '%1'", physics_node.debug_name);
 }
 
 } // namespace

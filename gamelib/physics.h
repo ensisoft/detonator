@@ -31,6 +31,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include <unordered_map>
 
 class b2World;
@@ -48,6 +49,18 @@ namespace game
     class SceneNode;
     class Scene;
     class FBox;
+
+    struct ContactEvent {
+        enum class Type {
+            BeginContact,
+            EndContact
+        };
+        Type type = Type::BeginContact;
+        std::string entityA;
+        std::string entityB;
+        std::string nodeA;
+        std::string nodeB;
+    };
 
     class PhysicsEngine
     {
@@ -99,7 +112,7 @@ namespace game
         void UpdateEntity(Entity& entity);
 
         // Tick the physics simulation forward by one time step.
-        void Tick();
+        void Tick(std::vector<ContactEvent>* contacts = nullptr);
 
         // Delete all physics bodies currently in the system.
         void DeleteAll();
@@ -140,21 +153,28 @@ namespace game
     private:
         void UpdateEntity(const glm::mat4& model_to_world, Entity& scene);
         void AddEntity(const glm::mat4& model_to_world, const Entity& entity);
-        void AddPhysicsNode(const glm::mat4& model_to_world, const EntityNode& node);
+        void AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node);
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mLoader = nullptr;
         // Physics node.
         struct PhysicsNode {
-            // The instance id of the scene node in the scene.
-            std::string instance;
+            std::string debug_name;
+            // the instance id of the entity that owns the node.
+            std::string entity;
+            // The instance id of the entity node in the scene.
+            std::string node;
             // the extents (box) of the scene node.
             glm::vec2 world_extents;
-              // the corresponding box2d physics body for this node.
+            // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
+
+            bool alive = true;
         };
         // The nodes represented in the physics simulation.
         std::unordered_map<std::string, PhysicsNode> mNodes;
+        // the fixtures in the physics world that map to nodes.
+        std::unordered_map<b2Fixture*, std::string> mFixtures;
         // The current physics world if any.
         std::unique_ptr<b2World> mWorld;
         // Gravity vector of the world.
