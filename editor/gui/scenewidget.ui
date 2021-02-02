@@ -459,6 +459,9 @@
               <property name="text">
                <string>Snap to grid</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -1068,7 +1071,6 @@
   <tabstop>chkSnap</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
-  <tabstop>pushButton</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

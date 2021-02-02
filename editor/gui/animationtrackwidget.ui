@@ -432,6 +432,9 @@
               <property name="text">
                <string>Snap to grid</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -1158,6 +1161,13 @@
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLabel" name="actuatorInfo">
+             <property name="text">
+              <string>actuatorInfo</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <spacer name="horizontalSpacer_4">
              <property name="orientation">

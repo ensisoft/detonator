@@ -1330,7 +1330,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         {
             mUI.actuatorProperties->setEnabled(false);
         }
-        mUI.actuatorGroup->setTitle(QString("Actuator - %1").arg(item->text));
+        mUI.actuatorGroup->setTitle(QString("Actuator - %1, %2s").arg(item->text).arg(QString::number(end-start,'f', 2)));
         mUI.btnAddActuator->setEnabled(true);
         mUI.actuatorType->setEnabled(false);
         mUI.actuatorNode->setEnabled(false);
