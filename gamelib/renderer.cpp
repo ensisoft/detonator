@@ -27,6 +27,7 @@
 
 #include <type_traits>
 #include <algorithm>
+#include <unordered_set>
 
 #include "base/logging.h"
 #include "graphics/drawable.h"
@@ -109,13 +110,26 @@ void Renderer::Update(const EntityNode& node, float time, float dt)
 
 void Renderer::Update(const SceneClass& scene, float time, float dt)
 {
+    // when updating scene class the scene class nodes
+    // refer to an entity class. Multiple scene nodes that
+    // define a placement for an entity of some type then
+    // refer to the same entity class type and actually point
+    // to the *same* entity class object.
+    // this map is used to check against duplicate reference
+    // in order to discard incorrect duplicate update iterations
+    // of the entity class object.
+    std::unordered_set<std::string> klass_set;
+
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
         const auto& node = scene.GetNode(i);
         const auto& klass = node.GetEntityClass();
         if (!klass)
             continue;
+        else if (klass_set.find(klass->GetId()) != klass_set.end())
+            continue;
         Update(*klass, time, dt);
+        klass_set.insert(klass->GetId());
     }
 }
 void Renderer::Update(const Scene& scene, float time, float dt)
