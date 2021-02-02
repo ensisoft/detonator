@@ -4286,6 +4286,84 @@
       },
       "resource_id": "gwm3bTflRn",
       "resource_name": "Background"
+    },
+    {
+      "id": "dfb84OzuRo",
+      "idle_track": "",
+      "name": "Coin",
+      "nodes": [
+        {
+          "class": "w7ahuB3YZx",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "2ynNMbWOK3",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "angular_velocity": 0.0,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": true
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "linear_velocity": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Static"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "w7ahuB3YZx"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "dfb84OzuRo",
+      "resource_name": "Coin"
     }
   ],
   "materials": [
@@ -8003,6 +8081,154 @@
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 10.0,
+      "gamma": 1.0,
+      "id": "2ynNMbWOK3",
+      "particle_action": "None",
+      "resource_id": "2ynNMbWOK3",
+      "resource_name": "Coin Spin",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
+            "id": "1FpkKtmnZr",
+            "name": "star coin rotate 1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
+            "id": "Ew3fxv4O7K",
+            "name": "star coin rotate 2"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
+            "id": "qL31d29OqM",
+            "name": "star coin rotate 3"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
+            "id": "ISZa55vs02",
+            "name": "star coin rotate 4"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
+            "id": "NDYRxkCUa5",
+            "name": "star coin rotate 5"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
+            "id": "GC0phyHJnT",
+            "name": "star coin rotate 6"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
     }
   ],
   "scenes": [
@@ -9184,6 +9410,195 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "6zuwD0pMzH",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -1200.0,
+            "y": 100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "dvkliAdfMT",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -1100.0,
+            "y": 100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "dYDh5Fz35J",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -1000.0,
+            "y": 100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "xKr6GGbEWT",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -900.0,
+            "y": 100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "NkLfFEplEF",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -600.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "FQnY8SFLoQ",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_5",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -500.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "kiNspBsIaf",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -400.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "e0syrSo9bW",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_7",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -300.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dfb84OzuRo",
+          "flags": {
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "KhfxiTrkzD",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Coin_8",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -200.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -9476,6 +9891,51 @@
           {
             "node": {
               "id": "OdnS4aTNv2"
+            }
+          },
+          {
+            "node": {
+              "id": "6zuwD0pMzH"
+            }
+          },
+          {
+            "node": {
+              "id": "dvkliAdfMT"
+            }
+          },
+          {
+            "node": {
+              "id": "dYDh5Fz35J"
+            }
+          },
+          {
+            "node": {
+              "id": "xKr6GGbEWT"
+            }
+          },
+          {
+            "node": {
+              "id": "NkLfFEplEF"
+            }
+          },
+          {
+            "node": {
+              "id": "FQnY8SFLoQ"
+            }
+          },
+          {
+            "node": {
+              "id": "kiNspBsIaf"
+            }
+          },
+          {
+            "node": {
+              "id": "e0syrSo9bW"
+            }
+          },
+          {
+            "node": {
+              "id": "KhfxiTrkzD"
             }
           }
         ],
