@@ -27,7 +27,7 @@
 // Editor build time configuration file.
 
 #define BASE_LOGGING_ENABLE_LOG
-#define APP_TITLE "Editor"
+#define APP_TITLE "Gamestudio Editor"
 #define APP_VERSION "0.1"
 
 // some of the code uses LINUX_OS
