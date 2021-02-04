@@ -56,9 +56,16 @@ namespace gui
 
         // by default open resources in a new window or new tab
         QString default_open_win_or_tab = "Tab";
-        // Name of the qt style when using some specific QStyle
-        // or "GameStudio" when using our darkstyle.
-        QString style_name = GAMESTUDIO_DEFAULT_STYLE_NAME;
+        // Name of the qt style currently in use.
+        // kvantum is a Qt5 style engine, there's a windows port
+        // available here:
+        // https://github.com/ensisoft/kvantum-on-windows
+        // build the style per instructions and place into dist/styles
+        // note that this is a SVG rendered based style engine so the
+        // QtSvg.dll also needs to be deployed.
+        // kvantum is also available on linux through various package
+        // managers.
+        QString style_name = "kvantum";
 
         AppSettings()
         {

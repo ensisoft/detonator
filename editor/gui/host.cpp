@@ -109,7 +109,7 @@ private:
 void Main(int argc, char* argv[])
 {
     base::CommandLineOptions options;
-    options.Add("--app-style", "Name of the style to apply.", std::string(GAMESTUDIO_DEFAULT_STYLE_NAME));
+    options.Add("--app-style", "Name of the style to apply.", std::string(""));
     options.Add("--no-term-colors", "Turn off terminal colors.");
     options.Add("--standalone", "Run as a standalone executable.");
     options.Add("--workspace", "Path to workspace content dir.", std::string(""));
@@ -226,14 +226,7 @@ void Main(int argc, char* argv[])
     // note that this needs to be called *after* the QApplication object has been created.
     QCoreApplication::addLibraryPath(app::JoinPath(QCoreApplication::applicationDirPath(), "plugins"));
 
-    if (style == GAMESTUDIO_DEFAULT_STYLE_NAME)
-    {
-        QFile style(":qdarkstyle/style.qss");
-        style.open(QIODevice::ReadOnly);
-        app.setStyleSheet(style.readAll());
-        DEBUG("Loaded qdarkstyle.");
-    }
-    else if (!style.empty())
+    if (!style.empty())
     {
         QStyle* pstyle = QApplication::setStyle(app::FromUtf8(style));
         if (pstyle == nullptr) {

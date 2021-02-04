@@ -248,7 +248,6 @@ add_executable(Editor
     editor/gui/timelinewidget.h
     editor/gui/timelinewidget.cpp
     editor/resource/resource.qrc
-    editor/resource/qdarkstyle/style.qrc
     third_party/QSourceHighlight/languagedata.cpp
     third_party/QSourceHighlight/qsourcehighliter.cpp
     third_party/QSourceHighlight/qsourcehighliterthemes.cpp
@@ -338,7 +337,6 @@ add_executable(EditorGameHost
     editor/gui/playwindow.ui
     editor/gui/playwindow.cpp
     editor/resource/resource.qrc
-    editor/resource/qdarkstyle/style.qrc
     third_party/base64/base64.cpp
     third_party/stb/stb_image_write.c
     third_party/stb/stb_image.c

@@ -172,13 +172,6 @@ int main(int argc, char* argv[])
 {
     try
     {
-        bool use_dark_style = true;
-        for (int i=1; i<argc; ++i)
-        {
-            if (!std::strcmp("--no-dark-style", argv[i]))
-                use_dark_style = false;
-        }
-
         // prefix with a . to make this a "hidden" dir
         // which is the convention on Linux
         app::InitializeAppHome("." APP_TITLE);

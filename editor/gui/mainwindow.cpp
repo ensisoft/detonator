@@ -222,23 +222,14 @@ void MainWindow::loadState()
     settings.getValue("TextEditor", "tab_spaces",             &editor_settings.tab_spaces);
     TextEditor::SetDefaultSettings(editor_settings);
 
-    if (mSettings.style_name == GAMESTUDIO_DEFAULT_STYLE_NAME)
-    {
-        QFile style(":qdarkstyle/style.qss");
-        style.open(QIODevice::ReadOnly);
-        QTextStream stream(&style);
-        mApplication.setStyleSheet(stream.readAll());
+    QStyle* style = QApplication::setStyle(mSettings.style_name);
+    if (style == nullptr) {
+        WARN("No such application style '%1'", mSettings.style_name);
+    } else {
+        QApplication::setPalette(style->standardPalette());
+        DEBUG("Application style set to '%1'", mSettings.style_name);
     }
-    else
-    {
-        QStyle* style = QApplication::setStyle(mSettings.style_name);
-        if (style == nullptr) {
-            WARN("No such application style '%1'", mSettings.style_name);
-        } else {
-            QApplication::setPalette(style->standardPalette());
-            DEBUG("Application style set to '%1'", mSettings.style_name);
-        }
-    }
+
     mEventLog.SetShowBits(log_bits);
     mEventLog.invalidate();
     mUI.actionLogShowInfo->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Info));
@@ -1233,23 +1224,13 @@ void MainWindow::on_actionSettings_triggered()
     if (current_style == mSettings.style_name)
         return;
 
-    if (mSettings.style_name == GAMESTUDIO_DEFAULT_STYLE_NAME)
-    {
-        QFile style(":qdarkstyle/style.qss");
-        style.open(QIODevice::ReadOnly);
-        QTextStream stream(&style);
-        mApplication.setStyleSheet(stream.readAll());
-    }
-    else
-    {
-        QStyle* style = QApplication::setStyle(mSettings.style_name);
-        if (style == nullptr) {
-            WARN("No such application style '%1'", mSettings.style_name);
-        } else {
-            mApplication.setStyleSheet("");
-            QApplication::setPalette(style->standardPalette());
-            DEBUG("Application style set to '%1'", mSettings.style_name);
-        }
+    QStyle* style = QApplication::setStyle(mSettings.style_name);
+    if (style == nullptr) {
+        WARN("No such application style '%1'", mSettings.style_name);
+    } else {
+        mApplication.setStyleSheet("");
+        QApplication::setPalette(style->standardPalette());
+        DEBUG("Application style set to '%1'", mSettings.style_name);
     }
 }
 
