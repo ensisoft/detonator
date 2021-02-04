@@ -248,6 +248,7 @@ add_executable(Editor
     editor/gui/timelinewidget.h
     editor/gui/timelinewidget.cpp
     editor/resource/resource.qrc
+    editor/welcome.qrc
     third_party/QSourceHighlight/languagedata.cpp
     third_party/QSourceHighlight/qsourcehighliter.cpp
     third_party/QSourceHighlight/qsourcehighliterthemes.cpp

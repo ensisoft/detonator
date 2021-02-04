@@ -158,6 +158,8 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.actionPaste->setShortcut(QKeySequence::Paste);
     mUI.actionUndo->setShortcut(QKeySequence::Undo);
 
+    ShowHelpWidget();
+
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
     // and tick the workspace for periodic cleanup and stuff.
@@ -344,6 +346,13 @@ void MainWindow::prepareMainTab()
 
 }
 
+void MainWindow::LoadDemoWorkspace(const QString& which)
+{
+    QString where = qApp->applicationDirPath();
+
+    LoadWorkspace(app::JoinPath(where, which));
+}
+
 bool MainWindow::LoadWorkspace(const QString& dir)
 {
     auto workspace = std::make_unique<app::Workspace>();
@@ -443,6 +452,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
     mWorkspaceProxy.SetShowBits(show_resource_bits);
     mWorkspaceProxy.invalidate();
+    ShowHelpWidget();
     return success;
 }
 
@@ -637,6 +647,8 @@ void MainWindow::CloseWorkspace()
     mWorkspace.reset();
 
     gfx::SetResourceLoader(nullptr);
+
+    ShowHelpWidget();
 }
 
 void MainWindow::showWindow()
@@ -809,7 +821,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
     mUI.mainToolBar->addSeparator();
 
     prepareWindowMenu();
-
+    ShowHelpWidget();
 }
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
@@ -1056,7 +1068,6 @@ void MainWindow::on_actionSaveWorkspace_triggered()
 
 void MainWindow::on_actionLoadWorkspace_triggered()
 {
-
     const auto& file = QFileDialog::getOpenFileName(this, tr("Select Workspace"),
         QString(), QString("workspace.json"));
     if (file.isEmpty())
@@ -1117,7 +1128,7 @@ void MainWindow::on_actionLoadWorkspace_triggered()
         mRecentWorkspaces.pop_back();
 
     BuildRecentWorkspacesMenu();
-
+    ShowHelpWidget();
     NOTE("Loaded workspace.");
 }
 
@@ -1189,6 +1200,8 @@ void MainWindow::on_actionNewWorkspace_triggered()
     mWorkspaceProxy.SetModel(mWorkspace.get());
     mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
     gfx::SetResourceLoader(mWorkspace.get());
+
+    ShowHelpWidget();
     NOTE("New workspace created.");
 }
 
@@ -1503,6 +1516,41 @@ void MainWindow::on_actionProjectPlay_triggered()
             mPlayWindow->raise();
         }
     }
+}
+
+void MainWindow::on_btnBandit_clicked()
+{
+    LoadDemoWorkspace("demos/bandit");
+}
+void MainWindow::on_btnMaterial_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::Material, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnParticle_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::ParticleSystem, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnShape_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::Shape, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnEntity_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::Entity, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnScene_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::Scene, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnScript_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::Script, mWorkspace.get()), new_window);
 }
 
 void MainWindow::RefreshUI()
@@ -1986,6 +2034,31 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     }
     // no child window
     return nullptr;
+}
+
+void MainWindow::ShowHelpWidget()
+{
+    // todo: could build the demo setup here dynamically.
+
+    mUI.lblBanditDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/bandit"));
+
+    if (mWorkspace && mCurrentWidget)
+    {
+        mUI.helpWidget->setVisible(false);
+        mUI.mainTab->setVisible(true);
+    }
+    else if (mWorkspace && !mCurrentWidget)
+    {
+        mUI.helpWidget->setVisible(true);
+        mUI.helpWidget->setCurrentIndex(0);
+        mUI.mainTab->setVisible(false);
+    }
+    else
+    {
+        mUI.helpWidget->setCurrentIndex(1);
+        mUI.helpWidget->setVisible(true);
+        mUI.mainTab->setVisible(false);
+    }
 }
 
 void MainWindow::EditResources(bool open_new_window)

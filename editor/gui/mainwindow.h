@@ -148,6 +148,13 @@ namespace gui
         void on_actionNewResource_triggered();
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
+        void on_btnBandit_clicked();
+        void on_btnMaterial_clicked();
+        void on_btnParticle_clicked();
+        void on_btnShape_clicked();
+        void on_btnEntity_clicked();
+        void on_btnScene_clicked();
+        void on_btnScript_clicked();
         void actionWindowFocus_triggered();
         void RefreshUI();
         void ShowNote(const app::Event& event);
@@ -161,12 +168,15 @@ namespace gui
     private:
         void BuildRecentWorkspacesMenu();
         bool SaveState();
+        void LoadDemoWorkspace(const QString& which);
         bool LoadWorkspace(const QString& dir);
         bool SaveWorkspace();
         void CloseWorkspace();
         void EditResources(bool open_new_window);
         bool FocusWidget(const QString& id);
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
+        void ShowHelpWidget();
+
 
     private:
         bool event(QEvent* event)  override;
