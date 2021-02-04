@@ -138,7 +138,13 @@
     </item>
     <item>
      <widget class="QTabWidget" name="mainTab">
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
       <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <property name="tabBarAutoHide">
        <bool>true</bool>
       </property>
      </widget>
