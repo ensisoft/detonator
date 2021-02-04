@@ -17,884 +17,480 @@
    <iconset resource="../resource/resource.qrc">
     <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_7">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="title">
-      <string>Scene</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_11">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Base  properties</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="name">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="ID">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_5">
+       <property name="title">
+        <string>Script variables</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_17">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>Base  properties</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="name">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Name</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>ID</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="ID">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_5">
-            <property name="title">
-             <string>Script variables</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_17">
-             <item>
-              <widget class="QTableView" name="scriptVarList">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="selectionMode">
-                <enum>QAbstractItemView::SingleSelection</enum>
-               </property>
-               <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectRows</enum>
-               </property>
-               <attribute name="horizontalHeaderStretchLastSection">
-                <bool>true</bool>
-               </attribute>
-               <attribute name="verticalHeaderVisible">
-                <bool>false</bool>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_7">
-               <item>
-                <spacer name="horizontalSpacer_3">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Preferred</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnNewScriptVar">
-                 <property name="text">
-                  <string>New ...</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnEditScriptVar">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>Edit ...</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnDeleteScriptVar">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>Delete</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="transform">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>View transform</string>
-            </property>
-            <property name="checkable">
-             <bool>false</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <item>
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_18">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(0, 200, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>X Pos</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QDoubleSpinBox" name="rotation">
-                 <property name="wrapping">
-                  <bool>true</bool>
-                 </property>
-                 <property name="minimum">
-                  <double>-180.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>180.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_21">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(200,0, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>Y Pos</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="3">
-                <widget class="QDoubleSpinBox" name="scaleX">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>100.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>1.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="2">
-                <widget class="QLabel" name="label_20">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(0, 200, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>X Scale</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="2">
-                <widget class="QPushButton" name="btnViewPlus90">
-                 <property name="text">
-                  <string>+ 90°</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="3">
-                <widget class="QPushButton" name="btnViewMinus90">
-                 <property name="text">
-                  <string>- 90°</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QDoubleSpinBox" name="translateY">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>-1000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="3">
-                <widget class="QDoubleSpinBox" name="scaleY">
-                 <property name="minimum">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>100.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>1.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QDoubleSpinBox" name="translateX">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>-1000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_22">
-                 <property name="text">
-                  <string>Rotation</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QLabel" name="label_19">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(200,0, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>Y Scale</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnViewReset">
-               <property name="text">
-                <string>Reset</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::MinimumExpanding</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to maintain aspect ratio when resizing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::AutoText</enum>
-            </property>
-            <property name="scaledContents">
-             <bool>false</bool>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QTableView" name="scriptVarList">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+         </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="gui::GfxWidget" name="widget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>100</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Zoom</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="zoom">
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>5.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="cmbGrid"/>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Expanding</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkSnap">
-              <property name="text">
-               <string>Snap to grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowViewport">
-              <property name="text">
-               <string>Show viewport</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowOrigin">
-              <property name="text">
-               <string>Show origin</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowGrid">
-              <property name="text">
-               <string>Show grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QGroupBox" name="groupBox_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>Scene graph</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="gui::TreeWidget" name="tree" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>200</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="contextMenuPolicy">
-                <enum>Qt::CustomContextMenu</enum>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QFrame:hover {
-  border: 1px solid #148CD2;
-  color: #F0F0F0;
-}
-</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="nodeProperties">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Node properties</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <layout class="QGridLayout" name="gridLayout_2">
-               <item row="2" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_3">
-                 <item>
-                  <widget class="QComboBox" name="nodeEntity"/>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="btnEntityParams">
-                   <property name="text">
-                    <string>...</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="../resource/resource.qrc">
-                     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Entity</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QSpinBox" name="nodeLayer">
-                 <property name="minimum">
-                  <number>-100</number>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <widget class="QCheckBox" name="nodeIsVisible">
-                 <property name="text">
-                  <string>Visible</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="nodeName">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_14">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Node ID</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="nodeID">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Name</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Layer</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QComboBox" name="nodeLink">
-                 <property name="placeholderText">
-                  <string>Scene Root</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>Parent node</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="nodeTransform">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>Node transform</string>
-            </property>
-            <property name="checkable">
-             <bool>false</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_14">
-             <item>
-              <layout class="QGridLayout" name="gridLayout_3">
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_28">
-                 <property name="text">
-                  <string>Rotation</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="4">
-                <widget class="QLabel" name="label_26">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(200,0, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>Y Pos</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="4">
-                <widget class="QPushButton" name="btnNodePlus90">
-                 <property name="text">
-                  <string>+ 90°</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_23">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(0, 200, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>X Pos</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QDoubleSpinBox" name="nodeRotation">
-                 <property name="wrapping">
-                  <bool>true</bool>
-                 </property>
-                 <property name="minimum">
-                  <double>-180.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>180.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QDoubleSpinBox" name="nodeTranslateX">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>-10000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>10000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="2">
-                <widget class="QDoubleSpinBox" name="nodeScaleX">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>10000.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>1.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="4">
-                <widget class="QLabel" name="label_29">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(200,0, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>Y Scale</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="5">
-                <widget class="QDoubleSpinBox" name="nodeTranslateY">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <double>-10000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>10000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_25">
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(0, 200, 0)</string>
-                 </property>
-                 <property name="text">
-                  <string>X Scale</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="5">
-                <widget class="QPushButton" name="btnNodeMinus90">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>- 90°</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="5">
-                <widget class="QDoubleSpinBox" name="nodeScaleY">
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>10000.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>1.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
+           <spacer name="horizontalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
              <enum>QSizePolicy::Preferred</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>20</width>
-              <height>40</height>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnNewScriptVar">
+            <property name="text">
+             <string>New ...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnEditScriptVar">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Edit ...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteScriptVar">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="transform">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>View transform</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 200, 0)</string>
+            </property>
+            <property name="text">
+             <string>X Pos</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="rotation">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
+            <property name="text">
+             <string>Y Pos</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="scaleX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_20">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 200, 0)</string>
+            </property>
+            <property name="text">
+             <string>X Scale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="btnViewPlus90">
+            <property name="text">
+             <string>+ 90°</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="btnViewMinus90">
+            <property name="text">
+             <string>- 90°</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="translateY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>-1000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="scaleY">
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="translateX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>-1000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Rotation</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_19">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
+            <property name="text">
+             <string>Y Scale</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnViewReset">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to maintain aspect ratio when resizing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Viewport</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="gui::GfxWidget" name="widget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>100</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Zoom</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="zoom">
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>5.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmbGrid"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkSnap">
+            <property name="text">
+             <string>Snap to grid</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowViewport">
+            <property name="text">
+             <string>Show viewport</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowOrigin">
+            <property name="text">
+             <string>Show origin</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowGrid">
+            <property name="text">
+             <string>Show grid</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -902,6 +498,406 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Scene graph</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="gui::TreeWidget" name="tree" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QFrame:hover {
+  border: 1px solid #148CD2;
+  color: #F0F0F0;
+}
+</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="nodeProperties">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Node properties</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QComboBox" name="nodeEntity"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnEntityParams">
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Entity</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="nodeLayer">
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="nodeIsVisible">
+            <property name="text">
+             <string>Visible</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="nodeName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Node ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="nodeID">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Layer</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="nodeLink">
+            <property name="placeholderText">
+             <string>Scene Root</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Parent node</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="nodeTransform">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Node transform</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_14">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_28">
+            <property name="text">
+             <string>Rotation</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_26">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
+            <property name="text">
+             <string>Y Pos</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="4">
+           <widget class="QPushButton" name="btnNodePlus90">
+            <property name="text">
+             <string>+ 90°</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 200, 0)</string>
+            </property>
+            <property name="text">
+             <string>X Pos</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QDoubleSpinBox" name="nodeRotation">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QDoubleSpinBox" name="nodeTranslateX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>-10000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QDoubleSpinBox" name="nodeScaleX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLabel" name="label_29">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
+            <property name="text">
+             <string>Y Scale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QDoubleSpinBox" name="nodeTranslateY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>-10000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 200, 0)</string>
+            </property>
+            <property name="text">
+             <string>X Scale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QPushButton" name="btnNodeMinus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>- 90°</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5">
+           <widget class="QDoubleSpinBox" name="nodeScaleY">
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
   </layout>
   <action name="actionNodeDelete">
