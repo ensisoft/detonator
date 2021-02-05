@@ -14,6 +14,9 @@
         "shader_file": "",
         "use_shader_file": false
     },
+    "4rBCnTGuXK": {
+        "material": "Bandit Fall"
+    },
     "5GPKkIzzUf": {
         "checked_for_packing": true
     },
@@ -123,6 +126,9 @@
     },
     "O5QefURbEM": {
         "checked_for_packing": true
+    },
+    "PBPIRCm9MB": {
+        "material": "Bandit Die"
     },
     "PiCFlSf9Gm": {
         "checked_for_packing": true
@@ -335,7 +341,6 @@
         "checked_for_packing": true
     },
     "vWm1hXNdOD": {
-        "checked_for_packing": true
     },
     "vYm7CMPRrJ": {
         "checked_for_packing": true

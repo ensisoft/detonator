@@ -1856,6 +1856,80 @@
             "x": 120.0,
             "y": 140.0
           }
+        },
+        {
+          "class": "ysQmAZ8shT",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "4rBCnTGuXK",
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": false
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "90E8gRgYDP",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Fall",
+          "position": {
+            "x": -5.0,
+            "y": 8.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 120.0,
+            "y": 140.0
+          }
+        },
+        {
+          "class": "uEzZkNIIJv",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "PBPIRCm9MB",
+            "flags": {
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": false
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "9aRwE7zov7",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Die",
+          "position": {
+            "x": -5.0,
+            "y": 8.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 120.0,
+            "y": 140.0
+          }
         }
       ],
       "render_tree": {
@@ -1880,6 +1954,16 @@
               {
                 "node": {
                   "id": "yF3GzMv8OR"
+                }
+              },
+              {
+                "node": {
+                  "id": "ysQmAZ8shT"
+                }
+              },
+              {
+                "node": {
+                  "id": "uEzZkNIIJv"
                 }
               }
             ],
@@ -1938,6 +2022,28 @@
                 "starttime": 0.0
               },
               "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 1.0,
+                "flag": "VisibleInGame",
+                "id": "vE0jOzB9Al",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 1.0,
+                "flag": "VisibleInGame",
+                "id": "E1aDIr8lKY",
+                "node": "uEzZkNIIJv",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
             }
           ],
           "delay": 0.0,
@@ -1988,6 +2094,28 @@
                 "flag": "VisibleInGame",
                 "id": "tyr8CZjEKL",
                 "node": "yF3GzMv8OR",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.09507054090499878,
+                "flag": "VisibleInGame",
+                "id": "W7wHPdMQPU",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.09305836260318756,
+                "flag": "VisibleInGame",
+                "id": "v5XjD51HyC",
+                "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
               "type": "SetFlag"
@@ -2044,6 +2172,28 @@
                 "starttime": 0.0
               },
               "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.10060364007949829,
+                "flag": "VisibleInGame",
+                "id": "rF7YiWpIw4",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.10261568427085876,
+                "flag": "VisibleInGame",
+                "id": "7Lzy2z4gXA",
+                "node": "uEzZkNIIJv",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
             }
           ],
           "delay": 0.0,
@@ -2097,6 +2247,28 @@
                 "starttime": 0.0
               },
               "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.09708249568939209,
+                "flag": "VisibleInGame",
+                "id": "YjgFLgRgGR",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.09758555144071579,
+                "flag": "VisibleInGame",
+                "id": "HgA8F8j3t1",
+                "node": "uEzZkNIIJv",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
             }
           ],
           "delay": 0.0,
@@ -2104,6 +2276,156 @@
           "id": "JptgWmzdfY",
           "looping": false,
           "name": "Jump"
+        },
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.20271632075309753,
+                "flag": "VisibleInGame",
+                "id": "XnRGMMR7jE",
+                "node": "E5g8vRsJGU",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.20120733976364136,
+                "flag": "VisibleInGame",
+                "id": "iP8hmKsLaR",
+                "node": "lLQQND6Zx7",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.20020131766796112,
+                "flag": "VisibleInGame",
+                "id": "OD52kANM1i",
+                "node": "KWkjjMvdpN",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.2002009004354477,
+                "flag": "VisibleInGame",
+                "id": "JByFlM7KOG",
+                "node": "yF3GzMv8OR",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "On",
+                "duration": 0.1971834897994995,
+                "flag": "VisibleInGame",
+                "id": "ms9sT29MFj",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.1986924558877945,
+                "flag": "VisibleInGame",
+                "id": "hS7rTubFpi",
+                "node": "uEzZkNIIJv",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.5,
+          "id": "4FKDqoTRqr",
+          "looping": true,
+          "name": "Fall"
+        },
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.19969822466373444,
+                "flag": "VisibleInGame",
+                "id": "N2JkMyiHk9",
+                "node": "E5g8vRsJGU",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.1996982842683792,
+                "flag": "VisibleInGame",
+                "id": "6ZAjJr1plq",
+                "node": "lLQQND6Zx7",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.20020121335983276,
+                "flag": "VisibleInGame",
+                "id": "OYeWJs9j6z",
+                "node": "KWkjjMvdpN",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.19969843327999115,
+                "flag": "VisibleInGame",
+                "id": "SvC7JwLtel",
+                "node": "yF3GzMv8OR",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.20070414245128632,
+                "flag": "VisibleInGame",
+                "id": "yuYiHj1dJx",
+                "node": "ysQmAZ8shT",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "On",
+                "duration": 0.19919505715370178,
+                "flag": "VisibleInGame",
+                "id": "8ozpAa96iF",
+                "node": "uEzZkNIIJv",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.699999988079071,
+          "id": "zDTReDlqHd",
+          "looping": false,
+          "name": "Die"
         }
       ],
       "vars": [
@@ -12150,6 +12472,276 @@
           "t": -0.0,
           "x": 0.9000000357627869,
           "y": 0.0
+        }
+      ]
+    },
+    {
+      "draws": [
+        {
+          "count": 19,
+          "offset": 0,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "4rBCnTGuXK",
+      "resource_id": "4rBCnTGuXK",
+      "resource_name": "Bandit Fall",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.5992366671562195,
+          "t": 0.4494274854660034,
+          "x": 0.5992366671562195,
+          "y": -0.4494274854660034
+        },
+        {
+          "s": 0.6498091816902161,
+          "t": 0.09923664480447769,
+          "x": 0.6498091816902161,
+          "y": -0.09923664480447769
+        },
+        {
+          "s": 0.4494274854660034,
+          "t": 0.09923664480447769,
+          "x": 0.4494274854660034,
+          "y": -0.09923664480447769
+        },
+        {
+          "s": 0.29961833357810974,
+          "t": 0.14980916678905487,
+          "x": 0.29961833357810974,
+          "y": -0.14980916678905487
+        },
+        {
+          "s": 0.25,
+          "t": 0.19942748546600342,
+          "x": 0.25,
+          "y": -0.19942748546600342
+        },
+        {
+          "s": 0.3492366373538971,
+          "t": 0.5,
+          "x": 0.3492366373538971,
+          "y": -0.5
+        },
+        {
+          "s": 0.3492366373538971,
+          "t": 0.6498091816902161,
+          "x": 0.3492366373538971,
+          "y": -0.6498091816902161
+        },
+        {
+          "s": 0.4494274854660034,
+          "t": 0.75,
+          "x": 0.4494274854660034,
+          "y": -0.75
+        },
+        {
+          "s": 0.5,
+          "t": 0.7996183037757874,
+          "x": 0.5,
+          "y": -0.7996183037757874
+        },
+        {
+          "s": 0.6498091816902161,
+          "t": 0.7996183037757874,
+          "x": 0.6498091816902161,
+          "y": -0.7996183037757874
+        },
+        {
+          "s": 0.6994274854660034,
+          "t": 0.75,
+          "x": 0.6994274854660034,
+          "y": -0.75
+        },
+        {
+          "s": 0.75,
+          "t": 0.6994274854660034,
+          "x": 0.75,
+          "y": -0.6994274854660034
+        },
+        {
+          "s": 0.7996183037757874,
+          "t": 0.6498091816902161,
+          "x": 0.7996183037757874,
+          "y": -0.6498091816902161
+        },
+        {
+          "s": 0.9494274854660034,
+          "t": 0.4494274854660034,
+          "x": 0.9494274854660034,
+          "y": -0.4494274854660034
+        },
+        {
+          "s": 0.9494274854660034,
+          "t": 0.3492366373538971,
+          "x": 0.9494274854660034,
+          "y": -0.3492366373538971
+        },
+        {
+          "s": 0.8998091816902161,
+          "t": 0.29961833357810974,
+          "x": 0.8998091816902161,
+          "y": -0.29961833357810974
+        },
+        {
+          "s": 0.7996183037757874,
+          "t": 0.25,
+          "x": 0.7996183037757874,
+          "y": -0.25
+        },
+        {
+          "s": 0.75,
+          "t": 0.14980916678905487,
+          "x": 0.75,
+          "y": -0.14980916678905487
+        },
+        {
+          "s": 0.6498091816902161,
+          "t": 0.09923664480447769,
+          "x": 0.6498091816902161,
+          "y": -0.09923664480447769
+        }
+      ]
+    },
+    {
+      "draws": [
+        {
+          "count": 21,
+          "offset": 0,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "PBPIRCm9MB",
+      "resource_id": "PBPIRCm9MB",
+      "resource_name": "Bandit Die",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.5992366671562195,
+          "t": 0.5992366671562195,
+          "x": 0.5992366671562195,
+          "y": -0.5992366671562195
+        },
+        {
+          "s": 0.75,
+          "t": 0.15000000596046448,
+          "x": 0.75,
+          "y": -0.15000000596046448
+        },
+        {
+          "s": 0.5992366671562195,
+          "t": 0.09923664480447769,
+          "x": 0.5992366671562195,
+          "y": -0.09923664480447769
+        },
+        {
+          "s": 0.29961833357810974,
+          "t": 0.09923664480447769,
+          "x": 0.29961833357810974,
+          "y": -0.09923664480447769
+        },
+        {
+          "s": 0.14980916678905487,
+          "t": 0.29961833357810974,
+          "x": 0.14980916678905487,
+          "y": -0.29961833357810974
+        },
+        {
+          "s": 0.09923664480447769,
+          "t": 0.3492366373538971,
+          "x": 0.09923664480447769,
+          "y": -0.3492366373538971
+        },
+        {
+          "s": 0.09923664480447769,
+          "t": 0.5,
+          "x": 0.09923664480447769,
+          "y": -0.5
+        },
+        {
+          "s": 0.049618322402238846,
+          "t": 0.6498091816902161,
+          "x": 0.049618322402238846,
+          "y": -0.6498091816902161
+        },
+        {
+          "s": 0.09923664480447769,
+          "t": 0.75,
+          "x": 0.09923664480447769,
+          "y": -0.75
+        },
+        {
+          "s": 0.14980916678905487,
+          "t": 0.9494274854660034,
+          "x": 0.14980916678905487,
+          "y": -0.9494274854660034
+        },
+        {
+          "s": 0.3492366373538971,
+          "t": 0.9494274854660034,
+          "x": 0.3492366373538971,
+          "y": -0.9494274854660034
+        },
+        {
+          "s": 0.5,
+          "t": 0.8492366671562195,
+          "x": 0.5,
+          "y": -0.8492366671562195
+        },
+        {
+          "s": 0.5992366671562195,
+          "t": 0.7996183037757874,
+          "x": 0.5992366671562195,
+          "y": -0.7996183037757874
+        },
+        {
+          "s": 0.6994274854660034,
+          "t": 0.7996183037757874,
+          "x": 0.6994274854660034,
+          "y": -0.7996183037757874
+        },
+        {
+          "s": 0.7996183037757874,
+          "t": 0.6994274854660034,
+          "x": 0.7996183037757874,
+          "y": -0.6994274854660034
+        },
+        {
+          "s": 0.8998091816902161,
+          "t": 0.6498091816902161,
+          "x": 0.8998091816902161,
+          "y": -0.6498091816902161
+        },
+        {
+          "s": 1.0,
+          "t": 0.5992366671562195,
+          "x": 1.0,
+          "y": -0.5992366671562195
+        },
+        {
+          "s": 1.0,
+          "t": 0.4494274854660034,
+          "x": 1.0,
+          "y": -0.4494274854660034
+        },
+        {
+          "s": 0.9494274854660034,
+          "t": 0.3492366373538971,
+          "x": 0.9494274854660034,
+          "y": -0.3492366373538971
+        },
+        {
+          "s": 0.8500000238418579,
+          "t": 0.20000000298023224,
+          "x": 0.8500000238418579,
+          "y": -0.20000000298023224
+        },
+        {
+          "s": 0.75,
+          "t": 0.15000000596046448,
+          "x": 0.75,
+          "y": -0.15000000596046448
         }
       ]
     }
