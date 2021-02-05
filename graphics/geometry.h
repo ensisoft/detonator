@@ -171,14 +171,10 @@ namespace gfx
         // Add a draw command for some particular set of vertices within
         // the current vertex buffer.
         virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) = 0;
-        // Set (request) the line width to be using when rasterizing
-        // the geometry as a series of lines.
-        virtual void SetLineWidth(float width) = 0;
         // Set the vertex buffer that contains the vertex data for this geometry.
         virtual void SetVertexBuffer(std::unique_ptr<VertexBuffer> buffer) = 0;
         // Set the layout object that describes the contents of the vertex buffer vertices.
         virtual void SetVertexLayout(const VertexLayout& layout) = 0;
-
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
         void SetVertexBuffer(const Vertex* vertices, std::size_t count)

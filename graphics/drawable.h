@@ -39,86 +39,24 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "graphics/geometry.h"
+#include "graphics/device.h"
 
 namespace gfx
 {
     class Device;
     class Shader;
     class Geometry;
+    class Program;
     class ResourcePacker;
 
-    // Drawable interface represents some kind of drawable
-    // object or shape such as quad/rectangle/mesh/particle engine.
-    class Drawable
-    {
-    public:
-        // Style of the drawable's geometry determines how the geometry
-        // is to be rasterized.
-        enum class Style {
-            // Rasterize the outline of the shape as lines.
-            // Only the fragments that are within the line are shaded.
-            // Line width setting is applied to determine the width
-            // of the lines.
-            Outline,
-            // Rasterize the individual triangles as lines.
-            Wireframe,
-            // Rasterize the interior of the drawable. This is the default
-            Solid,
-            // Rasterize the shape's vertices as individual points.
-            Points
-        };
-
-        struct Environment {
-            // how many render surface units (pixels, texels if rendering to a texture)
-            // to a game unit.
-            glm::vec2 pixel_ratio = {1.0f, 1.0f};
-            // the current projection matrix that will be used to project the
-            // vertices from the view space into Normalized Device Coordinates.
-            const glm::mat4* proj_matrix = nullptr;
-            // The current view matrix that will be used to transform the
-            // vertices to the game camera/view space.
-            const glm::mat4* view_matrix = nullptr;
-        };
-
-        virtual ~Drawable() = default;
-        // Get the device specific shader object.
-        // If the shader does not yet exist on the device it's created
-        // and compiled.  On any errors nullptr should be returned.
-        virtual Shader* GetShader(Device& device) const = 0;
-        // Get the device specific geometry object. If the geometry
-        // does not yet exist on the device it's created and the
-        // contents from this drawable object are uploaded in some
-        // device specific data format.
-        virtual Geometry* Upload(const Environment& env, Device& device) const = 0;
-        // Update the state of the drawable object. dt is the
-        // elapsed (delta) time in seconds.
-        virtual void Update(float dt) {}
-        // Request a particular line width to be used when style
-        // is either Outline or Wireframe.
-        virtual void SetLineWidth(float width) {}
-        // Set the style to be used for rasterizing the drawable
-        // shapes's fragments.
-        // Not all drawables support all Styles.
-        virtual void SetStyle(Style style) {}
-        // Get the current style.
-        virtual Style GetStyle() const = 0;
-        // Returns true if the drawable is still considered to be alive.
-        // For example a particle simulation still has live particles.
-        virtual bool IsAlive() const
-        { return true; }
-        // Restart the drawable, if applicable.
-        virtual void Restart() {}
-        // Get the ID of the drawable shape. Used to map the
-        // drawable to a device specific program object.
-        inline std::string GetId() const
-        { return typeid(*this).name(); }
-    private:
-    };
-
     // DrawableClass defines a new type of drawable.
+    // Currently not all drawable shapes have a drawable specific
+    // class since theres's no actual class specific state, so
+    // the class state can be folded directly into he instance classes.
     class DrawableClass
     {
     public:
+        using Culling = Device::State::Culling;
         // Type of the drawable (and its instances)
         enum class Type {
             Arrow,
@@ -157,6 +95,95 @@ namespace gfx
     };
 
 
+    // Drawable interface represents some kind of drawable
+    // object or shape such as quad/rectangle/mesh/particle engine.
+    class Drawable
+    {
+    public:
+        // Style of the drawable's geometry determines how the geometry
+        // is to be rasterized.
+        enum class Style {
+            // Rasterize the outline of the shape as lines.
+            // Only the fragments that are within the line are shaded.
+            // Line width setting is applied to determine the width
+            // of the lines.
+            Outline,
+            // Rasterize the individual triangles as lines.
+            Wireframe,
+            // Rasterize the interior of the drawable. This is the default
+            Solid,
+            // Rasterize the shape's vertices as individual points.
+            Points
+        };
+
+        // Which polygon faces to cull. Note that this only applies
+        // to polygons, not to lines or points.
+        using Culling = DrawableClass::Culling;
+
+        struct Environment {
+            // how many render surface units (pixels, texels if rendering to a texture)
+            // to a game unit.
+            glm::vec2 pixel_ratio = {1.0f, 1.0f};
+            // the current projection matrix that will be used to project the
+            // vertices from the view space into Normalized Device Coordinates.
+            const glm::mat4* proj_matrix = nullptr;
+            // The current view matrix that will be used to transform the
+            // vertices to the game camera/view space.
+            const glm::mat4* view_matrix = nullptr;
+        };
+
+        // Rasterizer state that the geometry can manipulate.
+        struct RasterState {
+            // rasterizer setting for line width when the geometry
+            // contains lines.
+            float line_width = 1.0f;
+            // Culling state for discarding back/front facing fragments.
+            // Culling state only applies to polygon's not to points or lines.
+            Culling culling = Culling::Back;
+        };
+
+        virtual ~Drawable() = default;
+        // Apply the drawable's state (if any) on the program
+        // and set the rasterizer state.
+        virtual void ApplyState(Program& program, RasterState& state) const {}
+        // Get the device specific shader object.
+        // If the shader does not yet exist on the device it's created
+        // and compiled.  On any errors nullptr should be returned.
+        virtual Shader* GetShader(Device& device) const = 0;
+        // Get the device specific geometry object. If the geometry
+        // does not yet exist on the device it's created and the
+        // contents from this drawable object are uploaded in some
+        // device specific data format.
+        virtual Geometry* Upload(const Environment& env, Device& device) const = 0;
+        // Update the state of the drawable object. dt is the
+        // elapsed (delta) time in seconds.
+        virtual void Update(float dt) {}
+        // Request a particular line width to be used when style
+        // is either Outline or Wireframe.
+        virtual void SetLineWidth(float width) {}
+        // Set the style to be used for rasterizing the drawable
+        // shapes's fragments.
+        // Not all drawables support all Styles.
+        virtual void SetStyle(Style style) {}
+        // Set the culling flag for the drawable.
+        virtual void SetCulling(Culling culling) {}
+        // Get the current style.
+        virtual Style GetStyle() const = 0;
+        // Returns true if the drawable is still considered to be alive.
+        // For example a particle simulation still has live particles.
+        virtual bool IsAlive() const
+        { return true; }
+        // Restart the drawable, if applicable.
+        virtual void Restart() {}
+        // Get the ID of the drawable shape. Used to map the
+        // drawable to a device specific program object.
+        inline std::string GetId() const
+        { return typeid(*this).name(); }
+    private:
+    };
+
+
+
     class Arrow : public Drawable
     {
     public:
@@ -165,16 +192,20 @@ namespace gfx
         {}
         Arrow(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
         Style mStyle = Style::Solid;
+        Culling mCulling = Culling::Back;
         float mLineWidth = 1.0f;
     };
 
@@ -184,9 +215,9 @@ namespace gfx
         Line() = default;
         Line(float line_width) : mLineWidth(line_width)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
@@ -203,15 +234,19 @@ namespace gfx
         {}
         Capsule(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -224,15 +259,19 @@ namespace gfx
         {}
         Circle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style;}
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -246,15 +285,19 @@ namespace gfx
         {}
         Rectangle(Style style, float linewidth)  : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -321,16 +364,17 @@ namespace gfx
         RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass)
             : mClass(klass)
         {}
-
+        virtual void ApplyState(Program& program, RasterState& state) const override
+        {
+            state.line_width = mLineWidth;
+            state.culling    = mCulling;
+        }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        {
-            Geometry* geom = mClass->Upload(mStyle, device);
-            if (geom)
-                geom->SetLineWidth(mLineWidth);
-            return geom;
-        }
+        { return mClass->Upload(mStyle , device); }
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual void SetLineWidth(float width) override
@@ -339,7 +383,7 @@ namespace gfx
         { return mStyle; }
     private:
         std::shared_ptr<const RoundRectangleClass> mClass;
-
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -352,8 +396,11 @@ namespace gfx
         {}
         IsocelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -361,6 +408,7 @@ namespace gfx
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -373,8 +421,11 @@ namespace gfx
         {}
         RightTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -382,6 +433,7 @@ namespace gfx
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -395,8 +447,11 @@ namespace gfx
         {}
         Trapezoid(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -404,6 +459,7 @@ namespace gfx
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -416,8 +472,11 @@ namespace gfx
         {}
         Parallelogram(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
+        virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style;}
         virtual void SetLineWidth(float width) override
@@ -425,6 +484,7 @@ namespace gfx
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
+        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
     };
@@ -499,15 +559,15 @@ namespace gfx
             klass->SetBorders(border_lines);
             mClass = klass;
         }
+        virtual void ApplyState(Program& program, RasterState& state) const override
+        {
+            state.line_width = mLineWidth;
+            state.culling    = Culling::None;
+        }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        {
-            Geometry* geom = mClass->Upload(device);
-            if (geom)
-                geom->SetLineWidth(mLineWidth);
-            return geom;
-        }
+        { return mClass->Upload(device); }
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
@@ -534,15 +594,11 @@ namespace gfx
 
         using Vertex = gfx::Vertex;
 
-        struct InstanceState {
-            float line_width = 1.0f;
-        };
-
         PolygonClass()
         { mId = base::RandomString(10); }
 
         Shader* GetShader(Device& device) const;
-        Geometry* Upload(const InstanceState& state, Device& device) const;
+        Geometry* Upload(Device& device) const;
 
         void Clear()
         {
@@ -704,25 +760,25 @@ namespace gfx
         {
             mClass = std::make_shared<PolygonClass>(klass);
         }
+        virtual void ApplyState(Program& program, RasterState& state) const
+        {
+            state.culling = mCulling;
+            state.line_width = mLineWidth;
+        }
         virtual Shader* GetShader(Device& device) const override
-        {
-            return mClass->GetShader(device);
-        }
+        { return mClass->GetShader(device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        {
-            return mClass->Upload(mState, device);
-        }
+        { return mClass->Upload(device); }
         virtual Style GetStyle() const override
-        {
-            return Style::Solid;
-        }
-        virtual void SetLineWidth(float width)
-        {
-            mState.line_width = width;
-        }
+        { return Style::Solid; }
+        virtual void SetCulling(Culling culling) override
+        { mCulling = culling;}
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
     private:
         std::shared_ptr<const PolygonClass> mClass;
-        PolygonClass::InstanceState mState;
+        Culling mCulling = Culling::Back;
+        float mLineWidth = 1.0f;
     };
 
 
@@ -948,7 +1004,11 @@ namespace gfx
             mClass = std::make_shared<KinematicsParticleEngineClass>(params);
             Restart();
         }
-
+        virtual void ApplyState(Program& program, RasterState& state) const override
+        {
+            state.line_width = 1.0;
+            state.culling    = Culling::None;
+        }
         // Drawable implementation. Compile the shader.
         virtual Shader* GetShader(Device& device) const override
         {

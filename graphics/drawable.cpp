@@ -35,6 +35,12 @@
 namespace gfx
 {
 
+void Arrow::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling    = mCulling;
+    state.line_width = mLineWidth;
+}
+
 Shader* Arrow::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -129,8 +135,13 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
+}
+
+void Line::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling    = Culling::None;
+    state.line_width = mLineWidth;
 }
 
 Shader* Line::GetShader(Device& device) const
@@ -157,8 +168,13 @@ Geometry* Line::Upload(const Environment& env, Device& device) const
         geom->SetVertexBuffer(verts, 2);
         geom->AddDrawCmd(Geometry::DrawType::Lines);
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
+}
+
+void Capsule::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling    = mCulling;
+    state.line_width = mLineWidth;
 }
 
 Shader* Capsule::GetShader(Device &device) const
@@ -314,8 +330,13 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
 
         geom->SetVertexBuffer(std::move(vs));
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
+}
+
+void Circle::ApplyState(Program& program, RasterState& state) const
+{
+    state.line_width = mLineWidth;
+    state.culling    = mCulling;
 }
 
 Shader* Circle::GetShader(Device& device) const
@@ -397,10 +418,14 @@ Geometry* Circle::Upload(const Environment& env, Device& device) const
         geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     else if (mStyle == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
+void Rectangle::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling = mCulling;
+    state.line_width = mLineWidth;
+}
 Shader* Rectangle::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
@@ -458,7 +483,6 @@ Geometry* Rectangle::Upload(const Environment& env, Device& device) const
         else if (mStyle == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
@@ -675,6 +699,12 @@ bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
     return true;
 }
 
+void IsocelesTriangle::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling = mCulling;
+    state.line_width = mLineWidth;
+}
+
 Shader* IsocelesTriangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
@@ -704,7 +734,6 @@ Geometry* IsocelesTriangle::Upload(const Environment& env, Device& device) const
         geom = device.MakeGeometry("IsocelesTriangle");
         geom->SetVertexBuffer(verts, 3);
     }
-    geom->SetLineWidth(mLineWidth);
     geom->ClearDraws();
     if (mStyle == Style::Solid)
         geom->AddDrawCmd(Geometry::DrawType::Triangles);
@@ -713,6 +742,12 @@ Geometry* IsocelesTriangle::Upload(const Environment& env, Device& device) const
     else if (mStyle == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
+}
+
+void RightTriangle::ApplyState(Program& program, RasterState& state) const
+{
+    state.line_width = mLineWidth;
+    state.culling    = mCulling;
 }
 
 Shader* RightTriangle::GetShader(Device& device) const
@@ -744,7 +779,6 @@ Geometry* RightTriangle::Upload(const Environment& env, Device& device) const
         geom = device.MakeGeometry("RightTriangle");
         geom->SetVertexBuffer(verts, 3);
     }
-    geom->SetLineWidth(mLineWidth);
     geom->ClearDraws();
     if (mStyle == Style::Solid)
         geom->AddDrawCmd(Geometry::DrawType::Triangles);
@@ -753,6 +787,12 @@ Geometry* RightTriangle::Upload(const Environment& env, Device& device) const
     else if (mStyle == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
     return geom;
+}
+
+void Trapezoid::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling = mCulling;
+    state.line_width = mLineWidth;
 }
 
 Shader* Trapezoid::GetShader(Device& device) const
@@ -827,8 +867,13 @@ Geometry* Trapezoid::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
         }
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
+}
+
+void Parallelogram::ApplyState(Program& program, RasterState& state) const
+{
+    state.culling = mCulling;
+    state.line_width = mLineWidth;
 }
 
 Shader* Parallelogram::GetShader(Device& device) const
@@ -892,7 +937,6 @@ Geometry* Parallelogram::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
         }
     }
-    geom->SetLineWidth(mLineWidth);
     return geom;
 }
 
@@ -1008,7 +1052,7 @@ Shader* PolygonClass::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* PolygonClass::Upload(const InstanceState& state, Device& device) const
+Geometry* PolygonClass::Upload(Device& device) const
 {
     Geometry* geom = nullptr;
 
@@ -1039,7 +1083,6 @@ Geometry* PolygonClass::Upload(const InstanceState& state, Device& device) const
             geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
         }
     }
-    geom->SetLineWidth(state.line_width);
     return geom;
 }
 

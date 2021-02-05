@@ -109,20 +109,25 @@ public:
         if (!prog || !geom)
             return;
 
-        MaterialClass::RasterState raster;
-        MaterialClass::Environment env;
-        env.render_points = style == Drawable::Style::Points;
+        MaterialClass::RasterState material_raster_state;
+        MaterialClass::Environment material_env;
+        material_env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
         prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
-        mat.ApplyDynamicState(env, *mDevice, *prog, raster);
+        mat.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
+
+        Drawable::RasterState drawable_raster_state;
+        shape.ApplyState(*prog, drawable_raster_state);
 
         Device::State state;
         state.viewport     = MapToDevice(mViewport);
         state.scissor      = MapToDevice(mScissor);
         state.bWriteColor  = true;
         state.stencil_func = Device::State::StencilFunc::Disabled;
-        state.blending     = raster.blending;
+        state.blending     = material_raster_state.blending;
+        state.line_width   = drawable_raster_state.line_width;
+        state.culling      = drawable_raster_state.culling;
         mDevice->Draw(*prog, *geom, state);
     }
 
@@ -180,11 +185,16 @@ public:
             prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*mask.transform));
 
-            MaterialClass::RasterState raster;
-            MaterialClass::Environment env;
-            env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
+            MaterialClass::RasterState material_raster_state;
+            MaterialClass::Environment material_env;
+            material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
+            mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
-            mask_material.ApplyDynamicState(env, *mDevice, *prog, raster);
+            Drawable::RasterState drawable_raster_state;
+            mask.drawable->ApplyState(*prog, drawable_raster_state);
+            state.culling = drawable_raster_state.culling;
+            state.line_width = drawable_raster_state.line_width;
+
             mDevice->Draw(*prog, *geom, state);
         }
 
@@ -209,12 +219,18 @@ public:
 
             prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
             prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*draw.transform));
-            MaterialClass::RasterState raster;
-            MaterialClass::Environment env;
-            env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+            MaterialClass::RasterState material_raster_state;
+            MaterialClass::Environment material_env;
+            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
-            draw.material->ApplyDynamicState(env, *mDevice, *prog, raster);
-            state.blending = raster.blending;
+            draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
+            state.blending = material_raster_state.blending;
+
+            Drawable::RasterState drawable_raster_state;
+            draw.drawable->ApplyState(*prog, drawable_raster_state);
+            state.line_width = drawable_raster_state.line_width;
+            state.culling    = drawable_raster_state.culling;
+
             mDevice->Draw(*prog, *geom, state);
         }
     }
@@ -241,17 +257,22 @@ public:
             program->SetUniform("kViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(*draw.transform));
 
-            MaterialClass::RasterState raster;
-            MaterialClass::Environment env;
-            env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
-            draw.material->ApplyDynamicState(env, *mDevice, *program, raster);
+            MaterialClass::RasterState material_raster_state;
+            MaterialClass::Environment material_env;
+            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+            draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
+
+            Drawable::RasterState drawable_raster_state;
+            draw.drawable->ApplyState(*program, drawable_raster_state);
 
             Device::State state;
             state.viewport     = MapToDevice(mViewport);
             state.scissor      = MapToDevice(mScissor);
             state.bWriteColor  = true;
             state.stencil_func = Device::State::StencilFunc::Disabled;
-            state.blending     = raster.blending;
+            state.blending     = material_raster_state.blending;
+            state.culling      = drawable_raster_state.culling;
+            state.line_width   = drawable_raster_state.line_width;
             mDevice->Draw(*program, *geom, state);
         }
     }

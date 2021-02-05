@@ -42,16 +42,19 @@ namespace gfx
     class Device
     {
     public:
+        // Device state including the rasterizer state
+        // that is to be appplied for any draw operation.
         struct State {
+            // should write color buffer or not.
             bool bWriteColor = true;
-
+            // how to mix the fragment with the existing color buffer value.
             enum class BlendOp {
                 None,
                 Transparent,
                 Additive
             };
             BlendOp blending = BlendOp::None;
-
+            // stencil test
             enum class StencilFunc {
                 Disabled,
                 PassAlways,
@@ -63,6 +66,7 @@ namespace gfx
                 RefIsEqual,
                 RefIsNotEqual
             };
+            // the stencil action to take on various stencil tests.
             enum class StencilOp {
                 DontModify,
                 WriteZero,
@@ -70,15 +74,44 @@ namespace gfx
                 Increment,
                 Decrement
             };
+            // the stencil test function.
             StencilFunc  stencil_func  = StencilFunc::Disabled;
+            // what to do when the stencil test fails.
             StencilOp    stencil_fail  = StencilOp::DontModify;
+            // what to do when the stencil test passes.
             StencilOp    stencil_dpass = StencilOp::DontModify;
+            // what to do when the stencil test passes but depth test fails.
             StencilOp    stencil_dfail = StencilOp::DontModify;
+            // todo:
             std::uint8_t stencil_mask  = 0xff;
+            // todo:
             std::uint8_t stencil_ref   = 0x0;
-
+            // the device viewport into the render target. the viewport is in
+            // device coordinates (pixels, texels) and the origin is at the bottom
+            // left and Y axis grows upwards (towards the window top)
             IRect viewport;
+            // the device scissor that can be used to limit the rendering to the
+            // area inside the scissor. if the scissor rect is an empty rect
+            // the scissor test is disabled.
             IRect scissor;
+            // Which polygon faces to cull. Note that this only applies
+            // to polygons, not to lines or points.
+            enum class Culling {
+                // Dont' cull anything, both polygon front and back faces are rasterized
+                None,
+                // Cull front faces. Front face is determined by the polygon
+                // winding order. Currently counter clockwise is the front.
+                Front,
+                // Cull back faces. This is the default.
+                Back,
+                // Cull both front and back faces.
+                FrontAndBack
+            };
+            // polygon face culling setting.
+            Culling culling = Culling::Back;
+            // rasterizer setting for line width when rasterizing
+            // geometries with lines.
+            float line_width = 1.0f;
         };
 
         enum class Type {

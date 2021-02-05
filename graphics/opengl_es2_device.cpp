@@ -304,7 +304,7 @@ public:
         DEBUG("Fragment shader texture units: %1", max_texture_units);
         mTextureUnits.resize(max_texture_units);
 
-        // set some initial state that is currently not changed
+        // set some initial state
         GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glEnable(GL_CULL_FACE));
         GL_CALL(glCullFace(GL_BACK));
@@ -582,6 +582,27 @@ private:
         GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
                            state.viewport.GetWidth(), state.viewport.GetHeight()));
 
+        GL_CALL(glLineWidth(state.line_width));
+
+        switch (state.culling)
+        {
+            case State::Culling::None: {
+                GL_CALL(glDisable(GL_CULL_FACE));
+            } break;
+            case State::Culling::Back: {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_BACK));
+            } break;
+            case State::Culling::Front: {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT));
+            } break;
+            case State::Culling::FrontAndBack: {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
+            } break;
+        }
+
         // enable scissor if needed.
         if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
         {
@@ -591,23 +612,17 @@ private:
 
         switch (state.blending)
         {
-            case State::BlendOp::None:
-                {
+            case State::BlendOp::None: {
                     GL_CALL(glDisable(GL_BLEND));
-                }
-                break;
-            case State::BlendOp::Transparent:
-                {
+                } break;
+            case State::BlendOp::Transparent: {
                     GL_CALL(glEnable(GL_BLEND));
                     GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                }
-                break;
-            case State::BlendOp::Additive:
-                {
+                } break;
+            case State::BlendOp::Additive: {
                     GL_CALL(glEnable(GL_BLEND));
                     GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
-                }
-                break;
+                } break;
         }
 
         if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))
@@ -796,10 +811,6 @@ private:
             cmd.count  = count;
             mDrawCommands.push_back(cmd);
         }
-
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-
         virtual void SetVertexBuffer(std::unique_ptr<VertexBuffer> buffer) override
         { mBuffer = std::move(buffer); }
         virtual void SetVertexLayout(const VertexLayout& layout) override
@@ -834,15 +845,9 @@ private:
                 else if (type == DrawType::TriangleFan)
                     GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
                 else if (type == DrawType::Lines)
-                {
-                    GL_CALL(glLineWidth(mLineWidth));
                     GL_CALL(glDrawArrays(GL_LINES, offset, count));
-                }
                 else if (type == DrawType::LineLoop)
-                {
-                    GL_CALL(glLineWidth(mLineWidth));
                     GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
-                }
             }
         }
         void SetLastUseFrameNumber(size_t frame_number)
@@ -860,7 +865,6 @@ private:
         std::vector<DrawCommand> mDrawCommands;
         std::unique_ptr<VertexBuffer> mBuffer;
         VertexLayout mLayout;
-        float mLineWidth = 1.0f;
     };
 
     class ProgImpl : public Program
