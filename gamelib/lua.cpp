@@ -536,6 +536,7 @@ void BindGameLib(sol::state& L)
     entity["GetId"]                = &Entity::GetId;
     entity["GetClassName"]         = &Entity::GetClassName;
     entity["GetClassId"]           = &Entity::GetClassId;
+    entity["GetNumNodes"]          = &Entity::GetNumNodes;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;

@@ -7,7 +7,7 @@
 -- 'Game' is the native instance of *this* game that is running. It provides
 --        the native services for interfacing with the game engine.
 
--- player object that we're controlling
+-- player entity object that we're controlling
 Player = nil
 -- the current scene that we're playing.
 Scene  = nil
@@ -44,6 +44,29 @@ function LoadGame()
     Game:PlayScene(scene)
     Game:SetViewport(Viewport)
 end
+
+function TurnPlayerLeft()
+    local max_nodes = Player:GetNumNodes()
+    for i=0, max_nodes-1, 1 do
+        local node = Player:GetNode(i)
+        local draw = node:GetDrawable()
+        if draw ~= nil then
+           draw:SetFlag('FlipVertically', true)
+        end
+    end
+end
+
+function TurnPlayerRight()
+    local max_nodes = Player:GetNumNodes()
+    for i=0, max_nodes-1, 1 do
+        local node = Player:GetNode(i)
+        local draw = node:GetDrawable()
+        if draw ~= nil then
+            draw:SetFlag('FlipVertically', false)
+        end
+    end
+end
+
 
 function LoadBackgroundDone(background)
     Background = background:FindEntityByInstanceName('Background')
@@ -122,9 +145,11 @@ function OnKeyDown(symbol, modifier_bits)
     local slide = Player.slide
 
     if symbol == wdk.Keys.ArrowRight then
+        TurnPlayerRight()
         Physics:ApplyImpulseToCenter(body, WorldRight * slide)
         Player:PlayAnimationByName('Walk')
     elseif symbol == wdk.Keys.ArrowLeft then
+        TurnPlayerLeft()
         Physics:ApplyImpulseToCenter(body, WorldRight * slide * -1.0)
         Player:PlayAnimationByName('Walk')
     elseif symbol == wdk.Keys.ArrowUp then
