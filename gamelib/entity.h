@@ -197,7 +197,9 @@ namespace game
             // finished, for example particle engines.
             RestartDrawable,
             // Whether the item should override the material alpha value.
-            OverrideAlpha
+            OverrideAlpha,
+            // Whether to flip (mirror) the item about Y axis
+            FlipVertically,
         };
         DrawableItemClass()
         {
@@ -206,6 +208,7 @@ namespace game
             mBitFlags.set(Flags::UpdateMaterial, true);
             mBitFlags.set(Flags::RestartDrawable, true);
             mBitFlags.set(Flags::OverrideAlpha, false);
+            mBitFlags.set(Flags::FlipVertically, false);
         }
 
         std::size_t GetHash() const;

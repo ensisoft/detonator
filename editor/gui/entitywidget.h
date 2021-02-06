@@ -132,6 +132,7 @@ namespace gui
         void on_dsUpdateMaterial_stateChanged(int);
         void on_dsRestartDrawable_stateChanged(int);
         void on_dsOverrideAlpha_stateChanged(int);
+        void on_dsFlipVertically_stateChanged(int);
         void on_dsAlpha_valueChanged();
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
@@ -173,7 +174,7 @@ namespace gui
         void DisplayCurrentNodeProperties();
         void UncheckPlacementActions();
         void UpdateCurrentNodePosition(float dx, float dy);
-        void UpdateCurrentNodeAlpha();
+        void UpdateCurrentNodeProperties();
         void RebuildMenus();
         void RebuildCombos();
         void UpdateDeletedResourceReferences();

@@ -1257,10 +1257,7 @@ void EntityWidget::on_nodeScaleY_valueChanged(double value)
 }
 void EntityWidget::on_nodeRotation_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetRotation(qDegreesToRadians(value));
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_nodePlus90_clicked()
@@ -1284,300 +1281,137 @@ void EntityWidget::on_nodeMinus90_clicked()
 
 void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetDrawableId(mState.workspace->GetDrawableClassByName(name)->GetId());
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsMaterial_currentIndexChanged(const QString& name)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetMaterialId(mState.workspace->GetMaterialClassByName(name)->GetId());
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsRenderPass_currentIndexChanged(const QString&)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetRenderPass(GetValue(mUI.dsRenderPass));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsLayer_valueChanged(int value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetLayer(value);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsLineWidth_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetLineWidth(value);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsTimeScale_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetTimeScale(value);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsVisible_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsUpdateDrawable_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsUpdateMaterial_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetFlag(game::DrawableItemClass::Flags::UpdateMaterial, GetValue(mUI.dsUpdateMaterial));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsRestartDrawable_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* item = node->GetDrawable())
-        {
-            item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_dsOverrideAlpha_stateChanged(int)
 {
-    UpdateCurrentNodeAlpha();
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsFlipVertically_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsAlpha_valueChanged()
 {
-    UpdateCurrentNodeAlpha();
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetSimulation(GetValue(mUI.rbSimulation));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbShape_currentIndexChanged(const QString&)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetCollisionShape(GetValue(mUI.rbShape));
-            DisplayCurrentNodeProperties();
-        }
-    }
+    UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbPolygon_currentIndexChanged(const QString&)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            const QString& poly = GetValue(mUI.rbPolygon);
-            body->SetPolygonShapeId(mState.workspace->GetDrawableClassByName(poly)->GetId());
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbFriction_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFriction(GetValue(mUI.rbFriction));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbRestitution_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetRestitution(GetValue(mUI.rbRestitution));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbAngularDamping_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetAngularDamping(GetValue(mUI.rbAngularDamping));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbLinearDamping_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetLinearDamping(GetValue(mUI.rbLinearDamping));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbDensity_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetDensity(GetValue(mUI.rbDensity));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbLinearVeloX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            auto vector = body->GetLinearVelocity();
-            vector.x = value;
-            body->SetLinearVelocity(vector);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbLinearVeloY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            auto vector = body->GetLinearVelocity();
-            vector.y = value;
-            body->SetLinearVelocity(vector);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbAngularVelo_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetAngularVelocity(value);
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbIsBullet_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbIsSensor_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsSensor));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbIsEnabled_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFlag(game::RigidBodyItemClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbCanSleep_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFlag(game::RigidBodyItemClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_rbDiscardRotation_stateChanged(int)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        if (auto* body = node->GetRigidBody())
-        {
-            body->SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
-        }
-    }
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_drawableItem_toggled(bool on)
@@ -1990,6 +1824,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));
             SetValue(mUI.dsOverrideAlpha, item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha));
+            SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -2056,33 +1891,78 @@ void EntityWidget::UpdateCurrentNodePosition(float dx, float dy)
     }
 }
 
-void EntityWidget::UpdateCurrentNodeAlpha()
+void EntityWidget::UpdateCurrentNodeProperties()
 {
-    if (auto* node = GetCurrentNode())
+    auto* node = GetCurrentNode();
+    if (node == nullptr)
+        return;
+
+    node->SetRotation(qDegreesToRadians((float)GetValue(mUI.nodeRotation)));
+
+    if (auto* item = node->GetDrawable())
     {
-        if (auto* item = node->GetDrawable())
+        const float alpha_val = mUI.dsAlpha->value();
+        const float alpha_max = mUI.dsAlpha->maximum();
+        const float alpha = alpha_val / alpha_max;
+
+        const QString& material_name = GetValue(mUI.dsMaterial);
+        const QString& drawable_name = GetValue(mUI.dsDrawable);
+        item->SetDrawableId(mState.workspace->GetDrawableClassByName(drawable_name)->GetId());
+        item->SetMaterialId(mState.workspace->GetMaterialClassByName(material_name)->GetId());
+        item->SetTimeScale(GetValue(mUI.dsTimeScale));
+        item->SetLineWidth(GetValue(mUI.dsLineWidth));
+        item->SetLayer(GetValue(mUI.dsLayer));
+        item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
+        item->SetRenderPass(GetValue(mUI.dsRenderPass));
+        item->SetAlpha(alpha);
+
+        item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
+        item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));
+        item->SetFlag(game::DrawableItemClass::Flags::UpdateMaterial, GetValue(mUI.dsUpdateMaterial));
+        item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
+        item->SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, GetValue(mUI.dsOverrideAlpha));
+        item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
+
+        // validate.
+        const auto& material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
+        if (material && item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
         {
-            const float value = mUI.dsAlpha->value();
-            const float max   = mUI.dsAlpha->maximum();
-            const float alpha = value / max;
-            const bool checked = GetValue(mUI.dsOverrideAlpha);
-            item->SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, checked);
-            item->SetAlpha(alpha);
-            const auto &material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
-
-            if (!checked || !material)
-                return;
-
             const bool has_alpha_blending = material->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Transparent;
-            if (has_alpha_blending)
-                return;
-
-            QMessageBox msg(this);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Warning);
-            msg.setText(tr("The current material doesn't enable transparency. Setting alpha will have no effect."));
-            msg.exec();
+            if (!has_alpha_blending)
+            {
+                QMessageBox msg(this);
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setIcon(QMessageBox::Warning);
+                msg.setText(tr("The current material doesn't enable transparency."
+                               "Setting alpha will have no effect."));
+                msg.exec();
+            }
         }
+    }
+
+    if (auto* body = node->GetRigidBody())
+    {
+        glm::vec2 linear_velocity;
+        linear_velocity.x = GetValue(mUI.rbLinearVeloX);
+        linear_velocity.y = GetValue(mUI.rbLinearVeloY);
+        const QString& shape_name = GetValue(mUI.rbPolygon);
+        body->SetPolygonShapeId(mState.workspace->GetDrawableClassByName(shape_name)->GetId());
+        body->SetSimulation(GetValue(mUI.rbSimulation));
+        body->SetCollisionShape(GetValue(mUI.rbShape));
+        body->SetFriction(GetValue(mUI.rbFriction));
+        body->SetRestitution(GetValue(mUI.rbRestitution));
+        body->SetAngularDamping(GetValue(mUI.rbAngularDamping));
+        body->SetLinearDamping(GetValue(mUI.rbLinearDamping));
+        body->SetDensity(GetValue(mUI.rbDensity));
+        body->SetAngularVelocity(GetValue(mUI.rbAngularVelo));
+        body->SetLinearVelocity(linear_velocity);
+
+        // flags
+        body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
+        body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsSensor));
+        body->SetFlag(game::RigidBodyItemClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
+        body->SetFlag(game::RigidBodyItemClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
+        body->SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
     }
 }
 

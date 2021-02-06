@@ -302,12 +302,21 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
             {
                 paint_node.drawable->SetStyle(item->GetRenderStyle());
                 paint_node.drawable->SetLineWidth(item->GetLineWidth());
+                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
+                else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
             }
 
             // if it doesn't render then no draw packets are generated
             if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
             {
                 mTransform.Push(node->GetModelTransform());
+                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                {
+                    mTransform.Push();
+                    mTransform.Scale(-1.0f, 1.0f);
+                    mTransform.Translate(1.0f, 0.0f);
+                }
 
                 DrawPacket packet;
                 packet.material  = paint_node.material;
@@ -317,6 +326,9 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                 packet.transform = mTransform.GetAsMatrix();
                 if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
                     mPackets.push_back(std::move(packet));
+
+                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    mTransform.Pop();
 
                 // pop the model transform
                 mTransform.Pop();
