@@ -2014,22 +2014,31 @@ void EntityWidget::UpdateDeletedResourceReferences()
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         auto& node = mState.entity->GetNode(i);
-        if (!node.HasDrawable())
-            continue;
-        auto* draw = node.GetDrawable();
-        const auto drawable = draw->GetDrawableId();
-        const auto material = draw->GetMaterialId();
-        if (!mState.workspace->IsValidMaterial(material))
+        if (auto* draw = node.GetDrawable())
         {
-            WARN("Entity node '%1' uses material that is no longer available.", node.GetName());
-            draw->ResetMaterial();
-            draw->SetMaterialId("_checkerboard");
+            const auto drawable = draw->GetDrawableId();
+            const auto material = draw->GetMaterialId();
+            if (!mState.workspace->IsValidMaterial(material))
+            {
+                WARN("Entity node '%1' uses material that is no longer available." , node.GetName());
+                draw->ResetMaterial();
+                draw->SetMaterialId("_checkerboard");
+            }
+            if (!mState.workspace->IsValidDrawable(drawable))
+            {
+                WARN("Entity node '%1' uses drawable that is no longer available." , node.GetName());
+                draw->ResetDrawable();
+                draw->SetDrawableId("_rect");
+            }
         }
-        if (!mState.workspace->IsValidDrawable(drawable))
+        if (auto* body = node.GetRigidBody())
         {
-            WARN("Entity node '%1' uses drawable that is no longer available.", node.GetName());
-            draw->ResetDrawable();
-            draw->SetDrawableId("_rect");
+            const auto polygon = body->GetPolygonShapeId();
+            if (!mState.workspace->IsValidDrawable(polygon))
+            {
+                WARN("Entity node '%1' uses rigid body shape that is no longer available.", node.GetName());
+                body->ResetPolygonShapeId();
+            }
         }
     }
 }
