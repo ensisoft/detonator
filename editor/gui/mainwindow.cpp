@@ -395,6 +395,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             continue;
         }
         const auto& klass = settings.getValue("MainWindow", "class_name", QString(""));
+        const auto& id    = settings.getValue("MainWindow", "widget_id", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
             widget = new MaterialWidget(workspace.get());
@@ -411,7 +412,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         else if (klass == ScriptWidget::staticMetaObject.className())
             widget = new ScriptWidget(workspace.get());
         else BUG("Unhandled widget type.");
-
+        widget->SetId(id);
         if (!widget->LoadState(settings))
         {
             WARN("Widget '%1 failed to load state.", widget->windowTitle());
@@ -489,6 +490,7 @@ bool MainWindow::SaveWorkspace()
 
         Settings settings(file);
         settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.setValue("MainWindow", "widget_id", widget->GetId());
         if (!widget->SaveState(settings))
         {
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
