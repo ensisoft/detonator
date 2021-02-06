@@ -1339,6 +1339,77 @@ private:
     float mTime = 0.0f;
 };
 
+class FillShapeTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FRect rect(10, 10, 100, 140);
+        gfx::FillShape(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen);
+        rect.Move(10, 200);
+        gfx::FillShape(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::FillShape(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+    }
+    virtual std::string GetName() const override
+    { return "FillShapeTest"; }
+private:
+};
+
+class DrawShapeOutlineTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FRect rect(10, 10, 100, 140);
+        gfx::DrawShapeOutline(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen);
+        rect.Move(10, 200);
+        gfx::DrawShapeOutline(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+
+        rect.Move(10, 400);
+        gfx::DrawShapeOutline(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen, 3.0f);
+        rect.Move(10, 600);
+        gfx::DrawShapeOutline(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen, 3.0f);
+        rect.Translate(150, 0);
+        gfx::DrawShapeOutline(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+    }
+    virtual std::string GetName() const override
+    { return "DrawShapeOutline"; }
+private:
+};
+
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -1446,6 +1517,8 @@ int main(int argc, char* argv[])
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;
+    tests.emplace_back(new FillShapeTest);
+    tests.emplace_back(new DrawShapeOutlineTest);
     tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new TextAlignTest);

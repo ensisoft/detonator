@@ -34,6 +34,18 @@
 #include "graphics/transform.h"
 #include "graphics/text.h"
 
+namespace {
+gfx::Material MakeMaterial(const gfx::Color4f& color)
+{
+    const auto alpha = color.Alpha();
+    auto mat = SolidColor(color);
+    mat.SetSurfaceType(alpha == 1.0f
+                       ? gfx::MaterialClass::SurfaceType::Opaque
+                       : gfx::MaterialClass::SurfaceType::Transparent);
+    return mat;
+}
+} // namespace
+
 namespace gfx
 {
 
@@ -111,16 +123,20 @@ void DrawTextRect(Painter& painter,
 
 void FillRect(Painter& painter, const FRect& rect, const Color4f& color)
 {
-    const float alpha = color.Alpha();
-
-    FillRect(painter, rect,
-        SolidColor(color).SetSurfaceType(alpha == 1.0f
-            ? MaterialClass::SurfaceType::Opaque
-            : MaterialClass::SurfaceType::Transparent));
-
+    FillRect(painter, rect, MakeMaterial(color));
 }
 
 void FillRect(Painter& painter, const FRect& rect, const Material& material)
+{
+    FillShape(painter, rect, Rectangle(), material);
+}
+
+void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color)
+{
+    const float alpha = color.Alpha();
+    FillShape(painter, rect, shape, MakeMaterial(color));
+}
+void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -130,22 +146,31 @@ void FillRect(Painter& painter, const FRect& rect, const Material& material)
     Transform trans;
     trans.Resize(width, height);
     trans.Translate(x, y);
-    painter.Draw(Rectangle(), trans, material);
+    painter.Draw(shape, trans, material);
 }
 
 void DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
-    const float alpha = color.Alpha();
-
-    DrawRectOutline(painter, rect,
-        SolidColor(color).SetSurfaceType(alpha == 1.0f
-            ? MaterialClass::SurfaceType::Opaque
-            : MaterialClass::SurfaceType::Transparent),
-        line_width);
+    DrawRectOutline(painter, rect, MakeMaterial(color));
 }
 
 void DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width)
 {
+    DrawShapeOutline(painter, rect, gfx::Rectangle(), material, line_width);
+}
+
+void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+                      const Color4f& color, float line_width)
+{
+    DrawShapeOutline(painter, rect, shape, MakeMaterial(color), line_width);
+}
+void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+                      const Material& material, float line_width)
+{
+    // todo: this algorithm produces crappy results with diagonal lines
+    // for example when drawing right angled triangle even with line widths > 1.0f
+    // the results aren't looking that great.
+
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
     const auto x = rect.GetX();
@@ -160,31 +185,19 @@ void DrawRectOutline(Painter& painter, const FRect& rect, const Material& materi
     const auto mask_height = height - 2 * line_width;
     mask_transform.Resize(mask_width, mask_height);
     mask_transform.Translate(x + line_width, y + line_width);
-
-    // todo: if the stencil buffer is not multisampled this
-    // could produce some aliasing artifacts if there's a rotational
-    // component in the transformation. Not sure if a better way to
-    // draw the outline then would be to just draw lines.
-    // However the line rasterization leaves the gaps at the end where
-    // the lines meet which becomes clearly visible at higher
-    // line widths. One possible solution could be to use
-    // NV_path_rendering (when available) or then manually fill
-    // the line gaps with quads.
-    painter.Draw(Rectangle(), outline_transform,
-                 Rectangle(), mask_transform,
-                 material);
+    painter.Draw(shape, outline_transform, shape, mask_transform, material);
 }
 
 void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
 {
-    DrawLine(painter, a, b, SolidColor(color), line_width);
+    DrawLine(painter, a, b, MakeMaterial(color), line_width);
 }
 
 void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
 {
-    // The line shape defines a horizonal line so in order to
+    // The line shape defines a horizontal line so in order to
     // support lines with arbitrary directions we need to figure
-    // out which way to rotate the line shape in order to have a matchin
+    // out which way to rotate the line shape in order to have a matching
     // line (slope) and also how to scale the shape
     const auto& p = b - a;
     const auto x = p.GetX();
