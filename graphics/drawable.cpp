@@ -699,13 +699,13 @@ bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
     return true;
 }
 
-void IsocelesTriangle::ApplyState(Program& program, RasterState& state) const
+void IsoscelesTriangle::ApplyState(Program& program, RasterState& state) const
 {
     state.culling = mCulling;
     state.line_width = mLineWidth;
 }
 
-Shader* IsocelesTriangle::GetShader(Device& device) const
+Shader* IsoscelesTriangle::GetShader(Device& device) const
 {
     Shader* s = device.FindShader("vertex_array.glsl");
     if (s == nullptr || !s->IsValid())
@@ -718,7 +718,7 @@ Shader* IsocelesTriangle::GetShader(Device& device) const
     return s;
 }
 
-Geometry* IsocelesTriangle::Upload(const Environment& env, Device& device) const
+Geometry* IsoscelesTriangle::Upload(const Environment& env, Device& device) const
 {
     if (mStyle == Style::Points)
         return nullptr;
@@ -1644,7 +1644,7 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
         case DrawableClass::Type::RoundRectangle:
             return std::make_unique<RoundRectangle>(std::static_pointer_cast<const RoundRectangleClass>(klass));
         case DrawableClass::Type::IsoscelesTriangle:
-            return std::make_unique<IsocelesTriangle>();
+            return std::make_unique<IsoscelesTriangle>();
         case DrawableClass::Type::RightTriangle:
             return std::make_unique<RightTriangle>();
         case DrawableClass::Type::Trapezoid:

@@ -68,7 +68,7 @@ ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const
     if (name == "_rect")
         return std::make_shared<gfx::RectangleClass>();
     else if (name == "_isosceles_triangle")
-        return std::make_shared<gfx::IsocelesTriangleClass>();
+        return std::make_shared<gfx::IsoscelesTriangleClass>();
     else if (name == "_right_triangle")
         return std::make_shared<gfx::RightTriangleClass>();
     else if (name == "_capsule")

@@ -388,13 +388,13 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
-    class IsocelesTriangle : public Drawable
+    class IsoscelesTriangle : public Drawable
     {
     public:
-        IsocelesTriangle() = default;
-        IsocelesTriangle(Style style) : mStyle(style)
+        IsoscelesTriangle() = default;
+        IsoscelesTriangle(Style style) : mStyle(style)
         {}
-        IsocelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
+        IsoscelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
         {}
         virtual void ApplyState(Program& program, RasterState& state) const override;
         virtual Shader* GetShader(Device& device) const override;
@@ -1109,7 +1109,7 @@ namespace gfx
     using ArrowClass = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
     using CapsuleClass = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
     using CircleClass = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
-    using IsocelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
+    using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
     using LineClass = detail::GenericDrawableClass<DrawableClass::Type::Line>;
     using ParallelogramClass = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
     using RectangleClass = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
