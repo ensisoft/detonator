@@ -34,14 +34,10 @@
 
 namespace gfx
 {
+namespace detail {
 
-void Arrow::ApplyState(Program& program, RasterState& state) const
-{
-    state.culling    = mCulling;
-    state.line_width = mLineWidth;
-}
-
-Shader* Arrow::GetShader(Device& device) const
+// static
+Shader* GeometryBase::GetShader(Device& device)
 {
     Shader* shader = device.FindShader("vertex_array.glsl");
     if (shader == nullptr)
@@ -51,14 +47,15 @@ Shader* Arrow::GetShader(Device& device) const
     }
     return shader;
 }
-Geometry* Arrow::Upload(const Environment& env, Device& device) const
+// static
+Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
-    if (mStyle == Style::Points)
+    if (style == Style::Points)
         return nullptr;
 
    Geometry* geom = nullptr;
 
-    if (mStyle == Style::Outline)
+    if (style == Style::Outline)
     {
         geom = device.FindGeometry("ArrowOutline");
         if (!geom)
@@ -77,7 +74,7 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
-    else if (mStyle == Style::Solid)
+    else if (style == Style::Solid)
     {
         geom = device.FindGeometry("Arrow");
         if (!geom)
@@ -102,7 +99,7 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::Triangles);
         }
     }
-    else if (mStyle == Style::Wireframe)
+    else if (style == Style::Wireframe)
     {
         geom = device.FindGeometry("ArrowWireframe");
         if (!geom)
@@ -138,31 +135,16 @@ Geometry* Arrow::Upload(const Environment& env, Device& device) const
     return geom;
 }
 
-void Line::ApplyState(Program& program, RasterState& state) const
-{
-    state.culling    = Culling::None;
-    state.line_width = mLineWidth;
-}
-
-Shader* Line::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
-Geometry* Line::Upload(const Environment& env, Device& device) const
+// static
+Geometry* LineGeometry::Generate(const Environment& env, Style style, Device& device)
 {
     Geometry* geom = device.FindGeometry("LineSegment");
     if (geom == nullptr)
     {
         // horizontal line.
         const gfx::Vertex verts[2] = {
-            {{0.0f,  -0.5f}, {0.0f, 0.5f}},
-            {{1.0f,  -0.5f}, {1.0f, 0.5f}}
+                {{0.0f,  -0.5f}, {0.0f, 0.5f}},
+                {{1.0f,  -0.5f}, {1.0f, 0.5f}}
         };
         geom = device.MakeGeometry("LineSegment");
         geom->SetVertexBuffer(verts, 2);
@@ -171,36 +153,20 @@ Geometry* Line::Upload(const Environment& env, Device& device) const
     return geom;
 }
 
-void Capsule::ApplyState(Program& program, RasterState& state) const
+// static
+Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device& device)
 {
-    state.culling    = mCulling;
-    state.line_width = mLineWidth;
-}
-
-Shader* Capsule::GetShader(Device &device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
-
-Geometry* Capsule::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
+    if (style == Style::Points)
         return nullptr;
 
     // todo LOD information
     const auto slices = 50;
     const auto radius = 0.1f;
-    const auto max_slice = mStyle == Style::Solid ? slices + 1 : slices;
+    const auto max_slice = style == Style::Solid ? slices + 1 : slices;
     const auto angle_increment = math::Pi / slices;
 
-    const auto* name = mStyle == Style::Outline ? "CapsuleOutline" :
-                      (mStyle == Style::Wireframe ? "CapsuleWireframe" : "Capsule");
+    const auto* name = style == Style::Outline ? "CapsuleOutline" :
+                      (style == Style::Wireframe ? "CapsuleWireframe" : "Capsule");
 
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
@@ -216,7 +182,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
         left_center.aPosition.y = -0.5f;
         left_center.aTexCoord.x =  radius;
         left_center.aTexCoord.y =  0.5f;
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
             vs.push_back(left_center);
 
         float left_angle = math::Pi * 0.5;
@@ -233,7 +199,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
 
             left_angle += angle_increment;
 
-            if (mStyle == Style::Wireframe)
+            if (style == Style::Wireframe)
             {
                 const auto x = std::cos(left_angle) * radius;
                 const auto y = std::sin(left_angle) * radius;
@@ -246,12 +212,12 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
                 vs.push_back(left_center);
             }
         }
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
             geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (mStyle == Style::Wireframe)
+        else if (style == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
-        if (mStyle != Style::Outline)
+        if (style != Style::Outline)
         {
             // center box.
             const Vertex box[6] = {
@@ -270,7 +236,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
             vs.push_back(box[3]);
             vs.push_back(box[4]);
             vs.push_back(box[5]);
-            if (mStyle == Style::Solid)
+            if (style == Style::Solid)
             {
                 geom->AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
             }
@@ -289,7 +255,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
         right_center.aPosition.y = -0.5f;
         right_center.aTexCoord.x =  1.0f - radius;
         right_center.aTexCoord.y =  0.5f;
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
             vs.push_back(right_center);
 
         const float right_angle_increment = math::Pi / slices;
@@ -307,7 +273,7 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
 
             right_angle += right_angle_increment;
 
-            if (mStyle == Style::Wireframe)
+            if (style == Style::Wireframe)
             {
                 const auto x = std::cos(right_angle) * radius;
                 const auto y = std::sin(right_angle) * radius;
@@ -320,12 +286,12 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
                 vs.push_back(right_center);
             }
         }
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
             geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (mStyle == Style::Wireframe)
+        else if (style == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
-        if (mStyle == Style::Outline)
+        if (style == Style::Outline)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
 
         geom->SetVertexBuffer(std::move(vs));
@@ -333,33 +299,18 @@ Geometry* Capsule::Upload(const Environment& env, Device& device) const
     return geom;
 }
 
-void Circle::ApplyState(Program& program, RasterState& state) const
+// static
+Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& device)
 {
-    state.line_width = mLineWidth;
-    state.culling    = mCulling;
-}
-
-Shader* Circle::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
-Geometry* Circle::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
+    if (style == Style::Points)
         return nullptr;
 
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 100;
-    const auto* name = mStyle == Style::Outline   ? "CircleOutline" :
-                      (mStyle == Style::Wireframe ? "CircleWireframe" : "Circle");
+    const auto* name = style == Style::Outline   ? "CircleOutline" :
+                      (style == Style::Wireframe ? "CircleWireframe" : "Circle");
 
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
@@ -372,7 +323,7 @@ Geometry* Circle::Upload(const Environment& env, Device& device) const
         center.aPosition.y = -0.5;
         center.aTexCoord.x = 0.5;
         center.aTexCoord.y = 0.5;
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
         {
             vs.push_back(center);
         }
@@ -393,7 +344,7 @@ Geometry* Circle::Upload(const Environment& env, Device& device) const
 
             angle += angle_increment;
 
-            if (mStyle == Style::Wireframe)
+            if (style == Style::Wireframe)
             {
                 const auto x = std::cos(angle) * 0.5f;
                 const auto y = std::sin(angle) * 0.5f;
@@ -412,39 +363,24 @@ Geometry* Circle::Upload(const Environment& env, Device& device) const
     }
     geom->ClearDraws();
 
-    if (mStyle == Style::Solid)
+    if (style == Style::Solid)
         geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
-    else if (mStyle == Style::Outline)
+    else if (style == Style::Outline)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    else if (mStyle == Style::Wireframe)
+    else if (style == Style::Wireframe)
         geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     return geom;
 }
 
-void Rectangle::ApplyState(Program& program, RasterState& state) const
+// static
+Geometry* RectangleGeometry::Generate(const Environment& env, Style style, Device& device)
 {
-    state.culling = mCulling;
-    state.line_width = mLineWidth;
-}
-Shader* Rectangle::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
-
-Geometry* Rectangle::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
+    if (style == Style::Points)
         return nullptr;
 
     Geometry* geom = nullptr;
 
-    if (mStyle == Style::Outline)
+    if (style == Style::Outline)
     {
         geom = device.FindGeometry("RectangleOutline");
         if (geom == nullptr)
@@ -460,7 +396,7 @@ Geometry* Rectangle::Upload(const Environment& env, Device& device) const
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
         }
     }
-    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
+    else if (style == Style::Solid || style == Style::Wireframe)
     {
         geom = device.FindGeometry("Rectangle");
         if (geom == nullptr)
@@ -478,13 +414,184 @@ Geometry* Rectangle::Upload(const Environment& env, Device& device) const
             geom->SetVertexBuffer(verts, 6);
         }
         geom->ClearDraws();
-        if (mStyle == Style::Solid)
+        if (style == Style::Solid)
             geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (mStyle == Style::Wireframe)
+        else if (style == Style::Wireframe)
             geom->AddDrawCmd(Geometry::DrawType::LineLoop);
     }
     return geom;
 }
+
+// static
+Geometry* IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("IsoscelesTriangle");
+    if (!geom)
+    {
+        const Vertex verts[3] = {
+                { {0.5f,  0.0f}, {0.5f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} }
+        };
+        geom = device.MakeGeometry("IsoscelesTriangle");
+        geom->SetVertexBuffer(verts, 3);
+    }
+    geom->ClearDraws();
+    if (style == Style::Solid)
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    else if (style == Style::Outline)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (style == Style::Wireframe)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    return geom;
+}
+
+// static
+Geometry* RightTriangleGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("RightTriangle");
+    if (!geom)
+    {
+        const Vertex verts[3] = {
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} }
+        };
+        geom = device.MakeGeometry("RightTriangle");
+        geom->SetVertexBuffer(verts, 3);
+    }
+    geom->ClearDraws();
+    if (style == Style::Solid)
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    else if (style == Style::Outline)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (style == Style::Wireframe)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    return geom;
+}
+
+// static
+Geometry* TrapezoidGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    Geometry* geom = nullptr;
+    if (style == Style::Outline)
+    {
+        geom = device.FindGeometry("TrapezoidOutline");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                    { {0.2f,  0.0f}, {0.2f, 0.0f} },
+                    { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                    { {1.0f, -1.0f}, {1.0f, 1.0f} },
+                    { {0.8f,  0.0f}, {0.8f, 0.0f} }
+            };
+
+            geom = device.MakeGeometry("TrapezoidOutline");
+            geom->SetVertexBuffer(verts, 4);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        }
+    }
+    else if (style == Style::Solid || style == Style::Wireframe)
+    {
+        geom = device.FindGeometry("Trapezoid");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                    {{0.0f, -1.0f}, {0.0f, 1.0f}},
+                    {{0.2f, -1.0f}, {0.2f, 1.0f}},
+
+                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                    {{0.2f, -1.0f}, {0.2f, 1.0f}},
+                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                    {{0.8f,  0.0f}, {0.8f, 0.0f}},
+                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
+
+                    {{0.8f,  0.0f}, {0.8f, 0.0f}},
+                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                    {{1.0f, -1.0f}, {1.0f, 1.0f}}
+            };
+            geom = device.MakeGeometry("Trapezoid");
+            geom->SetVertexBuffer(verts, 12);
+        }
+        geom->ClearDraws();
+        if (style == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (style == Style::Wireframe)
+        {
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
+        }
+    }
+    return geom;
+}
+
+// static
+Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    Geometry* geom = nullptr;
+    if (style == Style::Outline)
+    {
+        geom = device.FindGeometry("ParallelogramOutline");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                    { {0.2f,  0.0f}, {0.2f, 0.0f} },
+                    { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                    { {0.8f, -1.0f}, {0.8f, 1.0f} },
+                    { {1.0f,  0.0f}, {1.0f, 0.0f} }
+            };
+            geom = device.MakeGeometry("ParallelogramOutline");
+            geom->SetVertexBuffer(verts, 4);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        }
+    }
+    else if (style == Style::Solid || style == Style::Wireframe)
+    {
+        geom = device.FindGeometry("Parallelogram");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
+                    {{0.0f, -1.0f}, {0.0f, 1.0f}},
+                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
+                    {{1.0f,  0.0f}, {1.0f, 0.0f}},
+                    {{0.2f,  0.0f}, {0.2f, 0.0f}}
+            };
+            geom = device.MakeGeometry("Parallelogram");
+            geom->SetVertexBuffer(verts, 6);
+        }
+        geom->ClearDraws();
+        if (style == Style::Solid)
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (style == Style::Wireframe)
+        {
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+        }
+    }
+    return geom;
+}
+
+} // detail
 
 Shader* RoundRectangleClass::GetShader(Device& device) const
 {
@@ -699,246 +806,14 @@ bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
     return true;
 }
 
-void IsoscelesTriangle::ApplyState(Program& program, RasterState& state) const
-{
-    state.culling = mCulling;
-    state.line_width = mLineWidth;
-}
 
-Shader* IsoscelesTriangle::GetShader(Device& device) const
-{
-    Shader* s = device.FindShader("vertex_array.glsl");
-    if (s == nullptr || !s->IsValid())
-    {
-        if (s == nullptr)
-            s = device.MakeShader("vertex_array.glsl");
-        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-            return nullptr;
-    }
-    return s;
-}
 
-Geometry* IsoscelesTriangle::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
-        return nullptr;
 
-    Geometry* geom = device.FindGeometry("IsocelesTriangle");
-    if (!geom)
-    {
-        const Vertex verts[3] = {
-            { {0.5f,  0.0f}, {0.5f, 0.0f} },
-            { {0.0f, -1.0f}, {0.0f, 1.0f} },
-            { {1.0f, -1.0f}, {1.0f, 1.0f} }
-        };
-        geom = device.MakeGeometry("IsocelesTriangle");
-        geom->SetVertexBuffer(verts, 3);
-    }
-    geom->ClearDraws();
-    if (mStyle == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    else if (mStyle == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (mStyle == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    return geom;
-}
 
-void RightTriangle::ApplyState(Program& program, RasterState& state) const
-{
-    state.line_width = mLineWidth;
-    state.culling    = mCulling;
-}
 
-Shader* RightTriangle::GetShader(Device& device) const
-{
-    Shader* s = device.FindShader("vertex_array.glsl");
-    if (s == nullptr || !s->IsValid())
-    {
-        if (s == nullptr)
-            s = device.MakeShader("vertex_array.glsl");
-        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-            return nullptr;
-    }
-    return s;
-}
 
-Geometry* RightTriangle::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
-        return nullptr;
 
-    Geometry* geom = device.FindGeometry("RightTriangle");
-    if (!geom)
-    {
-        const Vertex verts[3] = {
-            { {0.0f,  0.0f}, {0.0f, 0.0f} },
-            { {0.0f, -1.0f}, {0.0f, 1.0f} },
-            { {1.0f, -1.0f}, {1.0f, 1.0f} }
-        };
-        geom = device.MakeGeometry("RightTriangle");
-        geom->SetVertexBuffer(verts, 3);
-    }
-    geom->ClearDraws();
-    if (mStyle == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    else if (mStyle == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (mStyle == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    return geom;
-}
 
-void Trapezoid::ApplyState(Program& program, RasterState& state) const
-{
-    state.culling = mCulling;
-    state.line_width = mLineWidth;
-}
-
-Shader* Trapezoid::GetShader(Device& device) const
-{
-    Shader* s = device.FindShader("vertex_array.glsl");
-    if (s == nullptr || !s->IsValid())
-    {
-        if (s == nullptr)
-            s = device.MakeShader("vertex_array.glsl");
-        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-            return nullptr;
-    }
-    return s;
-}
-
-Geometry* Trapezoid::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
-        return nullptr;
-
-    Geometry* geom = nullptr;
-    if (mStyle == Style::Outline)
-    {
-        geom = device.FindGeometry("TrapezoidOutline");
-        if (!geom)
-        {
-            const Vertex verts[] = {
-                { {0.2f,  0.0f}, {0.2f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-                { {0.8f,  0.0f}, {0.8f, 0.0f} }
-            };
-
-            geom = device.MakeGeometry("TrapezoidOutline");
-            geom->SetVertexBuffer(verts, 4);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
-    }
-    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
-    {
-        geom = device.FindGeometry("Trapezoid");
-        if (!geom)
-        {
-            const Vertex verts[] = {
-                {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                {{0.0f, -1.0f}, {0.0f, 1.0f}},
-                {{0.2f, -1.0f}, {0.2f, 1.0f}},
-
-                {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                {{0.2f, -1.0f}, {0.2f, 1.0f}},
-                {{0.8f, -1.0f}, {0.8f, 1.0f}},
-
-                {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                {{0.8f,  0.0f}, {0.8f, 0.0f}},
-                {{0.2f,  0.0f}, {0.2f, 0.0f}},
-
-                {{0.8f,  0.0f}, {0.8f, 0.0f}},
-                {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                {{1.0f, -1.0f}, {1.0f, 1.0f}}
-            };
-            geom = device.MakeGeometry("Trapezoid");
-            geom->SetVertexBuffer(verts, 12);
-        }
-        geom->ClearDraws();
-        if (mStyle == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (mStyle == Style::Wireframe)
-        {
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
-        }
-    }
-    return geom;
-}
-
-void Parallelogram::ApplyState(Program& program, RasterState& state) const
-{
-    state.culling = mCulling;
-    state.line_width = mLineWidth;
-}
-
-Shader* Parallelogram::GetShader(Device& device) const
-{
-    Shader* s = device.FindShader("vertex_array.glsl");
-    if (s == nullptr || !s->IsValid())
-    {
-        if (s == nullptr)
-            s = device.MakeShader("vertex_array.glsl");
-        if (!s->CompileFile("shaders/es2/vertex_array.glsl"))
-            return nullptr;
-    }
-    return s;
-}
-
-Geometry* Parallelogram::Upload(const Environment& env, Device& device) const
-{
-    if (mStyle == Style::Points)
-        return nullptr;
-
-    Geometry* geom = nullptr;
-    if (mStyle == Style::Outline)
-    {
-        geom = device.FindGeometry("ParallelogramOutline");
-        if (!geom)
-        {
-            const Vertex verts[] = {
-                { {0.2f,  0.0f}, {0.2f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {0.8f, -1.0f}, {0.8f, 1.0f} },
-                { {1.0f,  0.0f}, {1.0f, 0.0f} }
-            };
-            geom = device.MakeGeometry("ParallelogramOutline");
-            geom->SetVertexBuffer(verts, 4);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
-    }
-    else if (mStyle == Style::Solid || mStyle == Style::Wireframe)
-    {
-        geom = device.FindGeometry("Parallelogram");
-        if (!geom)
-        {
-            const Vertex verts[] = {
-                {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                {{0.0f, -1.0f}, {0.0f, 1.0f}},
-                {{0.8f, -1.0f}, {0.8f, 1.0f}},
-
-                {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                {{1.0f,  0.0f}, {1.0f, 0.0f}},
-                {{0.2f,  0.0f}, {0.2f, 0.0f}}
-            };
-            geom = device.MakeGeometry("Parallelogram");
-            geom->SetVertexBuffer(verts, 6);
-        }
-        geom->ClearDraws();
-        if (mStyle == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (mStyle == Style::Wireframe)
-        {
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-        }
-    }
-    return geom;
-}
 
 Shader* GridClass::GetShader(Device& device) const
 {

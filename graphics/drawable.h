@@ -182,125 +182,166 @@ namespace gfx
     private:
     };
 
+    namespace detail {
+        // generic shim to help refactoring efforts.
+        // todo: replace this with the actual class types for
+        // RoundRectangle and Circle (anything that has parameters
+        // that affect the geometry generation)
+        template<DrawableClass::Type ActualType>
+        class GenericDrawableClass : public DrawableClass
+        {
+        public:
+            virtual std::string GetId() const override
+            {
+                // since the generic drawable class doesn't actually
+                // have any state that would define new drawable types
+                // the IDs can be fixed.
+                using types = DrawableClass::Type;
+                if constexpr (ActualType == types::Arrow)
+                    return "_arrow";
+                else if (ActualType == types::Capsule)
+                    return "_capsule";
+                else if (ActualType == types::Circle)
+                    return "_circle";
+                else if (ActualType == types::IsoscelesTriangle)
+                    return "_isosceles_triangle";
+                else if (ActualType == types::Line)
+                    return "_line";
+                else if (ActualType == types::Parallelogram)
+                    return "_parallelogram";
+                else if (ActualType == types::Rectangle)
+                    return "_rect";
+                else if (ActualType == types::RoundRectangle)
+                    return "_round_rect";
+                else if (ActualType == types::RightTriangle)
+                    return "_right_triangle";
+                else if (ActualType == types::Trapezoid)
+                    return "_trapezoid";
+                else BUG("???");
+            }
+            virtual std::unique_ptr<DrawableClass> Clone() const override
+            { return std::make_unique<GenericDrawableClass>(*this); }
+            virtual std::unique_ptr<DrawableClass> Copy() const override
+            { return std::make_unique<GenericDrawableClass>(*this); }
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, GetId()); }
+            virtual Type GetType() const override
+            { return ActualType; }
+            virtual void Pack(ResourcePacker*) const override {}
+            virtual nlohmann::json ToJson() const override
+            { return nlohmann::json {}; }
+            virtual bool LoadFromJson(const nlohmann::json&) override
+            { return true; }
+        private:
+        };
 
+        template<typename GeometryType>
+        class GenericDrawable : public Drawable
+        {
+        public:
+            GenericDrawable() = default;
+            GenericDrawable(Style style) : mStyle(style) {}
+            GenericDrawable(Style style, Culling culling)
+              : mStyle(style)
+              , mCulling(culling)
+            {}
+            GenericDrawable(Style style, Culling culling, float line_width)
+              : mStyle(style)
+              , mCulling(culling)
+              , mLineWidth(line_width)
+            {}
+            GenericDrawable(Style style, float line_width)
+              : mStyle(style)
+              , mLineWidth(line_width)
+            {}
+            GenericDrawable(float line_width)
+              : mLineWidth(line_width)
+            {}
+            virtual void ApplyState(Program& program, RasterState& state) const override
+            {
+                state.line_width = mLineWidth;
+                state.culling    = mCulling;
+            }
+            virtual Shader* GetShader(Device& device) const override
+            { return GeometryType::GetShader(device); }
+            virtual Geometry* Upload(const Environment& env, Device& device) const override
+            { return GeometryType::Generate(env, mStyle, device); }
+            virtual void SetCulling(Culling culling) override
+            { mCulling = culling; }
+            virtual void SetLineWidth(float width) override
+            { mLineWidth = width; }
+            virtual void SetStyle(Style style) override
+            { mStyle = style; }
+            virtual Style GetStyle() const override
+            { return mStyle; }
+        private:
+            Style mStyle     = GeometryType::InitialStyle;
+            Culling mCulling = GeometryType::InitialCulling;
+            float mLineWidth = 1.0f;
+        };
 
-    class Arrow : public Drawable
-    {
-    public:
-        Arrow() = default;
-        Arrow(Style style) : mStyle(style)
-        {}
-        Arrow(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Style mStyle = Style::Solid;
-        Culling mCulling = Culling::Back;
-        float mLineWidth = 1.0f;
-    };
+        struct GeometryBase {
+            using Environment = Drawable::Environment;
+            using Style       = Drawable::Style;
+            using Culling     = Drawable::Culling ;
+            static constexpr Culling InitialCulling = Culling::Back;
+            static constexpr Style   InitialStyle   = Style::Solid;
+            static Shader* GetShader(Device& device);
+        };
+        struct ArrowGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct LineGeometry : public GeometryBase {
+            static constexpr Culling InitialCulling = Culling::None;
+            static constexpr Style   InitialStyle   = Style::Outline;
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct CapsuleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct CircleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct RectangleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct IsoscelesTriangleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct RightTriangleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct TrapezoidGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct ParallelogramGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+    } // namespace
 
-    class Line : public Drawable
-    {
-    public:
-        Line() = default;
-        Line(float line_width) : mLineWidth(line_width)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return Style::Solid; }
-    private:
-        float mLineWidth = 1.0f;
-    };
+    // shim type definitions for drawables that don't have or need their
+    // own actual type class yet.
+    using ArrowClass             = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
+    using CapsuleClass           = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
+    using CircleClass            = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
+    using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
+    using LineClass              = detail::GenericDrawableClass<DrawableClass::Type::Line>;
+    using ParallelogramClass     = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
+    using RectangleClass         = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
+    using RightTriangleClass     = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
+    using TrapezoidClass         = detail::GenericDrawableClass<DrawableClass::Type::Trapezoid>;
 
-    class Capsule : public Drawable
-    {
-    public:
-        Capsule() = default;
-        Capsule(Style style) : mStyle(style)
-        {}
-        Capsule(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-    class Circle : public Drawable
-    {
-    public:
-        Circle() = default;
-        Circle(Style style) : mStyle(style)
-        {}
-        Circle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-
-    class Rectangle : public Drawable
-    {
-    public:
-        Rectangle() = default;
-        Rectangle(Style style) : mStyle(style)
-        {}
-        Rectangle(Style style, float linewidth)  : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetStyle(Style style) override
-        { mStyle = style; }
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
+    // generic drawable definitions for drawables that don't need special
+    // behaviour at runtime.
+    using Arrow             = detail::GenericDrawable<detail::ArrowGeometry>;
+    using Capsule           = detail::GenericDrawable<detail::CapsuleGeometry>;
+    using Circle            = detail::GenericDrawable<detail::CircleGeometry>;
+    using IsoscelesTriangle = detail::GenericDrawable<detail::IsoscelesTriangleGeometry>;
+    using Line              = detail::GenericDrawable<detail::LineGeometry>;
+    using Parallelogram     = detail::GenericDrawable<detail::ParallelogramGeometry>;
+    using Rectangle         = detail::GenericDrawable<detail::RectangleGeometry>;
+    using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
+    using Trapezoid         = detail::GenericDrawable<detail::TrapezoidGeometry>;
 
     class RoundRectangleClass : public DrawableClass
     {
@@ -383,107 +424,6 @@ namespace gfx
         { return mStyle; }
     private:
         std::shared_ptr<const RoundRectangleClass> mClass;
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-    class IsoscelesTriangle : public Drawable
-    {
-    public:
-        IsoscelesTriangle() = default;
-        IsoscelesTriangle(Style style) : mStyle(style)
-        {}
-        IsoscelesTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-    class RightTriangle : public Drawable
-    {
-    public:
-        RightTriangle() = default;
-        RightTriangle(Style style) : mStyle(style)
-        {}
-        RightTriangle(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-
-    class Trapezoid : public Drawable
-    {
-    public:
-        Trapezoid() = default;
-        Trapezoid(Style style) : mStyle(style)
-        {}
-        Trapezoid(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
-        Culling mCulling = Culling::Back;
-        Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
-    };
-
-    class Parallelogram : public Drawable
-    {
-    public:
-        Parallelogram() = default;
-        Parallelogram(Style style) : mStyle(style)
-        {}
-        Parallelogram(Style style, float linewidth) : mStyle(style), mLineWidth(linewidth)
-        {}
-        virtual void ApplyState(Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(Device& device) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
-        virtual void SetStyle(Style style) override
-        { mStyle = style;}
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
-    private:
         Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
         float mLineWidth = 1.0f;
@@ -1048,73 +988,6 @@ namespace gfx
         // this is this particle engine's state.
         KinematicsParticleEngineClass::InstanceState mState;
     };
-
-    namespace detail {
-        // generic shim to help refactoring efforts.
-        // todo: replace this with the actual class types for
-        // RoundRectangle and Circle (anything that has parameters
-        // that affect the geometry generation)
-        template<DrawableClass::Type ActualType>
-        class GenericDrawableClass : public DrawableClass
-        {
-        public:
-            virtual std::string GetId() const override
-            {
-                // since the generic drawable class doesn't actually
-                // have any state that would define new drawable types
-                // the IDs can be fixed.
-                using types = DrawableClass::Type;
-                if constexpr (ActualType == types::Arrow)
-                    return "_arrow";
-                else if (ActualType == types::Capsule)
-                    return "_capsule";
-                else if (ActualType == types::Circle)
-                    return "_circle";
-                else if (ActualType == types::IsoscelesTriangle)
-                    return "_isosceles_triangle";
-                else if (ActualType == types::Line)
-                    return "_line";
-                else if (ActualType == types::Parallelogram)
-                    return "_parallelogram";
-                else if (ActualType == types::Rectangle)
-                    return "_rect";
-                else if (ActualType == types::RoundRectangle)
-                    return "_round_rect";
-                else if (ActualType == types::RightTriangle)
-                    return "_right_triangle";
-                else if (ActualType == types::Trapezoid)
-                    return "_trapezoid";
-                else BUG("???");
-            }
-            virtual std::unique_ptr<DrawableClass> Clone() const override
-            { return std::make_unique<GenericDrawableClass>(*this); }
-            virtual std::unique_ptr<DrawableClass> Copy() const override
-            { return std::make_unique<GenericDrawableClass>(*this); }
-            virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, GetId()); }
-            virtual Type GetType() const override
-            { return ActualType; }
-            virtual void Pack(ResourcePacker*) const override {}
-            virtual nlohmann::json ToJson() const override
-            { return nlohmann::json {}; }
-            virtual bool LoadFromJson(const nlohmann::json&) override
-            { return true; }
-        private:
-
-        };
-    } // namespace
-
-    // shim type definitions for drawables that don't have their
-    // own actual type class yet.
-    using ArrowClass = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
-    using CapsuleClass = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
-    using CircleClass = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
-    using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
-    using LineClass = detail::GenericDrawableClass<DrawableClass::Type::Line>;
-    using ParallelogramClass = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
-    using RectangleClass = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
-    using RightTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
-    using TrapezoidClass = detail::GenericDrawableClass<DrawableClass::Type::Trapezoid>;
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 
