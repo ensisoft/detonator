@@ -166,6 +166,7 @@ void DlgPackage::on_btnStart_clicked()
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
     options.write_config_file  = GetValue(mUI.chkWriteConfig);
     options.write_content_file = GetValue(mUI.chkWriteContent);
+    options.texture_padding    = 2;
 
     const auto success = mWorkspace.PackContent(resources, options);
 

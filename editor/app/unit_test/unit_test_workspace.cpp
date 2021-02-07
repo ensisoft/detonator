@@ -379,7 +379,7 @@ void unit_test_packing_basic()
     TEST_REQUIRE(!base::FileExists("TestPackage/test/config.json"));
 }
 
-void unit_test_packing_texture_composition()
+void unit_test_packing_texture_composition(unsigned padding)
 {
     // generate some test textures.
     gfx::RgbBitmap bitmap[4];
@@ -420,6 +420,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures = false;
         options.max_texture_width = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -427,7 +428,10 @@ void unit_test_packing_texture_composition()
 
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/test_bitmap0.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[0], generated.AsBitmap<gfx::RGB>()));
+        const auto& bmp = generated.AsBitmap<gfx::RGB>();
+        TEST_REQUIRE(bmp.GetWidth() == bitmap[0].GetWidth());
+        TEST_REQUIRE(bmp.GetHeight() == bitmap[0].GetHeight());
+        TEST_REQUIRE(gfx::Compare(bitmap[0], bmp));
     }
 
     // use 2 small textures. packing should be done.
@@ -453,6 +457,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures = false;
         options.max_texture_width = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -461,10 +466,10 @@ void unit_test_packing_texture_composition()
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
         const auto& bmp = generated.AsBitmap<gfx::RGB>();
-        TEST_REQUIRE((bmp.GetWidth() == 64 && bmp.GetHeight() == 128) ||
-                          (bmp.GetWidth() == 128 && bmp.GetHeight() == 64));
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == 64*64);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 64*64);
+        TEST_REQUIRE((bmp.GetWidth() == 64 + 2*padding && bmp.GetHeight() == 128 + 4*padding) ||
+                          (bmp.GetWidth() == 128+4*padding && bmp.GetHeight() == 64 + 2*padding));
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == (64+2*padding)*(64+2*padding));
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == (64+2*padding)*(64+2*padding));
     }
 
     // disable packing, should get 2 textures
@@ -490,6 +495,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures    = false;
         options.max_texture_width  = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -525,6 +531,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures    = false;
         options.max_texture_width  = 512;
         options.max_texture_height = 512;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -575,6 +582,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures    = false;
         options.max_texture_width  = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -586,9 +594,9 @@ void unit_test_packing_texture_composition()
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
         const auto& bmp = generated.AsBitmap<gfx::RGB>();
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == 64*64);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 64*64);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green) == 512*512);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == (64+2*padding)*(64+2*padding));
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == (64+2*padding)*(64+2*padding));
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green) == (512+2*padding)*(512+2*padding));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
@@ -630,6 +638,7 @@ void unit_test_packing_texture_composition()
         options.resize_textures    = false;
         options.max_texture_width  = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -650,7 +659,7 @@ void unit_test_packing_texture_composition()
     // todo: test cases where texture packing cannot be done (see material.cpp)
 }
 
-void unit_test_packing_texture_rects()
+void unit_test_packing_texture_rects(unsigned padding)
 {
     // generate a test texture.
     gfx::RgbBitmap bitmap[2];
@@ -688,6 +697,7 @@ void unit_test_packing_texture_rects()
         options.resize_textures = false;
         options.max_texture_width = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -723,6 +733,7 @@ void unit_test_packing_texture_rects()
         options.resize_textures = false;
         options.max_texture_width = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -762,6 +773,7 @@ void unit_test_packing_texture_rects()
         options.resize_textures = false;
         options.max_texture_width = 1024;
         options.max_texture_height = 1024;
+        options.texture_padding = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -770,11 +782,11 @@ void unit_test_packing_texture_rects()
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/Generated_0.png"));
         const auto& bmp = img.AsBitmap<gfx::RGB>();
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::HotPink) == 32*32);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green) == 32*32);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 32*32);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == 32*32);
-        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 32*32);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::HotPink) == (32+2*padding) * (32+2*padding));
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green)   >= 32*32);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red)     >= 32*32);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue)    >= 32*32);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow)  >= 32*32);
 
         game::ContentLoader loader;
         loader.LoadFromFile("TestPackage", "TestPackage/content.json");
@@ -789,7 +801,6 @@ void unit_test_packing_texture_rects()
         TEST_REQUIRE(gfx::Compare(bitmap[1].Copy(src_fixed_rect1), bmp.Copy(dst_fixed_rect1)));
     }
 }
-
 
 int test_main(int argc, char* argv[])
 {
@@ -807,7 +818,9 @@ int test_main(int argc, char* argv[])
     unit_test_resource();
     unit_test_save_load();
     unit_test_packing_basic();
-    unit_test_packing_texture_composition();
-    unit_test_packing_texture_rects();
+    unit_test_packing_texture_composition(0);
+    unit_test_packing_texture_composition(3);
+    unit_test_packing_texture_rects(0);
+    unit_test_packing_texture_rects(5);
     return 0;
 }

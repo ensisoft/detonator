@@ -88,10 +88,11 @@ class ResourcePacker : public gfx::ResourcePacker
 public:
     using ObjectHandle = gfx::ResourcePacker::ObjectHandle;
 
-    ResourcePacker(const QString& outdir, unsigned max_width, unsigned max_height, bool resize_large, bool pack_small)
+    ResourcePacker(const QString& outdir, unsigned max_width, unsigned max_height, unsigned padding, bool resize_large, bool pack_small)
         : kOutDir(outdir)
         , kMaxTextureWidth(max_width)
         , kMaxTextureHeight(max_height)
+        , kTexturePadding(padding)
         , kResizeLargeTextures(resize_large)
         , kPackSmallTextures(pack_small)
     {}
@@ -196,7 +197,7 @@ public:
             const TextureSource& tex = it->second;
             if (tex.file.empty())
                 continue;
-            if (auto it = dupemap.find(tex.file) != dupemap.end())
+            else if (auto it = dupemap.find(tex.file) != dupemap.end())
                 continue;
 
             const QFileInfo info(app::FromUtf8(tex.file));
@@ -212,7 +213,7 @@ public:
             const auto width  = pix.width();
             const auto height = pix.height();
             DEBUG("Image %1 %2%%3 px", src, width, height);
-            if (width > kMaxTextureWidth || height > kMaxTextureHeight)
+            if (width >= kMaxTextureWidth || height >= kMaxTextureHeight)
             {
                 // todo: resample the image to fit within the maximum dimensions
                 // for now just map it as is.
@@ -239,8 +240,8 @@ public:
             {
                 // add as a source for texture packing
                 app::PackingRectangle rc;
-                rc.width  = pix.width();
-                rc.height = pix.height();
+                rc.width  = pix.width() + kTexturePadding * 2;
+                rc.height = pix.height() + kTexturePadding * 2;
                 rc.cookie = tex.file;
                 sources.push_back(rc);
             }
@@ -299,11 +300,18 @@ public:
             {
                 const auto& rc = *it;
                 ASSERT(rc.success);
+                const auto padded_width  = rc.width;
+                const auto padded_height = rc.height;
+                const auto width  = padded_width - kTexturePadding*2;
+                const auto height = padded_height - kTexturePadding*2;
 
                 const QFileInfo info(app::FromUtf8(rc.cookie));
                 const QString file(info.absoluteFilePath());
-                const QRectF dst(rc.xpos, rc.ypos, rc.width, rc.height);
-                const QRectF src(0, 0, rc.width, rc.height);
+                // compensate for possible texture sampling issues by padding the
+                // image with some extra pixels by growing it a few pixels on both
+                // axis.
+                const QRectF dst(rc.xpos, rc.ypos, padded_width, padded_height);
+                const QRectF src(0, 0, width, height);
                 const QPixmap pix(file);
                 if (pix.isNull())
                 {
@@ -313,7 +321,6 @@ public:
                 else
                 {
                     painter.drawPixmap(dst, pix, src);
-
                 }
             }
 
@@ -342,12 +349,18 @@ public:
             for (auto it = first_success; it != sources.end(); ++it)
             {
                 const auto& rc = *it;
+                const auto padded_width  = rc.width;
+                const auto padded_height = rc.height;
+                const auto width  = padded_width - kTexturePadding*2;
+                const auto height = padded_height - kTexturePadding*2;
+                const auto xpos   = rc.xpos + kTexturePadding;
+                const auto ypos   = rc.ypos + kTexturePadding;
                 GeneratedTextureEntry gen;
                 gen.texture_file   = QString("pck://textures/%1").arg(name);
-                gen.width          = (float)rc.width / pack_width;
-                gen.height         = (float)rc.height / pack_height;
-                gen.xpos           = (float)rc.xpos / pack_width;
-                gen.ypos           = (float)rc.ypos / pack_height;
+                gen.width          = (float)width / pack_width;
+                gen.height         = (float)height / pack_height;
+                gen.xpos           = (float)xpos / pack_width;
+                gen.ypos           = (float)ypos / pack_height;
                 relocation_map[rc.cookie] = gen;
                 DEBUG("Packed %1 into %2", rc.cookie, gen.texture_file);
             }
@@ -374,7 +387,7 @@ public:
             if (it == relocation_map.end()) // font texture sources only have texture box.
                 continue;
             //ASSERT(it != relocation_map.end());
-            const auto& relocation = it->second;
+            const GeneratedTextureEntry& relocation = it->second;
 
             const auto original_rect_x = original_rect.GetX();
             const auto original_rect_y = original_rect.GetY();
@@ -478,8 +491,9 @@ private:
     }
 private:
     const QString kOutDir;
-    const unsigned kMaxTextureHeight;
-    const unsigned kMaxTextureWidth;
+    const unsigned kMaxTextureHeight = 0;
+    const unsigned kMaxTextureWidth = 0;
+    const unsigned kTexturePadding = 0;
     const bool kResizeLargeTextures = true;
     const bool kPackSmallTextures = true;
     std::size_t mNumErrors = 0;
@@ -1753,8 +1767,12 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         mutable_copies.push_back(resource->Copy());
     }
 
-    ResourcePacker packer(outdir, options.max_texture_width, options.max_texture_height,
-        options.resize_textures, options.combine_textures);
+    ResourcePacker packer(outdir,
+        options.max_texture_width,
+        options.max_texture_height,
+        options.texture_padding,
+        options.resize_textures,
+        options.combine_textures);
 
     // not all shaders are referenced by user defined resources
     // so for now just copy all the shaders that we discover over to

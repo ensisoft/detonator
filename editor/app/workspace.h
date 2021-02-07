@@ -481,6 +481,13 @@ namespace app
             unsigned max_texture_height = 1024;
             // Max texture width, Textures larger than this will be downsized.
             unsigned max_texture_width  = 1024;
+            // Padding pixels to use in order to create some extra "cushion" pixels
+            // between adjacent packed textures in order to mitigate sampling
+            // artifacts. If textures are packed next to each other the sampling
+            // might sample pixels that belong to another texture depending
+            // on the filtering setting on the sampler. the padding pixels
+            // are filtered from the source texture.
+            unsigned texture_padding = 0;
         };
 
         // Pack the selected resources into a deployable "package".
