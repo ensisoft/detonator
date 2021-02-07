@@ -1971,7 +1971,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         glm::vec2 linear_velocity;
         linear_velocity.x = GetValue(mUI.rbLinearVeloX);
         linear_velocity.y = GetValue(mUI.rbLinearVeloY);
-        const auto& shape_name  = (QString)GetValue(mUI.rbPolygon);
+        const QString& shape_name  = GetValue(mUI.rbPolygon);
         if (!shape_name.isEmpty())
             body->SetPolygonShapeId(mState.workspace->GetDrawableClassByName(shape_name)->GetId());
         body->SetSimulation(GetValue(mUI.rbSimulation));
