@@ -1331,6 +1331,27 @@ void EntityWidget::on_dsRestartDrawable_stateChanged(int)
 void EntityWidget::on_dsOverrideAlpha_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
+
+    if (auto* node = GetCurrentNode())
+    {
+        if (const auto* item = node->GetDrawable())
+        {
+            const auto& material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
+            if (!material || !item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
+                return;
+
+            const bool has_alpha_blending = material->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Transparent;
+            if (has_alpha_blending)
+                return;
+
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setIcon(QMessageBox::Warning);
+            msg.setText(tr("The current material doesn't enable transparency."
+                           "Setting alpha will have no effect."));
+            msg.exec();
+        }
+    }
 }
 void EntityWidget::on_dsFlipVertically_stateChanged(int)
 {
@@ -1943,22 +1964,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
         item->SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, GetValue(mUI.dsOverrideAlpha));
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
-
-        // validate.
-        const auto& material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
-        if (material && item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
-        {
-            const bool has_alpha_blending = material->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Transparent;
-            if (!has_alpha_blending)
-            {
-                QMessageBox msg(this);
-                msg.setStandardButtons(QMessageBox::Ok);
-                msg.setIcon(QMessageBox::Warning);
-                msg.setText(tr("The current material doesn't enable transparency."
-                               "Setting alpha will have no effect."));
-                msg.exec();
-            }
-        }
     }
 
     if (auto* body = node->GetRigidBody())
