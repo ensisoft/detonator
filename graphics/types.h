@@ -379,7 +379,7 @@ namespace gfx
     using FRect = Rect<float>;
     using IRect = Rect<int>;
 
-    // Find the itersection of the two rectangles
+    // Find the intersection of the two rectangles
     // and return the rectangle that represents the intersect.
     template<typename T>
     Rect<T> Intersect(const Rect<T>& lhs, const Rect<T>& rhs)
@@ -411,6 +411,30 @@ namespace gfx
         const auto top    = std::max(lhs_top, rhs_top);
         const auto bottom = std::min(lhs_bottom, rhs_bottom);
         return R(left, top, right - left, bottom - top);
+    }
+
+    template<typename T>
+    bool DoesIntersect(const Rect<T>& lhs, const Rect<T>& rhs)
+    {
+        using R = Rect<T>;
+        if (lhs.IsEmpty() || rhs.IsEmpty())
+            return false;
+
+        const auto lhs_top    = lhs.GetY();
+        const auto lhs_left   = lhs.GetX();
+        const auto lhs_right  = lhs_left + lhs.GetWidth();
+        const auto lhs_bottom = lhs_top + lhs.GetHeight();
+        const auto rhs_top    = rhs.GetY();
+        const auto rhs_left   = rhs.GetX();
+        const auto rhs_right  = rhs_left + rhs.GetWidth();
+        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+        // no intersection conditions
+        if ((lhs_right <= rhs_left) ||
+            (lhs_left >= rhs_right) ||
+            (lhs_top >= rhs_bottom) ||
+            (lhs_bottom <= rhs_top))
+            return false;
+        return true;
     }
 
     template<typename T>

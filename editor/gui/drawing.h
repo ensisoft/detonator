@@ -30,6 +30,7 @@
 #include "warnpop.h"
 
 #include "gamelib/renderer.h"
+#include "gamelib/treeop.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
@@ -72,8 +73,15 @@ class DrawHook : public game::EntityClassDrawHook,
 public:
     template<typename Node>
     DrawHook(const Node* selected, bool playing)
+        : mSelectedItem(selected)
+        , mPlaying(playing)
+    {}
+
+    template<typename Node>
+    DrawHook(const Node* selected, bool playing, const game::FRect& view)
       : mSelectedItem(selected)
       , mPlaying(playing)
+      , mViewRect(view)
     {}
 
     // EntityNode
@@ -125,6 +133,12 @@ private:
     {
         if (!node->TestFlag(Node::Flags::VisibleInEditor))
             return false;
+        else if(!mViewRect.IsEmpty())
+        {
+            const auto& rect = game::ComputeBoundingRect(packet.transform);
+            if (!DoesIntersect(mViewRect, rect))
+                return false;
+        }
         return true;
     }
 
@@ -216,6 +230,7 @@ private:
     const bool mPlaying   = false;
     bool mDrawSelection  = false;
     bool mDrawIndicators = true;
+    const game::FRect mViewRect;
 };
 
 

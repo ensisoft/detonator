@@ -46,6 +46,28 @@
 namespace game
 {
 
+inline FRect ComputeBoundingRect(const glm::mat4& mat)
+{
+    // for each corner of a bounding rect compute new positions per
+    // the transformation matrix and then choose the min/max on each axis.
+    const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+    const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+    const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // choose min/max on each axis.
+    const auto left = std::min(std::min(top_left.x, top_right.x),
+                               std::min(bot_left.x, bot_right.x));
+    const auto right = std::max(std::max(top_left.x, top_right.x),
+                                std::max(bot_left.x, bot_right.x));
+    const auto top = std::min(std::min(top_left.y, top_right.y),
+                              std::min(bot_left.y, bot_right.y));
+    const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                                 std::max(bot_left.y, bot_right.y));
+    return FRect(left, top, right - left, bottom - top);
+}
+
+
 template<typename Node>
 class TreeNodeFromJson
 {
@@ -476,23 +498,8 @@ template<typename Node>
 FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
 {
     const auto& mat = FindNodeModelTransform(tree, node);
-    // for each corner of a bounding volume compute new positions per
-    // the transformation matrix and then choose the min/max on each axis.
-    const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-    const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-    const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    // choose min/max on each axis.
-    const auto left = std::min(std::min(top_left.x, top_right.x),
-                               std::min(bot_left.x, bot_right.x));
-    const auto right = std::max(std::max(top_left.x, top_right.x),
-                                std::max(bot_left.x, bot_right.x));
-    const auto top = std::min(std::min(top_left.y, top_right.y),
-                              std::min(bot_left.y, bot_right.y));
-    const auto bottom = std::max(std::max(top_left.y, top_right.y),
-                                 std::max(bot_left.y, bot_right.y));
-    return FRect(left, top, right - left, bottom - top);
+    return ComputeBoundingRect(mat);
 }
 
 template<typename Node>
@@ -506,25 +513,8 @@ FRect GetBoundingRect(const RenderTree<Node>& tree)
                 return;
             mTransform.Push(node->GetNodeTransform());
             mTransform.Push(node->GetModelTransform());
-            // node to animation matrix.
-            // for each corner of a bounding volume compute new positions per
-            // the transformation matrix and then choose the min/max on each axis.
-            const auto& mat = mTransform.GetAsMatrix();
-            const auto& top_left  = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-            const auto& top_right = mat * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-            const auto& bot_left  = mat * glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-            const auto& bot_right = mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-            // choose min/max on each axis.
-            const auto left = std::min(std::min(top_left.x, top_right.x),
-                                       std::min(bot_left.x, bot_right.x));
-            const auto right = std::max(std::max(top_left.x, top_right.x),
-                                        std::max(bot_left.x, bot_right.x));
-            const auto top = std::min(std::min(top_left.y, top_right.y),
-                                      std::min(bot_left.y, bot_right.y));
-            const auto bottom = std::max(std::max(top_left.y, top_right.y),
-                                         std::max(bot_left.y, bot_right.y));
-            const auto box = FRect(left, top, right - left, bottom - top);
+            const auto box = ComputeBoundingRect(mTransform.GetAsMatrix());
             if (mResult.IsEmpty())
                 mResult = box;
             else mResult = Union(mResult, box);

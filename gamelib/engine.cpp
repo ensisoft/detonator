@@ -55,6 +55,7 @@
 #include "gamelib/game.h"
 #include "gamelib/lua.h"
 #include "gamelib/format.h"
+#include "gamelib/treeop.h"
 #include "gamelib/main/interface.h"
 
 namespace
@@ -169,12 +170,29 @@ public:
 
         if (mForeground)
         {
+            // low level draw packet filter for culling draw packets
+            // that fall outside of the current viewport.
+            class Culler : public game::EntityInstanceDrawHook {
+            public:
+                Culler(const game::FRect& view) : mViewRect(view)
+                {}
+                virtual bool InspectPacket(const game::EntityNode* node, game::DrawPacket& packet) override
+                {
+                    const auto& rect = game::ComputeBoundingRect(packet.transform);
+                    if (!DoesIntersect(rect, mViewRect))
+                        return false;
+                    return true;
+                }
+            private:
+                const game::FRect& mViewRect;
+            };
+            Culler cull(view);
             // set the logical viewport to whatever the game
             // has set it.
             mPainter->SetView(view);
 
             gfx::Transform transform;
-            mRenderer.Draw(*mForeground , *mPainter , transform);
+            mRenderer.Draw(*mForeground , *mPainter , transform, nullptr, &cull);
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
                 mPhysics.DebugDrawObjects(*mPainter , transform);

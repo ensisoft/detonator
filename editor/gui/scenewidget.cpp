@@ -1202,9 +1202,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     painter.SetViewport(0, 0, width, height);
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
 
-    // apply the view transformation. The view transformation is not part of the
-    // animation per-se but it's the transformation that transforms the animation
-    // and its components from the space of the animation to the global space.
+    // setup the view transform.
     gfx::Transform view;
     view.Push();
     view.Scale(xs, ys);
@@ -1218,7 +1216,12 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
-    DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing);
+    // setup a viewport rect for culling draw packets against
+    // draw packets which don't intersect with the viewrect are culled
+    // for improved perf.
+    const game::FRect rect(0, 0, width, height);
+
+    DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing, rect);
 
     // begin the animation transformation space
     view.Push();
