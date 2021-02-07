@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "base/logging.h"
+#include "base/math.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
@@ -34,6 +35,11 @@
 #include "gamelib/types.h"
 #include "gamelib/scene.h"
 #include "gamelib/transform.h"
+
+// ADL lookup for math::FindConvexHull in the global
+// namespace for box2d
+inline b2Vec2 GetPosition(const b2Vec2& vec2)
+{ return vec2; }
 
 namespace game
 {
@@ -268,26 +274,56 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
 {
+    auto mat = gfx::SolidColor(gfx::Color::HotPink);
+    mat.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    mat.SetBaseAlpha(0.6);
+
     view.Push();
     view.Scale(mScale);
 
-    // todo: use the box2d debug draw interface.
+    // there's b2Draw api for debug drawing but it seems that
+    // when wanting to debug the *game* (not the physics engine
+    // integration issues itself) this is actually more straightforward
+    // than using the b2Draw way of visualizing the physics world.
     for (const auto& p : mNodes)
     {
         const auto& physics_node = p.second;
         const float angle = physics_node.world_body->GetAngle();
         const b2Vec2& pos = physics_node.world_body->GetPosition();
+
         view.Push();
-            view.Rotate(angle);
-            view.Translate(pos.x, pos.y);
-            view.Push();
-                view.Scale(physics_node.world_extents);
-                view.Translate(physics_node.world_extents * -0.5f);
-                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, gfx::SolidColor(gfx::Color::HotPink));
-            view.Pop();
+        view.Rotate(angle);
+        view.Translate(pos.x, pos.y);
+
+        view.Push();
+        view.Scale(physics_node.world_extents);
+        view.Translate(physics_node.world_extents * -0.5f);
+
+        if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Box)
+            painter.Draw(gfx::Rectangle(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Circle)
+            painter.Draw(gfx::Circle(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::RightTriangle)
+            painter.Draw(gfx::RightTriangle(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+            painter.Draw(gfx::IsoscelesTriangle(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Trapezoid)
+            painter.Draw(gfx::Trapezoid(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Parallelogram)
+            painter.Draw(gfx::Parallelogram(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Polygon) {
+            const auto& klass = mLoader->FindDrawableClassById(physics_node.polygonId);
+            if (klass == nullptr) {
+                WARN("No polygon class found for node '%1'", physics_node.debug_name);
+            } else {
+                auto poly = gfx::CreateDrawableInstance(klass);
+                painter.Draw(*poly, view, mat);
+            }
+        } else BUG("!unhandled collision shape for debug drawing.");
+
+        view.Pop();
         view.Pop();
     }
-
     view.Pop();
 }
 #endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
@@ -466,6 +502,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     const auto& node_pos_in_world   = box.GetPosition();
     const auto& node_size_in_world  = box.GetSize();
     const auto& rigid_body_class    = body->GetClass();
+    const auto& debug_name          = entity.GetName() + "/" + node.GetName();
 
     // body def is used to define a new physics body in the world.
     b2BodyDef body_def;
@@ -492,6 +529,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
 
     // collision shape used for collision resolver for the body.
     std::unique_ptr<b2Shape> collision_shape;
+    std::string polygonId;
     if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Box)
     {
         auto box = std::make_unique<b2PolygonShape>();
@@ -504,16 +542,66 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         circle->m_radius = std::max(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
         collision_shape = std::move(circle);
     }
+    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::RightTriangle)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[3];
+        verts[0] = b2Vec2(-width*0.5, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5f, height*0.5);
+        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 3);
+        collision_shape = std::move(poly);
+    }
+    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[3];
+        verts[0] = b2Vec2( 0.0f, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5f, height*0.5);
+        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 3);
+        collision_shape = std::move(poly);
+    }
+    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Trapezoid)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[4];
+        verts[0] = b2Vec2(-width*0.3, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5, height*0.5);
+        verts[2] = b2Vec2( width*0.5, height*0.5);
+        verts[3] = b2Vec2( width*0.3, -height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 4);
+        collision_shape = std::move(poly);
+    }
+    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Parallelogram)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[4];
+        verts[0] = b2Vec2(-width*0.3, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5, height*0.5);
+        verts[2] = b2Vec2( width*0.3, height*0.5);
+        verts[3] = b2Vec2( width*0.5, -height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 4);
+        collision_shape = std::move(poly);
+    }
     else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Polygon)
     {
-        const auto& polygonid = body->GetPolygonShapeId();
-        if (polygonid.empty()) {
-            WARN("Rigid body for node '%1' ('%2') has no polygon shape id set.", node.GetId(), node.GetName());
+        polygonId = body->GetPolygonShapeId();
+        if (polygonId.empty()) {
+            WARN("Rigid body '%1' has no polygon shape id set.", debug_name);
             return;
         }
-        const auto& drawable = mLoader->FindDrawableClassById(polygonid);
+        const auto& drawable = mLoader->FindDrawableClassById(polygonId);
         if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
-            WARN("No polygon class found for node '%1' ('%2')", node.GetId(), node.GetName());
+            WARN("No polygon class found for rigid body '%1'.", debug_name);
             return;
         }
         const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
@@ -538,8 +626,20 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         // invert the order of polygons in order to invert the winding
         // oder. This is done because of the flip around axis inverts
         // the winding order
-        // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
         std::reverse(verts.begin(), verts.end());
+
+        // it's possible that the set of vertices for a convex hull has
+        // less vertices than the polygon itself. I'm not sure how Box2D
+        // will behave when the number of vertices exceeds b2_maxPolygonVertices.
+        // Finding the convex hull here can at least help us discard some
+        // irrelevant vertices already.
+        verts = math::FindConvexHull(verts);
+        // still too many?
+        if (verts.size() > b2_maxPolygonVertices) {
+            // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
+            WARN("The convex hull for rigid body '%1' has too many vertices.", debug_name);
+        }
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(&verts[0], verts.size());
         // todo: radius??
@@ -556,14 +656,17 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     b2Fixture* fixture_ptr = world_body->CreateFixture(&fixture);
 
     PhysicsNode physics_node;
-    physics_node.debug_name = entity.GetName() + "/" + node.GetName();
-    physics_node.world_body = world_body;
-    physics_node.entity     = entity.GetId();
-    physics_node.node       = node.GetId();
+    physics_node.debug_name    = debug_name;
+    physics_node.world_body    = world_body;
+    physics_node.entity        = entity.GetId();
+    physics_node.node          = node.GetId();
     physics_node.world_extents = node_size_in_world;
+    physics_node.polygonId     = polygonId;
+    physics_node.shape         = (unsigned)body->GetCollisionShape();
+
     mNodes[node.GetId()]   = physics_node;
     mFixtures[fixture_ptr] = node.GetId();
-    DEBUG("Created new physics body '%1'", physics_node.debug_name);
+    DEBUG("Created new physics body '%1'", debug_name);
 }
 
 } // namespace

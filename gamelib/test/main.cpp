@@ -352,7 +352,7 @@ public:
         mScene = game::CreateSceneInstance(klass);
         mRenderer.SetLoader(loader);
         mPhysics.SetLoader(loader);
-        mPhysics.SetGravity(glm::vec2(0.0f, 10.0f));
+        mPhysics.SetGravity(glm::vec2(0.0f, 100.0f));
         mPhysics.SetScale(glm::vec2(10.0f, 10.0f));
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);

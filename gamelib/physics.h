@@ -168,8 +168,14 @@ namespace game
             glm::vec2 world_extents;
             // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
-
+            // flag for culling physics nodes that have are no longer
+            // alive in the scene.
             bool alive = true;
+            // the polygon shape id if any. empty string
+            // if the shape is a box or a circle.
+            std::string polygonId;
+            // RigidBodyItemClass::Collision shape
+            unsigned shape = 0;
         };
         // The nodes represented in the physics simulation.
         std::unordered_map<std::string, PhysicsNode> mNodes;

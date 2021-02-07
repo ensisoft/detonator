@@ -1439,22 +1439,43 @@ void EntityWidget::on_drawableItem_toggled(bool on)
 }
 void EntityWidget::on_rigidBodyItem_toggled(bool on)
 {
-    if (auto* node = GetCurrentNode())
+    auto* node = GetCurrentNode();
+    if (!node)
+        return;
+    if (!on)
     {
-        if (on)
+        node->RemoveRigidBody();
+        DEBUG("Removed rigid body from '%1'" , node->GetName());
+    }
+    else if (!node->HasRigidBody())
+    {
+        game::RigidBodyItemClass body;
+        // try to see if we can figure out the right collision
+        // box for this rigid body based on the drawable.
+        if (auto* item = node->GetDrawable())
         {
-            if (!node->HasRigidBody())
-            {
-                game::RigidBodyItemClass body;
-                node->SetRigidBody(body);
-                DEBUG("Added rigid body to '%1'", node->GetName());
+            const auto& drawableId = item->GetDrawableId();
+            if (drawableId == "_circle")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
+            else if (drawableId == "_parallelogram")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Parallelogram);
+            else if (drawableId == "_rect" || drawableId == "_round_rect")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            else if (drawableId == "_isosceles_triangle")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::IsoscelesTriangle);
+            else if (drawableId == "_right_triangle")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::RightTriangle);
+            else if (drawableId == "_trapezoid")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Trapezoid);
+            else if (auto klass = mState.workspace->FindDrawableClassById(drawableId)) {
+                if (klass->GetType() == gfx::DrawableClass::Type::Polygon) {
+                    body.SetPolygonShapeId(drawableId);
+                    body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Polygon);
+                }
             }
         }
-        else
-        {
-            node->RemoveRigidBody();
-            DEBUG("Removed rigid body from '%1'", node->GetName());
-        }
+        node->SetRigidBody(body);
+        DEBUG("Added rigid body to '%1'", node->GetName());
     }
     DisplayCurrentNodeProperties();
 }

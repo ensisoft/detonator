@@ -75,6 +75,16 @@ namespace game
             // The collision shape is a circle based on the largest extent of
             // the node's box.
             Circle,
+            // The collision shape is a right angled triangle where the
+            // height of the triangle is the height of the box and the
+            // width is the width of the node's box
+            RightTriangle,
+            // Isosceles triangle
+            IsoscelesTriangle,
+            // Trapezoid
+            Trapezoid,
+            //
+            Parallelogram,
             // The collision shape is a convex polygon. The polygon shape id
             // must then be selected in order to be able to extract the
             // polygon's convex hull.
