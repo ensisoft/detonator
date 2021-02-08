@@ -22,21 +22,13 @@
 
 #pragma once
 
-#include "base/platform.h"
+#include "config/config.h"
 
 // Editor build time configuration file.
-
-#define BASE_LOGGING_ENABLE_LOG
 #define APP_TITLE "Gamestudio Editor"
 #define APP_VERSION "0.1"
 
-// some of the code uses LINUX_OS
-// we expect that POSIX_OS is Linux
-#ifdef POSIX_OS
-  #define LINUX_OS
-#endif
 
-#ifdef POSIX_OS
-//  #define BASE_LOGGING_ENABLE_CURSES
-#endif
+
+
 

@@ -22,6 +22,6 @@
 
 #pragma once
 
-#include "base/warnpop.h"
+#include "config/warnpop.h"
 
 // editor specific build time warning suppressions 

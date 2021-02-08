@@ -18,7 +18,7 @@
     "application": {
         "title": "hello world",
         "version": "0.1b",
-        "library": "gamelib_test",
+        "library": "TestEngine",
         "ticks_per_second": 2.0,
         "updates_per_second": 60.0
     }

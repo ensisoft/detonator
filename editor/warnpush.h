@@ -22,6 +22,6 @@
 
 #pragma once
 
-#include "base/warnpush.h"
+#include "config/warnpush.h"
 
 // editor specific build time warning suppressions 
