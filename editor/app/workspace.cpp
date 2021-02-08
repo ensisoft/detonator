@@ -152,6 +152,13 @@ public:
         if (mTextureMap.empty())
             return;
 
+        if (!app::MakePath(app::JoinPath(kOutDir, "textures")))
+        {
+            ERROR("Failed to create %1/%2", kOutDir, "textures");
+            mNumErrors++;
+            return;
+        }
+
         // OpenGL ES 2. defines the minimum required supported texture size to be
         // only 64x64 px which is not much. Anything bigger than that
         // is implementation specific. :p
@@ -201,28 +208,61 @@ public:
                 continue;
 
             const QFileInfo info(app::FromUtf8(tex.file));
-            const QString src = info.absoluteFilePath();
-            const QPixmap pix(src);
-            if (pix.isNull())
+            const QString src_file = info.absoluteFilePath();
+            const QPixmap src_pix(src_file);
+            if (src_pix.isNull())
             {
-                ERROR("Failed to open image: '%1'", src);
+                ERROR("Failed to open image: '%1'", src_file);
                 mNumErrors++;
                 continue;
             }
 
-            const auto width  = pix.width();
-            const auto height = pix.height();
-            DEBUG("Image %1 %2%%3 px", src, width, height);
+            const auto width  = src_pix.width();
+            const auto height = src_pix.height();
+            DEBUG("Image %1 %2%%3 px", src_file, width, height);
             if (width >= kMaxTextureWidth || height >= kMaxTextureHeight)
             {
-                // todo: resample the image to fit within the maximum dimensions
-                // for now just map it as is.
+                QString filename;
+                if ((width > kMaxTextureWidth || height > kMaxTextureHeight) && kResizeLargeTextures)
+                {
+                    const auto scale = std::min(kMaxTextureWidth/(float)width, kMaxTextureHeight/(float)height);
+                    const auto dst_width = width * scale;
+                    const auto dst_height = height* scale;
+                    QPixmap buffer(dst_width, dst_height);
+                    buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
+                    QPainter painter(&buffer);
+                    painter.setCompositionMode(QPainter::CompositionMode_Source);
+                    const QRectF dst_rect(0, 0, dst_width, dst_height);
+                    const QRectF src_rect(0, 0, width, height);
+                    painter.drawPixmap(dst_rect, src_pix, src_rect);
+                    const QString& name = info.baseName() + ".png";
+                    const QString& file = app::JoinPath(app::JoinPath(kOutDir, "textures"), name);
+                    QImageWriter writer;
+                    writer.setFormat("PNG");
+                    writer.setQuality(100);
+                    writer.setFileName(file);
+                    if (!writer.write(buffer.toImage()))
+                    {
+                        ERROR("Failed to write image '%1'", file);
+                        mNumErrors++;
+                        continue;
+                    }
+                    filename = file;
+                    DEBUG("Texture '%1' was re-sampled.", src_file);
+                }
+                else
+                {
+                    // copy the file as is, since it's just at the max allowed
+                    // texture size.
+                    filename = app::FromUtf8(CopyFile(tex.file , "textures"));
+                }
+
                 GeneratedTextureEntry self;
-                self.width  = 1.0f;
+                self.width = 1.0f;
                 self.height = 1.0f;
-                self.xpos   = 0.0f;
-                self.ypos   = 0.0f;
-                self.texture_file   = app::FromUtf8(CopyFile(tex.file, "textures"));
+                self.xpos = 0.0f;
+                self.ypos = 0.0f;
+                self.texture_file = filename;
                 relocation_map[tex.file] = std::move(self);
             }
             else if (!kPackSmallTextures || !tex.can_be_combined)
@@ -240,8 +280,8 @@ public:
             {
                 // add as a source for texture packing
                 app::PackingRectangle rc;
-                rc.width  = pix.width() + kTexturePadding * 2;
-                rc.height = pix.height() + kTexturePadding * 2;
+                rc.width  = src_pix.width() + kTexturePadding * 2;
+                rc.height = src_pix.height() + kTexturePadding * 2;
                 rc.cookie = tex.file;
                 sources.push_back(rc);
             }
@@ -325,11 +365,6 @@ public:
             }
 
             const QString& name = QString("Generated_%1.png").arg(atlas_number);
-            if (!app::MakePath(app::JoinPath(kOutDir, "textures")))
-            {
-                ERROR("Failed to create %1/%2", kOutDir, "textures");
-                mNumErrors++;
-            }
             const QString& file = app::JoinPath(app::JoinPath(kOutDir, "textures"), name);
 
             QImageWriter writer;

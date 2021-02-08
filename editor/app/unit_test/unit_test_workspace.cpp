@@ -544,7 +544,38 @@ void unit_test_packing_texture_composition(unsigned padding)
 
     // texture size that exceeds the max texture size gets resized.
     {
-        // todo: implement resizing of textures
+        DeleteDir("TestWorkspace");
+        DeleteDir("TestPackage");
+
+        gfx::MaterialClass material;
+        material.AddTexture("test_bitmap3.png");
+        app::MaterialResource resource(material, "material");
+
+        app::Workspace workspace;
+        workspace.MakeWorkspace("TestWorkspace");
+        workspace.SaveResource(resource);
+
+        app::Workspace::ContentPackingOptions options;
+        options.directory = "TestPackage";
+        options.package_name = "";
+        options.write_content_file = true;
+        options.write_config_file  = true;
+        options.combine_textures   = true;
+        options.resize_textures    = true;
+        options.max_texture_width  = 512;
+        options.max_texture_height = 512;
+        options.texture_padding    = padding;
+        // select the resources.
+        std::vector<const app::Resource *> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+        TEST_REQUIRE(workspace.PackContent(resources, options));
+
+        gfx::Image img;
+        TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
+        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        TEST_REQUIRE(bmp.GetHeight() == 512);
+        TEST_REQUIRE(bmp.GetWidth() == 512);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 512*512);
     }
 
     // test discarding multiple copies of textures while combining
