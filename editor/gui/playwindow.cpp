@@ -34,7 +34,6 @@
 #include <unordered_map>
 #include <mutex>
 #include <vector>
-#include <gamelib/main/interface.h>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -46,8 +45,8 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
-#include "gamelib/main/interface.h"
-#include "gamelib/animation.h"
+#include "engine/main/interface.h"
+#include "engine/animation.h"
 #include "wdk/system.h"
 
 namespace {

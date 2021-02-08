@@ -36,7 +36,7 @@
 namespace app
 {
     // script resource. Currently this resource isn't part of any of
-    // the actual subsystem (gamelib, graphics, audio etc). It's only
+    // the actual subsystem (engine, graphics, audio etc). It's only
     // relevant to the editor for the purposes of showing the scripts
     // in the resource table and for packing the resources.
     class Script

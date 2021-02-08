@@ -17,7 +17,7 @@
 #include "editor/app/resource.h"
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"
-#include "gamelib/loader.h"
+#include "engine/loader.h"
 #include "graphics/types.h"
 
 void DeleteDir(const QString& dir)

@@ -29,8 +29,8 @@
 #  include <glm/gtx/matrix_decompose.hpp>
 #include "warnpop.h"
 
-#include "gamelib/renderer.h"
-#include "gamelib/treeop.h"
+#include "engine/renderer.h"
+#include "engine/treeop.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"

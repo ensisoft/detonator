@@ -43,7 +43,7 @@
 #include "graphics/material.h"
 #include "graphics/resource.h"
 #include "graphics/device.h"
-#include "gamelib/classlib.h"
+#include "engine/classlib.h"
 #include "resource.h"
 #include "utility.h"
 

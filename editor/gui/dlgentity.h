@@ -29,8 +29,8 @@
 #  include <QDialog>
 #include "warnpop.h"
 
-#include "gamelib/entity.h"
-#include "gamelib/scene.h"
+#include "engine/entity.h"
+#include "engine/scene.h"
 
 namespace gui
 {

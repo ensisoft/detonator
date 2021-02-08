@@ -20,20 +20,38 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#include "config.h"
-
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 
+#include "base/assert.h"
 #include "base/logging.h"
 #include "engine/main/interface.h"
-#include "gamewidget.h"
+#include "engine/loader.h"
+#include "graphics/resource.h"
+
+// helper stuff for dependency management for now.
+// see interface.h for more details.
 
 extern "C" {
-
-GAMESTUDIO_EXPORT game::App* MakeApp()
+GAMESTUDIO_EXPORT void CreateDefaultEnvironment(game::ClassLibrary** classlib)
 {
-    INFO("%1 %2", GAME_TITLE, GAME_VERSION);
-    return new invaders::GameWidget();
+    auto* ret = new game::ContentLoader();
+    *classlib = ret;
+    gfx::SetResourceLoader(ret);
+}
+GAMESTUDIO_EXPORT void DestroyDefaultEnvironment(game::ClassLibrary* classlib)
+{
+    gfx::SetResourceLoader(nullptr);
+    delete classlib;
+}
+
+GAMESTUDIO_EXPORT void SetResourceLoader(gfx::ResourceLoader* loader)
+{
+    gfx::SetResourceLoader(loader);
+}
+
+GAMESTUDIO_EXPORT void SetGlobalLogger(base::Logger* logger)
+{
+    base::SetGlobalLog(logger);
 }
 
 } // extern "C"

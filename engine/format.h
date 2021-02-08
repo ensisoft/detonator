@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2014 Sami Väisänen, Ensisoft
+// Copyright (c) 2010-2020 Sami Väisänen, Ensisoft
 //
 // http://www.ensisoft.com
 //
@@ -20,20 +20,16 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+#pragma once
+
 #include "config.h"
 
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+#include <cstdio>
+#include <string>
 
-#include "base/logging.h"
-#include "engine/main/interface.h"
-#include "gamewidget.h"
+#include "engine/types.h"
+#include "graphics/format.h"
 
-extern "C" {
-
-GAMESTUDIO_EXPORT game::App* MakeApp()
-{
-    INFO("%1 %2", GAME_TITLE, GAME_VERSION);
-    return new invaders::GameWidget();
-}
-
-} // extern "C"
+// this header is currently a placeholder shim
+// while the types that format (ToString etc) functions
+// would apply are all in graphics/

@@ -59,7 +59,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-#include "gamelib/treeop.h"
+#include "engine/treeop.h"
 
 namespace {
     inline glm::vec4 ToVec4(const QPoint& point)

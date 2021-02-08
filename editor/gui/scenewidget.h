@@ -35,8 +35,8 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
-#include "gamelib/scene.h"
-#include "gamelib/renderer.h"
+#include "engine/scene.h"
+#include "engine/renderer.h"
 
 namespace gfx {
     class Painter;

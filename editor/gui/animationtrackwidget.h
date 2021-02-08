@@ -36,10 +36,10 @@
 #include "editor/gui/treemodel.h"
 #include "editor/gui/drawing.h"
 #include "editor/app/workspace.h"
-#include "gamelib/entity.h"
-#include "gamelib/animation.h"
-#include "gamelib/renderer.h"
-#include "gamelib/physics.h"
+#include "engine/entity.h"
+#include "engine/animation.h"
+#include "engine/renderer.h"
+#include "engine/physics.h"
 
 namespace gui
 {

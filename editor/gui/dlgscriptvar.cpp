@@ -26,7 +26,7 @@
 
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/utility.h"
-#include "gamelib/types.h"
+#include "engine/types.h"
 
 namespace gui
 {

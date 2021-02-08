@@ -149,12 +149,12 @@ add_executable(Editor
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    gamelib/animation.cpp
-    gamelib/renderer.cpp
-    gamelib/entity.cpp
-    gamelib/scene.cpp
-    gamelib/types.cpp
-    gamelib/physics.cpp
+    engine/animation.cpp
+    engine/renderer.cpp
+    engine/entity.cpp
+    engine/scene.cpp
+    engine/types.cpp
+    engine/physics.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -319,10 +319,10 @@ add_executable(EditorGameHost
     graphics/image.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    gamelib/animation.cpp
-    gamelib/entity.cpp
-    gamelib/scene.cpp
-    gamelib/types.cpp
+    engine/animation.cpp
+    engine/entity.cpp
+    engine/scene.cpp
+    engine/types.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h
@@ -405,8 +405,8 @@ add_executable(GameMain
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
-    gamelib/main/main.cpp)
-target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
+    engine/main/main.cpp)
+target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameMain wdk_system wdk_desktop_gl)
 if (UNIX)
     target_link_libraries(GameMain dl pthread)
@@ -426,21 +426,21 @@ add_library(GameEngine SHARED
     graphics/resource.cpp
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
-    gamelib/physics.cpp
-    gamelib/entity.cpp
-    gamelib/types.cpp
-    gamelib/renderer.cpp
-    gamelib/animation.cpp
-    gamelib/scene.cpp
-    gamelib/loader.cpp
-    gamelib/engine.cpp
-    gamelib/lua.cpp
-    gamelib/main/gamelib.cpp
+    engine/physics.cpp
+    engine/entity.cpp
+    engine/types.cpp
+    engine/renderer.cpp
+    engine/animation.cpp
+    engine/scene.cpp
+    engine/loader.cpp
+    engine/engine.cpp
+    engine/lua.cpp
+    engine/main/gamelib.cpp
     third_party/stb/stb_image_write.c
     third_party/stb/stb_image.c
     third_party/base64/base64.cpp
 )
-target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/main")
+target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 # hide symbols on linux
@@ -448,7 +448,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(GameEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
-# gamelib test application.
+# engine test application.
 add_library(gamelib_test SHARED
     base/assert.cpp
     base/format.cpp
@@ -461,24 +461,24 @@ add_library(gamelib_test SHARED
     graphics/resource.cpp
     graphics/image.cpp
     graphics/opengl_es2_device.cpp
-    gamelib/physics.cpp
-    gamelib/entity.cpp
-    gamelib/types.cpp
-    gamelib/renderer.cpp
-    gamelib/animation.cpp
-    gamelib/loader.cpp
-    gamelib/scene.cpp
-    gamelib/test/main.cpp
-    gamelib/main/gamelib.cpp
+    engine/physics.cpp
+    engine/entity.cpp
+    engine/types.cpp
+    engine/renderer.cpp
+    engine/animation.cpp
+    engine/loader.cpp
+    engine/scene.cpp
+    engine/test/main.cpp
+    engine/main/gamelib.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp
 )
-target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
+target_include_directories(gamelib_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
 target_link_libraries(gamelib_test PRIVATE ${CONAN_LIBS})
-install(TARGETS gamelib_test GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+install(TARGETS gamelib_test GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/gamelib/test/dist")
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(gamelib_test PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
@@ -486,8 +486,8 @@ endif()
 
 # simple standalone executable to play with lua and sol
 # for testing c++/lua integration strategies.
-add_executable(lua-test gamelib/test/luatest.cpp)
-target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/test")
+add_executable(lua-test engine/test/luatest.cpp)
+target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
 target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
 
 # game project
@@ -511,14 +511,14 @@ add_library(invaders SHARED
     graphics/painter.cpp
     graphics/text.cpp
     graphics/resource.cpp
-    gamelib/animation.cpp
-    gamelib/renderer.cpp
-    gamelib/homedir.cpp
-    gamelib/scene.cpp
-    gamelib/entity.cpp
-    gamelib/types.cpp
-    gamelib/loader.cpp
-    gamelib/main/gamelib.cpp
+    engine/animation.cpp
+    engine/renderer.cpp
+    engine/homedir.cpp
+    engine/scene.cpp
+    engine/entity.cpp
+    engine/types.cpp
+    engine/loader.cpp
+    engine/main/gamelib.cpp
     wdk/wdk/keys.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -555,10 +555,10 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         graphics/text.cpp
         graphics/drawable.cpp
         graphics/image.cpp
-        gamelib/animation.cpp
-        gamelib/entity.cpp
-        gamelib/scene.cpp
-        gamelib/types.cpp
+        engine/animation.cpp
+        engine/entity.cpp
+        engine/scene.cpp
+        engine/types.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -576,11 +576,11 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/eventlog.cpp
         editor/app/workspace.cpp
         editor/app/packing.cpp
-        gamelib/animation.cpp
-        gamelib/entity.cpp
-        gamelib/types.cpp
-        gamelib/scene.cpp
-        gamelib/loader.cpp
+        engine/animation.cpp
+        engine/entity.cpp
+        engine/types.cpp
+        engine/scene.cpp
+        engine/loader.cpp
         graphics/drawable.cpp
         graphics/material.cpp
         graphics/image.cpp
@@ -604,43 +604,43 @@ target_link_libraries(unit_test_ipc ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 
-# gamelib tests
-add_executable(unit_test_settings gamelib/unit_test/unit_test_settings.cpp)
-add_executable(unit_test_tree     gamelib/unit_test/unit_test_tree.cpp  base/assert.cpp)
-add_executable(unit_test_anim     gamelib/unit_test/unit_test_animation.cpp
+# engine tests
+add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
+add_executable(unit_test_tree engine/unit_test/unit_test_tree.cpp base/assert.cpp)
+add_executable(unit_test_anim engine/unit_test/unit_test_animation.cpp
     base/assert.cpp
-    gamelib/entity.cpp
-    gamelib/types.cpp
-    gamelib/animation.cpp)
+        engine/entity.cpp
+        engine/types.cpp
+        engine/animation.cpp)
 target_link_libraries(unit_test_anim ${CONAN_LIBS})
 
-add_executable(unit_test_entity gamelib/unit_test/unit_test_entity.cpp
+add_executable(unit_test_entity engine/unit_test/unit_test_entity.cpp
         base/assert.cpp
-        gamelib/animation.cpp
-        gamelib/types.cpp
-        gamelib/entity.cpp)
-add_executable(unit_test_scene gamelib/unit_test/unit_test_scene.cpp
+        engine/animation.cpp
+        engine/types.cpp
+        engine/entity.cpp)
+add_executable(unit_test_scene engine/unit_test/unit_test_scene.cpp
         base/assert.cpp
-        gamelib/scene.cpp
-        gamelib/animation.cpp
-        gamelib/types.cpp
-        gamelib/entity.cpp)
-add_executable(unit_test_lua gamelib/unit_test/unit_test_lua.cpp
+        engine/scene.cpp
+        engine/animation.cpp
+        engine/types.cpp
+        engine/entity.cpp)
+add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         base/assert.cpp
-        gamelib/lua.cpp
-        gamelib/animation.cpp
-        gamelib/scene.cpp
-        gamelib/entity.cpp
-        gamelib/types.cpp
-        gamelib/physics.cpp)
+        engine/lua.cpp
+        engine/animation.cpp
+        engine/scene.cpp
+        engine/entity.cpp
+        engine/types.cpp
+        engine/physics.cpp)
 target_link_libraries(unit_test_lua ${CONAN_LIBS})
 
-target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
-target_include_directories(unit_test_lua      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/gamelib/unit_test")
+target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_lua      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 add_test(NAME unit_test_tree COMMAND unit_test_tree)
 add_test(NAME unit_test_anim COMMAND unit_test_anim)
 add_test(NAME unit_test_settings COMMAND unit_test_settings)

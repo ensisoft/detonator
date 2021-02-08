@@ -36,7 +36,7 @@
 
 #include <memory>
 
-#include "gamelib/main/interface.h"
+#include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
 
 namespace app {

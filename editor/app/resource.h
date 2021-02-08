@@ -38,8 +38,8 @@
 #include "base/assert.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "gamelib/entity.h"
-#include "gamelib/scene.h"
+#include "engine/entity.h"
+#include "engine/scene.h"
 #include "editor/app/utility.h"
 #include "editor/app/script.h"
 
