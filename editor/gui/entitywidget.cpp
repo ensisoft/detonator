@@ -2059,7 +2059,9 @@ void EntityWidget::UpdateDeletedResourceReferences()
         }
         if (auto* body = node.GetRigidBody())
         {
-            const auto polygon = body->GetPolygonShapeId();
+            if (body->GetCollisionShape() != game::RigidBodyItemClass::CollisionShape::Polygon)
+                continue;
+            const auto& polygon = body->GetPolygonShapeId();
             if (!mState.workspace->IsValidDrawable(polygon))
             {
                 WARN("Entity node '%1' uses rigid body shape that is no longer available.", node.GetName());
