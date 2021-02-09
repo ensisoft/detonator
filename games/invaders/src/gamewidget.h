@@ -77,7 +77,7 @@ namespace invaders
         virtual void Load() override;
         virtual void Start() override;
         virtual void Save() override;
-        virtual void Update(double current_time, double dt) override;
+        virtual void Update(double wall_time, double game_time, double dt) override;
         virtual void Draw() override;
         virtual bool IsRunning() const override
         { return mRunning; }

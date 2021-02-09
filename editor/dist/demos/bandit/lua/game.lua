@@ -77,11 +77,11 @@ function BeginPlay(scene)
     Scene  = scene
 end
 
-function Tick(current_time)
+function Tick(wall_time, tick_time, dt)
 
 end
 
-function Update(current_time, delta)
+function Update(wall_time, game_time, dt)
     if Player == nil then
         return
     end

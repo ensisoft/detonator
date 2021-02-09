@@ -96,15 +96,23 @@ namespace game
         // Tick is called intermittently in order to perform some low frequency
         // game activity. The actual frequency is specified in the game configuration
         // in config.json.
-        // Current time is the current total accumulated application time,
-        // measured in seconds since the application was started.
-        virtual void Tick(double current_time) = 0;
+        // wall_time is the current continuously increasing time since application started.
+        // tick-time is the current total accumulated application/game/ tick time measured
+        // in seconds and updated in dt steps with each step being equal to
+        // 1.0/ticks_per_second seconds. it only updates when the game is actually
+        // running, so in case game is paused by the host runner this counter will
+        // not increase.
+        virtual void Tick(double wall_time, double tick_time, double dt) = 0;
         // Update is the main game update callback. It is called (normally)
         // at much higher frequency (for example @ 60 Hz) than Tick. The actual
         // frequency is specified in the game configuration in config.json.
-        // Current time is the current total accumulated application time,
-        // measured in seconds since the application was started.
-        virtual void Update(double current_time,  double dt) = 0;
+        // wall_time is the current continuously increasing time since application started.
+        // game_time is the current total accumulated application/game time measured
+        // in seconds and updated in dt steps with each step being equal to
+        // 1.0/updates_per_second seconds. it only updates when the game is
+        // actually running, so in case game is paused by the host runner
+        // this counter will not increase.
+        virtual void Update(double wall_time, double game_time,  double dt) = 0;
         // EndPlay is called after EndPlay action has taken place.
         virtual void EndPlay() = 0;
         // todo:

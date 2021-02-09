@@ -128,24 +128,24 @@ void LuaGame::LoadBackgroundDone(Scene* background)
     }
 }
 
-void LuaGame::Tick(double current_time)
+void LuaGame::Tick(double wall_time, double tick_time, double dt)
 {
     sol::protected_function func = (*mLuaState)["Tick"];
     if (!func.valid())
         return;
-    auto result = func(current_time);
+    auto result = func(wall_time, tick_time, dt);
     if (!result.valid())
     {
         const sol::error err = result;
         ERROR(err.what());
     }
 }
-void LuaGame::Update(double current_time, double dt)
+void LuaGame::Update(double wall_time, double game_time, double dt)
 {
     sol::protected_function func = (*mLuaState)["Update"];
     if (!func.valid())
         return;
-    auto result = func(current_time, dt);
+    auto result = func(wall_time, game_time, dt);
     if (!result.valid())
     {
         const sol::error err = result;

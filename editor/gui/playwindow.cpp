@@ -491,12 +491,13 @@ void PlayWindow::Update(double dt)
         // do simulation/animation update steps.
         while (mTimeAccum >= time_step)
         {
+            const auto wall_time = CurrentRuntime();
             // if the simulation step takes more real time than
             // what the time step is worth we're going to start falling
             // behind, i.e. the frame times will grow and and for the
             // bigger time values more simulation steps need to be taken
             // which will slow things down even more.
-            mApp->Update(mTimeTotal, time_step);
+            mApp->Update(wall_time, mTimeTotal, time_step);
             mTimeTotal += time_step;
             mTimeAccum -= time_step;
 
@@ -508,7 +509,9 @@ void PlayWindow::Update(double dt)
         auto tick_time = mTimeTotal;
         while (mTickAccum >= tick_step)
         {
-            mApp->Tick(tick_time);
+            const auto wall_time = CurrentRuntime();
+
+            mApp->Tick(wall_time, tick_time, tick_step);
             tick_time += tick_step;
             mTickAccum -= tick_step;
         }

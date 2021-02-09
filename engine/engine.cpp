@@ -236,12 +236,12 @@ public:
         mDevice->CleanGarbage(120);
     }
 
-    virtual void Tick(double time) override
+    virtual void Tick(double wall_time, double tick_time, double dt) override
     {
-        mGame->Tick(time);
+        mGame->Tick(wall_time, tick_time, dt);
     }
 
-    virtual void Update(double time, double dt) override
+    virtual void Update(double wall_time, double game_time, double dt) override
     {
         // process the game actions.
         game::Game::Action action;
@@ -258,7 +258,7 @@ public:
         if (mBackground)
         {
             mBackground->Update(dt);
-            mRenderer.Update(*mBackground, time, dt);
+            mRenderer.Update(*mBackground, game_time, dt);
         }
 
         if (mForeground)
@@ -272,9 +272,9 @@ public:
                 for (const auto& contact : contacts)
                     mGame->OnContactEvent(contact);
             }
-            mRenderer.Update(*mForeground, time, dt);
+            mRenderer.Update(*mForeground, game_time, dt);
         }
-        mGame->Update(time, dt);
+        mGame->Update(wall_time, game_time, dt);
     }
     virtual void Shutdown() override
     {

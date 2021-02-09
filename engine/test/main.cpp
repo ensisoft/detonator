@@ -415,11 +415,11 @@ public:
         mDevice->CleanGarbage(120);
     }
 
-    virtual void Tick(double time) override
+    virtual void Tick(double wall_time, double tick_time, double dt) override
     {
     }
 
-    virtual void Update(double time, double dt) override
+    virtual void Update(double wall_time, double game_time, double dt) override
     {
         // jump animations forward by the some timestep
         for (auto& test : mTestList)

@@ -2027,7 +2027,7 @@ void GameWidget::Start()
     PlayMusic();
 }
 
-void GameWidget::Update(double current_time, double dt)
+void GameWidget::Update(double wall_time, double game_time, double dt)
 {
     // convert to milliseconds
     dt = dt * 1000.0;
@@ -2053,7 +2053,7 @@ void GameWidget::Update(double current_time, double dt)
     }
 
     mBackground->Update(time/1000.0f);
-    mRenderer.Update(*mBackground, current_time, time/1000.0f);
+    mRenderer.Update(*mBackground, game_time, time/1000.0f);
 
     mStates.top()->update(time);
 
