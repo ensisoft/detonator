@@ -99,7 +99,7 @@ void Process::Start(const QString& executable,
     if (!logFile.isEmpty())
     {
         mLogFile.setFileName(logFile);
-        mLogFile.open(QIODevice::Append | QIODevice::WriteOnly);
+        mLogFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
         if (!mLogFile.isOpen())
         {
             WARN("Unable to write log file %1, %2", logFile, mLogFile.error());
