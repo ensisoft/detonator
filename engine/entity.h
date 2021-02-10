@@ -940,6 +940,13 @@ namespace game
     class Entity
     {
     public:
+        // Runtime management flags
+        enum class ControlFlags {
+            // The entity has been killed and will be
+            // removed at the end of the update cycle
+            Killed
+        };
+
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
             VisibleInEditor,
@@ -1069,6 +1076,8 @@ namespace game
         // can still be changed as long as the variable is not read only.
         const ScriptVar* FindScriptVar(const std::string& name) const;
 
+        void SetFlag(ControlFlags flag, bool on_off)
+        { mControlFlags.set(flag, on_off); }
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
         void SetParentNodeClassId(const std::string& id)
@@ -1100,6 +1109,8 @@ namespace game
         { return mInstanceId; }
         int GetLayer() const
         { return mLayer; }
+        bool TestFlag(ControlFlags flag) const
+        { return mControlFlags.test(flag); }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
         bool HasIdleTrack() const
@@ -1143,6 +1154,8 @@ namespace game
         base::bitflag<Flags> mFlags;
         // id of the idle animation track.
         std::string mIdleTrackId;
+        // control flags for the engine itself
+        base::bitflag<ControlFlags> mControlFlags;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

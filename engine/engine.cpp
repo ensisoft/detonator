@@ -238,13 +238,7 @@ public:
         mDevice->CleanGarbage(120);
     }
 
-    virtual void Tick(double wall_time, double tick_time, double dt) override
-    {
-        mGame->Tick(wall_time, tick_time, dt);
-        mScripting->Tick(wall_time, tick_time, dt);
-    }
-
-    virtual void Update(double wall_time, double game_time, double dt) override
+    virtual void BeginMainLoop() override
     {
         // process the game actions.
         {
@@ -268,7 +262,16 @@ public:
                     DebugPrintString(ptr->message);
             }
         }
+    }
 
+    virtual void Tick(double wall_time, double tick_time, double dt) override
+    {
+        mGame->Tick(wall_time, tick_time, dt);
+        mScripting->Tick(wall_time, tick_time, dt);
+    }
+
+    virtual void Update(double wall_time, double game_time, double dt) override
+    {
         if (mBackground)
         {
             mBackground->Update(dt);
@@ -295,6 +298,12 @@ public:
         mGame->Update(wall_time, game_time, dt);
         mScripting->Update(wall_time, game_time, dt);
     }
+    virtual void EndMainLoop() override
+    {
+        if (mForeground)
+            mForeground->PruneEntities();
+    }
+
     virtual void Shutdown() override
     {
         DEBUG("Engine shutdown");

@@ -412,9 +412,14 @@ namespace game
         const Entity* FindEntityByInstanceName(const std::string& name) const;
         // Delete the entity from the scene. The given entity and all entities
         // linked to it will be removed from the scene's render tree and deleted.
+        // Warning, do not call this unless you know what you're doing. Furthermore
+        // IF YOU ARE CALLING THIS WHILE LOOPING OVER ENTITIES BE EXTRA CAREFUL.
         void DeleteEntity(Entity* entity);
-
-        // Find a scripting variable. 
+        // Kill entity and mark it for removal later.
+        void KillEntity(Entity* entity);
+        // Remove and delete the entities that have been killed.
+        void PruneEntities();
+        // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
         // Note that the const here only implies that the object
         // may not change in terms of c++ semantics. The actual *value*

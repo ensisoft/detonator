@@ -849,7 +849,7 @@ void BindGameLib(sol::state& L)
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
     scene["GetEntity"]                = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
-    scene["DeleteEntity"]             = &Scene::DeleteEntity;
+    scene["KillEntity"]               = &Scene::KillEntity;
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;

@@ -675,6 +675,36 @@ void Scene::DeleteEntity(Entity* entity)
     }), mEntities.end());
 }
 
+void Scene::KillEntity(Entity* entity)
+{
+    // either set this flag here or then keep separate
+    // kill set. The flag has the benefit that the entity can
+    // easily proclaim it's status to the world if needed
+    entity->SetFlag(Entity::ControlFlags::Killed, true);
+}
+
+void Scene::PruneEntities()
+{
+    // remove the entities that have been killed.
+    // this may propagate to children when a parent
+    // entity is killed. if this is not desired then one
+    // should have unlinked the children first.
+    for (auto& entity : mEntities)
+    {
+        if (!entity->TestFlag(Entity::ControlFlags::Killed))
+            continue;
+        mRenderTree.PreOrderTraverseForEach([](Entity* entity) {
+            entity->SetFlag(Entity::ControlFlags::Killed, true);
+        }, entity.get());
+        DEBUG("Deleting entity '%1'", entity->GetName());
+        mRenderTree.DeleteNode(entity.get());
+    }
+    // delete from the container.
+    mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
+        return entity->TestFlag(Entity::ControlFlags::Killed);
+    }), mEntities.end());
+}
+
 std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
 {
     std::vector<Scene::ConstSceneNode> ret;

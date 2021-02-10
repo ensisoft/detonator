@@ -51,7 +51,7 @@ function OnBeginContact(player, node, other, other_node)
     player.coins = coins
 
     Game:DebugPrint('Coin collected!')
-    Scene:DeleteEntity(other)
+    Scene:KillEntity(other)
 end
 
 function OnEndContact(player, node, other, other_node)
