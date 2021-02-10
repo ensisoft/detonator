@@ -787,7 +787,7 @@ void PlayWindow::DoAppInit()
 
 void PlayWindow::ActivateWindow()
 {
-    mSurface->setKeyboardGrabEnabled(true);
+    //mSurface->setKeyboardGrabEnabled(true);
     mSurface->raise();
     mSurface->requestActivate();
 }
