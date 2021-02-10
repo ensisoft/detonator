@@ -69,10 +69,12 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
 
     const std::string& uri = script->GetFileURI();
     DEBUG("Editing script: '%1'", uri);
-    mFilename   = mWorkspace->MapFileToFilesystem(app::FromUtf8(uri));
-    mResourceID = resource.GetId();
+    mFilename     = mWorkspace->MapFileToFilesystem(app::FromUtf8(uri));
+    mResourceID   = resource.GetId();
+    mResourceName = resource.GetName();
     mWatcher.addPath(mFilename);
     LoadDocument(mFilename);
+    setWindowTitle(mResourceName);
 }
 ScriptWidget::~ScriptWidget()
 {
@@ -142,7 +144,8 @@ bool ScriptWidget::SaveState(Settings& settings) const
     // to the file they're then lost. options are to either
     // ask for save when shutting down or to save to an
     // intermediate scrap file somewhere.
-    settings.setValue("Script", "resource", mResourceID);
+    settings.setValue("Script", "resource_id", mResourceID);
+    settings.setValue("Script", "resource_name", mResourceName);
     settings.setValue("Script", "filename", mFilename);
     settings.saveWidget("Script", mUI.findText);
     settings.saveWidget("Script", mUI.replaceText);
@@ -153,13 +156,16 @@ bool ScriptWidget::SaveState(Settings& settings) const
 }
 bool ScriptWidget::LoadState(const Settings& settings)
 {
-    settings.getValue("Script", "resource", &mResourceID);
+    settings.getValue("Script", "resource_id", &mResourceID);
+    settings.getValue("Script", "resource_name", &mResourceName);
     settings.getValue("Script", "filename", &mFilename);
     settings.loadWidget("Script", mUI.findText);
     settings.loadWidget("Script", mUI.replaceText);
     settings.loadWidget("Script", mUI.findBackwards);
     settings.loadWidget("Script", mUI.findCaseSensitive);
     settings.loadWidget("Script", mUI.findWholeWords);
+    if (!mResourceName.isEmpty())
+        setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
         return true;
     mWatcher.addPath(mFilename);
@@ -227,6 +233,9 @@ void ScriptWidget::on_actionSave_triggered()
     if (!mResourceID.isEmpty())
         return;
 
+    const QFileInfo info(mFilename);
+    mResourceName = info.baseName();
+
     // does it even make any sense to ask?
 #if 0
     QMessageBox msg(this);
@@ -241,14 +250,11 @@ void ScriptWidget::on_actionSave_triggered()
     const auto& URI = mWorkspace->AddFileToWorkspace(mFilename);
     DEBUG("Script file URI '%1'", URI);
 
-    const QFileInfo info(mFilename);
-    const QString name = info.baseName();
-
     app::Script script;
     script.SetFileURI(app::ToUtf8(URI));
-    app::ScriptResource resource(script, name);
+    app::ScriptResource resource(script, mResourceName);
     mWorkspace->SaveResource(resource);
-    setWindowTitle(mFilename);
+    setWindowTitle(mResourceName);
 }
 
 void ScriptWidget::on_actionOpen_triggered()
@@ -440,7 +446,6 @@ bool ScriptWidget::LoadDocument(const QString& file)
     mDocument.setPlainText(data);
     mFileHash = qHash(data);
     mFilename = file;
-    setWindowTitle(mFilename);
     DEBUG("Loaded script file '%1'", mFilename);
     return true;
 }

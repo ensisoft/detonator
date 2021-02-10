@@ -83,6 +83,7 @@ namespace gui
         QTextCursor   mCursor;
         QString mFilename;
         QString mResourceID;
+        QString mResourceName;
         std::size_t mFileHash = 0;
     };
 
