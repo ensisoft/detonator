@@ -108,6 +108,14 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
+struct ListItemId {
+    QString id;
+    ListItemId(QString id) : id(id)
+    {}
+    ListItemId(const std::string& str) : id(app::FromUtf8(str))
+    {}
+};
+
 template<typename T>
 void SetValue(QComboBox* combo, T value)
 {
@@ -128,17 +136,46 @@ void SetValue(QComboBox* combo, T value)
         combo->setCurrentIndex(index);
     }
 }
+
+inline void SetValue(QComboBox* combo, const ListItemId& id)
+{
+    QSignalBlocker s(combo);
+    for (int i=0; i<combo->count(); ++i)
+    {
+        const QVariant& data = combo->itemData(i);
+        if (data.toString() == id.id) {
+            combo->setCurrentIndex(i);
+            return;
+        }
+    }
+    combo->setCurrentIndex(-1);
+}
+
 inline void SetValue(QComboBox* combo, int index)
 {
     QSignalBlocker s(combo);
     combo->setCurrentIndex(index);
 }
 
-inline void SetList(QComboBox* combo, const QStringList& list)
+struct ListItem {
+    QString name;
+    QString id;
+};
+
+inline void SetList(QComboBox* combo, const std::vector<ListItem>& items)
 {
     QSignalBlocker s(combo);
     combo->clear();
-    combo->addItems(list);
+    for (const auto& item : items) {
+        combo->addItem(item.name, item.id);
+    }
+}
+
+inline void SetList(QComboBox* combo, const QStringList& items)
+{
+    QSignalBlocker s(combo);
+    combo->clear();
+    combo->addItems(items);
 }
 
 inline void SetValue(QRadioButton* btn, bool value)

@@ -97,7 +97,10 @@ namespace gui
         void on_actionNodeMoveDownLayer_triggered();
         void on_actionNodeDuplicate_triggered();
         void on_entityName_textChanged(const QString& text);
+        void on_btnAddIdleTrack_clicked();
         void on_btnResetIdleTrack_clicked();
+        void on_btnAddScript_clicked();
+        void on_btnResetScript_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
@@ -110,6 +113,7 @@ namespace gui
         void on_btnSelectMaterial_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
+        void on_scriptFile_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
         void on_nodeSizeX_valueChanged(double value);
         void on_nodeSizeY_valueChanged(double value);

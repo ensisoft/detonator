@@ -91,6 +91,8 @@ public:
         mSurfaceHeight = surface_height;
         mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
+        mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
+        mScripting->SetPhysicsEngine(&mPhysics);
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -239,20 +241,32 @@ public:
     virtual void Tick(double wall_time, double tick_time, double dt) override
     {
         mGame->Tick(wall_time, tick_time, dt);
+        mScripting->Tick(wall_time, tick_time, dt);
     }
 
     virtual void Update(double wall_time, double game_time, double dt) override
     {
         // process the game actions.
-        game::Game::Action action;
-        while (mGame->GetNextAction(&action))
         {
-            if (auto* ptr = std::get_if<game::Game::PlaySceneAction>(&action))
-                LoadForegroundScene(ptr->klass);
-            else if (auto* ptr = std::get_if<game::Game::LoadBackgroundAction>(&action))
-                LoadBackgroundScene(ptr->klass);
-            else if (auto* ptr = std::get_if<game::Game::PrintDebugStrAction>(&action))
-                DebugPrintString(ptr->message);
+            game::Game::Action action;
+            while (mGame->GetNextAction(&action))
+            {
+                if (auto* ptr = std::get_if<game::Game::PlaySceneAction>(&action))
+                    LoadForegroundScene(ptr->klass);
+                else if (auto* ptr = std::get_if<game::Game::LoadBackgroundAction>(&action))
+                    LoadBackgroundScene(ptr->klass);
+                else if (auto* ptr = std::get_if<game::Game::PrintDebugStrAction>(&action))
+                    DebugPrintString(ptr->message);
+            }
+        }
+        // process scripting actions.
+        {
+            game::ScriptEngine::Action action;
+            while (mScripting->GetNextAction(&action))
+            {
+                if (auto* ptr = std::get_if<game::ScriptEngine::PrintDebugStrAction>(&action))
+                    DebugPrintString(ptr->message);
+            }
         }
 
         if (mBackground)
@@ -270,11 +284,16 @@ public:
                 mPhysics.Tick(&contacts);
                 mPhysics.UpdateScene(*mForeground);
                 for (const auto& contact : contacts)
+                {
                     mGame->OnContactEvent(contact);
+                    mScripting->OnContactEvent(contact);
+                }
             }
             mRenderer.Update(*mForeground, game_time, dt);
         }
+
         mGame->Update(wall_time, game_time, dt);
+        mScripting->Update(wall_time, game_time, dt);
     }
     virtual void Shutdown() override
     {
@@ -341,11 +360,13 @@ public:
         }
         //DEBUG("OnKeyDown: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
         mGame->OnKeyDown(key);
+        mScripting->OnKeyDown(key);
     }
     virtual void OnKeyup(const wdk::WindowEventKeyup& key) override
     {
         //DEBUG("OnKeyUp: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
         mGame->OnKeyUp(key);
+        mScripting->OnKeyUp(key);
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
@@ -374,6 +395,8 @@ private:
         }
         mForeground = game::CreateSceneInstance(klass);
         mPhysics.CreateWorld(*mForeground);
+        mScripting->SetPhysicsEngine(&mPhysics);
+        mScripting->BeginPlay(mForeground.get());
         mGame->BeginPlay(mForeground.get());
     }
     void LoadBackgroundScene(game::ClassHandle<game::SceneClass> klass)
@@ -422,6 +445,8 @@ private:
     game::Renderer mRenderer;
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
+    // The scripting subsystem.
+    std::unique_ptr<game::ScriptEngine> mScripting;
     // Current backdrop scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mBackground;
     // Current game scene or nullptr if no scene.

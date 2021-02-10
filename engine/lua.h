@@ -32,12 +32,15 @@
 
 #include <memory>
 #include <queue>
+#include <unordered_map>
 
 #include "engine/game.h"
 #include "engine/types.h"
 
 namespace game
 {
+    // Implementation for the main game interface that
+    // simply delegates the calls to a Lua script.
     class LuaGame : public Game
     {
     public:
@@ -68,6 +71,46 @@ namespace game
         FRect mView;
         Scene* mScene = nullptr;
     };
+
+
+    class ScriptEngine
+    {
+    public:
+        struct PrintDebugStrAction {
+            std::string message;
+        };
+        using Action = std::variant<PrintDebugStrAction>;
+
+        ScriptEngine(const std::string& lua_path);
+        void SetLoader(const ClassLibrary* loader)
+        { mClassLib = loader; }
+        void SetPhysicsEngine(const PhysicsEngine* engine)
+        { mPhysicsEngine = engine; }
+        void BeginPlay(Scene* scene);
+        void EndPlay();
+        void Tick(double wall_time, double tick_time, double dt);
+        void Update(double wall_time, double game_time, double dt);
+        bool GetNextAction(Action* out);
+
+        void OnContactEvent(const ContactEvent& contact);
+        void OnKeyDown(const wdk::WindowEventKeydown& key);
+        void OnKeyUp(const wdk::WindowEventKeyup& key);
+        void OnChar(const wdk::WindowEventChar& text);
+        void OnMouseMove(const wdk::WindowEventMouseMove& mouse);
+        void OnMousePress(const wdk::WindowEventMousePress& mouse);
+        void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse);
+    private:
+        sol::environment* GetTypeEnv(const EntityClass& klass);
+    private:
+        const std::string mLuaPath;
+        const ClassLibrary* mClassLib = nullptr;
+        const PhysicsEngine* mPhysicsEngine = nullptr;
+        std::unique_ptr<sol::state> mLuaState;
+        std::unordered_map<std::string, std::unique_ptr<sol::environment>> mTypeEnvs;
+        std::queue<Action> mActionQueue;
+        Scene* mScene = nullptr;
+    };
+
 
     void BindBase(sol::state& L);
     void BindGLM(sol::state& L);

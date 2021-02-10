@@ -838,10 +838,16 @@ namespace game
         { mName = name; }
         void SetIdleTrackId(const std::string& id)
         { mIdleTrackId = id; }
+        void SetSriptFileId(const std::string& file)
+        { mScriptFile = file; }
         void ResetIdleTrack()
         { mIdleTrackId.clear(); }
+        void ResetScriptFile()
+        { mScriptFile.clear(); }
         bool HasIdleTrack() const
         { return !mIdleTrackId.empty(); }
+        bool HasScriptFile() const
+        { return !mScriptFile.empty(); }
 
         RenderTree& GetRenderTree()
         { return mRenderTree; }
@@ -861,6 +867,8 @@ namespace game
         { return mIdleTrackId; }
         std::string GetName() const
         { return mName; }
+        std::string GetScriptFileId() const
+        { return mScriptFile; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
@@ -896,6 +904,8 @@ namespace game
         // Scripting variables. read-only variables are
         // shareable with each entity instance.
         std::vector<std::shared_ptr<ScriptVar>> mScriptVars;
+        // the name of the associated script if any.
+        std::string mScriptFile;
     };
 
     // Collection of arguments for creating a new entity

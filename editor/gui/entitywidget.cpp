@@ -28,6 +28,9 @@
 #  include <QPoint>
 #  include <QMouseEvent>
 #  include <QMessageBox>
+#  include <QFile>
+#  include <QFileInfo>
+#  include <QTextStream>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
@@ -46,6 +49,7 @@
 #include "editor/gui/tool.h"
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/animationtrackwidget.h"
+#include "editor/gui/scriptwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
@@ -380,6 +384,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
 
     SetValue(mUI.entityName, content->GetName());
     SetValue(mUI.entityID, content->GetId());
+    SetValue(mUI.scriptFile, ListItemId(content->GetScriptFileId()));
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -1007,13 +1012,91 @@ void EntityWidget::on_entityName_textChanged(const QString& text)
     mState.entity->SetName(GetValue(mUI.entityName));
 }
 
+void EntityWidget::on_btnAddIdleTrack_clicked()
+{
+    // todo:
+}
+
 void EntityWidget::on_btnResetIdleTrack_clicked()
 {
-    if (mState.entity->HasIdleTrack())
+    mState.entity->ResetIdleTrack();
+    SetValue(mUI.idleTrack, -1);
+}
+
+void EntityWidget::on_btnAddScript_clicked()
+{
+    app::Script script;
+    // use the script ID as the file name so that we can
+    // avoid naming clashes and always find the correct lua
+    // file even if the entity is later renamed.
+    const auto& filename = app::FromUtf8(script.GetId());
+    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
+    const auto& filepath = mState.workspace->MapFileToFilesystem(fileuri);
+    const auto& name = GetValue(mUI.entityName);
+    const QFileInfo info(filepath);
+    if (info.exists())
     {
-        mState.entity->ResetIdleTrack();
-        SetValue(mUI.idleTrack, -1);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle(tr("File already exists"));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
     }
+
+    QFile io;
+    io.setFileName(filepath);
+    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        ERROR("Failed to open '%1' for writing (%2)", filepath, io.error());
+        ERROR(io.errorString());
+        QMessageBox msg;
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle(tr("Error Occurred"));
+        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setStandardButtons(QMessageBox::Ok);
+        return;
+    }
+    QString var = name;
+    var.replace(' ', '_');
+    var = var.toLower();
+
+    QTextStream stream(&io);
+    stream.setCodec("UTF-8");
+    stream << QString("-- Entity '%1' script.\n\n").arg(name);
+    stream << QString("-- This script will be called for every instance of '%1'\n"
+                      "-- in the scene during gameplay.\n").arg(name);
+    stream << "-- You're free to delete functions you don't need.\n\n";
+    stream << "-- Called when the game play begins for a scene.\n";
+    stream << QString("function BeginPlay(%1, scene)\n\nend\n\n").arg(var);
+    stream << "-- Called on every low frequency game tick.\n";
+    stream << QString("function Tick(%1, wall_time, tick_time, dt)\n\nend\n\n").arg(var);
+    stream << "-- Called on every iteration of game loop.\n";
+    stream << QString("function Update(%1, wall_time, game_time, dt)\n\nend\n\n").arg(var);
+    stream << "-- Called on collision events with other objects.\n";
+    stream << QString("function OnBeginContact(%1, node, other, other_node)\nend\n\n").arg(var);
+    stream << "-- Called on collision events with other objects.\n";
+    stream << QString("function OnEndContact(%1, node, other, other_node)\nend\n\n").arg(var);
+
+    io.flush();
+    io.close();
+
+    script.SetFileURI(app::ToUtf8(fileuri));
+    app::ScriptResource resource(script, name);
+    mState.workspace->SaveResource(resource);
+    mState.entity->SetSriptFileId(script.GetId());
+
+    ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
+    emit OpenNewWidget(widget);
+
+    SetValue(mUI.scriptFile, ListItemId(script.GetId()));
+}
+
+void EntityWidget::on_btnResetScript_clicked()
+{
+    mState.entity->ResetScriptFile();
+    SetValue(mUI.scriptFile, -1);
 }
 
 void EntityWidget::on_btnViewPlus90_clicked()
@@ -1186,6 +1269,19 @@ void EntityWidget::on_idleTrack_currentIndexChanged(int index)
     const auto name = mUI.idleTrack->currentText();
     mState.entity->SetIdleTrackId(app::ToUtf8(id));
     DEBUG("Entity idle track set to '%1' ('%2')", name, id);
+}
+
+void EntityWidget::on_scriptFile_currentIndexChanged(int index)
+{
+    if (index == -1)
+    {
+        mState.entity->ResetIdleTrack();
+        return;
+    }
+    const auto id   = mUI.scriptFile->currentData().toString();
+    const auto name = mUI.scriptFile->currentText();
+    mState.entity->SetSriptFileId(app::ToUtf8(id));
+    DEBUG("Entity script file set to '%1' ('%2')", name, id);
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -2021,18 +2117,26 @@ void EntityWidget::RebuildCombos()
     SetList(mUI.dsMaterial, mState.workspace->ListAllMaterials());
     SetList(mUI.dsDrawable, mState.workspace->ListAllDrawables());
 
-    QStringList polygons;
+    std::vector<ListItem> polygons;
+    std::vector<ListItem> scripts;
     // for the rigid body we need to list the polygonal (custom) shape
     // objects. (note that it's actually possible that these would be concave
     // but this case isn't currently supported)
     for (size_t i=0; i<mState.workspace->GetNumUserDefinedResources(); ++i)
     {
         const auto& res = mState.workspace->GetUserDefinedResource(i);
-        if (res.GetType() != app::Resource::Type::Shape)
-            continue;
-        polygons.append(res.GetName());
+        ListItem pair;
+        pair.name = res.GetName();
+        pair.id   = res.GetId();
+        if (res.GetType() == app::Resource::Type::Shape) {
+            polygons.push_back(pair);
+        } else if (res.GetType() == app::Resource::Type::Script) {
+            scripts.push_back(pair);
+        }
     }
     SetList(mUI.rbPolygon, polygons);
+    SetList(mUI.scriptFile, scripts);
+    SetValue(mUI.scriptFile, ListItemId(mState.entity->GetScriptFileId()));
 }
 
 void EntityWidget::UpdateDeletedResourceReferences()
@@ -2067,6 +2171,16 @@ void EntityWidget::UpdateDeletedResourceReferences()
                 WARN("Entity node '%1' uses rigid body shape that is no longer available.", node.GetName());
                 body->ResetPolygonShapeId();
             }
+        }
+    }
+
+    if (mState.entity->HasScriptFile())
+    {
+        const auto& scriptId = mState.entity->GetScriptFileId();
+        if (!mState.workspace->IsValidScript(scriptId))
+        {
+            WARN("Entity '%1' script is no longer available.", mState.entity->GetName());
+            mState.entity->ResetScriptFile();
         }
     }
 }

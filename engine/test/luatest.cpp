@@ -78,9 +78,10 @@ public:
 
 int main(int argc, char* argv[])
 {
+
     sol::state L;
     L.open_libraries();
-
+#if 0
     // the index only works when set in the constructor?
     auto foo = L.new_usertype<Foobar>("foo",
 		sol::meta_function::index, &Foobar::GetValue);
@@ -93,5 +94,20 @@ int main(int argc, char* argv[])
 		"print(f[1])\n"
 		"print(b[1])\n"
 	);
+#endif
+
+	L["keke"] = [](int x) { return 123*x; };
+	sol::environment a(L, sol::create, L.globals());
+	sol::environment b(L, sol::create, L.globals());
+
+	// two functions by the same name but in different environments.
+    L.script("function jallu()\n"
+             "print(keke(2))\n"
+             "end\n", a);
+    L.script("function jallu()\n"
+             "print(keke(3))\n"
+             "end\n", b);
+    a["jallu"]();
+    b["jallu"]();
     return 0;
 }

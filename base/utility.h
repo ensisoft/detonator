@@ -723,6 +723,13 @@ inline bool FileExists(const std::string& filename)
 #endif
 }
 
+inline std::string JoinPath(const std::string& a, const std::string& b)
+{
+    const std::filesystem::path pa(a);
+    const std::filesystem::path pb(b);
+    return (pa / pb).generic_u8string();
+}
+
 inline std::ifstream OpenBinaryInputStream(const std::string& filename)
 {
 #if defined(WINDOWS_OS)

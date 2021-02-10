@@ -77,7 +77,8 @@
         "node": null
       },
       "resource_id": "HFSA8Yezdr",
-      "resource_name": "StoneBlock"
+      "resource_name": "StoneBlock",
+      "script_file": ""
     },
     {
       "id": "DOzd15fNMX",
@@ -156,7 +157,8 @@
         "node": null
       },
       "resource_id": "DOzd15fNMX",
-      "resource_name": "Tile1"
+      "resource_name": "Tile1",
+      "script_file": ""
     },
     {
       "id": "7WjAKJb7hY",
@@ -235,7 +237,8 @@
         "node": null
       },
       "resource_id": "7WjAKJb7hY",
-      "resource_name": "Tile2"
+      "resource_name": "Tile2",
+      "script_file": ""
     },
     {
       "id": "SFrJwO771l",
@@ -314,7 +317,8 @@
         "node": null
       },
       "resource_id": "SFrJwO771l",
-      "resource_name": "Tile4"
+      "resource_name": "Tile4",
+      "script_file": ""
     },
     {
       "id": "Fm5ByqI6xo",
@@ -393,7 +397,8 @@
         "node": null
       },
       "resource_id": "Fm5ByqI6xo",
-      "resource_name": "Tile3"
+      "resource_name": "Tile3",
+      "script_file": ""
     },
     {
       "id": "y7bWvFuoie",
@@ -450,7 +455,8 @@
         "node": null
       },
       "resource_id": "y7bWvFuoie",
-      "resource_name": "Tree"
+      "resource_name": "Tree",
+      "script_file": ""
     },
     {
       "id": "b2lU3gYIwf",
@@ -529,7 +535,8 @@
         "node": null
       },
       "resource_id": "b2lU3gYIwf",
-      "resource_name": "Tile8"
+      "resource_name": "Tile8",
+      "script_file": ""
     },
     {
       "id": "ImTnUuKMDu",
@@ -608,7 +615,8 @@
         "node": null
       },
       "resource_id": "ImTnUuKMDu",
-      "resource_name": "Tile7"
+      "resource_name": "Tile7",
+      "script_file": ""
     },
     {
       "id": "GaQT22N3OL",
@@ -687,7 +695,8 @@
         "node": null
       },
       "resource_id": "GaQT22N3OL",
-      "resource_name": "Tile6"
+      "resource_name": "Tile6",
+      "script_file": ""
     },
     {
       "id": "9LU4RC9DH0",
@@ -766,7 +775,8 @@
         "node": null
       },
       "resource_id": "9LU4RC9DH0",
-      "resource_name": "Tile15"
+      "resource_name": "Tile15",
+      "script_file": ""
     },
     {
       "id": "d8ZPi5y9Ps",
@@ -845,7 +855,8 @@
         "node": null
       },
       "resource_id": "d8ZPi5y9Ps",
-      "resource_name": "Tile14"
+      "resource_name": "Tile14",
+      "script_file": ""
     },
     {
       "id": "bOtC7Fnmmp",
@@ -924,7 +935,8 @@
         "node": null
       },
       "resource_id": "bOtC7Fnmmp",
-      "resource_name": "Tile13"
+      "resource_name": "Tile13",
+      "script_file": ""
     },
     {
       "id": "g3TRakI9ob",
@@ -1003,7 +1015,8 @@
         "node": null
       },
       "resource_id": "g3TRakI9ob",
-      "resource_name": "Tile12"
+      "resource_name": "Tile12",
+      "script_file": ""
     },
     {
       "id": "8Prh114uxP",
@@ -1082,7 +1095,8 @@
         "node": null
       },
       "resource_id": "8Prh114uxP",
-      "resource_name": "Tile11"
+      "resource_name": "Tile11",
+      "script_file": ""
     },
     {
       "id": "dJKagvO0jM",
@@ -1161,7 +1175,8 @@
         "node": null
       },
       "resource_id": "dJKagvO0jM",
-      "resource_name": "Tile10"
+      "resource_name": "Tile10",
+      "script_file": ""
     },
     {
       "id": "nR73zKx341",
@@ -1240,7 +1255,8 @@
         "node": null
       },
       "resource_id": "nR73zKx341",
-      "resource_name": "Tile9"
+      "resource_name": "Tile9",
+      "script_file": ""
     },
     {
       "id": "vYm7CMPRrJ",
@@ -1319,7 +1335,8 @@
         "node": null
       },
       "resource_id": "vYm7CMPRrJ",
-      "resource_name": "Tile5"
+      "resource_name": "Tile5",
+      "script_file": ""
     },
     {
       "id": "bEAIWd3ESl",
@@ -1376,7 +1393,8 @@
         "node": null
       },
       "resource_id": "bEAIWd3ESl",
-      "resource_name": "Bush (1)"
+      "resource_name": "Bush (1)",
+      "script_file": ""
     },
     {
       "id": "2Q2vkLGDEg",
@@ -1455,7 +1473,8 @@
         "node": null
       },
       "resource_id": "2Q2vkLGDEg",
-      "resource_name": "Crate"
+      "resource_name": "Crate",
+      "script_file": ""
     },
     {
       "id": "HpAo2l11sT",
@@ -1512,7 +1531,8 @@
         "node": null
       },
       "resource_id": "HpAo2l11sT",
-      "resource_name": "Cactus (1)"
+      "resource_name": "Cactus (1)",
+      "script_file": ""
     },
     {
       "id": "2sWxF1jCqU",
@@ -1569,7 +1589,8 @@
         "node": null
       },
       "resource_id": "2sWxF1jCqU",
-      "resource_name": "Cactus (2)"
+      "resource_name": "Cactus (2)",
+      "script_file": ""
     },
     {
       "id": "Y3nvZp6DaX",
@@ -1626,7 +1647,8 @@
         "node": null
       },
       "resource_id": "Y3nvZp6DaX",
-      "resource_name": "Cactus (3)"
+      "resource_name": "Cactus (3)",
+      "script_file": ""
     },
     {
       "id": "WKsCpHkbNw",
@@ -1683,7 +1705,8 @@
         "node": null
       },
       "resource_id": "WKsCpHkbNw",
-      "resource_name": "Billboard"
+      "resource_name": "Billboard",
+      "script_file": ""
     },
     {
       "id": "FNUUxWSBTe",
@@ -2005,6 +2028,7 @@
       },
       "resource_id": "FNUUxWSBTe",
       "resource_name": "Player",
+      "script_file": "vq6v6WdXwZ",
       "tracks": [
         {
           "actuators": [
@@ -2459,18 +2483,6 @@
       ],
       "vars": [
         {
-          "name": "name",
-          "readonly": true,
-          "type": "String",
-          "value": "Dicky Dick"
-        },
-        {
-          "name": "ammo",
-          "readonly": false,
-          "type": "Integer",
-          "value": 666
-        },
-        {
           "name": "jump",
           "readonly": true,
           "type": "Float",
@@ -2483,10 +2495,10 @@
           "value": 3.0
         },
         {
-          "name": "foo",
-          "readonly": true,
-          "type": "String",
-          "value": "joojoo"
+          "name": "coins",
+          "readonly": false,
+          "type": "Integer",
+          "value": 0
         }
       ]
     },
@@ -2724,6 +2736,7 @@
       },
       "resource_id": "MiA8FWNEaF",
       "resource_name": "Horizontal Elevator",
+      "script_file": "",
       "tracks": [
         {
           "actuators": [
@@ -3030,6 +3043,7 @@
       },
       "resource_id": "Jn0SpbgGSY",
       "resource_name": "Vertical Elevator",
+      "script_file": "",
       "tracks": [
         {
           "actuators": [
@@ -3248,7 +3262,8 @@
         "node": null
       },
       "resource_id": "te9JjLzdlp",
-      "resource_name": "Tile16"
+      "resource_name": "Tile16",
+      "script_file": ""
     },
     {
       "id": "z3qBPdpAGa",
@@ -3569,7 +3584,8 @@
         "node": null
       },
       "resource_id": "z3qBPdpAGa",
-      "resource_name": "Small Island"
+      "resource_name": "Small Island",
+      "script_file": ""
     },
     {
       "id": "O5QefURbEM",
@@ -3626,7 +3642,8 @@
         "node": null
       },
       "resource_id": "O5QefURbEM",
-      "resource_name": "Grass (2)"
+      "resource_name": "Grass (2)",
+      "script_file": ""
     },
     {
       "id": "TyE5N8JWlx",
@@ -3683,7 +3700,8 @@
         "node": null
       },
       "resource_id": "TyE5N8JWlx",
-      "resource_name": "Grass (1)"
+      "resource_name": "Grass (1)",
+      "script_file": ""
     },
     {
       "id": "ZNaUsmn31R",
@@ -4391,7 +4409,8 @@
         "node": null
       },
       "resource_id": "ZNaUsmn31R",
-      "resource_name": "Plateu"
+      "resource_name": "Plateu",
+      "script_file": ""
     },
     {
       "id": "WtCkGlPDwf",
@@ -4448,7 +4467,8 @@
         "node": null
       },
       "resource_id": "WtCkGlPDwf",
-      "resource_name": "Skeleton"
+      "resource_name": "Skeleton",
+      "script_file": ""
     },
     {
       "id": "tqF7brLL08",
@@ -4505,7 +4525,8 @@
         "node": null
       },
       "resource_id": "tqF7brLL08",
-      "resource_name": "Stone"
+      "resource_name": "Stone",
+      "script_file": ""
     },
     {
       "id": "gwm3bTflRn",
@@ -4673,7 +4694,8 @@
         "node": null
       },
       "resource_id": "gwm3bTflRn",
-      "resource_name": "Background"
+      "resource_name": "Background",
+      "script_file": ""
     },
     {
       "id": "dfb84OzuRo",
@@ -4752,7 +4774,8 @@
         "node": null
       },
       "resource_id": "dfb84OzuRo",
-      "resource_name": "Coin"
+      "resource_name": "Coin",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -10386,6 +10409,12 @@
       "resource_id": "SId1upp3XQ",
       "resource_name": "game",
       "uri": "ws://lua/game.lua"
+    },
+    {
+      "id": "vq6v6WdXwZ",
+      "resource_id": "vq6v6WdXwZ",
+      "resource_name": "Player",
+      "uri": "ws://lua/vq6v6WdXwZ.lua"
     }
   ],
   "shapes": [

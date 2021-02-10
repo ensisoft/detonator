@@ -31,6 +31,7 @@
             "alpha": 1.0,
             "drawable": "hR9OWOACQy",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -68,6 +69,7 @@
             "alpha": 1.0,
             "drawable": "9D2vt3ioun",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -105,6 +107,7 @@
             "alpha": 1.0,
             "drawable": "d8CDbfETmY",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -142,6 +145,7 @@
             "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -207,7 +211,8 @@
         "node": null
       },
       "resource_id": "sPJ5mHTwAg",
-      "resource_name": "Space"
+      "resource_name": "Space",
+      "script_file": ""
     },
     {
       "id": "D57sl8JCQS",
@@ -220,6 +225,7 @@
             "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -257,6 +263,7 @@
             "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -305,7 +312,8 @@
         "node": null
       },
       "resource_id": "D57sl8JCQS",
-      "resource_name": "UFO"
+      "resource_name": "UFO",
+      "script_file": ""
     },
     {
       "id": "b18SpfABQ5",
@@ -318,6 +326,7 @@
             "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -361,7 +370,8 @@
         "node": null
       },
       "resource_id": "b18SpfABQ5",
-      "resource_name": "Asteroid"
+      "resource_name": "Asteroid",
+      "script_file": ""
     },
     {
       "id": "PTsZrCTnM0",
@@ -374,6 +384,7 @@
             "alpha": 1.0,
             "drawable": "k0uqQHtPFX",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -411,6 +422,7 @@
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -486,7 +498,8 @@
         "node": null
       },
       "resource_id": "PTsZrCTnM0",
-      "resource_name": "Cricket"
+      "resource_name": "Cricket",
+      "script_file": ""
     },
     {
       "id": "0q5xgI7aXU",
@@ -499,6 +512,7 @@
             "alpha": 1.0,
             "drawable": "ZxF4YiTJ0d",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -536,6 +550,7 @@
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -611,7 +626,8 @@
         "node": null
       },
       "resource_id": "0q5xgI7aXU",
-      "resource_name": "Mantis"
+      "resource_name": "Mantis",
+      "script_file": ""
     },
     {
       "id": "AGpwFLniqi",
@@ -624,6 +640,7 @@
             "alpha": 1.0,
             "drawable": "0LQtJeq8Dl",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -661,6 +678,7 @@
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -736,7 +754,8 @@
         "node": null
       },
       "resource_id": "AGpwFLniqi",
-      "resource_name": "Scarab"
+      "resource_name": "Scarab",
+      "script_file": ""
     },
     {
       "id": "LeNxoNvQbn",
@@ -749,6 +768,7 @@
             "alpha": 1.0,
             "drawable": "5OtYNGYEi5",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -786,6 +806,7 @@
             "alpha": 1.0,
             "drawable": "wE5I5Tg7p0",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -861,7 +882,8 @@
         "node": null
       },
       "resource_id": "LeNxoNvQbn",
-      "resource_name": "Locust"
+      "resource_name": "Locust",
+      "script_file": ""
     },
     {
       "id": "lQDnzkH9Ky",
@@ -874,6 +896,7 @@
             "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
+              "FlipVertically": false,
               "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
@@ -917,7 +940,8 @@
         "node": null
       },
       "resource_id": "lQDnzkH9Ky",
-      "resource_name": "Big Explosion"
+      "resource_name": "Big Explosion",
+      "script_file": ""
     }
   ],
   "materials": [

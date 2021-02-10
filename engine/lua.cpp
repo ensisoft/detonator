@@ -29,6 +29,8 @@
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
+#include <unordered_set>
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "engine/entity.h"
@@ -203,13 +205,13 @@ void LuaGame::OnContactEvent(const ContactEvent& contact)
     Entity* entityA = mScene->FindEntityByInstanceId(contact.entityA);
     Entity* entityB = mScene->FindEntityByInstanceId(contact.entityB);
     if (entityA == nullptr || entityB == nullptr)  {
-        WARN("Contact event ignored, entity was not be found.");
+        WARN("Contact event ignored, entity was not found.");
         return;
     }
     EntityNode* nodeA = entityA->FindNodeByInstanceId(contact.nodeA);
     EntityNode* nodeB = entityB->FindNodeByInstanceId(contact.nodeB);
     if (nodeA == nullptr || nodeB == nullptr) {
-        WARN("Contact event ignored, entity node was found.");
+        WARN("Contact event ignored, entity node was not found.");
         return;
     }
 
@@ -276,6 +278,265 @@ void LuaGame::OnMousePress(const wdk::WindowEventMousePress& mouse)
 }
 void LuaGame::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse)
 {
+}
+
+ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
+{}
+
+void ScriptEngine::BeginPlay(Scene* scene)
+{
+    // When the game play begins we create fresh new lua state
+    // and environments for all scriptable entity classes.
+
+    auto state = std::make_unique<sol::state>();
+    state->open_libraries();
+    // ? is a wildcard (usually denoted by kleene star *)
+    // todo: setup a package loader instead of messing with the path?
+    // https://github.com/ThePhD/sol2/issues/90
+    std::string path = (*state)["package"]["path"];
+    path = path + ";" + mLuaPath + "/?.lua";
+    path = path + ";" + mLuaPath + "/?/?.lua";
+    (*state)["package"]["path"] = path;
+
+    BindBase(*state);
+    BindGLM(*state);
+    BindGFX(*state);
+    BindWDK(*state);
+    BindGameLib(*state);
+
+    // table that maps entity types to their scripting
+    // environments. then we later invoke the script per
+    // each instance's type on each instance of that type.
+    // In other words if there's an EntityClass 'foobar'
+    // it has a "foobar.lua" script and there are 2 entities
+    // a and b, the same script foobar.lua will be invoked
+    // for a total of two times (per script function), once
+    // per each instance.
+    std::unordered_map<std::string, std::unique_ptr<sol::environment>> envs;
+    std::unordered_set<std::string> ids;
+
+    for (size_t i=0; i<scene->GetNumEntities(); ++i)
+    {
+        const auto& entity = scene->GetEntity(i);
+        const auto& klass  = entity.GetClass();
+        if (ids.find(klass.GetId()) != ids.end())
+            continue;
+        ids.insert(klass.GetId());
+        if (!klass.HasScriptFile())
+            continue;
+        else if (envs.find(klass.GetId()) != envs.end())
+            continue;
+        const auto& script = klass.GetScriptFileId();
+        const auto& file = base::JoinPath(mLuaPath, script + ".lua");
+        if (!base::FileExists(file)) {
+            ERROR("Entity '%1' Lua file '%2' was not found.", klass.GetName(), file);
+            continue;
+        }
+        auto env = std::make_unique<sol::environment>(*state, sol::create, state->globals());
+        state->script_file(file, *env);
+        envs[klass.GetId()] = std::move(env);
+        DEBUG("Entity class '%1' script loaded.", klass.GetName());
+    }
+    // careful here, make sure to clean up the environment objects
+    // first since they depend on lua state. changing the order
+    // of these two lines will crash.
+    mTypeEnvs = std::move(envs);
+    mLuaState = std::move(state);
+
+    mScene    = scene;
+    (*mLuaState)["Physics"]  = mPhysicsEngine;
+    (*mLuaState)["ClassLib"] = mClassLib;
+    (*mLuaState)["Game"]     = this;
+    auto table = (*mLuaState)["game"].get_or_create<sol::table>();
+    auto engine = table.new_usertype<ScriptEngine>("Engine");
+    engine["DebugPrint"] = [](ScriptEngine* self, std::string message) {
+        PrintDebugStrAction action;
+        action.message = std::move(message);
+        self->mActionQueue.push(std::move(action));
+    };
+
+    for (size_t i=0; i<scene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        const auto& klass   = entity->GetClass();
+        const auto& klassId = klass.GetId();
+        auto it = mTypeEnvs.find(klassId);
+        if (it == mTypeEnvs.end())
+            continue;
+        auto& env = it->second;
+        sol::protected_function func = (*env)["BeginPlay"];
+        if (!func.valid())
+            continue;
+        auto result = func(entity, scene);
+        if (!result.valid())
+        {
+            const sol::error err = result;
+            ERROR(err.what());
+        }
+    }
+}
+
+void ScriptEngine::EndPlay()
+{
+
+}
+
+void ScriptEngine::Tick(double wall_time, double tick_time, double dt)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            sol::protected_function func = (*env)["Tick"];
+            if (!func.valid())
+                continue;
+            auto result = func(entity, wall_time, tick_time, dt);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
+}
+void ScriptEngine::Update(double wall_time, double game_time, double dt)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            sol::protected_function func = (*env)["Update"];
+            if (!func.valid())
+                continue;
+            auto result = func(entity , wall_time , game_time , dt);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
+}
+
+bool ScriptEngine::GetNextAction(Action* out)
+{
+    if (mActionQueue.empty())
+        return false;
+    *out = mActionQueue.front();
+    mActionQueue.pop();
+    return true;
+}
+
+void ScriptEngine::OnContactEvent(const ContactEvent& contact)
+{
+    Entity* entityA = mScene->FindEntityByInstanceId(contact.entityA);
+    Entity* entityB = mScene->FindEntityByInstanceId(contact.entityB);
+    if (entityA == nullptr || entityB == nullptr)  {
+        WARN("Contact event ignored, entity was not found.");
+        return;
+    }
+    EntityNode* nodeA = entityA->FindNodeByInstanceId(contact.nodeA);
+    EntityNode* nodeB = entityB->FindNodeByInstanceId(contact.nodeB);
+    if (nodeA == nullptr || nodeB == nullptr) {
+        WARN("Contact event ignored, entity node was not found.");
+        return;
+    }
+    const auto* function_name = contact.type == ContactEvent::Type::BeginContact
+            ? "OnBeginContact" : "OnEndContact";
+
+    // there's a little problem here that needs to be fixed regarding the
+    // lifetimes of objects. calling into the script may choose to for
+    // example delete the object from the scene which would invalidate
+    // the pointers above. This needs to be fixed somehow.
+    const auto& klassA = entityA->GetClass();
+    const auto& klassB = entityB->GetClass();
+
+    if (auto* env = GetTypeEnv(klassA))
+    {
+        sol::protected_function func = (*env)[function_name];
+        if (func.valid())
+        {
+            auto result = func(entityA, nodeA, entityB, nodeB);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
+    if (auto* env = GetTypeEnv(klassB))
+    {
+        sol::protected_function func = (*env)[function_name];
+        if (func.valid())
+        {
+            auto result = func(entityB, nodeB, entityA, nodeA);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
+}
+void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            sol::protected_function func = (*env)["OnKeyDown"];
+            if (!func.valid())
+                continue;
+            auto result = func(entity , static_cast<int>(key.symbol) , static_cast<int>(key.modifiers.value()));
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
+}
+void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
+{
+
+}
+void ScriptEngine::OnChar(const wdk::WindowEventChar& text)
+{
+
+}
+void ScriptEngine::OnMouseMove(const wdk::WindowEventMouseMove& mouse)
+{
+
+}
+void ScriptEngine::OnMousePress(const wdk::WindowEventMousePress& mouse)
+{
+
+}
+void ScriptEngine::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse)
+{
+
+}
+
+sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
+{
+    if (!klass.HasScriptFile())
+        return nullptr;
+    const auto& klassId = klass.GetId();
+    auto it = mTypeEnvs.find(klassId);
+    if (it != mTypeEnvs.end())
+        return it->second.get();
+
+    const auto& script = klass.GetScriptFileId();
+    const auto& file   = base::JoinPath(mLuaPath, script + ".lua");
+    if (!base::FileExists(file))
+        return nullptr;
+    auto env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+    mLuaState->script_file(file, *env);
+    it = mTypeEnvs.insert({klassId, std::move(env)}).first;
+    return it->second.get();
 }
 
 void BindBase(sol::state& L)
