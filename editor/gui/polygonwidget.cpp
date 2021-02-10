@@ -127,6 +127,9 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "widget", mUI.widget);
     setWindowTitle(mUI.name->text());
+
+    mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
+                                mPolygon.GetNumDrawCommands());
 }
 
 ShapeWidget::~ShapeWidget()
@@ -204,6 +207,9 @@ bool ShapeWidget::LoadState(const Settings& settings)
         return false;
     }
     mPolygon = std::move(ret.value());
+    mOriginalHash = mPolygon.GetHash();
+    mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
+                                mPolygon.GetNumDrawCommands());
     return true;
 }
 
