@@ -64,6 +64,7 @@
 #include "editor/gui/dlgopen.h"
 #include "editor/gui/dlgnew.h"
 #include "editor/gui/dlgproject.h"
+#include "editor/gui/dlgsave.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -212,6 +213,7 @@ void MainWindow::loadState()
     settings.getValue("Settings", "shader_editor_arguments",  &mSettings.shader_editor_arguments);
     settings.getValue("Settings", "default_open_win_or_tab",  &mSettings.default_open_win_or_tab);
     settings.getValue("Settings", "style_name", &mSettings.style_name);
+    settings.getValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
 
     TextEditor::Settings editor_settings;
     settings.getValue("TextEditor", "font",                   &editor_settings.font_description);
@@ -1444,8 +1446,41 @@ void MainWindow::on_actionProjectPlay_triggered()
         msg.setText("You haven't set the application library for the project.\n"
                     "The game should be built into a library (a .dll or .so file).\n"
                     "You can change the application library in the workspace settings.");
-        msg.exec();        return;
+        msg.exec();
+        return;
     }
+
+    std::vector<MainWidget*> unsaved;
+    for (int i=0; i<mUI.mainTab->count(); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->HasUnsavedChanges())
+        {
+            if (mSettings.save_automatically_on_play)
+                widget->Save();
+            else unsaved.push_back(widget);
+        }
+    }
+    for (auto* wnd : mChildWindows)
+    {
+        auto* widget = wnd->GetWidget();
+        if (widget->HasUnsavedChanges())
+        {
+            if (mSettings.save_automatically_on_play)
+                widget->Save();
+            else unsaved.push_back(widget);
+        }
+    }
+
+    if (!unsaved.empty())
+    {
+        DlgSave dlg(this, unsaved);
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+        const bool save_automatically = dlg.SaveAutomatically();
+        mSettings.save_automatically_on_play = save_automatically;
+    }
+
 
     if (settings.use_gamehost_process)
     {
@@ -1961,6 +1996,7 @@ bool MainWindow::SaveState()
     settings.setValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
     settings.setValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
     settings.setValue("Settings", "style_name", mSettings.style_name);
+    settings.setValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
     settings.setValue("MainWindow", "current_workspace",
         (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.setValue("MainWindow", "recent_workspaces", mRecentWorkspaces);

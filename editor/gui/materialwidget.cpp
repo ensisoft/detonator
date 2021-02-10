@@ -399,6 +399,19 @@ void MaterialWidget::Update(double secs)
     }
 }
 
+void MaterialWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
+bool MaterialWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+    const auto hash = mMaterial.GetHash();
+    return hash != mOriginalHash;
+}
+
 bool MaterialWidget::ConfirmClose()
 {
     // any unsaved changes ?

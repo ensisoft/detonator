@@ -500,6 +500,20 @@ void AnimationTrackWidget::Update(double secs)
         }
     }
 }
+
+void AnimationTrackWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
+bool AnimationTrackWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+    const auto hash = mState.track->GetHash();
+    return hash != mOriginalHash;
+}
+
 bool AnimationTrackWidget::ConfirmClose()
 {
     const auto hash = mState.track->GetHash();

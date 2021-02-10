@@ -138,6 +138,11 @@ void ScriptWidget::Paste(const Clipboard&)
     mUI.code->paste();
 }
 
+void ScriptWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
 bool ScriptWidget::SaveState(Settings& settings) const
 {
     // todo: if there are changes that have not been saved
@@ -170,6 +175,16 @@ bool ScriptWidget::LoadState(const Settings& settings)
         return true;
     mWatcher.addPath(mFilename);
     return LoadDocument(mFilename);
+}
+
+bool ScriptWidget::HasUnsavedChanges() const
+{
+    if (!mFileHash)
+        return false;
+
+    const auto& plain = mDocument.toPlainText();
+    const auto hash = qHash(plain);
+    return mFileHash != hash;
 }
 
 bool ScriptWidget::ConfirmClose()

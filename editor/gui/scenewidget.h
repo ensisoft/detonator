@@ -69,6 +69,7 @@ namespace gui
         virtual void Copy(Clipboard& clipboard) const override;
         virtual void Paste(const Clipboard& clipboard) override;
         virtual void Undo() override;
+        virtual void Save() override;
         virtual void ZoomIn() override;
         virtual void ZoomOut() override;
         virtual void ReloadShaders() override;
@@ -76,6 +77,7 @@ namespace gui
         virtual void Shutdown() override;
         virtual void Update(double secs) override;
         virtual void Render() override;
+        virtual bool HasUnsavedChanges() const override;
         virtual bool ConfirmClose() override;
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;

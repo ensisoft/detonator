@@ -143,6 +143,16 @@ namespace gui
         // Undo the last action on the undo stack.
         virtual void Undo()
         {}
+        
+        // Returns true if the widget has whatever are considered
+        // as "unsaved changes". 
+        virtual bool HasUnsavedChanges() const
+        { return false; }
+
+        // Request the widget to save it's content. After this
+        // HasUnsavedChanges should no longer be true (if it was true before)
+        virtual void Save()
+        {}
 
         // Called before the widget is being closed by the user.
         // If there are any pending/unsaved changes the widget

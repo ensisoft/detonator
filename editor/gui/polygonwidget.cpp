@@ -269,6 +269,19 @@ void ShapeWidget::Update(double secs)
     }
 }
 
+void ShapeWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
+bool ShapeWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+    const auto hash = mPolygon.GetHash();
+    return hash != mOriginalHash;
+}
+
 bool ShapeWidget::ConfirmClose()
 {
     const auto hash = mPolygon.GetHash();

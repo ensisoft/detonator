@@ -375,6 +375,24 @@ void ParticleEditorWidget::Render()
     mUI.widget->triggerPaint();
 }
 
+void ParticleEditorWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
+bool ParticleEditorWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+
+    gfx::KinematicsParticleEngineClass::Params params;
+    gfx::KinematicsParticleEngineClass klass;
+    FillParams(params);
+    klass.SetParams(params);
+    const auto hash = klass.GetHash();
+    return hash != mOriginalHash;
+}
+
 bool ParticleEditorWidget::ConfirmClose()
 {
     gfx::KinematicsParticleEngineClass::Params params;

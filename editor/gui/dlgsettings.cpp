@@ -54,6 +54,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Set
     SetUIValue(mUI.edtScriptEditorExecutable, settings.script_editor_executable);
     SetUIValue(mUI.edtScriptEditorArguments, settings.script_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
+    SetUIValue(mUI.chkSaveAutomatically, settings.save_automatically_on_play);
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -90,8 +91,9 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtShaderEditorArguments,  &mSettings.shader_editor_arguments);
     GetUIValue(mUI.edtScriptEditorExecutable, &mSettings.script_editor_executable);
     GetUIValue(mUI.edtScriptEditorArguments,  &mSettings.script_editor_arguments);
-    GetUIValue(mUI.cmbWinOrTab, &mSettings.default_open_win_or_tab);
-    GetUIValue(mUI.cmbStyle, &mSettings.style_name);
+    GetUIValue(mUI.cmbWinOrTab,               &mSettings.default_open_win_or_tab);
+    GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
+    GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
     // text editor settings.
     GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);

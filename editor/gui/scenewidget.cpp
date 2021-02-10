@@ -680,6 +680,11 @@ void SceneWidget::Undo()
     NOTE("Undo!");
 }
 
+void SceneWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
 void SceneWidget::ZoomIn()
 {
     const auto value = mUI.zoom->value();
@@ -715,6 +720,15 @@ void SceneWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
+
+bool SceneWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+    const auto hash = mState.scene.GetHash();
+    return hash != mOriginalHash;
+}
+
 bool SceneWidget::ConfirmClose()
 {
     const auto hash = mState.scene.GetHash();

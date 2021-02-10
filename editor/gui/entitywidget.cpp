@@ -687,6 +687,11 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
 }
 
+void EntityWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
 void EntityWidget::Undo()
 {
     if (mUndoStack.size() <= 1)
@@ -746,6 +751,15 @@ void EntityWidget::Render()
 {
     mUI.widget->triggerPaint();
 }
+
+bool EntityWidget::HasUnsavedChanges() const
+{
+    if (!mOriginalHash)
+        return false;
+    const auto hash = mState.entity->GetHash();
+    return hash != mOriginalHash;
+}
+
 bool EntityWidget::ConfirmClose()
 {
     const auto hash = mState.entity->GetHash();

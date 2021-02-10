@@ -36,6 +36,9 @@
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="1" colspan="2">
+             <widget class="QComboBox" name="cmbStyle"/>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
@@ -64,8 +67,12 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QComboBox" name="cmbStyle"/>
+            <item row="2" column="0" colspan="3">
+             <widget class="QCheckBox" name="chkSaveAutomatically">
+              <property name="text">
+               <string>Save changes automatically before play</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -374,6 +381,7 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>cmbStyle</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
+  <tabstop>chkSaveAutomatically</tabstop>
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>
   <tabstop>edtImageEditorArguments</tabstop>

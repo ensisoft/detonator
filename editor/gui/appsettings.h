@@ -66,6 +66,9 @@ namespace gui
         // kvantum is also available on linux through various package
         // managers.
         QString style_name = "kvantum";
+        // Whether to save widgets with unsaved changes automatically
+        // on play or whether to ask
+        bool save_automatically_on_play = false;
 
         AppSettings()
         {
