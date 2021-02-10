@@ -149,8 +149,8 @@ namespace game
                        SceneDrawHook<EntityType>* scene_hook,
                        EntityDrawHook<NodeType>* entity_hook);
 
-        template<typename NodeType>
-        void DrawRenderTree(const RenderTree<NodeType>& tree,
+        template<typename EntityType, typename NodeType>
+        void DrawEntity(const EntityType& entity,
                             gfx::Painter& painter, gfx::Transform& transform,
                             EntityDrawHook<NodeType>* hook);
     private:

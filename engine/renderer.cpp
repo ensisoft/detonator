@@ -52,14 +52,14 @@ void Renderer::Draw(const Entity& entity,
                     gfx::Painter& painter, gfx::Transform& transform,
                     EntityInstanceDrawHook* hook)
 {
-    DrawRenderTree<EntityNode>(entity.GetRenderTree(), painter, transform, hook);
+    DrawEntity<Entity, EntityNode>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const EntityClass& entity,
                     gfx::Painter& painter, gfx::Transform& transform,
                     EntityClassDrawHook* hook)
 {
-    DrawRenderTree<EntityNodeClass>(entity.GetRenderTree(), painter, transform, hook);
+    DrawEntity<EntityClass, EntityNodeClass>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const Scene& scene,
@@ -217,16 +217,18 @@ void Renderer::DrawScene(const SceneType& scene,
     }
 }
 
-template<typename Node>
-void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
-                              gfx::Painter& painter, gfx::Transform& transform,
-                              EntityDrawHook<Node>* hook)
+template<typename EntityType, typename Node>
+void Renderer::DrawEntity(const EntityType& entity,
+                          gfx::Painter& painter, gfx::Transform& transform,
+                          EntityDrawHook<Node>* hook)
 
 {
     using RenderTree = game::RenderTree<Node>;
     using DrawPacket = DrawPacket;
     using DrawHook   = EntityDrawHook<Node>;
     using DrawableItemType = typename Node::DrawableItemType;
+
+    auto tree = entity.GetRenderTree();
 
     // here we could apply operations that would apply to the whole
     // animation but currently we don't need such things.
@@ -238,12 +240,13 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
 
     class Visitor : public RenderTree::ConstVisitor {
     public:
-        Visitor(std::vector<DrawPacket>& packets, Renderer& renderer,
-                gfx::Transform& transform, DrawHook* hook)
-                : mPackets(packets)
-                , mRenderer(renderer)
-                , mTransform(transform)
-                , mHook(hook)
+        Visitor(const EntityType& entity, std::vector<DrawPacket>& packets,
+                Renderer& renderer, gfx::Transform& transform, DrawHook* hook)
+            : mEntity(entity)
+            , mPackets(packets)
+            , mRenderer(renderer)
+            , mTransform(transform)
+            , mHook(hook)
         {}
 
         virtual void EnterNode(const Node* node) override
@@ -279,7 +282,7 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                 if (klass)
                     paint_node.material = gfx::CreateMaterialInstance(klass);
                 if (!paint_node.material)
-                    WARN("No such material class '%1' found for node '%2' ('%3')", material, node->GetId(), node->GetName());
+                    WARN("No such material class '%1' found for '%2/%3')", material, mEntity.GetName(), node->GetName());
             }
             if (paint_node.drawable_class_id != drawable)
             {
@@ -290,7 +293,7 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
                 if (klass)
                     paint_node.drawable = gfx::CreateDrawableInstance(klass);
                 if (!paint_node.drawable)
-                    WARN("No such drawable class '%1' found for node '%2' ('%3')", drawable, node->GetId(), node->GetName());
+                    WARN("No such drawable class '%1' found for '%2/%3'", drawable, mEntity.GetName(), node->GetName());
             }
             if (paint_node.material)
             {
@@ -351,13 +354,14 @@ void Renderer::DrawRenderTree(const RenderTree<Node>& tree,
         }
 
     private:
+        const EntityType& mEntity;
         std::vector<DrawPacket>& mPackets;
         Renderer& mRenderer;
         gfx::Transform& mTransform;
         DrawHook* mHook = nullptr;
     };
 
-    Visitor visitor(packets, *this, transform, hook);
+    Visitor visitor(entity, packets, *this, transform, hook);
     tree.PreOrderTraverse(visitor);
 
     // the layer value is negative but for the indexing below
