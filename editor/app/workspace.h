@@ -134,6 +134,7 @@ namespace app
 
         // Map a "workspace file" to a file path in the file system.
         QString MapFileToFilesystem(const QString& file) const;
+        QString MapFileToFilesystem(const std::string& file) const;
 
         // Save a new resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to
@@ -191,6 +192,10 @@ namespace app
         bool IsValidDrawable(const QString& klass) const;
         bool IsValidDrawable(const std::string& klass) const
         { return IsValidDrawable(FromUtf8(klass)); }
+
+        bool IsValidScript(const QString& id) const;
+        bool IsValidScript(const std::string& id) const
+        { return IsValidScript(FromUtf8(id)); }
 
         // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)

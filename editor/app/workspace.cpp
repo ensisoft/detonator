@@ -1056,6 +1056,11 @@ QString Workspace::MapFileToFilesystem(const QString& file) const
     return ret;
 }
 
+QString Workspace::MapFileToFilesystem(const std::string& file) const
+{
+    return MapFileToFilesystem(FromUtf8(file));
+}
+
 template<typename ClassType>
 void LoadResources(const std::string& array,
                    const nlohmann::json& json,
@@ -1526,6 +1531,17 @@ bool Workspace::IsValidDrawable(const QString& klass) const
     return false;
 }
 
+bool Workspace::IsValidScript(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == id &&
+            resource->IsScript())
+            return true;
+    }
+    return false;
+}
+
 Resource& Workspace::GetResource(size_t index)
 {
     ASSERT(index < mResources.size());
@@ -1672,6 +1688,30 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
     for (const auto& carcass : graveyard)
     {
         emit ResourceToBeDeleted(carcass.get());
+    }
+
+    // script resources are special in the sense that they're the only
+    // resources where the underlying file system content file is actually
+    // created by this editor. for everything else, shaders, image files
+    // and font files the resources are created by other tools/applications
+    // and we only keep references to those files.
+    // So for scripts when the script resource is deleted we're actually
+    // going to delete the underlying filesystem file as well.
+    for (const auto& carcass : graveyard)
+    {
+        if (!carcass->IsScript())
+            continue;
+        Script* script = nullptr;
+        carcass->GetContent(&script);
+        const auto& file = MapFileToFilesystem(script->GetFileURI());
+        if (!QFile::remove(file))
+        {
+            ERROR("Failed to remove file '%1'", file);
+        }
+        else
+        {
+            INFO("Deleted '%1'", file);
+        }
     }
 }
 
