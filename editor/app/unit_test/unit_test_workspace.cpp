@@ -78,9 +78,9 @@ void unit_test_path_mapping()
     TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://some/file/name.png")) == "some/file/name.png");
 #elif defined(WINDOWS_OS)
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("c:\\tmp\\file.png")) == "fs://c:\\tmp\\file.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://c:\\tmp\\file.png") == "c:\\tmp\\file.png");
+    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://c:\\tmp\\file.png")) == "c:\\tmp\\file.png");
     TEST_REQUIRE(workspace.AddFileToWorkspace(QString("some\\file\\name.png")) == "fs://some\\file\\name.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://some\\file\\name.png") == "some\\file\\name.png");
+    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://some\\file\\name.png")) == "some\\file\\name.png");
 #endif
     TEST_REQUIRE(workspace.MapFileToFilesystem(QString("ws://relative/path/file.png")) == app::JoinPath(cwd, "TestWorkspace/relative/path/file.png"));
     TEST_REQUIRE(workspace.MapFileToFilesystem(QString("app://relative/path/file.png")) == app::JoinPath(app, "relative/path/file.png"));
