@@ -227,6 +227,13 @@ namespace game
         // main game update/render loop.
         virtual void Start() {}
 
+        // Called once at the start of every iteration of the main application
+        // loop. The calls to Tick, Draw, Update  are sandwiched between
+        // the calls to BeginMainLoop and EndMainLoop which is called at the
+        // end of the mainloop as the very last thing.
+        virtual void BeginMainLoop() {}
+        virtual void EndMainLoop() {};
+
         // Draw the next frame.
         virtual void Draw() {}
 

@@ -63,14 +63,17 @@ namespace gui
         bool IsClosed() const
         { return mClosed; }
 
-        // Update the application.
-        void Update(double dt);
+        // Begin an iteration of the mainloop.
+        void BeginMainLoop();
 
-        // Render the application.
-        void Render();
+        // Iterate the app once.
+        void RunOnce();
 
         // Do periodic low frequency tick.
-        void Tick();
+        void NonGameTick();
+
+        // End an iteration of the mainloop.
+        void EndMainLoop();
 
         // Load the game library and launch the game.
         // Returns true if successful or false if some problem happened.

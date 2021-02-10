@@ -439,7 +439,43 @@ PlayWindow::~PlayWindow()
     DEBUG("Destroy PlayWindow");
 }
 
-void PlayWindow::Update(double dt)
+void PlayWindow::BeginMainLoop()
+{
+    if (!mApp || !mInitDone)
+        return;
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+
+    mContext.makeCurrent(mSurface);
+    try
+    {
+        mApp->BeginMainLoop();
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in App::BeginMainLoop.");
+        ERROR(e.what());
+    }
+}
+
+void PlayWindow::EndMainLoop()
+{
+    if (!mApp || !mInitDone)
+        return;
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+
+    mContext.makeCurrent(mSurface);
+    try
+    {
+        mApp->EndMainLoop();
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in App::EndMainLoop.");
+        ERROR(e.what());
+    }
+}
+
+void PlayWindow::RunOnce()
 {
     if (!mApp || !mInitDone)
         return;
@@ -515,23 +551,7 @@ void PlayWindow::Update(double dt)
             tick_time += tick_step;
             mTickAccum -= tick_step;
         }
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Exception in App::Update: '%1'", e.what());
-    }
-}
 
-void PlayWindow::Render()
-{
-    if (!mApp || !mInitDone)
-        return;
-
-    TemporaryCurrentDirChange cwd(mGameWorkingDir);
-
-    mContext.makeCurrent(mSurface);
-    try
-    {
         // ask the application to draw the current frame.
         mApp->Draw();
 
@@ -560,11 +580,12 @@ void PlayWindow::Render()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in App::Draw: '%1'", e.what());
+        ERROR("Exception in App::Update: '%1'");
+        ERROR(e.what());
     }
 }
 
-void PlayWindow::Tick()
+void PlayWindow::NonGameTick()
 {
     // flush the buffer logger to the main log.
     mLogger->Dispatch();

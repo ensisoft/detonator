@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
         // app.exec() but it seems to greatly degrade the performance
         // up to an order of magnitude difference in rendering perf
         // as measured by frames per second.
-        // the problemwith this type of loop however is that on a modern
+        // the problem with this type of loop however is that on a modern
         // machine with performant GPU were the GPU workloads
         // and without sync to vblank enabled we're basically going
         // to be running a busy loop here burning the CPU.
@@ -244,6 +244,13 @@ int main(int argc, char* argv[])
             if (window.isClosed())
                 break;
 
+            // why are we not calling iterateMainLoop directly here??
+            // the problem has to do with modal dialogs. When a modal
+            // dialog is open Qt enters a temporary event loop which
+            // would mean that this code would not get a chance to render.
+            // thus the iteration of the main loop code in the mainwindow
+            // is triggered by an event posted to the application queue
+
             if (!window.haveAcceleratedWindows())
             {
                 DEBUG("Enter slow event loop.");
@@ -251,10 +258,8 @@ int main(int argc, char* argv[])
                 // windows that require "acceleration" i.e. continuous game loop
                 // style processing.
                 QEventLoop loop;
-                QObject::connect(&window, &gui::MainWindow::newAcceleratedWindowOpen,
-                    &loop, &QEventLoop::quit);
-                QObject::connect(&window, &gui::MainWindow::aboutToClose,
-                    &loop, &QEventLoop::quit);
+                QObject::connect(&window, &gui::MainWindow::newAcceleratedWindowOpen, &loop, &QEventLoop::quit);
+                QObject::connect(&window, &gui::MainWindow::aboutToClose, &loop, &QEventLoop::quit);
                 loop.exec();
                 DEBUG("Exit slow event loop.");
             }

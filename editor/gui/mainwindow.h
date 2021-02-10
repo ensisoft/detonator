@@ -88,8 +88,6 @@ namespace gui
 
         // Perform one iteration of the "game" loop, update and render
         // all currently open widgets.
-        // Returns true if next fast iteration is needed or false
-        // if there are no windows open that would required fast iteration.x
         void iterateGameLoop();
 
         bool haveAcceleratedWindows() const;

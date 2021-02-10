@@ -465,6 +465,9 @@ int main(int argc, char* argv[])
 
         while (app->IsRunning() && !quit)
         {
+            // indicate beginning of the main loop iteration.
+            app->BeginMainLoop();
+
             // process pending window events if any.
             wdk::native_event_t event;
             while(wdk::PeekEvent(event))
@@ -561,7 +564,9 @@ int main(int argc, char* argv[])
                 frames  = 0;
                 seconds = 0.0;
             }
-        }
+            // indicate end of iteration.
+            app->EndMainLoop();
+        } // main loop
 
         app->Save();
         app->Shutdown();
