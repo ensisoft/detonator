@@ -932,6 +932,8 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             const auto* key_event = static_cast<const QKeyEvent *>(event);
             if (key_event->key() == Qt::Key_F11 && InFullScreen())
                 SetFullScreen(false);
+            else if (key_event->key() == Qt::Key_F7 && InFullScreen())
+                mUI.actionPause->trigger();
 
             wdk::WindowEventKeydown key;
             key.symbol    = MapVirtualKey(key_event->key());
