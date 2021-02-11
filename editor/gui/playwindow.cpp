@@ -401,6 +401,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     mUI.actionClose->setShortcut(QKeySequence::Close);
     mUI.log->setModel(&mEventLog);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
+    mUI.problem->setVisible(false);
 
     const auto& settings = mWorkspace.GetProjectSettings();
     setWindowTitle(settings.application_name);
@@ -452,8 +453,8 @@ void PlayWindow::BeginMainLoop()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in App::BeginMainLoop.");
-        ERROR(e.what());
+        DEBUG("Exception in App::BeginMainLoop.");
+        Barf(e.what());
     }
 }
 
@@ -470,8 +471,8 @@ void PlayWindow::EndMainLoop()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in App::EndMainLoop.");
-        ERROR(e.what());
+        DEBUG("Exception in App::EndMainLoop.");
+        Barf(e.what());
     }
 }
 
@@ -580,8 +581,8 @@ void PlayWindow::RunOnce()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in App::Update: '%1'");
-        ERROR(e.what());
+        DEBUG("Exception in App Update/Draw.");
+        Barf(e.what());
     }
 }
 
@@ -649,7 +650,8 @@ void PlayWindow::Shutdown()
     }
     catch (const std::exception &e)
     {
-        ERROR("Exception in app close: '%1'", e.what());
+        DEBUG("Exception in app shutdown.");
+        ERROR(e.what());
     }
     mApp.reset();
 
@@ -802,7 +804,8 @@ void PlayWindow::DoAppInit()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in app init: '%1'", e.what());
+        DEBUG("Exception in app init.");
+        Barf(e.what());
     }
 }
 
@@ -1000,7 +1003,8 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in app '%1'", e.what());
+        DEBUG("Exception in app event handler.");
+        Barf(e.what());
     }
 
     return QMainWindow::event(event);
@@ -1116,6 +1120,15 @@ void PlayWindow::SetDebugOptions() const
     debug.debug_show_msg  = true;
     debug.debug_print_fps = false;
     mApp->SetDebugOptions(debug);
+}
+
+void PlayWindow::Barf(const std::string& msg)
+{
+    ERROR(msg);
+    mApp.reset();
+    mContainer->setVisible(false);
+    mUI.problem->setVisible(true);
+    SetValue(mUI.lblError, msg);
 }
 
 } // namespace

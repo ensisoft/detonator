@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1060</width>
-    <height>732</height>
+    <width>1053</width>
+    <height>1059</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,40 @@
        <string>Application window</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QWidget" name="problem" native="true">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(85, 170, 255);</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);
+font: 22pt &quot;Sans Serif&quot;;</string>
+            </property>
+            <property name="text">
+             <string>Oopsie, there was a problem :(</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblError">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);
+font: 22pt &quot;Sans Serif&quot;;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout">
          <property name="sizeConstraint">
@@ -132,7 +166,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1060</width>
+     <width>1053</width>
      <height>22</height>
     </rect>
    </property>

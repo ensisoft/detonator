@@ -279,6 +279,11 @@ inline void SetValue(QLabel* label, const QString& str)
     QSignalBlocker s(label);
     label->setText(str);
 }
+inline void SetValue(QLabel* label, const std::string& str)
+{
+    QSignalBlocker s(label);
+    label->setText(app::FromUtf8(str));
+}
 
 struct NormalizedFloat {
     float value = 0.0f;

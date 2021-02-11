@@ -328,7 +328,7 @@ void ScriptWidget::on_btnFindNext_clicked()
 
     if (cursor.isNull())
     {
-        SetValue(mUI.findResult, "No results found.");
+        SetValue(mUI.findResult, tr("No results found."));
         return;
     }
     SetValue(mUI.findResult, QString(""));
@@ -360,7 +360,7 @@ void ScriptWidget::on_btnReplaceNext_clicked()
 
     if (cursor.isNull())
     {
-        SetValue(mUI.findResult, "No results found.");
+        SetValue(mUI.findResult, tr("No results found."));
         return;
     }
     SetValue(mUI.findResult, QString(""));

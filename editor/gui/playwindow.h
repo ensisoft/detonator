@@ -116,6 +116,7 @@ namespace gui
         bool InFullScreen() const;
         void SetFullScreen(bool fullscreen);
         void SetDebugOptions() const;
+        void Barf(const std::string& msg);
 
     private:
         class WindowContext;
