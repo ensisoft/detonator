@@ -404,6 +404,7 @@ private:
         }
         mForeground = game::CreateSceneInstance(klass);
         mPhysics.CreateWorld(*mForeground);
+        mScripting->SetLoader(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->BeginPlay(mForeground.get());
         mGame->BeginPlay(mForeground.get());
