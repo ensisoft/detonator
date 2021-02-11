@@ -211,6 +211,8 @@ void MainWindow::loadState()
     settings.getValue("Settings", "image_editor_arguments",   &mSettings.image_editor_arguments);
     settings.getValue("Settings", "shader_editor_executable", &mSettings.shader_editor_executable);
     settings.getValue("Settings", "shader_editor_arguments",  &mSettings.shader_editor_arguments);
+    settings.getValue("Settings", "script_editor_executable", &mSettings.script_editor_executable);
+    settings.getValue("Settings", "script_editor_arguments",  &mSettings.script_editor_arguments);
     settings.getValue("Settings", "default_open_win_or_tab",  &mSettings.default_open_win_or_tab);
     settings.getValue("Settings", "style_name", &mSettings.style_name);
     settings.getValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
