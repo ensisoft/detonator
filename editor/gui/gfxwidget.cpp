@@ -122,41 +122,28 @@ GfxWindow::~GfxWindow()
 GfxWindow::GfxWindow()
 {
     surfaces.insert(this);
-
-    // if we need a vsynced rendering surface but don't
-    // have any yet then this window should become one that is
-    // synced.
-    mVsync = should_have_vsync && !have_vsync;
-
-    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    format.setSwapInterval(mVsync ? 1 : 0);
-
-    setSurfaceType(QWindow::OpenGLSurface);
-    setFormat(format);
-
-    have_vsync = should_have_vsync;
-
-    auto context = shared_context.lock();
-    if (!context)
-    {
-        context = std::make_shared<QOpenGLContext>();
-        // the default configuration has been set in main
-        context->create();
-        shared_context = context;
-    }
-    mContext = context;
-    mContext->makeCurrent(this);
     // There's the problem that it seems a bit tricky to get the
     // OpenGLWidget's size (framebuffer size) properly when
     // starting things up. When the widget is loaded  there are
-    // multiple invokations of resizeGL where the first call(s)
+    // multiple invocations of resizeGL where the first call(s)
     // don't report the final size that the widget will eventually
     // have. I suspect this happens because there is some layout
     // engine adjusting the widget sizes. However this is a problem
-    // if we want to for example have a user modifyable viewport
+    // if we want to for example have a user modifiable viewport
     // default to the initial size of the widget.
     // Doing a little hack here and hoping that when the first timer
     // event fires we'd have the final size correctly.
+    //
+    // Second issue discovery. When loading the editor with multiple
+    // widgets being restored from the start there's a weird issue that
+    // if the device is created "too soon" even though supposedly we
+    // have a surface and a valid context that is current with the surface
+    // the device isn't created correctly. The calls to probe the device
+    // in graphics/opengl_es2_device for number of texture units, color buffer
+    // info, etc all provide junk values (0 for texture units.. really??)
+    // Moving all context/device creation to take place after a hack delay.
+    // yay! 
+
     QTimer::singleShot(10, this, &GfxWindow::doInit);
 }
 
@@ -210,34 +197,7 @@ bool GfxWindow::hasInputFocus() const
 
 void GfxWindow::initializeGL()
 {
-    class WindowContext : public gfx::Device::Context
-    {
-    public:
-        WindowContext(QOpenGLContext* context) : mContext(context)
-        {}
-        virtual void Display() override
-        {}
-        virtual void MakeCurrent() override
-        {}
-        virtual void* Resolve(const char* name) override
-        {
-            return (void*)mContext->getProcAddress(name);
-        }
-    private:
-        QOpenGLContext* mContext = nullptr;
-    };
 
-    mContext->makeCurrent(this);
-    auto device = shared_device.lock();
-    if (!device)
-    {
-        // create custom painter for fancier shader based effects.
-        device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                            std::make_shared<WindowContext>(mContext.get()));
-        shared_device = device;
-    }
-    mCustomGraphicsDevice  = device;
-    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
 }
 
 void GfxWindow::paintGL()
@@ -333,7 +293,61 @@ void GfxWindow::recreateRenderingSurface(bool vsync)
 
 void GfxWindow::doInit()
 {
-    initializeGL();
+    // if we need a vsynced rendering surface but don't have
+    // any yet then this window should become one that is synced.
+    mVsync = should_have_vsync && !have_vsync;
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setSwapInterval(mVsync ? 1 : 0);
+
+    setSurfaceType(QWindow::OpenGLSurface);
+    setFormat(format);
+    destroy();
+    create();
+    show();
+
+    have_vsync = should_have_vsync;
+
+    auto context = shared_context.lock();
+    if (!context)
+    {
+        context = std::make_shared<QOpenGLContext>();
+        // the default configuration has been set in main
+        context->create();
+        shared_context = context;
+    }
+    mContext = context;
+    mContext->makeCurrent(this);
+
+    class WindowContext : public gfx::Device::Context
+    {
+    public:
+        WindowContext(QOpenGLContext* context) : mContext(context)
+        {}
+        virtual void Display() override
+        {}
+        virtual void MakeCurrent() override
+        {}
+        virtual void* Resolve(const char* name) override
+        {
+            return (void*)mContext->getProcAddress(name);
+        }
+    private:
+        QOpenGLContext* mContext = nullptr;
+    };
+
+
+    auto device = shared_device.lock();
+    if (!device)
+    {
+        // create custom painter for fancier shader based effects.
+        device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                     std::make_shared<WindowContext>(mContext.get()));
+        shared_device = device;
+    }
+    mCustomGraphicsDevice  = device;
+    mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
+
 
     const auto w = width();
     const auto h = height();
