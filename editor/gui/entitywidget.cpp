@@ -361,6 +361,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityID,   mState.entity->GetId());
+    SetValue(mUI.entityLifetime, mState.entity->GetLifetime());
+    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
     setWindowTitle("My Entity");
 
     RebuildMenus();
@@ -385,6 +387,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     SetValue(mUI.entityName, content->GetName());
     SetValue(mUI.entityID, content->GetId());
     SetValue(mUI.scriptFile, ListItemId(content->GetScriptFileId()));
+    SetValue(mUI.entityLifetime, content->GetLifetime());
+    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -460,6 +464,8 @@ bool EntityWidget::SaveState(Settings& settings) const
 {
     settings.saveWidget("Entity", mUI.entityName);
     settings.saveWidget("Entity", mUI.entityID);
+    settings.saveWidget("Entity", mUI.entityLifetime);
+    settings.saveWidget("Entity", mUI.chkEntityLifetime);
     settings.saveWidget("Entity", mUI.scaleX);
     settings.saveWidget("Entity", mUI.scaleY);
     settings.saveWidget("Entity", mUI.rotation);
@@ -484,6 +490,8 @@ bool EntityWidget::LoadState(const Settings& settings)
 {
     settings.loadWidget("Entity", mUI.entityName);
     settings.loadWidget("Entity", mUI.entityID);
+    settings.loadWidget("Entity", mUI.entityLifetime);
+    settings.loadWidget("Entity", mUI.chkEntityLifetime);
     settings.loadWidget("Entity", mUI.scaleX);
     settings.loadWidget("Entity", mUI.scaleY);
     settings.loadWidget("Entity", mUI.rotation);
@@ -1024,6 +1032,16 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
 void EntityWidget::on_entityName_textChanged(const QString& text)
 {
     mState.entity->SetName(GetValue(mUI.entityName));
+}
+
+void EntityWidget::on_entityLifetime_valueChanged(double value)
+{
+    mState.entity->SetLifetime(GetValue(mUI.entityLifetime));
+}
+
+void EntityWidget::on_chkEntityLifetime_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::LimitLifetime, GetValue(mUI.chkEntityLifetime));
 }
 
 void EntityWidget::on_btnAddIdleTrack_clicked()

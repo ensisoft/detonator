@@ -381,6 +381,8 @@ EntityClass::EntityClass(const EntityClass& other)
     mName    = other.mName;
     mScriptFile  = other.mScriptFile;
     mIdleTrackId = other.mIdleTrackId;
+    mFlags = other.mFlags;
+    mLifetime = other.mLifetime;
 
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
@@ -658,6 +660,8 @@ std::size_t EntityClass::GetHash() const
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mIdleTrackId);
     hash = base::hash_combine(hash, mScriptFile);
+    hash = base::hash_combine(hash, mFlags.value());
+    hash = base::hash_combine(hash, mLifetime);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const EntityNodeClass* node) {
@@ -681,6 +685,8 @@ nlohmann::json EntityClass::ToJson() const
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "idle_track", mIdleTrackId);
     base::JsonWrite(json, "script_file", mScriptFile);
+    base::JsonWrite(json, "flags", mFlags);
+    base::JsonWrite(json, "lifetime", mLifetime);
     for (const auto& node : mNodes)
     {
         json["nodes"].push_back(node->ToJson());
@@ -708,7 +714,9 @@ std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
     if (!base::JsonReadSafe(json, "id", &ret.mClassId) ||
         !base::JsonReadSafe(json, "name", &ret.mName) ||
         !base::JsonReadSafe(json, "idle_track", &ret.mIdleTrackId) ||
-        !base::JsonReadSafe(json, "script_file", &ret.mScriptFile))
+        !base::JsonReadSafe(json, "script_file", &ret.mScriptFile) ||
+        !base::JsonReadSafe(json, "flags", &ret.mFlags) ||
+        !base::JsonReadSafe(json, "lifetime", &ret.mLifetime))
         return std::nullopt;
     if (json.contains("nodes"))
     {
@@ -803,6 +811,8 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     mNodes       = std::move(tmp.mNodes);
     mScriptVars  = std::move(tmp.mScriptVars);
     mScriptFile  = std::move(tmp.mScriptFile);
+    mFlags       = std::move(tmp.mFlags);
+    mLifetime    = tmp.mLifetime;
     mRenderTree  = tmp.mRenderTree;
     mAnimationTracks = std::move(tmp.mAnimationTracks);
     return *this;
@@ -835,9 +845,9 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
             mScriptVars.push_back(*var);
     }
 
-    mInstanceId = base::RandomString(10);
+    mInstanceId  = base::RandomString(10);
     mIdleTrackId = mClass->GetIdleTrackId();
-    mFlags.set(Flags::VisibleInGame, true);
+    mFlags       = mClass->GetFlags();
 }
 
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)
@@ -1078,6 +1088,15 @@ bool Entity::PlayIdle()
 bool Entity::IsPlaying() const
 {
     return !!mAnimationTrack;
+}
+
+bool Entity::HasExpired() const
+{
+    if (!mFlags.test(EntityClass::Flags::LimitLifetime))
+        return false;
+    else if (mCurrentTime >= mClass->GetLifetime())
+        return true;
+    return false;
 }
 
 const ScriptVar* Entity::FindScriptVar(const std::string& name) const

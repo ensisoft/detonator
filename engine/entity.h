@@ -687,8 +687,26 @@ namespace game
         using RenderTreeNode  = EntityNodeClass;
         using RenderTreeValue = EntityNodeClass;
 
+        enum class Flags {
+            // Only pertains to editor (todo: maybe this flag should be removed)
+            VisibleInEditor,
+            // node is visible in the game or not.
+            // Even if this is true the node will still need to have some
+            // renderable items attached to it such as a shape or
+            // animation item.
+            VisibleInGame,
+            // Limit the lifetime to some maximum amount
+            // after which the entity is killed.
+            LimitLifetime
+        };
+
         EntityClass()
-        { mClassId = base::RandomString(10); }
+        {
+            mClassId = base::RandomString(10);
+            mFlags.set(Flags::VisibleInEditor, true);
+            mFlags.set(Flags::VisibleInGame, true);
+            mFlags.set(Flags::LimitLifetime, false);
+        }
         EntityClass(const EntityClass& other);
 
         // Add a new node to the entity.
@@ -834,6 +852,10 @@ namespace game
         // exists then nullptr is returned.
         const ScriptVar* FindScriptVar(const std::string& name) const;
 
+        void SetLifetime(float value)
+        { mLifetime = value;}
+        void SetFlag(Flags flag, bool on_off)
+        { mFlags.set(flag, on_off); }
         void SetName(const std::string& name)
         { mName = name; }
         void SetIdleTrackId(const std::string& id)
@@ -848,6 +870,8 @@ namespace game
         { return !mIdleTrackId.empty(); }
         bool HasScriptFile() const
         { return !mScriptFile.empty(); }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
 
         RenderTree& GetRenderTree()
         { return mRenderTree; }
@@ -869,6 +893,10 @@ namespace game
         { return mName; }
         std::string GetScriptFileId() const
         { return mScriptFile; }
+        float GetLifetime() const
+        { return mLifetime; }
+        base::bitflag<Flags> GetFlags() const
+        { return mFlags; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
@@ -906,6 +934,11 @@ namespace game
         std::vector<std::shared_ptr<ScriptVar>> mScriptVars;
         // the name of the associated script if any.
         std::string mScriptFile;
+        // entity class flags.
+        base::bitflag<Flags> mFlags;
+        // maximum lifetime after which the entity is
+        // deleted if LimitLifetime flag is set.
+        float mLifetime = 0.0f;
     };
 
     // Collection of arguments for creating a new entity
@@ -946,16 +979,8 @@ namespace game
             // removed at the end of the update cycle
             Killed
         };
+        using Flags = EntityClass::Flags;
 
-        enum class Flags {
-            // Only pertains to editor (todo: maybe this flag should be removed)
-            VisibleInEditor,
-            // node is visible in the game or not.
-            // Even if this is true the node will still need to have some
-            // renderable items attached to it such as a shape or
-            // animation item.
-            VisibleInGame
-        };
         using RenderTree      = game::RenderTree<EntityNode>;
         using RenderTreeNode  = EntityNode;
         using RenderTreeValue = EntityNode;
@@ -1068,6 +1093,8 @@ namespace game
         bool PlayIdle();
         // Returns true if an animation track is still playing.
         bool IsPlaying() const;
+        // Returns true if the lifetime has been exceeded.
+        bool HasExpired() const;
 
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
@@ -1093,6 +1120,8 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
+        double GetTime() const
+        { return mCurrentTime; }
         std::string GetIdleTrackId() const
         { return mIdleTrackId; }
         std::string GetParentNodeClassId() const

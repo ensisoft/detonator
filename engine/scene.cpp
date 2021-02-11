@@ -572,6 +572,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
 {
     std::unordered_map<const SceneNodeClass*, const Entity*> map;
 
+    // spawn an entity instance for each scene node class
+    // in the scene class
     for (size_t i=0; i<klass->GetNumNodes(); ++i)
     {
         const auto& node = klass->GetNode(i);
@@ -584,6 +586,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.id       = node.GetId();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
+        // override entity instance flags with the flag values from the
+        // placement scene node class.
         entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
         entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
         entity->SetIdleTrackId(node.GetIdleAnimationId());
@@ -826,6 +830,11 @@ void Scene::Update(float dt)
     for (auto& entity : mEntities)
     {
         entity->Update(dt);
+        if (entity->HasExpired())
+        {
+            entity->SetFlag(Entity::ControlFlags::Killed , true);
+            continue;
+        }
         if (entity->IsPlaying())
             continue;
         if (entity->HasIdleTrack())

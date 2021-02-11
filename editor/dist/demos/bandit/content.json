@@ -1,8 +1,14 @@
 {
   "entities": [
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "HFSA8Yezdr",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "StoneBlock",
       "nodes": [
         {
@@ -81,8 +87,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "DOzd15fNMX",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile1",
       "nodes": [
         {
@@ -161,8 +173,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "7WjAKJb7hY",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile2",
       "nodes": [
         {
@@ -241,8 +259,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "SFrJwO771l",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile4",
       "nodes": [
         {
@@ -321,8 +345,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "Fm5ByqI6xo",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile3",
       "nodes": [
         {
@@ -401,8 +431,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "y7bWvFuoie",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tree",
       "nodes": [
         {
@@ -459,8 +495,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "b2lU3gYIwf",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile8",
       "nodes": [
         {
@@ -539,8 +581,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "ImTnUuKMDu",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile7",
       "nodes": [
         {
@@ -619,8 +667,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "GaQT22N3OL",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile6",
       "nodes": [
         {
@@ -699,8 +753,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "9LU4RC9DH0",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile15",
       "nodes": [
         {
@@ -779,8 +839,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "d8ZPi5y9Ps",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile14",
       "nodes": [
         {
@@ -859,8 +925,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "bOtC7Fnmmp",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile13",
       "nodes": [
         {
@@ -939,8 +1011,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "g3TRakI9ob",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile12",
       "nodes": [
         {
@@ -1019,8 +1097,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "8Prh114uxP",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile11",
       "nodes": [
         {
@@ -1099,8 +1183,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "dJKagvO0jM",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile10",
       "nodes": [
         {
@@ -1179,8 +1269,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "nR73zKx341",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile9",
       "nodes": [
         {
@@ -1259,8 +1355,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "vYm7CMPRrJ",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile5",
       "nodes": [
         {
@@ -1339,8 +1441,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "bEAIWd3ESl",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Bush (1)",
       "nodes": [
         {
@@ -1397,8 +1505,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "2Q2vkLGDEg",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Crate",
       "nodes": [
         {
@@ -1477,8 +1591,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "HpAo2l11sT",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Cactus (1)",
       "nodes": [
         {
@@ -1535,8 +1655,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "2sWxF1jCqU",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Cactus (2)",
       "nodes": [
         {
@@ -1593,8 +1719,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "Y3nvZp6DaX",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Cactus (3)",
       "nodes": [
         {
@@ -1651,8 +1783,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "WKsCpHkbNw",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Billboard",
       "nodes": [
         {
@@ -1709,8 +1847,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "FNUUxWSBTe",
       "idle_track": "R0MIshyT60",
+      "lifetime": 0.0,
       "name": "Player",
       "nodes": [
         {
@@ -2503,8 +2647,14 @@
       ]
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "MiA8FWNEaF",
       "idle_track": "0nrM22fbCl",
+      "lifetime": 0.0,
       "name": "Horizontal Elevator",
       "nodes": [
         {
@@ -2810,8 +2960,14 @@
       ]
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "Jn0SpbgGSY",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Vertical Elevator",
       "nodes": [
         {
@@ -3186,8 +3342,14 @@
       ]
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "te9JjLzdlp",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Tile16",
       "nodes": [
         {
@@ -3266,8 +3428,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": false,
+        "VisibleInGame": false
+      },
       "id": "z3qBPdpAGa",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Small Island",
       "nodes": [
         {
@@ -3588,8 +3756,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "O5QefURbEM",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Grass (2)",
       "nodes": [
         {
@@ -3646,8 +3820,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "TyE5N8JWlx",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Grass (1)",
       "nodes": [
         {
@@ -3704,8 +3884,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "ZNaUsmn31R",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Plateu",
       "nodes": [
         {
@@ -4413,8 +4599,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "WtCkGlPDwf",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Skeleton",
       "nodes": [
         {
@@ -4471,8 +4663,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "tqF7brLL08",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Stone",
       "nodes": [
         {
@@ -4529,8 +4727,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "gwm3bTflRn",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Background",
       "nodes": [
         {
@@ -4698,8 +4902,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "dfb84OzuRo",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Coin",
       "nodes": [
         {
@@ -8650,6 +8860,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8671,6 +8882,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8692,6 +8904,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8713,6 +8926,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8734,6 +8948,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8755,6 +8970,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8776,6 +8992,7 @@
         {
           "entity": "FNUUxWSBTe",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8797,6 +9014,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8818,6 +9036,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8839,6 +9058,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8860,6 +9080,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8881,6 +9102,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8902,6 +9124,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8923,6 +9146,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8944,6 +9168,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8965,6 +9190,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -8986,6 +9212,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9007,6 +9234,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9028,6 +9256,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9049,6 +9278,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9070,6 +9300,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9091,6 +9322,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9112,6 +9344,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9133,6 +9366,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9154,6 +9388,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9175,6 +9410,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9196,6 +9432,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9217,6 +9454,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9238,6 +9476,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9259,6 +9498,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9280,6 +9520,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9301,6 +9542,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9322,6 +9564,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9343,6 +9586,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9364,6 +9608,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9385,6 +9630,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9406,6 +9652,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9427,6 +9674,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9448,6 +9696,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9469,6 +9718,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9490,6 +9740,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9511,6 +9762,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9532,6 +9784,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9553,6 +9806,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9574,6 +9828,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9595,6 +9850,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9616,6 +9872,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9637,6 +9894,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9658,6 +9916,7 @@
         {
           "entity": "WtCkGlPDwf",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9679,6 +9938,7 @@
         {
           "entity": "tqF7brLL08",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9700,6 +9960,7 @@
         {
           "entity": "tqF7brLL08",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9721,6 +9982,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9742,6 +10004,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9763,6 +10026,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9784,6 +10048,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9805,6 +10070,7 @@
         {
           "entity": "Jn0SpbgGSY",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9826,6 +10092,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9847,6 +10114,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9868,6 +10136,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9889,6 +10158,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9910,6 +10180,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9931,6 +10202,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9952,6 +10224,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9973,6 +10246,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -9994,6 +10268,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },
@@ -10370,6 +10645,7 @@
         {
           "entity": "gwm3bTflRn",
           "flags": {
+            "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
           },

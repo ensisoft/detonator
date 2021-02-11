@@ -1,8 +1,14 @@
 {
   "entities": [
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "sPJ5mHTwAg",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Space",
       "nodes": [
         {
@@ -215,8 +221,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "D57sl8JCQS",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "UFO",
       "nodes": [
         {
@@ -316,8 +328,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "b18SpfABQ5",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Asteroid",
       "nodes": [
         {
@@ -374,8 +392,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "PTsZrCTnM0",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Cricket",
       "nodes": [
         {
@@ -502,8 +526,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "0q5xgI7aXU",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Mantis",
       "nodes": [
         {
@@ -630,8 +660,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "AGpwFLniqi",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Scarab",
       "nodes": [
         {
@@ -758,8 +794,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "LeNxoNvQbn",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Locust",
       "nodes": [
         {
@@ -886,8 +928,14 @@
       "script_file": ""
     },
     {
+      "flags": {
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
       "id": "lQDnzkH9Ky",
       "idle_track": "",
+      "lifetime": 0.0,
       "name": "Big Explosion",
       "nodes": [
         {
