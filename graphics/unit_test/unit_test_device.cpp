@@ -941,6 +941,75 @@ void main() {
     TEST_REQUIRE(bmp.Compare(gfx::Color::White));
 }
 
+void unit_test_uniform_sampler_optimize_bug()
+{
+    // shader code doesn't actually use the material, the sampler/uniform location
+    // is thus -1 and no texture will be set.
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, std::make_shared<TestContext>(10, 10));
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+
+    auto* texture = dev->MakeTexture("foo");
+    const gfx::RGB pixels[2*3] = {
+            gfx::Color::White, gfx::Color::White,
+            gfx::Color::Red, gfx::Color::Red,
+            gfx::Color::Blue, gfx::Color::Blue
+    };
+    texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
+
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    // no mention of the texture sampler in the fragment shader!
+    const std::string& fssrc =
+            R"(#version 100
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1.0);
+})";
+
+    const std::string& vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* vs = dev->MakeShader("vert");
+    auto* fs = dev->MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+    auto* prog = dev->MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    // set the texture that isn't actually set  since the shader
+    // doesnt' use it.
+    prog->SetTexture("kTexture", 0, *texture);
+    prog->SetTextureCount(1);
+
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+    dev->CleanGarbage(120);
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -956,5 +1025,6 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix2x2_uniform();
     unit_test_render_set_matrix3x3_uniform();
     unit_test_render_set_matrix4x4_uniform();
+    unit_test_uniform_sampler_optimize_bug();
     return 0;
 }

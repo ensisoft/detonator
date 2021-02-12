@@ -1175,7 +1175,12 @@ private:
 
             for (size_t i=0; i<num_textures; ++i)
             {
+                // it's possible that this is nullptr when the shader compiler
+                // has removed the un-used texture sampler reference. In other
+                // words the glGetUniformLocation returns -1.
                 const TextureImpl* texture = mTextures[i].texture;
+                if (texture == nullptr)
+                    continue;
 
                 // see if there's already a unit that has this texture bound.
                 // if so, we use the same unit.
@@ -1291,6 +1296,12 @@ private:
             mFrameNumber = frame_number;
             for (auto& it : mTextures)
             {
+                // shader compiler optimized texture that isn't used.
+                // our logical "how many textures this shader expects"
+                // vector might then have holes in it for textures for
+                // which the glUniformLocation returns -1
+                if (!it.texture)
+                    continue;
                 it.texture->SetLastUseFrameNumber(frame_number);
             }
         }
