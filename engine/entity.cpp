@@ -577,11 +577,11 @@ void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeCl
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
-glm::vec2 EntityClass::MapCoordsFromNode(float x, float y, const EntityNodeClass* node) const
+glm::vec2 EntityClass::MapCoordsFromNodeModel(float x, float y, const EntityNodeClass* node) const
 {
     return game::MapCoordsFromNode(mRenderTree, x, y, node);
 }
-glm::vec2 EntityClass::MapCoordsToNode(float x, float y, const EntityNodeClass* node) const
+glm::vec2 EntityClass::MapCoordsToNodeModel(float x, float y, const EntityNodeClass* node) const
 {
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
@@ -978,12 +978,12 @@ void Entity::CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hit
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
-glm::vec2 Entity::MapCoordsFromNode(float x, float y, const EntityNode* node) const
+glm::vec2 Entity::MapCoordsFromNodeModel(float x, float y, const EntityNode* node) const
 {
     return game::MapCoordsFromNode(mRenderTree, x, y, node);
 }
 
-glm::vec2 Entity::MapCoordsToNode(float x, float y, const EntityNode* node) const
+glm::vec2 Entity::MapCoordsToNodeModel(float x, float y, const EntityNode* node) const
 {
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }

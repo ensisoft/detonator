@@ -286,10 +286,10 @@ namespace game
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
         // Map coordinates in some node's (see SceneNode::GetNodeTransform) space
-        // into entity coordinate space.
-        glm::vec2 MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const;
-        // Map coordinates in scene's coordinate space into some node's coordinate space.
-        glm::vec2 MapCoordsToNode(float x, float y, const SceneNodeClass* node) const;
+        // into scene coordinate space.
+        glm::vec2 MapCoordsFromNodeModel(float x, float y, const SceneNodeClass* node) const;
+        // Map coordinates in scene's coordinate space into some node's model coordinate space.
+        glm::vec2 MapCoordsToNodeModel(float x, float y, const SceneNodeClass* node) const;
 
         glm::mat4 GetNodeTransform(const SceneNodeClass* node) const;
 

@@ -409,12 +409,12 @@ void unit_test_entity_class()
     // coordinate mapping
     {
         const auto* node = entity.FindNodeByName("child_1");
-        auto vec = entity.MapCoordsFromNode(1.0f, 1.0f, node);
+        auto vec = entity.MapCoordsFromNodeModel(1.0f , 1.0f , node);
         TEST_REQUIRE(math::equals(20.0f, vec.x));
         TEST_REQUIRE(math::equals(20.0f, vec.y));
 
         // inverse operation to MapCoordsFromNode
-        vec = entity.MapCoordsToNode(20.0f, 20.0f, node);
+        vec = entity.MapCoordsToNodeModel(20.0f , 20.0f , node);
         TEST_REQUIRE(math::equals(1.0f, vec.x));
         TEST_REQUIRE(math::equals(1.0f, vec.y));
     }
@@ -530,11 +530,177 @@ void unit_test_entity_clone_track_bug()
     }
 }
 
+void unit_test_entity_class_coords()
+{
+    game::EntityClass entity;
+    entity.SetName("test");
+
+    {
+        game::EntityNodeClass node;
+        node.SetName("node0");
+        node.SetSize(glm::vec2(10.0f, 10.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(0.0f);
+        entity.LinkChild(nullptr,entity.AddNode(std::move(node)));
+    }
+    {
+        game::EntityNodeClass node;
+        node.SetName("node1");
+        node.SetTranslation(glm::vec2(100.0f, 100.0f));
+        node.SetSize(glm::vec2(50.0f, 10.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(math::Pi*0.5);
+        entity.LinkChild(entity.FindNodeByName("node0"), entity.AddNode(std::move(node)));
+    }
+
+    // the hit coordinate is in the *model* space with the
+    // top left corner of the model itself being at 0,0
+    // and then extending to the width and height of the node's
+    // width and height.
+    // so anything that falls outside the range of x >= 0 && x <= width
+    // and y >= 0 && y <= height is not within the model itself.
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(0.0f, 0.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(5.0f, hitpos[0].x));
+        TEST_REQUIRE(math::equals(5.0f, hitpos[0].y));
+    }
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(-5.0f, -5.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(0.0f, hitpos[0].x));
+        TEST_REQUIRE(math::equals(0.0f, hitpos[0].y));
+    }
+    {
+        // expected: outside the box.
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(-6.0f, -5.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 0);
+    }
+    {
+        // expected: outside the box
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(-5.0f, -6.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 0);
+    }
+    {
+        // expected: outside the box
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(6.0f, 0.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 0);
+    }
+    {
+        // expected: outside the box
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(0.0f, 6.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 0);
+    }
+
+    // node1's transform is relative to node0
+    // since they're linked together, remember it's rotated by 90deg
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(100.0f, 100.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(25.0f, hitpos[0].x));
+        TEST_REQUIRE(math::equals(5.0f, hitpos[0].y));
+    }
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(100.0f, 75.0f, &hits, &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(0.0f, hitpos[0].x));
+        TEST_REQUIRE(math::equals(5.0f, hitpos[0].y));
+    }
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(105.0f , 75.0f , &hits , &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(0.0f , hitpos[0].x));
+        TEST_REQUIRE(math::equals(0.0f , hitpos[0].y));
+    }
+    {
+        std::vector<game::EntityNodeClass*> hits;
+        std::vector<glm::vec2> hitpos;
+        entity.CoarseHitTest(105.0f , 124.0f , &hits , &hitpos);
+        TEST_REQUIRE(hits.size() == 1);
+        TEST_REQUIRE(hitpos.size() == 1);
+        TEST_REQUIRE(math::equals(49.0f , hitpos[0].x));
+        TEST_REQUIRE(math::equals(0.0f , hitpos[0].y));
+    }
+
+    // map coords to/from entity node's model
+    // the coordinates that go in are in the entity coordinate space.
+    // the coordinates that come out are relative to the nodes model
+    // coordinate space. The model itself has width/size extent in this
+    // space thus any results that fall outside x < 0 && x width or
+    // y < 0 && y > height are not within the model's extents.
+    {
+        auto vec = entity.MapCoordsToNodeModel(0.0f, 0.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(5.0f, vec.x));
+        TEST_REQUIRE(math::equals(5.0f, vec.y));
+        vec = entity.MapCoordsFromNodeModel(5.0f, 5.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(0.0f, vec.x));
+        TEST_REQUIRE(math::equals(0.0f, vec.y));
+
+        vec = entity.MapCoordsToNodeModel(-5.0f, -5.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(0.0f, vec.x));
+        TEST_REQUIRE(math::equals(0.0f, vec.y));
+        vec = entity.MapCoordsFromNodeModel(0.0f, 0.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(-5.0f, vec.x));
+        TEST_REQUIRE(math::equals(-5.0f, vec.y));
+
+        vec = entity.MapCoordsToNodeModel(5.0f, 5.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(10.0f, vec.x));
+        TEST_REQUIRE(math::equals(10.0f, vec.y));
+        vec = entity.MapCoordsFromNodeModel(10.0f, 10.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(5.0f, vec.x));
+        TEST_REQUIRE(math::equals(5.0f, vec.y));
+
+        vec = entity.MapCoordsToNodeModel(15.0f, 15.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(20.0f, vec.x));
+        TEST_REQUIRE(math::equals(20.0f, vec.y));
+        vec = entity.MapCoordsFromNodeModel(20.0f, 20.0f, entity.FindNodeByName("node0"));
+        TEST_REQUIRE(math::equals(15.0f, vec.x));
+        TEST_REQUIRE(math::equals(15.0f, vec.y));
+    }
+    {
+        auto vec = entity.MapCoordsToNodeModel(100.0f, 100.0f, entity.FindNodeByName("node1"));
+        TEST_REQUIRE(math::equals(25.0f, vec.x));
+        TEST_REQUIRE(math::equals(5.0f, vec.y));
+        vec = entity.MapCoordsFromNodeModel(25.0f, 5.0f, entity.FindNodeByName("node1"));
+        TEST_REQUIRE(math::equals(100.0f, vec.x));
+        TEST_REQUIRE(math::equals(100.0f, vec.y));
+
+        vec = entity.MapCoordsToNodeModel(105.0f, 75.0f, entity.FindNodeByName("node1"));
+        TEST_REQUIRE(math::equals(0.0f, vec.x));
+        TEST_REQUIRE(math::equals(0.0f, vec.y));
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_entity_node();
     unit_test_entity_class();
     unit_test_entity_instance();
     unit_test_entity_clone_track_bug();
+    unit_test_entity_class_coords();
     return 0;
 }

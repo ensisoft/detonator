@@ -388,7 +388,7 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
     }
 }
 
-glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsFromNodeModel(float x, float y, const SceneNodeClass* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
@@ -402,7 +402,7 @@ glm::vec2 SceneClass::MapCoordsFromNode(float x, float y, const SceneNodeClass* 
     // todo: should we return something else maybe ?
     return glm::vec2(0.0f, 0.0f);
 }
-glm::vec2 SceneClass::MapCoordsToNode(float x, float y, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsToNodeModel(float x, float y, const SceneNodeClass* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)

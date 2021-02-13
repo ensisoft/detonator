@@ -147,7 +147,8 @@ namespace gui
             if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
                 const auto* parent = tree.GetParent(mNode);
-                const auto& mouse_pos_in_node = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent);
+                const auto& mouse_pos_in_node = mModel.MapCoordsToNodeModel(mouse_pos_in_view.x , mouse_pos_in_view.y ,
+                                                                            parent);
                 const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
                 glm::vec2 position = mNode->GetTranslation();
@@ -184,7 +185,7 @@ namespace gui
             if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
                 const auto* parent = tree.GetParent(mNode);
-                mPreviousMousePos = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, parent);
+                mPreviousMousePos = mModel.MapCoordsToNodeModel(mouse_pos_in_view.x , mouse_pos_in_view.y , parent);
             }
             else
             {
@@ -284,7 +285,8 @@ namespace gui
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            const auto& mouse_pos_in_node = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
+            const auto& mouse_pos_in_node = mModel.MapCoordsToNodeModel(mouse_pos_in_view.x , mouse_pos_in_view.y ,
+                                                                        mNode);
             const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
             const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
 
@@ -312,7 +314,7 @@ namespace gui
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            mPreviousMousePos = mModel.MapCoordsToNode(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
+            mPreviousMousePos = mModel.MapCoordsToNodeModel(mouse_pos_in_view.x , mouse_pos_in_view.y , mNode);
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -337,12 +339,13 @@ namespace gui
         {
             if constexpr (std::is_same_v<TreeNode, game::SceneNodeClass>)
             {
-                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNode(0.0f, 0.0f, mNode), 1.0f, 1.0f);
+                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNodeModel(0.0f , 0.0f , mNode), 1.0f, 1.0f);
             }
             else
             {
                 const auto &node_size = mNode->GetSize();
-                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNode(node_size.x * 0.5f, node_size.y * 0.5, mNode),
+                mNodeCenterInView = glm::vec4(
+                        mModel.MapCoordsFromNodeModel(node_size.x * 0.5f , node_size.y * 0.5 , mNode),
                                               1.0f, 1.0f);
             }
         }

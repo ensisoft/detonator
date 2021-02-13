@@ -812,11 +812,11 @@ namespace game
         void CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some node's (see EntityNode::GetNodeTransform) space
+        // Map coordinates in some node's (see EntityNode::GetNodeTransform) model space
         // into entity coordinate space.
-        glm::vec2 MapCoordsFromNode(float x, float y, const EntityNodeClass* node) const;
+        glm::vec2 MapCoordsFromNodeModel(float x, float y, const EntityNodeClass* node) const;
         // Map coordinates in entity coordinate space into some node's coordinate space.
-        glm::vec2 MapCoordsToNode(float x, float y, const EntityNodeClass* node) const;
+        glm::vec2 MapCoordsToNodeModel(float x, float y, const EntityNodeClass* node) const;
 
         // Compute the axis aligned bounding rectangle for the given node
         // at the current time.
@@ -1057,11 +1057,11 @@ namespace game
         void CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some EntityNode's (see EntityNode::GetNodeTransform) space
+        // Map coordinates in some EntityNode's (see EntityNode::GetNodeTransform) model space
         // into entity coordinate space.
-        glm::vec2 MapCoordsFromNode(float x, float y, const EntityNode* node) const;
+        glm::vec2 MapCoordsFromNodeModel(float x, float y, const EntityNode* node) const;
         // Map coordinates in entity coordinate space into some EntityNode's coordinate space.
-        glm::vec2 MapCoordsToNode(float x, float y, const EntityNode* node) const;
+        glm::vec2 MapCoordsToNodeModel(float x, float y, const EntityNode* node) const;
 
         glm::mat4 GetNodeTransform(const EntityNode* node) const;
 

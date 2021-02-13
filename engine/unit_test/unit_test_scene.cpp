@@ -280,12 +280,12 @@ void unit_test_scene_class()
     // test coordinate mapping
     {
         const auto* node = klass.FindNodeByName("child_1");
-        auto vec = klass.MapCoordsFromNode(0.0f, 0.0f, node);
+        auto vec = klass.MapCoordsFromNodeModel(0.0f , 0.0f , node);
         TEST_REQUIRE(math::equals(100.0f, vec.x));
         TEST_REQUIRE(math::equals(100.0f, vec.y));
 
         // inverse operation to MapCoordsFromNode
-        vec = klass.MapCoordsToNode(100.0f, 100.0f, node);
+        vec = klass.MapCoordsToNodeModel(100.0f , 100.0f , node);
         TEST_REQUIRE(math::equals(0.0f, vec.x));
         TEST_REQUIRE(math::equals(0.0f, vec.y));
     }
