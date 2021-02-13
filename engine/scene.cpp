@@ -832,7 +832,8 @@ void Scene::Update(float dt)
         entity->Update(dt);
         if (entity->HasExpired())
         {
-            entity->SetFlag(Entity::ControlFlags::Killed , true);
+            if (entity->TestFlag(Entity::Flags::KillAtLifetime))
+                entity->SetFlag(Entity::ControlFlags::Killed , true);
             continue;
         }
         if (entity->IsPlaying())

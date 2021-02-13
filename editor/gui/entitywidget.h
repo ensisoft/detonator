@@ -101,6 +101,7 @@ namespace gui
         void on_entityName_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
         void on_chkEntityLifetime_stateChanged(int);
+        void on_chkKillAtLifetime_stateChanged(int);
         void on_btnAddIdleTrack_clicked();
         void on_btnResetIdleTrack_clicked();
         void on_btnAddScript_clicked();

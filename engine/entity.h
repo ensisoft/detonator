@@ -697,7 +697,10 @@ namespace game
             VisibleInGame,
             // Limit the lifetime to some maximum amount
             // after which the entity is killed.
-            LimitLifetime
+            LimitLifetime,
+            // Whether to automatically kill entity when it reaches
+            // it's end of lifetime.
+            KillAtLifetime
         };
 
         EntityClass()
@@ -706,6 +709,7 @@ namespace game
             mFlags.set(Flags::VisibleInEditor, true);
             mFlags.set(Flags::VisibleInGame, true);
             mFlags.set(Flags::LimitLifetime, false);
+            mFlags.set(Flags::KillAtLifetime, true);
         }
         EntityClass(const EntityClass& other);
 
