@@ -57,6 +57,12 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
         view.Translate(0.0f, 50.0f);
         painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
     view.Pop();
+
+    view.Push();
+        view.Scale(2.5f, 2.5f);
+        view.Translate(-1.25f, -1.25f);
+        painter.Draw(gfx::RoundRectangle(), view, gfx::SolidColor(gfx::Color::Yellow));
+    view.Pop();
 }
 
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
