@@ -1461,7 +1461,7 @@ void Workspace::SaveResource(const Resource& resource)
             continue;
         res->UpdateFrom(resource);
         emit ResourceUpdated(mResources[i].get());
-        emit dataChanged(index(i, 0), index(i, 2));
+        emit dataChanged(index(i, 0), index(i, 1));
         return;
     }
     // if we're here no such resource exists yet.
