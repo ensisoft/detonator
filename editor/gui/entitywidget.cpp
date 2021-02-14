@@ -1746,8 +1746,8 @@ void EntityWidget::InitScene(unsigned width, unsigned height)
     {
         // if the camera hasn't been loaded then compute now the
         // initial position for the camera.
-        mState.camera_offset_x = width * 0.5;
-        mState.camera_offset_y = height * 0.5;
+        mState.camera_offset_x = mUI.widget->width()  * 0.5;
+        mState.camera_offset_y = mUI.widget->height() * 0.5;
     }
     DisplayCurrentCameraLocation();
 }
