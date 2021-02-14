@@ -174,6 +174,7 @@ namespace gui
     private:
         void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
+        void MouseZoom(std::function<void(void)> zoom_function);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);

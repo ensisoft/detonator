@@ -319,8 +319,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
-    mUI.widget->onZoomIn       = std::bind(&EntityWidget::ZoomIn, this);
-    mUI.widget->onZoomOut      = std::bind(&EntityWidget::ZoomOut, this);
+    mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&EntityWidget::ZoomIn, this)); };
+    mUI.widget->onZoomOut      = [this]() { MouseZoom(std::bind(&EntityWidget::ZoomOut, this)); };
     mUI.widget->onMouseMove    = std::bind(&EntityWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&EntityWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this, std::placeholders::_1);
@@ -1803,6 +1803,46 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     // pop view transformation
     view.Pop();
+}
+
+void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
+{
+    // where's the mouse in the widget
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > mUI.widget->width() ||
+        mickey.y() > mUI.widget->height())
+        return;
+
+    glm::vec4 mickey_pos_in_entity;
+    glm::vec4 mickey_pos_in_widget;
+
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        const auto& mat = glm::inverse(view.GetAsMatrix());
+        mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
+    }
+
+    zoom_function();
+
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        const auto& mat = view.GetAsMatrix();
+        mickey_pos_in_widget = mat * mickey_pos_in_entity;
+    }
+    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
+    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+    DisplayCurrentCameraLocation();
 }
 
 void EntityWidget::MouseMove(QMouseEvent* mickey)
