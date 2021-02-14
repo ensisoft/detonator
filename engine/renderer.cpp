@@ -274,7 +274,7 @@ void Renderer::DrawEntity(const EntityType& entity,
             const auto& drawable = item->GetDrawableId();
             auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
             paint_node.visited = true;
-            if (paint_node.material_class_id != material)
+            if (item->GetRenderPass() == RenderPass::Draw && paint_node.material_class_id != material)
             {
                 paint_node.material.reset();
                 paint_node.material_class_id = material;
@@ -385,7 +385,9 @@ void Renderer::DrawEntity(const EntityType& entity,
 
     for (auto &packet : packets)
     {
-        if (!packet.material || !packet.drawable)
+        if (packet.pass == RenderPass::Draw && !packet.material)
+            continue;
+        else if (!packet.drawable)
             continue;
 
         const auto layer_index = packet.layer;
