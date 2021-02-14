@@ -1838,12 +1838,23 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
         auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
         if (hitnode)
         {
+            view.Push(mState.entity->GetNodeTransform(hitnode));
+                const auto mat = view.GetAsMatrix();
+                glm::vec3 scale;
+                glm::vec3 translation;
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::quat orientation;
+                glm::decompose(mat, scale, orientation, translation, skew,  perspective);
+            view.Pop();
+            
             const auto& size = hitnode->GetSize();
+            const auto& box_size = glm::vec2(10.0f/scale.x, 10.0f/scale.y);
             // check if any particular special area of interest is being hit
-            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                 hitpos.y >= size.y - 10.0f;
-            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                             hitpos.y >= 0 && hitpos.y <= 10.0f;
+            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - box_size.x &&
+                                                 hitpos.y >= size.y - box_size.y;
+            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= box_size.x &&
+                                             hitpos.y >= 0 && hitpos.y <= box_size.y;
             if (bottom_right_hitbox_hit)
                 mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode));
             else if (top_left_hitbox_hit)
