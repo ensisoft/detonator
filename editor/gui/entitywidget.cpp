@@ -1878,7 +1878,7 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
         auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
         if (hitnode)
         {
-            view.Push(mState.entity->GetNodeTransform(hitnode));
+            view.Push(mState.entity->FindNodeTransform(hitnode));
                 const auto mat = view.GetAsMatrix();
                 glm::vec3 scale;
                 glm::vec3 translation;

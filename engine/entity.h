@@ -812,24 +812,28 @@ namespace game
         void CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some node's (see EntityNode::GetNodeTransform) model space
+        // Map coordinates in some node's (see EntityNode::FindNodeModelTransform) model space
         // into entity coordinate space.
         glm::vec2 MapCoordsFromNodeModel(float x, float y, const EntityNodeClass* node) const;
         // Map coordinates in entity coordinate space into some node's coordinate space.
         glm::vec2 MapCoordsToNodeModel(float x, float y, const EntityNodeClass* node) const;
 
-        // Compute the axis aligned bounding rectangle for the given node
-        // at the current time.
-        FRect GetBoundingRect(const EntityNodeClass* node) const;
         // Compute the axis aligned bounding rectangle for the whole entity.
         // i.e. including all the nodes at the current time.
         // This is a shortcut for getting the union of all the bounding rectangles
         // of all the entity nodes.
         FRect GetBoundingRect() const;
 
-        FBox GetBoundingBox(const EntityNodeClass* node) const;
+        // Compute the axis aligned bounding rectangle for the given node
+        // at the current time.
+        FRect FindNodeBoundingRect(const EntityNodeClass* node) const;
 
-        glm::mat4 GetNodeTransform(const EntityNodeClass* node) const;
+        // todo:
+        FBox FindNodeBoundingBox(const EntityNodeClass* node) const;
+
+        // todo:
+        glm::mat4 FindNodeTransform(const EntityNodeClass* node) const;
+        glm::mat4 FindNodeModelTransform(const EntityNodeClass* node) const;
 
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
@@ -1057,24 +1061,28 @@ namespace game
         void CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some EntityNode's (see EntityNode::GetNodeTransform) model space
+        // Map coordinates in some EntityNode's (see EntityNode::FindNodeModelTransform) model space
         // into entity coordinate space.
         glm::vec2 MapCoordsFromNodeModel(float x, float y, const EntityNode* node) const;
         // Map coordinates in entity coordinate space into some EntityNode's coordinate space.
         glm::vec2 MapCoordsToNodeModel(float x, float y, const EntityNode* node) const;
 
-        glm::mat4 GetNodeTransform(const EntityNode* node) const;
-
-        // Compute the axis aligned bounding rectangle for the give entity node
-        // at the current time of the entity.
-        gfx::FRect GetBoundingRect(const EntityNode* node) const;
         // Compute the axis aligned bounding rectangle for the whole entity
         // i.e. including all the nodes at the current time of entity.
         // This is a shortcut for getting the union of all the bounding rectangles
         // of all the entity nodes.
-        gfx::FRect GetBoundingRect() const;
+        FRect GetBoundingRect() const;
 
-        FBox GetBoundingBox(const EntityNode* node) const;
+        // Compute the axis aligned bounding rectangle for the give entity node
+        // at the current time of the entity.
+        FRect FindNodeBoundingRect(const EntityNode* node) const;
+
+        // todo:
+        FBox FindNodeBoundingBox(const EntityNode* node) const;
+
+        // todo:
+        glm::mat4 FindNodeTransform(const EntityNode* node) const;
+        glm::mat4 FindNodeModelTransform(const EntityNode* node) const;
 
         void Update(float dt);
 

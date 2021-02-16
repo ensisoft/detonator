@@ -285,13 +285,13 @@ namespace game
         void CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some node's (see SceneNode::GetNodeTransform) space
+        // Map coordinates in some node's (see SceneNode::FindNodeTransform) space
         // into scene coordinate space.
         glm::vec2 MapCoordsFromNodeModel(float x, float y, const SceneNodeClass* node) const;
         // Map coordinates in scene's coordinate space into some node's model coordinate space.
         glm::vec2 MapCoordsToNodeModel(float x, float y, const SceneNodeClass* node) const;
 
-        glm::mat4 GetNodeTransform(const SceneNodeClass* node) const;
+        glm::mat4 FindNodeTransform(const SceneNodeClass* node) const;
 
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name

@@ -585,7 +585,7 @@ glm::vec2 EntityClass::MapCoordsToNodeModel(float x, float y, const EntityNodeCl
 {
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
-FRect EntityClass::GetBoundingRect(const EntityNodeClass* node) const
+FRect EntityClass::FindNodeBoundingRect(const EntityNodeClass* node) const
 {
     return game::GetBoundingRect(mRenderTree, node);
 }
@@ -594,14 +594,19 @@ FRect EntityClass::GetBoundingRect() const
     return game::GetBoundingRect(mRenderTree);
 }
 
-FBox EntityClass::GetBoundingBox(const EntityNodeClass* node) const
+FBox EntityClass::FindNodeBoundingBox(const EntityNodeClass* node) const
 {
     return game::GetBoundingBox(mRenderTree, node);
 }
 
-glm::mat4 EntityClass::GetNodeTransform(const EntityNodeClass* node) const
+glm::mat4 EntityClass::FindNodeTransform(const EntityNodeClass* node) const
 {
     return game::FindNodeTransform(mRenderTree, node);
+}
+
+glm::mat4 EntityClass::FindNodeModelTransform(const EntityNodeClass* node) const
+{
+    return game::FindNodeModelTransform(mRenderTree, node);
 }
 
 void EntityClass::AddScriptVar(const ScriptVar& var)
@@ -988,12 +993,16 @@ glm::vec2 Entity::MapCoordsToNodeModel(float x, float y, const EntityNode* node)
     return game::MapCoordsToNode(mRenderTree, x, y, node);
 }
 
-glm::mat4 Entity::GetNodeTransform(const EntityNode* node) const
+glm::mat4 Entity::FindNodeTransform(const EntityNode* node) const
 {
     return game::FindNodeTransform(mRenderTree, node);
 }
+glm::mat4 Entity::FindNodeModelTransform(const EntityNode* node) const
+{
+    return game::FindNodeModelTransform(mRenderTree, node);
+}
 
-FRect Entity::GetBoundingRect(const EntityNode* node) const
+FRect Entity::FindNodeBoundingRect(const EntityNode* node) const
 {
     return game::GetBoundingRect(mRenderTree, node);
 }
@@ -1003,7 +1012,7 @@ FRect Entity::GetBoundingRect() const
     return game::GetBoundingRect(mRenderTree);
 }
 
-FBox Entity::GetBoundingBox(const EntityNode* node) const
+FBox Entity::FindNodeBoundingBox(const EntityNode* node) const
 {
     return game::GetBoundingBox(mRenderTree, node);
 }

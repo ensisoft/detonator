@@ -390,7 +390,7 @@ void unit_test_entity_class()
     // node bounding box
     {
         const auto* node = entity.FindNodeByName("root");
-        const auto& box = entity.GetBoundingRect(node);
+        const auto& box = entity.FindNodeBoundingRect(node);
         TEST_REQUIRE(math::equals(5.0f, box.GetX()));
         TEST_REQUIRE(math::equals(5.0f, box.GetY()));
         TEST_REQUIRE(math::equals(10.0f, box.GetWidth()));
@@ -399,7 +399,7 @@ void unit_test_entity_class()
     // node bounding box
     {
         const auto* node = entity.FindNodeByName("child_1");
-        const auto box = entity.GetBoundingRect(node);
+        const auto box = entity.FindNodeBoundingRect(node);
         TEST_REQUIRE(math::equals(19.0f, box.GetX()));
         TEST_REQUIRE(math::equals(19.0f, box.GetY()));
         TEST_REQUIRE(math::equals(2.0f, box.GetWidth()));

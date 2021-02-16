@@ -228,7 +228,7 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
             {
                 const auto& klass = parent->GetEntityClass();
                 const auto* parent_node = klass->FindNodeById(node->GetParentRenderTreeNodeId());
-                parent_node_transform   = klass->GetNodeTransform(parent_node);
+                parent_node_transform   = klass->FindNodeTransform(parent_node);
             }
 
             mParents.push(node);
@@ -295,7 +295,7 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
             {
                 const auto& klass = parent->GetEntityClass();
                 const auto* parent_node = klass->FindNodeById(node->GetParentRenderTreeNodeId());
-                parent_node_transform   = klass->GetNodeTransform(parent_node);
+                parent_node_transform   = klass->FindNodeTransform(parent_node);
             }
             mParents.push(node);
             mTransform.Push(parent_node_transform);
@@ -417,7 +417,7 @@ glm::vec2 SceneClass::MapCoordsToNodeModel(float x, float y, const SceneNodeClas
     return glm::vec2(0.0f, 0.0f);
 }
 
-glm::mat4 SceneClass::GetNodeTransform(const SceneNodeClass* node) const
+glm::mat4 SceneClass::FindNodeTransform(const SceneNodeClass* node) const
 {
     return game::FindNodeTransform(mRenderTree, node);
 }
@@ -738,7 +738,7 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
             if (const auto* parent = GetParent())
             {
                 const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
-                parent_node_transform   = parent->GetNodeTransform(parent_node);
+                parent_node_transform   = parent->FindNodeTransform(parent_node);
             }
             mParents.push(node);
             mTransform.Push(parent_node_transform);
@@ -789,7 +789,7 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
             if (const auto* parent = GetParent())
             {
                 const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
-                parent_node_transform   = parent->GetNodeTransform(parent_node);
+                parent_node_transform   = parent->FindNodeTransform(parent_node);
             }
             mParents.push(node);
             mTransform.Push(parent_node_transform);
@@ -843,7 +843,7 @@ glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
             if (const auto* parent = GetParent())
             {
                 const auto* parent_node = parent->FindNodeByClassId(entity->GetParentNodeClassId());
-                parent_node_transform   = parent->GetNodeTransform(parent_node);
+                parent_node_transform   = parent->FindNodeTransform(parent_node);
             }
             mParents.push(entity);
             mTransform.Push(parent_node_transform);
@@ -887,7 +887,7 @@ glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
 glm::mat4 Scene::FindEntityNodeTransform(const Entity* entity, const EntityNode* node) const
 {
     Transform transform(FindEntityTransform(entity));
-    transform.Push(entity->GetNodeTransform(node));
+    transform.Push(entity->FindNodeTransform(node));
     return transform.GetAsMatrix();
 }
 
@@ -898,7 +898,7 @@ FRect Scene::FindEntityBoundingRect(const Entity* entity) const
     for (size_t i=0; i<entity->GetNumNodes(); ++i)
     {
         const auto& node = entity->GetNode(i);
-        transform.Push(entity->GetNodeTransform(&node));
+        transform.Push(entity->FindNodeTransform(&node));
         transform.Push(node->GetModelTransform());
         ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
         transform.Pop();

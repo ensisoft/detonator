@@ -241,7 +241,7 @@ public:
             const auto& node = mEntity->GetNode(i);
             if (mDrawBoundingBoxes)
             {
-                auto box = mEntity->GetBoundingBox(&node);
+                auto box = mEntity->FindNodeBoundingBox(&node);
                 box.Transform(transform.GetAsMatrix());
                 gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
                 gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
@@ -250,7 +250,7 @@ public:
             }
             if (mDrawBoundingRects)
             {
-                auto rect = mEntity->GetBoundingRect(&node);
+                auto rect = mEntity->FindNodeBoundingRect(&node);
                 rect.Translate(400, 400);
                 gfx::DrawRectOutline(painter, rect, gfx::SolidColor(gfx::Color::Yellow), 1.0f);
             }

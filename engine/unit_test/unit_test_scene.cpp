@@ -512,7 +512,7 @@ void unit_test_scene_instance_transform()
         auto* node  = entity->FindNodeByInstanceName("parent");
         box.Reset();
         box.Transform(node->GetModelTransform());
-        box.Transform(entity->GetNodeTransform(node));
+        box.Transform(entity->FindNodeTransform(node));
         TEST_REQUIRE(box.GetWidth() == real::float32(10.0f));
         TEST_REQUIRE(box.GetHeight() == real::float32(10.0f));
         TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-15.0f, -15.0f));
@@ -521,7 +521,7 @@ void unit_test_scene_instance_transform()
         node = entity->FindNodeByInstanceName("child0");
         box.Reset();
         box.Transform(node->GetModelTransform());
-        box.Transform(entity->GetNodeTransform(node));
+        box.Transform(entity->FindNodeTransform(node));
         TEST_REQUIRE(box.GetWidth() == real::float32(16.0f));
         TEST_REQUIRE(box.GetHeight() == real::float32(6.0f));
         TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0, -10.0f) +
@@ -547,7 +547,7 @@ void unit_test_scene_instance_transform()
         auto* node = entity->FindNodeByInstanceName("node");
         box.Reset();
         box.Transform(node->GetModelTransform());
-        box.Transform(entity->GetNodeTransform(node));
+        box.Transform(entity->FindNodeTransform(node));
         box.Transform(mat);
         TEST_REQUIRE(box.GetWidth() == real::float32(5.0f));
         TEST_REQUIRE(box.GetHeight() == real::float32(5.0f));

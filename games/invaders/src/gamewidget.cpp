@@ -752,7 +752,7 @@ public:
         renderer.Draw(*mSprite, painter, t);
 
         const auto* box = mSprite->FindNodeByClassName("Box");
-        auto text = mSprite->GetBoundingRect(box);
+        auto text = mSprite->FindNodeBoundingRect(box);
         text.Translate(position);
         gfx::DrawTextRect(painter, base::ToUtf8(mText),
                           "fonts/SourceHanSerifTC-SemiBold.otf", 36, text, gfx::Color::Gray);
@@ -912,7 +912,7 @@ public:
 
         const auto pos = FPoint(mPosition.x * width + xpos,
                                 mPosition.y * height + ypos);
-        auto bounds = mSprite->GetBoundingRect(mSprite->FindNodeByClassName("UFO"));
+        auto bounds = mSprite->FindNodeBoundingRect(mSprite->FindNodeByClassName("UFO"));
         bounds.Translate(pos);
         return bounds;
     }
@@ -2195,7 +2195,7 @@ void GameWidget::Draw()
     // paint the background
     {
         const auto* node = (*mBackground)->FindNodeByName("Background");
-        const auto& rect = (*mBackground)->GetBoundingRect(node);
+        const auto& rect = (*mBackground)->FindNodeBoundingRect(node);
         gfx::Transform view;
         view.Scale(w / rect.GetWidth(), h / rect.GetHeight());
         mRenderer.Draw(*mBackground, *mPainter, view);
