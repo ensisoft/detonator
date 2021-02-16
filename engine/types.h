@@ -186,6 +186,13 @@ namespace game
         }
         glm::vec2 GetSize() const
         { return glm::vec2(GetWidth(), GetHeight()); }
+        void Reset(float w = 1.0f, float h = 1.0f)
+        {
+            mTopLeft  = glm::vec2(0.0f, 0.0f);
+            mTopRight = glm::vec2(w, 0.0f);
+            mBotLeft  = glm::vec2(0.0f, h);
+            mBotRight = glm::vec2(w, h);
+        }
     private:
         static glm::vec4 ToVec4(const glm::vec2& vec)
         { return glm::vec4(vec.x, vec.y, 1.0f, 1.0f); }

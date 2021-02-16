@@ -823,6 +823,98 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
     return ret;
 }
 
+glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
+{
+    // search the render tree until we find the entity.
+    class Visitor : public RenderTree::ConstVisitor {
+    public:
+        Visitor(const Entity* entity) : mEntity(entity), mMatrix(1.0f)
+        {}
+        virtual void EnterNode(const Entity* entity) override
+        {
+            if (!entity)
+                return;
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent = GetParent())
+            {
+                const auto* parent_node = parent->FindNodeByClassId(entity->GetParentNodeClassId());
+                parent_node_transform   = parent->GetNodeTransform(parent_node);
+            }
+            mParents.push(entity);
+            mTransform.Push(parent_node_transform);
+            if (entity == mEntity)
+            {
+                mMatrix = mTransform.GetAsMatrix();
+                mDone = true;
+            }
+        }
+        virtual void LeaveNode(const Entity* entity) override
+        {
+            if (!entity)
+                return;
+            mTransform.Pop();
+            mParents.pop();
+        }
+        virtual bool IsDone() const override
+        { return mDone; }
+
+        glm::mat4 GetMatrix() const
+        { return mMatrix; }
+    private:
+        const Entity* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        const Entity* mEntity = nullptr;
+        std::stack<const Entity*> mParents;
+        glm::mat4 mMatrix;
+        Transform mTransform;
+        bool mDone = false;
+    };
+    Visitor visitor(entity);
+    mRenderTree.PreOrderTraverse(visitor);
+    return visitor.GetMatrix();
+}
+
+glm::mat4 Scene::FindEntityNodeTransform(const Entity* entity, const EntityNode* node) const
+{
+    Transform transform(FindEntityTransform(entity));
+    transform.Push(entity->GetNodeTransform(node));
+    return transform.GetAsMatrix();
+}
+
+FRect Scene::FindEntityBoundingRect(const Entity* entity) const
+{
+    FRect ret;
+    Transform transform(FindEntityTransform(entity));
+    for (size_t i=0; i<entity->GetNumNodes(); ++i)
+    {
+        const auto& node = entity->GetNode(i);
+        transform.Push(entity->GetNodeTransform(&node));
+        transform.Push(node->GetModelTransform());
+        ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
+        transform.Pop();
+        transform.Pop();
+    }
+    return ret;
+}
+FRect Scene::FindEntityNodeBoundingRect(const Entity* entity, const EntityNode* node) const
+{
+    Transform transform(FindEntityNodeTransform(entity, node));
+    transform.Push(node->GetModelTransform());
+    return ComputeBoundingRect(transform.GetAsMatrix());
+}
+
+FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* node) const
+{
+    Transform transform(FindEntityNodeTransform(entity, node));
+    transform.Push(node->GetModelTransform());
+    return FBox(transform.GetAsMatrix());
+}
+
 const ScriptVar* Scene::FindScriptVar(const std::string& name) const
 {
     // first check the mutable variables per this instance then check the class.

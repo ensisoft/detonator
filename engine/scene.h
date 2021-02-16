@@ -470,6 +470,32 @@ namespace game
         // Collect the entities in the scene into a flat list.
         std::vector<SceneNode> CollectNodes();
 
+        // Find the transformation for transforming nodes
+        // from this entity's space into scene's coordinate space.
+        // If the entity is not part of this scene the result is undefined.
+        glm::mat4 FindEntityTransform(const Entity* entity) const;
+        // Find the complete transformation for transforming the given entity node's model
+        // into the scene's coordinate space.
+        // If the entity is not part of this scene or if the node is not part
+        // of the entity the result is undefined.
+        glm::mat4 FindEntityNodeTransform(const Entity* entity, const EntityNode* node) const;
+        // Find the bounding (axis aligned) rectangle that encloses
+        // all the entity nodes' models. The returned rectangle is in
+        // the scene coordinate space.
+        // If the entity is not part of this scene the result is undefined.
+        FRect FindEntityBoundingRect(const Entity* entity) const;
+        // Find the bounding (axis aligned) rectangle that encloses the
+        // given entity node's model. The returned rectangle is in the scene
+        // coordinate space. If the entity is not part of this scene or
+        // if the node is not part of the entity the result is undefined.
+        FRect FindEntityNodeBoundingRect(const Entity* entity, const EntityNode* node) const;
+        // Find the bounding box (object oriented) rectangle that encloses the
+        // given entity node's model. The returned box is in the scene coordinate space
+        // and has the dimensions and orientation corresponding to the node's
+        // model transformation. If the entity is not part of this scene or
+        // the node is not part of the entity the result is undefined.
+        FBox FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* node) const;
+
         void Update(float dt);
 
         // Get the scene's render tree (scene graph). The render tree defines

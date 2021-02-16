@@ -400,10 +400,172 @@ void unit_test_scene_instance()
     }
 }
 
+void unit_test_scene_instance_transform()
+{
+    auto entity0 = std::make_shared<game::EntityClass>();
+    {
+        game::EntityNodeClass parent;
+        parent.SetName("parent");
+        parent.SetSize(glm::vec2(10.0f, 10.0f));
+        parent.SetTranslation(glm::vec2(0.0f, 0.0f));
+        entity0->LinkChild(nullptr,  entity0->AddNode(parent));
+
+        game::EntityNodeClass child0;
+        child0.SetName("child0");
+        child0.SetSize(glm::vec2(16.0f, 6.0f));
+        child0.SetTranslation(glm::vec2(20.0f, 20.0f));
+        entity0->LinkChild(entity0->FindNodeByName("parent"), entity0->AddNode(child0));
+    }
+    auto entity1 = std::make_shared<game::EntityClass>();
+    {
+        game::EntityNodeClass node;
+        node.SetName("node");
+        node.SetSize(glm::vec2(5.0f, 5.0f));
+        node.SetTranslation(glm::vec2(15.0f, 15.0f));
+        entity1->LinkChild(nullptr,  entity1->AddNode(node));
+    }
+
+    game::SceneClass klass;
+    // setup a scene with 2 entities where the second entity
+    // is  linked to one of the nodes in the first entity
+    {
+        game::SceneNodeClass node;
+        node.SetName("entity0");
+        node.SetEntity(entity0);
+        node.SetTranslation(glm::vec2(-10.0f, -10.0f));
+        klass.LinkChild(nullptr, klass.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("entity1");
+        node.SetEntity(entity1);
+        // link this sucker to so that the nodes in entity1 are transformed relative
+        // to child0 node in entity0
+        node.SetParentRenderTreeNodeId(entity0->FindNodeByName("child0")->GetId());
+        node.SetTranslation(glm::vec2(50.0f, 50.0f));
+        klass.LinkChild(klass.FindNodeByName("entity0"), klass.AddNode(node));
+    }
+
+    auto scene = game::CreateSceneInstance(klass);
+
+    // check entity nodes.
+    // when the scene instance is created the scene nodes
+    // are used to give the initial placement of entity nodes in the scene.
+    {
+        auto* entity0 = scene->FindEntityByInstanceName("entity0");
+        auto box = scene->FindEntityNodeBoundingBox(entity0, entity0->FindNodeByInstanceName("parent"));
+        TEST_REQUIRE(box.GetSize() == glm::vec2(10.0f, 10.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0f, -10.0f) // placement
+                                       + glm::vec2(0.0f, 0.0f) // node's offset relative to entity root
+                                       + glm::vec2(-5.0f, -5.0f)); // half the size for model offset
+
+        auto rect = scene->FindEntityNodeBoundingRect(entity0, entity0->FindNodeByInstanceName("parent"));
+        TEST_REQUIRE(rect.GetWidth() == real::float32(10.0f));
+        TEST_REQUIRE(rect.GetWidth() == real::float32(10.0f));
+        TEST_REQUIRE(rect.GetX() == real::float32(-10.0f + 0.0f -5.0f));
+        TEST_REQUIRE(rect.GetY() == real::float32(-10.0f + 0.0f -5.0f));
+
+        box = scene->FindEntityNodeBoundingBox(entity0, entity0->FindNodeByInstanceName("child0"));
+        TEST_REQUIRE(box.GetSize() == glm::vec2(16.0f, 6.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0f, -10.0f) // entity placement
+                                       + glm::vec2(0.0f, 0.0f) // parent offset relative to the entity root
+                                       + glm::vec2(20.0f, 20.0f) // node's offset relative to parent
+                                       + glm::vec2(-8.0f, -3.0f)); // half the size for model offset
+        rect = scene->FindEntityNodeBoundingRect(entity0, entity0->FindNodeByInstanceName("child0"));
+        TEST_REQUIRE(rect.GetWidth() == real::float32(16.0f));
+        TEST_REQUIRE(rect.GetHeight() == real::float32(6.0f));
+        TEST_REQUIRE(rect.GetX() == real::float32(-10.0f + 0.0f + 20.0f -8.0f));
+        TEST_REQUIRE(rect.GetY() == real::float32(-10.0f + 0.0f + 20.0f -3.0f));
+
+        // combined bounding rect for both nodes in entity0
+        rect = scene->FindEntityBoundingRect(entity0);
+        TEST_REQUIRE(rect.GetWidth() == real::float32(15.0 + 18.0f));
+        TEST_REQUIRE(rect.GetHeight() == real::float32(15.0 + 13.0f));
+        TEST_REQUIRE(rect.GetX() == real::float32(-15.0));
+        TEST_REQUIRE(rect.GetY() == real::float32(-15.0));
+
+        auto* entity1 = scene->FindEntityByInstanceName("entity1");
+        box = scene->FindEntityNodeBoundingBox(entity1, entity1->FindNodeByInstanceName("node"));
+        TEST_REQUIRE(box.GetSize() == glm::vec2(5.0f, 5.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0f, -10.0f) // parent entity placement
+                                            + glm::vec2(0.0f, 0.0f)     // parent entity parent node offset relative to entity root
+                                            + glm::vec2(20.0f, 20.0f)   // child node offset relative to its entity parent node
+                                            + glm::vec2(50.0f, 50.0f)  // this entity placement
+                                            + glm::vec2(15.0f, 15.0f) // node placement relative to entity root
+                                            + glm::vec2(-2.5, -2.5f)); // half the size for model offset
+        // todo: bounding rects for entity1
+    }
+
+
+    {
+        // entity0 is linked to the root of the scene graph, therefore the scene graph transform
+        // for the nodes in entity0 is identity.
+        auto* entity = scene->FindEntityByInstanceName("entity0");
+        auto mat = scene->FindEntityTransform(entity);
+        game::FBox box(mat);
+        TEST_REQUIRE(box.GetWidth() == real::float32(1.0f));
+        TEST_REQUIRE(box.GetHeight() == real::float32(1.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(0.0f , 0.0f));
+        // when the scene instance is created the scene class nodes are used to give the
+        // initial placement of entities and the scene class nodes' transforms are
+        // baked into the transforms of the top level entity nodes.
+        auto* node  = entity->FindNodeByInstanceName("parent");
+        box.Reset();
+        box.Transform(node->GetModelTransform());
+        box.Transform(entity->GetNodeTransform(node));
+        TEST_REQUIRE(box.GetWidth() == real::float32(10.0f));
+        TEST_REQUIRE(box.GetHeight() == real::float32(10.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-15.0f, -15.0f));
+
+        // 'child0' node's transform is relative to 'parent' node.
+        node = entity->FindNodeByInstanceName("child0");
+        box.Reset();
+        box.Transform(node->GetModelTransform());
+        box.Transform(entity->GetNodeTransform(node));
+        TEST_REQUIRE(box.GetWidth() == real::float32(16.0f));
+        TEST_REQUIRE(box.GetHeight() == real::float32(6.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0, -10.0f) +
+                                              glm::vec2(20.0f, 20.0f)  -
+                                              glm::vec2(8.0, 3.0));
+    }
+
+    {
+        // entity1 is linked to entity0 with the link node being child0 in entity0.
+        // that means that the nodes in entity1 have a transform that is relative
+        // child0 node in entity0.
+        auto* entity = scene->FindEntityByInstanceName("entity1");
+        auto mat = scene->FindEntityTransform(entity);
+        game::FBox box(mat);
+        TEST_REQUIRE(box.GetWidth() == real::float32(1.0f));
+        TEST_REQUIRE(box.GetHeight() == real::float32(1.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0f , -10.0f) // initial placement
+                                         + glm::vec2(20.0f, 20.0f));  // link node offset
+
+        // when the scene instance is created the scene class nodes are used to give the
+        // initial placement of entities and the scene class nodes' transforms are
+        // baked into the transforms of the top level entity nodes.
+        auto* node = entity->FindNodeByInstanceName("node");
+        box.Reset();
+        box.Transform(node->GetModelTransform());
+        box.Transform(entity->GetNodeTransform(node));
+        box.Transform(mat);
+        TEST_REQUIRE(box.GetWidth() == real::float32(5.0f));
+        TEST_REQUIRE(box.GetHeight() == real::float32(5.0f));
+        TEST_REQUIRE(box.GetTopLeft() == glm::vec2(-10.0f, -10.0f) // parent entity placement translate
+                                         + glm::vec2(0.0f, 0.0f) // parent entity parent node translate
+                                         + glm::vec2(20.0f, 20.0f) // parent entity child node translate
+                                         + glm::vec2(50.0f, 50.0f) // this entity placement translate
+                                         + glm::vec2(15.0f, 15.0f) // this entity node translate
+                                         + glm::vec2(-2.5f, -2.5f)); // half model size translate offset
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_node();
     unit_test_scene_class();
     unit_test_scene_instance();
+    unit_test_scene_instance_transform();
     return 0;
 }
