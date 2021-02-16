@@ -825,6 +825,11 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
 
 glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
 {
+    // if the parent of this entity is the root node then the
+    // the matrix will be simply identity
+    if (!mRenderTree.HasNode(entity) || !mRenderTree.GetParent(entity))
+        return glm::mat4(1.0f);
+
     // search the render tree until we find the entity.
     class Visitor : public RenderTree::ConstVisitor {
     public:

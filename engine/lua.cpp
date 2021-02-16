@@ -40,6 +40,7 @@
 #include "engine/physics.h"
 #include "engine/lua.h"
 #include "wdk/keys.h"
+#include "wdk/system.h"
 
 namespace game
 {
@@ -157,6 +158,7 @@ void LuaGame::Update(double wall_time, double game_time, double dt)
 void LuaGame::BeginPlay(Scene* scene)
 {
     mScene = scene;
+    (*mLuaState)["Scene"] = mScene;
 
     sol::protected_function func = (*mLuaState)["BeginPlay"];
     if (!func.valid())
@@ -346,6 +348,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     mScene    = scene;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClassLib;
+    (*mLuaState)["Scene"]    = mScene;
     (*mLuaState)["Game"]     = this;
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<ScriptEngine>("Engine");
@@ -501,7 +504,22 @@ void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
 }
 void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
 {
-
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            sol::protected_function func = (*env)["OnKeyUp"];
+            if (!func.valid())
+                continue;
+            auto result = func(entity , static_cast<int>(key.symbol) , static_cast<int>(key.modifiers.value()));
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR(err.what());
+            }
+        }
+    }
 }
 void ScriptEngine::OnChar(const wdk::WindowEventChar& text)
 {
@@ -560,42 +578,56 @@ void BindGLM(sol::state& L)
 {
     sol::constructors<glm::vec2(), glm::vec2(float, float)> ctors;
     auto table = L.create_named_table("glm");
-    auto type   = table.new_usertype<glm::vec2>("vec2", ctors,
-sol::meta_function::index, [](const glm::vec2& vec, int index) {
-        if (index > 2)
+    auto vec2   = table.new_usertype<glm::vec2>("vec2", ctors,
+        sol::meta_function::index, [](const glm::vec2& vec, int index) {
+        if (index >= 2)
             throw std::runtime_error("glm.vec2 access out of bounds");
         return vec[index];
             });
-    type["x"]   = &glm::vec2::x;
-    type["y"]   = &glm::vec2::y;
-    type["length"] = [](const glm::vec2& vec) {
-        return glm::length(vec);
-    };
+    vec2["x"]   = &glm::vec2::x;
+    vec2["y"]   = &glm::vec2::y;
+    vec2["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
+    vec2["normalize"] = [](const glm::vec2& vec) { return glm::normalize(vec); };
     // adding meta functions for operators
     // setting the index through set_function seems to be broken! (sol 3.2.3)
     //type.set_function(sol::meta_function::index, [](const glm::vec2& vec, int index) {
     //    return vec[index];
     //});
-    type.set_function(sol::meta_function::addition, [](const glm::vec2& a, const glm::vec2& b) {
+    vec2.set_function(sol::meta_function::addition, [](const glm::vec2& a, const glm::vec2& b) {
         return a + b;
     });
-    type.set_function(sol::meta_function::subtraction, [](const glm::vec2& a, const glm::vec2& b) {
+    vec2.set_function(sol::meta_function::subtraction, [](const glm::vec2& a, const glm::vec2& b) {
         return a - b;
     });
-    type.set_function(sol::meta_function::multiplication, [](const glm::vec2& vector, float scalar) {
+    vec2.set_function(sol::meta_function::multiplication, [](const glm::vec2& vector, float scalar) {
         return vector * scalar;
     });
-    type.set_function(sol::meta_function::multiplication, [](float scalar, const glm::vec2& vector) {
+    vec2.set_function(sol::meta_function::multiplication, [](float scalar, const glm::vec2& vector) {
         return vector * scalar;
     });
-    type.set_function(sol::meta_function::division, [](const glm::vec2& vector, float scalar) {
+    vec2.set_function(sol::meta_function::division, [](const glm::vec2& vector, float scalar) {
         return vector / scalar;
     });
-    type.set_function(sol::meta_function::to_string, [](const glm::vec2& vector) {
+    vec2.set_function(sol::meta_function::to_string, [](const glm::vec2& vector) {
         return std::to_string(vector.x) + "," + std::to_string(vector.y);
     });
+    table["dot"]       = [](const glm::vec2 &a, const glm::vec2 &b) { return glm::dot(a, b); };
+    table["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
+    table["normalize"] = [](const glm::vec2& vec) { return glm::normalize(vec); };
 
-    table["dot"] = [](const glm::vec2 &a, const glm::vec2 &b) { return glm::dot(a, b); };
+    auto mat4 = table.new_usertype<glm::mat4>("mat4");
+    mat4["GetRotation"] = [](const glm::mat4& mat) {
+        game::FBox box(mat);
+        return box.GetRotation();
+    };
+    mat4["GetScale"] = [](const glm::mat4& mat) {
+        game::FBox box(mat);
+        return box.GetSize();
+    };
+    mat4["GetTranslation"] = [](const glm::mat4& mat) {
+        game::FBox box(mat);
+        return box.GetPosition();
+    };
 }
 
 void BindGFX(sol::state& L)
@@ -632,7 +664,12 @@ void BindWDK(sol::state& L)
             ret.pop_back();
         return ret;
     };
-
+    table["TestKeyDown"] = [](int value) {
+        const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
+        if (!key.has_value())
+            return false;
+        return wdk::TestKeyDown(key.value());
+    };
 
     // build table for key names.
     for (const auto& key : magic_enum::enum_values<wdk::Keysym>())
@@ -798,6 +835,11 @@ void BindGameLib(sol::state& L)
     entity["GetClassName"]         = &Entity::GetClassName;
     entity["GetClassId"]           = &Entity::GetClassId;
     entity["GetNumNodes"]          = &Entity::GetNumNodes;
+    entity["GetTime"]              = &Entity::GetTime;
+    entity["GetLayer"]             = &Entity::GetLayer;
+    entity["SetLayer"]             = &Entity::SetLayer;
+    entity["IsPlaying"]            = &Entity::IsPlaying;
+    entity["HasExpired"]           = &Entity::HasExpired;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
@@ -805,6 +847,19 @@ void BindGameLib(sol::state& L)
     entity["PlayIdle"]             = &Entity::PlayIdle;
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
+    entity["TestFlag"]             = [](const Entity* entity, const std::string& str) {
+        const auto enum_val = magic_enum::enum_cast<Entity::Flags>(str);
+        if (!enum_val.has_value())
+            throw std::runtime_error("no such drawable item flag:" + str);
+        return entity->TestFlag(enum_val.value());
+    };
+
+    auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());
+    entity_args["class"]    = sol::property(&EntityArgs::klass);
+    entity_args["name"]     = sol::property(&EntityArgs::name);
+    entity_args["scale"]    = sol::property(&EntityArgs::scale);
+    entity_args["position"] = sol::property(&EntityArgs::position);
+    entity_args["rotation"] = sol::property(&EntityArgs::rotation);
 
     // todo: cleanup the copy pasta regarding script vars index/newindex
     auto scene = table.new_usertype<Scene>("Scene",
@@ -846,10 +901,15 @@ void BindGameLib(sol::state& L)
                     var->SetValue(value.as<glm::vec2>());
                 else WARN("Script value type mismatch. '%1' expects: '%2'", key, var->GetType());
             });
+    scene["GetNumEntities"]           = &Scene::GetNumEntities;
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
     scene["GetEntity"]                = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
     scene["KillEntity"]               = &Scene::KillEntity;
+    scene["SpawnEntity"]              = &Scene::SpawnEntity;
+    scene["FindEntityTransform"]      = &Scene::FindEntityTransform;
+    scene["FindEntityNodeTransform"]  = &Scene::FindEntityNodeTransform;
+    scene["GetTime"]                  = &Scene::GetTime;
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;

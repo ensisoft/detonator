@@ -1099,6 +1099,12 @@ bool Entity::HasExpired() const
     return false;
 }
 
+bool Entity::HasBeenKilled() const
+{
+    return TestFlag(ControlFlags::Killed);
+}
+
+
 const ScriptVar* Entity::FindScriptVar(const std::string& name) const
 {
     // first check the mutable variables per this instance then check the class.

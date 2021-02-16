@@ -421,6 +421,7 @@ add_library(GameEngine SHARED
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameEngine PRIVATE BaseLib GfxLib EngineLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
+target_link_libraries(GameEngine PRIVATE wdk_system)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -569,6 +570,7 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         engine/types.cpp
         engine/physics.cpp)
 target_link_libraries(unit_test_lua ${CONAN_LIBS})
+target_link_libraries(unit_test_lua wdk_system)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")

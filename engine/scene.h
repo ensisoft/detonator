@@ -509,6 +509,8 @@ namespace game
         // Get the current number of entities in the scene.
         size_t GetNumEntities() const
         { return mEntities.size(); }
+        double GetTime() const
+        { return mCurrentTime; }
 
         // Get access to the scene class object.
         const SceneClass& GetClass() const

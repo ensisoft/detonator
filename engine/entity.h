@@ -1099,6 +1099,8 @@ namespace game
         bool IsPlaying() const;
         // Returns true if the lifetime has been exceeded.
         bool HasExpired() const;
+        // Returns true if the kill control flag has been set.
+        bool HasBeenKilled() const;
 
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
