@@ -1458,7 +1458,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
             for (size_t i=0; i<klass->GetNumNodes(); ++i) {
                 const auto& tree = klass->GetRenderTree();
                 const auto& link = klass->GetNode(i);
-                if (tree.GetParent(&link) == nullptr)
+                //if (tree.GetParent(&link) == nullptr)
                 {
                     const auto name = app::FromUtf8(link.GetName());
                     const auto id   = app::FromUtf8(link.GetId());
