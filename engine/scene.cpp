@@ -687,6 +687,18 @@ void Scene::KillEntity(Entity* entity)
     entity->SetFlag(Entity::ControlFlags::Killed, true);
 }
 
+Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
+{
+    auto entity = CreateEntityInstance(args);
+    mEntities.push_back(std::move(entity));
+    auto ret = mEntities.back().get();
+    if (link_to_root)
+    {
+        mRenderTree.LinkChild(nullptr, ret);
+    }
+    return ret;
+}
+
 void Scene::PruneEntities()
 {
     // remove the entities that have been killed.

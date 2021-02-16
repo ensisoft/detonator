@@ -353,20 +353,51 @@ void unit_test_scene_instance()
     TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
-
     TEST_REQUIRE(instance.FindScriptVar("foo"));
     TEST_REQUIRE(instance.FindScriptVar("bar"));
     TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
     TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
     instance.FindScriptVar("foo")->SetValue(444);
     TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
-
     instance.DeleteEntity(instance.FindEntityByInstanceName("child_1"));
     TEST_REQUIRE(instance.GetNumEntities() == 2);
     instance.DeleteEntity(instance.FindEntityByInstanceName("root"));
     TEST_REQUIRE(instance.GetNumEntities() == 0);
 
-    // todo: test more of the instance api.
+    // spawn an entity.
+    {
+        game::EntityArgs args;
+        args.name = "foo";
+        args.klass = entity;
+        args.id = "13412sfgf12";
+        instance.SpawnEntity(args , true /*link to root*/);
+        TEST_REQUIRE(instance.GetNumEntities() == 1);
+        TEST_REQUIRE(instance.GetEntity(0).GetName() == "foo");
+        TEST_REQUIRE(instance.GetEntity(0).GetId() == "13412sfgf12");
+        TEST_REQUIRE(WalkTree(instance) == "foo");
+        instance.DeleteEntity(instance.FindEntityByInstanceName("foo"));
+        TEST_REQUIRE(instance.GetNumEntities() == 0);
+    }
+
+    // kill entity at lifetime
+    {
+        entity->SetFlag(game::EntityClass::Flags::LimitLifetime, true);
+        entity->SetFlag(game::EntityClass::Flags::KillAtLifetime, true);
+        entity->SetLifetime(2.5);
+        game::EntityArgs args;
+        args.name = "foo";
+        args.klass = entity;
+        args.id = "13412sfgf12";
+        instance.SpawnEntity(args , true /*link to root*/);
+        instance.Update(1.0);
+        TEST_REQUIRE(instance.GetEntity(0).HasExpired() == false);
+        TEST_REQUIRE(instance.GetEntity(0).HasBeenKilled() == false);
+        instance.Update(1.51);
+        TEST_REQUIRE(instance.GetEntity(0).HasExpired() == true);
+        TEST_REQUIRE(instance.GetEntity(0).HasBeenKilled() == true);
+        instance.PruneEntities();
+        TEST_REQUIRE(instance.GetNumEntities() == 0);
+    }
 }
 
 int test_main(int argc, char* argv[])

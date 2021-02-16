@@ -417,6 +417,13 @@ namespace game
         void DeleteEntity(Entity* entity);
         // Kill entity and mark it for removal later.
         void KillEntity(Entity* entity);
+        // Spawn a new entity in the scene. Returns a pointer to the spawned
+        // entity or nullptr if spawning failed.
+        // if link_to_root is true the new entity is automatically linked to the
+        // root of the scene graph. Otherwise you can use LinkEntity to link
+        // to any other entity or later RelinkEntity to relink to some other
+        // entity in the scene graph.
+        Entity* SpawnEntity(const EntityArgs& args, bool link_to_root = true);
         // Remove and delete the entities that have been killed.
         void PruneEntities();
         // Find a scripting variable.
