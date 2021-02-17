@@ -2,6 +2,7 @@
   "entities": [
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -88,6 +89,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -174,6 +176,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -260,6 +263,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -346,6 +350,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -432,6 +437,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -496,6 +502,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -582,6 +589,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -668,6 +676,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -754,6 +763,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -840,6 +850,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -926,6 +937,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1012,6 +1024,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1098,6 +1111,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1184,6 +1198,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1270,6 +1285,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1356,6 +1372,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1442,6 +1459,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1506,6 +1524,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1592,6 +1611,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1656,6 +1676,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1720,6 +1741,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1784,6 +1806,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -1848,6 +1871,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -2648,6 +2672,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -2961,6 +2986,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -3343,6 +3369,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -3429,6 +3456,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": false,
         "VisibleInGame": false
@@ -3757,6 +3785,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -3821,6 +3850,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -3885,6 +3915,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -4600,6 +4631,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -4664,6 +4696,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -4728,6 +4761,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -4903,6 +4937,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -8860,6 +8895,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8882,6 +8918,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8904,6 +8941,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8926,6 +8964,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8948,6 +8987,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8970,6 +9010,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -8992,6 +9033,7 @@
         {
           "entity": "FNUUxWSBTe",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9014,6 +9056,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9036,6 +9079,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9058,6 +9102,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9080,6 +9125,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9102,6 +9148,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9124,6 +9171,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9146,6 +9194,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9168,6 +9217,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9190,6 +9240,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9212,6 +9263,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9234,6 +9286,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9256,6 +9309,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9278,6 +9332,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9300,6 +9355,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9322,6 +9378,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9344,6 +9401,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9366,6 +9424,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9388,6 +9447,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9410,6 +9470,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9432,6 +9493,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9454,6 +9516,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9476,6 +9539,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9498,6 +9562,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9520,6 +9585,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9542,6 +9608,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9564,6 +9631,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9586,6 +9654,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9608,6 +9677,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9630,6 +9700,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9652,6 +9723,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9674,6 +9746,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9696,6 +9769,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9718,6 +9792,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9740,6 +9815,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9762,6 +9838,7 @@
         {
           "entity": "HpAo2l11sT",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9784,6 +9861,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9806,6 +9884,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9828,6 +9907,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9850,6 +9930,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9872,6 +9953,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9894,6 +9976,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9916,6 +9999,7 @@
         {
           "entity": "WtCkGlPDwf",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9938,6 +10022,7 @@
         {
           "entity": "tqF7brLL08",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9960,6 +10045,7 @@
         {
           "entity": "tqF7brLL08",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -9982,6 +10068,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10004,6 +10091,7 @@
         {
           "entity": "O5QefURbEM",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10026,6 +10114,7 @@
         {
           "entity": "y7bWvFuoie",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10048,6 +10137,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10070,6 +10160,7 @@
         {
           "entity": "Jn0SpbgGSY",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10092,6 +10183,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10114,6 +10206,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10136,6 +10229,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10158,6 +10252,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10180,6 +10275,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10202,6 +10298,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10224,6 +10321,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10246,6 +10344,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10268,6 +10367,7 @@
         {
           "entity": "dfb84OzuRo",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true
@@ -10645,6 +10745,7 @@
         {
           "entity": "gwm3bTflRn",
           "flags": {
+            "KillAtLifetime": false,
             "LimitLifetime": false,
             "VisibleInEditor": true,
             "VisibleInGame": true

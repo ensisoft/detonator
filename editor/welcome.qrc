@@ -2,5 +2,6 @@
 <RCC version="1.0">
     <qresource>
       <file>dist/demos/bandit/screenshot.png</file>
+      <file>dist/demos/blast/screenshot.png</file>
    </qresource>
 </RCC>

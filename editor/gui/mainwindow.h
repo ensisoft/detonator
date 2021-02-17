@@ -147,6 +147,7 @@ namespace gui
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
         void on_btnBandit_clicked();
+        void on_btnBlast_clicked();
         void on_btnMaterial_clicked();
         void on_btnParticle_clicked();
         void on_btnShape_clicked();

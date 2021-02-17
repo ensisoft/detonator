@@ -1,0 +1,2949 @@
+{
+  "entities": [
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "diUlEeS5JH",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Player",
+      "nodes": [
+        {
+          "class": "6IMWYKiN1b",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          }
+        },
+        {
+          "class": "37wPuCDipF",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Weapon",
+          "position": {
+            "x": -1.1999969482421875,
+            "y": -47.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 9.076040267944336,
+            "y": 11.678150177001953
+          }
+        },
+        {
+          "class": "PBF6jATZjy",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HnopPLXPe5",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -24.635902404785156,
+            "y": 12.317947387695313
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 10.003127098083496,
+            "y": 10.003127098083496
+          }
+        },
+        {
+          "class": "Os7YCfrooA",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HnopPLXPe5",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 20.369232177734375,
+            "y": 12.117965698242188
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 10.166576385498047,
+            "y": 10.400559425354004
+          }
+        },
+        {
+          "class": "fKBJvFFCHC",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_trapezoid",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HnopPLXPe5",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 2",
+          "position": {
+            "x": -0.6999969482421875,
+            "y": -42.69999694824219
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 8.511751174926758,
+            "y": 5.122047424316406
+          }
+        },
+        {
+          "class": "zP7K5Htw9Y",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "rrmZfWe97e",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Ship Sprite",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "37wPuCDipF"
+                }
+              },
+              {
+                "children": [
+                  {
+                    "node": {
+                      "id": "fKBJvFFCHC"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "Os7YCfrooA"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "PBF6jATZjy"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "zP7K5Htw9Y"
+                }
+              }
+            ],
+            "node": {
+              "id": "6IMWYKiN1b"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "diUlEeS5JH",
+      "resource_name": "Player",
+      "script_file": "rvZg0UT77h",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 0.9015048146247864,
+                "id": "SOys5Ry1kP",
+                "method": "Cosine",
+                "node": "zP7K5Htw9Y",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 0.6000000238418579,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 100.0,
+                  "y": 100.0
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            },
+            {
+              "actuator": {
+                "duration": 0.09849518537521362,
+                "id": "MPkMdJ4HCb",
+                "method": "Cosine",
+                "node": "zP7K5Htw9Y",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 100.0,
+                  "y": 100.0
+                },
+                "starttime": 0.9015048146247864
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.10000000149011612,
+          "id": "B1wwJqB1NE",
+          "looping": false,
+          "name": "Bank"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "iH79uGdYNY",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "RedBullet",
+      "nodes": [
+        {
+          "class": "pfOmm2UnnY",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "4IluygNgeR",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Bullet",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 60.0
+          }
+        },
+        {
+          "class": "MYUjvQktA9",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "qklhbbEm10",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "4IluygNgeR",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Trail",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 180.0,
+            "y": 200.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "MYUjvQktA9"
+                }
+              }
+            ],
+            "node": {
+              "id": "pfOmm2UnnY"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "iH79uGdYNY",
+      "resource_name": "RedBullet",
+      "script_file": "4KwMiHn2Zz",
+      "vars": [
+        {
+          "name": "velocity",
+          "readonly": true,
+          "type": "Float",
+          "value": -500.0
+        },
+        {
+          "name": "red",
+          "readonly": true,
+          "type": "Boolean",
+          "value": true
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "pNT0bA0bpw",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Ship2",
+      "nodes": [
+        {
+          "class": "WOIwH6Bxgh",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "nQUmTOnClw",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": -3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 150.0,
+            "y": 150.0
+          }
+        },
+        {
+          "class": "dUDZP9QwKv",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Weapon",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": -3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          }
+        },
+        {
+          "class": "Y1oeiOvTtt",
+          "drawable_item": {
+            "alpha": 0.5320000052452087,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EgsgPADEqi",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 30.50322723388672,
+            "y": 29.07952117919922
+          },
+          "rotation": 2.5274112224578857,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 15.0,
+            "y": 15.0
+          }
+        },
+        {
+          "class": "5aEJYp5IlZ",
+          "drawable_item": {
+            "alpha": 0.49000000953674316,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EgsgPADEqi",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": -33.20540237426758,
+            "y": 29.479663848876953
+          },
+          "rotation": -1.6123350858688354,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 15.0,
+            "y": 15.0
+          }
+        },
+        {
+          "class": "8J3bnYn7k3",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_capsule",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EgsgPADEqi",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 2",
+          "position": {
+            "x": 32.37348937988281,
+            "y": -42.285484313964844
+          },
+          "rotation": -2.1083576679229736,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 13.22772216796875,
+            "y": 9.256370544433594
+          }
+        },
+        {
+          "class": "Ej7SOQuTSS",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_capsule",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EgsgPADEqi",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Copy of Node 2",
+          "position": {
+            "x": -34.59999084472656,
+            "y": -40.80000305175781
+          },
+          "rotation": -1.0887364149093628,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 14.251016616821289,
+            "y": 10.07977294921875
+          }
+        },
+        {
+          "class": "XEEkJGHbxM",
+          "drawable_item": {
+            "alpha": 0.4180000126361847,
+            "drawable": "pWeN1jfBre",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "EgsgPADEqi",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Core",
+          "position": {
+            "x": -0.4999999701976776,
+            "y": -0.5000000596046448
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 148.0,
+            "y": 148.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "dUDZP9QwKv"
+                }
+              },
+              {
+                "node": {
+                  "id": "Y1oeiOvTtt"
+                }
+              },
+              {
+                "node": {
+                  "id": "5aEJYp5IlZ"
+                }
+              },
+              {
+                "node": {
+                  "id": "8J3bnYn7k3"
+                }
+              },
+              {
+                "node": {
+                  "id": "Ej7SOQuTSS"
+                }
+              },
+              {
+                "node": {
+                  "id": "XEEkJGHbxM"
+                }
+              }
+            ],
+            "node": {
+              "id": "WOIwH6Bxgh"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "pNT0bA0bpw",
+      "resource_name": "Ship2",
+      "script_file": "FXdfIUPul3",
+      "vars": [
+        {
+          "name": "velocity",
+          "readonly": false,
+          "type": "Vec2",
+          "value": {
+            "x": 200.0,
+            "y": 50.0
+          }
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "7NAD3QgFlq",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Background",
+      "nodes": [
+        {
+          "class": "n9QIMigZH2",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "CopZZzjQd4",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 0.20000000298023224
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": -1.5705559253692627,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 498.1338806152344,
+            "y": 597.6924438476563
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "n9QIMigZH2"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "7NAD3QgFlq",
+      "resource_name": "Background",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "qOIpuPbyL1",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Asteroid",
+      "nodes": [
+        {
+          "class": "z5Hf9L3Qvp",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "lOfMr3YBtI",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 88.0,
+            "y": 88.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "z5Hf9L3Qvp"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "qOIpuPbyL1",
+      "resource_name": "Asteroid",
+      "script_file": "bjZ0TrwuxI",
+      "vars": [
+        {
+          "name": "radius",
+          "readonly": false,
+          "type": "Float",
+          "value": 30.0
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "7AdsZqt5pg",
+      "idle_track": "",
+      "lifetime": 0.5,
+      "name": "RedExplosion",
+      "nodes": [
+        {
+          "class": "XsGp2E38Hk",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "TNyQSW6bB6",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 800.0,
+            "y": 800.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "XsGp2E38Hk"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "7AdsZqt5pg",
+      "resource_name": "RedExplosion",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "gMY5RFLgyd",
+      "idle_track": "",
+      "lifetime": 0.5,
+      "name": "BlueExplosion",
+      "nodes": [
+        {
+          "class": "5LD6mi4JIR",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "1lANs9A0yJ",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 700.0,
+            "y": 700.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "5LD6mi4JIR"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "gMY5RFLgyd",
+      "resource_name": "BlueExplosion",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "5LKG2wBRGq",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "BlueBullet",
+      "nodes": [
+        {
+          "class": "UIG3lUtmPm",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "s4zt0bFnAL",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Bullet",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 60.0
+          }
+        },
+        {
+          "class": "TqmZOL4SIb",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "qklhbbEm10",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "s4zt0bFnAL",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 180.0,
+            "y": 200.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "TqmZOL4SIb"
+                }
+              }
+            ],
+            "node": {
+              "id": "UIG3lUtmPm"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "5LKG2wBRGq",
+      "resource_name": "BlueBullet",
+      "script_file": "4KwMiHn2Zz",
+      "vars": [
+        {
+          "name": "velocity",
+          "readonly": true,
+          "type": "Float",
+          "value": 500.0
+        },
+        {
+          "name": "red",
+          "readonly": true,
+          "type": "Boolean",
+          "value": false
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": false,
+        "LimitLifetime": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "A7Z5jfJF38",
+      "idle_track": "h8tSjQIuP3",
+      "lifetime": 4.0,
+      "name": "RedMine",
+      "nodes": [
+        {
+          "class": "bhTMTzzFAN",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "vg5yQskPIv",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "bhTMTzzFAN"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "A7Z5jfJF38",
+      "resource_name": "RedMine",
+      "script_file": "QldASNFLIb",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 1.0,
+                "id": "SmthD9lBKf",
+                "method": "Acceleration",
+                "name": "DrawableTimeScale",
+                "node": "bhTMTzzFAN",
+                "starttime": 0.0,
+                "value": 10.0
+              },
+              "type": "SetValue"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 4.0,
+          "id": "h8tSjQIuP3",
+          "looping": false,
+          "name": "Countdown"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "sX3kBAhLxU",
+      "idle_track": "",
+      "lifetime": 0.5,
+      "name": "BlastRadius",
+      "nodes": [
+        {
+          "class": "EQKGzykOAt",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "2a488SIQsU",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 2.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1000.0,
+            "y": 1000.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "EQKGzykOAt"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "sX3kBAhLxU",
+      "resource_name": "BlastRadius",
+      "script_file": ""
+    }
+  ],
+  "materials": [
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 5.0,
+      "gamma": 1.0,
+      "id": "rrmZfWe97e",
+      "particle_action": "None",
+      "resource_id": "rrmZfWe97e",
+      "resource_name": "Player",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Ship3/1.png",
+            "id": "TlNS7o376g",
+            "name": "1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Ship3/2.png",
+            "id": "v4P4ZmgqoU",
+            "name": "2"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Ship3/3.png",
+            "id": "sDbqEiMYUJ",
+            "name": "3"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Ship3/4.png",
+            "id": "4SqoIFioJD",
+            "name": "4"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Ship3/5.png",
+            "id": "uu8Cv0ARzZ",
+            "name": "5"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.0,
+      "gamma": 1.0,
+      "id": "4IluygNgeR",
+      "particle_action": "None",
+      "resource_id": "4IluygNgeR",
+      "resource_name": "RedBullet",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/bullet.png",
+            "id": "AhN2vQrZMo",
+            "name": "bullet"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 10.0,
+      "gamma": 0.800000011920929,
+      "id": "nQUmTOnClw",
+      "particle_action": "None",
+      "resource_id": "nQUmTOnClw",
+      "resource_name": "Ship2",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Blue/Ship2/0.png",
+            "id": "vSd2N9fkJo",
+            "name": "0"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Linear",
+      "texture_min_filter": "Trilinear",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 0.885664165019989,
+        "g": 0.885664165019989,
+        "r": 0.885664165019989
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 0.5058823823928833,
+        "g": 0.5058823823928833,
+        "r": 0.5058823823928833
+      },
+      "fps": 0.0,
+      "gamma": 1.0,
+      "id": "lOfMr3YBtI",
+      "particle_action": "None",
+      "resource_id": "lOfMr3YBtI",
+      "resource_name": "Asteroid",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Asteroids/asteroid_gray_2.png",
+            "id": "HKoJP8lwWD",
+            "name": "asteroid_gray_2"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 30.0,
+      "gamma": 1.0,
+      "id": "TNyQSW6bB6",
+      "particle_action": "None",
+      "resource_id": "TNyQSW6bB6",
+      "resource_name": "RedExplosion",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_0.png",
+            "id": "AelHCiDmIR",
+            "name": "1_0"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_1.png",
+            "id": "xTTFMKZZGZ",
+            "name": "1_1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_2.png",
+            "id": "pBv0LGmbsK",
+            "name": "1_2"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_3.png",
+            "id": "QNZ66Fgxpu",
+            "name": "1_3"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_4.png",
+            "id": "agwE2bK5Kv",
+            "name": "1_4"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_5.png",
+            "id": "HyzzJkgAfv",
+            "name": "1_5"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_6.png",
+            "id": "gf32mYytyP",
+            "name": "1_6"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_7.png",
+            "id": "whA1NFsuZo",
+            "name": "1_7"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_8.png",
+            "id": "ySSWidtOSD",
+            "name": "1_8"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_9.png",
+            "id": "3IbEuH6ulI",
+            "name": "1_9"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_10.png",
+            "id": "IANrx0bXwR",
+            "name": "1_10"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_11.png",
+            "id": "u6E80JTCMA",
+            "name": "1_11"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_12.png",
+            "id": "PBREEbtSrQ",
+            "name": "1_12"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_13.png",
+            "id": "GykWYtlYj7",
+            "name": "1_13"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_14.png",
+            "id": "47CNB17beu",
+            "name": "1_14"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_15.png",
+            "id": "NYyp8MtPJw",
+            "name": "1_15"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Red Explosion/1_16.png",
+            "id": "SbhNffl3Xz",
+            "name": "1_16"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 30.0,
+      "gamma": 1.0,
+      "id": "1lANs9A0yJ",
+      "particle_action": "None",
+      "resource_id": "1lANs9A0yJ",
+      "resource_name": "BlueExplosion",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_0.png",
+            "id": "penIqNeIZ9",
+            "name": "1_0"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_1.png",
+            "id": "hCdROQhRJ5",
+            "name": "1_1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_2.png",
+            "id": "zfTsgZNrmM",
+            "name": "1_2"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_3.png",
+            "id": "m8pQwHAFwm",
+            "name": "1_3"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_4.png",
+            "id": "Des5oNpfgi",
+            "name": "1_4"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_5.png",
+            "id": "We6NRkOLl6",
+            "name": "1_5"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_6.png",
+            "id": "LwxEbgYvNr",
+            "name": "1_6"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_7.png",
+            "id": "4w8Bz9PR0R",
+            "name": "1_7"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_8.png",
+            "id": "fiWn0mkBOK",
+            "name": "1_8"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_9.png",
+            "id": "svaEoif2LR",
+            "name": "1_9"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_10.png",
+            "id": "Mb2heoFDPZ",
+            "name": "1_10"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_11.png",
+            "id": "DuIN161baS",
+            "name": "1_11"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_12.png",
+            "id": "6mO7nn0fIE",
+            "name": "1_12"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_13.png",
+            "id": "bEebSw986B",
+            "name": "1_13"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_14.png",
+            "id": "C9wEDl3p21",
+            "name": "1_14"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_15.png",
+            "id": "uqBsqy3hys",
+            "name": "1_15"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Effects/Blue Explosion/1_16.png",
+            "id": "f50KmlfHd6",
+            "name": "1_16"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "s4zt0bFnAL",
+      "particle_action": "None",
+      "resource_id": "s4zt0bFnAL",
+      "resource_name": "BlueBullet",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Blue/bullet.png",
+            "id": "hodATmMbmz",
+            "name": "bullet"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 1.0,
+      "gamma": 1.0,
+      "id": "vg5yQskPIv",
+      "particle_action": "None",
+      "resource_id": "vg5yQskPIv",
+      "resource_name": "RedMine",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Spacemine/1.png",
+            "id": "M0IxxpWvei",
+            "name": "1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Red/Spacemine/2.png",
+            "id": "mQM3va6sY5",
+            "name": "2"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 2.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 0.04318303242325783,
+        "g": 0.09971770644187927,
+        "r": 0.9062333106994629
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 0.0021362630650401115,
+        "g": 0.10446326434612274,
+        "r": 0.99884033203125
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "2a488SIQsU",
+      "particle_action": "None",
+      "resource_id": "2a488SIQsU",
+      "resource_name": "BlastRadius",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "function": "Noise",
+            "generator": {
+              "height": 20,
+              "layers": [
+                {
+                  "amplitude": 249.0,
+                  "frequency": 100.0,
+                  "prime0": 4481,
+                  "prime1": 743,
+                  "prime2": 7873
+                },
+                {
+                  "amplitude": 60.0,
+                  "frequency": 13.0,
+                  "prime0": 4481,
+                  "prime1": 743,
+                  "prime2": 7873
+                },
+                {
+                  "amplitude": 249.0,
+                  "frequency": 100.0,
+                  "prime0": 4481,
+                  "prime1": 743,
+                  "prime2": 7873
+                },
+                {
+                  "amplitude": 249.0,
+                  "frequency": 100.0,
+                  "prime0": 4481,
+                  "prime1": 743,
+                  "prime2": 7873
+                }
+              ],
+              "width": 20
+            },
+            "id": "Lk5kmjpi2s",
+            "name": "Noise"
+          },
+          "type": "BitmapGenerator"
+        }
+      ],
+      "shader_file": "ws://shaders/es2/disc.glsl",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 0.40367743372917175,
+        "g": 0.382299542427063,
+        "r": 0.32585641741752625
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.0,
+      "gamma": 1.0,
+      "id": "CopZZzjQd4",
+      "particle_action": "None",
+      "resource_id": "CopZZzjQd4",
+      "resource_name": "Stars",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Background/bg_1_1.png",
+            "id": "M2QHr8zXgE",
+            "name": "bg_1_1"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.10000000149011612,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Repeat",
+      "texture_wrap_y": "Repeat",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 0.9211413860321045,
+        "g": 0.609079122543335,
+        "r": 0.0788586288690567
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "EgsgPADEqi",
+      "particle_action": "None",
+      "resource_id": "EgsgPADEqi",
+      "resource_name": "BluePulse",
+      "shader_file": "ws://shaders/es2/pulsing.glsl",
+      "static": true,
+      "surface": "Emissive",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Color"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 0.0788586288690567,
+        "g": 0.0788586288690567,
+        "r": 0.9211413860321045
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "HnopPLXPe5",
+      "particle_action": "None",
+      "resource_id": "HnopPLXPe5",
+      "resource_name": "RedPulse",
+      "shader_file": "ws://shaders/es2/pulsing.glsl",
+      "static": true,
+      "surface": "Emissive",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Color"
+    }
+  ],
+  "particles": [
+    {
+      "alpha_over_dist": -0.30000001192092896,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "direction_sector_size": 0.3490658402442932,
+      "direction_sector_start_angle": 1.3962633609771729,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "qklhbbEm10",
+      "init_rect_height": 0.0,
+      "init_rect_width": 0.0,
+      "init_rect_xpos": 0.5,
+      "init_rect_ypos": 0.5,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 10.0,
+      "max_velocity": 1.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 1.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "resource_id": "qklhbbEm10",
+      "resource_name": "BulletTrail"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "UWF4u1fYHa",
+      "nodes": [
+        {
+          "entity": "diUlEeS5JH",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "v6jMFkJ4BJ",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Player",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -2.0,
+            "y": 320.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "7NAD3QgFlq",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "6bXKmTw71O",
+          "idle_animation_id": "",
+          "layer": -2,
+          "name": "Copy of Background_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 2.0,
+            "y": 2.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "v6jMFkJ4BJ"
+            }
+          },
+          {
+            "node": {
+              "id": "6bXKmTw71O"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "UWF4u1fYHa",
+      "resource_name": "My Scene"
+    }
+  ],
+  "scripts": [
+    {
+      "id": "OtyRiUrsTd",
+      "resource_id": "OtyRiUrsTd",
+      "resource_name": "game",
+      "uri": "ws://lua/game.lua"
+    },
+    {
+      "id": "rvZg0UT77h",
+      "resource_id": "rvZg0UT77h",
+      "resource_name": "Ship",
+      "uri": "ws://lua/rvZg0UT77h.lua"
+    },
+    {
+      "id": "4KwMiHn2Zz",
+      "resource_id": "4KwMiHn2Zz",
+      "resource_name": "Bullet",
+      "uri": "ws://lua/4KwMiHn2Zz.lua"
+    },
+    {
+      "id": "FXdfIUPul3",
+      "resource_id": "FXdfIUPul3",
+      "resource_name": "Ship2",
+      "uri": "ws://lua/FXdfIUPul3.lua"
+    },
+    {
+      "id": "bjZ0TrwuxI",
+      "resource_id": "bjZ0TrwuxI",
+      "resource_name": "Asteroid",
+      "uri": "ws://lua/bjZ0TrwuxI.lua"
+    },
+    {
+      "id": "QldASNFLIb",
+      "resource_id": "QldASNFLIb",
+      "resource_name": "RedMine",
+      "uri": "ws://lua/QldASNFLIb.lua"
+    },
+    {
+      "id": "AA5C8qjoDb",
+      "resource_id": "AA5C8qjoDb",
+      "resource_name": "common",
+      "uri": "ws://lua/common.lua"
+    }
+  ],
+  "shapes": [
+    {
+      "draws": [
+        {
+          "count": 9,
+          "offset": 0,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "pWeN1jfBre",
+      "resource_id": "pWeN1jfBre",
+      "resource_name": "Ship2 Core",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.5,
+          "t": 0.5,
+          "x": 0.5,
+          "y": -0.5
+        },
+        {
+          "s": 0.5,
+          "t": 0.3793363571166992,
+          "x": 0.5,
+          "y": -0.3793363571166992
+        },
+        {
+          "s": 0.4193061888217926,
+          "t": 0.4396681785583496,
+          "x": 0.4193061888217926,
+          "y": -0.4396681785583496
+        },
+        {
+          "s": 0.3996983468532562,
+          "t": 0.5595777034759521,
+          "x": 0.3996983468532562,
+          "y": -0.5595777034759521
+        },
+        {
+          "s": 0.459276020526886,
+          "t": 0.5995475053787231,
+          "x": 0.459276020526886,
+          "y": -0.5995475053787231
+        },
+        {
+          "s": 0.5399698615074158,
+          "t": 0.5995475053787231,
+          "x": 0.5399698615074158,
+          "y": -0.5995475053787231
+        },
+        {
+          "s": 0.6000000238418579,
+          "t": 0.5600000023841858,
+          "x": 0.6000000238418579,
+          "y": -0.5600000023841858
+        },
+        {
+          "s": 0.5799999833106995,
+          "t": 0.4399999976158142,
+          "x": 0.5799999833106995,
+          "y": -0.4399999976158142
+        },
+        {
+          "s": 0.5,
+          "t": 0.3793363571166992,
+          "x": 0.5,
+          "y": -0.3793363571166992
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+    "1lANs9A0yJ": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "2a488SIQsU": {
+        "shader_file": "ws://shaders/es2/disc.glsl",
+        "use_shader_file": true
+    },
+    "4IluygNgeR": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "4KwMiHn2Zz": {
+        "checked_for_packing": true
+    },
+    "5LKG2wBRGq": {
+        "checked_for_packing": true
+    },
+    "7AdsZqt5pg": {
+        "checked_for_packing": true
+    },
+    "7NAD3QgFlq": {
+    },
+    "A7Z5jfJF38": {
+        "checked_for_packing": true
+    },
+    "AA5C8qjoDb": {
+        "checked_for_packing": true
+    },
+    "CopZZzjQd4": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "EgsgPADEqi": {
+        "shader_file": "ws://shaders/es2/pulsing.glsl",
+        "use_shader_file": true
+    },
+    "FXdfIUPul3": {
+        "checked_for_packing": true
+    },
+    "HnopPLXPe5": {
+        "shader_file": "ws://shaders/es2/pulsing.glsl",
+        "use_shader_file": true
+    },
+    "OtyRiUrsTd": {
+        "checked_for_packing": true
+    },
+    "QldASNFLIb": {
+        "checked_for_packing": true
+    },
+    "TNyQSW6bB6": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "UWF4u1fYHa": {
+    },
+    "bjZ0TrwuxI": {
+        "checked_for_packing": true
+    },
+    "diUlEeS5JH": {
+        "checked_for_packing": true
+    },
+    "gMY5RFLgyd": {
+        "checked_for_packing": true
+    },
+    "iH79uGdYNY": {
+        "checked_for_packing": true
+    },
+    "lOfMr3YBtI": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "nQUmTOnClw": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "pNT0bA0bpw": {
+    },
+    "pWeN1jfBre": {
+        "checked_for_packing": true,
+        "material": "Ship2"
+    },
+    "project": {
+        "application_library_lin": "app://libGameEngine.so",
+        "application_library_win": "",
+        "application_name": "Blast!",
+        "application_version": "",
+        "clear_color": "4278190080",
+        "command_line_arguments": "",
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "game_viewport_height": 800,
+        "game_viewport_width": 1200,
+        "multisample_sample_count": 8,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 10,
+        "phys_scale_x": 100,
+        "phys_scale_y": 100,
+        "ticks_per_second": 1,
+        "updates_per_second": 60,
+        "use_gamehost_process": true,
+        "window_can_resize": true,
+        "window_has_border": true,
+        "window_height": 768,
+        "window_mode": "Windowed",
+        "window_vsync": false,
+        "window_width": 1024,
+        "working_folder": "${workspace}"
+    },
+    "qOIpuPbyL1": {
+        "checked_for_packing": true
+    },
+    "qklhbbEm10": {
+        "checked_for_packing": true,
+        "material": "White",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "use_alpha_derivatives": true,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": true,
+        "use_size_derivatives": false
+    },
+    "rrmZfWe97e": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "rvZg0UT77h": {
+        "checked_for_packing": true
+    },
+    "s4zt0bFnAL": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "sX3kBAhLxU": {
+        "checked_for_packing": true
+    },
+    "vg5yQskPIv": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_pack_name": "dist",
+        "packing_param_resize_large_textures": true,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
+    }
+}

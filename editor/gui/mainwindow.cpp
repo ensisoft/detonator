@@ -1574,6 +1574,12 @@ void MainWindow::on_btnBandit_clicked()
 {
     LoadDemoWorkspace("demos/bandit");
 }
+
+void MainWindow::on_btnBlast_clicked()
+{
+    LoadDemoWorkspace("demos/blast");
+}
+
 void MainWindow::on_btnMaterial_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
@@ -2094,6 +2100,7 @@ void MainWindow::ShowHelpWidget()
     // todo: could build the demo setup here dynamically.
 
     mUI.lblBanditDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/bandit"));
+    mUI.lblBlastDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/blast"));
 
     if (mWorkspace && mCurrentWidget)
     {
