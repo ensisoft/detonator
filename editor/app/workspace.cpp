@@ -219,7 +219,7 @@ public:
 
             const auto width  = src_pix.width();
             const auto height = src_pix.height();
-            DEBUG("Image %1 %2%%3 px", src_file, width, height);
+            DEBUG("Image %1 %2x%3 px", src_file, width, height);
             if (width >= kMaxTextureWidth || height >= kMaxTextureHeight)
             {
                 QString filename;
@@ -462,8 +462,8 @@ public:
 
         // this will actually resolve the file path.
         // using the resolution scheme in Workspace.
-        const QFileInfo info(app::FromUtf8(file));
-        if (!info.exists())
+        const QFileInfo src_info(app::FromUtf8(file));
+        if (!src_info.exists())
         {
             ERROR("File %1 could not be found!", file);
             mNumErrors++;
@@ -471,17 +471,37 @@ public:
             return "";
         }
 
-        // todo: resolve a case where two different source files
-        // would map to same file in the package folder.
-        // one needs to be renamed.
-
-        const QString& name = info.fileName();
-        const QString& src  = info.absoluteFilePath(); // resolved path.
-        const QString& dst  = app::JoinPath(kOutDir, app::JoinPath(where, name));
-        CopyFileBuffer(src, dst);
+        const QString& src_file = src_info.absoluteFilePath(); // resolved path.
+        const QString& src_name = src_info.fileName();
+        QString dst_name = src_name;
+        QString dst_file = app::JoinPath(kOutDir, app::JoinPath(where, dst_name));
+        // try to generate a different name for the file when a file
+        // by the same name already exists.
+        unsigned attempt = 0;
+        while (true)
+        {
+            const QFileInfo dst_info(dst_file);
+            // if there's no file by this name we're good to go
+            if (!dst_info.exists())
+                break;
+            // if the destination file exists *from before* we're
+            // going to overwrite it. The user should have been confirmed
+            // for this and it should be fine at this point.
+            // So only try to resolve a name collision if we're trying to
+            // write an output file by the same name multiple times
+            if (mFileNames.find(dst_file) == mFileNames.end())
+                break;
+            // generate a new name.
+            dst_name = QString("%1_%2").arg(attempt).arg(src_name);
+            dst_file = app::JoinPath(kOutDir, app::JoinPath(where, dst_name));
+            attempt++;
+        }
+        CopyFileBuffer(src_file, dst_file);
+        // keep track of which files we wrote.
+        mFileNames.insert(dst_file);
 
         // generate the resource identifier
-        const auto& pckid = app::ToUtf8(QString("pck://%1/%2").arg(where).arg(name));
+        const auto& pckid = app::ToUtf8(QString("pck://%1/%2").arg(where).arg(dst_name));
 
         mResourceMap[file] = pckid;
         return pckid;
@@ -548,6 +568,8 @@ private:
 
     // resource mapping from source to packed resource id.
     std::unordered_map<std::string, std::string> mResourceMap;
+    // filenames of files we've written.
+    std::unordered_set<QString> mFileNames;
 };
 
 } // namespace

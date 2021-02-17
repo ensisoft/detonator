@@ -26,6 +26,12 @@ void DeleteDir(const QString& dir)
     d.removeRecursively();
 }
 
+void MakeDir(const QString& dir)
+{
+    QDir d(dir);
+    d.mkpath(dir);
+}
+
 template<typename Pixel>
 size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
 {
@@ -837,6 +843,80 @@ void unit_test_packing_texture_rects(unsigned padding)
     }
 }
 
+
+void unit_test_packing_texture_name_collision()
+{
+
+    DeleteDir("TestWorkspace");
+    DeleteDir("TestPackage");
+
+    app::Workspace workspace;
+    workspace.MakeWorkspace("TestWorkspace");
+
+    // when there are multiple source textures with the same name
+    // such as ws://textures/foo/1.png and ws://textures/bar/1.png
+    // they output names must be resolved to different names.
+    gfx::RgbBitmap bitmap[2];
+    bitmap[0].Resize(64, 64);
+    bitmap[0].Fill(gfx::Color::Green);
+    bitmap[1].Resize(32, 32);
+    bitmap[1].Fill(gfx::Color::HotPink);
+
+    MakeDir("TestWorkspace/textures/foo");
+    MakeDir("TestWorkspace/textures/bar");
+    gfx::WritePNG(bitmap[0], "TestWorkspace/textures/foo/bitmap.png");
+    gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
+
+    // setup 2 materials
+    gfx::MaterialClass materials[2];
+    materials[0].AddTexture("ws://textures/foo/bitmap.png");
+    materials[1].AddTexture("ws://textures/bar/bitmap.png");
+    workspace.SaveResource(app::MaterialResource(materials[0], "material0"));
+    workspace.SaveResource(app::MaterialResource(materials[1], "material0"));
+
+    app::Workspace::ContentPackingOptions options;
+    options.directory = "TestPackage";
+    options.package_name = "";
+    options.write_content_file = true;
+    options.write_config_file = true;
+    options.combine_textures = false;
+    options.resize_textures = false;
+    options.max_texture_width = 1024;
+    options.max_texture_height = 1024;
+    options.texture_padding = 0;
+    // select the resources.
+    std::vector<const app::Resource *> resources;
+    resources.push_back(&workspace.GetUserDefinedResource(0));
+    resources.push_back(&workspace.GetUserDefinedResource(1));
+    TEST_REQUIRE(workspace.PackContent(resources, options));
+
+    // verify output
+    game::ContentLoader loader;
+    loader.LoadFromFile("TestPackage", "TestPackage/content.json");
+    gfx::SetResourceLoader(&loader);
+
+    {
+        const auto& mat = loader.FindMaterialClassById(materials[0].GetId());
+        const auto& source = mat->GetTextureSource(0);
+        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(&source);
+        gfx::Image img;
+        TEST_REQUIRE(img.Load(file->GetFilename()));
+        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        TEST_REQUIRE(bmp == bitmap[0]);
+    }
+
+    {
+        const auto& mat = loader.FindMaterialClassById(materials[1].GetId());
+        const auto& source = mat->GetTextureSource(0);
+        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(&source);
+        gfx::Image img;
+        TEST_REQUIRE(img.Load(file->GetFilename()));
+        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        TEST_REQUIRE(bmp == bitmap[1]);
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -857,5 +937,6 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_composition(3);
     unit_test_packing_texture_rects(0);
     unit_test_packing_texture_rects(5);
+    unit_test_packing_texture_name_collision();
     return 0;
 }
