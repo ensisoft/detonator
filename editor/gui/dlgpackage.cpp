@@ -62,16 +62,23 @@ DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
         item->setData(Qt::UserRole, quint64(i));
         mUI.listWidget->addItem(item);
     }
-
+    QString path;
     GetProperty(workspace, "packing_param_max_tex_height", mUI.cmbMaxTexHeight);
     GetProperty(workspace, "packing_param_max_tex_width", mUI.cmbMaxTexWidth);
+    GetProperty(workspace, "packing_param_tex_padding", mUI.spinTexPadding);
     GetProperty(workspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     GetProperty(workspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
-    GetProperty(workspace, "packing_param_pack_name", mUI.editPckName);
     GetProperty(workspace, "packing_param_write_config", mUI.chkWriteConfig);
     GetProperty(workspace, "packing_param_write_content", mUI.chkWriteContent);
+    GetProperty(workspace, "packing_param_delete_prev", mUI.chkDelete);
+    GetProperty(workspace, "packing_param_output_dir", &path);
+    if (path.isEmpty()) {
+        path = app::JoinPath(workspace.GetDir(), "dist");
+    } else {
+        path = workspace.MapFileToFilesystem(path);
+    }
 
-    SetValue(mUI.editOutDir, app::CleanPath(workspace.GetDir()));
+    SetValue(mUI.editOutDir, path);
     mUI.progressBar->setVisible(false);
 
     connect(&mWorkspace, &app::Workspace::ResourcePackingUpdate,
@@ -109,26 +116,39 @@ void DlgPackage::on_btnStart_clicked()
 {
     if (!MustHaveInput(mUI.editOutDir))
         return;
-    else if (!MustHaveInput(mUI.editPckName))
-        return;
     else if (!MustHaveNumber(mUI.cmbMaxTexHeight))
         return;
     else if (!MustHaveNumber(mUI.cmbMaxTexWidth))
         return;
 
-    const QString& dir  = GetValue(mUI.editOutDir);
-    const QString& name = GetValue(mUI.editPckName);
-    const auto& out  = app::JoinPath(dir, name);
-    if (!QDir(out).isEmpty())
+    const QString& path = GetValue(mUI.editOutDir);
+    QDir dir(path);
+    if (dir.exists() && !dir.isEmpty() && GetValue(mUI.chkDelete))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr("You've chosen to delete the previous contents of\n%1.\n"
+                       "Are you sure you want to proceed?").arg(path));
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    else if (dir.exists() && !dir.isEmpty())
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setText(tr("The directory\n%1\ncontains files that might get overwritten.\n"
-            "Are you sure you want to proceed?").arg(out));
+            "Are you sure you want to proceed?").arg(path));
         if (msg.exec() == QMessageBox::No)
             return;
     }
+    if (GetValue(mUI.chkDelete))
+    {
+        dir.removeRecursively();
+    }
+
+
     mUI.btnStart->setEnabled(false);
     mUI.btnClose->setEnabled(false);
     mUI.progressBar->setVisible(true);
@@ -151,23 +171,24 @@ void DlgPackage::on_btnStart_clicked()
     // remember the settings.
     SetProperty(mWorkspace, "packing_param_max_tex_height", mUI.cmbMaxTexHeight);
     SetProperty(mWorkspace, "packing_param_max_tex_width", mUI.cmbMaxTexWidth);
+    SetProperty(mWorkspace, "packing_param_tex_padding", mUI.spinTexPadding);
     SetProperty(mWorkspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     SetProperty(mWorkspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
-    SetProperty(mWorkspace, "packing_param_pack_name", name);
     SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
     SetProperty(mWorkspace, "packing_param_write_content", mUI.chkWriteContent);
+    SetProperty(mWorkspace, "packing_param_delete_prev", mUI.chkDelete);
+    SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.AddFileToWorkspace(path));
 
     app::Workspace::ContentPackingOptions options;
-    options.directory          = dir;
-    options.package_name       = name;
+    options.directory          = path;
+    options.package_name       = "";
     options.combine_textures   = GetValue(mUI.chkCombineTextures);
     options.resize_textures    = GetValue(mUI.chkResizeTextures);
     options.max_texture_width  = GetValue(mUI.cmbMaxTexWidth);
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
     options.write_config_file  = GetValue(mUI.chkWriteConfig);
     options.write_content_file = GetValue(mUI.chkWriteContent);
-    options.texture_padding    = 2;
-
+    options.texture_padding    = GetValue(mUI.spinTexPadding);
     const auto success = mWorkspace.PackContent(resources, options);
 
     mUI.btnStart->setEnabled(true);

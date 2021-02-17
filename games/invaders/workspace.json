@@ -186,10 +186,13 @@
     },
     "workspace": {
         "packing_param_combine_textures": true,
+        "packing_param_delete_prev": false,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
+        "packing_param_output_dir": "ws://dist",
         "packing_param_pack_name": "dist/",
         "packing_param_resize_large_textures": true,
+        "packing_param_tex_padding": 2,
         "packing_param_write_config": true,
         "packing_param_write_content": true
     },
