@@ -35,46 +35,49 @@
 
 namespace app
 {
-    // script resource. Currently this resource isn't part of any of
-    // the actual subsystem (engine, graphics, audio etc). It's only
-    // relevant to the editor for the purposes of showing the scripts
-    // in the resource table and for packing the resources.
-    class Script
-    {
-    public:
-        Script()
-        { mScriptId = base::RandomString(10); }
-        std::string GetId() const
-        { return mScriptId; }
-        std::string GetFileURI() const
-        { return mFileURI; }
-        void SetFileURI(const std::string& uri)
-        { mFileURI = uri; }
-        nlohmann::json ToJson()
+    namespace detail {
+        // Generic file based resource.
+        template<unsigned Discriminator>
+        class FileResource
         {
-            nlohmann::json json;
-            base::JsonWrite(json, "id", mScriptId);
-            base::JsonWrite(json, "uri", mFileURI);
-            return json;
-        }
-        std::unique_ptr<Script> Clone() const
-        {
-            Script ret;
-            ret.mFileURI = mFileURI;
-            return std::make_unique<Script>(ret);
-        }
-        static std::optional<Script> FromJson(const nlohmann::json& json)
-        {
-            Script ret;
-            if (!base::JsonReadSafe(json, "id", &ret.mScriptId) ||
-                !base::JsonReadSafe(json, "uri", &ret.mFileURI))
-                return std::nullopt;
-            return ret;
-        }
-    private:
-        std::string mScriptId;
-        // UTF8 encoded file URI. (Workspace file mapping).
-        std::string mFileURI;
-    };
+        public:
+            FileResource()
+            { mId = base::RandomString(10); }
+            std::string GetId() const
+            { return mId; }
+            std::string GetFileURI() const
+            { return mFileURI; }
+            void SetFileURI(const std::string& uri)
+            { mFileURI = uri; }
+            nlohmann::json ToJson()
+            {
+                nlohmann::json json;
+                base::JsonWrite(json, "id", mId);
+                base::JsonWrite(json, "uri", mFileURI);
+                return json;
+            }
+            std::unique_ptr<FileResource> Clone() const
+            {
+                FileResource ret;
+                ret.mFileURI = mFileURI;
+                return std::make_unique<FileResource>(ret);
+            }
+            static std::optional<FileResource> FromJson(const nlohmann::json& json)
+            {
+                FileResource ret;
+                if (!base::JsonReadSafe(json, "id", &ret.mId) ||
+                    !base::JsonReadSafe(json, "uri", &ret.mFileURI))
+                    return std::nullopt;
+                return ret;
+            }
+        public:
+            std::string mId;
+            // UTF8 encoded file URI. (Workspace file mapping).
+            std::string mFileURI;
+        };
+    } // detail
+    using Script = detail::FileResource<0>;
+    using AudioFile = detail::FileResource<1>;
+    using DataFile = detail::FileResource<2>;
 
 } // namespace

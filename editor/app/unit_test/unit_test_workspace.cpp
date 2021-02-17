@@ -286,14 +286,18 @@ void unit_test_packing_basic()
     DeleteDir("TestPackage");
 
     QDir d;
-    // setup dummy shaders.
+    // setup dummy shaders and data.
     TEST_REQUIRE(d.mkpath("shaders/es2"));
     TEST_REQUIRE(d.mkpath("lua"));
+    TEST_REQUIRE(d.mkpath("audio"));
+    TEST_REQUIRE(d.mkpath("data"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/solid_color.glsl", "solid_color.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/vertex_array.glsl", "vertex_array.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/particles.glsl", "particles.glsl"));
     // setup dummy scripts this one is global (outside the workspace tree)
     TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua", "game_script.lua"));
+    TEST_REQUIRE(app::WriteTextFile("audio/music.mp3", "music.mp3"));
+    TEST_REQUIRE(app::WriteTextFile("data/levels.txt", "levels.txt"));
 
     app::Workspace workspace;
     workspace.MakeWorkspace("TestWorkspace");
@@ -329,12 +333,22 @@ void unit_test_packing_basic()
 
     app::Script script;
     script.SetFileURI(workspace.AddFileToWorkspace(std::string("lua/game_script.lua")));
-    app::ScriptResource  script_resource(script, "GameScript");
+    app::ScriptResource script_resource(script, "GameScript");
+
+    app::AudioFile audio;
+    audio.SetFileURI(workspace.AddFileToWorkspace(std::string("audio/music.mp3")));
+    app::AudioResource  audio_resource(audio, "music.mp3");
+
+    app::DataFile data;
+    data.SetFileURI(workspace.AddFileToWorkspace(std::string("data/levels.txt")));
+    app::DataResource data_resource(data, "levels.txt");
 
     workspace.SaveResource(material_resource);
     workspace.SaveResource(shape_resource);
     workspace.SaveResource(particle_resource);
     workspace.SaveResource(script_resource);
+    workspace.SaveResource(audio_resource);
+    workspace.SaveResource(data_resource);
 
     app::Workspace::ContentPackingOptions options;
     options.directory    = "TestPackage";
@@ -350,6 +364,8 @@ void unit_test_packing_basic()
     resources.push_back(&workspace.GetUserDefinedResource(1));
     resources.push_back(&workspace.GetUserDefinedResource(2));
     resources.push_back(&workspace.GetUserDefinedResource(3));
+    resources.push_back(&workspace.GetUserDefinedResource(4));
+    resources.push_back(&workspace.GetUserDefinedResource(5));
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // in the output folder we should have content.json, config.json
@@ -359,6 +375,10 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/particles.glsl") == "particles.glsl");
     // Lua scripts should be copied into lua/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/game_script.lua") == "game_script.lua");
+    // Audio files should be copied into audio/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/audio/music.mp3") == "music.mp3");
+    // Data files should be copied into data/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/data/levels.txt") == "levels.txt");
 
     game::ContentLoader loader;
     loader.LoadFromFile("TestPackage/test", "TestPackage/test/content.json");

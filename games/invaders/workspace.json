@@ -40,6 +40,9 @@
     "D57sl8JCQS": {
         "checked_for_packing": true
     },
+    "DGAWKukQ8k": {
+        "checked_for_packing": true
+    },
     "E6ZHdAHRBY": {
         "checked_for_packing": true
     },
@@ -67,6 +70,12 @@
         "checked_for_packing": true,
         "shader_file": "ws://assets/shaders/es2/concentric_rings_effect.glsl",
         "use_shader_file": true
+    },
+    "HgeyMQWwyD": {
+        "checked_for_packing": true
+    },
+    "Hs93gz7TGP": {
+        "checked_for_packing": true
     },
     "Kt7KKux9mo": {
         "checked_for_packing": true
@@ -98,6 +107,9 @@
         "use_init_rect": true,
         "use_lifetime": true,
         "use_size_derivatives": false
+    },
+    "f7gtmBYSXJ": {
+        "checked_for_packing": true
     },
     "gLRYUQObGy": {
         "checked_for_packing": true,

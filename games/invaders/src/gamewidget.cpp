@@ -1243,7 +1243,7 @@ public:
 
         if (bPlaySound && mPlaySounds)
         {
-            auto swoosh = std::make_unique<audio::AudioFile>("sounds/Slide_Soft_00.ogg", "swoosh");
+            auto swoosh = std::make_unique<audio::AudioFile>("audio/Slide_Soft_00.ogg", "swoosh");
             mAudioPlayer->Play(std::move(swoosh));
         }
     }
@@ -1703,7 +1703,7 @@ GameWidget::GameWidget()
         if (mPlaySounds)
         {
             // sound effects FX
-            auto sndExplosion = std::make_unique<audio::AudioFile>("sounds/explode.wav", "explosion");
+            auto sndExplosion = std::make_unique<audio::AudioFile>("audio/explode.wav", "explosion");
             mAudioPlayer->Play(std::move(sndExplosion), std::chrono::milliseconds(missileFlyTime));
         }
     };
@@ -2354,7 +2354,7 @@ void GameWidget::OnWantClose(const wdk::WindowEventWantClose& close)
 void GameWidget::PlayMusic()
 {
     static const char* tracks[] = {
-        "music/awake10_megaWall.ogg"
+        "audio/awake10_megaWall.ogg"
     };
 
     if (mPlayMusic)

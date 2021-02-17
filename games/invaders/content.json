@@ -1,7 +1,36 @@
 {
+  "audio_files": [
+    {
+      "id": "DGAWKukQ8k",
+      "resource_id": "DGAWKukQ8k",
+      "resource_name": "awake10_megaWall",
+      "uri": "ws://assets/audio/awake10_megaWall.ogg"
+    },
+    {
+      "id": "f7gtmBYSXJ",
+      "resource_id": "f7gtmBYSXJ",
+      "resource_name": "explode",
+      "uri": "ws://assets/audio/explode.wav"
+    },
+    {
+      "id": "Hs93gz7TGP",
+      "resource_id": "Hs93gz7TGP",
+      "resource_name": "Slide_Soft_00",
+      "uri": "ws://assets/audio/Slide_Soft_00.ogg"
+    }
+  ],
+  "data_files": [
+    {
+      "id": "HgeyMQWwyD",
+      "resource_id": "HgeyMQWwyD",
+      "resource_name": "levels",
+      "uri": "ws://assets/data/levels.txt"
+    }
+  ],
   "entities": [
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -222,6 +251,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -329,6 +359,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -393,6 +424,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -527,6 +559,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -661,6 +694,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -795,6 +829,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true
@@ -929,6 +964,7 @@
     },
     {
       "flags": {
+        "KillAtLifetime": true,
         "LimitLifetime": false,
         "VisibleInEditor": true,
         "VisibleInGame": true

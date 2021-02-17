@@ -445,6 +445,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     }
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
+    SetValue(mUI.grpHelp, workspace->GetName());
 
     mUI.mainTab->setCurrentIndex(workspace->GetUserProperty("focused_widget_index", 0));
     mUI.workspace->setModel(&mWorkspaceProxy);
@@ -1328,6 +1329,18 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
 
+    // disable edit actions if a non-native resources have been
+    // selected. these need to be opened through an external editor.
+    for (int i=0; i<indices.size(); ++i)
+    {
+        const auto& resource = mWorkspace->GetResource(indices[i].row());
+        if (resource.IsAudioFile() || resource.IsDataFile()) {
+            mUI.actionEditResource->setEnabled(false);
+            mUI.actionEditResourceNewTab->setEnabled(false);
+            mUI.actionEditResourceNewWindow->setEnabled(false);
+        }
+    }
+
     QMenu show;
     show.setTitle("Show ...");
     for (const auto val : magic_enum::enum_values<app::Resource::Type>())
@@ -1389,6 +1402,16 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     app::Resource* resource = dlg.GetSelected();
     if (resource == nullptr)
         return;
+    else if (resource->IsDataFile() || resource->IsAudioFile())
+    {
+        WARN("Can't edit '%1' since it's not a %2 resource.", resource->GetName(), APP_TITLE);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Warning);
+        msg.setText(tr("Can't edit '%1' since it's not a %2 resource.").arg(resource->GetName(), APP_TITLE));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
     if (!FocusWidget(resource->GetId()))
     {
         const auto new_window = mSettings.default_open_win_or_tab == "Window";
@@ -2112,9 +2135,17 @@ void MainWindow::ShowHelpWidget()
         mUI.helpWidget->setVisible(true);
         mUI.helpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
+        mUI.mainToolBar->addAction(mUI.actionNewMaterial);
+        mUI.mainToolBar->addAction(mUI.actionNewParticleSystem);
+        mUI.mainToolBar->addAction(mUI.actionNewCustomShape);
+        mUI.mainToolBar->addAction(mUI.actionNewEntity);
+        mUI.mainToolBar->addAction(mUI.actionNewScene);
+        mUI.mainToolBar->addAction(mUI.actionNewScript);
+        mUI.mainToolBar->addSeparator();
     }
     else
     {
+        mUI.mainToolBar->clear();
         mUI.helpWidget->setCurrentIndex(1);
         mUI.helpWidget->setVisible(true);
         mUI.mainTab->setVisible(false);
@@ -2127,6 +2158,14 @@ void MainWindow::EditResources(bool open_new_window)
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
+        // we don't know how to open these.
+        if (resource.GetType() == app::Resource::Type::DataFile ||
+            resource.GetType() == app::Resource::Type::AudioFile)
+        {
+            WARN("Can't edit '%1' since it's not a %2 resource.", resource.GetName(), APP_TITLE);
+            continue;
+        }
+
         if (!FocusWidget(resource.GetId()))
             ShowWidget(MakeWidget(resource.GetType() , mWorkspace.get() , &resource) , open_new_window);
     }

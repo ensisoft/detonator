@@ -1155,6 +1155,8 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<game::EntityClass>("entities", json, mResources);
     LoadResources<game::SceneClass>("scenes", json, mResources);
     LoadResources<Script>("scripts", json, mResources);
+    LoadResources<DataFile>("data_files", json, mResources);
+    LoadResources<AudioFile>("audio_files", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
@@ -1811,7 +1813,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             SaveResource(res);
             INFO("Imported new script file '%1' based on file '%2'", name, info.filePath());
         }
-        else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG")
+        else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG" || suffix == "TGA" || suffix == "BMP")
         {
             const auto& uri = AddFileToWorkspace(file);
             gfx::detail::TextureFileSource texture;
@@ -1828,9 +1830,23 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             SaveResource(res);
             INFO("Imported new material '%1' based on image file '%2'", name, info.filePath());
         }
+        else if (suffix == "MP3" || suffix == "WAV" || suffix == "FLAC" || suffix == "OGG")
+        {
+            const auto& uri = AddFileToWorkspace(file);
+            AudioFile audio;
+            audio.SetFileURI(ToUtf8(uri));
+            AudioResource res(audio, name);
+            SaveResource(res);
+            INFO("Imported new audio file '%1' based on file '%2'", name, info.filePath());
+        }
         else
         {
-            WARN("File '%1' doesn't seem to be a supported file type.", info.filePath());
+            const auto& uri = AddFileToWorkspace(file);
+            DataFile data;
+            data.SetFileURI(ToUtf8(uri));
+            DataResource res(data, name);
+            SaveResource(res);
+            INFO("Imported new data file '%1' based on file '%2'", name, info.filePath());
         }
     }
 }
@@ -1917,7 +1933,9 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
-    // perform the packing step.
+    // copy some file based content around.
+    // todo: this would also need some kind of file name collision
+    // resolution and mapping functionality.
     for (int i=0; i<mutable_copies.size(); ++i)
     {
         const auto& resource = mutable_copies[i];
@@ -1926,6 +1944,18 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             const Script* script = nullptr;
             resource->GetContent(&script);
             packer.CopyFile(script->GetFileURI(), "lua/");
+        }
+        else if (resource->IsDataFile())
+        {
+            const DataFile* datafile = nullptr;
+            resource->GetContent(&datafile);
+            packer.CopyFile(datafile->GetFileURI(), "data/");
+        }
+        else if (resource->IsAudioFile())
+        {
+            const AudioFile* audio = nullptr;
+            resource->GetContent(&audio);
+            packer.CopyFile(audio->GetFileURI(), "audio/");
         }
     }
 

@@ -74,7 +74,11 @@ namespace app
             // It's a scene description
             Scene,
             // it's a script file.
-            Script
+            Script,
+            // it's an audio file such as .ogg or .mp3
+            AudioFile,
+            // it's an arbitrary application/game data file
+            DataFile
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -150,6 +154,10 @@ namespace app
                     return QIcon("icons:scene.png");
                 case Resource::Type::Script:
                     return QIcon("icons:script.png");
+                case Resource::Type::AudioFile:
+                    return QIcon("icons:audio.png");
+                case Resource::Type::DataFile:
+                    return QIcon("icons:database.png");
                 default: break;
             }
             return QIcon();
@@ -168,6 +176,10 @@ namespace app
         { return GetType() == Type::Scene; }
         inline bool IsScript() const
         { return GetType() == Type::Script; }
+        inline bool IsAudioFile() const
+        { return GetType() == Type::AudioFile; }
+        inline bool IsDataFile() const
+        { return GetType() == Type::DataFile; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -282,6 +294,14 @@ namespace app
         struct ResourceTypeTraits<Script> {
             static constexpr auto Type = app::Resource::Type::Script;
         };
+        template<>
+        struct ResourceTypeTraits<AudioFile> {
+            static constexpr auto Type = app::Resource::Type::AudioFile;
+        };
+        template<>
+        struct ResourceTypeTraits<DataFile> {
+            static constexpr auto Type = app::Resource::Type::DataFile;
+        };
     } // detail
 
     template<typename BaseTypeContent>
@@ -372,6 +392,10 @@ namespace app
                 json["scenes"].push_back(content_json);
             else if (TypeValue == Resource::Type::Script)
                 json["scripts"].push_back(content_json);
+            else if (TypeValue == Resource::Type::AudioFile)
+                json["audio_files"].push_back(content_json);
+            else if (TypeValue == Resource::Type::DataFile)
+                json["data_files"].push_back(content_json);
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {
@@ -480,6 +504,8 @@ namespace app
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;
     using ScriptResource         = GameResource<Script>;
+    using AudioResource          = GameResource<AudioFile>;
+    using DataResource           = GameResource<DataFile>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
