@@ -408,6 +408,7 @@ int main(int argc, char* argv[])
         window.Create(title, window_width, window_height, context->GetVisualID(),
             window_can_resize, window_has_border, true);
         window.SetFullscreen(window_set_fullscreen);
+        window.ShowCursor(false);
 
         // Setup context to render in the window.
         context->SetWindowSurface(window);

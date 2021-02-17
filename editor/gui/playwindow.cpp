@@ -419,6 +419,8 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     // the container takes ownership of the window.
     mContainer = QWidget::createWindowContainer(mSurface, this);
     mContainer->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::MinimumExpanding);
+    mContainer->setCursor(Qt::BlankCursor);
+    mSurface->setCursor(Qt::BlankCursor);
     mUI.verticalLayout->addWidget(mContainer);
 
     // the default configuration has been set in main
@@ -1117,8 +1119,10 @@ void PlayWindow::SetFullScreen(bool fullscreen)
         delete mContainer;
         mContainer = QWidget::createWindowContainer(surface, this);
         mContainer->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::MinimumExpanding);
+        mContainer->setCursor(Qt::BlankCursor);
         mUI.verticalLayout->addWidget(mContainer);
         mSurface = surface;
+        mSurface->setCursor(Qt::BlankCursor);
 
         // todo: this can be wrong if the window never did go into fullscreen mode.
         mApp->OnLeaveFullScreen();
