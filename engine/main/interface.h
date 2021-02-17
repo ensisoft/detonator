@@ -296,6 +296,9 @@ namespace game
         // approximately once per second.
         virtual void UpdateStats(const Stats& stats) {}
 
+        // Ask the engine to take a screenshot of the current default (window)
+        // rendering surface and write it out as an image file.
+        virtual void TakeScreenshot(const std::string& filename) const {}
         // Called when the primary rendering surface in which the application
         // renders for display has been resized. Note that this may not be
         // the same as the current window and its size if an off-screen rendering

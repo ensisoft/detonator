@@ -872,6 +872,24 @@ void PlayWindow::on_actionFullscreen_triggered()
     }
 }
 
+void PlayWindow::on_actionScreenshot_triggered()
+{
+    if (!mApp || !mInitDone)
+        return;
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+    try
+    {
+        mContext.makeCurrent(mSurface);
+        mApp->TakeScreenshot("screenshot.png");
+        INFO("Wrote screenshot '%1'", "screenshot.png");
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in App::TakeScreenshot.");
+        ERROR(e.what());
+    }
+}
+
 void PlayWindow::on_btnApplyFilter_clicked()
 {
     mEventLog.SetFilterStr(GetValue(mUI.logFilter),GetValue(mUI.logFilterCaseSensitive));
@@ -934,6 +952,8 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
                 SetFullScreen(false);
             else if (key_event->key() == Qt::Key_F7 && InFullScreen())
                 mUI.actionPause->trigger();
+            else if (key_event->key() == Qt::Key_F9 && InFullScreen())
+                mUI.actionScreenshot->trigger();
 
             wdk::WindowEventKeydown key;
             key.symbol    = MapVirtualKey(key_event->key());

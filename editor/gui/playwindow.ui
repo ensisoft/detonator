@@ -229,6 +229,8 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    <addaction name="actionToggleDebugDraw"/>
    <addaction name="actionToggleDebugLog"/>
    <addaction name="separator"/>
+   <addaction name="actionScreenshot"/>
+   <addaction name="separator"/>
    <addaction name="actionFullscreen"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
@@ -466,6 +468,18 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/camera.png</normaloff>:/32x32_ico_png/camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
    </property>
   </action>
  </widget>

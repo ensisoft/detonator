@@ -334,6 +334,25 @@ public:
             } else ++it;
         }
     }
+    virtual void TakeScreenshot(const std::string& filename) const override
+    {
+        const auto& rgba = mDevice->ReadColorBuffer(mSurfaceWidth, mSurfaceHeight);
+        // pre-multiply alpha, STB image write with semi transparent pixels
+        // aren't really the expected output visually. should this just discard alpha?
+        gfx::Bitmap<gfx::RGB> rgb;
+        rgb.Resize(rgba.GetWidth(), rgba.GetHeight());
+        for (unsigned y=0; y<rgba.GetHeight(); ++y) {
+            for (unsigned x=0; x<rgba.GetWidth(); ++x) {
+                const auto src = rgba.GetPixel(y, x);
+                const auto alpha = src.a / 255.0;
+                const auto dst = gfx::RGB(src.r * alpha, src.g * alpha, src.b * alpha);
+                rgb.SetPixel(y, x, dst);
+            }
+        }
+        gfx::WritePNG(rgb, filename);
+        INFO("Wrote screenshot '%1'", filename);
+    }
+
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
         DEBUG("Rendering surface resized to %1x%2", width, height);
@@ -352,7 +371,6 @@ public:
         mFullScreen = false;
     }
 
-
     // WindowListener
     virtual void OnWantClose(const wdk::WindowEventWantClose&) override
     {
@@ -361,12 +379,6 @@ public:
     }
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
     {
-        if (key.symbol == wdk::Keysym::KeyS &&
-            key.modifiers.test(wdk::Keymod::Control) &&
-            key.modifiers.test(wdk::Keymod::Shift))
-        {
-            TakeScreenshot();
-        }
         //DEBUG("OnKeyDown: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
         mGame->OnKeyDown(key);
         mScripting->OnKeyDown(key);
@@ -427,12 +439,6 @@ private:
         if (!ret.empty())
             ret.pop_back();
         return ret;
-    }
-    void TakeScreenshot()
-    {
-        const auto& rgba = mDevice->ReadColorBuffer(mSurfaceWidth, mSurfaceHeight);
-        gfx::WritePNG(rgba, "screenshot.png");
-        INFO("Wrote screenshot.png");
     }
 private:
     unsigned mSurfaceWidth  = 0;

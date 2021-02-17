@@ -104,6 +104,7 @@ namespace gui
         void on_actionToggleDebugDraw_toggled();
         void on_actionToggleDebugLog_toggled();
         void on_actionFullscreen_triggered();
+        void on_actionScreenshot_triggered();
         void on_btnApplyFilter_clicked();
         void on_log_customContextMenuRequested(QPoint point);
 
