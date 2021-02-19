@@ -804,139 +804,58 @@ private:
     float mTime = 0.0f;
 };
 
-// render some different simple shapes.
-class ShapesTest : public GraphicsTest
+template<typename Shape>
+class ShapeTest : public GraphicsTest
 {
 public:
+    ShapeTest(const std::string& name) : mName(name)
+    {}
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::MaterialClass materials[4];
-        materials[0] = gfx::SolidColor(gfx::Color::Red);
-        materials[1] = gfx::TextureMap("textures/uv_test_512.png");
-        materials[2] = gfx::SolidColor(gfx::Color::HotPink);
-        materials[3] = gfx::TextureMap("textures/Checkerboard.png");
-
+        auto material = gfx::TextureMap("textures/uv_test_512.png");
         // in order to validate the texture coordinates let's set
         // the filtering to nearest and clamp to edge on sampling
-        materials[1].SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
-        materials[1].SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
-        materials[1].SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
-        materials[1].SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+        material.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+        material.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+        material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+        material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
 
-        {
-            gfx::Transform transform;
-            transform.Scale(100.0f, 100.0f);
-            transform.Translate(10.0f, 10.0f);
+        gfx::Transform transform;
+        transform.Scale(200.0f, 200.0f);
 
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+        transform.Translate(10.0f, 10.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Wireframe), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Outline, 10.0f), transform, material);
 
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Trapezoid(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
+        transform.MoveTo(10.0f, 250.0f);
+        transform.Resize(200.0f, 100.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Wireframe), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Wireframe, 2.0f), transform, material);
 
-            transform.Translate(-1020.0f, 150.0f);
-            painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Circle(gfx::Drawable::Style::Wireframe), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Wireframe), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Capsule(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-
-            transform.Translate(-1020.0f, 150.0f);
-            painter.Draw(gfx::IsoscelesTriangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::IsoscelesTriangle(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::IsoscelesTriangle(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::IsoscelesTriangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::IsoscelesTriangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::RightTriangle(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-
-            transform.Translate(-1020.0f, 150.0f);
-            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Arrow(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Wireframe), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Outline), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Wireframe, 10.0f), transform, materials[1]);
-            transform.Translate(120.0f, 0.0f);
-            painter.Draw(gfx::Parallelogram(gfx::Drawable::Style::Outline, 10.0f), transform, materials[1]);
-
-            transform.Translate(-1020.0f, 150.0f);
-            painter.Draw(gfx::Grid(5, 5), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Grid(5, 5), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Grid(5, 5), transform, materials[2]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::Grid(5, 5, 10.0f), transform, materials[1]);
-
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Solid), transform, materials[0]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Solid), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Outline), transform, materials[1]);
-            transform.Translate(110.0f, 0.0f);
-            painter.Draw(gfx::RoundRectangle(gfx::Drawable::Style::Wireframe), transform, materials[1]);
-        }
+        transform.MoveTo(60.0f, 400.0f);
+        transform.Resize(100.0f, 200.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Wireframe), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        transform.Translate(250.0f, 0.0f);
+        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
     }
-    virtual void Update(float dts)
+    virtual void Update(float dt) override
     {}
     virtual std::string GetName() const override
-    { return "ShapesTest"; }
+    { return mName; }
 private:
+    const std::string mName;
 };
 
 class RenderParticleTest : public GraphicsTest
@@ -1523,7 +1442,15 @@ int main(int argc, char* argv[])
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new TextAlignTest);
     tests.emplace_back(new RenderParticleTest);
-    tests.emplace_back(new ShapesTest);
+    tests.emplace_back(new ShapeTest<gfx::Arrow>("ArrowShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Capsule>("CapsuleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Circle>("CircleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::IsoscelesTriangle>("IsoscelesTriangleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Parallelogram>("ParallelogramShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Rectangle>("RectangleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::RoundRectangle>("RoundRectShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::RightTriangle>("RightTriangleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Trapezoid>("TrapezoidShapeTest"));
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
