@@ -123,6 +123,7 @@ namespace gui
         void on_actionNewEntity_triggered();
         void on_actionNewScene_triggered();
         void on_actionNewScript_triggered();
+        void on_actionImportFiles_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();
@@ -175,7 +176,7 @@ namespace gui
         bool FocusWidget(const QString& id);
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         void ShowHelpWidget();
-
+        void ImportFiles(const QStringList& files);
 
     private:
         bool event(QEvent* event)  override;

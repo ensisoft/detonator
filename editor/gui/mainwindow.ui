@@ -139,7 +139,7 @@
     <item>
      <widget class="QStackedWidget" name="helpWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="started">
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -844,6 +844,8 @@
     <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
+    <addaction name="actionImportFiles"/>
+    <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
@@ -1449,6 +1451,18 @@
    </property>
    <property name="toolTip">
     <string>Undo the last action</string>
+   </property>
+  </action>
+  <action name="actionImportFiles">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import File(s)</string>
+   </property>
+   <property name="toolTip">
+    <string>Import files as resources</string>
    </property>
   </action>
  </widget>

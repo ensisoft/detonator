@@ -136,8 +136,8 @@ namespace app
         QString MapFileToFilesystem(const QString& file) const;
         QString MapFileToFilesystem(const std::string& file) const;
 
-        // Save a new resource in the workspace. If the resource by the same type
-        // and name exists it's overwritten, otherwise a new resource is added to
+        // Save a resource in the workspace. If the resource by the same id
+        // already exists it's overwritten, otherwise a new resource is added to
         // the workspace.
         void SaveResource(const Resource& resource);
 

@@ -1033,6 +1033,14 @@ void MainWindow::on_actionNewScript_triggered()
     ShowWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
 }
 
+void MainWindow::on_actionImportFiles_triggered()
+{
+    QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Files"));
+    if (files.isEmpty())
+        return;
+    ImportFiles(files);
+}
+
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1366,6 +1374,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewEntity);
     menu.addAction(mUI.actionNewScene);
     menu.addAction(mUI.actionNewScript);
+    menu.addSeparator();
+    menu.addAction(mUI.actionImportFiles);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
@@ -1991,9 +2001,8 @@ void MainWindow::dropEvent(QDropEvent* event)
         DEBUG("Local file path: %1", name);
         files.append(name);
     }
-    mWorkspace->ImportFilesAsResource(files);
+    ImportFiles(files);
 }
-
 
 void MainWindow::BuildRecentWorkspacesMenu()
 {
@@ -2142,6 +2151,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewScene);
         mUI.mainToolBar->addAction(mUI.actionNewScript);
         mUI.mainToolBar->addSeparator();
+        mUI.mainToolBar->addAction(mUI.actionImportFiles);
     }
     else
     {
@@ -2196,6 +2206,14 @@ bool MainWindow::FocusWidget(const QString& id)
         }
     }
     return false;
+}
+
+void MainWindow::ImportFiles(const QStringList& files)
+{
+    if (!mWorkspace)
+        return;
+
+    mWorkspace->ImportFilesAsResource(files);
 }
 
 } // namespace
