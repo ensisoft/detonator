@@ -29,10 +29,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "base/logging.h"
 #include "audio/device.h"
 #include "audio/player.h"
-#include "audio/sample.h"
-#include "base/logging.h"
+#include "audio/source.h"
 
 // audio test application
 

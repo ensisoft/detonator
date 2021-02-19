@@ -32,9 +32,9 @@
 #include <cassert>
 
 #include "base/logging.h"
-#include "sample.h"
-#include "stream.h"
-#include "device.h"
+#include "audio/source.h"
+#include "audio/stream.h"
+#include "audio/device.h"
 
 namespace audio
 {
@@ -47,9 +47,9 @@ class Waveout : public AudioDevice
 public:
     Waveout(const char*)
     {}
-    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSample> sample) override
+    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSource> source) override
     {
-        auto s = std::make_shared<Stream>(std::move(sample));
+        auto s = std::make_shared<Stream>(std::move(source));
         streams_.push_back(s);
         return s;
     }
@@ -156,9 +156,9 @@ private:
 
             AlignedAllocator::get().free(buffer_);
         }
-        std::size_t fill(AudioSample& sample)
+        std::size_t fill(AudioSource& source)
         {
-            const auto pcm_bytes = sample.FillBuffer(buffer_, size_);
+            const auto pcm_bytes = source.FillBuffer(buffer_, size_);
 
             ZeroMemory(&header_, sizeof(header_));
             header_.lpData         = (LPSTR)buffer_;
@@ -186,11 +186,11 @@ private:
     class Stream : public AudioStream
     {
     public:
-        Stream(std::unique_ptr<AudioSample> sample) 
+        Stream(std::unique_ptr<AudioSource> source) 
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-            sample_      = std::move(sample);
+            source_      = std::move(source);
             done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
             last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
             state_       = AudioStream::State::None;
@@ -199,7 +199,7 @@ private:
             const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
 
             WAVEFORMATEX wfx = {0};
-            wfx.nSamplesPerSec  = sample_->GetRateHz();
+            wfx.nSamplesPerSec  = source_->GetRateHz();
             wfx.wBitsPerSample  = 32;
             wfx.nChannels       = 2;
             wfx.cbSize          = 0; // extra info
@@ -246,17 +246,17 @@ private:
             return state_;
         }
 
-        virtual std::unique_ptr<AudioSample> GetFinishedSample() override
+        virtual std::unique_ptr<AudioSource> GetFinishedSource() override
         {
-            std::unique_ptr<AudioSample> ret;
+            std::unique_ptr<AudioSource> ret;
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             if (state_ == State::Complete || state_ == State::Error)
-                ret = std::move(sample_);
+                ret = std::move(source_);
             return ret;
         }
 
         virtual std::string GetName() const override
-        { return sample_->GetName(); }
+        { return source_->GetName(); }
 
         virtual void Play()
         {
@@ -270,7 +270,7 @@ private:
 
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                num_pcm_bytes_ += buffers_[i]->fill(*sample_);
+                num_pcm_bytes_ += buffers_[i]->fill(*source_);
             }
             for (size_t i=0; i<buffers_.size(); ++i)
             {
@@ -306,7 +306,7 @@ private:
             const auto num_buffers = buffers_.size();
             const auto free_buffer = done_buffer_ % num_buffers;
             
-            num_pcm_bytes_ += buffers_[free_buffer]->fill(*sample_);
+            num_pcm_bytes_ += buffers_[free_buffer]->fill(*source_);
 
             buffers_[free_buffer]->play();
 
@@ -333,7 +333,7 @@ private:
 
                 case WOM_DONE:
                     this_->done_buffer_++;
-                    if (this_->sample_ && !this_->sample_->HasNextBuffer(this_->num_pcm_bytes_))
+                    if (this_->source_ && !this_->source_->HasNextBuffer(this_->num_pcm_bytes_))
                         this_->state_ = AudioStream::State::Complete;
                     break;
 
@@ -344,7 +344,7 @@ private:
         }
 
     private:
-        std::unique_ptr<AudioSample> sample_;
+        std::unique_ptr<AudioSource> source_;
         std::uint64_t num_pcm_bytes_ = 0;
     private:
         HWAVEOUT handle_ = NULL;

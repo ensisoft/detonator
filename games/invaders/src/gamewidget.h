@@ -151,7 +151,7 @@ namespace invaders
         bool mRunning    = true;
         bool mFullscreen = false;
     private:
-        std::vector<std::shared_ptr<audio::AudioSample>> mMusicTracks;
+        std::vector<std::shared_ptr<audio::AudioSource>> mMusicTracks;
         std::unique_ptr<audio::AudioPlayer> mAudioPlayer;
         std::size_t mMusicTrackId = 0;
         std::size_t mMusicTrackIndex = 0;

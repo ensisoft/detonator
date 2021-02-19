@@ -360,7 +360,7 @@ install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/di
 add_executable(audio_test
     audio/pulseaudio.cpp
     audio/waveout.cpp
-    audio/sample.cpp
+    audio/source.cpp
     audio/player.cpp
     audio/test/main.cpp
 )

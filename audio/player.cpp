@@ -29,10 +29,10 @@
 #endif
 
 #include "base/logging.h"
-#include "player.h"
-#include "device.h"
-#include "sample.h"
-#include "stream.h"
+#include "audio/player.h"
+#include "audio/device.h"
+#include "audio/source.h"
+#include "audio/stream.h"
 
 namespace audio
 {
@@ -56,14 +56,14 @@ AudioPlayer::~AudioPlayer()
     thread_->join();
 }
 
-std::size_t AudioPlayer::Play(std::unique_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping)
+std::size_t AudioPlayer::Play(std::unique_ptr<AudioSource> source, std::chrono::milliseconds ms, bool looping)
 {
     std::lock_guard<std::mutex> lock(queue_mutex_);
 
     size_t id = trackid_++;
     Track track;
     track.id       = id;
-    track.sample   = std::move(sample);
+    track.source   = std::move(source);
     track.when     = std::chrono::steady_clock::now() + ms;
     track.looping  = looping;
     waiting_.push(std::move(track));
@@ -71,9 +71,9 @@ std::size_t AudioPlayer::Play(std::unique_ptr<AudioSample> sample, std::chrono::
     return id;
 }
 
-std::size_t AudioPlayer::Play(std::unique_ptr<AudioSample> sample, bool looping)
+std::size_t AudioPlayer::Play(std::unique_ptr<AudioSource> source, bool looping)
 {
-    return Play(std::move(sample), std::chrono::milliseconds(0), looping);
+    return Play(std::move(source), std::chrono::milliseconds(0), looping);
 }
 
 void AudioPlayer::Pause(std::size_t id)
@@ -152,14 +152,14 @@ void AudioPlayer::AudioThreadLoop(AudioDevice* ptr)
             if (state == AudioStream::State::Complete ||
                 state == AudioStream::State::Error)
             {
-                auto sample = track.stream->GetFinishedSample();
+                auto source = track.stream->GetFinishedSource();
 
                 if (state == AudioStream::State::Complete && track.looping)
                 {
-                    // reset sample state for replay.
-                    sample->Reset();
+                    // reset state for replay.
+                    source->Reset();
 
-                    track.stream = dev->Prepare(std::move(sample));
+                    track.stream = dev->Prepare(std::move(source));
                     track.stream->Play();
                     DEBUG("Looping track ...");                    
                 }
@@ -209,7 +209,7 @@ void AudioPlayer::AudioThreadLoop(AudioDevice* ptr)
             
             Track item;
             item.id      = top.id;
-            item.stream  = dev->Prepare(std::move(const_cast<pq_value_type&>(top).sample));
+            item.stream  = dev->Prepare(std::move(const_cast<pq_value_type&>(top).source));
             item.when    = top.when;
             item.looping = top.looping;
             item.stream->Play();

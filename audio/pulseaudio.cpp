@@ -30,9 +30,9 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
-#include "sample.h"
-#include "stream.h"
-#include "device.h"
+#include "audio/source.h"
+#include "audio/stream.h"
+#include "audio/device.h"
 
 namespace audio
 {
@@ -60,9 +60,9 @@ public:
         pa_mainloop_free(loop_);
     }
 
-    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSample> sample) override
+    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSource> source) override
     {
-        auto stream = std::make_shared<PlaybackStream>(std::move(sample), context_);
+        auto stream = std::make_shared<PlaybackStream>(std::move(source), context_);
 
         while (stream->GetState() == AudioStream::State::None)
         {
@@ -103,15 +103,15 @@ private:
     class PlaybackStream  : public AudioStream
     {
     public:
-        PlaybackStream(std::unique_ptr<AudioSample> sample, pa_context* context) 
-            : sample_(std::move(sample))
+        PlaybackStream(std::unique_ptr<AudioSource> source, pa_context* context)
+            : source_(std::move(source))
         {
-            const std::string& sample_name = sample_->GetName();
+            const std::string& name = source_->GetName();
             pa_sample_spec spec;
-            spec.channels = sample_->GetNumChannels();
-            spec.rate     = sample_->GetRateHz();
+            spec.channels = source_->GetNumChannels();
+            spec.rate     = source_->GetRateHz();
             spec.format   = PA_SAMPLE_FLOAT32NE;
-            stream_ = pa_stream_new(context, sample_name.c_str(), &spec, nullptr);
+            stream_ = pa_stream_new(context, name.c_str(), &spec, nullptr);
             if (!stream_)
                 throw std::runtime_error("create stream failed");
 
@@ -136,16 +136,16 @@ private:
         virtual AudioStream::State GetState() const override
         {  return state_; }
         
-        virtual std::unique_ptr<AudioSample> GetFinishedSample() override
+        virtual std::unique_ptr<AudioSource> GetFinishedSource() override
         {
-            std::unique_ptr<AudioSample> ret;
+            std::unique_ptr<AudioSource> ret;
             if (state_ == State::Complete || state_ == State::Error)
-                ret = std::move(sample_);
+                ret = std::move(source_);
             return ret;
         }
 
         virtual std::string GetName() const override
-        { return sample_->GetName(); }
+        { return source_->GetName(); }
 
         virtual void Play() override
         {
@@ -177,23 +177,23 @@ private:
         static void write_callback(pa_stream* stream, size_t length, void* user)
         {
             auto* this_  = static_cast<PlaybackStream*>(user);
-            auto& sample = this_->sample_;
+            auto& source = this_->source_;
 
-            // we should always still have the sample object as long
+            // we should always still have the source object as long
             // as the state is ready and playing and we're expected
             // to write more data into the stream!
-            ASSERT(sample);            
+            ASSERT(source);
             
             std::vector<std::uint8_t> buff(length);
 
-            const auto bytes = this_->sample_->FillBuffer(&buff[0], length);
+            const auto bytes = this_->source_->FillBuffer(&buff[0], length);
 
             pa_stream_write(this_->stream_, &buff[0], bytes, nullptr, 0, PA_SEEK_RELATIVE);
             this_->num_pcm_bytes_ += bytes;
 
             // reaching the end of the stream, i.e. we're providing the last
             // write of data. schedule the drain operation callback on the stream.                
-            if (!sample->HasNextBuffer(this_->num_pcm_bytes_))
+            if (!source->HasNextBuffer(this_->num_pcm_bytes_))
                 pa_operation_unref(pa_stream_drain(this_->stream_, drain_callback, this_));
 
         }
@@ -230,7 +230,7 @@ private:
             }
         }
     private:
-        std::unique_ptr<AudioSample> sample_;
+        std::unique_ptr<AudioSource> source_;
         pa_stream*  stream_  = nullptr;
         AudioStream::State state_ = AudioStream::State::None;
         std::uint64_t num_pcm_bytes_ = 0;

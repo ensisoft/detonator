@@ -29,7 +29,7 @@
 #include <sndfile.h>
 
 #include "base/assert.h"
-#include "sample.h"
+#include "audio/source.h"
 
 namespace audio
 {

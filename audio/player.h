@@ -39,7 +39,7 @@ namespace audio
 {
     class AudioDevice;
     class AudioStream;
-    class AudioSample;
+    class AudioSource;
 
     // Play audio samples using the given audio device. Once audio 
     // is played the results are stored in TrackEvents which can be
@@ -52,7 +52,7 @@ namespace audio
     public:
         // Track specific playback status.
         enum class TrackStatus {
-            // track was played succesfully.
+            // track was played successfully.
             Success,
             // track failed to play
             Failure
@@ -75,15 +75,16 @@ namespace audio
         // dtor.
        ~AudioPlayer();
 
-        // Play the audio sample after the given time elapses (i.e. in X milliseconds after now)
+        // Play the audio samples sourced from the source object after some delay
+        // i.e. the given time elapses (i.e. in X milliseconds after now).
         // Returns an identifier for the audio play back that will happen later.
         // The same id can be used in a call to pause/resume.
-        std::size_t Play(std::unique_ptr<AudioSample> sample, std::chrono::milliseconds ms, bool looping = false);
+        std::size_t Play(std::unique_ptr<AudioSource> source, std::chrono::milliseconds ms, bool looping = false);
 
-        // Play the audio sample immediately.
-        // returns an identifier for the audio play back that will happen later.
-        // the same id can be used in a call to pause/resume.
-        std::size_t Play(std::unique_ptr<AudioSample> sample, bool looping = false);
+        // Play the audio samples sourced from the source object starting immediately.
+        // Returns an identifier for the audio play back that will happen later.
+        // The same id can be used in a call to pause/resume.
+        std::size_t Play(std::unique_ptr<AudioSource> source, bool looping = false);
 
         // Pause the audio stream identified by id. 
         void Pause(std::size_t id);
@@ -104,7 +105,7 @@ namespace audio
     private:
         struct Track {
             std::size_t id = 0;
-            std::unique_ptr<AudioSample> sample;
+            std::unique_ptr<AudioSource> source;
             std::shared_ptr<AudioStream> stream;
             std::chrono::steady_clock::time_point when;
             bool looping = false;
