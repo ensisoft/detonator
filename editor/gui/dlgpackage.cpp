@@ -177,7 +177,7 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
     SetProperty(mWorkspace, "packing_param_write_content", mUI.chkWriteContent);
     SetProperty(mWorkspace, "packing_param_delete_prev", mUI.chkDelete);
-    SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.AddFileToWorkspace(path));
+    SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.MapFileToWorkspace(path));
 
     app::Workspace::ContentPackingOptions options;
     options.directory          = path;

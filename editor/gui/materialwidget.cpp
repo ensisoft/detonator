@@ -555,7 +555,7 @@ void MaterialWidget::on_btnEditTextureMap_clicked()
         for (size_t i=0; i<text.GetNumTexts(); ++i)
         {
             auto& style_and_text = text.GetText(i);
-            style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
+            style_and_text.font  = mWorkspace->MapFileToWorkspace(style_and_text.font);
         }
 
         // Update the texture source's TextBuffer
@@ -620,7 +620,7 @@ void MaterialWidget::on_browseShader_clicked()
         tr("Select Shader File"), "", tr("GLSL files (*.glsl)"));
     if (list.isEmpty())
         return;
-    const auto& file = mWorkspace->AddFileToWorkspace(list[0]);
+    const auto& file = mWorkspace->MapFileToWorkspace(list[0]);
     mUI.shaderFile->setText(file);
     mUI.shaderFile->setCursorPosition(0);
 }
@@ -775,7 +775,7 @@ void MaterialWidget::AddNewTextureMapFromFile()
     {
         const QFileInfo info(item);
         const auto& name = info.baseName();
-        const auto& file = mWorkspace->AddFileToWorkspace(info.absoluteFilePath());
+        const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
 
         std::vector<TexturePackImage> images;
 
@@ -852,7 +852,7 @@ void MaterialWidget::AddNewTextureMapFromText()
     for (size_t i=0; i<text.GetNumTexts(); ++i)
     {
         auto& style_and_text = text.GetText(i);
-        style_and_text.font  = mWorkspace->AddFileToWorkspace(style_and_text.font);
+        style_and_text.font  = mWorkspace->MapFileToWorkspace(style_and_text.font);
     }
 
     auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));

@@ -127,14 +127,13 @@ namespace app
         bool IsOpen() const
         { return mIsOpen; }
 
-        // Add a file to the workspace and return a path to the file encoded in
-        // "workspace file" notation.
-        QString AddFileToWorkspace(const QString& file);
-        std::string AddFileToWorkspace(const std::string& file);
+        // Map a file to the workspace and return a file URI
+        QString MapFileToWorkspace(const QString& file) const;
+        std::string MapFileToWorkspace(const std::string& file) const;
 
         // Map a "workspace file" to a file path in the file system.
-        QString MapFileToFilesystem(const QString& file) const;
-        QString MapFileToFilesystem(const std::string& file) const;
+        QString MapFileToFilesystem(const QString& uri) const;
+        QString MapFileToFilesystem(const std::string& uri) const;
 
         // Save a resource in the workspace. If the resource by the same id
         // already exists it's overwritten, otherwise a new resource is added to

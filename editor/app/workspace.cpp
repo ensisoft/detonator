@@ -994,7 +994,7 @@ QString Workspace::GetName() const
     return mWorkspaceDir;
 }
 
-QString Workspace::AddFileToWorkspace(const QString& filepath)
+QString Workspace::MapFileToWorkspace(const QString& filepath) const
 {
     // don't remap already mapped files.
     if (filepath.startsWith("app://") ||
@@ -1054,33 +1054,33 @@ QString Workspace::AddFileToWorkspace(const QString& filepath)
 }
 
 // convenience wrapper
-std::string Workspace::AddFileToWorkspace(const std::string& file)
+std::string Workspace::MapFileToWorkspace(const std::string& file) const
 {
-    return ToUtf8(AddFileToWorkspace(FromUtf8(file)));
+    return ToUtf8(MapFileToWorkspace(FromUtf8(file)));
 }
 
-QString Workspace::MapFileToFilesystem(const QString& file) const
+QString Workspace::MapFileToFilesystem(const QString& uri) const
 {
     // see comments in AddFileToWorkspace.
     // this is basically the same as MapFilePath except this API
     // is internal to only this application whereas MapFilePath is part of the
     // API exposed to the graphics/ subsystem.
 
-    QString ret = file;
+    QString ret = uri;
     if (ret.startsWith("ws://"))
         ret = CleanPath(ret.replace("ws://", mWorkspaceDir));
-    else if (file.startsWith("app://"))
+    else if (uri.startsWith("app://"))
         ret = CleanPath(ret.replace("app://", GetAppDir()));
-    else if (file.startsWith("fs://"))
+    else if (uri.startsWith("fs://"))
         ret.remove(0, 5);
 
     // return as is
     return ret;
 }
 
-QString Workspace::MapFileToFilesystem(const std::string& file) const
+QString Workspace::MapFileToFilesystem(const std::string& uri) const
 {
-    return MapFileToFilesystem(FromUtf8(file));
+    return MapFileToFilesystem(FromUtf8(uri));
 }
 
 template<typename ClassType>
@@ -1806,7 +1806,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         const auto& suffix = info.completeSuffix().toUpper();
         if (suffix == "LUA")
         {
-            const auto& uri = AddFileToWorkspace(file);
+            const auto& uri = MapFileToWorkspace(file);
             Script script;
             script.SetFileURI(ToUtf8(uri));
             ScriptResource res(script, name);
@@ -1815,7 +1815,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG" || suffix == "TGA" || suffix == "BMP")
         {
-            const auto& uri = AddFileToWorkspace(file);
+            const auto& uri = MapFileToWorkspace(file);
             gfx::detail::TextureFileSource texture;
             texture.SetFileName(ToUtf8(uri));
             texture.SetName(ToUtf8(name));
@@ -1832,7 +1832,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else if (suffix == "MP3" || suffix == "WAV" || suffix == "FLAC" || suffix == "OGG")
         {
-            const auto& uri = AddFileToWorkspace(file);
+            const auto& uri = MapFileToWorkspace(file);
             AudioFile audio;
             audio.SetFileURI(ToUtf8(uri));
             AudioResource res(audio, name);
@@ -1841,7 +1841,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else
         {
-            const auto& uri = AddFileToWorkspace(file);
+            const auto& uri = MapFileToWorkspace(file);
             DataFile data;
             data.SetFileURI(ToUtf8(uri));
             DataResource res(data, name);

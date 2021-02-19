@@ -262,7 +262,7 @@ void ScriptWidget::on_actionSave_triggered()
         return;
 #endif
 
-    const auto& URI = mWorkspace->AddFileToWorkspace(mFilename);
+    const auto& URI = mWorkspace->MapFileToWorkspace(mFilename);
     DEBUG("Script file URI '%1'", URI);
 
     app::Script script;

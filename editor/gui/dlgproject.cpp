@@ -124,7 +124,7 @@ void DlgProject::on_btnSelectEngine_clicked()
 #endif
     if (list.isEmpty())
         return;
-    const auto& file = mWorkspace.AddFileToWorkspace(list[0]);
+    const auto& file = mWorkspace.MapFileToWorkspace(list[0]);
     SetValue(mUI.edtAppLibrary, file);
 }
 
