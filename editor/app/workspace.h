@@ -406,9 +406,9 @@ namespace app
             }
 
             // default texture minification filter.
-            gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Nearest;
+            gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Trilinear;
             // default texture magnification filter.
-            gfx::Device::MagFilter default_mag_filter = gfx::Device::MagFilter::Nearest;
+            gfx::Device::MagFilter default_mag_filter = gfx::Device::MagFilter::Linear;
             // The starting window mode.
             WindowMode window_mode = WindowMode::Windowed;
             // the assumed window width when launching the application
