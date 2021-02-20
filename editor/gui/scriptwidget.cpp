@@ -270,6 +270,7 @@ void ScriptWidget::on_actionSave_triggered()
     app::ScriptResource resource(script, mResourceName);
     mWorkspace->SaveResource(resource);
     setWindowTitle(mResourceName);
+    mResourceID = app::FromUtf8(script.GetId());
 }
 
 void ScriptWidget::on_actionOpen_triggered()
