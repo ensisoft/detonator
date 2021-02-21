@@ -300,6 +300,80 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 }
 
 // static
+Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    // todo: we could use some information here about the
+    // eventual transform on the screen and use that to compute
+    // some kind of "LOD" value for figuring out how many slices we should have.
+    const auto slices = 50;
+    const auto* name = style == Style::Outline   ? "SemiCircleOutline" :
+                       (style == Style::Wireframe ? "SemiCircleWireframe" : "SemiCircle");
+
+    Geometry* geom = device.FindGeometry(name);
+    if (!geom)
+    {
+        std::vector<Vertex> vs;
+
+        // center point for triangle fan.
+        Vertex center;
+        center.aPosition.x =  0.5;
+        center.aPosition.y = -0.5;
+        center.aTexCoord.x =  0.5;
+        center.aTexCoord.y =  0.5;
+        if (style == Style::Solid)
+        {
+            vs.push_back(center);
+        }
+
+        const float angle_increment = (float)math::Pi / slices;
+        const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+        float angle = 0.0f;
+
+        for (unsigned i=0; i<max_slice; ++i)
+        {
+            const auto x = std::cos(angle) * 0.5f;
+            const auto y = std::sin(angle) * 0.5f;
+            Vertex v;
+            v.aPosition.x = x + 0.5f;
+            v.aPosition.y = y - 0.5f;
+            v.aTexCoord.x = x + 0.5f;
+            v.aTexCoord.y = 1.0 - (y + 0.5f);
+            vs.push_back(v);
+
+            angle += angle_increment;
+
+            if (style == Style::Wireframe)
+            {
+                const auto x = std::cos(angle) * 0.5f;
+                const auto y = std::sin(angle) * 0.5f;
+                Vertex v;
+                v.aPosition.x = x + 0.5f;
+                v.aPosition.y = y - 0.5f;
+                v.aTexCoord.x = x + 0.5f;
+                v.aTexCoord.y = 1.0 - (y + 0.5f);
+                vs.push_back(v);
+                vs.push_back(center);
+            }
+        }
+        geom = device.MakeGeometry(name);
+        geom->SetVertexBuffer(&vs[0], vs.size());
+    }
+    geom->ClearDraws();
+
+    if (style == Style::Solid)
+        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
+    else if (style == Style::Outline)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+    else if (style == Style::Wireframe)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+    return geom;
+
+}
+
+// static
 Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& device)
 {
     if (style == Style::Points)
@@ -1501,7 +1575,7 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
     // but this would have 2 problems: creating based shared_ptr of the drawable
     // class would require shared_from_this which I consider to be bad practice and
     // it'd cause some problems at some point.
-    // secondly it'd create a circular depedency between class and the instance types
+    // secondly it'd create a circular dependency between class and the instance types
     // which is going to cause some problems at some point.
 
     switch (klass->GetType())
@@ -1514,6 +1588,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<Capsule>();
         case DrawableClass::Type::Circle:
             return std::make_unique<Circle>();
+        case DrawableClass::Type::SemiCircle:
+            return std::make_unique<SemiCircle>();
         case DrawableClass::Type::Rectangle:
             return std::make_unique<Rectangle>();
         case DrawableClass::Type::RoundRectangle:
@@ -1533,7 +1609,7 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
         case DrawableClass::Type::Polygon:
             return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
     }
-    BUG("???");
+    BUG("Unhandled drawable class type");
     return {};
 }
 

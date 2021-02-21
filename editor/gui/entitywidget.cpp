@@ -429,6 +429,7 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewRoundRect);
     bar.addAction(mUI.actionNewCircle);
+    bar.addAction(mUI.actionNewSemiCircle);
     bar.addAction(mUI.actionNewIsoscelesTriangle);
     bar.addAction(mUI.actionNewRightTriangle);
     bar.addAction(mUI.actionNewTrapezoid);
@@ -451,6 +452,7 @@ void EntityWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewRect);
     menu.addAction(mUI.actionNewRoundRect);
     menu.addAction(mUI.actionNewCircle);
+    menu.addAction(mUI.actionNewSemiCircle);
     menu.addAction(mUI.actionNewIsoscelesTriangle);
     menu.addAction(mUI.actionNewRightTriangle);
     menu.addAction(mUI.actionNewTrapezoid);
@@ -942,6 +944,15 @@ void EntityWidget::on_actionNewCircle_triggered()
     UncheckPlacementActions();
     mUI.actionNewCircle->setChecked(true);
 }
+
+void EntityWidget::on_actionNewSemiCircle_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "SemiCircle"));
+
+    UncheckPlacementActions();
+    mUI.actionNewSemiCircle->setChecked(true);
+}
+
 void EntityWidget::on_actionNewIsoscelesTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "IsoscelesTriangle"));
@@ -2108,6 +2119,7 @@ void EntityWidget::UncheckPlacementActions()
     mUI.actionNewTrapezoid->setChecked(false);
     mUI.actionNewParallelogram->setChecked(false);
     mUI.actionNewCapsule->setChecked(false);
+    mUI.actionNewSemiCircle->setChecked(false);
 }
 
 void EntityWidget::UpdateCurrentNodePosition(float dx, float dy)

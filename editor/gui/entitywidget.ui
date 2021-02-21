@@ -1996,6 +1996,18 @@
     <string>Duplicate</string>
    </property>
   </action>
+  <action name="actionNewSemiCircle">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/semi_circle.png</normaloff>:/32x32_ico_png/semi_circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Semi</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new semi circle</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

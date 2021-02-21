@@ -61,6 +61,7 @@ namespace gfx
         enum class Type {
             Arrow,
             Capsule,
+            SemiCircle,
             Circle,
             Grid,
             IsoscelesTriangle,
@@ -201,6 +202,8 @@ namespace gfx
                     return "_arrow";
                 else if (ActualType == types::Capsule)
                     return "_capsule";
+                else if (ActualType == types::SemiCircle)
+                    return "_semi_circle";
                 else if (ActualType == types::Circle)
                     return "_circle";
                 else if (ActualType == types::IsoscelesTriangle)
@@ -299,6 +302,9 @@ namespace gfx
         struct CapsuleGeometry : public GeometryBase {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
+        struct SemiCircleGeometry : public GeometryBase {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
         struct CircleGeometry : public GeometryBase {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
@@ -323,6 +329,7 @@ namespace gfx
     // own actual type class yet.
     using ArrowClass             = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
     using CapsuleClass           = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
+    using SemiCircleClass        = detail::GenericDrawableClass<DrawableClass::Type::SemiCircle>;
     using CircleClass            = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
     using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
     using LineClass              = detail::GenericDrawableClass<DrawableClass::Type::Line>;
@@ -335,6 +342,7 @@ namespace gfx
     // behaviour at runtime.
     using Arrow             = detail::GenericDrawable<detail::ArrowGeometry>;
     using Capsule           = detail::GenericDrawable<detail::CapsuleGeometry>;
+    using SemiCircle        = detail::GenericDrawable<detail::SemiCircleGeometry>;
     using Circle            = detail::GenericDrawable<detail::CircleGeometry>;
     using IsoscelesTriangle = detail::GenericDrawable<detail::IsoscelesTriangleGeometry>;
     using Line              = detail::GenericDrawable<detail::LineGeometry>;

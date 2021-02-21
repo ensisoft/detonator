@@ -88,6 +88,7 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionNewRect_triggered();
         void on_actionNewCircle_triggered();
+        void on_actionNewSemiCircle_triggered();
         void on_actionNewIsoscelesTriangle_triggered();
         void on_actionNewRightTriangle_triggered();
         void on_actionNewRoundRect_triggered();

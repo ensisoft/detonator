@@ -75,6 +75,8 @@ ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const
         return std::make_shared<gfx::CapsuleClass>();
     else if (name == "_circle")
         return std::make_shared<gfx::CircleClass>();
+    else if (name == "_semi_circle")
+        return std::make_shared<gfx::SemiCircleClass>();
     else if (name == "_round_rect")
         return std::make_shared<gfx::RoundRectangleClass>();
     else if (name == "_trapezoid")
