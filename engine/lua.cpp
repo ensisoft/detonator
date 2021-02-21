@@ -26,6 +26,7 @@
 #  define SOL_ALL_SAFETIES_ON 1
 #  include <sol/sol.hpp>
 #  include <glm/glm.hpp>
+#  include <glm/gtx/matrix_decompose.hpp>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -577,8 +578,8 @@ void BindBase(sol::state& L)
 void BindGLM(sol::state& L)
 {
     sol::constructors<glm::vec2(), glm::vec2(float, float)> ctors;
-    auto table = L.create_named_table("glm");
-    auto vec2   = table.new_usertype<glm::vec2>("vec2", ctors,
+    auto glm  = L.create_named_table("glm");
+    auto vec2 = glm.new_usertype<glm::vec2>("vec2", ctors,
         sol::meta_function::index, [](const glm::vec2& vec, int index) {
         if (index >= 2)
             throw std::runtime_error("glm.vec2 access out of bounds");
@@ -611,22 +612,21 @@ void BindGLM(sol::state& L)
     vec2.set_function(sol::meta_function::to_string, [](const glm::vec2& vector) {
         return std::to_string(vector.x) + "," + std::to_string(vector.y);
     });
-    table["dot"]       = [](const glm::vec2 &a, const glm::vec2 &b) { return glm::dot(a, b); };
-    table["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
-    table["normalize"] = [](const glm::vec2& vec) { return glm::normalize(vec); };
+    glm["dot"]       = [](const glm::vec2 &a, const glm::vec2 &b) { return glm::dot(a, b); };
+    glm["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
+    glm["normalize"] = [](const glm::vec2& vec) { return glm::normalize(vec); };
 
-    auto mat4 = table.new_usertype<glm::mat4>("mat4");
-    mat4["GetRotation"] = [](const glm::mat4& mat) {
-        game::FBox box(mat);
-        return box.GetRotation();
-    };
-    mat4["GetScale"] = [](const glm::mat4& mat) {
-        game::FBox box(mat);
-        return box.GetSize();
-    };
-    mat4["GetTranslation"] = [](const glm::mat4& mat) {
-        game::FBox box(mat);
-        return box.GetPosition();
+    auto mat4 = glm.new_usertype<glm::mat4>("mat4");
+    mat4["decompose"] = [](const glm::mat4& mat) {
+        glm::vec3 scale;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat orientation;
+        glm::decompose(mat, scale, orientation, translation, skew, perspective);
+        return std::make_tuple(glm::vec2(translation.x, translation.y),
+                               glm::vec2(scale.x, scale.y),
+                               glm::angle(orientation));
     };
 }
 
@@ -696,6 +696,39 @@ void BindWDK(sol::state& L)
 void BindGameLib(sol::state& L)
 {
     auto table = L["game"].get_or_create<sol::table>();
+
+    {
+        auto util = table["util"].get_or_create<sol::table>();
+        util["GetRotationFromMatrix"] = [](const glm::mat4& mat) {
+            glm::vec3 scale;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::quat orientation;
+            glm::decompose(mat, scale, orientation, translation, skew, perspective);
+            return glm::angle(orientation);
+        };
+        util["GetScaleFromMatrix"] = [](const glm::mat4& mat) {
+            glm::vec3 scale;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::quat orientation;
+            glm::decompose(mat, scale, orientation, translation, skew, perspective);
+            return glm::vec2(scale.x, scale.y);
+        };
+        util["GetTranslationFromMatrix"] = [](const glm::mat4& mat) {
+            glm::vec3 scale;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::quat orientation;
+            glm::decompose(mat, scale, orientation, translation, skew, perspective);
+            return glm::vec2(translation.x, translation.y);
+        };
+    }
+
+
     {
         sol::constructors<FRect(), FRect(float, float, float, float)> ctors;
         auto rect = table.new_usertype<FRect>("FRect", ctors);

@@ -33,8 +33,8 @@ function Update(bullet, wall_time, game_time, dt)
         local entity = Scene:GetEntity(i)
         if entity:GetClassName() == 'Ship2' and bullet.red then
             -- player's bullet hit invader ship
-            local ship_mat = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local ship_pos = ship_mat:GetTranslation()
+            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
+            local ship_pos = game.util.GetTranslationFromMatrix(matrix)
             local distance = glm.length(ship_pos - bullet_pos)
             if (distance <= 50.0) then
                 Game:DebugPrint('enemy was hit!')
@@ -44,8 +44,8 @@ function Update(bullet, wall_time, game_time, dt)
             end
         elseif entity:GetClassName() == 'Player' and bullet.red == false then
             -- invader ship bullet hit player's ship
-            local ship_mat = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local ship_pos = ship_mat:GetTranslation()
+            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
+            local ship_pos = game.util.GetTranslationFromMatrix(matrix)
             local distance = glm.length(ship_pos - bullet_pos)
             if (distance <= 50.0) then
                 Game:DebugPrint('you were hit!')
@@ -53,8 +53,8 @@ function Update(bullet, wall_time, game_time, dt)
                 SpawnExplosion(ship_pos, 'RedExplosion')
             end
         elseif entity:GetClassName() == 'Asteroid' and bullet.red then
-            local rock_mat = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local rock_pos = rock_mat:GetTranslation()
+            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
+            local rock_pos = game.util.GetTranslationFromMatrix(matrix)
             local distance = glm.length(rock_pos -bullet_pos)
             local radius   = entity.radius
             if (distance <= radius) then
