@@ -40,6 +40,8 @@
 #include "engine/classlib.h"
 #include "engine/physics.h"
 #include "engine/lua.h"
+#include "engine/transform.h"
+#include "engine/util.h"
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
@@ -699,36 +701,11 @@ void BindGameLib(sol::state& L)
 
     {
         auto util = table["util"].get_or_create<sol::table>();
-        util["GetRotationFromMatrix"] = [](const glm::mat4& mat) {
-            glm::vec3 scale;
-            glm::vec3 translation;
-            glm::vec3 skew;
-            glm::vec4 perspective;
-            glm::quat orientation;
-            glm::decompose(mat, scale, orientation, translation, skew, perspective);
-            return glm::angle(orientation);
-        };
-        util["GetScaleFromMatrix"] = [](const glm::mat4& mat) {
-            glm::vec3 scale;
-            glm::vec3 translation;
-            glm::vec3 skew;
-            glm::vec4 perspective;
-            glm::quat orientation;
-            glm::decompose(mat, scale, orientation, translation, skew, perspective);
-            return glm::vec2(scale.x, scale.y);
-        };
-        util["GetTranslationFromMatrix"] = [](const glm::mat4& mat) {
-            glm::vec3 scale;
-            glm::vec3 translation;
-            glm::vec3 skew;
-            glm::vec4 perspective;
-            glm::quat orientation;
-            glm::decompose(mat, scale, orientation, translation, skew, perspective);
-            return glm::vec2(translation.x, translation.y);
-        };
+        util["GetRotationFromMatrix"]    = GetRotationFromMatrix;
+        util["GetScaleFromMatrix"]       = GetScaleFromMatrix;
+        util["GetTranslationFromMatrix"] = GetTranslationFromMatrix;
+        util["RotateVector"]             = RotateVector;
     }
-
-
     {
         sol::constructors<FRect(), FRect(float, float, float, float)> ctors;
         auto rect = table.new_usertype<FRect>("FRect", ctors);
