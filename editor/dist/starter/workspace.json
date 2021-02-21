@@ -1,0 +1,75 @@
+{
+    "8UZOHE5ijx": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "Fj66N4PDUG": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "LPH6tgo9eN": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "SfDYJTRhGz": {
+        "checked_for_packing": true
+    },
+    "Ytj4tDET1a": {
+    },
+    "e1zlPY8HTm": {
+        "material": "FlappyBird Hurt"
+    },
+    "iiKBwhkDbI": {
+    },
+    "project": {
+        "application_library_lin": "app://libGameEngine.so",
+        "application_library_win": "app://GameEngine.dll",
+        "application_name": "",
+        "application_version": "",
+        "clear_color": "4281486692",
+        "command_line_arguments": "",
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "game_viewport_height": 800,
+        "game_viewport_width": 1000,
+        "multisample_sample_count": 4,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 10,
+        "phys_scale_x": 100,
+        "phys_scale_y": 100,
+        "ticks_per_second": 1,
+        "updates_per_second": 60,
+        "use_gamehost_process": true,
+        "window_can_resize": true,
+        "window_has_border": true,
+        "window_height": 768,
+        "window_mode": "Windowed",
+        "window_vsync": false,
+        "window_width": 1024,
+        "working_folder": "${workspace}"
+    },
+    "qv7w7J7Aiv": {
+        "checked_for_packing": true
+    },
+    "sUAHqYkAPp": {
+        "shader_file": "",
+        "use_shader_file": false
+    },
+    "tqHo3nK0b9": {
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_delete_prev": false,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_output_dir": "ws://dist",
+        "packing_param_resize_large_textures": true,
+        "packing_param_tex_padding": 2,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
+    },
+    "zJgI2SZT3X": {
+    }
+}

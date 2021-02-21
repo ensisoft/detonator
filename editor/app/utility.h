@@ -60,8 +60,10 @@ QString JoinPath(const QString& lhs, const QString& rhs);
 // Clean the path string. Returns with native separators.
 QString CleanPath(const QString& path);
 
-// Make path. returns true if succesful, otherwise false.
+// Make path. returns true if successful, otherwise false.
 bool MakePath(const QString& path);
+
+bool CopyRecursively(const QString& src_dir_path, const QString& dst_dir_path);
 
 // Convert the UTF-8 encoded string to a QString.
 QString FromUtf8(const std::string& str);

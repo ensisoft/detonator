@@ -94,6 +94,33 @@ bool MakePath(const QString& path)
     return d.mkpath(path);
 }
 
+bool CopyRecursively(const QString& src, const QString& dst)
+{
+    const QFileInfo srcFileInfo(src);
+    if (srcFileInfo.isDir())
+    {
+        QDir dstDir(dst);
+        dstDir.cdUp();
+        if (!dstDir.mkdir(QFileInfo(dst).fileName()))
+            return false;
+        const QDir srcDir(src);
+        const QStringList fileNames = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString& fileName : fileNames)
+        {
+            const QString& newSrcFilePath = JoinPath(src, fileName);
+            const QString& newTgtFilePath = JoinPath(dst, fileName);
+            if (!CopyRecursively(newSrcFilePath, newTgtFilePath))
+                return false;
+        }
+    }
+    else
+    {
+        if (!QFile::copy(src, dst))
+            return false;
+    }
+    return true;
+}
+
 QString FromUtf8(const std::string& str)
 {
     return QString::fromUtf8(str.c_str());

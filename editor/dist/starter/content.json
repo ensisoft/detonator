@@ -1,0 +1,1094 @@
+{
+  "entities": [
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "tqHo3nK0b9",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "FlappyBird",
+      "nodes": [
+        {
+          "class": "xYSBrgLxKL",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "angular_velocity": 0.0,
+            "density": 2.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "linear_velocity": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "polygon": "e1zlPY8HTm",
+            "restitution": 0.5,
+            "shape": "Circle",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 65.0,
+            "y": 65.0
+          }
+        },
+        {
+          "class": "mqxbWFGIg9",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "e1zlPY8HTm",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Fj66N4PDUG",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Flying",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          }
+        },
+        {
+          "class": "2qZDXrpOrX",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "e1zlPY8HTm",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": false
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "sUAHqYkAPp",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Hurt",
+          "position": {
+            "x": 0.6000000238418579,
+            "y": 0.6000000238418579
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "mqxbWFGIg9"
+                }
+              },
+              {
+                "node": {
+                  "id": "2qZDXrpOrX"
+                }
+              }
+            ],
+            "node": {
+              "id": "xYSBrgLxKL"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "tqHo3nK0b9",
+      "resource_name": "FlappyBird",
+      "script_file": "zJgI2SZT3X",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.050159506499767303,
+                "flag": "VisibleInGame",
+                "id": "qwTk9r9jtD",
+                "node": "mqxbWFGIg9",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "On",
+                "duration": 0.03374391794204712,
+                "flag": "VisibleInGame",
+                "id": "CZ0idO9d63",
+                "node": "mqxbWFGIg9",
+                "starttime": 0.9662560820579529
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "On",
+                "duration": 0.050159744918346405,
+                "flag": "VisibleInGame",
+                "id": "XNpMqgsCPz",
+                "node": "2qZDXrpOrX",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.949840247631073,
+                "flag": "VisibleInGame",
+                "id": "If0O9rvH0H",
+                "node": "2qZDXrpOrX",
+                "starttime": 0.050159744918346405
+              },
+              "type": "SetFlag"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 2.0,
+          "id": "YsC2G7tR4w",
+          "looping": false,
+          "name": "Hurt"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "Ytj4tDET1a",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Spike",
+      "nodes": [
+        {
+          "class": "Q6Pq01QoEA",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8UZOHE5ijx",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.625,
+            "y": -110.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 58.52046203613281,
+            "y": 219.220703125
+          }
+        },
+        {
+          "class": "Bft0bWhpnE",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Sharp Tip",
+          "position": {
+            "x": -0.625,
+            "y": -72.5
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "angular_velocity": 0.0,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": true
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "linear_velocity": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "IsoscelesTriangle",
+            "simulation": "Static"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 58.29808044433594,
+            "y": 67.99427795410156
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "Bft0bWhpnE"
+                }
+              }
+            ],
+            "node": {
+              "id": "Q6Pq01QoEA"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "Ytj4tDET1a",
+      "resource_name": "Spike",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "qv7w7J7Aiv",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Background",
+      "nodes": [
+        {
+          "class": "0EZszTO4jB",
+          "drawable_item": {
+            "alpha": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "FlipVertically": false,
+              "OverrideAlpha": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "LPH6tgo9eN",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Layer0",
+          "position": {
+            "x": -0.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1000.0,
+            "y": 800.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "0EZszTO4jB"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "qv7w7J7Aiv",
+      "resource_name": "Background",
+      "script_file": ""
+    }
+  ],
+  "materials": [
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 10.0,
+      "gamma": 1.0,
+      "id": "Fj66N4PDUG",
+      "particle_action": "None",
+      "resource_id": "Fj66N4PDUG",
+      "resource_name": "FlappyBird Flying",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+            "id": "QE77Xqrin5",
+            "name": "frame-1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+            "id": "5Af6AX5fWj",
+            "name": "frame-2"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+            "id": "IQp58PZpYr",
+            "name": "frame-3"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+            "id": "TF41G2qs1F",
+            "name": "frame-4"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+            "id": "nXMMo8BY6K",
+            "name": "frame-5"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+            "id": "5lkAUt9o0i",
+            "name": "frame-6"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+            "id": "J25WMydmQE",
+            "name": "frame-7"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+            "id": "sbiaNztdZx",
+            "name": "frame-8"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "LPH6tgo9eN",
+      "particle_action": "None",
+      "resource_id": "LPH6tgo9eN",
+      "resource_name": "Background",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Background/full_background.png",
+            "id": "SJaydLoMio",
+            "name": "full_background"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Repeat",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 2.0,
+      "gamma": 1.0,
+      "id": "sUAHqYkAPp",
+      "particle_action": "None",
+      "resource_id": "sUAHqYkAPp",
+      "resource_name": "FlappyBird Hurt",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
+            "id": "OBfB5nAqqI",
+            "name": "frame-1"
+          },
+          "type": "Filesystem"
+        },
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
+            "id": "LPXrp9f5XW",
+            "name": "frame-2"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "8UZOHE5ijx",
+      "particle_action": "None",
+      "resource_id": "8UZOHE5ijx",
+      "resource_name": "Spike",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Spikes/sharp wood.png",
+            "id": "myOwbtHDMG",
+            "name": "sharp wood"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "iiKBwhkDbI",
+      "nodes": [
+        {
+          "entity": "tqHo3nK0b9",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "DrCJuFGCIS",
+          "idle_animation_id": "",
+          "layer": 1,
+          "name": "FlappyBird",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -369.0,
+            "y": -392.0
+          },
+          "rotation": 0.0015032291412353516,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "qv7w7J7Aiv",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "ytPpbxGQnZ",
+          "idle_animation_id": "",
+          "layer": -1,
+          "name": "Background_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "Ytj4tDET1a",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "X4Wj3RepYI",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Spike_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "DrCJuFGCIS"
+            }
+          },
+          {
+            "node": {
+              "id": "ytPpbxGQnZ"
+            }
+          },
+          {
+            "node": {
+              "id": "X4Wj3RepYI"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "iiKBwhkDbI",
+      "resource_name": "My Scene"
+    }
+  ],
+  "scripts": [
+    {
+      "id": "SfDYJTRhGz",
+      "resource_id": "SfDYJTRhGz",
+      "resource_name": "game",
+      "uri": "ws://lua/game.lua"
+    },
+    {
+      "id": "zJgI2SZT3X",
+      "resource_id": "zJgI2SZT3X",
+      "resource_name": "FlappyBird",
+      "uri": "ws://lua/zJgI2SZT3X.lua"
+    }
+  ],
+  "shapes": [
+    {
+      "draws": [
+        {
+          "count": 26,
+          "offset": 0,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "e1zlPY8HTm",
+      "resource_id": "e1zlPY8HTm",
+      "resource_name": "FlappyBird",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.5497737526893616,
+          "t": 0.3996983468532562,
+          "x": 0.5497737526893616,
+          "y": -0.3996983468532562
+        },
+        {
+          "s": 0.550000011920929,
+          "t": -0.0,
+          "x": 0.550000011920929,
+          "y": 0.0
+        },
+        {
+          "s": 0.4000000059604645,
+          "t": 0.05000000074505806,
+          "x": 0.4000000059604645,
+          "y": -0.05000000074505806
+        },
+        {
+          "s": 0.29939669370651245,
+          "t": 0.0,
+          "x": 0.29939669370651245,
+          "y": -0.0
+        },
+        {
+          "s": 0.09954751282930374,
+          "t": 0.0,
+          "x": 0.09954751282930374,
+          "y": -0.0
+        },
+        {
+          "s": 0.049410030245780945,
+          "t": 0.049410030245780945,
+          "x": 0.049410030245780945,
+          "y": -0.049410030245780945
+        },
+        {
+          "s": 0.0,
+          "t": 0.1998491734266281,
+          "x": 0.0,
+          "y": -0.1998491734266281
+        },
+        {
+          "s": 0.04977375641465187,
+          "t": 0.5,
+          "x": 0.04977375641465187,
+          "y": -0.5
+        },
+        {
+          "s": 0.04977375641465187,
+          "t": 0.8499245643615723,
+          "x": 0.04977375641465187,
+          "y": -0.8499245643615723
+        },
+        {
+          "s": 0.14970500767230988,
+          "t": 0.9498525261878967,
+          "x": 0.14970500767230988,
+          "y": -0.9498525261878967
+        },
+        {
+          "s": 0.19985251128673553,
+          "t": 1.0,
+          "x": 0.19985251128673553,
+          "y": -1.0
+        },
+        {
+          "s": 0.24962292611598969,
+          "t": 1.0,
+          "x": 0.24962292611598969,
+          "y": -1.0
+        },
+        {
+          "s": 0.5,
+          "t": 1.0,
+          "x": 0.5,
+          "y": -1.0
+        },
+        {
+          "s": 0.5995475053787231,
+          "t": 0.7496229410171509,
+          "x": 0.5995475053787231,
+          "y": -0.7496229410171509
+        },
+        {
+          "s": 0.6998491883277893,
+          "t": 0.6493212580680847,
+          "x": 0.6998491883277893,
+          "y": -0.6493212580680847
+        },
+        {
+          "s": 0.75,
+          "t": 0.6998525261878967,
+          "x": 0.75,
+          "y": -0.6998525261878967
+        },
+        {
+          "s": 0.8996983170509338,
+          "t": 0.7496229410171509,
+          "x": 0.8996983170509338,
+          "y": -0.7496229410171509
+        },
+        {
+          "s": 1.0,
+          "t": 0.6998491883277893,
+          "x": 1.0,
+          "y": -0.6998491883277893
+        },
+        {
+          "s": 1.0,
+          "t": 0.3996983468532562,
+          "x": 1.0,
+          "y": -0.3996983468532562
+        },
+        {
+          "s": 0.8996983170509338,
+          "t": 0.34992459416389465,
+          "x": 0.8996983170509338,
+          "y": -0.34992459416389465
+        },
+        {
+          "s": 0.8499245643615723,
+          "t": 0.1998491734266281,
+          "x": 0.8499245643615723,
+          "y": -0.1998491734266281
+        },
+        {
+          "s": 0.9000000357627869,
+          "t": 0.15000000596046448,
+          "x": 0.9000000357627869,
+          "y": -0.15000000596046448
+        },
+        {
+          "s": 0.9000000357627869,
+          "t": 0.05000000074505806,
+          "x": 0.9000000357627869,
+          "y": -0.05000000074505806
+        },
+        {
+          "s": 0.8500000834465027,
+          "t": -0.0,
+          "x": 0.8500000834465027,
+          "y": 0.0
+        },
+        {
+          "s": 0.7500000596046448,
+          "t": 0.05000000074505806,
+          "x": 0.7500000596046448,
+          "y": -0.05000000074505806
+        },
+        {
+          "s": 0.550000011920929,
+          "t": 0.0,
+          "x": 0.550000011920929,
+          "y": -0.0
+        }
+      ]
+    }
+  ]
+}

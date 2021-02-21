@@ -1175,9 +1175,8 @@ void MainWindow::on_actionNewWorkspace_triggered()
 
     // todo: might want to improve the dialog here to be a custom dialog
     // with an option to create some directory for the new workspace
-    const auto& dir = QFileDialog::getExistingDirectory(this,
-        tr("Select New Workspace Directory"));
-    if (dir.isEmpty())
+    const auto& workspace_dst_dir = QFileDialog::getExistingDirectory(this,tr("Select New Workspace Directory"));
+    if (workspace_dst_dir.isEmpty())
         return;
 
     // todo: should/could ask about saving. the current workspace if we have any.
@@ -1194,8 +1193,8 @@ void MainWindow::on_actionNewWorkspace_triggered()
     // close existing workspace if any.
     CloseWorkspace();
 
-    if (!MissingFile(app::JoinPath(dir, "content.json")) ||
-        !MissingFile(app::JoinPath(dir, "workspace.json")))
+    if (!MissingFile(app::JoinPath(workspace_dst_dir, "content.json")) ||
+        !MissingFile(app::JoinPath(workspace_dst_dir, "workspace.json")))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
@@ -1207,7 +1206,7 @@ void MainWindow::on_actionNewWorkspace_triggered()
     }
 
     auto workspace = std::make_unique<app::Workspace>();
-    if (!workspace->MakeWorkspace(dir))
+    if (!workspace->MakeWorkspace(workspace_dst_dir))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1216,6 +1215,37 @@ void MainWindow::on_actionNewWorkspace_triggered()
             "Please see the log for details."));
         msg.exec();
         return;
+    }
+
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Question);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setText(tr("Would you like to initialize the new workspace with some starter content?"));
+    if (msg.exec() == QMessageBox::Yes)
+    {
+        const QString& starter_src_dir = app::JoinPath(QApplication::applicationDirPath(), "starter");
+        app::Workspace starter;
+        if (!starter.LoadWorkspace(starter_src_dir))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("Failed to load starter content.\nPlease see the log for details."));
+            msg.exec();
+            return;
+        }
+
+        // copy the data files.
+        app::CopyRecursively(app::JoinPath(starter_src_dir, "textures"),
+                             app::JoinPath(workspace_dst_dir, "textures"));
+        app::CopyRecursively(app::JoinPath(starter_src_dir, "lua"),
+                             app::JoinPath(workspace_dst_dir, "lua"));
+        // copy the resources. todo: maybe just copy the content.json and workspace.json?
+        for (size_t i=0; i<starter.GetNumUserDefinedResources(); ++i)
+        {
+            const auto& resource = starter.GetUserDefinedResource(i);
+            workspace->SaveResource(resource);
+        }
     }
 
     mUI.workspace->setModel(&mWorkspaceProxy);
