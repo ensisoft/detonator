@@ -116,8 +116,9 @@ int TextEditor::ComputeLineNumberAreaWidth() const
         max /= 10;
         ++digits;
     }
+    QFontMetrics metrics(mFont);
 
-    int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
+    int space = 3 + metrics.horizontalAdvance(QLatin1Char('9')) * digits;
 
     return space;
 }
@@ -213,6 +214,10 @@ void TextEditor::PaintLineNumbers(const QRect& rect)
 {
     QPainter painter(mLineNumberArea);
     painter.fillRect(rect, Qt::lightGray);
+    painter.setPen(Qt::black);
+    painter.setFont(mFont);
+
+    QFontMetrics metrics(mFont);
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -224,9 +229,7 @@ void TextEditor::PaintLineNumbers(const QRect& rect)
         if (block.isVisible() && bottom >= rect.top())
         {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
-            //painter.setFont(font());
-            painter.drawText(0, top, mLineNumberArea->width(), fontMetrics().height(),Qt::AlignRight, number);
+            painter.drawText(0, top, mLineNumberArea->width(), metrics.height(),Qt::AlignRight, number);
         }
 
         block = block.next();
@@ -243,6 +246,7 @@ void TextEditor::ApplySettings()
     {
         font.setPointSize(mSettings.font_size);
         mDocument->setDefaultFont(font);
+        mFont = font;
     }
 
     if (mSettings.highlight_syntax && !mHighlighter)

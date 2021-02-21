@@ -92,6 +92,7 @@ namespace gui
         static Settings mSettings;
         bool mCanCopy = false;
         bool mCanUndo = false;
+        QFont mFont;
     };
 
 } // namespace
