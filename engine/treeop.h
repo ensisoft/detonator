@@ -257,7 +257,7 @@ void BreakChild(RenderTree<Node>& tree, Node* child, bool retain_world_transform
         const auto& child_to_world = FindNodeTransform(tree, child);
         FBox box;
         box.Transform(child_to_world);
-        child->SetTranslation(box.GetPosition());
+        child->SetTranslation(box.GetCenter());
         child->SetRotation(box.GetRotation());
     }
     tree.BreakChild(child);
@@ -277,7 +277,7 @@ void ReparentChild(RenderTree<Node>& tree, const Node* parent, Node* child, bool
         FBox box;
         box.Transform(child_to_world);
         box.Transform(glm::inverse(parent_to_world));
-        child->SetTranslation(box.GetPosition());
+        child->SetTranslation(box.GetCenter());
         child->SetRotation(box.GetRotation());
     }
 

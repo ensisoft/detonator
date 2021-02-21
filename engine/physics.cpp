@@ -384,7 +384,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
                 // update the world transform from the scene to the physics world.
                 mTransform.Push(node->GetModelTransform());
                     const FBox box(mTransform.GetAsMatrix());
-                    const auto& node_pos_in_world   = box.GetPosition();
+                    const auto& node_pos_in_world   = box.GetCenter();
                     body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
                 mTransform.Pop();
             }
@@ -420,7 +420,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
 
                 FBox box(mat);
                 box.Transform(glm::inverse(node_to_world));
-                node->SetTranslation(box.GetPosition());
+                node->SetTranslation(box.GetCenter());
                 node->SetRotation(box.GetRotation());
                 auto* body = node->GetRigidBody();
                 const auto& linear_velocity = physics_node.world_body->GetLinearVelocity();
@@ -499,7 +499,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
 {
     const FBox box(model_to_world);
     const auto* body = node.GetRigidBody();
-    const auto& node_pos_in_world   = box.GetPosition();
+    const auto& node_pos_in_world   = box.GetCenter();
     const auto& node_size_in_world  = box.GetSize();
     const auto& rigid_body_class    = body->GetClass();
     const auto& debug_name          = entity.GetName() + "/" + node.GetName();

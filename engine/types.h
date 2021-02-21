@@ -179,7 +179,7 @@ namespace game
         { return mBotLeft; }
         glm::vec2 GetBotRight() const
         { return mBotRight; }
-        glm::vec2 GetPosition() const
+        glm::vec2 GetCenter() const
         {
             const auto diagonal = mBotRight - mTopLeft;
             return mTopLeft + diagonal * 0.5f;
