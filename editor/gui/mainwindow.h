@@ -72,16 +72,9 @@ namespace gui
         // Load the MainWindow and all MainWidget states.
         void loadState();
 
-        // Prepare the file menu to have actions such as "New X ..."
-        // The actions available are loaded from the registered MainWidgets.
-        void prepareFileMenu();
-
         // Prepare (enumerate) the currently open MainWidgets in the window menu
         // and prepare window swapping shortcuts.
-        void prepareWindowMenu();
-
-        // Prepare the main tab for first display.
-        void prepareMainTab();
+        void UpdateWindowMenu();
 
         // Show the application window.
         void showWindow();

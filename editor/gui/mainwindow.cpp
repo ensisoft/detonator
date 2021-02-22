@@ -311,12 +311,7 @@ void MainWindow::focusWidget(const MainWidget* widget)
     mUI.mainTab->setCurrentIndex(index);
 }
 
-void MainWindow::prepareFileMenu()
-{
-
-}
-
-void MainWindow::prepareWindowMenu()
+void MainWindow::UpdateWindowMenu()
 {
     mUI.menuWindow->clear();
 
@@ -333,8 +328,7 @@ void MainWindow::prepareWindowMenu()
         if (i < 9)
             action->setShortcut(QKeySequence(Qt::ALT | (Qt::Key_1 + i)));
 
-        QObject::connect(action, SIGNAL(triggered()),
-            this, SLOT(actionWindowFocus_triggered()));
+        QObject::connect(action, SIGNAL(triggered()),this, SLOT(actionWindowFocus_triggered()));
     }
     // and this is in the window menu
     mUI.menuWindow->addSeparator();
@@ -343,11 +337,6 @@ void MainWindow::prepareWindowMenu()
     mUI.menuWindow->addAction(mUI.actionWindowNext);
     mUI.menuWindow->addAction(mUI.actionWindowPrev);
     mUI.menuWindow->setEnabled(count != 0);
-}
-
-void MainWindow::prepareMainTab()
-{
-
 }
 
 void MainWindow::LoadDemoWorkspace(const QString& which)
@@ -381,6 +370,9 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     const QList<QScreen*>& screens = QGuiApplication::screens();
     const QScreen* screen0 = screens[0];
     const QSize& size = screen0->availableVirtualSize();
+
+    // block main tab signals
+    QSignalBlocker blocker(mUI.mainTab);
 
     // Load workspace windows and their content.
     bool success = true;
@@ -446,8 +438,6 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
     SetValue(mUI.grpHelp, workspace->GetName());
-
-    mUI.mainTab->setCurrentIndex(workspace->GetUserProperty("focused_widget_index", 0));
     mUI.workspace->setModel(&mWorkspaceProxy);
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
@@ -458,7 +448,17 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
     mWorkspaceProxy.SetShowBits(show_resource_bits);
     mWorkspaceProxy.invalidate();
-    ShowHelpWidget();
+
+    const auto current_index = mWorkspace->GetUserProperty("focused_widget_index", 0);
+    if (current_index < GetCount(mUI.mainTab))
+    {
+        mUI.mainTab->setCurrentIndex(current_index);
+        on_mainTab_currentChanged(current_index);
+    }
+    else
+    {
+        on_mainTab_currentChanged(-1);
+    }
     return success;
 }
 
@@ -637,7 +637,7 @@ void MainWindow::CloseWorkspace()
     }
 
     // update window menu.
-    prepareWindowMenu();
+    UpdateWindowMenu();
 
     mUI.actionSaveWorkspace->setEnabled(false);
     mUI.actionCloseWorkspace->setEnabled(false);
@@ -836,11 +836,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.actionZoomIn->setEnabled(false);
         mUI.actionZoomOut->setEnabled(false);
     }
-
-    // add the stuff that is always in the edit menu
-    mUI.mainToolBar->addSeparator();
-
-    prepareWindowMenu();
+    UpdateWindowMenu();
     ShowHelpWidget();
 }
 
@@ -870,7 +866,7 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     delete widget;
 
     // rebuild window menu.
-    prepareWindowMenu();
+    UpdateWindowMenu();
 
 }
 
@@ -2146,7 +2142,7 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     mUI.mainTab->setCurrentIndex(count);
 
     // rebuild window menu and shortcuts
-    prepareWindowMenu();
+    UpdateWindowMenu();
 
     if (widget->IsAccelerated())
     {
@@ -2174,6 +2170,7 @@ void MainWindow::ShowHelpWidget()
         mUI.helpWidget->setVisible(true);
         mUI.helpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
+        mUI.mainToolBar->clear();
         mUI.mainToolBar->addAction(mUI.actionNewMaterial);
         mUI.mainToolBar->addAction(mUI.actionNewParticleSystem);
         mUI.mainToolBar->addAction(mUI.actionNewCustomShape);
@@ -2186,6 +2183,8 @@ void MainWindow::ShowHelpWidget()
     else
     {
         mUI.mainToolBar->clear();
+        mUI.mainToolBar->addAction(mUI.actionNewWorkspace);
+        mUI.mainToolBar->addAction(mUI.actionLoadWorkspace);
         mUI.helpWidget->setCurrentIndex(1);
         mUI.helpWidget->setVisible(true);
         mUI.mainTab->setVisible(false);

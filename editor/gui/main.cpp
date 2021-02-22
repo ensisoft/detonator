@@ -223,9 +223,6 @@ int main(int argc, char* argv[])
         gui::MainWindow window(app);
 
         window.loadState();
-        window.prepareFileMenu();
-        window.prepareWindowMenu();
-        window.prepareMainTab();
         window.showWindow();
 
         // run the mainloop
