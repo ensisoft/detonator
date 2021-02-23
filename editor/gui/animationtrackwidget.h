@@ -91,7 +91,7 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionReset_triggered();
         void on_actionDeleteActuator_triggered();
-        void on_actionClearActuators_triggered();
+        void on_actionDeleteActuators_triggered();
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
@@ -131,6 +131,7 @@ namespace gui
     private:
         void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
+        void MouseZoom(std::function<void(void)> zoom_function);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);

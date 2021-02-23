@@ -162,8 +162,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     setFocusPolicy(Qt::StrongFocus);
     setWindowTitle("My Track");
 
-    mUI.widget->onZoomIn       = std::bind(&AnimationTrackWidget::ZoomIn, this);
-    mUI.widget->onZoomOut      = std::bind(&AnimationTrackWidget::ZoomOut, this);
+    mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&AnimationTrackWidget::ZoomIn, this)); };
+    mUI.widget->onZoomOut      = [this]() { MouseZoom(std::bind(&AnimationTrackWidget::ZoomOut, this)); };
     mUI.widget->onMouseMove    = std::bind(&AnimationTrackWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&AnimationTrackWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&AnimationTrackWidget::MouseRelease, this, std::placeholders::_1);
@@ -228,6 +228,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     mUI.tree->Rebuild();
     mUI.timeline->SetDuration(track.GetDuration());
     mUI.timeline->Rebuild();
+    setWindowTitle(app::FromUtf8(track.GetName()));
 }
 AnimationTrackWidget::~AnimationTrackWidget()
 {
@@ -666,7 +667,7 @@ void AnimationTrackWidget::on_actionDeleteActuator_triggered()
     SelectedItemChanged(nullptr);
 }
 
-void AnimationTrackWidget::on_actionClearActuators_triggered()
+void AnimationTrackWidget::on_actionDeleteActuators_triggered()
 {
     mState.track->Clear();
     mUI.timeline->ClearSelection();
@@ -872,7 +873,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 {
     const auto* selected = mUI.timeline->GetSelectedItem();
     mUI.actionDeleteActuator->setEnabled(selected != nullptr);
-    mUI.actionClearActuators->setEnabled(mState.track->GetNumActuators());
+    mUI.actionDeleteActuators->setEnabled(mState.track->GetNumActuators());
 
     // map the click point to a position in the timeline.
     const auto* timeline = mUI.timeline->GetCurrentTimeline();
@@ -915,11 +916,11 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     QMenu menu(this);
     menu.addMenu(&add);
+    menu.addAction(mUI.actionDeleteActuator);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.addSeparator();
-    menu.addAction(mUI.actionDeleteActuator);
-    menu.addAction(mUI.actionClearActuators);
+    menu.addAction(mUI.actionDeleteActuators);
     menu.exec(QCursor::pos());
 }
 
@@ -1461,9 +1462,57 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Pop();
 }
 
+void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
+{
+    // where's the mouse in the widget
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > mUI.widget->width() ||
+        mickey.y() > mUI.widget->height())
+        return;
+
+    glm::vec4 mickey_pos_in_entity;
+    glm::vec4 mickey_pos_in_widget;
+
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        const auto& mat = glm::inverse(view.GetAsMatrix());
+        mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
+    }
+
+    zoom_function();
+
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        const auto& mat = view.GetAsMatrix();
+        mickey_pos_in_widget = mat * mickey_pos_in_entity;
+    }
+    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
+    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+
+    // update the distance to center.
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
+    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
+    SetValue(mUI.viewPosX, dist_x);
+    SetValue(mUI.viewPosY, dist_y);
+}
+
 void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
 {
-    if (mCurrentTool) {
+    if (mCurrentTool)
+    {
         gfx::Transform view;
         view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
         view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
@@ -1480,8 +1529,8 @@ void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
     // update the distance to center.
     const auto dist_x = mState.camera_offset_x - (width / 2.0f);
     const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-    mUI.viewPosX->setValue(dist_x);
-    mUI.viewPosY->setValue(dist_y);
+    SetValue(mUI.viewPosX, dist_x);
+    SetValue(mUI.viewPosY, dist_y);
 
     UpdateTransformActuatorUI();
     SetSelectedActuatorProperties();
@@ -1499,12 +1548,22 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
         auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mEntity, current);
         if (hitnode && hitnode == current)
         {
+            view.Push(mEntity->FindNodeTransform(hitnode));
+                const auto mat = view.GetAsMatrix();
+                glm::vec3 scale;
+                glm::vec3 translation;
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::quat orientation;
+                glm::decompose(mat, scale, orientation, translation, skew,  perspective);
+            view.Pop();
             const auto& size = hitnode->GetSize();
+            const auto& box_size = glm::vec2(10.0f/scale.x, 10.0f/scale.y);
             // check if any particular special area of interest is being hit
-            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                 hitpos.y >= size.y - 10.0f;
-            const bool top_left_hitbox_hit     = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                 hitpos.y >= 0 && hitpos.y <= 10.0f;
+            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - box_size.x &&
+                                                 hitpos.y >= size.y - box_size.y;
+            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= box_size.x &&
+                                             hitpos.y >= 0 && hitpos.y <= box_size.y;
             const auto snap = (bool)GetValue(mUI.chkSnap);
             const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
             const auto grid_size = (unsigned)grid;

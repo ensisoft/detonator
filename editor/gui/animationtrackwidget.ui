@@ -1167,13 +1167,6 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QLabel" name="actuatorInfo">
-          <property name="text">
-           <string>actuatorInfo</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="horizontalSpacer_4">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1262,16 +1255,16 @@
     <string>Del</string>
    </property>
   </action>
-  <action name="actionClearActuators">
+  <action name="actionDeleteActuators">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/clear.png</normaloff>:/16x16_ico_png/clear.png</iconset>
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Clear All</string>
+    <string>Delete All</string>
    </property>
    <property name="toolTip">
-    <string>Clear all actuators from all timelines</string>
+    <string>Delete all actuators from all timelines</string>
    </property>
   </action>
   <action name="actionReset">
