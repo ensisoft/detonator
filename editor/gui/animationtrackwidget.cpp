@@ -31,12 +31,14 @@
 #include "warnpop.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "base/math.h"
 #include "base/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/animationtrackwidget.h"
+#include "editor/gui/entitywidget.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
@@ -51,6 +53,8 @@ namespace {
     // whenever an editor session is restored.
     std::unordered_map<size_t,
             std::weak_ptr<game::EntityClass>> SharedAnimations;
+    std::unordered_set<gui::EntityWidget*> EntityWidgets;
+    std::unordered_set<gui::AnimationTrackWidget*> AnimationWidgets;
 } // namespace
 
 namespace gui
@@ -534,8 +538,8 @@ bool AnimationTrackWidget::ConfirmClose()
     on_actionSave_triggered();
     return true;
 }
- bool AnimationTrackWidget::GetStats(Stats* stats) const
- {
+bool AnimationTrackWidget::GetStats(Stats* stats) const
+{
     if (mPlaybackAnimation)
     {
         const auto* track = mPlaybackAnimation->GetCurrentTrack();
@@ -544,7 +548,22 @@ bool AnimationTrackWidget::ConfirmClose()
     stats->fps  = mUI.widget->getCurrentFPS();
     stats->vsync = mUI.widget->haveVSYNC();
     return true;
- }
+}
+
+bool AnimationTrackWidget::ShouldClose() const
+{
+    // these 2 widget types are basically very tightly coupled
+    // and they share information using these global data structures.
+    // When the entity widget that is used to edit this animation track
+    // has been closed (i.e. no longer found in list of entity widgets)
+    // this track widget should also close.
+    for (auto* widget : EntityWidgets)
+    {
+        if (widget->GetEntityId() == mState.entity->GetId())
+            return false;
+    }
+    return true;
+}
 
 void AnimationTrackWidget::SetZoom(float zoom)
 {
@@ -1741,6 +1760,25 @@ void ShareEntity(const std::shared_ptr<game::EntityClass>& klass)
 {
     const auto hash = klass->GetHash();
     SharedAnimations[hash] = klass;
+}
+
+void RegisterEntityWidget(EntityWidget* widget)
+{
+    EntityWidgets.insert(widget);
+}
+void DeleteEntityWidget(EntityWidget* widget)
+{
+    auto it = EntityWidgets.find(widget);
+    ASSERT(it != EntityWidgets.end());
+    EntityWidgets.erase(it);
+}
+void RegisterTrackWidget(AnimationTrackWidget* widget)
+{
+
+}
+void DeleteTrackWidget(AnimationTrackWidget* widget)
+{
+
 }
 
 } // namespace

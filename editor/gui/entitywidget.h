@@ -81,6 +81,9 @@ namespace gui
         virtual bool ConfirmClose() override;
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
+
+        std::string GetEntityId() const
+        { return mState.entity->GetId(); }
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();

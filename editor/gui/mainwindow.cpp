@@ -1685,7 +1685,7 @@ void MainWindow::RefreshUI()
 
     // refresh the UI state, and update the tab widget icon/text
     // if needed.
-    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    for (int i=0; i<GetCount(mUI.mainTab);)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
         widget->Refresh();
@@ -1693,6 +1693,25 @@ void MainWindow::RefreshUI()
         const auto& text = widget->windowTitle();
         mUI.mainTab->setTabText(i, text);
         mUI.mainTab->setTabIcon(i, icon);
+        if (widget->ShouldClose())
+        {
+            // does not delete the widget.
+            mUI.mainTab->removeTab(i);
+            // shut the widget down, release graphics resources etc.
+            widget->Shutdown();
+            //               !!!!! WARNING !!!!!
+            // setParent(nullptr) will cause an OpenGL memory leak
+            //
+            // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+            // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+            // https://bugreports.qt.io/browse/QTBUG-69429
+            //
+            delete widget;
+        }
+        else
+        {
+            ++i;
+        }
     }
 
     // cull child windows that have been closed.
@@ -1708,7 +1727,7 @@ void MainWindow::RefreshUI()
             // however we're going to add as a tab so the widget will
             // go into the main tab not into mChildWindows.
             ShowWidget(widget, false /* new window */);
-            // seems that we need some delay (presumaly to allow some
+            // seems that we need some delay (presumably to allow some
             // event processing to take place) on Windows before
             // calling the update geometry. Without this the window is  
             // somewhat fucked up in its appearance. (Layout is off)
@@ -1973,7 +1992,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->ignore();
 
     // try to perform an orderly shutdown.
-    // first save everything and only if that is succesful
+    // first save everything and only if that is successful
     // (or the user don't care) we then close the workspace
     // and exit the application.
     if (!SaveWorkspace() || !SaveState())

@@ -107,6 +107,15 @@ void ChildWindow::RefreshUI()
 
     mUI.actionZoomIn->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
     mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
+
+    if (mWidget->ShouldClose())
+    {
+        Shutdown();
+
+        hide();
+
+        mClosed = true;
+    }
 }
 
 void ChildWindow::Update(double secs)

@@ -43,6 +43,7 @@
 
 namespace gui
 {
+    class EntityWidget;
     class MouseTool;
     // User interface widget for editing animation tracks.
     // All edits are eventually stored in an animation class object,
@@ -78,6 +79,7 @@ namespace gui
         virtual bool HasUnsavedChanges() const override;
         virtual bool ConfirmClose() override;
         virtual bool GetStats(Stats* stats) const override;
+        virtual bool ShouldClose() const override;
 
         void SetZoom(float zoom);
         void SetShowGrid(bool on_off);
@@ -199,9 +201,14 @@ namespace gui
         game::PhysicsEngine mPhysics;
     };
 
-    // Functions used to share animation class objects between AnimationTrackWidget
+    // Functions used to share state between AnimationTrackWidget
     // and EntityWidget instances.
     std::shared_ptr<game::EntityClass> FindSharedEntity(size_t hash);
     void ShareEntity(const std::shared_ptr<game::EntityClass>& klass);
+
+    void RegisterEntityWidget(EntityWidget* widget);
+    void DeleteEntityWidget(EntityWidget* widget);
+    void RegisterTrackWidget(AnimationTrackWidget* widget);
+    void DeleteTrackWidget(AnimationTrackWidget* widget);
 
 } // namespace

@@ -154,6 +154,12 @@ namespace gui
         virtual void Save()
         {}
 
+        // Returns true if the widget wants to close itself. The caller should
+        // not call "ConfirmClose" or anything else on the widget other than shutdown
+        // since the widget has made the decision to want to close already.
+        virtual bool ShouldClose() const
+        { return false; }
+
         // Called before the widget is being closed by the user.
         // If there are any pending/unsaved changes the widget
         // implementation can ask the user for a confirmation and

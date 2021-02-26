@@ -368,6 +368,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     RebuildMenus();
     RebuildCombos();
+
+    RegisterEntityWidget(this);
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -415,6 +417,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
 EntityWidget::~EntityWidget()
 {
     DEBUG("Destroy EntityWidget");
+
+    DeleteEntityWidget(this);
 }
 
 void EntityWidget::AddActions(QToolBar& bar)
