@@ -405,6 +405,16 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
+    // load per track resource properties.
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& Id = track.GetId();
+        QVariantMap properties;
+        GetProperty(resource, "track_" + app::FromUtf8(Id), &properties);
+        mTrackProperties[Id] = properties;
+    }
+
     setWindowTitle(resource.GetName());
 
     UpdateDeletedResourceReferences();
@@ -486,6 +496,12 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.saveWidget("Entity", mUI.widget);
     settings.setValue("Entity", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("Entity", "camera_offset_y", mState.camera_offset_y);
+
+    for (const auto& p : mTrackProperties)
+    {
+        settings.setValue("Entity", app::FromUtf8(p.first), p.second);
+    }
+
     // the entity can already serialize into JSON.
     // so let's use the JSON serialization in the entity
     // and then convert that into base64 string which we can
@@ -539,6 +555,14 @@ bool EntityWidget::LoadState(const Settings& settings)
     }
 
     mOriginalHash = mState.entity->GetHash();
+
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        const auto& track = mState.entity->GetAnimationTrack(i);
+        QVariantMap properties;
+        settings.getValue("Entity", app::FromUtf8(track.GetId()), &properties);
+        mTrackProperties[track.GetId()] = properties;
+    }
 
     UpdateDeletedResourceReferences();
 
@@ -886,6 +910,31 @@ bool EntityWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void EntityWidget::SaveAnimationTrack(const game::AnimationTrackClass& track, const QVariantMap& properties)
+{
+    // keep track of the associated track properties 
+    // separately. these only pertain to the UI and are not
+    // used by the track/animation system itself.
+    mTrackProperties[track.GetId()] = properties;
+
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        auto& other = mState.entity->GetAnimationTrack(i);
+        if (other.GetId() != track.GetId())
+            continue;
+
+        // copy it over.
+        other = track;
+        INFO("Saved animation track '%1'", track.GetName());
+        NOTE("Saved animation track '%1'", track.GetName());
+        return;
+    }
+    // add a copy
+    mState.entity->AddAnimationTrack(track);
+    INFO("Saved animation track '%1'", track.GetName());
+    NOTE("Saved animation track '%1'", track.GetName());
+}
+
 void EntityWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -926,6 +975,12 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
+
+    // save the track properties.
+    for (auto p : mTrackProperties)
+    {
+        SetProperty(resource, "track_" + app::FromUtf8(p.first), p.second);
+    }
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.entity->GetHash();
@@ -1213,8 +1268,10 @@ void EntityWidget::on_btnEditTrack_clicked()
         const auto& klass = mState.entity->GetAnimationTrack(i);
         if (klass.GetId() != app::ToUtf8(id))
             continue;
-
-        AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass);
+        auto it = mTrackProperties.find(klass.GetId());
+        ASSERT(it != mTrackProperties.end());
+        const auto& properties = (*it).second;
+        AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass, properties);
         widget->SetZoom(GetValue(mUI.zoom));
         widget->SetShowGrid(GetValue(mUI.chkShowGrid));
         widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
@@ -1229,11 +1286,11 @@ void EntityWidget::on_btnDeleteTrack_clicked()
     if (items.isEmpty())
         return;
     QListWidgetItem* item = items[0];
-    QString id = item->data(Qt::UserRole).toString();
+    const auto& trackId = app::ToUtf8(item->data(Qt::UserRole).toString());
 
     if (mState.entity->HasIdleTrack())
     {
-        if (mState.entity->GetIdleTrackId() == app::ToUtf8(id))
+        if (mState.entity->GetIdleTrackId() == trackId)
         {
             QMessageBox msg(this);
             msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1246,9 +1303,13 @@ void EntityWidget::on_btnDeleteTrack_clicked()
             SetValue(mUI.idleTrack, -1);
         }
     }
-    mState.entity->DeleteAnimationTrackById(app::ToUtf8(id));
+    mState.entity->DeleteAnimationTrackById(trackId);
     // this will remove it from the widget.
     delete item;
+    // delete the associated properties.
+    auto it = mTrackProperties.find(trackId);
+    ASSERT(it != mTrackProperties.end());
+    mTrackProperties.erase(it);
 }
 
 void EntityWidget::on_btnNewScriptVar_clicked()

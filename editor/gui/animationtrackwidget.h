@@ -30,6 +30,8 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 #include "base/bitflag.h"
 #include "editor/gui/mainwidget.h"
@@ -59,7 +61,8 @@ namespace gui
         AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::EntityClass>& entity);
         AnimationTrackWidget(app::Workspace* workspace,
                 const std::shared_ptr<game::EntityClass>& entity,
-                const game::AnimationTrackClass& track);
+                const game::AnimationTrackClass& track,
+                const QVariantMap& properties);
        ~AnimationTrackWidget();
 
         // MainWidget implementation.
@@ -141,7 +144,8 @@ namespace gui
         void UpdateTransformActuatorUI();
         void SetSelectedActuatorProperties();
         void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
-        void AddActuator(const game::EntityNodeClass& node, game::ActuatorClass::Type type,
+        void AddActuator(const std::string& timelineId, const std::string& nodeId,
+                         game::ActuatorClass::Type type,
                          float start_time, float duration);
         game::EntityNode* GetCurrentNode();
     private:
@@ -158,6 +162,10 @@ namespace gui
         std::unique_ptr<MouseTool> mCurrentTool;
         // The workspace object.
         app::Workspace* mWorkspace = nullptr;
+        struct Timeline {
+            std::string selfId;
+            std::string nodeId;
+        };
         // Current state that is accessed and modified by this widget
         // object's event handlers (slots) and also by the current tool.
         struct State {
@@ -166,6 +174,8 @@ namespace gui
             std::shared_ptr<game::EntityClass> entity;
             std::shared_ptr<game::AnimationTrackClass> track;
             base::bitflag<game::ActuatorClass::Type> show_flags = {~0u};
+            std::vector<Timeline> timelines;
+            std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;
         // Current time accumulator.
         float mCurrentTime = 0.0f;

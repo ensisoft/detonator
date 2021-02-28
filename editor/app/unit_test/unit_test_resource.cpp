@@ -144,18 +144,24 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetNameUtf8() == "joojoo");
     TEST_REQUIRE(r.IsPrimitive() == true);
 
+    QVariantMap map;
+    map["value"] = 123;
+    map["string"] = "boo";
+    r.SetProperty("variant_map", map);
     r.SetProperty("eka", 123);
     r.SetProperty("toka", 123.0f);
     r.SetProperty("koli", QString("hip hop"));
     r.SetProperty("neli", 123.0);
     r.SetProperty("vika", quint64(123));
     r.SetUserProperty("foo", 42);
+    map.clear();
 
     TEST_REQUIRE(r.HasProperty("eka"));
     TEST_REQUIRE(r.HasProperty("toka"));
     TEST_REQUIRE(r.HasProperty("koli"));
     TEST_REQUIRE(r.HasProperty("neli"));
     TEST_REQUIRE(r.HasProperty("vika"));
+    TEST_REQUIRE(r.HasProperty("variant_map"));
     TEST_REQUIRE(r.HasProperty("baz") == false);
     TEST_REQUIRE(r.HasUserProperty("bar") == false);
 
@@ -165,6 +171,9 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetProperty("neli", 0.0) == real::float32(123.0));
     TEST_REQUIRE(r.GetProperty("toka", 0.0f) == real::float32(123.0f));
     TEST_REQUIRE(r.GetUserProperty("foo", 0) == 42);
+    map = r.GetProperty("variant_map", map);
+    TEST_REQUIRE(map["value"].toInt() == 123);
+    TEST_REQUIRE(map["string"].toString() == "boo");
 
     QJsonObject props;
     QJsonObject user_props;
@@ -179,6 +188,7 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(!r.HasProperty("vika"));
     r.LoadProperties(props);
     r.LoadUserProperties(user_props);
+    TEST_REQUIRE(r.HasProperty("variant_map"));
     TEST_REQUIRE(r.HasProperty("eka"));
     TEST_REQUIRE(r.HasProperty("toka"));
     TEST_REQUIRE(r.HasProperty("koli"));

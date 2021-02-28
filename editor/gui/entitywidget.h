@@ -27,6 +27,7 @@
 #include "warnpush.h"
 #  include "ui_entitywidget.h"
 #  include <QMenu>
+#  include <QVariantMap>
 #  include <boost/circular_buffer.hpp>
 #include "warnpop.h"
 
@@ -84,6 +85,7 @@ namespace gui
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
+        void SaveAnimationTrack(const game::AnimationTrackClass& track, const QVariantMap& properties);
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
@@ -208,7 +210,7 @@ namespace gui
             Playing, Paused, Stopped
         };
         struct State {
-            // shared with the animation trackw widget.
+            // shared with the animation track widget.
             std::shared_ptr<game::EntityClass> entity;
             game::Renderer renderer;
             app::Workspace* workspace = nullptr;
@@ -230,7 +232,9 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
         bool mCameraWasLoaded = false;
-
+        // storage for keeping per track properties around until
+        // being saved.
+        std::unordered_map<std::string, QVariantMap> mTrackProperties;
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::EntityClass> mUndoStack;

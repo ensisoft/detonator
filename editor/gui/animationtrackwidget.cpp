@@ -73,12 +73,12 @@ public:
         std::unordered_map<std::string, size_t> id_to_index_map;
 
         // setup all timelines with empty item vectors.
-        for (size_t i=0; i<anim.GetNumNodes(); ++i)
+        for (const auto& item : mState.timelines)
         {
-            const auto& node = anim.GetNode(i);
-            const auto& name = node.GetName();
-            const auto& id   = node.GetId();
-            id_to_index_map[id] = list->size();
+            const auto* node = mState.entity->FindNodeById(item.nodeId);
+            const auto& name = node->GetName();
+            // map timeline objects to widget timeline indices
+            id_to_index_map[item.selfId] = list->size();
             TimelineWidget::Timeline line;
             line.SetName(app::FromUtf8(name));
             list->push_back(line);
@@ -92,10 +92,11 @@ public:
             if (!mState.show_flags.test(type))
                 continue;
 
-            const auto& id   = actuator.GetNodeId();
-            const auto& node = anim.FindNodeById(id);
+            const auto& nodeId = actuator.GetNodeId();
+            const auto& lineId = mState.actuator_to_timeline[actuator.GetId()];
+            const auto* node = mState.entity->FindNodeById(nodeId);
             const auto& name = app::FromUtf8(node->GetName());
-            const auto index = id_to_index_map[id];
+            const auto index = id_to_index_map[lineId];
             const auto num   = (*list)[index].GetNumItems();
 
             // pastel color palette.
@@ -193,6 +194,15 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
     mEntity = game::CreateEntityInstance(mState.entity);
     SetValue(mUI.trackID, mState.track->GetId());
 
+    // create timelines, by default 1 per node.
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        Timeline tl;
+        tl.selfId = base::RandomString(10);
+        tl.nodeId = mState.entity->GetNode(i).GetId();
+        mState.timelines.push_back(std::move(tl));
+    }
+
     // Put the nodes in the list.
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
@@ -207,7 +217,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
 
 AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         const std::shared_ptr<game::EntityClass>& entity,
-        const game::AnimationTrackClass& track)
+        const game::AnimationTrackClass& track,
+        const QVariantMap& properties)
         : AnimationTrackWidget(workspace)
 {
     // Edit an existing animation track for the given animation.
@@ -220,6 +231,22 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     SetValue(mUI.delay, track.GetDelay());
     mEntity = game::CreateEntityInstance(mState.entity);
     mOriginalHash = track.GetHash();
+
+    ASSERT(!properties.isEmpty());
+    const int num_timelines = properties["num_timelines"].toInt();
+    for (int i = 0; i < num_timelines; ++i)
+    {
+        Timeline tl;
+        tl.selfId = app::ToUtf8(properties[QString("timeline_%1_self_id").arg(i)].toString());
+        tl.nodeId = app::ToUtf8(properties[QString("timeline_%1_node_id").arg(i)].toString());
+        mState.timelines.push_back(std::move(tl));
+    }
+    for (size_t i = 0; i < mState.track->GetNumActuators(); ++i)
+    {
+        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& timeline = properties[app::FromUtf8(actuator.GetId())].toString();
+        mState.actuator_to_timeline[actuator.GetId()] = app::ToUtf8(timeline);
+    }
 
     // put the nodes in the node list
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
@@ -300,7 +327,19 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.setValue("TrackWidget", "show_bits", mState.show_flags.value());
     settings.setValue("TrackWidget", "original_hash", mOriginalHash);
 
-    // use the animation's JSON serialization to save the state.
+    settings.setValue("TrackWidget", "num_timelines", (unsigned)mState.timelines.size());
+    for (int i=0; i<(unsigned)mState.timelines.size(); ++i)
+    {
+        const auto& timeline = mState.timelines[i];
+        settings.setValue("TrackWidget", QString("timeline_%1_self_id").arg(i), timeline.selfId);
+        settings.setValue("TrackWidget", QString("timeline_%1_node_id").arg(i), timeline.nodeId);
+    }
+    for (const auto& p : mState.actuator_to_timeline)
+    {
+        settings.setValue("TrackWidget", app::FromUtf8(p.first), p.second);
+    }
+
+    // use the entity JSON serialization to save the state.
     {
         const auto& json = mState.entity->ToJson();
         const auto& base64 = base64::Encode(json.dump(2));
@@ -351,6 +390,17 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.getValue("TrackWidget", "show_bits", &show_bits);
     mState.show_flags.set_from_value(show_bits);
 
+    unsigned num_timelines = 0;
+    settings.getValue("TrackWidget", "num_timelines", &num_timelines);
+    for (unsigned i=0; i<num_timelines; ++i)
+    {
+        Timeline tl;
+        settings.getValue("TrackWidget", QString("timeline_%1_self_id").arg(i), &tl.selfId);
+        settings.getValue("TrackWidget", QString("timeline_%1_node_id").arg(i), &tl.nodeId);
+        mState.timelines.push_back(std::move(tl));
+    }
+
+
 
     // try to restore the shared animation class object
     {
@@ -385,6 +435,16 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
         auto klass = std::move(ret.value());
         mState.track = std::make_shared<game::AnimationTrackClass>(std::move(klass));
     }
+
+    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    {
+        const auto& actuator = mState.track->GetActuatorClass(i);
+        std::string trackId;
+        settings.getValue("TrackWidget", app::FromUtf8(actuator.GetId()), &trackId);
+        mState.actuator_to_timeline[actuator.GetId()] = trackId;
+    }
+
+
     // put the nodes in the node list
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
@@ -647,25 +707,32 @@ void AnimationTrackWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.trackName))
         return;
     mState.track->SetName(GetValue(mUI.trackName));
-
     mOriginalHash = mState.track->GetHash();
-
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    EntityWidget* parent = nullptr;
+    for (auto* widget : EntityWidgets)
     {
-        auto& track = mState.entity->GetAnimationTrack(i);
-        if (track.GetId() != mState.track->GetId())
-            continue;
-
-        // copy it over.
-        track = *mState.track;
-        INFO("Saved animation track '%1'", GetValue(mUI.trackName));
-        NOTE("Saved animation track '%1'", GetValue(mUI.trackName));
-        return;
+        if (widget->GetEntityId() == mState.entity->GetId())
+        {
+            parent = widget;
+            break;
+        }
     }
-    // add a copy
-    mState.entity->AddAnimationTrack(*mState.track);
-    INFO("Saved animation track '%1'", GetValue(mUI.trackName));
-    NOTE("Saved animation track '%1'", GetValue(mUI.trackName));
+    ASSERT(parent);
+
+    QVariantMap properties;
+    properties["num_timelines"] = (int)mState.timelines.size();
+    for (int i=0; i<(int)mState.timelines.size(); ++i)
+    {
+        const auto& timeline = mState.timelines[i];
+        properties[QString("timeline_%1_self_id").arg(i)] = app::FromUtf8(timeline.selfId);
+        properties[QString("timeline_%1_node_id").arg(i)] = app::FromUtf8(timeline.nodeId);
+    }
+    for (const auto& p : mState.actuator_to_timeline)
+    {
+        properties[app::FromUtf8(p.first)] = app::FromUtf8(p.second);
+    }
+
+    parent->SaveAnimationTrack(*mState.track, properties);
 }
 
 void AnimationTrackWidget::on_actionReset_triggered()
@@ -1082,6 +1149,19 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
 {
     const auto& name = app::ToUtf8(GetValue(mUI.actuatorNode));
     const auto* node = mState.entity->FindNodeByName(name);
+
+    // for now simply find the first timeline that matches
+    size_t timeline_index = mState.timelines.size();
+    for (size_t i=0; i<mState.timelines.size(); ++i)
+    {
+        if (mState.timelines[i].nodeId == node->GetId()) {
+            timeline_index = i;
+            break;
+        }
+    }
+    ASSERT(timeline_index < mState.timelines.size());
+    const auto& timeline = mState.timelines[timeline_index];
+
     // get the animation duration in seconds and normalize the actuator times.
     const float animation_duration = GetValue(mUI.duration);
     const float actuator_start = GetValue(mUI.actuatorStartTime);
@@ -1101,7 +1181,7 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != id)
+        if (mState.actuator_to_timeline[klass.GetId()] != timeline.selfId)
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -1111,12 +1191,15 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
             lo_bound = std::max(lo_bound, end);
         // this isn't a free slot actually.
         if (norm_start >= start && norm_start <= end)
+        {
+            NOTE("No available time slot found.");
             return;
+        }
     }
     const auto start = std::max(lo_bound, norm_start);
     const auto end   = std::min(hi_bound, norm_end);
     const game::Actuator::Type type = GetValue(mUI.actuatorType);
-    AddActuator(*node, type, start, end-start);
+    AddActuator(timeline.selfId, node->GetId(), type, start, end-start);
 }
 
 void AnimationTrackWidget::SetSelectedActuatorProperties()
@@ -1652,16 +1735,18 @@ void AnimationTrackWidget::UpdateTransformActuatorUI()
 
 void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type type, float seconds)
 {
-    const auto* timeline = mUI.timeline->GetCurrentTimeline();
-    if (timeline == nullptr)
+    if (!mUI.timeline->GetCurrentTimeline())
         return;
-    const auto index = mUI.timeline->GetCurrentTimelineIndex();
-    if (index >= mEntity->GetNumNodes())
+    const auto timeline_index = mUI.timeline->GetCurrentTimelineIndex();
+    if (timeline_index >= mState.timelines.size())
         return;
+
+    const auto& timeline = mState.timelines[timeline_index];
+
     // get the node from the animation class object.
     // the class node's transform values are used for the
     // initial data for the actuator.
-    const auto& node = mState.entity->GetNode(index);
+    const auto* node = mState.entity->FindNodeById(timeline.nodeId);
     const auto duration = mState.track->GetDuration();
     const auto position = seconds / duration;
 
@@ -1670,7 +1755,7 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
     for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
     {
         const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetNodeId() != node.GetId())
+        if (mState.actuator_to_timeline[klass.GetId()] != timeline.selfId)
             continue;
         const auto start = klass.GetStartTime();
         const auto end   = klass.GetStartTime() + klass.GetDuration();
@@ -1679,15 +1764,17 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         if (end <= position)
             lo_bound = std::max(lo_bound, end);
     }
-    AddActuator(node, type, lo_bound, hi_bound - lo_bound);
+    AddActuator(timeline.selfId, node->GetId(), type, lo_bound, hi_bound - lo_bound);
 }
 
-void AnimationTrackWidget::AddActuator(const game::EntityNodeClass& node, game::ActuatorClass::Type type, float start_time, float duration)
+void AnimationTrackWidget::AddActuator(const std::string& timelineId, const std::string& nodeId,
+                                       game::ActuatorClass::Type type,
+                                       float start_time, float duration)
 {
     if (type == game::ActuatorClass::Type::Transform)
     {
         game::TransformActuatorClass klass;
-        klass.SetNodeId(node.GetId());
+        klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1695,23 +1782,25 @@ void AnimationTrackWidget::AddActuator(const game::EntityNodeClass& node, game::
         klass.SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
         klass.SetInterpolation(GetValue(mUI.transformInterpolation));
         klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
+        mState.actuator_to_timeline[klass.GetId()] = timelineId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::SetValue)
     {
         game::SetValueActuatorClass klass;
-        klass.SetNodeId(node.GetId());
+        klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetEndValue(GetValue(mUI.setvalEndValue));
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
+        mState.actuator_to_timeline[klass.GetId()] = timelineId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::Kinematic)
     {
         game::KinematicActuatorClass klass;
-        klass.SetNodeId(node.GetId());
+        klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
@@ -1719,23 +1808,25 @@ void AnimationTrackWidget::AddActuator(const game::EntityNodeClass& node, game::
         velocity.x = GetValue(mUI.kinematicEndVeloX);
         velocity.y = GetValue(mUI.kinematicEndVeloY);
         klass.SetEndLinearVelocity(velocity);
+        mState.actuator_to_timeline[klass.GetId()] = timelineId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::SetFlag)
     {
         game::SetFlagActuatorClass klass;
-        klass.SetNodeId(node.GetId());
+        klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
         klass.SetFlagAction(GetValue(mUI.flagAction));
+        mState.actuator_to_timeline[klass.GetId()] = timelineId;
         mState.track->AddActuator(klass);
     }
     mUI.timeline->Rebuild();
 
     const float end = start_time + duration;
     const float animation_duration = GetValue(mUI.duration);
-    DEBUG("New %1 actuator for node '%1' from %2s to %3s", type, node.GetName(),
+    DEBUG("New %1 actuator for node '%1' from %2s to %3s", type, nodeId,
           start_time * animation_duration, end * animation_duration);
 }
 
