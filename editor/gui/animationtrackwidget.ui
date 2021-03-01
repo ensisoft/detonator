@@ -1249,7 +1249,7 @@
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>Delete Actuator</string>
    </property>
    <property name="shortcut">
     <string>Del</string>
@@ -1261,7 +1261,7 @@
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete All</string>
+    <string>Delete Actuators</string>
    </property>
    <property name="toolTip">
     <string>Delete all actuators from all timelines</string>
@@ -1298,6 +1298,18 @@
    </property>
    <property name="toolTip">
     <string>Toggle physics simulation on/off</string>
+   </property>
+  </action>
+  <action name="actionDeleteTimeline">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Timeline</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete selected node timeline</string>
    </property>
   </action>
  </widget>

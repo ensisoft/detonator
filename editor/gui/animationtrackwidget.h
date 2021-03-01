@@ -97,6 +97,7 @@ namespace gui
         void on_actionReset_triggered();
         void on_actionDeleteActuator_triggered();
         void on_actionDeleteActuators_triggered();
+        void on_actionDeleteTimeline_triggered();
         void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
@@ -133,6 +134,7 @@ namespace gui
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
         void ToggleShowResource();
         void AddActuatorAction();
+        void AddNodeTimelineAction();
     private:
         void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);

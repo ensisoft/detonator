@@ -761,6 +761,28 @@ void AnimationTrackWidget::on_actionDeleteActuators_triggered()
     SelectedItemChanged(nullptr);
 }
 
+void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
+{
+    if (!mUI.timeline->GetCurrentTimeline())
+        return;
+    const auto index = mUI.timeline->GetCurrentTimelineIndex();
+    ASSERT(index < mState.timelines.size());
+    auto tl = mState.timelines[index];
+
+    for (size_t i=0; i<mState.track->GetNumActuators();)
+    {
+        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
+        if (timeline == tl.selfId) {
+            mState.track->DeleteActuator(i);
+        } else {
+            ++i;
+        }
+    }
+    mState.timelines.erase(mState.timelines.begin() + index);
+    mUI.timeline->Rebuild();
+}
+
 void AnimationTrackWidget::on_duration_valueChanged(double value)
 {
     QSignalBlocker s(mUI.actuatorStartTime);
@@ -963,16 +985,17 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     // map the click point to a position in the timeline.
     const auto* timeline = mUI.timeline->GetCurrentTimeline();
+    mUI.actionDeleteTimeline->setEnabled(timeline != nullptr);
 
     // build menu for adding actuators.
-    QMenu add(this);
-    add.setEnabled(timeline != nullptr);
-    add.setIcon(QIcon("icons:add.png"));
-    add.setTitle(tr("Add Actuator..."));
+    QMenu add_actuator(this);
+    add_actuator.setEnabled(timeline != nullptr);
+    add_actuator.setIcon(QIcon("icons:add.png"));
+    add_actuator.setTitle(tr("Add Actuator..."));
     for (const auto val : magic_enum::enum_values<game::ActuatorClass::Type>())
     {
         const std::string name(magic_enum::enum_name(val));
-        QAction* action = add.addAction(app::FromUtf8(name));
+        QAction* action = add_actuator.addAction(app::FromUtf8(name));
         action->setEnabled(false);
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
         if (timeline)
@@ -988,6 +1011,20 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         }
     }
 
+    // build menu for adding timelines
+    QMenu add_timeline(this);
+    add_timeline.setEnabled(true);
+    add_timeline.setIcon(QIcon("icons:add.png"));
+    add_timeline.setTitle(tr("Add Timeline..."));
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        const auto& node = mState.entity->GetNode(i);
+        QAction* action = add_timeline.addAction(app::FromUtf8(node.GetName()));
+        action->setEnabled(true);
+        action->setData(app::FromUtf8(node.GetId()));
+        connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddNodeTimelineAction);
+    }
+
     QMenu show(this);
     show.setTitle(tr("Show ..."));
     for (const auto val : magic_enum::enum_values<game::ActuatorClass::Type>())
@@ -1001,12 +1038,14 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     }
 
     QMenu menu(this);
-    menu.addMenu(&add);
+    menu.addMenu(&add_actuator);
     menu.addAction(mUI.actionDeleteActuator);
+    menu.addAction(mUI.actionDeleteActuators);
+    menu.addSeparator();
+    menu.addMenu(&add_timeline);
+    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addMenu(&show);
-    menu.addSeparator();
-    menu.addAction(mUI.actionDeleteActuators);
     menu.exec(QCursor::pos());
 }
 
@@ -1493,6 +1532,28 @@ void AnimationTrackWidget::AddActuatorAction()
     const auto type = magic_enum::enum_cast<game::ActuatorClass::Type>(app::ToUtf8(action->text()));
     ASSERT(type.has_value());
     AddActuatorFromTimeline(type.value(), seconds);
+}
+
+void AnimationTrackWidget::AddNodeTimelineAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+
+    const QString& nodeId = action->data().toString();
+    size_t index = 0;
+    if (!mUI.timeline->GetCurrentTimeline())
+    {
+        if (!mState.timelines.empty())
+            index = mState.timelines.size();
+    }
+    else
+    {
+        index = mUI.timeline->GetCurrentTimelineIndex();
+    }
+    Timeline tl;
+    tl.selfId = base::RandomString(10);
+    tl.nodeId = app::ToUtf8(nodeId);
+    mState.timelines.insert(mState.timelines.begin() + index, tl);
+    mUI.timeline->Rebuild();
 }
 
 void AnimationTrackWidget::InitScene(unsigned int width, unsigned int height)
