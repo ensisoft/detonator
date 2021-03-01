@@ -180,6 +180,9 @@ namespace gui
         // set to true when items cannot be moved/edited.
         bool mFreezeItems = false;
 
+        bool mAlignmentBar = false;
+        float mAlignmentBarTime = 0.0f;
+
         QPoint mDragStart;
         QPoint mDragPoint;
         bool mDragging = false;

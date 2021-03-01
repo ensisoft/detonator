@@ -50,8 +50,8 @@
 #include "editor/gui/timelinewidget.h"
 
 namespace {
-    const auto HorizontalMargin = 5;
-    const auto VerticalMargin = 5;
+    const auto HorizontalMargin = 5; // left/right margin
+    const auto VerticalMargin = 5; // top/bottom margin
     const auto TimelineHeight = 15;
     const auto RulerHeight = 40;
     const auto PixelsToSecond = 20;
@@ -107,9 +107,9 @@ float TimelineWidget::MapToSeconds(const QPoint& pos) const
     const unsigned window_height = viewport()->height();
     // only interested in the x position which should be
     // within the widget's width.
-    const float x = pos.x() - mXOffset - VerticalMargin;
+    const float x = pos.x() - mXOffset - HorizontalMargin;
 
-    const int timeline_width = window_width - 2 * VerticalMargin; // leave 5px gap at both ends
+    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
     const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
     const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
                                         ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
@@ -182,7 +182,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     {
         const auto& timeline = mTimelines[i];
         const auto x = timeline_start;
-        const auto y = RulerHeight + i * TimelineHeight + i * HorizontalMargin;
+        const auto y = RulerHeight + i * TimelineHeight + i * VerticalMargin;
         const QRect box(x, y, render_width, TimelineHeight);
 
         if (i == mHoveredTimeline)
@@ -227,6 +227,16 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         }
     }
 
+    if (mAlignmentBar)
+    {
+        const auto xpos = timeline_start + mAlignmentBarTime * pixels_per_one_second * mDuration;
+        QPen pen;
+        pen.setColor(Qt::green);
+        p.setPen(pen);
+        p.drawLine(xpos, 0, xpos, viewport()->height());
+    }
+
+
     // visualize the current time
     QPixmap bullet("icons:bullet.png");
     p.drawPixmap(timeline_start + mCurrentTime * pixels_per_one_second - 8, 25, bullet);
@@ -243,11 +253,14 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
 {
     const auto& pos = mickey->pos();
     const unsigned window_width  = viewport()->width();
-    const int timeline_start = mXOffset + VerticalMargin;
-    const int timeline_width = window_width - 2 * VerticalMargin; // leave 5px gap at both ends
+    const int timeline_start = mXOffset + HorizontalMargin;
+    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
     const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
     const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
                                         ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
+
+    mAlignmentBar = false;
+
     if (mDragging)
     {
         // convert drag coordinates to normalized positions.
@@ -276,6 +289,55 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         }
         moved_start = math::clamp(0.0f, 1.0f, moved_start);
         moved_end   = math::clamp(moved_start, 1.0f, moved_end);
+        // compare against other timeline's items to see if there's an
+        // alignment on the start or end time with some other item.
+        for (size_t i=0; i<mTimelines.size(); ++i)
+        {
+            if (i == mSelectedTimeline)
+                continue;
+            const auto& timeline = mTimelines[i];
+            for (size_t i=0; i<timeline.GetNumItems(); ++i)
+            {
+                const auto& item = timeline.GetItem(i);
+                const auto start = item.starttime;
+                const auto end   = item.starttime + item.duration;
+                const auto epsilon = 0.0001f;
+                if (mDraggingFromStart || mDraggingFromEnd)
+                {
+                    const auto drag_pos = mDraggingFromStart ? moved_start : moved_end;
+
+                    if (math::equals(drag_pos, start, epsilon))
+                    {
+                        mAlignmentBar = true;
+                        mAlignmentBarTime = start;
+                    }
+                    else if (math::equals(drag_pos, end, epsilon))
+                    {
+                        mAlignmentBar = true;
+                        mAlignmentBarTime = end;
+                    }
+                }
+                else
+                {
+                    if (math::equals(moved_start , start , epsilon) ||
+                        math::equals(moved_end, start, epsilon))
+                    {
+                        mAlignmentBar = true;
+                        mAlignmentBarTime = start;
+                    }
+                    else if (math::equals(moved_start , end , epsilon) ||
+                            math::equals(moved_end, end, epsilon))
+                    {
+                        mAlignmentBar = true;
+                        mAlignmentBarTime = end;
+                    }
+                }
+                if (mAlignmentBar)
+                    break;
+            }
+            if (mAlignmentBar)
+                break;
+        }
 
         float lo_bound = 0.0f;
         float hi_bound = 1.0f;
@@ -335,7 +397,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
     const auto mouse_x = pos.x() - mXOffset;
     if (mouse_y <= RulerHeight)
         return;
-    const auto height = TimelineHeight + HorizontalMargin;
+    const auto height = TimelineHeight + VerticalMargin;
     const auto index  = (mouse_y - RulerHeight) / height;
     if (index >= mTimelines.size())
         return;
@@ -386,8 +448,8 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
 
     const auto& pos = mickey->pos();
     const unsigned window_width  = viewport()->width();
-    const int timeline_start = mXOffset + VerticalMargin;
-    const int timeline_width = window_width - 2 * VerticalMargin; // leave 5px gap at both ends
+    const int timeline_start = mXOffset + HorizontalMargin;
+    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
     const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
     const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
                                         ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
@@ -396,7 +458,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
 
     if (mouse_y <= RulerHeight)
         return;
-    const auto height = TimelineHeight + HorizontalMargin;
+    const auto height = TimelineHeight + VerticalMargin;
     const auto index  = (mouse_y - RulerHeight) / height;
 
     if (index >= mTimelines.size())
