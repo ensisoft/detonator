@@ -968,7 +968,7 @@ void AnimationTrackWidget::on_setvalInterpolation_currentIndexChanged(int index)
 {
     SetSelectedActuatorProperties();
 }
-void AnimationTrackWidget::on_setvalParamName_currentIndexChanged(int index)
+void AnimationTrackWidget::on_setvalName_currentIndexChanged(int index)
 {
     SetSelectedActuatorProperties();
 }
@@ -1176,7 +1176,7 @@ void AnimationTrackWidget::on_itemFlags_currentIndexChanged(int)
     }
 }
 
-void AnimationTrackWidget::on_flagAction_currentIndexChanged()
+void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
