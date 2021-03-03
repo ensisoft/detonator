@@ -158,7 +158,10 @@ namespace gui
         virtual void scrollContentsBy(int dx, int dy) override;
         virtual void enterEvent(QEvent*) override;
         virtual void leaveEvent(QEvent*) override;
-
+        virtual void resizeEvent(QResizeEvent* event) override;
+    private:
+        void ComputeVerticalScrollbars();
+        void ComputeHorizontalScrollbars();
     private:
         // the provider of the timeline data.
         TimelineModel* mModel = nullptr;
@@ -170,11 +173,11 @@ namespace gui
         std::size_t mSelectedTimeline = 0;
         // Index of the currently hovered timeline.
         std::size_t mHoveredTimeline = std::numeric_limits<size_t>::max();
-
+        unsigned mNumVisibleTimelines = 0;
         float mDuration    = 10.0f; // length of timeline in seconds.
         float mZoomFactor  = 1.0f;
         float mCurrentTime = 0.0f;
-        // view offset.
+        // scroll view offset.
         int mXOffset = 0;
         int mYOffset = 0;
         // set to true when items cannot be moved/edited.

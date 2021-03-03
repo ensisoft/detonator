@@ -89,6 +89,8 @@ void TimelineWidget::Rebuild()
     }
 
     viewport()->update();
+
+    ComputeVerticalScrollbars();
 }
 
 void TimelineWidget::Update()
@@ -124,15 +126,13 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     const unsigned window_width  = viewport()->width();
     const unsigned window_height = viewport()->height();
 
-    const int timeline_start = mXOffset + VerticalMargin;
-    const int timeline_width = window_width - 2 * VerticalMargin; // leave 5px gap at both ends
+    const int timeline_start = mXOffset + HorizontalMargin;
+    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
     const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
     const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
         ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-    const auto num_second_ticks = timeline_width / pixels_per_one_second;
-
-    const unsigned render_height = mTimelines.size() * TimelineHeight + RulerHeight;
-    const unsigned render_width  = mDuration * pixels_per_one_second;
+    const auto num_second_ticks = (timeline_width + std::abs(mXOffset)) / pixels_per_one_second;
+    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
 
     QPainter p(viewport());
     p.setRenderHint(QPainter::Antialiasing);
@@ -146,8 +146,9 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         QPen line;
         line.setColor(palette.color(QPalette::Text));
 
+        const auto line_length = mDuration * pixels_per_one_second;
         p.setPen(line);
-        p.drawLine(timeline_start, 20, timeline_start + render_width, 20);
+        p.drawLine(timeline_start, 20, timeline_start + line_length, 20);
         p.setFont(small);
 
         for (unsigned i=0; i<=num_second_ticks; ++i)
@@ -178,14 +179,18 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     p.setFont(font);
 
     // visualize the timelines and their items
-    for (size_t i=0; i<mTimelines.size(); ++i)
+    for (size_t i=0; i<max_num_visible_timelines; ++i)
     {
-        const auto& timeline = mTimelines[i];
+        const auto index = i + mYOffset;
+        if (index >= mTimelines.size())
+            break;
+        const auto& timeline = mTimelines[index];
         const auto x = timeline_start;
         const auto y = RulerHeight + i * TimelineHeight + i * VerticalMargin;
-        const QRect box(x, y, render_width, TimelineHeight);
+        const auto l = mDuration * pixels_per_one_second;
+        const QRect box(x, y, l, TimelineHeight);
 
-        if (i == mHoveredTimeline)
+        if (index == mHoveredTimeline)
             p.fillRect(box, QColor(70, 70, 70));
 
         p.drawText(box, Qt::AlignVCenter | Qt::AlignHCenter, timeline.GetName());
@@ -197,8 +202,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
             const auto y0 = y;
             const QRect box(x0, y0, item.duration * pixels_per_one_second * mDuration, TimelineHeight);
 
-            const auto group = mFreezeItems ? QPalette::ColorGroup::Disabled :
-                    QPalette::ColorGroup::Active;
+            const auto group = mFreezeItems ? QPalette::ColorGroup::Disabled : QPalette::ColorGroup::Active;
             QColor box_color;
             QColor pen_color;
             if (&item == mSelected)
@@ -236,17 +240,9 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         p.drawLine(xpos, 0, xpos, viewport()->height());
     }
 
-
     // visualize the current time
     QPixmap bullet("icons:bullet.png");
     p.drawPixmap(timeline_start + mCurrentTime * pixels_per_one_second - 8, 25, bullet);
-
-    const auto vertical_excess = render_height - window_height;
-    const auto horizontal_excess = render_width - window_width;
-    verticalScrollBar()->setRange(0, vertical_excess);
-    verticalScrollBar()->setPageStep(window_height);
-    horizontalScrollBar()->setRange(0, horizontal_excess);
-    horizontalScrollBar()->setPageStep(horizontal_excess);
 }
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
@@ -393,12 +389,12 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
     mHoveredTimeline = mTimelines.size();
     setCursor(Qt::ArrowCursor);
 
-    const auto mouse_y = pos.y() - mYOffset;
+    const auto mouse_y = pos.y(); // - mYOffset;
     const auto mouse_x = pos.x() - mXOffset;
     if (mouse_y <= RulerHeight)
         return;
     const auto height = TimelineHeight + VerticalMargin;
-    const auto index  = (mouse_y - RulerHeight) / height;
+    const auto index  = (mouse_y - RulerHeight) / height + mYOffset;
     if (index >= mTimelines.size())
         return;
 
@@ -453,14 +449,13 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
     const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
     const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
                                         ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-    const auto mouse_y = pos.y() - mYOffset;
+    const auto mouse_y = pos.y(); // - mYOffset;
     const auto mouse_x = pos.x() - mXOffset;
 
     if (mouse_y <= RulerHeight)
         return;
     const auto height = TimelineHeight + VerticalMargin;
-    const auto index  = (mouse_y - RulerHeight) / height;
-
+    const auto index  = (mouse_y - RulerHeight) / height + mYOffset;
     if (index >= mTimelines.size())
         return;
 
@@ -505,35 +500,50 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent* mickey)
 void TimelineWidget::wheelEvent(QWheelEvent* wheel)
 {
     const auto mods = wheel->modifiers();
-    if (mods != Qt::ControlModifier)
-        return;
-
     const QPoint& num_degrees = wheel->angleDelta() / 8;
     const QPoint& num_steps = num_degrees / 15;
     // only consider the wheel scroll steps on the vertical
     // axis for zooming.
     // if steps are positive the wheel is scrolled away from the user
     // and if steps are negative the wheel is scrolled towards the user.
-    const int num_zoom_steps = num_steps.y();
+    const int num_wheel_steps = num_steps.y();
 
-    //DEBUG("Zoom steps: %1", num_zoom_steps);
+    //DEBUG("Mouse wheel event with steps: %1", num_wheel_steps);
 
-    for (int i=0; i<std::abs(num_zoom_steps); ++i)
+    for (int i=0; i<std::abs(num_wheel_steps); ++i)
     {
-        if (num_zoom_steps > 0)
-            mZoomFactor += 0.1;
-        else if (num_zoom_steps < 0 && mZoomFactor > 0.1)
-            mZoomFactor -= 0.1;
+        if (mods & Qt::ControlModifier)
+        {
+            if (num_wheel_steps > 0)
+                mZoomFactor += 0.1;
+            else if (num_wheel_steps < 0 && mZoomFactor > 0.1)
+                mZoomFactor -= 0.1;
+        }
+        else if (verticalScrollBar()->isVisible())
+        {
+            unsigned max = verticalScrollBar()->maximum();
+            // scrolling upwards
+            if (num_wheel_steps > 0 )
+                mYOffset = mYOffset > 0 ? mYOffset - 1 : 0;
+            else if (num_wheel_steps < 0)
+                mYOffset = mYOffset < max ? mYOffset + 1 : mYOffset;
+            QSignalBlocker s(verticalScrollBar());
+            verticalScrollBar()->setValue(mYOffset);
+        }
     }
     viewport()->update();
+
+    if (mods & Qt::ControlModifier)
+        ComputeHorizontalScrollbars();
 }
 
 void TimelineWidget::scrollContentsBy(int dx, int dy)
 {
+    dy *= -1;
+
     mXOffset += dx;
     mYOffset += dy;
-    DEBUG("Scroll event dx=%1 dy=%2 xoffset=%3 yoffset=%4",
-          dx, dy, mXOffset, mYOffset);
+    //DEBUG("Scroll event dx=%1 dy=%2 xoffset=%3 yoffset=%4", dx, dy, mXOffset, mYOffset);
     viewport()->update();
 }
 
@@ -549,6 +559,71 @@ void TimelineWidget::leaveEvent(QEvent*)
     //mHoveredTimeline = mTimelines.size();
 
     viewport()->update();
+}
+
+void TimelineWidget::resizeEvent(QResizeEvent* event)
+{
+    ComputeHorizontalScrollbars();
+
+    const unsigned window_height = viewport()->height();
+    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
+    // filter bullshit events, such as when a QMenu is opened on top
+    // of the widget and resizeEvent is invoked.
+    if (max_num_visible_timelines == mNumVisibleTimelines)
+        return;
+
+    ComputeVerticalScrollbars();
+
+    mNumVisibleTimelines = max_num_visible_timelines;
+}
+
+void TimelineWidget::ComputeVerticalScrollbars()
+{
+    const unsigned window_width = viewport()->width();
+    const unsigned window_height = viewport()->height();
+    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
+
+    // compute vertical scroll
+    if (mTimelines.size() > max_num_visible_timelines)
+    {
+        const auto num_scroll_steps = mTimelines.size() - max_num_visible_timelines;
+        QSignalBlocker s(verticalScrollBar());
+        verticalScrollBar()->setMaximum(num_scroll_steps);
+        verticalScrollBar()->setRange(0 , num_scroll_steps);
+        verticalScrollBar()->setVisible(true);
+        setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        verticalScrollBar()->setValue(0);
+        mYOffset = 0;
+    }
+    else
+    {
+        verticalScrollBar()->setVisible(false);
+    }
+}
+
+void TimelineWidget::ComputeHorizontalScrollbars()
+{
+    const unsigned window_width = viewport()->width();
+    // compute horizontal scroll
+    const int available_timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
+    const float available_num_seconds_on_timeline = available_timeline_width / float(PixelsToSecond);
+    const auto pixels_per_one_second = (available_num_seconds_on_timeline > mDuration
+        ? available_timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
+
+    const unsigned total_width  = mDuration * pixels_per_one_second + 2 * HorizontalMargin;
+
+    if (total_width > window_width)
+    {
+        const auto horizontal_excess = total_width - window_width;
+        horizontalScrollBar()->setRange(0, horizontal_excess);
+        horizontalScrollBar()->setPageStep(horizontal_excess);
+        horizontalScrollBar()->setVisible(true);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    }
+    else
+    {
+        horizontalScrollBar()->setVisible(false);
+    }
 }
 
 } // namespace
