@@ -204,11 +204,16 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
     }
 
     // Put the nodes in the list.
+    std::vector<ListItem> items;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        mUI.actuatorNode->addItem(app::FromUtf8(node.GetName()));
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        items.push_back(std::move(item));
     }
+    SetList(mUI.actuatorNode, items);
     mTreeModel.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -249,11 +254,17 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     }
 
     // put the nodes in the node list
+    std::vector<ListItem> items;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        mUI.actuatorNode->addItem(app::FromUtf8(node.GetName()));
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        items.push_back(std::move(item));
     }
+    SetList(mUI.actuatorNode, items);
+
     mTreeModel.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
@@ -446,11 +457,16 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
 
     // put the nodes in the node list
+    std::vector<ListItem> items;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        mUI.actuatorNode->addItem(app::FromUtf8(node.GetName()));
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        items.push_back(std::move(item));
     }
+    SetList(mUI.actuatorNode, items);
 
     mEntity = game::CreateEntityInstance(mState.entity);
 
@@ -1186,8 +1202,9 @@ void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
 
 void AnimationTrackWidget::on_btnAddActuator_clicked()
 {
-    const auto& name = app::ToUtf8(GetValue(mUI.actuatorNode));
-    const auto* node = mState.entity->FindNodeByName(name);
+    // the combobox defines which node is selected as the
+    // target node of the actuator
+    const auto* node = mState.entity->FindNodeById(GetItemId(mUI.actuatorNode));
 
     // for now simply find the first timeline that matches
     size_t timeline_index = mState.timelines.size();
@@ -1300,11 +1317,14 @@ void AnimationTrackWidget::on_btnTransformReset_clicked()
     const auto index = mUI.actuatorNode->currentIndex();
     if (index == -1)
         return;
-    const auto& klass   = mState.entity->GetNode(index);
-    const auto& pos     = klass.GetTranslation();
-    const auto& size    = klass.GetSize();
-    const auto& scale   = klass.GetScale();
-    const auto rotation = klass.GetRotation();
+    // reset the properties of the actuator to the original node class values
+    // first set the values to the UI widgets and then ask the actuator's
+    // state to be updated from the UI.
+    const auto* klass   = mState.entity->FindNodeById(GetItemId(mUI.actuatorNode));
+    const auto& pos     = klass->GetTranslation();
+    const auto& size    = klass->GetSize();
+    const auto& scale   = klass->GetScale();
+    const auto rotation = klass->GetRotation();
     SetValue(mUI.transformEndPosX, pos.x);
     SetValue(mUI.transformEndPosY, pos.y);
     SetValue(mUI.transformEndSizeX, size.x);
@@ -1313,11 +1333,12 @@ void AnimationTrackWidget::on_btnTransformReset_clicked()
     SetValue(mUI.transformEndScaleY, scale.y);
     SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
 
-    auto& node = mEntity->GetNode(index);
-    node.SetTranslation(pos);
-    node.SetSize(size);
-    node.SetScale(scale);
-    node.SetRotation(rotation);
+    // apply the reset to the visualization entity and to its node instance.
+    auto* node = mEntity->FindNodeByClassId(GetItemId(mUI.actuatorNode));
+    node->SetTranslation(pos);
+    node->SetSize(size);
+    node->SetScale(scale);
+    node->SetRotation(rotation);
 
     SetSelectedActuatorProperties();
 }
@@ -1429,7 +1450,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         SetValue(mUI.actuatorStartTime, start);
         SetValue(mUI.actuatorEndTime, end);
-        SetValue(mUI.actuatorNode, app::FromUtf8(node->GetClassName()));
+        SetValue(mUI.actuatorNode, ListItemId(app::FromUtf8(node->GetClassId())));
         SetValue(mUI.actuatorType, actuator->GetType());
         if (const auto* ptr = dynamic_cast<const game::TransformActuatorClass*>(actuator))
         {
@@ -1740,9 +1761,9 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
         else if (!mUI.timeline->GetSelectedItem() && hitnode)
         {
             // pick a new node as the selected actuator node
-            const auto& name = hitnode->GetClassName();
-            const auto index = mUI.actuatorNode->findText(app::FromUtf8(name));
-            SetValue(mUI.actuatorNode, app::FromUtf8(name));
+            const auto& nodeId = hitnode->GetClassId();
+            const auto index = mUI.actuatorNode->findData(app::FromUtf8(nodeId));
+            SetValue(mUI.actuatorNode, ListItemId(app::FromUtf8(nodeId)));
             on_actuatorNode_currentIndexChanged(index);
         }
         else if (!mUI.timeline->GetSelectedItem())
@@ -1896,7 +1917,7 @@ game::EntityNode* AnimationTrackWidget::GetCurrentNode()
     const auto index = mUI.actuatorNode->currentIndex();
     if (index == -1)
         return nullptr;
-    return &mEntity->GetNode(index);
+    return mEntity->FindNodeByClassId(GetItemId(mUI.actuatorNode));
 }
 
 std::shared_ptr<game::EntityClass> FindSharedEntity(size_t hash)

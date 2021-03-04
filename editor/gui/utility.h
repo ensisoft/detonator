@@ -333,6 +333,14 @@ inline bool FileExists(const QLineEdit* edit)
 {
     return !MissingFile(edit);
 }
+struct ComboBoxItemIdGetter
+{
+    operator std::string() const
+    { return app::ToUtf8(cmb->currentData().toString()); }
+    operator QString() const
+    { return cmb->currentData().toString(); }
+    const QComboBox* cmb = nullptr;
+};
 
 struct ComboBoxValueGetter
 {
@@ -452,6 +460,8 @@ inline ActionValueGetter GetValue(const QAction* action)
 { return ActionValueGetter { action }; }
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
+inline ComboBoxItemIdGetter GetItemId(const QComboBox* cmb)
+{ return ComboBoxItemIdGetter { cmb }; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
 inline PlainTextEditValueGetter GetValue(const QPlainTextEdit* edit)
