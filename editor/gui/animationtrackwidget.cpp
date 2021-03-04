@@ -163,6 +163,10 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     SetValue(mUI.actuatorStartTime, 0.0f);
     SetValue(mUI.actuatorEndTime, 10.0f);
     SetValue(mUI.trackName, QString("My Track"));
+    SetEnabled(mUI.transformActuator, false);
+    SetEnabled(mUI.setvalActuator,  false);
+    SetEnabled(mUI.kinematicActuator, false);
+    SetEnabled(mUI.setflagActuator,   false);
 
     setFocusPolicy(Qt::StrongFocus);
     setWindowTitle("My Track");
@@ -937,12 +941,13 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         mUI.actuatorEndTime->setMinimum(0.0f);
         mUI.actuatorEndTime->setMaximum(duration);
 
-        mUI.actuatorType->setEnabled(true);
-        mUI.actuatorStartTime->setEnabled(true);
-        mUI.actuatorEndTime->setEnabled(true);
-        mUI.actuatorProperties->setEnabled(true);
+        SetEnabled(mUI.actuatorType, true);
+        SetEnabled(mUI.transformActuator, true);
+        SetEnabled(mUI.actuatorStartTime, true);
+        SetEnabled(mUI.actuatorEndTime, true);
+        SetEnabled(mUI.btnAddActuator, true);
+        SetEnabled(mUI.actuatorProperties, true);
         mUI.actuatorProperties->setCurrentIndex(0);
-        mUI.btnAddActuator->setEnabled(true);
     }
 }
 
@@ -1206,15 +1211,25 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     // target node of the actuator
     const auto* node = mState.entity->FindNodeById(GetItemId(mUI.actuatorNode));
 
-    // for now simply find the first timeline that matches
+    // for now simply find the first timeline that matches if any.
     size_t timeline_index = mState.timelines.size();
     for (size_t i=0; i<mState.timelines.size(); ++i)
     {
-        if (mState.timelines[i].nodeId == node->GetId()) {
+        if (mState.timelines[i].nodeId == node->GetId())
+        {
             timeline_index = i;
             break;
         }
     }
+    // no such timeline at all? then create a new one.
+    if (timeline_index == mState.timelines.size())
+    {
+        Timeline tl;
+        tl.selfId = base::RandomString(10);
+        tl.nodeId = node->GetId();
+        mState.timelines.push_back(std::move(tl));
+    }
+
     ASSERT(timeline_index < mState.timelines.size());
     const auto& timeline = mState.timelines[timeline_index];
 
@@ -1408,12 +1423,12 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.kinematicEndVeloZ, 0.0f);
         mUI.actuatorNode->setCurrentIndex(-1);
         mUI.actuatorGroup->setTitle("Actuator");
-        mUI.actuatorNode->setEnabled(true);
-        mUI.actuatorType->setEnabled(false);
-        mUI.actuatorStartTime->setEnabled(false);
-        mUI.actuatorEndTime->setEnabled(false);
-        mUI.actuatorProperties->setEnabled(false);
-        mUI.btnAddActuator->setEnabled(false);
+        SetEnabled(mUI.actuatorNode, true);
+        SetEnabled(mUI.actuatorType, false);
+        SetEnabled(mUI.actuatorStartTime, false);
+        SetEnabled(mUI.actuatorEndTime, false);
+        SetEnabled(mUI.actuatorProperties, false);
+        SetEnabled(mUI.btnAddActuator, false);
     }
     else
     {
@@ -1508,12 +1523,11 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
             mUI.actuatorProperties->setEnabled(false);
         }
         mUI.actuatorGroup->setTitle(QString("Actuator - %1, %2s").arg(item->text).arg(QString::number(end-start,'f', 2)));
-        mUI.btnAddActuator->setEnabled(true);
-        mUI.actuatorType->setEnabled(false);
-        mUI.actuatorNode->setEnabled(false);
-        mUI.actuatorStartTime->setEnabled(true);
-        mUI.actuatorEndTime->setEnabled(true);
-
+        SetEnabled(mUI.btnAddActuator, false);
+        SetEnabled(mUI.actuatorType, false);
+        SetEnabled(mUI.actuatorNode, false);
+        SetEnabled(mUI.actuatorStartTime, true);
+        SetEnabled(mUI.actuatorEndTime, true);
         DEBUG("Selected timeline item '%1' (%2)", item->text, item->id);
     }
 }

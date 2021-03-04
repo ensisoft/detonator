@@ -582,26 +582,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="actuatorType">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Start time (s)</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="sizePolicy">
@@ -612,29 +592,6 @@
             </property>
             <property name="text">
              <string>Node</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Type</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="actuatorEndTime">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximum">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
             </property>
            </widget>
           </item>
@@ -661,6 +618,49 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="actuatorEndTime">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="actuatorType">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Start time (s)</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -678,7 +678,7 @@
            <enum>QFrame::Plain</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="transformActuator">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -975,7 +975,7 @@
             <item row="0" column="1">
              <widget class="QComboBox" name="setvalInterpolation">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -990,7 +990,30 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="setvalName"/>
+             <widget class="QComboBox" name="setvalName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1003,7 +1026,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="2" colspan="2">
+            <item row="1" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QDoubleSpinBox" name="kinematicEndVeloX">
@@ -1043,19 +1066,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </item>
             <item row="1" column="0">
@@ -1065,14 +1075,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Angular velocity (rad/s)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2" colspan="2">
+            <item row="2" column="1">
              <widget class="QDoubleSpinBox" name="kinematicEndVeloZ">
               <property name="minimum">
                <double>-1000.000000000000000</double>
@@ -1091,68 +1094,88 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="2" colspan="2">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Angular velocity (rad/s)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
              <widget class="QComboBox" name="kinematicInterpolation">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
              </widget>
             </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="setflagActuator">
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <spacer name="horizontalSpacer_5">
+            <item row="1" column="2">
+             <spacer name="horizontalSpacer_3">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>161</width>
+                <width>40</width>
                 <height>20</height>
                </size>
               </property>
              </spacer>
             </item>
-            <item>
-             <widget class="QLabel" name="label_10">
+           </layout>
+          </widget>
+          <widget class="QWidget" name="setflagActuator">
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_30">
               <property name="text">
-               <string>Set flag</string>
+               <string>Value</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QComboBox" name="itemFlags">
+            <item row="1" column="1">
+             <widget class="QComboBox" name="flagAction">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label_30">
-              <property name="text">
-               <string>To</string>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="itemFlags">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QComboBox" name="flagAction"/>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Flag</string>
+              </property>
+             </widget>
             </item>
-            <item>
-             <spacer name="horizontalSpacer">
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_5">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>161</width>
+                <width>40</width>
                 <height>20</height>
                </size>
               </property>
