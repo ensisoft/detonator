@@ -85,6 +85,8 @@ namespace game
             Trapezoid,
             //
             Parallelogram,
+            // The collision shape is the upper half of a circle.
+            SemiCircle,
             // The collision shape is a convex polygon. The polygon shape id
             // must then be selected in order to be able to extract the
             // polygon's convex hull.

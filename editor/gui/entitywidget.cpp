@@ -1701,6 +1701,8 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
                 body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::RightTriangle);
             else if (drawableId == "_trapezoid")
                 body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Trapezoid);
+            else if (drawableId == "_semi_circle")
+                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::SemiCircle);
             else if (auto klass = mState.workspace->FindDrawableClassById(drawableId)) {
                 if (klass->GetType() == gfx::DrawableClass::Type::Polygon) {
                     body.SetPolygonShapeId(drawableId);

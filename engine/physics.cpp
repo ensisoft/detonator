@@ -303,6 +303,8 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             painter.Draw(gfx::Rectangle(), view, mat);
         else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Circle)
             painter.Draw(gfx::Circle(), view, mat);
+        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::SemiCircle)
+            painter.Draw(gfx::SemiCircle(), view, mat);
         else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::RightTriangle)
             painter.Draw(gfx::RightTriangle(), view, mat);
         else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
@@ -541,6 +543,22 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         auto circle = std::make_unique<b2CircleShape>();
         circle->m_radius = std::max(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
         collision_shape = std::move(circle);
+    }
+    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::SemiCircle)
+    {
+        const float width  = node_size_in_world.x;
+        const float height = node_size_in_world.y;
+        b2Vec2 verts[7];
+        verts[0] = b2Vec2(0.0, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5*0.50, -height*0.5*0.86);
+        verts[2] = b2Vec2(-width*0.5*0.86, -height*0.5*0.50);
+        verts[3] = b2Vec2(-width*0.5*1.00, -height*0.5*0.00);
+        verts[4] = b2Vec2( width*0.5*1.00, -height*0.5*0.00);
+        verts[5] = b2Vec2( width*0.5*0.86, -height*0.5*0.50);
+        verts[6] = b2Vec2( width*0.5*0.50, -height*0.5*0.86);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 7);
+        collision_shape = std::move(poly);
     }
     else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::RightTriangle)
     {
