@@ -29,7 +29,7 @@
 #include <cmath>
 #include <ctime>
 
-#include "audio/sample.h"
+#include "audio/source.h"
 #include "audio/player.h"
 #include "base/bitflag.h"
 #include "base/format.h"

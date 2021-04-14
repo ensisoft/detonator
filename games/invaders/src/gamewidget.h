@@ -30,7 +30,7 @@
 #include <stack>
 #include <string>
 
-#include "audio/sample.h"
+#include "audio/source.h"
 #include "audio/player.h"
 #include "audio/device.h"
 #include "engine/main/interface.h"

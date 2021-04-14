@@ -459,7 +459,7 @@ add_library(invaders SHARED
     games/invaders/src/main.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
-    audio/sample.cpp
+    audio/source.cpp
     audio/player.cpp
     base/assert.cpp
     base/format.cpp
