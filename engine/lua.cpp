@@ -723,6 +723,21 @@ void BindGameLib(sol::state& L)
         rect["Translate"] = (void(FRect::*)(float, float))&FRect::Translate;
         rect["IsEmpty"]   = &FRect::IsEmpty;
     }
+    {
+        sol::constructors<FBox(), FBox(float, float), FBox(const glm::mat4& mat, float, float), FBox(const glm::mat4& mat)> ctors;
+        auto box = table.new_usertype<FBox>("FBox", ctors);
+        box["GetWidth"]    = &FBox::GetWidth;
+        box["GetHeight"]   = &FBox::GetHeight;
+        box["GetTopLeft"]  = &FBox::GetTopLeft;
+        box["GetTopRight"] = &FBox::GetTopRight;
+        box["GetBotRight"] = &FBox::GetTopRight;
+        box["GetBotLeft"]  = &FBox::GetBotLeft;
+        box["GetCenter"]   = &FBox::GetCenter;
+        box["GetSize"]     = &FBox::GetSize;
+        box["GetRotation"] = &FBox::GetRotation;
+        box["Transform"]   = &FBox::Transform;
+        box["Reset"]       = &FBox::Reset;
+    }
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"] = &ClassLibrary::FindEntityClassByName;
