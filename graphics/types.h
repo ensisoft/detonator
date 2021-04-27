@@ -184,6 +184,12 @@ namespace gfx
             mWidth = static_cast<T>(other.GetWidth());
             mHeight = static_cast<T>(other.GetHeight());
         }
+        Rect(T x, T y, const Size<T>& size)
+                : mX(x)
+                , mY(y)
+                , mWidth(size.GetWidth())
+                , mHeight(size.GetHeight())
+        {}
         Rect(const Point<T>& pos, T width, T height)
         {
             mX = pos.GetX();

@@ -496,6 +496,9 @@ namespace gfx
         Grid(const std::shared_ptr<const GridClass>& klass)
             : mClass(klass)
         {}
+        Grid(const GridClass& klass)
+           : mClass(std::make_shared<GridClass>(klass))
+        {}
 
         // the num vertical and horizontal lines is the number of lines
         // *inside* the grid. I.e. not including the enclosing border lines
