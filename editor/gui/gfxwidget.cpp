@@ -235,7 +235,7 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
     {
-        mCustomGraphicsPainter->SetTopLeftView((float)width(), (float)height());
+        mCustomGraphicsPainter->SetOrthographicView((float) width() , (float) height());
         mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
         mCustomGraphicsPainter->SetSurfaceSize(width(), height());
         onPaintScene(*mCustomGraphicsPainter, 0.0);

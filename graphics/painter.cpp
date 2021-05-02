@@ -77,15 +77,10 @@ public:
     {
         mScissor = IRect(0, 0, 0, 0);
     }
-    virtual void SetView(float left, float top, float width, float height) override
+    virtual void SetProjectionMatrix(const glm::mat4& proj) override
     {
-        mView = FRect(left, top, width, height);
+        mProjection = proj;
     }
-    virtual void SetView(const FRect& view) override
-    {
-        mView = view;
-    }
-
     virtual void Clear(const Color4f& color) override
     {
         mDevice->ClearColor(color);
@@ -95,7 +90,7 @@ public:
     {
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
-        const auto& kProjMatrix = MakeOrtho();
+        const auto& kProjMatrix = mProjection;
         const auto& kViewMatrix = transform.GetAsMatrix();
         const auto style = shape.GetStyle();
 
@@ -156,7 +151,7 @@ public:
     {
         mDevice->ClearStencil(1);
 
-        const auto& kProjMatrix = MakeOrtho();
+        const auto& kProjMatrix = mProjection;
 
         Device::State state;
         state.viewport      = MapToDevice(mViewport);
@@ -237,7 +232,7 @@ public:
 
     virtual void Draw(const std::vector<DrawShape>& shapes) override
     {
-        const auto& kProjMatrix = MakeOrtho();
+        const auto& kProjMatrix = mProjection;
 
         for (const auto& draw : shapes)
         {
@@ -305,14 +300,7 @@ private:
             return prog;
         return nullptr;
     }
-    glm::mat4 MakeOrtho() const
-    {
-        const auto left   = mView.GetX();
-        const auto right  = mView.GetWidth() + left;
-        const auto top    = mView.GetY();
-        const auto bottom = mView.GetHeight() + top;
-        return glm::ortho(left, right, bottom, top);
-    }
+
     IRect MapToDevice(const IRect& rect) const
     {
         if (rect.IsEmpty())
@@ -336,11 +324,21 @@ private:
     // the current scissor setting to be applied
     // on the rendering surface.
     IRect mScissor;
-    // logical viewport for the orthographic projection.
-    FRect mView;
-    // the ratio of rendering surface pixels to game units.
+   // the ratio of rendering surface pixels to game units.
     glm::vec2 mPixelRatio = {1.0f, 1.0f};
+    // current (orthographic) projection matrix.
+    glm::mat4 mProjection;
 };
+
+// static
+glm::mat4 Painter::MakeOrthographicProjection(const FRect& rect)
+{
+    const auto left   = rect.GetX();
+    const auto right  = rect.GetWidth() + left;
+    const auto top    = rect.GetY();
+    const auto bottom = rect.GetHeight() + top;
+    return glm::ortho(left , right , bottom , top);
+}
 
 // static
 std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
@@ -351,6 +349,22 @@ std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 std::unique_ptr<Painter> Painter::Create(Device* device)
 {
     return std::make_unique<StandardPainter>(device);
+}
+
+void Painter::SetOrthographicView(const FRect& view)
+{
+    SetProjectionMatrix(MakeOrthographicProjection(view));
+}
+void Painter::SetOrthographicView(float left, float top, float width, float height)
+{
+    const FRect view(left, top, width, height);
+    SetProjectionMatrix(MakeOrthographicProjection(view));
+}
+// Set the logical viewport for "top left" origin based drawing.
+void Painter::SetOrthographicView(float width, float height)
+{
+    const FRect view(0.0f, 0.0f, width, height);
+    SetProjectionMatrix(MakeOrthographicProjection(view));
 }
 
 } // namespace

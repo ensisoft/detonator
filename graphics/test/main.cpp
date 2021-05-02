@@ -1537,7 +1537,7 @@ int main(int argc, char* argv[])
                 device->ClearColor(gfx::Color::Black);
                 painter->SetViewport(0, 0, surface_width, surface_height);
                 painter->SetSurfaceSize(surface_width, surface_height);
-                painter->SetTopLeftView(surface_width, surface_height);
+                painter->SetOrthographicView(surface_width , surface_height);
                 // render the test.
                 test->Render(*painter);
 
@@ -1661,7 +1661,7 @@ int main(int argc, char* argv[])
             device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
             painter->SetViewport(0, 0, surface_width, surface_height);
             painter->SetSurfaceSize(surface_width, surface_height);
-            painter->SetTopLeftView(surface_width, surface_height);
+            painter->SetOrthographicView(surface_width , surface_height);
             // render the current test
             tests[test_index]->Render(*painter);
 

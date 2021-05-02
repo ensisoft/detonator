@@ -2188,7 +2188,7 @@ void GameWidget::Draw()
     mDevice->BeginFrame();
     mPainter->Clear(gfx::Color4f(7, 14, 22, 255));
     mPainter->SetViewport(0, 0, w, h);
-    mPainter->SetTopLeftView(w, h);
+    mPainter->SetOrthographicView(w , h);
     mRenderer.SetLoader(mClassLib);
     mRenderer.BeginFrame();
 

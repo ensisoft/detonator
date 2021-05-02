@@ -92,7 +92,7 @@ public:
         // set the actual viewport for proper clipping.
         painter.SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
         // set the logical game view
-        painter.SetView(mViewport);
+        painter.SetOrthographicView(mViewport);
 
         //gfx::FRect test(0.0f, 0.0f, 100.0f, 100.0f);
         //gfx::FillRect(painter, test, gfx::Color::Yellow);
@@ -407,7 +407,7 @@ public:
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
         mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-        mPainter->SetTopLeftView(mSurfaceWidth, mSurfaceHeight);
+        mPainter->SetOrthographicView(mSurfaceWidth , mSurfaceHeight);
         mTestList[mTestIndex]->SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);

@@ -147,7 +147,7 @@ public:
         if (mDebug.debug_draw)
         {
             mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-            mPainter->SetView(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
+            mPainter->SetOrthographicView(0.0f , 0.0f , mSurfaceWidth , mSurfaceHeight);
             gfx::DrawRectOutline(*mPainter, gfx::FRect(device_viewport_x, device_viewport_y,
                                                      device_viewport_width, device_viewport_height),
                                  gfx::Color::Green, 1.0f);
@@ -164,7 +164,7 @@ public:
         {
             // use an adjusted viewport so that the center of the
             // background scene is always at the center of the window.
-            mPainter->SetView(width*-0.5, height*-0.5, width, height);
+            mPainter->SetOrthographicView(width * -0.5 , height * -0.5 , width , height);
 
             gfx::Transform transform;
             mRenderer.Draw(*mBackground, *mPainter, transform);
@@ -191,7 +191,7 @@ public:
             Culler cull(view);
             // set the logical viewport to whatever the game
             // has set it.
-            mPainter->SetView(view);
+            mPainter->SetOrthographicView(view);
 
             gfx::Transform transform;
             mRenderer.Draw(*mForeground , *mPainter , transform, nullptr, &cull);
@@ -204,7 +204,7 @@ public:
         if (mDebug.debug_show_fps || mDebug.debug_show_msg)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetView(0, 0, surf_width, surf_height);
+            mPainter->SetOrthographicView(0 , 0 , surf_width , surf_height);
             mPainter->SetViewport(0,0, surf_width, surf_height);
         }
         if (mDebug.debug_show_fps)

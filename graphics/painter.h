@@ -58,7 +58,7 @@ namespace gfx
         // has been resized. The setting will be kept until the next call
         // to surface size.
         virtual void SetSurfaceSize(unsigned width, unsigned height) = 0;
-        // Set the current render target view port.
+        // Set the current render target/device view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
         // width and height are the dimensions of the viewport.
@@ -73,24 +73,8 @@ namespace gfx
         virtual void SetScissor(int x, int y, unsigned width, unsigned  height) = 0;
         // Clear any scissor setting.
         virtual void ClearScissor() = 0;
-        // Set the logical viewport of the scene to be rendered for
-        // orthographic 2D projection. This defines a logical coordinate
-        // transformation such that objects that are placed within the
-        // rectangle defined by the top left and bottom right coordinates
-        // are visible in the rendered scene.
-        // For example if left = 0.0f and width = 10.0f an object A that is
-        // a 5.0f in width and is at coordinate -5.0f would not be shown.
-        // While an object B that is at 1.0f and is 2.0f units wide would be
-        // visible in the scene.
-        // Do not confuse this with SetViewport which defines the viewport
-        // in terms of device/render target coordinate space. I.e. the area
-        // of the rendering surface where the pixels of the rendered scene are
-        // placed in the surface.
-        virtual void SetView(float left, float top, float width, float height) = 0;
-        virtual void SetView(const FRect& view) = 0;
-        // Set the logical viewport for "top left" origin based drawing.
-        inline void SetTopLeftView(float width, float height)
-        { SetView(0.0f, 0.0f, width, height); }
+        // Set the current projection matrix for projecting the scene onto a 2D plane.
+        virtual void SetProjectionMatrix(const glm::mat4& proj) = 0;
         // Clear the render target with the given clear color.
         // You probably want to do this as the first step before
         // doing any other drawing.
@@ -118,12 +102,33 @@ namespace gfx
         // Draw the shapes in the draw list after combining all the shapes in the mast list
         // into a single mask that covers some areas of the render buffer.
         virtual void Draw(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) = 0;
-
+        // todo:
         virtual void Draw(const std::vector<DrawShape>& shapes) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
         static std::unique_ptr<Painter> Create(Device* device);
+
+        // convenience and helper functions.
+
+        static glm::mat4 MakeOrthographicProjection(const FRect& rect);
+        // Set the projection matrix of the painter to an orthographic
+        // projection matrix. Essentially this creates a logical viewport
+        // (and coordinate transformation) into the scene to be rendered
+        // such that objects that are placed within the rectangle defined
+        // by the top left and bottom right coordinates are visible in the
+        // rendered scene.
+        // For example if left = 0.0f and width = 10.0f an object A that is
+        // 5.0f in width and is at coordinate -5.0f would not be shown.
+        // While an object B that is at 1.0f and is 2.0f units wide would be
+        // visible in the scene.
+        // Do not confuse this with SetViewport which defines the viewport
+        // in terms of device/render target coordinate space. I.e. the area
+        // of the rendering surface where the pixels of the rendered scene are
+        // placed in the surface.
+        void SetOrthographicView(const FRect& view);
+        void SetOrthographicView(float left, float top, float width, float height);
+        void SetOrthographicView(float width, float height);
     private:
     };
 
