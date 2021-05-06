@@ -95,7 +95,8 @@ void DrawTextRect(Painter& painter,
     const FRect& rect,
     const Color4f& color,
     unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
-    unsigned properties = 0x0);
+    unsigned properties = 0x0,
+    float line_height = 1.0f);
 
 // Draw a rectangle filled with the desired color or material.
 void FillRect(Painter& painter, const FRect& rect, const Color4f& color);

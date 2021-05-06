@@ -55,7 +55,8 @@ void DrawTextRect(Painter& painter,
     const FRect& rect,
     const Color4f& color,
     unsigned alignment,
-    unsigned properties)
+    unsigned properties,
+    float line_height)
 {
     TextBuffer buff(rect.GetWidth(), rect.GetHeight());
     if ((alignment & 0xf) == AlignTop)
@@ -81,6 +82,7 @@ void DrawTextRect(Painter& painter,
     text_and_style.font = font;
     text_and_style.fontsize = font_size_px;
     text_and_style.underline = underline;
+    text_and_style.lineheight = line_height;
     buff.AddText(text_and_style);
 
     // Setup material to shade the text.
