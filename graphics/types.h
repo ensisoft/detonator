@@ -266,6 +266,18 @@ namespace gfx
             return !has_width || !has_height;
         }
 
+        // Return true if the point p is within this rectangle.
+        bool TestPoint(const Point<T>& p) const
+        {
+            if (p.GetX() <= mX || p.GetY() <= mY)
+                return false;
+            else if (p.GetX() >= mX + mWidth || p.GetY() >= mY + mHeight)
+                return false;
+            return true;
+        }
+        inline bool TestPoint(T x, T y) const
+        { return TestPoint(Point<T>(x, y)); }
+
         // Map a local point relative to the rect origin
         // into a global point relative to the origin of the
         // coordinate system.

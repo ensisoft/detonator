@@ -238,6 +238,20 @@ void unit_test_rect_serialize()
     }
 }
 
+template<typename T>
+void unit_test_rect_test_point()
+{
+    using R = gfx::Rect<T>;
+    using P = gfx::Point<T>;
+
+    const R rect(10, 10, 15, 7);
+    TEST_REQUIRE(!rect.TestPoint(0, 0));
+    TEST_REQUIRE(!rect.TestPoint(10, 10));
+    TEST_REQUIRE(!rect.TestPoint(11, 8));
+    TEST_REQUIRE(!rect.TestPoint(11, 30));
+    TEST_REQUIRE(rect.TestPoint(11, 11));
+}
+
 void unit_test_color_serialize()
 {
     const float test_values[] = {
@@ -272,6 +286,8 @@ int test_main(int argc, char* argv[])
     unit_test_rect_union<int>();
     unit_test_rect_serialize<int>();
     unit_test_rect_serialize<float>();
+    unit_test_rect_test_point<int>();
+    unit_test_rect_test_point<float>();
     unit_test_color_serialize();
 
     return 0;
