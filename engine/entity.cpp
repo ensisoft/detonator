@@ -142,6 +142,52 @@ std::optional<DrawableItemClass> DrawableItemClass::FromJson(const nlohmann::jso
     return ret;
 }
 
+size_t TextItemClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mBitFlags.value());
+    hash = base::hash_combine(hash, mHAlign);
+    hash = base::hash_combine(hash, mVAlign);
+    hash = base::hash_combine(hash, mLayer);
+    hash = base::hash_combine(hash, mText);
+    hash = base::hash_combine(hash, mFontName);
+    hash = base::hash_combine(hash, mFontSize);
+    hash = base::hash_combine(hash, mLineHeight);
+    hash = base::hash_combine(hash, mTextColor.GetHash());
+    return hash;
+}
+
+nlohmann::json TextItemClass::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "flags",            mBitFlags);
+    base::JsonWrite(json, "horizontal_align", mHAlign);
+    base::JsonWrite(json, "vertical_align",   mVAlign);
+    base::JsonWrite(json, "layer",            mLayer);
+    base::JsonWrite(json, "text",             mText);
+    base::JsonWrite(json, "font_name",        mFontName);
+    base::JsonWrite(json, "font_size",        mFontSize);
+    base::JsonWrite(json, "line_height",      mLineHeight);
+    base::JsonWrite(json, "text_color",       mTextColor);
+    return json;
+}
+
+// static
+std::optional<TextItemClass> TextItemClass::FromJson(const nlohmann::json& json)
+{
+    TextItemClass ret;
+    if (!base::JsonReadSafe(json, "flags",            &ret.mBitFlags) ||
+        !base::JsonReadSafe(json, "horizontal_align", &ret.mHAlign) ||
+        !base::JsonReadSafe(json, "vertical_align",   &ret.mVAlign) ||
+        !base::JsonReadSafe(json, "layer",            &ret.mLayer) ||
+        !base::JsonReadSafe(json, "text",             &ret.mText) ||
+        !base::JsonReadSafe(json, "font_name",        &ret.mFontName) ||
+        !base::JsonReadSafe(json, "font_size",        &ret.mFontSize) ||
+        !base::JsonReadSafe(json, "line_height",      &ret.mLineHeight) ||
+        !base::JsonReadSafe(json, "text_color",       &ret.mTextColor))
+        return std::nullopt;
+    return ret;
+}
 
 EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
 {
@@ -156,6 +202,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mRigidBody = std::make_shared<RigidBodyItemClass>(*other.mRigidBody);
     if (other.mDrawable)
         mDrawable = std::make_shared<DrawableItemClass>(*other.mDrawable);
+    if (other.mTextItem)
+        mTextItem = std::make_shared<TextItemClass>(*other.mTextItem);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
@@ -168,6 +216,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mRotation  = std::move(other.mRotation);
     mRigidBody = std::move(other.mRigidBody);
     mDrawable  = std::move(other.mDrawable);
+    mTextItem  = std::move(other.mTextItem);
     mBitFlags  = std::move(other.mBitFlags);
 }
 
@@ -185,6 +234,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mRigidBody->GetHash());
     if (mDrawable)
         hash = base::hash_combine(hash, mDrawable->GetHash());
+    if (mTextItem)
+        hash = base::hash_combine(hash, mTextItem->GetHash());
     return hash;
 }
 
@@ -196,6 +247,11 @@ void EntityNodeClass::SetRigidBody(const RigidBodyItemClass &body)
 void EntityNodeClass::SetDrawable(const DrawableItemClass &drawable)
 {
     mDrawable = std::make_shared<DrawableItemClass>(drawable);
+}
+
+void EntityNodeClass::SetTextItem(const TextItemClass& text)
+{
+    mTextItem = std::make_shared<TextItemClass>(text);
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -234,6 +290,8 @@ nlohmann::json EntityNodeClass::ToJson() const
         json["rigid_body"] = mRigidBody->ToJson();
     if (mDrawable)
         json["drawable_item"] = mDrawable->ToJson();
+    if (mTextItem)
+        json["text_item"] = mTextItem->ToJson();
 
     return json;
 }
@@ -266,6 +324,14 @@ std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &j
             return std::nullopt;
         ret.mDrawable = std::make_shared<DrawableItemClass>(std::move(draw.value()));
     }
+
+    if (json.contains("text_item"))
+    {
+        auto text = TextItemClass::FromJson(json["text_item"]);
+        if (!text.has_value())
+            return std::nullopt;
+        ret.mTextItem = std::make_shared<TextItemClass>(std::move(text.value()));
+    }
     return ret;
 }
 
@@ -289,6 +355,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mRotation  = std::move(tmp.mRotation);
     mRigidBody = std::move(tmp.mRigidBody);
     mDrawable  = std::move(tmp.mDrawable);
+    mTextItem  = std::move(tmp.mTextItem);
     mBitFlags  = std::move(tmp.mBitFlags);
     return *this;
 }
@@ -314,6 +381,8 @@ EntityNode::EntityNode(const EntityNode& other)
         mRigidBody = std::make_unique<RigidBodyItem>(*other.GetRigidBody());
     if (other.HasDrawable())
         mDrawable = std::make_unique<DrawableItem>(*other.GetDrawable());
+    if (other.HasTextItem())
+        mTextItem = std::make_unique<TextItem>(*other.GetTextItem());
 }
 
 EntityNode::EntityNode(EntityNode&& other)
@@ -327,6 +396,7 @@ EntityNode::EntityNode(EntityNode&& other)
     mRotation  = std::move(other.mRotation);
     mRigidBody = std::move(other.mRigidBody);
     mDrawable  = std::move(other.mDrawable);
+    mTextItem  = std::move(other.mTextItem);
 }
 
 EntityNode::EntityNode(const EntityNodeClass& klass) : EntityNode(std::make_shared<EntityNodeClass>(klass))
@@ -338,11 +408,17 @@ DrawableItem* EntityNode::GetDrawable()
 RigidBodyItem* EntityNode::GetRigidBody()
 { return mRigidBody.get(); }
 
+TextItem* EntityNode::GetTextItem()
+{ return mTextItem.get(); }
+
 const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
 const RigidBodyItem* EntityNode::GetRigidBody() const
 { return mRigidBody.get(); }
+
+const TextItem* EntityNode::GetTextItem() const
+{ return mTextItem.get(); }
 
 void EntityNode::Reset()
 {
@@ -354,6 +430,8 @@ void EntityNode::Reset()
         mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
     if (mClass->HasRigidBody())
         mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
+    if (mClass->HasTextItem())
+        mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
 }
 
 glm::mat4 EntityNode::GetNodeTransform() const

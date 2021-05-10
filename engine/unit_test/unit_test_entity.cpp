@@ -103,6 +103,17 @@ void unit_test_entity_node()
     body.SetLinearVelocity(glm::vec2(-1.0f, -2.0f));
     body.SetPolygonShapeId("shape");
 
+    game::TextItemClass text;
+    text.SetText("jeesus ajaa mopolla");
+    text.SetLineHeight(2.0f);
+    text.SetFontSize(18);
+    text.SetLayer(3);
+    text.SetFontName("fontname.otf");
+    text.SetFlag(game::TextItemClass::Flags::UnderlineText, true);
+    text.SetAlign(game::TextItemClass::VerticalTextAlign::Top);
+    text.SetAlign(game::TextItemClass::HorizontalTextAlign::Left);
+    text.SetTextColor(game::Color::HotPink);
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetSize(glm::vec2(100.0f, 100.0f));
@@ -111,9 +122,11 @@ void unit_test_entity_node()
     node.SetRotation(1.5f);
     node.SetDrawable(draw);
     node.SetRigidBody(body);
+    node.SetTextItem(text);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
+    TEST_REQUIRE(node.HasTextItem());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -137,6 +150,9 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity()== real::float32(5.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(-1.0f, -2.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetPolygonShapeId() == "shape");
+    TEST_REQUIRE(node.GetTextItem()->GetText() == "jeesus ajaa mopolla");
+    TEST_REQUIRE(node.GetTextItem()->GetFontSize() == 18);
+    TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
 
     // to/from json
     {
@@ -144,6 +160,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->HasDrawable());
         TEST_REQUIRE(ret->HasRigidBody());
+        TEST_REQUIRE(ret->HasTextItem());
         TEST_REQUIRE(ret->GetName()         == "root");
         TEST_REQUIRE(ret->GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret->GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -164,6 +181,9 @@ void unit_test_entity_node()
         TEST_REQUIRE(node.GetRigidBody()->GetLinearDamping()  == real::float32(5.0f));
         TEST_REQUIRE(node.GetRigidBody()->GetDensity()        == real::float32(-1.0));
         TEST_REQUIRE(node.GetRigidBody()->GetPolygonShapeId() == "shape");
+        TEST_REQUIRE(node.GetTextItem()->GetText() == "jeesus ajaa mopolla");
+        TEST_REQUIRE(node.GetTextItem()->GetFontSize() == 18);
+        TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
         TEST_REQUIRE(ret->GetHash() == node.GetHash());
     }
 
@@ -194,6 +214,9 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetDrawable()->GetRenderPass()   == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
+        TEST_REQUIRE(clone.GetTextItem()->GetText() == "jeesus ajaa mopolla");
+        TEST_REQUIRE(clone.GetTextItem()->GetFontSize() == 18);
+        TEST_REQUIRE(clone.GetTextItem()->GetFontName() == "fontname.otf");
     }
 
     // test instance state.
@@ -212,6 +235,10 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
         TEST_REQUIRE(instance.GetDrawable()->GetRenderPass()  == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");
+        TEST_REQUIRE(instance->GetTextItem());
+        TEST_REQUIRE(instance->GetTextItem()->GetText() == "jeesus ajaa mopolla");
+        TEST_REQUIRE(instance->GetTextItem()->GetFontSize() == 18);
+        TEST_REQUIRE(instance->GetTextItem()->GetFontName() == "fontname.otf");
 
         instance.SetName("foobar");
         instance.SetSize(glm::vec2(200.0f, 200.0f));

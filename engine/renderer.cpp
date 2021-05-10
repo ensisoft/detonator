@@ -30,6 +30,7 @@
 #include <unordered_set>
 
 #include "base/logging.h"
+#include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
@@ -164,7 +165,7 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
 
     using DrawableItemType = typename Node::DrawableItemType;
 
-    auto it = mPaintNodes.find(node.GetId());
+    auto it = mPaintNodes.find("item/" + node.GetId());
     if (it == mPaintNodes.end())
         return;
     auto& paint = it->second;
@@ -259,7 +260,8 @@ void Renderer::DrawEntity(const EntityType& entity,
             mTransform.Push(node->GetNodeTransform());
 
             const auto* item = node->GetDrawable();
-            if (!item)
+            const auto* text = node->GetTextItem();
+            if (!item && !text)
             {
                 if (mHook)
                 {
@@ -270,71 +272,150 @@ void Renderer::DrawEntity(const EntityType& entity,
                 return;
             }
 
-            const auto& material = item->GetMaterialId();
-            const auto& drawable = item->GetDrawableId();
-            auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
-            paint_node.visited = true;
-            if (item->GetRenderPass() == RenderPass::Draw && paint_node.material_class_id != material)
+            if (text)
             {
-                paint_node.material.reset();
-                paint_node.material_class_id = material;
-                auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
-                if (klass)
-                    paint_node.material = gfx::CreateMaterialInstance(klass);
-                if (!paint_node.material)
-                    WARN("No such material class '%1' found for '%2/%3')", material, mEntity.GetName(), node->GetName());
-            }
-            if (paint_node.drawable_class_id != drawable)
-            {
-                paint_node.drawable.reset();
-                paint_node.drawable_class_id = drawable;
-
-                auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
-                if (klass)
-                    paint_node.drawable = gfx::CreateDrawableInstance(klass);
-                if (!paint_node.drawable)
-                    WARN("No such drawable class '%1' found for '%2/%3'", drawable, mEntity.GetName(), node->GetName());
-            }
-            if (paint_node.material)
-            {
-                if (item->TestFlag(DrawableItemType::Flags::OverrideAlpha))
-                    paint_node.material->SetAlpha(item->GetAlpha());
-                else paint_node.material->ResetAlpha();
-            }
-            if (paint_node.drawable)
-            {
-                paint_node.drawable->SetStyle(item->GetRenderStyle());
-                paint_node.drawable->SetLineWidth(item->GetLineWidth());
-                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
-                    paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
-                else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
-            }
-
-            // if it doesn't render then no draw packets are generated
-            if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
-            {
-                mTransform.Push(node->GetModelTransform());
-                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                const auto& size = node->GetSize();
+                auto& paint_node = mRenderer.mPaintNodes["text/" + node->GetId()];
+                paint_node.visited = true;
+                // use the instance hash as a material id to realize whether
+                // we need to re-create the material. (i.e. the text in the text item has changed)
+                // or the rasterization parameters have changed (node size -> raster buffer size)
+                size_t hash = 0;
+                hash = base::hash_combine(hash, text->GetHash());
+                hash = base::hash_combine(hash, size.x);
+                hash = base::hash_combine(hash, size.y);
+                const auto& material = std::to_string(hash);
+                if (paint_node.material_class_id != material)
                 {
-                    mTransform.Push();
-                    mTransform.Scale(-1.0f, 1.0f);
-                    mTransform.Translate(1.0f, 0.0f);
+                    gfx::TextBuffer::Text text_and_style;
+                    text_and_style.text = text->GetText();
+                    text_and_style.font = text->GetFontName();
+                    text_and_style.fontsize = text->GetFontSize();
+                    text_and_style.lineheight = text->GetLineHeight();
+                    text_and_style.underline  = text->TestFlag(TextItem::Flags::UnderlineText);
+                    gfx::TextBuffer buffer(size.x, size.y);
+                    if (text->GetVAlign() == TextItem::VerticalTextAlign::Top)
+                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignTop);
+                    else if (text->GetVAlign() == TextItem::VerticalTextAlign::Center)
+                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignCenter);
+                    else if (text->GetVAlign() == TextItem::VerticalTextAlign::Bottom)
+                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignBottom);
+                    if (text->GetHAlign() == TextItem::HorizontalTextAlign::Left)
+                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignLeft);
+                    else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Center)
+                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignCenter);
+                    else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Right)
+                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignRight);
+                    buffer.AddText(std::move(text_and_style));
+
+                    // setup material to shade text.
+                    auto klass = std::make_shared<gfx::MaterialClass>();
+                    klass->SetType(gfx::MaterialClass::Type::Texture);
+                    klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+                    klass->SetBaseColor(text->GetTextColor());
+                    klass->AddTexture(std::move(buffer));
+                    klass->SetTextureGc(0, true); // enable gc
+                    paint_node.material = gfx::CreateMaterialInstance(klass);
+                    paint_node.material_class_id = material;
+                }
+                bool visible_now = true;
+                if (text->TestFlag(TextItemClass::Flags::BlinkText))
+                {
+                    const auto fps = 1.5;
+                    const auto full_period = 2.0 / fps;
+                    const auto half_period = full_period * 0.5;
+                    const auto time = fmodf(base::GetRuntimeSec(), full_period);
+                    if (time >= half_period)
+                        visible_now = false;
                 }
 
-                DrawPacket packet;
-                packet.material  = paint_node.material;
-                packet.drawable  = paint_node.drawable;
-                packet.layer     = item->GetLayer();
-                packet.pass      = item->GetRenderPass();
-                packet.transform = mTransform.GetAsMatrix();
-                if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                    mPackets.push_back(std::move(packet));
+                if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
+                {
+                    mTransform.Push(node->GetModelTransform());
 
-                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    static auto rect = std::make_shared<gfx::Rectangle>();
+                    DrawPacket packet;
+                    packet.drawable  = rect;
+                    packet.material  = paint_node.material;
+                    packet.transform = mTransform.GetAsMatrix();
+                    packet.pass  = RenderPass::Draw;
+                    packet.layer = text->GetLayer();
+                    if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
+                        mPackets.push_back(std::move(packet));
+
+                    // pop the model transform.
                     mTransform.Pop();
+                }
+            }
 
-                // pop the model transform
-                mTransform.Pop();
+            if (item)
+            {
+                const auto& material = item->GetMaterialId();
+                const auto& drawable = item->GetDrawableId();
+                auto& paint_node = mRenderer.mPaintNodes["item/" + node->GetId()];
+                paint_node.visited = true;
+                if (item->GetRenderPass() == RenderPass::Draw && paint_node.material_class_id != material)
+                {
+                    paint_node.material.reset();
+                    paint_node.material_class_id = material;
+                    auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
+                    if (klass)
+                        paint_node.material = gfx::CreateMaterialInstance(klass);
+                    if (!paint_node.material)
+                        WARN("No such material class '%1' found for '%2/%3')", material, mEntity.GetName(), node->GetName());
+                }
+                if (paint_node.drawable_class_id != drawable)
+                {
+                    paint_node.drawable.reset();
+                    paint_node.drawable_class_id = drawable;
+
+                    auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
+                    if (klass)
+                        paint_node.drawable = gfx::CreateDrawableInstance(klass);
+                    if (!paint_node.drawable)
+                        WARN("No such drawable class '%1' found for '%2/%3'", drawable, mEntity.GetName(), node->GetName());
+                }
+                if (paint_node.material)
+                {
+                    if (item->TestFlag(DrawableItemType::Flags::OverrideAlpha))
+                        paint_node.material->SetAlpha(item->GetAlpha());
+                    else paint_node.material->ResetAlpha();
+                }
+                if (paint_node.drawable)
+                {
+                    paint_node.drawable->SetStyle(item->GetRenderStyle());
+                    paint_node.drawable->SetLineWidth(item->GetLineWidth());
+                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                        paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
+                    else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
+                }
+
+                // if it doesn't render then no draw packets are generated
+                if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
+                {
+                    mTransform.Push(node->GetModelTransform());
+                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    {
+                        mTransform.Push();
+                        mTransform.Scale(-1.0f , 1.0f);
+                        mTransform.Translate(1.0f , 0.0f);
+                    }
+
+                    DrawPacket packet;
+                    packet.material  = paint_node.material;
+                    packet.drawable  = paint_node.drawable;
+                    packet.layer     = item->GetLayer();
+                    packet.pass      = item->GetRenderPass();
+                    packet.transform = mTransform.GetAsMatrix();
+                    if (!mHook || (mHook && mHook->InspectPacket(node , packet)))
+                        mPackets.push_back(std::move(packet));
+
+                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                        mTransform.Pop();
+
+                    // pop the model transform
+                    mTransform.Pop();
+                }
             }
 
             // append any extra packets if needed.
@@ -402,7 +483,7 @@ void Renderer::DrawEntity(const EntityType& entity,
             shape.drawable = packet.drawable.get();
             shape.material = packet.material.get();
             layer.draw_list.push_back(shape);
-        } 
+        }
         else if (packet.pass == RenderPass::Mask)
         {
             gfx::Painter::MaskShape shape;

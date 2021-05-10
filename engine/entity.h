@@ -45,6 +45,7 @@
 #include "engine/types.h"
 #include "engine/enum.h"
 #include "engine/animation.h"
+#include "engine/color.h"
 
 namespace game
 {
@@ -295,6 +296,104 @@ namespace game
         RenderStyle  mRenderStyle = RenderStyle::Solid;
     };
 
+    // TextItem allows human readable text entity node attachment with
+    // some simple properties that defined how the text should look.
+    class TextItemClass
+    {
+    public:
+        // How to align the text inside the node vertically.
+        enum class HorizontalTextAlign {
+            // Align to the node's left edge.
+            Left,
+            // Align around center of the node.
+            Center,
+            // Align to the node's right edge.
+            Right
+        };
+        // How to align the text inside the node vertically.
+        enum class VerticalTextAlign {
+            // Align to the top of the node.
+            Top,
+            // Align around the center of the node.
+            Center,
+            // Align to the bottom of the node.
+            Bottom
+        };
+        enum class Flags {
+            // Whether the item is currently visible or not.
+            VisibleInGame,
+            // Make the text blink annoyingly
+            BlinkText,
+            // Set text to underline
+            UnderlineText
+        };
+        TextItemClass()
+        {
+            mBitFlags.set(Flags::VisibleInGame, true);
+        }
+        std::size_t GetHash() const;
+
+        // class setters
+        void SetText(const std::string& text)
+        { mText = text; }
+        void SetText(std::string&& text)
+        { mText = std::move(text); }
+        void SetFontName(const std::string& font)
+        { mFontName = font; }
+        void SetFontSize(unsigned size)
+        { mFontSize = size; }
+        void SetLayer(int layer)
+        { mLayer = layer; }
+        void SetLineHeight(float height)
+        { mLineHeight = height; }
+        void SetFlag(Flags flag, bool on_off)
+        { mBitFlags.set(flag, on_off); }
+        void SetAlign(VerticalTextAlign align)
+        { mVAlign = align; }
+        void SetAlign(HorizontalTextAlign align)
+        { mHAlign = align; }
+        void SetTextColor(const Color4f& color)
+        { mTextColor = color; }
+
+        // class getters
+        bool TestFlag(Flags flag) const
+        { return mBitFlags.test(flag); }
+        const Color4f& GetTextColor() const
+        { return mTextColor; }
+        const std::string& GetText() const
+        { return mText; }
+        const std::string& GetFontName() const
+        { return mFontName; }
+        int GetLayer() const
+        { return mLayer; }
+        float GetLineHeight() const
+        { return mLineHeight; }
+        unsigned GetFontSize() const
+        { return mFontSize; }
+        base::bitflag<Flags> GetFlags() const
+        { return mBitFlags; }
+        HorizontalTextAlign GetHAlign() const
+        { return mHAlign; }
+        VerticalTextAlign GetVAlign() const
+        { return mVAlign; }
+
+        nlohmann::json ToJson() const;
+
+        static std::optional<TextItemClass> FromJson(const nlohmann::json& json);
+    private:
+        // item's bit flags
+        base::bitflag<Flags> mBitFlags;
+        HorizontalTextAlign mHAlign = HorizontalTextAlign::Center;
+        VerticalTextAlign mVAlign = VerticalTextAlign::Center;
+        int mLayer = 0;
+        std::string mText;
+        std::string mFontName;
+        unsigned mFontSize = 0;
+        float mLineHeight = 1.0f;
+        Color4f mTextColor = Color::White;
+    };
+
+
     class DrawableItem
     {
     public:
@@ -424,6 +523,71 @@ namespace game
         base::bitflag<Flags> mInstanceFlags;
     };
 
+    class TextItem
+    {
+    public:
+        using Flags = TextItemClass::Flags;
+        using VerticalTextAlign = TextItemClass::VerticalTextAlign;
+        using HorizontalTextAlign = TextItemClass::HorizontalTextAlign;
+        TextItem(std::shared_ptr<const TextItemClass> klass)
+          : mClass(klass)
+        {
+            mText  = mClass->GetText();
+            mFlags = mClass->GetFlags();
+            mTextColor = mClass->GetTextColor();
+        }
+
+        // instance getters.
+        const Color4f& GetTextColor() const
+        { return mTextColor; }
+        const std::string& GetText() const
+        { return mText; }
+        const std::string& GetFontName() const
+        { return mClass->GetFontName(); }
+        unsigned GetFontSize() const
+        { return mClass->GetFontSize(); }
+        float GetLineHeight() const
+        { return mClass->GetLineHeight(); }
+        int GetLayer() const
+        { return mClass->GetLayer(); }
+        HorizontalTextAlign GetHAlign() const
+        { return mClass->GetHAlign(); }
+        VerticalTextAlign GetVAlign() const
+        { return mClass->GetVAlign(); }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
+        std::size_t GetHash() const
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mText);
+            hash = base::hash_combine(hash, mTextColor.GetHash());
+            hash = base::hash_combine(hash, mFlags.value());
+            return hash;
+        }
+
+        // instance setters.
+        void SetText(const std::string& text)
+        { mText = text; }
+        void SetText(std::string&& text)
+        { mText = std::move(text); }
+        void SetFlag(Flags flag, bool on_off)
+        { mFlags.set(flag, on_off); }
+
+        // class access
+        const TextItemClass& GetClass() const
+        { return *mClass.get(); }
+        const TextItemClass* operator->() const
+        { return mClass.get(); }
+    private:
+        std::shared_ptr<const TextItemClass> mClass;
+        // instance text.
+        std::string mText;
+        // instance text color
+        Color4f mTextColor;
+        // instance flags.
+        base::bitflag<Flags> mFlags;
+    };
+
     class EntityNodeClass
     {
     public:
@@ -492,13 +656,17 @@ namespace game
 
         // Attach a rigid body to this node class.
         void SetRigidBody(const RigidBodyItemClass& body);
-        // Attach a simple static drawable item to this node.
+        // Attach a simple static drawable item to this node class.
         void SetDrawable(const DrawableItemClass& drawable);
+        // Attach a text item to this node class.
+        void SetTextItem(const TextItemClass& text);
 
         void RemoveDrawable()
         { mDrawable.reset(); }
         void RemoveRigidBody()
         { mRigidBody.reset(); }
+        void RemoveTextItem()
+        { mTextItem.reset(); }
 
         // Get the rigid body shared class object if any.
         std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const
@@ -506,6 +674,9 @@ namespace game
         // Get the drawable shared class object if any.
         std::shared_ptr<const DrawableItemClass> GetSharedDrawable() const
         { return mDrawable; }
+        // Get the text item class object if any.
+        std::shared_ptr<const TextItemClass> GetSharedTextItem() const
+        { return mTextItem; }
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const
@@ -513,6 +684,8 @@ namespace game
         // Returns true if a drawable object has been set for this class.
         bool HasDrawable() const
         { return !!mDrawable; }
+        bool HasTextItem() const
+        { return !!mTextItem; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -522,6 +695,10 @@ namespace game
         // has been set then returns nullptr.
         DrawableItemClass* GetDrawable()
         { return mDrawable.get(); }
+        // Get the text item object if any. If no text item class object
+        // has been set then returns nullptr:
+        TextItemClass* GetTextItem()
+        { return mTextItem.get(); }
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
         const RigidBodyItemClass* GetRigidBody() const
@@ -530,6 +707,10 @@ namespace game
         // has been set then returns nullptr.
         const DrawableItemClass* GetDrawable() const
         { return mDrawable.get(); }
+        // Get the text item object if any. If no text item class object
+        // has been set then returns nullptr:
+        const TextItemClass* GetTextItem() const
+        { return mTextItem.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -569,6 +750,8 @@ namespace game
         std::shared_ptr<RigidBodyItemClass> mRigidBody;
         // drawable item if any.
         std::shared_ptr<DrawableItemClass> mDrawable;
+        // text item if any.
+        std::shared_ptr<TextItemClass> mTextItem;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -625,17 +808,25 @@ namespace game
         // Get the node's rigid body item if any. If no rigid body
         // item is set then returns nullptr.
         RigidBodyItem* GetRigidBody();
+        // Get the node's text item if any. If no text item
+        // is set then returns nullptr.
+        TextItem* GetTextItem();
         // Get the node's drawable item if any. If now drawable
         // item is set then returns nullptr.
         const DrawableItem* GetDrawable() const;
         // Get the node's rigid body item if any. If no rigid body
         // item is set then returns nullptr.
         const RigidBodyItem* GetRigidBody() const;
+        // Get the node's text item if any. If no text item
+        // is set then returns nullptr.
+        const TextItem* GetTextItem() const;
 
         bool HasRigidBody() const
         { return !!mRigidBody; }
         bool HasDrawable() const
         { return !!mDrawable; }
+        bool HasTextItem() const
+        { return !!mTextItem; }
 
         // shortcut for class getters.
         std::string GetClassId() const
@@ -680,6 +871,8 @@ namespace game
         std::unique_ptr<RigidBodyItem> mRigidBody;
         // drawable if any.
         std::unique_ptr<DrawableItem> mDrawable;
+        // text item if any
+        std::unique_ptr<TextItem> mTextItem;
     };
 
     class EntityClass
