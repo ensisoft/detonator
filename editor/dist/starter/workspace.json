@@ -58,6 +58,19 @@
         "use_shader_file": false
     },
     "tqHo3nK0b9": {
+        "track_0YxK4CGXbf": {
+            "KG5fOHpMYa": "AzUofLOAMl",
+            "OHFoxLJrUF": "xzg62aztGL",
+            "QeuPJrbmpq": "xzg62aztGL",
+            "num_timelines": 3,
+            "sTMBX1vz6w": "AzUofLOAMl",
+            "timeline_0_node_id": "xYSBrgLxKL",
+            "timeline_0_self_id": "Pr3NOKLFEv",
+            "timeline_1_node_id": "mqxbWFGIg9",
+            "timeline_1_self_id": "AzUofLOAMl",
+            "timeline_2_node_id": "2qZDXrpOrX",
+            "timeline_2_self_id": "xzg62aztGL"
+        }
     },
     "workspace": {
         "packing_param_combine_textures": true,

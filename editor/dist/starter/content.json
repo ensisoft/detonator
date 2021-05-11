@@ -162,9 +162,9 @@
             {
               "actuator": {
                 "action": "Off",
-                "duration": 0.050159506499767303,
+                "duration": 0.10009009391069412,
                 "flag": "VisibleInGame",
-                "id": "qwTk9r9jtD",
+                "id": "KG5fOHpMYa",
                 "node": "mqxbWFGIg9",
                 "starttime": 0.0
               },
@@ -173,20 +173,20 @@
             {
               "actuator": {
                 "action": "On",
-                "duration": 0.03374391794204712,
+                "duration": 0.10414785146713257,
                 "flag": "VisibleInGame",
-                "id": "CZ0idO9d63",
+                "id": "sTMBX1vz6w",
                 "node": "mqxbWFGIg9",
-                "starttime": 0.9662560820579529
+                "starttime": 0.8958521485328674
               },
               "type": "SetFlag"
             },
             {
               "actuator": {
                 "action": "On",
-                "duration": 0.050159744918346405,
+                "duration": 0.09963932633399963,
                 "flag": "VisibleInGame",
-                "id": "XNpMqgsCPz",
+                "id": "QeuPJrbmpq",
                 "node": "2qZDXrpOrX",
                 "starttime": 0.0
               },
@@ -195,18 +195,18 @@
             {
               "actuator": {
                 "action": "Off",
-                "duration": 0.949840247631073,
+                "duration": 0.10414791107177734,
                 "flag": "VisibleInGame",
-                "id": "If0O9rvH0H",
+                "id": "OHFoxLJrUF",
                 "node": "2qZDXrpOrX",
-                "starttime": 0.050159744918346405
+                "starttime": 0.8958520889282227
               },
               "type": "SetFlag"
             }
           ],
           "delay": 0.0,
-          "duration": 2.0,
-          "id": "YsC2G7tR4w",
+          "duration": 1.0,
+          "id": "0YxK4CGXbf",
           "looping": false,
           "name": "Hurt"
         }
