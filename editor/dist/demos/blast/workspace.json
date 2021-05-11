@@ -111,7 +111,7 @@
     },
     "project": {
         "application_library_lin": "app://libGameEngine.so",
-        "application_library_win": "",
+        "application_library_win": "app://GameEngine.dll",
         "application_name": "Blast!",
         "application_version": "",
         "clear_color": "4278190080",
