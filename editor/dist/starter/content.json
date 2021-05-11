@@ -390,6 +390,142 @@
       "resource_id": "qv7w7J7Aiv",
       "resource_name": "Background",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "5BJ1Irtjgp",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Message",
+      "nodes": [
+        {
+          "class": "kYijveYeNG",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 539.9892578125,
+            "y": 72.0888671875
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": true,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/orbitron-light.otf",
+            "font_size": 48,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "text": "Press Space to fly!",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.09390401840209961,
+              "g": 0.2860761284828186,
+              "r": 0.8060883283615112
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "kYijveYeNG"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "5BJ1Irtjgp",
+      "resource_name": "Message",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "IxyHIKNMIn",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Ground",
+      "nodes": [
+        {
+          "class": "p46dK0RAxd",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "angular_velocity": 0.0,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "linear_velocity": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Static"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 935.0,
+            "y": 40.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "p46dK0RAxd"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "IxyHIKNMIn",
+      "resource_name": "Ground",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -878,6 +1014,52 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "5BJ1Irtjgp",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "SeXuroIaIW",
+          "idle_animation_id": "",
+          "layer": 1,
+          "name": "Message_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -650.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "IxyHIKNMIn",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "oYqoig6iog",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Ground_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 7.0,
+            "y": -81.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -895,6 +1077,16 @@
           {
             "node": {
               "id": "X4Wj3RepYI"
+            }
+          },
+          {
+            "node": {
+              "id": "SeXuroIaIW"
+            }
+          },
+          {
+            "node": {
+              "id": "oYqoig6iog"
             }
           }
         ],
