@@ -1958,6 +1958,19 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             resource->GetContent(&audio);
             packer.CopyFile(audio->GetFileURI(), "audio/");
         }
+        else if (resource->IsEntity())
+        {
+            game::EntityClass* entity = nullptr;
+            resource->GetContent(&entity);
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                auto& node = entity->GetNode(i);
+                if (!node.HasTextItem())
+                    continue;
+                auto* text = node.GetTextItem();
+                text->SetFontName(packer.CopyFile(text->GetFontName(), "fonts/"));
+            }
+        }
     }
 
     packer.PackTextures([this](const std::string& action, int step, int max) {

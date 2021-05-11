@@ -1471,48 +1471,8 @@
                <layout class="QVBoxLayout" name="verticalLayout_13">
                 <item>
                  <layout class="QGridLayout" name="gridLayout_6">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_15">
-                    <property name="text">
-                     <string>Simulation</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="1">
-                   <widget class="QDoubleSpinBox" name="rbAngularVelo">
-                    <property name="minimum">
-                     <double>-1000.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1000.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.100000000000000</double>
-                    </property>
-                    <property name="stepType">
-                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                    </property>
-                    <property name="value">
-                     <double>0.000000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="label_32">
-                    <property name="text">
-                     <string>Restitution</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_30">
-                    <property name="text">
-                     <string>Shape</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QDoubleSpinBox" name="rbAngularDamping">
+                  <item row="6" column="1">
+                   <widget class="QDoubleSpinBox" name="rbLinearDamping">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -1527,6 +1487,27 @@
                     </property>
                     <property name="stepType">
                      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_17">
+                    <property name="text">
+                     <string>Linear damping</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="0">
+                   <widget class="QLabel" name="label_35">
+                    <property name="text">
+                     <string>Linear velocity (m/s) X</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="label_33">
+                    <property name="text">
+                     <string>Density (kg/m²)</string>
                     </property>
                    </widget>
                   </item>
@@ -1555,23 +1536,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="label_16">
-                    <property name="text">
-                     <string>Angular damping</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QDoubleSpinBox" name="rbDensity">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="4" column="1">
                    <widget class="QDoubleSpinBox" name="rbRestitution">
                     <property name="sizePolicy">
@@ -1591,49 +1555,24 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="rbShape"/>
-                  </item>
-                  <item row="6" column="1">
-                   <widget class="QDoubleSpinBox" name="rbLinearDamping">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="maximum">
-                     <double>1.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.010000000000000</double>
-                    </property>
-                    <property name="stepType">
-                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_34">
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_30">
                     <property name="text">
-                     <string>Polygon</string>
+                     <string>Shape</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QComboBox" name="rbSimulation">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="0">
-                   <widget class="QLabel" name="label_38">
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_16">
                     <property name="text">
-                     <string>Angular velocity (rad/s)</string>
+                     <string>Angular damping</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="0">
+                   <widget class="QLabel" name="label_36">
+                    <property name="text">
+                     <string>Linear velocity (m/s) Y</string>
                     </property>
                    </widget>
                   </item>
@@ -1656,22 +1595,49 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="label_33">
-                    <property name="text">
-                     <string>Density (kg/m²)</string>
+                  <item row="0" column="1">
+                   <widget class="QComboBox" name="rbSimulation">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
                     </property>
                    </widget>
                   </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_17">
-                    <property name="text">
-                     <string>Linear damping</string>
+                  <item row="7" column="1">
+                   <widget class="QDoubleSpinBox" name="rbDensity">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="rbPolygon"/>
+                  <item row="12" column="1">
+                   <widget class="QCheckBox" name="rbIsBullet">
+                    <property name="text">
+                     <string>Fast moving body</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="rbShape"/>
+                  </item>
+                  <item row="14" column="1">
+                   <widget class="QCheckBox" name="rbIsEnabled">
+                    <property name="text">
+                     <string>Enabled</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="13" column="1">
+                   <widget class="QCheckBox" name="rbIsSensor">
+                    <property name="text">
+                     <string>Sensor only</string>
+                    </property>
+                   </widget>
                   </item>
                   <item row="3" column="0">
                    <widget class="QLabel" name="label_31">
@@ -1705,56 +1671,90 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="8" column="0">
-                   <widget class="QLabel" name="label_35">
+                  <item row="15" column="1">
+                   <widget class="QCheckBox" name="rbCanSleep">
                     <property name="text">
-                     <string>Linear velocity (m/s) X</string>
+                     <string>Can sleep</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="9" column="0">
-                   <widget class="QLabel" name="label_36">
+                  <item row="2" column="1">
+                   <widget class="QComboBox" name="rbPolygon"/>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_34">
                     <property name="text">
-                     <string>Linear velocity (m/s) Y</string>
+                     <string>Polygon</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QDoubleSpinBox" name="rbAngularDamping">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_15">
+                    <property name="text">
+                     <string>Simulation</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_32">
+                    <property name="text">
+                     <string>Restitution</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0">
+                   <widget class="QLabel" name="label_38">
+                    <property name="text">
+                     <string>Angular velocity (rad/s)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="1">
+                   <widget class="QDoubleSpinBox" name="rbAngularVelo">
+                    <property name="minimum">
+                     <double>-1000.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                    <property name="value">
+                     <double>0.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="16" column="1">
+                   <widget class="QCheckBox" name="rbDiscardRotation">
+                    <property name="text">
+                     <string>Discard rotation</string>
                     </property>
                    </widget>
                   </item>
                  </layout>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="rbIsBullet">
-                  <property name="text">
-                   <string>Fast moving body (Bullet physics)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="rbIsSensor">
-                  <property name="text">
-                   <string>Sensor only</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="rbIsEnabled">
-                  <property name="text">
-                   <string>Enabled</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="rbCanSleep">
-                  <property name="text">
-                   <string>Can sleep</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="rbDiscardRotation">
-                  <property name="text">
-                   <string>Discard rotation</string>
-                  </property>
-                 </widget>
                 </item>
                 <item>
                  <spacer name="verticalSpacer_3">
@@ -1768,6 +1768,264 @@
                    <size>
                     <width>20</width>
                     <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabTextItem">
+            <attribute name="title">
+             <string>Text Item</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <widget class="QGroupBox" name="textItem">
+               <property name="title">
+                <string>Text item</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_11">
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_7">
+                  <item row="5" column="1">
+                   <widget class="QDoubleSpinBox" name="tiLineHeight">
+                    <property name="minimum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="tiFontSize">
+                    <property name="placeholderText">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QCheckBox" name="tiBlink">
+                    <property name="text">
+                     <string>Blinking text</string>
+                    </property>
+                    <property name="checked">
+                     <bool>false</bool>
+                    </property>
+                    <property name="tristate">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_47">
+                    <property name="text">
+                     <string>Layer</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QComboBox" name="tiVAlign">
+                    <property name="currentText">
+                     <string/>
+                    </property>
+                    <property name="placeholderText">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QCheckBox" name="tiVisible">
+                    <property name="text">
+                     <string>Visible in game</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_42">
+                    <property name="text">
+                     <string>Font size</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="color_widgets::ColorSelector" name="tiTextColor">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="color">
+                     <color>
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </property>
+                    <property name="display_mode" stdset="0">
+                     <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                    </property>
+                    <property name="background">
+                     <brush brushstyle="Dense3Pattern">
+                      <color alpha="255">
+                       <red>128</red>
+                       <green>128</green>
+                       <blue>128</blue>
+                      </color>
+                     </brush>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_45">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Text align</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1">
+                   <widget class="QSpinBox" name="tiLayer">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimum">
+                     <number>-100</number>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QComboBox" name="tiHAlign">
+                    <property name="placeholderText">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_44">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Text align</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_43">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Text color</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_41">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Font name</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1">
+                   <widget class="QCheckBox" name="tiUnderline">
+                    <property name="text">
+                     <string>Underline text</string>
+                    </property>
+                    <property name="tristate">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_46">
+                    <property name="text">
+                     <string>Line height</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                    <item>
+                     <widget class="QComboBox" name="tiFontName">
+                      <property name="editable">
+                       <bool>true</bool>
+                      </property>
+                      <property name="currentText">
+                       <string/>
+                      </property>
+                      <property name="placeholderText">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="btnSelectFont">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="arrowType">
+                       <enum>Qt::NoArrow</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPlainTextEdit" name="tiText">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>50</height>
                    </size>
                   </property>
                  </spacer>
@@ -2011,6 +2269,16 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -2092,17 +2360,29 @@
   <tabstop>rbLinearVeloX</tabstop>
   <tabstop>rbLinearVeloY</tabstop>
   <tabstop>rbAngularVelo</tabstop>
+  <tabstop>btnAddIdleTrack</tabstop>
   <tabstop>rbIsBullet</tabstop>
   <tabstop>rbIsSensor</tabstop>
   <tabstop>rbIsEnabled</tabstop>
   <tabstop>rbCanSleep</tabstop>
   <tabstop>rbDiscardRotation</tabstop>
+  <tabstop>textItem</tabstop>
+  <tabstop>tiFontName</tabstop>
+  <tabstop>btnSelectFont</tabstop>
+  <tabstop>tiFontSize</tabstop>
+  <tabstop>tiVAlign</tabstop>
+  <tabstop>tiHAlign</tabstop>
+  <tabstop>tiLineHeight</tabstop>
+  <tabstop>tiLayer</tabstop>
+  <tabstop>tiVisible</tabstop>
+  <tabstop>tiUnderline</tabstop>
+  <tabstop>tiBlink</tabstop>
+  <tabstop>tiText</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
-  <tabstop>btnAddIdleTrack</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

@@ -25,11 +25,13 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QFontDatabase>
 #  include <QPoint>
 #  include <QMouseEvent>
 #  include <QMessageBox>
 #  include <QFile>
 #  include <QFileInfo>
+#  include <QFileDialog>
 #  include <QTextStream>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
@@ -358,6 +360,27 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
     PopulateFromEnum<game::RigidBodyItemClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
+    PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
+    PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
+
+    QStringList filters;
+    filters << "*.ttf" << "*.otf";
+    const auto& appdir  = QCoreApplication::applicationDirPath();
+    const auto& fontdir = app::JoinPath(appdir, "fonts");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& font_files = dir.entryList();
+    for (const auto& font_file : font_files)
+    {
+        const QFileInfo info(font_file);
+        mUI.tiFontName->addItem("app://fonts/" + info.fileName());
+    }
+
+    const auto font_sizes = QFontDatabase::standardSizes();
+    for (int size : font_sizes)
+        mUI.tiFontSize->addItem(QString::number(size));
+
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityID,   mState.entity->GetId());
@@ -1647,6 +1670,67 @@ void EntityWidget::on_rbDiscardRotation_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
+void EntityWidget::on_tiFontName_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiFontSize_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiVAlign_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiHAlign_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiTextColor_colorChanged(QColor color)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiLineHeight_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiLayer_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiText_textChanged()
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiVisible_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiUnderline_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiBlink_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_btnSelectFont_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* text = node->GetTextItem())
+        {
+            const auto& list = QFileDialog::getOpenFileNames(this ,
+                tr("Select Font File") , "" , tr("Font (*.ttf *.otf)"));
+            if (list.isEmpty())
+                return;
+            const auto& file = mState.workspace->MapFileToWorkspace(list[0]);
+            SetValue(mUI.tiFontName , file);
+            text->SetFontName(app::ToUtf8(file));
+        }
+    }
+}
 
 void EntityWidget::on_drawableItem_toggled(bool on)
 {
@@ -1714,6 +1798,30 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
         DEBUG("Added rigid body to '%1'", node->GetName());
     }
     DisplayCurrentNodeProperties();
+}
+
+void EntityWidget::on_textItem_toggled(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on)
+        {
+            if (!node->HasTextItem())
+            {
+                game::TextItemClass text;
+                text.SetFontSize(GetValue(mUI.tiFontSize));
+                text.SetFontName(GetValue(mUI.tiFontName));
+                node->SetTextItem(text);
+                DEBUG("Added text item to '%1'", node->GetName());
+            }
+        }
+        else
+        {
+            node->RemoveTextItem();
+            DEBUG("Removed text item from '%1'" , node->GetName());
+        }
+        DisplayCurrentNodeProperties();
+    }
 }
 
 void EntityWidget::on_tree_customContextMenuRequested(QPoint)
@@ -2078,6 +2186,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
 {
     SetValue(mUI.drawableItem, false);
     SetValue(mUI.rigidBodyItem, false);
+    SetValue(mUI.textItem, false);
     SetValue(mUI.dsMaterial, QString(""));
     SetValue(mUI.dsDrawable, QString(""));
     SetValue(mUI.dsLayer, 0);
@@ -2099,6 +2208,17 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbIsEnabled, false);
     SetValue(mUI.rbCanSleep, false);
     SetValue(mUI.rbDiscardRotation, false);
+    SetValue(mUI.tiFontName, 0);
+    SetValue(mUI.tiFontSize, 16);
+    SetValue(mUI.tiVAlign, game::TextItemClass::VerticalTextAlign::Center);
+    SetValue(mUI.tiHAlign, game::TextItemClass::HorizontalTextAlign::Center);
+    SetValue(mUI.tiTextColor, Qt::white);
+    SetValue(mUI.tiLineHeight, 1.0f);
+    SetValue(mUI.tiLayer, 0);
+    SetValue(mUI.tiText, QString(""));
+    SetValue(mUI.tiVisible, true);
+    SetValue(mUI.tiUnderline, false);
+    SetValue(mUI.tiBlink, false);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -2162,6 +2282,21 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 SetEnabled(mUI.rbPolygon, false);
                 SetValue(mUI.rbPolygon, QString(""));
             }
+        }
+        if (const auto* text = node->GetTextItem())
+        {
+            SetValue(mUI.textItem, true);
+            SetValue(mUI.tiFontName, text->GetFontName());
+            SetValue(mUI.tiFontSize, text->GetFontSize());
+            SetValue(mUI.tiVAlign, text->GetVAlign());
+            SetValue(mUI.tiHAlign, text->GetHAlign());
+            SetValue(mUI.tiTextColor, text->GetTextColor());
+            SetValue(mUI.tiLineHeight, text->GetLineHeight());
+            SetValue(mUI.tiLayer, text->GetLayer());
+            SetValue(mUI.tiText, text->GetText());
+            SetValue(mUI.tiVisible, text->TestFlag(game::TextItemClass::Flags::VisibleInGame));
+            SetValue(mUI.tiUnderline, text->TestFlag(game::TextItemClass::Flags::UnderlineText));
+            SetValue(mUI.tiBlink, text->TestFlag(game::TextItemClass::Flags::BlinkText));
         }
     }
 }
@@ -2257,6 +2392,22 @@ void EntityWidget::UpdateCurrentNodeProperties()
         body->SetFlag(game::RigidBodyItemClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
         body->SetFlag(game::RigidBodyItemClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
         body->SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
+    }
+
+    if (auto* text = node->GetTextItem())
+    {
+        text->SetFontName(GetValue(mUI.tiFontName));
+        text->SetFontSize(GetValue(mUI.tiFontSize));
+        text->SetAlign((game::TextItemClass::VerticalTextAlign)GetValue(mUI.tiVAlign));
+        text->SetAlign((game::TextItemClass::HorizontalTextAlign)GetValue(mUI.tiHAlign));
+        text->SetTextColor(GetValue(mUI.tiTextColor));
+        text->SetLineHeight(GetValue(mUI.tiLineHeight));
+        text->SetText(GetValue(mUI.tiText));
+        text->SetLayer(GetValue(mUI.tiLayer));
+        // flags
+        text->SetFlag(game::TextItemClass::Flags::VisibleInGame, GetValue(mUI.tiVisible));
+        text->SetFlag(game::TextItemClass::Flags::UnderlineText, GetValue(mUI.tiUnderline));
+        text->SetFlag(game::TextItemClass::Flags::BlinkText, GetValue(mUI.tiBlink));
     }
 }
 

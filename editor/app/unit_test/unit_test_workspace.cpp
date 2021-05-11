@@ -291,6 +291,7 @@ void unit_test_packing_basic()
     TEST_REQUIRE(d.mkpath("lua"));
     TEST_REQUIRE(d.mkpath("audio"));
     TEST_REQUIRE(d.mkpath("data"));
+    TEST_REQUIRE(d.mkpath("fonts"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/solid_color.glsl", "solid_color.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/vertex_array.glsl", "vertex_array.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/particles.glsl", "particles.glsl"));
@@ -298,6 +299,8 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua", "game_script.lua"));
     TEST_REQUIRE(app::WriteTextFile("audio/music.mp3", "music.mp3"));
     TEST_REQUIRE(app::WriteTextFile("data/levels.txt", "levels.txt"));
+    // setup dummy font file
+    TEST_REQUIRE(app::WriteTextFile("fonts/font.otf", "font.otf"));
 
     app::Workspace workspace;
     workspace.MakeWorkspace("TestWorkspace");
@@ -350,6 +353,24 @@ void unit_test_packing_basic()
     workspace.SaveResource(audio_resource);
     workspace.SaveResource(data_resource);
 
+    // setup entity resource that uses a font resource.
+    {
+        game::TextItemClass text;
+        text.SetFontName(workspace.MapFileToWorkspace(std::string("fonts/font.otf")));
+        text.SetText("hello");
+
+        game::EntityNodeClass node;
+        node.SetName("node");
+        node.SetTextItem(text);
+
+        game::EntityClass entity;
+        entity.SetName("entity");
+        entity.AddNode(node);
+
+        app::EntityResource resource(entity, "entity");
+        workspace.SaveResource(resource);
+    }
+
     app::Workspace::ContentPackingOptions options;
     options.directory    = "TestPackage";
     options.package_name = "test";
@@ -366,6 +387,7 @@ void unit_test_packing_basic()
     resources.push_back(&workspace.GetUserDefinedResource(3));
     resources.push_back(&workspace.GetUserDefinedResource(4));
     resources.push_back(&workspace.GetUserDefinedResource(5));
+    resources.push_back(&workspace.GetUserDefinedResource(6));
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // in the output folder we should have content.json, config.json
@@ -379,6 +401,8 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/audio/music.mp3") == "music.mp3");
     // Data files should be copied into data/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/data/levels.txt") == "levels.txt");
+    // Font files should be copied into fonts/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/font.otf") == "font.otf");
 
     game::ContentLoader loader;
     loader.LoadFromFile("TestPackage/test", "TestPackage/test/content.json");

@@ -116,24 +116,35 @@ struct ListItemId {
     {}
 };
 
+struct CurrentText {
+    QString text;
+    CurrentText(QString text) : text(text)
+    {}
+    CurrentText(const std::string& text) : text(app::FromUtf8(text))
+    {}
+};
+
 template<typename T>
 void SetValue(QComboBox* combo, T value)
 {
+    QSignalBlocker s(combo);
     if constexpr (std::is_enum<T>::value)
     {
         const std::string name(magic_enum::enum_name(value));
         const auto index = combo->findText(QString::fromStdString(name));
         //ASSERT(index != -1);
-        QSignalBlocker s(combo);
         combo->setCurrentIndex(index);
     }
     else
     {
         const QString& str = app::toString(value);
-        const auto index = combo->findText(str);
-        //ASSERT(index != -1);
-        QSignalBlocker s(combo);
-        combo->setCurrentIndex(index);
+        if (combo->isEditable()) {
+            combo->setCurrentText(str);
+        } else {
+            const auto index = combo->findText(str);
+            //ASSERT(index != -1);
+            combo->setCurrentIndex(index);
+        }
     }
 }
 
@@ -155,6 +166,12 @@ inline void SetValue(QComboBox* combo, int index)
 {
     QSignalBlocker s(combo);
     combo->setCurrentIndex(index);
+}
+
+inline void SetValue(QComboBox* combo, const CurrentText& text)
+{
+    QSignalBlocker s(combo);
+    combo->setCurrentText(text.text);
 }
 
 struct ListItem {
@@ -255,6 +272,13 @@ inline void SetValue(color_widgets::ColorSelector* color, QColor value)
 {
     QSignalBlocker s(color);
     color->setColor(value);
+}
+
+inline void SetValue(QCheckBox* check, Qt::CheckState state)
+{
+    QSignalBlocker s(check);
+    check->setTristate(true);
+    check->setCheckState(state);
 }
 
 inline void SetValue(QCheckBox* check, bool val)

@@ -165,8 +165,22 @@ namespace gui
         void on_rbIsEnabled_stateChanged(int);
         void on_rbCanSleep_stateChanged(int);
         void on_rbDiscardRotation_stateChanged(int);
+        void on_tiFontName_currentIndexChanged(int);
+        void on_tiFontSize_currentIndexChanged(int);
+        void on_tiVAlign_currentIndexChanged(int);
+        void on_tiHAlign_currentIndexChanged(int);
+        void on_tiTextColor_colorChanged(QColor color);
+        void on_tiLineHeight_valueChanged(double value);
+        void on_tiLayer_valueChanged(int);
+        void on_tiText_textChanged();
+        void on_tiVisible_stateChanged(int);
+        void on_tiUnderline_stateChanged(int);
+        void on_tiBlink_stateChanged(int);
+        void on_btnSelectFont_clicked();
+
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
+        void on_textItem_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
 
         void TreeCurrentNodeChangedEvent();
