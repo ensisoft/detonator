@@ -119,9 +119,7 @@ namespace real
         };
     };
 
-
-    inline
-    bool equals(float a, float b)
+    inline bool equals(float a, float b)
     {
         const float32 a32(a);
         const float32 b32(b);
@@ -140,23 +138,20 @@ namespace real
         return (ulps <= 1);
     }
 
-    inline
-    bool operator==(const float32& f32, float f)
-    {
-        return equals(f32.as_float(), f);
-    }
+    inline bool operator==(const float32& f32, float f)
+    { return equals(f32.as_float(), f); }
+    inline bool operator!=(const float32& f32, float f)
+    { return !equals(f32.as_float(), f); }
 
-    inline
-    bool operator==(float f, const float32& f32)
-    {
-        return equals(f, f32.as_float());
-    }
+    inline bool operator==(float f, const float32& f32)
+    { return equals(f, f32.as_float()); }
+    inline bool operator!=(float f, const float32& f32)
+    { return !equals(f, f32.as_float()); }
 
-    inline
-    bool operator==(const float32& lhs, const float32& rhs)
-    {
-        return equals(lhs.as_float(), rhs.as_float());
-    }
+    inline bool operator!=(const float32& lhs, const float32& rhs)
+    { return !equals(lhs.as_float(), rhs.as_float()); }
+    inline bool operator==(const float32& lhs, const float32& rhs)
+    { return equals(lhs.as_float(), rhs.as_float()); }
 
 #define F32(x) \
     real::float32(x)
