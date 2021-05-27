@@ -25,6 +25,8 @@
 #include "config.h"
 
 #include <string>
+#include <any>
+#include <memory>
 
 namespace gui
 {
@@ -34,26 +36,35 @@ namespace gui
     {
     public:
         void SetText(const std::string& text)
-        {mText = text; }
+        { mData = text; }
         void SetText(std::string&& text)
-        {mText = std::move(text); }
+        { mData = std::move(text); }
         void SetType(const std::string& type)
         { mType = type; }
         void SetType(std::string&& type)
         { mType = std::move(type); }
         bool IsEmpty() const
-        { return mText.empty(); }
+        { return !mData.has_value(); }
         void Clear()
         {
-            mText.clear();
+            mData.reset();
             mType.clear();
         }
         const std::string& GetType() const
         { return mType; }
-        const std::string& GetText() const
-        { return mText; }
+        std::string GetText() const
+        { return std::any_cast<std::string>(mData); }
+        template<typename T>
+        void SetObject(std::shared_ptr<T> object)
+        { mData = object; }
+        template<typename T>
+        void SetObject(std::unique_ptr<T> object)
+        { mData = std::shared_ptr<T>(std::move(object)); }
+        template<typename T>
+        std::shared_ptr<const T> GetObject() const
+        { return std::any_cast<std::shared_ptr<T>>(mData); }
     private:
-        std::string mText;
+        std::any mData;
         std::string mType;
     };
 
