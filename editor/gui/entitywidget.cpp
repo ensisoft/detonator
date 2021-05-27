@@ -857,6 +857,9 @@ void EntityWidget::Refresh()
     // don't take undo snapshot while the node alpha is being slid
     if (mUI.dsAlpha->isSliderDown())
         return;
+    // don't take undo snapshot while continuous edits to text props
+    if (mUI.tiTextColor->isDialogOpen() || mUI.tiText->hasFocus())
+        return;
 
     if (mUndoStack.empty())
     {
