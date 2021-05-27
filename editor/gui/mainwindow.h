@@ -116,6 +116,7 @@ namespace gui
         void on_actionNewEntity_triggered();
         void on_actionNewScene_triggered();
         void on_actionNewScript_triggered();
+        void on_actionNewUI_triggered();
         void on_actionImportFiles_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
@@ -148,6 +149,7 @@ namespace gui
         void on_btnEntity_clicked();
         void on_btnScene_clicked();
         void on_btnScript_clicked();
+        void on_btnUI_clicked();
         void actionWindowFocus_triggered();
         void RefreshUI();
         void ShowNote(const app::Event& event);

@@ -1,0 +1,161 @@
+{
+  "properties": [
+    {
+      "key": "widget/text-color",
+      "value": "White"
+    },
+    {
+      "key": "widget/shape",
+      "value": "RoundRect"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+    {
+      "key": "widget/text-blink",
+      "value": false
+    },
+    {
+      "key": "widget/text-underline",
+      "value": false
+    },
+    {
+      "key": "widget/font-name",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/font-size",
+      "value": 16
+    },
+    {
+      "key": "widget/text-vertical-align",
+      "value": "Center"
+    },
+    {
+      "key": "widget/text-horizontal-align",
+      "value": "Center"
+    },
+
+    {
+      "key": "form/shape",
+      "value": "Rect"
+    }
+
+  ],
+
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Color",
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      }
+    },
+
+    {
+      "key": "widget/border",
+      "type": "Color",
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      }
+    },
+
+    {
+      "key": "form/background",
+      "type": "Color",
+      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+    },
+    {
+      "key": "form/border",
+      "type": "Color",
+      "color": "Gray"
+    },
+
+    {
+      "key": "label/background",
+      "type": "Null"
+    },
+    {
+      "key": "label/border",
+      "type": "Null"
+    },
+
+    {
+      "key": "checkbox/background",
+      "type": "Null"
+    },
+    {
+      "key": "checkbox/border",
+      "type": "Null"
+    },
+    {
+      "key": "checkbox/check-background",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+    {
+      "key": "checkbox/check-border",
+      "type": "Color",
+      "color": "Gray"
+    },
+    {
+      "key": "checkbox/check-mark",
+      "type": "Color",
+      "color": "Silver"
+    },
+
+
+    {
+      "key": "push-button/background",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+    {
+      "key": "push-button/border",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/pressed/border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray"
+    },
+    {
+      "key": "push-button/mouse-over/background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+    {
+      "key": "push-button/pressed/background",
+      "type": "Gradient",
+      "color0": "DarkGray",
+      "color1": "DarkGray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+
+    {
+      "key": "groupbox/background",
+      "type": "Color",
+      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+    }
+  ]
+}

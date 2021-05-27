@@ -40,6 +40,7 @@
 #include "graphics/material.h"
 #include "engine/entity.h"
 #include "engine/scene.h"
+#include "uikit/window.h"
 #include "editor/app/utility.h"
 #include "editor/app/script.h"
 
@@ -78,7 +79,9 @@ namespace app
             // it's an audio file such as .ogg or .mp3
             AudioFile,
             // it's an arbitrary application/game data file
-            DataFile
+            DataFile,
+            // it's a UI / window description
+            UI
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -158,6 +161,8 @@ namespace app
                     return QIcon("icons:audio.png");
                 case Resource::Type::DataFile:
                     return QIcon("icons:database.png");
+                case Resource::Type::UI:
+                    return QIcon("icons:ui.png");
                 default: break;
             }
             return QIcon();
@@ -180,6 +185,8 @@ namespace app
         { return GetType() == Type::AudioFile; }
         inline bool IsDataFile() const
         { return GetType() == Type::DataFile; }
+        inline bool IsUI() const
+        { return GetType() == Type::UI; }
 
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
@@ -302,6 +309,10 @@ namespace app
         struct ResourceTypeTraits<DataFile> {
             static constexpr auto Type = app::Resource::Type::DataFile;
         };
+        template<>
+        struct ResourceTypeTraits<uik::Window> {
+            static constexpr auto Type = app::Resource::Type::UI;
+        };
     } // detail
 
     template<typename BaseTypeContent>
@@ -329,11 +340,22 @@ namespace app
             mContent = std::make_shared<Content>(std::move(content));
             mName    = name;
         }
+        GameResource(std::shared_ptr<Content> content, const QString& name)
+        {
+            mContent = content;
+            mName    = name;
+        }
         template<typename T>
         GameResource(std::unique_ptr<T> content, const QString& name)
         {
             std::shared_ptr<T> shared(std::move(content));
             mContent = std::static_pointer_cast<Content>(shared);
+            mName    = name;
+        }
+        template<typename T>
+        GameResource(std::shared_ptr<T> content, const QString& name)
+        {
+            mContent = std::static_pointer_cast<Content>(content);
             mName    = name;
         }
         GameResource(const QString& name)
@@ -396,6 +418,8 @@ namespace app
                 json["audio_files"].push_back(content_json);
             else if (TypeValue == Resource::Type::DataFile)
                 json["data_files"].push_back(content_json);
+            else if (TypeValue == Resource::Type::UI)
+                json["uis"].push_back(content_json);
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {
@@ -506,6 +530,7 @@ namespace app
     using ScriptResource         = GameResource<Script>;
     using AudioResource          = GameResource<AudioFile>;
     using DataResource           = GameResource<DataFile>;
+    using UIResource             = GameResource<uik::Window>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;

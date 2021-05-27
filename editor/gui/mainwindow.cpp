@@ -69,6 +69,7 @@
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/codewidget.h"
+#include "editor/gui/uiwidget.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -124,6 +125,10 @@ gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspac
             if (resource)
                 return new gui::ScriptWidget(workspace, *resource);
             return new gui::ScriptWidget(workspace);
+        case app::Resource::Type::UI:
+            if (resource)
+                return new gui::UIWidget(workspace, *resource);
+            return new gui::UIWidget(workspace);
     }
     BUG("Unhandled widget type.");
     return nullptr;
@@ -407,6 +412,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             widget = new SceneWidget(workspace.get());
         else if (klass == ScriptWidget::staticMetaObject.className())
             widget = new ScriptWidget(workspace.get());
+        else if (klass == UIWidget::staticMetaObject.className())
+            widget = new UIWidget(workspace.get());
         else BUG("Unhandled widget type.");
         widget->SetId(id);
         if (!widget->LoadState(settings))
@@ -1029,6 +1036,12 @@ void MainWindow::on_actionNewScript_triggered()
     ShowWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
 }
 
+void MainWindow::on_actionNewUI_triggered()
+{
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(new UIWidget(mWorkspace.get()), open_new_window);
+}
+
 void MainWindow::on_actionImportFiles_triggered()
 {
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Files"));
@@ -1400,6 +1413,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewEntity);
     menu.addAction(mUI.actionNewScene);
     menu.addAction(mUI.actionNewScript);
+    menu.addAction(mUI.actionNewUI);
     menu.addSeparator();
     menu.addAction(mUI.actionImportFiles);
     menu.addSeparator();
@@ -1668,6 +1682,11 @@ void MainWindow::on_btnScript_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
     ShowWidget(MakeWidget(app::Resource::Type::Script, mWorkspace.get()), new_window);
+}
+void MainWindow::on_btnUI_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::UI, mWorkspace.get()), new_window);
 }
 
 void MainWindow::RefreshUI()
@@ -2196,6 +2215,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewEntity);
         mUI.mainToolBar->addAction(mUI.actionNewScene);
         mUI.mainToolBar->addAction(mUI.actionNewScript);
+        mUI.mainToolBar->addAction(mUI.actionNewUI);
         mUI.mainToolBar->addSeparator();
         mUI.mainToolBar->addAction(mUI.actionImportFiles);
     }

@@ -49,6 +49,7 @@
     <file>16x16_ico_png/database.png</file>
     <file>16x16_ico_png/audio.png</file>
     <file>16x16_ico_png/import.png</file>
+    <file>16x16_ico_png/ui.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
@@ -79,7 +80,7 @@
     <file>32x32_ico_png/arrow_out.png</file>
     <file>32x32_ico_png/camera.png</file>
     <file>32x32_ico_png/semi_circle.png</file>
-
+    <file>32x32_ico_png/placeholder.png</file>
     <file>texture.png</file>
   </qresource>
 </RCC>

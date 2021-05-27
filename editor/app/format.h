@@ -33,6 +33,9 @@
 #  include <QLocalSocket>
 #  include <QProcess>
 #  include <neargye/magic_enum.hpp>
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
 #include "warnpop.h"
 
 #include <cstring>
@@ -57,6 +60,10 @@ namespace app
     { return QString("%1,%2").arg(point.x()).arg(point.y()); }
     inline QString toString(bool value)
     { return (value ? "True" : "False"); }
+    inline QString toString(const glm::vec2& vec)
+    { return QString("%1,%2").arg(vec.x).arg(vec.y); }
+    inline QString toString(const glm::vec4& vec)
+    { return QString("%1,%2,%3,%4").arg(vec.x).arg(vec.y).arg(vec.z).arg(vec.w); }
 
     template<typename T>
     QString toString(const T& val)

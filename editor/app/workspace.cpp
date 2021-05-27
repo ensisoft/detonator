@@ -1158,6 +1158,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<Script>("scripts", json, mResources);
     LoadResources<DataFile>("data_files", json, mResources);
     LoadResources<AudioFile>("audio_files", json, mResources);
+    LoadResources<uik::Window>("uis", json, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
