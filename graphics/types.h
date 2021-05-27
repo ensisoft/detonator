@@ -96,6 +96,18 @@ namespace gfx
         return Size<T>(size.GetWidth() * scale,
                        size.GetHeight() * scale);
     }
+    template<typename T> inline
+    Size<T> operator+(const Size<T>& rhs, const Size<T>& lhs)
+    {
+        return Size<T>(rhs.GetWidth() + lhs.GetWidth(),
+                       rhs.GetHeight() + lhs.GetHeight());
+    }
+    template<typename T> inline
+    Size<T> operator-(const Size<T>& rhs, const Size<T>& lhs)
+    {
+        return Size<T>(rhs.GetWidth() - lhs.GetWidth(),
+                       rhs.GetHeight() - lhs.GetHeight());
+    }
 
     using USize = Size<unsigned>;
     using FSize = Size<float>;
@@ -141,6 +153,18 @@ namespace gfx
             hash = base::hash_combine(hash, mX);
             hash = base::hash_combine(hash, mY);
             return hash;
+        }
+        Point& operator+=(const Point& other)
+        {
+            mX += other.mX;
+            mY += other.mY;
+            return *this;
+        }
+        Point& operator-=(const Point& other)
+        {
+            mX -= other.mX;
+            mY -= other.mY;
+            return *this;
         }
     private:
         T mX = T();
@@ -213,6 +237,10 @@ namespace gfx
         { return mX; }
         T GetY() const
         { return mY; }
+        Point<T> GetPosition() const
+        { return Point<T>(mX, mY); }
+        Size<T> GetSize() const
+        { return Size<T>(mWidth, mHeight); }
         void SetX(T value)
         { mX = value; }
         void SetY(T value)
