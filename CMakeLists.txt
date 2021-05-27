@@ -160,14 +160,22 @@ add_library(EngineLib
     engine/entity.cpp
     engine/scene.cpp
     engine/types.cpp
-    engine/physics.cpp)
+    engine/physics.cpp
+    engine/ui.cpp)
+add_library(UiLib
+    uikit/layout.cpp
+    uikit/widget.cpp
+    uikit/window.cpp)
+
 target_include_directories(BaseLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 target_include_directories(GfxLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+target_include_directories(UiLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 if (UNIX)
     target_compile_options(BaseLib PRIVATE -fPIC)
     target_compile_options(GfxLib  PRIVATE -fPIC)
     target_compile_options(EngineLib PRIVATE -fPIC)
+    target_compile_options(UiLib PRIVATE -fPIC)
 endif()
 
 # Editor application.
@@ -435,7 +443,7 @@ add_library(TestEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(TestEngine PRIVATE BaseLib GfxLib EngineLib)
+target_link_libraries(TestEngine PRIVATE BaseLib GfxLib EngineLib UiLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"

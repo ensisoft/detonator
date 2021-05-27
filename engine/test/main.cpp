@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <boost/circular_buffer.hpp>
+#include "warnpop.h"
+
 #include <memory>
 #include <vector>
 #include <cstring>
@@ -40,12 +44,15 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
+#include "uikit/window.h"
+#include "uikit/widget.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
 #include "engine/entity.h"
 #include "engine/physics.h"
 #include "engine/scene.h"
 #include "engine/format.h"
+#include "engine/ui.h"
 #include "engine/main/interface.h"
 
 namespace {
@@ -61,7 +68,11 @@ public:
     virtual void Update(float dts) {}
     virtual void Start(game::ClassLibrary* loader) {}
     virtual void End() {}
+    virtual void Tick() {}
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) {}
+    virtual void OnMousePress(const wdk::WindowEventMousePress& mickey) {}
+    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) {}
+    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) {}
     virtual void SetSurfaceSize(unsigned width, unsigned height)  {}
 private:
 };
@@ -363,6 +374,159 @@ private:
     game::PhysicsEngine mPhysics;
 };
 
+class UITest : public TestCase
+{
+public:
+    UITest() : mMessageQueue(20)
+    {}
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform view;
+        view.Translate(mOffsetX, mOffsetY);
+        painter.SetViewMatrix(view.GetAsMatrix());
+
+        mPainter.SetPainter(&painter);
+        mWindow.Paint(mState, mPainter, mTime);
+
+        painter.ResetViewMatrix();
+
+        gfx::FRect rect(10, 30, 500, 20);
+        for (const auto& print : mMessageQueue)
+        {
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+            gfx::DrawTextRect(painter, print, "fonts/orbitron-medium.otf", 14, rect,
+                gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+            rect.Translate(0, 20);
+        }
+    }
+    virtual void Update(float dt) override
+    {
+        mPainter.Update(mTime, dt);
+        mTime += dt;
+    }
+    virtual void Start(game::ClassLibrary* loader) override
+    {
+        mWindow.Resize(500.0f, 500.0f);
+        mStyle.SetLoader(loader);
+        mPainter.SetStyle(&mStyle);
+
+        mStyle.SetMaterial("widget/background", game::detail::UIColor(gfx::Color::Black));
+        mStyle.SetMaterial("widget/border", game::detail::UIColor(gfx::Color::LightGray));
+        mStyle.SetProperty("widget/font-name", "fonts/orbitron-medium.otf");
+        mStyle.SetProperty("widget/shape", "RoundRect");
+        mStyle.SetProperty("widget/text-color", gfx::Color::White);
+
+        mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);
+
+        mStyle.SetMaterial("checkbox/background", game::detail::UINullMaterial());
+        mStyle.SetMaterial("checkbox/border", game::detail::UINullMaterial());
+        mStyle.SetMaterial("checkbox/check-border", game::detail::UIColor(gfx::Color::White));
+        mStyle.SetMaterial("checkbox/check-mark", game::detail::UIColor(gfx::Color::Silver));
+        mStyle.SetMaterial("label/background", game::detail::UINullMaterial());
+        mStyle.SetMaterial("label/border", game::detail::UINullMaterial());
+
+        mStyle.SetMaterial("push-button/pressed/background", game::detail::UIColor(gfx::Color::Gray));
+        mStyle.SetMaterial("push-button/pressed/border", game::detail::UIColor(gfx::Color::Silver));
+
+        // add some widgets
+        {
+            uik::CheckBox chk;
+            chk.SetName("Check");
+            chk.SetText("Check");
+            chk.SetPosition(30.0f, 30.0f);
+            mWindow.AddWidget(chk);
+        }
+        {
+            uik::PushButton ok;
+            ok.SetName("ok");
+            ok.SetText("OK");
+            ok.SetPosition(150.0f, 30.0f);
+            mWindow.AddWidget(ok);
+        }
+        {
+            uik::PushButton play;
+            play.SetName("play");
+            play.SetText("Play!");
+            play.SetPosition(300.0f, 30.0f);
+            mWindow.AddWidget(play);
+        }
+
+        {
+            uik::Label lbl;
+            lbl.SetName("label");
+            lbl.SetText("Hello world");
+            lbl.SetPosition(30.0f, 80.0f);
+            mWindow.AddWidget(lbl);
+        }
+
+        mState.Clear();
+        mTime = 0.0;
+    }
+    virtual void Tick() override
+    {
+        if (!mMessageQueue.empty())
+            mMessageQueue.pop_front();
+    }
+    virtual void OnMousePress(const wdk::WindowEventMousePress& mickey) override
+    {
+        uik::Window::MouseEvent event;
+        event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
+        event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
+        event.button = MapMouseButton(mickey.btn);
+        event.time   = mTime;
+        auto action = mWindow.MousePress(event, mState);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+    }
+    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) override
+    {
+        uik::Window::MouseEvent event;
+        event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
+        event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
+        event.button = MapMouseButton(mickey.btn);
+        event.time   = mTime;
+        auto action = mWindow.MouseRelease(event, mState);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+    }
+    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    {
+        uik::Window::MouseEvent event;
+        event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
+        event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
+        event.button = MapMouseButton(mickey.btn);
+        event.time   = mTime;
+        auto action = mWindow.MouseMove(event, mState);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+    }
+private:
+    uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const
+    {
+        if (btn == wdk::MouseButton::Left)
+            return uik::MouseButton::Left;
+        else if (btn == wdk::MouseButton::Right)
+            return uik::MouseButton::Right;
+        else if (btn == wdk::MouseButton::Wheel)
+            return uik::MouseButton::Wheel;
+        else if (btn == wdk::MouseButton::WheelScrollUp)
+            return uik::MouseButton::WheelUp;
+        else if (btn == wdk::MouseButton::WheelScrollDown)
+            return uik::MouseButton::WheelDown;
+        return uik::MouseButton::None;
+    }
+private:
+    float mOffsetX = 250.0f;
+    float mOffsetY = 180.0f;
+    uik::Window mWindow;
+    uik::State mState;
+    game::UIStyle mStyle;
+    game::UIPainter mPainter;
+    double mTime = 0.0;
+    boost::circular_buffer<std::string> mMessageQueue;
+};
+
 class MyApp : public game::App, public game::ClassLibrary, public wdk::WindowListener
 {
 public:
@@ -389,6 +553,7 @@ public:
         mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new ViewportTest);
+        mTestList.emplace_back(new UITest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -417,6 +582,7 @@ public:
 
     virtual void Tick(double wall_time, double tick_time, double dt) override
     {
+        mTestList[mTestIndex]->Tick();
     }
 
     virtual void Update(double wall_time, double game_time, double dt) override
@@ -460,6 +626,19 @@ public:
         }
         mTestList[mTestIndex]->OnKeydown(key);
     }
+    virtual void OnMousePress(const wdk::WindowEventMousePress& mickey) override
+    {
+        mTestList[mTestIndex]->OnMousePress(mickey);
+    }
+    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) override
+    {
+        mTestList[mTestIndex]->OnMouseRelease(mickey);
+    }
+    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    {
+        mTestList[mTestIndex]->OnMouseMove(mickey);
+    }
+
     virtual void UpdateStats(const Stats& stats) override
     {
         DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
