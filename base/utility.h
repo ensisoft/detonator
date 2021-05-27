@@ -44,6 +44,7 @@
 #include <filesystem>
 #include <fstream>
 #include <tuple>
+#include <vector>
 
 #include "base/math.h"
 #include "base/assert.h"
@@ -57,6 +58,19 @@
 
 namespace base
 {
+
+template<typename T>
+T& SafeIndex(std::vector<T>& vector, std::size_t index)
+{
+    ASSERT(index < vector.size());
+    return vector[index];
+}
+template<typename T>
+const T& SafeIndex(const std::vector<T>& vector, std::size_t index)
+{
+    ASSERT(index < vector.size());
+    return vector[index];
+}
 
 inline bool Contains(const std::string& str, const std::string& what)
 {

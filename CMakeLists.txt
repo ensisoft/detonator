@@ -585,6 +585,12 @@ add_test(NAME unit_test_entity COMMAND unit_test_entity)
 add_test(NAME unit_test_scene COMMAND unit_test_scene)
 add_test(NAME unit_test_lua COMMAND unit_test_lua)
 
+#UI kit tests
+add_executable(unit_test_uikit uikit/unit_test/unit_test.cpp base/assert.cpp
+        uikit/widget.cpp
+        uikit/window.cpp)
+target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/uikit/unit_test")
+
 # base tests
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
