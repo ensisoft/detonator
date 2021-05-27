@@ -55,6 +55,8 @@ public:
 
     ColorWheel::DisplayFlags wheelFlags() const;
 
+    bool isDialogOpen() const;
+
 Q_SIGNALS:
     void wheelFlagsChanged(ColorWheel::DisplayFlags flags);
 

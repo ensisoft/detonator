@@ -86,6 +86,11 @@ ColorWheel::DisplayFlags ColorSelector::wheelFlags() const
     return p->dialog->wheelFlags();
 }
 
+bool ColorSelector::isDialogOpen() const
+{
+    return p->dialog->isVisible();
+}
+
 void ColorSelector::showDialog()
 {
     p->old_color = color();
