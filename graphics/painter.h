@@ -75,6 +75,11 @@ namespace gfx
         virtual void ClearScissor() = 0;
         // Set the current projection matrix for projecting the scene onto a 2D plane.
         virtual void SetProjectionMatrix(const glm::mat4& proj) = 0;
+        // Set an additional view transformation matrix that gets multiplied into
+        // every view matrix/transform when doing any actual draw operations. This
+        // is useful when using some drawing system that doesn't support arbitrary
+        // transformations.
+        virtual void SetViewMatrix(const glm::mat4& view) = 0;
         // Clear the render target with the given clear color.
         // You probably want to do this as the first step before
         // doing any other drawing.
@@ -129,6 +134,9 @@ namespace gfx
         void SetOrthographicView(const FRect& view);
         void SetOrthographicView(float left, float top, float width, float height);
         void SetOrthographicView(float width, float height);
+
+        inline void ResetViewMatrix()
+        { SetViewMatrix(glm::mat4(1.0f)); }
     private:
     };
 

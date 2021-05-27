@@ -81,6 +81,10 @@ public:
     {
         mProjection = proj;
     }
+    virtual void SetViewMatrix(const glm::mat4& view) override
+    {
+        mViewMatrix = view;
+    }
     virtual void Clear(const Color4f& color) override
     {
         mDevice->ClearColor(color);
@@ -91,7 +95,7 @@ public:
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
         const auto& kProjMatrix = mProjection;
-        const auto& kViewMatrix = transform.GetAsMatrix();
+        const auto& kViewMatrix = mViewMatrix * transform.GetAsMatrix();
         const auto style = shape.GetStyle();
 
         Drawable::Environment draw_env;
@@ -108,8 +112,11 @@ public:
         MaterialClass::Environment material_env;
         material_env.render_points = style == Drawable::Style::Points;
 
-        prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-        prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+        prog->SetUniform("kProjectionMatrix",
+            *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
+        prog->SetUniform("kViewMatrix",
+            *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+
         mat.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
         Drawable::RasterState drawable_raster_state;
@@ -166,9 +173,10 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
+            const auto& kViewMatrix = mViewMatrix * (*mask.transform);
             Drawable::Environment draw_env;
             draw_env.pixel_ratio = mPixelRatio;
-            draw_env.view_matrix = mask.transform;
+            draw_env.view_matrix = &kViewMatrix;
             draw_env.proj_matrix = &kProjMatrix;
             Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
@@ -177,8 +185,10 @@ public:
             if (prog == nullptr)
                 continue;
 
-            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-            prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*mask.transform));
+            prog->SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
+            prog->SetUniform("kViewMatrix",
+                *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
 
             MaterialClass::RasterState material_raster_state;
             MaterialClass::Environment material_env;
@@ -201,9 +211,10 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
+            const auto& kViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
             draw_env.pixel_ratio = mPixelRatio;
-            draw_env.view_matrix = draw.transform;
+            draw_env.view_matrix = &kViewMatrix;
             draw_env.proj_matrix = &kProjMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
@@ -212,8 +223,11 @@ public:
             if (prog == nullptr)
                 continue;
 
-            prog->SetUniform("kProjectionMatrix", *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-            prog->SetUniform("kViewMatrix", *(const Program::Matrix4x4*)glm::value_ptr(*draw.transform));
+            prog->SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
+            prog->SetUniform("kViewMatrix",
+               *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+
             MaterialClass::RasterState material_raster_state;
             MaterialClass::Environment material_env;
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
@@ -236,10 +250,11 @@ public:
 
         for (const auto& draw : shapes)
         {
+            const auto& kViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
             draw_env.pixel_ratio = mPixelRatio;
             draw_env.proj_matrix = &kProjMatrix;
-            draw_env.view_matrix = draw.transform;
+            draw_env.view_matrix = &kViewMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -250,7 +265,7 @@ public:
             program->SetUniform("kProjectionMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(kProjMatrix));
             program->SetUniform("kViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(*draw.transform));
+                *(const Program::Matrix4x4 *) glm::value_ptr(kViewMatrix));
 
             MaterialClass::RasterState material_raster_state;
             MaterialClass::Environment material_env;
@@ -328,6 +343,11 @@ private:
     glm::vec2 mPixelRatio = {1.0f, 1.0f};
     // current (orthographic) projection matrix.
     glm::mat4 mProjection;
+    // current additional view matrix that gets multiplied
+    // with the draw transforms. convenient for cases when
+    // when everything that is to be drawn needs to get
+    // transformed in some additional way.
+    glm::mat4 mViewMatrix {1.0f};
 };
 
 // static
