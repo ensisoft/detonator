@@ -77,6 +77,10 @@ inline void SetEnabled(QWidget* widget, bool enabled)
     QSignalBlocker s(widget);
     widget->setEnabled(enabled);
 }
+inline void SetEnabled(QAction* action, bool enabled)
+{
+    action->setEnabled(enabled);
+}
 
 template<typename EnumT>
 void PopulateFromEnum(QComboBox* combo, bool clear = true)
@@ -116,36 +120,19 @@ struct ListItemId {
     {}
 };
 
-struct CurrentText {
-    QString text;
-    CurrentText(QString text) : text(text)
-    {}
-    CurrentText(const std::string& text) : text(app::FromUtf8(text))
-    {}
-};
+inline void SetValue(QComboBox* combo, const QString& str)
+{
+    QSignalBlocker s(combo);
+    const auto index = combo->findText(str);
+    combo->setCurrentIndex(index);
+    if (combo->isEditable())
+        combo->setCurrentText(str);
+}
 
 template<typename T>
 void SetValue(QComboBox* combo, T value)
 {
-    QSignalBlocker s(combo);
-    if constexpr (std::is_enum<T>::value)
-    {
-        const std::string name(magic_enum::enum_name(value));
-        const auto index = combo->findText(QString::fromStdString(name));
-        //ASSERT(index != -1);
-        combo->setCurrentIndex(index);
-    }
-    else
-    {
-        const QString& str = app::toString(value);
-        if (combo->isEditable()) {
-            combo->setCurrentText(str);
-        } else {
-            const auto index = combo->findText(str);
-            //ASSERT(index != -1);
-            combo->setCurrentIndex(index);
-        }
-    }
+    SetValue(combo, app::toString(value));
 }
 
 inline void SetValue(QComboBox* combo, const ListItemId& id)
@@ -156,6 +143,9 @@ inline void SetValue(QComboBox* combo, const ListItemId& id)
         const QVariant& data = combo->itemData(i);
         if (data.toString() == id.id) {
             combo->setCurrentIndex(i);
+            if (combo->isEditable()) {
+                combo->setCurrentText(combo->itemText(i));
+            }
             return;
         }
     }
@@ -166,12 +156,11 @@ inline void SetValue(QComboBox* combo, int index)
 {
     QSignalBlocker s(combo);
     combo->setCurrentIndex(index);
-}
-
-inline void SetValue(QComboBox* combo, const CurrentText& text)
-{
-    QSignalBlocker s(combo);
-    combo->setCurrentText(text.text);
+    if (combo->isEditable()) {
+        if (index == -1)
+            combo->clearEditText();
+        else combo->setCurrentText(combo->itemText(index));
+    }
 }
 
 struct ListItem {
