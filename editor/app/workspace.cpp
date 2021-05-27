@@ -1241,6 +1241,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "window_can_resize"       , mSettings.window_can_resize);
     JsonWrite(project, "window_has_border"       , mSettings.window_has_border);
     JsonWrite(project, "window_vsync"            , mSettings.window_vsync);
+    JsonWrite(project, "window_cursor"           , mSettings.window_cursor);
     JsonWrite(project, "ticks_per_second"        , mSettings.ticks_per_second);
     JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
@@ -1327,6 +1328,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "window_can_resize",        &mSettings.window_can_resize);
     JsonReadSafe(project, "window_has_border",        &mSettings.window_has_border);
     JsonReadSafe(project, "window_vsync",             &mSettings.window_vsync);
+    JsonReadSafe(project, "window_cursor",            &mSettings.window_cursor);
     JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
     JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
@@ -2064,10 +2066,12 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["window"], "can_resize", mSettings.window_can_resize);
         base::JsonWrite(json["window"], "has_border", mSettings.window_has_border);
         base::JsonWrite(json["window"], "vsync",      mSettings.window_vsync);
+        base::JsonWrite(json["window"], "cursor",     mSettings.window_cursor);
         if (mSettings.window_mode == ProjectSettings::WindowMode::Windowed)
             base::JsonWrite(json["window"], "set_fullscreen", false);
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
             base::JsonWrite(json["window"], "set_fullscreen", true);
+
 
         base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));

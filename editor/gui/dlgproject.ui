@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>521</width>
+    <width>560</width>
     <height>485</height>
    </rect>
   </property>
@@ -194,14 +194,14 @@
             <item>
              <widget class="QCheckBox" name="chkWndCanResize">
               <property name="text">
-               <string>Allow resize</string>
+               <string>Resizeable</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="chkWndHasBorder">
               <property name="text">
-               <string>Has border</string>
+               <string>Border</string>
               </property>
              </widget>
             </item>
@@ -209,6 +209,13 @@
              <widget class="QCheckBox" name="chkVsync">
               <property name="text">
                <string>VSYNC</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkCursor">
+              <property name="text">
+               <string>Cursor</string>
               </property>
              </widget>
             </item>
@@ -766,6 +773,7 @@
   <tabstop>chkWndCanResize</tabstop>
   <tabstop>chkWndHasBorder</tabstop>
   <tabstop>chkVsync</tabstop>
+  <tabstop>chkCursor</tabstop>
   <tabstop>ticksPerSecond</tabstop>
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>

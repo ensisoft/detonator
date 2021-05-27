@@ -389,12 +389,14 @@ int main(int argc, char* argv[])
         bool window_has_border = true;
         bool window_set_fullscreen = false;
         bool window_vsync = false;
+        bool window_show_cursor = false;
         base::JsonReadSafe(json["window"], "width", &window_width);
         base::JsonReadSafe(json["window"], "height", &window_height);
         base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
         base::JsonReadSafe(json["window"], "has_border", &window_has_border);
         base::JsonReadSafe(json["window"], "set_fullscreen", &window_set_fullscreen);
         base::JsonReadSafe(json["window"], "vsync", &window_vsync);
+        base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
 
         wdk::Window window;
         // makes sure to connect the listener before creating the window
@@ -408,7 +410,7 @@ int main(int argc, char* argv[])
         window.Create(title, window_width, window_height, context->GetVisualID(),
             window_can_resize, window_has_border, true);
         window.SetFullscreen(window_set_fullscreen);
-        window.ShowCursor(false);
+        window.ShowCursor(window_show_cursor);
 
         // Setup context to render in the window.
         context->SetWindowSurface(window);

@@ -58,6 +58,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkWndCanResize, mSettings.window_can_resize);
     SetUIValue(mUI.chkWndHasBorder, mSettings.window_has_border);
     SetUIValue(mUI.chkVsync, mSettings.window_vsync);
+    SetUIValue(mUI.chkCursor, mSettings.window_cursor);
     SetUIValue(mUI.edtAppName, mSettings.application_name);
     SetUIValue(mUI.edtAppVersion, mSettings.application_version);
     SetUIValue(mUI.edtAppLibrary, library);
@@ -88,6 +89,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkWndCanResize, &mSettings.window_can_resize);
     GetUIValue(mUI.chkWndHasBorder, &mSettings.window_has_border);
     GetUIValue(mUI.chkVsync, &mSettings.window_vsync);
+    GetUIValue(mUI.chkCursor, &mSettings.window_cursor);
     GetUIValue(mUI.edtAppName, &mSettings.application_name);
     GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
     GetUIValue(mUI.ticksPerSecond, &mSettings.ticks_per_second);

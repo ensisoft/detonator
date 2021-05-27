@@ -423,6 +423,8 @@ namespace app
             bool window_has_border = true;
             // vsync or not.
             bool window_vsync = false;
+            // whether to use/show the native window system mouse cursor/pointer.
+            bool window_cursor = true;
             // how many times the app ticks per second.
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.
