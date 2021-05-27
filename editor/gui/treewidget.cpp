@@ -331,6 +331,7 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent* mickey)
         if (index >= mItems.size())
             return;
         emit clickEvent(&mItems[index]);
+        viewport()->update();
         return;
     }
 
