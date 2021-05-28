@@ -47,39 +47,28 @@ namespace game
     class RenderTree
     {
     public:
-        // Mutating visitor for visiting nodes in the tree.
-        class Visitor
+        template<typename T>
+        class TVisitor
         {
         public:
+            virtual ~TVisitor() = default;
             // Called when the tree traversal algorithm enters a node.
-            virtual void EnterNode(Element* node) {}
+            virtual void EnterNode(T* node) {}
             // Called when the tree traversal algorithm leaves a node.
-            virtual void LeaveNode(Element* node) {}
+            virtual void LeaveNode(T* node) {}
             // Called to check whether the tree traversal can finish early
             // without visiting the remainder of the nodes. When true is
             // returned the rest of the nodes are skipped and the algorithm
             // returns early. On false the tree traversal continues.
             virtual bool IsDone() const { return false; }
-        protected:
-            ~Visitor() = default;
+        private:
         };
 
+        // Mutating visitor for visiting nodes in the tree.
+        using Visitor = TVisitor<Element>;
         // Non-mutating visitor for visiting nodes in the tree.
-        class ConstVisitor
-        {
-        public:
-            // Called when the tree traversal algorithm enters a node.
-            virtual void EnterNode(const Element* node) {}
-            // Called when the tree traversal algorithm leaves a node.
-            virtual void LeaveNode(const Element* node) {}
-            // Called to check whether the tree traversal can finish early
-            // without visiting the remainder of the nodes. When true is
-            // returned the rest of the nodes are skipped and the algorithm
-            // returns early. On false the tree traversal continues.
-            virtual bool IsDone() const { return false; }
-        protected:
-            ~ConstVisitor() = default;
-        };
+        using ConstVisitor = TVisitor<const Element>;
+
         // Clear the tree. After this the tree is empty
         // and contains no nodes.
         void Clear()
@@ -89,67 +78,18 @@ namespace game
         }
 
         void PreOrderTraverse(Visitor& visitor, Element* parent = nullptr)
-        {
-            visitor.EnterNode(parent);
-            auto it = mChildren.find(parent);
-            if (it != mChildren.end())
-            {
-                const auto& children = it->second;
-                for (auto *child : children)
-                {
-                    PreOrderTraverse(visitor, const_cast<Element*>(child));
-                    if (visitor.IsDone())
-                        break;
-                }
-            }
-            visitor.LeaveNode(parent);
-        }
+        { PreOrderTraverse<Element>(visitor, parent); }
+
         void PreOrderTraverse(ConstVisitor& visitor, const Element* parent = nullptr) const
-        {
-            visitor.EnterNode(parent);
-            auto it = mChildren.find(parent);
-            if (it != mChildren.end())
-            {
-                const auto& children = it->second;
-                for (const auto *child : children)
-                {
-                    PreOrderTraverse(visitor, child);
-                    if (visitor.IsDone())
-                        break;
-                }
-            }
-            visitor.LeaveNode(parent);
-        }
+        { PreOrderTraverse<const Element>(visitor, parent); }
+
         template<typename Function>
         void PreOrderTraverseForEach(Function callback, Element* parent = nullptr)
-        {
-            class PrivateVisitor : public Visitor {
-            public:
-                PrivateVisitor(Function callback) : mCallback(std::move(callback))
-                {}
-                virtual void EnterNode(Element* node) override
-                { mCallback(node); }
-            private:
-                Function mCallback;
-            };
-            PrivateVisitor visitor(std::move(callback));
-            PreOrderTraverse(visitor, parent);
-        }
+        { PreOrderTraverseForEach<Element>(std::move(callback), parent); }
+
         template<typename Function>
         void PreOrderTraverseForEach(Function callback, const Element* parent = nullptr) const
-        {
-            class PrivateVisitor : public ConstVisitor {
-            public:
-                PrivateVisitor(Function callback) : mCallback(std::move(callback))
-                {}
-                virtual void EnterNode(const Element* node) override
-                { mCallback(node); }
-            private:
-                Function mCallback;
-            };
-            PrivateVisitor visitor(std::move(callback));
-            PreOrderTraverse(visitor, parent);
-        }
+        { PreOrderTraverseForEach<const Element>(std::move(callback), parent); }
 
         // Convenience operation for moving a child node to a new parent.
         void ReparentChild(const Element* parent, const Element* child)
@@ -316,6 +256,38 @@ namespace game
             {
                 FromJson(js.value(), from_json, node);
             }
+        }
+        template<typename T>
+        void PreOrderTraverse(TVisitor<T>& visitor, T* parent = nullptr) const
+        {
+            visitor.EnterNode(parent);
+            auto it = mChildren.find(parent);
+            if (it != mChildren.end())
+            {
+                const auto& children = it->second;
+                for (auto *child : children)
+                {
+                    PreOrderTraverse(visitor, const_cast<Element*>(child));
+                    if (visitor.IsDone())
+                        break;
+                }
+            }
+            visitor.LeaveNode(parent);
+        }
+        template<typename T, typename Function>
+        void PreOrderTraverseForEach(Function callback, T* parent = nullptr) const
+        {
+            class PrivateVisitor : public TVisitor<T> {
+            public:
+                PrivateVisitor(Function callback) : mCallback(std::move(callback))
+                {}
+                virtual void EnterNode(T* node) override
+                { mCallback(node); }
+            private:
+                Function mCallback;
+            };
+            PrivateVisitor visitor(std::move(callback));
+            PreOrderTraverse(visitor, parent);
         }
     private:
         using ChildList = std::vector<const Element*>;

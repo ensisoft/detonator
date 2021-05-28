@@ -340,113 +340,67 @@ Node* DuplicateNode(RenderTree<Node>& tree, const Node* node, std::vector<std::u
     return (*clones)[first].get();
 }
 
-
-
-template<typename Node>
-void CoarseHitTest(RenderTree<Node>& tree, float x, float y,
-                   std::vector<Node*>* hits,
-                   std::vector<glm::vec2>* hitbox_positions)
-{
-    class Visitor : public RenderTree<Node>::Visitor {
+namespace detail {
+    template<typename Node, typename PtrT>
+    class HitTestVisitor : public RenderTree<Node>::template TVisitor<PtrT> {
     public:
-        Visitor(const glm::vec4& point, std::vector<Node*>* hits, std::vector<glm::vec2>* boxes)
-                : mHitPoint(point)
-                , mHits(hits)
-                , mBoxes(boxes)
+        HitTestVisitor(const glm::vec4& point, std::vector<PtrT*>* hits, std::vector<glm::vec2>* boxes)
+            : mHitPoint(point)
+            , mHits(hits)
+            , mBoxes(boxes)
         {}
-        virtual void EnterNode(Node* node) override
+        virtual void EnterNode(PtrT* node) override
         {
             if (!node)
                 return;
-
             mTransform.Push(node->GetNodeTransform());
             // using the model transform will put the coordinates in the drawable coordinate
             // space, i.e. normalized coordinates.
             mTransform.Push(node->GetModelTransform());
 
-            const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-            const auto& hitpoint_in_node = animation_to_node * mHitPoint;
-
-            if (hitpoint_in_node.x >= 0.0f && hitpoint_in_node.x < 1.0f &&
-                hitpoint_in_node.y >= 0.0f && hitpoint_in_node.y < 1.0f)
+            const auto& world_to_node = glm::inverse(mTransform.GetAsMatrix());
+            const auto& point_in_node = world_to_node * mHitPoint;
+            if (point_in_node.x >= 0.0f && point_in_node.x < 1.0f &&
+                point_in_node.y >= 0.0f && point_in_node.y < 1.0f)
             {
                 mHits->push_back(node);
                 if (mBoxes)
                 {
                     const auto& size = node->GetSize();
-                    mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
+                    mBoxes->push_back(glm::vec2(point_in_node.x * size.x,
+                                                point_in_node.y * size.y));
                 }
             }
             mTransform.Pop();
         }
-        virtual void LeaveNode(Node* node) override
+        virtual void LeaveNode(PtrT* node) override
         {
             if (!node)
                 return;
-
             mTransform.Pop();
         }
     private:
         const glm::vec4 mHitPoint;
         Transform mTransform;
-        std::vector<Node*>* mHits = nullptr;
+        std::vector<PtrT*>* mHits = nullptr;
         std::vector<glm::vec2>* mBoxes = nullptr;
     };
+} // detail
 
-    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
+template<typename Node>
+void CoarseHitTest(RenderTree<Node>& tree, float x, float y,
+                   std::vector<Node*>* hit_nodes,
+                   std::vector<glm::vec2>* hit_node_points)
+{
+    detail::HitTestVisitor<Node, Node> visitor(glm::vec4(x, y, 1.0f, 1.0), hit_nodes, hit_node_points);
     tree.PreOrderTraverse(visitor);
 }
 template<typename Node>
 void CoarseHitTest(const RenderTree<Node>& tree, float x, float y,
-                   std::vector<const Node*>* hits,
-                   std::vector<glm::vec2>* hitbox_positions)
+                   std::vector<const Node*>* hit_nodes,
+                   std::vector<glm::vec2>* hit_node_points)
 {
-    class Visitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        Visitor(const glm::vec4& point, std::vector<const Node*>* hits, std::vector<glm::vec2>* boxes)
-                : mHitPoint(point)
-                , mHits(hits)
-                , mBoxes(boxes)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Push(node->GetNodeTransform());
-            // using the model transform will put the coordinates in the drawable coordinate
-            // space, i.e. normalized coordinates.
-            mTransform.Push(node->GetModelTransform());
-
-            const auto& animation_to_node = glm::inverse(mTransform.GetAsMatrix());
-            const auto& hitpoint_in_node = animation_to_node * mHitPoint;
-
-            if (hitpoint_in_node.x >= 0.0f && hitpoint_in_node.x < 1.0f &&
-                hitpoint_in_node.y >= 0.0f && hitpoint_in_node.y < 1.0f)
-            {
-                mHits->push_back(node);
-                if (mBoxes)
-                {
-                    const auto& size = node->GetSize();
-                    mBoxes->push_back(glm::vec2(hitpoint_in_node.x * size.x, hitpoint_in_node.y * size.y));
-                }
-            }
-            mTransform.Pop();
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!node)
-                return;
-
-            mTransform.Pop();
-        }
-    private:
-        const glm::vec4 mHitPoint;
-        Transform mTransform;
-        std::vector<const Node*>* mHits = nullptr;
-        std::vector<glm::vec2>* mBoxes = nullptr;
-    };
-    Visitor visitor(glm::vec4(x, y, 1.0f, 1.0f), hits, hitbox_positions);
+    detail::HitTestVisitor<Node, const Node> visitor(glm::vec4(x, y, 1.0f, 1.0), hit_nodes, hit_node_points);
     tree.PreOrderTraverse(visitor);
 }
 
