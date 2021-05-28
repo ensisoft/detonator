@@ -281,6 +281,7 @@ add_executable(Editor
     editor/gui/widgetstylewidget.h
     editor/gui/widgetstylewidget.ui
     editor/gui/widgetstylewidget.cpp
+    editor/gui/utility.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
     third_party/QSourceHighlight/languagedata.cpp

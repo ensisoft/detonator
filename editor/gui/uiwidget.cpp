@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QFontDatabase>
 #  include <QMessageBox>
 #  include <QFileDialog>
 #  include <QFileInfo>
@@ -342,7 +341,8 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
 
-    ListStyles();
+    PopulateUIStyles(mUI.baseStyle);
+
     LoadStyle("app://ui/default.json");
     RebuildCombos();
     setWindowTitle("My UI");
@@ -1659,22 +1659,6 @@ bool UIWidget::LoadStyle(const std::string& name)
     return true;
 }
 
-void UIWidget::ListStyles()
-{
-    QStringList filters;
-    filters << "*.json";
-    const auto& appdir = QCoreApplication::applicationDirPath();
-    const auto& styledir = app::JoinPath(appdir, "ui");
-    QDir dir;
-    dir.setPath(styledir);
-    dir.setNameFilters(filters);
-    const QStringList& style_files = dir.entryList();
-    for (const auto& style_file : style_files)
-    {
-        const QFileInfo info(style_file);
-        mUI.baseStyle->addItem("app://ui/" + info.fileName());
-    }
-}
 
 bool UIWidget::IsRootWidget(const uik::Widget* widget) const
 {

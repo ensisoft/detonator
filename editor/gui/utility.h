@@ -847,4 +847,8 @@ inline bool MustHaveNumber(QComboBox* box)
     return ok;
 }
 
+void PopulateFontNames(QComboBox* cmb);
+void PopulateFontSizes(QComboBox* cmb);
+void PopulateUIStyles(QComboBox* cmb);
+
 } // namespace

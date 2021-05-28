@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QFontDatabase>
 #  include <QPoint>
 #  include <QMouseEvent>
 #  include <QMessageBox>
@@ -363,23 +362,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
 
-    QStringList filters;
-    filters << "*.ttf" << "*.otf";
-    const auto& appdir  = QCoreApplication::applicationDirPath();
-    const auto& fontdir = app::JoinPath(appdir, "fonts");
-    QDir dir;
-    dir.setPath(fontdir);
-    dir.setNameFilters(filters);
-    const QStringList& font_files = dir.entryList();
-    for (const auto& font_file : font_files)
-    {
-        const QFileInfo info(font_file);
-        mUI.tiFontName->addItem("app://fonts/" + info.fileName());
-    }
-
-    const auto font_sizes = QFontDatabase::standardSizes();
-    for (int size : font_sizes)
-        mUI.tiFontSize->addItem(QString::number(size));
+    PopulateFontNames(mUI.tiFontName);
+    PopulateFontSizes(mUI.tiFontSize);
 
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.entityName, mState.entity->GetName());

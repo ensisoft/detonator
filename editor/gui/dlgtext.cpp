@@ -29,11 +29,11 @@
 #  include <QFileInfo>
 #include "warnpop.h"
 
-#include "editor/gui/utility.h"
 #include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
-#include "dlgtext.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/dlgtext.h"
 
 namespace gui
 {
@@ -61,24 +61,12 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
         mTimer.start();
     };
 
-    QStringList filters;
-    filters << "*.ttf" << "*.otf";
-    const auto& appdir  = QCoreApplication::applicationDirPath();
-    const auto& fontdir = app::JoinPath(appdir, "fonts");
-    QDir dir;
-    dir.setPath(fontdir);
-    dir.setNameFilters(filters);
-    const QStringList& files = dir.entryList();
-    for (const auto& file : files) {
-        const QFileInfo info(file);
-        mUI.cmbFont->addItem("app://fonts/" + info.fileName());
-    }
+    PopulateFontNames(mUI.cmbFont);
 
     if (!text.IsEmpty())
     {
         const auto& text_and_style = text.GetText(0);
-        //SetValue(mUI.cmbFont, text_and_style.font);
-        mUI.cmbFont->setCurrentText(app::FromUtf8(text_and_style.font));
+        SetValue(mUI.cmbFont, text_and_style.font);
         SetValue(mUI.fontSize, text_and_style.fontsize);
         SetValue(mUI.underline, text_and_style.underline);
         SetValue(mUI.lineHeight, text_and_style.lineheight);

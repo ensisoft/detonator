@@ -125,7 +125,6 @@ namespace gui
         uik::Widget* GetCurrentWidget();
         const uik::Widget* GetCurrentWidget() const;
         bool LoadStyle(const std::string& name);
-        void ListStyles();
         bool IsRootWidget(const uik::Widget* widget) const;
         void UpdateDeletedResourceReferences();
     private:

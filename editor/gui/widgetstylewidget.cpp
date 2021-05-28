@@ -25,7 +25,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QFontDatabase>
 #  include <QFileDialog>
 #  include <QFileInfo>
 #  include <QStringList>
@@ -47,23 +46,8 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
     PopulateFromEnum<game::UIStyle::VerticalTextAlign>(mUI.widgetTextVAlign);
     PopulateFromEnum<game::UIStyle::HorizontalTextAlign>(mUI.widgetTextHAlign);
 
-    QStringList filters;
-    filters << "*.ttf" << "*.otf";
-    const auto& appdir = QCoreApplication::applicationDirPath();
-    const auto& fontdir = app::JoinPath(appdir , "fonts");
-    QDir dir;
-    dir.setPath(fontdir);
-    dir.setNameFilters(filters);
-    const QStringList& font_files = dir.entryList();
-    for (const auto& font_file : font_files)
-    {
-        const QFileInfo info(font_file);
-        mUI.widgetFontName->addItem("app://fonts/" + info.fileName());
-    }
-
-    const auto font_sizes = QFontDatabase::standardSizes();
-    for (int size : font_sizes)
-        mUI.widgetFontSize->addItem(QString::number(size));
+    PopulateFontNames(mUI.widgetFontName);
+    PopulateFontSizes(mUI.widgetFontSize);
 }
 
 void WidgetStyleWidget::RebuildMaterialCombos(const std::vector<ListItem>& list)
