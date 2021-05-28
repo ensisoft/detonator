@@ -52,17 +52,17 @@ namespace gfx
             // Use the nearest texture element from the nearest
             // mipmap level
             Mipmap,
-            // Use mips (precomputed) minified textures.
+            // Use mips (precomputed) minified textures).
             // Use the weighted average of the four texture
             // elements that are sampled from the closest mipmap level.
             Bilinear,
-            // Use mips (precomputd minified textures.
-            // Use the weigted average of the four texture
+            // Use mips (precomputed minified textures).
+            // Use the weighted average of the four texture
             // elements that are sampled from the two nearest mipmap levels.
             Trilinear
         };
 
-        // Texture magnifying filter is used whenver the
+        // Texture magnifying filter is used whenever the
         // pixel being textured maps to to an area less than
         // one texture element.
         enum class MagFilter {

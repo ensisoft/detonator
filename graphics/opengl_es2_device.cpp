@@ -646,12 +646,21 @@ private:
 
 private:
     class TextureImpl;
+    // cached texture unit state. used to omit texture unit
+    // state changes when not needed.
     struct TextureUnit {
+        // the texture currently bound to the unit.
         const TextureImpl* texture = nullptr;
-        Texture::MinFilter min_filter = Texture::MinFilter::Nearest;
-        Texture::MagFilter mag_filter = Texture::MagFilter::Nearest;
-        Texture::Wrapping  wrap_x     = Texture::Wrapping::Clamp;
-        Texture::Wrapping  wrap_y     = Texture::Wrapping::Clamp;
+        // the unit's texture filtering setting.
+        // initialized to GL_NONE just to make sure that the first
+        // time the unit is used the settings are applied.
+        GLenum min_filter = GL_NONE;
+        GLenum mag_filter = GL_NONE;
+        // the unit's texture coordinate wrapping settings.
+        // initialized to GL_NONE just to make sure that the first
+        // time the unit is used the settings are applied.
+        GLenum wrap_x = GL_NONE;
+        GLenum wrap_y = GL_NONE;
     };
 
     using TextureUnits = std::vector<TextureUnit>;
@@ -1214,19 +1223,7 @@ private:
                 }
                 ASSERT(unit < units.size());
 
-                // if nothing has changed then skip all of the work
-                if (units[unit].texture    == texture &&
-                    units[unit].min_filter == texture->GetMinFilter() &&
-                    units[unit].mag_filter == texture->GetMagFilter() &&
-                    units[unit].wrap_x     == texture->GetWrapX() &&
-                    units[unit].wrap_y     == texture->GetWrapY())
-                {
-                    // set the teture unit to the sampler
-                    GL_CALL(glUniform1i(mTextures[i].location, unit));
-                    continue;
-                }
-
-                GLuint texture_name = texture->GetName();
+                // map the texture filter to a GL setting.
                 GLenum texture_min_filter = GL_NONE;
                 GLenum texture_mag_filter = GL_NONE;
                 switch (texture->GetMinFilter())
@@ -1262,30 +1259,45 @@ private:
                         texture_mag_filter = GL_LINEAR;
                         break;
                 }
+                ASSERT(texture_min_filter != GL_NONE);
+                ASSERT(texture_mag_filter != GL_NONE);
+
+                const GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+                const GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+                // if nothing has changed then skip all of the work
+                if (units[unit].texture    == texture &&
+                    units[unit].min_filter == texture_min_filter &&
+                    units[unit].mag_filter == texture_mag_filter &&
+                    units[unit].wrap_x     == texture_wrap_x &&
+                    units[unit].wrap_y     == texture_wrap_y)
+                {
+                    // set the texture unit to the sampler
+                    GL_CALL(glUniform1i(mTextures[i].location, unit));
+                    continue;
+                }
 
                 // set all this fucking state here, so we can easily track/understand
                 // which unit the texture is bound to.
+                const GLuint texture_name = texture->GetName();
 
                 // // first select the desired texture unit.
                 GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
                 // bind the 2D texture.
                 GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
                 // set texture parameters, wrapping and min/mag filters.
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                    texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                    texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
                 GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
                 GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
-                // set the teture unit to the sampler
+                // set the texture unit to the sampler
                 GL_CALL(glUniform1i(mTextures[i].location, unit));
 
-                // store current binding.
-                units[unit].texture = texture;
-                units[unit].min_filter = texture->GetMinFilter();
-                units[unit].mag_filter = texture->GetMagFilter();
-                units[unit].wrap_x = texture->GetWrapX();
-                units[unit].wrap_y = texture->GetWrapY();
+                // store current binding and the sampler state.
+                units[unit].texture    = texture;
+                units[unit].min_filter = texture_min_filter;
+                units[unit].mag_filter = texture_mag_filter;
+                units[unit].wrap_x     = texture_wrap_x;
+                units[unit].wrap_y     = texture_wrap_y;
             }
         }
         GLuint GetName() const
