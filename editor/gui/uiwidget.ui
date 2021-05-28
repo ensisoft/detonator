@@ -840,7 +840,7 @@
     <string>Start play simulation of the window</string>
    </property>
    <property name="shortcut">
-    <string>Return</string>
+    <string>F5</string>
    </property>
   </action>
   <action name="actionStop">

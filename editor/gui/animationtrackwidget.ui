@@ -1230,7 +1230,7 @@
     <string>Play</string>
    </property>
    <property name="shortcut">
-    <string>Return</string>
+    <string>F5</string>
    </property>
   </action>
   <action name="actionStop">
@@ -1241,6 +1241,9 @@
    <property name="text">
     <string>Stop</string>
    </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
   </action>
   <action name="actionPause">
    <property name="icon">
@@ -1249,6 +1252,9 @@
    </property>
    <property name="text">
     <string>Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
    </property>
   </action>
   <action name="actionSave">
