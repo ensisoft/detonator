@@ -203,7 +203,8 @@ namespace gui
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
         void UncheckPlacementActions();
-        void UpdateCurrentNodePosition(float dx, float dy);
+        void TranslateCamera(float dx, float dy);
+        void TranslateCurrentNode(float dx, float dy);
         void UpdateCurrentNodeProperties();
         void RebuildMenus();
         void RebuildCombos();

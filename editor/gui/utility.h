@@ -33,6 +33,7 @@
 #  include <QFileInfo>
 #  include <QPoint>
 #  include <color_selector.hpp>
+#  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -52,6 +53,11 @@
 
 namespace gui
 {
+
+inline glm::vec4 ToVec4(const QPoint& point)
+{ return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
+inline glm::vec2 ToVec2(const QPoint& point)
+{ return glm::vec2(point.x(), point.y()); }
 
 inline gfx::Color4f ToGfx(const QColor& color)
 {

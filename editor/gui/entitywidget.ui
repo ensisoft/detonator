@@ -2261,6 +2261,9 @@
    </property>
   </action>
   <action name="actionNewSemiCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/semi_circle.png</normaloff>:/32x32_ico_png/semi_circle.png</iconset>

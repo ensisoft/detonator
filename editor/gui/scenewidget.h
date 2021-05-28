@@ -108,7 +108,6 @@ namespace gui
         void on_nodeScaleX_valueChanged(double value);
         void on_nodeScaleY_valueChanged(double value);
         void on_nodeRotation_valueChanged(double value);
-
         void on_btnEntityParams_clicked();
         void on_btnNodePlus90_clicked();
         void on_btnNodeMinus90_clicked();
@@ -132,7 +131,8 @@ namespace gui
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
         void UncheckPlacementActions();
-        void UpdateCurrentNodePosition(float dx, float dy);
+        void TranslateCurrentNode(float dx, float dy);
+        void TranslateCamera(float dx, float dy);
         void RebuildMenus();
         void RebuildCombos();
         void UpdateResourceReferences();

@@ -60,11 +60,6 @@
 #include "graphics/types.h"
 #include "engine/treeop.h"
 
-namespace {
-    inline glm::vec4 ToVec4(const QPoint& point)
-    { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
-} // namespace
-
 namespace gui
 {
 
@@ -215,8 +210,6 @@ public:
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
             return false;
-        else if (mCancelled)
-            return true;
 
         bool snap = mSnapToGrid;
 
@@ -251,17 +244,6 @@ public:
         // in rapid succession.
         return false;
     }
-    virtual bool KeyPress(QKeyEvent* key) override
-    {
-        if (key->key() == Qt::Key_Escape)
-        {
-            mCancelled = true;
-            return true;
-        }
-        return false;
-    }
-    virtual bool IsCancelled() const override
-    { return mCancelled; }
     void SelectNextEntity()
     {
         mCurrentEntityIdIndex = (mCurrentEntityIdIndex + 1) % mEntityIds.size();
@@ -298,8 +280,6 @@ private:
     glm::vec4 mWorldPos;
     // entity class for the item we're going to add to scene.
     std::shared_ptr<const game::EntityClass> mClass;
-    // true if the tool was cancelled.
-    bool mCancelled = false;
     // true if we want the x,y coords to be aligned on grid size units.
     bool mSnapToGrid = false;
     // the grid size in scene units to align the object onto.
@@ -364,6 +344,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 
     RebuildMenus();
     RebuildCombos();
+    DisplayCurrentNodeProperties();
 }
 
 SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -563,6 +544,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
 
         mState.scene.DeleteNode(node);
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 void SceneWidget::Copy(Clipboard& clipboard) const
@@ -836,6 +818,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
         mState.scene.DeleteNode(node);
 
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 
@@ -1134,16 +1117,6 @@ void SceneWidget::PlaceNewEntity()
 
 void SceneWidget::TreeCurrentNodeChangedEvent()
 {
-    if (const auto* node = GetCurrentNode())
-    {
-        SetEnabled(mUI.nodeProperties, true);
-        SetEnabled(mUI.nodeTransform, true);
-    }
-    else
-    {
-        SetEnabled(mUI.nodeProperties, false);
-        SetEnabled(mUI.nodeTransform, false);
-    }
     DisplayCurrentNodeProperties();
 }
 void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
@@ -1270,16 +1243,16 @@ void SceneWidget::MouseMove(QMouseEvent* mickey)
     if (mCurrentTool)
     {
         gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
         view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-        mCurrentTool->MouseMove(mickey, view);
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        mCurrentTool->MouseMove(mickey , view);
+        // update the properties that might have changed as the result of application
+        // of the current tool.
+        DisplayCurrentCameraLocation();
+        DisplayCurrentNodeProperties();
     }
-    // update the properties that might have changed as the result of application
-    // of the current tool.
-    DisplayCurrentCameraLocation();
-    DisplayCurrentNodeProperties();
 }
 void SceneWidget::MousePress(QMouseEvent* mickey)
 {
@@ -1376,44 +1349,44 @@ void SceneWidget::MouseWheel(QWheelEvent* wheel)
 
 bool SceneWidget::KeyPress(QKeyEvent* key)
 {
-    if (mCurrentTool)
-    {
-        const auto ret = mCurrentTool->KeyPress(key);
-        if (mCurrentTool->IsCancelled())
-            mCurrentTool.reset();
-        return ret;
-    }
+    // handle key press events coming from the gfx widget
 
-    switch (key->key()) {
+    if (mCurrentTool && mCurrentTool->KeyPress(key))
+        return true;
+
+    switch (key->key())
+    {
         case Qt::Key_Delete:
             on_actionNodeDelete_triggered();
             break;
         case Qt::Key_W:
-            mState.camera_offset_y += 20.0f;
+            TranslateCamera(0.0f, 20.0f);
             break;
         case Qt::Key_S:
-            mState.camera_offset_y -= 20.0f;
+            TranslateCamera(0.0f, -20.0f);
             break;
         case Qt::Key_A:
-            mState.camera_offset_x += 20.0f;
+            TranslateCamera(20.0f, 0.0);
             break;
         case Qt::Key_D:
-            mState.camera_offset_x -= 20.0f;
+            TranslateCamera(-20.0f, 0.0f);
             break;
         case Qt::Key_Left:
-            UpdateCurrentNodePosition(-20.0f, 0.0f);
+            TranslateCurrentNode(-20.0f, 0.0f);
             break;
         case Qt::Key_Right:
-            UpdateCurrentNodePosition(20.0f, 0.0f);
+            TranslateCurrentNode(20.0f, 0.0f);
             break;
         case Qt::Key_Up:
-            UpdateCurrentNodePosition(0.0f, -20.0f);
+            TranslateCurrentNode(0.0f, -20.0f);
             break;
         case Qt::Key_Down:
-            UpdateCurrentNodePosition(0.0f, 20.0f);
+            TranslateCurrentNode(0.0f, 20.0f);
             break;
         case Qt::Key_Escape:
-            mUI.tree->ClearSelection();
+            if (mCurrentTool)
+                mCurrentTool.reset();
+            else mUI.tree->ClearSelection();
             break;
         default:
             return false;
@@ -1436,8 +1409,14 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetList(mUI.nodeLink, QStringList());
     SetValue(mUI.nodeLink, QString(""));
 
+    SetEnabled(mUI.nodeProperties, false);
+    SetEnabled(mUI.nodeTransform, false);
+
     if (const auto* node = GetCurrentNode())
     {
+        SetEnabled(mUI.nodeProperties, true);
+        SetEnabled(mUI.nodeTransform, true);
+
         const auto& translate = node->GetTranslation();
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetId());
@@ -1493,7 +1472,7 @@ void SceneWidget::UncheckPlacementActions()
 
 }
 
-void SceneWidget::UpdateCurrentNodePosition(float dx, float dy)
+void SceneWidget::TranslateCurrentNode(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1501,7 +1480,16 @@ void SceneWidget::UpdateCurrentNodePosition(float dx, float dy)
         pos.x += dx;
         pos.y += dy;
         node->SetTranslation(pos);
+        SetValue(mUI.nodeTranslateX, pos.x);
+        SetValue(mUI.nodeTranslateY, pos.y);
     }
+}
+
+void SceneWidget::TranslateCamera(float dx, float dy)
+{
+    mState.camera_offset_x += dx;
+    mState.camera_offset_y += dy;
+    DisplayCurrentCameraLocation();
 }
 
 void SceneWidget::RebuildMenus()

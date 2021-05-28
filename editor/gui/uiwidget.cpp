@@ -53,11 +53,6 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgmaterial.h"
 
-namespace {
-    inline glm::vec4 ToVec4(const QPoint& point)
-    { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
-} // namespace
-
 namespace gui
 {
 class UIWidget::TreeModel : public TreeWidget::TreeModel
@@ -141,8 +136,6 @@ public:
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
             return false;
-        else  if (mCancelled)
-            return true;
 
         if (mickey->modifiers() & Qt::ControlModifier)
             mSnapGrid = !mSnapGrid;
@@ -171,17 +164,6 @@ public:
         mState.tree->SelectItemById(app::FromUtf8(child->GetId()));
         return true;
     }
-    virtual bool KeyPress(QKeyEvent* key) override
-    {
-        if (key->key() == Qt::Key_Escape)
-        {
-            mCancelled = true;
-            return true;
-        }
-        return false;
-    }
-    virtual bool IsCancelled() const override
-    { return mCancelled; }
 private:
     std::string CreateName() const
     {
@@ -193,7 +175,6 @@ private:
         return base::FormatString("%1_%2", mWidget->GetType(), count);
     }
 private:
-    bool mCancelled = false;
     UIWidget::State& mState;
     std::unique_ptr<uik::Widget> mWidget;
     glm::vec4 mWidgetPos;
@@ -306,7 +287,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onKeyPress     = std::bind(&UIWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onZoomIn       = std::bind(&UIWidget::ZoomIn, this);
     mUI.widget->onZoomOut      = std::bind(&UIWidget::ZoomOut, this);
-    mUI.widget->onPaintScene = std::bind(&UIWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onPaintScene   = std::bind(&UIWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onInitScene    = [this](unsigned width, unsigned height) {
         if (!mCameraWasLoaded) {
             on_btnResetTransform_clicked();
@@ -528,6 +509,7 @@ void UIWidget::Cut(Clipboard& clipboard)
 
         mState.window.DeleteWidget(widget);
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 void UIWidget::Copy(Clipboard& clipboard)  const
@@ -876,6 +858,7 @@ void UIWidget::on_actionWidgetDelete_triggered()
 
         mState.window.DeleteWidget(widget);
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 void UIWidget::on_actionWidgetDuplicate_triggered()
@@ -1339,30 +1322,8 @@ void UIWidget::MouseDoubleClick(QMouseEvent* mickey)
 
 bool UIWidget::KeyPress(QKeyEvent* key)
 {
-    // if we're playing then pass the key presses
-    // to the window or back out on Esc.
-    if (mPlayState == PlayState::Playing)
-    {
-        if (key->key() == Qt::Key_Escape)
-        {
-            on_actionStop_triggered();
-        }
-        else
-        {
-            // todo: pass the keyboard even to the window.
-        }
+    if (mCurrentTool && mCurrentTool->KeyPress(key))
         return true;
-    }
-
-    // If the current tool is being employed then pass the keypress
-    // to the tool in case it reacts to it, or cancel the tool on Esc.
-    if (mCurrentTool)
-    {
-        if (key->key() == Qt::Key_Escape)
-            mCurrentTool.reset();
-        else mCurrentTool->KeyPress(key);
-        return true;
-    }
 
     // Handle key press
     switch (key->key())
@@ -1371,39 +1332,34 @@ bool UIWidget::KeyPress(QKeyEvent* key)
             on_actionWidgetDelete_triggered();
             break;
         case Qt::Key_W:
-            mState.camera_offset_y += 20.0f;
-            DisplayCurrentCameraLocation();
+            TranslateCamera(0.0f, 20.0f);
             break;
         case Qt::Key_S:
-            mState.camera_offset_y -= 20.0f;
-            DisplayCurrentCameraLocation();
+            TranslateCamera(0.0f, -20.0f);
             break;
         case Qt::Key_A:
-            mState.camera_offset_x += 20.0f;
-            DisplayCurrentCameraLocation();
+            TranslateCamera(20.0f, 0.0f);
             break;
         case Qt::Key_D:
-            mState.camera_offset_x -= 20.0f;
-            DisplayCurrentCameraLocation();
+            TranslateCamera(-20.0f, 0.0f);
             break;
         case Qt::Key_Left:
-            UpdateCurrentWidgetPosition(-20.0f, 0.0f);
-            DisplayCurrentWidgetProperties();
+            TranslateCurrentWidget(-20.0f, 0.0f);
             break;
         case Qt::Key_Right:
-            UpdateCurrentWidgetPosition(20.0f, 0.0f);
-            DisplayCurrentWidgetProperties();
+            TranslateCurrentWidget(20.0f, 0.0f);
             break;
         case Qt::Key_Up:
-            UpdateCurrentWidgetPosition(0.0f, -20.0f);
-            DisplayCurrentWidgetProperties();
+            TranslateCurrentWidget(0.0f, -20.0f);
             break;
         case Qt::Key_Down:
-            UpdateCurrentWidgetPosition(0.0f, 20.0f);
-            DisplayCurrentWidgetProperties();
+            TranslateCurrentWidget(0.0f, 20.0f);
             break;
         case Qt::Key_Escape:
-            mUI.tree->ClearSelection();
+            if (mCurrentTool)
+                mCurrentTool.reset();
+            else mUI.tree->ClearSelection();
+            break;
         default:
             return false;
     }
@@ -1441,11 +1397,21 @@ void UIWidget::UpdateCurrentWidgetProperties()
     }
 }
 
-void UIWidget::UpdateCurrentWidgetPosition(float dx, float dy)
+void UIWidget::TranslateCamera(float dx, float dy)
+{
+    mState.camera_offset_x += dx;
+    mState.camera_offset_y += dy;
+    DisplayCurrentCameraLocation();
+}
+
+void UIWidget::TranslateCurrentWidget(float dx, float dy)
 {
     if (auto* widget = GetCurrentWidget())
     {
         widget->Translate(dx, dy);
+        const auto& pos = widget->GetPosition();
+        SetValue(mUI.widgetXPos, pos.GetX());
+        SetValue(mUI.widgetYPos, pos.GetY());
     }
 }
 

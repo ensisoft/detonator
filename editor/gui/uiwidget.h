@@ -118,7 +118,8 @@ namespace gui
         void MouseDoubleClick(QMouseEvent* mickey);
         bool KeyPress(QKeyEvent* key);
         void UpdateCurrentWidgetProperties();
-        void UpdateCurrentWidgetPosition(float dx, float dy);
+        void TranslateCamera(float dx, float dy);
+        void TranslateCurrentWidget(float dx, float dy);
         void DisplayCurrentWidgetProperties();
         void DisplayCurrentCameraLocation();
         void RebuildCombos();

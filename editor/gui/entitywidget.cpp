@@ -66,11 +66,6 @@
 #include "graphics/types.h"
 #include "engine/treeop.h"
 
-namespace {
-    inline glm::vec4 ToVec4(const QPoint& point)
-    { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
-} // namespace
-
 namespace gui
 {
 
@@ -377,6 +372,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     RebuildCombos();
 
     RegisterEntityWidget(this);
+    DisplayCurrentNodeProperties();
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -640,6 +636,7 @@ void EntityWidget::Cut(Clipboard& clipboard)
 
         mState.entity->DeleteNode(node);
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 void EntityWidget::Copy(Clipboard& clipboard) const
@@ -1072,6 +1069,7 @@ void EntityWidget::on_actionNodeDelete_triggered()
         mState.entity->DeleteNode(node);
 
         mUI.tree->Rebuild();
+        mUI.tree->ClearSelection();
     }
 }
 void EntityWidget::on_actionNodeMoveUpLayer_triggered()
@@ -1833,18 +1831,6 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
 
 void EntityWidget::TreeCurrentNodeChangedEvent()
 {
-    if (const auto* node = GetCurrentNode())
-    {
-        SetEnabled(mUI.nodeProperties, true);
-        SetEnabled(mUI.nodeTransform, true);
-        SetEnabled(mUI.nodeItems, true);
-    }
-    else
-    {
-        SetEnabled(mUI.nodeProperties, false);
-        SetEnabled(mUI.nodeTransform, false);
-        SetEnabled(mUI.nodeItems, false);
-    }
     DisplayCurrentNodeProperties();
 }
 void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
@@ -2023,16 +2009,17 @@ void EntityWidget::MouseMove(QMouseEvent* mickey)
     if (mCurrentTool)
     {
         gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
         view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-        mCurrentTool->MouseMove(mickey, view);
+        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
+        mCurrentTool->MouseMove(mickey , view);
+
+        // update the properties that might have changed as the result of application
+        // of the current tool.
+        DisplayCurrentCameraLocation();
+        DisplayCurrentNodeProperties();
     }
-    // update the properties that might have changed as the result of application
-    // of the current tool.
-    DisplayCurrentCameraLocation();
-    DisplayCurrentNodeProperties();
 }
 void EntityWidget::MousePress(QMouseEvent* mickey)
 {
@@ -2132,36 +2119,43 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
 {
-    switch (key->key()) {
+    // handle key press events coming from the gfx widget
+    if (mCurrentTool && mCurrentTool->KeyPress(key))
+        return true;
+
+    switch (key->key())
+    {
         case Qt::Key_Delete:
             on_actionNodeDelete_triggered();
             break;
         case Qt::Key_W:
-            mState.camera_offset_y += 20.0f;
+            TranslateCamera(0.0f, 20.0f);
             break;
         case Qt::Key_S:
-            mState.camera_offset_y -= 20.0f;
+            TranslateCamera(0.0f, -20.0f);
             break;
         case Qt::Key_A:
-            mState.camera_offset_x += 20.0f;
+            TranslateCamera(20.0f, 0.0f);
             break;
         case Qt::Key_D:
-            mState.camera_offset_x -= 20.0f;
+            TranslateCamera(-20.0f, 0.0f);
             break;
         case Qt::Key_Left:
-            UpdateCurrentNodePosition(-20.0f, 0.0f);
+            TranslateCurrentNode(-20.0f, 0.0f);
             break;
         case Qt::Key_Right:
-            UpdateCurrentNodePosition(20.0f, 0.0f);
+            TranslateCurrentNode(20.0f, 0.0f);
             break;
         case Qt::Key_Up:
-            UpdateCurrentNodePosition(0.0f, -20.0f);
+            TranslateCurrentNode(0.0f, -20.0f);
             break;
         case Qt::Key_Down:
-            UpdateCurrentNodePosition(0.0f, 20.0f);
+            TranslateCurrentNode(0.0f, 20.0f);
             break;
         case Qt::Key_Escape:
-            mUI.tree->ClearSelection();
+            if (mCurrentTool)
+                mCurrentTool.reset();
+            else mUI.tree->ClearSelection();
             break;
         default:
             return false;
@@ -2171,6 +2165,15 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
 
 void EntityWidget::DisplayCurrentNodeProperties()
 {
+    SetValue(mUI.nodeID, QString(""));
+    SetValue(mUI.nodeName, QString(""));
+    SetValue(mUI.nodeTranslateX, 0.0f);
+    SetValue(mUI.nodeTranslateY, 0.0f);
+    SetValue(mUI.nodeSizeX, 0.0f);
+    SetValue(mUI.nodeSizeY, 0.0f);
+    SetValue(mUI.nodeScaleX, 1.0f);
+    SetValue(mUI.nodeScaleY, 1.0f);
+    SetValue(mUI.nodeRotation, 0.0f);
     SetValue(mUI.drawableItem, false);
     SetValue(mUI.rigidBodyItem, false);
     SetValue(mUI.textItem, false);
@@ -2195,7 +2198,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbIsEnabled, false);
     SetValue(mUI.rbCanSleep, false);
     SetValue(mUI.rbDiscardRotation, false);
-    SetValue(mUI.tiFontName, 0);
+    SetValue(mUI.tiFontName, QString(""));
     SetValue(mUI.tiFontSize, 16);
     SetValue(mUI.tiVAlign, game::TextItemClass::VerticalTextAlign::Center);
     SetValue(mUI.tiHAlign, game::TextItemClass::HorizontalTextAlign::Center);
@@ -2206,9 +2209,16 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiVisible, true);
     SetValue(mUI.tiUnderline, false);
     SetValue(mUI.tiBlink, false);
+    SetEnabled(mUI.nodeProperties, false);
+    SetEnabled(mUI.nodeTransform, false);
+    SetEnabled(mUI.nodeItems, false);
 
     if (const auto* node = GetCurrentNode())
     {
+        SetEnabled(mUI.nodeProperties, true);
+        SetEnabled(mUI.nodeTransform, true);
+        SetEnabled(mUI.nodeItems, true);
+
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();
         const auto& scale = node->GetScale();
@@ -2311,7 +2321,14 @@ void EntityWidget::UncheckPlacementActions()
     mUI.actionNewSemiCircle->setChecked(false);
 }
 
-void EntityWidget::UpdateCurrentNodePosition(float dx, float dy)
+void EntityWidget::TranslateCamera(float dx, float dy)
+{
+    mState.camera_offset_x += dx;
+    mState.camera_offset_y += dy;
+    DisplayCurrentCameraLocation();
+}
+
+void EntityWidget::TranslateCurrentNode(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -2319,6 +2336,8 @@ void EntityWidget::UpdateCurrentNodePosition(float dx, float dy)
         pos.x += dx;
         pos.y += dy;
         node->SetTranslation(pos);
+        SetValue(mUI.nodeTranslateX, pos.x);
+        SetValue(mUI.nodeTranslateY, pos.y);
     }
 }
 
