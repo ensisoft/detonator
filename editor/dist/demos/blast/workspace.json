@@ -27,7 +27,12 @@
         "checked_for_packing": true
     },
     "A7Z5jfJF38": {
-        "checked_for_packing": true
+        "track_shUULfTlQd": {
+            "IXQDBTw7Ub": "5AoCn7w0Cp",
+            "num_timelines": 1,
+            "timeline_0_node_id": "bhTMTzzFAN",
+            "timeline_0_self_id": "5AoCn7w0Cp"
+        }
     },
     "AA5C8qjoDb": {
         "checked_for_packing": true
@@ -131,6 +136,7 @@
         "updates_per_second": 60,
         "use_gamehost_process": true,
         "window_can_resize": true,
+        "window_cursor": true,
         "window_has_border": true,
         "window_height": 768,
         "window_mode": "Windowed",

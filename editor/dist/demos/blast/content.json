@@ -1147,7 +1147,7 @@
         "VisibleInGame": true
       },
       "id": "A7Z5jfJF38",
-      "idle_track": "h8tSjQIuP3",
+      "idle_track": "shUULfTlQd",
       "lifetime": 4.0,
       "name": "RedMine",
       "nodes": [
@@ -1209,7 +1209,7 @@
             {
               "actuator": {
                 "duration": 1.0,
-                "id": "SmthD9lBKf",
+                "id": "IXQDBTw7Ub",
                 "method": "Acceleration",
                 "name": "DrawableTimeScale",
                 "node": "bhTMTzzFAN",
@@ -1221,7 +1221,7 @@
           ],
           "delay": 0.0,
           "duration": 4.0,
-          "id": "h8tSjQIuP3",
+          "id": "shUULfTlQd",
           "looping": false,
           "name": "Countdown"
         }
