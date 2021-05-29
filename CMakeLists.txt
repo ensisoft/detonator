@@ -466,54 +466,6 @@ add_executable(lua-test engine/test/luatest.cpp)
 target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
 target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
 
-# game project
-add_library(invaders SHARED
-    games/invaders/src/level.cpp
-    games/invaders/src/gamewidget.cpp
-    games/invaders/src/game.cpp
-    games/invaders/src/main.cpp
-    audio/pulseaudio.cpp
-    audio/waveout.cpp
-    audio/source.cpp
-    audio/player.cpp
-    base/assert.cpp
-    base/format.cpp
-    base/logging.cpp
-    graphics/material.cpp
-    graphics/image.cpp
-    graphics/drawable.cpp
-    graphics/drawing.cpp
-    graphics/opengl_es2_device.cpp
-    graphics/painter.cpp
-    graphics/text.cpp
-    graphics/resource.cpp
-    engine/animation.cpp
-    engine/renderer.cpp
-    engine/homedir.cpp
-    engine/scene.cpp
-    engine/entity.cpp
-    engine/types.cpp
-    engine/loader.cpp
-    engine/main/gamelib.cpp
-    wdk/wdk/keys.cpp
-    third_party/stb/stb_image.c
-    third_party/stb/stb_image_write.c
-    third_party/base64/base64.cpp
-)
-target_include_directories(invaders PRIVATE "${CMAKE_CURRENT_LIST_DIR}/games/invaders/src")
-target_link_libraries(invaders PRIVATE ${CONAN_LIBS})
-if (UNIX)
-  target_link_libraries(invaders PRIVATE pulse)
-  target_link_libraries(invaders PRIVATE pthread)
-endif()
-install(TARGETS invaders DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist")
-install(FILES games/invaders/assets/shaders/es2/sliding_glint_effect.glsl
-        DESTINATION "${CMAKE_CURRENT_LIST_DIR}/games/invaders/dist/shaders/es2/")
-# hide symbols on linux
-if (CMAKE_COMPILER_IS_GNUCC)
-    target_link_options(invaders PRIVATE  "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
-endif()
-
 # unit tests
 enable_testing()
 
