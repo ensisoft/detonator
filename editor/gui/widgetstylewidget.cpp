@@ -163,7 +163,10 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
         const auto& id = widget->GetId();
         if (mUI.widgetFontName->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/font-name");
-        else mStyle->SetProperty(id + mSelector + "/font-name", (std::string)GetValue(mUI.widgetFontName));
+        else {
+            const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
+            mStyle->SetProperty(id + mSelector + "/font-name", font);
+        }
 
         if (mUI.widgetFontSize->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/font-size");
