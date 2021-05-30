@@ -413,18 +413,7 @@ bool UIStyle::ParseMaterials(const nlohmann::json& json, std::vector<MaterialPai
             material.reset(new detail::UIMaterialReference);
         else if (type == UIMaterial::Type::Texture)
             material.reset(new detail::UITexture);
-
-        if (!material)
-        {
-            // this is not necessarily a BUG because currently the style json files are
-            // hand written. thus we have to be prepared to handle unexpected
-            // cases. That being said it's possible that this else is hit because
-            // the conditionals above have not been updated. douh.
-            success = false;
-            WARN("Ignoring unexpected material type for key '%1'.", key);
-            continue;
-        }
-
+        else BUG("Unhandled material type.");
         if (!material->FromJson(json))
         {
             success = false;
