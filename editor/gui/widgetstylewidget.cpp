@@ -104,6 +104,21 @@ void WidgetStyleWidget::on_btnResetWidgetFontName_clicked()
     SetValue(mUI.widgetFontName, -1);
     UpdateCurrentWidgetProperties();
 }
+
+void WidgetStyleWidget::on_btnSelectWidgetFont_clicked()
+{
+    if (!mWidget)
+        return;
+
+    const auto& list = QFileDialog::getOpenFileNames(this,
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf"));
+    if (list.isEmpty())
+        return;
+    const auto& file = mWorkspace->MapFileToWorkspace(list[0]);
+    SetValue(mUI.widgetFontName, file);
+    UpdateCurrentWidgetProperties();
+}
+
 void WidgetStyleWidget::on_btnResetWidgetFontSize_clicked()
 {
     SetValue(mUI.widgetFontSize, -1);
@@ -161,12 +176,10 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
     {
         // set style properties
         const auto& id = widget->GetId();
-        if (mUI.widgetFontName->currentIndex() == -1)
+        const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
+        if (font.empty())
             mStyle->DeleteProperty(id + mSelector + "/font-name");
-        else {
-            const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
-            mStyle->SetProperty(id + mSelector + "/font-name", font);
-        }
+        else mStyle->SetProperty(id + mSelector + "/font-name", font);
 
         if (mUI.widgetFontSize->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/font-size");

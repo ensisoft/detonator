@@ -70,6 +70,7 @@ namespace gui
         void on_widgetTextColor_colorChanged(QColor color);
         void on_widgetBackground_currentIndexChanged(int);
         void on_widgetBorder_currentIndexChanged(int);
+        void on_btnSelectWidgetFont_clicked();
         void on_btnResetWidgetFontName_clicked();
         void on_btnResetWidgetFontSize_clicked();
         void on_btnResetWidgetTextVAlign_clicked();
