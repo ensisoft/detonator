@@ -1115,6 +1115,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     }
 
     painter.SetViewMatrix(view.GetAsMatrix());
+    painter.SetPixelRatio(glm::vec2(xs * zoom, ys * zoom));
 
     // draw the window outline
     if (mPlayState != PlayState::Playing)
