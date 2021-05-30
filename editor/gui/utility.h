@@ -126,7 +126,7 @@ inline void SetValue(QComboBox* combo, const QString& str)
     const auto index = combo->findText(str);
     combo->setCurrentIndex(index);
     if (combo->isEditable())
-        combo->setCurrentText(str);
+        combo->setEditText(str);
 }
 
 template<typename T>
@@ -138,14 +138,18 @@ void SetValue(QComboBox* combo, T value)
 inline void SetValue(QComboBox* combo, const ListItemId& id)
 {
     QSignalBlocker s(combo);
+    combo->setCurrentIndex(-1);
+    if (combo->isEditable())
+        combo->clearEditText();
+
     for (int i=0; i<combo->count(); ++i)
     {
         const QVariant& data = combo->itemData(i);
-        if (data.toString() == id.id) {
+        if (data.toString() == id.id)
+        {
             combo->setCurrentIndex(i);
-            if (combo->isEditable()) {
-                combo->setCurrentText(combo->itemText(i));
-            }
+            if (combo->isEditable())
+                combo->setEditText(combo->itemText(i));
             return;
         }
     }
@@ -156,11 +160,8 @@ inline void SetValue(QComboBox* combo, int index)
 {
     QSignalBlocker s(combo);
     combo->setCurrentIndex(index);
-    if (combo->isEditable()) {
-        if (index == -1)
-            combo->clearEditText();
-        else combo->setCurrentText(combo->itemText(index));
-    }
+    if (index == -1 && combo->isEditable())
+        combo->clearEditText();
 }
 
 struct ListItem {
