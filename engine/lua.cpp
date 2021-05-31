@@ -39,6 +39,20 @@
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
+namespace {
+template<typename... Args>
+void CallLua(const sol::protected_function& func, const Args&... args)
+{
+    if (!func.valid())
+        return;
+    const auto& result = func(args...);
+    if (result.valid())
+        return;
+    const sol::error err = result;
+    ERROR(err.what());
+}
+} // namespace
+
 namespace game
 {
 
@@ -105,81 +119,32 @@ void LuaGame::LoadGame(const ClassLibrary* loader)
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClasslib;
     (*mLuaState)["Game"]     = this;
-    sol::protected_function func = (*mLuaState)["LoadGame"];
-    if (!func.valid())
-        return;
-    auto result = func();
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["LoadGame"]);
 }
 void LuaGame::LoadBackgroundDone(Scene* background)
 {
-    sol::protected_function func = (*mLuaState)["LoadBackgroundDone"];
-    if (!func.valid())
-        return;
-    auto result = func(background);
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["LoadBackgroundDone"], background);
 }
 
 void LuaGame::Tick(double wall_time, double tick_time, double dt)
 {
-    sol::protected_function func = (*mLuaState)["Tick"];
-    if (!func.valid())
-        return;
-    auto result = func(wall_time, tick_time, dt);
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["Tick"], wall_time, tick_time, dt);
 }
 void LuaGame::Update(double wall_time, double game_time, double dt)
 {
-    sol::protected_function func = (*mLuaState)["Update"];
-    if (!func.valid())
-        return;
-    auto result = func(wall_time, game_time, dt);
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["Update"], wall_time, game_time, dt);
 }
 void LuaGame::BeginPlay(Scene* scene)
 {
     mScene = scene;
     (*mLuaState)["Scene"] = mScene;
 
-    sol::protected_function func = (*mLuaState)["BeginPlay"];
-    if (!func.valid())
-        return;
-    auto result = func(scene);
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["BeginPlay"], scene);
 }
 void LuaGame::EndPlay()
 {
     mScene = nullptr;
-
-    sol::protected_function func = (*mLuaState)["EndPlay"];
-    if (!func.valid())
-        return;
-    auto result = func();
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["EndPlay"]);
 }
 
 void LuaGame::SaveGame()
@@ -216,53 +181,25 @@ void LuaGame::OnContactEvent(const ContactEvent& contact)
 
     if (contact.type == ContactEvent::Type::BeginContact)
     {
-        sol::protected_function func = (*mLuaState)["OnBeginContact"];
-        if (!func.valid())
-            return;
-        auto result = func(entityA, entityB, nodeA, nodeB);
-        if (!result.valid())
-        {
-            const sol::error err = result;
-            ERROR(err.what());
-        }
+        CallLua((*mLuaState)["OnBeginContact"], entityA, entityB, nodeA, nodeB);
     }
     else if (contact.type == ContactEvent::Type::EndContact)
     {
-        sol::protected_function func = (*mLuaState)["OnEndContact"];
-        if (!func.valid())
-            return;
-        auto result = func(entityA, entityB, nodeA, nodeB);
-        if (!result.valid())
-        {
-            const sol::error err = result;
-            ERROR(err.what());
-        }
+        CallLua((*mLuaState)["OnEndContact"], entityA, entityB, nodeA, nodeB);
     }
 }
 
 void LuaGame::OnKeyDown(const wdk::WindowEventKeydown& key)
 {
-    sol::protected_function func = (*mLuaState)["OnKeyDown"];
-    if (!func.valid())
-        return;
-    auto result = func(static_cast<int>(key.symbol), static_cast<int>(key.modifiers.value()));
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["OnKeyDown"],
+            static_cast<int>(key.symbol),
+            static_cast<int>(key.modifiers.value()));
 }
 void LuaGame::OnKeyUp(const wdk::WindowEventKeyup& key)
 {
-    sol::protected_function func = (*mLuaState)["OnKeyUp"];
-    if (!func.valid())
-        return;
-    auto result = func(static_cast<int>(key.symbol), static_cast<int>(key.modifiers.value()));
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR(err.what());
-    }
+    CallLua((*mLuaState)["OnKeyUp"],
+            static_cast<int>(key.symbol),
+            static_cast<int>(key.modifiers.value()));
 }
 void LuaGame::OnChar(const wdk::WindowEventChar& text)
 {
@@ -364,15 +301,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
         if (it == mTypeEnvs.end())
             continue;
         auto& env = it->second;
-        sol::protected_function func = (*env)["BeginPlay"];
-        if (!func.valid())
-            continue;
-        auto result = func(entity, scene);
-        if (!result.valid())
-        {
-            const sol::error err = result;
-            ERROR(err.what());
-        }
+        CallLua((*env)["BeginPlay"], entity, scene);
     }
 }
 
@@ -388,15 +317,7 @@ void ScriptEngine::Tick(double wall_time, double tick_time, double dt)
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            sol::protected_function func = (*env)["Tick"];
-            if (!func.valid())
-                continue;
-            auto result = func(entity, wall_time, tick_time, dt);
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
+            CallLua((*env)["Tick"], entity, wall_time, tick_time, dt);
         }
     }
 }
@@ -407,15 +328,7 @@ void ScriptEngine::Update(double wall_time, double game_time, double dt)
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            sol::protected_function func = (*env)["Update"];
-            if (!func.valid())
-                continue;
-            auto result = func(entity , wall_time , game_time , dt);
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
+            CallLua((*env)["Update"], entity, wall_time, game_time, dt);
         }
     }
 }
@@ -443,7 +356,7 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
         WARN("Contact event ignored, entity node was not found.");
         return;
     }
-    const auto* function_name = contact.type == ContactEvent::Type::BeginContact
+    const auto* function = contact.type == ContactEvent::Type::BeginContact
             ? "OnBeginContact" : "OnEndContact";
 
     // there's a little problem here that needs to be fixed regarding the
@@ -455,29 +368,11 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
 
     if (auto* env = GetTypeEnv(klassA))
     {
-        sol::protected_function func = (*env)[function_name];
-        if (func.valid())
-        {
-            auto result = func(entityA, nodeA, entityB, nodeB);
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
-        }
+        CallLua((*env)[function], entityA, nodeA, entityB, nodeB);
     }
     if (auto* env = GetTypeEnv(klassB))
     {
-        sol::protected_function func = (*env)[function_name];
-        if (func.valid())
-        {
-            auto result = func(entityB, nodeB, entityA, nodeA);
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
-        }
+        CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
     }
 }
 void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
@@ -487,15 +382,9 @@ void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            sol::protected_function func = (*env)["OnKeyDown"];
-            if (!func.valid())
-                continue;
-            auto result = func(entity , static_cast<int>(key.symbol) , static_cast<int>(key.modifiers.value()));
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
+            CallLua((*env)["OnKeyDown"], entity,
+                    static_cast<int>(key.symbol) ,
+                    static_cast<int>(key.modifiers.value()));
         }
     }
 }
@@ -506,15 +395,9 @@ void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            sol::protected_function func = (*env)["OnKeyUp"];
-            if (!func.valid())
-                continue;
-            auto result = func(entity , static_cast<int>(key.symbol) , static_cast<int>(key.modifiers.value()));
-            if (!result.valid())
-            {
-                const sol::error err = result;
-                ERROR(err.what());
-            }
+            CallLua((*env)["OnKeyUp"], entity,
+                    static_cast<int>(key.symbol) ,
+                    static_cast<int>(key.modifiers.value()));
         }
     }
 }
