@@ -91,6 +91,8 @@ namespace gui
         void on_widgetText_textChanged();
         void on_widgetCheckBox_stateChanged(int);
         void on_btnReloadStyle_clicked();
+        void on_btnSelectStyle_clicked();
+        void on_btnEditStyle_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
@@ -119,7 +121,7 @@ namespace gui
         void RebuildCombos();
         uik::Widget* GetCurrentWidget();
         const uik::Widget* GetCurrentWidget() const;
-        bool LoadStyle(const std::string& name);
+        bool LoadStyle(const QString& name);
         bool IsRootWidget(const uik::Widget* widget) const;
         void UpdateDeletedResourceReferences();
     private:

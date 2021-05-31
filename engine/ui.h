@@ -116,6 +116,17 @@ namespace game
             using ColorIndex = gfx::MaterialClass::ColorIndex;
 
             UIGradient() = default;
+            UIGradient(const gfx::Color4f& top_left,
+                       const gfx::Color4f& top_right,
+                       const gfx::Color4f& bottom_left,
+                       const gfx::Color4f& bottom_right)
+            {
+                SetColor(top_left, ColorIndex::TopLeft);
+                SetColor(top_right, ColorIndex::TopRight);
+                SetColor(bottom_left, ColorIndex ::BottomLeft);
+                SetColor(bottom_right, ColorIndex::BottomRight);
+            }
+
             virtual MaterialClass GetClass(const ClassLibrary& loader) const override;
             virtual Type GetType() const override
             { return Type::Gradient; }
@@ -146,6 +157,11 @@ namespace game
                     return mColorMap[3];
                 else BUG("incorrect color index");
                 return gfx::Color4f();
+            }
+            gfx::Color4f GetColor(unsigned index) const
+            {
+                ASSERT(index < 4);
+                return mColorMap[index];
             }
         private:
             gfx::Color4f mColorMap[4];

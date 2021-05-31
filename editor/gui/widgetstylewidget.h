@@ -25,6 +25,10 @@
 
 #include <string>
 
+namespace app {
+    class Workspace;
+}
+
 namespace uik {
     class Widget;
 } // namespace

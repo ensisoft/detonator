@@ -350,7 +350,7 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
     setWindowTitle(resource.GetName());
-    LoadStyle(mState.window.GetStyleName());
+    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
     UpdateDeletedResourceReferences();
     DisplayCurrentCameraLocation();
     DisplayCurrentWidgetProperties();
@@ -442,7 +442,7 @@ bool UIWidget::LoadState(const Settings& settings)
     }
     mState.window = std::move(window.value());
     mUI.tree->Rebuild();
-    LoadStyle(mState.window.GetStyleName());
+    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
     DEBUG("Loaded UI widget state successfully.");
     return true;
 }
@@ -938,7 +938,22 @@ void UIWidget::on_widgetCheckBox_stateChanged(int)
 
 void UIWidget::on_btnReloadStyle_clicked()
 {
-    LoadStyle(mState.window.GetStyleName());
+    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
+}
+
+void UIWidget::on_btnSelectStyle_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select JSON Style File"), "",
+        tr("Style (*.json)"));
+    if (file.isEmpty())
+        return;
+    LoadStyle(mState.workspace->MapFileToWorkspace(file));
+}
+
+void UIWidget::on_btnEditStyle_clicked()
+{
+
 }
 
 void UIWidget::on_btnViewPlus90_clicked()
@@ -1548,17 +1563,17 @@ const uik::Widget* UIWidget::GetCurrentWidget() const
     return static_cast<const uik::Widget*>(item->GetUserData());
 }
 
-bool UIWidget::LoadStyle(const std::string& name)
+bool UIWidget::LoadStyle(const QString& name)
 {
     const auto& filename = mState.workspace->MapFileToFilesystem(name);
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
-        ERROR("Failed to open file: '%1'", filename);
+        ERROR("Failed to open style file: '%1' (%2)", filename, file.error());
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("Failed to open style file."));
+        msg.setText(tr("Failed to open style file.\n%1").arg(file.errorString()));
         msg.exec();
         return false;
     }
@@ -1568,7 +1583,7 @@ bool UIWidget::LoadStyle(const std::string& name)
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("No JSON content found in style file."));
+        msg.setText(tr("Unable to apply the style because no JSON content was found in style file."));
         msg.exec();
         ERROR("No style JSON content found in file: '%1'", filename);
         return false;
@@ -1591,7 +1606,7 @@ bool UIWidget::LoadStyle(const std::string& name)
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("JSON parse error."));
+        msg.setText(tr("Unable to apply the style because JSON parse error occurred."));
         msg.exec();
         return false;
     }
@@ -1604,7 +1619,8 @@ bool UIWidget::LoadStyle(const std::string& name)
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("Errors were found while parsing the style.\n"
+        msg.setText(tr("Errors were found while parsing the style settings.\n"
+                       "Styling might be incomplete or unusable.\n"
                        "Do you want to continue?"));
         if (msg.exec() == QMessageBox::No)
             return false;
@@ -1616,7 +1632,8 @@ bool UIWidget::LoadStyle(const std::string& name)
     mState.painter->DeleteMaterialInstances();
     // reapply the styling for each widget.
     mState.window.Style(*mState.painter);
-    mState.window.SetStyleName(name);
+    mState.window.SetStyleName(app::ToUtf8(name));
+    SetValue(mUI.baseStyle, name);
     return true;
 }
 
