@@ -47,7 +47,7 @@ function Tick(ship2, wall_time, tick_time, dt)
         local matrix = Scene:FindEntityNodeTransform(ship2, weapon)
         local args = game.EntityArgs:new()
         args.class = ClassLib:FindEntityClassByName('BlueBullet')
-        args.position = game.util.GetTranslationFromMatrix(matrix)
+        args.position = util.GetTranslationFromMatrix(matrix)
         args.name = 'blue bullet'
         local bullet = Scene:SpawnEntity(args, true)
     end

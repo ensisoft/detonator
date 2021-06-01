@@ -106,6 +106,7 @@ namespace game
     };
 
 
+    void BindUtil(sol::state& L);
     void BindBase(sol::state& L);
     void BindGLM(sol::state& L);
     void BindGFX(sol::state& L);

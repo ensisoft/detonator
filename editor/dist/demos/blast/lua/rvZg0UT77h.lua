@@ -13,7 +13,7 @@ function FireWeapon(player, ammo_name)
     -- setup the args for spawning a new bullet.
     local args = game.EntityArgs:new()
     args.class    = ClassLib:FindEntityClassByName(ammo_name)
-    args.position = game.util.GetTranslationFromMatrix(matrix)
+    args.position = util.GetTranslationFromMatrix(matrix)
     args.name     = ammo_name
     Scene:SpawnEntity(args, true)
 end

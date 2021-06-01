@@ -101,7 +101,7 @@ function LoadGame()
     Game:PlayScene(scene)
 
     -- set the viewport size and position
-    local viewport = game.FRect:new(-600.0, -400.0, 1200, 800.0)
+    local viewport = base.FRect:new(-600.0, -400.0, 1200, 800.0)
     Game:SetViewport(viewport)
 end
 

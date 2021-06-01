@@ -28,6 +28,9 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/types.h"
+#include "base/color4f.h"
+#include "base/format.h"
 #include "engine/entity.h"
 #include "engine/game.h"
 #include "engine/scene.h"
@@ -73,6 +76,7 @@ LuaGame::LuaGame(const std::string& lua_path)
     path = path + ";" + lua_path + "/?/?.lua";
     (*mLuaState)["package"]["path"] = path;
     BindBase(*mLuaState);
+    BindUtil(*mLuaState);
     BindGLM(*mLuaState);
     BindGFX(*mLuaState);
     BindWDK(*mLuaState);
@@ -235,6 +239,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*state)["package"]["path"] = path;
 
     BindBase(*state);
+    BindUtil(*state);
     BindGLM(*state);
     BindGFX(*state);
     BindWDK(*state);
@@ -437,21 +442,117 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
     return it->second.get();
 }
 
+void BindUtil(sol::state& L)
+{
+    auto util = L.create_named_table("util");
+    {
+        util["GetRotationFromMatrix"]    = GetRotationFromMatrix;
+        util["GetScaleFromMatrix"]       = GetScaleFromMatrix;
+        util["GetTranslationFromMatrix"] = GetTranslationFromMatrix;
+        util["RotateVector"]             = RotateVector;
+    }
+
+    {
+        sol::constructors<FBox(), FBox(float, float), FBox(const glm::mat4& mat, float, float), FBox(const glm::mat4& mat)> ctors;
+        auto box = util.new_usertype<FBox>("FBox", ctors);
+        box["GetWidth"]    = &FBox::GetWidth;
+        box["GetHeight"]   = &FBox::GetHeight;
+        box["GetTopLeft"]  = &FBox::GetTopLeft;
+        box["GetTopRight"] = &FBox::GetTopRight;
+        box["GetBotRight"] = &FBox::GetTopRight;
+        box["GetBotLeft"]  = &FBox::GetBotLeft;
+        box["GetCenter"]   = &FBox::GetCenter;
+        box["GetSize"]     = &FBox::GetSize;
+        box["GetRotation"] = &FBox::GetRotation;
+        box["Transform"]   = &FBox::Transform;
+        box["Reset"]       = &FBox::Reset;
+    }
+
+}
+
 void BindBase(sol::state& L)
 {
     auto table = L.create_named_table("base");
-    table["debug"] = [](const std::string& str) {
-        DEBUG(str);
-    };
-    table["warn"] = [](const std::string& str) {
-        WARN(str);
-    };
-    table["error"] = [](const std::string& str) {
-        ERROR(str);
-    };
-    table["info"] = [](const std::string& str) {
-        INFO(str);
-    };
+    table["debug"] = [](const std::string& str) { DEBUG(str); };
+    table["warn"]  = [](const std::string& str) { WARN(str); };
+    table["error"] = [](const std::string& str) { ERROR(str); };
+    table["info"]  = [](const std::string& str) { INFO(str); };
+
+    // FRect
+    {
+        sol::constructors<base::FRect(), base::FRect(float, float, float, float)> ctors;
+        auto rect = table.new_usertype<base::FRect>("FRect", ctors);
+        rect["GetHeight"] = &base::FRect::GetHeight;
+        rect["GetWidth"]  = &base::FRect::GetWidth;
+        rect["GetX"]      = &base::FRect::GetX;
+        rect["GetY"]      = &base::FRect::GetY;
+        rect["SetX"]      = &base::FRect::SetX;
+        rect["SetY"]      = &base::FRect::SetY;
+        rect["SetWidth"]  = &base::FRect::SetWidth;
+        rect["SetHeight"] = &base::FRect::SetHeight;
+        rect["Resize"]    = (void(base::FRect::*)(float, float))&base::FRect::Resize;
+        rect["Grow"]      = (void(base::FRect::*)(float, float))&base::FRect::Grow;
+        rect["Move"]      = (void(base::FRect::*)(float, float))&base::FRect::Move;
+        rect["Translate"] = (void(base::FRect::*)(float, float))&base::FRect::Translate;
+        rect["IsEmpty"]   = &base::FRect::IsEmpty;
+        // global functions for FRect
+        table["CombineRects"]     = base::Union<float>;
+        table["IntersectRects"]   = base::Intersect<float>;
+        table["DoRectsIntersect"] = base::DoesIntersect<float>;
+    }
+
+    // FSize
+    {
+        sol::constructors<base::FSize(), base::FSize(float, float)> ctors;
+        auto size = table.new_usertype<base::FSize>("FSize", ctors);
+        size["GetWidth"]  = &base::FSize::GetWidth;
+        size["GetHeight"] = &base::FSize::GetHeight;
+        size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
+        size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
+        size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
+    }
+
+    // FPoint
+    {
+        sol::constructors<base::FPoint(), base::FPoint(float, float)> ctors;
+        auto point = table.new_usertype<base::FPoint>("FPoint", ctors);
+        point["GetX"] = &base::FPoint::GetX;
+        point["GetY"] = &base::FPoint::GetY;
+        point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
+        point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
+    }
+
+    // build table for color names
+    {
+        for (const auto& color : magic_enum::enum_values<base::Color>())
+        {
+            const std::string name(magic_enum::enum_name(color));
+            table[sol::create_if_nil]["Colors"][name] = magic_enum::enum_integer(color);
+        }
+    }
+
+    // Color4f
+    {
+        // todo: figure out a way to construct from color name, is that possible?
+        sol::constructors<base::Color4f(),
+                base::Color4f(float, float, float, float),
+                base::Color4f(int, int, int, int)> ctors;
+        auto color = table.new_usertype<base::Color4f>("Color4f", ctors);
+        color["GetRed"]     = &base::Color4f::Red;
+        color["GetGreen"]   = &base::Color4f::Green;
+        color["GetBlue"]    = &base::Color4f::Blue;
+        color["GetAlpha"]   = &base::Color4f::Alpha;
+        color["SetRed"]     = (void(base::Color4f::*)(float))&base::Color4f::SetRed;
+        color["SetGreen"]   = (void(base::Color4f::*)(float))&base::Color4f::SetGreen;
+        color["SetBlue"]    = (void(base::Color4f::*)(float))&base::Color4f::SetBlue;
+        color["SetAlpha"]   = (void(base::Color4f::*)(float))&base::Color4f::SetAlpha;
+        color["SetColor"]   = [](base::Color4f& color, int value) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(value);
+            if (!color_value.has_value())
+                return;
+            color = base::Color4f(color_value.value());
+        };
+    }
 }
 
 void BindGLM(sol::state& L)
@@ -575,46 +676,6 @@ void BindWDK(sol::state& L)
 void BindGameLib(sol::state& L)
 {
     auto table = L["game"].get_or_create<sol::table>();
-
-    {
-        auto util = table["util"].get_or_create<sol::table>();
-        util["GetRotationFromMatrix"]    = GetRotationFromMatrix;
-        util["GetScaleFromMatrix"]       = GetScaleFromMatrix;
-        util["GetTranslationFromMatrix"] = GetTranslationFromMatrix;
-        util["RotateVector"]             = RotateVector;
-    }
-    {
-        sol::constructors<FRect(), FRect(float, float, float, float)> ctors;
-        auto rect = table.new_usertype<FRect>("FRect", ctors);
-        rect["GetHeight"] = &FRect::GetHeight;
-        rect["GetWidth"]  = &FRect::GetWidth;
-        rect["GetX"]      = &FRect::GetX;
-        rect["GetY"]      = &FRect::GetY;
-        rect["SetX"]      = &FRect::SetX;
-        rect["SetY"]      = &FRect::SetY;
-        rect["SetWidth"]  = &FRect::SetWidth;
-        rect["SetHeight"] = &FRect::SetHeight;
-        rect["Resize"]    = (void(FRect::*)(float, float))&FRect::Resize;
-        rect["Grow"]      = (void(FRect::*)(float, float))&FRect::Grow;
-        rect["Move"]      = (void(FRect::*)(float, float))&FRect::Move;
-        rect["Translate"] = (void(FRect::*)(float, float))&FRect::Translate;
-        rect["IsEmpty"]   = &FRect::IsEmpty;
-    }
-    {
-        sol::constructors<FBox(), FBox(float, float), FBox(const glm::mat4& mat, float, float), FBox(const glm::mat4& mat)> ctors;
-        auto box = table.new_usertype<FBox>("FBox", ctors);
-        box["GetWidth"]    = &FBox::GetWidth;
-        box["GetHeight"]   = &FBox::GetHeight;
-        box["GetTopLeft"]  = &FBox::GetTopLeft;
-        box["GetTopRight"] = &FBox::GetTopRight;
-        box["GetBotRight"] = &FBox::GetTopRight;
-        box["GetBotLeft"]  = &FBox::GetBotLeft;
-        box["GetCenter"]   = &FBox::GetCenter;
-        box["GetSize"]     = &FBox::GetSize;
-        box["GetRotation"] = &FBox::GetRotation;
-        box["Transform"]   = &FBox::Transform;
-        box["Reset"]       = &FBox::Reset;
-    }
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"] = &ClassLibrary::FindEntityClassByName;

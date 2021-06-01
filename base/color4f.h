@@ -176,7 +176,7 @@ namespace base
         void SetRed(int red)
         { mRed = math::clamp(0, 255, red) / 255.0f; }
 
-        void setBlue(float blue)
+        void SetBlue(float blue)
         { mBlue = math::clamp(0.0f, 1.0f, blue); }
         void SetBlue(int blue)
         { mBlue = math::clamp(0, 255, blue) / 255.0f; }

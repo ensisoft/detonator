@@ -33,7 +33,7 @@ function Update(asteroid, wall_time, game_time, dt)
         return
     end
     local matrix = Scene:FindEntityNodeTransform(ship, ship:FindNodeByClassName('Body'))
-    local ship_pos = game.util.GetTranslationFromMatrix(matrix)
+    local ship_pos = util.GetTranslationFromMatrix(matrix)
     local distance = glm.length(ship_pos - rock_pos)
     local radius   = asteroid.radius
     if distance <= radius then
