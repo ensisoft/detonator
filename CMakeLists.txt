@@ -562,6 +562,8 @@ target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/ui
 add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
 add_executable(unit_test_logging base/unit_test/unit_test_log.cpp base/logging.cpp)
+add_executable(unit_test_base base/unit_test/unit_test.cpp)
+target_include_directories(unit_test_base    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 target_include_directories(unit_test_logging PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 if (UNIX)
    target_link_libraries(unit_test_logging PRIVATE pthread)

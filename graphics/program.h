@@ -20,11 +20,12 @@
 
 #include <vector>
 
+#include "graphics/color4f.h"
+
 namespace gfx
 {
     class Shader;
     class Texture;
-    class Color4f;
 
     // Program object interface. Program objects are device
     // specific graphics programs that are built from shaders
@@ -35,13 +36,13 @@ namespace gfx
         virtual ~Program() = default;
 
         // Build the program from the given list of shaders.
-        // Returns true if the build was succesful.
+        // Returns true if the build was successful.
         // Failed build will leave the program object in the previous state.
         // Trying to build from shaders that are not valid is considered a bug.
         virtual bool Build(const std::vector<const Shader*>& shaders) = 0;
 
         // Returns true if the program is valid or not I.e. it has been
-        // succesfully build and can be used for drawing.
+        // successfully build and can be used for drawing.
         virtual bool IsValid() const = 0;
 
         // Set uniforms in the program object.

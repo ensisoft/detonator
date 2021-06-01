@@ -28,26 +28,19 @@
 #include <any>
 
 #include "base/assert.h"
-// todo: refactor the include away.
-#include "graphics/types.h"
-#include "graphics/color4f.h"
+#include "base/types.h"
+#include "base/color4f.h"
 
 namespace uik
 {
-    // provide type aliases for now for these types so that we can
-    // use them as if they weren't in graphics where they shouldn't
-    // be for most of the use in engine code. (i.e. not related to
-    // graphics in any way)
-    // todo: eventually should refactor them out of graphics/ into base/
-    using FRect = gfx::FRect;
-    using IRect = gfx::IRect;
-    using IPoint = gfx::IPoint;
-    using FPoint = gfx::FPoint;
-    using FSize  = gfx::FSize;
-    using ISize  = gfx::ISize;
-
-    using Color4f = gfx::Color4f;
-    using Color = gfx::Color;
+    using FRect = base::FRect;
+    using IRect = base::IRect;
+    using IPoint = base::IPoint;
+    using FPoint = base::FPoint;
+    using FSize  = base::FSize;
+    using ISize  = base::ISize;
+    using Color4f = base::Color4f;
+    using Color   = base::Color;
 
     enum class MouseButton {
         None, Left, Wheel, WheelUp, WheelDown, Right

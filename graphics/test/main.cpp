@@ -422,7 +422,7 @@ public:
         {
             gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             material.AddTexture("textures/uv_test_512.png");
-            material.SetTextureRect(0, gfx::Rect(0.0f, 0.0f, 1.0f, 1.0f));
+            material.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             gfx::FillRect(painter, gfx::FRect(0, 0, 128, 128), material);
 
             material.SetTextureScaleX(2.0);

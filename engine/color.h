@@ -18,7 +18,7 @@
 
 #include "config.h"
 
-#include "graphics/color4f.h"
+#include "base/color4f.h"
 
 namespace game
 {
@@ -26,6 +26,6 @@ namespace game
     // use them as if they weren't in graphics where they shouldn't
     // be for most of the use in engine code. (i.e. not related to
     // graphics in any way)
-    using Color   = gfx::Color;
-    using Color4f = gfx::Color4f;
+    using Color   = base::Color;
+    using Color4f = base::Color4f;
 } // namespace

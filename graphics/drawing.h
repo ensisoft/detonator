@@ -21,6 +21,7 @@
 #include <string>
 
 #include "graphics/types.h"
+#include "graphics/color4f.h"
 
 // This is the simple drawing API that provides auxiliary drawing
 // functionality mostly useful for drawing stuff outside the actual
@@ -62,7 +63,6 @@ class Painter;
 class Transform;
 class Material;
 class Drawable;
-class Color4f;
 
 // Text alignment inside a rect
 enum TextAlign {
