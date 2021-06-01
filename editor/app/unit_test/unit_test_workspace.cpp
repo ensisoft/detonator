@@ -27,6 +27,7 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/logging.h"
 #include "base/utility.h"
 #include "editor/app/resource.h"
@@ -57,14 +58,6 @@ size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
                 ++ret;
     }
     return ret;
-}
-
-bool operator==(const gfx::FRect& lhs, const gfx::FRect& rhs)
-{
-    return real::equals(lhs.GetX(), rhs.GetX()) &&
-           real::equals(lhs.GetY(), rhs.GetY()) &&
-           real::equals(lhs.GetWidth(), rhs.GetWidth()) &&
-           real::equals(lhs.GetHeight(), rhs.GetHeight());
 }
 
 void unit_test_path_mapping()

@@ -25,33 +25,12 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/assert.h"
 #include "uikit/layout.h"
 #include "uikit/painter.h"
 #include "uikit/widget.h"
 #include "uikit/window.h"
-
-bool operator==(const uik::FSize& lhs, const uik::FSize& rhs)
-{
-    return real::equals(lhs.GetWidth(), rhs.GetWidth()) &&
-           real::equals(lhs.GetHeight(), rhs.GetHeight());
-}
-bool operator!=(const uik::FSize& lhs, const uik::FSize& rhs)
-{
-    return !(lhs == rhs);
-}
-
-bool operator==(const uik::FPoint& lhs, const uik::FPoint& rhs)
-{
-    return real::equals(lhs.GetX(), rhs.GetX()) &&
-           real::equals(lhs.GetY(), rhs.GetY());
-}
-
-bool operator==(const uik::FRect& lhs, const uik::FRect& rhs)
-{
-    return lhs.GetPosition() == rhs.GetPosition() &&
-           lhs.GetSize() == rhs.GetSize();
-}
 
 class Painter : public uik::Painter
 {
