@@ -27,6 +27,7 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
@@ -35,14 +36,6 @@
 #include "graphics/program.h"
 #include "graphics/texture.h"
 #include "graphics/geometry.h"
-
-bool operator==(const gfx::Color4f& lhs, const gfx::Color4f& rhs)
-{
-    return real::equals(lhs.Red(), rhs.Red()) &&
-           real::equals(lhs.Green(), rhs.Green()) &&
-           real::equals(lhs.Blue(), rhs.Blue()) &&
-           real::equals(lhs.Alpha(), rhs.Alpha());
-}
 
 class TestShader : public gfx::Shader
 {

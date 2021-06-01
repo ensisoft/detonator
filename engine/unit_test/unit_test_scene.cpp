@@ -26,16 +26,11 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/assert.h"
 #include "base/math.h"
 #include "engine/scene.h"
 #include "engine/entity.h"
-
-bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
-{
-    return real::equals(lhs.x, rhs.x) &&
-           real::equals(lhs.y, rhs.y);
-}
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order

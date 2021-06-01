@@ -31,11 +31,6 @@
 #include "engine/animation.h"
 #include "engine/entity.h"
 
-bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
-{
-    return real::equals(lhs.x, rhs.x) &&
-           real::equals(lhs.y, rhs.y);
-}
 
 void unit_test_setflag_actuator()
 {

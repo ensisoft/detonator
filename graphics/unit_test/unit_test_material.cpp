@@ -20,6 +20,7 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 
@@ -27,22 +28,6 @@ template<typename To, typename From>
 const To& SameCast(const From& from, const To& to)
 {
     return dynamic_cast<const To&>(from);
-}
-
-bool operator==(const gfx::Color4f& lhs, const gfx::Color4f& rhs)
-{
-    return real::equals(lhs.Red(), rhs.Red()) &&
-           real::equals(lhs.Green(), rhs.Green()) &&
-           real::equals(lhs.Blue(), rhs.Blue()) &&
-           real::equals(lhs.Alpha(), rhs.Alpha());
-}
-
-bool operator==(const gfx::FRect& lhs, const gfx::FRect& rhs)
-{
-    return real::equals(lhs.GetX(), rhs.GetX()) &&
-           real::equals(lhs.GetY(), rhs.GetY()) &&
-           real::equals(lhs.GetWidth(), rhs.GetWidth()) &&
-           real::equals(lhs.GetHeight(), rhs.GetHeight());
 }
 
 void unit_test_data()

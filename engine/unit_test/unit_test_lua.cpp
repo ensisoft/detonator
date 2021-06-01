@@ -18,16 +18,9 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/color4f.h"
 #include "engine/lua.h"
-
-bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
-{
-    return real::equals(lhs.Red(), rhs.Red()) &&
-           real::equals(lhs.Green(), rhs.Green()) &&
-           real::equals(lhs.Blue(), rhs.Blue()) &&
-           real::equals(lhs.Alpha(), rhs.Alpha());
-}
 
 void unit_test_glm()
 {
