@@ -55,6 +55,8 @@
 #include <iomanip>
 #include <type_traits>
 
+#include "base/types.h"
+
 #if defined(__MSVC__)
 #  pragma warning(push)
 #  pragma warning(disable: 4996) // deprecated use of wstring_convert
@@ -64,6 +66,8 @@
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
 // template arguments converted into strings.
 // for example str("hello %1", "world") returns "hello world"
+
+// todo: move the JSON functionality here for the simple types such as Rect etc.
 
 #if defined(BASE_FORMAT_SUPPORT_GLM)
 namespace glm {
@@ -132,6 +136,33 @@ namespace base
         inline std::string ToString(long double value)
         { return std::to_string(value); }
 
+        inline std::string ToString(const FRect& rect)
+        {
+            char buff[100];
+            std::memset(buff, 0, sizeof(buff));
+            std::snprintf(buff, sizeof(buff),"x:%.2f, y:%.2f, w:%.2f, h:%.2f",
+                          rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
+            return buff;
+        }
+
+        inline std::string ToString(const FSize& size)
+        {
+            char buff[100];
+            std::memset(buff, 0, sizeof(buff));
+            std::snprintf(buff, sizeof(buff), "w:%.2f, h:%.2f",
+                          size.GetWidth(), size.GetHeight());
+            return buff;
+        }
+
+        inline std::string ToString(const FPoint& point)
+        {
+            char buff[100];
+            std::memset(buff, 0, sizeof(buff));
+            std::snprintf(buff, sizeof(buff), "x:%.2f, y:%.2f",
+                          point.GetX(), point.GetY());
+            return buff;
+        }
+
         template<typename T>
         std::string ReplaceIndex(std::size_t index, const std::string& fmt, const T& value)
         {
@@ -146,39 +177,25 @@ namespace base
             return boost::replace_all_copy(fmt, key, ToString(value));
         }
 
-        template<typename T>
+        template<typename T> inline
         std::string FormatString(std::size_t index, const std::string& fmt, const T& value)
-        {
-            return ReplaceIndex(index, fmt, value);
-        }
+        { return ReplaceIndex(index, fmt, value); }
 
-        template<typename T, typename... Args>
+        template<typename T, typename... Args> inline
         std::string FormatString(std::size_t index, const std::string& fmt, const T& value, const Args&... args)
-        {
-            auto ret = ReplaceIndex(index, fmt, value);
-
-            return FormatString(index + 1, std::move(ret), args...);
-        }
-
+        {  return FormatString(index + 1, ReplaceIndex(index, fmt, value), args...); }
     } // detail
 
-    template<typename T>
+    template<typename T> inline
     std::string FormatString(const std::string& fmt, const T& value)
-    {
-        return detail::FormatString(1, fmt, value);
-    }
+    { return detail::FormatString(1, fmt, value); }
 
-    template<typename T, typename... Args>
+    template<typename T, typename... Args> inline
     std::string FormatString(const std::string& fmt, const T& value, const Args&... args)
-    {
-        return detail::FormatString(1, fmt, value, args...);
-    }
+    { return detail::FormatString(1, fmt, value, args...); }
 
-    inline
-    std::string FormatString(const std::string& fmt)
-    {
-        return fmt;
-    }
+    inline std::string FormatString(const std::string& fmt)
+    { return fmt; }
 
     using detail::ToString;
 

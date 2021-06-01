@@ -23,6 +23,7 @@
 #include <string>
 
 #include "graphics/types.h"
+#include "graphics/color4f.h"
 #include "graphics/bitmap.h"
 
 namespace gfx
@@ -31,13 +32,12 @@ namespace gfx
     class Program;
     class Geometry;
     class Texture;
-    class Color4f;
 
     class Device
     {
     public:
         // Device state including the rasterizer state
-        // that is to be appplied for any draw operation.
+        // that is to be applied for any draw operation.
         struct State {
             // should write color buffer or not.
             bool bWriteColor = true;

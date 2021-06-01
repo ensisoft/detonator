@@ -32,7 +32,7 @@ namespace {
 gfx::Material MakeMaterial(const gfx::Color4f& color)
 {
     const auto alpha = color.Alpha();
-    auto mat = SolidColor(color);
+    auto mat = gfx::SolidColor(color);
     mat.SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
@@ -45,7 +45,8 @@ namespace gfx
 
 void DrawTextRect(Painter& painter,
     const std::string& text,
-    const std::string& font, unsigned font_size_px,
+    const std::string& font,
+    unsigned font_size_px,
     const FRect& rect,
     const Color4f& color,
     unsigned alignment,
@@ -209,7 +210,7 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
     Transform trans;
     trans.Scale(length, line_width);
     // offset by half the line width so that the vertical center of the
-    // line alings with the point. important when using line widths > 1.0f
+    // line aligns with the point. important when using line widths > 1.0f
     trans.Translate(0, -0.5*line_width);
     trans.Rotate(angle);
     trans.Translate(a);

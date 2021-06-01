@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "graphics/types.h"
+#include "graphics/color4f.h"
 
 namespace gfx
 {
@@ -34,7 +35,6 @@ namespace gfx
     class Device;
     class Drawable;
     class Material;
-    class Color4f;
     class Transform;
 
     // Painter class implements some algorithms for

@@ -18,10 +18,9 @@
 
 #include "base/test_minimal.h"
 #include "base/math.h"
-
-#include "editor/app/packing.h"
+#include "base/types.h"
 #include "graphics/bitmap.h"
-#include "graphics/types.h"
+#include "editor/app/packing.h"
 
 void unit_test_unbounded()
 {
@@ -58,7 +57,7 @@ void unit_test_unbounded()
         for (size_t i=0; i<images.size(); ++i)
         {
             const auto& img = images[i];
-            const gfx::Rect rc(img.xpos, img.ypos, img.width, img.height);
+            const base::URect rc(img.xpos, img.ypos, img.width, img.height);
             // this are of the bitmap should be black i.e.
             // nothing has been placed there yet.
             const auto is_non_occupied = bmp.Compare(rc, gfx::Color::Black);

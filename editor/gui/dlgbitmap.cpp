@@ -200,7 +200,7 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
         const auto render_height = bmp_height * scale;
         const auto x = (widget_width - render_width) / 2.0f;
         const auto y = (widget_height - render_height) / 2.0f;
-        gfx::FillRect(painter, gfx::Rect(x, y, render_width, render_height), *material);
+        gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), *material);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
                              gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
     }

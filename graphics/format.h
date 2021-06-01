@@ -21,37 +21,10 @@
 #include <cstdio>
 #include <string>
 
-#include "graphics/types.h"
+#include "graphics/format.h"
 
 namespace gfx
 {
-// basic formatting functionality for some simple types.
-// todo: move the JSON functionality here.
-inline std::string ToString(const FRect& rect)
-{
-    char buff[100];
-    std::memset(buff, 0, sizeof(buff));
-    std::snprintf(buff, sizeof(buff),"x:%.2f, y:%.2f, w:%.2f, h:%.2f",
-                  rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
-    return buff;
-}
-
-inline std::string ToString(const FSize& size)
-{
-    char buff[100];
-    std::memset(buff, 0, sizeof(buff));
-    std::snprintf(buff, sizeof(buff), "w:%.2f, h:%.2f",
-                  size.GetWidth(), size.GetHeight());
-    return buff;
-}
-
-inline std::string ToString(const FPoint& point)
-{
-    char buff[100];
-    std::memset(buff, 0, sizeof(buff));
-    std::snprintf(buff, sizeof(buff), "x:%.2f, y:%.2f",
-                  point.GetX(), point.GetY());
-    return buff;
-}
+    // provide formatting here for gfx types.
 
 } // namespace

@@ -29,22 +29,17 @@
 #include <optional>
 
 #include "base/assert.h"
-// todo: refactor the include away.
-#include "graphics/types.h"
+#include "base/types.h"
 
 namespace game
 {
-    // provide type aliases for now for these types so that we can
-    // use them as if they weren't in graphics where they shouldn't
-    // be for most of the use in engine code. (i.e. not related to
-    // graphics in any way)
-    // todo: eventually should refactor them out of graphics/ into base/
-    using FRect = gfx::FRect;
-    using IRect = gfx::IRect;
-    using IPoint = gfx::IPoint;
-    using FPoint = gfx::FPoint;
-    using FSize  = gfx::FSize;
-    using ISize  = gfx::ISize;
+    // type aliases for base types
+    using FRect = base::FRect;
+    using IRect = base::IRect;
+    using IPoint = base::IPoint;
+    using FPoint = base::FPoint;
+    using FSize  = base::FSize;
+    using ISize  = base::ISize;
 
     // Value supporting "arbitrary" values for scripting environments
     // such as Lua.
@@ -126,6 +121,7 @@ namespace game
         bool mReadOnly = true;
     };
 
+    // todo: refactor into base/types ?
     // Box represents a rectangular object which (unlike gfx::FRect)
     // also maintains orientation.
     class FBox
