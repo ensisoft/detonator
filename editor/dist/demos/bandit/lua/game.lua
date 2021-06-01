@@ -13,7 +13,7 @@ Scene  = nil
 Background = nil
 -- viewport into the game world, we move it as the game
 -- advances to follow the player
-Viewport = game.FRect:new(0.0, 0.0, 1200, 800.0)
+Viewport = base.FRect:new(0.0, 0.0, 1200, 800.0)
 
 
 function SetTimeScale(entity, node_name, scale)

@@ -18,7 +18,16 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/color4f.h"
 #include "engine/lua.h"
+
+bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
+{
+    return real::equals(lhs.Red(), rhs.Red()) &&
+           real::equals(lhs.Green(), rhs.Green()) &&
+           real::equals(lhs.Blue(), rhs.Blue()) &&
+           real::equals(lhs.Alpha(), rhs.Alpha());
+}
 
 void unit_test_glm()
 {
@@ -114,8 +123,64 @@ end
     }
 }
 
+void unit_test_base()
+{
+    // color4f
+    {
+        sol::state L;
+        L.open_libraries();
+        game::BindBase(L);
+
+        L.script(
+            R"(
+function make_red()
+    return base.Color4f:new(1.0, 0.0, 0.0, 1.0)
+end
+function make_green()
+    return base.Color4f:new(0.0, 1.0, 0.0, 1.0)
+end
+function make_blue()
+    return base.Color4f:new(0.0, 1.0, 0.0, 1.0)
+end
+
+function set_red()
+    local ret = base.Color4f:new()
+    ret:SetColor(base.Colors.Red)
+    return ret
+end
+function set_green()
+    local ret = base.Color4f:new()
+    ret:SetColor(base.Colors.Green)
+    return ret
+end
+function set_blue()
+    local ret = base.Color4f:new()
+    ret:SetColor(base.Colors.Blue)
+    return ret
+end
+        )");
+
+        base::Color4f ret = L["make_red"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Red));
+
+        ret = L["make_green"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Green));
+
+        ret = L["make_blue"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Green));
+
+        ret = L["set_red"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Red));
+        ret = L["set_green"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Green));
+        ret = L["set_blue"]();
+        TEST_REQUIRE(ret == base::Color4f(base::Color::Blue));
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_glm();
+    unit_test_base();
     return 0;
 }
