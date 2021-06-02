@@ -26,7 +26,7 @@
 namespace gfx
 {
     // Resource is the interface for accessing the actual
-    // content/bytes of some graphics resource such as a
+    // bits and bytes  of some graphics resource such as a
     // texture, font file etc.
     // The resource abstraction allows the resource to be
     // provided through several possible means, such as
@@ -35,24 +35,8 @@ namespace gfx
     class Resource
     {
     public:
-        virtual ~Resource() = default;
-        // Get the immutable data content pointer.
-        virtual const void* GetData() const = 0;
-        // Get the size of the resource in bytes.
-        virtual size_t GetSize() const = 0;
-    private:
-    };
-
-    // ResourceLoader is the interface for accessing actual resources
-    // such as textures (.png, .jpg), fonts (.ttf and .otf) and shader
-    // (.glsl) files.
-    // Currently it only provides functionality for mapping arbitrary
-    // resource identifiers to actual locations on the file system.
-    class ResourceLoader
-    {
-    public:
         // Expected Type of the resource to be loaded.
-        enum class ResourceType {
+        enum class Type {
             // Image file with the purpose of being used as a texture.
             Texture,
             // A glsl shader file (text)
@@ -62,20 +46,29 @@ namespace gfx
             // Compressed image such as .png or .jpeg
             Image
         };
+        virtual ~Resource() = default;
+        // Get the immutable data content pointer.
+        virtual const void* GetData() const = 0;
+        // Get the size of the resource in bytes.
+        virtual std::size_t GetSize() const = 0;
+        virtual std::string GetName() const = 0;
+    private:
+    };
+    using ResourceHandle = std::shared_ptr<const Resource>;
+    using ResourceType   = Resource::Type;
 
-        // Resolve the given resource URI to an actual filename on the file system.
-        // Whenever the graphics system needs some resource such as a font file
-        // or a texture file the resource is identified by an URI. Before the data
-        // be loaded the URI needs to be mapped to an actual filename.
-        // Resource type is the expected type of the resource in question.
-        // The return value should be a path of the file in the file system.
-        virtual std::string ResolveURI(ResourceType type, const std::string& URI) const = 0;
-
+    // ResourceLoader is the interface for accessing actual resources
+    // such as textures (.png, .jpg), fonts (.ttf and .otf) and shader
+    // (.glsl) files as well as for resolving resource URIs to file names.
+    class ResourceLoader
+    {
+    public:
+        using ResourceHandle = gfx::ResourceHandle;
+        virtual ~ResourceLoader() = default;
         // Load the contents of the given resource and return a pointer to the actual
         // contents of the resource. If the load fails a nullptr is returned.
-        virtual std::shared_ptr<const Resource> LoadResource(ResourceType type, const std::string& URI);
+        virtual ResourceHandle LoadResource(const std::string& URI) = 0;
     protected:
-        ~ResourceLoader() = default;
     private:
     };
 
@@ -132,21 +125,17 @@ namespace gfx
         ~ResourcePacker() = default;
     };
 
-    // Set the global resource map object.
+    // Set the global graphics resource loader.
     // If nothing is ever set the mapping will be effectively
     // disabled and every resource handle maps to itself.
-    void SetResourceLoader(ResourceLoader* map);
-
-    // Get the current resource map.
+    // Note that not using a resource loader will only work
+    // if the resource URIs are in fact file paths and can be
+    // used as-is.
+    void SetResourceLoader(ResourceLoader* loader);
+    // Get the current resource loader if any.
     ResourceLoader* GetResourceLoader();
-
-    // Shortcut for resolving a graphics resource URI to a filename on the
-    // filesystem through the resource loader if any is set.
-    // If resource loader is not set then returns the original URI.
-    std::string ResolveURI(ResourceLoader::ResourceType type, const std::string& URI);
-
     // Shortcut for loading the contents of a file through a the resource loader if any is set.
     // If resource loader is not set then performs a default file loader operation.
     // Returns nullptr on any error.
-    std::shared_ptr<const Resource> LoadResource(ResourceLoader::ResourceType type, const std::string& URI);
+    ResourceHandle LoadResource(const std::string& URI);
 } // namespace

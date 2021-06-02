@@ -847,9 +847,6 @@ public:
     { return nullptr; }
     virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string&) const override
     { return nullptr; }
-    virtual void LoadFromFile(const std::string& dir, const std::string& file) override
-    {}
-
 private:
     void TakeScreenshot()
     {
@@ -870,7 +867,7 @@ private:
 
 extern "C" {
 
-GAMESTUDIO_EXPORT game::App* MakeApp()
+GAMESTUDIO_EXPORT game::App* Gamestudio_CreateApp()
 {
     DEBUG("test app");
     return new MyApp;

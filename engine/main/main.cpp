@@ -57,11 +57,9 @@
 // provided by the game module.
 
 // entry point functions that are resolved when the game library is loaded.
-MakeAppFunc                   GameLibMakeApp;
-SetResourceLoaderFunc         GameLibSetResourceLoader;
-SetGlobalLoggerFunc           GameLibSetGlobalLogger;
-CreateDefaultEnvironmentFunc  GameLibCreateEnvironment;
-DestroyDefaultEnvironmentFunc GameLibDestroyEnvironment;
+Gamestudio_CreateAppFunc         GameLibCreateApp;
+Gamestudio_CreateFileLoadersFunc GameLibCreateLoaders;
+Gamestudio_SetGlobalLoggerFunc   GameLibSetGlobalLogger;
 
 #if defined(POSIX_OS)
 void* application_library;
@@ -326,33 +324,35 @@ int main(int argc, char* argv[])
         LoadAppLibrary(library);
         DEBUG("Loaded library: '%1'", library);
 
-        GameLibMakeApp            = (MakeAppFunc)LoadFunction("MakeApp");
-        GameLibSetResourceLoader  = (SetResourceLoaderFunc)LoadFunction("SetResourceLoader");
-        GameLibSetGlobalLogger    = (SetGlobalLoggerFunc)LoadFunction("SetGlobalLogger");
-        GameLibCreateEnvironment  = (CreateDefaultEnvironmentFunc)LoadFunction("CreateDefaultEnvironment");
-        GameLibDestroyEnvironment = (DestroyDefaultEnvironmentFunc)LoadFunction("DestroyDefaultEnvironment");
+        GameLibCreateApp       = (Gamestudio_CreateAppFunc)LoadFunction("Gamestudio_CreateApp");
+        GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
+        GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
 
         // we've created the logger object, so pass it to the engine.
         GameLibSetGlobalLogger(&logger);
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
-        game::ClassLibrary* classlib = nullptr;
-        GameLibCreateEnvironment(&classlib);
+        Gamestudio_Loaders loaders;
+        GameLibCreateLoaders(&loaders);
+
         if (!content.empty())
         {
-            classlib->LoadFromFile(".", content);
+            loaders.ContentLoader->LoadFromFile(content);
+            loaders.ResourceLoader->SetDirectory(".");
         }
 
         // Create the app instance.
-        std::unique_ptr<game::App> app(GameLibMakeApp());
+        std::unique_ptr<game::App> app(GameLibCreateApp());
         if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
 
         app->SetDebugOptions(debug);
 
         game::App::Environment env;
-        env.classlib  = classlib;
+        env.classlib  = loaders.ContentLoader.get();
+        env.loader    = loaders.ResourceLoader.get();
+        env.content   = loaders.ResourceLoader.get();
         env.directory = GetPath();
         app->SetEnvironment(env);
 
@@ -571,8 +571,6 @@ int main(int argc, char* argv[])
 
         context->Dispose();
 
-        GameLibDestroyEnvironment(classlib);
-        GameLibSetResourceLoader(nullptr);
         GameLibSetGlobalLogger(nullptr);
         DEBUG("Exiting...");
     }

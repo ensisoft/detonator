@@ -49,7 +49,7 @@
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/packing.h"
-#include "editor/app/utility.h"
+#include "editor/app/buffer.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
 
@@ -880,22 +880,18 @@ game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const st
     return ret;
 }
 
-std::string Workspace::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& file) const
+game::GameDataHandle Workspace::LoadGameData(const std::string& URI)
 {
-    // see comments in AddFile about resource path mapping.
-    // this method is only called by the graphics/ subsystem
+    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    DEBUG("URI '%1' => '%2'", URI, file);
+    return GameDataFileBuffer::LoadFromFile(file);
+}
 
-    QString ret = FromUtf8(file);
-    if (ret.startsWith("ws://"))
-        ret.replace("ws://", mWorkspaceDir);
-    else if (ret.startsWith("app://"))
-        ret.replace("app://", GetAppDir());
-    else if (ret.startsWith("fs://"))
-        ret.remove(0 , 5);
-
-    DEBUG("Mapping gfx resource '%1' => '%2'", file, ret);
-
-    return ToUtf8(ret);
+gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
+{
+    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    DEBUG("URI '%1' => '%2'", URI, file);
+    return GraphicsFileBuffer::LoadFromFile(file);
 }
 
 bool Workspace::LoadWorkspace(const QString& dir)

@@ -38,6 +38,7 @@
 #include "graphics/resource.h"
 #include "graphics/device.h"
 #include "engine/classlib.h"
+#include "engine/loader.h"
 #include "resource.h"
 #include "utility.h"
 
@@ -55,6 +56,7 @@ namespace app
     class Workspace : public QAbstractTableModel,
                       public QAbstractFileEngineHandler,
                       public game::ClassLibrary,
+                      public game::GameDataLoader,
                       public gfx::ResourceLoader
     {
         Q_OBJECT
@@ -70,9 +72,21 @@ namespace app
         { return static_cast<int>(mVisibleCount); }
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
-
         // QAbstractFileEngineHandler implementation
         virtual QAbstractFileEngine* create(const QString& file) const override;
+        // game::ClassLibrary implementation
+        // The methods here allow requests for resources that don't exist and return
+        // nullptr as specified in the ClassLibrary API.
+        virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual game::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual game::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        // game::GameDataLoader implementation.
+        virtual game::GameDataHandle LoadGameData(const std::string& URI) override;
+        // gfx::ResourceLoader implementation
+        virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
 
         // These are for internal use in the editor and they have different semantics
         // from the similar functions in the ClassLibrary API. Basically trying to access
@@ -88,21 +102,6 @@ namespace app
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
-
-        // ClassLibrary implementation
-        // The methods here allow requests for resources that don't exist and return
-        // nullptr as specified in the ClassLibrary API.
-        virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual game::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual game::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
-        virtual void LoadFromFile(const std::string&, const std::string&) override
-        {}
-
-        // gfx::ResourceLoader implementation
-        virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;
 
         // Try to load the content of the workspace from the files in the given
         // directory. Returns true on success. Any errors are logged.

@@ -412,11 +412,11 @@ void unit_test_packing_basic()
     // Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/font.otf") == "font.otf");
 
-    game::ContentLoader loader;
-    loader.LoadFromFile("TestPackage/test", "TestPackage/test/content.json");
-    TEST_REQUIRE(loader.FindMaterialClassById(material.GetId()));
-    TEST_REQUIRE(loader.FindDrawableClassById(poly.GetId()));
-    TEST_REQUIRE(loader.FindDrawableClassById(particles.GetId()));
+    auto loader = game::JsonFileClassLoader::Create();
+    loader->LoadFromFile("TestPackage/test/content.json");
+    TEST_REQUIRE(loader->FindMaterialClassById(material.GetId()));
+    TEST_REQUIRE(loader->FindDrawableClassById(poly.GetId()));
+    TEST_REQUIRE(loader->FindDrawableClassById(particles.GetId()));
 
     auto [ok, json, error] = base::JsonParseFile("TestPackage/test/config.json");
     TEST_REQUIRE(ok);
@@ -796,9 +796,9 @@ void unit_test_packing_texture_rects(unsigned padding)
         resources.push_back(&workspace.GetUserDefinedResource(0));
         TEST_REQUIRE(workspace.PackContent(resources, options));
 
-        game::ContentLoader loader;
-        loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        auto mat = loader.FindMaterialClassById(material.GetId());
+        auto loader = game::JsonFileClassLoader::Create();
+        loader->LoadFromFile("TestPackage/content.json");
+        auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->GetTextureRect(0);
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
@@ -832,9 +832,9 @@ void unit_test_packing_texture_rects(unsigned padding)
         resources.push_back(&workspace.GetUserDefinedResource(0));
         TEST_REQUIRE(workspace.PackContent(resources, options));
 
-        game::ContentLoader loader;
-        loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        auto mat = loader.FindMaterialClassById(material.GetId());
+        auto loader = game::JsonFileClassLoader::Create();
+        loader->LoadFromFile("TestPackage/content.json");
+        auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->GetTextureRect(0);
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 0.5f, 0.5f));
     }
@@ -881,9 +881,9 @@ void unit_test_packing_texture_rects(unsigned padding)
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue)    >= 32*32);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow)  >= 32*32);
 
-        game::ContentLoader loader;
-        loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-        const auto& mat = loader.FindMaterialClassById(material.GetId());
+        auto loader = game::JsonFileClassLoader::Create();
+        loader->LoadFromFile("TestPackage/content.json");
+        const auto& mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect0 = mat->GetTextureRect(0);
         const auto& rect1 = mat->GetTextureRect(1);
         const auto src_fixed_rect0 = src_rect0.Expand(bitmap[0].GetSize());
@@ -943,12 +943,14 @@ void unit_test_packing_texture_name_collision()
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // verify output
-    game::ContentLoader loader;
-    loader.LoadFromFile("TestPackage", "TestPackage/content.json");
-    gfx::SetResourceLoader(&loader);
+    auto cloader = game::JsonFileClassLoader::Create();
+    auto floader = game::FileResourceLoader::Create();
+    cloader->LoadFromFile("TestPackage/content.json");
+    floader->SetDirectory("TestPackage");
+    gfx::SetResourceLoader(floader.get());
 
     {
-        const auto& mat = loader.FindMaterialClassById(materials[0].GetId());
+        const auto& mat = cloader->FindMaterialClassById(materials[0].GetId());
         const auto& source = mat->GetTextureSource(0);
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(&source);
         gfx::Image img;
@@ -958,7 +960,7 @@ void unit_test_packing_texture_name_collision()
     }
 
     {
-        const auto& mat = loader.FindMaterialClassById(materials[1].GetId());
+        const auto& mat = cloader->FindMaterialClassById(materials[1].GetId());
         const auto& source = mat->GetTextureSource(0);
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(&source);
         gfx::Image img;

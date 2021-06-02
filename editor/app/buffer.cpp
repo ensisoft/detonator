@@ -14,24 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
-#include "base/logging.h"
-#include "engine/main/interface.h"
-#include "engine/loader.h"
+#define LOGTAG "workspace"
 
-// helper stuff for dependency management for now.
-// see interface.h for more details.
+#include "config.h"
 
-extern "C" {
-GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
+#include "warnpush.h"
+  #include <QFile>
+#include "warnpop.h"
+
+#include "editor/app/eventlog.h"
+#include "editor/app/buffer.h"
+
+namespace app
 {
-    out->ContentLoader  = game::JsonFileClassLoader::Create();
-    out->ResourceLoader = game::FileResourceLoader::Create();
+// static
+bool detail::FileBufferImpl::LoadData(const QString& file, QByteArray* data)
+{
+    QFile io;
+    io.setFileName(file);
+    io.open(QIODevice::ReadOnly);
+    if (!io.isOpen())
+    {
+        ERROR("Failed to open '%1' for reading (%2).", file, io.error());
+        return false;
+    }
+    *data = io.readAll();
+    DEBUG("Loaded %1 bytes from file '%2'.", data->size(), file);
+    return true;
 }
 
-GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger)
-{
-    base::SetGlobalLog(logger);
-}
-
-} // extern "C"
+} // namespace

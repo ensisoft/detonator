@@ -25,7 +25,6 @@
 
 #include "base/assert.h"
 #include "graphics/bitmap.h"
-#include "graphics/resource.h"
 
 namespace gfx
 {
@@ -44,7 +43,7 @@ namespace gfx
         // The optional resource type is a hint to the resource loader
         // (in case of using encoded file identifier) as to what's the
         // purpose of the data.
-        Image(const std::string& URI, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
+        Image(const std::string& URI);
         Image(const Image&) = delete;
        ~Image();
 
@@ -55,10 +54,10 @@ namespace gfx
         // it is resolved through the ResourceLoader.
         // On error returns false and the image object remains
         // unchanged.
-        bool Load(const std::string& URI, ResourceLoader::ResourceType hint = ResourceLoader::ResourceType::Image);
+        bool Load(const std::string& URI);
 
         // Copy (and optionally convert) the pixel contents of the
-        // image into a specific type of bitmap object.
+        // image into a specific type of a bitmap object.
         // The bitmap allows for more fine grained control over
         // the pixel data such as GetPixel/SetPixel if that's what you need.
         // If the image cannot be represented as a bitmap of any type
@@ -77,7 +76,6 @@ namespace gfx
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGB*>(mData));
             else if (mDepth == 4)
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
-
             return ret;
         }
         // Returns true if the image has been loaded, otherwise false.

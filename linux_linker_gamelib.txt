@@ -3,11 +3,9 @@
 
 FOO {
   # explicitly list symbols to be exported.
-  global: MakeApp;
-          CreateDefaultEnvironment;
-          DestroyDefaultEnvironment;
-          SetGlobalLogger;
-          SetResourceLoader;
+  global: Gamestudio_CreateApp;
+          Gamestudio_CreateFileLoaders;
+          Gamestudio_SetGlobalLogger;
 
   # hide everything else
   local: *;

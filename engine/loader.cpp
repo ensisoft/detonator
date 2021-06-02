@@ -22,6 +22,9 @@
 #include "warnpop.h"
 
 #include <fstream>
+#include <vector>
+#include <unordered_map>
+#include <memory>
 
 #include "base/logging.h"
 #include "base/platform.h"
@@ -35,7 +38,167 @@
 namespace game
 {
 
-ClassHandle<const gfx::MaterialClass> ContentLoader::FindMaterialClassById(const std::string& name) const
+bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
+{
+#if defined(WINDOWS_OS)
+    std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
+#elif defined(POSIX_OS)
+    std::fstream in(filename, std::ios::in | std::ios::binary);
+#endif
+    if (!in.is_open())
+    {
+        ERROR("Failed to open '%1'.", filename);
+        return false;
+    }
+    in.seekg(0, std::ios::end);
+    const auto size = (std::size_t)in.tellg();
+    in.seekg(0, std::ios::beg);
+    buffer->resize(size);
+    in.read(&(*buffer)[0], size);
+    if ((std::size_t)in.gcount() != size)
+    {
+        ERROR("Failed to read all of '%1'.", filename);
+        return false;
+    }
+
+    DEBUG("Loaded %1 bytes from file '%2'.", buffer->size(), filename);
+    return true;
+}
+template<typename Interface>
+class FileBuffer : public Interface
+{
+public:
+    FileBuffer(const std::string& filename, std::vector<char>&& data)
+        : mFileName(filename)
+        , mFileData(std::move(data))
+    {}
+    virtual const void* GetData() const override
+    {
+        if (mFileData.empty())
+            return nullptr;
+        return &mFileData[0];
+    }
+    virtual std::size_t GetSize() const override
+    { return mFileData.size(); }
+    virtual std::string GetName() const override
+    { return mFileName; }
+private:
+    const std::string mFileName;
+    const std::vector<char> mFileData;
+};
+
+using GameDataFileBuffer = FileBuffer<GameData>;
+using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
+
+class FileResourceLoaderImpl : public FileResourceLoader
+{
+public:
+    // gfx::resource loader impl
+    virtual gfx::ResourceHandle LoadResource(const std::string& uri) override
+    {
+        auto it = mGraphicsFileBufferCache.find(uri);
+        if (it != mGraphicsFileBufferCache.end())
+            return it->second;
+        std::vector<char> buffer;
+        if (!LoadFileBuffer(ResolveURI(uri), &buffer))
+            return nullptr;
+        auto buff = std::make_shared<GraphicsFileBuffer>(uri, std::move(buffer));
+        mGraphicsFileBufferCache[uri] = buff;
+        return buff;
+    }
+    // GameDataLoader impl
+    virtual GameDataHandle LoadGameData(const std::string& uri) override
+    {
+        auto it = mGameDataBufferCache.find(uri);
+        if (it != mGameDataBufferCache.end())
+            return it->second;
+        std::vector<char> buffer;
+        if (LoadFileBuffer(ResolveURI(uri), &buffer))
+            return nullptr;
+        auto buff = std::make_shared<GameDataFileBuffer>(uri, std::move(buffer));
+        mGameDataBufferCache[uri] = buff;
+        return buff;
+    }
+
+    // FileResourceLoader impl
+    virtual void SetDirectory(const std::string& dir) override
+    { mResourceDir = dir; }
+private:
+    std::string ResolveURI(const std::string& URI) const
+    {
+        auto it = mUriCache.find(URI);
+        if (it != mUriCache.end())
+            return it->second;
+
+        std::string str = URI;
+        if (str.find("pck://", 0) == 0)
+            str = mResourceDir + "/" + str.substr(6);
+        else if (str.find("ws://", 0) == 0)
+            str = str.substr(5);
+        else if (str.find("fs://", 0) == 0)
+            str = str.substr(5);
+
+        DEBUG("Mapped %1 to %2", URI, str);
+        mUriCache[URI] = str;
+        return str;
+    }
+private:
+    // cache of URIs that have been resolved to file
+    // names already.
+    mutable std::unordered_map<std::string, std::string> mUriCache;
+    // cache of graphics file buffers that have already been loaded.
+    std::unordered_map<std::string,
+        std::shared_ptr<const GraphicsFileBuffer>> mGraphicsFileBufferCache;
+    std::unordered_map<std::string,
+        std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
+    // the root of the resource dir against which to resolve the resource URIs.
+    std::string mResourceDir;
+};
+
+// static
+std::unique_ptr<FileResourceLoader> FileResourceLoader::Create()
+{ return std::make_unique<FileResourceLoaderImpl>(); }
+
+class ContentLoaderImpl : public JsonFileClassLoader
+{
+public:
+    // ClassLibrary implementation.
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
+    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
+    virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const override;
+    virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const override;
+    virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const override;
+    virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const override;
+    // ContentLoader impl
+    virtual void LoadFromFile(const std::string& file) override;
+private:
+    std::string mResourceFile;
+    // These are the material types that have been loaded
+    // from the resource file.
+    std::unordered_map<std::string,
+            std::shared_ptr<gfx::MaterialClass>> mMaterials;
+    // These are the particle engine types that have been loaded
+    // from the resource file.
+    std::unordered_map<std::string,
+            std::shared_ptr<gfx::KinematicsParticleEngineClass>> mParticleEngines;
+    // These are the custom shapes (polygons) that have been loaded
+    // from the resource file.
+    std::unordered_map<std::string,
+            std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
+    // These are the entities that have been loaded from
+    // the resource file.
+    std::unordered_map<std::string, std::shared_ptr<EntityClass>> mEntities;
+    // These are the scenes that have been loaded from
+    // the resource file.
+    std::unordered_map<std::string, std::shared_ptr<SceneClass>> mScenes;
+    // name table maps entity names to ids.
+    std::unordered_map<std::string, std::string> mEntityNameTable;
+    // name table maps scene names to ids.
+    std::unordered_map<std::string, std::string> mSceneNameTable;
+};
+
+
+ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& name) const
 {
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
@@ -56,7 +219,7 @@ ClassHandle<const gfx::MaterialClass> ContentLoader::FindMaterialClassById(const
     return nullptr;
 }
 
-ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const std::string& name) const
+ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(const std::string& name) const
 {
     // these are the current primitive cases that are not packed as part of the resources
     if (name == "_rect")
@@ -97,24 +260,6 @@ ClassHandle<const gfx::DrawableClass> ContentLoader::FindDrawableClassById(const
     return nullptr;
 }
 
-std::string ContentLoader::ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const
-{
-    auto it = mUriCache.find(URI);
-    if (it != mUriCache.end())
-        return it->second;
-
-    std::string str = URI;
-    if (str.find("pck://", 0) == 0)
-        str = mResourceDir + "/" + str.substr(6);
-    else if (str.find("ws://", 0) == 0)
-        str = str.substr(5);
-    else if (str.find("fs://", 0) == 0)
-        str = str.substr(5);
-
-    DEBUG("Mapped %1 to %2", URI, str);
-    mUriCache[URI] = str;
-    return str;
-}
 
 template<typename Interface, typename Implementation>
 void LoadResources(const nlohmann::json& json, const std::string& type,
@@ -139,7 +284,7 @@ void LoadResources(const nlohmann::json& json, const std::string& type,
     }
 }
 
-void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file)
+void ContentLoaderImpl::LoadFromFile(const std::string& file)
 {
     std::ifstream in(base::OpenBinaryInputStream(file));
     if (!in.is_open())
@@ -177,12 +322,10 @@ void ContentLoader::LoadFromFile(const std::string& dir, const std::string& file
             }
         }
     }
-
-    mResourceDir  = dir;
     mResourceFile = file;
 }
 
-ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassByName(const std::string& name) const
+ClassHandle<const game::EntityClass> ContentLoaderImpl::FindEntityClassByName(const std::string& name) const
 {
     auto it = mEntityNameTable.find(name);
     if (it != mEntityNameTable.end())
@@ -190,7 +333,7 @@ ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassByName(const 
 
     return nullptr;
 }
-ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassById(const std::string& id) const
+ClassHandle<const game::EntityClass> ContentLoaderImpl::FindEntityClassById(const std::string& id) const
 {
     auto it = mEntities.find(id);
     if (it != std::end(mEntities))
@@ -199,7 +342,7 @@ ClassHandle<const game::EntityClass> ContentLoader::FindEntityClassById(const st
     return nullptr;
 }
 
-ClassHandle<const SceneClass> ContentLoader::FindSceneClassByName(const std::string& name) const
+ClassHandle<const SceneClass> ContentLoaderImpl::FindSceneClassByName(const std::string& name) const
 {
     auto it = mSceneNameTable.find(name);
     if (it != mSceneNameTable.end())
@@ -207,7 +350,7 @@ ClassHandle<const SceneClass> ContentLoader::FindSceneClassByName(const std::str
 
     return nullptr;
 }
-ClassHandle<const SceneClass> ContentLoader::FindSceneClassById(const std::string& id) const
+ClassHandle<const SceneClass> ContentLoaderImpl::FindSceneClassById(const std::string& id) const
 {
     auto it = mScenes.find(id);
     if (it != mScenes.end())
@@ -215,5 +358,9 @@ ClassHandle<const SceneClass> ContentLoader::FindSceneClassById(const std::strin
 
     return nullptr;
 }
+
+// static
+std::unique_ptr<JsonFileClassLoader> JsonFileClassLoader::Create()
+{ return std::make_unique<ContentLoaderImpl>(); }
 
 } // namespace

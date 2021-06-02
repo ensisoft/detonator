@@ -18,71 +18,57 @@
 
 #include "config.h"
 
-#include <unordered_map>
 #include <memory>
 
 #include "engine/classlib.h"
+#include "engine/data.h"
 #include "graphics/resource.h"
-#include "graphics/material.h"
-#include "graphics/drawable.h"
 
 namespace game
 {
-    class EntityClass;
+    // in order to de-couple the loader application from transitive
+    // dependencies such as the graphics subsystem etc. this header
+    // is  *pure* interface only.  The implementations can be built
+    // into the shared engine library which will need those deps in
+    // any case.
 
-    // Game content (assets + gfx resources) loader.
-    // Provides access to high level game content, i.e. game assets such as
-    // animations based on their descriptions in the JSON file(s).
-    // Additionally implements the gfx::ResourceLoader in order to implement
-    // access to the low level file based graphics resources such as
-    // texture, font and shader files.
-    class ContentLoader : public ClassLibrary,
-                          public gfx::ResourceLoader
+    class GameData;
+    using GameDataHandle = std::shared_ptr<const GameData>;
+
+    // Interface for accessing game objects' data.
+    class GameDataLoader
     {
     public:
-        // ClassLibrary implementation.
-        // resource creation for the game level subsystem.
-        virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
-        virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
-        virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const override;
-        virtual void LoadFromFile(const std::string& dir, const std::string& file) override;
-        // gfx::ResourceLoader implementation. Provides access to the
-        // low level byte buffer / file system file resources such as
-        // textures/font files, shaders used by the graphics subsystem.
-        virtual std::string ResolveURI(gfx::ResourceLoader::ResourceType type, const std::string& URI) const override;
+        virtual ~GameDataLoader() = default;
+        virtual GameDataHandle LoadGameData(const std::string& uri) = 0;
+    };
 
+    // Low level resource loader for loading gfx resource
+    // files (shaders, textures, fonts etc) and game data
+    // files such as UI styles.
+    class FileResourceLoader : public gfx::ResourceLoader,
+                               public game::GameDataLoader
+    {
+    public:
+        // Set the directory in which to look for resource files
+        virtual void SetDirectory(const std::string& dir) = 0;
+        // Create new file resource loader.
+        static std::unique_ptr<FileResourceLoader> Create();
     private:
-        std::string mResourceDir;
-        std::string mResourceFile;
-        // These are the material types that have been loaded
-        // from the resource file.
-        std::unordered_map<std::string,
-            std::shared_ptr<gfx::MaterialClass>> mMaterials;
-        // These are the particle engine types that have been loaded
-        // from the resource file.
-        std::unordered_map<std::string,
-            std::shared_ptr<gfx::KinematicsParticleEngineClass>> mParticleEngines;
-        // These are the custom shapes (polygons) that have been loaded
-        // from the resource file.
-        std::unordered_map<std::string,
-            std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
-        // These are the entities that have been loaded from
-        // the resource file.
-        std::unordered_map<std::string, std::shared_ptr<EntityClass>> mEntities;
-        // These are the scenes that have been loaded from
-        // the resource file.
-        std::unordered_map<std::string, std::shared_ptr<SceneClass>> mScenes;
-        // name table maps entity names to ids.
-        std::unordered_map<std::string, std::string> mEntityNameTable;
-        // name table maps scene names to ids.
-        std::unordered_map<std::string, std::string> mSceneNameTable;
+    };
 
-        // cache of URIs that have been resolved to file
-        // names already.
-        mutable std::unordered_map<std::string, std::string> mUriCache;
-
+    // Load the Entity, Scene, Material etc. classes from a JSON file.
+    class JsonFileClassLoader : public ClassLibrary
+    {
+    public:
+        // Load game content from a JSON file. Expects the file to be well formed, on
+        // an ill-formed JSON file an exception is thrown.
+        // No validation is done regarding the completeness of the loaded content,
+        // I.e. it's possible that classes refer to resources (i.e. other classes)
+        // that aren't available.
+        virtual void LoadFromFile(const std::string& file) = 0;
+        // create new content loader.
+        static std::unique_ptr<JsonFileClassLoader> Create();
+    private:
     };
 } // namespace

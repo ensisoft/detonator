@@ -65,12 +65,6 @@ namespace game
         // Find a scene class object by the given id.
         // if not found will return a nullptr.
         virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const = 0;
-        // Load content from a JSON file. Expects the file to be well formed, on
-        // an ill-formed JSON file an exception is thrown.
-        // No validation is done regarding the completeness of the loaded content,
-        // I.e. it's possible that classes refer to resources (i.e. other classes)
-        // that aren't available.
-        virtual void LoadFromFile(const std::string& dir, const std::string& file) = 0;
     private:
     };
 } // namespace
