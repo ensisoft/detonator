@@ -42,6 +42,49 @@
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
+// About Lua error handling. The binding code here must be careful
+// to understand what is a BUG, a logical error condition and an
+// exceptional condition. Normally in the engine code BUG is an
+// error made by the programmer of the engine and results in a
+// stack strace and a core dump. Logical error conditions are
+// conditions that the code needs to be prepared to deal with, e.g
+// failed/mangled data in various content files, missing data files
+// etc. Finally exceptional conditions are conditions that happen
+// as some unexpected failure (most typically an underlying OS
+// resource allocation has failed). Exceptions are normally not
+// used for logical error conditions (oops, this texture file could
+// not be read etc.)
+//
+// However here when dealing with calls coming from the running game
+// what could normally be considered a BUG in other parts of the
+// engine code may not be so here since the code here needs to be
+// prepared to deal with mistakes in the Lua code. (That being said
+// it's still possible that *this* code contains BUGS too)
+// For example: If an OOB array access is attempted it's normally a bug
+// in the calling code and triggers an ASSERT. However when coming from
+// a Lua it must be an expected condition. I.e we must expect that the
+// Lua code will call us wrong and be prepared to deal with such situations.
+//
+// So what strategies are there for dealing with this?
+// 1. simply ignore incorrect/buggy calls
+//    - if return value is needed return some "default" value.
+//    - possibly log a warning/error
+// 2. device API semantics that return some "status" OK (boolean)
+//    value to indicate that the call was OK.
+// 3. raise a Lua error and let the caller either fail or use pcall
+//
+// It seems that the option number 3 is the most reasonable of these
+// i.e in case of any buggy calls coming from lua a lua error is raised
+// and then it's the callers responsibility to deal with that somehow
+// by for example wrapping the call inside pcall.
+// And for better or for worse an std exception can be used to indicate
+// to sol that Lua error should be raised. (Quickly looking didn't see
+// another way of raising Lua errors, maybe it does exist but sol2 docs
+// are sucn an awful mess..)
+// The problem with the exceptions though is that when this code has
+// BUGS i.e. calls the sol2 API incorrectly for example sol2 will then
+// throw an exception. So that muddles the waters a bit unfortunately..
+
 namespace {
 template<typename... Args>
 void CallLua(const sol::protected_function& func, const Args&... args)
@@ -49,6 +92,16 @@ void CallLua(const sol::protected_function& func, const Args&... args)
     if (!func.valid())
         return;
     const auto& result = func(args...);
+    // All the calls into Lua begin by the engine calling into Lua.
+    // That means that if any error is raised by:
+    // - Lua code calls error(....) to raise an error
+    // - Lua code calls into the binding code below buggily and and exception
+    //   gets thrown which sol2 will catch and convert into Lua error
+    // - The binding code itself is buggy and calls into sol2 wrong which throws an
+    //   exception...
+    // - There's some other c++ exception 
+    // regardless of the source of the error/exception will then obtain
+    // an invalid object here.
     if (result.valid())
         return;
     const sol::error err = result;
@@ -538,6 +591,12 @@ void BindBase(sol::state& L)
                 base::Color4f(float, float, float, float),
                 base::Color4f(int, int, int, int)> ctors;
         auto color = table.new_usertype<base::Color4f>("Color4f", ctors);
+        color["FromEnum"]   = [](int value) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(value);
+            if (!color_value.has_value())
+                throw std::runtime_error("No such color value:" + std::to_string(value));
+            return base::Color4f(color_value.value());
+        };
         color["GetRed"]     = &base::Color4f::Red;
         color["GetGreen"]   = &base::Color4f::Green;
         color["GetBlue"]    = &base::Color4f::Blue;
@@ -549,7 +608,7 @@ void BindBase(sol::state& L)
         color["SetColor"]   = [](base::Color4f& color, int value) {
             const auto color_value = magic_enum::enum_cast<base::Color>(value);
             if (!color_value.has_value())
-                return;
+                throw std::runtime_error("No such color value:" + std::to_string(value));
             color = base::Color4f(color_value.value());
         };
     }
@@ -620,15 +679,15 @@ void BindWDK(sol::state& L)
     auto table = L["wdk"].get_or_create<sol::table>();
     table["KeyStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
-        if (key.has_value())
-            return std::string(magic_enum::enum_name(key.value()));
-        return std::string("");
+        if (!key.has_value())
+            throw std::runtime_error("No such keysym value:" + std::to_string(value));
+        return std::string(magic_enum::enum_name(key.value()));
     };
     table["BtnStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::MouseButton>(value);
-        if (key.has_value())
-            return std::string(magic_enum::enum_name(key.value()));
-        return std::string("");
+        if (!key.has_value())
+            throw std::runtime_error("No such mouse button value: " + std::to_string(value));
+        return std::string(magic_enum::enum_name(key.value()));
     };
     table["ModStr"] = [](int value) {
         std::string ret;
@@ -647,7 +706,7 @@ void BindWDK(sol::state& L)
     table["TestKeyDown"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
         if (!key.has_value())
-            return false;
+            throw std::runtime_error("No such key symbol: " + std::to_string(value));
         return wdk::TestKeyDown(key.value());
     };
 
@@ -695,13 +754,13 @@ void BindGameLib(sol::state& L)
     drawable["TestFlag"]      = [](const DrawableItem* item, const std::string& str) {
         const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
         if (!enum_val.has_value())
-            throw std::runtime_error("no such drawable item flag:" + str);
+            throw std::runtime_error("No such drawable item flag:" + str);
         return item->TestFlag(enum_val.value());
     };
     drawable["SetFlag"]       = [](DrawableItem* item, const std::string& str, bool on_off) {
         const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
         if (!enum_val.has_value())
-            throw std::runtime_error("no such drawable item flag: " + str);
+            throw std::runtime_error("No such drawable item flag: " + str);
         item->SetFlag(enum_val.value(), on_off);
     };
 
@@ -719,13 +778,13 @@ void BindGameLib(sol::state& L)
     body["TestFlag"] = [](const RigidBodyItem* item, const std::string& str) {
         const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
         if (!enum_val.has_value())
-            throw std::runtime_error("no such rigid body flag:" + str);
+            throw std::runtime_error("No such rigid body flag:" + str);
         return item->TestFlag(enum_val.value());
     };
     body["SetFlag"] = [](RigidBodyItem* item, const std::string& str, bool on_off) {
         const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
         if (!enum_val.has_value())
-            throw std::runtime_error("no such rigid body flag: " + str);
+            throw std::runtime_error("No such rigid body flag: " + str);
         item->SetFlag(enum_val.value(), on_off);
     };
     body["GetSimulationType"] = [](const RigidBodyItem* item) {
@@ -769,18 +828,16 @@ void BindGameLib(sol::state& L)
                 else if (var && var->GetType() == ScriptVar::Type::Vec2)
                     return sol::make_object(lua, var->GetValue<glm::vec2>());
                 else if (var) BUG("Unhandled ScriptVar type.");
-                WARN("No such script variable: '%1'", key);
-                return sol::make_object(lua, sol::lua_nil);
+
+                throw std::runtime_error(base::FormatString("No such entity variable: '%1'", key));
             },
             sol::meta_function::new_index, [](const Entity* entity, const char* key, sol::object value) {
                 const ScriptVar* var = entity->FindScriptVar(key);
-                if (var == nullptr) {
-                    WARN("No such script variable: '%1'", key);
-                    return;
-                } else if (var->IsReadOnly()) {
-                    WARN("Trying to write to a read only variable: '%1'", key);
-                    return;
-                }
+                if (var == nullptr)
+                    throw std::runtime_error(base::FormatString("No such entity variable: '%1'", key));
+                else if (var->IsReadOnly())
+                    throw std::runtime_error(base::FormatString("Trying to write to a read only entity variable: '%1'", key));
+
                 if (value.is<int>() && var->HasType<int>())
                     var->SetValue(value.as<int>());
                 else if (value.is<float>() && var->HasType<float>())
@@ -791,7 +848,7 @@ void BindGameLib(sol::state& L)
                     var->SetValue(value.as<std::string>());
                 else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
                     var->SetValue(value.as<glm::vec2>());
-                else WARN("Script value type mismatch. '%1' expects: '%2'", key, var->GetType());
+                else throw std::runtime_error(base::FormatString("Entity variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
             });
     entity["GetName"]              = &Entity::GetName;
     entity["GetId"]                = &Entity::GetId;
@@ -813,7 +870,7 @@ void BindGameLib(sol::state& L)
     entity["TestFlag"]             = [](const Entity* entity, const std::string& str) {
         const auto enum_val = magic_enum::enum_cast<Entity::Flags>(str);
         if (!enum_val.has_value())
-            throw std::runtime_error("no such drawable item flag:" + str);
+            throw std::runtime_error("No such drawable item flag:" + str);
         return entity->TestFlag(enum_val.value());
     };
 
@@ -840,18 +897,16 @@ void BindGameLib(sol::state& L)
                 else if (var && var->GetType() == ScriptVar::Type::Vec2)
                     return sol::make_object(lua, var->GetValue<glm::vec2>());
                 else if (var) BUG("Unhandled ScriptVar type.");
-                WARN("No such script variable: '%1'", key);
-                return sol::make_object(lua, sol::lua_nil);
+
+                throw std::runtime_error(base::FormatString("No such scene variable: '%1'", key));
             },
        sol::meta_function::new_index, [](const Scene* scene, const char* key, sol::object value) {
                 const ScriptVar* var = scene->FindScriptVar(key);
-                if (var == nullptr) {
-                    WARN("No such script variable: '%1'", key);
-                    return;
-                } else if (var->IsReadOnly()) {
-                    WARN("Trying to write to a read only variable: '%1'", key);
-                    return;
-                }
+                if (var == nullptr)
+                    throw std::runtime_error(base::FormatString("No such scene variable: '%1'", key));
+                else if (var->IsReadOnly())
+                    throw std::runtime_error(base::FormatString("Trying to write to a read only scene variable: '%1'", key));
+
                 if (value.is<int>() && var->HasType<int>())
                     var->SetValue(value.as<int>());
                 else if (value.is<float>() && var->HasType<float>())
@@ -862,7 +917,7 @@ void BindGameLib(sol::state& L)
                     var->SetValue(value.as<std::string>());
                 else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
                     var->SetValue(value.as<glm::vec2>());
-                else WARN("Script value type mismatch. '%1' expects: '%2'", key, var->GetType());
+                else throw std::runtime_error(base::FormatString("Scene variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
             });
     scene["GetNumEntities"]           = &Scene::GetNumEntities;
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
