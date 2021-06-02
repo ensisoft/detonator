@@ -21,21 +21,17 @@
 #include "warnpop.h"
 
 #include <algorithm>
-#include <fstream>
-#include <stdexcept>
 
 #include "base/logging.h"
-#include "base/utility.h"
 #include "graphics/image.h"
 #include "graphics/resource.h"
 
 namespace gfx
 {
 
-Image::Image(const std::string& URI, ResourceLoader::ResourceType hint)
+Image::Image(const std::string& URI)
 {
-    // resolve file first.
-    const auto& buffer = LoadResource(hint, URI);
+    const auto& buffer = gfx::LoadResource(URI);
     if (!buffer)
     {
         ERROR("Failed to load image: '%1' buffer", URI);
@@ -64,9 +60,9 @@ Image::~Image()
         stbi_image_free(mData);
 }
 
-bool Image::Load(const std::string& URI, ResourceLoader::ResourceType hint)
+bool Image::Load(const std::string& URI)
 {
-    Image temp(URI, hint);
+    Image temp(URI);
     if (!temp.IsValid())
         return false;
     std::swap(mURI, temp.mURI);

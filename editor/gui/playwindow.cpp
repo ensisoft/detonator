@@ -32,15 +32,15 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
+#include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/app/utility.h"
 #include "editor/gui/playwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/utility.h"
-#include "editor/gui/settings.h"
 #include "engine/main/interface.h"
-#include "engine/animation.h"
+#include "engine/loader.h"
 #include "wdk/system.h"
 
 namespace {
@@ -241,16 +241,32 @@ private:
 // implementation of game asset table for accessing the
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
-class PlayWindow::ResourceLoader : public gfx::ResourceLoader
+class PlayWindow::ResourceLoader : public gfx::ResourceLoader,
+                                   public game::GameDataLoader
 {
 public:
-    ResourceLoader(const app::Workspace& workspace, const QString& gamedir, const QString& hostdir)
+    ResourceLoader(const app::Workspace& workspace,
+                   const QString& gamedir,
+                   const QString& hostdir)
         : mWorkspace(workspace)
         , mGameDir(gamedir)
         , mHostDir(hostdir)
     {}
     // Resource loader implementation
-    virtual std::string ResolveURI(ResourceType type, const std::string& URI) const override
+    virtual gfx::ResourceHandle LoadResource(const std::string& URI) override
+    {
+        const auto& file = ResolveURI(URI);
+        DEBUG("URI '%1' => '%2'", URI, file);
+        return app::GraphicsFileBuffer::LoadFromFile(file);
+    }
+    virtual game::GameDataHandle LoadGameData(const std::string& URI) override
+    {
+        const auto& file = ResolveURI(URI);
+        DEBUG("URI '%1' => '%2'", URI, file);
+        return app::GameDataFileBuffer::LoadFromFile(file);
+    }
+private:
+    QString ResolveURI(const std::string& URI) const
     {
         auto it = mFileMaps.find(URI);
         if (it != mFileMaps.end())
@@ -263,7 +279,11 @@ public:
         if (base::StartsWith(URI, "ws://") ||
             base::StartsWith(URI, "app://") ||
             base::StartsWith(URI, "fs://"))
-            return mWorkspace.ResolveURI(type, URI);
+        {
+            const auto& ret = mWorkspace.MapFileToFilesystem(app::FromUtf8(URI));
+            mFileMaps[URI]  = ret;
+            return ret;
+        }
 
         // What to do with paths such as "textures/UFO/ufo.png" ?
         // the application expects this to be relative and to be resolved
@@ -276,24 +296,20 @@ public:
         // instead. note that if the game resources use custom shaders
         // when they are added to the materials their paths are properly
         // encoded.
-        QString dir = mGameDir;
-
+        QString ret;
         // todo: somehow remove and fix this hack related to the shaders
         if (base::StartsWith(URI, "shaders/"))
-            dir = mHostDir;
+            ret = app::JoinPath(mHostDir, app::FromUtf8(URI));
+        else ret = app::JoinPath(mGameDir, app::FromUtf8(URI));
 
-        const auto& resolved = app::JoinPath(dir, app::FromUtf8(URI));
-        const auto& ret = app::ToUtf8(resolved);
         mFileMaps[URI] = ret;
-        DEBUG("Mapping gfx resource '%1' => '%2'", URI, resolved);
         return ret;
     }
-
 private:
     const app::Workspace& mWorkspace;
     const QString mGameDir;
     const QString mHostDir;
-    mutable std::unordered_map<std::string, std::string> mFileMaps;
+    mutable std::unordered_map<std::string, QString> mFileMaps;
 };
 
 // implement base::logger and forward the log events
@@ -331,7 +347,7 @@ public:
         event.msg = QString::fromUtf8(msg);
         // make sure the log event doesn't end with carriage return/new line
         // characters since these can create confusing output in the listview.
-        // i.e. if there's not enough space to dispay multiple rows of text
+        // i.e. if there's not enough space to display multiple rows of text
         // (see size hint role in eventlog) the text will be elided with ellipses
         if (event.msg.endsWith('\n'))
             event.msg.chop(1);
@@ -605,23 +621,19 @@ bool PlayWindow::LoadGame()
         return false;
     }
 
-    mGameLibMakeApp            = (MakeAppFunc)mLibrary.resolve("MakeApp");
-    mGameLibSetResourceLoader  = (SetResourceLoaderFunc)mLibrary.resolve("SetResourceLoader");
-    mGameLibSetGlobalLogger    = (SetGlobalLoggerFunc)mLibrary.resolve("SetGlobalLogger");
-    if (!mGameLibMakeApp)
-        ERROR("Failed to resolve 'MakeApp'.");
-    else if (!mGameLibSetResourceLoader)
-        ERROR("Failed to resolve 'SetResourceLoader'.");
+    mGameLibCreateApp       = (Gamestudio_CreateAppFunc)mLibrary.resolve("Gamestudio_CreateApp");
+    mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
+    if (!mGameLibCreateApp)
+        ERROR("Failed to resolve 'Gamestudio_CreateApp'.");
     else if (!mGameLibSetGlobalLogger)
-        ERROR("Failed to resolve 'SetGlobalLogger'.");
-    if (!mGameLibMakeApp || !mGameLibSetGlobalLogger || !mGameLibSetResourceLoader)
+        ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
+    if (!mGameLibCreateApp || !mGameLibSetGlobalLogger)
         return false;
 
     mGameLibSetGlobalLogger(mLogger.get());
-    mGameLibSetResourceLoader(mResourceLoader.get());
 
     std::unique_ptr<game::App> app;
-    app.reset(mGameLibMakeApp());
+    app.reset(mGameLibCreateApp());
     if (!app)
     {
         ERROR("Failed to create app instance.");
@@ -654,16 +666,12 @@ void PlayWindow::Shutdown()
     }
     mApp.reset();
 
-    if (mGameLibSetResourceLoader)
-        mGameLibSetResourceLoader(nullptr);
     if (mGameLibSetGlobalLogger)
         mGameLibSetGlobalLogger(nullptr);
 
     mLibrary.unload();
-
-    mGameLibMakeApp = nullptr;
+    mGameLibCreateApp = nullptr;
     mGameLibSetGlobalLogger = nullptr;
-    mGameLibSetResourceLoader = nullptr;
 }
 
 void PlayWindow::LoadState()
@@ -766,6 +774,8 @@ void PlayWindow::DoAppInit()
 
         game::App::Environment env;
         env.classlib  = &mWorkspace;
+        env.content   = mResourceLoader.get();
+        env.loader    = mResourceLoader.get();
         env.directory = app::ToUtf8(mGameWorkingDir);
         mApp->SetEnvironment(env);
 

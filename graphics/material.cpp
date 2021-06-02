@@ -54,12 +54,11 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
 {
     try
     {
-        // in case of an image load exception, catch and log and return
-        // null.
+        // in case of an image load exception, catch and log and return null.
         // Todo: image class should probably provide a non-throw load
         // but then it also needs some mechanism for getting the error
         // message why it failed.
-        Image file(mFile, ResourceLoader::ResourceType::Texture);
+        Image file(mFile);
         if (file.GetDepthBits() == 8)
             return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
         else if (file.GetDepthBits() == 24)
@@ -139,18 +138,18 @@ Shader* MaterialClass::GetShader(Device& device) const
     if (shader)
         return shader;
 
-    const auto& file = ResolveURI(ResourceLoader::ResourceType::Shader, GetShaderFile());
-    std::ifstream stream;
-    stream.open(file);
-    if (!stream.is_open())
+    const auto& buffer = gfx::LoadResource(GetShaderFile());
+    if (!buffer)
     {
-        ERROR("Failed to open shader file: '%1'", file);
+        ERROR("Failed to load shader file: '%1'", GetShaderFile());
         return nullptr;
     }
-    const std::string source(std::istreambuf_iterator<char>(stream), {});
+    // todo: get rid of the copy into stringstream below
+    const char* beg = (const char*)buffer->GetData();
+    const char* end = beg + buffer->GetSize();
     std::string code;
     std::string line;
-    std::stringstream ss(source);
+    std::stringstream ss(std::string(beg, end));
     while (std::getline(ss, line))
     {
         if (mStatic && base::Contains(line, "uniform"))

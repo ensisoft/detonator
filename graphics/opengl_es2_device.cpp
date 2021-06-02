@@ -1428,20 +1428,18 @@ private:
             // shaders because they're cool to do so and want some special customized
             // shader effect.
             //
-            const auto& file = ResolveURI(ResourceLoader::ResourceType::Shader, URI);
-
-            std::ifstream stream;
-            stream.open(file);
-            if (!stream.is_open())
+            const auto& buffer = gfx::LoadResource(URI);
+            if (!buffer)
             {
-                ERROR("Failed to open shader file: '%1'", file);
+                ERROR("Failed to load shader source: '%1'", URI);
                 return false;
             }
-            const std::string source(std::istreambuf_iterator<char>(stream), {});
 
-            if (!CompileSource(source))
+            const char* beg = (const char*)buffer->GetData();
+            const char* end = beg + buffer->GetSize();
+            if (!CompileSource(std::string(beg, end)))
             {
-                ERROR("Failed to compile shader source file: '%1'", file);
+                ERROR("Failed to compile shader source file: '%1'", URI);
                 return false;
             }
             return true;

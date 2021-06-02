@@ -280,7 +280,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize(const std::string& line
 
     // todo: refactor away the exceptions.
 
-    const auto& font_buff = LoadResource(ResourceLoader::ResourceType::Font, text.font);
+    const auto& font_buff = gfx::LoadResource(text.font);
     if (!font_buff)
         throw std::runtime_error("Failed to load font file: " + text.font);
 

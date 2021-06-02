@@ -131,9 +131,8 @@ namespace gui
         // loader for the game/app library.
         QLibrary mLibrary;
         // entry point functions into the game/app library.
-        MakeAppFunc                   mGameLibMakeApp = nullptr;
-        SetResourceLoaderFunc         mGameLibSetResourceLoader = nullptr;
-        SetGlobalLoggerFunc           mGameLibSetGlobalLogger = nullptr;
+        Gamestudio_CreateAppFunc       mGameLibCreateApp = nullptr;
+        Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
         // Qt's Open GL context for the QWindow.
         QOpenGLContext mContext;
         // This is the actual OpenGL renderable surface.

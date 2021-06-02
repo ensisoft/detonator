@@ -191,6 +191,8 @@ add_executable(Editor
     editor/app/utility.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
+    editor/app/buffer.h
+    editor/app/buffer.cpp
     editor/app/packing.cpp
     editor/app/process.h
     editor/app/process.cpp
@@ -351,6 +353,7 @@ add_executable(EditorGameHost
     editor/app/packing.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
+    editor/app/buffer.cpp
     editor/app/ipc.h
     editor/app/ipc.cpp
     editor/gui/host.cpp
@@ -480,6 +483,7 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
         editor/app/workspace.cpp
+        editor/app/buffer.cpp
         editor/app/ipc.cpp
         editor/app/packing.cpp)
 add_executable(unit_test_resource editor/app/unit_test/unit_test_resource.cpp
@@ -491,6 +495,7 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/format.cpp
         editor/app/eventlog.cpp
         editor/app/workspace.cpp
+        editor/app/buffer.cpp
         editor/app/packing.cpp)
 add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)

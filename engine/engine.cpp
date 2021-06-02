@@ -106,6 +106,8 @@ public:
         mDirectory = env.directory;
         mRenderer.SetLoader(mClasslib);
         mPhysics.SetLoader(mClasslib);
+        // set the unfortunate global gfx loader
+        gfx::SetResourceLoader(env.loader);
     }
     virtual void SetEngineConfig(const EngineConfig& conf) override
     {
@@ -301,6 +303,7 @@ public:
     virtual void Shutdown() override
     {
         DEBUG("Engine shutdown");
+        gfx::SetResourceLoader(nullptr);
         mDevice.reset();
     }
     virtual bool IsRunning() const override
@@ -483,7 +486,7 @@ private:
 } //namespace
 
 extern "C" {
-GAMESTUDIO_EXPORT game::App* MakeApp()
+GAMESTUDIO_EXPORT game::App* Gamestudio_CreateApp()
 {
     DEBUG("Engine");
     return new DefaultGameEngine;

@@ -231,7 +231,7 @@ void Process::ProcessStdErr()
 
 void Process::ProcessFinished(int exitCode, QProcess::ExitStatus status)
 {
-    DEBUG("%1 finished exitCode: %2 exitStatus: %3",
+    DEBUG("%1 finished. code: %2 status: %3",
         mExecutable, exitCode, status);
 
     ProcessStdOut();
@@ -289,7 +289,7 @@ void Process::ProcessError(QProcess::ProcessError error)
 
 void Process::ProcessState(QProcess::ProcessState state)
 {
-    DEBUG("%1 state %2", mExecutable, state);
+    DEBUG("%1 state: %2", mExecutable, state);
 }
 
 void Process::ProcessTimeout()

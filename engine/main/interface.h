@@ -29,6 +29,7 @@
 #include "base/platform.h"
 #include "base/logging.h"
 #include "engine/classlib.h"
+#include "engine/loader.h"
 #include "graphics/device.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
@@ -143,9 +144,17 @@ namespace game
 
         // Parameters pertaining to the environment of the application.
         struct Environment {
-            // Interface for accessing resources (content) implemented
-            // by the graphics subsystem, i.e. drawable shapes and materials.
+            // Interface for accessing game content such as scenes, entities
+            // materials etc.
             game::ClassLibrary* classlib = nullptr;
+            // Interface for accessing the game data from the game's running
+            // environment, i.e. data that is packaged with the game. Not the
+            // data *generated* by the game such as save games.
+            game::GameDataLoader* content = nullptr;
+            // The low level gfx resource loader that implements loading
+            // of graphics resources such as shaders, fonts and textures.
+            // The engine should use this with the graphics subsystem.
+            gfx::ResourceLoader* loader = nullptr;
             // Path to the top level directory where the app/game is
             // I.e. where the GameMain, config.json, content.json etc. files
             // are. UTF-8 encoded.
@@ -362,10 +371,10 @@ namespace game
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_API game::App* MakeApp();
+    GAMESTUDIO_API game::App* Gamestudio_CreateApp();
 } // extern "C"
 
-typedef game::App* (*MakeAppFunc)();
+typedef game::App* (*Gamestudio_CreateAppFunc)();
 
 // The below interface only exists currently for simplifying
 // the structure of the builds. I.e the dependencies for creating
@@ -376,14 +385,15 @@ typedef game::App* (*MakeAppFunc)();
 // might go away. However currently we provide this helper that will
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
+struct Gamestudio_Loaders {
+    std::unique_ptr<game::JsonFileClassLoader> ContentLoader;
+    std::unique_ptr<game::FileResourceLoader> ResourceLoader;
+};
+
 extern "C" {
-    GAMESTUDIO_API void CreateDefaultEnvironment(game::ClassLibrary** classlib);
-    GAMESTUDIO_API void DestroyDefaultEnvironment(game::ClassLibrary* classlib);
-    GAMESTUDIO_API void SetResourceLoader(gfx::ResourceLoader* loader);
-    GAMESTUDIO_API void SetGlobalLogger(base::Logger* logger);
+    GAMESTUDIO_API void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out);
+    GAMESTUDIO_API void Gamestudio_SetGlobalLogger(base::Logger* logger);
 } // extern "C"
 
-typedef void (*CreateDefaultEnvironmentFunc)(game::ClassLibrary**);
-typedef void (*DestroyDefaultEnvironmentFunc)(game::ClassLibrary*);
-typedef void (*SetResourceLoaderFunc)(gfx::ResourceLoader*);
-typedef void (*SetGlobalLoggerFunc)(base::Logger*);
+typedef void (*Gamestudio_CreateFileLoadersFunc)(Gamestudio_Loaders*);
+typedef void (*Gamestudio_SetGlobalLoggerFunc)(base::Logger*);
