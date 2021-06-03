@@ -24,12 +24,14 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
+#include "engine/data.h"
 
 namespace {
 bool ReadColor(const nlohmann::json& json, const std::string& name, gfx::Color4f* out)
@@ -262,6 +264,19 @@ bool UIStyle::LoadStyle(const nlohmann::json& json)
     }
     return true;
 }
+bool UIStyle::LoadStyle(const GameData& data)
+{
+    const auto* beg = (const char*)data.GetData();
+    const auto* end = beg + data.GetSize();
+    auto [ok, json, error] = base::JsonParse(beg, end);
+    if (!ok)
+    {
+        ERROR("JSON parse error: '%1' in file: '%2'", error, data.GetName());
+        return false;
+    }
+    return LoadStyle(json);
+}
+
 std::string UIStyle::MakeStyleString(const std::string& filter) const
 {
     nlohmann::json json;

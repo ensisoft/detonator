@@ -1565,61 +1565,27 @@ const uik::Widget* UIWidget::GetCurrentWidget() const
 
 bool UIWidget::LoadStyle(const QString& name)
 {
-    const auto& filename = mState.workspace->MapFileToFilesystem(name);
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
+    const auto& data = mState.workspace->LoadGameData(app::ToUtf8(name));
+    if (!data)
     {
-        ERROR("Failed to open style file: '%1' (%2)", filename, file.error());
+        ERROR("Failed to load style file: '%1'", name);
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("Failed to open style file.\n%1").arg(file.errorString()));
-        msg.exec();
-        return false;
-    }
-    const auto& buff = file.readAll();
-    if (buff.isEmpty())
-    {
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("Unable to apply the style because no JSON content was found in style file."));
-        msg.exec();
-        ERROR("No style JSON content found in file: '%1'", filename);
-        return false;
-    }
-
-    // Warning about nlohmann::json
-    // !! SEMANTICS CHANGE BETWEEN DEBUG AND RELEASE BUILD !!
-    //
-    // Trying to access an attribute using operator[] does not check
-    // whether a given key exists. instead it uses a standard CRT assert
-    // which then changes semantics depending whether NDEBUG is defined
-    // or not.
-
-    const auto* beg  = buff.data();
-    const auto* end  = buff.data() + buff.size();
-    auto [ok, json, error] = base::JsonParse(beg, end);
-    if (!ok)
-    {
-        ERROR("JSON parse error: '%1' in file: '%2'", error, filename);
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("Unable to apply the style because JSON parse error occurred."));
+        msg.setText(tr("Failed to load style file.\n%1").arg(name));
         msg.exec();
         return false;
     }
 
     auto style = std::make_unique<game::UIStyle>();
     style->SetLoader(mState.workspace);
-    if (!style->LoadStyle(json))
+    if (!style->LoadStyle(*data))
     {
         WARN("Errors were found while parsing the style.");
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("Errors were found while parsing the style settings.\n"
+        msg.setText(tr("Errors were found while parsing the style.\n"
                        "Styling might be incomplete or unusable.\n"
                        "Do you want to continue?"));
         if (msg.exec() == QMessageBox::No)
