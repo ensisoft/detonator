@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include "base/json.h"
+#include "base/types.h"
 
 namespace base
 {
@@ -111,6 +112,63 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec4* out
     out->y = vector["y"];
     out->z = vector["z"];
     out->w = vector["w"];
+    return true;
+}
+
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FRect* rect)
+{
+    if (!json.contains(name) || !json[name].is_object())
+        return false;
+    const auto& object = json[name];
+    float x, y, w, h;
+    if (!JsonReadSafe(object, "x", &x) ||
+        !JsonReadSafe(object, "y", &y) ||
+        !JsonReadSafe(object, "w", &w) ||
+        !JsonReadSafe(object, "h", &h))
+        return false;
+    *rect = FRect(x, y, w, h);
+    return true;
+}
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FPoint* point)
+{
+    if (!json.contains(name) || !json[name].is_object())
+        return false;
+    const auto& object = json[name];
+
+    float x, y;
+    if (!JsonReadSafe(object, "x", &x) ||
+        !JsonReadSafe(object, "y", &y))
+        return false;
+    *point = FPoint(x,y);
+    return true;
+}
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* size)
+{
+    if (!json.contains(name) || !json[name].is_object())
+        return false;
+    const auto& object = json[name];
+
+    float w, h;
+    if (!JsonReadSafe(object, "w", &w) ||
+        !JsonReadSafe(object, "h", &h))
+        return false;
+    *size = FSize(w, h);
+    return true;
+}
+
+bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color)
+{
+    if (!json.contains(name) || !json[name].is_object())
+        return false;
+    const auto& object = json[name];
+
+    float r, g, b, a;
+    if (!base::JsonReadSafe(object, "r", &r) ||
+        !base::JsonReadSafe(object, "g", &g) ||
+        !base::JsonReadSafe(object, "b", &b) ||
+        !base::JsonReadSafe(object, "a", &a))
+        return false;
+    *color = Color4f(r, g, b, a);
     return true;
 }
 
@@ -242,6 +300,41 @@ void JsonWrite(nlohmann::json& object, const char* name, const glm::vec4& vec)
     JsonWrite(json, "w", vec.w);
     object[name] = std::move(json);
 }
+
+void JsonWrite(nlohmann::json& object, const char* name, const FRect& rect)
+{
+    nlohmann::json json;
+    JsonWrite(json, "x", rect.GetX());
+    JsonWrite(json, "y", rect.GetY());
+    JsonWrite(json, "w", rect.GetWidth());
+    JsonWrite(json, "h", rect.GetHeight());
+    object[name] = std::move(json);
+
+}
+void JsonWrite(nlohmann::json& object, const char* name, const FPoint& point)
+{
+    nlohmann::json json;
+    JsonWrite(json, "x", point.GetX());
+    JsonWrite(json, "y", point.GetY());
+    object[name] = std::move(json);
+}
+void JsonWrite(nlohmann::json& object, const char* name, const FSize& size)
+{
+    nlohmann::json json;
+    JsonWrite(json, "w", size.GetWidth());
+    JsonWrite(json, "h", size.GetHeight());
+    object[name] = std::move(json);
+}
+void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
+{
+    nlohmann::json object;
+    JsonWrite(object, "r", color.Red());
+    JsonWrite(object, "g", color.Green());
+    JsonWrite(object, "b", color.Blue());
+    JsonWrite(object, "a", color.Alpha());
+    json[name] = std::move(object);
+}
+
 
 std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& filename)
 {

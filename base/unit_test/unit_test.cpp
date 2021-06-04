@@ -211,21 +211,6 @@ void unit_test_rect_union()
 }
 
 template<typename T>
-void unit_test_rect_serialize()
-{
-    const T test_values[] = {
-            T(0), T(1.5), T(100), T(-40), T(125.0)
-    };
-    for (const auto& val : test_values)
-    {
-        const base::Rect<T> src(val, val, val, val);
-        const auto& value = base::Rect<T>::FromJson(src.ToJson());
-        TEST_REQUIRE(value.has_value());
-        TEST_REQUIRE(value.value() == src);
-    }
-}
-
-template<typename T>
 void unit_test_rect_test_point()
 {
     using R = base::Rect<T>;
@@ -239,30 +224,6 @@ void unit_test_rect_test_point()
     TEST_REQUIRE(rect.TestPoint(11, 11));
 }
 
-void unit_test_color_serialize()
-{
-    const float test_values[] = {
-            0.0f, 0.2f, 0.5f, 1.0f
-    };
-    for (const float val : test_values)
-    {
-        {
-            const base::Color4f src(val, val, val, val);
-            const auto& value = base::Color4f::FromJson(src.ToJson());
-            TEST_REQUIRE(value.has_value());
-            TEST_REQUIRE(value.value() == src);
-        }
-        {
-            bool success = true;
-            const auto& json = nlohmann::json::parse(
-                    R"({"r":0.0, "g":"basa", "b":0.0, "a":0.0})");
-
-            const auto& value = base::Color4f::FromJson(json);
-            TEST_REQUIRE(value.has_value() == false);
-        }
-    }
-}
-
 int test_main(int argc, char* argv[])
 {
     unit_test_rect<int>();
@@ -270,10 +231,7 @@ int test_main(int argc, char* argv[])
     unit_test_rect_intersect<int>();
     unit_test_rect_union<float>();
     unit_test_rect_union<int>();
-    unit_test_rect_serialize<int>();
-    unit_test_rect_serialize<float>();
     unit_test_rect_test_point<int>();
     unit_test_rect_test_point<float>();
-    unit_test_color_serialize();
     return 0;
 }

@@ -18,6 +18,7 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"
 

@@ -18,15 +18,8 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
-#include <optional>
-
 #include "base/math.h"
 #include "base/utility.h"
-#include "base/json.h"
 
 namespace base
 {
@@ -192,26 +185,6 @@ namespace base
         void SetAlpha(int alpha)
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
 
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "r", mRed);
-            base::JsonWrite(json, "g", mGreen);
-            base::JsonWrite(json, "b", mBlue);
-            base::JsonWrite(json, "a", mAlpha);
-            return json;
-        }
-        static std::optional<Color4f> FromJson(const nlohmann::json& object)
-        {
-            Color4f ret;
-            if (!base::JsonReadSafe(object, "r", &ret.mRed) ||
-                !base::JsonReadSafe(object, "g", &ret.mGreen) ||
-                !base::JsonReadSafe(object, "b", &ret.mBlue) ||
-                !base::JsonReadSafe(object, "a", &ret.mAlpha))
-                return std::nullopt;
-            return ret;
-        }
-
         size_t GetHash() const
         {
             size_t hash = 0;
@@ -221,7 +194,6 @@ namespace base
             hash = base::hash_combine(hash, mAlpha);
             return hash;
         }
-
     private:
         float mRed   = 1.0f;
         float mGreen = 1.0f;

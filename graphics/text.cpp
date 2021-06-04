@@ -32,6 +32,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "graphics/resource.h"
 #include "graphics/text.h"
 

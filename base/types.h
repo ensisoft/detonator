@@ -18,16 +18,9 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <algorithm> // for min, max
-#include <optional>
 
 #include "base/utility.h"
-#include "base/json.h"
-// simple type definitions
 
 namespace base
 {
@@ -57,23 +50,6 @@ namespace base
                 return false;
             return true;
         }
-
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "w", mWidth);
-            base::JsonWrite(json, "h", mHeight);
-            return json;
-        }
-        static std::optional<Size<T>> FromJson(const nlohmann::json& object)
-        {
-            Size<T> ret;
-            if (!base::JsonReadSafe(object, "w", &ret.mWidth) ||
-                !base::JsonReadSafe(object, "h", &ret.mHeight))
-                return std::nullopt;
-            return ret;
-        }
-
         std::size_t GetHash() const
         {
             std::size_t hash = 0;
@@ -125,22 +101,6 @@ namespace base
 
         T GetX() const { return mX; }
         T GetY() const { return mY; }
-
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "x", mX);
-            base::JsonWrite(json, "y", mY);
-            return json;
-        }
-        static std::optional<Point<T>> FromJson(const nlohmann::json& object)
-        {
-            Point<T> ret;
-            if (!base::JsonReadSafe(object, "x", &ret.mX) ||
-                !base::JsonReadSafe(object, "y", &ret.mY))
-                return std::nullopt;
-            return ret;
-        }
 
         std::size_t GetHash() const
         {
@@ -373,32 +333,6 @@ namespace base
             const unsigned h = mHeight * space.GetHeight();
             return Rect<unsigned>(x, y, w, h);
         }
-
-        // Serialize into JSON
-        nlohmann::json ToJson() const
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "x", mX);
-            base::JsonWrite(json, "y", mY);
-            base::JsonWrite(json, "w", mWidth);
-            base::JsonWrite(json, "h", mHeight);
-            return json;
-        }
-
-        // Create Rect from JSON and indicate through success whether
-        // the JSON contains all the required data or not.
-        static std::optional<Rect<T>> FromJson(const nlohmann::json& object)
-        {
-            Rect<T> ret;
-            if (!base::JsonReadSafe(object, "x", &ret.mX) ||
-                !base::JsonReadSafe(object, "y", &ret.mY) ||
-                !base::JsonReadSafe(object, "w", &ret.mWidth) ||
-                !base::JsonReadSafe(object, "h", &ret.mHeight))
-                return std::nullopt;
-
-            return ret;
-        }
-
         std::size_t GetHash() const
         {
             std::size_t hash = 0;
