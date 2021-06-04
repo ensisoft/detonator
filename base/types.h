@@ -26,6 +26,7 @@
 #include <optional>
 
 #include "base/utility.h"
+#include "base/json.h"
 // simple type definitions
 
 namespace base

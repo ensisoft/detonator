@@ -26,6 +26,7 @@
 
 #include "base/math.h"
 #include "base/utility.h"
+#include "base/json.h"
 
 namespace base
 {
