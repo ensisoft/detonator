@@ -40,6 +40,7 @@
 #include "base/format.h"
 #include "base/cmdline.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "engine/main/interface.h"
 #include "engine/classlib.h"
 #include "wdk/opengl/config.h"
