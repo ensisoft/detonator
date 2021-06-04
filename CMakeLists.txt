@@ -145,6 +145,7 @@ add_library(BaseLib
     base/json.cpp
     base/utility.cpp)
 add_library(GfxLib
+    graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
@@ -397,6 +398,7 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 # graphics test application. Uses the graphics APIs to draw stuff.
 # needs DETERMINISTIC_RANDOM flag
 add_executable(graphics_test
+    graphics/bitmap.cpp
     graphics/material.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
@@ -585,53 +587,40 @@ add_test(NAME unit_test_math COMMAND unit_test_math)
 add_test(NAME unit_test_cmdline COMMAND unit_test_cmdline)
 add_test(NAME unit_test_logging COMMAND unit_test_logging)
 
-# gfx tests
-add_executable(unit_test_bitmap
-        graphics/unit_test/unit_test_bitmap.cpp
-        third_party/stb/stb_image_write.c)
-add_executable(unit_test_image
-        graphics/unit_test/unit_test_image.cpp
-        third_party/stb/stb_image.c
-        graphics/image.cpp
-        graphics/resource.cpp)
-add_executable(unit_test_graphics
-        graphics/unit_test/unit_test.cpp
-        graphics/drawable.cpp)
-add_executable(unit_test_device
-        graphics/unit_test/unit_test_device.cpp
-        graphics/opengl_es2_device.cpp
-        graphics/resource.cpp
-        third_party/stb/stb_image_write.c)
-add_executable(unit_test_material
-        graphics/unit_test/unit_test_material.cpp
-        graphics/material.cpp
-        graphics/image.cpp
-        graphics/text.cpp
-        graphics/resource.cpp
-        third_party/base64/base64.cpp
-        third_party/stb/stb_image_write.c
-        third_party/stb/stb_image.c)
-add_executable(unit_test_drawable
-        graphics/unit_test/unit_test_drawable.cpp
+add_library(GfxLibTesting
+        graphics/bitmap.cpp
+        graphics/drawing.cpp
         graphics/drawable.cpp
-        graphics/resource.cpp)
-add_executable(unit_test_drawing
-        graphics/unit_test/unit_test_drawing.cpp
         graphics/material.cpp
         graphics/image.cpp
+        graphics/opengl_es2_device.cpp
+        graphics/painter.cpp
         graphics/text.cpp
         graphics/resource.cpp
-        third_party/base64/base64.cpp
+        third_party/stb/stb_image.c
         third_party/stb/stb_image_write.c
-        third_party/stb/stb_image.c)
+        third_party/base64/base64.cpp)
+target_include_directories(GfxLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+if (UNIX)
+    target_compile_options(GfxLibTesting PRIVATE -fPIC)
+endif()
 
-target_link_libraries(unit_test_image    BaseLib)
-target_link_libraries(unit_test_graphics BaseLib)
-target_link_libraries(unit_test_device   BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
-target_link_libraries(unit_test_material BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_drawable BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_bitmap   BaseLib)
-target_link_libraries(unit_test_drawing  BaseLib ${CONAN_LIBS})
+# gfx tests
+add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp)
+add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp)
+add_executable(unit_test_graphics graphics/unit_test/unit_test.cpp)
+add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp)
+add_executable(unit_test_material graphics/unit_test/unit_test_material.cpp)
+add_executable(unit_test_drawable graphics/unit_test/unit_test_drawable.cpp)
+add_executable(unit_test_drawing graphics/unit_test/unit_test_drawing.cpp)
+
+target_link_libraries(unit_test_image    GfxLibTesting BaseLib)
+target_link_libraries(unit_test_graphics GfxLibTesting BaseLib)
+target_link_libraries(unit_test_device   GfxLibTesting BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_material GfxLibTesting BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_drawable GfxLibTesting BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_bitmap   GfxLibTesting BaseLib)
+target_link_libraries(unit_test_drawing  GfxLibTesting BaseLib ${CONAN_LIBS})
 
 add_test(NAME unit_test_drawable COMMAND unit_test_drawable)
 add_test(NAME unit_test_drawing  COMMAND unit_test_drawing)

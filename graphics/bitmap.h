@@ -20,12 +20,11 @@
 
 #include "warnpush.h"
 #  include <stb/stb_image_write.h>
-#  include <nlohmann/json.hpp>
+#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <limits>
 #include <vector>
-#include <cassert>
 #include <cstring>
 #include <type_traits>
 #include <fstream>
@@ -35,9 +34,6 @@
 #include <functional>
 
 #include "base/assert.h"
-#include "base/math.h"
-#include "base/utility.h"
-#include "base/json.h"
 #include "base/hash.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
@@ -907,87 +903,10 @@ namespace gfx
         { mHeight = height; }
         virtual void SetWidth(unsigned width) override
         { mWidth = width; }
-        virtual nlohmann::json ToJson() const override
-        {
-            nlohmann::json json;
-            base::JsonWrite(json, "width", mWidth);
-            base::JsonWrite(json, "height", mHeight);
-            for (const auto& layer : mLayers)
-            {
-                nlohmann::json js;
-                base::JsonWrite(js, "prime0", layer.prime0);
-                base::JsonWrite(js, "prime1", layer.prime1);
-                base::JsonWrite(js, "prime2", layer.prime2);
-                base::JsonWrite(js, "frequency", layer.frequency);
-                base::JsonWrite(js, "amplitude", layer.amplitude);
-                json["layers"].push_back(std::move(js));
-            }
-            return json;
-        }
-
-        virtual bool FromJson(const nlohmann::json& json) override
-        {
-            if (!base::JsonReadSafe(json, "width", &mWidth) ||
-                !base::JsonReadSafe(json, "height", &mHeight))
-                return false;
-            if (!json.contains("layers"))
-                return true;
-
-            for (const auto& js : json["layers"].items())
-            {
-                const auto& obj = js.value();
-                Layer layer;
-                if (!base::JsonReadSafe(obj, "prime0", &layer.prime0) ||
-                    !base::JsonReadSafe(obj, "prime1", &layer.prime1) ||
-                    !base::JsonReadSafe(obj, "prime2", &layer.prime2) ||
-                    !base::JsonReadSafe(obj, "frequency", &layer.frequency) ||
-                    !base::JsonReadSafe(obj, "amplitude", &layer.amplitude))
-                    return false;
-                mLayers.push_back(std::move(layer));
-            }
-            return true;
-        }
-
-        virtual std::unique_ptr<IBitmap> Generate() const override
-        {
-            auto ret = std::make_unique<GrayscaleBitmap>();
-            ret->Resize(mWidth, mHeight);
-            const float w = mWidth;
-            const float h = mHeight;
-            for (unsigned y=0; y<mHeight; ++y)
-            {
-                for (unsigned x = 0; x < mWidth; ++x)
-                {
-                    float pixel = 0.0f;
-                    for (const auto &layer : mLayers)
-                    {
-                        const math::NoiseGenerator gen(layer.frequency, layer.prime0, layer.prime1, layer.prime2);
-                        const auto amplitude = math::clamp(0.0f, 255.0f, layer.amplitude);
-                        const auto sample = gen.GetSample(x/w, y/h);
-                        pixel += (sample * amplitude);
-                    }
-                    Grayscale px;
-                    px.r = math::clamp(0u, 255u, (unsigned)pixel);
-                    ret->SetPixel(y, x, px);
-                }
-            }
-            return ret;
-        }
-        virtual size_t GetHash() const override
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mWidth);
-            hash = base::hash_combine(hash, mHeight);
-            for (const auto& layer : mLayers)
-            {
-                hash = base::hash_combine(hash,layer.prime0);
-                hash = base::hash_combine(hash,layer.prime1);
-                hash = base::hash_combine(hash,layer.prime2);
-                hash = base::hash_combine(hash, layer.amplitude);
-                hash = base::hash_combine(hash, layer.frequency);
-            }
-            return hash;
-        }
+        virtual nlohmann::json ToJson() const override;
+        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual std::unique_ptr<IBitmap> Generate() const override;
+        virtual std::size_t GetHash() const override;
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
