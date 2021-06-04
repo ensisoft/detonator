@@ -17,16 +17,20 @@
 #include "config.h"
 
 #include <cstdio>
-#include <cassert>
-#include "format.h"
+#include <locale>
+#include <codecvt>
+#include "base/types.h"
+#include "base/format.h"
 
-#if defined(BASE_FORMAT_SUPPORT_GLM)
+#if defined(__MSVC__)
+#  pragma warning(push)
+#  pragma warning(disable: 4996) // deprecated use of wstring_convert
+#endif
 
-namespace glm
-{
+namespace base {
 namespace detail {
-
-std::ostream& operator << (std::ostream& out, const mat4& m)
+#if defined(BASE_FORMAT_SUPPORT_GLM)
+std::string ToString(const glm::mat4& m)
 {
     const auto& x = m[0];
     const auto& y = m[1];
@@ -36,80 +40,116 @@ std::ostream& operator << (std::ostream& out, const mat4& m)
     char buff[1024];
     std::memset(buff, 0, sizeof(buff));
     std::snprintf(buff, sizeof(buff),
-       "%.2f %.2f %.2f %.2f\n"
-       "%.2f %.2f %.2f %.2f\n"
-       "%.2f %.2f %.2f %.2f\n"
-       "%.2f %.2f %.2f %.2f\n",
-       x[0], y[0], z[0], w[0],
-       x[1], y[1], z[1], w[1],
-       x[2], y[2], z[2], w[2],
-       x[3], y[3], z[3], w[3]);
-    out << buff;
-    return out;
+       "[%.2f %.2f %.2f %.2f],"
+       "[%.2f %.2f %.2f %.2f],"
+       "[%.2f %.2f %.2f %.2f],"
+       "[%.2f %.2f %.2f %.2f]",
+       x[0], x[1], x[2], x[3],
+       y[0], y[1], y[2], y[3],
+       z[0], z[1], z[2], x[3],
+       w[0], w[1], w[2], w[3]);
+    return buff;
 }
-
-std::ostream& operator << (std::ostream& out, const mat3& m)
+std::string ToString(const glm::mat3& m)
 {
     const auto& x = m[0];
     const auto& y = m[1];
     const auto& z = m[2];
-
     char buff[1024];
     std::memset(buff, 0, sizeof(buff));
     std::snprintf(buff, sizeof(buff),
-       "%.2f %.2f %.2f\n"
-       "%.2f %.2f %.2f\n"
-       "%.2f %.2f %.2f\n",
-       x[0], y[0], z[0],
-       x[1], y[1], z[1],
-       x[2], y[2], z[2]);
-    out << buff;
-    return out;
+        "[%.2f %.2f %.2f],"
+        "[%.2f %.2f %.2f],"
+        "[%.2f %.2f %.2f]",
+        x[0], x[1], x[2],
+        y[0], y[1], y[2],
+        z[0], z[1], z[2]);
+    return buff;
 }
 
-std::ostream& operator<<(std::ostream& out, const glm::vec4& v)
+std::string ToString(const glm::vec4& v)
 {
     char buff[1024];
     std::memset(buff, 0, sizeof(buff));
     std::snprintf(buff, sizeof(buff),
-        "[%.2f %.2f %.2f %.2f]", v[0], v[1], v[2], v[3]);
-    out << buff;
-    return out;
+       "[%.2f %.2f %.2f %.2f]", v[0], v[1], v[2], v[3]);
+    return buff;
 }
 
-std::ostream& operator<<(std::ostream& out, const glm::vec3& v)
+std::string ToString(const glm::vec3& v)
 {
     char buff[1024];
     std::memset(buff, 0, sizeof(buff));
     std::snprintf(buff, sizeof(buff),
         "[%.2f %.2f %.2f]", v[0], v[1], v[2]);
-    out << buff;
-    return out;
+    return buff;
 }
 
-std::ostream& operator<<(std::ostream& out, const glm::vec2& v)
+std::string ToString(const glm::vec2& v)
 {
     char buff[1024];
     std::memset(buff, 0, sizeof(buff));
     std::snprintf(buff, sizeof(buff),
         "[%.2f %.2f]", v[0], v[1]);
-    out << buff;
-    return out;
+    return buff;
 }
-} // detail
-} // glm
-
 #endif // BASE_FORMAT_SUPPORT_GLM
 
-#if defined(BASE_FORMAT_SUPPORT_QT)
-  #include "warnpush.h"
-    #include <QString>
-  #include "warnpop.h"
-
-std::ostream& operator<<(std::ostream& out, const QString& str)
+std::string ToString(const FRect& rect)
 {
-    out << str.toStdString();
-    return out;
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "x:%.2f, y:%.2f, w:%.2f, h:%.2f",
+        rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
+    return buff;
 }
-#endif
 
+std::string ToString(const FSize& size)
+{
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "w:%.2f, h:%.2f",
+        size.GetWidth(), size.GetHeight());
+    return buff;
+}
+
+std::string ToString(const FPoint& point)
+{
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "x:%.2f, y:%.2f",
+        point.GetX(), point.GetY());
+    return buff;
+}
+
+std::string ToString(const std::wstring& s)
+{
+    //setup converter
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string converted_str = converter.to_bytes(s);
+    return converted_str;
+}
+
+} // detail
+} // namespace
+
+
+namespace base
+{
+std::string ToChars(float value)
+{
+    // c++17 has to_chars in <charconv> but GCC (stdlib) doesn't
+    // yet support float conversion. gah.
+    std::stringstream ss;
+    std::string ret;
+    ss.imbue(std::locale("C"));
+    ss << std::fixed << std::setprecision(2) << value;
+    ss >> ret;
+    return ret;
+}
+} // namespace
+
+#if defined(__MSVC__)
+#  pragma warning(pop) // deprecated use of wstring_convert
+#endif
