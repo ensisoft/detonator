@@ -38,6 +38,7 @@
 #include "base/math.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "base/hash.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 

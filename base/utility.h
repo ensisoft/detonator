@@ -93,41 +93,6 @@ inline std::string RandomString(size_t len)
     return ret;
 }
 
-template<typename S, typename T> inline
-S hash_combine(S seed, T value)
-{
-    const auto hash = std::hash<T>()(value);
-    seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    return seed;
-}
-
-template<typename S> inline
-S hash_combine(S seed, const glm::vec2& value)
-{
-    seed = hash_combine(seed, value.x);
-    seed = hash_combine(seed, value.y);
-    return seed;
-}
-
-template<typename S> inline
-S hash_combine(S seed, const glm::vec3& value)
-{
-    seed = hash_combine(seed, value.x);
-    seed = hash_combine(seed, value.y);
-    seed = hash_combine(seed, value.z);
-    return seed;
-}
-
-template<typename S> inline
-S hash_combine(S seed, const glm::vec4& value)
-{
-    seed = hash_combine(seed, value.x);
-    seed = hash_combine(seed, value.y);
-    seed = hash_combine(seed, value.z);
-    seed = hash_combine(seed, value.w);
-    return seed;
-}
-
 inline double GetRuntimeSec()
 {
     using steady_clock = std::chrono::steady_clock;

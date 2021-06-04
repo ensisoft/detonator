@@ -34,6 +34,7 @@
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "base/math.h"
+#include "base/hash.h"
 #include "graphics/drawable.h"
 #include "engine/tree.h"
 #include "engine/types.h"
@@ -554,8 +555,8 @@ namespace game
         {
             size_t hash = 0;
             hash = base::hash_combine(hash, mText);
-            hash = base::hash_combine(hash, mTextColor.GetHash());
-            hash = base::hash_combine(hash, mFlags.value());
+            hash = base::hash_combine(hash, mTextColor);
+            hash = base::hash_combine(hash, mFlags);
             return hash;
         }
 
