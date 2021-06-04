@@ -167,10 +167,10 @@ add_library(UiLib
     uikit/widget.cpp
     uikit/window.cpp)
 
-target_include_directories(BaseLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-target_include_directories(GfxLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-target_include_directories(UiLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+target_include_directories(BaseLib PRIVATE   "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(GfxLib PRIVATE    "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(UiLib PRIVATE     "${CMAKE_CURRENT_LIST_DIR}/config")
 if (UNIX)
     target_compile_options(BaseLib PRIVATE -fPIC)
     target_compile_options(GfxLib  PRIVATE -fPIC)
