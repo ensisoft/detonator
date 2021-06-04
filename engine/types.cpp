@@ -23,6 +23,7 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "engine/types.h"
 
 namespace game

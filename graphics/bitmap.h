@@ -37,6 +37,7 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 

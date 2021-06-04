@@ -28,6 +28,8 @@
 #include <string>
 
 #include "base/bitflag.h"
+#include "base/types.h"
+#include "base/color4f.h"
 
 // json utilities. the big problem with nlohmann::json is the huge size of the file
 // at around 20kloc. Including json.hpp is a great way to make your build take a
@@ -55,17 +57,27 @@ bool JsonReadSafe(const nlohmann::json& value, std::string* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec2* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec3* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec4* out);
+// todo: if needed provide wrappers for writing the the U and I types too.
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FRect* rect);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FPoint* point);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* point);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color);
 
 void JsonWrite(nlohmann::json& object, const char* name, int value);
 void JsonWrite(nlohmann::json& object, const char* name, unsigned value);
 void JsonWrite(nlohmann::json& object, const char* name, double value);
 void JsonWrite(nlohmann::json& object, const char* name, float value);
-void JsonWrite(nlohmann::json& object, const char* name, const std::string& value);
 void JsonWrite(nlohmann::json& object, const char* name, bool value);
 void JsonWrite(nlohmann::json& object, const char* name, const char* str);
+void JsonWrite(nlohmann::json& object, const char* name, const std::string& value);
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec2& vec);
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec3& vec);
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec4& vec);
+// todo: if needed provide wrappers for writing the the U and I types too.
+void JsonWrite(nlohmann::json& json, const char* name, const FRect& rect);
+void JsonWrite(nlohmann::json& json, const char* name, const FPoint& point);
+void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
+void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 
 template<typename EnumT> inline
 bool JsonReadSafeEnum(const nlohmann::json& object, const char* name, EnumT* out)

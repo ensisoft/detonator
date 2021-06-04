@@ -59,7 +59,6 @@
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
 // template arguments converted into strings.
 // for example str("hello %1", "world") returns "hello world"
-// todo: move the JSON functionality here for the simple types such as Rect etc.
 
 namespace base
 {
