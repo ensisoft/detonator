@@ -16,11 +16,15 @@
 
 #include "config.h"
 
-#include <fstream>
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#  include <base64/base64.h>
+#include "warnpop.h"
 
 #include "base/logging.h"
 #include "base/format.h"
 #include "base/hash.h"
+#include "base/json.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -77,6 +81,84 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
     }
     return nullptr;
 }
+nlohmann::json detail::TextureFileSource::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "file", mFile);
+    base::JsonWrite(json, "name", mName);
+    return json;
+}
+bool detail::TextureFileSource::FromJson(const nlohmann::json& object)
+{
+    return base::JsonReadSafe(object, "id", &mId) &&
+            base::JsonReadSafe(object, "file", &mFile) &&
+            base::JsonReadSafe(object, "name", &mName);
+}
+
+nlohmann::json detail::TextureBitmapBufferSource::ToJson() const
+{
+    const auto depth = mBitmap->GetDepthBits() / 8;
+    const auto width = mBitmap->GetWidth();
+    const auto height = mBitmap->GetHeight();
+    const auto bytes = width * height * depth;
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "name", mName);
+    base::JsonWrite(json, "width", width);
+    base::JsonWrite(json, "height", height);
+    base::JsonWrite(json, "depth", depth);
+    base::JsonWrite(json, "data",
+    base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
+    return json;
+}
+bool detail::TextureBitmapBufferSource::FromJson(const nlohmann::json& json)
+{
+    unsigned width = 0;
+    unsigned height = 0;
+    unsigned depth = 0;
+    std::string base64;
+    if (!base::JsonReadSafe(json, "id", &mId) ||
+        !base::JsonReadSafe(json, "name", &mName) ||
+        !base::JsonReadSafe(json, "width", &width) ||
+        !base::JsonReadSafe(json, "height", &height) ||
+        !base::JsonReadSafe(json, "depth", &depth) ||
+        !base::JsonReadSafe(json, "data", &base64))
+        return false;
+    const auto& data = base64::Decode(base64);
+    if (depth == 1)
+        mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*) &data[0], width, height);
+    else if (depth == 3)
+        mBitmap = std::make_shared<RgbBitmap>((const RGB*) &data[0], width, height);
+    else if (depth == 4)
+        mBitmap = std::make_shared<RgbaBitmap>((const RGBA*) &data[0], width, height);
+    else return false;
+    return true;
+}
+
+nlohmann::json detail::TextureBitmapGeneratorSource::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "name", mName);
+    base::JsonWrite(json, "function", mGenerator->GetFunction());
+    base::JsonWrite(json, "generator", *mGenerator);
+    return json;
+}
+bool detail::TextureBitmapGeneratorSource::FromJson(const nlohmann::json& json)
+{
+    IBitmapGenerator::Function function;
+    if (!base::JsonReadSafe(json, "id", &mId) ||
+        !base::JsonReadSafe(json, "name", &mName) ||
+        !base::JsonReadSafe(json, "function", &function))
+        return false;
+    if (function == IBitmapGenerator::Function::Noise)
+        mGenerator = std::make_unique<NoiseBitmapGenerator>();
+    if (!mGenerator->FromJson(json["generator"]))
+        return false;
+    return true;
+}
+
 
 std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 {
@@ -94,6 +176,29 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     }
     return nullptr;
 }
+
+nlohmann::json detail::TextureTextBufferSource::ToJson() const
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "name", mName);
+    base::JsonWrite(json, "buffer", mTextBuffer);
+    return json;
+}
+bool detail::TextureTextBufferSource::FromJson(const nlohmann::json& json)
+{
+    if (!json.contains("buffer") || !json["buffer"].is_object())
+        return false;
+    if (!base::JsonReadSafe(json, "name", &mName) ||
+        !base::JsonReadSafe(json, "id", &mId))
+        return false;
+    auto ret = TextBuffer::FromJson(json["buffer"]);
+    if (!ret.has_value())
+        return false;
+    mTextBuffer = std::move(ret.value());
+    return true;
+}
+
 
 MaterialClass::MaterialClass(const MaterialClass& other)
 {
