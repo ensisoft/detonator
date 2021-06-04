@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <fstream>
 
 #include "base/logging.h"
 #include "base/utility.h"

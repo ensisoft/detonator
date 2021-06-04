@@ -142,7 +142,8 @@ add_library(BaseLib
     base/assert.cpp
     base/format.cpp
     base/logging.cpp
-    base/json.cpp)
+    base/json.cpp
+    base/utility.cpp)
 add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
