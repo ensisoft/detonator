@@ -19,7 +19,7 @@
 #include "warnpush.h"
 #  include <hb.h>
 #  include <hb-ft.h>
-
+#  include <nlohmann/json.hpp>
 #  include <ft2build.h>
 #  include FT_FREETYPE_H
 #  include FT_SIZES_H
@@ -27,7 +27,6 @@
 
 #include <functional>
 #include <stdexcept>
-#include <sstream>
 #include <map>
 
 #include "base/logging.h"
