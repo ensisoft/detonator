@@ -19,27 +19,19 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <neargye/magic_enum.hpp>
-#  include <nlohmann/json.hpp>
-#  include <base64/base64.h>
+#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
-#include <map>
 #include <vector>
 #include <string>
-#include <chrono>
 #include <memory>
-#include <stdexcept>
-#include <functional> // for hash
 #include <optional>
 #include <utility>
 #include <type_traits>
 #include <cmath>
-#include <cassert>
 
 #include "base/utility.h"
 #include "base/assert.h"
-#include "base/json.h"
 #include "base/hash.h"
 #include "graphics/texture.h"
 #include "graphics/resource.h"
@@ -151,20 +143,9 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureFileSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override
-            {
-                nlohmann::json json;
-                base::JsonWrite(json, "id", mId);
-                base::JsonWrite(json, "file", mFile);
-                base::JsonWrite(json, "name", mName);
-                return json;
-            }
-            virtual bool FromJson(const nlohmann::json& object) override
-            {
-                return base::JsonReadSafe(object, "id", &mId) &&
-                       base::JsonReadSafe(object, "file", &mFile) &&
-                       base::JsonReadSafe(object, "name", &mName);
-            }
+            virtual nlohmann::json ToJson() const override;
+            virtual bool FromJson(const nlohmann::json& object) override;
+
             virtual void BeginPacking(ResourcePacker* packer) const override
             {
                 packer->PackTexture(this, mFile);
@@ -243,45 +224,9 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapBufferSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override
-            {
-                const auto depth = mBitmap->GetDepthBits() / 8;
-                const auto width = mBitmap->GetWidth();
-                const auto height = mBitmap->GetHeight();
-                const auto bytes = width * height * depth;
-                nlohmann::json json;
-                base::JsonWrite(json, "id", mId);
-                base::JsonWrite(json, "name", mName);
-                base::JsonWrite(json, "width", width);
-                base::JsonWrite(json, "height", height);
-                base::JsonWrite(json, "depth", depth);
-                base::JsonWrite(json, "data",
-                    base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
-                return json;
-            }
-            virtual bool FromJson(const nlohmann::json& json) override
-            {
-                unsigned width = 0;
-                unsigned height = 0;
-                unsigned depth  = 0;
-                std::string base64;
-                if (!base::JsonReadSafe(json, "id", &mId) ||
-                    !base::JsonReadSafe(json, "name", &mName) ||
-                    !base::JsonReadSafe(json, "width", &width) ||
-                    !base::JsonReadSafe(json, "height", &height) ||
-                    !base::JsonReadSafe(json, "depth", &depth) ||
-                    !base::JsonReadSafe(json, "data", &base64))
-                    return false;
-                const auto& data = base64::Decode(base64);
-                if (depth == 1)
-                    mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*)&data[0], width, height);
-                else if (depth == 3)
-                    mBitmap = std::make_shared<RgbBitmap>((const RGB*)&data[0], width, height);
-                else if (depth == 4)
-                    mBitmap = std::make_shared<RgbaBitmap>((const RGBA*)&data[0], width, height);
-                else return false;
-                return true;
-            }
+            virtual nlohmann::json ToJson() const override;
+            virtual bool FromJson(const nlohmann::json& json) override;
+
             void SetBitmap(std::unique_ptr<IBitmap> bitmap)
             { mBitmap = std::move(bitmap); }
             template<typename T>
@@ -364,28 +309,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override
-            {
-                nlohmann::json json;
-                base::JsonWrite(json, "id", mId);
-                base::JsonWrite(json, "name", mName);
-                base::JsonWrite(json, "function", mGenerator->GetFunction());
-                base::JsonWrite(json, "generator", *mGenerator);
-                return json;
-            }
-            virtual bool FromJson(const nlohmann::json& json) override
-            {
-                IBitmapGenerator::Function function;
-                if (!base::JsonReadSafe(json, "id", &mId) ||
-                    !base::JsonReadSafe(json, "name", &mName) ||
-                    !base::JsonReadSafe(json, "function", &function))
-                    return false;
-                if (function == IBitmapGenerator::Function::Noise)
-                    mGenerator = std::make_unique<NoiseBitmapGenerator>();
-                if (!mGenerator->FromJson(json["generator"]))
-                    return false;
-                return true;
-            }
+            virtual nlohmann::json ToJson() const override;
+            virtual bool FromJson(const nlohmann::json& json) override;
 
             IBitmapGenerator& GetGenerator()
             { return *mGenerator; }
@@ -451,27 +376,9 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override
-            {
-                nlohmann::json json;
-                base::JsonWrite(json, "id", mId);
-                base::JsonWrite(json, "name", mName);
-                base::JsonWrite(json, "buffer", mTextBuffer);
-                return json;
-            }
-            virtual bool FromJson(const nlohmann::json& json) override
-            {
-                if (!json.contains("buffer") || !json["buffer"].is_object())
-                    return false;
-                if (!base::JsonReadSafe(json, "name", &mName) ||
-                    !base::JsonReadSafe(json, "id", &mId))
-                    return false;
-                auto ret = TextBuffer::FromJson(json["buffer"]);
-                if (!ret.has_value())
-                    return false;
-                mTextBuffer = std::move(ret.value());
-                return true;
-            }
+            virtual nlohmann::json ToJson() const override;
+            virtual bool FromJson(const nlohmann::json& json) override;
+
             virtual void BeginPacking(ResourcePacker* packer) const override
             {
                 const size_t num_texts = mTextBuffer.GetNumTexts();
