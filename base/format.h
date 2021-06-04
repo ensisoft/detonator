@@ -50,71 +50,21 @@
 
 #include <sstream>
 #include <string>
-#include <locale>
-#include <codecvt>
 #include <iomanip>
 #include <type_traits>
 
 #include "base/types.h"
 
-#if defined(__MSVC__)
-#  pragma warning(push)
-#  pragma warning(disable: 4996) // deprecated use of wstring_convert
-#endif
-
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
 // template arguments converted into strings.
 // for example str("hello %1", "world") returns "hello world"
-
 // todo: move the JSON functionality here for the simple types such as Rect etc.
-
-#if defined(BASE_FORMAT_SUPPORT_GLM)
-namespace glm {
-    namespace detail {
-
-    std::ostream& operator << (std::ostream& out, const glm::mat4& m);
-    std::ostream& operator << (std::ostream& out, const glm::mat3& m);
-    std::ostream& operator << (std::ostream& out, const glm::vec4& v);
-    std::ostream& operator << (std::ostream& out, const glm::vec3& v);
-    std::ostream& operator << (std::ostream& out, const glm::vec2& v);
-
-    } // detail
-} // glm
-#endif // BASE_FORMAT_SUPPORT_GLM
-
-#if defined(BASE_FORMAT_SUPPORT_QT)
-   class QString;
-   std::ostream& operator << (std::ostream& out, const QString& str);
-#endif // BASE_FORMAT_SUPPORT_QT
 
 namespace base
 {
     namespace detail {
-        // generic version trying to use stringstream based conversion.
-        template<typename T> inline
-        std::string ToString(const T& value)
-        {
-            if constexpr (std::is_enum<T>::value)
-            {
-                return std::string(magic_enum::enum_name(value));
-            }
-            else
-            {
-                std::stringstream ss;
-                ss << value;
-                return ss.str();
-            }
-        }
-        inline std::string ToString(const std::wstring& s)
-        {
-            //setup converter
-            using convert_type = std::codecvt_utf8<wchar_t>;
-            std::wstring_convert<convert_type, wchar_t> converter;
-            std::string converted_str = converter.to_bytes(s);
-            return converted_str;
-        }
-
+        std::string ToString(const std::wstring& s);
         inline std::string ToString(const std::string& s)
         { return s; }
         inline std::string ToString(int value)
@@ -135,32 +85,36 @@ namespace base
         { return std::to_string(value); }
         inline std::string ToString(long double value)
         { return std::to_string(value); }
+#if defined(BASE_FORMAT_SUPPORT_GLM)
+        std::string ToString(const glm::mat4& m);
+        std::string ToString(const glm::mat3& m);
+        std::string ToString(const glm::vec4& v);
+        std::string ToString(const glm::vec3& v);
+        std::string ToString(const glm::vec2& v);
+#endif // BASE_FORMAT_SUPPORT_GLM
+        std::string ToString(const FRect& rect);
+        std::string ToString(const FSize& size);
+        std::string ToString(const FPoint& point);
 
-        inline std::string ToString(const FRect& rect)
+        template<typename Enum> inline
+        std::string EnumToString(const Enum value)
+        { return std::string(magic_enum::enum_name(value)); }
+
+        template<typename T> inline
+        std::string ValueToString(const T& value)
         {
-            char buff[100];
-            std::memset(buff, 0, sizeof(buff));
-            std::snprintf(buff, sizeof(buff),"x:%.2f, y:%.2f, w:%.2f, h:%.2f",
-                          rect.GetX(), rect.GetY(), rect.GetWidth(), rect.GetHeight());
-            return buff;
+            // generic version trying to use stringstream based conversion.
+            std::stringstream ss;
+            ss << value;
+            return ss.str();
         }
 
-        inline std::string ToString(const FSize& size)
+        template<typename T> inline
+        std::string ToString(const T& value)
         {
-            char buff[100];
-            std::memset(buff, 0, sizeof(buff));
-            std::snprintf(buff, sizeof(buff), "w:%.2f, h:%.2f",
-                          size.GetWidth(), size.GetHeight());
-            return buff;
-        }
-
-        inline std::string ToString(const FPoint& point)
-        {
-            char buff[100];
-            std::memset(buff, 0, sizeof(buff));
-            std::snprintf(buff, sizeof(buff), "x:%.2f, y:%.2f",
-                          point.GetX(), point.GetY());
-            return buff;
+            if constexpr (std::is_enum<T>::value)
+                return EnumToString(value);
+            else return ValueToString(value);
         }
 
         template<typename T>
@@ -197,23 +151,11 @@ namespace base
     inline std::string FormatString(const std::string& fmt)
     { return fmt; }
 
+    // bring ToString also into base namespace scope
     using detail::ToString;
 
      // format float value to a string ignoring the user's locale.
      // I.e. the format always uses . as the decimal point.
-    inline std::string ToChars(float value)
-    {
-        // c++17 has to_chars in <charconv> but GCC (stdlib) doesn't
-        // yet support float conversion. gah.
-        std::stringstream ss;
-        std::string ret;
-        ss.imbue(std::locale("C"));
-        ss << std::fixed << std::setprecision(2) << value;
-        ss >> ret;
-        return ret;
-    }
+    std::string ToChars(float value);
 } // base
 
-#if defined(__MSVC__)
-#  pragma warning(pop) // deprecated use of wstring_convert
-#endif
