@@ -21,23 +21,20 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring> // for memcpy
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
 #include <vector>
 #include <string>
 #include <map>
 
 #include "base/assert.h"
 #include "base/logging.h"
-#include "base/utility.h"
-#include "resource.h"
-#include "shader.h"
-#include "program.h"
-#include "device.h"
-#include "geometry.h"
-#include "texture.h"
-#include "color4f.h"
+#include "base/hash.h"
+#include "graphics/resource.h"
+#include "graphics/shader.h"
+#include "graphics/program.h"
+#include "graphics/device.h"
+#include "graphics/geometry.h"
+#include "graphics/texture.h"
+#include "graphics/color4f.h"
 
 #define GL_CALL(x)                                      \
 do {                                                    \
@@ -1032,7 +1029,7 @@ private:
             auto& ret = GetUniform(name);
             if (ret.location == -1)
                 return;
-            const auto hash = color.GetHash();
+            const auto hash = base::hash_combine(0u, color);
             if (ret.hash != hash)
             {
                 GL_CALL(glUseProgram(mProgram));

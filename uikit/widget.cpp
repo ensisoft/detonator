@@ -17,8 +17,8 @@
 #include "config.h"
 
 #include "base/assert.h"
-#include "base/utility.h"
 #include "base/json.h"
+#include "base/hash.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"
 
@@ -31,9 +31,9 @@ size_t WidgetBase::GetHash(size_t hash ) const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStyle);
-    hash = base::hash_combine(hash, mPosition.GetHash());
-    hash = base::hash_combine(hash, mSize.GetHash());
-    hash = base::hash_combine(hash, mFlags.value());
+    hash = base::hash_combine(hash, mPosition);
+    hash = base::hash_combine(hash, mSize);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 void WidgetBase::IntoJson(nlohmann::json& json) const

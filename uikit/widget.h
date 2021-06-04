@@ -27,6 +27,7 @@
 
 #include "base/assert.h"
 #include "base/bitflag.h"
+#include "base/utility.h"
 #include "uikit/painter.h"
 #include "uikit/types.h"
 

@@ -19,7 +19,6 @@
 #include "config.h"
 
 #include "base/math.h"
-#include "base/utility.h"
 
 namespace base
 {
@@ -184,16 +183,6 @@ namespace base
         { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
         void SetAlpha(int alpha)
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
-
-        size_t GetHash() const
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mRed);
-            hash = base::hash_combine(hash, mGreen);
-            hash = base::hash_combine(hash, mBlue);
-            hash = base::hash_combine(hash, mAlpha);
-            return hash;
-        }
     private:
         float mRed   = 1.0f;
         float mGreen = 1.0f;

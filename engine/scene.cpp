@@ -25,6 +25,7 @@
 
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/hash.h"
 #include "engine/scene.h"
 #include "engine/entity.h"
 #include "engine/treeop.h"
@@ -42,7 +43,7 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mRotation);
-    hash = base::hash_combine(hash, mFlags.value());
+    hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
     hash = base::hash_combine(hash, mIdleAnimationId);

@@ -40,6 +40,7 @@
 #include "base/utility.h"
 #include "base/assert.h"
 #include "base/json.h"
+#include "base/hash.h"
 #include "graphics/texture.h"
 #include "graphics/resource.h"
 #include "graphics/bitmap.h"

@@ -29,6 +29,7 @@
 #include "base/logging.h"
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/hash.h"
 #include "engine/treeop.h"
 #include "engine/entity.h"
 #include "engine/transform.h"
@@ -41,7 +42,7 @@ std::size_t RigidBodyItemClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mSimulation);
     hash = base::hash_combine(hash, mCollisionShape);
-    hash = base::hash_combine(hash, mBitFlags.value());
+    hash = base::hash_combine(hash, mBitFlags);
     hash = base::hash_combine(hash, mPolygonShapeId);
     hash = base::hash_combine(hash, mFriction);
     hash = base::hash_combine(hash, mRestitution);
@@ -91,7 +92,7 @@ std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::j
 std::size_t DrawableItemClass::GetHash() const
 {
     size_t hash = 0;
-    hash = base::hash_combine(hash, mBitFlags.value());
+    hash = base::hash_combine(hash, mBitFlags);
     hash = base::hash_combine(hash, mMaterialId);
     hash = base::hash_combine(hash, mDrawableId);
     hash = base::hash_combine(hash, mLayer);
@@ -146,7 +147,7 @@ size_t TextItemClass::GetHash() const
     hash = base::hash_combine(hash, mFontName);
     hash = base::hash_combine(hash, mFontSize);
     hash = base::hash_combine(hash, mLineHeight);
-    hash = base::hash_combine(hash, mTextColor.GetHash());
+    hash = base::hash_combine(hash, mTextColor);
     return hash;
 }
 

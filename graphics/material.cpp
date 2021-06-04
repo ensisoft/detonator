@@ -20,6 +20,7 @@
 
 #include "base/logging.h"
 #include "base/format.h"
+#include "base/hash.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -336,14 +337,14 @@ std::string MaterialClass::GetProgramId() const
     if (mStatic)
     {
         std::size_t hash = 0;
-        hash = base::hash_combine(hash, mBaseColor.GetHash());
+        hash = base::hash_combine(hash, mBaseColor);
         hash = base::hash_combine(hash, mGamma);
         hash = base::hash_combine(hash, mTextureScale);
         hash = base::hash_combine(hash, mTextureVelocity);
-        hash = base::hash_combine(hash, mColorMap[0].GetHash());
-        hash = base::hash_combine(hash, mColorMap[1].GetHash());
-        hash = base::hash_combine(hash, mColorMap[2].GetHash());
-        hash = base::hash_combine(hash, mColorMap[3].GetHash());
+        hash = base::hash_combine(hash, mColorMap[0]);
+        hash = base::hash_combine(hash, mColorMap[1]);
+        hash = base::hash_combine(hash, mColorMap[2]);
+        hash = base::hash_combine(hash, mColorMap[3]);
         return std::to_string(hash);
     }
 
@@ -383,7 +384,7 @@ size_t MaterialClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mShaderFile);
-    hash = base::hash_combine(hash, mBaseColor.GetHash());
+    hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mGamma);
@@ -396,16 +397,16 @@ size_t MaterialClass::GetHash() const
     hash = base::hash_combine(hash, mWrapY);
     hash = base::hash_combine(hash, mTextureScale);
     hash = base::hash_combine(hash, mTextureVelocity);
-    hash = base::hash_combine(hash, mColorMap[0].GetHash());
-    hash = base::hash_combine(hash, mColorMap[1].GetHash());
-    hash = base::hash_combine(hash, mColorMap[2].GetHash());
-    hash = base::hash_combine(hash, mColorMap[3].GetHash());
+    hash = base::hash_combine(hash, mColorMap[0]);
+    hash = base::hash_combine(hash, mColorMap[1]);
+    hash = base::hash_combine(hash, mColorMap[2]);
+    hash = base::hash_combine(hash, mColorMap[3]);
     hash = base::hash_combine(hash, mParticleAction);
     for (const auto& sampler : mTextures)
     {
         hash = base::hash_combine(hash, sampler.source->GetHash());
         hash = base::hash_combine(hash, sampler.enable_gc);
-        hash = base::hash_combine(hash, sampler.box.GetHash());
+        hash = base::hash_combine(hash, sampler.box);
     }
     return hash;
 }

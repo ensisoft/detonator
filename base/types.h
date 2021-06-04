@@ -20,8 +20,6 @@
 
 #include <algorithm> // for min, max
 
-#include "base/utility.h"
-
 namespace base
 {
     template<typename T>
@@ -49,13 +47,6 @@ namespace base
             if (has_height || has_width)
                 return false;
             return true;
-        }
-        std::size_t GetHash() const
-        {
-            std::size_t hash = 0;
-            hash = base::hash_combine(hash, mWidth);
-            hash = base::hash_combine(hash, mHeight);
-            return hash;
         }
     private:
         T mWidth  = T();
@@ -102,13 +93,6 @@ namespace base
         T GetX() const { return mX; }
         T GetY() const { return mY; }
 
-        std::size_t GetHash() const
-        {
-            std::size_t hash = 0;
-            hash = base::hash_combine(hash, mX);
-            hash = base::hash_combine(hash, mY);
-            return hash;
-        }
         Point& operator+=(const Point& other)
         {
             mX += other.mX;
@@ -333,16 +317,6 @@ namespace base
             const unsigned h = mHeight * space.GetHeight();
             return Rect<unsigned>(x, y, w, h);
         }
-        std::size_t GetHash() const
-        {
-            std::size_t hash = 0;
-            hash = base::hash_combine(hash, mX);
-            hash = base::hash_combine(hash, mY);
-            hash = base::hash_combine(hash, mWidth);
-            hash = base::hash_combine(hash, mHeight);
-            return hash;
-        }
-
     private:
         T mX = 0;
         T mY = 0;

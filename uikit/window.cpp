@@ -25,6 +25,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "base/hash.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"

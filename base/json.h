@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
+#  include <glm/fwd.hpp>
 #include "warnpop.h"
 
 #include <tuple>

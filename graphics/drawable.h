@@ -32,6 +32,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/math.h"
+#include "base/hash.h"
 #include "graphics/geometry.h"
 #include "graphics/device.h"
 
