@@ -26,6 +26,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/json.h"
 #include "engine/scene.h"
 #include "engine/entity.h"
 #include "engine/treeop.h"

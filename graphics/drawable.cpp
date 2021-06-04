@@ -20,11 +20,12 @@
 #include <cmath>
 
 #include "base/utility.h"
-#include "drawable.h"
-#include "device.h"
-#include "shader.h"
-#include "geometry.h"
-#include "resource.h"
+#include "base/json.h"
+#include "graphics/drawable.h"
+#include "graphics/device.h"
+#include "graphics/shader.h"
+#include "graphics/geometry.h"
+#include "graphics/resource.h"
 
 namespace gfx
 {

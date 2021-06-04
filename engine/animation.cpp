@@ -25,7 +25,8 @@
 
 #include "base/logging.h"
 #include "base/assert.h"
-#include "base/utility.h"
+#include "base/json.h"
+#include "base/hash.h"
 #include "engine/animation.h"
 #include "engine/entity.h"
 

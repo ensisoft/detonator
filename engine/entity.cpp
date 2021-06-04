@@ -23,13 +23,12 @@
 
 #include <algorithm>
 #include <map>
-#include <cmath>
-#include <unordered_set>
 
 #include "base/logging.h"
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/json.h"
 #include "engine/treeop.h"
 #include "engine/entity.h"
 #include "engine/transform.h"

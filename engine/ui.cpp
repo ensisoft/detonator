@@ -25,6 +25,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
