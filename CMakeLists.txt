@@ -141,7 +141,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(BaseLib
     base/assert.cpp
     base/format.cpp
-    base/logging.cpp)
+    base/logging.cpp
+    base/json.cpp)
 add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
@@ -167,15 +168,15 @@ add_library(UiLib
     uikit/widget.cpp
     uikit/window.cpp)
 
-target_include_directories(BaseLib PRIVATE   "${CMAKE_CURRENT_LIST_DIR}/config")
-target_include_directories(GfxLib PRIVATE    "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(GfxLib    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
-target_include_directories(UiLib PRIVATE     "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(UiLib     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 if (UNIX)
-    target_compile_options(BaseLib PRIVATE -fPIC)
-    target_compile_options(GfxLib  PRIVATE -fPIC)
+    target_compile_options(BaseLib   PRIVATE -fPIC)
+    target_compile_options(GfxLib    PRIVATE -fPIC)
     target_compile_options(EngineLib PRIVATE -fPIC)
-    target_compile_options(UiLib PRIVATE -fPIC)
+    target_compile_options(UiLib     PRIVATE -fPIC)
 endif()
 
 # Editor application.
@@ -419,11 +420,9 @@ install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
 # main game runner application. The executable will read a
 # config.json and create the window/context for the application as
 # per the configuration. The game logic will be loaded from a .so or .dll
-add_executable(GameMain
-    engine/main/main.cpp)
+add_executable(GameMain engine/main/main.cpp)
 target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameMain BaseLib)
-target_link_libraries(GameMain wdk_system wdk_desktop_gl)
+target_link_libraries(GameMain BaseLib wdk_system wdk_desktop_gl)
 if (UNIX)
     target_link_libraries(GameMain dl pthread)
 endif()
@@ -473,12 +472,14 @@ target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
 enable_testing()
 
 #editor unit tests
-add_executable(unit_test_imgpack  editor/app/unit_test/unit_test_image_packing.cpp
-                                  editor/app/packing.cpp
-                                  base/assert.cpp
-                                  third_party/stb/stb_image.c
-                                  third_party/stb/stb_image_write.c)
-add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
+add_executable(unit_test_imgpack
+        editor/app/unit_test/unit_test_image_packing.cpp
+        editor/app/packing.cpp
+        base/assert.cpp
+        third_party/stb/stb_image.c
+        third_party/stb/stb_image_write.c)
+add_executable(unit_test_ipc
+        editor/app/unit_test/unit_test_ipc.cpp
         editor/app/eventlog.cpp
         editor/app/format.cpp
         editor/app/utility.cpp
@@ -486,10 +487,12 @@ add_executable(unit_test_ipc editor/app/unit_test/unit_test_ipc.cpp
         editor/app/buffer.cpp
         editor/app/ipc.cpp
         editor/app/packing.cpp)
-add_executable(unit_test_resource editor/app/unit_test/unit_test_resource.cpp
+add_executable(unit_test_resource
+        editor/app/unit_test/unit_test_resource.cpp
         editor/app/utility.cpp
         base/assert.cpp)
-add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
+add_executable(unit_test_workspace
+        editor/app/unit_test/unit_test_workspace.cpp
         engine/loader.cpp
         editor/app/utility.cpp
         editor/app/format.cpp
@@ -497,17 +500,17 @@ add_executable(unit_test_workspace editor/app/unit_test/unit_test_workspace.cpp
         editor/app/workspace.cpp
         editor/app/buffer.cpp
         editor/app/packing.cpp)
-add_test(NAME unit_test_imgpack COMMAND unit_test_imgpack)
-add_test(NAME unit_test_ipc     COMMAND unit_test_ipc)
-add_test(NAME unit_test_resource COMMAND unit_test_resource)
+add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
+add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
+add_test(NAME unit_test_resource  COMMAND unit_test_resource)
 add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
-target_include_directories(unit_test_imgpack  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_ipc      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_resource PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc GfxLib EngineLib UiLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets)
+target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets BaseLib)
 target_link_libraries(unit_test_workspace GfxLib EngineLib UiLib BaseLib)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 
@@ -515,12 +518,10 @@ target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivat
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
 add_executable(unit_test_tree engine/unit_test/unit_test_tree.cpp base/assert.cpp)
 add_executable(unit_test_anim engine/unit_test/unit_test_animation.cpp
-    base/assert.cpp
+        base/assert.cpp
         engine/entity.cpp
         engine/types.cpp
         engine/animation.cpp)
-target_link_libraries(unit_test_anim ${CONAN_LIBS})
-
 add_executable(unit_test_entity engine/unit_test/unit_test_entity.cpp
         base/assert.cpp
         engine/animation.cpp
@@ -540,8 +541,11 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         engine/entity.cpp
         engine/types.cpp
         engine/physics.cpp)
-target_link_libraries(unit_test_lua ${CONAN_LIBS})
-target_link_libraries(unit_test_lua wdk_system)
+target_link_libraries(unit_test_entity   BaseLib)
+target_link_libraries(unit_test_scene    BaseLib)
+target_link_libraries(unit_test_lua      BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_settings BaseLib)
+target_link_libraries(unit_test_anim     BaseLib ${CONAN_LIBS})
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
@@ -549,24 +553,27 @@ target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_lua      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
-add_test(NAME unit_test_tree COMMAND unit_test_tree)
-add_test(NAME unit_test_anim COMMAND unit_test_anim)
+add_test(NAME unit_test_tree     COMMAND unit_test_tree)
+add_test(NAME unit_test_anim     COMMAND unit_test_anim)
 add_test(NAME unit_test_settings COMMAND unit_test_settings)
-add_test(NAME unit_test_entity COMMAND unit_test_entity)
-add_test(NAME unit_test_scene COMMAND unit_test_scene)
-add_test(NAME unit_test_lua COMMAND unit_test_lua)
+add_test(NAME unit_test_entity   COMMAND unit_test_entity)
+add_test(NAME unit_test_scene    COMMAND unit_test_scene)
+add_test(NAME unit_test_lua      COMMAND unit_test_lua)
 
 #UI kit tests
-add_executable(unit_test_uikit uikit/unit_test/unit_test.cpp base/assert.cpp
+add_executable(unit_test_uikit
+        uikit/unit_test/unit_test.cpp
         uikit/widget.cpp
         uikit/window.cpp)
 target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/uikit/unit_test")
+target_link_libraries(unit_test_uikit BaseLib)
+add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 
 # base tests
-add_executable(unit_test_math base/unit_test/unit_test_math.cpp)
+add_executable(unit_test_math    base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
 add_executable(unit_test_logging base/unit_test/unit_test_log.cpp base/logging.cpp)
-add_executable(unit_test_base base/unit_test/unit_test.cpp)
+add_executable(unit_test_base    base/unit_test/unit_test.cpp base/json.cpp)
 target_include_directories(unit_test_base    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 target_include_directories(unit_test_logging PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 if (UNIX)
@@ -578,23 +585,24 @@ add_test(NAME unit_test_cmdline COMMAND unit_test_cmdline)
 add_test(NAME unit_test_logging COMMAND unit_test_logging)
 
 # gfx tests
-add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp base/assert.cpp third_party/stb/stb_image_write.c)
-add_executable(unit_test_image    graphics/unit_test/unit_test_image.cpp  base/assert.cpp third_party/stb/stb_image.c
+add_executable(unit_test_bitmap
+        graphics/unit_test/unit_test_bitmap.cpp
+        third_party/stb/stb_image_write.c)
+add_executable(unit_test_image
+        graphics/unit_test/unit_test_image.cpp
+        third_party/stb/stb_image.c
         graphics/image.cpp
         graphics/resource.cpp)
-add_executable(unit_test          graphics/unit_test/unit_test.cpp graphics/drawable.cpp base/assert.cpp)
-add_executable(unit_test_device   graphics/unit_test/unit_test_device.cpp base/assert.cpp
+add_executable(unit_test_graphics
+        graphics/unit_test/unit_test.cpp
+        graphics/drawable.cpp)
+add_executable(unit_test_device
+        graphics/unit_test/unit_test_device.cpp
         graphics/opengl_es2_device.cpp
         graphics/resource.cpp
         third_party/stb/stb_image_write.c)
-target_link_libraries(unit_test_device
-    wdk_system
-    wdk_desktop_gl
-    ${CONAN_LIBS})
-add_executable(unit_test_material graphics/unit_test/unit_test_material.cpp
-        base/logging.cpp
-        base/assert.cpp
-        base/format.cpp
+add_executable(unit_test_material
+        graphics/unit_test/unit_test_material.cpp
         graphics/material.cpp
         graphics/image.cpp
         graphics/text.cpp
@@ -602,19 +610,12 @@ add_executable(unit_test_material graphics/unit_test/unit_test_material.cpp
         third_party/base64/base64.cpp
         third_party/stb/stb_image_write.c
         third_party/stb/stb_image.c)
-target_link_libraries(unit_test_material ${CONAN_LIBS})
-
-add_executable(unit_test_drawable graphics/unit_test/unit_test_drawable.cpp
-        base/logging.cpp
-        base/assert.cpp
+add_executable(unit_test_drawable
+        graphics/unit_test/unit_test_drawable.cpp
         graphics/drawable.cpp
         graphics/resource.cpp)
-target_link_libraries(unit_test_drawable ${CONAN_LIBS})
-
-add_executable(unit_test_drawing graphics/unit_test/unit_test_drawing.cpp
-        base/logging.cpp
-        base/assert.cpp
-        base/format.cpp
+add_executable(unit_test_drawing
+        graphics/unit_test/unit_test_drawing.cpp
         graphics/material.cpp
         graphics/image.cpp
         graphics/text.cpp
@@ -622,18 +623,25 @@ add_executable(unit_test_drawing graphics/unit_test/unit_test_drawing.cpp
         third_party/base64/base64.cpp
         third_party/stb/stb_image_write.c
         third_party/stb/stb_image.c)
-target_link_libraries(unit_test_drawing ${CONAN_LIBS})
+
+target_link_libraries(unit_test_image    BaseLib)
+target_link_libraries(unit_test_graphics BaseLib)
+target_link_libraries(unit_test_device   BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_material BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_drawable BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_bitmap   BaseLib)
+target_link_libraries(unit_test_drawing  BaseLib ${CONAN_LIBS})
 
 add_test(NAME unit_test_drawable COMMAND unit_test_drawable)
-add_test(NAME unit_test_drawing COMMAND unit_test_drawing)
+add_test(NAME unit_test_drawing  COMMAND unit_test_drawing)
 add_test(NAME unit_test_material COMMAND unit_test_material)
-add_test(NAME unit_test_bitmap COMMAND unit_test_bitmap)
-add_test(NAME unit_test_image COMMAND unit_test_image)
-add_test(NAME unit_test COMMAND unit_test)
-add_test(NAME unit_test_device COMMAND unit_test_device)
+add_test(NAME unit_test_bitmap   COMMAND unit_test_bitmap)
+add_test(NAME unit_test_image    COMMAND unit_test_image)
+add_test(NAME unit_test_graphics COMMAND unit_test_graphics)
+add_test(NAME unit_test_device   COMMAND unit_test_device)
 target_include_directories(unit_test_bitmap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_image    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-target_include_directories(unit_test          PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+target_include_directories(unit_test_graphics PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_device   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_material PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_drawing  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")

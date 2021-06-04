@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "base/utility.h"
+#include "base/json.h"
 #include "base/platform.h"
 
 namespace game
@@ -99,7 +100,7 @@ namespace game
         {
             auto& obj = mJson[module][key];
             for (const auto& value : values)
-                base::JsonAppend(obj, value);
+                obj.push_back(value);
         }
 
         // Get the value under module/key as an object of type T.
