@@ -30,6 +30,7 @@
 #include <memory>
 #include <algorithm>
 #include <unordered_map>
+#include <optional>
 
 #include "base/bitflag.h"
 #include "base/utility.h"

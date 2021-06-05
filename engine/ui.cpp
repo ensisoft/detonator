@@ -166,7 +166,7 @@ UIProperty UIStyle::GetProperty(const std::string& key) const
 
 bool UIStyle::ParseStyleString(const WidgetId& id, const std::string& style)
 {
-    auto [ok, json, error] = base::JsonParse(style.begin(), style.end());
+    auto [ok, json, error] = base::JsonParse(style);
     if (!ok)
     {
         ERROR("Failed to parse widget ('%1') style.", id);

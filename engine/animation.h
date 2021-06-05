@@ -31,6 +31,7 @@
 #include <vector>
 #include <memory>
 #include <variant>
+#include <optional>
 
 #include "base/utility.h"
 #include "base/math.h"
