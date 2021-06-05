@@ -27,7 +27,7 @@
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "uikit/window.h"
-#include "uikit/widget.h"
+#include "uikit/fwd.h"
 #include "editor/gui/mainwidget.h"
 
 namespace app {

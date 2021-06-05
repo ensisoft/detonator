@@ -28,12 +28,14 @@
 #include <functional>
 
 #include "uikit/widget.h"
-#include "uikit/painter.h"
 #include "uikit/types.h"
 #include "uikit/op.h"
 
 namespace uik
 {
+    class State;
+    class Painter;
+
     // Paint hook interface is for intercepting and inspecting the widget
     // paint operations. It's mostly useful for things such as filtering out
     // widget paints based on some property while doing UI design in the
@@ -89,7 +91,9 @@ namespace uik
 
         // Delete the given widget from the window's widget hierarchy.
         // Note that the root widget cannot be deleted and such calls
-        // will be silently ignored.
+        // will be silently ignored. The widget and all its ascendants
+        // are deleted and thus the caller must be sure not to use the
+        // carcass pointer anymore since it'll no longer be valid.
         void DeleteWidget(const Widget* carcass);
 
         // Find the first widget (if any) that satisfies the given predicate.

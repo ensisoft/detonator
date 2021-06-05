@@ -40,6 +40,7 @@
 #include "graphics/resource.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
+#include "uikit/state.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
 #include "engine/entity.h"

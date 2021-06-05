@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <vector>
+#include <stack>
 #include <cstring>
 #include <cmath>
 
@@ -51,6 +52,7 @@
 #include "engine/lua.h"
 #include "engine/format.h"
 #include "engine/treeop.h"
+#include "engine/ui.h"
 
 namespace
 {
@@ -200,8 +202,8 @@ public:
         if (mDebug.debug_show_fps || mDebug.debug_show_msg)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetOrthographicView(0 , 0 , surf_width , surf_height);
-            mPainter->SetViewport(0,0, surf_width, surf_height);
+            mPainter->SetOrthographicView(0, 0, surf_width, surf_height);
+            mPainter->SetViewport(0, 0, surf_width, surf_height);
         }
         if (mDebug.debug_show_fps)
         {
@@ -447,7 +449,7 @@ private:
     // such as the window size/position etc that the game host
     // may/may not support.
     game::AppRequestQueue mRequests;
-    // Interface for accessing the game content and resources
+    // Interface for accessing the game classes and resources
     // such as animations, materials etc.
     game::ClassLibrary* mClasslib = nullptr;
     // The graphics painter device.
