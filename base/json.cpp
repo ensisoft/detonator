@@ -27,9 +27,45 @@
 
 #include "base/json.h"
 #include "base/types.h"
+#include "base/utility.h" // for FromUtf8 for win32
 
-namespace base
+namespace base {
+namespace detail {
+
+void JsonWriteJson(nlohmann::json& json, const char* name, nlohmann::json&& object)
+{ json[name] = std::move(object); }
+
+void JsonWriteJson(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> object)
+{ json[name] = std::move(*object); }
+
+bool IsObject(const nlohmann::json& json)
+{ return json.is_object(); }
+
+bool HasObject(const nlohmann::json& json, const char* name)
+{ return json.contains(name) && json[name].is_object(); }
+
+bool HasValue(const nlohmann::json& json, const char* name)
+{ return json.contains(name); }
+
+std::unique_ptr<nlohmann::json> NewJson()
+{ return std::make_unique<nlohmann::json>(); }
+
+} // namespace
+
+JsonPtr::~JsonPtr() = default;
+JsonPtr::JsonPtr(std::unique_ptr<nlohmann::json> j) : json(std::move(j))
+{}
+
+JsonPtr NewJsonPtr()
+{ return JsonPtr(detail::NewJson()); }
+
+JsonRef GetJsonObj(const nlohmann::json& json, const char* name)
 {
+    JsonRef ret;
+    ret.json = &json[name]; 
+    return ret;
+}
+
 bool JsonReadSafe(const nlohmann::json& object, const char* name, float* out)
 {
     if (!object.contains(name) || !object[name].is_number_float())
@@ -334,8 +370,29 @@ void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
     JsonWrite(object, "a", color.Alpha());
     json[name] = std::move(object);
 }
+template<typename It>
+std::tuple<bool, nlohmann::json, std::string> JsonParse(It beg, It end)
+{
+    // if exceptions are suppressed there are no diagnostics
+    // so use this wrapper.
+    std::string msg;
+    nlohmann::json json;
+    bool ok = true;
 
+    try
+    { json = nlohmann::json::parse(beg, end); }
+    catch (const nlohmann::detail::parse_error& err)
+    {
+        msg = err.what();
+        ok = false;
+    }
+    return std::make_tuple(ok, std::move(json), std::move(msg));
+}
 
+std::tuple<bool, nlohmann::json, std::string> JsonParse(const char* beg, const char* end)
+{ return JsonParse<const char*>(beg, end); }
+std::tuple<bool, nlohmann::json, std::string> JsonParse(const std::string& json)
+{ return JsonParse(json.begin(), json.end()); }
 std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& filename)
 {
 #if defined(WINDOWS_OS)
@@ -346,7 +403,7 @@ std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& f
 #  error unimplemented function
 #endif
     const std::string contents(std::istreambuf_iterator<char>(stream), {});
-    return JsonParse(contents.begin(), contents.end());
+    return JsonParse(contents);
 }
 
 } // namespace

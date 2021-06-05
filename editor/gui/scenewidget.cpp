@@ -565,8 +565,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         return;
     }
 
-    const auto& str = clipboard.GetText();
-    auto [success, json, _] = base::JsonParse(str.begin(), str.end());
+    auto [success, json, _] = base::JsonParse(clipboard.GetText());
     if (!success)
     {
         NOTE("Clipboard JSON parse failed.");

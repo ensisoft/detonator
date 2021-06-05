@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <nlohmann/json.hpp>
+#  include <nlohmann/json_fwd.hpp>
 #  include <neargye/magic_enum.hpp>
 #  include <glm/fwd.hpp>
 #include "warnpop.h"
@@ -27,6 +27,8 @@
 #include <tuple>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <memory>
 
 #include "base/bitflag.h"
 #include "base/types.h"
@@ -37,10 +39,31 @@
 // long time. So this header (and the source file) try to provide a little firewall
 // around that.
 
-// todo: refactor the templates so the json.hpp can be moved
+// todo: refactor the object templates away.
 
-namespace base
-{
+namespace base {
+namespace detail {
+    // helpers for trying to hide the impl in the translation unit
+    void JsonWriteJson(nlohmann::json& json, const char* name, nlohmann::json&& object);
+    void JsonWriteJson(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> object);
+    bool IsObject(const nlohmann::json& json);
+    bool HasObject(const nlohmann::json& json, const char* name);
+    bool HasValue(const nlohmann::json& json, const char* name);
+    std::unique_ptr<nlohmann::json> NewJson();
+} // detail
+
+struct JsonPtr {
+   ~JsonPtr();
+    JsonPtr(std::unique_ptr<nlohmann::json> j);
+    std::unique_ptr<nlohmann::json> json;
+};
+
+struct JsonRef {
+    const nlohmann::json* json = nullptr;
+};
+
+JsonPtr NewJsonPtr();
+JsonRef GetJsonObj(const nlohmann::json& json, const char* name);
 
 bool JsonReadSafe(const nlohmann::json& object, const char* name, float* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, int* out);
@@ -81,17 +104,14 @@ void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 
 template<typename EnumT> inline
-bool JsonReadSafeEnum(const nlohmann::json& object, const char* name, EnumT* out)
+bool JsonReadSafeEnum(const nlohmann::json& json, const char* name, EnumT* out)
 {
     std::string str;
-    if (!object.contains(name) || !object[name].is_string())
+    if (!JsonReadSafe(json, name, &str))
         return false;
-
-    str = object[name];
     const auto& enum_val = magic_enum::enum_cast<EnumT>(str);
     if (!enum_val.has_value())
         return false;
-
     *out = enum_val.value();
     return true;
 }
@@ -99,24 +119,23 @@ bool JsonReadSafeEnum(const nlohmann::json& object, const char* name, EnumT* out
 template<typename EnumT> inline
 bool JsonReadSafeEnum(const nlohmann::json& value, EnumT* out)
 {
-    if (!value.is_string())
+    std::string str;
+    if (!JsonReadSafe(value, &str))
         return false;
-
-    const std::string& str = value;
     const auto& enum_val = magic_enum::enum_cast<EnumT>(str);
     if (!enum_val.has_value())
         return false;
-
     *out = enum_val.value();
     return true;
 }
 
 template<typename T> inline
-bool JsonReadObject(const nlohmann::json& object, const char* name, T* out)
+bool JsonReadObject(const nlohmann::json& json, const char* name, T* out)
 {
-    if (!object.contains(name) || !object[name].is_object())
+    if (!detail::HasObject(json, name))
         return false;
-    const std::optional<T>& ret = T::FromJson(object[name]);
+    JsonRef object = GetJsonObj(json, name);
+    const std::optional<T>& ret = T::FromJson(*object.json);
     if (!ret.has_value())
         return false;
     *out = ret.value();
@@ -126,7 +145,7 @@ bool JsonReadObject(const nlohmann::json& object, const char* name, T* out)
 template<typename T> inline
 bool JsonReadObject(nlohmann::json& value, T* out)
 {
-    if (!value.is_object())
+    if (!detail::IsObject(value))
         return false;
     const std::optional<T>& ret = T::FromJson(value);
     if (!ret.has_value())
@@ -154,20 +173,20 @@ bool JsonReadSafe(const nlohmann::json&  value, ValueT* out)
 }
 
 template<typename Enum, typename Bits>
-bool JsonReadSafe(const nlohmann::json& object, const char* name, base::bitflag<Enum, Bits>* bitflag)
+bool JsonReadSafe(const nlohmann::json& object, base::bitflag<Enum, Bits>* bitflag)
 {
-    if (!object.contains(name) || !object[name].is_object())
+    if (!detail::IsObject(object))
         return false;
-    const auto& value = object[name];
+
     for (const auto& flag : magic_enum::enum_values<Enum>())
     {
         // for easy versioning of bits in the flag don't require
         // that all the flags exist in the object
         const std::string flag_name(magic_enum::enum_name(flag));
-        if (!value.contains(flag_name))
+        if (!detail::HasValue(object, flag_name.c_str()))
             continue;
         bool on_off = false;
-        if (!JsonReadSafe(value, flag_name.c_str(), &on_off))
+        if (!JsonReadSafe(object, flag_name.c_str(), &on_off))
             return false;
         bitflag->set(flag, on_off);
     }
@@ -175,79 +194,45 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, base::bitflag<
 }
 
 template<typename Enum, typename Bits>
-bool JsonReadSafe(const nlohmann::json& value, base::bitflag<Enum, Bits>* bitflag)
+bool JsonReadSafe(const nlohmann::json& json, const char* name, base::bitflag<Enum, Bits>* bitflag)
 {
-    if (!value.is_object())
+    if (!detail::HasObject(json, name))
         return false;
-    for (const auto& flag : magic_enum::enum_values<Enum>())
-    {
-        // for easy versioning of bits in the flag don't require
-        // that all the flags exist in the object
-        const std::string flag_name(magic_enum::enum_name(flag));
-        if (!value.contains(flag_name))
-            continue;
-        bool on_off = false;
-        if (!JsonReadSafe(value, flag_name.c_str(), &on_off))
-            return false;
-        bitflag->set(flag, on_off);
-    }
-    return true;
+    JsonRef object = GetJsonObj(json, name);
+    return JsonReadSafe(*object.json, bitflag);
 }
 
 template<typename EnumT> inline
-void JsonWriteEnum(nlohmann::json& object, const char* name, EnumT value)
-{
-    const std::string str(magic_enum::enum_name(value));
-    object[name] = str;
-}
-template<typename T> inline
-void JsonWriteObject(nlohmann::json& object, const char* name, const T& value)
-{
-    object[name] = value.ToJson();
-}
+void JsonWriteEnum(nlohmann::json& json, const char* name, EnumT value)
+{ JsonWrite(json, name, std::string(magic_enum::enum_name(value))); }
 
-template<typename JsonObject, typename ValueT> inline
-void JsonWrite(JsonObject& object, const char* name, const ValueT& value)
+template<typename T> inline
+void JsonWriteObject(nlohmann::json& json, const char* name, const T& value)
+{ detail::JsonWriteJson(json, name, value.ToJson()); }
+
+template<typename ValueT> inline
+void JsonWrite(nlohmann::json& json, const char* name, const ValueT& value)
 {
     if constexpr (std::is_enum<ValueT>::value)
-        JsonWriteEnum(object, name, value);
-    else JsonWriteObject(object, name, value);
+        JsonWriteEnum(json, name, value);
+    else JsonWriteObject(json, name, value);
 }
 
-
-template<typename JsonObject, typename Enum, typename Bits>
-void JsonWrite(JsonObject& object, const char* name, base::bitflag<Enum, Bits> bitflag)
+template<typename Enum, typename Bits>
+void JsonWrite(nlohmann::json& json, const char* name, base::bitflag<Enum, Bits> bitflag)
 {
-    JsonObject json;
+    auto object = NewJsonPtr();
     for (const auto& flag : magic_enum::enum_values<Enum>())
     {
         const std::string flag_name(magic_enum::enum_name(flag));
-        JsonWrite(json, flag_name.c_str(), bitflag.test(flag));
+        JsonWrite(*object.json, flag_name.c_str(), bitflag.test(flag));
     }
-    object[name] = std::move(json);
+    detail::JsonWriteJson(json, name, std::move(*object.json));
 }
 
-template<typename It> inline
-std::tuple<bool, nlohmann::json, std::string> JsonParse(It beg, It end)
-{
-    // if exceptions are suppressed there are no diagnostics
-    // so use this wrapper.
-    std::string message;
-    nlohmann::json json;
-    bool ok = true;
-    try
-    {
-        json = nlohmann::json::parse(beg, end);
-    }
-    catch (const nlohmann::detail::parse_error& err)
-    {
-        std::stringstream ss;
-        ss << "JSON parse error '" << err.what() << "'";
-        ss >> message;
-        ok = false;
-    }
-    return std::make_tuple(ok, std::move(json), std::move(message));
-}
+
+std::tuple<bool, nlohmann::json, std::string> JsonParse(const char* beg, const char* end);
+std::tuple<bool, nlohmann::json, std::string> JsonParse(const std::string& json);
 std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& filename);
 
 } // base

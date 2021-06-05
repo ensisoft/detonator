@@ -427,8 +427,7 @@ bool UIWidget::LoadState(const Settings& settings)
     const std::string& base64 = settings.getValue("UI", "content", std::string(""));
     if (base64.empty())
         return true;
-    const auto& content = base64::Decode(base64);
-    auto [ok, json, error] = base::JsonParse(content.begin(), content.end());
+    auto [ok, json, error] = base::JsonParse(base64::Decode(base64));
     if (!ok)
     {
         ERROR("Failed to parse content JSON. '%1'", error);
