@@ -31,6 +31,7 @@
 #include "uikit/painter.h"
 #include "uikit/widget.h"
 #include "uikit/window.h"
+#include "uikit/state.h"
 
 class Painter : public uik::Painter
 {

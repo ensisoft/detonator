@@ -21,6 +21,7 @@
 #include "base/hash.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"
+#include "uikit/state.h"
 
 namespace uik
 {
