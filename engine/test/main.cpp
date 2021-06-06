@@ -648,6 +648,15 @@ public:
     }
 
     // ClassLibrary
+    virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
+    {
+        return nullptr;
+    }
+    virtual game::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
+    {
+        return nullptr;
+    }
+
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
     {
         if (name == "uv_test")

@@ -49,6 +49,9 @@ namespace game
         virtual void SaveGame() override;
         virtual bool GetNextAction(Action* out) override;
         virtual FRect GetViewport() const override;
+        virtual void OnUIOpen(uik::Window* ui) override;
+        virtual void OnUIClose(uik::Window* ui, int result) override;
+        virtual void OnUIAction(const uik::Window::WidgetAction& action) override;
         virtual void OnContactEvent(const ContactEvent& contact) override;
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
@@ -110,6 +113,7 @@ namespace game
     void BindGLM(sol::state& L);
     void BindGFX(sol::state& L);
     void BindWDK(sol::state& L);
+    void BindUIK(sol::state& L);
     void BindGameLib(sol::state& L);
 
 } // namespace

@@ -163,6 +163,8 @@ class ContentLoaderImpl : public JsonFileClassLoader
 {
 public:
     // ClassLibrary implementation.
+    virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
+    virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
     virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
     virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const override;
@@ -197,6 +199,17 @@ private:
     std::unordered_map<std::string, std::string> mSceneNameTable;
 };
 
+
+ClassHandle<const uik::Window> ContentLoaderImpl::FindUIByName(const std::string& name) const
+{
+    // todo: need to implement UI packaging
+    return nullptr;
+}
+ClassHandle<const uik::Window> ContentLoaderImpl::FindUIById(const std::string& id) const
+{
+    // todo: need to implement UI packaging
+    return nullptr;
+}
 
 ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& name) const
 {

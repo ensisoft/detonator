@@ -53,6 +53,9 @@
 #include "engine/format.h"
 #include "engine/treeop.h"
 #include "engine/ui.h"
+#include "uikit/window.h"
+#include "uikit/painter.h"
+#include "uikit/state.h"
 
 namespace
 {
@@ -90,6 +93,9 @@ public:
         mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
         mScripting->SetLoader(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
+        mUIStyle.SetLoader(mClasslib);
+        mUIPainter.SetPainter(mPainter.get());
+        mUIPainter.SetStyle(&mUIStyle);
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -106,6 +112,7 @@ public:
     virtual void SetEnvironment(const Environment& env) override
     {
         mClasslib  = env.classlib;
+        mContent   = env.content;
         mDirectory = env.directory;
         mRenderer.SetLoader(mClasslib);
         mPhysics.SetLoader(mClasslib);
@@ -190,6 +197,22 @@ public:
             }
         }
 
+        if (auto* ui = GetUI())
+        {
+            const float width  = ui->GetWidth();
+            const float height = ui->GetHeight();
+            const float scale = std::min(surf_width / width, surf_height / height);
+            const float device_viewport_width = width * scale;
+            const float device_viewport_height = height * scale;
+
+            mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            mPainter->SetOrthographicView(0, 0, width, height);
+            mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
+                                  (surf_height - device_viewport_height)*0.5,
+                                  device_viewport_width, device_viewport_height);
+            ui->Paint(mUIState, mUIPainter, base::GetRuntimeSec(), nullptr);
+        }
+
         if (mDebug.debug_show_fps || mDebug.debug_show_msg)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
@@ -234,7 +257,11 @@ public:
             game::Game::Action action;
             while (mGame->GetNextAction(&action))
             {
-                if (auto* ptr = std::get_if<game::Game::PlayAction>(&action))
+                if (auto* ptr = std::get_if<game::Game::OpenUIAction>(&action))
+                    OpenUI(ptr->ui);
+                else if (auto* ptr = std::get_if<game::Game::CloseUIAction>(&action))
+                    CloseUI(ptr->result);
+                else if (auto* ptr = std::get_if<game::Game::PlayAction>(&action))
                     PlayGame(ptr->klass);
                 else if (auto* ptr = std::get_if<game::Game::SuspendAction>(&action))
                     SuspendGame();
@@ -262,7 +289,10 @@ public:
     virtual void Tick(double wall_time, double tick_time, double dt) override
     {
         mGame->Tick(wall_time, tick_time, dt);
-        mScripting->Tick(wall_time, tick_time, dt);
+        if (mScene)
+        {
+            mScripting->Tick(wall_time, tick_time, dt);
+        }
     }
 
     virtual void Update(double wall_time, double game_time, double dt) override
@@ -282,15 +312,22 @@ public:
                 }
             }
             mRenderer.Update(*mScene, game_time, dt);
+            mScripting->Update(wall_time, game_time, dt);
         }
-
         mGame->Update(wall_time, game_time, dt);
-        mScripting->Update(wall_time, game_time, dt);
+
+        if (HaveOpenUI())
+        {
+            mUIPainter.Update(game_time, dt);
+        }
     }
     virtual void EndMainLoop() override
     {
         if (mScene)
+        {
+            // todo: stop play on entities that were killed.
             mScene->PruneEntities();
+        }
     }
 
     virtual void Shutdown() override
@@ -371,13 +408,19 @@ public:
     {
         //DEBUG("OnKeyDown: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
         mGame->OnKeyDown(key);
-        mScripting->OnKeyDown(key);
+        if (mScene)
+        {
+            mScripting->OnKeyDown(key);
+        }
     }
     virtual void OnKeyup(const wdk::WindowEventKeyup& key) override
     {
         //DEBUG("OnKeyUp: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
         mGame->OnKeyUp(key);
-        mScripting->OnKeyUp(key);
+        if (mScene)
+        {
+            mScripting->OnKeyUp(key);
+        }
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
@@ -385,17 +428,147 @@ public:
     }
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
+        if (HaveOpenUI())
+        {
+            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseMove);
+        }
+
         mGame->OnMouseMove(mouse);
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
+        if (HaveOpenUI())
+        {
+            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MousePress);
+        }
+
         mGame->OnMousePress(mouse);
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
+        if (HaveOpenUI())
+        {
+            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseRelease);
+        }
+
         mGame->OnMouseRelease(mouse);
     }
 private:
+    using MouseFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
+    void SendMouseEvent(const uik::Window::MouseEvent& mickey, MouseFunc which)
+    {
+        auto* ui = GetUI();
+
+        auto action = (ui->*which)(mickey, mUIState);
+        if (action.type == uik::WidgetActionType::None)
+            return;
+        mGame->OnUIAction(action);
+        //DEBUG("Widget action: '%1'", action.type);
+    }
+    template<typename WdkMouseEvent>
+    uik::Window::MouseEvent MapMouseEvent(const WdkMouseEvent& mickey) const
+    {
+        const auto* ui     = GetUI();
+        const float width  = ui->GetWidth();
+        const float height = ui->GetHeight();
+        const float scale = std::min((float)mSurfaceWidth/width, (float)mSurfaceHeight/height);
+        const glm::vec2 window_size(width, height);
+        const glm::vec2 surface_size(mSurfaceWidth, mSurfaceHeight);
+        const glm::vec2 viewport_size = glm::vec2(width, height) * scale;
+        const glm::vec2 viewport_origin = (surface_size - viewport_size) * glm::vec2(0.5, 0.5);
+        const glm::vec2 mickey_pos_win(mickey.window_x, mickey.window_y);
+        const glm::vec2 mickey_pos_uik = (mickey_pos_win - viewport_origin) / scale;
+
+        uik::Window::MouseEvent event;
+        event.time   = base::GetRuntimeSec();
+        event.button = MapMouseButton(mickey.btn);
+        event.native_mouse_pos = uik::FPoint(mickey_pos_win.x, mickey_pos_win.y);
+        event.window_mouse_pos = uik::FPoint(mickey_pos_uik.x, mickey_pos_uik.y);
+        //DEBUG("win: %1, uik: %2", event.native_mouse_pos, event.window_mouse_pos);
+        return event;
+    }
+    uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const
+    {
+        if (btn == wdk::MouseButton::None)
+            return uik::MouseButton::None;
+        else if (btn == wdk::MouseButton::Left)
+            return uik::MouseButton::Left;
+        else if (btn == wdk::MouseButton::Right)
+            return uik::MouseButton::Right;
+        else if (btn == wdk::MouseButton::Wheel)
+            return uik::MouseButton::Wheel;
+        else if (btn == wdk::MouseButton::WheelScrollUp)
+            return uik::MouseButton::WheelUp;
+        else if (btn == wdk::MouseButton::WheelScrollDown)
+            return uik::MouseButton::WheelDown;
+        WARN("Unmapped wdk mouse button '%1'", btn);
+        return uik::MouseButton::None;
+    }
+    inline uik::Window* GetUI()
+    {
+        if (mUI.empty())
+            return nullptr;
+        return mUI.top().get();
+    }
+    inline const uik::Window* GetUI() const
+    {
+        if (mUI.empty())
+            return nullptr;
+        return mUI.top().get();
+    }
+    bool HaveOpenUI() const
+    { return !mUI.empty(); }
+
+
+    void OpenUI(game::ClassHandle<uik::Window> window)
+    {
+        // todo: if the style loading somehow fails, then what?
+        mUIStyle.ClearProperties();
+        mUIStyle.ClearMaterials();
+        mUIState.Clear();
+
+        auto style_data = mContent->LoadGameData(window->GetStyleName());
+        if (!style_data || !mUIStyle.LoadStyle(*style_data))
+        {
+            ERROR("The UI style ('%1') could not be loaded.", window->GetStyleName());
+            return;
+        }
+        DEBUG("Loaded UI style '%1'", window->GetStyleName());
+
+        // there's no "class" object for the UI system so we're just
+        // going to create a mutable copy and put that on the UI stack.
+        auto ui = std::make_unique<uik::Window>(*window);
+        ui->Style(mUIPainter);
+        // push the window to the top of the UI stack. this is the new
+        // currently active UI
+        mUI.push(std::move(ui));
+        mUIPainter.DeleteMaterialInstances();
+
+        mGame->OnUIOpen(mUI.top().get());
+    }
+    void CloseUI(int result)
+    {
+        if (mUI.empty())
+            return;
+
+        mGame->OnUIClose(mUI.top().get(), result);
+        mUI.pop();
+
+        if (auto* ui = GetUI())
+        {
+            mUIPainter.DeleteMaterialInstances();
+            mUIStyle.ClearProperties();
+            mUIStyle.ClearMaterials();
+            mUIState.Clear();
+            auto style_data = mContent->LoadGameData(ui->GetStyleName());
+            if (!style_data || !mUIStyle.LoadStyle(*style_data))
+            {
+                ERROR("The UI style ('%1') could not be loaded.", ui->GetStyleName());
+                return;
+            }
+            ui->Style(mUIPainter);
+        }
+    }
     void PlayGame(game::ClassHandle<game::SceneClass> klass)
     {
         mScene = game::CreateSceneInstance(klass);
@@ -451,6 +624,8 @@ private:
     // Interface for accessing the game classes and resources
     // such as animations, materials etc.
     game::ClassLibrary* mClasslib = nullptr;
+    // Game data/content loader.
+    game::GameDataLoader* mContent = nullptr;
     // The graphics painter device.
     std::unique_ptr<gfx::Painter> mPainter;
     // The graphics device.
@@ -459,12 +634,23 @@ private:
     game::Renderer mRenderer;
     // The physics subsystem.
     game::PhysicsEngine mPhysics;
+    // The UI painter for painting UIs
+    game::UIPainter mUIPainter;
+    game::UIStyle mUIStyle;
     // The scripting subsystem.
     std::unique_ptr<game::ScriptEngine> mScripting;
-    // Current backdrop scene or nullptr if no scene.
+    // Current game scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
     // Game logic implementation.
     std::unique_ptr<game::Game> mGame;
+    // The UI stack onto which UIs are opened.
+    // The top of the stack is the currently "active" UI
+    // that gets the mouse/keyboard input events. It's
+    // possible that the stack is empty if the game is
+    // not displaying any UI
+    std::stack<std::unique_ptr<uik::Window>> mUI;
+    // Transient UI state.
+    uik::State mUIState;
     // flag to indicate whether the app is still running or not.
     bool mRunning = true;
     // a flag to indicate whether currently in fullscreen or not.

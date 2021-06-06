@@ -39,6 +39,8 @@
 #include "engine/lua.h"
 #include "engine/transform.h"
 #include "engine/util.h"
+#include "uikit/window.h"
+#include "uikit/widget.h"
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
@@ -133,6 +135,7 @@ LuaGame::LuaGame(const std::string& lua_path)
     BindGLM(*mLuaState);
     BindGFX(*mLuaState);
     BindWDK(*mLuaState);
+    BindUIK(*mLuaState);
     BindGameLib(*mLuaState);
 
     // bind engine interface.
@@ -169,6 +172,18 @@ LuaGame::LuaGame(const std::string& lua_path)
         action.message = std::move(message);
         self.mActionQueue.push(std::move(action));
     };
+    engine["OpenUI"] = [](LuaGame& self, ClassHandle<uik::Window> model) {
+        if (!model)
+            throw std::runtime_error("Nil UI window object.");
+        OpenUIAction action;
+        action.ui = model;
+        self.mActionQueue.push(std::move(action));
+    };
+    engine["CloseUI"] = [](LuaGame& self, int result) {
+        CloseUIAction action;
+        action.result = result;
+        self.mActionQueue.push(std::move(action));
+    };
 
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");
@@ -178,7 +193,6 @@ void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
 {
     mPhysicsEngine = engine;
 }
-
 void LuaGame::LoadGame(const ClassLibrary* loader)
 {
     mClasslib = loader;
@@ -225,6 +239,20 @@ bool LuaGame::GetNextAction(Action* out)
 
 FRect LuaGame::GetViewport() const
 { return mView; }
+
+void LuaGame::OnUIOpen(uik::Window* ui)
+{
+    CallLua((*mLuaState)["OnUIOpen"], ui);
+}
+void LuaGame::OnUIClose(uik::Window* ui, int result)
+{
+    CallLua((*mLuaState)["OnUIClose"], ui, result);
+}
+
+void LuaGame::OnUIAction(const uik::Window::WidgetAction& action)
+{
+    CallLua((*mLuaState)["OnUIAction"], action);
+}
 
 void LuaGame::OnContactEvent(const ContactEvent& contact)
 {
@@ -739,6 +767,132 @@ void BindWDK(sol::state& L)
     }
 }
 
+void BindUIK(sol::state& L)
+{
+    auto table = L["uik"].get_or_create<sol::table>();
+    {
+        auto widget = table.new_usertype<uik::Widget>("Widget");
+        widget["GetId"]          = &uik::Widget::GetId;
+        widget["GetName"]        = &uik::Widget::GetName;
+        widget["GetHash"]        = &uik::Widget::GetHash;
+        widget["GetSize"]        = &uik::Widget::GetSize;
+        widget["GetPosition"]    = &uik::Widget::GetPosition;
+        widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
+        widget["TestFlag"]       = [](const uik::Widget* widget, const std::string& name) {
+            const auto enum_val = magic_enum::enum_cast<uik::Widget::Flags>(name);
+            if (!enum_val.has_value())
+                throw std::runtime_error("No such widget flag:" + name);
+            return widget->TestFlag(enum_val.value());
+        };
+        widget["SetName"]     = &uik::Widget::SetName;
+        widget["SetSize"]     = (void(uik::Widget::*)(const uik::FSize&))&uik::Widget::SetSize;
+        widget["SetPosition"] = (void(uik::Widget::*)(const uik::FPoint&))&uik::Widget::SetPosition;
+        widget["SetFlag"]     = [](uik::Widget* widget, const std::string& name, bool on_off) {
+            const auto enum_val = magic_enum::enum_cast<uik::Widget::Flags>(name);
+            if (!enum_val.has_value())
+                throw std::runtime_error("No such widget flag:" + name);
+            widget->SetFlag(enum_val.value(), on_off);
+        };
+        widget["IsEnabled"]   = &uik::Widget::IsEnabled;
+        widget["IsVisible"]   = &uik::Widget::IsVisible;
+        widget["IsContainer"] = &uik::Widget::IsContainer;
+        widget["GetNumChildren"] = &uik::Widget::GetNumChildren;
+        widget["GetChild"] = [](uik::Widget* widget, unsigned index) {
+            if (!widget->IsContainer())
+                throw std::runtime_error(base::FormatString("Widget '%1' is not a container.", widget->GetName()));
+            if (index >= widget->GetNumChildren())
+                throw std::runtime_error(base::FormatString("Widget '%1' index (%2) is out of bounds.", widget->GetName(), index));
+            return &widget->GetChild(index);
+        };
+        widget["Grow"]      = &uik::Widget::Grow;
+        widget["Translate"] = &uik::Widget::Translate;
+
+        widget["AsLabel"] = [](uik::Widget* widget) {
+            if (widget->GetType() != uik::Widget::Type::Label)
+                throw std::runtime_error(base::FormatString("Widget '%1' is not a Label", widget->GetName()));
+            return static_cast<uik::Label*>(widget);
+        };
+        widget["AsPushButton"] = [](uik::Widget* widget) {
+            if (widget->GetType() != uik::Widget::Type::PushButton)
+                throw std::runtime_error(base::FormatString("Widget '%1' is not a PushButton", widget->GetName()));
+            return static_cast<uik::PushButton*>(widget);
+        };
+        widget["AsCheckBox"] = [](uik::Widget* widget) {
+            if (widget->GetType() != uik::Widget::Type::CheckBox)
+                throw std::runtime_error(base::FormatString("Widget '%1' is not a CheckBox", widget->GetName()));
+            return static_cast<uik::CheckBox*>(widget);
+        };
+        widget["AsGroupBox"] = [](uik::Widget* widget) {
+            if (widget->GetType() != uik::Widget::Type::GroupBox)
+                throw std::runtime_error(base::FormatString("Widget '%1' is not a GroupBox", widget->GetName()));
+            return static_cast<uik::GroupBox*>(widget);
+        };
+
+        auto label = table.new_usertype<uik::Label>("Label");
+        label["GetText"] = &uik::Label::GetText;
+        label["SetText"] = (void(uik::Label::*)(const std::string&))&uik::Label::SetText;
+
+        auto pushbtn = table.new_usertype<uik::PushButton>("PushButton");
+        pushbtn["GetText"] = &uik::PushButton::GetText;
+        pushbtn["SetText"] = (void(uik::PushButton::*)(const std::string&))&uik::PushButton::SetText;
+
+        auto check = table.new_usertype<uik::CheckBox>("CheckBox");
+        check["GetText"]    = &uik::CheckBox::GetText;
+        check["SetText"]    = (void(uik::CheckBox::*)(const std::string&))&uik::CheckBox::SetText;
+        check["IsChecked"]  = &uik::CheckBox::IsChecked;
+        check["SetChecked"] = &uik::CheckBox::SetChecked;
+
+        auto group = table.new_usertype<uik::GroupBox>("GroupBox");
+        group["GetText"] = &uik::GroupBox::GetText;
+        group["SetText"] = (void(uik::GroupBox::*)(const std::string&))&uik::GroupBox::SetText;
+    }
+
+    {
+        auto window = table.new_usertype<uik::Window>("Window");
+        window["GetId"]   = &uik::Window::GetId;
+        window["GetSize"] = &uik::Window::GetSize;
+        window["GetName"] = &uik::Window::GetName;
+        window["GetWidth"] = &uik::Window::GetWidth;
+        window["GetHeight"] = &uik::Window::GetHeight;
+        window["GetNumWidgets"] = &uik::Window::GetNumWidgets;
+        window["GetWidget"]        = [](uik::Window* window, unsigned index) {
+            if (index >= window->GetNumWidgets())
+                throw std::runtime_error(base::FormatString("Widget index %1 is out of bounds", index));
+            return &window->GetWidget(index);
+        };
+        window["GetRootWidget"]    = [](uik::Window* window) { return &window->GetRootWidget(); };
+        window["FindWidgetById"]   = [](uik::Window* window, const std::string& id) { return window->FindWidgetById(id); };
+        window["FindWidgetByName"] = [](uik::Window* window, const std::string& name) { return window->FindWidgetByName(name); };
+        window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
+        window["Resize"]           = (void(uik::Window::*)(const uik::FSize&))&uik::Window::Resize;
+    }
+
+    {
+        auto action = table.new_usertype<uik::Window::WidgetAction>("Action",
+        sol::meta_function::index, [&L](const uik::Window::WidgetAction* action, const char* key) {
+            sol::state_view lua(L);
+            if (!std::strcmp(key, "name"))
+                return sol::make_object(lua, action->name);
+            else if (!std::strcmp(key, "id"))
+                return sol::make_object(lua, action->id);
+            else if (!std::strcmp(key, "type"))
+                return sol::make_object(lua, base::ToString(action->type));
+            else if (!std::strcmp(key, "value")) {
+                if (std::holds_alternative<int>(action->value))
+                    return sol::make_object(lua, std::get<int>(action->value));
+                else if (std::holds_alternative<float>(action->value))
+                    return sol::make_object(lua, std::get<float>(action->value));
+                else if (std::holds_alternative<bool>(action->value))
+                    return sol::make_object(lua, std::get<bool>(action->value));
+                else if (std::holds_alternative<std::string>(action->value))
+                    return sol::make_object(lua, std::get<std::string>(action->value));
+                else BUG("???");
+            }
+            throw std::runtime_error(base::FormatString("No such ui action index: %1", key));
+        });
+    }
+}
+
 void BindGameLib(sol::state& L)
 {
     auto table = L["game"].get_or_create<sol::table>();
@@ -748,6 +902,8 @@ void BindGameLib(sol::state& L)
     classlib["FindEntityClassById"]   = &ClassLibrary::FindEntityClassById;
     classlib["FindSceneClassByName"]  = &ClassLibrary::FindSceneClassByName;
     classlib["FindSceneClassById"]    = &ClassLibrary::FindSceneClassById;
+    classlib["FindUIByName"]          = &ClassLibrary::FindUIByName;
+    classlib["FindUIById"]            = &ClassLibrary::FindUIById;
 
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
     drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;

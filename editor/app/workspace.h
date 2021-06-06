@@ -77,6 +77,8 @@ namespace app
         // game::ClassLibrary implementation
         // The methods here allow requests for resources that don't exist and return
         // nullptr as specified in the ClassLibrary API.
+        virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
+        virtual game::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
         virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
         virtual game::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
         virtual game::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;

@@ -25,6 +25,8 @@
 #include "wdk/events.h"
 #include "engine/classlib.h"
 #include "engine/types.h"
+#include "uikit/window.h"
+#include "uikit/types.h"
 
 namespace game
 {
@@ -35,14 +37,23 @@ namespace game
 
     // This is the main interface for the game engine to interface
     // with the actual game logic. I.e. implementations of this
-    // interface implement some gam/application logic by for example
-    // reacting to the callbacks or keyboard/mouse input from the player.
+    // interface implement game specific functionality by for example
+    // reacting to the engine callbacks or by handling the keyboard/mouse
+    // input coming from the player.
     class Game
     {
     public:
-        struct OpenMenuAction {
-
+        // Open a new UI window and place it on top of the stack.
+        // The top of the stack UI (if any) will be given the chance
+        // to process the user input coming from mouse/keyboard.
+        struct OpenUIAction {
+            ClassHandle<uik::Window> ui;
         };
+        // Close the topmost UI and pop it off of the UI stack.
+        struct CloseUIAction {
+            int result = 0;
+        };
+
         // Action to start playing the given scene.
         // When the engine processes this action request
         // it will create an instance of the SceneClass and
@@ -64,14 +75,18 @@ namespace game
         struct PrintDebugStrAction {
             std::string message;
         };
+        // Play, Suspend, Resume, Stop, Quit
+
         // Actions express some want the game wants to take
         // such as opening a menu, playing a scene and so on.
         using Action = std::variant<PlayAction,
-                                    SuspendAction,
-                                    ResumeAction,
-                                    StopAction,
-                                    QuitAction,
-                                    PrintDebugStrAction>;
+                                SuspendAction,
+                                ResumeAction,
+                                StopAction,
+                                QuitAction,
+                                OpenUIAction,
+                                CloseUIAction,
+                                PrintDebugStrAction>;
 
         virtual ~Game() = default;
         // Set physics engine instance.
@@ -79,9 +94,9 @@ namespace game
         // Load the game. This is called once by the engine after the
         // application has started. In the implementation you should
         // start with some initial game state and possibly request some
-        // action to take place such as loading the main menu.
+        // action to take place such as loading/displaying the game main UI.
         virtual void LoadGame(const ClassLibrary* loader) = 0;
-        // BeginPlay is called as a response to PlaySceneAction. When the
+        // BeginPlay is called as a response to PlayAction. When the
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
         // of the scene for the duration of the game play.
@@ -106,26 +121,39 @@ namespace game
         // actually running, so in case game is paused by the host runner
         // this counter will not increase.
         virtual void Update(double wall_time, double game_time,  double dt) = 0;
-        // EndPlay is called after EndPlay action has taken place.
-        virtual void EndPlay(Scene* scene) = 0;
         // todo:
+        virtual void PausePlay()
+        {}
+        virtual void ResumePlay()
+        {}
+        // Called after StopAction has taken place.
+        virtual void EndPlay(Scene* scene) = 0;
+
         virtual void SaveGame() = 0;
+
         // Get the next action from the game's action queue. The game engine
         // will process all the game actions once per game update loop iteration.
         // If there was no next action returns false, otherwise true is returned
         // and the action should be copied into out.
         virtual bool GetNextAction(Action* out)
         { return false; }
-
         // Get the game's logical viewport into the game world.
         // The viewport is defined in the same units as the game itself
-        // and has no direct relation to pixels or to a graphics device
-        // viewport. Instead it's completely logical and is managed by
+        // and has no direct relation to pixels or to the graphics device
+        // viewport. Instead it's completely game related and is managed by
         // the game. The engine will then use the viewport information to
         // render the contents within the game's viewport into some area
         // in some rendering surface such as a window. If your game returns
         // an empty viewport (width and height are 0) *nothing* will be shown.
         virtual FRect GetViewport() const = 0;
+
+        // Event listeners.
+        virtual void OnUIOpen(uik::Window* ui)
+        {}
+        virtual void OnUIClose(uik::Window* ui, int result)
+        {}
+        virtual void OnUIAction(const uik::Window::WidgetAction& action)
+        {}
 
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
