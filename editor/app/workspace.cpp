@@ -755,6 +755,31 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
+game::ClassHandle<const uik::Window> Workspace::FindUIByName(const std::string& name) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::UI)
+            continue;
+        else if (resource->GetNameUtf8() != name)
+            continue;
+        return ResourceCast<uik::Window>(*resource).GetSharedResource();
+    }
+    return nullptr;
+}
+game::ClassHandle<const uik::Window> Workspace::FindUIById(const std::string& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::UI)
+            continue;
+        else if (resource->GetIdUtf8() != id)
+            continue;
+        return ResourceCast<uik::Window>(*resource).GetSharedResource();
+    }
+    return nullptr;
+}
+
 game::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
     for (const auto& resource : mResources)

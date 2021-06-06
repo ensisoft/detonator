@@ -20,10 +20,8 @@
 
 #include <memory>
 
-namespace gfx {
-    class MaterialClass;
-    class DrawableClass;
-} // gfx
+#include "graphics/fwd.h"
+#include "uikit/fwd.h"
 
 namespace game
 {
@@ -50,8 +48,17 @@ namespace game
     {
     public:
         virtual ~ClassLibrary() = default;
-
+        // Find a user interface (UI KIT) provided window object by name.
+        // If not found will return a nullptr.
+        virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const = 0;
+        // Find a user interface (UI KIT) provided window object by name.
+        // If not found will return a nullptr.
+        virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const = 0;
+        // Find a graphics subsystem provided material class object by its class id.
+        // If not found will return a nullptr.
         virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const = 0;
+        // Find a graphics subsystem provided drawable class object by its class id.
+        // If not found will return a nullptr.
         virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const = 0;
         // Find a entity class object by the given name.
         // If not found will return a nullptr.
