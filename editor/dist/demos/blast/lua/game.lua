@@ -105,9 +105,6 @@ function LoadGame()
     Game:SetViewport(viewport)
 end
 
-function LoadBackgroundDone(background)
-end
-
 function BeginPlay(scene)
     ship_velo_increment = 1.0
     tick_count          = 0

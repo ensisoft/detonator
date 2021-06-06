@@ -10386,6 +10386,29 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "gwm3bTflRn",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "g89jOt4yC0",
+          "idle_animation_id": "",
+          "layer": -2,
+          "name": "Background",
+          "parent_render_tree_node": "xEXRxAU680",
+          "position": {
+            "x": 400.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -10411,6 +10434,13 @@
             }
           },
           {
+            "children": [
+              {
+                "node": {
+                  "id": "g89jOt4yC0"
+                }
+              }
+            ],
             "node": {
               "id": "KlgMiOboLX"
             }
@@ -10738,46 +10768,6 @@
           "value": 123
         }
       ]
-    },
-    {
-      "id": "5uH3ql26SD",
-      "nodes": [
-        {
-          "entity": "gwm3bTflRn",
-          "flags": {
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true
-          },
-          "id": "bRrwTBa56A",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Background",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "bRrwTBa56A"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "5uH3ql26SD",
-      "resource_name": "Background"
     }
   ],
   "scripts": [

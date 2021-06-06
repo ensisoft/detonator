@@ -148,13 +148,6 @@ LuaGame::LuaGame(const std::string& lua_path)
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
     };
-    engine["LoadBackground"] = [](LuaGame* self, ClassHandle<SceneClass> klass) {
-        if (!klass)
-            throw std::runtime_error("nil scene class");
-        LoadBackgroundAction action;
-        action.klass = klass;
-        self->mActionQueue.push(action);
-    };
     engine["DebugPrint"] = [](LuaGame* self, std::string message) {
         PrintDebugStrAction action;
         action.message = std::move(message);
@@ -178,11 +171,6 @@ void LuaGame::LoadGame(const ClassLibrary* loader)
     (*mLuaState)["Game"]     = this;
     CallLua((*mLuaState)["LoadGame"]);
 }
-void LuaGame::LoadBackgroundDone(Scene* background)
-{
-    CallLua((*mLuaState)["LoadBackgroundDone"], background);
-}
-
 void LuaGame::Tick(double wall_time, double tick_time, double dt)
 {
     CallLua((*mLuaState)["Tick"], wall_time, tick_time, dt);
