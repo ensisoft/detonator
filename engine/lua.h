@@ -45,7 +45,7 @@ namespace game
         virtual void Tick(double wall_time, double tick_time, double dt) override;
         virtual void Update(double wall_time, double game_time,  double dt) override;
         virtual void BeginPlay(Scene* scene) override;
-        virtual void EndPlay() override;
+        virtual void EndPlay(Scene* scene) override;
         virtual void SaveGame() override;
         virtual bool GetNextAction(Action* out) override;
         virtual FRect GetViewport() const override;
@@ -80,7 +80,7 @@ namespace game
         void SetPhysicsEngine(const PhysicsEngine* engine)
         { mPhysicsEngine = engine; }
         void BeginPlay(Scene* scene);
-        void EndPlay();
+        void EndPlay(Scene* scene);
         void Tick(double wall_time, double tick_time, double dt);
         void Update(double wall_time, double game_time, double dt);
         bool GetNextAction(Action* out);

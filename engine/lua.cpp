@@ -138,20 +138,36 @@ LuaGame::LuaGame(const std::string& lua_path)
     // bind engine interface.
     auto table  = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<LuaGame>("Engine");
-    engine["PlayScene"] = [](LuaGame& self, ClassHandle<SceneClass> klass) {
+    engine["Play"] = [](LuaGame& self, ClassHandle<SceneClass> klass) {
         if (!klass)
-            throw std::runtime_error("nil scene class");
-        PlaySceneAction play;
+            throw std::runtime_error("Nil scene class");
+        PlayAction play;
         play.klass = klass;
         self.mActionQueue.push(play);
+    };
+    engine["Suspend"] = [](LuaGame& self) {
+        SuspendAction suspend;
+        self.mActionQueue.push(suspend);
+    };
+    engine["Stop"] = [](LuaGame& self) {
+        StopAction stop;
+        self.mActionQueue.push(stop);
+    };
+    engine["Resume"] = [](LuaGame& self) {
+        ResumeAction resume;
+        self.mActionQueue.push(resume);
+    };
+    engine["Quit"] = [](LuaGame& self) {
+        QuitAction quit;
+        self.mActionQueue.push(quit);
     };
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
     };
-    engine["DebugPrint"] = [](LuaGame* self, std::string message) {
+    engine["DebugPrint"] = [](LuaGame& self, std::string message) {
         PrintDebugStrAction action;
         action.message = std::move(message);
-        self->mActionQueue.push(std::move(action));
+        self.mActionQueue.push(std::move(action));
     };
 
     // todo: maybe this needs some configuring or whatever?
@@ -186,10 +202,11 @@ void LuaGame::BeginPlay(Scene* scene)
 
     CallLua((*mLuaState)["BeginPlay"], scene);
 }
-void LuaGame::EndPlay()
+void LuaGame::EndPlay(Scene* scene)
 {
+    CallLua((*mLuaState)["EndPlay"], scene);
+    (*mLuaState)["Scene"] = nullptr;
     mScene = nullptr;
-    CallLua((*mLuaState)["EndPlay"]);
 }
 
 void LuaGame::SaveGame()
@@ -351,9 +368,11 @@ void ScriptEngine::BeginPlay(Scene* scene)
     }
 }
 
-void ScriptEngine::EndPlay()
+void ScriptEngine::EndPlay(Scene* scene)
 {
-
+    mTypeEnvs.clear();
+    mScene = nullptr;
+    (*mLuaState)["Scene"] = nullptr;
 }
 
 void ScriptEngine::Tick(double wall_time, double tick_time, double dt)

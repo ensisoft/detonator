@@ -30,7 +30,7 @@ end
 -- object and ask for the game to show the menu.
 function LoadGame()
     local scene = ClassLib:FindSceneClassByName('My Scene')
-    Game:PlayScene(scene)
+    Game:Play(scene)
     Game:SetViewport(Viewport)
 end
 
@@ -40,7 +40,7 @@ function BeginPlay(scene)
 end
 
 -- Called when the scene play ends.
-function EndPlay()
+function EndPlay(scene)
 
 end
 
@@ -88,7 +88,7 @@ end
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         local scene = ClassLib:FindSceneClassByName('My Scene')
-        Game:PlayScene(scene)
+        Game:Play(scene)
     end
 end
 
