@@ -88,6 +88,7 @@ public:
         mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
         mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
+        mScripting->SetLoader(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
@@ -233,8 +234,16 @@ public:
             game::Game::Action action;
             while (mGame->GetNextAction(&action))
             {
-                if (auto* ptr = std::get_if<game::Game::PlaySceneAction>(&action))
-                    LoadScene(ptr->klass);
+                if (auto* ptr = std::get_if<game::Game::PlayAction>(&action))
+                    PlayGame(ptr->klass);
+                else if (auto* ptr = std::get_if<game::Game::SuspendAction>(&action))
+                    SuspendGame();
+                else if (auto* ptr = std::get_if<game::Game::ResumeAction>(&action))
+                    ResumeGame();
+                else if (auto* ptr = std::get_if<game::Game::QuitAction>(&action))
+                    QuitGame();
+                else if (auto* ptr = std::get_if<game::Game::StopAction>(&action))
+                    StopGame();
                 else if (auto* ptr = std::get_if<game::Game::PrintDebugStrAction>(&action))
                     DebugPrintString(ptr->message);
             }
@@ -387,21 +396,35 @@ public:
         mGame->OnMouseRelease(mouse);
     }
 private:
-    void LoadScene(game::ClassHandle<game::SceneClass> klass)
+    void PlayGame(game::ClassHandle<game::SceneClass> klass)
     {
-        if (mScene)
-        {
-            mGame->EndPlay();
-            mPhysics.DeleteAll();
-            mScene.reset();
-        }
         mScene = game::CreateSceneInstance(klass);
+        mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
-        mScripting->SetLoader(mClasslib);
-        mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->BeginPlay(mScene.get());
         mGame->BeginPlay(mScene.get());
     }
+    void SuspendGame()
+    {
+
+    }
+    void ResumeGame()
+    {
+
+    }
+    void StopGame()
+    {
+        mGame->EndPlay(mScene.get());
+        mScripting->EndPlay(mScene.get());
+        mScene.reset();
+    }
+    void QuitGame()
+    {
+        // todo: cleanup?
+
+        mRequests.Quit();
+    }
+
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
     {
         std::string ret;

@@ -98,7 +98,7 @@ end
 -- object and ask for the game to show the menu.
 function LoadGame()
     local scene = ClassLib:FindSceneClassByName('My Scene')
-    Game:PlayScene(scene)
+    Game:Play(scene)
 
     -- set the viewport size and position
     local viewport = base.FRect:new(-600.0, -400.0, 1200, 800.0)
@@ -109,6 +109,9 @@ function BeginPlay(scene)
     ship_velo_increment = 1.0
     tick_count          = 0
     math.randomseed(6634)
+end
+
+function EndPlay(scene)
 end
 
 function Tick(wall_time, tick_time, dt)
@@ -136,14 +139,13 @@ end
 function Update(wall_time, game_time, dt)
 end
 
-function EndPlay()
-end
+
 
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         local scene = ClassLib:FindSceneClassByName('My Scene')
-        Game:PlayScene(scene)
+        Game:Play(scene)
     end
 end
 

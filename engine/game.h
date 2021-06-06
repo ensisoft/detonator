@@ -48,22 +48,30 @@ namespace game
         // it will create an instance of the SceneClass and
         // call BeginPlay. The engine will retain the ownership
         // of the Scene instance that is created.
-        struct PlaySceneAction {
+        struct PlayAction {
             // handle of the scene class object for the scene instance
             // creation. This may not be nullptr.
             ClassHandle<SceneClass> klass;
         };
-        struct EndPlay {
-            // todo: any params ?
-        };
+
+        // Suspend the game play. Suspending keeps the current scene
+        // loaded but time accumulation and updates stop.
+        struct SuspendAction {};
+        struct ResumeAction {};
+        struct StopAction {};
+        struct QuitAction {};
+
         struct PrintDebugStrAction {
             std::string message;
         };
         // Actions express some want the game wants to take
         // such as opening a menu, playing a scene and so on.
-        using Action = std::variant<
-                PlaySceneAction,
-                PrintDebugStrAction>;
+        using Action = std::variant<PlayAction,
+                                    SuspendAction,
+                                    ResumeAction,
+                                    StopAction,
+                                    QuitAction,
+                                    PrintDebugStrAction>;
 
         virtual ~Game() = default;
         // Set physics engine instance.
@@ -99,7 +107,7 @@ namespace game
         // this counter will not increase.
         virtual void Update(double wall_time, double game_time,  double dt) = 0;
         // EndPlay is called after EndPlay action has taken place.
-        virtual void EndPlay() = 0;
+        virtual void EndPlay(Scene* scene) = 0;
         // todo:
         virtual void SaveGame() = 0;
         // Get the next action from the game's action queue. The game engine
