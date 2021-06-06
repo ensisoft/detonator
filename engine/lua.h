@@ -42,7 +42,6 @@ namespace game
         LuaGame(const std::string& lua_path);
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void LoadGame(const ClassLibrary* loader) override;
-        virtual void LoadBackgroundDone(Scene* background) override;
         virtual void Tick(double wall_time, double tick_time, double dt) override;
         virtual void Update(double wall_time, double game_time,  double dt) override;
         virtual void BeginPlay(Scene* scene) override;

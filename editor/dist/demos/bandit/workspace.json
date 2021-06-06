@@ -21,9 +21,6 @@
     "5GPKkIzzUf": {
         "checked_for_packing": true
     },
-    "5uH3ql26SD": {
-        "checked_for_packing": true
-    },
     "7WjAKJb7hY": {
         "checked_for_packing": true
     },
@@ -507,6 +504,7 @@
         "updates_per_second": 60,
         "use_gamehost_process": true,
         "window_can_resize": true,
+        "window_cursor": true,
         "window_has_border": true,
         "window_height": 768,
         "window_mode": "Windowed",
@@ -530,7 +528,6 @@
         "checked_for_packing": true
     },
     "vWm1hXNdOD": {
-        "checked_for_packing": true
     },
     "vYm7CMPRrJ": {
         "checked_for_packing": true
