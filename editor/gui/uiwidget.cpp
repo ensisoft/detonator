@@ -1110,11 +1110,11 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    if (GetValue(mUI.chkShowGrid) && mPlayState != PlayState::Playing)
+    if (GetValue(mUI.chkShowGrid) && mPlayState == PlayState::Stopped)
     {
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, surface_width, surface_height);
     }
-    if (GetValue(mUI.chkShowOrigin) && mPlayState != PlayState::Playing)
+    if (GetValue(mUI.chkShowOrigin) && mPlayState == PlayState::Stopped)
     {
         DrawBasisVectors(painter , view);
     }
@@ -1130,14 +1130,6 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
     painter.SetViewMatrix(view.GetAsMatrix());
     painter.SetPixelRatio(glm::vec2(xs * zoom, ys * zoom));
-
-    // draw the window outline
-    if (mPlayState != PlayState::Playing)
-    {
-        gfx::DrawRectOutline(painter , gfx::FRect(0.0f , 0.0f , mState.window.GetSize()) ,
-                             gfx::Color::HotPink);
-    }
-
     mState.painter->SetPainter(&painter);
     mState.painter->SetStyle(mState.style.get());
     if (mPlayState == PlayState::Stopped)
@@ -1157,6 +1149,9 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         // paint the design state copy of the window.
         uik::State s;
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
+
+        // draw the window outline
+        gfx::DrawRectOutline(painter, gfx::FRect(0.0f, 0.0f,mState.window.GetSize()), gfx::Color::HotPink);
     }
     else
     {
