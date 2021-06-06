@@ -1324,7 +1324,7 @@
     <string>Play</string>
    </property>
    <property name="shortcut">
-    <string>Shift+F5</string>
+    <string>F4</string>
    </property>
   </action>
   <action name="actionNewCustomShape">
