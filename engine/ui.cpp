@@ -213,11 +213,25 @@ void UIStyle::DeleteProperties(const std::string& filter)
     for (auto it = mProperties.begin(); it != mProperties.end();)
     {
         const auto& key = (*it).first;
-        if (base::StartsWith(key, filter))
+        if (base::Contains(key, filter))
             it = mProperties.erase(it);
         else ++it;
     }
 }
+void UIStyle::GatherProperties(const std::string& filter, std::vector<PropertyKeyValue>* props) const
+{
+    for (const auto& pair : mProperties)
+    {
+        const auto& key = pair.first;
+        if (!base::Contains(key, filter))
+            continue;
+        PropertyKeyValue kv;
+        kv.key  = key;
+        kv.prop = pair.second;
+        props->push_back(std::move(kv));
+    }
+}
+
 
 void UIStyle::DeleteMaterial(const std::string& key)
 {
@@ -232,7 +246,7 @@ void UIStyle::DeleteMaterials(const std::string& filter)
     for (auto it = mMaterials.begin(); it != mMaterials.end();)
     {
         const auto& key = (*it).first;
-        if (base::StartsWith(key, filter))
+        if (base::Contains(key, filter))
             it = mMaterials.erase(it);
         else ++it;
     }

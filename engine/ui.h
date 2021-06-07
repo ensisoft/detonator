@@ -230,6 +230,8 @@ namespace game
         // Returns true if property holds a value.
         operator bool() const
         { return HasValue(); }
+        std::any GetAny() const
+        { return mValue; }
 
         // Get a string property value. Returns the given default value
         // if no property was available.
@@ -288,6 +290,14 @@ namespace game
                 return false;
             return GetValueInternal(value);
         }
+
+        template<typename T>
+        void SetValue(const T& value)
+        { mValue = value; }
+        void SetValue(const std::string& str)
+        { mValue = str; }
+        void SetValue(const char* str)
+        { mValue = std::string(str); }
     private:
         template<typename T>
         bool GetValueInternal(T* out) const
@@ -387,7 +397,14 @@ namespace game
         bool HasProperty(const std::string& key) const;
         // Delete a style property under the given property key.
         void DeleteProperty(const std::string& key);
+        // Delete style properties that match with the given filter.
         void DeleteProperties(const std::string& filter);
+        struct PropertyKeyValue {
+            std::string key;
+            UIProperty prop;
+        };
+        // Gather properties that match the given filter into a vector.
+        void GatherProperties(const std::string& filter, std::vector<PropertyKeyValue>* props) const;
         // Set a new property value under the given property key.
         template<typename T>
         void SetProperty(const std::string& key, const T& value)
@@ -402,6 +419,8 @@ namespace game
             }
             mProperties[key] = value;
         }
+        void SetProperty(const std::string& key, const UIProperty& prop)
+        { mProperties[key] = prop.GetAny(); }
         // Set a new material setting under the given material key.
         void SetMaterial(const std::string& key, std::unique_ptr<UIMaterial> material)
         { mMaterials[key] = std::move(material); }

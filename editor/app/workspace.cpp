@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <boost/algorithm/string/erase.hpp>
 #  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
 #  include <private/qfsfileengine_p.h> // private in Qt5
@@ -52,6 +53,8 @@
 #include "editor/app/buffer.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
+#include "engine/ui.h"
+#include "engine/data.h"
 
 namespace {
 
@@ -1952,6 +1955,8 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
+    unsigned errors = 0;
+
     // copy some file based content around.
     // todo: this would also need some kind of file name collision
     // resolution and mapping functionality.
@@ -1975,6 +1980,68 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             const AudioFile* audio = nullptr;
             resource->GetContent(&audio);
             packer.CopyFile(audio->GetFileURI(), "audio/");
+        }
+        else if (resource->IsUI())
+        {
+            uik::Window* window = nullptr;
+            resource->GetContent(&window);
+            // package the style resources. currently this is only the font files.
+            auto style_data = LoadGameData(window->GetStyleName());
+            if (!style_data)
+            {
+                ERROR("Failed to open '%1'", window->GetStyleName());
+                errors++;
+                continue;
+            }
+            game::UIStyle style;
+            if (!style.LoadStyle(*style_data))
+            {
+                ERROR("Failed to load UI style '%1'", window->GetStyleName());
+                errors++;
+                continue;
+            }
+            std::vector<game::UIStyle::PropertyKeyValue> props;
+            style.GatherProperties("font-name", &props);
+            for (auto& p : props)
+            {
+                std::string src_font_uri;
+                std::string dst_font_uri;
+                p.prop.GetValue(&src_font_uri);
+                dst_font_uri = packer.CopyFile(src_font_uri, "fonts/");
+                p.prop.SetValue(dst_font_uri);
+                style.SetProperty(p.key, p.prop);
+            }
+            window->SetStyleName(packer.CopyFile(window->GetStyleName(), "ui/"));
+            // for each widget, parse the style string and see if there are more font-name props.
+            window->ForEachWidget([&style, &packer](uik::Widget* widget) {
+                auto style_string = widget->GetStyleString();
+                if (style_string.empty())
+                    return;
+                DEBUG("Widget '%1' style string '%2'", widget->GetId(), style_string);
+                style.ClearProperties();
+                style.ClearMaterials();
+                style.ParseStyleString(widget->GetId(), style_string);
+                std::vector<game::UIStyle::PropertyKeyValue> props;
+                style.GatherProperties("font-name", &props);
+                for (auto& p : props)
+                {
+                    std::string src_font_uri;
+                    std::string dst_font_uri;
+                    p.prop.GetValue(&src_font_uri);
+                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts/");
+                    p.prop.SetValue(dst_font_uri);
+                    style.SetProperty(p.key, p.prop);
+                }
+                style_string = style.MakeStyleString(widget->GetId());
+                // this is a bit of a hack but we know that the style string
+                // contains the widget id for each property. removing the
+                // widget id from the style properties:
+                // a) saves some space
+                // b) makes the style string copyable from one widget to another as-s
+                boost::erase_all(style_string, widget->GetId() + "/");
+                DEBUG("Reset widget '%1' style string '%2'", widget->GetId(), style_string);
+                widget->SetStyleString(std::move(style_string));
+            });
         }
         else if (resource->IsEntity())
         {
@@ -2123,10 +2190,11 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         json_file.close();
     }
 
-    if (const auto errors = packer.GetNumErrors())
+    const auto total_errors = errors + packer.GetNumErrors();
+    if (total_errors)
     {
-        WARN("Resource packing completed with errors (%1).", errors);
-        WARN("Please see the log file for details about errors.");
+        WARN("Resource packing completed with errors (%1).", total_errors);
+        WARN("Please see the log file for details.");
         return false;
     }
     // Copy game main executable.
@@ -2138,7 +2206,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     // copy the engine dll.
     packer.CopyFile(ToUtf8(mSettings.GetApplicationLibrary()), "");
 
-    INFO("Packed %1 resource(s) into %2 successfully.", resources.size(), outdir);
+    INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), outdir);
     return true;
 }
 
