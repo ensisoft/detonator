@@ -29,9 +29,10 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
     out->ResourceLoader = game::FileResourceLoader::Create();
 }
 
-GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger)
+GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug)
 {
     base::SetGlobalLog(logger);
+    base::EnableDebugLog(debug);
 }
 
 } // extern "C"

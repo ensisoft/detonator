@@ -374,8 +374,8 @@ struct Gamestudio_Loaders {
 
 extern "C" {
     GAMESTUDIO_API void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out);
-    GAMESTUDIO_API void Gamestudio_SetGlobalLogger(base::Logger* logger);
+    GAMESTUDIO_API void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug);
 } // extern "C"
 
 typedef void (*Gamestudio_CreateFileLoadersFunc)(Gamestudio_Loaders*);
-typedef void (*Gamestudio_SetGlobalLoggerFunc)(base::Logger*);
+typedef void (*Gamestudio_SetGlobalLoggerFunc)(base::Logger*, bool debug);

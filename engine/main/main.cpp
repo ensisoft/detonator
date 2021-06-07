@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
         GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
 
         // we've created the logger object, so pass it to the engine.
-        GameLibSetGlobalLogger(&logger);
+        GameLibSetGlobalLogger(&logger, debug.debug_log);
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
 
         context->Dispose();
 
-        GameLibSetGlobalLogger(nullptr);
+        GameLibSetGlobalLogger(nullptr, false);
         DEBUG("Exiting...");
     }
     catch (const std::exception& e)

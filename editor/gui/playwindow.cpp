@@ -594,7 +594,8 @@ bool PlayWindow::LoadGame()
     if (!mGameLibCreateApp || !mGameLibSetGlobalLogger)
         return false;
 
-    mGameLibSetGlobalLogger(mLogger.get());
+    const auto debug_log = GetValue(mUI.actionToggleDebugLog);
+    mGameLibSetGlobalLogger(mLogger.get(), debug_log);
 
     std::unique_ptr<game::App> app;
     app.reset(mGameLibCreateApp());
@@ -631,7 +632,7 @@ void PlayWindow::Shutdown()
     mApp.reset();
 
     if (mGameLibSetGlobalLogger)
-        mGameLibSetGlobalLogger(nullptr);
+        mGameLibSetGlobalLogger(nullptr, false);
 
     mLibrary.unload();
     mGameLibCreateApp = nullptr;
