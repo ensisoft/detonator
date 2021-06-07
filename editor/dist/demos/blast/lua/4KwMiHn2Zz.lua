@@ -12,11 +12,11 @@ function BeginPlay(bullet, scene)
 end
 
 -- Called on every low frequency game tick.
-function Tick(bullet, wall_time, tick_time, dt)
+function Tick(bullet, game_time, dt)
 end
 
 -- Called on every iteration of game loop.
-function Update(bullet, wall_time, game_time, dt)
+function Update(bullet, game_time, dt)
     local bullet_node = bullet:FindNodeByClassName('Bullet')
     local bullet_pos  = bullet_node:GetTranslation()
     local velocity    = bullet.velocity

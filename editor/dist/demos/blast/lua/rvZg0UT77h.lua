@@ -23,7 +23,7 @@ function BeginPlay(player, scene)
 end
 
 -- Called on every low frequency game tick.
-function Tick(player, wall_time, tick_time, dt)
+function Tick(player, game_time, dt)
 end
 
 local hori_velocity = 0
@@ -38,7 +38,7 @@ function ClipVelocity(velo, min, max)
 end
 
 -- Called on every iteration of game loop.
-function Update(player, wall_time, game_time, dt)
+function Update(player, game_time, dt)
 
     if wdk.TestKeyDown(wdk.Keys.ArrowLeft) then
         if hori_velocity >= 0 then

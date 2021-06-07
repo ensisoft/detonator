@@ -201,13 +201,13 @@ void LuaGame::LoadGame(const ClassLibrary* loader)
     (*mLuaState)["Game"]     = this;
     CallLua((*mLuaState)["LoadGame"]);
 }
-void LuaGame::Tick(double wall_time, double tick_time, double dt)
+void LuaGame::Tick(double game_time, double dt)
 {
-    CallLua((*mLuaState)["Tick"], wall_time, tick_time, dt);
+    CallLua((*mLuaState)["Tick"], game_time, dt);
 }
-void LuaGame::Update(double wall_time, double game_time, double dt)
+void LuaGame::Update(double game_time, double dt)
 {
-    CallLua((*mLuaState)["Update"], wall_time, game_time, dt);
+    CallLua((*mLuaState)["Update"], game_time, dt);
 }
 void LuaGame::BeginPlay(Scene* scene)
 {
@@ -403,25 +403,25 @@ void ScriptEngine::EndPlay(Scene* scene)
     (*mLuaState)["Scene"] = nullptr;
 }
 
-void ScriptEngine::Tick(double wall_time, double tick_time, double dt)
+void ScriptEngine::Tick(double game_time, double dt)
 {
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["Tick"], entity, wall_time, tick_time, dt);
+            CallLua((*env)["Tick"], entity, game_time, dt);
         }
     }
 }
-void ScriptEngine::Update(double wall_time, double game_time, double dt)
+void ScriptEngine::Update(double game_time, double dt)
 {
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["Update"], entity, wall_time, game_time, dt);
+            CallLua((*env)["Update"], entity, game_time, dt);
         }
     }
 }

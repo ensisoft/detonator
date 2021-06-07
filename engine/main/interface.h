@@ -240,29 +240,13 @@ namespace game
         // Draw the next frame.
         virtual void Draw() {}
 
-        // Tick the application. Invoked on regular interval @ ticks_per_second.
-        // wall_time is the continuously increasing wall time coming from the
-        // system's high precision/monotonous clock and it counts the seconds
-        // since the application/game started.
-        // tick_time is the application/game running tick time when the time
-        // accumulating counters are running. if the game is for example paused
-        // by the host application this value will *not* increase. this counter
-        // increases in tick steps each step being equal to 1.0/ticks_per_second.
-        // dt is the current tick time step that is to be taken. it should be nearly
-        // constant each step being equal to 1.0/ticks_per_second seconds.
-        virtual void Tick(double wall_time, double tick_time, double dt)  {}
-
-        // Update the application.
-        // wall_time is the continuously increasing wall time coming from the
-        // system's high precision/monotonous clock and it counts the seconds
-        // since the application/game started.
-        // game_time is the application/game running time when the time
-        // accumulating counters are running. if the game is for example paused
-        // by the host application this value will *not* increase. This counter
-        // increases in update steps each step being equal to 1.0/updates_per_second.
-        // dt is the current time step that is to be taken. it should be nearly
-        // constant each step being equal to 1.0/updates_per_second seconds.
-        virtual void Update(double wall_time, double game_time, double dt) {}
+        // Update the application. wall_time is the current total
+        // accumulated wall time since the application started running
+        // and dt is the current time step to take. The time step to take
+        // is variable and depends on how long previous iteration of the
+        // main game loop took. On each all wall_time already includes the
+        // the time step dt.
+        virtual void Update(double wall_time, double dt) {}
 
         // Save the game and its current state.
         // Called once after leaving the main game update/render loop.
@@ -290,8 +274,6 @@ namespace game
             float current_fps = 0.0f;
             // The total time the application has been running.
             double total_wall_time = 0.0f;
-            // The total accumulated *game* time.
-            double total_game_time = 0.0f;
             // The total number of frames rendered.
             unsigned num_frames_rendered = 0;
         };

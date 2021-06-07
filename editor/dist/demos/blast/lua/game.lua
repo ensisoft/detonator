@@ -114,7 +114,7 @@ end
 function EndPlay(scene)
 end
 
-function Tick(wall_time, tick_time, dt)
+function Tick(game_time, dt)
     if math.fmod(tick_count, 3) == 0 then
         local formation = math.random(0, 3)
         Game:DebugPrint('Spawning: ' .. tostring(formation))
@@ -136,7 +136,7 @@ function Tick(wall_time, tick_time, dt)
     SpawnSpaceRock()
 end
 
-function Update(wall_time, game_time, dt)
+function Update(game_time, dt)
 end
 
 

@@ -499,23 +499,6 @@ void PlayWindow::RunOnce()
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
-
-    // this is the real wall time elapsed since the previous iteration
-    // of the "game loop".
-    // On each iteration of the loop we measure the time
-    // spent producing a frame. the time is then used to take
-    // some number of simulation steps in order for the simulations
-    // to catch up for the *next* frame.
-    const auto& settings = mWorkspace.GetProjectSettings();
-    const auto previous_frame_time = ElapsedSeconds();
-    const auto time_step = 1.0 / settings.updates_per_second;
-    const auto tick_step = 1.0 / settings.ticks_per_second;
-
-    if (!mPaused)
-    {
-        mTimeAccum += previous_frame_time;
-    }
-
     try
     {
         bool quit = false;
@@ -540,33 +523,16 @@ void PlayWindow::RunOnce()
             return;
         }
 
-        // do simulation/animation update steps.
-        while (mTimeAccum >= time_step)
-        {
-            const auto wall_time = CurrentRuntime();
-            // if the simulation step takes more real time than
-            // what the time step is worth we're going to start falling
-            // behind, i.e. the frame times will grow and and for the
-            // bigger time values more simulation steps need to be taken
-            // which will slow things down even more.
-            mApp->Update(wall_time, mTimeTotal, time_step);
-            mTimeTotal += time_step;
-            mTimeAccum -= time_step;
+        // this is the real wall time elapsed rendering the previous
+        // for each iteration of the loop we measure the time
+        // spent producing a frame. the time is then used to take
+        // some number of simulation steps in order for the simulations
+        // to catch up for the *next* frame.
+        const auto time_step = mPaused ? 0.0 : ElapsedSeconds();
+        mTimeTotal += time_step;
 
-            // put some accumulated time towards ticking the game.
-            mTickAccum += time_step;
-        }
-
-        // do game tick steps
-        auto tick_time = mTimeTotal;
-        while (mTickAccum >= tick_step)
-        {
-            const auto wall_time = CurrentRuntime();
-
-            mApp->Tick(wall_time, tick_time, tick_step);
-            tick_time += tick_step;
-            mTickAccum -= tick_step;
-        }
+        // ask the application to take its simulation steps.
+        mApp->Update(mTimeTotal, time_step);
 
         // ask the application to draw the current frame.
         mApp->Draw();
@@ -583,13 +549,11 @@ void PlayWindow::RunOnce()
             const auto fps = mNumFrames / seconds;
             game::App::Stats stats;
             stats.num_frames_rendered = mNumFramesTotal;
-            stats.total_game_time     = mTimeTotal;
-            stats.total_wall_time     = CurrentRuntime();
+            stats.total_wall_time     = mTimeTotal;
             stats.current_fps         = fps;
             mApp->UpdateStats(stats);
 
             SetValue(mUI.fps, fps);
-
             mNumFrames = 0;
             mFrameTimer.restart();
         }
@@ -828,6 +792,8 @@ void PlayWindow::ActivateWindow()
 void PlayWindow::on_actionPause_triggered()
 {
     mPaused = mUI.actionPause->isChecked();
+    if (!mPaused)
+        ElapsedSeconds(); // reset time to avoid big jumps in dt
 }
 
 void PlayWindow::on_actionClose_triggered()

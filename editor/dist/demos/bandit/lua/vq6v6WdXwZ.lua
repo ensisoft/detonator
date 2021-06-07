@@ -34,10 +34,10 @@ function BeginPlay(player, scene)
     Scene = scene
 end
 
-function Tick(player, wall_time, tick_time, dt)
+function Tick(player, game_time, dt)
 end
 
-function Update(player, wall_time, game_time, dt)
+function Update(player, game_time, dt)
 
 end
 

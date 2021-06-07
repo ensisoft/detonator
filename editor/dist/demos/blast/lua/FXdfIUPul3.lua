@@ -39,7 +39,7 @@ function BeginPlay(ship2, scene)
 end
 
 -- Called on every low frequency game tick.
-function Tick(ship2, wall_time, tick_time, dt)
+function Tick(ship2, game_time, dt)
     -- launch a few bullets towards the player.
 
     if math.fmod(tick_counter, 3) == 0 then
@@ -55,7 +55,7 @@ function Tick(ship2, wall_time, tick_time, dt)
 end
 
 -- Called on every iteration of game loop.
-function Update(ship2, wall_time, game_time, dt)
+function Update(ship2, game_time, dt)
     --move ship forward
     local ship_body = ship2:FindNodeByClassName('Body')
     local ship_pos  = ship_body:GetTranslation()

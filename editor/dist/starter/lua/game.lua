@@ -13,11 +13,11 @@ function EndPlay(scene)
 
 end
 
-function Tick(wall_time, tick_time, dt)
+function Tick(game_time, dt)
 
 end
 
-function Update(wall_time, game_time, dt)
+function Update(game_time, dt)
 
 end
 

@@ -575,16 +575,28 @@ public:
         mDevice->CleanGarbage(120);
     }
 
-    virtual void Tick(double wall_time, double tick_time, double dt) override
+    virtual void Update(double wall_time, double dt) override
     {
-        mTestList[mTestIndex]->Tick();
-    }
+        const auto time_step = 1.0/60.0;
+        const auto tick_step = 1.0/1.0;
+        mTimeAccum += dt;
 
-    virtual void Update(double wall_time, double game_time, double dt) override
-    {
-        // jump animations forward by the some timestep
-        for (auto& test : mTestList)
-            test->Update(dt);
+        while (mTimeAccum >= time_step)
+        {
+            mTestList[mTestIndex]->Update(time_step);
+
+            mTimeAccum -= time_step;
+            mGameTime  += time_step;
+            mTickAccum += time_step;
+            auto tick_time = mGameTime;
+            while (mTickAccum >= tick_step)
+            {
+                mTestList[mTestIndex]->Tick();
+                tick_time += tick_step;
+                mTickAccum -= tick_step;
+            }
+        }
+
     }
     virtual void Shutdown() override
     {
@@ -637,7 +649,7 @@ public:
     virtual void UpdateStats(const Stats& stats) override
     {
         DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
-            stats.current_fps, stats.total_wall_time, stats.total_game_time, stats.num_frames_rendered);
+            stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);
     }
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
@@ -873,6 +885,9 @@ private:
     game::AppRequestQueue mRequests;
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
+    double mGameTime = 0.0;
+    double mTimeAccum = 0.0;
+    double mTickAccum = 0.0;
 };
 
 extern "C" {

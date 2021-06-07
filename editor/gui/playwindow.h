@@ -167,10 +167,6 @@ namespace gui
         // Current game/app time. Updated in time steps whenever
         // the update timer runs.
         double mTimeTotal = 0.0;
-        // time accumulator for keeping track of partial updates
-        double mTimeAccum = 0.0;
-        // time accumulator for doing app ticks.
-        double mTickAccum = 0.0;
         // Current number of frames within the last second.
         unsigned mNumFrames = 0;
         // total number of frames rendered.

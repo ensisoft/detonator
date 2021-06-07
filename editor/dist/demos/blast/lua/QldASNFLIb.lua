@@ -41,12 +41,12 @@ function BeginPlay(redmine, scene)
 end
 
 -- Called on every low frequency game tick.
-function Tick(redmine, wall_time, tick_time, dt)
+function Tick(redmine, game_time, dt)
 
 end
 
 -- Called on every iteration of game loop.
-function Update(redmine, wall_time, game_time, dt)
+function Update(redmine, game_time, dt)
     local mine_body = redmine:FindNodeByClassName('Body')
     local mine_pos  = mine_body:GetTranslation()
     if redmine:HasExpired() then
