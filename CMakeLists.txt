@@ -439,7 +439,7 @@ add_library(GameEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameEngine PRIVATE BaseLib GfxLib EngineLib UiLib)
+target_link_libraries(GameEngine PRIVATE GfxLib EngineLib UiLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
