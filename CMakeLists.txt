@@ -180,6 +180,9 @@ if (UNIX)
     target_compile_options(EngineLib PRIVATE -fPIC)
     target_compile_options(UiLib     PRIVATE -fPIC)
 endif()
+if (MSVC)
+   target_compile_options(EngineLib  INTERFACE /bigobj)
+endif()
 
 # Editor application.
 add_executable(Editor
@@ -544,6 +547,9 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         engine/entity.cpp
         engine/types.cpp
         engine/physics.cpp)
+if (MSVC)
+    target_compile_options(unit_test_lua PRIVATE /bigobj)
+endif()
 target_link_libraries(unit_test_entity   BaseLib)
 target_link_libraries(unit_test_scene    BaseLib)
 target_link_libraries(unit_test_lua      BaseLib UiLib wdk_system ${CONAN_LIBS})
