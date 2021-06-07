@@ -12,12 +12,12 @@ function BeginPlay(asteroid, scene)
 end
 
 -- Called on every low frequency game tick.
-function Tick(asteroid, wall_time, tick_time, dt)
+function Tick(asteroid, game_time, dt)
 
 end
 
 -- Called on every iteration of game loop.
-function Update(asteroid, wall_time, game_time, dt)
+function Update(asteroid, game_time, dt)
     local speed = 300
     local rock_body  = asteroid:FindNodeByClassName('Body')
     local rock_pos   = rock_body:GetTranslation()

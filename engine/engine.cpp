@@ -129,6 +129,8 @@ public:
         mDevice->SetDefaultTextureFilter(conf.default_min_filter);
         mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
         mClearColor = conf.clear_color;
+        mGameTimeStep = 1.0f / conf.updates_per_second;
+        mGameTickStep = 1.0f / conf.ticks_per_second;
     }
 
     virtual void Draw() override
@@ -223,8 +225,8 @@ public:
         {
             char hallelujah[512] = {0};
             std::snprintf(hallelujah, sizeof(hallelujah) - 1,
-            "FPS: %.2f wall time: %.2f game time: %.2f",
-                mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.total_game_time, mLastStats.num_frames_rendered);
+            "FPS: %.2f wall time: %.2f frames: %u",
+                mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.num_frames_rendered);
 
             const gfx::FRect rect(10, 10, 500, 20);
             gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
@@ -286,39 +288,36 @@ public:
         }
     }
 
-    virtual void Tick(double wall_time, double tick_time, double dt) override
+    virtual void Update(double wall_time, double dt) override
     {
-        mGame->Tick(wall_time, tick_time, dt);
-        if (mScene)
-        {
-            mScripting->Tick(wall_time, tick_time, dt);
-        }
-    }
+        // there's plenty of information about different ways to write a basic
+        // game rendering loop. here are some suggested references:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // Game Engine Architecture by Jason Gregory
+        mTimeAccum += dt;
 
-    virtual void Update(double wall_time, double game_time, double dt) override
-    {
-        if (mScene)
+        // do simulation/animation update steps.
+        while (mTimeAccum >= mGameTimeStep)
         {
-            mScene->Update(dt);
-            if (mPhysics.HaveWorld())
+            mGameTimeTotal += mGameTimeStep;
+            mTimeAccum -= mGameTimeStep;
+            mTickAccum += mGameTimeStep;
+            UpdateGame(mGameTimeTotal, mGameTimeStep);
+
+            // put some accumulated time towards ticking game.
+            auto tick_time = mGameTimeTotal;
+
+            while (mTickAccum >= mGameTickStep)
             {
-                std::vector<game::ContactEvent> contacts;
-                mPhysics.Tick(&contacts);
-                mPhysics.UpdateScene(*mScene);
-                for (const auto& contact : contacts)
-                {
-                    mGame->OnContactEvent(contact);
-                    mScripting->OnContactEvent(contact);
-                }
+                TickGame(tick_time, mGameTickStep);
+                mTickAccum -= mGameTickStep;
+                tick_time += mGameTickStep;
             }
-            mRenderer.Update(*mScene, game_time, dt);
-            mScripting->Update(wall_time, game_time, dt);
         }
-        mGame->Update(wall_time, game_time, dt);
 
         if (HaveOpenUI())
         {
-            mUIPainter.Update(game_time, dt);
+            mUIPainter.Update(wall_time, dt);
         }
     }
     virtual void EndMainLoop() override
@@ -349,8 +348,8 @@ public:
         }
         if (mDebug.debug_print_fps)
         {
-            DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4" ,
-                  stats.current_fps , stats.total_wall_time , stats.total_game_time , stats.num_frames_rendered);
+            DEBUG("fps: %1, wall_time: %2, frames: %3",
+                  stats.current_fps, stats.total_wall_time, stats.num_frames_rendered);
         }
 
         for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
@@ -597,6 +596,36 @@ private:
 
         mRequests.Quit();
     }
+    void UpdateGame(double game_time,  double dt)
+    {
+        if (mScene)
+        {
+            mScene->Update(dt);
+            if (mPhysics.HaveWorld())
+            {
+                std::vector<game::ContactEvent> contacts;
+                mPhysics.Tick(&contacts);
+                mPhysics.UpdateScene(*mScene);
+                for (const auto& contact : contacts)
+                {
+                    mGame->OnContactEvent(contact);
+                    mScripting->OnContactEvent(contact);
+                }
+            }
+            mRenderer.Update(*mScene, game_time, dt);
+            mScripting->Update(game_time, dt);
+        }
+        mGame->Update(game_time, dt);
+    }
+
+    void TickGame(double game_time, double dt)
+    {
+        mGame->Tick(game_time, dt);
+        if (mScene)
+        {
+            mScripting->Tick(game_time, dt);
+        }
+    }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
     {
@@ -666,6 +695,18 @@ private:
         short lifetime = 3;
     };
     boost::circular_buffer<DebugPrint> mDebugPrints;
+    // The size of the game time step (in seconds) to take for each
+    // update of the game simulation state.
+    float mGameTimeStep = 0.0f;
+    // The size of the game tick step (in seconds) to take for each
+    // tick of the game staete.
+    float mGameTickStep = 0.0f;
+    // accumulation counters for keeping track of left over time
+    // available for taking update and tick steps.
+    float mTickAccum = 0.0f;
+    float mTimeAccum = 0.0f;
+    // Total accumulated game time so far.
+    double mGameTimeTotal = 0.0f;
 };
 
 } //namespace

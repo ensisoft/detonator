@@ -42,8 +42,8 @@ namespace game
         LuaGame(const std::string& lua_path);
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void LoadGame(const ClassLibrary* loader) override;
-        virtual void Tick(double wall_time, double tick_time, double dt) override;
-        virtual void Update(double wall_time, double game_time,  double dt) override;
+        virtual void Tick(double game_time, double dt) override;
+        virtual void Update(double game_time,  double dt) override;
         virtual void BeginPlay(Scene* scene) override;
         virtual void EndPlay(Scene* scene) override;
         virtual void SaveGame() override;
@@ -84,8 +84,8 @@ namespace game
         { mPhysicsEngine = engine; }
         void BeginPlay(Scene* scene);
         void EndPlay(Scene* scene);
-        void Tick(double wall_time, double tick_time, double dt);
-        void Update(double wall_time, double game_time, double dt);
+        void Tick(double game_time, double dt);
+        void Update(double game_time, double dt);
         bool GetNextAction(Action* out);
 
         void OnContactEvent(const ContactEvent& contact);

@@ -421,6 +421,7 @@ int main(int argc, char* argv[])
         float ticks_per_second = 1.0f;
         base::JsonReadSafe(json["application"], "updates_per_second", &updates_per_second);
         base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
+        DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
 
         game::App::EngineConfig config;
         base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
@@ -443,17 +444,6 @@ int main(int argc, char* argv[])
         app->SetEngineConfig(config);
         app->Load();
         app->Start();
-
-        // there's plenty of information about different ways ot write a basic
-        // game rendering loop. here are some suggested references:
-        // https://gafferongames.com/post/fix_your_timestep/
-        // Game Engine Architecture by Jason Gregory
-        double game_time_total = 0.0; // total time so far.
-        double game_time_step  = 1.0f / updates_per_second; // the simulation time step
-        double game_tick_step  = 1.0f / ticks_per_second;
-        double tick_accum = 0.0; // the time available for taking tick steps.
-        double time_accum = 0.0; // the time available for taking update steps.
-        DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
 
         bool quit = false;
         // initialize to false, so that if the window was requested to go into full screen
@@ -506,36 +496,11 @@ int main(int argc, char* argv[])
             // spent producing a frame. the time is then used to take
             // some number of simulation steps in order for the simulations
             // to catch up for the *next* frame.
-            const auto previous_frame_time = ElapsedSeconds();
+            const auto time_step = ElapsedSeconds();
+            const auto wall_time = CurrentRuntime();
 
-            time_accum += previous_frame_time;
-
-            // do simulation/animation update steps.
-            while (time_accum >= game_time_step)
-            {
-                const auto wall_time = CurrentRuntime();
-                // if the simulation step takes more real time than
-                // what the time step is worth we're going to start falling
-                // behind, i.e. the frame times will grow and and for the
-                // bigger time values more simulation steps need to be taken
-                // which will slow things down even more.
-                app->Update(wall_time, game_time_total, game_time_step);
-                game_time_total += game_time_step;
-                time_accum -= game_time_step;
-
-                //put some accumulated time towards ticking game
-                tick_accum += game_time_step;
-            }
-
-            // do game tick steps
-            auto game_tick_time = game_time_total;
-            while (tick_accum >= game_tick_step)
-            {
-                const auto wall_time = CurrentRuntime();
-                app->Tick(wall_time, game_tick_time, game_tick_step);
-                game_tick_time += game_tick_step;
-                tick_accum -= game_tick_step;
-            }
+            // ask the application to take its simulation steps.
+            app->Update(wall_time, time_step);
 
             // ask the application to draw the current frame.
             app->Draw();
@@ -547,15 +512,13 @@ int main(int argc, char* argv[])
 
             frames_total += 1;
             frames  += 1;
-            seconds += previous_frame_time;
+            seconds += time_step;
             if (seconds > 1.0)
             {
                 const auto fps = frames / seconds;
-
                 game::App::Stats stats;
                 stats.current_fps = fps;
                 stats.num_frames_rendered = frames_total;
-                stats.total_game_time = game_time_total;
                 stats.total_wall_time = CurrentRuntime();
                 app->UpdateStats(stats);
 

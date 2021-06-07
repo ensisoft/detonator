@@ -1183,9 +1183,9 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << "-- Called when the game play begins for a scene.\n";
     stream << QString("function BeginPlay(%1, scene)\n\nend\n\n").arg(var);
     stream << "-- Called on every low frequency game tick.\n";
-    stream << QString("function Tick(%1, wall_time, tick_time, dt)\n\nend\n\n").arg(var);
+    stream << QString("function Tick(%1, game_time, dt)\n\nend\n\n").arg(var);
     stream << "-- Called on every iteration of game loop.\n";
-    stream << QString("function Update(%1, wall_time, game_time, dt)\n\nend\n\n").arg(var);
+    stream << QString("function Update(%1, game_time, dt)\n\nend\n\n").arg(var);
     stream << "-- Called on collision events with other objects.\n";
     stream << QString("function OnBeginContact(%1, node, other, other_node)\nend\n\n").arg(var);
     stream << "-- Called on collision events with other objects.\n";
