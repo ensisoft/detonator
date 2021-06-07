@@ -340,7 +340,7 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(Editor GfxLib EngineLib UiLib BaseLib)
+target_link_libraries(Editor EngineLib UiLib GfxLib BaseLib)
 target_link_libraries(Editor ${CONAN_LIBS})
 install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
@@ -372,7 +372,7 @@ target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/thi
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(EditorGameHost GfxLib EngineLib UiLib BaseLib)
+target_link_libraries(EditorGameHost EngineLib UiLib GfxLib BaseLib)
 target_link_libraries(EditorGameHost ${CONAN_LIBS})
 install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
@@ -512,9 +512,9 @@ target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR
 target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(unit_test_ipc GfxLib EngineLib UiLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_ipc EngineLib UiLib GfxLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets BaseLib)
-target_link_libraries(unit_test_workspace GfxLib EngineLib UiLib BaseLib)
+target_link_libraries(unit_test_workspace EngineLib UiLib GfxLib BaseLib)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 
 # engine tests

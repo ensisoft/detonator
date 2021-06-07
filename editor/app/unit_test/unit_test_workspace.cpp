@@ -34,7 +34,10 @@
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"
 #include "engine/loader.h"
+#include "engine/ui.h"
 #include "graphics/types.h"
+#include "uikit/window.h"
+#include "uikit/widget.h"
 
 void DeleteDir(const QString& dir)
 {
@@ -300,6 +303,7 @@ void unit_test_packing_basic()
     TEST_REQUIRE(d.mkpath("audio"));
     TEST_REQUIRE(d.mkpath("data"));
     TEST_REQUIRE(d.mkpath("fonts"));
+    TEST_REQUIRE(d.mkpath("ui"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/solid_color.glsl", "solid_color.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/vertex_array.glsl", "vertex_array.glsl"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/particles.glsl", "particles.glsl"));
@@ -309,6 +313,26 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::WriteTextFile("data/levels.txt", "levels.txt"));
     // setup dummy font file
     TEST_REQUIRE(app::WriteTextFile("fonts/font.otf", "font.otf"));
+    // setup dummy UI style file
+    QString style(
+R"(
+{
+  "properties": [
+     {
+       "key": "widget/border-width",
+       "value": 1.0
+     }
+   ],
+
+  "materials": [
+     {
+       "key": "widget/background",
+       "type": "Null"
+     }
+  ]
+}
+)");
+    TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
 
     app::Workspace workspace;
     workspace.MakeWorkspace("TestWorkspace");
@@ -354,12 +378,17 @@ void unit_test_packing_basic()
     data.SetFileURI(workspace.MapFileToWorkspace(std::string("data/levels.txt")));
     app::DataResource data_resource(data, "levels.txt");
 
+    uik::Window window;
+    window.SetStyleName(workspace.MapFileToWorkspace(std::string("ui/style.json")));
+    app::UIResource ui_resource(window, "UI");
+
     workspace.SaveResource(material_resource);
     workspace.SaveResource(shape_resource);
     workspace.SaveResource(particle_resource);
     workspace.SaveResource(script_resource);
     workspace.SaveResource(audio_resource);
     workspace.SaveResource(data_resource);
+    workspace.SaveResource(ui_resource);
 
     // setup entity resource that uses a font resource.
     {
@@ -396,6 +425,7 @@ void unit_test_packing_basic()
     resources.push_back(&workspace.GetUserDefinedResource(4));
     resources.push_back(&workspace.GetUserDefinedResource(5));
     resources.push_back(&workspace.GetUserDefinedResource(6));
+    resources.push_back(&workspace.GetUserDefinedResource(7));
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // in the output folder we should have content.json, config.json
@@ -411,6 +441,8 @@ void unit_test_packing_basic()
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/data/levels.txt") == "levels.txt");
     // Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/font.otf") == "font.otf");
+    // UI style files should be copied into ui/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
 
     auto loader = game::JsonFileClassLoader::Create();
     loader->LoadFromFile("TestPackage/test/content.json");
@@ -971,6 +1003,84 @@ void unit_test_packing_texture_name_collision()
 
 }
 
+void unit_test_packing_ui_style_resources()
+{
+    DeleteDir("TestWorkspace");
+    DeleteDir("TestPackage");
+    QDir d;
+
+    // setup dummy UI style file
+    QString style(
+            R"(
+{
+  "properties": [
+     {
+       "key": "widget/border-width",
+       "value": 1.0
+     },
+     {
+       "key": "widget/font-name",
+       "value": "ws://fonts/style_font.otf"
+     }
+   ],
+
+  "materials": [
+     {
+       "key": "widget/background",
+       "type": "Null"
+     }
+  ]
+}
+)");
+    TEST_REQUIRE(d.mkpath("ui"));
+    TEST_REQUIRE(d.mkpath("fonts"));
+    TEST_REQUIRE(app::WriteTextFile("fonts/widget_font.otf", "widget_font.otf"));
+    TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
+
+    app::Workspace workspace;
+    workspace.MakeWorkspace("TestWorkspace");
+    // setup dummy font files
+    TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
+    TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/style_font.otf", "style_font.otf"));
+    // set project settings.
+    app::Workspace::ProjectSettings settings;
+    workspace.SetProjectSettings(settings);
+
+    // setup a UI window with widget(s)
+    {
+        uik::Label label;
+
+        game::UIStyle style;
+        style.SetProperty(label.GetId() + "/font-name", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
+        label.SetStyleString(style.MakeStyleString(label.GetId()));
+
+        uik::Window window;
+        window.SetStyleName(workspace.MapFileToWorkspace(std::string("ui/style.json")));
+        window.AddWidget(std::move(label));
+        app::UIResource ui_resource(window, "UI");
+        workspace.SaveResource(ui_resource);
+    }
+
+    app::Workspace::ContentPackingOptions options;
+    options.directory    = "TestPackage";
+    options.package_name = "test";
+    options.write_content_file = true;
+    options.write_config_file  = true;
+    options.combine_textures   = false;
+    options.resize_textures    = false;
+
+    // select the resources.
+    std::vector<const app::Resource*> resources;
+    resources.push_back(&workspace.GetUserDefinedResource(0));
+    TEST_REQUIRE(workspace.PackContent(resources, options));
+
+    // UI style files should be copied into ui/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
+    // UI Font files should be copied into fonts/
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/widget_font.otf") == "widget_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/style_font.otf") == "style_font.otf");
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -992,5 +1102,6 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_rects(0);
     unit_test_packing_texture_rects(5);
     unit_test_packing_texture_name_collision();
+    unit_test_packing_ui_style_resources();
     return 0;
 }

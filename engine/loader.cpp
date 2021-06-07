@@ -34,6 +34,7 @@
 #include "engine/entity.h"
 #include "engine/scene.h"
 #include "engine/loader.h"
+#include "uikit/window.h"
 
 namespace game
 {
@@ -113,7 +114,7 @@ public:
         if (it != mGameDataBufferCache.end())
             return it->second;
         std::vector<char> buffer;
-        if (LoadFileBuffer(ResolveURI(uri), &buffer))
+        if (!LoadFileBuffer(ResolveURI(uri), &buffer))
             return nullptr;
         auto buff = std::make_shared<GameDataFileBuffer>(uri, std::move(buffer));
         mGameDataBufferCache[uri] = buff;
@@ -197,18 +198,27 @@ private:
     std::unordered_map<std::string, std::string> mEntityNameTable;
     // name table maps scene names to ids.
     std::unordered_map<std::string, std::string> mSceneNameTable;
+    // UI objects (windows)
+    std::unordered_map<std::string, std::shared_ptr<uik::Window>> mWindows;
 };
 
 
 ClassHandle<const uik::Window> ContentLoaderImpl::FindUIByName(const std::string& name) const
 {
-    // todo: need to implement UI packaging
+    for (auto it=mWindows.begin(); it != mWindows.end(); ++it)
+    {
+        auto& win = it->second;
+        if (win->GetName() == name)
+            return win;
+    }
     return nullptr;
 }
 ClassHandle<const uik::Window> ContentLoaderImpl::FindUIById(const std::string& id) const
 {
-    // todo: need to implement UI packaging
-    return nullptr;
+    auto it = mWindows.find(id);
+    if (it == mWindows.end())
+        return nullptr;
+    return it->second;
 }
 
 ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& name) const
@@ -312,6 +322,7 @@ void ContentLoaderImpl::LoadFromFile(const std::string& file)
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
     game::LoadResources<EntityClass, EntityClass>(json, "entities", mEntities, &mEntityNameTable);
     game::LoadResources<SceneClass, SceneClass>(json, "scenes", mScenes, &mSceneNameTable);
+    game::LoadResources<uik::Window, uik::Window>(json, "uis", mWindows, nullptr);
 
     // need to resolve the entity references.
     for (auto& p : mScenes)
