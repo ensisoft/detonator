@@ -29,7 +29,7 @@
             "flags": {
               "Bullet": false,
               "CanSleep": true,
-              "DiscardRotation": false,
+              "DiscardRotation": true,
               "Enabled": true,
               "Sensor": false
             },
@@ -389,73 +389,6 @@
       },
       "resource_id": "qv7w7J7Aiv",
       "resource_name": "Background",
-      "script_file": ""
-    },
-    {
-      "flags": {
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true
-      },
-      "id": "5BJ1Irtjgp",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Message",
-      "nodes": [
-        {
-          "class": "kYijveYeNG",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": 0.0,
-            "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 539.9892578125,
-            "y": 72.0888671875
-          },
-          "text_item": {
-            "flags": {
-              "BlinkText": true,
-              "UnderlineText": false,
-              "VisibleInGame": true
-            },
-            "font_name": "app://fonts/orbitron-light.otf",
-            "font_size": 48,
-            "horizontal_align": "Center",
-            "layer": 0,
-            "line_height": 1.0,
-            "text": "Press Space to fly!",
-            "text_color": {
-              "a": 1.0,
-              "b": 0.09390401840209961,
-              "g": 0.2860761284828186,
-              "r": 0.8060883283615112
-            },
-            "vertical_align": "Center"
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "kYijveYeNG"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "5BJ1Irtjgp",
-      "resource_name": "Message",
       "script_file": ""
     },
     {
@@ -1016,29 +949,6 @@
           }
         },
         {
-          "entity": "5BJ1Irtjgp",
-          "flags": {
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true
-          },
-          "id": "SeXuroIaIW",
-          "idle_animation_id": "",
-          "layer": 1,
-          "name": "Message_0",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -0.0,
-            "y": -650.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
           "entity": "IxyHIKNMIn",
           "flags": {
             "KillAtLifetime": false,
@@ -1077,11 +987,6 @@
           {
             "node": {
               "id": "X4Wj3RepYI"
-            }
-          },
-          {
-            "node": {
-              "id": "SeXuroIaIW"
             }
           },
           {
@@ -1279,6 +1184,120 @@
           "t": 0.0,
           "x": 0.550000011920929,
           "y": -0.0
+        }
+      ]
+    }
+  ],
+  "uis": [
+    {
+      "id": "id5BsoCSrO",
+      "name": "MainMenu",
+      "resource_id": "id5BsoCSrO",
+      "resource_name": "MainMenu",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "flags": {
+            "Enabled": true,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "UkMw7aHvW5",
+          "name": "Form",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "h": 800.0,
+            "w": 1000.0
+          },
+          "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"LPH6tgo9eN\",\"type\":\"Reference\"}]}",
+          "type": "Form",
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "QvMkDaOwCb",
+              "line_height": 1.0,
+              "name": "Label_1",
+              "position": {
+                "x": 400.0,
+                "y": 250.0
+              },
+              "size": {
+                "h": 257.0,
+                "w": 221.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "z9NBWGOzbg",
+              "line_height": 1.0,
+              "name": "Label_2",
+              "position": {
+                "x": 50.5,
+                "y": 50.5
+              },
+              "size": {
+                "h": 200.0,
+                "w": 900.0
+              },
+              "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+              "text": "Press ' Space' to fly the derpo bird\nbut watch out for the spike!",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "iZfD90A3RQ",
+              "name": "play",
+              "position": {
+                "x": 350.5,
+                "y": 500.5
+              },
+              "size": {
+                "h": 100.0,
+                "w": 100.0
+              },
+              "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+              "text": "Play",
+              "type": "PushButton"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "5MYpaegeng",
+              "name": "quit",
+              "position": {
+                "x": 550.5,
+                "y": 500.5
+              },
+              "size": {
+                "h": 100.0,
+                "w": 100.0
+              },
+              "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+              "text": "Quit",
+              "type": "PushButton"
+            }
+          ]
         }
       ]
     }

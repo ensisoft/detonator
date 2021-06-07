@@ -1,17 +1,19 @@
 {
-    "5BJ1Irtjgp": {
-    },
     "8UZOHE5ijx": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
     "Fj66N4PDUG": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
     "IxyHIKNMIn": {
+        "checked_for_packing": true
     },
     "LPH6tgo9eN": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -19,11 +21,17 @@
         "checked_for_packing": true
     },
     "Ytj4tDET1a": {
+        "checked_for_packing": true
     },
     "e1zlPY8HTm": {
+        "checked_for_packing": true,
         "material": "FlappyBird Hurt"
     },
+    "id5BsoCSrO": {
+        "checked_for_packing": true
+    },
     "iiKBwhkDbI": {
+        "checked_for_packing": true
     },
     "project": {
         "application_library_lin": "app://libGameEngine.so",
@@ -47,6 +55,7 @@
         "updates_per_second": 60,
         "use_gamehost_process": true,
         "window_can_resize": true,
+        "window_cursor": true,
         "window_has_border": true,
         "window_height": 768,
         "window_mode": "Windowed",
@@ -58,6 +67,7 @@
         "checked_for_packing": true
     },
     "sUAHqYkAPp": {
+        "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
     },
@@ -78,7 +88,7 @@
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
@@ -88,5 +98,6 @@
         "packing_param_write_content": true
     },
     "zJgI2SZT3X": {
+        "checked_for_packing": true
     }
 }
