@@ -217,9 +217,8 @@ std::size_t TextBuffer::GetHash() const
     return hash;
 }
 
-nlohmann::json TextBuffer::ToJson() const
+void TextBuffer::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "width", mBufferWidth);
     base::JsonWrite(json, "height", mBufferHeight);
     base::JsonWrite(json, "horizontal_alignment", mHorizontalAlign);
@@ -234,7 +233,6 @@ nlohmann::json TextBuffer::ToJson() const
         base::JsonWrite(js, "underline", text.underline);
         json["texts"].push_back(js);
     }
-    return json;
 }
 
 // static

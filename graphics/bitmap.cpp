@@ -27,9 +27,8 @@
 namespace gfx
 {
 
-nlohmann::json NoiseBitmapGenerator::ToJson() const
+void NoiseBitmapGenerator::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "width", mWidth);
     base::JsonWrite(json, "height", mHeight);
     for (const auto& layer : mLayers)
@@ -42,7 +41,6 @@ nlohmann::json NoiseBitmapGenerator::ToJson() const
         base::JsonWrite(js, "amplitude", layer.amplitude);
         json["layers"].push_back(std::move(js));
     }
-    return json;
 }
 
 bool NoiseBitmapGenerator::FromJson(const nlohmann::json& json)

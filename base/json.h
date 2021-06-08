@@ -103,6 +103,10 @@ void JsonWrite(nlohmann::json& json, const char* name, const FPoint& point);
 void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 
+void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js);
+void JsonWrite(nlohmann::json& json, const char* name, nlohmann::json&& js);
+void JsonWrite(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> js);
+
 template<typename EnumT> inline
 bool JsonReadSafeEnum(const nlohmann::json& json, const char* name, EnumT* out)
 {
