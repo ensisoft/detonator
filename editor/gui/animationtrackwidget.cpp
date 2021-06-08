@@ -356,7 +356,8 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     }
 
     {
-        const auto& json = mState.track->ToJson();
+        nlohmann::json json;
+        mState.track->IntoJson(json);
         const auto& base64 = base64::Encode(json.dump(2));
         settings.setValue("TrackWidget", "track", base64);
     }

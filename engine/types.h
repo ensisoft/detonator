@@ -105,7 +105,7 @@ namespace game
         size_t GetHash() const;
 
         // Serialize into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         static std::optional<ScriptVar> FromJson(const nlohmann::json& json);
     private:

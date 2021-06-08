@@ -76,7 +76,9 @@ void unit_test_node()
 
     // to/from json
     {
-        auto ret = game::SceneNodeClass::FromJson(node.ToJson());
+        nlohmann::json json;
+        node.IntoJson(json);
+        auto ret = game::SceneNodeClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetName()         == "root");
         TEST_REQUIRE(ret->GetTranslation()  == glm::vec2(150.0f, -150.0f));

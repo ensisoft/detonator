@@ -167,7 +167,7 @@ namespace game
         void SetLinearVelocity(const glm::vec2& velocity)
         { mLinearVelocity = velocity; }
 
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         static std::optional<RigidBodyItemClass> FromJson(const nlohmann::json& json);
     private:
@@ -268,7 +268,7 @@ namespace game
         base::bitflag<Flags> GetFlags() const
         { return mBitFlags; }
 
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         static std::optional<DrawableItemClass> FromJson(const nlohmann::json& json);
     private:
@@ -373,7 +373,7 @@ namespace game
         VerticalTextAlign GetVAlign() const
         { return mVAlign; }
 
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         static std::optional<TextItemClass> FromJson(const nlohmann::json& json);
     private:
@@ -721,7 +721,7 @@ namespace game
 
         void Update(float time, float dt);
         // Serialize the node into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
         // Load the node's properties from the given JSON object.
         static std::optional<EntityNodeClass> FromJson(const nlohmann::json& json);
         // Make a new unique copy of this node class object

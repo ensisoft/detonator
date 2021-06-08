@@ -88,7 +88,7 @@ namespace game
         // Set the ID of the node affected by this actuator.
         virtual void SetNodeId(const std::string& id) = 0;
         // Serialize the actuator class object into JSON.
-        virtual nlohmann::json ToJson() const = 0;
+        virtual void IntoJson(nlohmann::json& json) const = 0;
         // Load the actuator class object state from JSON. Returns true
         // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const nlohmann::json& object) = 0;
@@ -131,7 +131,7 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual nlohmann::json ToJson() const override;
+        virtual void IntoJson(nlohmann::json& json) const override;
         virtual bool FromJson(const nlohmann::json& json) override;
 
         FlagAction GetFlagAction() const
@@ -204,7 +204,7 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual nlohmann::json ToJson() const override;
+        virtual void IntoJson(nlohmann::json& json) const override;
         virtual bool FromJson(const nlohmann::json& json) override;
 
     private:
@@ -279,7 +279,7 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual nlohmann::json ToJson() const override;
+        virtual void IntoJson(nlohmann::json& json) const override;
         virtual bool FromJson(const nlohmann::json& json) override;
     private:
         // id of the actuator.
@@ -354,7 +354,7 @@ namespace game
         void SetEndScale(float x, float y)
         { mEndScale = glm::vec2(x, y); }
 
-        virtual nlohmann::json ToJson() const override;
+        virtual void IntoJson(nlohmann::json& json) const override;
         virtual bool FromJson(const nlohmann::json& json) override;
         virtual std::size_t GetHash() const override;
 
@@ -630,7 +630,7 @@ namespace game
         std::size_t GetHash() const;
 
         // Serialize into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         // Try to create new instance of AnimationTrackClass based on the data
         // loaded from JSON. On failure returns std::nullopt otherwise returns

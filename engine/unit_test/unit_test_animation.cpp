@@ -49,8 +49,10 @@ void unit_test_setflag_actuator()
 
     // serialize
     {
+        nlohmann::json json;
+        klass.IntoJson(json);
         game::SetFlagActuatorClass copy;
-        TEST_REQUIRE(copy.FromJson(klass.ToJson()));
+        TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
         TEST_REQUIRE(copy.GetNodeId() == "1234");
@@ -118,8 +120,10 @@ void unit_test_kinematic_actuator()
 
     // serialize
     {
+        nlohmann::json json;
+        klass.IntoJson(json);
         game::KinematicActuatorClass copy;
-        TEST_REQUIRE(copy.FromJson(klass.ToJson()));
+        TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
@@ -206,8 +210,10 @@ void unit_test_transform_actuator()
 
     // serialize
     {
+        nlohmann::json json;
+        act.IntoJson(json);
         game::TransformActuatorClass copy;
-        copy.FromJson(act.ToJson());
+        copy.FromJson(json);
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
@@ -328,7 +334,10 @@ void unit_test_animation_track()
 
     // serialize
     {
-        auto ret = game::AnimationTrackClass::FromJson(track.ToJson());
+        nlohmann::json json;
+        track.IntoJson(json);
+
+        auto ret = game::AnimationTrackClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetNumActuators() == 1);
         TEST_REQUIRE(ret->IsLooping()       == true);

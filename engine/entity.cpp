@@ -53,9 +53,8 @@ std::size_t RigidBodyItemClass::GetHash() const
     return hash;
 }
 
-nlohmann::json RigidBodyItemClass::ToJson() const
+void RigidBodyItemClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "simulation",      mSimulation);
     base::JsonWrite(json, "shape",           mCollisionShape);
     base::JsonWrite(json, "flags",           mBitFlags);
@@ -67,7 +66,6 @@ nlohmann::json RigidBodyItemClass::ToJson() const
     base::JsonWrite(json, "density",         mDensity);
     base::JsonWrite(json, "linear_velocity", mLinearVelocity);
     base::JsonWrite(json, "angular_velocity", mAngularVelocity);
-    return json;
 }
 // static
 std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::json& json)
@@ -103,9 +101,8 @@ std::size_t DrawableItemClass::GetHash() const
     return hash;
 }
 
-nlohmann::json DrawableItemClass::ToJson() const
+void DrawableItemClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "flags",       mBitFlags);
     base::JsonWrite(json, "material",    mMaterialId);
     base::JsonWrite(json, "drawable",    mDrawableId);
@@ -115,7 +112,6 @@ nlohmann::json DrawableItemClass::ToJson() const
     base::JsonWrite(json, "renderpass",  mRenderPass);
     base::JsonWrite(json, "renderstyle", mRenderStyle);
     base::JsonWrite(json, "timescale",   mTimeScale);
-    return json;
 }
 
 // static
@@ -150,9 +146,8 @@ size_t TextItemClass::GetHash() const
     return hash;
 }
 
-nlohmann::json TextItemClass::ToJson() const
+void TextItemClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "flags",            mBitFlags);
     base::JsonWrite(json, "horizontal_align", mHAlign);
     base::JsonWrite(json, "vertical_align",   mVAlign);
@@ -162,7 +157,6 @@ nlohmann::json TextItemClass::ToJson() const
     base::JsonWrite(json, "font_size",        mFontSize);
     base::JsonWrite(json, "line_height",      mLineHeight);
     base::JsonWrite(json, "text_color",       mTextColor);
-    return json;
 }
 
 // static
@@ -269,9 +263,8 @@ void EntityNodeClass::Update(float time, float dt)
 {
 }
 
-nlohmann::json EntityNodeClass::ToJson() const
+void EntityNodeClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "class",    mClassId);
     base::JsonWrite(json, "name",     mName);
     base::JsonWrite(json, "position", mPosition);
@@ -280,13 +273,23 @@ nlohmann::json EntityNodeClass::ToJson() const
     base::JsonWrite(json, "rotation", mRotation);
     base::JsonWrite(json, "flags",    mBitFlags);
     if (mRigidBody)
-        json["rigid_body"] = mRigidBody->ToJson();
+    {
+        nlohmann::json js;
+        mRigidBody->IntoJson(js);
+        json["rigid_body"] = std::move(js);
+    }
     if (mDrawable)
-        json["drawable_item"] = mDrawable->ToJson();
+    {
+        nlohmann::json js;
+        mDrawable->IntoJson(js);
+        json["drawable_item"] = std::move(js);
+    }
     if (mTextItem)
-        json["text_item"] = mTextItem->ToJson();
-
-    return json;
+    {
+        nlohmann::json js;
+        mTextItem->IntoJson(js);
+        json["text_item"] = std::move(js);
+    }
 }
 
 // static
@@ -765,17 +768,23 @@ nlohmann::json EntityClass::ToJson() const
     base::JsonWrite(json, "lifetime", mLifetime);
     for (const auto& node : mNodes)
     {
-        json["nodes"].push_back(node->ToJson());
+        nlohmann::json js;
+        node->IntoJson(js);
+        json["nodes"].push_back(std::move(js));
     }
 
     for (const auto& track : mAnimationTracks)
     {
-        json["tracks"].push_back(track->ToJson());
+        nlohmann::json js;
+        track->IntoJson(js);
+        json["tracks"].push_back(std::move(js));
     }
 
     for (const auto& var : mScriptVars)
     {
-        json["vars"].push_back(var->ToJson());
+        nlohmann::json js;
+        var->IntoJson(js);
+        json["vars"].push_back(std::move(js));
     }
 
     json["render_tree"] = mRenderTree.ToJson(game::TreeNodeToJson<EntityNodeClass>);

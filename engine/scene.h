@@ -124,7 +124,7 @@ namespace game
         SceneNodeClass Clone() const;
 
         // Serialize node into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         // Load node and its properties from JSON. Returns nullopt
         // if there was a problem.
