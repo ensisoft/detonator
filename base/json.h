@@ -133,47 +133,17 @@ bool JsonReadSafeEnum(const nlohmann::json& value, EnumT* out)
     return true;
 }
 
-template<typename T> inline
-bool JsonReadObject(const nlohmann::json& json, const char* name, T* out)
-{
-    if (!detail::HasObject(json, name))
-        return false;
-    JsonRef object = GetJsonObj(json, name);
-    const std::optional<T>& ret = T::FromJson(*object.json);
-    if (!ret.has_value())
-        return false;
-    *out = ret.value();
-    return true;
-}
-
-template<typename T> inline
-bool JsonReadObject(nlohmann::json& value, T* out)
-{
-    if (!detail::IsObject(value))
-        return false;
-    const std::optional<T>& ret = T::FromJson(value);
-    if (!ret.has_value())
-        return false;
-    *out = ret.value();
-    return true;
-}
-
 template<typename ValueT> inline
 bool JsonReadSafe(const nlohmann::json& object, const char* name, ValueT* out)
 {
-    if constexpr (std::is_enum<ValueT>::value)
-        return JsonReadSafeEnum(object, name, out);
-    else return JsonReadObject(object, name, out);
-
-    return false;
+    static_assert(std::is_enum<ValueT>::value);
+    return JsonReadSafeEnum(object, name, out);
 }
 template<typename ValueT> inline
 bool JsonReadSafe(const nlohmann::json&  value, ValueT* out)
 {
-    if constexpr (std::is_enum<ValueT>::value)
-        return JsonReadSafeEnum(value,out);
-    else return JsonReadObject(value, out);
-    return false;
+    static_assert(std::is_enum<ValueT>::value);
+    return JsonReadSafeEnum(value,out);
 }
 
 template<typename Enum, typename Bits>
@@ -206,20 +176,11 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, base::bitflag<En
     return JsonReadSafe(*object.json, bitflag);
 }
 
-template<typename EnumT> inline
-void JsonWriteEnum(nlohmann::json& json, const char* name, EnumT value)
-{ JsonWrite(json, name, std::string(magic_enum::enum_name(value))); }
-
-template<typename T> inline
-void JsonWriteObject(nlohmann::json& json, const char* name, const T& value)
-{ detail::JsonWriteJson(json, name, value.ToJson()); }
-
 template<typename ValueT> inline
 void JsonWrite(nlohmann::json& json, const char* name, const ValueT& value)
 {
-    if constexpr (std::is_enum<ValueT>::value)
-        JsonWriteEnum(json, name, value);
-    else JsonWriteObject(json, name, value);
+    static_assert(std::is_enum<ValueT>::value);
+    JsonWrite(json, name, std::string(magic_enum::enum_name(value)));
 }
 
 template<typename Enum, typename Bits>
