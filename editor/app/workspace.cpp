@@ -222,30 +222,50 @@ public:
                 QString filename;
                 if ((width > kMaxTextureWidth || height > kMaxTextureHeight) && kResizeLargeTextures)
                 {
-                    const auto scale = std::min(kMaxTextureWidth/(float)width, kMaxTextureHeight/(float)height);
-                    const auto dst_width = width * scale;
-                    const auto dst_height = height* scale;
-                    QPixmap buffer(dst_width, dst_height);
-                    buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
-                    QPainter painter(&buffer);
-                    painter.setCompositionMode(QPainter::CompositionMode_Source);
-                    const QRectF dst_rect(0, 0, dst_width, dst_height);
-                    const QRectF src_rect(0, 0, width, height);
-                    painter.drawPixmap(dst_rect, src_pix, src_rect);
-                    const QString& name = info.baseName() + ".png";
-                    const QString& file = app::JoinPath(app::JoinPath(kOutDir, "textures"), name);
-                    QImageWriter writer;
-                    writer.setFormat("PNG");
-                    writer.setQuality(100);
-                    writer.setFileName(file);
-                    if (!writer.write(buffer.toImage()))
+                    auto it = mResourceMap.find(tex.file);
+                    if (it != mResourceMap.end())
                     {
-                        ERROR("Failed to write image '%1'", file);
-                        mNumErrors++;
-                        continue;
+                        DEBUG("Skipping duplicate copy of '%1'", tex.file);
+                        filename = app::FromUtf8(it->second);
                     }
-                    filename = file;
-                    DEBUG("Texture '%1' was re-sampled.", src_file);
+                    else
+                    {
+                        const auto scale = std::min(kMaxTextureWidth / (float) width,
+                                                    kMaxTextureHeight / (float) height);
+                        const auto dst_width = width * scale;
+                        const auto dst_height = height * scale;
+                        QPixmap buffer(dst_width, dst_height);
+                        buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
+                        QPainter painter(&buffer);
+                        painter.setCompositionMode(QPainter::CompositionMode_Source);
+                        const QRectF dst_rect(0, 0, dst_width, dst_height);
+                        const QRectF src_rect(0, 0, width, height);
+                        painter.drawPixmap(dst_rect, src_pix, src_rect);
+
+                        // create a scratch file into which write the re-sampled image file
+                        // and then copy from here to the packing location. This lets the
+                        // file name collision mapping to work as-is.
+                        const QString& name = info.baseName() + ".png";
+                        const QString temp = app::JoinPath(QDir::tempPath(), name);
+                        QImageWriter writer;
+                        writer.setFormat("PNG");
+                        writer.setQuality(100);
+                        writer.setFileName(temp);
+                        if (!writer.write(buffer.toImage()))
+                        {
+                            ERROR("Failed to write re-sampling temp image '%1'", temp);
+                            mNumErrors++;
+                            continue;
+                        }
+                        auto pckid = CopyFile(app::ToUtf8(temp), "textures");
+                        DEBUG("Texture '%1' (%2x%3px) was re-sampled.", src_file, width, height);
+                        // a bit of a hack to have this code here.. but strike the cached
+                        // temp file path from the map of already copied and replace with the
+                        // actual *source* image name which is what we really want to be using.
+                        mResourceMap.erase(app::ToUtf8(temp));
+                        mResourceMap[tex.file] = pckid;
+                        filename = app::FromUtf8(pckid);
+                    }
                 }
                 else
                 {
