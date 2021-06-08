@@ -168,7 +168,7 @@ namespace gfx
         std::size_t GetHash() const;
 
         // Serialize the contents into JSON
-        nlohmann::json ToJson() const;
+        void IntoJson(nlohmann::json& json) const;
 
         // Load a TextBuffer from JSON.
         static std::optional<TextBuffer> FromJson(const nlohmann::json& json);

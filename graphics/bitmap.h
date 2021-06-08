@@ -839,7 +839,7 @@ namespace gfx
         // Get the hash value of the generator.
         virtual std::size_t GetHash() const = 0;
         // Serialize the generator into JSON.
-        virtual nlohmann::json ToJson() const = 0;
+        virtual void IntoJson(nlohmann::json& json) const = 0;
         // Load the generator's state from the given JSON object.
         // Returns true if successful otherwise false.
         virtual bool FromJson(const nlohmann::json& json) = 0;
@@ -903,7 +903,7 @@ namespace gfx
         { mHeight = height; }
         virtual void SetWidth(unsigned width) override
         { mWidth = width; }
-        virtual nlohmann::json ToJson() const override;
+        virtual void IntoJson(nlohmann::json& json) const override;
         virtual bool FromJson(const nlohmann::json& json) override;
         virtual std::unique_ptr<IBitmap> Generate() const override;
         virtual std::size_t GetHash() const override;

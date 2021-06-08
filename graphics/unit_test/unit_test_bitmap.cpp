@@ -358,7 +358,8 @@ int test_main(int argc, char* argv[])
         auto bitmap = gen.Generate();
         WritePNG(*bitmap, "noise.png");
 
-        const auto& json = gen.ToJson();
+        nlohmann::json json;
+        gen.IntoJson(json);
         gfx::NoiseBitmapGenerator other;
         other.FromJson(json);
         TEST_REQUIRE(other.GetWidth() == 256);

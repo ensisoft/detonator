@@ -81,28 +81,25 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
     }
     return nullptr;
 }
-nlohmann::json detail::TextureFileSource::ToJson() const
+void detail::TextureFileSource::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
+    base::JsonWrite(json, "id",   mId);
     base::JsonWrite(json, "file", mFile);
     base::JsonWrite(json, "name", mName);
-    return json;
 }
-bool detail::TextureFileSource::FromJson(const nlohmann::json& object)
+bool detail::TextureFileSource::FromJson(const nlohmann::json& json)
 {
-    return base::JsonReadSafe(object, "id", &mId) &&
-            base::JsonReadSafe(object, "file", &mFile) &&
-            base::JsonReadSafe(object, "name", &mName);
+    return base::JsonReadSafe(json, "id",   &mId) &&
+           base::JsonReadSafe(json, "file", &mFile) &&
+           base::JsonReadSafe(json, "name", &mName);
 }
 
-nlohmann::json detail::TextureBitmapBufferSource::ToJson() const
+void detail::TextureBitmapBufferSource::IntoJson(nlohmann::json& json) const
 {
     const auto depth = mBitmap->GetDepthBits() / 8;
     const auto width = mBitmap->GetWidth();
     const auto height = mBitmap->GetHeight();
     const auto bytes = width * height * depth;
-    nlohmann::json json;
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "width", width);
@@ -110,7 +107,6 @@ nlohmann::json detail::TextureBitmapBufferSource::ToJson() const
     base::JsonWrite(json, "depth", depth);
     base::JsonWrite(json, "data",
     base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
-    return json;
 }
 bool detail::TextureBitmapBufferSource::FromJson(const nlohmann::json& json)
 {
@@ -136,14 +132,14 @@ bool detail::TextureBitmapBufferSource::FromJson(const nlohmann::json& json)
     return true;
 }
 
-nlohmann::json detail::TextureBitmapGeneratorSource::ToJson() const
+void detail::TextureBitmapGeneratorSource::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
+    nlohmann::json generator;
+    mGenerator->IntoJson(generator);
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "function", mGenerator->GetFunction());
-    base::JsonWrite(json, "generator", *mGenerator);
-    return json;
+    base::JsonWrite(json, "generator", std::move(generator));
 }
 bool detail::TextureBitmapGeneratorSource::FromJson(const nlohmann::json& json)
 {
@@ -177,13 +173,13 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     return nullptr;
 }
 
-nlohmann::json detail::TextureTextBufferSource::ToJson() const
+void detail::TextureTextBufferSource::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
+    nlohmann::json buffer;
+    mTextBuffer.IntoJson(buffer);
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "buffer", mTextBuffer);
-    return json;
+    base::JsonWrite(json, "buffer", std::move(buffer));
 }
 bool detail::TextureTextBufferSource::FromJson(const nlohmann::json& json)
 {
@@ -542,11 +538,12 @@ nlohmann::json MaterialClass::ToJson() const
 
     for (const auto& sampler : mTextures)
     {
-        nlohmann::json js;
+        nlohmann::json js, source;
+        sampler.source->IntoJson(source);
         base::JsonWrite(js, "box", sampler.box);
         base::JsonWrite(js, "type", sampler.source->GetSourceType());
-        base::JsonWrite(js, "source", *sampler.source);
         base::JsonWrite(js, "enable_gc", sampler.enable_gc);
+        base::JsonWrite(js, "source", std::move(source));
         json["samplers"].push_back(js);
     }
     return json;

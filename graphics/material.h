@@ -93,10 +93,10 @@ namespace gfx
         // Create an exact copy of this texture source object.
         virtual std::unique_ptr<TextureSource> Copy() const = 0;
         // Serialize into JSON object.
-        virtual nlohmann::json ToJson() const = 0;
+        virtual void IntoJson(nlohmann::json& json) const = 0;
         // Load state from JSON object. Returns true if successful
         // otherwise false.
-        virtual bool FromJson(const nlohmann::json& object) = 0;
+        virtual bool FromJson(const nlohmann::json& json) = 0;
         // Begin packing the texture source into the packer.
         virtual void BeginPacking(ResourcePacker* packer) const
         {}
@@ -143,8 +143,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureFileSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override;
-            virtual bool FromJson(const nlohmann::json& object) override;
+            virtual void IntoJson(nlohmann::json& json) const override;
+            virtual bool FromJson(const nlohmann::json& json) override;
 
             virtual void BeginPacking(ResourcePacker* packer) const override
             {
@@ -224,7 +224,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapBufferSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override;
+            virtual void IntoJson(nlohmann::json& json) const override;
             virtual bool FromJson(const nlohmann::json& json) override;
 
             void SetBitmap(std::unique_ptr<IBitmap> bitmap)
@@ -309,7 +309,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override;
+            virtual void IntoJson(nlohmann::json& json) const override;
             virtual bool FromJson(const nlohmann::json& json) override;
 
             IBitmapGenerator& GetGenerator()
@@ -376,7 +376,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 
-            virtual nlohmann::json ToJson() const override;
+            virtual void IntoJson(nlohmann::json& json) const override;
             virtual bool FromJson(const nlohmann::json& json) override;
 
             virtual void BeginPacking(ResourcePacker* packer) const override

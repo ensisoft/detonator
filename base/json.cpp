@@ -370,6 +370,16 @@ void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
     JsonWrite(object, "a", color.Alpha());
     json[name] = std::move(object);
 }
+
+void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js)
+{ json[name] = js; }
+
+void JsonWrite(nlohmann::json& json, const char* name, nlohmann::json&& js)
+{ json[name] = std::move(js); }
+
+void JsonWrite(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> js)
+{ json[name] = std::move(*js); }
+
 template<typename It>
 std::tuple<bool, nlohmann::json, std::string> JsonParse(It beg, It end)
 {
