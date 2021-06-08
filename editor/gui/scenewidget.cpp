@@ -529,7 +529,11 @@ void SceneWidget::Cut(Clipboard& clipboard)
     if (auto* node = GetCurrentNode())
     {
         const auto& tree = mState.scene.GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        const auto& json = tree.ToJson([](const auto* node) {
+            nlohmann::json json;
+            node->IntoJson(json);
+            return json;
+        }, node);
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.dump(2));
 
@@ -546,7 +550,11 @@ void SceneWidget::Copy(Clipboard& clipboard) const
     if (const auto* node = GetCurrentNode())
     {
         const auto& tree = mState.scene.GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        const auto& json = tree.ToJson([](const auto* node) {
+            nlohmann::json json;
+            node->IntoJson(json);
+            return json;
+         }, node);
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.dump(2));
 

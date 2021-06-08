@@ -67,9 +67,8 @@ SceneNodeClass SceneNodeClass::Clone() const
     return copy;
 }
 
-nlohmann::json SceneNodeClass::ToJson() const
+void SceneNodeClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id",       mClassId);
     base::JsonWrite(json, "entity",   mEntityId);
     base::JsonWrite(json, "name",     mName);
@@ -80,7 +79,6 @@ nlohmann::json SceneNodeClass::ToJson() const
     base::JsonWrite(json, "layer",    mLayer);
     base::JsonWrite(json, "parent_render_tree_node", mParentRenderTreeNodeId);
     base::JsonWrite(json, "idle_animation_id", mIdleAnimationId);
-    return json;
 }
 
 // static
@@ -489,11 +487,15 @@ nlohmann::json SceneClass::ToJson() const
     base::JsonWrite(json, "id", mClassId);
     for (const auto& node : mNodes)
     {
-        json["nodes"].push_back(node->ToJson());
+        nlohmann::json js;
+        node->IntoJson(js);
+        json["nodes"].push_back(std::move(js));
     }
     for (const auto& var : mScriptVars)
     {
-        json["vars"].push_back(var.ToJson());
+        nlohmann::json js;
+        var.IntoJson(js);
+        json["vars"].push_back(std::move(js));
     }
     json["render_tree"] = mRenderTree.ToJson(&game::TreeNodeToJson<SceneNodeClass>);
     return json;

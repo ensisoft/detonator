@@ -144,7 +144,9 @@ void unit_test_entity_node()
 
     // to/from json
     {
-        auto ret = game::EntityNodeClass::FromJson(node.ToJson());
+        nlohmann::json json;
+        node.IntoJson(json);
+        auto ret = game::EntityNodeClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->HasDrawable());
         TEST_REQUIRE(ret->HasRigidBody());

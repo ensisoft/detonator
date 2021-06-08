@@ -621,7 +621,11 @@ void EntityWidget::Cut(Clipboard& clipboard)
     if (auto* node = GetCurrentNode())
     {
         const auto& tree = mState.entity->GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        const auto& json = tree.ToJson([](const auto* node) {
+            nlohmann::json js;
+            node->IntoJson(js);
+            return js;
+        }, node);
         clipboard.SetType("application/json/entity");
         clipboard.SetText(json.dump(2));
 
@@ -638,7 +642,11 @@ void EntityWidget::Copy(Clipboard& clipboard) const
     if (const auto* node = GetCurrentNode())
     {
         const auto& tree = mState.entity->GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {return node->ToJson(); }, node);
+        const auto& json = tree.ToJson([](const auto* node) {
+            nlohmann::json js;
+            node->IntoJson(js);
+            return js;
+        }, node);
         clipboard.SetType("application/json/entity");
         clipboard.SetText(json.dump(2));
 

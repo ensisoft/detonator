@@ -45,16 +45,14 @@ std::size_t SetFlagActuatorClass::GetHash() const
     return hash;
 }
 
-nlohmann::json SetFlagActuatorClass::ToJson() const
+void SetFlagActuatorClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id",        mId);
     base::JsonWrite(json, "node",      mNodeId);
     base::JsonWrite(json, "flag",      mFlagName);
     base::JsonWrite(json, "starttime", mStartTime);
     base::JsonWrite(json, "duration",  mDuration);
     base::JsonWrite(json, "action",    mFlagAction);
-    return json;
 }
 
 bool SetFlagActuatorClass::FromJson(const nlohmann::json& json)
@@ -80,9 +78,8 @@ std::size_t KinematicActuatorClass::GetHash() const
     return hash;
 }
 
-nlohmann::json KinematicActuatorClass::ToJson() const
+void KinematicActuatorClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id",               mId);
     base::JsonWrite(json, "node",             mNodeId);
     base::JsonWrite(json, "method",           mInterpolation);
@@ -90,7 +87,6 @@ nlohmann::json KinematicActuatorClass::ToJson() const
     base::JsonWrite(json, "duration",         mDuration);
     base::JsonWrite(json, "linear_velocity",  mEndLinearVelocity);
     base::JsonWrite(json, "angular_velocity", mEndAngularVelocity);
-    return json;
 }
 
 bool KinematicActuatorClass::FromJson(const nlohmann::json &json)
@@ -117,9 +113,8 @@ size_t SetValueActuatorClass::GetHash() const
     return hash;
 }
 
-nlohmann::json SetValueActuatorClass::ToJson() const
+void SetValueActuatorClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id",        mId);
     base::JsonWrite(json, "node",      mNodeId);
     base::JsonWrite(json, "method",    mInterpolation);
@@ -127,7 +122,6 @@ nlohmann::json SetValueActuatorClass::ToJson() const
     base::JsonWrite(json, "starttime", mStartTime);
     base::JsonWrite(json, "duration",  mDuration);
     base::JsonWrite(json, "value",     mEndValue);
-    return json;
 }
 
 bool SetValueActuatorClass::FromJson(const nlohmann::json &json)
@@ -141,9 +135,8 @@ bool SetValueActuatorClass::FromJson(const nlohmann::json &json)
            base::JsonReadSafe(json, "value",     &mEndValue);
 }
 
-nlohmann::json TransformActuatorClass::ToJson() const
+void TransformActuatorClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id",        mId);
     base::JsonWrite(json, "node",      mNodeId);
     base::JsonWrite(json, "method",    mInterpolation);
@@ -153,7 +146,6 @@ nlohmann::json TransformActuatorClass::ToJson() const
     base::JsonWrite(json, "size",      mEndSize);
     base::JsonWrite(json, "scale",     mEndScale);
     base::JsonWrite(json, "rotation",  mEndRotation);
-    return json;
 }
 
 bool TransformActuatorClass::FromJson(const nlohmann::json& json)
@@ -475,9 +467,8 @@ std::size_t AnimationTrackClass::GetHash() const
     return hash;
 }
 
-nlohmann::json AnimationTrackClass::ToJson() const
+void AnimationTrackClass::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "id", mId);
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "duration", mDuration);
@@ -486,11 +477,12 @@ nlohmann::json AnimationTrackClass::ToJson() const
     for (const auto &actuator : mActuators)
     {
         nlohmann::json js;
+        nlohmann::json act;
+        actuator->IntoJson(act);
         base::JsonWrite(js, "type", actuator->GetType());
-        base::JsonWrite(js, "actuator", *actuator);
+        base::JsonWrite(js, "actuator", std::move(act));
         json["actuators"].push_back(std::move(js));
     }
-    return json;
 }
 
 // static

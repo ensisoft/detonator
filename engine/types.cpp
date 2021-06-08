@@ -18,7 +18,6 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp>
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include "base/assert.h"
@@ -70,9 +69,8 @@ size_t ScriptVar::GetHash() const
     return hash;
 }
 
-nlohmann::json ScriptVar::ToJson() const
+void ScriptVar::IntoJson(nlohmann::json& json) const
 {
-    nlohmann::json json;
     base::JsonWrite(json, "name", mName);
     base::JsonWrite(json, "readonly", mReadOnly);
     base::JsonWrite(json, "type", GetType());
@@ -94,7 +92,6 @@ nlohmann::json ScriptVar::ToJson() const
             base::JsonWrite(json, "value", GetValue<float>());
             break;
     }
-    return json;
 }
 
 template<typename T, typename Variant>
