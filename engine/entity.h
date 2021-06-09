@@ -36,7 +36,6 @@
 #include "base/math.h"
 #include "base/hash.h"
 #include "data/fwd.h"
-#include "graphics/drawable.h"
 #include "engine/tree.h"
 #include "engine/types.h"
 #include "engine/enum.h"
@@ -193,8 +192,8 @@ namespace game
     class DrawableItemClass
     {
     public:
-        using RenderPass = game::RenderPass;
-        using RenderStyle = gfx::Drawable::Style;
+        using RenderPass  = game::RenderPass;
+        using RenderStyle = game::RenderStyle;
         enum class Flags {
             // Whether the item is currently visible or not.
             VisibleInGame,
