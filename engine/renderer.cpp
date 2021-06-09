@@ -377,7 +377,18 @@ void Renderer::DrawEntity(const EntityType& entity,
                 }
                 if (paint_node.drawable)
                 {
-                    paint_node.drawable->SetStyle(item->GetRenderStyle());
+                    gfx::Drawable::Style style;
+                    if (item->GetRenderStyle() == RenderStyle::Solid)
+                        style = gfx::Drawable::Style::Solid;
+                    else if (item->GetRenderStyle() == RenderStyle::Wireframe)
+                        style = gfx::Drawable::Style::Wireframe;
+                    else if (item->GetRenderStyle() == RenderStyle::Outline)
+                        style = gfx::Drawable::Style::Outline;
+                    else if (item->GetRenderStyle() == RenderStyle::Points)
+                        style = gfx::Drawable::Style::Points;
+                    else BUG("Unsupported rendering style.");
+
+                    paint_node.drawable->SetStyle(style);
                     paint_node.drawable->SetLineWidth(item->GetLineWidth());
                     if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
                         paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);

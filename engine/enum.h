@@ -24,4 +24,18 @@ namespace game {
         Draw,
         Mask
     };
+
+    enum class RenderStyle {
+        // Rasterize the outline of the shape as lines.
+        // Only the fragments that are within the line are shaded.
+        // Line width setting is applied to determine the width
+        // of the lines.
+        Outline,
+        // Rasterize the individual triangles as lines.
+        Wireframe,
+        // Rasterize the interior of the drawable. This is the default
+        Solid,
+        // Rasterize the shape's vertices as individual points.
+        Points
+    };
 } // namespace
