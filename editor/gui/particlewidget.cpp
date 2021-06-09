@@ -26,12 +26,12 @@
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -39,8 +39,8 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/drawing.h"
-#include "particlewidget.h"
-#include "utility.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/particlewidget.h"
 
 namespace gui
 {
@@ -166,9 +166,9 @@ void ParticleEditorWidget::AddActions(QMenu& menu)
 
 bool ParticleEditorWidget::SaveState(Settings& settings) const
 {
-    const auto& json = mClass.ToJson();
-    const auto& base64 = base64::Encode(json.dump());
-    settings.setValue("Particle", "content", base64);
+    data::JsonObject json;
+    mClass.IntoJson(json);
+    settings.setValue("Particle", "content", base64::Encode(json.ToString()));
     settings.saveWidget("Particle", mUI.name);
     settings.saveWidget("Particle", mUI.ID);
     settings.saveWidget("Particle", mUI.materials);
@@ -216,12 +216,15 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
 bool ParticleEditorWidget::LoadState(const Settings& settings)
 {
     std::string base64;
-    if (!settings.getValue("Particle", "content", &base64))
+    settings.getValue("Particle", "content", &base64);
+
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
     {
-        ERROR("Content data is missing.");
+        ERROR("Failed to parse content JSON. '%1'", error);
         return false;
     }
-    const auto& json = nlohmann::json::parse(base64::Decode(base64));
     auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
     if (!ret.has_value())
     {

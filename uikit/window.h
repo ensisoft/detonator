@@ -18,15 +18,12 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json_fwd.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <memory>
 #include <optional>
 #include <functional>
 
+#include "data/fwd.h"
 #include "uikit/widget.h"
 #include "uikit/types.h"
 #include "uikit/op.h"
@@ -247,7 +244,7 @@ namespace uik
         // TBD keyboard events.
 
         // Serialize the window and its widget hierarchy into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(data::Writer& data) const;
 
         // Create a clone of this window object. The clone will contain
         // all the same properties except the object identifies will be
@@ -302,7 +299,7 @@ namespace uik
 
         Window& operator=(const Window& other);
 
-        static std::optional<Window> FromJson(const nlohmann::json& json);
+        static std::optional<Window> FromJson(const data::Reader& data);
     private:
         enum class MouseEventType {
             ButtonPress, ButtonRelease, MouseMove

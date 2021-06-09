@@ -18,15 +18,11 @@
 
 #include "config.h"
 
-#include "warnpop.h"
-#  include <nlohmann/json.hpp>
-#include "warnpush.h"
-
 #include <string>
 #include <memory>
 
-#include "base/json.h"
-
+#include "data/writer.h"
+#include "data/reader.h"
 namespace app
 {
     namespace detail {
@@ -43,12 +39,10 @@ namespace app
             { return mFileURI; }
             void SetFileURI(const std::string& uri)
             { mFileURI = uri; }
-            nlohmann::json ToJson()
+            void IntoJson(data::Writer& data) const
             {
-                nlohmann::json json;
-                base::JsonWrite(json, "id", mId);
-                base::JsonWrite(json, "uri", mFileURI);
-                return json;
+                data.Write("id", mId);
+                data.Write("uri", mFileURI);
             }
             std::unique_ptr<FileResource> Clone() const
             {
@@ -56,11 +50,11 @@ namespace app
                 ret.mFileURI = mFileURI;
                 return std::make_unique<FileResource>(ret);
             }
-            static std::optional<FileResource> FromJson(const nlohmann::json& json)
+            static std::optional<FileResource> FromJson(const data::Reader& data)
             {
                 FileResource ret;
-                if (!base::JsonReadSafe(json, "id", &ret.mId) ||
-                    !base::JsonReadSafe(json, "uri", &ret.mFileURI))
+                if (!data.Read("id", &ret.mId) ||
+                    !data.Read("uri", &ret.mFileURI))
                     return std::nullopt;
                 return ret;
             }

@@ -20,7 +20,8 @@
 #include <cmath>
 
 #include "base/utility.h"
-#include "base/json.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "graphics/drawable.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -859,30 +860,19 @@ void RoundRectangleClass::Pack(ResourcePacker* packer) const
 {
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
-nlohmann::json RoundRectangleClass::ToJson() const
+void RoundRectangleClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "radius", mRadius);
-    return json;
+    data.Write("id", mId);
+    data.Write("radius", mRadius);
 }
 
-bool RoundRectangleClass::LoadFromJson(const nlohmann::json& json)
+bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "id", &mId) ||
-        !base::JsonReadSafe(json, "radius", &mRadius))
+    if (!data.Read("id", &mId) ||
+        !data.Read("radius", &mRadius))
         return false;
     return true;
 }
-
-
-
-
-
-
-
-
-
 
 Shader* GridClass::GetShader(Device& device) const
 {
@@ -966,22 +956,20 @@ void GridClass::Pack(ResourcePacker* packer) const
     packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
-nlohmann::json GridClass::ToJson() const
+void GridClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "vertical_lines", mNumVerticalLines);
-    base::JsonWrite(json, "horizontal_lines", mNumHorizontalLines);
-    base::JsonWrite(json, "border_lines", mBorderLines);
-    return json;
+    data.Write("id", mId);
+    data.Write("vertical_lines", mNumVerticalLines);
+    data.Write("horizontal_lines", mNumHorizontalLines);
+    data.Write("border_lines", mBorderLines);
 }
 
-bool GridClass::LoadFromJson(const nlohmann::json& json)
+bool GridClass::LoadFromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "id", &mId) ||
-        !base::JsonReadSafe(json, "vertical_lines", &mNumVerticalLines) ||
-        !base::JsonReadSafe(json, "horizontal_lines", &mNumHorizontalLines) ||
-        !base::JsonReadSafe(json, "border_lines", &mBorderLines))
+    if (!data.Read("id", &mId) ||
+        !data.Read("vertical_lines", &mNumVerticalLines) ||
+        !data.Read("horizontal_lines", &mNumHorizontalLines) ||
+        !data.Read("border_lines", &mBorderLines))
         return false;
     return true;
 }
@@ -1057,35 +1045,32 @@ std::size_t PolygonClass::GetHash() const
     return hash;
 }
 
-nlohmann::json PolygonClass::ToJson() const
+void PolygonClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "static", mStatic);
+    data.Write("id", mId);
+    data.Write("static", mStatic);
     for (const auto& v : mVertices)
     {
-        nlohmann::json js = {
-            {"x", v.aPosition.x},
-            {"y", v.aPosition.y},
-            {"s", v.aTexCoord.x},
-            {"t", v.aTexCoord.y}
-        };
-        json["vertices"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("x", v.aPosition.x);
+        chunk->Write("y", v.aPosition.y);
+        chunk->Write("s", v.aTexCoord.x);
+        chunk->Write("t", v.aTexCoord.y);
+        data.AppendChunk("vertices", std::move(chunk));
     }
     for (const auto& cmd : mDrawCommands)
     {
-        nlohmann::json js;
-        base::JsonWrite(js, "type", cmd.type);
-        base::JsonWrite(js, "offset", (unsigned)cmd.offset);
-        base::JsonWrite(js, "count",  (unsigned)cmd.count);
-        json["draws"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("type", cmd.type);
+        chunk->Write("offset", (unsigned)cmd.offset);
+        chunk->Write("count",  (unsigned)cmd.count);
+        data.AppendChunk("draws", std::move(chunk));
     }
-    return json;
 }
 
-bool PolygonClass::LoadFromJson(const nlohmann::json& json)
+bool PolygonClass::LoadFromJson(const data::Reader& data)
 {
-    auto ret = PolygonClass::FromJson(json);
+    auto ret = PolygonClass::FromJson(data);
     if (!ret.has_value())
         return false;
     auto& val = ret.value();
@@ -1097,48 +1082,42 @@ bool PolygonClass::LoadFromJson(const nlohmann::json& json)
 }
 
 // static
-std::optional<PolygonClass> PolygonClass::FromJson(const nlohmann::json& object)
+std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
 {
     PolygonClass ret;
-    if (!base::JsonReadSafe(object, "id", &ret.mId) ||
-        !base::JsonReadSafe(object, "static", &ret.mStatic))
+    if (!data.Read("id", &ret.mId) ||
+        !data.Read("static", &ret.mStatic))
         return std::nullopt;
 
-    if (object.contains("vertices"))
+    for (unsigned i=0; i<data.GetNumChunks("vertices"); ++i)
     {
-        for (const auto& js : object["vertices"].items())
-        {
-            const auto& obj = js.value();
-            float x, y, s, t;
-            if (!base::JsonReadSafe(obj, "x", &x) ||
-                !base::JsonReadSafe(obj, "y", &y) ||
-                !base::JsonReadSafe(obj, "s", &s) ||
-                !base::JsonReadSafe(obj, "t", &t))
-                return std::nullopt;
-            Vertex vertex;
-            vertex.aPosition.x = x;
-            vertex.aPosition.y = y;
-            vertex.aTexCoord.x = s;
-            vertex.aTexCoord.y = t;
-            ret.mVertices.push_back(vertex);
-        }
+        const auto& chunk = data.GetReadChunk("vertices", i);
+        float x, y, s, t;
+        if (!chunk->Read("x", &x) ||
+            !chunk->Read("y", &y) ||
+            !chunk->Read("s", &s) ||
+            !chunk->Read("t", &t))
+            return std::nullopt;
+        Vertex vertex;
+        vertex.aPosition.x = x;
+        vertex.aPosition.y = y;
+        vertex.aTexCoord.x = s;
+        vertex.aTexCoord.y = t;
+        ret.mVertices.push_back(vertex);
     }
-    if (object.contains("draws"))
+    for (unsigned i=0; i<data.GetNumChunks("draws"); ++i)
     {
-        for (const auto& js : object["draws"].items())
-        {
-            const auto& obj = js.value();
-            unsigned offset = 0;
-            unsigned count  = 0;
-            DrawCommand cmd;
-            if (!base::JsonReadSafe(obj, "type", &cmd.type) ||
-                !base::JsonReadSafe(obj, "offset", &offset) ||
-                !base::JsonReadSafe(obj, "count",  &count))
-                return std::nullopt;
-            cmd.offset = offset;
-            cmd.count  = count;
-            ret.mDrawCommands.push_back(cmd);
-        }
+        const auto& chunk = data.GetReadChunk("draws", i);
+        unsigned offset = 0;
+        unsigned count  = 0;
+        DrawCommand cmd;
+        if (!chunk->Read("type", &cmd.type) ||
+            !chunk->Read("offset", &offset) ||
+            !chunk->Read("count",  &count))
+            return std::nullopt;
+        cmd.offset = offset;
+        cmd.count  = count;
+        ret.mDrawCommands.push_back(cmd);
     }
     return ret;
 }
@@ -1355,41 +1334,39 @@ void KinematicsParticleEngineClass::Restart(InstanceState& state) const
     InitParticles(state, size_t(mParams.num_particles));
 }
 
-nlohmann::json KinematicsParticleEngineClass::ToJson() const
+void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "motion", mParams.motion);
-    base::JsonWrite(json, "mode", mParams.mode);
-    base::JsonWrite(json, "boundary", mParams.boundary);
-    base::JsonWrite(json, "num_particles", mParams.num_particles);
-    base::JsonWrite(json, "min_lifetime", mParams.min_lifetime);
-    base::JsonWrite(json, "max_lifetime", mParams.max_lifetime);
-    base::JsonWrite(json, "max_xpos", mParams.max_xpos);
-    base::JsonWrite(json, "max_ypos", mParams.max_ypos);
-    base::JsonWrite(json, "init_rect_xpos", mParams.init_rect_xpos);
-    base::JsonWrite(json, "init_rect_ypos", mParams.init_rect_ypos);
-    base::JsonWrite(json, "init_rect_width", mParams.init_rect_width);
-    base::JsonWrite(json, "init_rect_height", mParams.init_rect_height);
-    base::JsonWrite(json, "min_velocity", mParams.min_velocity);
-    base::JsonWrite(json, "max_velocity", mParams.max_velocity);
-    base::JsonWrite(json, "direction_sector_start_angle", mParams.direction_sector_start_angle);
-    base::JsonWrite(json, "direction_sector_size", mParams.direction_sector_size);
-    base::JsonWrite(json, "min_point_size", mParams.min_point_size);
-    base::JsonWrite(json, "max_point_size", mParams.max_point_size);
-    base::JsonWrite(json, "min_alpha", mParams.min_alpha);
-    base::JsonWrite(json, "max_alpha", mParams.max_alpha);
-    base::JsonWrite(json, "growth_over_time", mParams.rate_of_change_in_size_wrt_time);
-    base::JsonWrite(json, "growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
-    base::JsonWrite(json, "alpha_over_time", mParams.rate_of_change_in_alpha_wrt_time);
-    base::JsonWrite(json, "alpha_over_dist", mParams.rate_of_change_in_alpha_wrt_dist);
-    base::JsonWrite(json, "gravity", mParams.gravity);
-    return json;
+    data.Write("id", mId);
+    data.Write("motion", mParams.motion);
+    data.Write("mode", mParams.mode);
+    data.Write("boundary", mParams.boundary);
+    data.Write("num_particles", mParams.num_particles);
+    data.Write("min_lifetime", mParams.min_lifetime);
+    data.Write("max_lifetime", mParams.max_lifetime);
+    data.Write("max_xpos", mParams.max_xpos);
+    data.Write("max_ypos", mParams.max_ypos);
+    data.Write("init_rect_xpos", mParams.init_rect_xpos);
+    data.Write("init_rect_ypos", mParams.init_rect_ypos);
+    data.Write("init_rect_width", mParams.init_rect_width);
+    data.Write("init_rect_height", mParams.init_rect_height);
+    data.Write("min_velocity", mParams.min_velocity);
+    data.Write("max_velocity", mParams.max_velocity);
+    data.Write("direction_sector_start_angle", mParams.direction_sector_start_angle);
+    data.Write("direction_sector_size", mParams.direction_sector_size);
+    data.Write("min_point_size", mParams.min_point_size);
+    data.Write("max_point_size", mParams.max_point_size);
+    data.Write("min_alpha", mParams.min_alpha);
+    data.Write("max_alpha", mParams.max_alpha);
+    data.Write("growth_over_time", mParams.rate_of_change_in_size_wrt_time);
+    data.Write("growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
+    data.Write("alpha_over_time", mParams.rate_of_change_in_alpha_wrt_time);
+    data.Write("alpha_over_dist", mParams.rate_of_change_in_alpha_wrt_dist);
+    data.Write("gravity", mParams.gravity);
 }
 
-bool KinematicsParticleEngineClass::LoadFromJson(const nlohmann::json& json)
+bool KinematicsParticleEngineClass::LoadFromJson(const data::Reader& data)
 {
-    auto ret = FromJson(json);
+    auto ret = FromJson(data);
     if (!ret.has_value())
         return false;
     const auto& val = ret.value();
@@ -1398,36 +1375,36 @@ bool KinematicsParticleEngineClass::LoadFromJson(const nlohmann::json& json)
 }
 
 // static
-std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const nlohmann::json& object)
+std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const data::Reader& data)
 {
     std::string id;
     Params params;
-    if (!base::JsonReadSafe(object, "id", &id) ||
-        !base::JsonReadSafe(object, "motion", &params.motion) ||
-        !base::JsonReadSafe(object, "mode", &params.mode) ||
-        !base::JsonReadSafe(object, "boundary", &params.boundary) ||
-        !base::JsonReadSafe(object, "num_particles", &params.num_particles) ||
-        !base::JsonReadSafe(object, "min_lifetime", &params.min_lifetime) ||
-        !base::JsonReadSafe(object, "max_lifetime", &params.max_lifetime) ||
-        !base::JsonReadSafe(object, "max_xpos", &params.max_xpos) ||
-        !base::JsonReadSafe(object, "max_ypos", &params.max_ypos) ||
-        !base::JsonReadSafe(object, "init_rect_xpos", &params.init_rect_xpos) ||
-        !base::JsonReadSafe(object, "init_rect_ypos", &params.init_rect_ypos) ||
-        !base::JsonReadSafe(object, "init_rect_width", &params.init_rect_width) ||
-        !base::JsonReadSafe(object, "init_rect_height", &params.init_rect_height) ||
-        !base::JsonReadSafe(object, "min_velocity", &params.min_velocity) ||
-        !base::JsonReadSafe(object, "max_velocity", &params.max_velocity) ||
-        !base::JsonReadSafe(object, "direction_sector_start_angle", &params.direction_sector_start_angle) ||
-        !base::JsonReadSafe(object, "direction_sector_size", &params.direction_sector_size) ||
-        !base::JsonReadSafe(object, "min_point_size", &params.min_point_size) ||
-        !base::JsonReadSafe(object, "max_point_size", &params.max_point_size) ||
-        !base::JsonReadSafe(object, "min_alpha", &params.min_alpha) ||
-        !base::JsonReadSafe(object, "max_alpha", &params.max_alpha) ||
-        !base::JsonReadSafe(object, "growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
-        !base::JsonReadSafe(object, "growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
-        !base::JsonReadSafe(object, "alpha_over_time", &params.rate_of_change_in_alpha_wrt_time) ||
-        !base::JsonReadSafe(object, "alpha_over_dist", &params.rate_of_change_in_alpha_wrt_dist) ||
-        !base::JsonReadSafe(object, "gravity", &params.gravity))
+    if (!data.Read("id", &id) ||
+        !data.Read("motion", &params.motion) ||
+        !data.Read("mode", &params.mode) ||
+        !data.Read("boundary", &params.boundary) ||
+        !data.Read("num_particles", &params.num_particles) ||
+        !data.Read("min_lifetime", &params.min_lifetime) ||
+        !data.Read("max_lifetime", &params.max_lifetime) ||
+        !data.Read("max_xpos", &params.max_xpos) ||
+        !data.Read("max_ypos", &params.max_ypos) ||
+        !data.Read("init_rect_xpos", &params.init_rect_xpos) ||
+        !data.Read("init_rect_ypos", &params.init_rect_ypos) ||
+        !data.Read("init_rect_width", &params.init_rect_width) ||
+        !data.Read("init_rect_height", &params.init_rect_height) ||
+        !data.Read("min_velocity", &params.min_velocity) ||
+        !data.Read("max_velocity", &params.max_velocity) ||
+        !data.Read("direction_sector_start_angle", &params.direction_sector_start_angle) ||
+        !data.Read("direction_sector_size", &params.direction_sector_size) ||
+        !data.Read("min_point_size", &params.min_point_size) ||
+        !data.Read("max_point_size", &params.max_point_size) ||
+        !data.Read("min_alpha", &params.min_alpha) ||
+        !data.Read("max_alpha", &params.max_alpha) ||
+        !data.Read("growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
+        !data.Read("growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
+        !data.Read("alpha_over_time", &params.rate_of_change_in_alpha_wrt_time) ||
+        !data.Read("alpha_over_dist", &params.rate_of_change_in_alpha_wrt_dist) ||
+        !data.Read("gravity", &params.gravity))
             return std::nullopt;
     KinematicsParticleEngineClass ret;
     ret.mId = std::move(id);

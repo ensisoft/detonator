@@ -18,7 +18,6 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp> // for glm::inverse
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -28,7 +27,8 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
-#include "base/json.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "engine/treeop.h"
 #include "engine/entity.h"
 #include "engine/transform.h"
@@ -53,35 +53,35 @@ std::size_t RigidBodyItemClass::GetHash() const
     return hash;
 }
 
-void RigidBodyItemClass::IntoJson(nlohmann::json& json) const
+void RigidBodyItemClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "simulation",      mSimulation);
-    base::JsonWrite(json, "shape",           mCollisionShape);
-    base::JsonWrite(json, "flags",           mBitFlags);
-    base::JsonWrite(json, "polygon",         mPolygonShapeId);
-    base::JsonWrite(json, "friction",        mFriction);
-    base::JsonWrite(json, "restitution",     mRestitution);
-    base::JsonWrite(json, "angular_damping", mAngularDamping);
-    base::JsonWrite(json, "linear_damping",  mLinearDamping);
-    base::JsonWrite(json, "density",         mDensity);
-    base::JsonWrite(json, "linear_velocity", mLinearVelocity);
-    base::JsonWrite(json, "angular_velocity", mAngularVelocity);
+    data.Write("simulation",      mSimulation);
+    data.Write("shape",           mCollisionShape);
+    data.Write("flags",           mBitFlags);
+    data.Write("polygon",         mPolygonShapeId);
+    data.Write("friction",        mFriction);
+    data.Write("restitution",     mRestitution);
+    data.Write("angular_damping", mAngularDamping);
+    data.Write("linear_damping",  mLinearDamping);
+    data.Write("density",         mDensity);
+    data.Write("linear_velocity", mLinearVelocity);
+    data.Write("angular_velocity", mAngularVelocity);
 }
 // static
-std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const nlohmann::json& json)
+std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const data::Reader& data)
 {
     RigidBodyItemClass ret;
-    if (!base::JsonReadSafe(json, "simulation",      &ret.mSimulation)  ||
-        !base::JsonReadSafe(json, "shape",           &ret.mCollisionShape)  ||
-        !base::JsonReadSafe(json, "flags",           &ret.mBitFlags)  ||
-        !base::JsonReadSafe(json, "polygon",         &ret.mPolygonShapeId)  ||
-        !base::JsonReadSafe(json, "friction",        &ret.mFriction)  ||
-        !base::JsonReadSafe(json, "restitution",     &ret.mRestitution)  ||
-        !base::JsonReadSafe(json, "angular_damping", &ret.mAngularDamping)  ||
-        !base::JsonReadSafe(json, "linear_damping",  &ret.mLinearDamping)  ||
-        !base::JsonReadSafe(json, "density",         &ret.mDensity) ||
-        !base::JsonReadSafe(json, "linear_velocity", &ret.mLinearVelocity) ||
-        !base::JsonReadSafe(json, "angular_velocity",&ret.mAngularVelocity))
+    if (!data.Read("simulation",      &ret.mSimulation)  ||
+        !data.Read("shape",           &ret.mCollisionShape)  ||
+        !data.Read("flags",           &ret.mBitFlags)  ||
+        !data.Read("polygon",         &ret.mPolygonShapeId)  ||
+        !data.Read("friction",        &ret.mFriction)  ||
+        !data.Read("restitution",     &ret.mRestitution)  ||
+        !data.Read("angular_damping", &ret.mAngularDamping)  ||
+        !data.Read("linear_damping",  &ret.mLinearDamping)  ||
+        !data.Read("density",         &ret.mDensity) ||
+        !data.Read("linear_velocity", &ret.mLinearVelocity) ||
+        !data.Read("angular_velocity",&ret.mAngularVelocity))
         return std::nullopt;
     return ret;
 }
@@ -101,32 +101,32 @@ std::size_t DrawableItemClass::GetHash() const
     return hash;
 }
 
-void DrawableItemClass::IntoJson(nlohmann::json& json) const
+void DrawableItemClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "flags",       mBitFlags);
-    base::JsonWrite(json, "material",    mMaterialId);
-    base::JsonWrite(json, "drawable",    mDrawableId);
-    base::JsonWrite(json, "layer",       mLayer);
-    base::JsonWrite(json, "alpha",       mAlpha);
-    base::JsonWrite(json, "linewidth",   mLineWidth);
-    base::JsonWrite(json, "renderpass",  mRenderPass);
-    base::JsonWrite(json, "renderstyle", mRenderStyle);
-    base::JsonWrite(json, "timescale",   mTimeScale);
+    data.Write("flags",       mBitFlags);
+    data.Write("material",    mMaterialId);
+    data.Write("drawable",    mDrawableId);
+    data.Write("layer",       mLayer);
+    data.Write("alpha",       mAlpha);
+    data.Write("linewidth",   mLineWidth);
+    data.Write("renderpass",  mRenderPass);
+    data.Write("renderstyle", mRenderStyle);
+    data.Write("timescale",   mTimeScale);
 }
 
 // static
-std::optional<DrawableItemClass> DrawableItemClass::FromJson(const nlohmann::json& json)
+std::optional<DrawableItemClass> DrawableItemClass::FromJson(const data::Reader& data)
 {
     DrawableItemClass ret;
-    if (!base::JsonReadSafe(json, "flags",       &ret.mBitFlags) ||
-        !base::JsonReadSafe(json, "material",    &ret.mMaterialId) ||
-        !base::JsonReadSafe(json, "drawable",    &ret.mDrawableId) ||
-        !base::JsonReadSafe(json, "layer",       &ret.mLayer) ||
-        !base::JsonReadSafe(json, "alpha",       &ret.mAlpha) ||
-        !base::JsonReadSafe(json, "linewidth",   &ret.mLineWidth) ||
-        !base::JsonReadSafe(json, "renderpass",  &ret.mRenderPass) ||
-        !base::JsonReadSafe(json, "renderstyle", &ret.mRenderStyle) ||
-        !base::JsonReadSafe(json, "timescale",   &ret.mTimeScale))
+    if (!data.Read("flags",       &ret.mBitFlags) ||
+        !data.Read("material",    &ret.mMaterialId) ||
+        !data.Read("drawable",    &ret.mDrawableId) ||
+        !data.Read("layer",       &ret.mLayer) ||
+        !data.Read("alpha",       &ret.mAlpha) ||
+        !data.Read("linewidth",   &ret.mLineWidth) ||
+        !data.Read("renderpass",  &ret.mRenderPass) ||
+        !data.Read("renderstyle", &ret.mRenderStyle) ||
+        !data.Read("timescale",   &ret.mTimeScale))
         return std::nullopt;
     return ret;
 }
@@ -146,32 +146,32 @@ size_t TextItemClass::GetHash() const
     return hash;
 }
 
-void TextItemClass::IntoJson(nlohmann::json& json) const
+void TextItemClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "flags",            mBitFlags);
-    base::JsonWrite(json, "horizontal_align", mHAlign);
-    base::JsonWrite(json, "vertical_align",   mVAlign);
-    base::JsonWrite(json, "layer",            mLayer);
-    base::JsonWrite(json, "text",             mText);
-    base::JsonWrite(json, "font_name",        mFontName);
-    base::JsonWrite(json, "font_size",        mFontSize);
-    base::JsonWrite(json, "line_height",      mLineHeight);
-    base::JsonWrite(json, "text_color",       mTextColor);
+    data.Write("flags",            mBitFlags);
+    data.Write("horizontal_align", mHAlign);
+    data.Write("vertical_align",   mVAlign);
+    data.Write("layer",            mLayer);
+    data.Write("text",             mText);
+    data.Write("font_name",        mFontName);
+    data.Write("font_size",        mFontSize);
+    data.Write("line_height",      mLineHeight);
+    data.Write("text_color",       mTextColor);
 }
 
 // static
-std::optional<TextItemClass> TextItemClass::FromJson(const nlohmann::json& json)
+std::optional<TextItemClass> TextItemClass::FromJson(const data::Reader& data)
 {
     TextItemClass ret;
-    if (!base::JsonReadSafe(json, "flags",            &ret.mBitFlags) ||
-        !base::JsonReadSafe(json, "horizontal_align", &ret.mHAlign) ||
-        !base::JsonReadSafe(json, "vertical_align",   &ret.mVAlign) ||
-        !base::JsonReadSafe(json, "layer",            &ret.mLayer) ||
-        !base::JsonReadSafe(json, "text",             &ret.mText) ||
-        !base::JsonReadSafe(json, "font_name",        &ret.mFontName) ||
-        !base::JsonReadSafe(json, "font_size",        &ret.mFontSize) ||
-        !base::JsonReadSafe(json, "line_height",      &ret.mLineHeight) ||
-        !base::JsonReadSafe(json, "text_color",       &ret.mTextColor))
+    if (!data.Read("flags",            &ret.mBitFlags) ||
+        !data.Read("horizontal_align", &ret.mHAlign) ||
+        !data.Read("vertical_align",   &ret.mVAlign) ||
+        !data.Read("layer",            &ret.mLayer) ||
+        !data.Read("text",             &ret.mText) ||
+        !data.Read("font_name",        &ret.mFontName) ||
+        !data.Read("font_size",        &ret.mFontSize) ||
+        !data.Read("line_height",      &ret.mLineHeight) ||
+        !data.Read("text_color",       &ret.mTextColor))
         return std::nullopt;
     return ret;
 }
@@ -263,67 +263,67 @@ void EntityNodeClass::Update(float time, float dt)
 {
 }
 
-void EntityNodeClass::IntoJson(nlohmann::json& json) const
+void EntityNodeClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "class",    mClassId);
-    base::JsonWrite(json, "name",     mName);
-    base::JsonWrite(json, "position", mPosition);
-    base::JsonWrite(json, "scale",    mScale);
-    base::JsonWrite(json, "size",     mSize);
-    base::JsonWrite(json, "rotation", mRotation);
-    base::JsonWrite(json, "flags",    mBitFlags);
+    data.Write("class",    mClassId);
+    data.Write("name",     mName);
+    data.Write("position", mPosition);
+    data.Write("scale",    mScale);
+    data.Write("size",     mSize);
+    data.Write("rotation", mRotation);
+    data.Write("flags",    mBitFlags);
     if (mRigidBody)
     {
-        nlohmann::json js;
-        mRigidBody->IntoJson(js);
-        json["rigid_body"] = std::move(js);
+        auto chunk = data.NewWriteChunk();
+        mRigidBody->IntoJson(*chunk);
+        data.Write("rigid_body", std::move(chunk));
     }
     if (mDrawable)
     {
-        nlohmann::json js;
-        mDrawable->IntoJson(js);
-        json["drawable_item"] = std::move(js);
+        auto chunk = data.NewWriteChunk();
+        mDrawable->IntoJson(*chunk);
+        data.Write("drawable_item", std::move(chunk));
     }
     if (mTextItem)
     {
-        nlohmann::json js;
-        mTextItem->IntoJson(js);
-        json["text_item"] = std::move(js);
+        auto chunk = data.NewWriteChunk();
+        mTextItem->IntoJson(*chunk);
+        data.Write("text_item", std::move(chunk));
     }
 }
 
 // static
-std::optional<EntityNodeClass> EntityNodeClass::FromJson(const nlohmann::json &json)
+std::optional<EntityNodeClass> EntityNodeClass::FromJson(const data::Reader& data)
 {
     EntityNodeClass ret;
-    if (!base::JsonReadSafe(json, "class",    &ret.mClassId) ||
-        !base::JsonReadSafe(json, "name",     &ret.mName) ||
-        !base::JsonReadSafe(json, "position", &ret.mPosition) ||
-        !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
-        !base::JsonReadSafe(json, "size",     &ret.mSize) ||
-        !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
-        !base::JsonReadSafe(json, "flags",    &ret.mBitFlags))
+    if (!data.Read("class",    &ret.mClassId) ||
+        !data.Read("name",     &ret.mName) ||
+        !data.Read("position", &ret.mPosition) ||
+        !data.Read("scale",    &ret.mScale) ||
+        !data.Read("size",     &ret.mSize) ||
+        !data.Read("rotation", &ret.mRotation) ||
+        !data.Read("flags",    &ret.mBitFlags))
         return std::nullopt;
 
-    if (json.contains("rigid_body"))
+    if (const auto& chunk = data.GetReadChunk("rigid_body"))
     {
-        auto body = RigidBodyItemClass::FromJson(json["rigid_body"]);
+        auto body = RigidBodyItemClass::FromJson(*chunk);
         if (!body.has_value())
             return std::nullopt;
         ret.mRigidBody = std::make_shared<RigidBodyItemClass>(std::move(body.value()));
     }
 
-    if (json.contains("drawable_item"))
+    if (const auto& chunk = data.GetReadChunk("drawable_item"))
     {
-        auto draw = DrawableItemClass::FromJson(json["drawable_item"]);
+        auto draw = DrawableItemClass::FromJson(*chunk);
         if (!draw.has_value())
             return std::nullopt;
         ret.mDrawable = std::make_shared<DrawableItemClass>(std::move(draw.value()));
     }
 
-    if (json.contains("text_item"))
+    if (const auto& chunk = data.GetReadChunk("text_item"))
     {
-        auto text = TextItemClass::FromJson(json["text_item"]);
+        auto text = TextItemClass::FromJson(*chunk);
         if (!text.has_value())
             return std::nullopt;
         ret.mTextItem = std::make_shared<TextItemClass>(std::move(text.value()));
@@ -757,84 +757,81 @@ std::size_t EntityClass::GetHash() const
     return hash;
 }
 
-nlohmann::json EntityClass::ToJson() const
+void EntityClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mClassId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "idle_track", mIdleTrackId);
-    base::JsonWrite(json, "script_file", mScriptFile);
-    base::JsonWrite(json, "flags", mFlags);
-    base::JsonWrite(json, "lifetime", mLifetime);
+    data.Write("id", mClassId);
+    data.Write("name", mName);
+    data.Write("idle_track", mIdleTrackId);
+    data.Write("script_file", mScriptFile);
+    data.Write("flags", mFlags);
+    data.Write("lifetime", mLifetime);
     for (const auto& node : mNodes)
     {
-        nlohmann::json js;
-        node->IntoJson(js);
-        json["nodes"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        node->IntoJson(*chunk);
+        data.AppendChunk("nodes", std::move(chunk));
     }
 
     for (const auto& track : mAnimationTracks)
     {
-        nlohmann::json js;
-        track->IntoJson(js);
-        json["tracks"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        track->IntoJson(*chunk);
+        data.AppendChunk("tracks", std::move(chunk));
     }
 
     for (const auto& var : mScriptVars)
     {
-        nlohmann::json js;
-        var->IntoJson(js);
-        json["vars"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        var->IntoJson(*chunk);
+        data.AppendChunk("vars", std::move(chunk));
     }
 
-    json["render_tree"] = mRenderTree.ToJson(game::TreeNodeToJson<EntityNodeClass>);
-    return json;
+    auto chunk = data.NewWriteChunk();
+    mRenderTree.IntoJson(game::TreeNodeToJson<EntityNodeClass>, *chunk);
+    data.Write("render_tree", std::move(chunk));
 }
 
-
 // static
-std::optional<EntityClass> EntityClass::FromJson(const nlohmann::json& json)
+std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
 {
     EntityClass ret;
-    if (!base::JsonReadSafe(json, "id", &ret.mClassId) ||
-        !base::JsonReadSafe(json, "name", &ret.mName) ||
-        !base::JsonReadSafe(json, "idle_track", &ret.mIdleTrackId) ||
-        !base::JsonReadSafe(json, "script_file", &ret.mScriptFile) ||
-        !base::JsonReadSafe(json, "flags", &ret.mFlags) ||
-        !base::JsonReadSafe(json, "lifetime", &ret.mLifetime))
+    if (!data.Read("id", &ret.mClassId) ||
+        !data.Read("name", &ret.mName) ||
+        !data.Read("idle_track", &ret.mIdleTrackId) ||
+        !data.Read("script_file", &ret.mScriptFile) ||
+        !data.Read("flags", &ret.mFlags) ||
+        !data.Read("lifetime", &ret.mLifetime))
         return std::nullopt;
-    if (json.contains("nodes"))
+
+    for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
-        for (const auto& json : json["nodes"].items())
-        {
-            std::optional<EntityNodeClass> node = EntityNodeClass::FromJson(json.value());
-            if (!node.has_value())
-                return std::nullopt;
-            ret.mNodes.push_back(std::make_shared<EntityNodeClass>(std::move(node.value())));
-        }
+        const auto& chunk = data.GetReadChunk("nodes", i);
+        std::optional<EntityNodeClass> node = EntityNodeClass::FromJson(*chunk);
+        if (!node.has_value())
+            return std::nullopt;
+        ret.mNodes.push_back(std::make_shared<EntityNodeClass>(std::move(node.value())));
     }
-    if (json.contains("tracks"))
+    for (unsigned i=0; i<data.GetNumChunks("tracks"); ++i)
     {
-        for (const auto& js : json["tracks"].items())
-        {
-            std::optional<AnimationTrackClass> track = AnimationTrackClass::FromJson(js.value());
-            if (!track.has_value())
-                return std::nullopt;
-            ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
-        }
+        const auto& chunk = data.GetReadChunk("tracks", i);
+        std::optional<AnimationTrackClass> track = AnimationTrackClass::FromJson(*chunk);
+        if (!track.has_value())
+            return std::nullopt;
+        ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
     }
-    if (json.contains("vars"))
+    for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
     {
-        for (const auto& js : json["vars"].items())
-        {
-            std::optional<ScriptVar> var = ScriptVar::FromJson(js.value());
-            if (!var.has_value())
-                return std::nullopt;
-            ret.mScriptVars.push_back(std::make_shared<ScriptVar>(var.value()));
-        }
+        const auto& chunk = data.GetReadChunk("vars", i);
+        std::optional<ScriptVar> var = ScriptVar::FromJson(*chunk);
+        if (!var.has_value())
+            return std::nullopt;
+        ret.mScriptVars.push_back(std::make_shared<ScriptVar>(var.value()));
     }
 
-    ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
+    const auto& chunk = data.GetReadChunk("render_tree");
+    if (!chunk)
+        return std::nullopt;
+    ret.mRenderTree.FromJson(*chunk, game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
 

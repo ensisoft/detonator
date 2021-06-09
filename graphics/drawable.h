@@ -21,7 +21,6 @@
 #include "warnpush.h"
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -34,6 +33,7 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "base/hash.h"
+#include "data/fwd.h"
 #include "graphics/geometry.h"
 #include "graphics/device.h"
 
@@ -84,10 +84,10 @@ namespace gfx
         // Pack the drawable resources.
         virtual void Pack(ResourcePacker* packer) const = 0;
         // Serialize into JSON
-        virtual nlohmann::json ToJson() const = 0;
+        virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
         // otherwise false.
-        virtual bool LoadFromJson(const nlohmann::json& json) = 0;
+        virtual bool LoadFromJson(const data::Reader& data) = 0;
     private:
     };
 
@@ -227,9 +227,9 @@ namespace gfx
             virtual Type GetType() const override
             { return ActualType; }
             virtual void Pack(ResourcePacker*) const override {}
-            virtual nlohmann::json ToJson() const override
-            { return nlohmann::json {}; }
-            virtual bool LoadFromJson(const nlohmann::json&) override
+            virtual void IntoJson(data::Writer&) const override
+            { }
+            virtual bool LoadFromJson(const data::Reader&) override
             { return true; }
         private:
         };
@@ -382,8 +382,8 @@ namespace gfx
             return hash;
         }
         virtual void Pack(ResourcePacker* packer) const override;
-        virtual nlohmann::json ToJson() const override;
-        virtual bool LoadFromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
     private:
         std::string mId;
         float mRadius = 0.05;
@@ -475,8 +475,8 @@ namespace gfx
             return hash;
         }
         virtual void Pack(ResourcePacker* packer) const override;
-        virtual nlohmann::json ToJson() const override;
-        virtual bool LoadFromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
     private:
         std::string mId;
         unsigned mNumVerticalLines = 1;
@@ -684,11 +684,11 @@ namespace gfx
         { return std::make_unique<PolygonClass>(*this); }
 
         virtual std::size_t GetHash() const override;
-        virtual nlohmann::json ToJson() const override;
-        virtual bool LoadFromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
 
         // Load from JSON
-        static std::optional<PolygonClass> FromJson(const nlohmann::json& object);
+        static std::optional<PolygonClass> FromJson(const data::Reader& data);
     private:
         std::string mId;
         std::vector<Vertex> mVertices;
@@ -908,14 +908,14 @@ namespace gfx
         virtual std::unique_ptr<DrawableClass> Copy() const override
         { return std::make_unique<KinematicsParticleEngineClass>(*this); }
         virtual void Pack(ResourcePacker* packer) const override;
-        virtual nlohmann::json ToJson() const override;
-        virtual bool LoadFromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
         // Get a hash value based on the engine parameters
         // and excluding any runtime data.
         virtual std::size_t GetHash() const override;
 
         // Load from JSON
-        static std::optional<KinematicsParticleEngineClass> FromJson(const nlohmann::json& object);
+        static std::optional<KinematicsParticleEngineClass> FromJson(const data::Reader& data);
     private:
         void InitParticles(InstanceState& state, size_t num) const;
         void KillParticle(InstanceState& state, size_t i) const;

@@ -22,7 +22,8 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
-#include "base/json.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "base/hash.h"
 #include "engine/types.h"
 
@@ -69,74 +70,74 @@ size_t ScriptVar::GetHash() const
     return hash;
 }
 
-void ScriptVar::IntoJson(nlohmann::json& json) const
+void ScriptVar::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "readonly", mReadOnly);
-    base::JsonWrite(json, "type", GetType());
+    data.Write("name", mName);
+    data.Write("readonly", mReadOnly);
+    data.Write("type", GetType());
     switch (GetType())
     {
         case Type::Integer:
-            base::JsonWrite(json, "value",GetValue<int>());
+            data.Write("value",GetValue<int>());
             break;
         case Type::Vec2:
-            base::JsonWrite(json, "value", GetValue<glm::vec2>());
+            data.Write("value", GetValue<glm::vec2>());
             break;
         case Type::Boolean:
-            base::JsonWrite(json, "value",GetValue<bool>());
+            data.Write("value",GetValue<bool>());
             break;
         case Type::String:
-            base::JsonWrite(json, "value", GetValue<std::string>());
+            data.Write("value", GetValue<std::string>());
             break;
         case Type::Float:
-            base::JsonWrite(json, "value", GetValue<float>());
+            data.Write("value", GetValue<float>());
             break;
     }
 }
 
 template<typename T, typename Variant>
-bool JsonReadValue(const nlohmann::json& json, Variant* out)
+bool JsonReadValue(const data::Reader& data, Variant* out)
 {
     T value;
-    if (!base::JsonReadSafe(json, "value", &value))
+    if (!data.Read("value", &value))
         return false;
     *out = value;
     return true;
 }
 
 // static
-std::optional<ScriptVar> ScriptVar::FromJson(const nlohmann::json& json)
+std::optional<ScriptVar> ScriptVar::FromJson(const data::Reader& data)
 {
     ScriptVar ret;
     ScriptVar::Type type = ScriptVar::Type::Integer;
-    if (!base::JsonReadSafe(json, "name", &ret.mName) ||
-        !base::JsonReadSafe(json, "type", &type) ||
-        !base::JsonReadSafe(json, "readonly", &ret.mReadOnly))
+    if (!data.Read("name", &ret.mName) ||
+        !data.Read("type", &type) ||
+        !data.Read("readonly", &ret.mReadOnly))
         return std::nullopt;
 
     switch (type) {
         case Type::Integer:
-            if (!JsonReadValue<int>(json, &ret.mData))
+            if (!JsonReadValue<int>(data, &ret.mData))
                 return std::nullopt;
             break;
 
         case Type::Vec2:
-            if (!JsonReadValue<glm::vec2>(json, &ret.mData))
+            if (!JsonReadValue<glm::vec2>(data, &ret.mData))
                 return std::nullopt;
             break;
 
         case Type::Float:
-            if (!JsonReadValue<float>(json, &ret.mData))
+            if (!JsonReadValue<float>(data, &ret.mData))
                 return std::nullopt;
             break;
 
         case Type::String:
-            if (!JsonReadValue<std::string>(json, &ret.mData))
+            if (!JsonReadValue<std::string>(data, &ret.mData))
                 return std::nullopt;
             break;
 
         case Type::Boolean:
-            if (!JsonReadValue<bool>(json, &ret.mData))
+            if (!JsonReadValue<bool>(data, &ret.mData))
                 return std::nullopt;
             break;
     }

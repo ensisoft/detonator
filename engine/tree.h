@@ -18,16 +18,14 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <memory>
 #include <vector>
 #include <unordered_map>
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "data/reader.h"
+#include "data/writer.h"
 
 namespace game
 {
@@ -195,31 +193,35 @@ namespace game
         }
 
         template<typename Serializer>
-        nlohmann::json ToJson(const Serializer& to_json, const Element* parent = nullptr) const
+        void IntoJson(const Serializer& to_json, data::Writer& data, const Element* parent = nullptr) const
         {
-            nlohmann::json json;
-            json["node"] = to_json(parent);
+            auto node  = data.NewWriteChunk();
+            to_json(*node, parent);
+            data.Write("node", *node);
             auto it = mChildren.find(parent);
             if (it != mChildren.end())
             {
                 const auto& children = it->second;
                 for (auto *child : children)
                 {
-                    json["children"].push_back(ToJson(to_json, child));
+                    auto child_chunk = data.NewWriteChunk();
+                    IntoJson(to_json, *child_chunk, child);
+                    data.AppendChunk("children", std::move(child_chunk));
                 }
             }
-            return json;
         }
         // Build render tree from a JSON object. The serializer object
         // should create a new Element instance and return the pointer to it.
         template<typename Serializer>
-        void FromJson(const nlohmann::json& json, const Serializer& from_json)
+        void FromJson(const data::Reader& data, const Serializer& from_json)
         {
-            const Element* root = from_json(json["node"]);
-            if (!json.contains("children"))
-                return;
-            for (const auto& js : json["children"].items())
-                FromJson(js.value(), from_json, root);
+            const auto& chunk = data.GetReadChunk("node");
+            const auto* root  = chunk ? from_json(*chunk) : nullptr;
+            for (unsigned i=0; i<data.GetNumChunks("children"); ++i)
+            {
+                const auto& chunk = data.GetReadChunk("children", i);
+                FromJson(*chunk, from_json, root);
+            }
         }
 
         // Build an equivalent tree (in terms of topology) based on the
@@ -238,17 +240,16 @@ namespace game
         }
     private:
         template<typename Serializer>
-        void FromJson(const nlohmann::json& json, const Serializer& from_json, const Element* parent)
+        void FromJson(const data::Reader& data, const Serializer& from_json, const Element* parent)
         {
-            const Element* node = from_json(json["node"]);
+            const auto& chunk = data.GetReadChunk("node");
+            const Element* node = from_json(*chunk);
             mChildren[parent].push_back(node);
             mParents[node] = parent;
-            if (!json.contains("children"))
-                return;
-
-            for (const auto& js : json["children"].items())
+            for (unsigned i=0; i<data.GetNumChunks("children"); ++i)
             {
-                FromJson(js.value(), from_json, node);
+                const auto& chunk = data.GetReadChunk("children", i);
+                FromJson(*chunk, from_json, node);
             }
         }
         template<typename T>

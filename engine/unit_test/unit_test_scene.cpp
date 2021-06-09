@@ -16,10 +16,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <cstddef>
 #include <iostream>
@@ -29,6 +25,7 @@
 #include "base/test_help.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "data/json.h"
 #include "engine/scene.h"
 #include "engine/entity.h"
 
@@ -76,7 +73,7 @@ void unit_test_node()
 
     // to/from json
     {
-        nlohmann::json json;
+        data::JsonObject json;
         node.IntoJson(json);
         auto ret = game::SceneNodeClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
@@ -174,7 +171,9 @@ void unit_test_scene_class()
 
     // to/from json
     {
-        auto ret = game::SceneClass::FromJson(klass.ToJson());
+        data::JsonObject json;
+        klass.IntoJson(json);
+        auto ret = game::SceneClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetNode(0).GetName() == "root");
         TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");

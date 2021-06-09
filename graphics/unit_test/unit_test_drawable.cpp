@@ -18,6 +18,7 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "data/json.h"
 #include "graphics/drawable.h"
 
 bool operator==(const gfx::Vertex& lhs, const gfx::Vertex& rhs)
@@ -47,8 +48,8 @@ void unit_test_polygon_data()
 
     // to/from json
     {
-
-        const auto& json = klass.ToJson();
+        data::JsonObject json;
+        klass.IntoJson(json);
         gfx::PolygonClass copy;
         TEST_REQUIRE(copy.LoadFromJson(json));
         TEST_REQUIRE(copy.GetNumVertices() == 1);
@@ -286,7 +287,8 @@ void unit_test_particle_engine_data()
 
     // to/from json
     {
-        const auto& json = klass.ToJson();
+        data::JsonObject json;
+        klass.IntoJson(json);
         auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetId() == klass.GetId());

@@ -18,16 +18,13 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json_fwd.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <algorithm>
 
 #include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
+#include "data/fwd.h"
 #include "uikit/types.h"
 
 namespace uik
@@ -99,11 +96,11 @@ namespace uik
         // Set a widget flag on or off.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Serialize the widget's state into JSON.
-        virtual void IntoJson(nlohmann::json& json) const = 0;
+        virtual void IntoJson(data::Writer& data) const = 0;
         // Load the widget's state from the given JSON object. Returns
         // true if successful otherwise false to indicate there was some
         // problem.
-        virtual bool FromJson(const nlohmann::json& json) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
 
         // The current transient state of the widget for painting operations.
         struct PaintEvent {
@@ -254,9 +251,9 @@ namespace uik
         public:
             inline std::size_t GetHash(size_t hash) const
             { return hash; }
-            inline void IntoJson(nlohmann::json&) const
+            inline void IntoJson(data::Writer&) const
             {}
-            inline bool FromJson(const nlohmann::json& json)
+            inline bool FromJson(const data::Reader&)
             { return true; }
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
         private:
@@ -282,8 +279,8 @@ namespace uik
             void SetLineHeight(float value)
             { mLineHeight = value; }
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
-            void IntoJson(nlohmann::json& json) const;
-            bool FromJson(const nlohmann::json& json);
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
         private:
             std::string mText;
             float mLineHeight = 1.0f;
@@ -304,8 +301,8 @@ namespace uik
             void SetText(std::string&& text)
             { mText = text; }
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
-            void IntoJson(nlohmann::json& json)  const;
-            bool FromJson(const nlohmann::json& json);
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
             WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct& ms);
@@ -334,8 +331,8 @@ namespace uik
             { return mText; }
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
-            void IntoJson(nlohmann::json& json) const;
-            bool FromJson(const nlohmann::json& json);
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
             inline WidgetAction MouseEnter(const MouseStruct&)
             { return WidgetAction{}; }
             inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
@@ -361,8 +358,8 @@ namespace uik
             { return mText; }
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
-            void IntoJson(nlohmann::json& json) const;
-            bool FromJson(const nlohmann::json& json);
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
         private:
             std::string mText;
         };
@@ -419,8 +416,8 @@ namespace uik
             WidgetBase()
             { mId   = base::RandomString(10); }
             size_t GetHash(size_t hash) const;
-            void IntoJson(nlohmann::json& json) const;
-            bool FromJson(const nlohmann::json& json);
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
         protected:
             std::string mId;
             std::string mName;
@@ -581,14 +578,14 @@ namespace uik
                     WidgetModel::Update(state, time, dt);
             }
 
-            virtual void IntoJson(nlohmann::json& json) const override
+            virtual void IntoJson(data::Writer& data) const override
             {
-                WidgetBase::IntoJson(json);
-                WidgetModel::IntoJson(json);
+                WidgetBase::IntoJson(data);
+                WidgetModel::IntoJson(data);
             }
-            virtual bool FromJson(const nlohmann::json& json) override
+            virtual bool FromJson(const data::Reader& data) override
             {
-                if (!WidgetBase::FromJson(json) || !WidgetModel::FromJson(json))
+                if (!WidgetBase::FromJson(data) || !WidgetModel::FromJson(data))
                     return false;
                 return true;
             }

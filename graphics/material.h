@@ -18,10 +18,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json_fwd.hpp>
-#include "warnpop.h"
-
 #include <vector>
 #include <string>
 #include <memory>
@@ -33,6 +29,7 @@
 #include "base/utility.h"
 #include "base/assert.h"
 #include "base/hash.h"
+#include "data/fwd.h"
 #include "graphics/texture.h"
 #include "graphics/resource.h"
 #include "graphics/bitmap.h"
@@ -93,10 +90,10 @@ namespace gfx
         // Create an exact copy of this texture source object.
         virtual std::unique_ptr<TextureSource> Copy() const = 0;
         // Serialize into JSON object.
-        virtual void IntoJson(nlohmann::json& json) const = 0;
+        virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
         // otherwise false.
-        virtual bool FromJson(const nlohmann::json& json) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
         // Begin packing the texture source into the packer.
         virtual void BeginPacking(ResourcePacker* packer) const
         {}
@@ -143,8 +140,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureFileSource>(*this); }
 
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual bool FromJson(const nlohmann::json& json) override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
 
             virtual void BeginPacking(ResourcePacker* packer) const override
             {
@@ -224,8 +221,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapBufferSource>(*this); }
 
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual bool FromJson(const nlohmann::json& json) override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
 
             void SetBitmap(std::unique_ptr<IBitmap> bitmap)
             { mBitmap = std::move(bitmap); }
@@ -309,8 +306,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
 
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual bool FromJson(const nlohmann::json& json) override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
 
             IBitmapGenerator& GetGenerator()
             { return *mGenerator; }
@@ -376,8 +373,8 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> Copy() const override
             { return std::make_unique<TextureTextBufferSource>(*this); }
 
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual bool FromJson(const nlohmann::json& json) override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
 
             virtual void BeginPacking(ResourcePacker* packer) const override
             {
@@ -923,9 +920,9 @@ namespace gfx
         // current material properties.
         size_t GetHash() const;
 
-        nlohmann::json ToJson() const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<MaterialClass> FromJson(const nlohmann::json& object);
+        static std::optional<MaterialClass> FromJson(const data::Reader& data);
 
         void BeginPacking(ResourcePacker* packer) const;
         void FinishPacking(const ResourcePacker* packer);

@@ -19,7 +19,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <nlohmann/json.hpp>
 #  include <QByteArray>
 #  include <QDataStream>
 #include "warnpop.h"
@@ -28,6 +27,9 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "data/writer.h"
+#include "data/reader.h"
+#include "data/json.h"
 #include "editor/app/ipc.h"
 #include "editor/app/resource.h"
 #include "editor/app/eventlog.h"
@@ -87,14 +89,14 @@ void IPCHost::ResourceUpdated(const Resource* resource)
     if (!mClient)
         return;
 
-    nlohmann::json json;
+    data::JsonObject json;
     resource->Serialize(json);
 
-    ASSERT(!json.contains("__type"));
-    ASSERT(!json.contains("__name"));
-    json["__type"] = ToUtf8(toString(resource->GetType()));
-    json["__name"] = ToUtf8(resource->GetName());
-    const auto& data = json.dump();
+    ASSERT(!json.HasValue("__type"));
+    ASSERT(!json.HasValue("__name"));
+    json.Write("__type", resource->GetType());
+    json.Write("__name", resource->GetNameUtf8());
+    const auto& data = json.ToString();
     const auto& str  = FromUtf8(data);
 
     QByteArray block;
@@ -208,19 +210,15 @@ void IPCClient::Close()
 }
 
 template<typename ClassType>
-std::unique_ptr<Resource> CreateResource(const std::string& array, const nlohmann::json& json, const std::string& name)
+std::unique_ptr<Resource> CreateResource(const char* type, const data::Reader& data, const std::string& name)
 {
-    if (!json.contains(array))
+    const auto& chunk = data.GetReadChunk(type, 0);
+    if (!chunk)
         return nullptr;
-    for (const auto& object : json[array].items())
-    {
-        const auto& value = object.value();
-        std::optional<ClassType> ret = ClassType::FromJson(value);
-        if (!ret.has_value())
-            return nullptr;
-        return std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name));
-    }
-    return nullptr;
+    std::optional<ClassType> ret = ClassType::FromJson(*chunk);
+    if (!ret.has_value())
+        return nullptr;
+    return std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name));
 }
 
 void IPCClient::UserPropertyUpdated(const QString& name, const QVariant& data)
@@ -258,19 +256,22 @@ void IPCClient::ReadMessage()
         if (!mStream.commitTransaction())
             return;
 
-        const auto &json = nlohmann::json::parse(ToUtf8(message));
-        ASSERT(json.contains("__name"));
-        ASSERT(json.contains("__type"));
-
+        data::JsonObject json;
+        const auto [ok, error] = json.ParseString(ToUtf8(message));
+        if (!ok)
+        {
+            ERROR("JSON parse error (%1') in IPC message.", error);
+            return;
+        }
         //std::cout << json.dump(2);
         //std::cout << std::endl;
-
+        ASSERT(json.HasValue("__name"));
+        ASSERT(json.HasValue("__type"));
         std::unique_ptr<Resource> resource;
-
         std::string name;
         Resource::Type type;
-        base::JsonReadSafe(json, "__type", &type);
-        base::JsonReadSafe(json, "__name", &name);
+        json.Read("__type", &type);
+        json.Read("__name", &name);
         if (type == Resource::Type::Entity)
             resource = CreateResource<game::EntityClass>("entities", json, name);
         else if (type == Resource::Type::Scene)

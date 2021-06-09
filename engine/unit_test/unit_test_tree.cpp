@@ -16,57 +16,50 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <cstddef>
 #include <iostream>
 
 #include "base/test_minimal.h"
+#include "data/json.h"
 #include "engine/tree.h"
 #include "engine/treeop.h"
 
 struct MyNode {
     std::string s;
-    std::size_t i;
-    MyNode(const std::string& s, std::size_t i)
+    unsigned i = 0;
+    MyNode(const std::string& s, unsigned i)
       : s(s)
       , i(i)
     {}
     MyNode() = default;
 
-    static nlohmann::json TreeNodeToJson(const MyNode* node)
+    static void TreeNodeToJson(data::Writer& data, const MyNode* node)
     {
-        nlohmann::json ret;
         if (node)
         {
-            ret["s"] = node->s;
-            ret["i"] = node->i;
+            data.Write("s", node->s);
+            data.Write("i", node->i);
         }
-        return ret;
     }
-    static MyNode* TreeNodeFromJson(const nlohmann::json& json)
+    static MyNode* TreeNodeFromJson(const data::Reader& data)
     {
         static std::vector<std::unique_ptr<MyNode>> nodes;
-        if (json.empty())
+        if (data.IsEmpty())
             return nullptr;
 
         auto ret = std::make_unique<MyNode>();
-        ret->s = json["s"];
-        ret->i = json["i"];
+        data.Read("s", &ret->s);
+        data.Read("i", &ret->i);
         nodes.push_back(std::move(ret));
         return nodes.back().get();
     }
 };
 
-nlohmann::json TreeNodeToJson(const MyNode* node)
+void TreeNodeToJson(data::Writer& data, const MyNode* node)
 {
-    nlohmann::json ret;
-    ret["s"] = node->s;
-    ret["i"] = node->i;
-    return ret;
+    data.Write("s", node->s);
+    data.Write("i", node->i);
 }
 
 std::string WalkTree(game::RenderTree<MyNode>& tree)
@@ -221,7 +214,7 @@ void unit_test_tree()
         TEST_REQUIRE(WalkTree(tree) == "bar child 2 child 3");
         tree.DeleteNode(&child3);
         TEST_REQUIRE(tree.HasNode(&child3) == false);
-        std::cout << WalkTree(tree) << std::endl;
+        //std::cout << WalkTree(tree) << std::endl;
         TEST_REQUIRE(WalkTree(tree) == "bar child 2");
     }
 
@@ -243,8 +236,10 @@ void unit_test_tree()
         tree.LinkChild(&bar, &child2);
         tree.LinkChild(&bar, &child3);
 
-        auto json = tree.ToJson(&MyNode::TreeNodeToJson);
-        std::cout << json.dump(2) << std::endl;
+        data::JsonObject json;
+
+        tree.IntoJson(&MyNode::TreeNodeToJson, json);
+        std::cout << json.ToString() << std::endl;
 
         tree.Clear();
         tree.FromJson(json, &MyNode::TreeNodeFromJson);

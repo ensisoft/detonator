@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <stb/stb_image_write.h>
-#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <limits>
@@ -32,9 +31,11 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <memory>
 
 #include "base/assert.h"
 #include "base/hash.h"
+#include "data/fwd.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 
@@ -839,10 +840,10 @@ namespace gfx
         // Get the hash value of the generator.
         virtual std::size_t GetHash() const = 0;
         // Serialize the generator into JSON.
-        virtual void IntoJson(nlohmann::json& json) const = 0;
+        virtual void IntoJson(data::Writer& data) const = 0;
         // Load the generator's state from the given JSON object.
         // Returns true if successful otherwise false.
-        virtual bool FromJson(const nlohmann::json& json) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
         // Get the width of the bitmaps that will be generated (in pixels).
         virtual unsigned GetWidth() const = 0;
         // Get the height of the bitmaps that will be generated (in pixels).
@@ -903,8 +904,8 @@ namespace gfx
         { mHeight = height; }
         virtual void SetWidth(unsigned width) override
         { mWidth = width; }
-        virtual void IntoJson(nlohmann::json& json) const override;
-        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
         virtual std::unique_ptr<IBitmap> Generate() const override;
         virtual std::size_t GetHash() const override;
     private:

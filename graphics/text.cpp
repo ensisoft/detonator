@@ -19,7 +19,6 @@
 #include "warnpush.h"
 #  include <hb.h>
 #  include <hb-ft.h>
-#  include <nlohmann/json.hpp>
 #  include <ft2build.h>
 #  include FT_FREETYPE_H
 #  include FT_SIZES_H
@@ -31,7 +30,8 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
-#include "base/json.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "graphics/resource.h"
 #include "graphics/text.h"
 
@@ -217,46 +217,44 @@ std::size_t TextBuffer::GetHash() const
     return hash;
 }
 
-void TextBuffer::IntoJson(nlohmann::json& json) const
+void TextBuffer::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "width", mBufferWidth);
-    base::JsonWrite(json, "height", mBufferHeight);
-    base::JsonWrite(json, "horizontal_alignment", mHorizontalAlign);
-    base::JsonWrite(json, "vertical_alignment", mVerticalAlign);
+    data.Write("width", mBufferWidth);
+    data.Write("height", mBufferHeight);
+    data.Write("horizontal_alignment", mHorizontalAlign);
+    data.Write("vertical_alignment", mVerticalAlign);
     for (const auto& text : mText)
     {
-        nlohmann::json js;
-        base::JsonWrite(js, "string", text.text);
-        base::JsonWrite(js, "font_file", text.font);
-        base::JsonWrite(js, "font_size", text.fontsize);
-        base::JsonWrite(js, "line_height", text.lineheight);
-        base::JsonWrite(js, "underline", text.underline);
-        json["texts"].push_back(js);
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("string", text.text);
+        chunk->Write("font_file", text.font);
+        chunk->Write("font_size", text.fontsize);
+        chunk->Write("line_height", text.lineheight);
+        chunk->Write("underline", text.underline);
+        data.AppendChunk("texts", std::move(chunk));
     }
 }
 
 // static
-std::optional<TextBuffer> TextBuffer::FromJson(const nlohmann::json& json)
+std::optional<TextBuffer> TextBuffer::FromJson(const data::Reader& data)
 {
     TextBuffer buffer;
-    if (!base::JsonReadSafe(json, "width", &buffer.mBufferWidth) ||
-        !base::JsonReadSafe(json, "height", &buffer.mBufferHeight) ||
-        !base::JsonReadSafe(json, "horizontal_alignment", &buffer.mHorizontalAlign) ||
-        !base::JsonReadSafe(json, "vertical_alignment", &buffer.mVerticalAlign))
+    if (!data.Read("width", &buffer.mBufferWidth) ||
+        !data.Read("height", &buffer.mBufferHeight) ||
+        !data.Read("horizontal_alignment", &buffer.mHorizontalAlign) ||
+        !data.Read("vertical_alignment", &buffer.mVerticalAlign))
         return std::nullopt;
 
-    if (!json.contains("texts"))
-        return buffer;
 
-    for (const auto& json_text : json["texts"].items())
+    for (unsigned i=0; i<data.GetNumChunks("texts"); ++i)
     {
-        const auto& js = json_text.value();
+        const auto& chunk = data.GetReadChunk("texts", i);
         Text t;
-        if (!base::JsonReadSafe(js, "string", &t.text) ||
-            !base::JsonReadSafe(js, "font_file", &t.font) ||
-            !base::JsonReadSafe(js, "font_size", &t.fontsize) ||
-            !base::JsonReadSafe(js, "line_height", &t.lineheight) |
-            !base::JsonReadSafe(js, "underline", &t.underline))
+        if (!chunk->Read("string", &t.text) ||
+            !chunk->Read("font_file", &t.font) ||
+            !chunk->Read("font_size", &t.fontsize) ||
+            !chunk->Read("line_height", &t.lineheight) |
+            !chunk->Read("underline", &t.underline))
             return std::nullopt;
         buffer.mText.push_back(std::move(t));
     }

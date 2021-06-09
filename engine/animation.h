@@ -24,7 +24,6 @@
 
 #include "warnpush.h"
 #  include <glm/vec2.hpp>
-#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -35,6 +34,7 @@
 
 #include "base/utility.h"
 #include "base/math.h"
+#include "data/fwd.h"
 
 namespace game
 {
@@ -88,10 +88,10 @@ namespace game
         // Set the ID of the node affected by this actuator.
         virtual void SetNodeId(const std::string& id) = 0;
         // Serialize the actuator class object into JSON.
-        virtual void IntoJson(nlohmann::json& json) const = 0;
+        virtual void IntoJson(data::Writer& data) const = 0;
         // Load the actuator class object state from JSON. Returns true
         // successful otherwise false and the object is not valid state.
-        virtual bool FromJson(const nlohmann::json& object) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
     private:
     };
 
@@ -131,8 +131,8 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual void IntoJson(nlohmann::json& json) const override;
-        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
 
         FlagAction GetFlagAction() const
         { return mFlagAction; }
@@ -204,8 +204,8 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual void IntoJson(nlohmann::json& json) const override;
-        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
 
     private:
         // id of the actuator.
@@ -279,8 +279,8 @@ namespace game
         { mStartTime = start; }
         virtual void SetDuration(float duration) override
         { mDuration = duration; }
-        virtual void IntoJson(nlohmann::json& json) const override;
-        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         // id of the actuator.
         std::string mId;
@@ -354,8 +354,8 @@ namespace game
         void SetEndScale(float x, float y)
         { mEndScale = glm::vec2(x, y); }
 
-        virtual void IntoJson(nlohmann::json& json) const override;
-        virtual bool FromJson(const nlohmann::json& json) override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
         virtual std::size_t GetHash() const override;
 
         virtual std::unique_ptr<ActuatorClass> Copy() const override
@@ -630,12 +630,12 @@ namespace game
         std::size_t GetHash() const;
 
         // Serialize into JSON.
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& json) const;
 
         // Try to create new instance of AnimationTrackClass based on the data
         // loaded from JSON. On failure returns std::nullopt otherwise returns
         // an instance of the class object.
-        static std::optional<AnimationTrackClass> FromJson(const nlohmann::json& json);
+        static std::optional<AnimationTrackClass> FromJson(const data::Reader& data);
 
         AnimationTrackClass Clone() const;
         // Do a deep copy on the assignment of a new object.

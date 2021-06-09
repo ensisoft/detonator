@@ -34,6 +34,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/format.h"
+#include "data/json.h"
 #include "uikit/widget.h"
 #include "uikit/window.h"
 #include "uikit/state.h"
@@ -407,9 +408,9 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.saveWidget("UI", mUI.widget);
     settings.setValue("UI", "camera_offset_x", mState.camera_offset_x);
     settings.setValue("UI", "camera_offset_y", mState.camera_offset_y);
-    const auto& json = mState.window.ToJson();
-    const auto& base64 = base64::Encode(json.dump());
-    settings.setValue("UI", "content", base64);
+    data::JsonObject json;
+    mState.window.IntoJson(json);
+    settings.setValue("UI", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool UIWidget::LoadState(const Settings& settings)
@@ -427,10 +428,11 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.getValue("UI", "camera_offset_y", &mState.camera_offset_y);
     mCameraWasLoaded = true;
 
-    const std::string& base64 = settings.getValue("UI", "content", std::string(""));
-    if (base64.empty())
-        return true;
-    auto [ok, json, error] = base::JsonParse(base64::Decode(base64));
+    std::string base64;
+    settings.getValue("UI", "content", &base64);
+
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
     if (!ok)
     {
         ERROR("Failed to parse content JSON. '%1'", error);

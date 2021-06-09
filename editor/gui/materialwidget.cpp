@@ -25,12 +25,15 @@
 #  include <QPixmap>
 #  include <QTextStream>
 #  include <base64/base64.h>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/json.h"
+#include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -244,11 +247,16 @@ void MaterialWidget::AddActions(QMenu& menu)
 
 bool MaterialWidget::LoadState(const Settings& settings)
 {
-    const std::string& base64 = settings.getValue("Material", "content", std::string(""));
-    if (base64.empty())
-        return true;
+    std::string base64;
+    settings.getValue("Material", "content", &base64);
 
-    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
+    {
+        ERROR("Failed to parse content JSON. '%1'", error);
+        return false;
+    }
     auto ret = gfx::MaterialClass::FromJson(json);
     if (!ret.has_value())
     {
@@ -317,14 +325,13 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.saveWidget("Material", mUI.zoom);
     settings.saveWidget("Material", mUI.cmbModel);
     settings.saveWidget("Material", mUI.widget);
-
     SetMaterialProperties();
 
     // the material can already serialize into JSON.
     // so let's use the material's JSON serialization here as well.
-    const auto& json = mMaterial.ToJson();
-    const auto& base64 = base64::Encode(json.dump(2));
-    settings.setValue("Material", "content", base64);
+    data::JsonObject json;
+    mMaterial.IntoJson(json);
+    settings.setValue("Material", "content", base64::Encode(json.ToString()));
     return true;
 }
 

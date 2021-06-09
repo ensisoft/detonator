@@ -18,16 +18,13 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json_fwd.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <vector>
 #include <memory>
 #include <optional>
 
 #include "base/assert.h"
+#include "data/fwd.h"
 #include "graphics/bitmap.h"
 
 namespace gfx
@@ -168,10 +165,10 @@ namespace gfx
         std::size_t GetHash() const;
 
         // Serialize the contents into JSON
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
         // Load a TextBuffer from JSON.
-        static std::optional<TextBuffer> FromJson(const nlohmann::json& json);
+        static std::optional<TextBuffer> FromJson(const data::Reader& data);
 
     private:
         std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, const Text& style) const;

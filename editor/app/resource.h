@@ -23,13 +23,13 @@
 #  include <QVariant>
 #  include <QJsonObject>
 #  include <QIcon>
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <memory>
 #include <string>
 
 #include "base/assert.h"
+#include "data/writer.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "engine/entity.h"
@@ -95,7 +95,7 @@ namespace app
         // Mark the resource primitive or not.
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
-        virtual void Serialize(nlohmann::json& json) const =0;
+        virtual void Serialize(data::Writer& data) const =0;
         // Save additional non-content properties into JSON
         virtual void SaveProperties(QJsonObject& json) const = 0;
         // Save additional user specific properties into JSON.
@@ -387,33 +387,34 @@ namespace app
         { mPrimitive = primitive; }
         virtual bool IsPrimitive() const override
         { return mPrimitive; }
-        virtual void Serialize(nlohmann::json& json) const override
+        virtual void Serialize(data::Writer& data) const override
         {
-            nlohmann::json content_json = mContent->ToJson();
+            auto chunk = data.NewWriteChunk();
+            mContent->IntoJson(*chunk);
             // tag some additional data with the content's JSON
-            ASSERT(content_json.contains("resource_name") == false);
-            ASSERT(content_json.contains("resource_id") == false);
-            content_json["resource_name"] = app::ToUtf8(mName);
-            content_json["resource_id"]   = app::ToUtf8(GetId());
+            //ASSERT(chunk->HasValue("resource_name") == false);
+            //ASSERT(chunk->HasValue("resource_id") == false);
+            chunk->Write("resource_name", app::ToUtf8(mName));
+            chunk->Write("resource_id",   app::ToUtf8(GetId()));
 
             if constexpr (TypeValue == Resource::Type::Material)
-                json["materials"].push_back(content_json);
+                data.AppendChunk("materials", std::move(chunk));
             else if (TypeValue == Resource::Type::ParticleSystem)
-                json["particles"].push_back(content_json);
+                data.AppendChunk("particles", std::move(chunk));
             else if (TypeValue == Resource::Type::Shape)
-                json["shapes"].push_back(content_json);
+                data.AppendChunk("shapes", std::move(chunk));
             else if (TypeValue == Resource::Type::Entity)
-                json["entities"].push_back(content_json);
+                data.AppendChunk("entities", std::move(chunk));
             else if (TypeValue == Resource::Type::Scene)
-                json["scenes"].push_back(content_json);
+                data.AppendChunk("scenes", std::move(chunk));
             else if (TypeValue == Resource::Type::Script)
-                json["scripts"].push_back(content_json);
+                data.AppendChunk("scripts", std::move(chunk));
             else if (TypeValue == Resource::Type::AudioFile)
-                json["audio_files"].push_back(content_json);
+                data.AppendChunk("audio_files", std::move(chunk));
             else if (TypeValue == Resource::Type::DataFile)
-                json["data_files"].push_back(content_json);
+                data.AppendChunk("data_files", std::move(chunk));
             else if (TypeValue == Resource::Type::UI)
-                json["uis"].push_back(content_json);
+                data.AppendChunk("uis", std::move(chunk));
         }
         virtual void SaveProperties(QJsonObject& json) const override
         {

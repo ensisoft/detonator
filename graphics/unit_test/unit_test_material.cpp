@@ -16,15 +16,12 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <iostream>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
+#include "data/json.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 
@@ -101,7 +98,8 @@ void unit_test_data()
     generator.SetName("noise");
     klass.AddTexture(generator);
 
-    const auto& json = klass.ToJson();
+    data::JsonObject json;
+    klass.IntoJson(json);
     //std::cout << json.dump(2);
     //std::cout << std::endl;
 

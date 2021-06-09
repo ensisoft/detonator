@@ -47,6 +47,7 @@
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
+#include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -432,9 +433,9 @@ bool SceneWidget::SaveState(Settings& settings) const
     // so let's use the JSON serialization in the scene
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mState.scene.ToJson();
-    const auto& base64 = base64::Encode(json.dump(2));
-    settings.setValue("Scene", "content", base64);
+    data::JsonObject json;
+    mState.scene.IntoJson(json);
+    settings.setValue("Scene", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -454,24 +455,27 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.getValue("Scene", "camera_offset_x", &mState.camera_offset_x);
     settings.getValue("Scene", "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(mUI.name->text());
-
-    // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
-    const std::string& base64 = settings.getValue("Scene", "content", std::string(""));
-    if (base64.empty())
-        return true;
+    std::string base64;
+    settings.getValue("Scene", "content", &base64);
 
-    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
+    {
+        ERROR("Failed to parse content JSON. '%1'", error);
+        return false;
+    }
     auto ret  = game::SceneClass::FromJson(json);
     if (!ret.has_value())
     {
         ERROR("Failed to load scene widget state.");
         return false;
     }
+
     mState.scene  = std::move(ret.value());
     mOriginalHash = mState.scene.GetHash();
-
     UpdateResourceReferences();
 
     const auto vars = mState.scene.GetNumScriptVars();
@@ -528,14 +532,13 @@ void SceneWidget::Cut(Clipboard& clipboard)
 {
     if (auto* node = GetCurrentNode())
     {
+        data::JsonObject json;
         const auto& tree = mState.scene.GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {
-            nlohmann::json json;
-            node->IntoJson(json);
-            return json;
-        }, node);
+        tree.IntoJson([](data::Writer& writer, const auto* node) {
+            node->IntoJson(writer);
+        }, json, node);
         clipboard.SetType("application/json/scene_node");
-        clipboard.SetText(json.dump(2));
+        clipboard.SetText(json.ToString());
 
         NOTE("Copied JSON to application clipboard.");
         DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
@@ -549,14 +552,13 @@ void SceneWidget::Copy(Clipboard& clipboard) const
 {
     if (const auto* node = GetCurrentNode())
     {
+        data::JsonObject json;
         const auto& tree = mState.scene.GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {
-            nlohmann::json json;
-            node->IntoJson(json);
-            return json;
-         }, node);
+        tree.IntoJson([](data::Writer& writer, const auto* node) {
+            node->IntoJson(writer);
+         }, json, node);
         clipboard.SetType("application/json/scene_node");
-        clipboard.SetText(json.dump(2));
+        clipboard.SetText(json.ToString());
 
         NOTE("Copied JSON to application clipboard.");
         DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
@@ -573,7 +575,8 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         return;
     }
 
-    auto [success, json, _] = base::JsonParse(clipboard.GetText());
+    data::JsonObject json;
+    auto [success, _] = json.ParseString(clipboard.GetText());
     if (!success)
     {
         NOTE("Clipboard JSON parse failed.");
@@ -584,8 +587,8 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     std::vector<std::unique_ptr<game::SceneNodeClass>> nodes;
     bool error = false;
     game::SceneClass::RenderTree tree;
-    tree.FromJson(json, [&nodes, &error](const nlohmann::json& json) {
-        auto ret = game::SceneNodeClass::FromJson(json);
+    tree.FromJson(json, [&nodes, &error](const data::Reader& data) {
+        auto ret = game::SceneNodeClass::FromJson(data);
         if (ret.has_value()) {
             auto node = std::make_unique<game::SceneNodeClass>(ret->Clone());
             node->SetName(base::FormatString("Copy of %1", ret->GetName()));

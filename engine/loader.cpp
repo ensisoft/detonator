@@ -17,7 +17,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -29,6 +28,7 @@
 #include "base/logging.h"
 #include "base/platform.h"
 #include "base/utility.h"
+#include "data/json.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "engine/entity.h"
@@ -285,20 +285,20 @@ ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(c
 
 
 template<typename Interface, typename Implementation>
-void LoadResources(const nlohmann::json& json, const std::string& type,
+void LoadResources(const data::Reader& data, const char* type,
     std::unordered_map<std::string, std::shared_ptr<Interface>>& out,
     std::unordered_map<std::string, std::string>* namemap)
 {
-    if (!json.contains(type))
-        return;
-    for (const auto& iter : json[type].items())
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        auto& value = iter.value();
-        const std::string& id   = value["resource_id"];
-        const std::string& name = value["resource_name"];
-        std::optional<Implementation> ret = Implementation::FromJson(value);
+        const auto& chunk = data.GetReadChunk(type, i);
+        std::string id;
+        std::string name;
+        chunk->Read("resource_id", &id);
+        chunk->Read("resource_name", &name);
+        std::optional<Implementation> ret = Implementation::FromJson(*chunk);
         if (!ret.has_value())
-            throw std::runtime_error("Failed to load: " + type + "/" + name);
+            throw std::runtime_error(std::string("Failed to load: ") + type + "/" + name);
 
         out[id] = std::make_shared<Implementation>(std::move(ret.value()));
         if (namemap)
@@ -309,20 +309,15 @@ void LoadResources(const nlohmann::json& json, const std::string& type,
 
 void ContentLoaderImpl::LoadFromFile(const std::string& file)
 {
-    std::ifstream in(base::OpenBinaryInputStream(file));
-    if (!in.is_open())
-        throw std::runtime_error("failed to open: " + file);
+    data::JsonFile json(file);
+    data::JsonObject root = json.GetRootObject();
 
-    const std::string buffer(std::istreambuf_iterator<char>(in), {});
-    // might throw.
-    const auto& json = nlohmann::json::parse(buffer);
-
-    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(json, "materials", mMaterials, nullptr);
-    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(json, "particles", mParticleEngines, nullptr);
-    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(json, "shapes", mCustomShapes, nullptr);
-    game::LoadResources<EntityClass, EntityClass>(json, "entities", mEntities, &mEntityNameTable);
-    game::LoadResources<SceneClass, SceneClass>(json, "scenes", mScenes, &mSceneNameTable);
-    game::LoadResources<uik::Window, uik::Window>(json, "uis", mWindows, nullptr);
+    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
+    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr);
+    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr);
+    game::LoadResources<EntityClass, EntityClass>(root, "entities", mEntities, &mEntityNameTable);
+    game::LoadResources<SceneClass, SceneClass>(root, "scenes", mScenes, &mSceneNameTable);
+    game::LoadResources<uik::Window, uik::Window>(root, "uis", mWindows, nullptr);
 
     // need to resolve the entity references.
     for (auto& p : mScenes)

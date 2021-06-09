@@ -16,50 +16,44 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
-#include "base/json.h"
 #include "base/hash.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "graphics/bitmap.h"
 
 namespace gfx
 {
 
-void NoiseBitmapGenerator::IntoJson(nlohmann::json& json) const
+void NoiseBitmapGenerator::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "width", mWidth);
-    base::JsonWrite(json, "height", mHeight);
+    data.Write("width", mWidth);
+    data.Write("height", mHeight);
     for (const auto& layer : mLayers)
     {
-        nlohmann::json js;
-        base::JsonWrite(js, "prime0", layer.prime0);
-        base::JsonWrite(js, "prime1", layer.prime1);
-        base::JsonWrite(js, "prime2", layer.prime2);
-        base::JsonWrite(js, "frequency", layer.frequency);
-        base::JsonWrite(js, "amplitude", layer.amplitude);
-        json["layers"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("prime0", layer.prime0);
+        chunk->Write("prime1", layer.prime1);
+        chunk->Write("prime2", layer.prime2);
+        chunk->Write("frequency", layer.frequency);
+        chunk->Write("amplitude", layer.amplitude);
+        data.AppendChunk("layers", std::move(chunk));
     }
 }
 
-bool NoiseBitmapGenerator::FromJson(const nlohmann::json& json)
+bool NoiseBitmapGenerator::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "width", &mWidth) ||
-        !base::JsonReadSafe(json, "height", &mHeight))
+    if (!data.Read("width", &mWidth) ||
+        !data.Read("height", &mHeight))
         return false;
-    if (!json.contains("layers"))
-        return true;
-
-    for (const auto& js : json["layers"].items())
+    for (unsigned i=0; i<data.GetNumChunks("layers"); ++i)
     {
-        const auto& obj = js.value();
+        const auto& chunk = data.GetReadChunk("layers", i);
         Layer layer;
-        if (!base::JsonReadSafe(obj, "prime0", &layer.prime0) ||
-            !base::JsonReadSafe(obj, "prime1", &layer.prime1) ||
-            !base::JsonReadSafe(obj, "prime2", &layer.prime2) ||
-            !base::JsonReadSafe(obj, "frequency", &layer.frequency) ||
-            !base::JsonReadSafe(obj, "amplitude", &layer.amplitude))
+        if (!chunk->Read("prime0", &layer.prime0) ||
+            !chunk->Read("prime1", &layer.prime1) ||
+            !chunk->Read("prime2", &layer.prime2) ||
+            !chunk->Read("frequency", &layer.frequency) ||
+            !chunk->Read("amplitude", &layer.amplitude))
             return false;
         mLayers.push_back(std::move(layer));
     }

@@ -16,13 +16,16 @@
 
 #include "config.h"
 
-#include <string>
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
 
-#include <nlohmann/json.hpp>
+#include <string>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "editor/app/resource.h"
 
 class TestResource0
@@ -49,14 +52,12 @@ public:
         ret.mStringProp = mStringProp;
         return ret;
     }
-    nlohmann::json ToJson() const
+    void IntoJson(data::Writer& data) const
     {
-        nlohmann::json json;
-        base::JsonWrite(json, "id", mClassId);
-        base::JsonWrite(json, "float1", mFloatProp1);
-        base::JsonWrite(json, "float2", mFloatProp2);
-        base::JsonWrite(json, "string", mStringProp);
-        return json;
+        data.Write("id", mClassId);
+        data.Write("float1", mFloatProp1);
+        data.Write("float2", mFloatProp2);
+        data.Write("string", mStringProp);
     }
 private:
     std::string mClassId;
@@ -83,10 +84,8 @@ public:
     {
         return std::make_unique<TestResource1>(*this);
     }
-    nlohmann::json ToJson() const
+    void IntoJson(data::Writer&) const
     {
-        nlohmann::json json;
-        return json;
     }
 private:
     std::string mClassId;

@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp>
-#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <cmath>
@@ -30,6 +29,7 @@
 
 #include "base/assert.h"
 #include "base/types.h"
+#include "data/fwd.h"
 
 namespace game
 {
@@ -105,9 +105,9 @@ namespace game
         size_t GetHash() const;
 
         // Serialize into JSON.
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<ScriptVar> FromJson(const nlohmann::json& json);
+        static std::optional<ScriptVar> FromJson(const data::Reader& data);
     private:
         ScriptVar() = default;
         // name of the variable in the script.

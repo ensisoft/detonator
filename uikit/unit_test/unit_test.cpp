@@ -16,10 +16,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <iostream>
 
@@ -27,6 +23,7 @@
 #include "base/test_float.h"
 #include "base/test_help.h"
 #include "base/assert.h"
+#include "data/json.h"
 #include "uikit/layout.h"
 #include "uikit/painter.h"
 #include "uikit/widget.h"
@@ -128,9 +125,9 @@ public:
     {}
     virtual void SetFlag(Flags flag, bool on_off) override
     { this->flags.set(flag, on_off); }
-    virtual void IntoJson(nlohmann::json& json) const override
+    virtual void IntoJson(data::Writer& json) const override
     {}
-    virtual bool FromJson(const nlohmann::json& json) override
+    virtual bool FromJson(const data::Reader& json) override
     { return true; }
 
     virtual void Paint(const PaintEvent& paint, uik::State& state, uik::Painter& painter) const override
@@ -202,7 +199,7 @@ void unit_test_widget()
     widget.SetPosition(45.0f, 50.0f);
     widget.SetFlag(uik::Widget::Flags::VisibleInGame, false);
 
-    nlohmann::json json;
+    data::JsonObject json;
     widget.IntoJson(json);
     {
         Widget other;
@@ -374,7 +371,8 @@ void unit_test_window()
 
     // serialize.
     {
-        nlohmann::json json = win.ToJson();
+        data::JsonObject json;
+        win.IntoJson(json);
         // for debugging
         //std::cout << json.dump(2);
 
