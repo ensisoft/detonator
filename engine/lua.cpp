@@ -1091,6 +1091,8 @@ void BindGameLib(sol::state& L)
     scene["FindEntityTransform"]      = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]  = &Scene::FindEntityNodeTransform;
     scene["GetTime"]                  = &Scene::GetTime;
+    scene["GetClassName"]             = &Scene::GetClassName;
+    scene["GetClassId"]               = &Scene::GetClassId;
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;

@@ -318,6 +318,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mEntities->menuAction()->setIcon(QIcon("icons:entity.png"));
     mEntities->menuAction()->setText("Entities");
 
+    mState.scene.SetName("My Scene");
     mState.workspace = workspace;
     mState.renderer.SetLoader(workspace);
     mState.view = mUI.tree;
@@ -333,8 +334,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.name, QString("My Scene"));
     SetValue(mUI.ID, mState.scene.GetId());
+    SetValue(mUI.name, mState.scene.GetName());
     setWindowTitle("My Scene");
 
     RebuildMenus();
@@ -357,7 +358,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 
-    SetValue(mUI.name, resource.GetName());
+    SetValue(mUI.name, content->GetName());
     SetValue(mUI.ID, content->GetId());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
@@ -766,6 +767,11 @@ bool SceneWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void SceneWidget::on_name_textChanged(const QString&)
+{
+    mState.scene.SetName(GetValue(mUI.name));
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -793,6 +799,7 @@ void SceneWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
     const QString& name = GetValue(mUI.name);
+    mState.scene.SetName(GetValue(mUI.name));
     app::SceneResource resource(mState.scene, name);
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);

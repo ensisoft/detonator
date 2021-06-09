@@ -76,6 +76,7 @@ namespace gui
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
     private slots:
+        void on_name_textChanged(const QString&);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

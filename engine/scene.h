@@ -322,7 +322,9 @@ namespace game
         // Get the scene class object id.
         std::string GetId() const
         { return mClassId; }
-
+        // Get the human readable name of the class.
+        std::string GetName() const
+        { return mName; }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
@@ -330,6 +332,9 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+
+        void SetName(const std::string& name)
+        { mName = name; }
 
         // Serialize the scene into JSON.
         void IntoJson(data::Writer& data) const;
@@ -348,6 +353,8 @@ namespace game
     private:
         // the class / resource of this class.
         std::string mClassId;
+        // the human readable name of the class.
+        std::string mName;
         // storing by unique ptr so that the pointers
         // given to the render tree don't become invalid
         // when new nodes are added to the scene.
@@ -496,6 +503,11 @@ namespace game
         { return mEntities.size(); }
         double GetTime() const
         { return mCurrentTime; }
+
+        std::string GetClassName() const
+        { return mClass->GetName(); }
+        std::string GetClassId() const
+        { return mClass->GetId(); }
 
         // Get access to the scene class object.
         const SceneClass& GetClass() const
