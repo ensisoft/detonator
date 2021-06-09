@@ -32,6 +32,9 @@
 namespace base {
 namespace detail {
 
+void JsonWriteJson(nlohmann::json& json, const char* name, const nlohmann::json& object)
+{ json[name] = object; }
+
 void JsonWriteJson(nlohmann::json& json, const char* name, nlohmann::json&& object)
 { json[name] = std::move(object); }
 

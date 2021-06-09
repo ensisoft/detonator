@@ -142,6 +142,18 @@ std::ifstream OpenBinaryInputStream(const std::string& filename)
     return in;
 }
 
+std::ofstream OpenBinaryOutputStream(const std::string& filename)
+{
+#if defined(WINDOWS_OS)
+    std::ofstream out(base::FromUtf8(filename), std::ios::out | std::ios::trunc | std::ios::binary);
+#elif defined(POSIX_OS)
+    std::ofstream out(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+#else
+#  error unimplemented function.
+#endif
+    return out;
+}
+
 bool OverwriteTextFile(const std::string& file, const std::string& text)
 {
 #if defined(WINDOWS_OS)

@@ -44,6 +44,7 @@
 namespace base {
 namespace detail {
     // helpers for trying to hide the impl in the translation unit
+    void JsonWriteJson(nlohmann::json& json, const char* name, const nlohmann::json& object);
     void JsonWriteJson(nlohmann::json& json, const char* name, nlohmann::json&& object);
     void JsonWriteJson(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> object);
     bool IsObject(const nlohmann::json& json);
