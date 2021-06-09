@@ -27,9 +27,9 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
-#include "data/writer.h"
 #include "data/reader.h"
 #include "data/json.h"
+#include "uikit/window.h"
 #include "editor/app/ipc.h"
 #include "editor/app/resource.h"
 #include "editor/app/eventlog.h"
@@ -282,6 +282,14 @@ void IPCClient::ReadMessage()
             resource = CreateResource<gfx::PolygonClass>("shapes", json, name);
         else if (type == Resource::Type::ParticleSystem)
             resource = CreateResource<gfx::KinematicsParticleEngineClass>("particles", json, name);
+        else if (type == Resource::Type::Script)
+            resource = CreateResource<Script>("scripts", json, name);
+        else if (type == Resource::Type::AudioFile)
+            resource = CreateResource<AudioFile>("audio_files", json, name);
+        else if (type == Resource::Type::DataFile)
+            resource = CreateResource<DataFile>("data_files", json, name);
+        else if (type == Resource::Type::UI)
+            resource = CreateResource<uik::Window>("uis", json, name);
         else BUG("Unhandled resource type.");
 
         if (!resource)
