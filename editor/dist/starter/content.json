@@ -878,6 +878,7 @@
   "scenes": [
     {
       "id": "iiKBwhkDbI",
+      "name": "My Scene",
       "nodes": [
         {
           "entity": "tqHo3nK0b9",

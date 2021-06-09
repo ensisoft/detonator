@@ -2764,6 +2764,7 @@
   "scenes": [
     {
       "id": "UWF4u1fYHa",
+      "name": "My Scene",
       "nodes": [
         {
           "entity": "diUlEeS5JH",

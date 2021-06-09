@@ -8891,6 +8891,7 @@
   "scenes": [
     {
       "id": "vWm1hXNdOD",
+      "name": "My Scene",
       "nodes": [
         {
           "entity": "HFSA8Yezdr",
