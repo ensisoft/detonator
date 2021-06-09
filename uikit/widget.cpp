@@ -17,8 +17,9 @@
 #include "config.h"
 
 #include "base/assert.h"
-#include "base/json.h"
 #include "base/hash.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
@@ -37,24 +38,24 @@ size_t WidgetBase::GetHash(size_t hash ) const
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
-void WidgetBase::IntoJson(nlohmann::json& json) const
+void WidgetBase::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",       mId);
-    base::JsonWrite(json, "name",     mName);
-    base::JsonWrite(json, "style",    mStyle);
-    base::JsonWrite(json, "position", mPosition);
-    base::JsonWrite(json, "size",     mSize);
-    base::JsonWrite(json, "flags",    mFlags);
+    data.Write("id",       mId);
+    data.Write("name",     mName);
+    data.Write("style",    mStyle);
+    data.Write("position", mPosition);
+    data.Write("size",     mSize);
+    data.Write("flags",    mFlags);
 }
 
-bool WidgetBase::FromJson(const nlohmann::json& json)
+bool WidgetBase::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "id",       &mId) ||
-        !base::JsonReadSafe(json, "name",     &mName) ||
-        !base::JsonReadSafe(json, "style",    &mStyle) ||
-        !base::JsonReadSafe(json, "position", &mPosition) ||
-        !base::JsonReadSafe(json, "size",     &mSize) ||
-        !base::JsonReadSafe(json, "flags",    &mFlags))
+    if (!data.Read("id",       &mId) ||
+        !data.Read("name",     &mName) ||
+        !data.Read("style",    &mStyle) ||
+        !data.Read("position", &mPosition) ||
+        !data.Read("size",     &mSize) ||
+        !data.Read("flags",    &mFlags))
         return false;
     return true;
 }
@@ -96,15 +97,15 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
-void LabelModel::IntoJson(nlohmann::json& json) const
+void LabelModel::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "text", mText);
-    base::JsonWrite(json, "line_height", mLineHeight);
+    data.Write("text", mText);
+    data.Write("line_height", mLineHeight);
 }
-bool LabelModel::FromJson(const nlohmann::json& json)
+bool LabelModel::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "text", &mText) ||
-        !base::JsonReadSafe(json, "line_height", &mLineHeight))
+    if (!data.Read("text", &mText) ||
+        !data.Read("line_height", &mLineHeight))
         return false;
     return true;
 }
@@ -130,14 +131,14 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
-void PushButtonModel::IntoJson(nlohmann::json& json)  const
+void PushButtonModel::IntoJson(data::Writer& data)  const
 {
-    base::JsonWrite(json, "text", mText);
+    data.Write("text", mText);
 }
 
-bool PushButtonModel::FromJson(const nlohmann::json& json)
+bool PushButtonModel::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "text", &mText))
+    if (!data.Read("text", &mText))
         return false;
     return true;
 }
@@ -213,15 +214,15 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
-void CheckBoxModel::IntoJson(nlohmann::json& json) const
+void CheckBoxModel::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "text", mText);
-    base::JsonWrite(json, "checked", mChecked);
+    data.Write("text", mText);
+    data.Write("checked", mChecked);
 }
-bool CheckBoxModel::FromJson(const nlohmann::json& json)
+bool CheckBoxModel::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "text", &mText) ||
-        !base::JsonReadSafe(json, "checked", &mChecked))
+    if (!data.Read("text", &mText) ||
+        !data.Read("checked", &mChecked))
         return false;
     return true;
 }
@@ -269,13 +270,13 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
-void GroupBoxModel::IntoJson(nlohmann::json& json) const
+void GroupBoxModel::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "text", mText);
+    data.Write("text", mText);
 }
-bool GroupBoxModel::FromJson(const nlohmann::json& json)
+bool GroupBoxModel::FromJson(const data::Reader& data)
 {
-    if (!base::JsonReadSafe(json, "text", &mText))
+    if (!data.Read("text", &mText))
         return false;
 
     return true;

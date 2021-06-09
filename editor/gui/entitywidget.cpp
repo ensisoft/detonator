@@ -53,6 +53,7 @@
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
+#include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
@@ -503,9 +504,9 @@ bool EntityWidget::SaveState(Settings& settings) const
     // so let's use the JSON serialization in the entity
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mState.entity->ToJson();
-    const auto& base64 = base64::Encode(json.dump(2));
-    settings.setValue("Entity", "content", base64);
+    data::JsonObject json;
+    mState.entity->IntoJson(json);
+    settings.setValue("Entity", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -527,15 +528,19 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.getValue("Entity", "camera_offset_x", &mState.camera_offset_x);
     settings.getValue("Entity", "camera_offset_y", &mState.camera_offset_y);
     setWindowTitle(mUI.entityName->text());
-
-    // set a flag to *not* adjust the camera on gfx widget init to the middle the of widget.
     mCameraWasLoaded = true;
 
-    const std::string& base64 = settings.getValue("Entity", "content", std::string(""));
-    if (base64.empty())
-        return true;
+    std::string base64;
+    settings.getValue("Entity", "content", &base64);
 
-    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
+    {
+        ERROR("Failed to parse content JSON. '%1'", error);
+        return false;
+    }
+
     auto ret  = game::EntityClass::FromJson(json);
     if (!ret.has_value())
     {
@@ -620,14 +625,13 @@ void EntityWidget::Cut(Clipboard& clipboard)
 {
     if (auto* node = GetCurrentNode())
     {
+        data::JsonObject json;
         const auto& tree = mState.entity->GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {
-            nlohmann::json js;
-            node->IntoJson(js);
-            return js;
-        }, node);
+        tree.IntoJson([](data::Writer& data, const auto* node) {
+            node->IntoJson(data);
+        }, json, node);
         clipboard.SetType("application/json/entity");
-        clipboard.SetText(json.dump(2));
+        clipboard.SetText(json.ToString());
 
         NOTE("Copied JSON to application clipboard.");
         DEBUG("Copied entity node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
@@ -641,14 +645,13 @@ void EntityWidget::Copy(Clipboard& clipboard) const
 {
     if (const auto* node = GetCurrentNode())
     {
+        data::JsonObject json;
         const auto& tree = mState.entity->GetRenderTree();
-        const auto& json = tree.ToJson([](const auto* node) {
-            nlohmann::json js;
-            node->IntoJson(js);
-            return js;
-        }, node);
+        tree.IntoJson([](data::Writer& data, const auto* node) {
+            node->IntoJson(data);
+        }, json, node);
         clipboard.SetType("application/json/entity");
-        clipboard.SetText(json.dump(2));
+        clipboard.SetText(json.ToString());
 
         NOTE("Copied JSON to application clipboard.");
         DEBUG("Copied entity node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
@@ -665,7 +668,8 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         return;
     }
 
-    auto [success, json, _] = base::JsonParse(clipboard.GetText());
+    data::JsonObject json;
+    auto [success, _] = json.ParseString(clipboard.GetText());
     if (!success)
     {
         NOTE("Clipboard JSON parse failed.");
@@ -676,8 +680,8 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     std::vector<std::unique_ptr<game::EntityNodeClass>> nodes;
     bool error = false;
     game::EntityClass::RenderTree tree;
-    tree.FromJson(json, [&nodes, &error](const nlohmann::json& json) {
-        auto ret = game::EntityNodeClass::FromJson(json);
+    tree.FromJson(json, [&nodes, &error](const data::Reader& data) {
+        auto ret = game::EntityNodeClass::FromJson(data);
         if (ret.has_value()) {
             auto node = std::make_unique<game::EntityNodeClass>(ret->Clone());
             node->SetName(base::FormatString("Copy of %1", ret->GetName()));

@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp> // for glm::inverse
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <stack>
@@ -29,6 +28,8 @@
 
 #include "base/assert.h"
 #include "base/format.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "engine/types.h"
 #include "engine/transform.h"
 #include "engine/tree.h"
@@ -56,11 +57,12 @@ public:
         for (const auto& node : nodes)
             mNodeMap[node->GetId()] = node.get();
     }
-    const Node* operator()(const nlohmann::json& json) const
+    const Node* operator()(const data::Reader& data) const
     {
-        if (!json.contains("id")) // root node has no id
-            return nullptr;
-        const std::string& id = json["id"];
+        if (!data.HasValue("id"))
+            return nullptr; // root node has no id
+        std::string id;
+        data.Read("id", &id);
         auto it = mNodeMap.find(id);
         if (it == mNodeMap.end())
         {
@@ -77,15 +79,13 @@ private:
 };
 
 template<typename Node>
-nlohmann::json TreeNodeToJson(const Node* node)
+void TreeNodeToJson(data::Writer& writer, const Node* node)
 {
     // do only shallow serialization of the render tree node,
     // i.e. only record the id so that we can restore the node
     // later on load based on the ID.
-    nlohmann::json ret;
     if (node)
-        ret["id"] = node->GetId();
-    return ret;
+        writer.Write("id", node->GetId());
 }
 
 // Search the tree for a route from parent to assumed child node.

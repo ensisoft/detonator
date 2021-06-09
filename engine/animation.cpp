@@ -17,7 +17,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -25,8 +24,9 @@
 
 #include "base/logging.h"
 #include "base/assert.h"
-#include "base/json.h"
 #include "base/hash.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "engine/animation.h"
 #include "engine/entity.h"
 
@@ -45,24 +45,24 @@ std::size_t SetFlagActuatorClass::GetHash() const
     return hash;
 }
 
-void SetFlagActuatorClass::IntoJson(nlohmann::json& json) const
+void SetFlagActuatorClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",        mId);
-    base::JsonWrite(json, "node",      mNodeId);
-    base::JsonWrite(json, "flag",      mFlagName);
-    base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "duration",  mDuration);
-    base::JsonWrite(json, "action",    mFlagAction);
+    data.Write("id",        mId);
+    data.Write("node",      mNodeId);
+    data.Write("flag",      mFlagName);
+    data.Write("starttime", mStartTime);
+    data.Write("duration",  mDuration);
+    data.Write("action",    mFlagAction);
 }
 
-bool SetFlagActuatorClass::FromJson(const nlohmann::json& json)
+bool SetFlagActuatorClass::FromJson(const data::Reader& data)
 {
-    return base::JsonReadSafe(json, "id",        &mId) &&
-           base::JsonReadSafe(json, "node",      &mNodeId) &&
-           base::JsonReadSafe(json, "flag",      &mFlagName) &&
-           base::JsonReadSafe(json, "starttime", &mStartTime) &&
-           base::JsonReadSafe(json, "duration",  &mDuration) &&
-           base::JsonReadSafe(json, "action",    &mFlagAction);
+    return data.Read("id",        &mId) &&
+           data.Read("node",      &mNodeId) &&
+           data.Read("flag",      &mFlagName) &&
+           data.Read("starttime", &mStartTime) &&
+           data.Read("duration",  &mDuration) &&
+           data.Read("action",    &mFlagAction);
 }
 
 std::size_t KinematicActuatorClass::GetHash() const
@@ -78,26 +78,26 @@ std::size_t KinematicActuatorClass::GetHash() const
     return hash;
 }
 
-void KinematicActuatorClass::IntoJson(nlohmann::json& json) const
+void KinematicActuatorClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",               mId);
-    base::JsonWrite(json, "node",             mNodeId);
-    base::JsonWrite(json, "method",           mInterpolation);
-    base::JsonWrite(json, "starttime",        mStartTime);
-    base::JsonWrite(json, "duration",         mDuration);
-    base::JsonWrite(json, "linear_velocity",  mEndLinearVelocity);
-    base::JsonWrite(json, "angular_velocity", mEndAngularVelocity);
+    data.Write("id",               mId);
+    data.Write("node",             mNodeId);
+    data.Write("method",           mInterpolation);
+    data.Write("starttime",        mStartTime);
+    data.Write("duration",         mDuration);
+    data.Write("linear_velocity",  mEndLinearVelocity);
+    data.Write("angular_velocity", mEndAngularVelocity);
 }
 
-bool KinematicActuatorClass::FromJson(const nlohmann::json &json)
+bool KinematicActuatorClass::FromJson(const data::Reader& data)
 {
-    return base::JsonReadSafe(json, "id",               &mId) &&
-           base::JsonReadSafe(json, "node",             &mNodeId) &&
-           base::JsonReadSafe(json, "method",           &mInterpolation) &&
-           base::JsonReadSafe(json, "starttime",        &mStartTime) &&
-           base::JsonReadSafe(json, "duration",         &mDuration) &&
-           base::JsonReadSafe(json, "linear_velocity",  &mEndLinearVelocity) &&
-           base::JsonReadSafe(json, "angular_velocity", &mEndAngularVelocity);
+    return data.Read("id",               &mId) &&
+           data.Read("node",             &mNodeId) &&
+           data.Read("method",           &mInterpolation) &&
+           data.Read("starttime",        &mStartTime) &&
+           data.Read("duration",         &mDuration) &&
+           data.Read("linear_velocity",  &mEndLinearVelocity) &&
+           data.Read("angular_velocity", &mEndAngularVelocity);
 }
 
 size_t SetValueActuatorClass::GetHash() const
@@ -113,52 +113,52 @@ size_t SetValueActuatorClass::GetHash() const
     return hash;
 }
 
-void SetValueActuatorClass::IntoJson(nlohmann::json& json) const
+void SetValueActuatorClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",        mId);
-    base::JsonWrite(json, "node",      mNodeId);
-    base::JsonWrite(json, "method",    mInterpolation);
-    base::JsonWrite(json, "name",      mParamName);
-    base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "duration",  mDuration);
-    base::JsonWrite(json, "value",     mEndValue);
+    data.Write("id",        mId);
+    data.Write("node",      mNodeId);
+    data.Write("method",    mInterpolation);
+    data.Write("name",      mParamName);
+    data.Write("starttime", mStartTime);
+    data.Write("duration",  mDuration);
+    data.Write("value",     mEndValue);
 }
 
-bool SetValueActuatorClass::FromJson(const nlohmann::json &json)
+bool SetValueActuatorClass::FromJson(const data::Reader& data)
 {
-    return base::JsonReadSafe(json, "id",        &mId) &&
-           base::JsonReadSafe(json, "node",      &mNodeId) &&
-           base::JsonReadSafe(json, "method",    &mInterpolation) &&
-           base::JsonReadSafe(json, "name",      &mParamName) &&
-           base::JsonReadSafe(json, "starttime", &mStartTime) &&
-           base::JsonReadSafe(json, "duration",  &mDuration) &&
-           base::JsonReadSafe(json, "value",     &mEndValue);
+    return data.Read("id",        &mId) &&
+           data.Read("node",      &mNodeId) &&
+           data.Read("method",    &mInterpolation) &&
+           data.Read("name",      &mParamName) &&
+           data.Read("starttime", &mStartTime) &&
+           data.Read("duration",  &mDuration) &&
+           data.Read("value",     &mEndValue);
 }
 
-void TransformActuatorClass::IntoJson(nlohmann::json& json) const
+void TransformActuatorClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",        mId);
-    base::JsonWrite(json, "node",      mNodeId);
-    base::JsonWrite(json, "method",    mInterpolation);
-    base::JsonWrite(json, "starttime", mStartTime);
-    base::JsonWrite(json, "duration",  mDuration);
-    base::JsonWrite(json, "position",  mEndPosition);
-    base::JsonWrite(json, "size",      mEndSize);
-    base::JsonWrite(json, "scale",     mEndScale);
-    base::JsonWrite(json, "rotation",  mEndRotation);
+    data.Write("id",        mId);
+    data.Write("node",      mNodeId);
+    data.Write("method",    mInterpolation);
+    data.Write("starttime", mStartTime);
+    data.Write("duration",  mDuration);
+    data.Write("position",  mEndPosition);
+    data.Write("size",      mEndSize);
+    data.Write("scale",     mEndScale);
+    data.Write("rotation",  mEndRotation);
 }
 
-bool TransformActuatorClass::FromJson(const nlohmann::json& json)
+bool TransformActuatorClass::FromJson(const data::Reader& data)
 {
-    return base::JsonReadSafe(json, "id",        &mId) &&
-           base::JsonReadSafe(json, "node",      &mNodeId) &&
-           base::JsonReadSafe(json, "starttime", &mStartTime) &&
-           base::JsonReadSafe(json, "duration",  &mDuration) &&
-           base::JsonReadSafe(json, "position",  &mEndPosition) &&
-           base::JsonReadSafe(json, "size",      &mEndSize) &&
-           base::JsonReadSafe(json, "scale",     &mEndScale) &&
-           base::JsonReadSafe(json, "rotation",  &mEndRotation) &&
-           base::JsonReadSafe(json, "method",    &mInterpolation);
+    return data.Read("id",        &mId) &&
+           data.Read("node",      &mNodeId) &&
+           data.Read("starttime", &mStartTime) &&
+           data.Read("duration",  &mDuration) &&
+           data.Read("position",  &mEndPosition) &&
+           data.Read("size",      &mEndSize) &&
+           data.Read("scale",     &mEndScale) &&
+           data.Read("rotation",  &mEndRotation) &&
+           data.Read("method",    &mInterpolation);
 }
 
 std::size_t TransformActuatorClass::GetHash() const
@@ -467,41 +467,40 @@ std::size_t AnimationTrackClass::GetHash() const
     return hash;
 }
 
-void AnimationTrackClass::IntoJson(nlohmann::json& json) const
+void AnimationTrackClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "duration", mDuration);
-    base::JsonWrite(json, "delay", mDelay);
-    base::JsonWrite(json, "looping", mLooping);
+    data.Write("id", mId);
+    data.Write("name", mName);
+    data.Write("duration", mDuration);
+    data.Write("delay", mDelay);
+    data.Write("looping", mLooping);
     for (const auto &actuator : mActuators)
     {
-        nlohmann::json js;
-        nlohmann::json act;
-        actuator->IntoJson(act);
-        base::JsonWrite(js, "type", actuator->GetType());
-        base::JsonWrite(js, "actuator", std::move(act));
-        json["actuators"].push_back(std::move(js));
+        auto meta = data.NewWriteChunk();
+        auto act  = data.NewWriteChunk();
+        actuator->IntoJson(*act);
+        meta->Write("type", actuator->GetType());
+        meta->Write("actuator", std::move(act));
+        data.AppendChunk("actuators", std::move(meta));
     }
 }
 
 // static
-std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann::json& json)
+std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const data::Reader& data)
 {
     AnimationTrackClass ret;
-    if (!base::JsonReadSafe(json, "id", &ret.mId) ||
-        !base::JsonReadSafe(json, "name", &ret.mName) ||
-        !base::JsonReadSafe(json, "duration", &ret.mDuration) ||
-        !base::JsonReadSafe(json, "delay", &ret.mDelay) ||
-        !base::JsonReadSafe(json, "looping", &ret.mLooping))
+    if (!data.Read("id", &ret.mId) ||
+        !data.Read("name", &ret.mName) ||
+        !data.Read("duration", &ret.mDuration) ||
+        !data.Read("delay", &ret.mDelay) ||
+        !data.Read("looping", &ret.mLooping))
         return std::nullopt;
-    if (!json.contains("actuators"))
-        return ret;
-    for (const auto& json_actuator : json["actuators"].items())
+
+    for (unsigned i=0; i<data.GetNumChunks("actuators"); ++i)
     {
-        const auto& obj = json_actuator.value();
+        const auto& meta = data.GetReadChunk("actuators", i);
         ActuatorClass::Type type;
-        if (!base::JsonReadSafe(obj, "type", &type))
+        if (!meta->Read("type", &type))
             return std::nullopt;
         std::shared_ptr<ActuatorClass> actuator;
         if (type == ActuatorClass::Type::Transform)
@@ -514,7 +513,8 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const nlohmann:
             actuator = std::make_shared<SetFlagActuatorClass>();
         else BUG("Unknown actuator type.");
 
-        if (!actuator->FromJson(obj["actuator"]))
+        const auto& act = meta->GetReadChunk("actuator");
+        if (!act || !actuator->FromJson(*act))
             return std::nullopt;
         ret.mActuators.push_back(actuator);
     }

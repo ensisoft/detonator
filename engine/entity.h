@@ -22,7 +22,6 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
-#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -36,6 +35,7 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "base/hash.h"
+#include "data/fwd.h"
 #include "graphics/drawable.h"
 #include "engine/tree.h"
 #include "engine/types.h"
@@ -167,9 +167,9 @@ namespace game
         void SetLinearVelocity(const glm::vec2& velocity)
         { mLinearVelocity = velocity; }
 
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<RigidBodyItemClass> FromJson(const nlohmann::json& json);
+        static std::optional<RigidBodyItemClass> FromJson(const data::Reader& data);
     private:
         Simulation mSimulation = Simulation::Dynamic;
         CollisionShape mCollisionShape = CollisionShape::Box;
@@ -268,9 +268,9 @@ namespace game
         base::bitflag<Flags> GetFlags() const
         { return mBitFlags; }
 
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<DrawableItemClass> FromJson(const nlohmann::json& json);
+        static std::optional<DrawableItemClass> FromJson(const data::Reader& data);
     private:
         // item's bit flags.
         base::bitflag<Flags> mBitFlags;
@@ -373,9 +373,9 @@ namespace game
         VerticalTextAlign GetVAlign() const
         { return mVAlign; }
 
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<TextItemClass> FromJson(const nlohmann::json& json);
+        static std::optional<TextItemClass> FromJson(const data::Reader& data);
     private:
         // item's bit flags
         base::bitflag<Flags> mBitFlags;
@@ -721,9 +721,9 @@ namespace game
 
         void Update(float time, float dt);
         // Serialize the node into JSON.
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
         // Load the node's properties from the given JSON object.
-        static std::optional<EntityNodeClass> FromJson(const nlohmann::json& json);
+        static std::optional<EntityNodeClass> FromJson(const data::Reader& data);
         // Make a new unique copy of this node class object
         // with all the same properties but with a different/unique ID.
         EntityNodeClass Clone() const;
@@ -1105,9 +1105,9 @@ namespace game
         { return mScriptVars[index]; }
 
         // Serialize the entity into JSON.
-        nlohmann::json ToJson() const;
+        void IntoJson(data::Writer& data) const;
 
-        static std::optional<EntityClass> FromJson(const nlohmann::json& json);
+        static std::optional<EntityClass> FromJson(const data::Reader& data);
 
         EntityClass Clone() const;
 

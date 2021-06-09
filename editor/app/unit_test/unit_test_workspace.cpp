@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <nlohmann/json.hpp>
 #  include <QCoreApplication>
 #  include <QApplication>
 #  include <QDir>
@@ -30,6 +31,7 @@
 #include "base/test_help.h"
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "editor/app/resource.h"
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"

@@ -18,10 +18,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <vector>
 #include <memory>
 #include <variant>

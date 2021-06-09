@@ -20,7 +20,6 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
-#  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -30,6 +29,7 @@
 #include <unordered_map>
 
 #include "base/bitflag.h"
+#include "data/fwd.h"
 #include "engine/entity.h"
 #include "engine/tree.h"
 #include "engine/types.h"
@@ -124,11 +124,11 @@ namespace game
         SceneNodeClass Clone() const;
 
         // Serialize node into JSON.
-        void IntoJson(nlohmann::json& json) const;
+        void IntoJson(data::Writer& data) const;
 
         // Load node and its properties from JSON. Returns nullopt
         // if there was a problem.
-        static std::optional<SceneNodeClass> FromJson(const nlohmann::json& json);
+        static std::optional<SceneNodeClass> FromJson(const data::Reader& data);
     private:
         // The node's unique class id.
         std::string mClassId;
@@ -331,20 +331,11 @@ namespace game
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
 
-        // Lookup a SceneNodeClass based on the serialized ID in the JSON.
-        SceneNodeClass* TreeNodeFromJson(const nlohmann::json& json);
-
         // Serialize the scene into JSON.
-        nlohmann::json ToJson() const;
-
-        // Serialize a scene node contained in the RenderTree to JSON by doing
-        // a shallow (id only) based serialization.
-        // Later in TreeNodeFromJson when reading back the render tree we simply
-        // look up the node based on the ID.
-        static nlohmann::json TreeNodeToJson(const SceneNodeClass* node);
+        void IntoJson(data::Writer& data) const;
 
         // Load the SceneClass from JSOn. Returns std::nullopt if there was a problem.
-        static std::optional<SceneClass> FromJson(const nlohmann::json& json);
+        static std::optional<SceneClass> FromJson(const data::Reader& data);
 
         // Make a clone of this scene. The cloned scene will
         // have all the same property values as its source

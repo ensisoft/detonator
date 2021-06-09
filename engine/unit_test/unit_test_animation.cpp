@@ -16,10 +16,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <cstddef>
 #include <iostream>
@@ -28,6 +24,7 @@
 #include "base/test_float.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "data/json.h"
 #include "engine/animation.h"
 #include "engine/entity.h"
 
@@ -49,7 +46,7 @@ void unit_test_setflag_actuator()
 
     // serialize
     {
-        nlohmann::json json;
+        data::JsonObject json;
         klass.IntoJson(json);
         game::SetFlagActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
@@ -120,7 +117,7 @@ void unit_test_kinematic_actuator()
 
     // serialize
     {
-        nlohmann::json json;
+        data::JsonObject json;
         klass.IntoJson(json);
         game::KinematicActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
@@ -210,7 +207,7 @@ void unit_test_transform_actuator()
 
     // serialize
     {
-        nlohmann::json json;
+        data::JsonObject json;
         act.IntoJson(json);
         game::TransformActuatorClass copy;
         copy.FromJson(json);
@@ -334,7 +331,7 @@ void unit_test_animation_track()
 
     // serialize
     {
-        nlohmann::json json;
+        data::JsonObject json;
         track.IntoJson(json);
 
         auto ret = game::AnimationTrackClass::FromJson(json);

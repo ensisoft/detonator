@@ -17,7 +17,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <nlohmann/json.hpp>
 #  include <base64/base64.h>
 #include "warnpop.h"
 
@@ -25,6 +24,8 @@
 #include "base/format.h"
 #include "base/hash.h"
 #include "base/json.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -81,76 +82,76 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
     }
     return nullptr;
 }
-void detail::TextureFileSource::IntoJson(nlohmann::json& json) const
+void detail::TextureFileSource::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",   mId);
-    base::JsonWrite(json, "file", mFile);
-    base::JsonWrite(json, "name", mName);
+    data.Write("id",   mId);
+    data.Write("file", mFile);
+    data.Write("name", mName);
 }
-bool detail::TextureFileSource::FromJson(const nlohmann::json& json)
+bool detail::TextureFileSource::FromJson(const data::Reader& data)
 {
-    return base::JsonReadSafe(json, "id",   &mId) &&
-           base::JsonReadSafe(json, "file", &mFile) &&
-           base::JsonReadSafe(json, "name", &mName);
+    return data.Read("id",   &mId) &&
+           data.Read("file", &mFile) &&
+           data.Read("name", &mName);
 }
 
-void detail::TextureBitmapBufferSource::IntoJson(nlohmann::json& json) const
+void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
 {
     const auto depth = mBitmap->GetDepthBits() / 8;
     const auto width = mBitmap->GetWidth();
     const auto height = mBitmap->GetHeight();
     const auto bytes = width * height * depth;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "width", width);
-    base::JsonWrite(json, "height", height);
-    base::JsonWrite(json, "depth", depth);
-    base::JsonWrite(json, "data",
-    base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
+    data.Write("id",     mId);
+    data.Write("name",   mName);
+    data.Write("width",  width);
+    data.Write("height", height);
+    data.Write("depth",  depth);
+    data.Write("data", base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
 }
-bool detail::TextureBitmapBufferSource::FromJson(const nlohmann::json& json)
+bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 {
     unsigned width = 0;
     unsigned height = 0;
     unsigned depth = 0;
     std::string base64;
-    if (!base::JsonReadSafe(json, "id", &mId) ||
-        !base::JsonReadSafe(json, "name", &mName) ||
-        !base::JsonReadSafe(json, "width", &width) ||
-        !base::JsonReadSafe(json, "height", &height) ||
-        !base::JsonReadSafe(json, "depth", &depth) ||
-        !base::JsonReadSafe(json, "data", &base64))
+    if (!data.Read("id",     &mId) ||
+        !data.Read("name",   &mName) ||
+        !data.Read("width",  &width) ||
+        !data.Read("height", &height) ||
+        !data.Read("depth",  &depth) ||
+        !data.Read("data",   &base64))
         return false;
-    const auto& data = base64::Decode(base64);
+    const auto& bits = base64::Decode(base64);
     if (depth == 1)
-        mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*) &data[0], width, height);
+        mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*) &bits[0], width, height);
     else if (depth == 3)
-        mBitmap = std::make_shared<RgbBitmap>((const RGB*) &data[0], width, height);
+        mBitmap = std::make_shared<RgbBitmap>((const RGB*) &bits[0], width, height);
     else if (depth == 4)
-        mBitmap = std::make_shared<RgbaBitmap>((const RGBA*) &data[0], width, height);
+        mBitmap = std::make_shared<RgbaBitmap>((const RGBA*) &bits[0], width, height);
     else return false;
     return true;
 }
 
-void detail::TextureBitmapGeneratorSource::IntoJson(nlohmann::json& json) const
+void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
 {
-    nlohmann::json generator;
-    mGenerator->IntoJson(generator);
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "function", mGenerator->GetFunction());
-    base::JsonWrite(json, "generator", std::move(generator));
+    auto chunk = data.NewWriteChunk();
+    mGenerator->IntoJson(*chunk);
+    data.Write("id", mId);
+    data.Write("name", mName);
+    data.Write("function", mGenerator->GetFunction());
+    data.Write("generator", std::move(chunk));
 }
-bool detail::TextureBitmapGeneratorSource::FromJson(const nlohmann::json& json)
+bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
 {
     IBitmapGenerator::Function function;
-    if (!base::JsonReadSafe(json, "id", &mId) ||
-        !base::JsonReadSafe(json, "name", &mName) ||
-        !base::JsonReadSafe(json, "function", &function))
+    if (!data.Read("id", &mId) ||
+        !data.Read("name", &mName) ||
+        !data.Read("function", &function))
         return false;
     if (function == IBitmapGenerator::Function::Noise)
         mGenerator = std::make_unique<NoiseBitmapGenerator>();
-    if (!mGenerator->FromJson(json["generator"]))
+    const auto& chunk = data.GetReadChunk("generator");
+    if (!chunk || !mGenerator->FromJson(*chunk))
         return false;
     return true;
 }
@@ -173,22 +174,23 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
     return nullptr;
 }
 
-void detail::TextureTextBufferSource::IntoJson(nlohmann::json& json) const
+void detail::TextureTextBufferSource::IntoJson(data::Writer& data) const
 {
-    nlohmann::json buffer;
-    mTextBuffer.IntoJson(buffer);
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "buffer", std::move(buffer));
+    auto chunk = data.NewWriteChunk();
+    mTextBuffer.IntoJson(*chunk);
+    data.Write("id", mId);
+    data.Write("name", mName);
+    data.Write("buffer", std::move(chunk));
 }
-bool detail::TextureTextBufferSource::FromJson(const nlohmann::json& json)
+bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
 {
-    if (!json.contains("buffer") || !json["buffer"].is_object())
+    if (!data.Read("name", &mName) ||
+        !data.Read("id", &mId))
         return false;
-    if (!base::JsonReadSafe(json, "name", &mName) ||
-        !base::JsonReadSafe(json, "id", &mId))
+    const auto& chunk = data.GetReadChunk("buffer");
+    if (!chunk)
         return false;
-    auto ret = TextBuffer::FromJson(json["buffer"]);
+    auto ret = TextBuffer::FromJson(*chunk);
     if (!ret.has_value())
         return false;
     mTextBuffer = std::move(ret.value());
@@ -512,76 +514,75 @@ size_t MaterialClass::GetHash() const
     return hash;
 }
 
-nlohmann::json MaterialClass::ToJson() const
+void MaterialClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "shader_file", mShaderFile);
-    base::JsonWrite(json, "type", mType);
-    base::JsonWrite(json, "color", mBaseColor);
-    base::JsonWrite(json, "surface", mSurfaceType);
-    base::JsonWrite(json, "gamma", mGamma);
-    base::JsonWrite(json, "fps", mFps);
-    base::JsonWrite(json, "blending", mBlendFrames);
-    base::JsonWrite(json, "static", mStatic);
-    base::JsonWrite(json, "texture_min_filter", mMinFilter);
-    base::JsonWrite(json, "texture_mag_filter", mMagFilter);
-    base::JsonWrite(json, "texture_wrap_x", mWrapX);
-    base::JsonWrite(json, "texture_wrap_y", mWrapY);
-    base::JsonWrite(json, "texture_scale", mTextureScale);
-    base::JsonWrite(json, "texture_velocity", mTextureVelocity);
-    base::JsonWrite(json, "color_map0", mColorMap[0]);
-    base::JsonWrite(json, "color_map1", mColorMap[1]);
-    base::JsonWrite(json, "color_map2", mColorMap[2]);
-    base::JsonWrite(json, "color_map3", mColorMap[3]);
-    base::JsonWrite(json, "particle_action", mParticleAction);
+    data.Write("id", mId);
+    data.Write("shader_file", mShaderFile);
+    data.Write("type", mType);
+    data.Write("color", mBaseColor);
+    data.Write("surface", mSurfaceType);
+    data.Write("gamma", mGamma);
+    data.Write("fps", mFps);
+    data.Write("blending", mBlendFrames);
+    data.Write("static", mStatic);
+    data.Write("texture_min_filter", mMinFilter);
+    data.Write("texture_mag_filter", mMagFilter);
+    data.Write("texture_wrap_x", mWrapX);
+    data.Write("texture_wrap_y", mWrapY);
+    data.Write("texture_scale", mTextureScale);
+    data.Write("texture_velocity", mTextureVelocity);
+    data.Write("color_map0", mColorMap[0]);
+    data.Write("color_map1", mColorMap[1]);
+    data.Write("color_map2", mColorMap[2]);
+    data.Write("color_map3", mColorMap[3]);
+    data.Write("particle_action", mParticleAction);
 
     for (const auto& sampler : mTextures)
     {
-        nlohmann::json js, source;
-        sampler.source->IntoJson(source);
-        base::JsonWrite(js, "box", sampler.box);
-        base::JsonWrite(js, "type", sampler.source->GetSourceType());
-        base::JsonWrite(js, "enable_gc", sampler.enable_gc);
-        base::JsonWrite(js, "source", std::move(source));
-        json["samplers"].push_back(js);
+        auto meta = data.NewWriteChunk();
+        auto source = data.NewWriteChunk();
+        sampler.source->IntoJson(*source);
+        meta->Write("box", sampler.box);
+        meta->Write("type", sampler.source->GetSourceType());
+        meta->Write("enable_gc", sampler.enable_gc);
+        meta->Write("source", std::move(source));
+        data.AppendChunk("samplers", std::move(meta));
     }
-    return json;
 }
 // static
-std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& object)
+std::optional<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
 {
     MaterialClass mat;
-    if (!base::JsonReadSafe(object, "id", &mat.mId) ||
-        !base::JsonReadSafe(object, "shader_file", &mat.mShaderFile) ||
-        !base::JsonReadSafe(object, "color", &mat.mBaseColor) ||
-        !base::JsonReadSafe(object, "type", &mat.mType) ||
-        !base::JsonReadSafe(object, "surface", &mat.mSurfaceType) ||
-        !base::JsonReadSafe(object, "gamma", &mat.mGamma) ||
-        !base::JsonReadSafe(object, "fps", &mat.mFps) ||
-        !base::JsonReadSafe(object, "blending", &mat.mBlendFrames) ||
-        !base::JsonReadSafe(object, "static", &mat.mStatic) ||
-        !base::JsonReadSafe(object, "texture_min_filter", &mat.mMinFilter) ||
-        !base::JsonReadSafe(object, "texture_mag_filter", &mat.mMagFilter) ||
-        !base::JsonReadSafe(object, "texture_wrap_x", &mat.mWrapX) ||
-        !base::JsonReadSafe(object, "texture_wrap_y", &mat.mWrapY) ||
-        !base::JsonReadSafe(object, "texture_scale", &mat.mTextureScale) ||
-        !base::JsonReadSafe(object, "texture_velocity", &mat.mTextureVelocity) ||
-        !base::JsonReadSafe(object, "color_map0", &mat.mColorMap[0]) ||
-        !base::JsonReadSafe(object, "color_map1", &mat.mColorMap[1]) ||
-        !base::JsonReadSafe(object, "color_map2", &mat.mColorMap[2]) ||
-        !base::JsonReadSafe(object, "color_map3", &mat.mColorMap[3]) ||
-        !base::JsonReadSafe(object, "particle_action", &mat.mParticleAction))
+    if (!data.Read("id", &mat.mId) ||
+        !data.Read("shader_file", &mat.mShaderFile) ||
+        !data.Read("color", &mat.mBaseColor) ||
+        !data.Read("type", &mat.mType) ||
+        !data.Read("surface", &mat.mSurfaceType) ||
+        !data.Read("gamma", &mat.mGamma) ||
+        !data.Read("fps", &mat.mFps) ||
+        !data.Read("blending", &mat.mBlendFrames) ||
+        !data.Read("static", &mat.mStatic) ||
+        !data.Read("texture_min_filter", &mat.mMinFilter) ||
+        !data.Read("texture_mag_filter", &mat.mMagFilter) ||
+        !data.Read("texture_wrap_x", &mat.mWrapX) ||
+        !data.Read("texture_wrap_y", &mat.mWrapY) ||
+        !data.Read("texture_scale", &mat.mTextureScale) ||
+        !data.Read("texture_velocity", &mat.mTextureVelocity) ||
+        !data.Read("color_map0", &mat.mColorMap[0]) ||
+        !data.Read("color_map1", &mat.mColorMap[1]) ||
+        !data.Read("color_map2", &mat.mColorMap[2]) ||
+        !data.Read("color_map3", &mat.mColorMap[3]) ||
+        !data.Read("particle_action", &mat.mParticleAction))
         return std::nullopt;
 
-    if (!object.contains("samplers"))
-        return mat;
-
-    for (const auto& json_sampler : object["samplers"].items())
+    for (unsigned i=0; i<data.GetNumChunks("samplers"); ++i)
     {
-        const auto& obj = json_sampler.value();
+        const auto& meta = data.GetReadChunk("samplers", i);
         TextureSource::Source type;
-        if (!base::JsonReadSafe(obj, "type", &type))
+        TextureSampler s;
+        if (!meta->Read("type", &type) ||
+            !meta->Read("box", &s.box) ||
+            !meta->Read("enable_gc", &s.enable_gc))
             return std::nullopt;
         std::shared_ptr<TextureSource> source;
         if (type == TextureSource::Source::Filesystem)
@@ -592,14 +593,10 @@ std::optional<MaterialClass> MaterialClass::FromJson(const nlohmann::json& objec
             source = std::make_shared<detail::TextureBitmapBufferSource>();
         else if (type == TextureSource::Source::BitmapGenerator)
             source = std::make_shared<detail::TextureBitmapGeneratorSource>();
-        else return std::nullopt;
+        else BUG("???");
 
-        if (!source->FromJson(obj["source"]))
-            return std::nullopt;
-
-        TextureSampler s;
-        if (!base::JsonReadSafe(obj, "box", &s.box) ||
-            !base::JsonReadSafe(obj, "enable_gc", &s.enable_gc))
+        const auto& chunk = meta->GetReadChunk("source");
+        if (!chunk || !source->FromJson(*chunk))
             return std::nullopt;
 
         s.source = std::move(source);

@@ -16,16 +16,13 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <stack>
 
 #include "base/assert.h"
 #include "base/utility.h"
-#include "base/json.h"
 #include "base/hash.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/painter.h"
@@ -277,31 +274,26 @@ void Window::Style(Painter& painter) const
         painter.ParseStyle(widget->GetId(), style);
     }, mRoot.get());
 }
-nlohmann::json Window::ToJson() const
+void Window::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mId);
-    base::JsonWrite(json, "name", mName);
-    base::JsonWrite(json, "style", mStyle);
-
+    data.Write("id", mId);
+    data.Write("name", mName);
+    data.Write("style", mStyle);
     struct Serializer {
-        static void IntoJson(nlohmann::json& json, const Widget& widget)
+        static void IntoJson(data::Writer& data, const Widget& widget)
         {
-            nlohmann::json js;
-            base::JsonWrite(js, "type", widget.GetType());
-            widget.IntoJson(js);
+            auto chunk = data.NewWriteChunk();
+            chunk->Write("type", widget.GetType());
+            widget.IntoJson(*chunk);
             for (size_t i=0; i<widget.GetNumChildren(); ++i)
             {
                 const auto& child = widget.GetChild(i);
-                IntoJson(js, child);
+                IntoJson(*chunk, child);
             }
-            json["widgets"].push_back(std::move(js));
+            data.AppendChunk("widgets", std::move(chunk));
         }
     };
-
-    Serializer::IntoJson(json, *mRoot);
-
-    return json;
+    Serializer::IntoJson(data, *mRoot);
 }
 
 Window::WidgetAction Window::MousePress(const MouseEvent& mouse, State& state)
@@ -350,35 +342,33 @@ Window& Window::operator=(const Window& other)
 }
 
 // static
-std::optional<Window> Window::FromJson(const nlohmann::json& json)
+std::optional<Window> Window::FromJson(const data::Reader& data)
 {
     Window ret;
-    if (!base::JsonReadSafe(json, "id",   &ret.mId) ||
-        !base::JsonReadSafe(json, "name", &ret.mName) ||
-        !base::JsonReadSafe(json, "style", &ret.mStyle))
+    if (!data.Read("id",   &ret.mId) ||
+        !data.Read("name", &ret.mName) ||
+        !data.Read("style", &ret.mStyle))
         return std::nullopt;
-    else if (!json.contains("widgets") || json["widgets"].empty())
+    if (!data.GetNumChunks("widgets"))
         return std::nullopt;
 
     struct Serializer {
-        static std::unique_ptr<Widget> FromJson(const nlohmann::json& json)
+        static std::unique_ptr<Widget> FromJson(const data::Reader& data)
         {
             Widget::Type type;
-            if (!base::JsonReadSafe(json, "type", &type))
+            if (!data.Read("type", &type))
                 return nullptr;
             auto widget = CreateWidget(type);
-            if (!widget->FromJson(json))
+            if (!widget->FromJson(data))
                 return nullptr;
 
             if (!widget->IsContainer())
                 return widget;
-            else if (!json.contains("widgets"))
-                return widget;
 
-            for (const auto& item : json["widgets"].items())
+            for (unsigned i=0; i<data.GetNumChunks("widgets"); ++i)
             {
-                const auto& json = item.value();
-                auto ret = FromJson(json);
+                const auto& chunk = data.GetReadChunk("widgets", i);
+                auto ret = FromJson(*chunk);
                 if (ret == nullptr)
                     return nullptr;
                 widget->AddChild(std::move(ret));
@@ -400,8 +390,11 @@ std::optional<Window> Window::FromJson(const nlohmann::json& json)
             else return nullptr;
         }
     };
+    const auto& chunk = data.GetReadChunk("widgets", 0);
+    if (!chunk)
+        return std::nullopt;
 
-    auto root = Serializer::FromJson(json["widgets"][0]);
+    auto root = Serializer::FromJson(*chunk);
     if (root == nullptr)
         return std::nullopt;
     else if (root->GetType() != Widget::Type::Form)

@@ -347,7 +347,7 @@ target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(Editor EngineLib UiLib GfxLib BaseLib)
+target_link_libraries(Editor EngineLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(Editor ${CONAN_LIBS})
 install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
@@ -379,7 +379,7 @@ target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/thi
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(EditorGameHost EngineLib UiLib GfxLib BaseLib)
+target_link_libraries(EditorGameHost EngineLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(EditorGameHost ${CONAN_LIBS})
 install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
@@ -432,7 +432,7 @@ install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
 # per the configuration. The game logic will be loaded from a .so or .dll
 add_executable(GameMain engine/main/main.cpp)
 target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameMain BaseLib wdk_system wdk_desktop_gl)
+target_link_libraries(GameMain DataLib BaseLib wdk_system wdk_desktop_gl)
 if (UNIX)
     target_link_libraries(GameMain dl pthread)
 endif()
@@ -446,7 +446,7 @@ add_library(GameEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameEngine PRIVATE GfxLib EngineLib UiLib BaseLib)
+target_link_libraries(GameEngine PRIVATE GfxLib EngineLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
@@ -462,7 +462,7 @@ add_library(TestEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(TestEngine PRIVATE BaseLib GfxLib EngineLib UiLib)
+target_link_libraries(TestEngine PRIVATE GfxLib EngineLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
@@ -519,9 +519,9 @@ target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR
 target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(unit_test_ipc EngineLib UiLib GfxLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets BaseLib)
-target_link_libraries(unit_test_workspace EngineLib UiLib GfxLib BaseLib)
+target_link_libraries(unit_test_ipc EngineLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets DataLib BaseLib)
+target_link_libraries(unit_test_workspace EngineLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 
 # engine tests
@@ -554,11 +554,12 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
-target_link_libraries(unit_test_entity   BaseLib)
-target_link_libraries(unit_test_scene    BaseLib)
-target_link_libraries(unit_test_lua      BaseLib UiLib wdk_system ${CONAN_LIBS})
-target_link_libraries(unit_test_settings BaseLib)
-target_link_libraries(unit_test_anim     BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_entity   DataLib BaseLib)
+target_link_libraries(unit_test_scene    DataLib BaseLib)
+target_link_libraries(unit_test_lua      UiLib   DataLib BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_settings DataLib BaseLib)
+target_link_libraries(unit_test_anim     DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_tree     DataLib BaseLib)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
@@ -579,7 +580,7 @@ add_executable(unit_test_uikit
         uikit/widget.cpp
         uikit/window.cpp)
 target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/uikit/unit_test")
-target_link_libraries(unit_test_uikit BaseLib)
+target_link_libraries(unit_test_uikit DataLib BaseLib)
 add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 
 # base tests
@@ -624,13 +625,13 @@ add_executable(unit_test_material graphics/unit_test/unit_test_material.cpp)
 add_executable(unit_test_drawable graphics/unit_test/unit_test_drawable.cpp)
 add_executable(unit_test_drawing graphics/unit_test/unit_test_drawing.cpp)
 
-target_link_libraries(unit_test_image    GfxLibTesting BaseLib)
-target_link_libraries(unit_test_graphics GfxLibTesting BaseLib)
-target_link_libraries(unit_test_device   GfxLibTesting BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
-target_link_libraries(unit_test_material GfxLibTesting BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_drawable GfxLibTesting BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_bitmap   GfxLibTesting BaseLib)
-target_link_libraries(unit_test_drawing  GfxLibTesting BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_image    GfxLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_graphics GfxLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_device   GfxLibTesting DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_material GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_drawable GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_bitmap   GfxLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_drawing  GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
 
 add_test(NAME unit_test_drawable COMMAND unit_test_drawable)
 add_test(NAME unit_test_drawing  COMMAND unit_test_drawing)

@@ -55,6 +55,8 @@
 #include "graphics/color4f.h"
 #include "engine/ui.h"
 #include "engine/data.h"
+#include "data/json.h"
+#include "base/json.h"
 
 namespace {
 
@@ -1123,26 +1125,23 @@ QString Workspace::MapFileToFilesystem(const std::string& uri) const
 }
 
 template<typename ClassType>
-void LoadResources(const std::string& array,
-                   const nlohmann::json& json,
+void LoadResources(const char* type,
+                   const data::Reader& data,
                    std::vector<std::unique_ptr<Resource>>& vector)
 {
-    DEBUG("Loading %1", array);
-
-    if (!json.contains(array))
-        return;
-    for (const auto& object : json[array].items())
+    DEBUG("Loading %1", type);
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        const auto& value = object.value();
+        const auto& chunk = data.GetReadChunk(type, i);
         std::string name;
         std::string id;
-        if (!base::JsonReadSafe(value, "resource_name", &name) ||
-            !base::JsonReadSafe(value, "resource_id", &id))
+        if (!chunk->Read("resource_name", &name) ||
+            !chunk->Read("resource_id", &id))
         {
             ERROR("Unexpected JSON. Maybe old workspace version?");
             continue;
         }
-        std::optional<ClassType> ret = ClassType::FromJson(value);
+        std::optional<ClassType> ret = ClassType::FromJson(*chunk);
         if (!ret.has_value())
         {
             ERROR("Failed to load resource '%1'", name);
@@ -1155,48 +1154,25 @@ void LoadResources(const std::string& array,
 
 bool Workspace::LoadContent(const QString& filename)
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        ERROR("Failed to open file: '%1'", filename);
-        return false;
-    }
-    const auto& buff = file.readAll(); // QByteArray
-    if (buff.isEmpty())
-    {
-        // odd but not necessarily wrong. Could be an empty workspace
-        // without any content.
-        WARN("No workspace content found in file: '%1'", filename);
-        return true;
-    }
-
-    // Warning about nlohmann::json
-    // !! SEMANTICS CHANGE BETWEEN DEBUG AND RELEASE BUILD !!
-    //
-    // Trying to access an attribute using operator[] does not check
-    // whether a given key exists. instead it uses a standard CRT assert
-    // which then changes semantics depending whether NDEBUG is defined
-    // or not.
-
-    const auto* beg  = buff.data();
-    const auto* end  = buff.data() + buff.size();
-    auto [ok, json, error] = base::JsonParse(beg, end);
+    data::JsonFile file;
+    const auto [ok, error] = file.Load(app::ToUtf8(filename));
     if (!ok)
     {
-        ERROR("Failed to parse JSON file: '%1'", filename);
-        ERROR("JSON parse error: '%1'", error);
+        ERROR("Failed to load JSON content file '%1'", filename);
+        ERROR("JSON file load error '%1'", error);
         return false;
     }
+    data::JsonObject root = file.GetRootObject();
 
-    LoadResources<gfx::MaterialClass>("materials", json, mResources);
-    LoadResources<gfx::KinematicsParticleEngineClass>("particles", json, mResources);
-    LoadResources<gfx::PolygonClass>("shapes", json, mResources);
-    LoadResources<game::EntityClass>("entities", json, mResources);
-    LoadResources<game::SceneClass>("scenes", json, mResources);
-    LoadResources<Script>("scripts", json, mResources);
-    LoadResources<DataFile>("data_files", json, mResources);
-    LoadResources<AudioFile>("audio_files", json, mResources);
-    LoadResources<uik::Window>("uis", json, mResources);
+    LoadResources<gfx::MaterialClass>("materials", root, mResources);
+    LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources);
+    LoadResources<gfx::PolygonClass>("shapes", root, mResources);
+    LoadResources<game::EntityClass>("entities", root, mResources);
+    LoadResources<game::SceneClass>("scenes", root, mResources);
+    LoadResources<Script>("scripts", root, mResources);
+    LoadResources<DataFile>("data_files", root, mResources);
+    LoadResources<AudioFile>("audio_files", root, mResources);
+    LoadResources<uik::Window>("uis", root, mResources);
 
     // setup an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
@@ -1216,14 +1192,7 @@ bool Workspace::LoadContent(const QString& filename)
 
 bool Workspace::SaveContent(const QString& filename) const
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        ERROR("Failed to open file: '%1'", filename);
-        return false;
-    }
-
-    nlohmann::json json;
+    data::JsonObject root;
     for (const auto& resource : mResources)
     {
         // skip persisting primitive resources since they're always
@@ -1232,24 +1201,16 @@ bool Workspace::SaveContent(const QString& filename) const
         if (resource->IsPrimitive())
             continue;
         // serialize the user defined resource.
-        resource->Serialize(json);
+        resource->Serialize(root);
     }
-
-    if (json.is_null())
+    data::JsonFile file;
+    file.SetRootObject(root);
+    const auto [ok, error] = file.Save(app::ToUtf8(filename));
+    if (!ok)
     {
-        WARN("Workspace contains no actual data. Skipped saving.");
-        return true;
-    }
-
-    const auto& str = json.dump(2);
-    if (file.write(&str[0], str.size()) == -1)
-    {
-        ERROR("File write failed. '%1'", filename);
+        ERROR("Failed to save JSON content file '%1'", filename);
         return false;
     }
-    file.flush();
-    file.close();
-
     INFO("Saved workspace content in '%1'", filename);
     return true;
 }
@@ -2113,16 +2074,16 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
 
         // finally serialize
-        nlohmann::json json;
-        json["json_version"] = 1;
-        json["made_with_app"] = APP_TITLE;
-        json["made_with_ver"] = APP_VERSION;
+        data::JsonObject json;
+        json.Write("json_version", 1);
+        json.Write("made_with_app", APP_TITLE);
+        json.Write("made_with_ver", APP_VERSION);
         for (const auto &resource : mutable_copies)
         {
             resource->Serialize(json);
         }
 
-        const auto &str = json.dump(2);
+        const auto &str = json.ToString();
         if (json_file.write(&str[0], str.size()) == -1)
         {
             ERROR("Failed to write JSON file: '%1' %2", json_filename, json_file.error());

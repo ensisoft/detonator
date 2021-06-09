@@ -28,6 +28,7 @@
 #include <unordered_set>
 
 #include "base/math.h"
+#include "data/json.h"
 #include "base/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
@@ -350,16 +351,15 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
 
     // use the entity JSON serialization to save the state.
     {
-        const auto& json = mState.entity->ToJson();
-        const auto& base64 = base64::Encode(json.dump(2));
-        settings.setValue("TrackWidget", "entity", base64);
+        data::JsonObject json;
+        mState.entity->IntoJson(json);
+        settings.setValue("TrackWidget", "entity", base64::Encode(json.ToString()));
     }
 
     {
-        nlohmann::json json;
+        data::JsonObject json;
         mState.track->IntoJson(json);
-        const auto& base64 = base64::Encode(json.dump(2));
-        settings.setValue("TrackWidget", "track", base64);
+        settings.setValue("TrackWidget", "track", base64::Encode(json.ToString()));
     }
     return true;
 }
@@ -410,12 +410,19 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
         mState.timelines.push_back(std::move(tl));
     }
 
-
-
     // try to restore the shared animation class object
     {
-        const auto& base64 = settings.getValue("TrackWidget", "entity", std::string(""));
-        const auto& json = nlohmann::json::parse(base64::Decode(base64));
+        std::string base64;
+        settings.getValue("TrackWidget", "entity", &base64);
+
+        data::JsonObject json;
+        auto [ok, error] = json.ParseString(base64::Decode(base64));
+        if (!ok)
+        {
+            ERROR("Failed to parse content JSON. '%1'", error);
+            return false;
+        }
+
         auto ret = game::EntityClass::FromJson(json);
         if (!ret.has_value())
         {
@@ -434,8 +441,16 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     // restore the track state.
     {
-        const auto& base64 = settings.getValue("TrackWidget", "track", std::string(""));
-        const auto& json = nlohmann::json::parse(base64::Decode(base64));
+        std::string base64;
+        settings.getValue("TrackWidget", "track", &base64);
+
+        data::JsonObject json;
+        auto [ok, error] = json.ParseString(base64::Decode(base64));
+        if (!ok)
+        {
+            ERROR("Failed to parse content JSON. '%1'", error);
+            return false;
+        }
         auto ret = game::AnimationTrackClass::FromJson(json);
         if (!ret.has_value())
         {

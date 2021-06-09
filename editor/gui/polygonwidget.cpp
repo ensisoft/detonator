@@ -23,6 +23,7 @@
 #include "warnpop.h"
 
 #include "base/math.h"
+#include "data/json.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/utility.h"
@@ -173,9 +174,9 @@ bool ShapeWidget::SaveState(Settings& settings) const
     // so let's use the JSON serialization in the animation
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
-    const auto& json = mPolygon.ToJson();
-    const auto& base64 = base64::Encode(json.dump(2));
-    settings.setValue("Polygon", "content", base64);
+    data::JsonObject json;
+    mPolygon.IntoJson(json);
+    settings.setValue("Polygon", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool ShapeWidget::LoadState(const Settings& settings)
@@ -189,11 +190,17 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.loadWidget("Polygon", mUI.widget);
     setWindowTitle(mUI.name->text());
 
-    const std::string& base64 = settings.getValue("Polygon", "content", std::string(""));
-    if (base64.empty())
-        return true;
+    std::string base64;
+    settings.getValue("Polygon", "content", &base64);
 
-    const auto& json = nlohmann::json::parse(base64::Decode(base64));
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
+    {
+        ERROR("Failed to parse content JSON. '%1'", error);
+        return false;
+    }
+
     auto ret  = gfx::PolygonClass::FromJson(json);
     if (!ret.has_value())
     {

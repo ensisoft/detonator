@@ -16,17 +16,14 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <unordered_set>
 #include <stack>
 
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/hash.h"
-#include "base/json.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "engine/scene.h"
 #include "engine/entity.h"
 #include "engine/treeop.h"
@@ -67,34 +64,34 @@ SceneNodeClass SceneNodeClass::Clone() const
     return copy;
 }
 
-void SceneNodeClass::IntoJson(nlohmann::json& json) const
+void SceneNodeClass::IntoJson(data::Writer& data) const
 {
-    base::JsonWrite(json, "id",       mClassId);
-    base::JsonWrite(json, "entity",   mEntityId);
-    base::JsonWrite(json, "name",     mName);
-    base::JsonWrite(json, "position", mPosition);
-    base::JsonWrite(json, "scale",    mScale);
-    base::JsonWrite(json, "rotation", mRotation);
-    base::JsonWrite(json, "flags",    mFlags);
-    base::JsonWrite(json, "layer",    mLayer);
-    base::JsonWrite(json, "parent_render_tree_node", mParentRenderTreeNodeId);
-    base::JsonWrite(json, "idle_animation_id", mIdleAnimationId);
+    data.Write("id",       mClassId);
+    data.Write("entity",   mEntityId);
+    data.Write("name",     mName);
+    data.Write("position", mPosition);
+    data.Write("scale",    mScale);
+    data.Write("rotation", mRotation);
+    data.Write("flags",    mFlags);
+    data.Write("layer",    mLayer);
+    data.Write("parent_render_tree_node", mParentRenderTreeNodeId);
+    data.Write("idle_animation_id", mIdleAnimationId);
 }
 
 // static
-std::optional<SceneNodeClass> SceneNodeClass::FromJson(const nlohmann::json& json)
+std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
 {
     SceneNodeClass ret;
-    if (!base::JsonReadSafe(json, "id",       &ret.mClassId)||
-        !base::JsonReadSafe(json, "entity",   &ret.mEntityId) ||
-        !base::JsonReadSafe(json, "name",     &ret.mName) ||
-        !base::JsonReadSafe(json, "position", &ret.mPosition) ||
-        !base::JsonReadSafe(json, "scale",    &ret.mScale) ||
-        !base::JsonReadSafe(json, "rotation", &ret.mRotation) ||
-        !base::JsonReadSafe(json, "flags",    &ret.mFlags) ||
-        !base::JsonReadSafe(json, "layer",    &ret.mLayer) ||
-        !base::JsonReadSafe(json, "parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
-        !base::JsonReadSafe(json, "idle_animation_id", &ret.mIdleAnimationId))
+    if (!data.Read("id",       &ret.mClassId)||
+        !data.Read("entity",   &ret.mEntityId) ||
+        !data.Read("name",     &ret.mName) ||
+        !data.Read("position", &ret.mPosition) ||
+        !data.Read("scale",    &ret.mScale) ||
+        !data.Read("rotation", &ret.mRotation) ||
+        !data.Read("flags",    &ret.mFlags) ||
+        !data.Read("layer",    &ret.mLayer) ||
+        !data.Read("parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
+        !data.Read("idle_animation_id", &ret.mIdleAnimationId))
         return std::nullopt;
     return ret;
 }
@@ -481,54 +478,53 @@ size_t SceneClass::GetHash() const
     return hash;
 }
 
-nlohmann::json SceneClass::ToJson() const
+void SceneClass::IntoJson(data::Writer& data) const
 {
-    nlohmann::json json;
-    base::JsonWrite(json, "id", mClassId);
+    data.Write("id", mClassId);
     for (const auto& node : mNodes)
     {
-        nlohmann::json js;
-        node->IntoJson(js);
-        json["nodes"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        node->IntoJson(*chunk);
+        data.AppendChunk("nodes", std::move(chunk));
     }
     for (const auto& var : mScriptVars)
     {
-        nlohmann::json js;
-        var.IntoJson(js);
-        json["vars"].push_back(std::move(js));
+        auto chunk = data.NewWriteChunk();
+        var.IntoJson(*chunk);
+        data.AppendChunk("vars", std::move(chunk));
     }
-    json["render_tree"] = mRenderTree.ToJson(&game::TreeNodeToJson<SceneNodeClass>);
-    return json;
+    auto chunk = data.NewWriteChunk();
+    mRenderTree.IntoJson(&game::TreeNodeToJson<SceneNodeClass>, *chunk);
+    data.Write("render_tree", std::move(chunk));
 }
 
 // static
-std::optional<SceneClass> SceneClass::FromJson(const nlohmann::json& json)
+std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
 {
     SceneClass ret;
-    if (!base::JsonReadSafe(json, "id", &ret.mClassId))
+    if (!data.Read("id", &ret.mClassId))
         return std::nullopt;
-    if (json.contains("nodes"))
+    for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
-        for (const auto& json : json["nodes"].items())
-        {
-            std::optional<SceneNodeClass> node = SceneNodeClass::FromJson(json.value());
-            if (!node.has_value())
-                return std::nullopt;
-            ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
-        }
-    }
-    if (json.contains("vars"))
-    {
-        for (const auto& js : json["vars"].items())
-        {
-            std::optional<ScriptVar> var = ScriptVar::FromJson(js.value());
-            if (!var.has_value())
-                return std::nullopt;
-            ret.mScriptVars.push_back(std::move(var.value()));
-        }
-    }
+        const auto& chunk = data.GetReadChunk("nodes", i);
+        std::optional<SceneNodeClass> node = SceneNodeClass::FromJson(*chunk);
+        if (!node.has_value())
+            return std::nullopt;
+        ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
 
-    ret.mRenderTree.FromJson(json["render_tree"], game::TreeNodeFromJson(ret.mNodes));
+    }
+    for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("vars", i);
+        std::optional<ScriptVar> var = ScriptVar::FromJson(*chunk);
+        if (!var.has_value())
+            return std::nullopt;
+        ret.mScriptVars.push_back(std::move(var.value()));
+    }
+    const auto& chunk = data.GetReadChunk("render_tree");
+    if (!chunk)
+        return std::nullopt;
+    ret.mRenderTree.FromJson(*chunk,  game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
 SceneClass SceneClass::Clone() const

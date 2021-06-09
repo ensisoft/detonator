@@ -16,10 +16,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <string>
 #include <cstddef>
 #include <iostream>
@@ -29,6 +25,7 @@
 #include "base/test_help.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "data/json.h"
 #include "graphics/color4f.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -144,7 +141,7 @@ void unit_test_entity_node()
 
     // to/from json
     {
-        nlohmann::json json;
+        data::JsonObject json;
         node.IntoJson(json);
         auto ret = game::EntityNodeClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
@@ -320,7 +317,10 @@ void unit_test_entity_class()
 
     // serialization
     {
-        auto ret = game::EntityClass::FromJson(entity.ToJson());
+        data::JsonObject json;
+        entity.IntoJson(json);
+        std::cout << json.ToString();
+        auto ret = game::EntityClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetName() == "TestEntityClass");
         TEST_REQUIRE(ret->GetNumNodes() == 3);

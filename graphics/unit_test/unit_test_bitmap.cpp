@@ -16,15 +16,12 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#include "warnpop.h"
-
 #include <cmath>
 #include <iostream>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "data/json.h"
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
 
@@ -358,7 +355,7 @@ int test_main(int argc, char* argv[])
         auto bitmap = gen.Generate();
         WritePNG(*bitmap, "noise.png");
 
-        nlohmann::json json;
+        data::JsonObject json;
         gen.IntoJson(json);
         gfx::NoiseBitmapGenerator other;
         other.FromJson(json);
