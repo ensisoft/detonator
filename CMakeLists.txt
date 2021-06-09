@@ -144,6 +144,8 @@ add_library(BaseLib
     base/logging.cpp
     base/json.cpp
     base/utility.cpp)
+add_library(DataLib
+    data/json.cpp)
 add_library(GfxLib
     graphics/bitmap.cpp
     graphics/drawing.cpp
@@ -171,10 +173,12 @@ add_library(UiLib
     uikit/window.cpp)
 
 target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(DataLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(GfxLib    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(UiLib     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 if (UNIX)
+    target_compile_options(DataLib   PRIVATE -fPIC)
     target_compile_options(BaseLib   PRIVATE -fPIC)
     target_compile_options(GfxLib    PRIVATE -fPIC)
     target_compile_options(EngineLib PRIVATE -fPIC)

@@ -63,6 +63,7 @@ std::wstring Widen(const std::string& str);
 std::string JoinPath(const std::string& a, const std::string& b);
 
 std::ifstream OpenBinaryInputStream(const std::string& filename);
+std::ofstream OpenBinaryOutputStream(const std::string& filename);
 bool OverwriteTextFile(const std::string& file, const std::string& text);
 bool FileExists(const std::string& filename);
 
