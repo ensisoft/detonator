@@ -11,6 +11,12 @@
 local tick_count = 0
 local ship_velo_increment = 0
 
+States = {
+    Menu = 1,
+    Play = 2
+}
+State = States.Menu
+
 function SpawnEnemy(x, y, velocity)
     local ship = ClassLib:FindEntityClassByName('Ship2')
     local args = game.EntityArgs:new()
@@ -97,27 +103,47 @@ end
 -- the initial state machine. I.e. for example find a menu
 -- object and ask for the game to show the menu.
 function LoadGame()
-    local scene = ClassLib:FindSceneClassByName('My Scene')
+    local scene = ClassLib:FindSceneClassByName('Menu')
+    local menu  = ClassLib:FindUIByName('Menu')
     Game:Play(scene)
-
+    Game:OpenUI(menu)
     -- set the viewport size and position
-    local viewport = base.FRect:new(-600.0, -400.0, 1200, 800.0)
-    Game:SetViewport(viewport)
+    Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
 end
 
 function BeginPlay(scene)
-    ship_velo_increment = 1.0
-    tick_count          = 0
-    math.randomseed(6634)
+    Game:DebugPrint('BeginPlay ' .. scene:GetClassName())
+    if scene:GetClassName() == 'Menu' then
+        State = States.Menu
+    elseif scene:GetClassName() == 'Game' then
+        ship_velo_increment = 1.0
+        tick_count          = 0
+        math.randomseed(6634)
+        State = States.Play
+    end
 end
 
 function EndPlay(scene)
+    Game:DebugPrint('EndPlay' .. scene:GetClassName())
+    if scene:GetClassName() == 'Game' then
+        local scene = ClassLib:FindSceneClassByName('Menu')
+        local menu  = ClassLib:FindUIByName('Menu')
+        Game:Play(scene)
+        Game:OpenUI(menu)
+        State = States.Menu
+    end
 end
 
 function Tick(game_time, dt)
+    -- spawn a space rock even in the menu.
+    SpawnSpaceRock()
+    if State == States.Menu then
+        return
+    end
+
     if math.fmod(tick_count, 3) == 0 then
         local formation = math.random(0, 3)
-        Game:DebugPrint('Spawning: ' .. tostring(formation))
+        --Game:DebugPrint('Spawning: ' .. tostring(formation))
         if formation == 0 then
             SpawnRow()
         elseif formation == 1 then
@@ -132,19 +158,43 @@ function Tick(game_time, dt)
     end
     -- use the tick count to throttle spawning of objects
     tick_count = tick_count + 1
-
-    SpawnSpaceRock()
 end
 
 function Update(game_time, dt)
 end
 
 
-
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
-        local scene = ClassLib:FindSceneClassByName('My Scene')
+        if State == States.Play then
+            base.debug('Stop game')
+            Game:Stop()
+        elseif State == States.Menu then
+            Game:Quit(0)
+        end
+    elseif symbol == wdk.Keys.Space then 
+        if State == States.Menu then 
+            Game:CloseUI(0)
+            Game:Play(ClassLib:FindSceneClassByName('Game'))
+        end
+    end
+end
+
+function OnUIOpen(ui)
+    Game:DebugPrint(ui:GetName() .. ' is open')
+end
+
+function OnUIClose(ui, result)
+    Game:DebugPrint(ui:GetName() .. ' is closed')
+end
+
+function OnUIAction(action)
+    if action.name == 'exit' then
+        Game:Quit(0)
+    elseif action.name == 'play' then
+        local scene = ClassLib:FindSceneClassByName('Game')
+        Game:CloseUI(0)
         Game:Play(scene)
     end
 end

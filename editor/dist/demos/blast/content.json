@@ -787,14 +787,14 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rotation": -1.5705559253692627,
+          "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 498.1338806152344,
-            "y": 597.6924438476563
+            "x": 600.0,
+            "y": 500.0
           }
         }
       ],
@@ -2605,8 +2605,8 @@
         "y": 1.0
       },
       "texture_velocity": {
-        "x": 0.10000000149011612,
-        "y": 0.0,
+        "x": 0.0,
+        "y": -0.10000000149011612,
         "z": 0.0
       },
       "texture_wrap_x": "Repeat",
@@ -2724,6 +2724,239 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Color"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 0.8905165195465088,
+        "g": 0.6069123148918152,
+        "r": 0.05021744221448898
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "Kb5sHrP5bL",
+      "particle_action": "None",
+      "resource_id": "Kb5sHrP5bL",
+      "resource_name": "Blast",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "buffer": {
+              "height": 79,
+              "horizontal_alignment": "AlignCenter",
+              "texts": [
+                {
+                  "font_file": "ws://fonts/MAXI_L_S.TTF",
+                  "font_size": 78,
+                  "line_height": 1.0,
+                  "string": "Blast!",
+                  "underline": false
+                }
+              ],
+              "vertical_alignment": "AlignCenter",
+              "width": 488
+            },
+            "id": "a4B50mYeff",
+            "name": "TextBuffer"
+          },
+          "type": "TextBuffer"
+        }
+      ],
+      "shader_file": "ws://shaders/es2/text.glsl",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "RKmQZx8H1s",
+      "particle_action": "None",
+      "resource_id": "RKmQZx8H1s",
+      "resource_name": "Play",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Menu Screen/play_buttons.png",
+            "id": "7aCInBoRoY",
+            "name": "play_buttons"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": false,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 0.20000000298023224,
+      "gamma": 1.0,
+      "id": "M0ePA9uzA5",
+      "particle_action": "None",
+      "resource_id": "M0ePA9uzA5",
+      "resource_name": "Exit",
+      "samplers": [
+        {
+          "box": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "enable_gc": false,
+          "source": {
+            "file": "ws://textures/Menu Screen/exit_buttons.png",
+            "id": "rTqW20d2ri",
+            "name": "exit_buttons"
+          },
+          "type": "Filesystem"
+        }
+      ],
+      "shader_file": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "particles": [
@@ -2764,7 +2997,7 @@
   "scenes": [
     {
       "id": "UWF4u1fYHa",
-      "name": "My Scene",
+      "name": "Game",
       "nodes": [
         {
           "entity": "diUlEeS5JH",
@@ -2829,7 +3062,48 @@
         "node": null
       },
       "resource_id": "UWF4u1fYHa",
-      "resource_name": "My Scene"
+      "resource_name": "Game"
+    },
+    {
+      "id": "Z2zrRug3HP",
+      "name": "Menu",
+      "nodes": [
+        {
+          "entity": "7NAD3QgFlq",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "WYKWrRK5Fj",
+          "idle_animation_id": "",
+          "layer": -2,
+          "name": "Background",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 2.0,
+            "y": 2.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "WYKWrRK5Fj"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "Z2zrRug3HP",
+      "resource_name": "Menu"
     }
   ],
   "scripts": [
@@ -2943,6 +3217,183 @@
           "t": 0.3793363571166992,
           "x": 0.5,
           "y": -0.3793363571166992
+        }
+      ]
+    }
+  ],
+  "uis": [
+    {
+      "id": "T38qa8wN2K",
+      "name": "Menu",
+      "resource_id": "T38qa8wN2K",
+      "resource_name": "Menu",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "flags": {
+            "Enabled": true,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "dkzxQN4CYv",
+          "name": "Form",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "size": {
+            "h": 800.0,
+            "w": 1200.0
+          },
+          "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"}]}",
+          "type": "Form",
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "yxS9Nl10Ob",
+              "line_height": 1.0,
+              "name": "Label_1",
+              "position": {
+                "x": 300.0,
+                "y": 100.0
+              },
+              "size": {
+                "h": 180.0,
+                "w": 600.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Kb5sHrP5bL\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "RTLiMmUoN2",
+              "name": "play",
+              "position": {
+                "x": 417.0,
+                "y": 526.0
+              },
+              "size": {
+                "h": 150.0,
+                "w": 150.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "PushButton"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "uwLts6eeud",
+              "line_height": 1.0,
+              "name": "Label_2",
+              "position": {
+                "x": 152.0,
+                "y": 151.0
+              },
+              "size": {
+                "h": 100.0,
+                "w": 100.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "9uBdXHd3R3",
+              "line_height": 1.0,
+              "name": "Label_3",
+              "position": {
+                "x": 950.0,
+                "y": 150.0
+              },
+              "size": {
+                "h": 100.0,
+                "w": 100.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "XfLEY3G2dj",
+              "name": "exit",
+              "position": {
+                "x": 625.0,
+                "y": 523.0
+              },
+              "size": {
+                "h": 150.0,
+                "w": 150.0
+              },
+              "style": "{\"materials\":[{\"key\":\"mouse-over/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"}]}",
+              "text": "",
+              "type": "PushButton"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "8Ifryfhw43",
+              "line_height": 1.0,
+              "name": "Label_4",
+              "position": {
+                "x": 400.0,
+                "y": 300.0
+              },
+              "size": {
+                "h": 105.0,
+                "w": 399.0
+              },
+              "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24}]}",
+              "text": "Press space to shoot.\n\nPress 1 to launch a mine.",
+              "type": "Label"
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "tTKrlLqGrS",
+              "line_height": 1.0,
+              "name": "Copy of Label_4",
+              "position": {
+                "x": 400.0,
+                "y": 700.0
+              },
+              "size": {
+                "h": 105.0,
+                "w": 399.0
+              },
+              "style": "{\"properties\":[{\"key\":\"text-blink\",\"value\":true},{\"key\":\"font-size\",\"value\":24}]}",
+              "text": "Press space to play!",
+              "type": "Label"
+            }
+          ]
         }
       ]
     }
