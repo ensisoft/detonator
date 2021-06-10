@@ -30,6 +30,7 @@
 
 #include "engine/game.h"
 #include "engine/types.h"
+#include "engine/action.h"
 
 namespace game
 {
@@ -72,10 +73,7 @@ namespace game
     class ScriptEngine
     {
     public:
-        struct PrintDebugStrAction {
-            std::string message;
-        };
-        using Action = std::variant<PrintDebugStrAction>;
+        using Action = game::Action;
 
         ScriptEngine(const std::string& lua_path);
         void SetLoader(const ClassLibrary* loader)

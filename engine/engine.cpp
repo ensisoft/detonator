@@ -254,38 +254,6 @@ public:
 
     virtual void BeginMainLoop() override
     {
-        // process the game actions.
-        {
-            game::Game::Action action;
-            while (mGame->GetNextAction(&action))
-            {
-                if (auto* ptr = std::get_if<game::Game::OpenUIAction>(&action))
-                    OpenUI(ptr->ui);
-                else if (auto* ptr = std::get_if<game::Game::CloseUIAction>(&action))
-                    CloseUI(ptr->result);
-                else if (auto* ptr = std::get_if<game::Game::PlayAction>(&action))
-                    PlayGame(ptr->klass);
-                else if (auto* ptr = std::get_if<game::Game::SuspendAction>(&action))
-                    SuspendGame();
-                else if (auto* ptr = std::get_if<game::Game::ResumeAction>(&action))
-                    ResumeGame();
-                else if (auto* ptr = std::get_if<game::Game::QuitAction>(&action))
-                    QuitGame();
-                else if (auto* ptr = std::get_if<game::Game::StopAction>(&action))
-                    StopGame();
-                else if (auto* ptr = std::get_if<game::Game::PrintDebugStrAction>(&action))
-                    DebugPrintString(ptr->message);
-            }
-        }
-        // process scripting actions.
-        {
-            game::ScriptEngine::Action action;
-            while (mScripting->GetNextAction(&action))
-            {
-                if (auto* ptr = std::get_if<game::ScriptEngine::PrintDebugStrAction>(&action))
-                    DebugPrintString(ptr->message);
-            }
-        }
     }
 
     virtual void Update(double wall_time, double dt) override
@@ -326,6 +294,32 @@ public:
         {
             // todo: stop play on entities that were killed.
             mScene->PruneEntities();
+        }
+
+        game::Action action;
+        while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
+        {
+            if (auto* ptr = std::get_if<game::OpenUIAction>(&action))
+                OpenUI(ptr->ui);
+            else if (auto* ptr = std::get_if<game::CloseUIAction>(&action))
+                CloseUI(ptr->result);
+            else if (auto* ptr = std::get_if<game::PlayAction>(&action))
+                PlayGame(ptr->klass);
+            else if (auto* ptr = std::get_if<game::SuspendAction>(&action))
+                SuspendGame();
+            else if (auto* ptr = std::get_if<game::ResumeAction>(&action))
+                ResumeGame();
+            else if (auto* ptr = std::get_if<game::QuitAction>(&action))
+                QuitGame();
+            else if (auto* ptr = std::get_if<game::StopAction>(&action))
+                StopGame();
+            else if (auto* ptr = std::get_if<game::DebugClearAction>(&action))
+                mDebugPrints.clear();
+            else if (auto* ptr = std::get_if<game::DebugPrintAction>(&action))  {
+                if (ptr->clear)
+                    mDebugPrints.clear();
+                DebugPrintString(ptr->message);
+            }
         }
     }
 
@@ -640,6 +634,7 @@ private:
             ret.pop_back();
         return ret;
     }
+
 private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;

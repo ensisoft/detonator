@@ -168,9 +168,13 @@ LuaGame::LuaGame(const std::string& lua_path)
         self.mView = view;
     };
     engine["DebugPrint"] = [](LuaGame& self, std::string message) {
-        PrintDebugStrAction action;
+        DebugPrintAction action;
         action.message = std::move(message);
         self.mActionQueue.push(std::move(action));
+    };
+    engine["DebugClear"] = [](LuaGame& self) {
+        DebugClearAction action;
+        self.mActionQueue.push(action);
     };
     engine["OpenUI"] = [](LuaGame& self, ClassHandle<uik::Window> model) {
         if (!model)
@@ -377,10 +381,37 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*mLuaState)["Game"]     = this;
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<ScriptEngine>("Engine");
-    engine["DebugPrint"] = [](ScriptEngine* self, std::string message) {
-        PrintDebugStrAction action;
+    engine["Play"] = [](ScriptEngine& self, ClassHandle<SceneClass> klass) {
+        if (!klass)
+            throw std::runtime_error("Nil scene class");
+        PlayAction play;
+        play.klass = klass;
+        self.mActionQueue.push(play);
+    };
+    engine["Suspend"] = [](ScriptEngine& self) {
+        SuspendAction suspend;
+        self.mActionQueue.push(suspend);
+    };
+    engine["Stop"] = [](ScriptEngine& self) {
+        StopAction stop;
+        self.mActionQueue.push(stop);
+    };
+    engine["Resume"] = [](ScriptEngine& self) {
+        ResumeAction resume;
+        self.mActionQueue.push(resume);
+    };
+    engine["Quit"] = [](ScriptEngine& self) {
+        QuitAction quit;
+        self.mActionQueue.push(quit);
+    };
+    engine["DebugClear"] = [](ScriptEngine& self) {
+        DebugClearAction action;
+        self.mActionQueue.push(action);
+    };
+    engine["DebugPrint"] = [](ScriptEngine& self, std::string message) {
+        DebugPrintAction action;
         action.message = std::move(message);
-        self->mActionQueue.push(std::move(action));
+        self.mActionQueue.push(std::move(action));
     };
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
