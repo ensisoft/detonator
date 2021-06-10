@@ -95,6 +95,26 @@ function SpawnSpaceRock()
     end
 end
 
+-- closes the menu and starts game.
+function EnterGame()
+    Game:ShowMouse(false)
+    Game:Delay(0.5)
+    Game:CloseUI(0)
+    Game:Play('Game')
+
+    ship_velo_increment = 1.0
+    tick_count          = 0
+    math.randomseed(6634)
+end
+
+-- quit the game asap and go back to the menu
+function QuitGame()
+    Game:Stop(0)
+    Game:Play('Menu')
+    Game:OpenUI('Menu')
+    Game:ShowMouse(true)
+end
+
 -- This is called when the game is first loaded when
 -- the application is started. Before the call the loader
 -- setups the global objects (as documented at the start of
@@ -103,11 +123,8 @@ end
 -- the initial state machine. I.e. for example find a menu
 -- object and ask for the game to show the menu.
 function LoadGame()
-    local scene = ClassLib:FindSceneClassByName('Menu')
-    local menu  = ClassLib:FindUIByName('Menu')
-    Game:Play(scene)
-    Game:OpenUI(menu)
-    -- set the viewport size and position
+    Game:Play('Menu')
+    Game:OpenUI('Menu')
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
 end
 
@@ -116,22 +133,12 @@ function BeginPlay(scene)
     if scene:GetClassName() == 'Menu' then
         State = States.Menu
     elseif scene:GetClassName() == 'Game' then
-        ship_velo_increment = 1.0
-        tick_count          = 0
-        math.randomseed(6634)
         State = States.Play
     end
 end
 
 function EndPlay(scene)
     Game:DebugPrint('EndPlay' .. scene:GetClassName())
-    if scene:GetClassName() == 'Game' then
-        local scene = ClassLib:FindSceneClassByName('Menu')
-        local menu  = ClassLib:FindUIByName('Menu')
-        Game:Play(scene)
-        Game:OpenUI(menu)
-        State = States.Menu
-    end
 end
 
 function Tick(game_time, dt)
@@ -168,15 +175,13 @@ end
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         if State == States.Play then
-            base.debug('Stop game')
-            Game:Stop()
+            QuitGame()
         elseif State == States.Menu then
             Game:Quit(0)
         end
-    elseif symbol == wdk.Keys.Space then 
-        if State == States.Menu then 
-            Game:CloseUI(0)
-            Game:Play(ClassLib:FindSceneClassByName('Game'))
+    elseif symbol == wdk.Keys.Space then
+        if State == States.Menu then
+            EnterGame()
         end
     end
 end
@@ -193,9 +198,7 @@ function OnUIAction(action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
-        local scene = ClassLib:FindSceneClassByName('Game')
-        Game:CloseUI(0)
-        Game:Play(scene)
+        EnterGame()
     end
 end
 

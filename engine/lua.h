@@ -60,6 +60,10 @@ namespace game
         virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override;
         virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override;
         virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override;
+        void PushAction(Action action)
+        { mActionQueue.push(std::move(action)); }
+        const ClassLibrary* GetClassLib() const
+        { return mClasslib; }
     private:
         const ClassLibrary* mClasslib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
@@ -94,6 +98,10 @@ namespace game
         void OnMouseMove(const wdk::WindowEventMouseMove& mouse);
         void OnMousePress(const wdk::WindowEventMousePress& mouse);
         void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse);
+        void PushAction(Action action)
+        { mActionQueue.push(std::move(action)); }
+        const ClassLibrary* GetClassLib() const
+        { return mClassLib; }
     private:
         sol::environment* GetTypeEnv(const EntityClass& klass);
     private:

@@ -100,7 +100,13 @@ namespace game
         struct ToggleFullScreen {};
 
         // Request to quit.
-        struct QuitApp {};
+        struct QuitApp {
+            int exit_code = 0;
+        };
+
+        struct ShowMouseCursor {
+            bool show = true;
+        };
 
         // Union of possible window requests.
         using Request = std::variant<
@@ -108,7 +114,8 @@ namespace game
             MoveWindow,
             SetFullScreen,
             ToggleFullScreen,
-            QuitApp>;
+            QuitApp,
+            ShowMouseCursor>;
 
         // During the runtime of the application the application may request
         // the host to provide some service. The application may queue such
@@ -327,8 +334,10 @@ namespace game
         { mQueue.push(game::App::SetFullScreen{fullscreen}); }
         inline void ToggleFullScreen()
         { mQueue.push(game::App::ToggleFullScreen{}); }
-        inline void Quit()
-        { mQueue.push(game::App::QuitApp{}); }
+        inline void Quit(int exit_code)
+        { mQueue.push(game::App::QuitApp{ exit_code }); }
+        inline void ShowMouseCursor(bool yes_no)
+        { mQueue.push(game::App::ShowMouseCursor { yes_no } ); }
     private:
         std::queue<Request> mQueue;
     };

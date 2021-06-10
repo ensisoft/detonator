@@ -292,6 +292,8 @@ public:
         {
             mUIPainter.Update(wall_time, dt);
         }
+
+        mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - (float)dt);
     }
     virtual void EndMainLoop() override
     {
@@ -301,10 +303,19 @@ public:
             mScene->EndLoop();
         }
 
+        if (mActionDelay > 0.0f)
+            return;
+
         game::Action action;
         while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
         {
-            if (auto* ptr = std::get_if<game::OpenUIAction>(&action))
+            if (auto* ptr = std::get_if<game::ShowMouseAction>(&action))
+                ShowMouseCursor(ptr->show);
+            else if (auto* ptr = std::get_if<game::BlockMouseAction>(&action))
+                BlockKeyboard(ptr->block);
+            else if (auto* ptr = std::get_if<game::BlockMouseAction>(&action))
+                BlockMouse(ptr->block);
+            else if (auto* ptr = std::get_if<game::OpenUIAction>(&action))
                 OpenUI(ptr->ui);
             else if (auto* ptr = std::get_if<game::CloseUIAction>(&action))
                 CloseUI(ptr->result);
@@ -315,15 +326,18 @@ public:
             else if (auto* ptr = std::get_if<game::ResumeAction>(&action))
                 ResumeGame();
             else if (auto* ptr = std::get_if<game::QuitAction>(&action))
-                QuitGame();
+                QuitGame(ptr->exit_code);
             else if (auto* ptr = std::get_if<game::StopAction>(&action))
                 StopGame();
+            else if (auto* ptr = std::get_if<game::RequestFullScreenAction>(&action))
+                RequestFullScreen(ptr->full_screen);
             else if (auto* ptr = std::get_if<game::DebugClearAction>(&action))
-                mDebugPrints.clear();
+                DebugClear();
             else if (auto* ptr = std::get_if<game::DebugPrintAction>(&action))  {
-                if (ptr->clear)
-                    mDebugPrints.clear();
-                DebugPrintString(ptr->message);
+                DebugPrintString(ptr->message, ptr->clear);
+            } else if (auto* ptr = std::get_if<game::DelayAction>(&action)) {
+                DelayGame(ptr->seconds);
+                break;
             }
         }
     }
@@ -404,7 +418,8 @@ public:
     }
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
     {
-        //DEBUG("OnKeyDown: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
+        if (mBlockKeyboard)
+            return;
         mGame->OnKeyDown(key);
         if (mScene)
         {
@@ -412,8 +427,9 @@ public:
         }
     }
     virtual void OnKeyup(const wdk::WindowEventKeyup& key) override
-    {
-        //DEBUG("OnKeyUp: %1, %2", ModifierString(key.modifiers), magic_enum::enum_name(key.symbol));
+    {       
+        if (mBlockKeyboard)
+            return;
         mGame->OnKeyUp(key);
         if (mScene)
         {
@@ -422,28 +438,34 @@ public:
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
+        if (mBlockKeyboard)
+            return;
         mGame->OnChar(text);
     }
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
+        if (mBlockMouse)
+            return;
         if (HaveOpenUI())
         {
             SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseMove);
         }
-
         mGame->OnMouseMove(mouse);
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
+        if (mBlockMouse)
+            return;
         if (HaveOpenUI())
         {
             SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MousePress);
         }
-
         mGame->OnMousePress(mouse);
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
+        if (mBlockMouse)
+            return;
         if (HaveOpenUI())
         {
             SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseRelease);
@@ -589,11 +611,11 @@ private:
         mScripting->EndPlay(mScene.get());
         mScene.reset();
     }
-    void QuitGame()
+    void QuitGame(int exit_code)
     {
         // todo: cleanup?
 
-        mRequests.Quit();
+        mRequests.Quit(exit_code);
     }
     void UpdateGame(double game_time,  double dt)
     {
@@ -624,6 +646,42 @@ private:
         {
             mScripting->Tick(game_time, dt);
         }
+    }
+    void DebugClear()
+    { mDebugPrints.clear(); }
+    void DebugPrintString(std::string msg, bool clear)
+    {
+        if (clear)
+            mDebugPrints.clear();
+        DebugPrint print;
+        print.message = std::move(msg);
+        mDebugPrints.push_back(std::move(print));
+    }
+
+    void DelayGame(float seconds)
+    {
+        mActionDelay = math::clamp(0.0f, seconds, seconds);
+        DEBUG("Action delay: %1 s", mActionDelay);
+    }
+    void ShowMouseCursor(bool show)
+    {
+        mRequests.ShowMouseCursor(show);
+        DEBUG("Requesting mouse cursor %1", show ? "ON" : "OFF");
+    }
+    void BlockKeyboard(bool block)
+    {
+        mBlockKeyboard = block;
+        DEBUG("Keyboard block is %1", block ? "ON" : "OFF");
+    }
+    void BlockMouse(bool block)
+    {
+        mBlockMouse = block;
+        DEBUG("Mouse block is %1", block ? "ON" : "OFF");
+    }
+    void RequestFullScreen(bool full_screen)
+    {
+        mRequests.SetFullScreen(full_screen);
+        DEBUG("Requesting %1 mode", full_screen ? "FullScreen" : "Window");
     }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
@@ -707,6 +765,13 @@ private:
     float mTimeAccum = 0.0f;
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
+    float mActionDelay = 0.0;
+    // when true will discard keyboard events. note that the game
+    // might still be polling the keyboard through a direct call
+    // to read the keyboard state. this applies only to the kv events.
+    bool mBlockKeyboard = false;
+    // block mouse event processing.
+    bool mBlockMouse = false;
 };
 
 } //namespace
