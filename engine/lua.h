@@ -84,8 +84,9 @@ namespace game
         void EndPlay(Scene* scene);
         void Tick(double game_time, double dt);
         void Update(double game_time, double dt);
+        void BeginLoop();
+        void EndLoop();
         bool GetNextAction(Action* out);
-
         void OnContactEvent(const ContactEvent& contact);
         void OnKeyDown(const wdk::WindowEventKeydown& key);
         void OnKeyUp(const wdk::WindowEventKeyup& key);
