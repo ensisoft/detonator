@@ -291,12 +291,12 @@ void unit_test_scene_class()
     }
 }
 
-void unit_test_scene_instance()
+void unit_test_scene_instance_create()
 {
     auto entity = std::make_shared<game::EntityClass>();
 
     game::SceneClass klass;
-    TEST_REQUIRE(klass.GetNumNodes() == 0);
+    // set some entity nodes in the scene class.
     {
         game::SceneNodeClass node;
         node.SetName("root");
@@ -315,7 +315,12 @@ void unit_test_scene_instance()
         node.SetEntity(entity);
         klass.AddNode(node);
     }
+    // link to the scene graph
+    klass.LinkChild(nullptr, klass.FindNodeByName("root"));
+    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
+    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
 
+    // set class scripting variables.
     {
         game::ScriptVar foo("foo", 123, game::ScriptVar::ReadWrite);
         game::ScriptVar bar("bar", 1.0f, game::ScriptVar::ReadOnly);
@@ -323,9 +328,6 @@ void unit_test_scene_instance()
         klass.AddScriptVar(std::move(bar));
     }
 
-    klass.LinkChild(nullptr, klass.FindNodeByName("root"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
 
     // the scene instance has the initial state based on the scene class object.
     // i.e. the initial entities are created based on the scene class nodes and
@@ -339,54 +341,185 @@ void unit_test_scene_instance()
     TEST_REQUIRE(instance.GetEntity(1).GetId() == klass.GetNode(1).GetId());
     TEST_REQUIRE(instance.GetEntity(2).GetId() == klass.GetNode(2).GetId());
     TEST_REQUIRE(instance.FindEntityByInstanceName("root"));
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_1"));
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_2"));
     TEST_REQUIRE(instance.FindEntityByInstanceName("blaal") == nullptr);
     TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(1).GetId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(2).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
+
+    // the scene instance has the initial values of scripting variables based on the
+    // values set in the scene class object.
     TEST_REQUIRE(instance.FindScriptVar("foo"));
     TEST_REQUIRE(instance.FindScriptVar("bar"));
     TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
     TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
     instance.FindScriptVar("foo")->SetValue(444);
     TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
-    instance.DeleteEntity(instance.FindEntityByInstanceName("child_1"));
-    TEST_REQUIRE(instance.GetNumEntities() == 2);
-    instance.DeleteEntity(instance.FindEntityByInstanceName("root"));
-    TEST_REQUIRE(instance.GetNumEntities() == 0);
+}
 
-    // spawn an entity.
+void unit_test_scene_instance_spawn()
+{
+    auto entity = std::make_shared<game::EntityClass>();
+
+    game::SceneClass klass;
+
+    // basic spawn cycle
     {
-        game::EntityArgs args;
-        args.name = "foo";
-        args.klass = entity;
-        args.id = "13412sfgf12";
-        instance.SpawnEntity(args , true /*link to root*/);
-        TEST_REQUIRE(instance.GetNumEntities() == 1);
-        TEST_REQUIRE(instance.GetEntity(0).GetName() == "foo");
-        TEST_REQUIRE(instance.GetEntity(0).GetId() == "13412sfgf12");
-        TEST_REQUIRE(WalkTree(instance) == "foo");
-        instance.DeleteEntity(instance.FindEntityByInstanceName("foo"));
-        TEST_REQUIRE(instance.GetNumEntities() == 0);
+        game::Scene scene(klass);
+        scene.BeginLoop();
+            game::EntityArgs args;
+            args.klass = entity;
+            args.name  = "foo";
+            auto* ret = scene.SpawnEntity(args);
+            TEST_REQUIRE(ret);
+            TEST_REQUIRE(ret->GetName() == "foo");
+            TEST_REQUIRE(ret->GetId() == args.id);
+            TEST_REQUIRE(ret->HasBeenSpawned() == false);
+            TEST_REQUIRE(scene.FindEntityByInstanceName("foo") == nullptr);
+            TEST_REQUIRE(scene.FindEntityByInstanceId(args.id) == nullptr);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(ret->HasBeenSpawned());
+            TEST_REQUIRE(scene.FindEntityByInstanceName("foo") == ret);
+            TEST_REQUIRE(scene.FindEntityByInstanceId(args.id) == ret);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(ret->HasBeenSpawned() == false);
+            TEST_REQUIRE(scene.FindEntityByInstanceName("foo") == ret);
+            TEST_REQUIRE(scene.FindEntityByInstanceId(args.id) == ret);
+        scene.EndLoop();
     }
 
-    // kill entity at lifetime
+    // spawn while iterating over the entities. typical usage case for example
+    // lua integration code is looping over the entities in order to invoke
+    // entity callbacks which might then call back into the scene to modify the
+    // scene state. special care must be taken to make sure that this is well defined
+    // behaviour.
     {
-        entity->SetFlag(game::EntityClass::Flags::LimitLifetime, true);
-        entity->SetFlag(game::EntityClass::Flags::KillAtLifetime, true);
-        entity->SetLifetime(2.5);
-        game::EntityArgs args;
-        args.name = "foo";
-        args.klass = entity;
-        args.id = "13412sfgf12";
-        instance.SpawnEntity(args , true /*link to root*/);
-        instance.Update(1.0);
-        TEST_REQUIRE(instance.GetEntity(0).HasExpired() == false);
-        TEST_REQUIRE(instance.GetEntity(0).HasBeenKilled() == false);
-        instance.Update(1.51);
-        TEST_REQUIRE(instance.GetEntity(0).HasExpired() == true);
-        TEST_REQUIRE(instance.GetEntity(0).HasBeenKilled() == true);
-        instance.PruneEntities();
-        TEST_REQUIRE(instance.GetNumEntities() == 0);
+        game::Scene scene(klass);
+
+        scene.BeginLoop();
+            game::EntityArgs args;
+            args.klass = entity;
+            args.name  = "0";
+            args.id    = "0";
+            scene.SpawnEntity(args);
+            args.klass = entity;
+            args.name  = "1";
+            args.id    = "1";
+            scene.SpawnEntity(args);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 2);
+            TEST_REQUIRE(scene.GetEntity(0).GetName() == "0");
+            TEST_REQUIRE(scene.GetEntity(1).GetName() == "1");
+            for (size_t i=0; i<scene.GetNumEntities(); ++i)
+            {
+                game::EntityArgs args;
+                args.klass = entity;
+                args.name  = std::to_string(2+i);
+                args.id    = std::to_string(2+i);
+                scene.SpawnEntity(args);
+            }
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 4);
+            TEST_REQUIRE(scene.GetEntity(0).GetName() == "0");
+            TEST_REQUIRE(scene.GetEntity(1).GetName() == "1");
+            TEST_REQUIRE(scene.GetEntity(2).GetName() == "2");
+            TEST_REQUIRE(scene.GetEntity(3).GetName() == "3");
+        scene.EndLoop();
+    }
+}
+
+void unit_test_scene_instance_kill()
+{
+    auto entity = std::make_shared<game::EntityClass>();
+
+    game::SceneClass klass;
+
+    // basic kill
+    {
+        game::Scene scene(klass);
+        scene.BeginLoop();
+           game::EntityArgs args;
+           args.klass = entity;
+           args.name  = "foo";
+           auto* ret = scene.SpawnEntity(args);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            scene.KillEntity(ret);
+            TEST_REQUIRE(ret->HasBeenKilled() == false);
+            TEST_REQUIRE(scene.FindEntityByInstanceName("foo") == ret);
+            TEST_REQUIRE(scene.FindEntityByInstanceId(args.id) == ret);
+            TEST_REQUIRE(scene.GetNumEntities() == 1);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(ret->HasBeenKilled() == true);
+            TEST_REQUIRE(scene.GetNumEntities() == 1);
+            TEST_REQUIRE(scene.FindEntityByInstanceId(args.id) == ret);
+            TEST_REQUIRE(scene.FindEntityByInstanceName("foo") == ret);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 0);
+        scene.EndLoop();
+    }
+
+    // kill flag propagation to children
+    {
+        // todo: need the linking api first
+    }
+
+    // kill while iterating over the entities.
+    {
+        game::Scene scene(klass);
+
+        scene.BeginLoop();
+            game::EntityArgs args;
+            args.klass = entity;
+            args.name  = "0";
+            args.id    = "0";
+            scene.SpawnEntity(args);
+            args.klass = entity;
+            args.name  = "1";
+            args.id    = "1";
+            scene.SpawnEntity(args);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 2);
+            TEST_REQUIRE(scene.GetEntity(0).GetName() == "0");
+            TEST_REQUIRE(scene.GetEntity(1).GetName() == "1");
+            for (size_t i=0; i<scene.GetNumEntities(); ++i)
+            {
+                auto* ret = &scene.GetEntity(i);
+                scene.KillEntity(ret);
+            }
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 2);
+            TEST_REQUIRE(scene.GetEntity(0).GetName() == "0");
+            TEST_REQUIRE(scene.GetEntity(1).GetName() == "1");
+            TEST_REQUIRE(scene.GetEntity(0).HasBeenKilled());
+            TEST_REQUIRE(scene.GetEntity(1).HasBeenKilled());
+            TEST_REQUIRE(scene.FindEntityByInstanceName("0"));
+            TEST_REQUIRE(scene.FindEntityByInstanceId("1"));
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 0);
+        scene.EndLoop();
     }
 }
 
@@ -555,7 +688,9 @@ int test_main(int argc, char* argv[])
 {
     unit_test_node();
     unit_test_scene_class();
-    unit_test_scene_instance();
+    unit_test_scene_instance_create();
+    unit_test_scene_instance_spawn();
+    unit_test_scene_instance_kill();
     unit_test_scene_instance_transform();
     return 0;
 }

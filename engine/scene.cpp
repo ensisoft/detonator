@@ -593,7 +593,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         entity->SetLayer(node.GetLayer());
 
         map[&node] = entity.get();
-        mEntityMap[entity->GetId()] = entity.get();
+        mIdMap[entity->GetId()] = entity.get();
+        mNameMap[entity->GetName()] = entity.get();
         mEntities.push_back(std::move(entity));
     }
     mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const SceneNodeClass* node) {
@@ -619,17 +620,17 @@ Entity& Scene::GetEntity(size_t index)
 }
 Entity* Scene::FindEntityByInstanceId(const std::string& id)
 {
-    auto it = mEntityMap.find(id);
-    if (it == mEntityMap.end())
+    auto it = mIdMap.find(id);
+    if (it == mIdMap.end())
         return nullptr;
     return it->second;
 }
 Entity* Scene::FindEntityByInstanceName(const std::string& name)
 {
-    for (auto& e : mEntities)
-        if (e->GetName() == name)
-            return e.get();
-    return nullptr;
+    auto it = mNameMap.find(name);
+    if (it == mNameMap.end())
+        return nullptr;
+    return it->second;
 }
 
 const Entity& Scene::GetEntity(size_t index) const
@@ -639,82 +640,83 @@ const Entity& Scene::GetEntity(size_t index) const
 }
 const Entity* Scene::FindEntityByInstanceId(const std::string& id) const
 {
-    auto it = mEntityMap.find(id);
-    if (it == mEntityMap.end())
+    auto it = mIdMap.find(id);
+    if (it == mIdMap.end())
         return nullptr;
     return it->second;
 }
 const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 {
-    for (const auto& e : mEntities)
-        if (e->GetName() == name)
-            return e.get();
-    return nullptr;
-}
-
-void Scene::DeleteEntity(Entity* entity)
-{
-    std::unordered_set<const Entity*> graveyard;
-
-    // traverse the tree starting from the node to be deleted
-    // and capture the ids of the scene nodes that are part
-    // of this hierarchy.
-    mRenderTree.PreOrderTraverseForEach([&graveyard](const Entity* value) {
-        graveyard.insert(value);
-    }, entity);
-
-    for (const auto* entity : graveyard)
-    {
-        DEBUG("Deleting entity '%1'", entity->GetName());
-        mEntityMap.erase(entity->GetId());
-    }
-
-    // delete from the tree.
-    mRenderTree.DeleteNode(entity);
-
-    // delete from the container.
-    mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [&graveyard](const auto& node) {
-        return graveyard.find(node.get()) != graveyard.end();
-    }), mEntities.end());
+    auto it = mNameMap.find(name);
+    if (it == mNameMap.end())
+        return nullptr;
+    return it->second;
 }
 
 void Scene::KillEntity(Entity* entity)
 {
-    // either set this flag here or then keep separate
-    // kill set. The flag has the benefit that the entity can
-    // easily proclaim it's status to the world if needed
-    entity->SetFlag(Entity::ControlFlags::Killed, true);
+    mKillList.push_back(entity);
 }
 
 Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 {
-    auto entity = CreateEntityInstance(args);
-    mEntities.push_back(std::move(entity));
-    auto ret = mEntities.back().get();
-    if (link_to_root)
-    {
-        mRenderTree.LinkChild(nullptr, ret);
-    }
-    return ret;
+    // we must have the klass of the entity and an id.
+    // the invariant that must hold is that entity IDs are
+    // always going to be unique.
+    ASSERT(args.klass);
+    ASSERT(args.id.empty() == false);
+    ASSERT(mIdMap.find(args.id) == mIdMap.end());
+
+    mSpawnList.push_back(CreateEntityInstance(args));
+    DEBUG("New entity '%1/%2'", args.klass->GetName(), args.name);
+    return mSpawnList.back().get();
 }
 
-void Scene::PruneEntities()
+void Scene::BeginLoop()
 {
-    // remove the entities that have been killed.
-    // this may propagate to children when a parent
-    // entity is killed. if this is not desired then one
-    // should have unlinked the children first.
-    for (auto& entity : mEntities)
+    // turn on the kill flag for entities that were killed
+    // during the last iteration of the game play.
+    for (auto* entity : mKillList)
     {
-        if (!entity->TestFlag(Entity::ControlFlags::Killed))
-            continue;
+        // Set entity kill flag to indicate that it's been killed from the scene.
+        // Note that this isn't the same as the c++ lifetime of the object!
+        entity->SetFlag(Entity::ControlFlags::Killed, true);
+        // propagate the kill flag to children when a parent
+        // entity is killed. if this is not desired then one
+        // should have unlinked the children first.
         mRenderTree.PreOrderTraverseForEach([](Entity* entity) {
             entity->SetFlag(Entity::ControlFlags::Killed, true);
-        }, entity.get());
-        DEBUG("Deleting entity '%1'", entity->GetName());
-        mRenderTree.DeleteNode(entity.get());
+            DEBUG("Entity '%1/%2' was killed", entity->GetClassName(), entity->GetName());
+        }, entity);
     }
-    // delete from the container.
+    for (auto& entity : mSpawnList)
+    {
+        DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
+        entity->SetFlag(Entity::ControlFlags::Spawned, true);
+        mIdMap[entity->GetId()]     = entity.get();
+        mNameMap[entity->GetName()] = entity.get();
+        mRenderTree.LinkChild(nullptr, entity.get());
+        mEntities.push_back(std::move(entity));
+    }
+    mKillList.clear();
+    mSpawnList.clear();
+}
+
+void Scene::EndLoop()
+{
+    for (auto& entity : mEntities)
+    {
+        // turn off spawn flags.
+        entity->SetFlag(Entity::ControlFlags::Spawned, false);
+
+        if (!entity->TestFlag(Entity::ControlFlags::Killed))
+            continue;
+        DEBUG("Delete entity '%1/%2'.", entity->GetClassName(), entity->GetName());
+        mRenderTree.DeleteNode(entity.get());
+        mIdMap.erase(entity->GetId());
+        mNameMap.erase(entity->GetName());
+    }
+    // delete from the container the ones that were killed.
     mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
         return entity->TestFlag(Entity::ControlFlags::Killed);
     }), mEntities.end());

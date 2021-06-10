@@ -1173,9 +1173,15 @@ namespace game
     public:
         // Runtime management flags
         enum class ControlFlags {
-            // The entity has been killed and will be
-            // removed at the end of the update cycle
-            Killed
+            // The entity has been killed and will be deleted
+            // at the end of the current game loop iteration.
+            Killed,
+            // The entity has been just spawned through a
+            // call to Scene::SpawnEntity. The flag will be
+            // cleared at the end of the main loop iteration
+            // and is thus on only from spawn until the end of
+            // loop iteration.
+            Spawned
         };
         using Flags = EntityClass::Flags;
 
@@ -1299,6 +1305,8 @@ namespace game
         bool HasExpired() const;
         // Returns true if the kill control flag has been set.
         bool HasBeenKilled() const;
+        // Returns true the spawn control flag has been set.
+        bool HasBeenSpawned() const;
 
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.

@@ -254,6 +254,11 @@ public:
 
     virtual void BeginMainLoop() override
     {
+        if (mScene)
+        {
+            mScene->BeginLoop();
+            mScripting->BeginLoop();
+        }
     }
 
     virtual void Update(double wall_time, double dt) override
@@ -292,8 +297,8 @@ public:
     {
         if (mScene)
         {
-            // todo: stop play on entities that were killed.
-            mScene->PruneEntities();
+            mScripting->EndLoop();
+            mScene->EndLoop();
         }
 
         game::Action action;

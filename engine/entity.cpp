@@ -1186,10 +1186,10 @@ bool Entity::HasExpired() const
 }
 
 bool Entity::HasBeenKilled() const
-{
-    return TestFlag(ControlFlags::Killed);
-}
+{ return TestFlag(ControlFlags::Killed); }
 
+bool Entity::HasBeenSpawned() const
+{ return TestFlag(ControlFlags::Spawned); }
 
 const ScriptVar* Entity::FindScriptVar(const std::string& name) const
 {

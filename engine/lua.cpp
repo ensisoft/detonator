@@ -456,6 +456,39 @@ void ScriptEngine::Update(double game_time, double dt)
         }
     }
 }
+void ScriptEngine::BeginLoop()
+{
+    // entities spawned in the scene during calls to update/tick
+    // have the spawned flag on. Invoke the BeginPlay callbacks
+    // for those entities.
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(game::Entity::ControlFlags::Spawned))
+            continue;
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["BeginPlay"], entity, mScene);
+        }
+    }
+}
+
+void ScriptEngine::EndLoop()
+{
+     // entities killed in the scene during calls to update/tick
+     // have the kill flag on. Invoke the EndPlay callbacks for
+     // those entities.
+     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+     {
+         auto* entity = &mScene->GetEntity(i);
+         if (!entity->TestFlag(game::Entity::ControlFlags::Killed))
+             continue;
+         if (auto* env = GetTypeEnv(entity->GetClass()))
+         {
+             CallLua((*env)["EndPlay"], entity, mScene);
+         }
+     }
+}
 
 bool ScriptEngine::GetNextAction(Action* out)
 {

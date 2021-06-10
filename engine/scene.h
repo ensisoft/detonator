@@ -402,12 +402,9 @@ namespace game
         // Note that if there are multiple entities with the same instance
         // name it's undefined which one is returned.
         const Entity* FindEntityByInstanceName(const std::string& name) const;
-        // Delete the entity from the scene. The given entity and all entities
-        // linked to it will be removed from the scene's render tree and deleted.
-        // Warning, do not call this unless you know what you're doing. Furthermore
-        // IF YOU ARE CALLING THIS WHILE LOOPING OVER ENTITIES BE EXTRA CAREFUL.
-        void DeleteEntity(Entity* entity);
-        // Kill entity and mark it for removal later.
+        // Kill entity and mark it for removal later. Note that this will propagate
+        // the kill to all of the entity's children as well. If this is not what
+        // you want then unlink the appropriate children first.
         void KillEntity(Entity* entity);
         // Spawn a new entity in the scene. Returns a pointer to the spawned
         // entity or nullptr if spawning failed.
@@ -416,8 +413,10 @@ namespace game
         // to any other entity or later RelinkEntity to relink to some other
         // entity in the scene graph.
         Entity* SpawnEntity(const EntityArgs& args, bool link_to_root = true);
-        // Remove and delete the entities that have been killed.
-        void PruneEntities();
+        // Prepare the scene for the next iteration of the game loop.
+        void BeginLoop();
+        // Perform end of game loop iteration cleanup etc.
+        void EndLoop();
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
         // Note that the const here only implies that the object
@@ -522,7 +521,11 @@ namespace game
         // Entities currently in the scene.
         std::vector<std::unique_ptr<Entity>> mEntities;
         // lookup table for mapping entity ids to entities.
-        std::unordered_map<std::string, Entity*> mEntityMap;
+        std::unordered_map<std::string, Entity*> mIdMap;
+        // lookup table for mapping entity names to entities.
+        // the names are *human readable* and set by the designer
+        // so it's possible that there could be name collisions.
+        std::unordered_map<std::string, Entity*> mNameMap;
         // The list of script variables.
         std::vector<ScriptVar> mScriptVars;
         // The scene graph/render tree for hierarchical traversal
@@ -530,6 +533,12 @@ namespace game
         RenderTree mRenderTree;
         // the current scene time.
         double mCurrentTime = 0.0;
+        // spawn list of new entities that have been spawned
+        // but not yet placed in the scene's entity list.
+        std::vector<std::unique_ptr<Entity>> mSpawnList;
+        // kill list of entities that were killed but have
+        // not yet been removed from the scene.
+        std::vector<Entity*> mKillList;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);
