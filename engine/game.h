@@ -25,6 +25,7 @@
 #include "wdk/events.h"
 #include "engine/classlib.h"
 #include "engine/types.h"
+#include "engine/action.h"
 #include "uikit/window.h"
 #include "uikit/types.h"
 
@@ -43,50 +44,7 @@ namespace game
     class Game
     {
     public:
-        // Open a new UI window and place it on top of the stack.
-        // The top of the stack UI (if any) will be given the chance
-        // to process the user input coming from mouse/keyboard.
-        struct OpenUIAction {
-            ClassHandle<uik::Window> ui;
-        };
-        // Close the topmost UI and pop it off of the UI stack.
-        struct CloseUIAction {
-            int result = 0;
-        };
-
-        // Action to start playing the given scene.
-        // When the engine processes this action request
-        // it will create an instance of the SceneClass and
-        // call BeginPlay. The engine will retain the ownership
-        // of the Scene instance that is created.
-        struct PlayAction {
-            // handle of the scene class object for the scene instance
-            // creation. This may not be nullptr.
-            ClassHandle<SceneClass> klass;
-        };
-
-        // Suspend the game play. Suspending keeps the current scene
-        // loaded but time accumulation and updates stop.
-        struct SuspendAction {};
-        struct ResumeAction {};
-        struct StopAction {};
-        struct QuitAction {};
-
-        struct PrintDebugStrAction {
-            std::string message;
-        };
-        // Play, Suspend, Resume, Stop, Quit
-
-        // Actions express some want the game wants to take
-        // such as opening a menu, playing a scene and so on.
-        using Action = std::variant<PlayAction,
-                                SuspendAction,
-                                ResumeAction,
-                                StopAction,
-                                QuitAction,
-                                OpenUIAction,
-                                CloseUIAction,
-                                PrintDebugStrAction>;
+        using Action = game::Action;
 
         virtual ~Game() = default;
         // Set physics engine instance.
