@@ -513,8 +513,18 @@ void PlayWindow::RunOnce()
                 AskSetFullScreen(ptr->fullscreen);
             else if (const auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
                 AskToggleFullScreen();
-            else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request))
+            else if (const auto* ptr = std::get_if<game::App::ShowMouseCursor>(&request)) {
+                if (ptr->show) {
+                    mContainer->setCursor(Qt::ArrowCursor);
+                    mSurface->setCursor(Qt::ArrowCursor);
+                } else {
+                    mContainer->setCursor(Qt::BlankCursor);
+                    mSurface->setCursor(Qt::BlankCursor);
+                }
+            } else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request)) {
+                INFO("Quit with exit code %1", ptr->exit_code);
                 quit = true;
+            }
         }
         if (!mApp->IsRunning() || quit)
         {

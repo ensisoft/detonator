@@ -22,10 +22,11 @@
 
 #include <memory>
 #include <vector>
-#include <cstring>
 #include <chrono>
-#include <cmath>
 #include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -228,7 +229,7 @@ int main(int argc, char* argv[])
     DEBUG("Enabled floating point exceptions");
      */
 #endif
-
+    int exit_code = EXIT_SUCCESS;
     try
     {
         game::App::DebugOptions debug;
@@ -487,10 +488,14 @@ int main(int argc, char* argv[])
                     window.SetFullscreen(ptr->fullscreen);
                 else if (auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
                     window.SetFullscreen(!window.IsFullscreen());
-                else if (auto* ptr = std::get_if<game::App::QuitApp>(&request))
+                else if (auto* ptr = std::get_if<game::App::ShowMouseCursor>(&request))
+                    window.ShowCursor(ptr->show);
+                else if (auto* ptr = std::get_if<game::App::QuitApp>(&request)) {
                     quit = true;
+                    exit_code = ptr->exit_code;
+                    INFO("Quit with exit code %1", exit_code);
+                }
             }
-
             // this is the real wall time elapsed rendering the previous
             // for each iteration of the loop we measure the time
             // spent producing a frame. the time is then used to take
@@ -542,9 +547,9 @@ int main(int argc, char* argv[])
     {
         std::cerr << "Oops there was a problem:\n";
         std::cerr << e.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
     std::cout << "Have a good day.\n";
     std::cout << std::endl;
-    return 0;
+    return exit_code;
 }

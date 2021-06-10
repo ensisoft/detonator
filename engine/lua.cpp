@@ -109,6 +109,101 @@ void CallLua(const sol::protected_function& func, const Args&... args)
     const sol::error err = result;
     ERROR(err.what());
 }
+
+template<typename LuaGame>
+void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
+{
+    using namespace game;
+    engine["Play"] = sol::overload(
+            [](LuaGame& self, ClassHandle<SceneClass> klass) {
+                if (!klass)
+                    throw std::runtime_error("Nil scene class");
+                PlayAction play;
+                play.klass = klass;
+                self.PushAction(play);
+            },
+            [](LuaGame& self, std::string name) {
+                auto handle = self.GetClassLib()->FindSceneClassByName(name);
+                if (!handle)
+                    throw std::runtime_error("No such scene class: " + name);
+                PlayAction play;
+                play.klass = handle;
+                self.PushAction(play);
+            });
+
+    engine["Suspend"] = [](LuaGame& self) {
+        SuspendAction suspend;
+        self.PushAction(suspend);
+    };
+    engine["Stop"] = [](LuaGame& self) {
+        StopAction stop;
+        self.PushAction(stop);
+    };
+    engine["Resume"] = [](LuaGame& self) {
+        ResumeAction resume;
+        self.PushAction(resume);
+    };
+    engine["Quit"] = [](LuaGame& self, int exit_code) {
+        QuitAction quit;
+        quit.exit_code = exit_code;
+        self.PushAction(quit);
+    };
+    engine["Delay"] = [](LuaGame& self, float value) {
+        DelayAction delay;
+        delay.seconds = value;
+        self.PushAction(delay);
+    };
+    engine["ShowMouse"] = [](LuaGame& self, bool show) {
+        ShowMouseAction mickey;
+        mickey.show = show;
+        self.PushAction(mickey);
+    };
+    engine["SetFullScreen"] = [](LuaGame& self, bool full_screen) {
+        RequestFullScreenAction fs;
+        fs.full_screen = full_screen;
+        self.PushAction(fs);
+    };
+    engine["BlockKeyboard"] = [](LuaGame& self, bool yes_no) {
+        BlockKeyboardAction block;
+        block.block = yes_no;
+        self.PushAction(block);
+    };
+    engine["BlockMouse"] = [](LuaGame& self, bool yes_no) {
+        BlockMouseAction block;
+        block.block = yes_no;
+        self.PushAction(block);
+    };
+    engine["DebugPrint"] = [](LuaGame& self, std::string message) {
+        DebugPrintAction action;
+        action.message = std::move(message);
+        self.PushAction(std::move(action));
+    };
+    engine["DebugClear"] = [](LuaGame& self) {
+        DebugClearAction action;
+        self.PushAction(action);
+    };
+    engine["OpenUI"] = sol::overload(
+            [](LuaGame& self, ClassHandle<uik::Window> model) {
+                if (!model)
+                    throw std::runtime_error("Nil UI window object.");
+                OpenUIAction action;
+                action.ui = model;
+                self.PushAction(std::move(action));
+            },
+            [](LuaGame& self, std::string name) {
+                auto handle = self.GetClassLib()->FindUIByName(name);
+                if (!handle)
+                    throw std::runtime_error("No such UI: " + name);
+                OpenUIAction action;
+                action.ui = handle;
+                self.PushAction(action);
+            });
+    engine["CloseUI"] = [](LuaGame& self, int result) {
+        CloseUIAction action;
+        action.result = result;
+        self.PushAction(std::move(action));
+    };
+}
 } // namespace
 
 namespace game
@@ -141,52 +236,9 @@ LuaGame::LuaGame(const std::string& lua_path)
     // bind engine interface.
     auto table  = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<LuaGame>("Engine");
-    engine["Play"] = [](LuaGame& self, ClassHandle<SceneClass> klass) {
-        if (!klass)
-            throw std::runtime_error("Nil scene class");
-        PlayAction play;
-        play.klass = klass;
-        self.mActionQueue.push(play);
-    };
-    engine["Suspend"] = [](LuaGame& self) {
-        SuspendAction suspend;
-        self.mActionQueue.push(suspend);
-    };
-    engine["Stop"] = [](LuaGame& self) {
-        StopAction stop;
-        self.mActionQueue.push(stop);
-    };
-    engine["Resume"] = [](LuaGame& self) {
-        ResumeAction resume;
-        self.mActionQueue.push(resume);
-    };
-    engine["Quit"] = [](LuaGame& self) {
-        QuitAction quit;
-        self.mActionQueue.push(quit);
-    };
+    BindEngine(engine, *this);
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
-    };
-    engine["DebugPrint"] = [](LuaGame& self, std::string message) {
-        DebugPrintAction action;
-        action.message = std::move(message);
-        self.mActionQueue.push(std::move(action));
-    };
-    engine["DebugClear"] = [](LuaGame& self) {
-        DebugClearAction action;
-        self.mActionQueue.push(action);
-    };
-    engine["OpenUI"] = [](LuaGame& self, ClassHandle<uik::Window> model) {
-        if (!model)
-            throw std::runtime_error("Nil UI window object.");
-        OpenUIAction action;
-        action.ui = model;
-        self.mActionQueue.push(std::move(action));
-    };
-    engine["CloseUI"] = [](LuaGame& self, int result) {
-        CloseUIAction action;
-        action.result = result;
-        self.mActionQueue.push(std::move(action));
     };
 
     // todo: maybe this needs some configuring or whatever?
@@ -381,38 +433,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*mLuaState)["Game"]     = this;
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<ScriptEngine>("Engine");
-    engine["Play"] = [](ScriptEngine& self, ClassHandle<SceneClass> klass) {
-        if (!klass)
-            throw std::runtime_error("Nil scene class");
-        PlayAction play;
-        play.klass = klass;
-        self.mActionQueue.push(play);
-    };
-    engine["Suspend"] = [](ScriptEngine& self) {
-        SuspendAction suspend;
-        self.mActionQueue.push(suspend);
-    };
-    engine["Stop"] = [](ScriptEngine& self) {
-        StopAction stop;
-        self.mActionQueue.push(stop);
-    };
-    engine["Resume"] = [](ScriptEngine& self) {
-        ResumeAction resume;
-        self.mActionQueue.push(resume);
-    };
-    engine["Quit"] = [](ScriptEngine& self) {
-        QuitAction quit;
-        self.mActionQueue.push(quit);
-    };
-    engine["DebugClear"] = [](ScriptEngine& self) {
-        DebugClearAction action;
-        self.mActionQueue.push(action);
-    };
-    engine["DebugPrint"] = [](ScriptEngine& self, std::string message) {
-        DebugPrintAction action;
-        action.message = std::move(message);
-        self.mActionQueue.push(std::move(action));
-    };
+    BindEngine(engine, *this);
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {

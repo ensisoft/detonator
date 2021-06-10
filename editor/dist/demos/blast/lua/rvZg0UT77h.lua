@@ -22,9 +22,14 @@ end
 function BeginPlay(player, scene)
 end
 
+-- called when the game play ends for an entity in the scene.
 function EndPlay(player, scene)
     Game:DebugPrint('Game Over!')
+    Game:Delay(1.0)
     Game:Stop(0)
+    Game:Play('Menu')
+    Game:OpenUI('Menu')
+    Game:ShowMouse(true)
 end
 
 -- Called on every low frequency game tick.

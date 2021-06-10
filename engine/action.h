@@ -53,7 +53,16 @@ namespace game
     struct SuspendAction {};
     struct ResumeAction {};
     struct StopAction {};
-    struct QuitAction {};
+    struct QuitAction {
+        int exit_code = 0;
+    };
+
+    // Delay the game state action processing by some
+    // amount of time. This can be used to create delayed
+    // transitions when going from one game state to another.
+    struct DelayAction {
+        float seconds = 0.0;
+    };
 
     struct DebugPrintAction {
         std::string message;
@@ -62,6 +71,19 @@ namespace game
     struct DebugClearAction {
     };
 
+    struct ShowMouseAction {
+        bool show = true;
+    };
+    struct BlockKeyboardAction {
+        bool block = true;
+    };
+    struct BlockMouseAction {
+        bool block = true;
+    };
+
+    struct RequestFullScreenAction {
+        bool full_screen = true;
+    };
 
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
@@ -73,6 +95,11 @@ namespace game
             OpenUIAction,
             CloseUIAction,
             DebugPrintAction,
-            DebugClearAction>;
+            DebugClearAction,
+            DelayAction,
+            ShowMouseAction,
+            BlockKeyboardAction,
+            BlockMouseAction,
+            RequestFullScreenAction>;
 
 } // namespace
