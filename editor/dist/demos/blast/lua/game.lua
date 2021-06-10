@@ -15,7 +15,12 @@ States = {
     Menu = 1,
     Play = 2
 }
+Menus = {
+    MainMenu = 1,
+    GameOver = 2
+}
 State = States.Menu
+Menu  = Menus.MainMenu
 
 function SpawnEnemy(x, y, velocity)
     local ship = ClassLib:FindEntityClassByName('Ship2')
@@ -111,7 +116,7 @@ end
 function QuitGame()
     Game:Stop(0)
     Game:Play('Menu')
-    Game:OpenUI('Menu')
+    Game:OpenUI('MainMenu')
     Game:ShowMouse(true)
 end
 
@@ -124,7 +129,7 @@ end
 -- object and ask for the game to show the menu.
 function LoadGame()
     Game:Play('Menu')
-    Game:OpenUI('Menu')
+    Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
 end
 
@@ -181,13 +186,24 @@ function OnKeyDown(symbol, modifier_bits)
         end
     elseif symbol == wdk.Keys.Space then
         if State == States.Menu then
-            EnterGame()
+            if Menu == Menus.MainMenu then
+                EnterGame()
+            elseif Menu == Menus.GameOver then
+                Game:CloseUI(0)
+                Game:OpenUI('MainMenu')
+                Game:ShowMouse(true)
+            end
         end
     end
 end
 
 function OnUIOpen(ui)
     Game:DebugPrint(ui:GetName() .. ' is open')
+    if ui:GetName() == 'MainMenu' then
+        Menu = Menus.MainMenu
+    elseif ui:GetName() == 'GameOver' then
+        Menu = Menus.GameOver
+    end
 end
 
 function OnUIClose(ui, result)

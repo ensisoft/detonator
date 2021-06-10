@@ -28,8 +28,7 @@ function EndPlay(player, scene)
     Game:Delay(1.0)
     Game:Stop(0)
     Game:Play('Menu')
-    Game:OpenUI('Menu')
-    Game:ShowMouse(true)
+    Game:OpenUI('GameOver')
 end
 
 -- Called on every low frequency game tick.
