@@ -18,8 +18,13 @@ function FireWeapon(player, ammo_name)
     Scene:SpawnEntity(args, true)
 end
 
--- Called when the game play begins for a scene.
+-- Called when the game play begins for an entity in scene.
 function BeginPlay(player, scene)
+end
+
+function EndPlay(player, scene)
+    Game:DebugPrint('Game Over!')
+    Game:Stop(0)
 end
 
 -- Called on every low frequency game tick.

@@ -27,6 +27,7 @@
         "checked_for_packing": true
     },
     "A7Z5jfJF38": {
+        "checked_for_packing": true,
         "track_shUULfTlQd": {
             "IXQDBTw7Ub": "5AoCn7w0Cp",
             "num_timelines": 1,
@@ -55,11 +56,28 @@
         "shader_file": "ws://shaders/es2/pulsing.glsl",
         "use_shader_file": true
     },
+    "Kb5sHrP5bL": {
+        "checked_for_packing": true,
+        "shader_file": "ws://shaders/es2/text.glsl",
+        "use_shader_file": true
+    },
+    "M0ePA9uzA5": {
+        "checked_for_packing": true,
+        "shader_file": "",
+        "use_shader_file": false
+    },
     "OtyRiUrsTd": {
         "checked_for_packing": true
     },
     "QldASNFLIb": {
         "checked_for_packing": true
+    },
+    "RKmQZx8H1s": {
+        "checked_for_packing": true,
+        "shader_file": "ws://shaders/es2/text.glsl",
+        "use_shader_file": false
+    },
+    "T38qa8wN2K": {
     },
     "TNyQSW6bB6": {
         "checked_for_packing": true,
@@ -67,11 +85,16 @@
         "use_shader_file": false
     },
     "UWF4u1fYHa": {
+        "checked_for_packing": true
+    },
+    "Z2zrRug3HP": {
+        "checked_for_packing": true
     },
     "bjZ0TrwuxI": {
         "checked_for_packing": true
     },
     "diUlEeS5JH": {
+        "checked_for_packing": true,
         "track_B1wwJqB1NE": {
             "MPkMdJ4HCb": "ZEhllNMgJq",
             "SOys5Ry1kP": "ZEhllNMgJq",
@@ -181,7 +204,7 @@
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
