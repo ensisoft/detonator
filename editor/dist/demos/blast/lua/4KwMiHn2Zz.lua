@@ -41,6 +41,12 @@ function Update(bullet, game_time, dt)
                 Scene:KillEntity(entity)
                 Scene:KillEntity(bullet)
                 SpawnExplosion(ship_pos, 'BlueExplosion')
+                SpawnScore(ship_pos, entity.score)
+                local score = Scene:FindEntityByInstanceName('GameScore')
+                local node  = score:FindNodeByClassName('text')
+                local text  = node:GetTextItem()
+                score.score = score.score + entity.score
+                text:SetText(tostring(score.score))
             end
         elseif entity:GetClassName() == 'Player' and bullet.red == false then
             -- invader ship bullet hit player's ship
