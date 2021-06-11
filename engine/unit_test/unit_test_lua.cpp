@@ -16,6 +16,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  define SOL_ALL_SAFETIES_ON 1
+#  include <sol/sol.hpp>
+#include "warnpop.h"
+
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
@@ -207,6 +212,34 @@ end
 
         sol::function_result res = L["set_junk"]();
         TEST_REQUIRE(res.valid() == false);
+    }
+
+    // frect
+    {
+        sol::state L;
+        L.open_libraries();
+        game::BindBase(L);
+        L.script(
+                R"(
+function test_combine()
+    local a = base.FRect:new(10.0, 10.0, 20.0, 20.0)
+    local b = base.FRect:new(-5.0, 3.0, 10.0, 45.0)
+    return base.FRect.Combine(a, b)
+end
+
+function test_intersect()
+    local a = base.FRect:new(10.0, 10.0, 20.0, 20.0)
+    local b = base.FRect:new(-5.0, 3.0, 10.0, 45.0)
+    return base.FRect.Intersect(a, b)
+end
+        )");
+
+        base::FRect ret = L["test_combine"]();
+        TEST_REQUIRE(ret == base::Union(base::FRect(10.0, 10.0, 20.0, 20.0),
+                                        base::FRect(-5.0, 3.0, 10.0, 45.0)));
+        ret = L["test_intersect"]();
+        TEST_REQUIRE(ret == base::Intersect(base::FRect(10.0, 10.0, 20.0, 20.0),
+                                            base::FRect(-5.0, 3.0, 10.0, 45.0)));
     }
 }
 

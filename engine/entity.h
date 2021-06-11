@@ -565,6 +565,8 @@ namespace game
         { mText = text; }
         void SetText(std::string&& text)
         { mText = std::move(text); }
+        void SetTextColor(const Color4f& color)
+        { mTextColor = color; }
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
 

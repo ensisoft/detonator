@@ -19,9 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  define SOL_ALL_SAFETIES_ON 1
-#  include <sol/sol.hpp>
-#  include <glm/glm.hpp>
+#  include <sol/forward.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -41,6 +39,7 @@ namespace game
     public:
         LuaGame(std::shared_ptr<sol::state> state);
         LuaGame(const std::string& lua_path);
+       ~LuaGame();
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void LoadGame(const ClassLibrary* loader) override;
         virtual void Tick(double game_time, double dt) override;
@@ -78,8 +77,8 @@ namespace game
     {
     public:
         using Action = game::Action;
-
         ScriptEngine(const std::string& lua_path);
+       ~ScriptEngine();
         void SetLoader(const ClassLibrary* loader)
         { mClassLib = loader; }
         void SetPhysicsEngine(const PhysicsEngine* engine)
