@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>ensisoft.com.gamestudio.1.0</namespace>
+    <virtualFolder>doc</virtualFolder>
+    <customFilter name="Ensisoft Gamestudio 1.0">
+        <filterAttribute>Gamestudio</filterAttribute>
+        <filterAttribute>1.0</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>Gamestudio</filterAttribute>
+        <filterAttribute>1.0</filterAttribute>
+        <toc>
+            <section title="Gamestudio Lua Bindings" ref="lua-bindings.html">
+                <section title="Scene"  ref="lua-bindings.html#scene"/>
+                <section title="Entity" ref="lua-bindings.html#entity"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="entity" id="Entity" ref="lua-bindings.html#entity"/>
+            <keyword name="entity" id="Scene" ref="lua-bindings.html#scene"/>
+            <keyword id="Entity:GetTranslation" ref="doc.html#Entity:GetTranslation"/>
+        </keywords>
+        <files>
+            <file>classic.css</file>
+            <file>*.html</file>
+        </files>
+    </filterSection>
+</QtHelpProject>
