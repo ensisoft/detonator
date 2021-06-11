@@ -6,8 +6,7 @@ State = States.Menu
 
 -- Called when the game is first loaded.
 function LoadGame()
-    local ui = ClassLib:FindUIByName('MainMenu')
-    Game:OpenUI(ui)
+    Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-500.0, -800.0, 1000, 800))
 end
 
@@ -17,10 +16,11 @@ function BeginPlay(scene)
     Game:DebugPrint('Press Space to fly the bird!')
 end
 
+
 -- Called as a response to Game:Stop when the game play ends.
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
-    Game:OpenUI(ClassLib:FindUIByName('MainMenu'))
+    Game:OpenUI('MainMenu')
 end
 
 -- Low frequency game tick. Normally called at a lower frequency
@@ -84,9 +84,8 @@ end
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(action)
     if action.name == 'play' then
-        local scene = ClassLib:FindSceneClassByName('My Scene')
         Game:CloseUI(0)
-        Game:Play(scene)
+        Game:Play('My Scene')
     elseif action.name == 'quit' then
         Game:Quit(0)
     end

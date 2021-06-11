@@ -4,8 +4,13 @@
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 
--- Called when the game play begins for a scene.
+-- Called when the game play begins for the entity in the scene.
 function BeginPlay(flappybird, scene)
+
+end
+
+-- Called when the game play ends for the entity in the scene.
+function EndPlay(flappybird, scene)
 
 end
 
@@ -30,6 +35,7 @@ end
 function OnEndContact(flappybird, node, other, other_node)
 end
 
+-- key event handler
 function OnKeyDown(flappybird, symbol, modifier_bits)
     if symbol == wdk.Keys.Space then
         local body = flappybird:FindNodeByClassName('Body')
