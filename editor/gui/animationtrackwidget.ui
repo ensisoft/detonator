@@ -438,6 +438,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="chkShowViewport">
+              <property name="text">
+               <string>Show viewport</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QCheckBox" name="chkShowOrigin">
               <property name="text">
                <string>Show origin</string>
@@ -1379,6 +1389,7 @@
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>chkSnap</tabstop>
+  <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>actuatorNode</tabstop>

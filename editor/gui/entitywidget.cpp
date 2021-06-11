@@ -396,6 +396,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -488,6 +489,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.saveWidget("Entity", mUI.rotation);
     settings.saveWidget("Entity", mUI.chkShowOrigin);
     settings.saveWidget("Entity", mUI.chkShowGrid);
+    settings.saveWidget("Entity", mUI.chkShowViewport);
     settings.saveWidget("Entity", mUI.chkSnap);
     settings.saveWidget("Entity", mUI.cmbGrid);
     settings.saveWidget("Entity", mUI.zoom);
@@ -521,6 +523,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.loadWidget("Entity", mUI.rotation);
     settings.loadWidget("Entity", mUI.chkShowOrigin);
     settings.loadWidget("Entity", mUI.chkShowGrid);
+    settings.loadWidget("Entity", mUI.chkShowViewport);
     settings.loadWidget("Entity", mUI.chkSnap);
     settings.loadWidget("Entity", mUI.cmbGrid);
     settings.loadWidget("Entity", mUI.zoom);
@@ -987,6 +990,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
+    SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
 
     // save the track properties.
     for (auto p : mTrackProperties)
@@ -1264,6 +1268,7 @@ void EntityWidget::on_btnNewTrack_clicked()
     widget->SetZoom(GetValue(mUI.zoom));
     widget->SetShowGrid(GetValue(mUI.chkShowGrid));
     widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
+    widget->SetShowViewport(GetValue(mUI.chkShowViewport));
     widget->SetSnapGrid(GetValue(mUI.chkSnap));
     widget->SetGrid(GetValue(mUI.cmbGrid));
     emit OpenNewWidget(widget);
@@ -1963,6 +1968,14 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     if (GetValue(mUI.chkShowOrigin))
     {
         DrawBasisVectors(painter, view);
+    }
+
+    if (GetValue(mUI.chkShowViewport))
+    {
+        const auto& settings = mState.workspace->GetProjectSettings();
+        const float game_width = settings.viewport_width;
+        const float game_height = settings.viewport_height;
+        DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
     // pop view transformation

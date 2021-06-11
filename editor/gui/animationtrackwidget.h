@@ -81,6 +81,7 @@ namespace gui
         void SetZoom(float zoom);
         void SetShowGrid(bool on_off);
         void SetShowOrigin(bool on_off);
+        void SetShowViewport(bool on_off);
         void SetSnapGrid(bool on_off);
         void SetGrid(GridDensity grid);
     private slots:
