@@ -53,6 +53,7 @@
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/polygonwidget.h"
+#include "editor/gui/dlgabout.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
 #include "editor/gui/dlgpackage.h"
@@ -875,6 +876,12 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    DlgAbout dlg(this);
+    dlg.exec();
 }
 
 void MainWindow::on_actionWindowClose_triggered()

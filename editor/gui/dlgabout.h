@@ -16,16 +16,28 @@
 
 #pragma once
 
-#include "config/config.h"
+#include "config.h"
 
-// Editor build time configuration file.
-#define APP_TITLE "Gamestudio Editor"
-#define APP_VERSION "0.1"
-#define APP_COPYRIGHT "Copyright (c) 2020-2021\n" \
-                      "Sami Väisänen\n"           \
-                      "Ensisoft"
+#include "warnpush.h"
+#  include "ui_dlgabout.h"
+#  include <QTimer>
+#  include <QDialog>
+#include "warnpop.h"
 
-#define APP_LINKS "http://www.ensisoft.com\n" \
-                  "http://www.gamestudio.com\n" \
-                  "http://www.github.com/ensisoft"
+namespace gui
+{
+    class DlgAbout : public QDialog
+    {
+        Q_OBJECT
 
+    public:
+        DlgAbout(QWidget* parent);
+    private slots:
+        void on_btnClose_clicked()
+        { close(); };
+    private:
+        Ui::DlgAbout mUI;
+    private:
+    };
+
+} // namespace
