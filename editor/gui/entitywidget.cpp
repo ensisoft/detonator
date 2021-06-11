@@ -1196,8 +1196,10 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << QString("-- This script will be called for every instance of '%1'\n"
                       "-- in the scene during gameplay.\n").arg(name);
     stream << "-- You're free to delete functions you don't need.\n\n";
-    stream << "-- Called when the game play begins for a scene.\n";
+    stream << "-- Called when the game play begins for an entity in the scene.\n";
     stream << QString("function BeginPlay(%1, scene)\n\nend\n\n").arg(var);
+    stream << "-- Called when the game play ends for an entity in the scene.\n";
+    stream << QString("function EndPlay(%1, scene)\n\nend\n\n").arg(var);
     stream << "-- Called on every low frequency game tick.\n";
     stream << QString("function Tick(%1, game_time, dt)\n\nend\n\n").arg(var);
     stream << "-- Called on every iteration of game loop.\n";
@@ -1206,6 +1208,10 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << QString("function OnBeginContact(%1, node, other, other_node)\nend\n\n").arg(var);
     stream << "-- Called on collision events with other objects.\n";
     stream << QString("function OnEndContact(%1, node, other, other_node)\nend\n\n").arg(var);
+    stream << "-- Called on key down events.\n";
+    stream << QString("function OnKeyDown(%1, symbol, modifier_bits)\nend\n\n").arg(var);
+    stream << "-- Called on key up events.\n";
+    stream << QString("function OnKeyUp(%1, symbol, modifier_bits)\nend\n\n").arg(var);
 
     io.flush();
     io.close();
