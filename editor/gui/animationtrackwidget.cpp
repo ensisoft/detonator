@@ -332,6 +332,7 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.saveWidget("TrackWidget", mUI.kinematicEndVeloZ);
     settings.saveWidget("TrackWidget", mUI.chkShowOrigin);
     settings.saveWidget("TrackWidget", mUI.chkShowGrid);
+    settings.saveWidget("TrackWidget", mUI.chkShowViewport);
     settings.saveWidget("TrackWidget", mUI.chkSnap);
     settings.saveAction("TrackWidget", mUI.actionUsePhysics);
     settings.setValue("TrackWidget", "show_bits", mState.show_flags.value());
@@ -393,6 +394,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.loadWidget("TrackWidget", mUI.kinematicEndVeloZ);
     settings.loadWidget("TrackWidget", mUI.chkShowOrigin);
     settings.loadWidget("TrackWidget", mUI.chkShowGrid);
+    settings.loadWidget("TrackWidget", mUI.chkShowViewport);
     settings.loadWidget("TrackWidget", mUI.chkSnap);
     settings.loadAction("TrackWidget", mUI.actionUsePhysics);
     settings.getValue("TrackWidget", "original_hash", &mOriginalHash);
@@ -674,6 +676,10 @@ void AnimationTrackWidget::SetSnapGrid(bool on_off)
 void AnimationTrackWidget::SetGrid(GridDensity grid)
 {
     SetValue(mUI.cmbGrid, grid);
+}
+void AnimationTrackWidget::SetShowViewport(bool on_off)
+{
+    SetValue(mUI.chkShowViewport, on_off);
 }
 
 void AnimationTrackWidget::on_actionPlay_triggered()
@@ -1664,6 +1670,14 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     if (GetValue(mUI.chkShowOrigin))
     {
         DrawBasisVectors(painter, view);
+    }
+
+    if (GetValue(mUI.chkShowViewport))
+    {
+        const auto& settings    = mWorkspace->GetProjectSettings();
+        const float game_width  = settings.viewport_width;
+        const float game_height = settings.viewport_height;
+        DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
     // pop view transformation
