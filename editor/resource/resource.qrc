@@ -5,7 +5,7 @@
     <file>16x16_ico_png/log_error.png</file>
     <file>16x16_ico_png/log_info.png</file>
     <file>16x16_ico_png/log_debug.png</file>
-
+    <file>16x16_ico_png/about.png</file>
     <file>16x16_ico_png/app_exit.png</file>
     <file>16x16_ico_png/app_next_window.png</file>
     <file>16x16_ico_png/app_prev_window.png</file>
@@ -83,5 +83,7 @@
     <file>32x32_ico_png/semi_circle.png</file>
     <file>32x32_ico_png/placeholder.png</file>
     <file>texture.png</file>
+
+    <file>fonts/orbitron-medium.otf</file>
   </qresource>
 </RCC>
