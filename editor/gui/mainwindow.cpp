@@ -37,6 +37,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "data/json.h"
 #include "graphics/resource.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
@@ -1044,6 +1045,42 @@ void MainWindow::on_actionImportFiles_triggered()
     ImportFiles(files);
 }
 
+void MainWindow::on_actionExportJSON_triggered()
+{
+    if (!mWorkspace)
+        return;
+    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    if (indices.isEmpty())
+        return;
+    const auto& filename = QFileDialog::getSaveFileName(this,
+        tr("Export Resources as Json"),
+        tr("content.json"),
+        tr("JSON (*.json)"));
+    if (filename.isEmpty())
+        return;
+
+    data::JsonObject json;
+    for (int i=0; i<indices.size(); ++i)
+    {
+        const auto& resource = mWorkspace->GetResource(indices[i].row());
+        resource.Serialize(json);
+    }
+    data::JsonFile file;
+    file.SetRootObject(json);
+    const auto [ok, error] = file.Save(app::ToUtf8(filename));
+    if (!ok)
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to export the JSON into file.\n"
+                       "Please see the log for details."));
+        msg.exec();
+    }
+    INFO("Exported %1 resource(s) into '%2'", indices.size(), filename);
+    NOTE("Exported %1 resource(s) into '%2'", indices.size(), filename);
+}
+
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1369,6 +1406,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
+    mUI.actionExportJSON->setEnabled(!indices.isEmpty());
 
     // disable edit actions if a non-native resources have been
     // selected. these need to be opened through an external editor.
@@ -1415,11 +1453,11 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
     menu.addSeparator();
-    menu.addMenu(&show);
-    menu.addSeparator();
     menu.addAction(mUI.actionDuplicateResource);
-    menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
+    menu.addAction(mUI.actionExportJSON);
+    menu.addSeparator();
+    menu.addMenu(&show);
     menu.exec(QCursor::pos());
 }
 

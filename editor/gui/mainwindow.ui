@@ -1510,6 +1510,18 @@
     <string>New UI</string>
    </property>
   </action>
+  <action name="actionExportJSON">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Json</string>
+   </property>
+   <property name="toolTip">
+    <string>Export resources as JSON</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>statTime</tabstop>
