@@ -189,7 +189,7 @@ if (MSVC)
 endif()
 
 # Editor application.
-add_executable(Editor
+add_executable(GSEditor
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -339,17 +339,17 @@ add_executable(Editor
     third_party/Qt-Color-Widgets/include/hue_slider.hpp
     third_party/Qt-Color-Widgets/include/swatch.hpp
 )
-target_compile_definitions(Editor PRIVATE "QTCOLORWIDGETS_LIBRARY")
-target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+target_compile_definitions(GSEditor PRIVATE "QTCOLORWIDGETS_LIBRARY")
+target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
-target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
-target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
-target_include_directories(Editor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
-target_link_libraries(Editor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(Editor EngineLib UiLib GfxLib DataLib BaseLib)
-target_link_libraries(Editor ${CONAN_LIBS})
-install(TARGETS Editor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
+target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(GSEditor EngineLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(GSEditor ${CONAN_LIBS})
+install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
