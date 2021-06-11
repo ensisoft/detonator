@@ -70,6 +70,9 @@ namespace game
     };
     struct DebugClearAction {
     };
+    struct ShowDebugAction {
+        bool show = true;
+    };
 
     struct ShowMouseAction {
         bool show = true;
@@ -97,6 +100,7 @@ namespace game
             DebugPrintAction,
             DebugClearAction,
             DelayAction,
+            ShowDebugAction,
             ShowMouseAction,
             BlockKeyboardAction,
             BlockMouseAction,

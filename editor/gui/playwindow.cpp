@@ -684,13 +684,16 @@ void PlayWindow::LoadState()
     }
 
     const bool show_status_bar = mWorkspace.GetUserProperty("play_window_show_statusbar",
-                                                            mUI.statusbar->isVisible());
+       mUI.statusbar->isVisible());
     const bool show_eventlog = mWorkspace.GetUserProperty("play_window_show_eventlog",
-                                                          mUI.dockWidget->isVisible());
+        mUI.dockWidget->isVisible());
     const bool debug_draw = mWorkspace.GetUserProperty("play_window_debug_draw",
-                                                       mUI.actionToggleDebugDraw->isChecked());
+       mUI.actionToggleDebugDraw->isChecked());
     const bool debug_log = mWorkspace.GetUserProperty("play_window_debug_log",
-                                                      mUI.actionToggleDebugLog->isChecked());
+       mUI.actionToggleDebugLog->isChecked());
+    const bool debug_msg = mWorkspace.GetUserProperty("play_window_debug_msg",
+       mUI.actionToggleDebugMsg->isChecked());
+    SetValue(mUI.actionToggleDebugMsg, debug_msg);
     SetValue(mUI.actionToggleDebugLog, debug_log);
     SetValue(mUI.actionToggleDebugDraw, debug_draw);
     SetValue(mUI.logFilter, log_filter);
@@ -712,6 +715,7 @@ void PlayWindow::SaveState()
     mWorkspace.SetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
     mWorkspace.SetUserProperty("play_window_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
     mWorkspace.SetUserProperty("play_window_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
+    mWorkspace.SetUserProperty("play_window_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
     mWorkspace.SetUserProperty("play_window_log_filter", (QString)GetValue(mUI.logFilter));
     mWorkspace.SetUserProperty("play_window_log_filter_case_sensitive", (bool)GetValue(mUI.logFilterCaseSensitive));
 }
@@ -842,6 +846,10 @@ void PlayWindow::on_actionToggleDebugDraw_toggled()
     SetDebugOptions();
 }
 void PlayWindow::on_actionToggleDebugLog_toggled()
+{
+    SetDebugOptions();
+}
+void PlayWindow::on_actionToggleDebugMsg_toggled()
 {
     SetDebugOptions();
 }
@@ -1128,9 +1136,9 @@ void PlayWindow::SetDebugOptions() const
     game::App::DebugOptions debug;
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_log       = GetValue(mUI.actionToggleDebugLog);
+    debug.debug_show_msg  = GetValue(mUI.actionToggleDebugMsg);
     debug.debug_font      = "app://fonts/orbitron-medium.otf";
     debug.debug_show_fps  = InFullScreen();
-    debug.debug_show_msg  = true;
     debug.debug_print_fps = false;
     mApp->SetDebugOptions(debug);
 }

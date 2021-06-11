@@ -158,6 +158,11 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         mickey.show = show;
         self.PushAction(mickey);
     };
+    engine["ShowDebug"] = [](LuaGame& self, bool show) {
+        ShowDebugAction act;
+        act.show = show;
+        self.PushAction(act);
+    };
     engine["SetFullScreen"] = [](LuaGame& self, bool full_screen) {
         RequestFullScreenAction fs;
         fs.full_screen = full_screen;

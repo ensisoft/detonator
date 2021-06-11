@@ -228,6 +228,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    <addaction name="separator"/>
    <addaction name="actionToggleDebugDraw"/>
    <addaction name="actionToggleDebugLog"/>
+   <addaction name="actionToggleDebugMsg"/>
    <addaction name="separator"/>
    <addaction name="actionScreenshot"/>
    <addaction name="separator"/>
@@ -480,6 +481,24 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="shortcut">
     <string>F9</string>
+   </property>
+  </action>
+  <action name="actionToggleDebugMsg">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Debug Msg</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle game debug message display</string>
    </property>
   </action>
  </widget>
