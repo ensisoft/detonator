@@ -30,6 +30,7 @@ function SpawnEnemy(x, y, velocity)
     args.position = glm.vec2:new(x, y)
     local ship = Scene:SpawnEntity(args, true)
     ship.velocity = velocity * ship_velo_increment
+    ship.score    = math.floor(ship.score * ship_velo_increment)
 end
 
 function SpawnWaveLeft()

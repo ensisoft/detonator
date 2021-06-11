@@ -50,6 +50,7 @@ function Tick(ship2, game_time, dt)
         args.position = util.GetTranslationFromMatrix(matrix)
         args.name = 'blue bullet'
         local bullet = Scene:SpawnEntity(args, true)
+        bullet.velocity = ship2.velocity.y + 100
     end
     tick_counter = tick_counter + 1
 end

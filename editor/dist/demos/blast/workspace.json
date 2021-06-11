@@ -57,7 +57,6 @@
         "use_shader_file": true
     },
     "Kb5sHrP5bL": {
-        "checked_for_packing": true,
         "shader_file": "ws://shaders/es2/text.glsl",
         "use_shader_file": true
     },
@@ -78,6 +77,7 @@
         "use_shader_file": false
     },
     "RoGbL91JLQ": {
+        "checked_for_packing": true
     },
     "T38qa8wN2K": {
     },
@@ -168,6 +168,19 @@
         "window_width": 1024,
         "working_folder": "${workspace}"
     },
+    "q4pUEDx2rE": {
+        "checked_for_packing": true,
+        "track_AnvwndODTH": {
+            "8l8mk3xaCl": "MYkNyOARX5",
+            "num_timelines": 2,
+            "sdAGTSoJav": "ifSQGpZzb4",
+            "timeline_0_node_id": "FwndgajgOa",
+            "timeline_0_self_id": "ifSQGpZzb4",
+            "timeline_1_node_id": "E5w4haXq1s",
+            "timeline_1_self_id": "MYkNyOARX5",
+            "uZqW9kL1Cn": "ifSQGpZzb4"
+        }
+    },
     "qOIpuPbyL1": {
         "checked_for_packing": true
     },
@@ -203,6 +216,8 @@
         "checked_for_packing": true,
         "shader_file": "",
         "use_shader_file": false
+    },
+    "wXtbrxNRpX": {
     },
     "workspace": {
         "packing_param_combine_textures": true,

@@ -744,6 +744,12 @@
             "x": 200.0,
             "y": 50.0
           }
+        },
+        {
+          "name": "score",
+          "readonly": false,
+          "type": "Integer",
+          "value": 100
         }
       ]
     },
@@ -1127,7 +1133,7 @@
       "vars": [
         {
           "name": "velocity",
-          "readonly": true,
+          "readonly": false,
           "type": "Float",
           "value": 500.0
         },
@@ -1291,6 +1297,255 @@
       "resource_id": "sX3kBAhLxU",
       "resource_name": "BlastRadius",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "q4pUEDx2rE",
+      "idle_track": "AnvwndODTH",
+      "lifetime": 2.0,
+      "name": "Score",
+      "nodes": [
+        {
+          "class": "FwndgajgOa",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "text",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "size": {
+            "x": 197.4628448486328,
+            "y": 101.5897445678711
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/orbitron-light.otf",
+            "font_size": 48,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "text": "123",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        },
+        {
+          "class": "E5w4haXq1s",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "body",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 10.0,
+            "y": 10.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "FwndgajgOa"
+                }
+              }
+            ],
+            "node": {
+              "id": "E5w4haXq1s"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "q4pUEDx2rE",
+      "resource_name": "Score",
+      "script_file": "",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 0.5013895034790039,
+                "id": "sdAGTSoJav",
+                "method": "Cosine",
+                "node": "FwndgajgOa",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.5235987901687622,
+                "scale": {
+                  "x": 0.5,
+                  "y": 0.5
+                },
+                "size": {
+                  "x": 197.4600067138672,
+                  "y": 101.58999633789063
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            },
+            {
+              "actuator": {
+                "duration": 0.4986104965209961,
+                "id": "uZqW9kL1Cn",
+                "method": "Cosine",
+                "node": "FwndgajgOa",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "size": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "starttime": 0.5013895034790039
+              },
+              "type": "Transform"
+            },
+            {
+              "actuator": {
+                "duration": 1.0,
+                "id": "8l8mk3xaCl",
+                "method": "Cosine",
+                "node": "E5w4haXq1s",
+                "position": {
+                  "x": -450.0,
+                  "y": -350.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 1.1100000143051147,
+                  "y": 0.0
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 2.0,
+          "id": "AnvwndODTH",
+          "looping": false,
+          "name": "Fade"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true
+      },
+      "id": "wXtbrxNRpX",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "GameScore",
+      "nodes": [
+        {
+          "class": "TdZawTgkXO",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "text",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 0.800000011920929,
+            "y": 0.800000011920929
+          },
+          "size": {
+            "x": 204.625,
+            "y": 45.2900390625
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/orbitron-bold.otf",
+            "font_size": 48,
+            "horizontal_align": "Left",
+            "layer": 0,
+            "line_height": 1.0,
+            "text": "0",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Top"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "TdZawTgkXO"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "wXtbrxNRpX",
+      "resource_name": "GameScore",
+      "script_file": "",
+      "vars": [
+        {
+          "name": "score",
+          "readonly": false,
+          "type": "Integer",
+          "value": 0
+        }
+      ]
     }
   ],
   "materials": [
@@ -3033,7 +3288,7 @@
           "id": "6bXKmTw71O",
           "idle_animation_id": "",
           "layer": -2,
-          "name": "Copy of Background_0",
+          "name": "Background",
           "parent_render_tree_node": "",
           "position": {
             "x": -0.0,
@@ -3043,6 +3298,29 @@
           "scale": {
             "x": 2.0,
             "y": 2.0
+          }
+        },
+        {
+          "entity": "wXtbrxNRpX",
+          "flags": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true
+          },
+          "id": "khKJrggLXs",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "GameScore",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -468.5714111328125,
+            "y": -362.85711669921875
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
           }
         }
       ],
@@ -3056,6 +3334,11 @@
           {
             "node": {
               "id": "6bXKmTw71O"
+            }
+          },
+          {
+            "node": {
+              "id": "khKJrggLXs"
             }
           }
         ],
