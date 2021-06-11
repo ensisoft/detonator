@@ -97,6 +97,7 @@ namespace gui
         void on_actionLogShowError_toggled(bool val);
         void on_actionToggleDebugDraw_toggled();
         void on_actionToggleDebugLog_toggled();
+        void on_actionToggleDebugMsg_toggled();
         void on_actionFullscreen_triggered();
         void on_actionScreenshot_triggered();
         void on_btnApplyFilter_clicked();

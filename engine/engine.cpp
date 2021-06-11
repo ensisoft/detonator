@@ -234,7 +234,7 @@ public:
                 mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
         }
-        if (mDebug.debug_show_msg)
+        if (mDebug.debug_show_msg && mShowDebugs)
         {
             gfx::FRect rect(10, 30, 500, 20);
             for (const auto& print : mDebugPrints)
@@ -772,6 +772,8 @@ private:
     bool mBlockKeyboard = false;
     // block mouse event processing.
     bool mBlockMouse = false;
+    // flag to control the debug string printing.
+    bool mShowDebugs = true;
 };
 
 } //namespace
