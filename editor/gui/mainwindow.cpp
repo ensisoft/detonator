@@ -878,6 +878,22 @@ void MainWindow::on_actionExit_triggered()
     this->close();
 }
 
+void MainWindow::on_actionHelp_triggered()
+{
+    QStringList help_args;
+    help_args << "-collectionFile";
+    help_args << "help/help.qhc";
+    QString help_name = "assistant-qt5";
+#if defined(WINDOWS_OS)
+    help_name.append(".exe");
+#endif
+    const auto& help = app::JoinPath(QCoreApplication::applicationDirPath(), help_name);
+    if (!QProcess::startDetached(help, help_args))
+    {
+        ERROR("Failed to start assistant-qt5.");
+    }
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     DlgAbout dlg(this);

@@ -1,0 +1,15 @@
+div {
+    margin-top: 10px;;
+}
+
+div.desc {
+    word-wrap: break-word;
+}
+
+div.name {
+    font-weight: bold;
+}
+
+div.code {
+    font-family: monospace;
+}

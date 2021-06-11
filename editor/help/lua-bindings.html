@@ -1,0 +1,102 @@
+<html>
+    <head>
+        <title>Gamestudio Lua bindings</title>
+        <link rel="stylesheet" type="text/css" href="classic.css">
+    </head>
+<body>
+
+<!-- template
+
+<div class="binding">
+    <div class="name"></div>
+    <div class="desc"></div>
+    <div class="code"></div>
+    <div class="parameters"></div>
+    <div class="retval"></div>
+</div>
+-->
+<div class="module">
+    <div class="desc" id="scene">
+        <h3>Scene</h3>
+        Scene is the basic representation of the game world. It contains the entities arranged in a hierarchy. The scene is initially
+        built in the editor application and during the game play you can access an instance of the scene. When the game play with some
+        scene begins the scene represenation built in the editor is used to create an instance and all scene nodes placed in the world
+        in the editor are used to create <a href="#entity">entity</a> instances. While the game runs you can interact with the scene, by
+        example querying it for entities and spawning new entities inside it.
+    </div>
+    <h3>Methods</h3>
+    todo:
+</div>
+
+
+<div class="module">
+    <div class="desc" id="entity">
+        <h3>Entity</h3>
+        Entities are the objects that are spawned in the game. When the game play beings for each object that is placed
+        in the <a href="#scene">scene</a> a new entity is spaned automatically. When the game play is going on it's possible to alter the game
+        world by adding/spawning new entities and removing/deleting existing entities. It's also possible to alter the
+        hierarchy of the game world by linking entities with other entities thus forming transformation hierarchies.
+    </div>
+    <h3>Methods</h3>
+    <div class="binding" id="Entity:GetTranslation">
+        <div class="name">GetTranslation</div>
+        <div class="desc">Returns the entity's translation (x, y offset) relative to its parent. If the entity's parent is the
+        game world root then this translation is also the global x,y position of the entity.</div>
+        <div class="code">my_entity:GetTranslation()</div>
+        <div class="parameters"></div>
+        <div class="retval">glm.vec2</div>
+    </div>
+
+    <div class="binding" id="Entity:GetName">
+        <div class="name">GetName</div>
+        <div class="desc">Returns the entity's human readable name if any. Entities that are spawned when
+        an instance of the scene is created are given names based on the names of the nodes in the scene editor.</div>
+        <div class="code">my_entity:GetName()</div>
+        <div class="parameters"></div>
+        <div class="retval">string</div>
+    </div>
+
+    <div class="binding">
+        <div class="name">GetId</div>
+        <div class="desc">Returns the entity's unique instance Id. Entities that are spawned when an
+        instance of the scene is created are given IDs based on the IDs of the nodes in the scene editor.</div>
+        <div class="code">my_entity:GetId()</div>
+        <div class="parameters"></div>
+        <div class="retval">string</div>
+    </div>
+
+    <div class="binding">
+        <div class="name">GetClassId</div>
+        <div class="desc">Returns the Id of the entity class, i.e the identifier for its type.</div>
+        <div class="code">my_entity:GetClassId()</div>
+        <div class="parameters"></div>
+        <div class="retval">string</div>
+    </div>
+
+    <div class="binding">
+        <div class="name">GetScale</div>
+        <div class="desc">Returns the scaling factor that applies to Entity and all of it's descendants, i.e. linked child entities (if any).</div>
+        <div class="code">my_entity:GetScale()</div>
+        <div class="parameters"></div>
+        <div class="retval">glm.vec2</div>
+    </div>
+
+    <div class="binding">
+        <div class="name"></div>
+        <div class="desc"></div>
+        <div class="code"></div>
+        <div class="parameters"></div>
+        <div class="retval"></div>
+    </div>
+
+    <div class="binding">
+        <div class="name"></div>
+        <div class="desc"></div>
+        <div class="code"></div>
+        <div class="parameters"></div>
+        <div class="retval"></div>
+    </div>
+</div>
+
+</body>
+</html>

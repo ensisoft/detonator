@@ -92,6 +92,7 @@ namespace gui
         void on_mainTab_currentChanged(int index);
         void on_mainTab_tabCloseRequested(int index);
         void on_actionExit_triggered();
+        void on_actionHelp_triggered();
         void on_actionAbout_triggered();
         void on_actionWindowClose_triggered();
         void on_actionWindowNext_triggered();
