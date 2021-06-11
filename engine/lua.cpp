@@ -115,21 +115,21 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
 {
     using namespace game;
     engine["Play"] = sol::overload(
-            [](LuaGame& self, ClassHandle<SceneClass> klass) {
-                if (!klass)
-                    throw std::runtime_error("Nil scene class");
-                PlayAction play;
-                play.klass = klass;
-                self.PushAction(play);
-            },
-            [](LuaGame& self, std::string name) {
-                auto handle = self.GetClassLib()->FindSceneClassByName(name);
-                if (!handle)
-                    throw std::runtime_error("No such scene class: " + name);
-                PlayAction play;
-                play.klass = handle;
-                self.PushAction(play);
-            });
+        [](LuaGame& self, ClassHandle<SceneClass> klass) {
+            if (!klass)
+                throw std::runtime_error("Nil scene class");
+            PlayAction play;
+            play.klass = klass;
+            self.PushAction(play);
+        },
+        [](LuaGame& self, std::string name) {
+            auto handle = self.GetClassLib()->FindSceneClassByName(name);
+            if (!handle)
+                throw std::runtime_error("No such scene class: " + name);
+            PlayAction play;
+            play.klass = handle;
+            self.PushAction(play);
+        });
 
     engine["Suspend"] = [](LuaGame& self) {
         SuspendAction suspend;
@@ -188,27 +188,103 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         self.PushAction(action);
     };
     engine["OpenUI"] = sol::overload(
-            [](LuaGame& self, ClassHandle<uik::Window> model) {
-                if (!model)
-                    throw std::runtime_error("Nil UI window object.");
-                OpenUIAction action;
-                action.ui = model;
-                self.PushAction(std::move(action));
-            },
-            [](LuaGame& self, std::string name) {
-                auto handle = self.GetClassLib()->FindUIByName(name);
-                if (!handle)
-                    throw std::runtime_error("No such UI: " + name);
-                OpenUIAction action;
-                action.ui = handle;
-                self.PushAction(action);
-            });
+        [](LuaGame& self, ClassHandle<uik::Window> model) {
+            if (!model)
+                throw std::runtime_error("Nil UI window object.");
+            OpenUIAction action;
+            action.ui = model;
+            self.PushAction(std::move(action));
+        },
+        [](LuaGame& self, std::string name) {
+            auto handle = self.GetClassLib()->FindUIByName(name);
+            if (!handle)
+                throw std::runtime_error("No such UI: " + name);
+            OpenUIAction action;
+            action.ui = handle;
+            self.PushAction(action);
+        });
     engine["CloseUI"] = [](LuaGame& self, int result) {
         CloseUIAction action;
         action.result = result;
         self.PushAction(std::move(action));
     };
 }
+template<typename Type>
+bool TestFlag(const Type& object, const std::string& name)
+{
+    using Flags = typename Type::Flags;
+    const auto enum_val = magic_enum::enum_cast<Flags>(name);
+    if (!enum_val.has_value())
+        throw std::runtime_error("No such flag: " + name);
+    return object.TestFlag(enum_val.value());
+}
+template<typename Type>
+void SetFlag(Type& object, const std::string& name, bool on_off)
+{
+    using Flags = typename Type::Flags;
+    const auto enum_val = magic_enum::enum_cast<Flags>(name);
+    if (!enum_val.has_value())
+        throw std::runtime_error("No such flag: " + name);
+    object.SetFlag(enum_val.value(), on_off);
+}
+
+template<typename Type>
+sol::object GetScriptVar(const Type& object, const char* key, sol::this_state state)
+{
+    using namespace game;
+    sol::state_view lua(state);
+    const ScriptVar* var = object.FindScriptVar(key);
+    if (var && var->GetType() == ScriptVar::Type::Boolean)
+        return sol::make_object(lua, var->GetValue<bool>());
+    else if (var && var->GetType() == ScriptVar::Type::Float)
+        return sol::make_object(lua, var->GetValue<float>());
+    else if (var && var->GetType() == ScriptVar::Type::String)
+        return sol::make_object(lua, var->GetValue<std::string>());
+    else if (var && var->GetType() == ScriptVar::Type::Integer)
+        return sol::make_object(lua, var->GetValue<int>());
+    else if (var && var->GetType() == ScriptVar::Type::Vec2)
+        return sol::make_object(lua, var->GetValue<glm::vec2>());
+    else if (var) BUG("Unhandled ScriptVar type.");
+    throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+}
+template<typename Type>
+void SetScriptVar(Type& object, const char* key, sol::object value)
+{
+    using namespace game;
+    const ScriptVar* var = object.FindScriptVar(key);
+    if (var == nullptr)
+        throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+    else if (var->IsReadOnly())
+        throw std::runtime_error(base::FormatString("Trying to write to a read only variable: '%1'", key));
+
+    if (value.is<int>() && var->HasType<int>())
+        var->SetValue(value.as<int>());
+    else if (value.is<float>() && var->HasType<float>())
+        var->SetValue(value.as<float>());
+    else if (value.is<bool>() && var->HasType<bool>())
+        var->SetValue(value.as<bool>());
+    else if (value.is<std::string>() && var->HasType<std::string>())
+        var->SetValue(value.as<std::string>());
+    else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
+        var->SetValue(value.as<glm::vec2>());
+    else throw std::runtime_error(base::FormatString("Variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
+}
+
+// WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
+// directly in the call to create new usertype. adding these specializations as a workaround.
+template sol::object GetScriptVar<game::Scene>(const game::Scene&, const char*, sol::this_state);
+template sol::object GetScriptVar<game::Entity>(const game::Entity&, const char*, sol::this_state);
+template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object);
+template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object);
+
+template<typename Widget, uik::Widget::Type CastType>
+Widget* WidgetCast(uik::Widget* widget)
+{
+    if (widget->GetType() != CastType)
+        throw std::runtime_error(base::FormatString("Widget '%1' is not a %2", widget->GetName(), CastType));
+    return static_cast<Widget*>(widget);
+}
+
 } // namespace
 
 namespace game
@@ -249,6 +325,8 @@ LuaGame::LuaGame(const std::string& lua_path)
     // todo: maybe this needs some configuring or whatever?
     mLuaState->script_file(lua_path + "/game.lua");
 }
+
+LuaGame::~LuaGame() = default;
 
 void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
 {
@@ -369,6 +447,8 @@ void LuaGame::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse)
 
 ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
 {}
+
+ScriptEngine::~ScriptEngine() = default;
 
 void ScriptEngine::BeginPlay(Scene* scene)
 {
@@ -623,29 +703,27 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
 void BindUtil(sol::state& L)
 {
     auto util = L.create_named_table("util");
-    {
-        util["GetRotationFromMatrix"]    = GetRotationFromMatrix;
-        util["GetScaleFromMatrix"]       = GetScaleFromMatrix;
-        util["GetTranslationFromMatrix"] = GetTranslationFromMatrix;
-        util["RotateVector"]             = RotateVector;
-    }
+    util["GetRotationFromMatrix"]    = &GetRotationFromMatrix;
+    util["GetScaleFromMatrix"]       = &GetScaleFromMatrix;
+    util["GetTranslationFromMatrix"] = &GetTranslationFromMatrix;
+    util["RotateVector"]             = &RotateVector;
 
-    {
-        sol::constructors<FBox(), FBox(float, float), FBox(const glm::mat4& mat, float, float), FBox(const glm::mat4& mat)> ctors;
-        auto box = util.new_usertype<FBox>("FBox", ctors);
-        box["GetWidth"]    = &FBox::GetWidth;
-        box["GetHeight"]   = &FBox::GetHeight;
-        box["GetTopLeft"]  = &FBox::GetTopLeft;
-        box["GetTopRight"] = &FBox::GetTopRight;
-        box["GetBotRight"] = &FBox::GetTopRight;
-        box["GetBotLeft"]  = &FBox::GetBotLeft;
-        box["GetCenter"]   = &FBox::GetCenter;
-        box["GetSize"]     = &FBox::GetSize;
-        box["GetRotation"] = &FBox::GetRotation;
-        box["Transform"]   = &FBox::Transform;
-        box["Reset"]       = &FBox::Reset;
-    }
-
+    sol::constructors<FBox(),
+            FBox(float, float),
+            FBox(const glm::mat4& mat, float, float),
+            FBox(const glm::mat4& mat)> ctors;
+    auto box = util.new_usertype<FBox>("FBox", ctors);
+    box["GetWidth"]    = &FBox::GetWidth;
+    box["GetHeight"]   = &FBox::GetHeight;
+    box["GetTopLeft"]  = &FBox::GetTopLeft;
+    box["GetTopRight"] = &FBox::GetTopRight;
+    box["GetBotRight"] = &FBox::GetTopRight;
+    box["GetBotLeft"]  = &FBox::GetBotLeft;
+    box["GetCenter"]   = &FBox::GetCenter;
+    box["GetSize"]     = &FBox::GetSize;
+    box["GetRotation"] = &FBox::GetRotation;
+    box["Transform"]   = &FBox::Transform;
+    box["Reset"]       = &FBox::Reset;
 }
 
 void BindBase(sol::state& L)
@@ -656,87 +734,73 @@ void BindBase(sol::state& L)
     table["error"] = [](const std::string& str) { ERROR(str); };
     table["info"]  = [](const std::string& str) { INFO(str); };
 
-    // FRect
+    sol::constructors<base::FRect(), base::FRect(float, float, float, float)> rect_ctors;
+    auto rect = table.new_usertype<base::FRect>("FRect", rect_ctors);
+    rect["GetHeight"]      = &base::FRect::GetHeight;
+    rect["GetWidth"]       = &base::FRect::GetWidth;
+    rect["GetX"]           = &base::FRect::GetX;
+    rect["GetY"]           = &base::FRect::GetY;
+    rect["SetX"]           = &base::FRect::SetX;
+    rect["SetY"]           = &base::FRect::SetY;
+    rect["SetWidth"]       = &base::FRect::SetWidth;
+    rect["SetHeight"]      = &base::FRect::SetHeight;
+    rect["Resize"]         = (void(base::FRect::*)(float, float))&base::FRect::Resize;
+    rect["Grow"]           = (void(base::FRect::*)(float, float))&base::FRect::Grow;
+    rect["Move"]           = (void(base::FRect::*)(float, float))&base::FRect::Move;
+    rect["Translate"]      = (void(base::FRect::*)(float, float))&base::FRect::Translate;
+    rect["IsEmpty"]        = &base::FRect::IsEmpty;
+    rect["Combine"]        = &base::Union<float>;
+    rect["Intersect"]      = &base::Intersect<float>;
+    rect["TestIntersect"]  = &base::DoesIntersect<float>;
+
+    sol::constructors<base::FSize(), base::FSize(float, float)> size_ctors;
+    auto size = table.new_usertype<base::FSize>("FSize", size_ctors);
+    size["GetWidth"]  = &base::FSize::GetWidth;
+    size["GetHeight"] = &base::FSize::GetHeight;
+    size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
+    size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
+    size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
+
+    sol::constructors<base::FPoint(), base::FPoint(float, float)> point_ctors;
+    auto point = table.new_usertype<base::FPoint>("FPoint", point_ctors);
+    point["GetX"] = &base::FPoint::GetX;
+    point["GetY"] = &base::FPoint::GetY;
+    point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
+    point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
+
+    // build color name table
+    for (const auto& color : magic_enum::enum_values<base::Color>())
     {
-        sol::constructors<base::FRect(), base::FRect(float, float, float, float)> ctors;
-        auto rect = table.new_usertype<base::FRect>("FRect", ctors);
-        rect["GetHeight"] = &base::FRect::GetHeight;
-        rect["GetWidth"]  = &base::FRect::GetWidth;
-        rect["GetX"]      = &base::FRect::GetX;
-        rect["GetY"]      = &base::FRect::GetY;
-        rect["SetX"]      = &base::FRect::SetX;
-        rect["SetY"]      = &base::FRect::SetY;
-        rect["SetWidth"]  = &base::FRect::SetWidth;
-        rect["SetHeight"] = &base::FRect::SetHeight;
-        rect["Resize"]    = (void(base::FRect::*)(float, float))&base::FRect::Resize;
-        rect["Grow"]      = (void(base::FRect::*)(float, float))&base::FRect::Grow;
-        rect["Move"]      = (void(base::FRect::*)(float, float))&base::FRect::Move;
-        rect["Translate"] = (void(base::FRect::*)(float, float))&base::FRect::Translate;
-        rect["IsEmpty"]   = &base::FRect::IsEmpty;
-        // global functions for FRect
-        table["CombineRects"]     = base::Union<float>;
-        table["IntersectRects"]   = base::Intersect<float>;
-        table["DoRectsIntersect"] = base::DoesIntersect<float>;
+        const std::string name(magic_enum::enum_name(color));
+        table[sol::create_if_nil]["Colors"][name] = magic_enum::enum_integer(color);
     }
 
-    // FSize
-    {
-        sol::constructors<base::FSize(), base::FSize(float, float)> ctors;
-        auto size = table.new_usertype<base::FSize>("FSize", ctors);
-        size["GetWidth"]  = &base::FSize::GetWidth;
-        size["GetHeight"] = &base::FSize::GetHeight;
-        size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
-        size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
-        size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
-    }
+    // todo: figure out a way to construct from color name, is that possible?
+    sol::constructors<base::Color4f(),
+            base::Color4f(float, float, float, float),
+            base::Color4f(int, int, int, int)> color_ctors;
+    auto color = table.new_usertype<base::Color4f>("Color4f", color_ctors);
+    color["GetRed"]     = &base::Color4f::Red;
+    color["GetGreen"]   = &base::Color4f::Green;
+    color["GetBlue"]    = &base::Color4f::Blue;
+    color["GetAlpha"]   = &base::Color4f::Alpha;
+    color["SetRed"]     = (void(base::Color4f::*)(float))&base::Color4f::SetRed;
+    color["SetGreen"]   = (void(base::Color4f::*)(float))&base::Color4f::SetGreen;
+    color["SetBlue"]    = (void(base::Color4f::*)(float))&base::Color4f::SetBlue;
+    color["SetAlpha"]   = (void(base::Color4f::*)(float))&base::Color4f::SetAlpha;
+    color["SetColor"]   = [](base::Color4f& color, int value) {
+        const auto color_value = magic_enum::enum_cast<base::Color>(value);
+        if (!color_value.has_value())
+            throw std::runtime_error("No such color value:" + std::to_string(value));
+        color = base::Color4f(color_value.value());
+    };
+    color["FromEnum"]   = [](int value) {
+        const auto color_value = magic_enum::enum_cast<base::Color>(value);
+        if (!color_value.has_value())
+            throw std::runtime_error("No such color value:" + std::to_string(value));
+        return base::Color4f(color_value.value());
+    };
 
-    // FPoint
-    {
-        sol::constructors<base::FPoint(), base::FPoint(float, float)> ctors;
-        auto point = table.new_usertype<base::FPoint>("FPoint", ctors);
-        point["GetX"] = &base::FPoint::GetX;
-        point["GetY"] = &base::FPoint::GetY;
-        point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
-        point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
-    }
-
-    // build table for color names
-    {
-        for (const auto& color : magic_enum::enum_values<base::Color>())
-        {
-            const std::string name(magic_enum::enum_name(color));
-            table[sol::create_if_nil]["Colors"][name] = magic_enum::enum_integer(color);
-        }
-    }
-
-    // Color4f
-    {
-        // todo: figure out a way to construct from color name, is that possible?
-        sol::constructors<base::Color4f(),
-                base::Color4f(float, float, float, float),
-                base::Color4f(int, int, int, int)> ctors;
-        auto color = table.new_usertype<base::Color4f>("Color4f", ctors);
-        color["FromEnum"]   = [](int value) {
-            const auto color_value = magic_enum::enum_cast<base::Color>(value);
-            if (!color_value.has_value())
-                throw std::runtime_error("No such color value:" + std::to_string(value));
-            return base::Color4f(color_value.value());
-        };
-        color["GetRed"]     = &base::Color4f::Red;
-        color["GetGreen"]   = &base::Color4f::Green;
-        color["GetBlue"]    = &base::Color4f::Blue;
-        color["GetAlpha"]   = &base::Color4f::Alpha;
-        color["SetRed"]     = (void(base::Color4f::*)(float))&base::Color4f::SetRed;
-        color["SetGreen"]   = (void(base::Color4f::*)(float))&base::Color4f::SetGreen;
-        color["SetBlue"]    = (void(base::Color4f::*)(float))&base::Color4f::SetBlue;
-        color["SetAlpha"]   = (void(base::Color4f::*)(float))&base::Color4f::SetAlpha;
-        color["SetColor"]   = [](base::Color4f& color, int value) {
-            const auto color_value = magic_enum::enum_cast<base::Color>(value);
-            if (!color_value.has_value())
-                throw std::runtime_error("No such color value:" + std::to_string(value));
-            color = base::Color4f(color_value.value());
-        };
-    }
 }
 
 void BindGLM(sol::state& L)
@@ -749,8 +813,8 @@ void BindGLM(sol::state& L)
             throw std::runtime_error("glm.vec2 access out of bounds");
         return vec[index];
             });
-    vec2["x"]   = &glm::vec2::x;
-    vec2["y"]   = &glm::vec2::y;
+    vec2["x"]         = &glm::vec2::x;
+    vec2["y"]         = &glm::vec2::y;
     vec2["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
     vec2["normalize"] = [](const glm::vec2& vec) { return glm::normalize(vec); };
     // adding meta functions for operators
@@ -860,127 +924,91 @@ void BindWDK(sol::state& L)
 void BindUIK(sol::state& L)
 {
     auto table = L["uik"].get_or_create<sol::table>();
-    {
-        auto widget = table.new_usertype<uik::Widget>("Widget");
-        widget["GetId"]          = &uik::Widget::GetId;
-        widget["GetName"]        = &uik::Widget::GetName;
-        widget["GetHash"]        = &uik::Widget::GetHash;
-        widget["GetSize"]        = &uik::Widget::GetSize;
-        widget["GetPosition"]    = &uik::Widget::GetPosition;
-        widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
-        widget["TestFlag"]       = [](const uik::Widget* widget, const std::string& name) {
-            const auto enum_val = magic_enum::enum_cast<uik::Widget::Flags>(name);
-            if (!enum_val.has_value())
-                throw std::runtime_error("No such widget flag:" + name);
-            return widget->TestFlag(enum_val.value());
-        };
-        widget["SetName"]     = &uik::Widget::SetName;
-        widget["SetSize"]     = (void(uik::Widget::*)(const uik::FSize&))&uik::Widget::SetSize;
-        widget["SetPosition"] = (void(uik::Widget::*)(const uik::FPoint&))&uik::Widget::SetPosition;
-        widget["SetFlag"]     = [](uik::Widget* widget, const std::string& name, bool on_off) {
-            const auto enum_val = magic_enum::enum_cast<uik::Widget::Flags>(name);
-            if (!enum_val.has_value())
-                throw std::runtime_error("No such widget flag:" + name);
-            widget->SetFlag(enum_val.value(), on_off);
-        };
-        widget["IsEnabled"]   = &uik::Widget::IsEnabled;
-        widget["IsVisible"]   = &uik::Widget::IsVisible;
-        widget["IsContainer"] = &uik::Widget::IsContainer;
-        widget["GetNumChildren"] = &uik::Widget::GetNumChildren;
-        widget["GetChild"] = [](uik::Widget* widget, unsigned index) {
-            if (!widget->IsContainer())
-                throw std::runtime_error(base::FormatString("Widget '%1' is not a container.", widget->GetName()));
-            if (index >= widget->GetNumChildren())
-                throw std::runtime_error(base::FormatString("Widget '%1' index (%2) is out of bounds.", widget->GetName(), index));
-            return &widget->GetChild(index);
-        };
-        widget["Grow"]      = &uik::Widget::Grow;
-        widget["Translate"] = &uik::Widget::Translate;
 
-        widget["AsLabel"] = [](uik::Widget* widget) {
-            if (widget->GetType() != uik::Widget::Type::Label)
-                throw std::runtime_error(base::FormatString("Widget '%1' is not a Label", widget->GetName()));
-            return static_cast<uik::Label*>(widget);
-        };
-        widget["AsPushButton"] = [](uik::Widget* widget) {
-            if (widget->GetType() != uik::Widget::Type::PushButton)
-                throw std::runtime_error(base::FormatString("Widget '%1' is not a PushButton", widget->GetName()));
-            return static_cast<uik::PushButton*>(widget);
-        };
-        widget["AsCheckBox"] = [](uik::Widget* widget) {
-            if (widget->GetType() != uik::Widget::Type::CheckBox)
-                throw std::runtime_error(base::FormatString("Widget '%1' is not a CheckBox", widget->GetName()));
-            return static_cast<uik::CheckBox*>(widget);
-        };
-        widget["AsGroupBox"] = [](uik::Widget* widget) {
-            if (widget->GetType() != uik::Widget::Type::GroupBox)
-                throw std::runtime_error(base::FormatString("Widget '%1' is not a GroupBox", widget->GetName()));
-            return static_cast<uik::GroupBox*>(widget);
-        };
+    auto widget = table.new_usertype<uik::Widget>("Widget");
+    widget["GetId"]          = &uik::Widget::GetId;
+    widget["GetName"]        = &uik::Widget::GetName;
+    widget["GetHash"]        = &uik::Widget::GetHash;
+    widget["GetSize"]        = &uik::Widget::GetSize;
+    widget["GetPosition"]    = &uik::Widget::GetPosition;
+    widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
+    widget["SetName"]        = &uik::Widget::SetName;
+    widget["SetSize"]        = (void(uik::Widget::*)(const uik::FSize&))&uik::Widget::SetSize;
+    widget["SetPosition"]    = (void(uik::Widget::*)(const uik::FPoint&))&uik::Widget::SetPosition;
+    widget["TestFlag"]       = &TestFlag<uik::Widget>;
+    widget["SetFlag"]        = &SetFlag<uik::Widget>;
+    widget["IsEnabled"]      = &uik::Widget::IsEnabled;
+    widget["IsVisible"]      = &uik::Widget::IsVisible;
+    widget["IsContainer"]    = &uik::Widget::IsContainer;
+    widget["GetNumChildren"] = &uik::Widget::GetNumChildren;
+    widget["Grow"]           = &uik::Widget::Grow;
+    widget["Translate"]      = &uik::Widget::Translate;
+    widget["AsLabel"]        = &WidgetCast<uik::Label,      uik::Widget::Type::Label>;
+    widget["AsPushButton"]   = &WidgetCast<uik::PushButton, uik::Widget::Type::PushButton>;
+    widget["AsCheckBox"]     = &WidgetCast<uik::CheckBox,   uik::Widget::Type::CheckBox>;
+    widget["AsGroupBox"]     = &WidgetCast<uik::GroupBox,   uik::Widget::Type::GroupBox>;
+    widget["GetChild"]       = [](uik::Widget* widget, unsigned index) {
+        if (!widget->IsContainer())
+            throw std::runtime_error(base::FormatString("Widget '%1' is not a container.", widget->GetName()));
+        if (index >= widget->GetNumChildren())
+            throw std::runtime_error(base::FormatString("Widget '%1' index (%2) is out of bounds.", widget->GetName(), index));
+        return &widget->GetChild(index);
+    };
+    auto label          = table.new_usertype<uik::Label>("Label");
+    auto check          = table.new_usertype<uik::CheckBox>("CheckBox");
+    auto group          = table.new_usertype<uik::GroupBox>("GroupBox");
+    auto pushbtn        = table.new_usertype<uik::PushButton>("PushButton");
+    label["GetText"]    = &uik::Label::GetText;
+    label["SetText"]    = (void(uik::Label::*)(const std::string&))&uik::Label::SetText;
+    check["GetText"]    = &uik::CheckBox::GetText;
+    check["SetText"]    = (void(uik::CheckBox::*)(const std::string&))&uik::CheckBox::SetText;
+    check["IsChecked"]  = &uik::CheckBox::IsChecked;
+    check["SetChecked"] = &uik::CheckBox::SetChecked;
+    group["GetText"]    = &uik::GroupBox::GetText;
+    group["SetText"]    = (void(uik::GroupBox::*)(const std::string&))&uik::GroupBox::SetText;
+    pushbtn["GetText"]  = &uik::PushButton::GetText;
+    pushbtn["SetText"]  = (void(uik::PushButton::*)(const std::string&))&uik::PushButton::SetText;
 
-        auto label = table.new_usertype<uik::Label>("Label");
-        label["GetText"] = &uik::Label::GetText;
-        label["SetText"] = (void(uik::Label::*)(const std::string&))&uik::Label::SetText;
+    auto window = table.new_usertype<uik::Window>("Window");
+    window["GetId"]            = &uik::Window::GetId;
+    window["GetSize"]          = &uik::Window::GetSize;
+    window["GetName"]          = &uik::Window::GetName;
+    window["GetWidth"]         = &uik::Window::GetWidth;
+    window["GetHeight"]        = &uik::Window::GetHeight;
+    window["GetNumWidgets"]    = &uik::Window::GetNumWidgets;
+    window["GetRootWidget"]    = [](uik::Window* window) { return &window->GetRootWidget(); };
+    window["FindWidgetById"]   = [](uik::Window* window, const std::string& id) { return window->FindWidgetById(id); };
+    window["FindWidgetByName"] = [](uik::Window* window, const std::string& name) { return window->FindWidgetByName(name); };
+    window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
+    window["Resize"]           = (void(uik::Window::*)(const uik::FSize&))&uik::Window::Resize;
+    window["GetWidget"]        = [](uik::Window* window, unsigned index) {
+        if (index >= window->GetNumWidgets())
+            throw std::runtime_error(base::FormatString("Widget index %1 is out of bounds", index));
+        return &window->GetWidget(index);
+    };
 
-        auto pushbtn = table.new_usertype<uik::PushButton>("PushButton");
-        pushbtn["GetText"] = &uik::PushButton::GetText;
-        pushbtn["SetText"] = (void(uik::PushButton::*)(const std::string&))&uik::PushButton::SetText;
-
-        auto check = table.new_usertype<uik::CheckBox>("CheckBox");
-        check["GetText"]    = &uik::CheckBox::GetText;
-        check["SetText"]    = (void(uik::CheckBox::*)(const std::string&))&uik::CheckBox::SetText;
-        check["IsChecked"]  = &uik::CheckBox::IsChecked;
-        check["SetChecked"] = &uik::CheckBox::SetChecked;
-
-        auto group = table.new_usertype<uik::GroupBox>("GroupBox");
-        group["GetText"] = &uik::GroupBox::GetText;
-        group["SetText"] = (void(uik::GroupBox::*)(const std::string&))&uik::GroupBox::SetText;
-    }
-
-    {
-        auto window = table.new_usertype<uik::Window>("Window");
-        window["GetId"]   = &uik::Window::GetId;
-        window["GetSize"] = &uik::Window::GetSize;
-        window["GetName"] = &uik::Window::GetName;
-        window["GetWidth"] = &uik::Window::GetWidth;
-        window["GetHeight"] = &uik::Window::GetHeight;
-        window["GetNumWidgets"] = &uik::Window::GetNumWidgets;
-        window["GetWidget"]        = [](uik::Window* window, unsigned index) {
-            if (index >= window->GetNumWidgets())
-                throw std::runtime_error(base::FormatString("Widget index %1 is out of bounds", index));
-            return &window->GetWidget(index);
-        };
-        window["GetRootWidget"]    = [](uik::Window* window) { return &window->GetRootWidget(); };
-        window["FindWidgetById"]   = [](uik::Window* window, const std::string& id) { return window->FindWidgetById(id); };
-        window["FindWidgetByName"] = [](uik::Window* window, const std::string& name) { return window->FindWidgetByName(name); };
-        window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
-        window["Resize"]           = (void(uik::Window::*)(const uik::FSize&))&uik::Window::Resize;
-    }
-
-    {
-        auto action = table.new_usertype<uik::Window::WidgetAction>("Action",
-        sol::meta_function::index, [&L](const uik::Window::WidgetAction* action, const char* key) {
-            sol::state_view lua(L);
-            if (!std::strcmp(key, "name"))
-                return sol::make_object(lua, action->name);
-            else if (!std::strcmp(key, "id"))
-                return sol::make_object(lua, action->id);
-            else if (!std::strcmp(key, "type"))
-                return sol::make_object(lua, base::ToString(action->type));
-            else if (!std::strcmp(key, "value")) {
-                if (std::holds_alternative<int>(action->value))
-                    return sol::make_object(lua, std::get<int>(action->value));
-                else if (std::holds_alternative<float>(action->value))
-                    return sol::make_object(lua, std::get<float>(action->value));
-                else if (std::holds_alternative<bool>(action->value))
-                    return sol::make_object(lua, std::get<bool>(action->value));
-                else if (std::holds_alternative<std::string>(action->value))
-                    return sol::make_object(lua, std::get<std::string>(action->value));
-                else BUG("???");
-            }
-            throw std::runtime_error(base::FormatString("No such ui action index: %1", key));
-        });
-    }
+    auto action = table.new_usertype<uik::Window::WidgetAction>("Action",
+    sol::meta_function::index, [&L](const uik::Window::WidgetAction* action, const char* key) {
+        sol::state_view lua(L);
+        if (!std::strcmp(key, "name"))
+            return sol::make_object(lua, action->name);
+        else if (!std::strcmp(key, "id"))
+            return sol::make_object(lua, action->id);
+        else if (!std::strcmp(key, "type"))
+            return sol::make_object(lua, base::ToString(action->type));
+        else if (!std::strcmp(key, "value")) {
+            if (std::holds_alternative<int>(action->value))
+                return sol::make_object(lua, std::get<int>(action->value));
+            else if (std::holds_alternative<float>(action->value))
+                return sol::make_object(lua, std::get<float>(action->value));
+            else if (std::holds_alternative<bool>(action->value))
+                return sol::make_object(lua, std::get<bool>(action->value));
+            else if (std::holds_alternative<std::string>(action->value))
+                return sol::make_object(lua, std::get<std::string>(action->value));
+            else BUG("???");
+        }
+        throw std::runtime_error(base::FormatString("No such ui action index: %1", key));
+    });
 }
 
 void BindGameLib(sol::state& L)
@@ -1004,18 +1032,8 @@ void BindGameLib(sol::state& L)
     drawable["GetAlpha"]      = &DrawableItem::GetAlpha;
     drawable["SetAlpha"]      = &DrawableItem::SetAlpha;
     drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
-    drawable["TestFlag"]      = [](const DrawableItem* item, const std::string& str) {
-        const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
-        if (!enum_val.has_value())
-            throw std::runtime_error("No such drawable item flag:" + str);
-        return item->TestFlag(enum_val.value());
-    };
-    drawable["SetFlag"]       = [](DrawableItem* item, const std::string& str, bool on_off) {
-        const auto enum_val = magic_enum::enum_cast<DrawableItem::Flags>(str);
-        if (!enum_val.has_value())
-            throw std::runtime_error("No such drawable item flag: " + str);
-        item->SetFlag(enum_val.value(), on_off);
-    };
+    drawable["TestFlag"]      = &TestFlag<DrawableItem>;
+    drawable["SetFlag"]       = &SetFlag<DrawableItem>;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
     body["GetFriction"]        = &RigidBodyItem::GetFriction;
@@ -1028,24 +1046,25 @@ void BindGameLib(sol::state& L)
     body["GetAngularVelocity"] = &RigidBodyItem::GetAngularVelocity;
     body["SetLinearVelocity"]  = &RigidBodyItem::SetLinearVelocity;
     body["SetAngularVelocity"] = &RigidBodyItem::SetAngularVelocity;
-    body["TestFlag"] = [](const RigidBodyItem* item, const std::string& str) {
-        const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
-        if (!enum_val.has_value())
-            throw std::runtime_error("No such rigid body flag:" + str);
-        return item->TestFlag(enum_val.value());
-    };
-    body["SetFlag"] = [](RigidBodyItem* item, const std::string& str, bool on_off) {
-        const auto enum_val = magic_enum::enum_cast<RigidBodyItem::Flags>(str);
-        if (!enum_val.has_value())
-            throw std::runtime_error("No such rigid body flag: " + str);
-        item->SetFlag(enum_val.value(), on_off);
-    };
-    body["GetSimulationType"] = [](const RigidBodyItem* item) {
+    body["TestFlag"]           = &TestFlag<RigidBodyItem>;
+    body["SetFlag"]            = &SetFlag<RigidBodyItem>;
+    body["GetSimulationType"]  = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetSimulation());
     };
     body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetCollisionShape());
     };
+
+    auto text = table.new_usertype<TextItem>("TextItem");
+    text["GetText"]       = &TextItem::GetText;
+    text["GetColor"]      = &TextItem::GetTextColor;
+    text["GetLayer"]      = &TextItem::GetLayer;
+    text["GetFontName"]   = &TextItem::GetFontName;
+    text["GetFontSize"]   = &TextItem::GetFontSize;
+    text["GetLineHeight"] = &TextItem::GetLineHeight;
+    text["SetText"]       = (void(TextItem::*)(const std::string&))&TextItem::SetText;
+    text["SetColor"]      = &TextItem::SetTextColor;
+    text["TestFlag"]      = &TestFlag<TextItem>;
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
@@ -1056,9 +1075,11 @@ void BindGameLib(sol::state& L)
     entity_node["GetScale"]       = &EntityNode::GetScale;
     entity_node["GetRotation"]    = &EntityNode::GetRotation;
     entity_node["HasRigidBody"]   = &EntityNode::HasRigidBody;
+    entity_node["HasTextItem"]    = &EntityNode::HasTextItem;
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
     entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
     entity_node["GetRigidBody"]   = (RigidBodyItem*(EntityNode::*)(void))&EntityNode::GetRigidBody;
+    entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
     entity_node["SetScale"]       = &EntityNode::SetScale;
     entity_node["SetSize"]        = &EntityNode::SetSize;
     entity_node["SetTranslation"] = &EntityNode::SetTranslation;
@@ -1067,42 +1088,8 @@ void BindGameLib(sol::state& L)
     entity_node["Rotate"]         = (void(EntityNode::*)(float))&EntityNode::Rotate;
 
     auto entity = table.new_usertype<Entity>("Entity",
-        sol::meta_function::index, [&L](const Entity* entity, const char* key) {
-                sol::state_view lua(L);
-                const ScriptVar* var = entity->FindScriptVar(key);
-                if (var && var->GetType() == ScriptVar::Type::Boolean)
-                    return sol::make_object(lua, var->GetValue<bool>());
-                else if (var && var->GetType() == ScriptVar::Type::Float)
-                    return sol::make_object(lua, var->GetValue<float>());
-                else if (var && var->GetType() == ScriptVar::Type::String)
-                    return sol::make_object(lua, var->GetValue<std::string>());
-                else if (var && var->GetType() == ScriptVar::Type::Integer)
-                    return sol::make_object(lua, var->GetValue<int>());
-                else if (var && var->GetType() == ScriptVar::Type::Vec2)
-                    return sol::make_object(lua, var->GetValue<glm::vec2>());
-                else if (var) BUG("Unhandled ScriptVar type.");
-
-                throw std::runtime_error(base::FormatString("No such entity variable: '%1'", key));
-            },
-            sol::meta_function::new_index, [](const Entity* entity, const char* key, sol::object value) {
-                const ScriptVar* var = entity->FindScriptVar(key);
-                if (var == nullptr)
-                    throw std::runtime_error(base::FormatString("No such entity variable: '%1'", key));
-                else if (var->IsReadOnly())
-                    throw std::runtime_error(base::FormatString("Trying to write to a read only entity variable: '%1'", key));
-
-                if (value.is<int>() && var->HasType<int>())
-                    var->SetValue(value.as<int>());
-                else if (value.is<float>() && var->HasType<float>())
-                    var->SetValue(value.as<float>());
-                else if (value.is<bool>() && var->HasType<bool>())
-                    var->SetValue(value.as<bool>());
-                else if (value.is<std::string>() && var->HasType<std::string>())
-                    var->SetValue(value.as<std::string>());
-                else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
-                    var->SetValue(value.as<glm::vec2>());
-                else throw std::runtime_error(base::FormatString("Entity variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
-            });
+        sol::meta_function::index,     &GetScriptVar<Entity>,
+        sol::meta_function::new_index, &SetScriptVar<Entity>);
     entity["GetName"]              = &Entity::GetName;
     entity["GetId"]                = &Entity::GetId;
     entity["GetClassName"]         = &Entity::GetClassName;
@@ -1120,12 +1107,7 @@ void BindGameLib(sol::state& L)
     entity["PlayIdle"]             = &Entity::PlayIdle;
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
-    entity["TestFlag"]             = [](const Entity* entity, const std::string& str) {
-        const auto enum_val = magic_enum::enum_cast<Entity::Flags>(str);
-        if (!enum_val.has_value())
-            throw std::runtime_error("No such drawable item flag:" + str);
-        return entity->TestFlag(enum_val.value());
-    };
+    entity["TestFlag"]             = &TestFlag<Entity>;
 
     auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());
     entity_args["class"]    = sol::property(&EntityArgs::klass);
@@ -1134,44 +1116,9 @@ void BindGameLib(sol::state& L)
     entity_args["position"] = sol::property(&EntityArgs::position);
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
 
-    // todo: cleanup the copy pasta regarding script vars index/newindex
     auto scene = table.new_usertype<Scene>("Scene",
-       sol::meta_function::index, [&L](const Scene* scene, const char* key) {
-                sol::state_view lua(L);
-                const ScriptVar* var = scene->FindScriptVar(key);
-                if (var && var->GetType() == ScriptVar::Type::Boolean)
-                    return sol::make_object(lua, var->GetValue<bool>());
-                else if (var && var->GetType() == ScriptVar::Type::Float)
-                    return sol::make_object(lua, var->GetValue<float>());
-                else if (var && var->GetType() == ScriptVar::Type::String)
-                    return sol::make_object(lua, var->GetValue<std::string>());
-                else if (var && var->GetType() == ScriptVar::Type::Integer)
-                    return sol::make_object(lua, var->GetValue<int>());
-                else if (var && var->GetType() == ScriptVar::Type::Vec2)
-                    return sol::make_object(lua, var->GetValue<glm::vec2>());
-                else if (var) BUG("Unhandled ScriptVar type.");
-
-                throw std::runtime_error(base::FormatString("No such scene variable: '%1'", key));
-            },
-       sol::meta_function::new_index, [](const Scene* scene, const char* key, sol::object value) {
-                const ScriptVar* var = scene->FindScriptVar(key);
-                if (var == nullptr)
-                    throw std::runtime_error(base::FormatString("No such scene variable: '%1'", key));
-                else if (var->IsReadOnly())
-                    throw std::runtime_error(base::FormatString("Trying to write to a read only scene variable: '%1'", key));
-
-                if (value.is<int>() && var->HasType<int>())
-                    var->SetValue(value.as<int>());
-                else if (value.is<float>() && var->HasType<float>())
-                    var->SetValue(value.as<float>());
-                else if (value.is<bool>() && var->HasType<bool>())
-                    var->SetValue(value.as<bool>());
-                else if (value.is<std::string>() && var->HasType<std::string>())
-                    var->SetValue(value.as<std::string>());
-                else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
-                    var->SetValue(value.as<glm::vec2>());
-                else throw std::runtime_error(base::FormatString("Scene variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
-            });
+       sol::meta_function::index,     &GetScriptVar<Scene>,
+       sol::meta_function::new_index, &SetScriptVar<Scene>);
     scene["GetNumEntities"]           = &Scene::GetNumEntities;
     scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
