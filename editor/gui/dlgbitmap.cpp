@@ -186,10 +186,10 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
     mNoise->SetHeight(bmp_height);
 
     gfx::MaterialClass klass;
-    klass.SetType(gfx::MaterialClass::Type::Texture);
+    klass.SetShader(gfx::MaterialClass::Shader::Texture);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     klass.SetBaseColor(gfx::Color::White);
-    klass.AddTexture(*mNoise);
+    klass.AddTexture(gfx::GenerateNoiseTexture(*mNoise));
     auto material = gfx::CreateMaterialInstance(std::move(klass));
 
     if ((bool)GetValue(mUI.chkScale))
@@ -202,7 +202,7 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
         const auto y = (widget_height - render_height) / 2.0f;
         gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), *material);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
-                             gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
+                             gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }
     else
     {

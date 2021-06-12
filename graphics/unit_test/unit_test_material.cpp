@@ -34,7 +34,7 @@ const To& SameCast(const From& from, const To& to)
 void unit_test_data()
 {
     gfx::MaterialClass klass;
-    klass.SetType(gfx::MaterialClass::Type::Sprite);
+    klass.SetShader(gfx::MaterialClass::Shader::Sprite);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
     klass.SetGamma(1.5f);
     klass.SetFps(3.0f);
@@ -45,7 +45,7 @@ void unit_test_data()
     klass.SetColorMapColor(gfx::Color::DarkGreen,gfx::MaterialClass::ColorIndex::TopLeft);
     klass.SetColorMapColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::BottomRight);
     klass.SetColorMapColor(gfx::Color::DarkGray, gfx::MaterialClass::ColorIndex::TopRight);
-    klass.SetShaderFile("my/shader/file.glsl");
+    klass.SetShader("my/shader/file.glsl");
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
     klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
     klass.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
@@ -60,7 +60,7 @@ void unit_test_data()
     gfx::detail::TextureFileSource texture;
     texture.SetFileName("file.png");
     texture.SetName("file");
-    klass.AddTexture(texture);
+    klass.AddTexture(texture.Copy());
     klass.SetTextureGc(0, true);
     klass.SetTextureRect(0, gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
 
@@ -70,7 +70,7 @@ void unit_test_data()
     gfx::detail::TextureTextBufferSource buffer;
     buffer.SetTextBuffer(text);
     buffer.SetName("text");
-    klass.AddTexture(buffer);
+    klass.AddTexture(buffer.Copy());
 
     gfx::RgbBitmap rgb;
     rgb.Resize(2, 2);
@@ -81,7 +81,7 @@ void unit_test_data()
     gfx::detail::TextureBitmapBufferSource bitmap;
     bitmap.SetName("bitmap");
     bitmap.SetBitmap(rgb);
-    klass.AddTexture(bitmap);
+    klass.AddTexture(bitmap.Copy());
 
     gfx::NoiseBitmapGenerator noise;
     noise.SetWidth(100);
@@ -96,7 +96,7 @@ void unit_test_data()
     gfx::detail::TextureBitmapGeneratorSource generator;
     generator.SetGenerator(noise);
     generator.SetName("noise");
-    klass.AddTexture(generator);
+    klass.AddTexture(generator.Copy());
 
     data::JsonObject json;
     klass.IntoJson(json);
@@ -109,7 +109,7 @@ void unit_test_data()
         const auto& copy = ret.value();
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
-        TEST_REQUIRE(copy.GetType() == gfx::MaterialClass::Type::Sprite);
+        TEST_REQUIRE(copy.GetType() == gfx::MaterialClass::Shader::Sprite);
         TEST_REQUIRE(copy.GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(copy.GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(copy.GetFps() == real::float32(3.0f));

@@ -163,7 +163,7 @@ public:
         state.bWriteColor   = false;
         state.blending      = Device::State::BlendOp::None;
 
-        Material mask_material = SolidColor(gfx::Color::White);
+        Material mask_material = CreateMaterialFromColor(gfx::Color::White);
         // do the masking pass
         for (const auto& mask : mask_list)
         {

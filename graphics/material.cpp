@@ -197,10 +197,15 @@ bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
     return true;
 }
 
+MaterialClass::MaterialClass(Shader type)
+{
+    mClassId = base::RandomString(10);
+    SetShader(type);
+}
 
 MaterialClass::MaterialClass(const MaterialClass& other)
 {
-    mId              = other.mId;
+    mClassId         = other.mClassId;
     mShaderFile      = other.mShaderFile;
     mBaseColor       = other.mBaseColor;
     mSurfaceType     = other.mSurfaceType;
@@ -232,13 +237,13 @@ MaterialClass::MaterialClass(const MaterialClass& other)
     }
 }
 
-Shader* MaterialClass::GetShader(Device& device) const
+gfx::Shader* MaterialClass::GetShader(Device& device) const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, GetShaderFile());
     hash = base::hash_combine(hash, mStatic ? GetProgramId() : "");
     const auto& name = std::to_string(hash);
-    Shader* shader = device.FindShader(name);
+    gfx::Shader* shader = device.FindShader(name);
     if (shader)
         return shader;
 
@@ -312,21 +317,21 @@ void MaterialClass::ApplyDynamicState(const Environment& env, const InstanceStat
     // then the rendering will use textures t0 and t1
     // or whichever textures happen to be bound to the texture units
     // since last rendering.
-    if ((mType == Type::Texture || mType == Type::Sprite) && !mTextures.empty())
+    if ((mType == Shader::Texture || mType == Shader::Sprite) && !mTextures.empty())
     {
         // if we're a sprite then we should probably animate if we have an FPS setting.
-        const auto animating         = mType == Type::Sprite && mFps > 0.0f;
+        const auto animating         = mType == Shader::Sprite && mFps > 0.0f;
         const auto frame_interval    = animating ? 1.0f / mFps : 0.0f;
         const auto frame_fraction    = animating ? std::fmod(inst.runtime, frame_interval) : 0.0f;
         const auto frame_blend_coeff = animating ? frame_fraction/frame_interval : 0.0f;
         const auto first_frame_index = animating ? (unsigned)(inst.runtime/frame_interval) : 0u;
 
-        const auto frame_index_count = mType == Type::Texture ? 1u : (unsigned)mTextures.size();
+        const auto frame_index_count = mType == Shader::Texture ? 1u : (unsigned)mTextures.size();
         const unsigned frame_index[2] = {
             (first_frame_index + 0) % frame_index_count,
             (first_frame_index + 1) % frame_index_count
         };
-        const auto texture_count = mType == Type::Texture ? 1u : 2u;
+        const auto texture_count = mType == Shader::Texture ? 1u : 2u;
 
         bool need_software_wrap = true;
 
@@ -470,13 +475,13 @@ std::string MaterialClass::GetShaderFile() const
     if (!mShaderFile.empty())
         return mShaderFile;
 
-    if (mType == Type::Color)
+    if (mType == Shader::Color)
         return "shaders/es2/solid_color.glsl";
-    else if (mType == Type::Gradient)
+    else if (mType == Shader::Gradient)
         return "shaders/es2/gradient.glsl";
-    else if (mType == Type::Texture)
+    else if (mType == Shader::Texture)
         return "shaders/es2/texture_map.glsl";
-    else if (mType == Type::Sprite)
+    else if (mType == Shader::Sprite)
         return "shaders/es2/texture_map.glsl";
     BUG("???");
     return "";
@@ -485,7 +490,7 @@ std::string MaterialClass::GetShaderFile() const
 size_t MaterialClass::GetHash() const
 {
     size_t hash = 0;
-    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mShaderFile);
     hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mSurfaceType);
@@ -516,7 +521,7 @@ size_t MaterialClass::GetHash() const
 
 void MaterialClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
+    data.Write("id", mClassId);
     data.Write("shader_file", mShaderFile);
     data.Write("type", mType);
     data.Write("color", mBaseColor);
@@ -553,7 +558,7 @@ void MaterialClass::IntoJson(data::Writer& data) const
 std::optional<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
 {
     MaterialClass mat;
-    if (!data.Read("id", &mat.mId) ||
+    if (!data.Read("id", &mat.mClassId) ||
         !data.Read("shader_file", &mat.mShaderFile) ||
         !data.Read("color", &mat.mBaseColor) ||
         !data.Read("type", &mat.mType) ||
@@ -722,7 +727,7 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
         return *this;
 
     MaterialClass tmp(other);
-    std::swap(mId, tmp.mId);
+    std::swap(mClassId, tmp.mClassId);
     std::swap(mShaderFile, tmp.mShaderFile);
     std::swap(mBaseColor, tmp.mBaseColor);
     std::swap(mSurfaceType, tmp.mSurfaceType);

@@ -268,7 +268,7 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
 {
-    auto mat = gfx::SolidColor(gfx::Color::HotPink);
+    auto mat = gfx::CreateMaterialFromColor(gfx::Color::HotPink);
     mat.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mat.SetBaseAlpha(0.6);
 

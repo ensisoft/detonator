@@ -188,8 +188,8 @@ public:
         painter.Draw(*mDrawable, view, *mMaterial);
 
         // draw a selection rect around it.
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline),
-                     view, gfx::SolidColor(gfx::Color::Green));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, 
+                     gfx::CreateMaterialFromColor(gfx::Color::Green));
         view.Pop();
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view)

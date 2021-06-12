@@ -32,7 +32,7 @@ namespace {
 gfx::Material MakeMaterial(const gfx::Color4f& color)
 {
     const auto alpha = color.Alpha();
-    auto mat = gfx::SolidColor(color);
+    auto mat = gfx::CreateMaterialFromColor(color);
     mat.SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
@@ -82,12 +82,12 @@ void DrawTextRect(Painter& painter,
 
     // Setup material to shade the text.
     static auto klass = std::make_shared<gfx::MaterialClass>();
-    klass->SetType(MaterialClass::Type::Texture);
+    klass->SetShader(MaterialClass::Shader::Texture);
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     klass->SetBaseColor(color);
     if (klass->GetNumTextures() == 0)
     {
-        klass->AddTexture(buff);
+        klass->AddTexture(CreateTextureFromText(buff));
         // let this texture object be garbage collected
         // when it's no longer used.
         klass->SetTextureGc(0, true); //

@@ -640,7 +640,8 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (GetValue(mUI.chkShowBounds))
     {
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, gfx::SolidColor(gfx::Color::Green));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
 
     if (mEngine)
