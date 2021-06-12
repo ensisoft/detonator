@@ -361,7 +361,7 @@ void unit_test_material_uniforms()
         TestProgram program;
         gfx::MaterialClass test;
 
-        test.SetType(gfx::MaterialClass::Type::Sprite);
+        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
         test.SetColorMapColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::BottomLeft);
@@ -433,7 +433,7 @@ void unit_test_material_uniforms()
         TestProgram program;
         gfx::MaterialClass test;
 
-        test.SetType(gfx::MaterialClass::Type::Sprite);
+        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
         test.SetColorMapColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::BottomLeft);
@@ -516,7 +516,7 @@ void unit_test_material_uniforms()
     // program has the same type.
     {
         gfx::MaterialClass foo;
-        foo.SetType(gfx::MaterialClass::Type::Sprite);
+        foo.SetShader(gfx::MaterialClass::Shader::Sprite);
         foo.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         foo.SetStatic(true);
         foo.SetBaseColor(gfx::Color::Red);
@@ -577,7 +577,7 @@ void unit_test_material_textures()
         TestProgram program;
 
         gfx::MaterialClass test;
-        test.SetType(gfx::MaterialClass::Type::Texture);
+        test.SetShader(gfx::MaterialClass::Shader::Texture);
         test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
         test.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
         test.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
@@ -585,7 +585,7 @@ void unit_test_material_textures()
 
         gfx::RgbBitmap bitmap;
         bitmap.Resize(100, 80);
-        test.AddTexture(bitmap);
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
 
         gfx::MaterialClass::Environment env;
         gfx::MaterialClass::RasterState raster;
@@ -611,12 +611,12 @@ void unit_test_material_textures()
     // same texture.
     {
         gfx::MaterialClass test;
-        test.SetType(gfx::MaterialClass::Type::Sprite);
+        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap bitmap;
         bitmap.Resize(10, 10);
-        test.AddTexture(bitmap);
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
 
         TestDevice device;
         TestProgram program;
@@ -658,7 +658,7 @@ void unit_test_material_textures()
     // 2 textures.
     {
         gfx::MaterialClass test;
-        test.SetType(gfx::MaterialClass::Type::Sprite);
+        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap one;
@@ -668,8 +668,8 @@ void unit_test_material_textures()
         two.Resize(10, 10);
         two.Fill(gfx::Color::Green);
 
-        test.AddTexture(one);
-        test.AddTexture(two);
+        test.AddTexture(gfx::CreateTextureFromBitmap(one));
+        test.AddTexture(gfx::CreateTextureFromBitmap(two));
 
         TestDevice device;
         TestProgram program;
@@ -707,7 +707,7 @@ void unit_test_material_textures()
     // 3 textures.
     {
         gfx::MaterialClass test;
-        test.SetType(gfx::MaterialClass::Type::Sprite);
+        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap one;
@@ -720,9 +720,9 @@ void unit_test_material_textures()
         two.Resize(10, 10);
         two.Fill(gfx::Color::Yellow);
 
-        test.AddTexture(one);
-        test.AddTexture(two);
-        test.AddTexture(three);
+        test.AddTexture(gfx::CreateTextureFromBitmap(one));
+        test.AddTexture(gfx::CreateTextureFromBitmap(two));
+        test.AddTexture(gfx::CreateTextureFromBitmap(three));
 
         TestDevice device;
         TestProgram program;
@@ -847,8 +847,7 @@ void main() {
     base::OverwriteTextFile("test_shader.glsl", original);
 
     gfx::MaterialClass klass;
-    klass.SetShaderFile("test_shader.glsl");
-    klass.SetType(gfx::MaterialClass::Type::Texture);
+    klass.SetShader("test_shader.glsl");
     klass.SetBaseColor(gfx::Color::White);
     klass.SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::BottomLeft);
     klass.SetColorMapColor(gfx::Color::Green,gfx::MaterialClass::ColorIndex::TopLeft);

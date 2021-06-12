@@ -136,10 +136,10 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     }
 
     gfx::MaterialClass material;
-    material.SetType(gfx::MaterialClass::Type::Texture);
+    material.SetShader(gfx::MaterialClass::Shader::Texture);
     material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material.SetBaseColor(gfx::Color::White);
-    material.AddTexture(mText);
+    material.AddTexture(gfx::CreateTextureFromText(mText));
 
     if ((bool)GetValue(mUI.chkScale))
     {
@@ -151,7 +151,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         const auto y = (widget_height - render_height) / 2.0f;
         gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), material);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
-            gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
+                             gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }
     else
     {
@@ -159,7 +159,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         const auto y = (widget_height - buffer_height) / 2;
         gfx::FillRect(painter, gfx::FRect(x, y, buffer_width, buffer_height), material);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, buffer_width, buffer_height),
-            gfx::SolidColor(gfx::Color::DarkGreen), 1.0f);
+                             gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }
 }
 

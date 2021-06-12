@@ -160,7 +160,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapX);
     PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapY);
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
-    PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
+    PopulateFromEnum<gfx::MaterialClass::Shader>(mUI.materialType);
     PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
     SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
     SetValue(mUI.cmbModel, "Rectangle");
@@ -697,24 +697,24 @@ void MaterialWidget::on_materialType_currentIndexChanged(const QString& text)
 
     // enable/disable UI properties based on the
     // material type.
-    const gfx::MaterialClass::Type type = GetValue(mUI.materialType);
+    const gfx::MaterialClass::Shader type = GetValue(mUI.materialType);
 
-    if (type == gfx::MaterialClass::Type::Color)
+    if (type == gfx::MaterialClass::Shader::Color)
     {
         mUI.baseProperties->setEnabled(true);
     }
-    else if (type == gfx::MaterialClass::Type::Gradient)
+    else if (type == gfx::MaterialClass::Shader::Gradient)
     {
         //mUI.colorMap->setEnabled(true);
     }
-    else if (type == gfx::MaterialClass::Type::Texture)
+    else if (type == gfx::MaterialClass::Shader::Texture)
     {
         mUI.texturing->setEnabled(true);
         mUI.textureMaps->setEnabled(true);
         mUI.textureProp->setEnabled(true);
         mUI.textureRect->setEnabled(true);
     }
-    else if (type == gfx::MaterialClass::Type::Sprite)
+    else if (type == gfx::MaterialClass::Shader::Sprite)
     {
         mUI.texturing->setEnabled(true);
         mUI.textureMaps->setEnabled(true);
@@ -897,14 +897,14 @@ void MaterialWidget::SetMaterialProperties() const
     if (mUI.customShader->isChecked())
     {
         const QString& file = mUI.shaderFile->text();
-        mMaterial.SetShaderFile(app::ToUtf8(file));
+        mMaterial.SetShader(app::ToUtf8(file));
     }
     else
     {
-        mMaterial.SetShaderFile("");
+        mMaterial.SetShader("");
     }
 
-    mMaterial.SetType(GetValue(mUI.materialType));
+    //mMaterial.SetShader(GetValue(mUI.materialType));
     mMaterial.SetBaseColor(GetValue(mUI.baseColor));
     mMaterial.SetColorMapColor(GetValue(mUI.colorMap0), gfx::MaterialClass::ColorIndex::TopLeft);
     mMaterial.SetColorMapColor(GetValue(mUI.colorMap1), gfx::MaterialClass::ColorIndex::TopRight);

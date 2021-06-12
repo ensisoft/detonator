@@ -412,6 +412,38 @@ namespace gfx
 
     } // detail
 
+    inline std::unique_ptr<TextureSource> LoadTextureFromFile(const std::string& uri)
+    { return std::make_unique<detail::TextureFileSource>(uri); }
+
+    template<typename T> inline
+    std::unique_ptr<TextureSource> CreateTextureFromBitmap(const Bitmap<T>& bitmap)
+    { return std::make_unique<detail::TextureBitmapBufferSource>(bitmap); }
+    template<typename T> inline
+    std::unique_ptr<TextureSource> CreateTextureFromBitmap(Bitmap<T>&& bitmap)
+    { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<T>(bitmap)); }
+
+    inline std::unique_ptr<TextureSource> CreateTextureFromText(const TextBuffer& text)
+    { return std::make_unique<detail::TextureTextBufferSource>(text); }
+    inline std::unique_ptr<TextureSource> CreateTextureFromText(TextBuffer&& text)
+    { return std::make_unique<detail::TextureTextBufferSource>(std::move(text)); }
+
+    inline std::unique_ptr<TextureSource> GenerateTexture(std::unique_ptr<IBitmapGenerator> generator)
+    { return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator)); }
+    template<typename T> inline
+    std::unique_ptr<TextureSource> GenerateTexture(T&& generator)
+    { return GenerateTexture(std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator))); }
+
+    inline std::unique_ptr<TextureSource> GenerateNoiseTexture(const NoiseBitmapGenerator& generator)
+    {
+        auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
+        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+    }
+    inline std::unique_ptr<TextureSource> GenerateNoiseTexture(NoiseBitmapGenerator&& generator)
+    {
+        auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
+        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+    }
+
     // MaterialClass holds the data for some particular type of material.
     // For example user might have defined material called "marble" with some
     // particular textures and parameters. One instance (a c++ object) of
@@ -426,7 +458,7 @@ namespace gfx
             // Surface is opaque and no blending is done.
             Opaque,
             // Surface is transparent and is blended with the destination
-            // to create a interpolated mix of the colors.
+            // to create an interpolated mix of the colors.
             Transparent,
             // Surface gives off color (light)
             Emissive
@@ -436,7 +468,7 @@ namespace gfx
         // type groups similar materials into categories with common
         // set of properties. Then the each specific shader will provide
         // the actual implementation using those properties.
-        enum class Type {
+        enum class Shader {
             // Material is using color(s) only.
             Color,
             // Material is using color(s) only.
@@ -461,11 +493,11 @@ namespace gfx
         using TextureWrapping  = Texture::Wrapping;
 
         // constructor.
-        MaterialClass(Type type) : mType(type)
-        { mId = base::RandomString(10); }
+        MaterialClass(Shader type);
+
         // allow "invalid" material to be constructed.
         MaterialClass()
-        { mId = base::RandomString(10); }
+        { mClassId = base::RandomString(10); }
 
         // Make a deep copy of the material class.
         MaterialClass(const MaterialClass& other);
@@ -473,7 +505,7 @@ namespace gfx
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
         // failed to compile.
-        Shader* GetShader(Device& device) const;
+        gfx::Shader* GetShader(Device& device) const;
 
         // Environmental parameters such as lights etc.
         struct Environment {
@@ -504,9 +536,9 @@ namespace gfx
 
         // get the class/resource id.
         std::string GetId() const
-        { return mId; }
+        { return mClassId; }
         void SetId(const std::string& id)
-        { mId = id; }
+        { mClassId = id; }
 
         // Get the program ID for the material that is
         // Used to map the material to a device specific program object.
@@ -548,7 +580,7 @@ namespace gfx
         { return mBaseColor.Alpha(); }
         SurfaceType GetSurfaceType() const
         { return mSurfaceType; }
-        Type GetType() const
+        Shader GetType() const
         { return mType; }
         ParticleAction GetParticleAction() const
         { return mParticleAction; }
@@ -556,20 +588,18 @@ namespace gfx
         // MaterialClass properties setters.
 
         // Set the material to use a specific shader.
-        MaterialClass& SetShaderFile(const std::string& shader_file)
+        MaterialClass& SetShader(const std::string& shader_file)
         {
             mShaderFile = shader_file;
             return *this;
         }
 
-        // Set the functional material type that describes approximately
-        // how the material should behave. The final output depends
-        // on the actual shader being used.
-        MaterialClass& SetType(Type type)
+        MaterialClass& SetShader(Shader type)
         {
             mType = type;
             return *this;
         }
+
 
         // Set whether to cut sharply between animation frames or
         // whether to smooth the transition by blending adjacent frames
@@ -663,111 +693,6 @@ namespace gfx
         MaterialClass& SetParticleAction(ParticleAction action)
         {
             mParticleAction = action;
-            return *this;
-        }
-
-        MaterialClass& AddTexture(const std::string& file)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureFileSource>(file);
-            return *this;
-        }
-        MaterialClass& AddTexture(const detail::TextureFileSource& texture)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureFileSource>(texture);
-            return *this;
-        }
-        MaterialClass& AddTexture(detail::TextureFileSource&& texture)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureFileSource>(std::move(texture));
-            return *this;
-        }
-        MaterialClass& AddTexture(const TextBuffer& text)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
-            return *this;
-        }
-        MaterialClass& AddTexture(TextBuffer&& text)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
-            return *this;
-        }
-        MaterialClass& AddTexture(const detail::TextureTextBufferSource& text)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(text);
-            return *this;
-        }
-        MaterialClass& AddTexture(detail::TextureTextBufferSource&& text)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureTextBufferSource>(std::move(text));
-            return *this;
-        }
-
-        MaterialClass& AddTexture(const detail::TextureBitmapBufferSource& bitmap)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(bitmap);
-            return *this;
-        }
-        MaterialClass& AddTexture(detail::TextureBitmapBufferSource&& bitmap)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(std::move(bitmap));
-            return *this;
-        }
-
-        MaterialClass& AddTexture(const NoiseBitmapGenerator& generator)
-        {
-            auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
-            return *this;
-        }
-        MaterialClass& AddTexture(NoiseBitmapGenerator&& generator)
-        {
-            auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
-            return *this;
-        }
-        MaterialClass& AddTexture(std::unique_ptr<IBitmapGenerator> generator)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
-            return *this;
-        }
-        MaterialClass& AddTexture(const detail::TextureBitmapGeneratorSource& generator)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(generator);
-            return *this;
-        }
-        MaterialClass& AddTexture(detail::TextureBitmapGeneratorSource&& generator)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator));
-            return *this;
-        }
-
-        template<typename T>
-        MaterialClass& AddTexture(const Bitmap<T>& bitmap)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(bitmap);
-            return *this;
-        }
-
-        template<typename T>
-        MaterialClass& AddTexture(Bitmap<T>&& bitmap)
-        {
-            mTextures.emplace_back();
-            mTextures.back().source = std::make_unique<detail::TextureBitmapBufferSource>(std::move(bitmap));
             return *this;
         }
 
@@ -937,13 +862,13 @@ namespace gfx
 
     private:
         // material class id.
-        std::string mId;
+        std::string mClassId;
         // warning: remember to edit the copy constructor
         // and the assignment operator if members are added.
         std::string mShaderFile;
         Color4f mBaseColor = gfx::Color::White;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
-        Type mType = Type::Color;
+        Shader mType = Shader::Color;
         float mGamma   = 1.0f;
         float mFps     = 0.0f;
         bool  mBlendFrames = true;
@@ -1035,80 +960,67 @@ namespace gfx
 
 
     // This material will fill the drawn shape with solid color value.
-    inline MaterialClass SolidColor(const Color4f& color)
+    inline MaterialClass CreateMaterialFromColor(const Color4f& color)
     {
-        return MaterialClass(MaterialClass::Type::Color)
-            .SetBaseColor(color);
+        auto material = MaterialClass();
+        material.SetShader(MaterialClass::Shader::Color);
+        material.SetBaseColor(color);
+        return material;
     }
 
     // This material will map the given texture onto the drawn shape.
     // The object being drawn must provide texture coordinates.
-    inline MaterialClass TextureMap(const std::string& texture)
+    inline MaterialClass CreateMaterialFromTexture(const std::string& uri)
     {
-        return MaterialClass(MaterialClass::Type::Texture)
-            .AddTexture(texture)
-            .SetSurfaceType(MaterialClass::SurfaceType::Opaque);
-    }
-
-    // SpriteSet is a material which renders a simple animation
-    // by cycling through a set of textures at some fps.
-    // The assumption is that cycling through the textures
-    // renders a coherent animation.
-    // In order to blend between the frames of the animation
-    // the current time value needs to be set.
-    inline MaterialClass SpriteSet()
-    {
-        return MaterialClass(MaterialClass::Type::Sprite)
-            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
-    }
-    inline MaterialClass SpriteSet(const std::initializer_list<std::string>& textures)
-    {
-        auto material = SpriteSet();
-        for (const auto& texture : textures)
-            material.AddTexture(texture);
-        return material;
-    }
-    inline MaterialClass SpriteSet(const std::vector<std::string>& textures)
-    {
-        auto material = SpriteSet();
-        for (const auto& texture : textures)
-            material.AddTexture(texture);
+        auto material = MaterialClass();
+        material.SetShader(MaterialClass::Shader::Texture);
+        material.AddTexture(LoadTextureFromFile(uri));
+        material.SetSurfaceType(MaterialClass::SurfaceType::Opaque);
         return material;
     }
 
-    // SpriteMap is a material which renders a simple animation
-    // by cycling through different subregions of a single sprite
-    // texture at some fps.
-    // The assumption is that cycling through the regions
-    // renders a coherent animation.
-    inline MaterialClass SpriteMap()
+    // Create sprite from multiple textures.
+    inline MaterialClass CreateMaterialFromSprite(const std::initializer_list<std::string>& textures)
     {
-        return MaterialClass(MaterialClass::Type::Sprite)
-            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        auto material = MaterialClass(MaterialClass::Shader::Sprite);
+        material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        for (const auto& texture : textures)
+            material.AddTexture(LoadTextureFromFile(texture));
+        return material;
     }
-    inline MaterialClass SpriteMap(const std::string& texture, const std::vector<FRect>& frames)
+    // Create sprite from multiple textures.
+    inline MaterialClass CreateMaterialFromSprite(const std::vector<std::string>& textures)
     {
-        auto material = SpriteMap();
+        auto material = MaterialClass(MaterialClass::Shader::Sprite);
+        material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        for (const auto& texture : textures)
+            material.AddTexture(LoadTextureFromFile(texture));
+        return material;
+    }
+
+    // Create material class from a sprite atlas.
+    inline MaterialClass CreateMaterialFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
+    {
+        auto material = MaterialClass();
+        material.SetShader(MaterialClass::Shader::Sprite);
+        material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
         for (size_t i=0; i<frames.size(); ++i)
         {
-            material.AddTexture(texture);
+            material.AddTexture(LoadTextureFromFile(texture));
             material.SetTextureRect(i, frames[i]);
         }
         return material;
     }
 
-    // This material will use the given text buffer object to
-    // display text by rasterizing the text and creating a new
-    // texture object of it. The resulting texture object is then
-    // mapped onto the shape being drawn.
-    // The drawable shape must provide texture coordinates.
-    inline MaterialClass BitmapText(const TextBuffer& text)
+    // Create material class from text buffer.
+    inline MaterialClass CreateMaterialFromText(const TextBuffer& text)
     {
-        return MaterialClass(MaterialClass::Type::Texture)
-            .AddTexture(text)
-            .SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        auto material = MaterialClass();
+        material.SetShader(MaterialClass::Shader::Texture);
+        material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        material.AddTexture(CreateTextureFromText(text));
+        return material;
     }
-
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);

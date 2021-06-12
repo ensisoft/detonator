@@ -258,7 +258,7 @@ public:
             {
                 auto rect = mEntity->FindNodeBoundingRect(&node);
                 rect.Translate(400, 400);
-                gfx::DrawRectOutline(painter, rect, gfx::SolidColor(gfx::Color::Yellow), 1.0f);
+                gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
             }
         }
     }
@@ -672,15 +672,15 @@ public:
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
     {
         if (name == "uv_test")
-            return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/uv_test_512.png"));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromTexture("textures/uv_test_512.png"));
         else if (name == "checkerboard")
-            return std::make_shared<gfx::MaterialClass>(gfx::TextureMap("textures/Checkerboard.png"));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromTexture("textures/Checkerboard.png"));
         else if (name == "color")
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::HotPink));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         else if (name == "object")
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::Gold));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromColor(gfx::Color::Gold));
         else if (name == "ground")
-            return std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color::DarkGreen));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
         ASSERT("No such material class.");
         return nullptr;
     }

@@ -476,19 +476,19 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         const GridDensity grid = GetValue(mUI.cmbGrid);
         const unsigned num_cell_lines = static_cast<unsigned>(grid) - 1;
         painter.Draw(gfx::Grid(num_cell_lines, num_cell_lines), view,
-            gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
+                     gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
                 .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
     }
     else
     {
         painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 1.0f), view,
-                     gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray)));
+                     gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray)));
     }
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
     painter.Draw(gfx::Polygon(mPolygon), view,
-        gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, alpha))
+                 gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, alpha))
             .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 
     // visualize the vertices.
@@ -502,11 +502,11 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         view.Translate(-3, -3);
         if (mVertexIndex == i)
         {
-            painter.Draw(gfx::Circle(), view, gfx::SolidColor(gfx::Color::Green));
+            painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
         }
         else
         {
-            painter.Draw(gfx::Circle(), view, gfx::SolidColor(gfx::Color::HotPink));
+            painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         }
     }
 
@@ -533,7 +533,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     cmd.count  = points.size();
     poly.AddDrawCommand(MakeVerts(points, width, height), cmd);
     painter.Draw(gfx::Polygon(poly), view,
-        gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray, alpha))
+                 gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, alpha))
             .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
 }
 

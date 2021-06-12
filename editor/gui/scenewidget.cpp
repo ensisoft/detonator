@@ -1601,7 +1601,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
         virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& draw) override
         {
             ASSERT(mColorIndex < mColors.size());
-            draw.material = gfx::CreateMaterialInstance(gfx::SolidColor(mColors[mColorIndex]));
+            draw.material = gfx::CreateMaterialInstance(gfx::CreateMaterialFromColor(mColors[mColorIndex]));
             return true;
         }
 

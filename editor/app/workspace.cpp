@@ -608,7 +608,7 @@ Workspace::Workspace()
     // It is used as the initial material when user hasn't selected
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
-    auto checkerboard = gfx::TextureMap("app://textures/Checkerboard.png");
+    auto checkerboard = gfx::CreateMaterialFromTexture("app://textures/Checkerboard.png");
     checkerboard.SetId("_checkerboard");
     mResources.emplace_back(new MaterialResource(std::move(checkerboard), "Checkerboard"));
 
@@ -617,7 +617,7 @@ Workspace::Workspace()
     for (const auto& val : values)
     {
         const std::string color_name(magic_enum::enum_name(val));
-        auto color = gfx::SolidColor(gfx::Color4f(val));
+        auto color = gfx::CreateMaterialFromColor(gfx::Color4f(val));
         color.SetId("_" + color_name);
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }
@@ -1824,9 +1824,9 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             texture.SetName(ToUtf8(name));
 
             gfx::MaterialClass klass;
-            klass.SetType(gfx::MaterialClass::Type::Texture);
+            klass.SetShader(gfx::MaterialClass::Shader::Texture);
             klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            klass.AddTexture(std::move(texture));
+            klass.AddTexture(texture.Copy());
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Default);
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter ::Default);
             MaterialResource res(klass, name);

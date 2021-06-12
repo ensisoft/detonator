@@ -304,10 +304,10 @@ void Renderer::DrawEntity(const EntityType& entity,
 
                     // setup material to shade text.
                     auto klass = std::make_shared<gfx::MaterialClass>();
-                    klass->SetType(gfx::MaterialClass::Type::Texture);
+                    klass->SetShader(gfx::MaterialClass::Shader::Texture);
                     klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
                     klass->SetBaseColor(text->GetTextColor());
-                    klass->AddTexture(std::move(buffer));
+                    klass->AddTexture(CreateTextureFromText(std::move(buffer)));
                     klass->SetTextureGc(0, true); // enable gc
                     paint_node.material = gfx::CreateMaterialInstance(klass);
                     paint_node.material_class_id = material;

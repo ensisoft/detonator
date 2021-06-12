@@ -229,7 +229,7 @@ ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(c
         const std::string color_name(magic_enum::enum_name(val));
         if ("_" + color_name == name)
         {
-            auto ret = std::make_shared<gfx::MaterialClass>(gfx::SolidColor(gfx::Color4f(val)));
+            auto ret = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromColor(gfx::Color4f(val)));
             ret->SetId("_" + color_name);
             return ret;
         }

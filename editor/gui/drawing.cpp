@@ -40,7 +40,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
     view.Push();
         view.Scale(100.0f, 5.0f);
         view.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Green));
+        painter.Draw(gfx::Arrow(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
     view.Pop();
 
     // draw the Y vector
@@ -49,13 +49,13 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
         view.Translate(-50.0f, -2.5f);
         view.Rotate(math::Pi * 0.5f);
         view.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(), view, gfx::SolidColor(gfx::Color::Red));
+        painter.Draw(gfx::Arrow(), view, gfx::CreateMaterialFromColor(gfx::Color::Red));
     view.Pop();
 
     view.Push();
         view.Scale(2.5f, 2.5f);
         view.Translate(-1.25f, -1.25f);
-        painter.Draw(gfx::RoundRectangle(), view, gfx::SolidColor(gfx::Color::Yellow));
+        painter.Draw(gfx::RoundRectangle(), view, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
     view.Pop();
 }
 
@@ -94,7 +94,7 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     const auto grid_height = cell_size_units * num_cells;
 
     auto drawable = gfx::Grid(num_grid_lines, num_grid_lines);
-    auto material = gfx::SolidColor(gfx::Color4f(gfx::Color::LightGray)); //, 0.7f));
+    auto material = gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray)); //, 0.7f));
     //material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
     view.Translate(grid_origin_x, grid_origin_y);
