@@ -651,3 +651,7 @@ target_include_directories(unit_test_material PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 target_include_directories(unit_test_drawing  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 target_include_directories(unit_test_drawable PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
 
+add_test(NAME gfx_test_msaa0  COMMAND graphics_test --test          --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
+add_test(NAME gfx_test_msaa4  COMMAND graphics_test --test --msaa4  --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
+add_test(NAME gfx_test_msaa8  COMMAND graphics_test --test --msaa8  --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
+add_test(NAME gfx_test_msaa16 COMMAND graphics_test --test --msaa16 --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
