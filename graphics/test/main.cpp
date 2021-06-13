@@ -21,6 +21,7 @@
 #include <cstring>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 
 #include "base/logging.h"
@@ -1329,15 +1330,17 @@ int main(int argc, char* argv[])
     logger.EnableTerminalColors(true);
     base::SetGlobalLog(&logger);
     DEBUG("It's alive!");
-    INFO("Copyright (c) 2010-2019 Sami Vaisanen");
+    INFO("Copyright (c) 2020-2021 Sami Vaisanen");
     INFO("http://www.ensisoft.com");
-    INFO("http://github.com/ensisoft/pinyin-invaders");
+    INFO("http://github.com/ensisoft/gamestudio");
 
     auto sampling = wdk::Config::Multisampling::None;
     bool testing  = false;
     bool issue_gold = false;
     bool fullscreen = false;
+    bool user_interaction = true;
     int swap_interval = 0;
+    int test_result   = EXIT_SUCCESS;
     std::string casename;
 
     for (int i=1; i<argc; ++i)
@@ -1360,6 +1363,8 @@ int main(int argc, char* argv[])
             swap_interval = 1;
         else if (!std::strcmp(argv[i], "--fullscreen"))
             fullscreen = true;
+        else if (!std::strcmp(argv[i], "--no-user"))
+            user_interaction = false;
     }
 
     // context integration glue code that puts together
@@ -1589,6 +1594,7 @@ int main(int argc, char* argv[])
                         gfx::WritePNG(diff, deltafile);
                     }
                     gfx::WritePNG(result, resultfile);
+                    test_result = EXIT_FAILURE;
                 }
                 else
                 {
@@ -1599,7 +1605,7 @@ int main(int argc, char* argv[])
                 device->EndFrame(true /* display */);
                 device->CleanGarbage(120);
 
-                if (stop_for_input)
+                if (stop_for_input && user_interaction)
                 {
                     while (stop_for_input)
                     {
@@ -1684,5 +1690,5 @@ int main(int argc, char* argv[])
     }
 
     context->Dispose();
-    return 0;
+    return test_result;
 }
