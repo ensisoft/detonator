@@ -726,6 +726,21 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(cons
     // convenience shim
     return GetMaterialClassByName(QString::fromUtf8(name));
 }
+
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassById(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Material)
+            continue;
+        else if (resource->GetId() != id)
+            continue;
+        return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
+    }
+    BUG("No such material class.");
+    return nullptr;
+}
+
 std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const QString& name) const
 {
     for (const auto& resource : mResources)
@@ -1152,6 +1167,35 @@ void LoadResources(const char* type,
     }
 }
 
+template<typename ClassType>
+void LoadMaterials(const char* type,
+                   const data::Reader& data,
+                   std::vector<std::unique_ptr<Resource>>& vector)
+{
+    DEBUG("Loading %1", type);
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
+    {
+        const auto& chunk = data.GetReadChunk(type, i);
+        std::string name;
+        std::string id;
+        if (!chunk->Read("resource_name", &name) ||
+            !chunk->Read("resource_id", &id))
+        {
+            ERROR("Unexpected JSON. Maybe old workspace version?");
+            continue;
+        }
+        auto ret = ClassType::FromJson(*chunk);
+        if (!ret)
+        {
+            ERROR("Failed to load resource '%1'", name);
+            continue;
+        }
+        //vector.push_back(std::make_unique<GameResource<ClassType>>(std::move(ret), FromUtf8(name)));
+        vector.push_back(std::make_unique<MaterialResource>(std::move(ret), FromUtf8(name)));
+        DEBUG("Loaded resource '%1'", name);
+    }
+}
+
 bool Workspace::LoadContent(const QString& filename)
 {
     data::JsonFile file;
@@ -1164,7 +1208,7 @@ bool Workspace::LoadContent(const QString& filename)
     }
     data::JsonObject root = file.GetRootObject();
 
-    LoadResources<gfx::MaterialClass>("materials", root, mResources);
+    LoadMaterials<gfx::MaterialClass>("materials", root, mResources);
     LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources);
     LoadResources<gfx::PolygonClass>("shapes", root, mResources);
     LoadResources<game::EntityClass>("entities", root, mResources);
@@ -1823,10 +1867,9 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             texture.SetFileName(ToUtf8(uri));
             texture.SetName(ToUtf8(name));
 
-            gfx::MaterialClass klass;
-            klass.SetShader(gfx::MaterialClass::Shader::Texture);
+            gfx::TextureMap2DClass klass;
             klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            klass.AddTexture(texture.Copy());
+            klass.SetTexture(texture.Copy());
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Default);
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter ::Default);
             MaterialResource res(klass, name);

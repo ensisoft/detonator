@@ -114,7 +114,7 @@ namespace game
         class UIGradient : public UIMaterial
         {
         public:
-            using ColorIndex = gfx::MaterialClass::ColorIndex;
+            using ColorIndex = gfx::GradientClass::ColorIndex;
 
             UIGradient() = default;
             UIGradient(const gfx::Color4f& top_left,

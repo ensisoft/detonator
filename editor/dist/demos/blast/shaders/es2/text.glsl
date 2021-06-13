@@ -3,11 +3,13 @@
 
 precision highp float;
 
-uniform sampler2D kTexture0;
 uniform float kRuntime;
 uniform float kRenderPoints;
+
+uniform sampler2D kTexture0;
 uniform float kGamma;
 uniform vec4  kBaseColor;
+
 varying vec2 vTexCoord;
 
 float SlidingGlint()

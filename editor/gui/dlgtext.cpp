@@ -135,11 +135,10 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         mText.SetBufferSize(buffer_width, buffer_height);
     }
 
-    gfx::MaterialClass material;
-    material.SetShader(gfx::MaterialClass::Shader::Texture);
+    gfx::TextureMap2DClass material;
     material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material.SetBaseColor(gfx::Color::White);
-    material.AddTexture(gfx::CreateTextureFromText(mText));
+    material.SetTexture(gfx::CreateTextureFromText(mText));
 
     if ((bool)GetValue(mUI.chkScale))
     {

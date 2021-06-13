@@ -247,11 +247,10 @@ void GfxWindow::paintGL()
     }
     if (mHasFocus)
     {
-        static std::shared_ptr<gfx::MaterialClass> material;
+        static std::shared_ptr<gfx::ColorClass> material;
         if (!material)
         {
-            material = std::make_shared<gfx::MaterialClass>();
-            material->SetShader(gfx::MaterialClass::Shader::Color);
+            material = std::make_shared<gfx::ColorClass>();
             material->SetBaseColor(mFocusColor);
         }
         gfx::Rectangle rect(gfx::Drawable::Style::Outline, 2.0f);

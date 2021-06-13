@@ -49,6 +49,7 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/clipboard.h"
 #include "base/assert.h"
 #include "base/format.h"
@@ -188,7 +189,7 @@ public:
         painter.Draw(*mDrawable, view, *mMaterial);
 
         // draw a selection rect around it.
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view, 
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
                      gfx::CreateMaterialFromColor(gfx::Color::Green));
         view.Pop();
     }
@@ -843,9 +844,6 @@ void EntityWidget::Refresh()
     // edited.
     if (mUI.nodeName->hasFocus())
         return;
-    // don't take undo snapshot while the node alpha is being slid
-    if (mUI.dsAlpha->isSliderDown())
-        return;
     // don't take undo snapshot while continuous edits to text props
     if (mUI.tiTextColor->isDialogOpen() || mUI.tiText->hasFocus())
         return;
@@ -1387,7 +1385,23 @@ void EntityWidget::on_btnSelectMaterial_clicked()
             DlgMaterial dlg(this, mState.workspace, material);
             if (dlg.exec() == QDialog::Rejected)
                 return;
+            material = dlg.GetSelectedMaterialId();
+            if (drawable->GetMaterialId() == app::ToUtf8(material))
+                return;
+            drawable->ResetMaterial();
             drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
+        }
+    }
+}
+
+void EntityWidget::on_btnMaterialParams_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* drawable = node->GetDrawable())
+        {
+            DlgMaterialParams dlg(this, mState.workspace, drawable);
+            dlg.exec();
         }
     }
 }
@@ -1565,37 +1579,7 @@ void EntityWidget::on_dsRestartDrawable_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
-void EntityWidget::on_dsOverrideAlpha_stateChanged(int)
-{
-    UpdateCurrentNodeProperties();
-
-    if (auto* node = GetCurrentNode())
-    {
-        if (const auto* item = node->GetDrawable())
-        {
-            const auto& material = mState.workspace->FindMaterialClassById(item->GetMaterialId());
-            if (!material || !item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha))
-                return;
-
-            const bool has_alpha_blending = material->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Transparent;
-            if (has_alpha_blending)
-                return;
-
-            QMessageBox msg(this);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Warning);
-            msg.setText(tr("The current material doesn't enable transparency."
-                           "Setting alpha will have no effect."));
-            msg.exec();
-        }
-    }
-}
 void EntityWidget::on_dsFlipVertically_stateChanged(int)
-{
-    UpdateCurrentNodeProperties();
-}
-
-void EntityWidget::on_dsAlpha_valueChanged()
 {
     UpdateCurrentNodeProperties();
 }
@@ -2208,7 +2192,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsRenderStyle, game::DrawableItemClass::RenderStyle::Solid);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
-    SetValue(mUI.dsAlpha, NormalizedFloat(1.0f));
     SetValue(mUI.rbFriction, 0.0f);
     SetValue(mUI.rbRestitution, 0.0f);
     SetValue(mUI.rbAngularDamping, 0.0f);
@@ -2267,12 +2250,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
-            SetValue(mUI.dsAlpha, NormalizedFloat(item->GetAlpha()));
             SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
             SetValue(mUI.dsUpdateDrawable, item->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable));
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));
-            SetValue(mUI.dsOverrideAlpha, item->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
         }
         if (const auto* body = node->GetRigidBody())
@@ -2375,10 +2356,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
 
     if (auto* item = node->GetDrawable())
     {
-        const float alpha_val = mUI.dsAlpha->value();
-        const float alpha_max = mUI.dsAlpha->maximum();
-        const float alpha = alpha_val / alpha_max;
-
         const QString& material_name = GetValue(mUI.dsMaterial);
         const QString& drawable_name = GetValue(mUI.dsDrawable);
         item->SetDrawableId(mState.workspace->GetDrawableClassByName(drawable_name)->GetId());
@@ -2388,13 +2365,11 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetLayer(GetValue(mUI.dsLayer));
         item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
-        item->SetAlpha(alpha);
 
         item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
         item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));
         item->SetFlag(game::DrawableItemClass::Flags::UpdateMaterial, GetValue(mUI.dsUpdateMaterial));
         item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
-        item->SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, GetValue(mUI.dsOverrideAlpha));
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
     }
 

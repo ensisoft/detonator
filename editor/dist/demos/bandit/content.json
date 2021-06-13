@@ -15,11 +15,9 @@
         {
           "class": "WyKYhKjCKB",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "JQAP7v0ZUJ",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -102,11 +100,9 @@
         {
           "class": "C8Zo9jLx2t",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -189,11 +185,9 @@
         {
           "class": "z91WmstalU",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -276,11 +270,9 @@
         {
           "class": "gLEkpUMPMY",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -363,11 +355,9 @@
         {
           "class": "2X1vo3R61U",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -450,11 +440,9 @@
         {
           "class": "2n7nlbnAPk",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "oNJA4jNZF9",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -515,11 +503,9 @@
         {
           "class": "pbStBifQYT",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -602,11 +588,9 @@
         {
           "class": "r2t3TrFkvU",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -689,11 +673,9 @@
         {
           "class": "066mSwAYNb",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -776,11 +758,9 @@
         {
           "class": "RaWnULHEHq",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -863,11 +843,9 @@
         {
           "class": "aky1XfEBAy",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -950,11 +928,9 @@
         {
           "class": "WxXttNKwyJ",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1037,11 +1013,9 @@
         {
           "class": "nyU7LB2bT7",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1124,11 +1098,9 @@
         {
           "class": "KTWTPjswtn",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1211,11 +1183,9 @@
         {
           "class": "DmMR4O2G87",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1298,11 +1268,9 @@
         {
           "class": "BeQmNI8QiC",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1385,11 +1353,9 @@
         {
           "class": "nPGxaHayQR",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1472,11 +1438,9 @@
         {
           "class": "qjYux7bo6E",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "oDE09YOPk9",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1537,11 +1501,9 @@
         {
           "class": "zuTdSa5Lgw",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1624,11 +1586,9 @@
         {
           "class": "uZd3FvpM9D",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "fW1kOmDCo0",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1689,11 +1649,9 @@
         {
           "class": "S17SJNDFPG",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "IfEi7dQdbW",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1754,11 +1712,9 @@
         {
           "class": "alg3H187iN",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "l9oab5XQTK",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1819,11 +1775,9 @@
         {
           "class": "xvyFXQZnfr",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1926,11 +1880,9 @@
         {
           "class": "E5g8vRsJGU",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "8636ofEjei",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1964,11 +1916,9 @@
         {
           "class": "lLQQND6Zx7",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "26DgI88X5u",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2002,11 +1952,9 @@
         {
           "class": "KWkjjMvdpN",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "zoqnFP5Gvz",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2040,11 +1988,9 @@
         {
           "class": "yF3GzMv8OR",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "W27ZFgJKAJ",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2078,11 +2024,9 @@
         {
           "class": "ysQmAZ8shT",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "4rBCnTGuXK",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2116,11 +2060,9 @@
         {
           "class": "uEzZkNIIJv",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "PBPIRCm9MB",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2727,11 +2669,9 @@
         {
           "class": "mWsaHvOmn4",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2765,11 +2705,9 @@
         {
           "class": "FHZRIiFzib",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2803,11 +2741,9 @@
         {
           "class": "ZzIQmqytjU",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2841,11 +2777,9 @@
         {
           "class": "831jqJ3JvU",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3041,11 +2975,9 @@
         {
           "class": "DyP6DobEdy",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3079,11 +3011,9 @@
         {
           "class": "KIvBW7vhZx",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3117,11 +3047,9 @@
         {
           "class": "q3uHAiODGR",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3155,11 +3083,9 @@
         {
           "class": "6NRIamZYFq",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3382,11 +3308,9 @@
         {
           "class": "pm2yoCXW5N",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3511,11 +3435,9 @@
         {
           "class": "AnEyPNZmoX",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3549,11 +3471,9 @@
         {
           "class": "Ueafg3xmjx",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3587,11 +3507,9 @@
         {
           "class": "G9dSSrd7QQ",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3625,11 +3543,9 @@
         {
           "class": "9wQFYrlhoB",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3663,11 +3579,9 @@
         {
           "class": "Wzr4KHfipN",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3701,11 +3615,9 @@
         {
           "class": "KbswSKw9Ol",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3798,11 +3710,9 @@
         {
           "class": "eWGWJAZIMO",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "FgJP6uJzoG",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3863,11 +3773,9 @@
         {
           "class": "simUyPhpXK",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "FgJP6uJzoG",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3928,11 +3836,9 @@
         {
           "class": "Im3L9TD9NG",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3966,11 +3872,9 @@
         {
           "class": "xIir5FvI0b",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4004,11 +3908,9 @@
         {
           "class": "ZrIIsrDZih",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4042,11 +3944,9 @@
         {
           "class": "BQuel1SLPP",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4080,11 +3980,9 @@
         {
           "class": "wMp7xOqWwq",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4118,11 +4016,9 @@
         {
           "class": "8MLbMo0t2a",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4156,11 +4052,9 @@
         {
           "class": "tldjq8ZAxW",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4194,11 +4088,9 @@
         {
           "class": "H8mpf49ZWy",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4232,11 +4124,9 @@
         {
           "class": "lyZMq4P1OB",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4270,11 +4160,9 @@
         {
           "class": "gwf216fO5y",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4350,11 +4238,9 @@
         {
           "class": "NMXPN7q6Nr",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4388,11 +4274,9 @@
         {
           "class": "RvqEqHyEIM",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4426,11 +4310,9 @@
         {
           "class": "iY8NoGOsJt",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4464,11 +4346,9 @@
         {
           "class": "50qgHmpvrf",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4502,11 +4382,9 @@
         {
           "class": "9gPpq9P8rg",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4644,11 +4522,9 @@
         {
           "class": "hHxxMDUpsE",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "dWDAODzq3M",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4709,11 +4585,9 @@
         {
           "class": "GRBemQtTuY",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "YkK6SEnX2R",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4774,11 +4648,9 @@
         {
           "class": "Y0gBBtChIX",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4812,11 +4684,9 @@
         {
           "class": "UIbYC5M3Iq",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4850,11 +4720,9 @@
         {
           "class": "l2p8ir9ZhN",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4950,11 +4818,9 @@
         {
           "class": "w7ahuB3YZx",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5025,1669 +4891,34 @@
   ],
   "materials": [
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "gzjp7PwMQd",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "gzjp7PwMQd",
       "resource_name": "StoneBlock",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
-            "id": "bbjIFexelt",
-            "name": "StoneBlock"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
+        "id": "TjsZJr2sQ7",
+        "name": "StoneBlock",
+        "type": "Filesystem"
       },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "ezvBTHxrAX",
-      "particle_action": "None",
-      "resource_id": "ezvBTHxrAX",
-      "resource_name": "tile1",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile1.png",
-            "id": "tLJo4r4QRd",
-            "name": "tile1"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "tdYbKt5I5Q",
-      "particle_action": "None",
-      "resource_id": "tdYbKt5I5Q",
-      "resource_name": "tile2",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile2.png",
-            "id": "YgkBm7qtDB",
-            "name": "tile2"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "WTNfneUmHx",
-      "particle_action": "None",
-      "resource_id": "WTNfneUmHx",
-      "resource_name": "tile3",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile3.png",
-            "id": "TzpxDKZePi",
-            "name": "tile3"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "NY4Of7DfnI",
-      "particle_action": "None",
-      "resource_id": "NY4Of7DfnI",
-      "resource_name": "tile4",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile4.png",
-            "id": "ApIEE3nBru",
-            "name": "tile4"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "PiCFlSf9Gm",
-      "particle_action": "None",
-      "resource_id": "PiCFlSf9Gm",
-      "resource_name": "tile5",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile5.png",
-            "id": "Qrw9Ewtpid",
-            "name": "tile5"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "5GPKkIzzUf",
-      "particle_action": "None",
-      "resource_id": "5GPKkIzzUf",
-      "resource_name": "tile6",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile6.png",
-            "id": "BXWq0OEstp",
-            "name": "tile6"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "uLZlHEU5XW",
-      "particle_action": "None",
-      "resource_id": "uLZlHEU5XW",
-      "resource_name": "tile7",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile7.png",
-            "id": "BFvMBZ9teN",
-            "name": "tile7"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "7uTDp9S0mt",
-      "particle_action": "None",
-      "resource_id": "7uTDp9S0mt",
-      "resource_name": "tile8",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile8.png",
-            "id": "P1qqMPCpGx",
-            "name": "tile8"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "kyLTH2YAJY",
-      "particle_action": "None",
-      "resource_id": "kyLTH2YAJY",
-      "resource_name": "tile9",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile9.png",
-            "id": "1eb5p4syu6",
-            "name": "tile9"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "FW5N4w5d3Z",
-      "particle_action": "None",
-      "resource_id": "FW5N4w5d3Z",
-      "resource_name": "tile10",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile10.png",
-            "id": "M0OSemiYXD",
-            "name": "tile10"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "jqIuU0kASH",
-      "particle_action": "None",
-      "resource_id": "jqIuU0kASH",
-      "resource_name": "tile11",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile11.png",
-            "id": "oUYtXufqNw",
-            "name": "tile11"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "sX94tG9WhR",
-      "particle_action": "None",
-      "resource_id": "sX94tG9WhR",
-      "resource_name": "tile12",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile12.png",
-            "id": "niGKN4PXSR",
-            "name": "tile12"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "MBEoxQ9SGX",
-      "particle_action": "None",
-      "resource_id": "MBEoxQ9SGX",
-      "resource_name": "tile13",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile13.png",
-            "id": "xIK7bf1we2",
-            "name": "tile13"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "UJKQNRymuO",
-      "particle_action": "None",
-      "resource_id": "UJKQNRymuO",
-      "resource_name": "tile14",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile14.png",
-            "id": "gtuSgRz3Jt",
-            "name": "tile14"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "UTfmL76ml0",
-      "particle_action": "None",
-      "resource_id": "UTfmL76ml0",
-      "resource_name": "tile15",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile15.png",
-            "id": "O5samHWMP7",
-            "name": "tile15"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "QCvtiZTp3b",
-      "particle_action": "None",
-      "resource_id": "QCvtiZTp3b",
-      "resource_name": "tile16",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Tile/tile16.png",
-            "id": "CxrWt3QAre",
-            "name": "tile16"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "zgwqXHtABU",
-      "particle_action": "None",
-      "resource_id": "zgwqXHtABU",
-      "resource_name": "Bush (1)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Bush (1).png",
-            "id": "Onbe4r8EpS",
-            "name": "Bush (1)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "MYaj1na7M4",
-      "particle_action": "None",
-      "resource_id": "MYaj1na7M4",
-      "resource_name": "Bush (2)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Bush (2).png",
-            "id": "o3nGoBoCyq",
-            "name": "Bush (2)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "wrSRezqUfj",
-      "particle_action": "None",
-      "resource_id": "wrSRezqUfj",
-      "resource_name": "Cactus (1)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
-            "id": "FKJA72OOQ3",
-            "name": "Cactus (1)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "QR14nEb7T3",
-      "particle_action": "None",
-      "resource_id": "QR14nEb7T3",
-      "resource_name": "Cactus (2)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
-            "id": "o8bJByXHfL",
-            "name": "Cactus (2)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "IPqp1SooOX",
-      "particle_action": "None",
-      "resource_id": "IPqp1SooOX",
-      "resource_name": "Cactus (3)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
-            "id": "7JwOxWJKl4",
-            "name": "Cactus (3)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "RhslGRtQQR",
-      "particle_action": "None",
-      "resource_id": "RhslGRtQQR",
-      "resource_name": "Crate",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Crate.png",
-            "id": "FSGa8mL5IB",
-            "name": "Crate"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
-      "static": false,
-      "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -6704,65 +4935,1004 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
+      "id": "ezvBTHxrAX",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "ezvBTHxrAX",
+      "resource_name": "tile1",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile1.png",
+        "id": "UW1bHwIOYN",
+        "name": "tile1",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "tdYbKt5I5Q",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "tdYbKt5I5Q",
+      "resource_name": "tile2",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile2.png",
+        "id": "1L0NLDlohh",
+        "name": "tile2",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "WTNfneUmHx",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "WTNfneUmHx",
+      "resource_name": "tile3",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile3.png",
+        "id": "opPOu5Zxym",
+        "name": "tile3",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "NY4Of7DfnI",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "NY4Of7DfnI",
+      "resource_name": "tile4",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile4.png",
+        "id": "bf9vvUkU8z",
+        "name": "tile4",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "PiCFlSf9Gm",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "PiCFlSf9Gm",
+      "resource_name": "tile5",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile5.png",
+        "id": "nGBPZqmLjP",
+        "name": "tile5",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "5GPKkIzzUf",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "5GPKkIzzUf",
+      "resource_name": "tile6",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile6.png",
+        "id": "k0Sk1nBWdT",
+        "name": "tile6",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "uLZlHEU5XW",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "uLZlHEU5XW",
+      "resource_name": "tile7",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile7.png",
+        "id": "j72PHAGAdY",
+        "name": "tile7",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "7uTDp9S0mt",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "7uTDp9S0mt",
+      "resource_name": "tile8",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile8.png",
+        "id": "JYj1uzo5dM",
+        "name": "tile8",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "kyLTH2YAJY",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "kyLTH2YAJY",
+      "resource_name": "tile9",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile9.png",
+        "id": "MTJR3MwqeH",
+        "name": "tile9",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "FW5N4w5d3Z",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "FW5N4w5d3Z",
+      "resource_name": "tile10",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile10.png",
+        "id": "uTPJbltI6X",
+        "name": "tile10",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "jqIuU0kASH",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "jqIuU0kASH",
+      "resource_name": "tile11",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile11.png",
+        "id": "QuEr4UqFv8",
+        "name": "tile11",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "sX94tG9WhR",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "sX94tG9WhR",
+      "resource_name": "tile12",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile12.png",
+        "id": "3abTOlTyNg",
+        "name": "tile12",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "MBEoxQ9SGX",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "MBEoxQ9SGX",
+      "resource_name": "tile13",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile13.png",
+        "id": "iRCZftM09d",
+        "name": "tile13",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "UJKQNRymuO",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "UJKQNRymuO",
+      "resource_name": "tile14",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile14.png",
+        "id": "8vzY1g1hNE",
+        "name": "tile14",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "UTfmL76ml0",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "UTfmL76ml0",
+      "resource_name": "tile15",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile15.png",
+        "id": "aU4MmT5Ijz",
+        "name": "tile15",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "QCvtiZTp3b",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "QCvtiZTp3b",
+      "resource_name": "tile16",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Tile/tile16.png",
+        "id": "OJ1iQ6oOYo",
+        "name": "tile16",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "zgwqXHtABU",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "zgwqXHtABU",
+      "resource_name": "Bush (1)",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Bush (1).png",
+        "id": "nw0nj0q6rr",
+        "name": "Bush (1)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "MYaj1na7M4",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "MYaj1na7M4",
+      "resource_name": "Bush (2)",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Bush (2).png",
+        "id": "dqweGyyY7y",
+        "name": "Bush (2)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "wrSRezqUfj",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "wrSRezqUfj",
+      "resource_name": "Cactus (1)",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
+        "id": "e5hYa8gAem",
+        "name": "Cactus (1)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "QR14nEb7T3",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "QR14nEb7T3",
+      "resource_name": "Cactus (2)",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
+        "id": "hihoJpZg1t",
+        "name": "Cactus (2)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "IPqp1SooOX",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "IPqp1SooOX",
+      "resource_name": "Cactus (3)",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
+        "id": "yd4fOCuEbL",
+        "name": "Cactus (3)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "RhslGRtQQR",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "RhslGRtQQR",
+      "resource_name": "Crate",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Crate.png",
+        "id": "pvUC2KetOE",
+        "name": "Crate",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
       "id": "bvJqe9fGu5",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "bvJqe9fGu5",
       "resource_name": "Grass (1)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Grass (1).png",
-            "id": "boCRXvF114",
-            "name": "Grass (1)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Grass (1).png",
+        "id": "Xa2UuFmZoJ",
+        "name": "Grass (1)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -6777,65 +5947,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "IM3dwFG7wS",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "IM3dwFG7wS",
       "resource_name": "Grass (2)",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Grass (2).png",
-            "id": "axvWKjf5aX",
-            "name": "Grass (2)"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Grass (2).png",
+        "id": "5Fp5rlwNuS",
+        "name": "Grass (2)",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -6850,65 +5991,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "bBSpmT5CN0",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "bBSpmT5CN0",
       "resource_name": "Sign",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Sign.png",
-            "id": "i2Q8q8dwBY",
-            "name": "Sign"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Sign.png",
+        "id": "l1TbCYb4HB",
+        "name": "Sign",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -6923,65 +6035,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "MDomkaGQRL",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "MDomkaGQRL",
       "resource_name": "SignArrow",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/SignArrow.png",
-            "id": "7tknNZ8k3T",
-            "name": "SignArrow"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/SignArrow.png",
+        "id": "zwS5KQkPF0",
+        "name": "SignArrow",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -6996,65 +6079,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "Ca4GgRWjP2",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "Ca4GgRWjP2",
       "resource_name": "Skeleton",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Skeleton.png",
-            "id": "xs9rJPhOWE",
-            "name": "Skeleton"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Skeleton.png",
+        "id": "G9qKL2EODD",
+        "name": "Skeleton",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -7069,65 +6123,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "xrUzM3pdBZ",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "xrUzM3pdBZ",
       "resource_name": "Stone",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Stone.png",
-            "id": "vbITWGPW5M",
-            "name": "Stone"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Stone.png",
+        "id": "nPrpJjXUg5",
+        "name": "Stone",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -7142,65 +6167,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "pQ2O7Ekypd",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "pQ2O7Ekypd",
       "resource_name": "Tree",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/Objects/Tree.png",
-            "id": "Z1SbDeS3gw",
-            "name": "Tree"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/Objects/Tree.png",
+        "id": "9NfwzTr3yN",
+        "name": "Tree",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -7215,65 +6211,36 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 0.9960784316062927,
-        "g": 0.9058823585510254,
-        "r": 0.8117647171020508
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "AgxrO05Kqg",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "AgxrO05Kqg",
       "resource_name": "BG_Layer_0",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/BG_layer_0.png",
-            "id": "9yS3kdi9J3",
-            "name": "BG_layer_0"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture_mag_filter": "Linear",
-      "texture_min_filter": "Bilinear",
+      "texture": {
+        "file": "ws://textures/desert tile set/BG_layer_0.png",
+        "id": "aEYiykIEUb",
+        "name": "BG_layer_0",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -7295,219 +6262,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "RnL44evfW5",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "RnL44evfW5",
       "resource_name": "Bandit Idle",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_000.png",
-            "id": "h74yTMLppT",
-            "name": "__Bandit02_Idle_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_001.png",
-            "id": "U7A8BiWv52",
-            "name": "__Bandit02_Idle_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_002.png",
-            "id": "iQJugU10h3",
-            "name": "__Bandit02_Idle_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_003.png",
-            "id": "hikkJUEhpB",
-            "name": "__Bandit02_Idle_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_004.png",
-            "id": "vY8X0xIFyv",
-            "name": "__Bandit02_Idle_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_005.png",
-            "id": "uN5A3EuC1Q",
-            "name": "__Bandit02_Idle_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_006.png",
-            "id": "jGaKKQhD3p",
-            "name": "__Bandit02_Idle_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_007.png",
-            "id": "WlqPr3kFEb",
-            "name": "__Bandit02_Idle_007"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_008.png",
-            "id": "MSjXJgmlhk",
-            "name": "__Bandit02_Idle_008"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_009.png",
-            "id": "KtzvG52DAN",
-            "name": "__Bandit02_Idle_009"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_010.png",
-            "id": "slXK2zXGpm",
-            "name": "__Bandit02_Idle_010"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_011.png",
-            "id": "LATALGfm0v",
-            "name": "__Bandit02_Idle_011"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -7523,6 +6288,152 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_000.png",
+          "id": "lsDm9xaD2L",
+          "name": "__Bandit02_Idle_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_001.png",
+          "id": "yZ9wtTdHRY",
+          "name": "__Bandit02_Idle_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_002.png",
+          "id": "mxUtQC7aQF",
+          "name": "__Bandit02_Idle_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_003.png",
+          "id": "dHhy3tALI5",
+          "name": "__Bandit02_Idle_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_004.png",
+          "id": "5RaivjL0Hb",
+          "name": "__Bandit02_Idle_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_005.png",
+          "id": "RhiTAfKt74",
+          "name": "__Bandit02_Idle_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_006.png",
+          "id": "3KSaRAlBH0",
+          "name": "__Bandit02_Idle_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_007.png",
+          "id": "N5s5nyZ5Ib",
+          "name": "__Bandit02_Idle_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_008.png",
+          "id": "fOiZlepCvl",
+          "name": "__Bandit02_Idle_008",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_009.png",
+          "id": "yPuh4BAttL",
+          "name": "__Bandit02_Idle_009",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_010.png",
+          "id": "RZh4Bi6S62",
+          "name": "__Bandit02_Idle_010",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_011.png",
+          "id": "IjNMUgONUy",
+          "name": "__Bandit02_Idle_011",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
@@ -7533,159 +6444,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "w26YsP04pJ",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "w26YsP04pJ",
       "resource_name": "Bandit Walk",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_000.png",
-            "id": "3721fINQXP",
-            "name": "__Bandit02_Walk_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_001.png",
-            "id": "gzX8DRQ8zR",
-            "name": "__Bandit02_Walk_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_002.png",
-            "id": "U7h3EOnxFg",
-            "name": "__Bandit02_Walk_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_003.png",
-            "id": "zyRRSUj0NM",
-            "name": "__Bandit02_Walk_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_004.png",
-            "id": "QZX9yveZ7D",
-            "name": "__Bandit02_Walk_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_005.png",
-            "id": "lKHKMmhqQj",
-            "name": "__Bandit02_Walk_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_006.png",
-            "id": "kX2QW05UEx",
-            "name": "__Bandit02_Walk_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_007.png",
-            "id": "zOfgxgSg8d",
-            "name": "__Bandit02_Walk_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -7701,35 +6470,109 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_000.png",
+          "id": "ADbm6G759D",
+          "name": "__Bandit02_Walk_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_001.png",
+          "id": "kBs4BEJxFk",
+          "name": "__Bandit02_Walk_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_002.png",
+          "id": "DRQRAwWo0M",
+          "name": "__Bandit02_Walk_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_003.png",
+          "id": "waihgKt70A",
+          "name": "__Bandit02_Walk_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_004.png",
+          "id": "N3IluHyFCA",
+          "name": "__Bandit02_Walk_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_005.png",
+          "id": "wa3MTJsJbM",
+          "name": "__Bandit02_Walk_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_006.png",
+          "id": "wTxY99zC6R",
+          "name": "__Bandit02_Walk_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_007.png",
+          "id": "oYKuoYQFgC",
+          "name": "__Bandit02_Walk_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
       "blending": false,
       "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
@@ -7737,133 +6580,15 @@
       },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "f2rOXhvzDy",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "f2rOXhvzDy",
       "resource_name": "Bandit Jump",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
-            "id": "FQy9ZhkXXG",
-            "name": "__Bandit02_JumpUP_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
-            "id": "8EKQMa8K2u",
-            "name": "__Bandit02_JumpUP_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
-            "id": "jkB7tI6S2C",
-            "name": "__Bandit02_JumpUP_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
-            "id": "zsk2QsXmen",
-            "name": "__Bandit02_JumpUP_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
-            "id": "tEMH88Fsnv",
-            "name": "__Bandit02_JumpUP_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
-            "id": "h7SR799dqf",
-            "name": "__Bandit02_JumpUP_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
-            "id": "XpThQU5kWD",
-            "name": "__Bandit02_JumpUP_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
-            "id": "opoJCTJLye",
-            "name": "__Bandit02_JumpUP_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -7879,35 +6604,109 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
+          "id": "eptt19lzUd",
+          "name": "__Bandit02_JumpUP_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
+          "id": "J2mHET2LI6",
+          "name": "__Bandit02_JumpUP_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
+          "id": "2iKz7f2R8S",
+          "name": "__Bandit02_JumpUP_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
+          "id": "pLJCSS0IdM",
+          "name": "__Bandit02_JumpUP_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
+          "id": "KAXti7LY02",
+          "name": "__Bandit02_JumpUP_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
+          "id": "X06OiLmUep",
+          "name": "__Bandit02_JumpUP_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
+          "id": "4I11qxNCdX",
+          "name": "__Bandit02_JumpUP_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
+          "id": "G21MKjk4pF",
+          "name": "__Bandit02_JumpUP_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
       "blending": false,
       "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
@@ -7915,133 +6714,15 @@
       },
       "fps": 30.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "mgo2XI2toK",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "mgo2XI2toK",
       "resource_name": "Bandit Attack",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_000.png",
-            "id": "E0xsK0TpWe",
-            "name": "__Bandit02_Attack_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_001.png",
-            "id": "TzNqs4p9DO",
-            "name": "__Bandit02_Attack_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_002.png",
-            "id": "Zrnp7nS8nS",
-            "name": "__Bandit02_Attack_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_003.png",
-            "id": "WllfQCAmsQ",
-            "name": "__Bandit02_Attack_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_004.png",
-            "id": "GPpurFG6FA",
-            "name": "__Bandit02_Attack_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_005.png",
-            "id": "K8YE3AFGyI",
-            "name": "__Bandit02_Attack_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_006.png",
-            "id": "KSLdI8UDEM",
-            "name": "__Bandit02_Attack_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_007.png",
-            "id": "Ps43nDM62R",
-            "name": "__Bandit02_Attack_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -8057,6 +6738,104 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_000.png",
+          "id": "rhlMPpQKBH",
+          "name": "__Bandit02_Attack_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_001.png",
+          "id": "kX3zx9umE6",
+          "name": "__Bandit02_Attack_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_002.png",
+          "id": "R3m6PbNOWE",
+          "name": "__Bandit02_Attack_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_003.png",
+          "id": "06s6OnrZnb",
+          "name": "__Bandit02_Attack_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_004.png",
+          "id": "XKPtQEYjuG",
+          "name": "__Bandit02_Attack_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_005.png",
+          "id": "ykrqQnB6Fy",
+          "name": "__Bandit02_Attack_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_006.png",
+          "id": "5q3PLD8zSM",
+          "name": "__Bandit02_Attack_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_007.png",
+          "id": "R2wBdmeRW7",
+          "name": "__Bandit02_Attack_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
@@ -8067,159 +6846,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "90E8gRgYDP",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "90E8gRgYDP",
       "resource_name": "Bandit Fall",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_000.png",
-            "id": "DaJBeQ5JqX",
-            "name": "__Bandit02_FallDown_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_001.png",
-            "id": "7T2I9iTzbO",
-            "name": "__Bandit02_FallDown_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_002.png",
-            "id": "atnUz2FuBY",
-            "name": "__Bandit02_FallDown_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_003.png",
-            "id": "eMb2aKkAJu",
-            "name": "__Bandit02_FallDown_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_004.png",
-            "id": "xOhnAgrFNN",
-            "name": "__Bandit02_FallDown_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_005.png",
-            "id": "6ZoU8Ld032",
-            "name": "__Bandit02_FallDown_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_006.png",
-            "id": "LmN4vx7Ahy",
-            "name": "__Bandit02_FallDown_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_007.png",
-            "id": "hMGjR7LshE",
-            "name": "__Bandit02_FallDown_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -8235,6 +6872,104 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_000.png",
+          "id": "9urAW8NmQb",
+          "name": "__Bandit02_FallDown_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_001.png",
+          "id": "n7BC1Nv7kn",
+          "name": "__Bandit02_FallDown_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_002.png",
+          "id": "rMR5Amjua8",
+          "name": "__Bandit02_FallDown_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_003.png",
+          "id": "69yf8mQekx",
+          "name": "__Bandit02_FallDown_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_004.png",
+          "id": "8GUeBBAZLo",
+          "name": "__Bandit02_FallDown_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_005.png",
+          "id": "CBQQjXRCnP",
+          "name": "__Bandit02_FallDown_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_006.png",
+          "id": "0ExH2AW2Zy",
+          "name": "__Bandit02_FallDown_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_007.png",
+          "id": "Bb7JvET8C0",
+          "name": "__Bandit02_FallDown_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
@@ -8245,159 +6980,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "fmxJ24RhUE",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "fmxJ24RhUE",
       "resource_name": "Bandit Hurt",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_000.png",
-            "id": "0JXdUjClay",
-            "name": "__Bandit02_Hurt_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_001.png",
-            "id": "Cez7JuqKd9",
-            "name": "__Bandit02_Hurt_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_002.png",
-            "id": "ZHWSvNhlq4",
-            "name": "__Bandit02_Hurt_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_003.png",
-            "id": "MwWbvhUi7b",
-            "name": "__Bandit02_Hurt_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_004.png",
-            "id": "kWqxN9pXmv",
-            "name": "__Bandit02_Hurt_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_005.png",
-            "id": "PpGCk038Rw",
-            "name": "__Bandit02_Hurt_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_006.png",
-            "id": "kOYvfKm8r9",
-            "name": "__Bandit02_Hurt_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_007.png",
-            "id": "mE1TKO8ovh",
-            "name": "__Bandit02_Hurt_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -8413,35 +7006,109 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_000.png",
+          "id": "AQFxlDxqks",
+          "name": "__Bandit02_Hurt_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_001.png",
+          "id": "kyy7htNP0O",
+          "name": "__Bandit02_Hurt_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_002.png",
+          "id": "Kf52D6y0z5",
+          "name": "__Bandit02_Hurt_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_003.png",
+          "id": "6uC8OYvMs1",
+          "name": "__Bandit02_Hurt_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_004.png",
+          "id": "lTXpze4OXO",
+          "name": "__Bandit02_Hurt_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_005.png",
+          "id": "rK1tOnvEKA",
+          "name": "__Bandit02_Hurt_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_006.png",
+          "id": "sF85FM2yrm",
+          "name": "__Bandit02_Hurt_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_007.png",
+          "id": "QisQwp6eB6",
+          "name": "__Bandit02_Hurt_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
       "blending": false,
       "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
@@ -8449,133 +7116,15 @@
       },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "9aRwE7zov7",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "9aRwE7zov7",
       "resource_name": "Bandit Die",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_000.png",
-            "id": "jNigO3g4e8",
-            "name": "__Bandit02_Die_000"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_001.png",
-            "id": "SnKAxauD7s",
-            "name": "__Bandit02_Die_001"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_002.png",
-            "id": "o3JP9TbG5y",
-            "name": "__Bandit02_Die_002"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_003.png",
-            "id": "DCBnEWBugx",
-            "name": "__Bandit02_Die_003"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_004.png",
-            "id": "QJS3Gku3iZ",
-            "name": "__Bandit02_Die_004"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_005.png",
-            "id": "UYbAZWSCuC",
-            "name": "__Bandit02_Die_005"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_006.png",
-            "id": "ZNtrLTIMpv",
-            "name": "__Bandit02_Die_006"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_007.png",
-            "id": "pH6Jo1kpLX",
-            "name": "__Bandit02_Die_007"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -8591,66 +7140,135 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_000.png",
+          "id": "P42qqr4xvz",
+          "name": "__Bandit02_Die_000",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_001.png",
+          "id": "EEJ7GOQJ47",
+          "name": "__Bandit02_Die_001",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_002.png",
+          "id": "vCgECOfMoD",
+          "name": "__Bandit02_Die_002",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_003.png",
+          "id": "fyq8iUOxjz",
+          "name": "__Bandit02_Die_003",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_004.png",
+          "id": "6WJxFehrMw",
+          "name": "__Bandit02_Die_004",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_005.png",
+          "id": "GYupJ99D2q",
+          "name": "__Bandit02_Die_005",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_006.png",
+          "id": "2Z4Xn3zi3l",
+          "name": "__Bandit02_Die_006",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_007.png",
+          "id": "WFh1DOYa82",
+          "name": "__Bandit02_Die_007",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 0.69514000415802,
-        "g": 0.7633325457572937,
-        "r": 0.8315404057502747
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "l6vR7abMmW",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "l6vR7abMmW",
       "resource_name": "BG_Layer_1",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/BG_layer_1.png",
-            "id": "SYZHe7Liu6",
-            "name": "BG_layer_1"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/BG_layer_1.png",
+        "id": "3KLuHOjPOz",
+        "name": "BG_layer_1",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -8667,63 +7285,34 @@
       "type": "Texture"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 0.5149157047271729,
-        "g": 0.5149157047271729,
-        "r": 0.5149157047271729
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "X6Q2aN3uWm",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "X6Q2aN3uWm",
       "resource_name": "BG_Layer_2",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/desert tile set/BG_layer_2.png",
-            "id": "Q43kDjRqE9",
-            "name": "BG_layer_2"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/desert tile set/BG_layer_2.png",
+        "id": "sBOmW38aFS",
+        "name": "BG_layer_2",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Linear",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -8747,129 +7336,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "2ynNMbWOK3",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "2ynNMbWOK3",
       "resource_name": "Coin Spin",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
-            "id": "1FpkKtmnZr",
-            "name": "star coin rotate 1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
-            "id": "Ew3fxv4O7K",
-            "name": "star coin rotate 2"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
-            "id": "qL31d29OqM",
-            "name": "star coin rotate 3"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
-            "id": "ISZa55vs02",
-            "name": "star coin rotate 4"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
-            "id": "NDYRxkCUa5",
-            "name": "star coin rotate 5"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
-            "id": "GC0phyHJnT",
-            "name": "star coin rotate 6"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -8885,6 +7362,80 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
+          "id": "PYmRNyEFSl",
+          "name": "star coin rotate 1",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
+          "id": "yrPLN00zzw",
+          "name": "star coin rotate 2",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
+          "id": "X80Yotnth3",
+          "name": "star coin rotate 3",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
+          "id": "IsB0BGUba8",
+          "name": "star coin rotate 4",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
+          "id": "nCBLyGHvzm",
+          "name": "star coin rotate 5",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
+          "id": "7rYNRwJpHs",
+          "name": "star coin rotate 6",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     }
   ],

@@ -185,11 +185,10 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
     mNoise->SetWidth(bmp_width);
     mNoise->SetHeight(bmp_height);
 
-    gfx::MaterialClass klass;
-    klass.SetShader(gfx::MaterialClass::Shader::Texture);
+    gfx::TextureMap2DClass klass;
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     klass.SetBaseColor(gfx::Color::White);
-    klass.AddTexture(gfx::GenerateNoiseTexture(*mNoise));
+    klass.SetTexture(gfx::GenerateNoiseTexture(*mNoise));
     auto material = gfx::CreateMaterialInstance(std::move(klass));
 
     if ((bool)GetValue(mUI.chkScale))

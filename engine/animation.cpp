@@ -278,36 +278,22 @@ void SetValueActuator::Start(EntityNode& node)
     const auto param  = mClass->GetParamName();
     const auto* draw  = node.GetDrawable();
     const auto* body  = node.GetRigidBody();
-    if (param == ParamName::AlphaOverride || param == ParamName::DrawableTimeScale)
+    if ((param == ParamName::DrawableTimeScale) && !draw)
     {
-        if (!draw)
-        {
-            WARN("EntityNode '%1' doesn't have a drawable item." , node.GetName());
-            WARN("Setting '%1' will have no effect.", param);
-            return;
-        }
+        WARN("EntityNode '%1' doesn't have a drawable item." , node.GetName());
+        WARN("Setting '%1' will have no effect.", param);
+        return;
     }
-    else if (param == ParamName::LinearVelocityY || param == ParamName::LinearVelocityX ||
-             param == ParamName::AngularVelocity)
+    else if ((param == ParamName::LinearVelocityY ||
+              param == ParamName::LinearVelocityX ||
+              param == ParamName::AngularVelocity) && !body)
     {
-        if (!body)
-        {
-            WARN("EntityNode '%1' doesn't have a rigid body ." , node.GetName());
-            WARN("Setting '%1' will have no effect.", param);
-            return;
-        }
+        WARN("EntityNode '%1' doesn't have a rigid body ." , node.GetName());
+        WARN("Setting '%1' will have no effect.", param);
+        return;
     }
 
-    if (param == ParamName::AlphaOverride)
-    {
-        if (!draw->TestFlag(DrawableItemClass::Flags::OverrideAlpha))
-        {
-            WARN("EntityNode '%1' doesn't set OverrideAlpha flag. " , node.GetName());
-            WARN("Setting '%1' value will have no effect.", param);
-        }
-        mStartValue = draw->GetAlpha();
-    }
-    else if (param == ParamName::DrawableTimeScale)
+    if (param == ParamName::DrawableTimeScale)
         mStartValue = draw->GetTimeScale();
     else if (param == ParamName::AngularVelocity)
         mStartValue = body->GetAngularVelocity();
@@ -325,9 +311,7 @@ void SetValueActuator::Apply(EntityNode& node, float t)
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
 
-    if (param == ParamName::AlphaOverride && draw)
-        draw->SetAlpha(value);
-    else if (param == ParamName::DrawableTimeScale && draw)
+    if (param == ParamName::DrawableTimeScale && draw)
         draw->SetTimeScale(value);
     else if (param == ParamName::AngularVelocity && body)
         body->SetAngularVelocity(value);
@@ -347,10 +331,7 @@ void SetValueActuator::Apply(EntityNode& node, float t)
 
 void SetValueActuator::Finish(EntityNode& node)
 {
-    if (auto* draw = node.GetDrawable())
-    {
-        draw->SetAlpha(mClass->GetEndValue());
-    }
+
 }
 
 void TransformActuator::Start(EntityNode& node)

@@ -1200,46 +1200,6 @@
                <layout class="QVBoxLayout" name="verticalLayout_10">
                 <item>
                  <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="12" column="1">
-                   <widget class="QCheckBox" name="dsOverrideAlpha">
-                    <property name="text">
-                     <string>Override material alpha</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="1">
-                   <widget class="QCheckBox" name="dsVisible">
-                    <property name="text">
-                     <string>Visible in game</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_37">
-                    <property name="text">
-                     <string>Time scale</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QComboBox" name="dsDrawable"/>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QSlider" name="dsAlpha">
-                    <property name="maximum">
-                     <number>1000</number>
-                    </property>
-                    <property name="value">
-                     <number>1000</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="tickPosition">
-                     <enum>QSlider::NoTicks</enum>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="5" column="1">
                    <widget class="QDoubleSpinBox" name="dsLineWidth">
                     <property name="sizePolicy">
@@ -1250,6 +1210,99 @@
                     </property>
                     <property name="minimum">
                      <double>1.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="1">
+                   <widget class="QCheckBox" name="dsFlipVertically">
+                    <property name="text">
+                     <string>Flip vertically</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QComboBox" name="dsRenderPass">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QSpinBox" name="dsLayer">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimum">
+                     <number>-100</number>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_6">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Material</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QCheckBox" name="dsUpdateMaterial">
+                    <property name="text">
+                     <string>Update material</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_10">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Drawable</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1">
+                   <widget class="QCheckBox" name="dsUpdateDrawable">
+                    <property name="text">
+                     <string>Update drawable</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QCheckBox" name="dsVisible">
+                    <property name="text">
+                     <string>Visible in game</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_8">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Pass </string>
                     </property>
                    </widget>
                   </item>
@@ -1279,7 +1332,31 @@
                       </property>
                      </widget>
                     </item>
+                    <item>
+                     <widget class="QToolButton" name="btnMaterialParams">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_5">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Line width</string>
+                    </property>
+                   </widget>
                   </item>
                   <item row="6" column="1">
                    <widget class="QDoubleSpinBox" name="dsTimeScale">
@@ -1297,125 +1374,17 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="1">
-                   <widget class="QSpinBox" name="dsLayer">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimum">
-                     <number>-100</number>
-                    </property>
-                    <property name="maximum">
-                     <number>100</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="label_4">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Style</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="1">
+                  <item row="10" column="1">
                    <widget class="QCheckBox" name="dsRestartDrawable">
                     <property name="text">
                      <string>Restart drawable</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="4" column="1">
-                   <widget class="QComboBox" name="dsRenderStyle"/>
-                  </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="label_12">
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_37">
                     <property name="text">
-                     <string>Alpha</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_10">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Drawable</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="dsRenderPass">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="10" column="1">
-                   <widget class="QCheckBox" name="dsUpdateMaterial">
-                    <property name="text">
-                     <string>Update material</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="label_5">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Line width</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_8">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Pass </string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_6">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Material</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QCheckBox" name="dsUpdateDrawable">
-                    <property name="text">
-                     <string>Update drawable</string>
+                     <string>Time scale</string>
                     </property>
                    </widget>
                   </item>
@@ -1432,12 +1401,31 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="13" column="1">
-                   <widget class="QCheckBox" name="dsFlipVertically">
-                    <property name="text">
-                     <string>Flip vertically</string>
+                  <item row="0" column="1">
+                   <widget class="QComboBox" name="dsDrawable">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
                     </property>
                    </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_4">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Style</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QComboBox" name="dsRenderStyle"/>
                   </item>
                  </layout>
                 </item>
@@ -1874,6 +1862,9 @@
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
                     </property>
                     <property name="color">
                      <color>
@@ -2355,17 +2346,16 @@
   <tabstop>dsDrawable</tabstop>
   <tabstop>dsMaterial</tabstop>
   <tabstop>btnSelectMaterial</tabstop>
+  <tabstop>btnMaterialParams</tabstop>
   <tabstop>dsRenderPass</tabstop>
   <tabstop>dsLayer</tabstop>
   <tabstop>dsRenderStyle</tabstop>
   <tabstop>dsLineWidth</tabstop>
   <tabstop>dsTimeScale</tabstop>
-  <tabstop>dsAlpha</tabstop>
   <tabstop>dsVisible</tabstop>
   <tabstop>dsUpdateDrawable</tabstop>
   <tabstop>dsUpdateMaterial</tabstop>
   <tabstop>dsRestartDrawable</tabstop>
-  <tabstop>dsOverrideAlpha</tabstop>
   <tabstop>dsFlipVertically</tabstop>
   <tabstop>rigidBodyItem</tabstop>
   <tabstop>rbSimulation</tabstop>
@@ -2391,6 +2381,7 @@
   <tabstop>tiFontSize</tabstop>
   <tabstop>tiVAlign</tabstop>
   <tabstop>tiHAlign</tabstop>
+  <tabstop>tiTextColor</tabstop>
   <tabstop>tiLineHeight</tabstop>
   <tabstop>tiLayer</tabstop>
   <tabstop>tiVisible</tabstop>

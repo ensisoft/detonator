@@ -35,13 +35,13 @@ void unit_test_setflag_actuator()
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetFlagName("OverrideAlpha");
+    klass.SetFlagName("VisibleInGame");
     klass.SetFlagAction(game::SetFlagActuatorClass::FlagAction::Off);
 
     TEST_REQUIRE(klass.GetNodeId() == "1234");
     TEST_REQUIRE(klass.GetStartTime() == real::float32(0.1f));
     TEST_REQUIRE(klass.GetDuration()  == real::float32(0.5f));
-    TEST_REQUIRE(klass.GetFlagName() == "OverrideAlpha");
+    TEST_REQUIRE(klass.GetFlagName() == "VisibleInGame");
     TEST_REQUIRE(klass.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
 
     // serialize
@@ -55,7 +55,7 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(copy.GetNodeId() == "1234");
         TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetFlagName() == "OverrideAlpha");
+        TEST_REQUIRE(copy.GetFlagName() == "VisibleInGame");
         TEST_REQUIRE(copy.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
     }
 
@@ -85,7 +85,7 @@ void unit_test_setflag_actuator()
 
         game::EntityNodeClass node_klass;
         game::DrawableItemClass draw_class;
-        draw_class.SetFlag(game::DrawableItemClass::Flags::OverrideAlpha, true);
+        draw_class.SetFlag(game::DrawableItemClass::Flags::VisibleInGame, true);
         node_klass.SetDrawable(draw_class);
 
         // create node instance
@@ -93,7 +93,7 @@ void unit_test_setflag_actuator()
         // start based on the node.
         instance.Start(node);
         instance.Finish(node);
-        TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::OverrideAlpha) == false);
+        TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::VisibleInGame) == false);
     }
 
 }

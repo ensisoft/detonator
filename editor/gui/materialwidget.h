@@ -24,6 +24,8 @@
 #  include <QString>
 #include "warnpop.h"
 
+#include <vector>
+
 #include "editor/gui/mainwidget.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
@@ -40,6 +42,9 @@ namespace app {
 
 namespace gui
 {
+    class Uniform;
+    class Sampler;
+
     class MaterialWidget : public MainWidget
     {
         Q_OBJECT
@@ -68,15 +73,37 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionRemoveTexture_triggered();
+        void on_btnReloadShader_clicked();
+        void on_btnSelectShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnDelTextureMap_clicked();
-        void on_btnEditTextureMap_clicked();
-        void on_btnEditShader_clicked();
+        void on_btnEditTexture_clicked();
         void on_btnResetTextureRect_clicked();
         void on_btnSelectTextureRect_clicked();
-        void on_browseShader_clicked();
         void on_textures_currentRowChanged(int row);
-        void on_materialType_currentIndexChanged(const QString& text);
+        void on_textures_customContextMenuRequested(const QPoint&);
+        void on_materialType_currentIndexChanged(int);
+        void on_surfaceType_currentIndexChanged(int);
+        void on_gamma_valueChanged(double value);
+        void on_baseColor_colorChanged(QColor color);
+        void on_particleAction_currentIndexChanged(int);
+        void on_spriteFps_valueChanged(double);
+        void on_chkStaticInstance_stateChanged(int);
+        void on_chkBlendFrames_stateChanged(int);
+        void on_colorMap0_colorChanged(QColor);
+        void on_colorMap1_colorChanged(QColor);
+        void on_colorMap2_colorChanged(QColor);
+        void on_colorMap3_colorChanged(QColor);
+        void on_scaleX_valueChanged(double);
+        void on_scaleY_valueChanged(double);
+        void on_velocityX_valueChanged(double);
+        void on_velocityY_valueChanged(double);
+        void on_velocityZ_valueChanged(double);
+        void on_minFilter_currentIndexChanged(int);
+        void on_magFilter_currentIndexChanged(int);
+        void on_wrapX_currentIndexChanged(int);
+        void on_wrapY_currentIndexChanged(int);
         void on_rectX_valueChanged(double value);
         void on_rectY_valueChanged(double value);
         void on_rectW_valueChanged(double value);
@@ -84,9 +111,14 @@ namespace gui
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
+        void UniformValueChanged(const Uniform* uniform);
 
     private:
-        void SetMaterialProperties() const;
+        void ApplyShaderDescription();
+        void SetTextureRect();
+        void SetMaterialProperties();
+        void GetMaterialProperties();
+        void GetTextureProperties();
         void PaintScene(gfx::Painter& painter, double sec);
 
     private:
@@ -95,7 +127,7 @@ namespace gui
         // current workspace object
         app::Workspace* mWorkspace = nullptr;
         // the material class we're editing
-        mutable gfx::MaterialClass mMaterial;
+        std::shared_ptr<gfx::MaterialClass> mMaterial;
         // play state
         enum PlayState {
             Playing, Paused, Stopped
@@ -106,6 +138,7 @@ namespace gui
         // the original material hash that is used to
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;
-
+        std::vector<Uniform*> mUniforms;
+        std::vector<Sampler*> mSamplers;
     };
 } // namespace

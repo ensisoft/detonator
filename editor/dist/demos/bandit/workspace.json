@@ -10,9 +10,7 @@
         "checked_for_packing": true
     },
     "2ynNMbWOK3": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "4rBCnTGuXK": {
         "checked_for_packing": true,
@@ -35,27 +33,19 @@
         "checked_for_packing": true
     },
     "90E8gRgYDP": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "9LU4RC9DH0": {
         "checked_for_packing": true
     },
     "9aRwE7zov7": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "AgxrO05Kqg": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "Ca4GgRWjP2": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "DOzd15fNMX": {
         "checked_for_packing": true
@@ -65,6 +55,7 @@
         "material": "Bush (2)"
     },
     "FNUUxWSBTe": {
+        "checked_for_packing": true,
         "track_4FKDqoTRqr": {
             "JByFlM7KOG": "FqRgn3KqOb",
             "OD52kANM1i": "7xS9z3T2Bo",
@@ -221,15 +212,12 @@
         "checked_for_packing": true
     },
     "HpAo2l11sT": {
-        "checked_for_packing": true
     },
     "IM3dwFG7wS": {
         "checked_for_packing": true
     },
     "IPqp1SooOX": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "IfEi7dQdbW": {
         "checked_for_packing": true,
@@ -243,6 +231,7 @@
         "material": "StoneBlock"
     },
     "Jn0SpbgGSY": {
+        "checked_for_packing": true,
         "track_NmRjjTphCH": {
             "15Uo6BfvUA": "56q3P8RS3n",
             "LsoPCxj4x8": "56q3P8RS3n",
@@ -288,6 +277,7 @@
         "checked_for_packing": true
     },
     "MiA8FWNEaF": {
+        "checked_for_packing": true,
         "track_0nrM22fbCl": {
             "56sCux3qYZ": "FrKYWYnLrb",
             "GaomHIXLnl": "FrKYWYnLrb",
@@ -323,23 +313,17 @@
         "checked_for_packing": true
     },
     "QR14nEb7T3": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "QwLaM5bEqx": {
         "checked_for_packing": true,
         "material": "Grass (2)"
     },
     "RhslGRtQQR": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "RnL44evfW5": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "SFrJwO771l": {
         "checked_for_packing": true
@@ -370,9 +354,7 @@
         "checked_for_packing": true
     },
     "X6Q2aN3uWm": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "Y3nvZp6DaX": {
         "checked_for_packing": true
@@ -420,18 +402,14 @@
         "checked_for_packing": true
     },
     "f2rOXhvzDy": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "fW1kOmDCo0": {
         "checked_for_packing": true,
         "material": "Cactus (1)"
     },
     "fmxJ24RhUE": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "g3TRakI9ob": {
         "checked_for_packing": true
@@ -444,9 +422,7 @@
         "checked_for_packing": true
     },
     "gzjp7PwMQd": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "jqIuU0kASH": {
         "checked_for_packing": true
@@ -455,18 +431,14 @@
         "checked_for_packing": true
     },
     "l6vR7abMmW": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "l9oab5XQTK": {
         "checked_for_packing": true,
         "material": "Cactus (3)"
     },
     "mgo2XI2toK": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "nR73zKx341": {
         "checked_for_packing": true
@@ -528,6 +500,7 @@
         "checked_for_packing": true
     },
     "vWm1hXNdOD": {
+        "checked_for_packing": true
     },
     "vYm7CMPRrJ": {
         "checked_for_packing": true
@@ -536,13 +509,11 @@
         "checked_for_packing": true
     },
     "w26YsP04pJ": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
@@ -553,9 +524,7 @@
         "packing_param_write_content": true
     },
     "wrSRezqUfj": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "xrUzM3pdBZ": {
         "checked_for_packing": true
@@ -567,9 +536,7 @@
         "checked_for_packing": true
     },
     "zgwqXHtABU": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "zoqnFP5Gvz": {
         "checked_for_packing": true,

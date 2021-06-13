@@ -904,7 +904,7 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         SetValue(mUI.transformEndScaleY, 0.0f);
         SetValue(mUI.transformEndRotation, 0.0f);
         SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::AlphaOverride);
+        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::DrawableTimeScale);
         SetValue(mUI.setvalEndValue, 0.0f);
         SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
         SetValue(mUI.kinematicEndVeloX, 0.0f);
@@ -932,11 +932,11 @@ void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
         SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::AlphaOverride);
+        SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::DrawableTimeScale);
         SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
         if (const auto* draw = node.GetDrawable())
         {
-            SetValue(mUI.setvalEndValue, draw->GetAlpha());
+            SetValue(mUI.setvalEndValue, draw->GetTimeScale());
         }
         if (const auto* body = node.GetRigidBody())
         {

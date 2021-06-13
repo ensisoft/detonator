@@ -116,6 +116,7 @@ namespace gui
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
         void on_btnSelectMaterial_clicked();
+        void on_btnMaterialParams_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
@@ -140,9 +141,7 @@ namespace gui
         void on_dsUpdateDrawable_stateChanged(int);
         void on_dsUpdateMaterial_stateChanged(int);
         void on_dsRestartDrawable_stateChanged(int);
-        void on_dsOverrideAlpha_stateChanged(int);
         void on_dsFlipVertically_stateChanged(int);
-        void on_dsAlpha_valueChanged();
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
         void on_rbPolygon_currentIndexChanged(const QString&);

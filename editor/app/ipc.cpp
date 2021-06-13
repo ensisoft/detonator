@@ -221,6 +221,18 @@ std::unique_ptr<Resource> CreateResource(const char* type, const data::Reader& d
     return std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name));
 }
 
+template<>
+std::unique_ptr<Resource> CreateResource<gfx::MaterialClass>(const char* type, const data::Reader& data, const std::string& name)
+{
+    const auto& chunk = data.GetReadChunk("materials", 0);
+    if (!chunk)
+        return nullptr;
+    auto ret = gfx::MaterialClass::FromJson(*chunk);
+    if (!ret)
+        return nullptr;
+    return std::make_unique<MaterialResource>(std::move(ret), FromUtf8(name));
+}
+
 void IPCClient::UserPropertyUpdated(const QString& name, const QVariant& data)
 {
     if (!mSocket.isOpen())

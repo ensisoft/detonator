@@ -18,6 +18,12 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
+#include "warnpop.h"
+
 #include <vector>
 
 #include "graphics/color4f.h"
@@ -96,6 +102,14 @@ namespace gfx
         // Todo: this api and the SetTexture are potentially bug prone, it'd be better to
         // combine both into a single api call that takes the whole array of textures.
         virtual void SetTextureCount(unsigned count) = 0;
+
+        // helpers
+        inline void SetUniform(const char* name, const glm::vec2& vec)
+        { SetUniform(name, vec.x, vec.y); }
+        inline void SetUniform(const char* name, const glm::vec3& vec)
+        { SetUniform(name, vec.x, vec.y, vec.z); }
+        inline void SetUniform(const char* name, const glm::vec4& vec)
+        { SetUniform(name, vec.x, vec.y, vec.z, vec.w); }
     private:
     };
 

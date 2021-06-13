@@ -55,11 +55,9 @@
         {
           "class": "PBF6jATZjy",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -93,11 +91,9 @@
         {
           "class": "Os7YCfrooA",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -131,11 +127,9 @@
         {
           "class": "fKBJvFFCHC",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_trapezoid",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -169,11 +163,9 @@
         {
           "class": "zP7K5Htw9Y",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -320,11 +312,9 @@
         {
           "class": "pfOmm2UnnY",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -358,11 +348,9 @@
         {
           "class": "MYUjvQktA9",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "qklhbbEm10",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -444,11 +432,9 @@
         {
           "class": "WOIwH6Bxgh",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -502,11 +488,9 @@
         {
           "class": "Y1oeiOvTtt",
           "drawable_item": {
-            "alpha": 0.5320000052452087,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -540,11 +524,9 @@
         {
           "class": "5aEJYp5IlZ",
           "drawable_item": {
-            "alpha": 0.49000000953674316,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -578,11 +560,9 @@
         {
           "class": "8J3bnYn7k3",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_capsule",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -616,11 +596,9 @@
         {
           "class": "Ej7SOQuTSS",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_capsule",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -654,11 +632,9 @@
         {
           "class": "XEEkJGHbxM",
           "drawable_item": {
-            "alpha": 0.4180000126361847,
             "drawable": "pWeN1jfBre",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -768,11 +744,9 @@
         {
           "class": "n9QIMigZH2",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -833,11 +807,9 @@
         {
           "class": "z5Hf9L3Qvp",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -906,11 +878,9 @@
         {
           "class": "XsGp2E38Hk",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -971,11 +941,9 @@
         {
           "class": "5LD6mi4JIR",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1036,11 +1004,9 @@
         {
           "class": "UIG3lUtmPm",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1074,11 +1040,9 @@
         {
           "class": "TqmZOL4SIb",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "qklhbbEm10",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1160,11 +1124,9 @@
         {
           "class": "bhTMTzzFAN",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1248,11 +1210,9 @@
         {
           "class": "EQKGzykOAt",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_circle",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1557,114 +1517,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 5.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "rrmZfWe97e",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "rrmZfWe97e",
       "resource_name": "Player",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Ship3/1.png",
-            "id": "TlNS7o376g",
-            "name": "1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Ship3/2.png",
-            "id": "v4P4ZmgqoU",
-            "name": "2"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Ship3/3.png",
-            "id": "sDbqEiMYUJ",
-            "name": "3"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Ship3/4.png",
-            "id": "4SqoIFioJD",
-            "name": "4"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Ship3/5.png",
-            "id": "uu8Cv0ARzZ",
-            "name": "5"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -1680,66 +1543,99 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Red/Ship3/1.png",
+          "id": "DsKu8WXlgk",
+          "name": "1",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Red/Ship3/2.png",
+          "id": "HEHUPZWYfi",
+          "name": "2",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Red/Ship3/3.png",
+          "id": "E3EKRUY8jm",
+          "name": "3",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Red/Ship3/4.png",
+          "id": "xKIwXXftpJ",
+          "name": "4",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Red/Ship3/5.png",
+          "id": "LtzUk2Bypd",
+          "name": "5",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "4IluygNgeR",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "4IluygNgeR",
       "resource_name": "RedBullet",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/bullet.png",
-            "id": "AhN2vQrZMo",
-            "name": "bullet"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Red/bullet.png",
+        "id": "Uq1XErPGt9",
+        "name": "bullet",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -1756,63 +1652,34 @@
       "type": "Texture"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 10.0,
       "gamma": 0.800000011920929,
+      "gc": false,
       "id": "nQUmTOnClw",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "nQUmTOnClw",
       "resource_name": "Ship2",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Blue/Ship2/0.png",
-            "id": "vSd2N9fkJo",
-            "name": "0"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Blue/Ship2/0.png",
+        "id": "wDtHYRHN35",
+        "name": "0",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Linear",
       "texture_min_filter": "Trilinear",
       "texture_scale": {
@@ -1829,61 +1696,68 @@
       "type": "Texture"
     },
     {
-      "blending": true,
       "color": {
         "a": 1.0,
         "b": 0.885664165019989,
         "g": 0.885664165019989,
         "r": 0.885664165019989
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 0.5058823823928833,
-        "g": 0.5058823823928833,
-        "r": 0.5058823823928833
-      },
-      "fps": 0.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "lOfMr3YBtI",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "lOfMr3YBtI",
       "resource_name": "Asteroid",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Asteroids/asteroid_gray_2.png",
-            "id": "HKoJP8lwWD",
-            "name": "asteroid_gray_2"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
+      "static": true,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Asteroids/asteroid_dark.png",
+        "id": "7ozeiqjW51",
+        "name": "asteroid_dark",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 2.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "blending": true,
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "fps": 30.0,
+      "gamma": 1.0,
+      "gc": false,
+      "id": "TNyQSW6bB6",
+      "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
+      "resource_id": "TNyQSW6bB6",
+      "resource_name": "RedExplosion",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -1899,319 +1773,212 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 30.0,
-      "gamma": 1.0,
-      "id": "TNyQSW6bB6",
-      "particle_action": "None",
-      "resource_id": "TNyQSW6bB6",
-      "resource_name": "RedExplosion",
-      "samplers": [
+      "textures": [
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_0.png",
+          "id": "vOx40r7XtN",
+          "name": "1_0",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_0.png",
-            "id": "AelHCiDmIR",
-            "name": "1_0"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_1.png",
+          "id": "XFQuQa6ke7",
+          "name": "1_1",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_1.png",
-            "id": "xTTFMKZZGZ",
-            "name": "1_1"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_2.png",
+          "id": "HNGXvPNbH4",
+          "name": "1_2",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_2.png",
-            "id": "pBv0LGmbsK",
-            "name": "1_2"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_3.png",
+          "id": "nyevSP2lkN",
+          "name": "1_3",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_3.png",
-            "id": "QNZ66Fgxpu",
-            "name": "1_3"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_4.png",
+          "id": "5Sk4vRsayC",
+          "name": "1_4",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_4.png",
-            "id": "agwE2bK5Kv",
-            "name": "1_4"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_5.png",
+          "id": "wGQw5zOGxG",
+          "name": "1_5",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_5.png",
-            "id": "HyzzJkgAfv",
-            "name": "1_5"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_6.png",
+          "id": "Yu9STIukB5",
+          "name": "1_6",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_6.png",
-            "id": "gf32mYytyP",
-            "name": "1_6"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_7.png",
+          "id": "eEJH2tXxbB",
+          "name": "1_7",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_7.png",
-            "id": "whA1NFsuZo",
-            "name": "1_7"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_8.png",
+          "id": "zmqJoLWQCT",
+          "name": "1_8",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_8.png",
-            "id": "ySSWidtOSD",
-            "name": "1_8"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_9.png",
+          "id": "voaz6zPgC4",
+          "name": "1_9",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_9.png",
-            "id": "3IbEuH6ulI",
-            "name": "1_9"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_10.png",
+          "id": "5yIKOF9JIU",
+          "name": "1_10",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_10.png",
-            "id": "IANrx0bXwR",
-            "name": "1_10"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_11.png",
+          "id": "ZNu0n6eDas",
+          "name": "1_11",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_11.png",
-            "id": "u6E80JTCMA",
-            "name": "1_11"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_12.png",
+          "id": "XZOU6mTi3y",
+          "name": "1_12",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_12.png",
-            "id": "PBREEbtSrQ",
-            "name": "1_12"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_13.png",
+          "id": "IYEJE6HxP5",
+          "name": "1_13",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_13.png",
-            "id": "GykWYtlYj7",
-            "name": "1_13"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_14.png",
+          "id": "it6sXiULQ0",
+          "name": "1_14",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_14.png",
-            "id": "47CNB17beu",
-            "name": "1_14"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_15.png",
+          "id": "YU2RFJUhLn",
+          "name": "1_15",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_15.png",
-            "id": "NYyp8MtPJw",
-            "name": "1_15"
           },
           "type": "Filesystem"
         },
         {
-          "box": {
+          "file": "ws://textures/Effects/Red Explosion/1_16.png",
+          "id": "UmBLh98Ua7",
+          "name": "1_16",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Red Explosion/1_16.png",
-            "id": "SbhNffl3Xz",
-            "name": "1_16"
           },
           "type": "Filesystem"
         }
       ],
-      "shader_file": "",
-      "static": true,
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
       "type": "Sprite"
     },
     {
@@ -2222,294 +1989,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 30.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "1lANs9A0yJ",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "1lANs9A0yJ",
       "resource_name": "BlueExplosion",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_0.png",
-            "id": "penIqNeIZ9",
-            "name": "1_0"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_1.png",
-            "id": "hCdROQhRJ5",
-            "name": "1_1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_2.png",
-            "id": "zfTsgZNrmM",
-            "name": "1_2"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_3.png",
-            "id": "m8pQwHAFwm",
-            "name": "1_3"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_4.png",
-            "id": "Des5oNpfgi",
-            "name": "1_4"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_5.png",
-            "id": "We6NRkOLl6",
-            "name": "1_5"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_6.png",
-            "id": "LwxEbgYvNr",
-            "name": "1_6"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_7.png",
-            "id": "4w8Bz9PR0R",
-            "name": "1_7"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_8.png",
-            "id": "fiWn0mkBOK",
-            "name": "1_8"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_9.png",
-            "id": "svaEoif2LR",
-            "name": "1_9"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_10.png",
-            "id": "Mb2heoFDPZ",
-            "name": "1_10"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_11.png",
-            "id": "DuIN161baS",
-            "name": "1_11"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_12.png",
-            "id": "6mO7nn0fIE",
-            "name": "1_12"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_13.png",
-            "id": "bEebSw986B",
-            "name": "1_13"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_14.png",
-            "id": "C9wEDl3p21",
-            "name": "1_14"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_15.png",
-            "id": "uqBsqy3hys",
-            "name": "1_15"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Effects/Blue Explosion/1_16.png",
-            "id": "f50KmlfHd6",
-            "name": "1_16"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -2521,70 +2011,247 @@
       "texture_velocity": {
         "x": 0.0,
         "y": 0.0,
-        "z": 0.0
+        "z": 1.0
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_0.png",
+          "id": "3tu85ryruW",
+          "name": "1_0",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_1.png",
+          "id": "rwPYQ2LwsY",
+          "name": "1_1",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_2.png",
+          "id": "h2uBKgs8LL",
+          "name": "1_2",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_3.png",
+          "id": "bS5Rgiv7fD",
+          "name": "1_3",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_4.png",
+          "id": "mweahbO7bu",
+          "name": "1_4",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_5.png",
+          "id": "e4efoyYERF",
+          "name": "1_5",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_6.png",
+          "id": "ydCAYjobBF",
+          "name": "1_6",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_7.png",
+          "id": "ez21XmMXXU",
+          "name": "1_7",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_8.png",
+          "id": "g8zJS2INPy",
+          "name": "1_8",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_9.png",
+          "id": "sIaXh5eA4u",
+          "name": "1_9",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_10.png",
+          "id": "oUnTwROR5P",
+          "name": "1_10",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_11.png",
+          "id": "CMJOBGoizy",
+          "name": "1_11",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_12.png",
+          "id": "RdUkzEK9Ys",
+          "name": "1_12",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_13.png",
+          "id": "aum5n0OTTr",
+          "name": "1_13",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_14.png",
+          "id": "lQuXfLIv1R",
+          "name": "1_14",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_15.png",
+          "id": "78h0IzaBAm",
+          "name": "1_15",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/Effects/Blue Explosion/1_16.png",
+          "id": "yFfZgvBT64",
+          "name": "1_16",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "s4zt0bFnAL",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "s4zt0bFnAL",
       "resource_name": "BlueBullet",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Blue/bullet.png",
-            "id": "hodATmMbmz",
-            "name": "bullet"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Blue/bullet.png",
+        "id": "KEKTLLkPjy",
+        "name": "bullet",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -2601,32 +2268,8 @@
       "type": "Texture"
     },
     {
-      "blending": false,
+      "blending": true,
       "color": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
@@ -2634,43 +2277,15 @@
       },
       "fps": 1.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "vg5yQskPIv",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "vg5yQskPIv",
       "resource_name": "RedMine",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Spacemine/1.png",
-            "id": "M0IxxpWvei",
-            "name": "1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Red/Spacemine/2.png",
-            "id": "mQM3va6sY5",
-            "name": "2"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": true,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -2686,173 +2301,132 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Sprite"
-    },
-    {
-      "blending": false,
-      "color": {
-        "a": 1.0,
-        "b": 0.04318303242325783,
-        "g": 0.09971770644187927,
-        "r": 0.9062333106994629
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 0.0021362630650401115,
-        "g": 0.10446326434612274,
-        "r": 0.99884033203125
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
-      "gamma": 1.0,
-      "id": "2a488SIQsU",
-      "particle_action": "None",
-      "resource_id": "2a488SIQsU",
-      "resource_name": "BlastRadius",
-      "samplers": [
+      "textures": [
         {
-          "box": {
+          "file": "ws://textures/Red/Spacemine/1.png",
+          "id": "qg19pdfC8l",
+          "name": "1",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
           },
-          "enable_gc": false,
-          "source": {
-            "function": "Noise",
-            "generator": {
-              "height": 20,
-              "layers": [
-                {
-                  "amplitude": 249.0,
-                  "frequency": 100.0,
-                  "prime0": 4481,
-                  "prime1": 743,
-                  "prime2": 7873
-                },
-                {
-                  "amplitude": 60.0,
-                  "frequency": 13.0,
-                  "prime0": 4481,
-                  "prime1": 743,
-                  "prime2": 7873
-                },
-                {
-                  "amplitude": 249.0,
-                  "frequency": 100.0,
-                  "prime0": 4481,
-                  "prime1": 743,
-                  "prime2": 7873
-                },
-                {
-                  "amplitude": 249.0,
-                  "frequency": 100.0,
-                  "prime0": 4481,
-                  "prime1": 743,
-                  "prime2": 7873
-                }
-              ],
-              "width": 20
-            },
-            "id": "Lk5kmjpi2s",
-            "name": "Noise"
-          },
-          "type": "BitmapGenerator"
-        }
-      ],
-      "shader_file": "ws://shaders/es2/disc.glsl",
-      "static": true,
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "blending": true,
-      "color": {
-        "a": 1.0,
-        "b": 0.40367743372917175,
-        "g": 0.382299542427063,
-        "r": 0.32585641741752625
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.0,
-      "gamma": 1.0,
-      "id": "CopZZzjQd4",
-      "particle_action": "None",
-      "resource_id": "CopZZzjQd4",
-      "resource_name": "Stars",
-      "samplers": [
+          "type": "Filesystem"
+        },
         {
-          "box": {
+          "file": "ws://textures/Red/Spacemine/2.png",
+          "id": "v6RMllUmIT",
+          "name": "2",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Background/bg_1_1.png",
-            "id": "M2QHr8zXgE",
-            "name": "bg_1_1"
           },
           "type": "Filesystem"
         }
       ],
-      "shader_file": "",
+      "type": "Sprite"
+    },
+    {
+      "id": "2a488SIQsU",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "2a488SIQsU",
+      "resource_name": "BlastRadius",
+      "shader": "ws://shaders/es2/disc.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture0",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "",
+          "sampler_name": "kTexture0",
+          "texture": {
+            "function": "Noise",
+            "generator": {
+              "height": 30,
+              "layers": [
+                {
+                  "amplitude": 42.0,
+                  "frequency": 26.0,
+                  "prime0": 2659,
+                  "prime1": 743,
+                  "prime2": 7873
+                }
+              ],
+              "width": 30
+            },
+            "id": "LDWnZ2fuen",
+            "name": "Noise",
+            "type": "BitmapGenerator"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 1.0
+          }
+        },
+        {
+          "name": "kGamma",
+          "value": 1.0
+        },
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.009170671924948692,
+            "g": 0.0,
+            "r": 1.0
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.3827725648880005,
+        "g": 0.32300296425819397,
+        "r": 0.18355077505111694
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "CopZZzjQd4",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "CopZZzjQd4",
+      "resource_name": "Stars",
+      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Background/bg_1_1.png",
+        "id": "NjsRA8HdkH",
+        "name": "bg_1_1",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -2869,165 +2443,71 @@
       "type": "Texture"
     },
     {
-      "blending": false,
-      "color": {
-        "a": 1.0,
-        "b": 0.9211413860321045,
-        "g": 0.609079122543335,
-        "r": 0.0788586288690567
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
-      "gamma": 1.0,
       "id": "EgsgPADEqi",
-      "particle_action": "None",
+      "mag_filter": "Default",
+      "min_filter": "Default",
       "resource_id": "EgsgPADEqi",
       "resource_name": "BluePulse",
-      "shader_file": "ws://shaders/es2/pulsing.glsl",
-      "static": true,
-      "surface": "Emissive",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Color"
+      "shader": "ws://shaders/es2/pulsing.glsl",
+      "surface": "Opaque",
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.9215686321258545,
+            "g": 0.6077821254730225,
+            "r": 0.0784313753247261
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     },
     {
-      "blending": false,
-      "color": {
-        "a": 1.0,
-        "b": 0.0788586288690567,
-        "g": 0.0788586288690567,
-        "r": 0.9211413860321045
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
-      "gamma": 1.0,
       "id": "HnopPLXPe5",
-      "particle_action": "None",
+      "mag_filter": "Default",
+      "min_filter": "Default",
       "resource_id": "HnopPLXPe5",
       "resource_name": "RedPulse",
-      "shader_file": "ws://shaders/es2/pulsing.glsl",
-      "static": true,
-      "surface": "Emissive",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Color"
+      "shader": "ws://shaders/es2/pulsing.glsl",
+      "surface": "Opaque",
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0784313753247261,
+            "g": 0.0784313753247261,
+            "r": 0.9215686321258545
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     },
     {
-      "blending": false,
-      "color": {
-        "a": 1.0,
-        "b": 0.8905165195465088,
-        "g": 0.6069123148918152,
-        "r": 0.05021744221448898
-      },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
-      "gamma": 1.0,
       "id": "Kb5sHrP5bL",
-      "particle_action": "None",
+      "mag_filter": "Default",
+      "min_filter": "Default",
       "resource_id": "Kb5sHrP5bL",
       "resource_name": "Blast",
-      "samplers": [
+      "shader": "ws://shaders/es2/text.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
         {
-          "box": {
+          "name": "kTexture0",
+          "rect": {
             "h": 1.0,
             "w": 1.0,
             "x": 0.0,
             "y": 0.0
           },
-          "enable_gc": false,
-          "source": {
+          "rect_name": "",
+          "sampler_name": "kTexture0",
+          "texture": {
             "buffer": {
               "height": 79,
               "horizontal_alignment": "AlignCenter",
@@ -3043,88 +2523,61 @@
               "vertical_alignment": "AlignCenter",
               "width": 488
             },
-            "id": "a4B50mYeff",
-            "name": "TextBuffer"
+            "id": "JQw78NDo0F",
+            "name": "TextBuffer",
+            "type": "TextBuffer"
           },
-          "type": "TextBuffer"
+          "type": "Texture2D"
         }
       ],
-      "shader_file": "ws://shaders/es2/text.glsl",
-      "static": false,
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kGamma",
+          "value": 1.0
+        },
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.8901960849761963,
+            "g": 0.607797384262085,
+            "r": 0.05098039284348488
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 0.0,
         "g": 0.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "RKmQZx8H1s",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "RKmQZx8H1s",
       "resource_name": "Play",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Menu Screen/play_buttons.png",
-            "id": "7aCInBoRoY",
-            "name": "play_buttons"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Menu Screen/play_buttons.png",
+        "id": "LFMiq02vEK",
+        "name": "play_buttons",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -3141,63 +2594,34 @@
       "type": "Texture"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "M0ePA9uzA5",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "M0ePA9uzA5",
       "resource_name": "Exit",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Menu Screen/exit_buttons.png",
-            "id": "rTqW20d2ri",
-            "name": "exit_buttons"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Menu Screen/exit_buttons.png",
+        "id": "Xk7ul0CO91",
+        "name": "exit_buttons",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -3366,7 +2790,7 @@
           "parent_render_tree_node": "",
           "position": {
             "x": 0.0,
-            "y": -0.0
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {

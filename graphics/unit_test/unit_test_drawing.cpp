@@ -205,6 +205,15 @@ public:
         TEST_REQUIRE(index < mTextures.size());
         return *mTextures[index].texture;
     }
+    TextureBinding* FindTextureBinding(const std::string& sampler)
+    {
+        for (auto& binding : mTextures)
+        {
+            if (binding.sampler == sampler)
+                return &binding;
+        }
+        return nullptr;
+    }
 
 private:
     std::unordered_map<std::string, std::any> mUniforms;
@@ -359,15 +368,65 @@ void unit_test_material_uniforms()
     {
         TestDevice device;
         TestProgram program;
-        gfx::MaterialClass test;
+        gfx::ColorClass test;
 
-        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
-        test.SetColorMapColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::BottomLeft);
-        test.SetColorMapColor(gfx::Color::DarkGreen,gfx::MaterialClass::ColorIndex::TopLeft);
-        test.SetColorMapColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::BottomRight);
-        test.SetColorMapColor(gfx::Color::DarkGray, gfx::MaterialClass::ColorIndex::TopRight);
+        test.SetStatic(false);
+        test.SetGamma(2.0f);
+
+        // check that the dynamic state is set as expected.
+        // this should mean that both static uniforms  and dynamic
+        // uniforms are set.
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+        test.ApplyDynamicState(env, device, program);
+
+        gfx::Color4f base_color;
+        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        TEST_REQUIRE(base_color == gfx::Color::Green);
+    }
+
+    {
+        TestDevice device;
+        TestProgram program;
+        gfx::GradientClass test;
+
+        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
+        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
+        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
+        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+        test.SetStatic(false);
+        test.SetGamma(2.0f);
+
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+        test.ApplyDynamicState(env, device, program);
+
+        glm::vec1 gamma;
+        gfx::Color4f gradients[4];
+        TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
+        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
+        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
+        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
+        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
+        TEST_REQUIRE(gamma == glm::vec1(2.0f));
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
+
+    }
+
+    {
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(2, 2);
+
+        TestDevice device;
+        TestProgram program;
+        gfx::TextureMap2DClass test;
         test.SetGamma(2.0f);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
@@ -375,71 +434,158 @@ void unit_test_material_uniforms()
         test.SetTextureVelocityY(5.0f);
         test.SetTextureVelocityZ(-1.0f);
         test.SetStatic(false);
-        test.ApplyStaticState(device, program);
-        TEST_REQUIRE(program.HasUniforms() == false);
+        test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        // check that the dynamic state is set as expected.
-        // this should mean that both static uniforms  and dynamic
-        // uniforms are set.
-        gfx::MaterialClass::Environment env;
+        gfx::MaterialClass::State env;
         env.render_points = false;
-        gfx::MaterialClass::InstanceState instance;
-        instance.base_color = gfx::Color::HotPink;
-        instance.runtime    = 2.0f;
-        gfx::MaterialClass::RasterState raster;
-        test.ApplyDynamicState(env, instance, device, program, raster);
+        env.material_time = 2.0f;
+        test.ApplyDynamicState(env, device, program);
 
-        glm::vec1 particle_rotation_flag;
-        glm::vec1 render_points_flag;
-        glm::vec2 texture_alpha_mask_flags;
-        glm::vec1 runtime;
-        gfx::Color4f base_color;
-        gfx::Color4f gradients[4];
         glm::vec2 texture_scale;
         glm::vec2 texture_velocity_xy;
         glm::vec1 texture_velocity_z;
         glm::vec1 gamma;
-        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        glm::vec1 particle_rotation_flag;
+        glm::vec1 render_points_flag;
+        glm::vec1 runtime;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
         TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
-        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
-        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
-        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
-        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
-        TEST_REQUIRE(program.GetUniform("kIsAlphaMask", &texture_alpha_mask_flags));
         TEST_REQUIRE(program.GetUniform("kRuntime", &runtime));
-        TEST_REQUIRE(base_color == gfx::Color::HotPink); // instance variable!
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
         TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
         TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
         TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(texture_alpha_mask_flags == glm::vec2(0.0f, 0.0f));
         TEST_REQUIRE(runtime == glm::vec1(2.0f));
+
+    }
+
+    {
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(2, 2);
+
+        TestDevice device;
+        TestProgram program;
+        gfx::SpriteClass test;
+        test.SetGamma(2.0f);
+        test.SetTextureScaleX(2.0f);
+        test.SetTextureScaleY(3.0f);
+        test.SetTextureVelocityX(4.0f);
+        test.SetTextureVelocityY(5.0f);
+        test.SetTextureVelocityZ(-1.0f);
+        test.SetBaseColor(gfx::Color::Green);
+        test.SetStatic(false);
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 2.0f;
+        test.ApplyDynamicState(env, device, program);
+
+        glm::vec2 texture_scale;
+        glm::vec2 texture_velocity_xy;
+        glm::vec1 texture_velocity_z;
+        glm::vec1 gamma;
+        glm::vec1 particle_rotation_flag;
+        glm::vec1 render_points_flag;
+        glm::vec1 runtime;
+        gfx::Color4f base_color;
+        TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
+        TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
+        TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
+        TEST_REQUIRE(program.GetUniform("kRuntime", &runtime));
+        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
+        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
+        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(gamma == glm::vec1(2.0f));
+        TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
+        TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
+        TEST_REQUIRE(runtime == glm::vec1(2.0f));
+        TEST_REQUIRE(base_color == gfx::Color::Green);
+
     }
 
     // test static program uniforms.
     {
         TestDevice device;
         TestProgram program;
-        gfx::MaterialClass test;
+        gfx::ColorClass test;
 
-        test.SetShader(gfx::MaterialClass::Shader::Sprite);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
-        test.SetColorMapColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::BottomLeft);
-        test.SetColorMapColor(gfx::Color::DarkGreen,gfx::MaterialClass::ColorIndex::TopLeft);
-        test.SetColorMapColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::BottomRight);
-        test.SetColorMapColor(gfx::Color::DarkGray, gfx::MaterialClass::ColorIndex::TopRight);
+        test.SetStatic(true);
+        test.SetGamma(2.0f);
+
+        test.ApplyStaticState(device, program);
+        gfx::Color4f base_color;
+        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        TEST_REQUIRE(base_color == gfx::Color::Green);
+
+        program.Clear();
+
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+        test.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(!program.HasUniform("kBaseColor"));
+    }
+
+    {
+        TestDevice device;
+        TestProgram program;
+        gfx::GradientClass test;
+
+        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
+        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
+        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
+        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+        test.SetStatic(true);
+        test.SetGamma(2.0f);
+
+        test.ApplyStaticState(device, program);
+        glm::vec1 gamma;
+        gfx::Color4f gradients[4];
+        TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
+        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
+        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
+        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
+        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
+        TEST_REQUIRE(gamma == glm::vec1(2.0f));
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
+        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
+
+        program.Clear();
+
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+        test.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(!program.HasUniform("kGamma"));
+        TEST_REQUIRE(!program.HasUniform("kColor0"));
+        TEST_REQUIRE(!program.HasUniform("kColor1"));
+        TEST_REQUIRE(!program.HasUniform("kColor2"));
+        TEST_REQUIRE(!program.HasUniform("kColor3"));
+    }
+
+    {
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(2, 2);
+
+        TestDevice device;
+        TestProgram program;
+        gfx::TextureMap2DClass test;
         test.SetGamma(2.0f);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
@@ -447,108 +593,137 @@ void unit_test_material_uniforms()
         test.SetTextureVelocityY(5.0f);
         test.SetTextureVelocityZ(-1.0f);
         test.SetStatic(true);
-        test.ApplyStaticState(device, program);
+        test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        // check that the static state is applied as expected.
-        gfx::Color4f base_color;
-        gfx::Color4f gradients[4];
+        test.ApplyStaticState(device, program);
         glm::vec2 texture_scale;
         glm::vec2 texture_velocity_xy;
         glm::vec1 texture_velocity_z;
         glm::vec1 gamma;
-        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        glm::vec1 particle_rotation_flag;
+        glm::vec1 render_points_flag;
+        glm::vec1 runtime;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
         TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
-        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
-        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
-        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
-        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
-        TEST_REQUIRE(base_color == gfx::Color::Green);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(gradients[(int)gfx::MaterialClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
         TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
+
         program.Clear();
 
-        // check that the dynamic state is set as expected.
-        // this should mean that the static uniforms are *not* set
-        // but only dynamic ones are.
-        gfx::MaterialClass::Environment env;
+        gfx::MaterialClass::State env;
         env.render_points = false;
-        gfx::MaterialClass::InstanceState instance;
-        instance.base_color = gfx::Color::HotPink;
-        instance.runtime    = 2.0f;
-        gfx::MaterialClass::RasterState raster;
-        test.ApplyDynamicState(env, instance, device, program, raster);
-
-        glm::vec1 particle_rotation_flag;
-        glm::vec1 render_points_flag;
-        glm::vec2 texture_alpha_mask_flags;
-        glm::vec1 runtime;
-        TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
-        TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
-        TEST_REQUIRE(program.GetUniform("kIsAlphaMask", &texture_alpha_mask_flags));
-        TEST_REQUIRE(program.GetUniform("kRuntime", &runtime));
-        TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(texture_alpha_mask_flags == glm::vec2(0.0f, 0.0f));
-        TEST_REQUIRE(runtime == glm::vec1(2.0f));
-        // these should not be set.
-        TEST_REQUIRE(!program.HasUniform("kBaseColor"));
+        env.material_time = 2.0f;
+        test.ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kGamma"));
         TEST_REQUIRE(!program.HasUniform("kTextureScale"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityXY"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityZ"));
-        TEST_REQUIRE(!program.HasUniform("kColor0"));
-        TEST_REQUIRE(!program.HasUniform("kColor1"));
-        TEST_REQUIRE(!program.HasUniform("kColor2"));
-        TEST_REQUIRE(!program.HasUniform("kColor3"));
+    }
+
+    {
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(2, 2);
+
+        TestDevice device;
+        TestProgram program;
+        gfx::SpriteClass test;
+        test.SetGamma(2.0f);
+        test.SetTextureScaleX(2.0f);
+        test.SetTextureScaleY(3.0f);
+        test.SetTextureVelocityX(4.0f);
+        test.SetTextureVelocityY(5.0f);
+        test.SetTextureVelocityZ(-1.0f);
+        test.SetStatic(true);
+        test.SetBaseColor(gfx::Color::Red);
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+
+        test.ApplyStaticState(device, program);
+        glm::vec2 texture_scale;
+        glm::vec2 texture_velocity_xy;
+        glm::vec1 texture_velocity_z;
+        glm::vec1 gamma;
+        gfx::Color4f base_color;
+        TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
+        TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
+        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
+        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(gamma == glm::vec1(2.0f));
+        TEST_REQUIRE(base_color == gfx::Color::Red);
+
+        program.Clear();
+
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 2.0f;
+        test.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(!program.HasUniform("kGamma"));
+        TEST_REQUIRE(!program.HasUniform("kTextureScale"));
+        TEST_REQUIRE(!program.HasUniform("kTextureVelocityXY"));
+        TEST_REQUIRE(!program.HasUniform("kTextureVelocityZ"));
+        TEST_REQUIRE(!program.HasUniform("kBaseColor"));
     }
 
     // test that static programs generate different program ID
     // based on their static state even if the underlying shader
     // program has the same type.
     {
-        gfx::MaterialClass foo;
-        foo.SetShader(gfx::MaterialClass::Shader::Sprite);
-        foo.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        gfx::ColorClass foo;
         foo.SetStatic(true);
         foo.SetBaseColor(gfx::Color::Red);
-        foo.SetColorMapColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::BottomLeft);
-        foo.SetColorMapColor(gfx::Color::DarkGreen,gfx::MaterialClass::ColorIndex::TopLeft);
-        foo.SetColorMapColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::BottomRight);
-        foo.SetColorMapColor(gfx::Color::DarkGray, gfx::MaterialClass::ColorIndex::TopRight);
+
+        auto bar = foo;
+        TEST_REQUIRE(foo.GetProgramId() == bar.GetProgramId());
+
+        bar.SetBaseColor(gfx::Color::Green);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+    }
+
+
+    {
+        gfx::GradientClass foo;
+        foo.SetStatic(true);
+        foo.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
+        foo.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
+        foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
+        foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+
+        auto bar = foo;
+        TEST_REQUIRE(foo.GetProgramId() == bar.GetProgramId());
+
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomLeft);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::TopLeft);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomRight);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+    }
+
+    {
+        gfx::TextureMap2DClass foo;
         foo.SetGamma(2.0f);
+        foo.SetStatic(true);
         foo.SetTextureScaleX(2.0f);
         foo.SetTextureScaleY(3.0f);
         foo.SetTextureVelocityX(4.0f);
         foo.SetTextureVelocityY(5.0f);
         foo.SetTextureVelocityZ(-1.0f);
 
-        gfx::MaterialClass bar = foo;
-        TEST_REQUIRE(foo.GetProgramId() == bar.GetProgramId());
-
-        bar.SetBaseColor(gfx::Color::Green);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
-        bar = foo;
-        foo.SetColorMapColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BottomLeft);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
-        bar = foo;
-        foo.SetColorMapColor(gfx::Color::White,gfx::MaterialClass::ColorIndex::TopLeft);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
-        bar = foo;
-        foo.SetColorMapColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BottomRight);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
-        bar = foo;
-        foo.SetColorMapColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::TopRight);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
-        bar = foo;
+        auto bar = foo;
+        TEST_REQUIRE(bar.GetProgramId() == foo.GetProgramId());
         foo.SetGamma(2.5f);
         TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
         bar = foo;
@@ -567,6 +742,41 @@ void unit_test_material_uniforms()
         foo.SetTextureVelocityZ(1.0f);
         TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
     }
+
+    {
+        gfx::SpriteClass foo;
+        foo.SetGamma(2.0f);
+        foo.SetStatic(true);
+        foo.SetTextureScaleX(2.0f);
+        foo.SetTextureScaleY(3.0f);
+        foo.SetTextureVelocityX(4.0f);
+        foo.SetTextureVelocityY(5.0f);
+        foo.SetTextureVelocityZ(-1.0f);
+        foo.SetBaseColor(gfx::Color::Red);
+
+        auto bar = foo;
+        TEST_REQUIRE(bar.GetProgramId() == foo.GetProgramId());
+        foo.SetGamma(2.5f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetTextureScaleX(2.2f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetTextureScaleY(2.0f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetTextureVelocityX(4.1f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetTextureVelocityY(-5.0f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetTextureVelocityZ(1.0f);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        bar = foo;
+        foo.SetBaseColor(gfx::Color::Blue);
+        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+    }
 }
 
 void unit_test_material_textures()
@@ -576,8 +786,7 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
 
-        gfx::MaterialClass test;
-        test.SetShader(gfx::MaterialClass::Shader::Texture);
+        gfx::TextureMap2DClass test;
         test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
         test.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
         test.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
@@ -585,14 +794,11 @@ void unit_test_material_textures()
 
         gfx::RgbBitmap bitmap;
         bitmap.Resize(100, 80);
-        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+        test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::MaterialClass::Environment env;
-        gfx::MaterialClass::RasterState raster;
-        gfx::MaterialClass::InstanceState instance;
-        instance.runtime = 1.0f;
-        instance.base_color = gfx::Color::White;
-        test.ApplyDynamicState(env, instance, device, program, raster);
+        gfx::MaterialClass::State env;
+        env.material_time = 1.0;
+        test.ApplyDynamicState(env, device, program);
 
         const auto& texture = device.GetTexture(0);
         TEST_REQUIRE(texture.GetHeight() == 80);
@@ -610,8 +816,7 @@ void unit_test_material_textures()
     // one texture, both texture bindings are using the
     // same texture.
     {
-        gfx::MaterialClass test;
-        test.SetShader(gfx::MaterialClass::Shader::Sprite);
+        gfx::SpriteClass test;
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap bitmap;
@@ -621,12 +826,9 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 0.0f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 0.0f;
+            test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
             TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
             TEST_REQUIRE(program.GetTextureBinding(0).texture == &texture);
@@ -638,12 +840,9 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 1.5f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 1.5f;
+            test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
             TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
             TEST_REQUIRE(program.GetTextureBinding(0).texture == &texture);
@@ -657,8 +856,7 @@ void unit_test_material_textures()
 
     // 2 textures.
     {
-        gfx::MaterialClass test;
-        test.SetShader(gfx::MaterialClass::Shader::Sprite);
+        gfx::SpriteClass test;
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap one;
@@ -674,12 +872,9 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 0.0f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 0.0f;
+            test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
@@ -689,12 +884,9 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 1.0f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 1.0f;
+            test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
@@ -706,8 +898,7 @@ void unit_test_material_textures()
 
     // 3 textures.
     {
-        gfx::MaterialClass test;
-        test.SetShader(gfx::MaterialClass::Shader::Sprite);
+        gfx::SpriteClass test;
         test.SetFps(1.0f); // 1 frame per second.
 
         gfx::RgbBitmap one;
@@ -727,12 +918,9 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 0.0f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 0.0f;
+            test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
@@ -742,12 +930,9 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 1.0f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 1.0f;
+            test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
@@ -758,12 +943,9 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::MaterialClass::Environment env;
-            gfx::MaterialClass::RasterState raster;
-            gfx::MaterialClass::InstanceState instance;
-            instance.runtime = 2.5f;
-            instance.base_color = gfx::Color::White;
-            test.ApplyDynamicState(env, instance, device, program, raster);
+            gfx::MaterialClass::State env;
+            env.material_time = 2.5f;
+            test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
@@ -777,105 +959,202 @@ void unit_test_material_textures()
 
 void unit_test_material_uniform_folding()
 {
+
     // fold uniforms into consts in the GLSL when the material is
     // marked static.
-
-    // dummy shader source which we write to the disk now
-    // in order to simplify the deployment of the unit test.
-    const std::string& original =
-            R"(#version 100
-precision highp float;
-uniform sampler2D kTexture0;
-uniform sampler2D kTexture1;
-uniform float kGamma;
-uniform float kRuntime;
-uniform vec2 kTextureScale;
-uniform vec2 kTextureVelocityXY;
-uniform float kTextureVelocityZ;
-uniform vec4 kBaseColor;
-uniform vec4 kColor0;
-uniform vec4 kColor1;
-uniform vec4 kColor2;
-uniform vec4 kColor3;
-
-const float MyConst1 = 1.24;
-const vec2 MyConst2 = vec2(1.0, 2.0);
-
-#define FOO 12.3
-
-varying vec2 vTexCoord;
-varying float vAlpha;
-
-void main() {
-   vec4 tex0 = texture2D(kTexture0, vTexCoord);
-   vec4 tex1 = texture2D(kTexture1, vTexCoord);
-   gl_FragColor = pow(vec4(1.0), vec4(kGamma));
-}
-)";
-
-    const std::string& expected =
-            R"(#version 100
-precision highp float;
-uniform sampler2D kTexture0;
-uniform sampler2D kTexture1;
-const float kGamma = 0.80;
-uniform float kRuntime;
-const vec2 kTextureScale = vec2(2.00,3.00);
-const vec2 kTextureVelocityXY = vec2(4.00,5.00);
-const float kTextureVelocityZ = -1.00;
-const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);
-const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);
-const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);
-const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);
-const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);
-
-const float MyConst1 = 1.24;
-const vec2 MyConst2 = vec2(1.0, 2.0);
-
-#define FOO 12.3
-
-varying vec2 vTexCoord;
-varying float vAlpha;
-
-void main() {
-   vec4 tex0 = texture2D(kTexture0, vTexCoord);
-   vec4 tex1 = texture2D(kTexture1, vTexCoord);
-   gl_FragColor = pow(vec4(1.0), vec4(kGamma));
-}
-)";
-
-    base::OverwriteTextFile("test_shader.glsl", original);
-
-    gfx::MaterialClass klass;
-    klass.SetShader("test_shader.glsl");
-    klass.SetBaseColor(gfx::Color::White);
-    klass.SetColorMapColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::BottomLeft);
-    klass.SetColorMapColor(gfx::Color::Green,gfx::MaterialClass::ColorIndex::TopLeft);
-    klass.SetColorMapColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BottomRight);
-    klass.SetColorMapColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::TopRight);
-    klass.SetGamma(0.8f);
-    klass.SetTextureVelocityX(4.0f);
-    klass.SetTextureVelocityY(5.0f);
-    klass.SetTextureVelocityZ(-1.0f);
-    klass.SetTextureScaleX(2.0);
-    klass.SetTextureScaleY(3.0);
-
-    TestDevice device;
     {
+        TestDevice device;
+
+        gfx::ColorClass klass;
+        klass.SetGamma(0.8f);
+        klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
         klass.GetShader(device);
+
         const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
-        TEST_REQUIRE(source == expected);
+        TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;"));
+        TEST_REQUIRE(base::Contains(source, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
     }
 
     {
-        klass.SetStatic(false);
+        TestDevice device;
+
+        gfx::GradientClass klass;
+        klass.SetGamma(0.8);
+        klass.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomLeft);
+        klass.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::TopLeft);
+        klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
+        klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        klass.SetStatic(true);
         klass.GetShader(device);
-        const auto& shader = device.GetShader(1);
+
+        const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
-        TEST_REQUIRE(source == original);
+        TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor0;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor1;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor2;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor3;") == false);
+        TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;"));
+        TEST_REQUIRE(base::Contains(source, "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
     }
+
+    {
+        TestDevice device;
+
+        gfx::TextureMap2DClass klass;
+        klass.SetStatic(true);
+        klass.SetGamma(0.8);
+        klass.SetBaseColor(gfx::Color::White);
+        klass.SetTextureVelocityX(4.0f);
+        klass.SetTextureVelocityY(5.0f);
+        klass.SetTextureVelocityZ(-1.0f);
+        klass.SetTextureScaleX(2.0);
+        klass.SetTextureScaleY(3.0);
+        klass.GetShader(device);
+
+        const auto& shader = device.GetShader(0);
+        const auto& source = shader.GetSource();
+        TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;") == true);
+        TEST_REQUIRE(base::Contains(source, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureVelocityXY = vec2(4.00,5.00);"));
+        TEST_REQUIRE(base::Contains(source, "const float kTextureVelocityZ = -1.00;"));
+    }
+
+    {
+        TestDevice device;
+
+        gfx::SpriteClass klass;
+        klass.SetStatic(true);
+        klass.SetGamma(0.8);
+        klass.SetTextureVelocityX(4.0f);
+        klass.SetTextureVelocityY(5.0f);
+        klass.SetTextureVelocityZ(-1.0f);
+        klass.SetTextureScaleX(2.0);
+        klass.SetTextureScaleY(3.0);
+        klass.GetShader(device);
+
+        const auto& shader = device.GetShader(0);
+        const auto& source = shader.GetSource();
+        TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(source, "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;") == true);
+        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureVelocityXY = vec2(4.00,5.00);"));
+        TEST_REQUIRE(base::Contains(source, "const float kTextureVelocityZ = -1.00;"));
+
+    }
+}
+
+void unit_test_custom_uniforms()
+{
+    gfx::CustomMaterialClass klass;
+    klass.SetUniform("float", 56.0f);
+    klass.SetUniform("int", 123);
+    klass.SetUniform("vec2", glm::vec2(1.0f, 2.0f));
+    klass.SetUniform("vec3", glm::vec3(1.0f, 2.0f, 3.0f));
+    klass.SetUniform("vec4", glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+    klass.SetUniform("color", gfx::Color::DarkCyan);
+
+    TestDevice device;
+    TestProgram program;
+    gfx::MaterialClass::State env;
+    env.material_time = 0.0f;
+    klass.ApplyDynamicState(env, device, program);
+
+    glm::ivec1 ivec1_;
+    glm::vec1 vec1_;
+    glm::vec2 vec2_;
+    glm::vec3 vec3_;
+    glm::vec4 vec4_;
+    gfx::Color4f color_;
+    TEST_REQUIRE(program.GetUniform("float", &vec1_));
+    TEST_REQUIRE(program.GetUniform("int", &ivec1_));
+    TEST_REQUIRE(program.GetUniform("vec2", &vec2_));
+    TEST_REQUIRE(program.GetUniform("vec3", &vec3_));
+    TEST_REQUIRE(program.GetUniform("vec4", &vec4_));
+    TEST_REQUIRE(program.GetUniform("color", &color_));
+    TEST_REQUIRE(ivec1_.x   == 123);
+    TEST_REQUIRE(vec1_.x == real::float32(56.0f));
+    TEST_REQUIRE(vec2_  == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(vec3_  == glm::vec3(1.0f, 2.0f, 3.0f));
+    TEST_REQUIRE(vec4_  == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+    TEST_REQUIRE(color_  == gfx::Color::DarkCyan);
+
+}
+
+void unit_test_custom_textures()
+{
+    gfx::CustomMaterialClass klass;
+    {
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(10, 10);
+
+        gfx::TextureMap2D texture;
+        texture.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
+        texture.SetSamplerName("kFoobar");
+        texture.SetRectUniformName("kFoobarRect");
+        texture.SetTextureRect(gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
+        klass.SetTextureMap("texture", texture);
+    }
+
+    {
+        gfx::RgbBitmap frame0, frame1;
+        frame0.Resize(20, 20);
+        frame1.Resize(30, 30);
+
+        gfx::SpriteMap sprite;
+        sprite.SetFps(10.0f);
+        sprite.AddTexture(gfx::CreateTextureFromBitmap(frame0));
+        sprite.AddTexture(gfx::CreateTextureFromBitmap(frame1));
+        sprite.SetSamplerName("kTexture0", 0);
+        sprite.SetSamplerName("kTexture1", 1);
+        sprite.SetRectUniformName("kTextureRect0", 0);
+        sprite.SetRectUniformName("kTextureRect1", 1);
+        sprite.SetTextureRect(size_t(0), gfx::FRect(1.0f, 2.0f, 3.0f, 4.0f));
+        sprite.SetTextureRect(size_t(1), gfx::FRect(4.0f, 3.0f, 2.0f, 1.0f));
+        klass.SetTextureMap("sprite", sprite);
+    }
+
+    TestDevice device;
+    TestProgram program;
+
+    gfx::MaterialClass::State env;
+    klass.ApplyDynamicState(env, device, program);
+    // these textures should be bound to these samplers. check the textures based on their sizes.
+    TEST_REQUIRE(program.FindTextureBinding("kFoobar")->texture->GetWidth() == 10);
+    TEST_REQUIRE(program.FindTextureBinding("kFoobar")->texture->GetHeight() == 10);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetWidth()  == 20);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetHeight() == 20);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetWidth()  == 30);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetHeight() == 30);
+
+    // check the texture rects.
+    glm::vec4 kFoobarRect;
+    TEST_REQUIRE(program.GetUniform("kFoobarRect", &kFoobarRect));
+    TEST_REQUIRE(kFoobarRect == glm::vec4(0.5f, 0.6f, 0.7f, 0.8f));
+
+    glm::vec4 kTextureRect0;
+    glm::vec4 kTextureRect1;
+    TEST_REQUIRE(program.GetUniform("kTextureRect0", &kTextureRect0));
+    TEST_REQUIRE(program.GetUniform("kTextureRect1", &kTextureRect1));
+    TEST_REQUIRE(kTextureRect0 == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+    TEST_REQUIRE(kTextureRect1 == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
+
 }
 
 int test_main(int argc, char* argv[])
@@ -883,5 +1162,7 @@ int test_main(int argc, char* argv[])
     unit_test_material_uniforms();
     unit_test_material_textures();
     unit_test_material_uniform_folding();
+    unit_test_custom_uniforms();
+    unit_test_custom_textures();
     return 0;
 }

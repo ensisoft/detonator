@@ -81,23 +81,11 @@ void DrawTextRect(Painter& painter,
     buff.AddText(text_and_style);
 
     // Setup material to shade the text.
-    static auto klass = std::make_shared<gfx::MaterialClass>();
-    klass->SetShader(MaterialClass::Shader::Texture);
+    static auto klass = std::make_shared<gfx::TextureMap2DClass>();
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     klass->SetBaseColor(color);
-    if (klass->GetNumTextures() == 0)
-    {
-        klass->AddTexture(CreateTextureFromText(buff));
-        // let this texture object be garbage collected
-        // when it's no longer used.
-        klass->SetTextureGc(0, true); //
-    }
-    else
-    {
-        auto& source = klass->GetTextureSource(0);
-        auto& text = static_cast<detail::TextureTextBufferSource&>(source);
-        text.SetTextBuffer(std::move(buff));
-    }
+    klass->SetTexture(CreateTextureFromText(buff));
+    klass->EnableGC(true);
 
     // if the text is set to be blinking do a sharp cut off
     // and when we have the "off" interval then simply don't

@@ -230,7 +230,6 @@ namespace game
     public:
         // Enumeration of support node parameters that can be changed.
         enum class ParamName {
-            AlphaOverride,
             DrawableTimeScale,
             LinearVelocityX,
             LinearVelocityY,
@@ -289,7 +288,7 @@ namespace game
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
         // which parameter to adjust
-        ParamName mParamName = ParamName::AlphaOverride;
+        ParamName mParamName = ParamName::DrawableTimeScale;
         // Normalized start time of the action
         float mStartTime = 0.0f;
         // Normalized duration of the action.

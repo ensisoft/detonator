@@ -99,9 +99,8 @@ void unit_test_ipc_send_recv()
         std::string id;
         std::size_t hash = 0;
         {
-            gfx::MaterialClass test;
+            gfx::ColorClass test;
             test.SetBaseColor(gfx::Color::DarkGreen);
-            test.SetBlendFrames(true);
             test.SetGamma(4.0f);
             id = test.GetId();
             hash = test.GetHash();

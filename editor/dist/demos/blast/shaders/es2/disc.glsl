@@ -3,13 +3,21 @@
 
 precision highp float;
 
+// material system will provide these.
+// kRuntime will be the current material instance runtime in second.s
 uniform float kRuntime;
+// If the material is applied on a particle system (i.e. we're rendering points)
+// kRenderPoints will be set to 1.0. When rendering points the shader must use
+// gl_PointCoord instead of vTexCoord. simple way to support both is to
+// vec2 pos = mix(vTexCoord, gl_PointCoord, kRenderPoints)
 uniform float kRenderPoints;
+
 uniform float kGamma;
 uniform vec4  kBaseColor;
 uniform vec4  kColor0;
 uniform sampler2D kTexture0;
 
+// data from vertex stage.
 varying vec2 vTexCoord;
 
 float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_origin)

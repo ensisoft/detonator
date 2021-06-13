@@ -1029,8 +1029,6 @@ void BindGameLib(sol::state& L)
     drawable["GetLayer"]      = &DrawableItem::GetLayer;
     drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;
     drawable["GetTimeScale"]  = &DrawableItem::GetTimeScale;
-    drawable["GetAlpha"]      = &DrawableItem::GetAlpha;
-    drawable["SetAlpha"]      = &DrawableItem::SetAlpha;
     drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
     drawable["TestFlag"]      = &TestFlag<DrawableItem>;
     drawable["SetFlag"]       = &SetFlag<DrawableItem>;
