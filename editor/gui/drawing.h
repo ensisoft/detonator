@@ -57,6 +57,9 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
     unsigned widget_width,
     unsigned widget_height);
 
+void ShowMessage(const std::string& msg, gfx::Painter& painter,
+                 unsigned widget_width, unsigned widget_height);
+
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.
@@ -148,7 +151,8 @@ private:
         // the mask object is not selected or when there's no drawable item.
         if ((is_mask || !drawable) && !is_selected && !is_playing)
         {
-            static const auto yellow = std::make_shared<gfx::Material>(gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+            static const auto yellow = std::make_shared<gfx::Material>(
+                    gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
             static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
             // visualize it.
             trans.Push(node->GetModelTransform());

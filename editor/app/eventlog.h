@@ -188,6 +188,12 @@ namespace app
 #define ERROR(msg, ...) \
     app::EventLog::get().write(app::Event::Type::Error, app::toString(msg, ## __VA_ARGS__), LOGTAG)
 
+#define ERROR_RETURN(msg, ...) \
+   do {                        \
+     app::EventLog::get().write(app::Event::Type::Error, app::toString(msg, ## __VA_ARGS__), LOGTAG); \
+     return;                    \
+   } while (0)
+
 #undef INFO
 #define INFO(msg, ...) \
     app::EventLog::get().write(app::Event::Type::Info, app::toString(msg, ## __VA_ARGS__), LOGTAG)

@@ -500,6 +500,140 @@ namespace app
         bool mPrimitive = false;
     };
 
+    class MaterialResource : public GameResourceBase<gfx::MaterialClass>
+    {
+    public:
+        MaterialResource() = default;
+        MaterialResource(const gfx::MaterialClass& klass, const QString& name)
+        {
+            mKlass = klass.Copy();
+            mName  = name;
+        }
+        MaterialResource(std::shared_ptr<gfx::MaterialClass> klass, const QString& name)
+        {
+            mKlass = klass;
+            mName  = name;
+        }
+        MaterialResource(std::unique_ptr<gfx::MaterialClass> klass, const QString& name)
+        {
+            mKlass = std::move(klass);
+            mName  = name;
+        }
+        MaterialResource(const QString& name)
+        { mName = name; }
+        MaterialResource(const MaterialResource& other)
+        {
+            mKlass = other.mKlass->Copy();
+            mName  = other.mName;
+            mProps = other.mProps;
+            mUserProps = other.mUserProps;
+        }
+        virtual QString GetId() const override
+        { return app::FromUtf8(mKlass->GetId());  }
+        virtual QString GetName() const override
+        { return mName; }
+        virtual Resource::Type GetType() const override
+        { return Resource::Type::Material; }
+        virtual void SetName(const QString& name) override
+        { mName = name; }
+        virtual void UpdateFrom(const Resource& other) override
+        {
+            const auto* ptr = dynamic_cast<const MaterialResource*>(&other);
+            ASSERT(ptr != nullptr);
+            mKlass     = ptr->mKlass->Copy();
+            mName      = ptr->mName;
+            mProps     = ptr->mProps;
+            mUserProps = ptr->mUserProps;
+        }
+        virtual void SetIsPrimitive(bool primitive) override
+        { mPrimitive = primitive; }
+        virtual bool IsPrimitive() const override
+        { return mPrimitive; }
+        virtual void Serialize(data::Writer& data) const override
+        {
+            auto chunk = data.NewWriteChunk();
+            mKlass->IntoJson(*chunk);
+            chunk->Write("resource_name", app::ToUtf8(mName));
+            chunk->Write("resource_id", mKlass->GetId());
+            data.AppendChunk("materials", std::move(chunk));
+        }
+        virtual void SaveProperties(QJsonObject& json) const override
+        {
+            json[GetId()] = QJsonObject::fromVariantMap(mProps);
+        }
+        virtual void SaveUserProperties(QJsonObject& json) const override
+        {
+            json[GetId()] = QJsonObject::fromVariantMap(mUserProps);
+        }
+        virtual bool HasProperty(const QString& name) const override
+        { return mProps.contains(name); }
+        virtual bool HasUserProperty(const QString& name) const override
+        { return mUserProps.contains(name); }
+
+        virtual void SetProperty(const QString& name, const QVariant& value) override
+        { mProps[name] = value; }
+        virtual void SetUserProperty(const QString& name, const QVariant& value) override
+        { mUserProps[name] = value; }
+        virtual QVariant GetVariantProperty(const QString& name) const override
+        { return mProps[name]; }
+        virtual QVariant GetUserVariantProperty(const QString& name) const override
+        { return mUserProps[name]; }
+        virtual void LoadProperties(const QJsonObject& object) override
+        {
+            mProps = object[GetId()].toObject().toVariantMap();
+        }
+        virtual void LoadUserProperties(const QJsonObject& object) override
+        {
+            mUserProps = object[GetId()].toObject().toVariantMap();
+        }
+        virtual std::unique_ptr<Resource> Copy() const override
+        {
+            auto ret = std::make_unique<MaterialResource>();
+            ret->mKlass     = mKlass->Copy();
+            ret->mName      = mName;
+            ret->mProps     = mProps;
+            ret->mUserProps = mUserProps;
+            ret->mPrimitive = mPrimitive;
+            return ret;
+        }
+        virtual std::unique_ptr<Resource> Clone() const override
+        {
+            auto ret = std::make_unique<MaterialResource>();
+            ret->mKlass = mKlass->Clone();
+            ret->mName  = mName;
+            ret->mProps = mProps;
+            ret->mUserProps = mUserProps;
+            ret->mPrimitive = mPrimitive;
+            return ret;
+        }
+
+        // GameResourceBase
+        virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override
+        { return mKlass; }
+        virtual std::shared_ptr<gfx::MaterialClass> GetSharedResource() override
+        { return mKlass; }
+        MaterialResource& operator=(const MaterialResource&) = delete;
+    protected:
+        virtual void* GetIf(const std::type_info& expected_type) override
+        {
+            if (typeid(gfx::MaterialClass) == expected_type)
+                return (void*)mKlass.get();
+            return nullptr;
+        }
+        virtual const void* GetIf(const std::type_info& expected_type) const override
+        {
+            if (typeid(gfx::MaterialClass) == expected_type)
+                return (const void*)mKlass.get();
+            return nullptr;
+        }
+    private:
+        QString mName;
+        std::shared_ptr<gfx::MaterialClass> mKlass;
+        QVariantMap mProps;
+        QVariantMap mUserProps;
+        bool mPrimitive = false;
+    };
+
     template<typename T> inline
     const GameResourceBase<T>& ResourceCast(const Resource& res)
     {
@@ -517,7 +651,7 @@ namespace app
         return *ptr;
     }
 
-    using MaterialResource       = GameResource<gfx::MaterialClass>;
+    //using MaterialResource       = GameResource<gfx::MaterialClass>;
     using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;

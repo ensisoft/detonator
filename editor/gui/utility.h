@@ -82,6 +82,12 @@ inline void SetEnabled(QAction* action, bool enabled)
     action->setEnabled(enabled);
 }
 
+inline void SetVisible(QWidget* widget, bool visible)
+{
+    QSignalBlocker s(widget);
+    widget->setVisible(visible);
+}
+
 template<typename EnumT>
 void PopulateFromEnum(QComboBox* combo, bool clear = true)
 {
@@ -168,6 +174,33 @@ struct ListItem {
     QString name;
     QString id;
 };
+
+inline void ClearList(QListWidget* list)
+{
+    QSignalBlocker s(list);
+    list->clear();
+}
+
+inline void UpdateList(QListWidget* list, const std::vector<ListItem>& items)
+{
+    // maintain the current/previous selections
+    std::unordered_set<QString> selected;
+    for (const auto* item : list->selectedItems())
+        selected.insert(item->data(Qt::UserRole).toString());
+
+    QSignalBlocker s(list);
+    list->clear();
+
+    for (const auto& item : items)
+    {
+        QListWidgetItem* li = new QListWidgetItem;
+        li->setText(item.name);
+        li->setData(Qt::UserRole, item.id);
+        if (selected.find(item.id) != selected.end())
+            li->setSelected(true);
+        list->addItem(li);
+    }
+}
 
 inline void SetList(QComboBox* combo, const std::vector<ListItem>& items)
 {
@@ -356,6 +389,23 @@ struct ComboBoxItemIdGetter
     const QComboBox* cmb = nullptr;
 };
 
+struct ListWidgetItemIdGetter
+{
+    operator std::string() const
+    {
+        if (const auto* item = list->currentItem())
+            return app::ToUtf8(item->data(Qt::UserRole).toString());
+        return "";
+    }
+    operator QString() const
+    {
+        if (const auto* item = list->currentItem())
+            return item->data(Qt::UserRole).toString();
+        return QString("");
+    }
+    const QListWidget* list = nullptr;
+};
+
 struct ComboBoxValueGetter
 {
     template<typename T>
@@ -476,6 +526,8 @@ inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline ComboBoxItemIdGetter GetItemId(const QComboBox* cmb)
 { return ComboBoxItemIdGetter { cmb }; }
+inline ListWidgetItemIdGetter GetItemId(const QListWidget* list)
+{ return ListWidgetItemIdGetter { list}; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
 inline PlainTextEditValueGetter GetValue(const QPlainTextEdit* edit)

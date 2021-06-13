@@ -54,13 +54,12 @@ namespace detail {
 
 UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& loader) const
 {
-    auto material = std::make_shared<gfx::MaterialClass>();
-    material->SetShader(gfx::MaterialClass::Shader::Gradient);
+    auto material = std::make_shared<gfx::GradientClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    material->SetColorMapColor(mColorMap[0], ColorIndex::TopLeft);
-    material->SetColorMapColor(mColorMap[1], ColorIndex::TopRight);
-    material->SetColorMapColor(mColorMap[2], ColorIndex::BottomLeft);
-    material->SetColorMapColor(mColorMap[3], ColorIndex::BottomRight);
+    material->SetColor(mColorMap[0], ColorIndex::TopLeft);
+    material->SetColor(mColorMap[1], ColorIndex::TopRight);
+    material->SetColor(mColorMap[2], ColorIndex::BottomLeft);
+    material->SetColor(mColorMap[3], ColorIndex::BottomRight);
     return material;
 }
 bool UIGradient::FromJson(const nlohmann::json& json)
@@ -82,8 +81,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& loader) const
 {
-    auto material = std::make_shared<gfx::MaterialClass>();
-    material->SetShader(gfx::MaterialClass::Shader::Color);
+    auto material = std::make_shared<gfx::ColorClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetBaseColor(mColor);
     return material;
@@ -126,10 +124,9 @@ bool UIMaterialReference::IsAvailable(const ClassLibrary& loader) const
 
 UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary&) const
 {
-    auto material = std::make_shared<gfx::MaterialClass>();
-    material->SetShader(gfx::MaterialClass::Shader::Texture);
+    auto material = std::make_shared<gfx::TextureMap2DClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    material->AddTexture(gfx::LoadTextureFromFile(mTextureUri));
+    material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     return material;
 }
 

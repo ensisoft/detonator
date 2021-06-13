@@ -22,12 +22,49 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/platform.h"
 
 namespace base
 {
+
+template<typename K, typename T>
+T* SafeFind(std::unordered_map<K, T>& map, const K& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return &it->second;
+}
+
+template<typename K, typename T>
+T* SafeFind(std::unordered_map<K, std::unique_ptr<T>>& map, const K& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return it->second.get();
+}
+template<typename K, typename T>
+const T* SafeFind(const std::unordered_map<K, T>& map, const K& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return &it->second;
+}
+
+template<typename K, typename T>
+const T* SafeFind(const std::unordered_map<K, std::unique_ptr<T>>& map, const K& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return it->second.get();
+}
+
 
 template<typename T>
 T& SafeIndex(std::vector<T>& vector, std::size_t index)
@@ -40,6 +77,34 @@ const T& SafeIndex(const std::vector<T>& vector, std::size_t index)
 {
     ASSERT(index < vector.size());
     return vector[index];
+}
+template<typename T>
+void SafeErase(std::vector<T>& vector, std::size_t index)
+{
+    ASSERT(index < vector.size());
+    vector.erase(vector.begin() + index);
+}
+
+template<typename T, typename Predicate>
+T* SafeFind(std::vector<T>& vector, Predicate predicate)
+{
+    for (auto& item : vector)
+    {
+        if (predicate(item))
+            return &item;
+    }
+    return nullptr;
+}
+
+template<typename T, typename Predicate>
+T* SafeFind(std::vector<std::unique_ptr<T>>& vector, Predicate predicate)
+{
+    for (auto& item : vector)
+    {
+        if (predicate(item))
+            return item.get();
+    }
+    return nullptr;
 }
 
 template<typename T, typename Deleter>

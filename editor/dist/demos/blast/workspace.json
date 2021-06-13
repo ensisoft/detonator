@@ -1,18 +1,12 @@
 {
     "1lANs9A0yJ": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "2a488SIQsU": {
-        "checked_for_packing": true,
-        "shader_file": "ws://shaders/es2/disc.glsl",
-        "use_shader_file": true
+        "checked_for_packing": true
     },
     "4IluygNgeR": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "4KwMiHn2Zz": {
         "checked_for_packing": true
@@ -39,31 +33,20 @@
         "checked_for_packing": true
     },
     "CopZZzjQd4": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
     },
     "EgsgPADEqi": {
-        "checked_for_packing": true,
-        "shader_file": "ws://shaders/es2/pulsing.glsl",
-        "use_shader_file": true
+        "checked_for_packing": true
     },
     "FXdfIUPul3": {
         "checked_for_packing": true
     },
     "HnopPLXPe5": {
-        "checked_for_packing": true,
-        "shader_file": "ws://shaders/es2/pulsing.glsl",
-        "use_shader_file": true
+        "checked_for_packing": true
     },
     "Kb5sHrP5bL": {
-        "shader_file": "ws://shaders/es2/text.glsl",
-        "use_shader_file": true
     },
     "M0ePA9uzA5": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "OtyRiUrsTd": {
         "checked_for_packing": true
@@ -72,25 +55,21 @@
         "checked_for_packing": true
     },
     "RKmQZx8H1s": {
-        "checked_for_packing": true,
-        "shader_file": "ws://shaders/es2/text.glsl",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "RoGbL91JLQ": {
         "checked_for_packing": true
     },
     "T38qa8wN2K": {
+        "checked_for_packing": true
     },
     "TNyQSW6bB6": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "UWF4u1fYHa": {
         "checked_for_packing": true
     },
     "Z2zrRug3HP": {
-        "checked_for_packing": true
     },
     "bjZ0TrwuxI": {
         "checked_for_packing": true
@@ -122,14 +101,9 @@
         "checked_for_packing": true
     },
     "lOfMr3YBtI": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
     },
     "nQUmTOnClw": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "pNT0bA0bpw": {
         "checked_for_packing": true
@@ -197,27 +171,22 @@
         "use_size_derivatives": false
     },
     "rrmZfWe97e": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "rvZg0UT77h": {
         "checked_for_packing": true
     },
     "s4zt0bFnAL": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "sX3kBAhLxU": {
         "checked_for_packing": true
     },
     "vg5yQskPIv": {
-        "checked_for_packing": true,
-        "shader_file": "",
-        "use_shader_file": false
+        "checked_for_packing": true
     },
     "wXtbrxNRpX": {
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,

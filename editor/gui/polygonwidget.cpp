@@ -476,8 +476,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         const GridDensity grid = GetValue(mUI.cmbGrid);
         const unsigned num_cell_lines = static_cast<unsigned>(grid) - 1;
         painter.Draw(gfx::Grid(num_cell_lines, num_cell_lines), view,
-                     gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, 0.7f))
-                .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
+                     gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
     else
     {
@@ -487,9 +486,10 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
-    painter.Draw(gfx::Polygon(mPolygon), view,
-                 gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, alpha))
-            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
+    gfx::ColorClass color;
+    color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
+    color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    painter.Draw(gfx::Polygon(mPolygon), view, color);
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -532,9 +532,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     cmd.offset = 0;
     cmd.count  = points.size();
     poly.AddDrawCommand(MakeVerts(points, width, height), cmd);
-    painter.Draw(gfx::Polygon(poly), view,
-                 gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, alpha))
-            .SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent));
+    painter.Draw(gfx::Polygon(poly), view, color);
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)

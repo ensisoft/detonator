@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <optional>
+#include <variant>
 
 #include "base/bitflag.h"
 #include "base/utility.h"
@@ -192,6 +193,13 @@ namespace game
     class DrawableItemClass
     {
     public:
+        // Variant of material params that can be set
+        // on this drawable item.
+        using MaterialParam = std::variant<float, int,
+                Color4f,
+                glm::vec2, glm::vec3, glm::vec4>;
+        // Key-value map of material params.
+        using MaterialParamMap = std::unordered_map<std::string, MaterialParam>;
         using RenderPass  = game::RenderPass;
         using RenderStyle = game::RenderStyle;
         enum class Flags {
@@ -204,8 +212,6 @@ namespace game
             // Whether the item should restart drawables that have
             // finished, for example particle engines.
             RestartDrawable,
-            // Whether the item should override the material alpha value.
-            OverrideAlpha,
             // Whether to flip (mirror) the item about Y axis
             FlipVertically,
         };
@@ -215,7 +221,6 @@ namespace game
             mBitFlags.set(Flags::UpdateDrawable, true);
             mBitFlags.set(Flags::UpdateMaterial, true);
             mBitFlags.set(Flags::RestartDrawable, true);
-            mBitFlags.set(Flags::OverrideAlpha, false);
             mBitFlags.set(Flags::FlipVertically, false);
         }
 
@@ -229,13 +234,14 @@ namespace game
         void SetLayer(int layer)
         { mLayer = layer; }
         void ResetMaterial()
-        { mMaterialId.clear(); }
+        {
+            mMaterialId.clear();
+            mMaterialParams.clear();
+        }
         void ResetDrawable()
         { mDrawableId.clear(); }
         void SetFlag(Flags flag, bool on_off)
         { mBitFlags.set(flag, on_off); }
-        void SetAlpha(float alpha)
-        { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
         void SetLineWidth(float width)
         { mLineWidth = width; }
         void SetRenderPass(RenderPass pass)
@@ -244,6 +250,12 @@ namespace game
         { mRenderStyle = style; }
         void SetTimeScale(float scale)
         { mTimeScale = scale; }
+        void SetMaterialParam(const std::string& name, const MaterialParam& value)
+        { mMaterialParams[name] = value; }
+        void SetMaterialParams(const MaterialParamMap& params)
+        { mMaterialParams = params; }
+        void SetMaterialParams(MaterialParamMap&& params)
+        { mMaterialParams = std::move(params); }
 
         // class getters.
         std::string GetDrawableId() const
@@ -252,8 +264,6 @@ namespace game
         { return mMaterialId; }
         int GetLayer() const
         { return mLayer; }
-        float GetAlpha() const
-        {return mAlpha; }
         float GetLineWidth() const
         { return mLineWidth; }
         float GetTimeScale() const
@@ -266,7 +276,32 @@ namespace game
         { return mRenderStyle; }
         base::bitflag<Flags> GetFlags() const
         { return mBitFlags; }
-
+        MaterialParamMap GetMaterialParams()
+        { return mMaterialParams; }
+        const MaterialParamMap& GetMaterialParams() const
+        { return mMaterialParams; }
+        bool HasMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name) != nullptr; }
+        MaterialParam* FindMaterialParam(const std::string& name)
+        { return base::SafeFind(mMaterialParams, name); }
+        const MaterialParam* FindMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name); }
+        template<typename T>
+        T* GetMaterialParamValue(const std::string& name)
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        template<typename T>
+        const T* GetMaterialParamValue(const std::string& name) const
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        void DeleteMaterialParam(const std::string& name)
+        { mMaterialParams.erase(name); }
         void IntoJson(data::Writer& data) const;
 
         static std::optional<DrawableItemClass> FromJson(const data::Reader& data);
@@ -279,9 +314,6 @@ namespace game
         std::string mDrawableId;
         // the layer in which this node should be drawn.
         int mLayer = 0;
-        // override alpha value, 0.0f = fully transparent, 1.0f = fully opaque.
-        // only works with materials that enable alpha blending (transparency)
-        float mAlpha = 1.0f;
         // linewidth for rasterizing the shape with lines.
         float mLineWidth = 1.0f;
         // scaler value for changing the time delta values
@@ -289,6 +321,7 @@ namespace game
         float mTimeScale = 1.0f;
         RenderPass mRenderPass = RenderPass::Draw;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
+        MaterialParamMap mMaterialParams;
     };
 
     // TextItem allows human readable text entity node attachment with
@@ -392,6 +425,8 @@ namespace game
     class DrawableItem
     {
     public:
+        using MaterialParam    = DrawableItemClass::MaterialParam;
+        using MaterialParamMap = DrawableItemClass::MaterialParamMap;
         using Flags       = DrawableItemClass::Flags;
         using RenderPass  = DrawableItemClass::RenderPass;
         using RenderStyle = DrawableItemClass::RenderStyle ;
@@ -399,9 +434,9 @@ namespace game
         DrawableItem(std::shared_ptr<const DrawableItemClass> klass)
           : mClass(klass)
         {
-            mInstanceAlpha = mClass->GetAlpha();
             mInstanceFlags = mClass->GetFlags();
             mInstanceTimeScale = mClass->GetTimeScale();
+            mMaterialParams = mClass->GetMaterialParams();
         }
         std::string GetMaterialId() const
         { return mClass->GetMaterialId(); }
@@ -417,17 +452,40 @@ namespace game
         { return mClass->GetRenderStyle(); }
         bool TestFlag(Flags flag) const
         { return mInstanceFlags.test(flag); }
-        float GetAlpha() const
-        { return mInstanceAlpha; }
         float GetTimeScale() const
         { return mInstanceTimeScale; }
-
         void SetFlag(Flags flag, bool on_off)
         { mInstanceFlags.set(flag, on_off); }
-        void SetAlpha(float alpha)
-        { mInstanceAlpha = alpha; }
         void SetTimeScale(float scale)
         { mInstanceTimeScale = scale; }
+        void SetMaterialParam(const std::string& name, const MaterialParam& value)
+        { mMaterialParams[name] = value; }
+        MaterialParamMap GetMaterialParams()
+        { return mMaterialParams; }
+        const MaterialParamMap& GetMaterialParams() const
+        { return mMaterialParams; }
+        bool HasMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name) != nullptr; }
+        MaterialParam* FindMaterialParam(const std::string& name)
+        { return base::SafeFind(mMaterialParams, name); }
+        const MaterialParam* FindMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name); }
+        template<typename T>
+        T* GetMaterialParamValue(const std::string& name)
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        template<typename T>
+        const T* GetMaterialParamValue(const std::string& name) const
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        void DeleteMaterialParam(const std::string& name)
+        { mMaterialParams.erase(name); }
 
         const DrawableItemClass& GetClass() const
         { return *mClass.get(); }
@@ -436,8 +494,8 @@ namespace game
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
         base::bitflag<Flags> mInstanceFlags;
-        float mInstanceAlpha = 1.0f;
         float mInstanceTimeScale = 1.0f;
+        MaterialParamMap mMaterialParams;
     };
 
     class RigidBodyItem

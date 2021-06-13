@@ -102,8 +102,8 @@ public:
         if (!prog || !geom)
             return;
 
-        MaterialClass::RasterState material_raster_state;
-        MaterialClass::Environment material_env;
+        Material::RasterState material_raster_state;
+        Material::Environment material_env;
         material_env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix",
@@ -184,8 +184,8 @@ public:
             prog->SetUniform("kViewMatrix",
                 *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
 
-            MaterialClass::RasterState material_raster_state;
-            MaterialClass::Environment material_env;
+            Material::RasterState material_raster_state;
+            Material::Environment material_env;
             material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
             mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
@@ -222,8 +222,8 @@ public:
             prog->SetUniform("kViewMatrix",
                *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
 
-            MaterialClass::RasterState material_raster_state;
-            MaterialClass::Environment material_env;
+            Material::RasterState material_raster_state;
+            Material::Environment material_env;
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
             draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
@@ -261,8 +261,8 @@ public:
             program->SetUniform("kViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(kViewMatrix));
 
-            MaterialClass::RasterState material_raster_state;
-            MaterialClass::Environment material_env;
+            Material::RasterState material_raster_state;
+            Material::Environment material_env;
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
             draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
 

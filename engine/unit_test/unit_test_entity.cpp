@@ -26,9 +26,6 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "data/json.h"
-#include "graphics/color4f.h"
-#include "graphics/material.h"
-#include "graphics/drawable.h"
 #include "engine/entity.h"
 
 // build easily comparable representation of the render tree
@@ -74,6 +71,10 @@ void unit_test_entity_node()
     draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
     draw.SetLayer(10);
     draw.SetLineWidth(5.0f);
+    draw.SetMaterialParam("kFloat", 1.0f);
+    draw.SetMaterialParam("kVec2", glm::vec2(1.0f, 2.0f));
+    draw.SetMaterialParam("kVec3", glm::vec3(1.0f, 2.0f, 3.0f));
+    draw.SetMaterialParam("kColor", game::Color::DarkCyan);
 
     game::RigidBodyItemClass body;
     body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
@@ -122,6 +123,10 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetDrawable()->GetLayer()        == 10);
     TEST_REQUIRE(node.GetDrawable()->GetDrawableId()   == "rectangle");
     TEST_REQUIRE(node.GetDrawable()->GetMaterialId()   == "test");
+    TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<float>("kFloat") == real::float32(1.0f));
+    TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<glm::vec2>("kVec2") == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<glm::vec3>("kVec3") == glm::vec3(1.0f, 2.0f, 3.0f));
+    TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<game::Color4f>("kColor") == game::Color::DarkCyan);
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
     TEST_REQUIRE(node.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);

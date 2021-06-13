@@ -254,7 +254,6 @@ void unit_test_scene()
         draw.SetLayer(5);
         draw.SetLineWidth(2.0f);
         draw.SetTimeScale(3.0f);
-        draw.SetAlpha(0.5f);
         draw.SetFlag(game::DrawableItemClass::Flags::FlipVertically, true);
         draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
 

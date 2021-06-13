@@ -5,7 +5,7 @@ precision highp float;
 
 uniform float kRuntime;
 uniform float kRenderPoints;
-uniform float kGamma;
+
 uniform vec4  kBaseColor;
 
 void main()

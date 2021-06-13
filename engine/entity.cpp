@@ -21,7 +21,7 @@
 #include "warnpop.h"
 
 #include <algorithm>
-#include <map>
+#include <set>
 
 #include "base/logging.h"
 #include "base/assert.h"
@@ -93,11 +93,34 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mMaterialId);
     hash = base::hash_combine(hash, mDrawableId);
     hash = base::hash_combine(hash, mLayer);
-    hash = base::hash_combine(hash, mAlpha);
     hash = base::hash_combine(hash, mLineWidth);
     hash = base::hash_combine(hash, mRenderPass);
     hash = base::hash_combine(hash, mRenderStyle);
     hash = base::hash_combine(hash, mTimeScale);
+
+    // remember the *unordered* nature of unordered_map
+    std::set<std::string> keys;
+    for (const auto& param : mMaterialParams)
+        keys.insert(param.first);
+
+    for (const auto& key : keys)
+    {
+        const auto* param = base::SafeFind(mMaterialParams, key);
+        hash = base::hash_combine(hash, key);
+        if (const auto* ptr = std::get_if<float>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else if (const auto* ptr = std::get_if<int>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec2>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec3>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec4>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else if (const auto* ptr = std::get_if<Color4f>(param))
+            hash = base::hash_combine(hash, *ptr);
+        else BUG("Unhandled material param type.");
+    }
     return hash;
 }
 
@@ -107,11 +130,39 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("material",    mMaterialId);
     data.Write("drawable",    mDrawableId);
     data.Write("layer",       mLayer);
-    data.Write("alpha",       mAlpha);
     data.Write("linewidth",   mLineWidth);
     data.Write("renderpass",  mRenderPass);
     data.Write("renderstyle", mRenderStyle);
     data.Write("timescale",   mTimeScale);
+    for (const auto& param : mMaterialParams)
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("name", param.first);
+        if (const auto* ptr = std::get_if<float>(&param.second))
+            chunk->Write("value", *ptr);
+        else if (const auto* ptr = std::get_if<int>(&param.second))
+            chunk->Write("value", *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec2>(&param.second))
+            chunk->Write("value", *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec3>(&param.second))
+            chunk->Write("value", *ptr);
+        else if (const auto* ptr = std::get_if<glm::vec4>(&param.second))
+            chunk->Write("value", *ptr);
+        else if (const auto* ptr = std::get_if<Color4f>(&param.second))
+            chunk->Write("value", *ptr);
+        else BUG("Unhandled uniform type.");
+        data.AppendChunk("material_params", std::move(chunk));
+    }
+}
+
+template<typename T>
+bool ReadMaterialParam(const data::Reader& data, DrawableItemClass::MaterialParam& param)
+{
+    T value;
+    if (!data.Read("value", &value))
+        return false;
+    param = value;
+    return true;
 }
 
 // static
@@ -122,12 +173,33 @@ std::optional<DrawableItemClass> DrawableItemClass::FromJson(const data::Reader&
         !data.Read("material",    &ret.mMaterialId) ||
         !data.Read("drawable",    &ret.mDrawableId) ||
         !data.Read("layer",       &ret.mLayer) ||
-        !data.Read("alpha",       &ret.mAlpha) ||
         !data.Read("linewidth",   &ret.mLineWidth) ||
         !data.Read("renderpass",  &ret.mRenderPass) ||
         !data.Read("renderstyle", &ret.mRenderStyle) ||
         !data.Read("timescale",   &ret.mTimeScale))
         return std::nullopt;
+
+    for (unsigned i=0; i<data.GetNumChunks("material_params"); ++i)
+    {
+        MaterialParam param;
+        const auto& chunk = data.GetReadChunk("material_params", i);
+        std::string name;
+        if (!chunk->Read("name", &name))
+            return std::nullopt;
+
+        // note: the order of vec2/3/4 reading is important since
+        // vec4 parses as vec3/2 and vec3 parses as vec2.
+        // this should be fixed in data/json.cpp
+        if (ReadMaterialParam<float>(*chunk, param) ||
+            ReadMaterialParam<int>(*chunk, param) ||
+            ReadMaterialParam<glm::vec4>(*chunk, param) ||
+            ReadMaterialParam<glm::vec3>(*chunk, param) ||
+            ReadMaterialParam<glm::vec2>(*chunk, param) ||
+            ReadMaterialParam<Color4f>(*chunk, param))
+        {
+            ret.mMaterialParams[std::move(name)] = std::move(param);
+        } else return std::nullopt;
+    }
     return ret;
 }
 

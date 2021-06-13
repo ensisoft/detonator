@@ -100,6 +100,7 @@ namespace app
         std::unique_ptr<gfx::Drawable> MakeDrawableByName(const QString& name) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const QString& name) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const char* name) const;
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassById(const QString& id) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const QString& name) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;

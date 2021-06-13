@@ -131,4 +131,12 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
     gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
 }
 
+void ShowMessage(const std::string& msg, gfx::Painter& painter,
+                 unsigned widget_width, unsigned widget_height)
+{
+    gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
+                      gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+}
+
 } // namespace

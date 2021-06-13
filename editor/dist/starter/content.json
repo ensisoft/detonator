@@ -57,11 +57,9 @@
         {
           "class": "mqxbWFGIg9",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "e1zlPY8HTm",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -95,11 +93,9 @@
         {
           "class": "2qZDXrpOrX",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "e1zlPY8HTm",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -227,11 +223,9 @@
         {
           "class": "Q6Pq01QoEA",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -341,11 +335,9 @@
         {
           "class": "0EZszTO4jB",
           "drawable_item": {
-            "alpha": 1.0,
             "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
-              "OverrideAlpha": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -470,159 +462,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 10.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "Fj66N4PDUG",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "Fj66N4PDUG",
       "resource_name": "FlappyBird Flying",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-1.png",
-            "id": "QE77Xqrin5",
-            "name": "frame-1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-2.png",
-            "id": "5Af6AX5fWj",
-            "name": "frame-2"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-3.png",
-            "id": "IQp58PZpYr",
-            "name": "frame-3"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-4.png",
-            "id": "TF41G2qs1F",
-            "name": "frame-4"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-5.png",
-            "id": "nXMMo8BY6K",
-            "name": "frame-5"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-6.png",
-            "id": "5lkAUt9o0i",
-            "name": "frame-6"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-7.png",
-            "id": "J25WMydmQE",
-            "name": "frame-7"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Flying/frame-8.png",
-            "id": "sbiaNztdZx",
-            "name": "frame-8"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -638,66 +488,135 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+          "id": "Co5k1txT4A",
+          "name": "frame-1",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+          "id": "ZQ9hjH0jrY",
+          "name": "frame-2",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+          "id": "JOpHaH1Pd9",
+          "name": "frame-3",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+          "id": "TyAai2iMIa",
+          "name": "frame-4",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+          "id": "iC2CbjCCZB",
+          "name": "frame-5",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+          "id": "Bo8rzdihtz",
+          "name": "frame-6",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+          "id": "0pSTZodGsq",
+          "name": "frame-7",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+          "id": "833XmLF5lN",
+          "name": "frame-8",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "LPH6tgo9eN",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "LPH6tgo9eN",
       "resource_name": "Background",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Background/full_background.png",
-            "id": "SJaydLoMio",
-            "name": "full_background"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Background/full_background.png",
+        "id": "szhPHqYeqg",
+        "name": "full_background",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {
@@ -721,69 +640,17 @@
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
       "fps": 2.0,
       "gamma": 1.0,
+      "gc": false,
       "id": "sUAHqYkAPp",
       "particle_action": "None",
+      "rect_name0": "",
+      "rect_name1": "",
       "resource_id": "sUAHqYkAPp",
       "resource_name": "FlappyBird Hurt",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
-            "id": "OBfB5nAqqI",
-            "name": "frame-1"
-          },
-          "type": "Filesystem"
-        },
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
-            "id": "LPXrp9f5XW",
-            "name": "frame-2"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name0": "",
+      "sampler_name1": "",
       "static": false,
       "surface": "Transparent",
       "texture_mag_filter": "Default",
@@ -799,66 +666,63 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
+      "textures": [
+        {
+          "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
+          "id": "QPWkqRqYkY",
+          "name": "frame-1",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        },
+        {
+          "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
+          "id": "L1mEfJMq1o",
+          "name": "frame-2",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "type": "Filesystem"
+        }
+      ],
       "type": "Sprite"
     },
     {
-      "blending": false,
       "color": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "fps": 0.20000000298023224,
       "gamma": 1.0,
+      "gc": false,
       "id": "8UZOHE5ijx",
       "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
       "resource_id": "8UZOHE5ijx",
       "resource_name": "Spike",
-      "samplers": [
-        {
-          "box": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "enable_gc": false,
-          "source": {
-            "file": "ws://textures/Spikes/sharp wood.png",
-            "id": "myOwbtHDMG",
-            "name": "sharp wood"
-          },
-          "type": "Filesystem"
-        }
-      ],
-      "shader_file": "",
+      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Spikes/sharp wood.png",
+        "id": "wJ2fqkub2J",
+        "name": "sharp wood",
+        "type": "Filesystem"
+      },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_scale": {

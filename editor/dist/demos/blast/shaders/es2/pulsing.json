@@ -1,0 +1,9 @@
+{
+    "uniforms": [
+        {
+            "desc": "BaseColor",
+            "type": "Color",
+            "name": "kBaseColor"
+        }
+    ]
+}

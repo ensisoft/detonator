@@ -229,7 +229,7 @@ ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(c
         const std::string color_name(magic_enum::enum_name(val));
         if ("_" + color_name == name)
         {
-            auto ret = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialFromColor(gfx::Color4f(val)));
+            auto ret = std::make_shared<gfx::ColorClass>(gfx::CreateMaterialFromColor(gfx::Color4f(val)));
             ret->SetId("_" + color_name);
             return ret;
         }
@@ -307,12 +307,35 @@ void LoadResources(const data::Reader& data, const char* type,
     }
 }
 
+template<typename Interface>
+void LoadResources(const data::Reader& data, const char* type,
+                   std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>>& out,
+                   std::unordered_map<std::string, std::string>* namemap)
+{
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
+    {
+        const auto& chunk = data.GetReadChunk(type, i);
+        std::string id;
+        std::string name;
+        chunk->Read("resource_id", &id);
+        chunk->Read("resource_name", &name);
+        auto ret = gfx::MaterialClass::FromJson(*chunk);
+        if (!ret)
+            throw std::runtime_error(std::string("Failed to load: ") + type + "/" + name);
+
+        out[id] = std::move(ret);
+        if (namemap)
+            (*namemap)[name] = id;
+        DEBUG("Loaded '%1/%2'", type, name);
+    }
+}
+
 void ContentLoaderImpl::LoadFromFile(const std::string& file)
 {
     data::JsonFile json(file);
     data::JsonObject root = json.GetRootObject();
 
-    game::LoadResources<gfx::MaterialClass, gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
+    game::LoadResources<gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
     game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr);
     game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr);
     game::LoadResources<EntityClass, EntityClass>(root, "entities", mEntities, &mEntityNameTable);

@@ -1,0 +1,28 @@
+{
+    "uniforms": [
+        {
+            "desc": "Base color",
+            "type": "Color",
+            "name": "kBaseColor"
+        },
+        {
+            "desc": "Gamma",
+            "type": "Float",
+            "name": "kGamma"
+        },
+        {
+            "desc": "Ring Color",
+            "type": "Color",
+            "name": "kColor0"
+        }
+    ],
+
+    "maps": [
+        {
+            "desc": "Texture",
+            "name": "kTexture0",
+            "type": "Texture2D",
+            "sampler": "kTexture0"
+        }
+    ]
+}

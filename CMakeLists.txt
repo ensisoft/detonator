@@ -242,6 +242,9 @@ add_executable(GSEditor
     editor/gui/dlgmaterial.h
     editor/gui/dlgmaterial.ui
     editor/gui/dlgmaterial.cpp
+    editor/gui/dlgmaterialparams.h
+    editor/gui/dlgmaterialparams.ui
+    editor/gui/dlgmaterialparams.cpp
     editor/gui/dlgpackage.h
     editor/gui/dlgpackage.ui
     editor/gui/dlgpackage.cpp
@@ -293,6 +296,10 @@ add_executable(GSEditor
     editor/gui/uiwidget.h
     editor/gui/uiwidget.ui
     editor/gui/uiwidget.cpp
+    editor/gui/uniform.h
+    editor/gui/uniform.ui
+    editor/gui/sampler.h
+    editor/gui/sampler.ui
     editor/gui/widgetstylewidget.h
     editor/gui/widgetstylewidget.ui
     editor/gui/widgetstylewidget.cpp

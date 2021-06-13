@@ -54,6 +54,7 @@ namespace data
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) = 0;
         virtual void AppendChunk(const char* name, const Writer& chunk) = 0;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) = 0;
+        virtual bool HasValue(const char* name) const = 0;
 
         // helpers
         template<typename T>
