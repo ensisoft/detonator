@@ -42,6 +42,12 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
      <property name="color">
       <color>
        <red>255</red>
@@ -60,6 +66,12 @@
         <blue>128</blue>
        </color>
       </brush>
+     </property>
+     <property name="placeholderText">
+      <string>Default</string>
+     </property>
+     <property name="hascolor" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -325,19 +337,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
-    <widget class="QCheckBox" name="widgetTextColorEnable">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="7" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_11">
      <item>
@@ -432,6 +431,26 @@
      </property>
     </spacer>
    </item>
+   <item row="4" column="2">
+    <widget class="QToolButton" name="btnResetWidgetTextColor">
+     <property name="toolTip">
+      <string>Reset idle track to nothing</string>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resource/resource.qrc">
+       <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+     </property>
+     <property name="autoRaise">
+      <bool>false</bool>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::NoArrow</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -456,7 +475,8 @@
   <tabstop>btnResetWidgetTextVAlign</tabstop>
   <tabstop>widgetTextHAlign</tabstop>
   <tabstop>btnResetWidgetTextHAlign</tabstop>
-  <tabstop>widgetTextColorEnable</tabstop>
+  <tabstop>widgetTextColor</tabstop>
+  <tabstop>btnResetWidgetTextColor</tabstop>
   <tabstop>widgetTextBlink</tabstop>
   <tabstop>widgetTextUnderline</tabstop>
   <tabstop>btnResetWidgetTextProp</tabstop>

@@ -68,7 +68,6 @@ namespace gui
         void on_widgetFontSize_currentIndexChanged(int);
         void on_widgetTextVAlign_currentIndexChanged(int);
         void on_widgetTextHAlign_currentIndexChanged(int);
-        void on_widgetTextColorEnable_stateChanged(int);
         void on_widgetTextBlink_stateChanged(int);
         void on_widgetTextUnderline_stateChanged(int);
         void on_widgetTextColor_colorChanged(QColor color);
@@ -82,6 +81,7 @@ namespace gui
         void on_btnResetWidgetTextProp_clicked();
         void on_btnResetWidgetBackground_clicked();
         void on_btnResetWidgetBorder_clicked();
+        void on_btnResetWidgetTextColor_clicked();
         void on_btnSelectWidgetBackground_clicked();
         void on_btnSelectWidgetBorder_clicked();
     private:

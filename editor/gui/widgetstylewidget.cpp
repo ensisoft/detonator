@@ -74,10 +74,6 @@ void WidgetStyleWidget::on_widgetTextHAlign_currentIndexChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
-void WidgetStyleWidget::on_widgetTextColorEnable_stateChanged(int)
-{
-    UpdateCurrentWidgetProperties();
-}
 void WidgetStyleWidget::on_widgetTextBlink_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
@@ -88,7 +84,6 @@ void WidgetStyleWidget::on_widgetTextUnderline_stateChanged(int)
 }
 void WidgetStyleWidget::on_widgetTextColor_colorChanged(QColor color)
 {
-    SetValue(mUI.widgetTextColorEnable, true);
     UpdateCurrentWidgetProperties();
 }
 void WidgetStyleWidget::on_widgetBackground_currentIndexChanged(int)
@@ -102,6 +97,11 @@ void WidgetStyleWidget::on_widgetBorder_currentIndexChanged(int)
 void WidgetStyleWidget::on_btnResetWidgetFontName_clicked()
 {
     SetValue(mUI.widgetFontName, -1);
+    UpdateCurrentWidgetProperties();
+}
+void WidgetStyleWidget::on_btnResetWidgetTextColor_clicked()
+{
+    mUI.widgetTextColor->clearColor();
     UpdateCurrentWidgetProperties();
 }
 
@@ -193,7 +193,7 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
             mStyle->DeleteProperty(id + mSelector + "/text-horizontal-align");
         else mStyle->SetProperty(id + mSelector + "/text-horizontal-align", (game::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
 
-        if (!GetValue(mUI.widgetTextColorEnable))
+        if (!mUI.widgetTextColor->hasColor())
             mStyle->DeleteProperty(id + mSelector + "/text-color");
         else mStyle->SetProperty(id + mSelector + "/text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
 
@@ -253,11 +253,11 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
     SetValue(mUI.widgetTextVAlign, -1);
     SetValue(mUI.widgetTextHAlign, -1);
     SetValue(mUI.widgetTextColor, game::Color::White);
-    SetValue(mUI.widgetTextColorEnable, false);
     SetValue(mUI.widgetTextBlink, Qt::PartiallyChecked);
     SetValue(mUI.widgetTextUnderline, Qt::PartiallyChecked);
     SetValue(mUI.widgetBackground, -1);
     SetValue(mUI.widgetBorder, -1);
+    mUI.widgetTextColor->clearColor();
     if (widget)
     {
         const auto& id = widget->GetId();
@@ -271,6 +271,9 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
             SetValue(mUI.widgetTextVAlign , prop.GetValue<game::UIStyle::VerticalTextAlign>());
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-horizontal-align"))
             SetValue(mUI.widgetTextHAlign , prop.GetValue<game::UIStyle::HorizontalTextAlign>());
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
+            SetValue(mUI.widgetTextColor , prop.GetValue<game::Color4f>());
+
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-blink"))
         {
             const auto value = prop.GetValue<bool>();
@@ -280,11 +283,6 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
         {
             const auto value = prop.GetValue<bool>();
             SetValue(mUI.widgetTextUnderline , value ? Qt::Checked : Qt::Unchecked);
-        }
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
-        {
-            SetValue(mUI.widgetTextColor , prop.GetValue<game::Color4f>());
-            SetValue(mUI.widgetTextColorEnable , true);
         }
 
         if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/background"))
