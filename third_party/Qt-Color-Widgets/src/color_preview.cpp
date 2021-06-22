@@ -37,7 +37,8 @@ public:
     QColor comparison; ///< comparison color
     QBrush back;///< Background brush, visible on a transparent color
     DisplayMode display_mode; ///< How the color(s) are to be shown
-
+    bool has_color = true;
+    QString placeholder_text;
     Private() : col(Qt::red), back(Qt::darkGray, Qt::DiagCrossPattern), display_mode(NoAlpha)
     {}
 };
@@ -75,6 +76,29 @@ void ColorPreview::setDisplayMode(DisplayMode m)
     update();
 }
 
+void ColorPreview::setPlaceholderText(QString text)
+{
+    p->placeholder_text = text;
+    update();
+}
+
+bool ColorPreview::hasColor() const
+{
+    return p->has_color;
+}
+
+void ColorPreview::setHasColor(bool on_off)
+{
+    p->has_color = on_off;
+    update();
+}
+
+void ColorPreview::clearColor()
+{
+    p->has_color = false;
+    update();
+}
+
 QColor ColorPreview::color() const
 {
     return p->col;
@@ -83,6 +107,10 @@ QColor ColorPreview::color() const
 QColor ColorPreview::comparisonColor() const
 {
     return p->comparison;
+}
+QString ColorPreview::placeholderText() const
+{
+    return p->placeholder_text;
 }
 
 QSize ColorPreview::sizeHint() const
@@ -115,22 +143,38 @@ void ColorPreview::paint(QPainter &painter, QRect rect) const
     panel.lineWidth = 2;
     panel.midLineWidth = 0;
     panel.state |= QStyle::State_Sunken;
-    style()->drawPrimitive(QStyle::PE_Frame, &panel, &painter, this);
-    QRect r = style()->subElementRect(QStyle::SE_FrameContents, &panel, this);
+    style()->drawPrimitive(QStyle::PE_Frame, &panel, &painter);
+    QRect r = style()->subElementRect(QStyle::SE_FrameContents, &panel);
+
+    if (hasFocus())
+    {
+        QStyleOptionFocusRect opt;
+        opt.initFrom(this);
+        style()->drawPrimitive(QStyle::PE_FrameFocusRect, &opt, &painter);
+    }
+
+    r.adjust(3, 3, -3, -3);
     painter.setClipRect(r);
 
-    if ( c1.alpha() < 255 || c2.alpha() < 255 )
-        painter.fillRect(0, 0, rect.width(), rect.height(), p->back);
+    if (!p->has_color)
+    {
+        style()->drawItemText(&painter, r, Qt::AlignLeft | Qt::AlignVCenter, palette(), isEnabled(), p->placeholder_text);
+        return;
+    }
 
-    int w = rect.width() / 2;
-    int h = rect.height();
-    painter.fillRect(0, 0, w, h, c1);
-    painter.fillRect(w, 0, w, h, c2);
+    if ( c1.alpha() < 255 || c2.alpha() < 255 )
+        painter.fillRect(r, p->back);
+
+    int w = r.width() / 2;
+    int h = r.height();
+    painter.fillRect(r.x() + 0, r.y(), w, h, c1);
+    painter.fillRect(r.x() + w, r.y(), w, h, c2);
 }
 
 void ColorPreview::setColor(const QColor &c)
 {
     p->col = c;
+    p->has_color = true;
     update();
     Q_EMIT colorChanged(c);
 }

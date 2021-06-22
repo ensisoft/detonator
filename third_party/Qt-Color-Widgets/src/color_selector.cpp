@@ -33,6 +33,7 @@ public:
     UpdateMode update_mode;
     ColorDialog *dialog;
     QColor old_color;
+    bool had_color = false;
 
     Private(QWidget *widget) : dialog(new ColorDialog(widget))
     {
@@ -45,6 +46,7 @@ ColorSelector::ColorSelector(QWidget *parent) :
 {
     setUpdateMode(Continuous);
     p->old_color = color();
+    p->had_color = hasColor();
 
     connect(this,&ColorPreview::clicked,this,&ColorSelector::showDialog);
     connect(this,SIGNAL(colorChanged(QColor)),this,SLOT(update_old_color(QColor)));
@@ -94,7 +96,8 @@ bool ColorSelector::isDialogOpen() const
 void ColorSelector::showDialog()
 {
     p->old_color = color();
-    p->dialog->setColor(color());
+    p->had_color = hasColor();
+    p->dialog->setColor(p->old_color);
     connect_dialog();
     p->dialog->show();
 }
@@ -126,6 +129,8 @@ void ColorSelector::accept_dialog()
 void ColorSelector::reject_dialog()
 {
     setColor(p->old_color);
+    setHasColor(p->had_color);
+    Q_EMIT colorChanged(p->old_color);
 }
 
 void ColorSelector::update_old_color(const QColor &c)

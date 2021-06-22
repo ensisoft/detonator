@@ -39,6 +39,8 @@ class QCP_EXPORT ColorPreview : public QWidget
     Q_PROPERTY(QColor comparisonColor READ comparisonColor WRITE setComparisonColor DESIGNABLE true)
     Q_PROPERTY(DisplayMode display_mode READ displayMode WRITE setDisplayMode DESIGNABLE true)
     Q_PROPERTY(QBrush background READ background WRITE setBackground DESIGNABLE true)
+    Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText DESIGNABLE true)
+    Q_PROPERTY(bool hascolor READ hasColor WRITE setHasColor DESIGNABLE true)
     Q_ENUMS(DisplayMode)
 public:
     enum DisplayMode
@@ -64,6 +66,16 @@ public:
 
     /// Set how transparent colors are handled
     void setDisplayMode(DisplayMode dm);
+
+    void setPlaceholderText(QString text);
+
+    bool hasColor() const;
+
+    void setHasColor(bool on_off);
+
+    void clearColor();
+
+    QString placeholderText() const;
 
     /// Get current color
     QColor color() const;
