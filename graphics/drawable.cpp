@@ -28,21 +28,55 @@
 #include "graphics/geometry.h"
 #include "graphics/resource.h"
 
-namespace gfx
+namespace {
+gfx::Shader* MakeVertexArrayShader(gfx::Device& device)
 {
-namespace detail {
+    auto* shader = device.FindShader("vertex-array-shader");
+    if (shader)
+        return shader;
 
-// static
-Shader* GeometryBase::GetShader(Device& device)
+    shader = device.MakeShader("vertex-array-shader");
+    // the 2 varyings vRandomValue and vAlpha are used to support
+    // per particle features. This shader doesn't provide that data
+    // but writes these varyings nevertheless so that it's possible to
+    // use a particle shader enabled material also with this shader.
+
+    // the vertex model space  is defined in the lower right quadrant in
+    // NDC (normalized device coordinates) (x grows right to 1.0 and
+    // y grows up to 1.0 to the top of the screen).
+
+constexpr auto* src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kViewMatrix;
+
+varying vec2 vTexCoord;
+varying float vRandomValue;
+varying float vAlpha;
+
+void main()
 {
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
+    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 1.0, 1.0);
+    vTexCoord    = aTexCoord;
+    vRandomValue = 0.0;
+    vAlpha       = 1.0;
+    gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
+}
+)";
+    shader->CompileSource(src);
     return shader;
 }
+} // namespace
+
+namespace gfx {
+namespace detail {
+// static
+Shader* GeometryBase::GetShader(Device& device)
+{ return MakeVertexArrayShader(device); }
+
 // static
 Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
@@ -664,15 +698,7 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 } // detail
 
 Shader* RoundRectangleClass::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
+{ return MakeVertexArrayShader(device); }
 
 Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) const
 {
@@ -858,7 +884,6 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
 
 void RoundRectangleClass::Pack(ResourcePacker* packer) const
 {
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 void RoundRectangleClass::IntoJson(data::Writer& data) const
 {
@@ -875,15 +900,7 @@ bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
 }
 
 Shader* GridClass::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
+{ return MakeVertexArrayShader(device); }
 
 Geometry* GridClass::Upload(Device& device) const
 {
@@ -953,7 +970,6 @@ Geometry* GridClass::Upload(Device& device) const
 
 void GridClass::Pack(ResourcePacker* packer) const
 {
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 void GridClass::IntoJson(data::Writer& data) const
@@ -975,15 +991,8 @@ bool GridClass::LoadFromJson(const data::Reader& data)
 }
 
 Shader* PolygonClass::GetShader(Device& device) const
-{
-    Shader* shader = device.FindShader("vertex_array.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("vertex_array.glsl");
-        shader->CompileFile("shaders/es2/vertex_array.glsl");
-    }
-    return shader;
-}
+{ return MakeVertexArrayShader(device); }
+
 Geometry* PolygonClass::Upload(Device& device) const
 {
     Geometry* geom = nullptr;
@@ -1020,7 +1029,6 @@ Geometry* PolygonClass::Upload(Device& device) const
 
 void PolygonClass::Pack(ResourcePacker* packer) const
 {
-    packer->PackShader(this, "shaders/es2/vertex_array.glsl");
 }
 
 std::size_t PolygonClass::GetHash() const
@@ -1197,12 +1205,36 @@ std::string PolygonClass::GetName() const
 
 Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
 {
-    Shader* shader = device.FindShader("particles.glsl");
-    if (shader == nullptr)
-    {
-        shader = device.MakeShader("particles.glsl");
-        shader->CompileFile("shaders/es2/particles.glsl");
-    }
+    Shader* shader = device.FindShader("particle-shader");
+    if (shader) return shader;
+
+    // this shader doesn't actually write to vTexCoord because when
+    // particle (GL_POINTS) rasterization is done the fragment shader
+    // must use gl_PointCoord instead.
+    constexpr auto* src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec4 aData;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kViewMatrix;
+
+varying vec2  vTexCoord;
+varying float vRandomValue;
+varying float vAlpha;
+
+void main()
+{
+    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 1.0, 1.0);
+    gl_PointSize = aData.x;
+    vRandomValue = aData.y;
+    vAlpha       = aData.z;
+    gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
+}
+    )";
+
+    shader = device.MakeShader("particle-shader");
+    shader->CompileSource(src);
     return shader;
 }
 
@@ -1257,7 +1289,6 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
 
 void KinematicsParticleEngineClass::Pack(ResourcePacker* packer) const
 {
-    packer->PackShader(this, "shaders/es2/particles.glsl");
 }
 
 // Update the particle simulation.

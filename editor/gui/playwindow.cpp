@@ -284,24 +284,13 @@ private:
             mFileMaps[URI]  = ret;
             return ret;
         }
+        WARN("Unmapped resource URI '%1'", URI);
 
         // What to do with paths such as "textures/UFO/ufo.png" ?
         // the application expects this to be relative and to be resolved
         // based on the current working directory when the application
         // is launched.
-        //
-        // currently there's a little problem withe shaders also having
-        // non-resolve hard coded paths. When playing the game we somehow
-        // need to resolve those shaders to the shaders under the editor
-        // instead. note that if the game resources use custom shaders
-        // when they are added to the materials their paths are properly
-        // encoded.
-        QString ret;
-        // todo: somehow remove and fix this hack related to the shaders
-        if (base::StartsWith(URI, "shaders/"))
-            ret = app::JoinPath(mHostDir, app::FromUtf8(URI));
-        else ret = app::JoinPath(mGameDir, app::FromUtf8(URI));
-
+        const auto& ret = app::JoinPath(mGameDir, app::FromUtf8(URI));
         mFileMaps[URI] = ret;
         return ret;
     }
