@@ -472,7 +472,6 @@ public:
         // texture box < 1.0
         {
             // basic case. sampling within the box.
-
             gfx::TextureMap2DClass material;
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
             material.SetTextureRect(gfx::FRect(0.5, 0.5, 0.5, 0.5));
@@ -571,40 +570,176 @@ class SpriteTest : public GraphicsTest
 public:
     SpriteTest()
     {
-        {
-            gfx::SpriteClass material;
-            material.AddTexture(gfx::LoadTextureFromFile("textures/red_64x64.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/green_64x64.png"));
-            material.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Linear);
-            material.SetFps(0.5); // two seconds to a frame
-            material.SetBlendFrames(false);
-            mMaterial = gfx::CreateMaterialInstance(material);
-        }
-
-        {
-            gfx::SpriteClass material;
-            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png"));
-            material.AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png"));
-            material.SetFps(10.0f);
-            material.SetBlendFrames(true);
-            mBird = gfx::CreateMaterialInstance(material);
-        }
+        mMaterial = std::make_shared<gfx::SpriteClass>();
+        mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png"));
+        mMaterial->SetBlendFrames(false);
+        mMaterial->SetFps(10.0f);
     }
 
     virtual void Render(gfx::Painter& painter) override
     {
-        mMaterial->SetRuntime(mTime);
-        gfx::FillRect(painter, gfx::FRect(20, 20, 200, 200), *mMaterial);
+        // instance
+        gfx::Material material(mMaterial);
+        material.SetRuntime(mTime);
 
-        mBird->SetRuntime(mTime);
-        gfx::FillRect(painter, gfx::FRect(250, 250, 300, 300), *mBird);
+        // whole texture (box = 1.0f)
+        {
+            SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(0, 0, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(150, 0, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 0, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(-2.0);
+            mMaterial->SetTextureScaleY(-2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(450, 0, 128, 128), material);
+        }
+
+        // texture box > 1.0
+        // todo: maybe just limit the box to 0.0, 1.0 range and dismiss this case ?
+        {
+
+            SetRect(gfx::FRect(0.0f, 0.0f, 2.0f, 1.0f));
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(0, 150, 128, 128), material);
+
+            SetRect(gfx::FRect(0.0, 0.0, 2.0, 2.0));
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(150, 150, 128, 128), material);
+
+            SetRect(gfx::FRect(0.0, 0.0, 2.0, 2.0));
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 150, 128, 128), material);
+        }
+
+        // texture box < 1.0
+        {
+            // basic case. sampling within the box.
+            SetRect(gfx::FRect(0.5f, 0.5f, 0.5f, 0.5f));
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(0, 300, 128, 128), material);
+
+            // clamping with texture boxing.
+            SetRect(gfx::FRect(0.0, 0.0, 0.5, 0.5));
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            gfx::FillRect(painter, gfx::FRect(150, 300, 128, 128),material);
+
+            // should be 4 squares each brick color (the top left quadrant of the source texture)
+            SetRect(gfx::FRect(0.0, 0.0, 0.5, 0.5));
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(300, 300, 128, 128), material);
+
+            SetRect(gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            mMaterial->SetTextureScaleX(1.0f);
+            mMaterial->SetTextureScaleY(1.0f);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(450, 300, 128, 128), material);
+
+            SetRect(gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            mMaterial->SetTextureScaleX(2.0f);
+            mMaterial->SetTextureScaleY(2.0f);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(600, 300, 128, 128), material);
+
+            SetRect(gfx::FRect(0.25, 0.25, 0.5, 0.5));
+            mMaterial->SetTextureScaleX(2.0f);
+            mMaterial->SetTextureScaleY(2.0f);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(750, 300, 128, 128), material);
+        }
+
+        // texture velocity
+        {
+            mMaterial->SetTextureScaleX(1.0f);
+            mMaterial->SetTextureScaleY(1.0f);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+
+            mMaterial->SetTextureVelocityX(0.2);
+            mMaterial->SetTextureVelocityY(0.0f);
+            gfx::FillRect(painter, gfx::FRect(0, 450, 128, 128), material);
+
+            mMaterial->SetTextureVelocityX(0.0);
+            mMaterial->SetTextureVelocityY(0.2);
+            gfx::FillRect(painter, gfx::FRect(150, 450, 128, 128), material);
+
+            SetRect(gfx::FRect(0.25f, 0.25f, 0.5f, 0.5f));
+            mMaterial->SetTextureVelocityX(0.25);
+            mMaterial->SetTextureVelocityY(0.2);
+            gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), material);
+
+
+            SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureVelocityX(0.0f);
+            mMaterial->SetTextureVelocityY(0.0f);
+            mMaterial->SetTextureVelocityZ(3.134);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(450, 450, 128, 128), material);
+
+
+            SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureVelocityX(0.0f);
+            mMaterial->SetTextureVelocityY(0.0f);
+            mMaterial->SetTextureVelocityZ(-3.134);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), material);
+        }
+
+        mMaterial->SetTextureVelocityX(0.0f);
+        mMaterial->SetTextureVelocityY(0.0f);
+        mMaterial->SetTextureVelocityZ(0.0f);
+        mMaterial->SetTextureScaleX(1.0f);
+        mMaterial->SetTextureScaleY(1.0f);
+        SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+
     }
 
     virtual void Update(float dt) override
@@ -612,9 +747,15 @@ public:
     virtual std::string GetName() const override
     { return "SpriteTest"; }
 private:
+    void SetRect(const gfx::FRect& rect)
+    {
+        for (size_t i=0; i<mMaterial->GetNumTextures(); ++i)
+            mMaterial->SetTextureRect(i, rect);
+    }
+
+private:
+    std::shared_ptr<gfx::SpriteClass> mMaterial;
     float mTime = 0.0f;
-    std::unique_ptr<gfx::Material> mMaterial;
-    std::unique_ptr<gfx::Material> mBird;
 };
 
 class TransformTest : public GraphicsTest
