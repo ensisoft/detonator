@@ -981,7 +981,7 @@ void unit_test_packing_texture_name_collision()
     auto cloader = game::JsonFileClassLoader::Create();
     auto floader = game::FileResourceLoader::Create();
     cloader->LoadFromFile("TestPackage/content.json");
-    floader->SetDirectory("TestPackage");
+    floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());
 
     {
@@ -1135,7 +1135,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     auto cloader = game::JsonFileClassLoader::Create();
     auto floader = game::FileResourceLoader::Create();
     cloader->LoadFromFile("TestPackage/content.json");
-    floader->SetDirectory("TestPackage");
+    floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());
 
     {

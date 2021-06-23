@@ -122,8 +122,10 @@ public:
     }
 
     // FileResourceLoader impl
-    virtual void SetDirectory(const std::string& dir) override
-    { mResourceDir = dir; }
+    virtual void SetApplicationPath(const std::string& path) override
+    { mApplicationPath = path; }
+    virtual void SetContentPath(const std::string& path) override
+    { mResourcePath = path; }
 private:
     std::string ResolveURI(const std::string& URI) const
     {
@@ -132,12 +134,13 @@ private:
             return it->second;
 
         std::string str = URI;
-        if (str.find("pck://", 0) == 0)
-            str = mResourceDir + "/" + str.substr(6);
-        else if (str.find("ws://", 0) == 0)
+        if (base::StartsWith(str, "pck://"))
+            str = mResourcePath + "/" + str.substr(6);
+        else if (base::StartsWith(str, "app://"))
+            str = mApplicationPath + "/" + str.substr(6);
+        else if (base::StartsWith(str, "fs://"))
             str = str.substr(5);
-        else if (str.find("fs://", 0) == 0)
-            str = str.substr(5);
+        else WARN("Unmapped resource URI '%1'", URI);
 
         DEBUG("Mapped %1 to %2", URI, str);
         mUriCache[URI] = str;
@@ -153,7 +156,8 @@ private:
     std::unordered_map<std::string,
         std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
     // the root of the resource dir against which to resolve the resource URIs.
-    std::string mResourceDir;
+    std::string mResourcePath;
+    std::string mApplicationPath;
 };
 
 // static
