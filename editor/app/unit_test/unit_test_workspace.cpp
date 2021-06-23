@@ -307,8 +307,6 @@ void unit_test_packing_basic()
     TEST_REQUIRE(d.mkpath("fonts"));
     TEST_REQUIRE(d.mkpath("ui"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/my_material.glsl", "my_material.glsl"));
-    TEST_REQUIRE(app::WriteTextFile("shaders/es2/vertex_array.glsl", "vertex_array.glsl"));
-    TEST_REQUIRE(app::WriteTextFile("shaders/es2/particles.glsl", "particles.glsl"));
     // setup dummy scripts this one is global (outside the workspace tree)
     TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua", "game_script.lua"));
     TEST_REQUIRE(app::WriteTextFile("audio/music.mp3", "music.mp3"));
@@ -434,8 +432,6 @@ R"(
     // in the output folder we should have content.json, config.json
     // and the shaders copied into shaders/es2/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/my_material.glsl") == "my_material.glsl");
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/vertex_array.glsl") == "vertex_array.glsl");
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/shaders/es2/particles.glsl") == "particles.glsl");
     // Lua scripts should be copied into lua/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/game_script.lua") == "game_script.lua");
     // Audio files should be copied into audio/

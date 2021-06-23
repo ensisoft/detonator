@@ -1933,26 +1933,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         options.resize_textures,
         options.combine_textures);
 
-    // not all shaders are referenced by user defined resources
-    // so for now just copy all the shaders that we discover over to
-    // the output folder.
-    QStringList filters;
-    filters << "*.glsl";
-    const auto& appdir  = QCoreApplication::applicationDirPath();
-    const auto& glsldir = app::JoinPath(appdir, "shaders/es2");
-    QDir dir;
-    dir.setPath(glsldir);
-    dir.setNameFilters(filters);
-    const QStringList& files = dir.entryList();
-    for (int i=0; i<files.size(); ++i)
-    {
-        emit ResourcePackingUpdate("Copying shaders...", i, files.size());
-        const QFile file(files[i]);
-        const QFileInfo info(file);
-        const QString& name = "shaders/es2/" + info.fileName();
-        packer.CopyFile(app::ToUtf8(name), "shaders/es2");
-    }
-
     // collect the resources in the packer.
     for (int i=0; i<mutable_copies.size(); ++i)
     {

@@ -360,8 +360,6 @@ target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePriva
 target_link_libraries(GSEditor EngineLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(GSEditor ${CONAN_LIBS})
 install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # game host application which provides a host process to load the game
 # libraries for playback.
@@ -434,8 +432,6 @@ target_link_libraries(graphics_test BaseLib)
 target_link_libraries(graphics_test ${CONAN_LIBS})
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
 install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 
 # main game runner application. The executable will read a
 # config.json and create the window/context for the application as
@@ -475,8 +471,7 @@ target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/
 target_link_libraries(TestEngine PRIVATE GfxLib EngineLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
-install(DIRECTORY    "${CMAKE_CURRENT_LIST_DIR}/graphics/shaders"
-        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
+
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(TestEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
