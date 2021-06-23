@@ -340,8 +340,10 @@ int main(int argc, char* argv[])
 
         if (!content.empty())
         {
+            const auto& path = GetPath();
             loaders.ContentLoader->LoadFromFile(content);
-            loaders.ResourceLoader->SetDirectory(".");
+            loaders.ResourceLoader->SetApplicationPath(path);
+            loaders.ResourceLoader->SetContentPath(path);
         }
 
         // Create the app instance.

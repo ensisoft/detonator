@@ -50,8 +50,11 @@ namespace game
                                public game::GameDataLoader
     {
     public:
-        // Set the directory in which to look for resource files
-        virtual void SetDirectory(const std::string& dir) = 0;
+        // Set the filesystem path of the current running binary on the file system.
+        // Used for resolving data references relative to the application binary.
+        virtual void SetApplicationPath(const std::string& path) = 0;
+        // Set the filesystem path in which to look for resource files
+        virtual void SetContentPath(const std::string& path) = 0;
         // Create new file resource loader.
         static std::unique_ptr<FileResourceLoader> Create();
     private:
