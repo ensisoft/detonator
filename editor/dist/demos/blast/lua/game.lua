@@ -8,8 +8,9 @@
 --        the native services for interfacing with the game engine.
 -- 'Scene' is the current scene that is loaded.
 
-local tick_count = 0
+local game_tick_count = 0
 local ship_velo_increment = 0
+local prev_formation = -1
 
 States = {
     Menu = 1,
@@ -76,12 +77,12 @@ end
 
 
 function SpawnSpaceRock()
-    local maybe = math.random(0, 2)
+    local maybe = util.Random(0, 2)
     local scale = glm.vec2:new(1.0, 1.0)
     local radius = 30
     local time_scale = 2.0
     if maybe == 1 then
-        local size = math.random(0, 2)
+        local size = util.Random(0, 2)
         if size == 1 then
             scale = glm.vec2:new(2.0, 2.0)
             radius = 60
@@ -91,7 +92,7 @@ function SpawnSpaceRock()
         local args = game.EntityArgs:new()
         args.class = asteroid
         args.name  = 'asteroid'
-        args.position = glm.vec2:new(math.random(-550, 550), -500)
+        args.position = glm.vec2:new(util.Random(-550, 550), -500)
         args.scale    = scale
         local entity = Scene:SpawnEntity(args, true)
         local body   = entity:FindNodeByClassName('Body')
@@ -107,10 +108,6 @@ function EnterGame()
     Game:Delay(0.5)
     Game:CloseUI(0)
     Game:Play('Game')
-
-    ship_velo_increment = 1.0
-    tick_count          = 0
-    math.randomseed(6634)
 end
 
 -- quit the game asap and go back to the menu
@@ -119,6 +116,13 @@ function QuitGame()
     Game:Play('Menu')
     Game:OpenUI('MainMenu')
     Game:ShowMouse(true)
+end
+
+function InitGameState()
+    ship_velo_increment = 1.0
+    game_tick_count = 0
+    prev_formation  = -1
+    util.RandomSeed(6634)
 end
 
 -- This is called when the game is first loaded when
@@ -140,6 +144,7 @@ function BeginPlay(scene)
         State = States.Menu
     elseif scene:GetClassName() == 'Game' then
         State = States.Play
+        InitGameState()
     end
 end
 
@@ -154,23 +159,27 @@ function Tick(game_time, dt)
         return
     end
 
-    if math.fmod(tick_count, 3) == 0 then
-        local formation = math.random(0, 3)
-        --Game:DebugPrint('Spawning: ' .. tostring(formation))
-        if formation == 0 then
+    if math.fmod(game_tick_count, 3) == 0 then
+        local next_formation = util.Random(0, 3)
+        while next_formation == prev_formation do
+            next_formation = util.Random(0, 3)
+        end
+        prev_formation = next_formation
+
+        if next_formation == 0 then
             SpawnRow()
-        elseif formation == 1 then
+        elseif next_formation == 1 then
             SpawnWaveLeft()
-        elseif formation == 2 then
+        elseif next_formation == 2 then
             SpawnWaveRight()
-        elseif formation == 3 then
+        elseif next_formation == 3 then
             SpawnChevron()
         end
         -- increase the velocity of the enemies after each wave.
         ship_velo_increment = ship_velo_increment + 0.05
     end
     -- use the tick count to throttle spawning of objects
-    tick_count = tick_count + 1
+    game_tick_count = game_tick_count + 1
 end
 
 function Update(game_time, dt)
