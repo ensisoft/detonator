@@ -35,6 +35,35 @@
 // needs to be tested. Other key point is to test the basic functionality
 // just to make sure that there are no unexpected sol2 snags/bugs.
 
+void unit_test_util()
+{
+    sol::state L;
+    L.open_libraries();
+
+    game::BindUtil(L);
+
+    L.script(R"(
+function test_random_begin()
+    util.RandomSeed(41231)
+end
+function make_random_int()
+    return util.Random(0, 100)
+end
+)");
+
+    L["test_random_begin"]();
+    auto lua_random_int = L["make_random_int"];
+    const int expected_ints[] = {
+      47, 71, 5, 28, 50, 41, 57, 19, 43, 38
+    };
+
+    for (int i=0; i<10; ++i)
+    {
+        const int ret = lua_random_int();
+        TEST_REQUIRE(ret == expected_ints[i]);
+        //std::cout << ret << std::endl;
+    }
+}
 
 void unit_test_glm()
 {
@@ -456,6 +485,7 @@ end
 
 int test_main(int argc, char* argv[])
 {
+    unit_test_util();
     unit_test_glm();
     unit_test_base();
     unit_test_scene();

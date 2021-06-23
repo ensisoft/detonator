@@ -22,9 +22,13 @@
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
 #  include <neargye/magic_enum.hpp>
+#  include <boost/random/mersenne_twister.hpp>
+#  include <boost/random/uniform_int_distribution.hpp>
+#  include <boost/random/uniform_real_distribution.hpp>
 #include "warnpop.h"
 
 #include <unordered_set>
+#include <random>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -284,6 +288,32 @@ Widget* WidgetCast(uik::Widget* widget)
         throw std::runtime_error(base::FormatString("Widget '%1' is not a %2", widget->GetName(), CastType));
     return static_cast<Widget*>(widget);
 }
+
+// the problem with using a std random number generation is that
+// the results may not be portable across implementations and it seems
+// that the standard Lua math random stuff has this problem.
+// http://lua-users.org/wiki/MathLibraryTutorial
+// "... math.randomseed will call the underlying C function srand ..."
+class RandomEngine {
+public:
+    static void Seed(int seed)
+    { mTwister = boost::random::mt19937(seed); }
+    static int NextInt()
+    { return NextInt(INT_MIN, INT_MAX); }
+    static int NextInt(int min, int max)
+    {
+        boost::random::uniform_int_distribution<int> dist(min, max);
+        return dist(mTwister);
+    }
+    static float NextFloat(float min, float max)
+    {
+        boost::random::uniform_real_distribution<float> dist(min, max);
+        return dist(mTwister);
+    }
+private:
+    static boost::random::mt19937 mTwister;
+};
+boost::random::mt19937 RandomEngine::mTwister;
 
 } // namespace
 
@@ -707,6 +737,22 @@ void BindUtil(sol::state& L)
     util["GetScaleFromMatrix"]       = &GetScaleFromMatrix;
     util["GetTranslationFromMatrix"] = &GetTranslationFromMatrix;
     util["RotateVector"]             = &RotateVector;
+
+    // see comments at RandomEngine about why this is done.
+    util["RandomSeed"] = &RandomEngine::Seed;
+    util["Random"] = sol::overload(
+        [](sol::this_state state) {
+            sol::state_view view(state);
+            return sol::make_object(view, RandomEngine::NextInt());
+        },
+        [](sol::this_state state, int min, int max) {
+            sol::state_view view(state);
+            return sol::make_object(view, RandomEngine::NextInt(min, max));
+        },
+        [](sol::this_state state, float min, float max) {
+            sol::state_view view(state);
+            return sol::make_object(view, RandomEngine::NextFloat(min, max));
+        });
 
     sol::constructors<FBox(),
             FBox(float, float),
