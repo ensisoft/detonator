@@ -26,7 +26,6 @@
 #include <memory>
 
 #include "base/logging.h"
-#include "base/platform.h"
 #include "base/utility.h"
 #include "data/json.h"
 #include "graphics/material.h"
@@ -41,11 +40,7 @@ namespace game
 
 bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
 {
-#if defined(WINDOWS_OS)
-    std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
-#elif defined(POSIX_OS)
-    std::fstream in(filename, std::ios::in | std::ios::binary);
-#endif
+    auto in = base::OpenBinaryInputStream(filename);
     if (!in.is_open())
     {
         ERROR("Failed to open '%1'.", filename);
