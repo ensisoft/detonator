@@ -305,17 +305,14 @@ int main(int argc, char* argv[])
         INFO("http://www.ensisoft.com");
         INFO("http://github.com/ensisoft/gamestudio");
 
-        // open config file.
-        #if defined(WINDOWS_OS)
-            std::fstream in(base::FromUtf8(config_file)); // msvs extension
-        #elif defined(POSIX_OS)
-            std::fstream in(config_file);
-        #endif
-        if (!in.is_open())
-            throw std::runtime_error("Failed to open: " + config_file);
-
         // read config JSON
-        const auto& json = nlohmann::json::parse(in);
+        const auto [json_ok, json, json_error] = base::JsonParseFile(config_file);
+        if (!json_ok)
+        {
+            ERROR("Failed to parse '%1'", config_file);
+            ERROR(json_error);
+            return EXIT_FAILURE;
+        }
 
         std::string library;
         std::string content;
