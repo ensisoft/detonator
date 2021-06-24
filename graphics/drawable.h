@@ -355,7 +355,7 @@ namespace gfx
         RoundRectangleClass(float radius) : mRadius(radius)
         { mId = base::RandomString(10); }
         Shader* GetShader(Device& device) const;
-        Geometry* Upload(Drawable::Style style, Device& device) const;
+        Geometry* Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const;
 
         float GetRadius() const
         { return mRadius; }
@@ -393,22 +393,17 @@ namespace gfx
     class RoundRectangle : public Drawable
     {
     public:
+        RoundRectangle(std::shared_ptr<const RoundRectangleClass> klass) : mClass(klass) {}
         RoundRectangle()
-        {
-            mClass = std::make_shared<const RoundRectangleClass>();
-        }
+        { mClass = std::make_shared<RoundRectangleClass>(); }
         RoundRectangle(Style style) : RoundRectangle()
-        {
-            mStyle = style;
-        }
+        { mStyle = style; }
         RoundRectangle(Style style, float linewidth) : RoundRectangle()
         {
             mStyle = style;
             mLineWidth = linewidth;
         }
-        RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass)
-            : mClass(klass)
-        {}
+
         virtual void ApplyState(Program& program, RasterState& state) const override
         {
             state.line_width = mLineWidth;
@@ -417,7 +412,7 @@ namespace gfx
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(mStyle , device); }
+        { return mClass->Upload(env, mStyle, device); }
         virtual void SetCulling(Culling cull) override
         { mCulling = cull; }
         virtual void SetStyle(Style style) override
