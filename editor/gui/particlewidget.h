@@ -69,8 +69,9 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionSave_triggered();
         void on_resetTransform_clicked();
-        void on_plus90_clicked();
-        void on_minus90_clicked();
+        void on_btnViewPlus90_clicked();
+        void on_btnViewMinus90_clicked();
+        void on_btnSelectMaterial_clicked();
         void on_motion_currentIndexChanged(int);
         void PaintScene(gfx::Painter& painter, double secs);
         void NewResourceAvailable(const app::Resource* resource);
