@@ -41,6 +41,7 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/particlewidget.h"
+#include "editor/gui/dlgmaterial.h"
 
 namespace gui
 {
@@ -378,12 +379,10 @@ void ParticleEditorWidget::Update(double secs)
         mUI.actionStop->setEnabled(false);
         mUI.actionPause->setEnabled(false);
         mUI.actionPlay->setEnabled(true);
-        mUI.curNumParticles->setText("0");
         mEngine.reset();
+        mMaterial.reset();
         return;
     }
-
-    mUI.curNumParticles->setText(QString::number(mEngine->GetNumParticlesAlive()));
 }
 
 void ParticleEditorWidget::Render()
@@ -596,15 +595,24 @@ void ParticleEditorWidget::on_resetTransform_clicked()
     mUI.rotation->setValue(0);
 }
 
-void ParticleEditorWidget::on_plus90_clicked()
+void ParticleEditorWidget::on_btnViewPlus90_clicked()
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(value + 90.0f);
 }
-void ParticleEditorWidget::on_minus90_clicked()
+void ParticleEditorWidget::on_btnViewMinus90_clicked()
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(value - 90.0f);
+}
+
+void ParticleEditorWidget::on_btnSelectMaterial_clicked()
+{
+    QString material = GetItemId(mUI.materials);
+    DlgMaterial dlg(this, mWorkspace, material);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+    SetValue(mUI.materials, ListItemId(dlg.GetSelectedMaterialId()));
 }
 
 void ParticleEditorWidget::on_motion_currentIndexChanged(int)
@@ -666,6 +674,8 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mEngine)
     {
         painter.Draw(*mEngine, view, *mMaterial);
+        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()),
+                    painter, width, height);
     }
 }
 

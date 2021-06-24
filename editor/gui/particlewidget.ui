@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1420</width>
-    <height>937</height>
+    <width>1448</width>
+    <height>952</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,25 +73,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="title">
-        <string>Material</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_6">
-        <item row="1" column="0">
-         <widget class="QComboBox" name="materials">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
       <widget class="QGroupBox" name="transform">
        <property name="title">
         <string>Visualization</string>
@@ -129,14 +110,14 @@
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QPushButton" name="plus90">
+           <widget class="QPushButton" name="btnViewPlus90">
             <property name="text">
              <string>+ 90°</string>
             </property>
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QPushButton" name="minus90">
+           <widget class="QPushButton" name="btnViewMinus90">
             <property name="text">
              <string>- 90°</string>
             </property>
@@ -144,6 +125,9 @@
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_20">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 200, 0)</string>
+            </property>
             <property name="text">
              <string>Width</string>
             </property>
@@ -167,6 +151,9 @@
           </item>
           <item row="0" column="2">
            <widget class="QLabel" name="label_19">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
             <property name="text">
              <string>Height</string>
             </property>
@@ -244,20 +231,31 @@
           <item>
            <widget class="QLabel" name="label_17">
             <property name="text">
-             <string>Particles</string>
+             <string>Material</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="curNumParticles">
+           <widget class="QComboBox" name="materials">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="readOnly">
-             <bool>true</bool>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnSelectMaterial">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
             </property>
            </widget>
           </item>
@@ -301,6 +299,9 @@
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -987,12 +988,11 @@
  <tabstops>
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
-  <tabstop>materials</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>rotation</tabstop>
-  <tabstop>plus90</tabstop>
-  <tabstop>minus90</tabstop>
+  <tabstop>btnViewPlus90</tabstop>
+  <tabstop>btnViewMinus90</tabstop>
   <tabstop>resetTransform</tabstop>
   <tabstop>simWidth</tabstop>
   <tabstop>simHeight</tabstop>
@@ -1029,7 +1029,8 @@
   <tabstop>chkShowBounds</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>zoom</tabstop>
-  <tabstop>curNumParticles</tabstop>
+  <tabstop>btnSelectMaterial</tabstop>
+  <tabstop>materials</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
