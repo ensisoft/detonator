@@ -829,6 +829,8 @@ void GradientClass::ApplyDynamicState(State& state, Device& device, Program& pro
     else if (mSurfaceType == SurfaceType::Emissive)
         state.blending = State::Blending::Additive;
 
+    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
+
     if (!mStatic)
     {
         SetUniform("kGamma",  state.uniforms, mGamma, program);
