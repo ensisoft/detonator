@@ -210,8 +210,6 @@ namespace gfx
                     return "_parallelogram";
                 else if (ActualType == types::Rectangle)
                     return "_rect";
-                else if (ActualType == types::RoundRectangle)
-                    return "_round_rect";
                 else if (ActualType == types::RightTriangle)
                     return "_right_triangle";
                 else if (ActualType == types::Trapezoid)
@@ -350,10 +348,15 @@ namespace gfx
     class RoundRectangleClass : public DrawableClass
     {
     public:
-        RoundRectangleClass()
+        RoundRectangleClass(float radius = 0.05) : mRadius(radius)
         { mId = base::RandomString(10); }
-        RoundRectangleClass(float radius) : mRadius(radius)
-        { mId = base::RandomString(10); }
+        // This ctor can be used (very carefully) to create a "known"
+        // class object with a known (yet unique) class id.
+        RoundRectangleClass(const std::string& id, float radius = 0.05)
+          : mId(id)
+          , mRadius(radius)
+        {}
+
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const;
 
