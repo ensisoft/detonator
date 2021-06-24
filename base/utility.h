@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
+#include <algorithm>
+#include <iterator>
 #include <unordered_map>
 
 #include "base/assert.h"
@@ -29,6 +31,19 @@
 
 namespace base
 {
+
+template<typename T>
+void AppendVector(std::vector<T>& head, const std::vector<T>& tail)
+{
+    std::copy(tail.begin(), tail.end(), std::back_inserter(head));
+}
+
+template<typename T>
+void AppendVector(std::vector<T>& head, std::vector<T>&& tail)
+{
+    head.insert(head.end(), std::make_move_iterator(tail.begin()),
+                std::make_move_iterator(tail.end()));
+}
 
 template<typename K, typename T>
 T* SafeFind(std::unordered_map<K, T>& map, const K& key)

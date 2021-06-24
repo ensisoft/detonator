@@ -170,10 +170,10 @@ inline void SetValue(QComboBox* combo, int index)
         combo->clearEditText();
 }
 
-struct ListItem {
-    QString name;
-    QString id;
-};
+// type moved from from here to app/utility.h
+// so that the workspace can also use this type.
+using ListItem = app::ListItem;
+
 
 inline void ClearList(QListWidget* list)
 {

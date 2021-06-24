@@ -43,6 +43,12 @@
 namespace app
 {
 
+ // move this somewhere else.
+struct ListItem {
+    QString name;
+    QString id;
+};
+
 // Compute a file hash based on the contents of the file.
 // Simply returns 0 if the file could not be read.
 std::uint64_t GetFileHash(const QString& file);

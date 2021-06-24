@@ -74,6 +74,7 @@ namespace gui
         void on_motion_currentIndexChanged(int);
         void PaintScene(gfx::Painter& painter, double secs);
         void NewResourceAvailable(const app::Resource* resource);
+        void ResourceUpdated(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
 
     private:
@@ -89,10 +90,6 @@ namespace gui
         bool mPaused = false;
         float mTime  = 0.0f;
     private:
-        // cache the name of the current material so that we can
-        // compare and detect if the user has selected different material
-        // from the material combo and then recreate the material instance.
-        QString mMaterialName;
         // the original hash value that is used to
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;

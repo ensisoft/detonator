@@ -770,6 +770,28 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
     // convenience shim
     return GetDrawableClassByName(QString::fromUtf8(name));
 }
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (!(resource->GetType() == Resource::Type::Shape ||
+              resource->GetType() == Resource::Type::ParticleSystem ||
+              resource->GetType() == Resource::Type::Drawable))
+            continue;
+        else if (resource->GetId() != id)
+            continue;
+
+        if (resource->GetType() == Resource::Type::Drawable)
+            return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
+        if (resource->GetType() == Resource::Type::ParticleSystem)
+            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+        else if (resource->GetType() == Resource::Type::Shape)
+            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+    }
+    BUG("No such drawable class.");
+    return nullptr;
+}
+
 
 std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const QString& name) const
 {
@@ -1426,88 +1448,61 @@ void Workspace::LoadUserSettings(const QString& filename)
     INFO("Loaded private workspace data: '%1'", filename);
 }
 
-QStringList Workspace::ListAllMaterials() const
+Workspace::ResourceList Workspace::ListAllMaterials() const
 {
-    QStringList list;
-    list << ListPrimitiveMaterials();
-    list << ListUserDefinedMaterials();
+    ResourceList list;
+    base::AppendVector(list, ListPrimitiveMaterials());
+    base::AppendVector(list, ListUserDefinedMaterials());
     return list;
 }
 
-QStringList Workspace::ListPrimitiveMaterials() const
+Workspace::ResourceList Workspace::ListPrimitiveMaterials() const
 {
-    QStringList list;
-    for (const auto& resource : mResources)
-    {
-        if (resource->IsPrimitive() &&
-            resource->GetType() == Resource::Type::Material)
-            list.append(resource->GetName());
-    }
-    list.sort();
+    return ListResources(Resource::Type::Material, true, true);
+}
+
+Workspace::ResourceList Workspace::ListUserDefinedMaterials() const
+{
+    return ListResources(Resource::Type::Material, false, true);
+}
+
+Workspace::ResourceList Workspace::ListAllDrawables() const
+{
+    ResourceList list;
+    base::AppendVector(list, ListPrimitiveDrawables());
+    base::AppendVector(list, ListUserDefinedDrawables());
     return list;
 }
 
-QStringList Workspace::ListUserDefinedMaterials() const
+Workspace::ResourceList Workspace::ListPrimitiveDrawables() const
 {
-    QStringList list;
-    for (const auto& resource : mResources)
-    {
-        if (!resource->IsPrimitive() &&
-             resource->GetType() == Resource::Type::Material)
-            list.append(resource->GetName());
-    }
+    ResourceList list;
+    base::AppendVector(list, ListResources(Resource::Type::Drawable, true, false));
+    base::AppendVector(list, ListResources(Resource::Type::ParticleSystem, true, false));
+    base::AppendVector(list, ListResources(Resource::Type::Shape, true, false));
+
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) {
+        return a.name < b.name;
+    });
     return list;
 }
 
-QStringList Workspace::ListAllDrawables() const
+Workspace::ResourceList Workspace::ListUserDefinedDrawables() const
 {
-    QStringList list;
-    list << ListPrimitiveDrawables();
-    list << ListUserDefinedDrawables();
+    ResourceList list;
+    base::AppendVector(list, ListResources(Resource::Type::Drawable, false, false));
+    base::AppendVector(list, ListResources(Resource::Type::ParticleSystem, false, false));
+    base::AppendVector(list, ListResources(Resource::Type::Shape, false, false));
+
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) {
+        return a.name < b.name;
+    });
     return list;
 }
 
-QStringList Workspace::ListPrimitiveDrawables() const
+Workspace::ResourceList Workspace::ListUserDefinedEntities() const
 {
-    QStringList list;
-    for (const auto& resource : mResources)
-    {
-        if (resource->IsPrimitive() &&
-            (resource->GetType() == Resource::Type::ParticleSystem ||
-             resource->GetType() == Resource::Type::Shape ||
-             resource->GetType() == Resource::Type::Drawable))
-            list.append(resource->GetName());
-    }
-    list.sort();
-    return list;
-}
-
-QStringList Workspace::ListUserDefinedDrawables() const
-{
-    QStringList list;
-    for (const auto& resource : mResources)
-    {
-        if (!resource->IsPrimitive() &&
-                (resource->GetType() == Resource::Type::ParticleSystem ||
-                 resource->GetType() == Resource::Type::Shape ||
-                 resource->GetType() == Resource::Type::Drawable))
-            list.append(resource->GetName());
-    }
-    list.sort();
-    return list;
-}
-
-QStringList Workspace::ListUserDefinedEntities() const
-{
-    QStringList list;
-    for (const auto& resource : mResources)
-    {
-        if (!resource->IsEntity())
-            continue;
-        list.append(resource->GetName());
-    }
-    list.sort();
-    return list;
+    return ListResources(Resource::Type::Entity, false, true);
 }
 
 QStringList Workspace::ListUserDefinedEntityIds() const
@@ -1519,7 +1514,29 @@ QStringList Workspace::ListUserDefinedEntityIds() const
             continue;
         list.append(resource->GetId());
     }
-    list.sort();
+    return list;
+}
+
+Workspace::ResourceList Workspace::ListResources(Resource::Type type, bool primitive, bool sort) const
+{
+    ResourceList list;
+    for (const auto& resource : mResources)
+    {
+        if (resource->IsPrimitive() == primitive &&
+            resource->GetType() == type)
+        {
+            ListItem item;
+            item.name = resource->GetName();
+            item.id   = resource->GetId();
+            list.push_back(item);
+        }
+    }
+    if (sort)
+    {
+        std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) {
+            return a.name < b.name;
+        });
+    }
     return list;
 }
 
@@ -1665,6 +1682,16 @@ Resource& Workspace::GetResourceByName(const QString& name, Resource::Type type)
     }
     BUG("No such resource");
 }
+Resource& Workspace::GetResourceById(const QString& id)
+{
+    for (auto& res : mResources)
+    {
+        if (res->GetId() == id)
+            return *res;
+    }
+    BUG("No such resource.");
+}
+
 
 const Resource& Workspace::GetResourceByName(const QString& name, Resource::Type type) const
 {

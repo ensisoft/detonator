@@ -88,13 +88,11 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
         this, std::placeholders::_1);
 
-    mUI.blueprints->addItems(QStringList(""));
-    mUI.blueprints->addItems(workspace->ListUserDefinedMaterials());
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(false);
+    SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, false);
     SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mPolygon.GetId());
-
     setWindowTitle("My Shape");
     setFocusPolicy(Qt::StrongFocus);
 
@@ -113,9 +111,12 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     mPolygon = *resource.GetContent<gfx::PolygonClass>();
     mOriginalHash = mPolygon.GetHash();
 
+    QString material;
+    GetProperty(resource, "material", &material);
+
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
-    GetProperty(resource, "material", mUI.blueprints);
+    SetValue(mUI.blueprints, ListItemId(material));
     GetUserProperty(resource, "alpha", mUI.alpha);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
@@ -125,6 +126,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
+
+    // the material could have been deleted, so create conditionally.
+    if (auto klass = mWorkspace->FindMaterialClassById(app::ToUtf8(material)))
+        mBlueprint = gfx::CreateMaterialInstance(klass);
 }
 
 ShapeWidget::~ShapeWidget()
@@ -161,10 +166,9 @@ void ShapeWidget::AddActions(QMenu& menu)
 
 bool ShapeWidget::SaveState(Settings& settings) const
 {
+    settings.setValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
     settings.saveWidget("Polygon", mUI.name);
-    settings.saveWidget("Polygon", mUI.blueprints);
     settings.saveWidget("Polygon", mUI.alpha);
-    settings.saveWidget("Polygon", mUI.blueprints);
     settings.saveWidget("Polygon", mUI.chkShowGrid);
     settings.saveWidget("Polygon", mUI.chkSnap);
     settings.saveWidget("Polygon", mUI.cmbGrid);
@@ -181,13 +185,14 @@ bool ShapeWidget::SaveState(Settings& settings) const
 }
 bool ShapeWidget::LoadState(const Settings& settings)
 {
+    QString material;
+    settings.getValue("Polygon", "material", &material);
     settings.loadWidget("Polygon", mUI.name);
-    settings.loadWidget("Polygon", mUI.blueprints);
-    settings.loadWidget("Polygon", mUI.blueprints);
     settings.loadWidget("Polygon", mUI.chkShowGrid);
     settings.loadWidget("Polygon", mUI.chkSnap);
     settings.loadWidget("Polygon", mUI.cmbGrid);
     settings.loadWidget("Polygon", mUI.widget);
+    SetValue(mUI.blueprints, ListItemId(material));
     setWindowTitle(mUI.name->text());
 
     std::string base64;
@@ -211,6 +216,8 @@ bool ShapeWidget::LoadState(const Settings& settings)
     mOriginalHash = mPolygon.GetHash();
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
+
+    on_blueprints_currentIndexChanged(0);
     return true;
 }
 
@@ -259,17 +266,6 @@ void ShapeWidget::Update(double secs)
 
     mTime += secs;
 
-    const auto& blueprint = mUI.blueprints->currentText();
-    if (blueprint.isEmpty())
-    {
-        mBlueprint.reset();
-        mBlueprintName.clear();
-    }
-    else if (blueprint != mBlueprintName)
-    {
-        mBlueprint = mWorkspace->MakeMaterialByName(blueprint);
-        mBlueprintName = blueprint;
-    }
     if (mBlueprint)
     {
         mBlueprint->SetRuntime(mTime);
@@ -360,10 +356,9 @@ void ShapeWidget::on_actionSave_triggered()
     mOriginalHash = mPolygon.GetHash();
 
     app::CustomShapeResource resource(mPolygon, name);
-    const QString& material = GetValue(mUI.blueprints);
+    QString material = GetItemId(mUI.blueprints);
     if (!material.isEmpty())
-        SetProperty(resource, "material", mUI.blueprints);
-
+        SetProperty(resource, "material", material);
     SetUserProperty(resource, "alpha",        mUI.alpha);
     SetUserProperty(resource, "grid",         mUI.cmbGrid);
     SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
@@ -397,19 +392,25 @@ void ShapeWidget::on_actionClear_triggered()
     mUI.actionClear->setEnabled(false);
 }
 
+void ShapeWidget::on_blueprints_currentIndexChanged(int)
+{
+    auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
+    mBlueprint.release();
+    mBlueprint = gfx::CreateMaterialInstance(klass);
+}
+
+void ShapeWidget::on_btnResetBlueprint_clicked()
+{
+    SetValue(mUI.blueprints, -1);
+    mBlueprint.reset();
+}
+
 void ShapeWidget::NewResourceAvailable(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
 
-    mUI.blueprints->clear();
-    mUI.blueprints->addItems(QStringList(""));
-    mUI.blueprints->addItems(mWorkspace->ListUserDefinedMaterials());
-    if (mBlueprintName.isEmpty())
-        return;
-
-    const auto index = mUI.blueprints->findText(mBlueprintName);
-    mUI.blueprints->setCurrentIndex(index);
+    SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
 }
 
 void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
@@ -417,22 +418,9 @@ void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
     if (resource->GetType() != app::Resource::Type::Material)
         return;
 
-    mUI.blueprints->clear();
-    mUI.blueprints->addItems(QStringList(""));
-    mUI.blueprints->addItems(mWorkspace->ListUserDefinedMaterials());
-    if (mBlueprintName.isEmpty())
-        return;
-
-    const auto index = mUI.blueprints->findText(mBlueprintName);
-    if (index == -1)
-    {
-        mBlueprint.reset();
-        mBlueprintName.clear();
-    }
-    else
-    {
-        mUI.blueprints->setCurrentIndex(index);
-    }
+    SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
+    if (mBlueprint && (*mBlueprint)->GetId() == resource->GetIdUtf8())
+        mBlueprint.release();
 }
 
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
@@ -452,18 +440,6 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     // some content (fragments) get clipped against the viewport.
     view.Resize(width-2, height-2);
     view.MoveTo(1, 1);
-
-    const auto& blueprint = mUI.blueprints->currentText();
-    if (blueprint.isEmpty())
-    {
-        mBlueprint.reset();
-        mBlueprintName.clear();
-    }
-    else if (mBlueprintName != blueprint)
-    {
-        mBlueprint = mWorkspace->MakeMaterialByName(blueprint);
-        mBlueprintName = blueprint;
-    }
 
     // if we have some blueprint then use it on the background.
     if (mBlueprint)
