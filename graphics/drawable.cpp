@@ -18,6 +18,7 @@
 
 #include <functional> // for hash
 #include <cmath>
+#include <cstdio>
 
 #include "base/utility.h"
 #include "base/math.h"
@@ -30,19 +31,37 @@
 #include "graphics/resource.h"
 
 namespace {
-std::string NameAspectRatio(float width, float height)
+float HalfRound(float value)
 {
+    const float fraction  = value - (int)value;
+    const float whole = (int)value;
+    if (fraction < 0.25)
+        return whole;
+    else if (fraction < 0.5)
+        return whole + 0.5f;
+    else if (fraction < 0.75)
+        return whole + 0.5f;
+    return whole + 1.0f;
+}
+int Truncate(float value)
+{ return (int)value; }
+
+template<typename RoundFunc>
+std::string NameAspectRatio(float width, float height, RoundFunc Round, const char* fmt)
+{
+    std::string ret;
+    ret.resize(64);
     if (width > height)
     {
-        const int q = math::clamp(1.0f, 5.0f, width/height);
-        return std::to_string(q) + ":1";
+        const auto q = Round(math::clamp(1.0f, 5.0f, width/height));
+        ret.resize(std::snprintf(&ret[0], ret.size(), fmt, q, Round(1.0f)));
     }
     else
     {
-        const int q = math::clamp(1.0f, 5.0f, height/width);
-        return "1:" + std::to_string(q);
+        const auto q = Round(math::clamp(1.0f, 5.0f, height/width));
+        ret.resize(std::snprintf(&ret[0], ret.size(), fmt, Round(1.0f), q));
     }
-    return "";
+    return ret;
 }
 
 gfx::Shader* MakeVertexArrayShader(gfx::Device& device)
@@ -211,8 +230,28 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
     const auto max_slice = style == Style::Solid ? slices + 1 : slices;
     const auto angle_increment = math::Pi / slices;
 
-    const auto* name = style == Style::Outline ? "CapsuleOutline" :
-                      (style == Style::Wireframe ? "CapsuleWireframe" : "Capsule");
+    // try to figure out if the view matrix will distort the
+    // round rectangle out of it's square shape which would then
+    // distort the rounded corners out of the shape too.
+    const auto& view_matrix = *env.view_matrix;
+    const auto rect_width   = glm::length(view_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height  = glm::length(view_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    const auto aspect_ratio = rect_width / rect_height;
+    float w = radius;
+    float h = radius;
+    if (rect_width > rect_height)
+        w = h / (rect_width/rect_height);
+    else h = w / (rect_height/rect_width);
+
+    std::string name;
+    if (style == Style::Outline)
+        name = "CapsuleOutline";
+    else if (style == Style::Wireframe)
+        name = "CapsuleWireframe";
+    else if (style == Style::Solid)
+        name = "Capsule";
+    else BUG("???");
+    name += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
 
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
@@ -224,9 +263,9 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 
         // semi-circle at the left end.
         Vertex left_center;
-        left_center.aPosition.x =  radius;
+        left_center.aPosition.x =  w;
         left_center.aPosition.y = -0.5f;
-        left_center.aTexCoord.x =  radius;
+        left_center.aTexCoord.x =  w;
         left_center.aTexCoord.y =  0.5f;
         if (style == Style::Solid)
             vs.push_back(left_center);
@@ -234,12 +273,12 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         float left_angle = math::Pi * 0.5;
         for (unsigned i=0; i<max_slice; ++i)
         {
-            const auto x = std::cos(left_angle) * radius;
-            const auto y = std::sin(left_angle) * radius;
+            const auto x = std::cos(left_angle) * w;
+            const auto y = std::sin(left_angle) * h;
             Vertex v;
-            v.aPosition.x =  radius + x;
+            v.aPosition.x =  w + x;
             v.aPosition.y = -0.5f + y;
-            v.aTexCoord.x =  radius + x;
+            v.aTexCoord.x =  w + x;
             v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
 
@@ -247,12 +286,12 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 
             if (style == Style::Wireframe)
             {
-                const auto x = std::cos(left_angle) * radius;
-                const auto y = std::sin(left_angle) * radius;
+                const auto x = std::cos(left_angle) * w;
+                const auto y = std::sin(left_angle) * h;
                 Vertex v;
-                v.aPosition.x =  radius + x;
+                v.aPosition.x =  w + x;
                 v.aPosition.y = -0.5f + y;
-                v.aTexCoord.x =  radius + x;
+                v.aTexCoord.x =  w + x;
                 v.aTexCoord.y =  0.5f - y;
                 vs.push_back(v);
                 vs.push_back(left_center);
@@ -267,13 +306,13 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         {
             // center box.
             const Vertex box[6] = {
-                {{0.1f, -0.4f}, {0.1f, 0.4f}},
-                {{0.1f, -0.6f}, {0.1f, 0.6f}},
-                {{0.9f, -0.6f}, {0.9f, 0.6f}},
+                {{     w, -0.5f+h}, {     w, 0.5f-h}},
+                {{     w, -0.5f-h}, {     w, 0.5f+h}},
+                {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
 
-                {{0.1f, -0.4f}, {0.1f, 0.4f}},
-                {{0.9f, -0.6f}, {0.9f, 0.6f}},
-                {{0.9f, -0.4f}, {0.9f, 0.4f}}
+                {{     w, -0.5f+h}, {     w, 0.5f-h}},
+                {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
+                {{1.0f-w, -0.5f+h}, {1.0f-w, 0.5f-h}}
             };
             offset = vs.size();
             vs.push_back(box[0]);
@@ -297,9 +336,9 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 
         // semi circle at the right end
         Vertex right_center;
-        right_center.aPosition.x =  1.0f - radius;
+        right_center.aPosition.x =  1.0f - w;
         right_center.aPosition.y = -0.5f;
-        right_center.aTexCoord.x =  1.0f - radius;
+        right_center.aTexCoord.x =  1.0f - w;
         right_center.aTexCoord.y =  0.5f;
         if (style == Style::Solid)
             vs.push_back(right_center);
@@ -308,12 +347,12 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         float right_angle = math::Pi * -0.5;
         for (unsigned i=0; i<max_slice; ++i)
         {
-            const auto x = std::cos(right_angle) * radius;
-            const auto y = std::sin(right_angle) * radius;
+            const auto x = std::cos(right_angle) * w;
+            const auto y = std::sin(right_angle) * h;
             Vertex v;
-            v.aPosition.x =  1.0f - radius + x;
+            v.aPosition.x =  1.0f - w + x;
             v.aPosition.y = -0.5f + y;
-            v.aTexCoord.x =  1.0f - radius + x;
+            v.aTexCoord.x =  1.0f - w + x;
             v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
 
@@ -321,12 +360,12 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 
             if (style == Style::Wireframe)
             {
-                const auto x = std::cos(right_angle) * radius;
-                const auto y = std::sin(right_angle) * radius;
+                const auto x = std::cos(right_angle) * w;
+                const auto y = std::sin(right_angle) * h;
                 Vertex v;
-                v.aPosition.x =  1.0f - radius + x;
+                v.aPosition.x =  1.0f - w + x;
                 v.aPosition.y = -0.5f + y;
-                v.aTexCoord.x =  1.0f - radius + x;
+                v.aTexCoord.x =  1.0f - w + x;
                 v.aTexCoord.y =  0.5f - y;
                 vs.push_back(v);
                 vs.push_back(right_center);
@@ -752,12 +791,21 @@ Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable
         {1.0f-w, -1.0f+h}, // bottom right
     };
 
+    std::string name;
+    if (style == Style::Outline)
+        name = "RoundRectOutline";
+    else if (style == Style::Wireframe)
+        name = "RoundRectWireframe";
+    else if (style == Style::Solid)
+        name = "RoundRect";
+    else BUG("???");
+    // use the aspect ratio up to some precision to derive a name
+    // for the generated geometry so that we can keep some of these
+    // around and not have to regenerate the geometry all the time.
+    name += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
+
     if (style == Style::Outline)
     {
-        // use the aspect ratio up to some precision to derive a name
-        // for the generated geometry so that we can keep some of these
-        // around and not have to regenerate the geometry all the time.
-        const auto name = "RoundRectOutline" + NameAspectRatio(rect_width, rect_height);
         geom = device.FindGeometry(name);
         if (geom == nullptr)
         {
@@ -810,10 +858,6 @@ Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable
     }
     else if (style == Style::Solid || style == Style::Wireframe)
     {
-        // use the aspect ratio up to some precision to derive a name
-        // for the generated geometry so that we can keep some of these
-        // around and not have to regenerate all the time.
-        const auto name = (style == Style::Solid ? "RoundRect" : "RoundRectWireframe") + NameAspectRatio(rect_width, rect_height);
         geom = device.FindGeometry(name);
         if (geom == nullptr)
         {
