@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include "base/utility.h"
+#include "base/math.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/drawable.h"
@@ -29,6 +30,21 @@
 #include "graphics/resource.h"
 
 namespace {
+std::string NameAspectRatio(float width, float height)
+{
+    if (width > height)
+    {
+        const int q = math::clamp(1.0f, 5.0f, width/height);
+        return std::to_string(q) + ":1";
+    }
+    else
+    {
+        const int q = math::clamp(1.0f, 5.0f, height/width);
+        return "1:" + std::to_string(q);
+    }
+    return "";
+}
+
 gfx::Shader* MakeVertexArrayShader(gfx::Device& device)
 {
     auto* shader = device.FindShader("vertex-array-shader");
@@ -700,14 +716,26 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 Shader* RoundRectangleClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 
-Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) const
+Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const
 {
     using Style = Drawable::Style;
 
     if (style == Style::Points)
         return nullptr;
 
-    const auto r = mRadius;
+    // try to figure out if the view matrix will distort the
+    // round rectangle out of it's square shape which would then
+    // distort the rounded corners out of the shape too.
+    const auto& view_matrix = *env.view_matrix;
+    const auto rect_width  = glm::length(view_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height = glm::length(view_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    const auto aspect_ratio = rect_width / rect_height;
+    float w = mRadius;
+    float h = mRadius;
+    if (rect_width > rect_height)
+        w = h / (rect_width/rect_height);
+    else h = w / (rect_height/rect_width);
+
     const auto slices    = 20;
     const auto increment = (float)(math::Pi * 0.5  / slices); // each corner is a quarter circle, i.e. half pi rad
 
@@ -718,30 +746,34 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
         // x, y pos of the origin
         float x, y;
     } corners[4] = {
-        {1.0f-r,      -r}, // top right
-        {     r,      -r}, // top left
-        {     r, -1.0f+r}, // bottom left
-        {1.0f-r, -1.0f+r}, // bottom right
+        {1.0f-w,      -h}, // top right
+        {     w,      -h}, // top left
+        {     w, -1.0f+h}, // bottom left
+        {1.0f-w, -1.0f+h}, // bottom right
     };
 
     if (style == Style::Outline)
     {
-        geom = device.FindGeometry("RoundRectOutline");
+        // use the aspect ratio up to some precision to derive a name
+        // for the generated geometry so that we can keep some of these
+        // around and not have to regenerate the geometry all the time.
+        const auto name = "RoundRectOutline" + NameAspectRatio(rect_width, rect_height);
+        geom = device.FindGeometry(name);
         if (geom == nullptr)
         {
             // outline of the box body
             std::vector<Vertex> vs = {
                 // left box
-                {{0.0f,      -r}, {0.0f,      r}},
-                {{0.0f, -1.0f+r}, {0.0f, 1.0f-r}},
+                {{0.0f,      -h}, {0.0f,      h}},
+                {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
                 // center box
-                {{r,       0.0f}, {r,      0.0f}},
-                {{1.0f-r,  0.0f}, {1.0f-r, 0.0f}},
-                {{r,      -1.0f}, {r,      1.0f}},
-                {{1.0f-r, -1.0f}, {r,      1.0f}},
+                {{w,       0.0f}, {w,      0.0f}},
+                {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
+                {{w,      -1.0f}, {w,      1.0f}},
+                {{1.0f-w, -1.0f}, {w,      1.0f}},
                 // right box
-                {{1.0f,      -r}, {1.0f,        r}},
-                {{1.0f, -1.0f+r}, {1.0f,   1.0f-r}},
+                {{1.0f,      -h}, {1.0f,        h}},
+                {{1.0f, -1.0f+h}, {1.0f,   1.0f-h}},
             };
 
             // generate corners
@@ -750,8 +782,8 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                 float angle = math::Pi * 0.5 * i;
                 for (unsigned s = 0; s<=slices; ++s)
                 {
-                    const auto x0 = std::cos(angle) * mRadius;
-                    const auto y0 = std::sin(angle) * mRadius;
+                    const auto x0 = std::cos(angle) * w;
+                    const auto y0 = std::sin(angle) * h;
                     Vertex v0, v1;
                     v0.aPosition.x = corners[i].x + x0;
                     v0.aPosition.y = corners[i].y + y0;
@@ -760,8 +792,8 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
 
                     angle += increment;
 
-                    const auto x1 = std::cos(angle) * mRadius;
-                    const auto y1 = std::sin(angle) * mRadius;
+                    const auto x1 = std::cos(angle) * w;
+                    const auto y1 = std::sin(angle) * h;
                     v1.aPosition.x = corners[i].x + x1;
                     v1.aPosition.y = corners[i].y + y1;
                     v1.aTexCoord.x = corners[i].x + x1;
@@ -771,43 +803,47 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                     vs.push_back(v1);
                 }
             }
-            geom = device.MakeGeometry("RoundRectOutline");
+            geom = device.MakeGeometry(name);
             geom->SetVertexBuffer(std::move(vs));
             geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
     }
     else if (style == Style::Solid || style == Style::Wireframe)
     {
-        geom = device.FindGeometry(style == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+        // use the aspect ratio up to some precision to derive a name
+        // for the generated geometry so that we can keep some of these
+        // around and not have to regenerate all the time.
+        const auto name = (style == Style::Solid ? "RoundRect" : "RoundRectWireframe") + NameAspectRatio(rect_width, rect_height);
+        geom = device.FindGeometry(name);
         if (geom == nullptr)
         {
-            geom = device.MakeGeometry(style == Style::Solid ? "RoundRect" : "RoundRectWireframe");
+            geom = device.MakeGeometry(name);
 
             // center body
             std::vector<Vertex> vs = {
                 // left box
-                {{0.0f,      -r}, {0.0f,      r}},
-                {{0.0f, -1.0f+r}, {0.0f, 1.0f-r}},
-                {{r,    -1.0f+r}, {r,    1.0f-r}},
-                {{r,    -1.0f+r}, {r,    1.0f-r}},
-                {{r,         -r}, {r,         r}},
-                {{0.0f,      -r}, {0.0f,      r}},
+                {{0.0f,      -h}, {0.0f,      h}},
+                {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
+                {{w,    -1.0f+h}, {w,    1.0f-h}},
+                {{w,    -1.0f+h}, {w,    1.0f-h}},
+                {{w,         -h}, {w,         h}},
+                {{0.0f,      -h}, {0.0f,      h}},
 
                 // center box
-                {{r,       0.0f}, {r,      0.0f}},
-                {{r,      -1.0f}, {r,      1.0f}},
-                {{1.0f-r, -1.0f}, {1.0f-r, 1.0f}},
-                {{1.0f-r, -1.0f}, {1.0f-r, 1.0f}},
-                {{1.0f-r,  0.0f}, {1.0f-r, 0.0f}},
-                {{r,       0.0f}, {r,      0.0f}},
+                {{w,       0.0f}, {w,      0.0f}},
+                {{w,      -1.0f}, {w,      1.0f}},
+                {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
+                {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
+                {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
+                {{w,       0.0f}, {w,      0.0f}},
 
                 // right box.
-                {{1.0f-r,       -r}, {1.0f-r,      r}},
-                {{1.0f-r,  -1.0f+r}, {1.0f-r, 1.0f-r}},
-                {{1.0f,    -1.0f+r}, {1.0f,   1.0f-r}},
-                {{1.0f,    -1.0f+r}, {1.0f,   1.0f-r}},
-                {{1.0f,         -r}, {1.0f,        r}},
-                {{1.0f-r,       -r}, {1.0f-r,      r}},
+                {{1.0f-w,       -h}, {1.0f-w,      h}},
+                {{1.0f-w,  -1.0f+h}, {1.0f-w, 1.0f-h}},
+                {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
+                {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
+                {{1.0f,         -h}, {1.0f,        h}},
+                {{1.0f-w,       -h}, {1.0f-w,      h}},
             };
 
             if (style == Style::Solid)
@@ -844,8 +880,8 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                 float angle = math::Pi * 0.5 * i;
                 for (unsigned s = 0; s<=slices; ++s)
                 {
-                    const auto x = std::cos(angle) * mRadius;
-                    const auto y = std::sin(angle) * mRadius;
+                    const auto x = std::cos(angle) * w;
+                    const auto y = std::sin(angle) * h;
                     Vertex v;
                     v.aPosition.x = corners[i].x + x;
                     v.aPosition.y = corners[i].y + y;
@@ -856,8 +892,8 @@ Geometry* RoundRectangleClass::Upload(Drawable::Style style, Device& device) con
                     angle += increment;
                     if (style == Style::Wireframe)
                     {
-                        const auto x = std::cos(angle) * mRadius;
-                        const auto y = std::sin(angle) * mRadius;
+                        const auto x = std::cos(angle) * w;
+                        const auto y = std::sin(angle) * h;
                         Vertex v;
                         v.aPosition.x = corners[i].x + x;
                         v.aPosition.y = corners[i].y + y;
