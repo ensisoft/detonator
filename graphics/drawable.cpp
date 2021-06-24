@@ -226,7 +226,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
 
     // todo LOD information
     const auto slices = 50;
-    const auto radius = 0.1f;
+    const auto radius = 0.25f;
     const auto max_slice = style == Style::Solid ? slices + 1 : slices;
     const auto angle_increment = math::Pi / slices;
 
