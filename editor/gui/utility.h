@@ -205,9 +205,26 @@ inline void UpdateList(QListWidget* list, const std::vector<ListItem>& items)
 inline void SetList(QComboBox* combo, const std::vector<ListItem>& items)
 {
     QSignalBlocker s(combo);
+    QString current = combo->currentData(Qt::UserRole).toString();
+
     combo->clear();
-    for (const auto& item : items) {
+    for (const auto& item : items)
+    {
         combo->addItem(item.name, item.id);
+    }
+    if (current.isEmpty())
+        return;
+
+    for (int i=0; i<combo->count(); ++i)
+    {
+        const QVariant& data = combo->itemData(i);
+        if (data.toString() == current)
+        {
+            combo->setCurrentIndex(i);
+            if (combo->isEditable())
+                combo->setEditText(combo->itemText(i));
+            return;
+        }
     }
 }
 
