@@ -628,9 +628,12 @@ Workspace::Workspace()
     mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>("RightTriangle"));
     mResources.emplace_back(new DrawableResource<gfx::CircleClass>("Circle"));
     mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>("SemiCircle"));
-    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>("RoundRect"));
     mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>("Trapezoid"));
     mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>("Parallelogram"));
+    {
+        gfx::RoundRectangleClass klass("_round_rect", 0.05f);
+        mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(klass, "RoundRect"));
+    }
 
     for (auto& resource : mResources)
     {
