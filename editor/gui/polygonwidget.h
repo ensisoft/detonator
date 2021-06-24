@@ -63,6 +63,8 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionNewTriangleFan_toggled(bool checked);
         void on_actionClear_triggered();
+        void on_blueprints_currentIndexChanged(int);
+        void on_btnResetBlueprint_clicked();
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
 
@@ -108,9 +110,6 @@ namespace gui
         // Index of the currently selected vertex.
         std::size_t mVertexIndex = 0;
     private:
-        // cache the name of the material used as the blueprint
-        // (background image) when designing the shape
-        QString mBlueprintName;
         // the original hash value that is used to
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;

@@ -103,6 +103,7 @@ namespace app
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassById(const QString& id) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const QString& name) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassById(const QString& id) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
 
@@ -142,24 +143,28 @@ namespace app
         QString GetDir() const
         { return mWorkspaceDir; }
 
+        using ResourceList = std::vector<ListItem>;
+
         // Get a list of user defined material names in the workspace.
-        QStringList ListUserDefinedMaterials() const;
+        ResourceList ListUserDefinedMaterials() const;
         // Get a list of all material names in the workspace
         // including the user defined materials and the "primitive" ones.
-        QStringList ListAllMaterials() const;
+        ResourceList ListAllMaterials() const;
         // Get a list of all primitive (built-in) materials.
-        QStringList ListPrimitiveMaterials() const;
+        ResourceList ListPrimitiveMaterials() const;
         // Get a list of all drawable names in the workspace
         // including the user defined drawables and the "primitive" ones.
-        QStringList ListAllDrawables() const;
+        ResourceList ListAllDrawables() const;
         // Get a list of primitive (build-in) drawables.
-        QStringList ListPrimitiveDrawables() const;
+        ResourceList ListPrimitiveDrawables() const;
         // Get a list of user defined drawables.
-        QStringList ListUserDefinedDrawables() const;
+        ResourceList ListUserDefinedDrawables() const;
         // Get a list of user defined entities.
-        QStringList ListUserDefinedEntities() const;
+        ResourceList ListUserDefinedEntities() const;
         // Get a list of user defined entity ids
         QStringList ListUserDefinedEntityIds() const;
+        // Get a list of resources with the matching type and primitive flag
+        ResourceList ListResources(Resource::Type type, bool primitive, bool sort = true) const;
 
         // Map material id to its human readable name.
         QString MapMaterialIdToName(const QString& id) const;
@@ -212,9 +217,10 @@ namespace app
         Resource& GetUserDefinedResource(size_t index);
         // Get a user defined resource.
         Resource& GetPrimitiveResource(size_t index);
-        // Get a resource identified by name and type.
-        // The resource must exist.
+        // Get a resource identified by name and type. The resource must exist.
         Resource& GetResourceByName(const QString& name, Resource::Type type);
+        // Get a resource identified by id. The resource must exist.
+        Resource& GetResourceById(const QString& id);
         // Find resource by id. Returns nullptr if it doesn't exist.
         Resource* FindResourceById(const QString& id);
         // Find resource by name and type. Returns nullptr if not found.

@@ -27,6 +27,7 @@
 
 namespace app {
     class Workspace;
+    struct ListItem;
 }
 
 namespace uik {
@@ -40,7 +41,6 @@ namespace game {
 
 namespace gui
 {
-    struct ListItem;
 
     class WidgetStyleWidget : public QWidget
     {
@@ -59,7 +59,7 @@ namespace gui
         { mPainter = painter;}
         void SetPropertySelector(const std::string& prop)
         { mSelector = prop; }
-        void RebuildMaterialCombos(const std::vector<ListItem>& list);
+        void RebuildMaterialCombos(const std::vector<app::ListItem>& list);
 
         bool IsUnderEdit() const;
 

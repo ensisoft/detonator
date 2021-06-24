@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1046</width>
-    <height>459</height>
+    <width>1215</width>
+    <height>444</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -154,6 +154,29 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>None selected</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnResetBlueprint">
+            <property name="toolTip">
+             <string>Reset idle track to nothing</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
             </property>
            </widget>
           </item>
@@ -335,6 +358,7 @@
   <tabstop>ID</tabstop>
   <tabstop>staticInstance</tabstop>
   <tabstop>blueprints</tabstop>
+  <tabstop>btnResetBlueprint</tabstop>
   <tabstop>alpha</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>chkSnap</tabstop>

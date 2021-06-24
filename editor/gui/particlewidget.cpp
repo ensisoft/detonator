@@ -57,8 +57,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
     // get the current list of materials from the workspace
-    mUI.materials->addItems(workspace->ListAllMaterials());
-    mUI.materials->setCurrentIndex(mUI.materials->findText("White"));
+    SetList(mUI.materials, workspace->ListAllMaterials());
+    SetValue(mUI.materials, QString("White"));
 
     // Set default transform state here. if there's a previous user setting
     // they'll get loaded in LoadState and will override these values.
@@ -80,17 +80,19 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     // connect workspace signals for resource management
     connect(mWorkspace, &app::Workspace::NewResourceAvailable,this, &ParticleEditorWidget::NewResourceAvailable);
     connect(mWorkspace, &app::Workspace::ResourceToBeDeleted, this, &ParticleEditorWidget::ResourceToBeDeleted);
+    connect(mWorkspace, &app::Workspace::ResourceUpdated,     this, &ParticleEditorWidget::ResourceUpdated);
     setWindowTitle("My Particle System");
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
 {
-    const auto& name = resource.GetName();
+    const auto& name   = resource.GetName();
     const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
     const auto& params = engine->GetParams();
     DEBUG("Editing particle system: '%1'", name);
 
-    GetProperty(resource, "material", mUI.materials);
+    QString material;
+    GetProperty(resource, "material", &material);
     GetProperty(resource, "transform_width", mUI.scaleX);
     GetProperty(resource, "transform_height", mUI.scaleY);
     GetProperty(resource, "transform_rotation", mUI.rotation);
@@ -103,6 +105,16 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
+
+    if (mWorkspace->IsValidMaterial(material))
+    {
+        SetValue(mUI.materials, ListItemId(material));
+    }
+    else
+    {
+        WARN("Material '%1' is no longer available.", material);
+        SetValue(mUI.materials, QString("White"));
+    }
 
     SetValue(mUI.name, name);
     SetValue(mUI.ID, engine->GetId());
@@ -169,9 +181,9 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     data::JsonObject json;
     mClass.IntoJson(json);
     settings.setValue("Particle", "content", base64::Encode(json.ToString()));
+    settings.setValue("Particle", "material", (QString)GetItemId(mUI.materials));
     settings.saveWidget("Particle", mUI.name);
     settings.saveWidget("Particle", mUI.ID);
-    settings.saveWidget("Particle", mUI.materials);
     settings.saveWidget("Particle", mUI.scaleX);
     settings.saveWidget("Particle", mUI.scaleY);
     settings.saveWidget("Particle", mUI.rotation);
@@ -234,9 +246,20 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     mClass = std::move(ret.value());
     mOriginalHash = mClass.GetHash();
 
+    QString material;
+    settings.getValue("Particle", "material", &material);
+    if (mWorkspace->IsValidMaterial(material))
+    {
+        SetValue(mUI.materials, ListItemId(material));
+    }
+    else
+    {
+        WARN("Material '%1' is no longer available.", material);
+        SetValue(mUI.materials, QString("White"));
+    }
+
     settings.loadWidget("Particle", mUI.name);
     settings.loadWidget("Particle", mUI.ID);
-    settings.loadWidget("Particle", mUI.materials);
     settings.loadWidget("Particle", mUI.scaleX);
     settings.loadWidget("Particle", mUI.scaleY);
     settings.loadWidget("Particle", mUI.rotation);
@@ -344,13 +367,9 @@ void ParticleEditorWidget::Update(double secs)
 
         mTime += secs;
 
-        const auto& material_name = mUI.materials->currentText();
-        if (mMaterialName != material_name)
-        {
-            mMaterial = mWorkspace->MakeMaterialByName(material_name);
-            mMaterialName = material_name;
-        }
-        mMaterial->SetRuntime(mTime);
+        // created in paint function.
+        if (mMaterial)
+            mMaterial->SetRuntime(mTime);
     }
 
     if (!mEngine->IsAlive())
@@ -442,7 +461,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     // setup the resource with the current auxiliary params
     app::ParticleSystemResource particle_resource(mClass, name);
-    SetProperty(particle_resource, "material", mUI.materials);
+    SetProperty(particle_resource, "material", (QString)GetItemId(mUI.materials));
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
@@ -616,11 +635,11 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Translate(width*0.5, height*0.5);
 
     // get the material based on the selection in the materials combobox
-    const auto& material_name = mUI.materials->currentText();
-    if (mMaterialName != material_name)
+    const std::string& id = GetItemId(mUI.materials);
+    if (!mMaterial || (*mMaterial)->GetId() != id)
     {
-        mMaterial = mWorkspace->MakeMaterialByName(material_name);
-        mMaterialName = material_name;
+        auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.materials));
+        mMaterial  = gfx::CreateMaterialInstance(klass);
     }
 
     if (GetValue(mUI.chkShowGrid))
@@ -655,7 +674,16 @@ void ParticleEditorWidget::NewResourceAvailable(const app::Resource* resource)
     // this is simple, just add new resources in the appropriate UI objects.
     if (resource->GetType() == app::Resource::Type::Material)
     {
-        mUI.materials->addItem(resource->GetName());
+        SetList(mUI.materials, mWorkspace->ListAllMaterials());
+    }
+}
+
+void ParticleEditorWidget::ResourceUpdated(const app::Resource* resource)
+{
+    if (resource->GetType() == app::Resource::Type::Material)
+    {
+        if (mMaterial && (*mMaterial)->GetId() == resource->GetIdUtf8())
+            mMaterial.reset();
     }
 }
 
@@ -663,19 +691,12 @@ void ParticleEditorWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {
-        const auto& current_material_name = mUI.materials->currentText();
-        const auto carcass_index = mUI.materials->findText(resource->GetName());
-        const auto current_index = mUI.materials->findText(current_material_name);
-        mUI.materials->blockSignals(true);
-        mUI.materials->removeItem(carcass_index);
-        if (current_index == carcass_index)
+        SetList(mUI.materials, mWorkspace->ListAllMaterials());
+        if (mMaterial && (*mMaterial)->GetId() == resource->GetIdUtf8())
         {
-            const auto index = mUI.materials->findText("White");
-            mUI.materials->setCurrentIndex(index);
-            WARN("Particle system '%1' uses material '%2' that is deleted.",
-                mUI.name->text(), current_material_name);
+            mMaterial.reset();
+            SetValue(mUI.materials, QString("White"));
         }
-        mUI.materials->blockSignals(false);
     }
 }
 

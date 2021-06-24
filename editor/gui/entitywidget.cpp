@@ -160,11 +160,11 @@ class EntityWidget::PlaceShapeTool : public MouseTool
 public:
     PlaceShapeTool(EntityWidget::State& state, const QString& material, const QString& drawable)
             : mState(state)
-            , mMaterialName(material)
-            , mDrawableName(drawable)
+            , mMaterialId(material)
+            , mDrawableId(drawable)
     {
-        mDrawableClass = mState.workspace->GetDrawableClassByName(mDrawableName);
-        mMaterialClass = mState.workspace->GetMaterialClassByName(mMaterialName);
+        mDrawableClass = mState.workspace->GetDrawableClassById(mDrawableId);
+        mMaterialClass = mState.workspace->GetMaterialClassById(mMaterialId);
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
@@ -282,8 +282,8 @@ private:
     bool mEngaged = false;
     bool mAlwaysSquare = false;
 private:
-    QString mMaterialName;
-    QString mDrawableName;
+    QString mMaterialId;
+    QString mDrawableId;
     std::shared_ptr<const gfx::DrawableClass> mDrawableClass;
     std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
     std::unique_ptr<gfx::Material> mMaterial;
@@ -1005,14 +1005,14 @@ void EntityWidget::on_actionSave_triggered()
 }
 void EntityWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Rectangle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_rect"));
 
     UncheckPlacementActions();
     mUI.actionNewRect->setChecked(true);
 }
 void EntityWidget::on_actionNewCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Circle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_circle"));
 
     UncheckPlacementActions();
     mUI.actionNewCircle->setChecked(true);
@@ -1020,7 +1020,7 @@ void EntityWidget::on_actionNewCircle_triggered()
 
 void EntityWidget::on_actionNewSemiCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "SemiCircle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_semi_circle"));
 
     UncheckPlacementActions();
     mUI.actionNewSemiCircle->setChecked(true);
@@ -1028,42 +1028,42 @@ void EntityWidget::on_actionNewSemiCircle_triggered()
 
 void EntityWidget::on_actionNewIsoscelesTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "IsoscelesTriangle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_isosceles_triangle"));
 
     UncheckPlacementActions();
     mUI.actionNewIsoscelesTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRightTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "RightTriangle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_right_triangle"));
 
     UncheckPlacementActions();
     mUI.actionNewRightTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRoundRect_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "RoundRect"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_round_rect"));
 
     UncheckPlacementActions();
     mUI.actionNewRoundRect->setChecked(true);
 }
 void EntityWidget::on_actionNewTrapezoid_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Trapezoid"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_trapezoid"));
 
     UncheckPlacementActions();
     mUI.actionNewTrapezoid->setChecked(true);
 }
 void EntityWidget::on_actionNewCapsule_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Capsule"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_capsule"));
 
     UncheckPlacementActions();
     mUI.actionNewCapsule->setChecked(true);
 }
 void EntityWidget::on_actionNewParallelogram_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "Checkerboard", "Parallelogram"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_parallelogram"));
 
     UncheckPlacementActions();
     mUI.actionNewParallelogram->setChecked(true);
@@ -1390,6 +1390,7 @@ void EntityWidget::on_btnSelectMaterial_clicked()
                 return;
             drawable->ResetMaterial();
             drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
+            DisplayCurrentNodeProperties();
         }
     }
 }
@@ -1878,24 +1879,27 @@ void EntityWidget::ResourceUpdated(const app::Resource* resource)
 void EntityWidget::PlaceNewParticleSystem()
 {
     const auto* action = qobject_cast<QAction*>(sender());
-    // using the text in the action as the name of the drawable.
-    const auto drawable = action->text();
-
+    // using the data in the action as the class id of the drawable.
+    const auto drawable = action->data().toString();
     // check the resource in order to get the default material name set in the
     // particle editor.
-    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::ParticleSystem);
-    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+    const auto& resource = mState.workspace->GetResourceById(drawable);
+    QString material = resource.GetProperty("material",  QString("_checkerboard"));
+    if (!mState.workspace->IsValidMaterial(material))
+        material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
 }
 void EntityWidget::PlaceNewCustomShape()
 {
     const auto* action = qobject_cast<QAction*>(sender());
-    // using the text in the action as the name of the drawable.
-    const auto drawable = action->text();
+    // using the data in the action as the name of the drawable.
+    const auto drawable = action->data().toString();
     // check the resource in order to get the default material name set in the
-    // particle editor.
-    const auto& resource = mState.workspace->GetResourceByName(drawable, app::Resource::Type::Shape);
-    const auto& material = resource.GetProperty("material",  QString("Checkerboard"));
+    // shape editor.
+    const auto& resource = mState.workspace->GetResourceById(drawable);
+    QString material = resource.GetProperty("material",  QString("_checkerboard"));
+    if (!mState.workspace->IsValidMaterial(material))
+        material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
 }
 
@@ -2118,11 +2122,15 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
         return;
 
     auto* drawable = hitnode->GetDrawable();
-    QString material = app::FromUtf8(drawable->GetMaterialId());
-    DlgMaterial dlg(this, mState.workspace, material);
+    DlgMaterial dlg(this, mState.workspace, app::FromUtf8(drawable->GetMaterialId()));
     if (dlg.exec() == QDialog::Rejected)
         return;
-    drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
+    const auto& materialId = app::ToUtf8(dlg.GetSelectedMaterialId());
+    if (drawable->GetMaterialId() == materialId)
+        return;
+    drawable->ResetMaterial();
+    drawable->SetMaterialId(materialId);
+    DisplayCurrentNodeProperties();
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
@@ -2240,11 +2248,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
         if (const auto* item = node->GetDrawable())
         {
-            const auto& material = mState.workspace->MapMaterialIdToName(item->GetMaterialId());
-            const auto& drawable = mState.workspace->MapDrawableIdToName(item->GetDrawableId());
             SetValue(mUI.drawableItem, true);
-            SetValue(mUI.dsMaterial, material);
-            SetValue(mUI.dsDrawable, drawable);
+            SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
+            SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
             SetValue(mUI.dsRenderPass, item->GetRenderPass());
             SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
             SetValue(mUI.dsLayer, item->GetLayer());
@@ -2277,7 +2283,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
             {
                 SetEnabled(mUI.rbPolygon, true);
-                SetValue(mUI.rbPolygon, mState.workspace->MapDrawableIdToName(body->GetPolygonShapeId()));
+                SetValue(mUI.rbPolygon, ListItemId(body->GetPolygonShapeId()));
             }
             else
             {
@@ -2356,10 +2362,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
 
     if (auto* item = node->GetDrawable())
     {
-        const QString& material_name = GetValue(mUI.dsMaterial);
-        const QString& drawable_name = GetValue(mUI.dsDrawable);
-        item->SetDrawableId(mState.workspace->GetDrawableClassByName(drawable_name)->GetId());
-        item->SetMaterialId(mState.workspace->GetMaterialClassByName(material_name)->GetId());
+        item->SetDrawableId(GetItemId(mUI.dsDrawable));
+        item->SetMaterialId(GetItemId(mUI.dsMaterial));
         item->SetTimeScale(GetValue(mUI.dsTimeScale));
         item->SetLineWidth(GetValue(mUI.dsLineWidth));
         item->SetLayer(GetValue(mUI.dsLayer));
@@ -2378,9 +2382,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
         glm::vec2 linear_velocity;
         linear_velocity.x = GetValue(mUI.rbLinearVeloX);
         linear_velocity.y = GetValue(mUI.rbLinearVeloY);
-        const QString& shape_name  = GetValue(mUI.rbPolygon);
-        if (!shape_name.isEmpty())
-            body->SetPolygonShapeId(mState.workspace->GetDrawableClassByName(shape_name)->GetId());
+        body->SetLinearVelocity(linear_velocity);
+        body->SetPolygonShapeId(GetItemId(mUI.rbPolygon));
         body->SetSimulation(GetValue(mUI.rbSimulation));
         body->SetCollisionShape(GetValue(mUI.rbShape));
         body->SetFriction(GetValue(mUI.rbFriction));
@@ -2389,7 +2392,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
         body->SetLinearDamping(GetValue(mUI.rbLinearDamping));
         body->SetDensity(GetValue(mUI.rbDensity));
         body->SetAngularVelocity(GetValue(mUI.rbAngularVelo));
-        body->SetLinearVelocity(linear_velocity);
 
         // flags
         body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
@@ -2424,16 +2426,19 @@ void EntityWidget::RebuildMenus()
     mCustomShapes->clear();
     for (size_t i = 0; i < mState.workspace->GetNumResources(); ++i)
     {
-        const auto &resource = mState.workspace->GetResource(i);
-        const auto &name = resource.GetName();
+        const auto& resource = mState.workspace->GetResource(i);
+        const auto& name = resource.GetName();
+        const auto& id   = resource.GetId();
         if (resource.GetType() == app::Resource::Type::ParticleSystem)
         {
-            QAction *action = mParticleSystems->addAction(name);
+            QAction* action = mParticleSystems->addAction(name);
+            action->setData(id);
             connect(action, &QAction::triggered, this, &EntityWidget::PlaceNewParticleSystem);
         }
         else if (resource.GetType() == app::Resource::Type::Shape)
         {
-            QAction *action = mCustomShapes->addAction(name);
+            QAction* action = mCustomShapes->addAction(name);
+            action->setData(id);
             connect(action, &QAction::triggered,this, &EntityWidget::PlaceNewCustomShape);
         }
     }
