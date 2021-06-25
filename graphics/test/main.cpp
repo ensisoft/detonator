@@ -135,8 +135,9 @@ public:
         gfx::DrawTextRect(painter,
           "VSYNC TEST",
           "fonts/AtariFontFullVersion.ttf", 40,
-          gfx::FRect(100, 100, 500, 30),
-          mColors[mColorIndex]);
+          gfx::FRect(100, 100, 500, 50),
+          mColors[mColorIndex],
+          gfx::TextAlign::AlignBottom, 0, 1.4f);
         mColorIndex = (mColorIndex + 1) % mColors.size();
     }
     virtual std::string GetName() const override
@@ -290,7 +291,7 @@ public:
             gfx::DrawTextRect(painter, "Chomp!",
                 "fonts/AtariFontFullVersion.ttf", 30,
                 gfx::FRect(500, 200, 200, 50),
-                gfx::Color::DarkYellow);
+                gfx::Color::DarkYellow, gfx::TextAlign::AlignBottom, 0, 1.4f);
         }
     }
     virtual std::string GetName() const override
@@ -1177,7 +1178,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(50, 50, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop);
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 50, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1186,7 +1187,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(300, 50, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop);
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 50, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1195,7 +1196,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(550, 50, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignTop);
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 50, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1205,7 +1206,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(50, 300, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 300, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1214,7 +1215,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(300, 300, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 300, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1223,7 +1224,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(550, 300, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignVCenter);
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 300, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1233,7 +1234,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(50, 550, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignBottom);
+            gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 550, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1242,7 +1243,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(300, 550, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignBottom);
+            gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 550, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1251,7 +1252,7 @@ public:
             "fonts/AtariFontFullVersion.ttf", 14,
             gfx::FRect(550, 550, 200, 200),
             gfx::Color::DarkGray,
-            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom);
+            gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 550, 200, 200), gfx::Color::HotPink, 1.0f);
 
@@ -1296,8 +1297,10 @@ public:
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
             "fonts/AtariFontFullVersion.ttf", 20,
-            gfx::FRect(0, 0, 1024, 100),
-            gfx::Color::DarkGray);
+            gfx::FRect(0, 0, 1024, 150),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
+            0, 1.4f);
 
         gfx::DrawTextRect(painter,
             "Cousine-Regular.ttf, 20px\n"
@@ -1305,8 +1308,9 @@ public:
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
             "fonts/Cousine-Regular.ttf", 20,
-            gfx::FRect(0, 100, 1024, 100),
-            gfx::Color::DarkGray);
+            gfx::FRect(0, 150, 1024, 100),
+            gfx::Color::DarkGray,
+            gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter);
 
         gfx::DrawTextRect(painter,
             "Cousine-Bold.ttf, 16px\n"
@@ -1314,7 +1318,7 @@ public:
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
             "fonts/Cousine-Bold.ttf", 16,
-            gfx::FRect(0, 200, 1024, 100),
+            gfx::FRect(0, 250, 1024, 100),
             gfx::Color::DarkGray);
 
         gfx::DrawTextRect(painter,
@@ -1323,16 +1327,16 @@ public:
             "1234567890\n"
             "!£$/[]}?,._-<>\n",
             "fonts/Cousine-Italic.ttf", 16,
-            gfx::FRect(0, 300, 1024, 100),
+            gfx::FRect(0, 350, 1024, 100),
             gfx::Color::DarkGray);
 
         gfx::DrawTextRect(painter,
             "Underlined text",
             "fonts/AtariFontFullVersion.ttf", 18,
-            gfx::FRect(0, 0, 300, 100),
+            gfx::FRect(0, 50, 300, 100),
             gfx::Color::DarkGray,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
-            gfx::TextProp::Underline);
+            gfx::TextProp::Underline, 1.4f);
 
         gfx::DrawTextRect(painter,
             "Blinking text",
@@ -1340,7 +1344,7 @@ public:
             gfx::FRect(0, 100, 300, 100),
             gfx::Color::DarkGray,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter,
-            gfx::TextProp::Blinking);
+            gfx::TextProp::Blinking, 1.4f);
 
         const auto circle = 2.0 * math::Pi;
         const auto angle  = circle * mTime * 0.3;
