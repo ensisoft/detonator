@@ -428,8 +428,8 @@ public:
         {
             case Device::MinFilter::Nearest:   default_texture_min_filter = GL_NEAREST; break;
             case Device::MinFilter::Linear:    default_texture_min_filter = GL_LINEAR;  break;
-            case Device::MinFilter::Mipmap:    default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
-            case Device::MinFilter::Bilinear:  default_texture_min_filter = GL_LINEAR_MIPMAP_NEAREST; break;
+            case Device::MinFilter::Mipmap:    default_texture_min_filter = GL_NEAREST_MIPMAP_NEAREST; break;
+            case Device::MinFilter::Bilinear:  default_texture_min_filter = GL_NEAREST_MIPMAP_LINEAR; break;
             case Device::MinFilter::Trilinear: default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
         }
         switch (mDefaultMagTextureFilter)
@@ -1229,10 +1229,10 @@ private:
                         texture_min_filter = GL_LINEAR;
                         break;
                     case Texture::MinFilter::Mipmap:
-                        texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                        texture_min_filter = GL_NEAREST_MIPMAP_NEAREST;
                         break;
                     case Texture::MinFilter::Bilinear:
-                        texture_min_filter = GL_LINEAR_MIPMAP_NEAREST;
+                        texture_min_filter = GL_NEAREST_MIPMAP_LINEAR;
                         break;
                     case Texture::MinFilter::Trilinear:
                         texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
@@ -1267,7 +1267,7 @@ private:
                     continue;
                 }
 
-                // set all this fucking state here, so we can easily track/understand
+                // set all this dang state here, so we can easily track/understand
                 // which unit the texture is bound to.
                 const GLuint texture_name = texture->GetName();
 
@@ -1393,13 +1393,13 @@ private:
             // path must be changed to not use instanced rendering.
             //
             // This then means that if a system was using a shader translation layer (such
-            // as libANGLE) any decent system would still require several different endering
+            // as libANGLE) any decent system would still require several different rendering
             // paths. For example a primary "high end path" and a "fallback path" for low end
             // devices. These different paths would use different feature sets (such as instanced
             // rendering) and also (in many cases) require different shaders to be written to
             // fully take advantage of the graphics API features.
             // Then these two different rendering paths would/could use a shader translation
-            // layer in order to use some specific graphcis API. (through libANGLE)
+            // layer in order to use some specific graphics API. (through libANGLE)
             //
             //            <<Device>>
             //              |    |
