@@ -1116,8 +1116,8 @@ namespace gfx
         gfx::Color4f mBaseColor = gfx::Color::White;
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-        MinTextureFilter mMinFilter = MinTextureFilter::Bilinear;
-        MagTextureFilter mMagFilter = MagTextureFilter::Linear;
+        MinTextureFilter mMinFilter = MinTextureFilter::Default;
+        MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         ParticleAction mParticleAction = ParticleAction::None;
@@ -1219,8 +1219,8 @@ namespace gfx
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
         bool mGarbageCollect = false;
-        MinTextureFilter mMinFilter = MinTextureFilter::Bilinear;
-        MagTextureFilter mMagFilter = MagTextureFilter::Linear;
+        MinTextureFilter mMinFilter = MinTextureFilter::Default;
+        MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         ParticleAction mParticleAction = ParticleAction::None;
