@@ -24,6 +24,7 @@
 #include <optional>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "data/fwd.h"
 #include "graphics/bitmap.h"
 
@@ -124,21 +125,15 @@ namespace gfx
 
         // Add text to the buffer for rasterization.
         void AddText(const Text& text)
-        {
-            mText.push_back(text);
-        }
+        { mText.push_back(text); }
 
         // add text to the buffer for rasterization.
         void AddText(Text&& text)
-        {
-            mText.push_back(std::move(text));
-        }
+        { mText.push_back(std::move(text)); }
 
         // Clear all texts from the text buffer.
         void ClearText()
-        {
-            mText.clear();
-        }
+        { mText.clear(); }
 
         // Get the number of text objects currently in the text buffer.
         size_t GetNumTexts() const
@@ -146,16 +141,12 @@ namespace gfx
 
         // Get the text blob at the given index
         const Text& GetText(size_t index) const
-        {
-            ASSERT(index < mText.size());
-            return mText[index];
-        }
+        { return base::SafeIndex(mText, index); }
+
         // Get the text blob at the given index.
         Text& GetText(size_t index)
-        {
-            ASSERT(index < mText.size());
-            return mText[index];
-        }
+        { return base::SafeIndex(mText, index); }
+
         // Returns true if the text buffer contains now text objects
         // otherwise false.
         bool IsEmpty() const
@@ -169,10 +160,6 @@ namespace gfx
 
         // Load a TextBuffer from JSON.
         static std::optional<TextBuffer> FromJson(const data::Reader& data);
-
-    private:
-        std::shared_ptr<Bitmap<Grayscale>> Rasterize(const std::string& text, const Text& style) const;
-
     private:
         // static raster buffer (bitmap) width or 0 if size to content is wanted.
         unsigned mBufferWidth  = 0;
