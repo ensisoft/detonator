@@ -2196,7 +2196,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "updates_per_second", (float)mSettings.updates_per_second);
         base::JsonWrite(json["application"], "content", "content.json");
         base::JsonWrite(json["application"], "default_min_filter", mSettings.default_min_filter);
-        base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_min_filter);
+        base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_mag_filter);
         base::JsonWrite(json["physics"], "num_velocity_iterations", mSettings.num_velocity_iterations);
         base::JsonWrite(json["physics"], "num_position_iterations", mSettings.num_position_iterations);
         base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
