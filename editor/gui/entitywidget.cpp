@@ -1874,6 +1874,7 @@ void EntityWidget::ResourceUpdated(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
+    mState.renderer.ClearPaintState();
 }
 
 void EntityWidget::PlaceNewParticleSystem()
