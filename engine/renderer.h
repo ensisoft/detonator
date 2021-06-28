@@ -133,6 +133,8 @@ namespace game
         void Update(const Scene& scene, float time, float dt);
 
         void EndFrame();
+
+        void ClearPaintState();
     private:
         template<typename NodeType>
         void UpdateNode(const NodeType& node, float time, float dt);

@@ -150,6 +150,11 @@ void Renderer::EndFrame()
     }
 }
 
+void Renderer::ClearPaintState()
+{
+    mPaintNodes.clear();
+}
+
 template<typename Node>
 void Renderer::UpdateNode(const Node& node, float time, float dt)
 {
