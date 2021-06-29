@@ -275,6 +275,7 @@ public:
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopRight);
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
+        material.SetGamma(2.2f);
         painter.Draw(gfx::Polygon(poly), transform, material);
 
         // eye
@@ -371,6 +372,7 @@ public:
             material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
             material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
             material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
+            material.SetGamma(2.2f);
             gfx::Transform transform;
             transform.Resize(1024, 768);
             painter.Draw(gfx::Rectangle(), transform, material);
@@ -410,6 +412,7 @@ public:
         material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
         material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
+        material.SetGamma(2.2f);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), material);
     }
     virtual std::string GetName() const override
