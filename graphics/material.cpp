@@ -60,6 +60,7 @@ namespace {
         glm::vec3 texture_velocity;
         gfx::Color4f base_color;
         gfx::Color4f color_map[4];
+        glm::vec2 gradient_offset;
     };
     std::string FoldUniforms(const std::string& src, const ShaderData& data)
     {
@@ -89,6 +90,8 @@ namespace {
                     line = base::FormatString("const vec4 kColor2 = %1;", ToConst(data.color_map[2]));
                 else if (base::Contains(line, "kColor3"))
                     line = base::FormatString("const vec4 kColor3 = %1;", ToConst(data.color_map[3]));
+                else if (base::Contains(line, "kOffset"))
+                    line = base::FormatString("const vec2 kOffset = %1;", ToConst(data.gradient_offset));
                 if (original != line)
                     DEBUG("'%1' => '%2", original, line);
             }
@@ -758,6 +761,7 @@ uniform vec4 kColor0;
 uniform vec4 kColor1;
 uniform vec4 kColor2;
 uniform vec4 kColor3;
+uniform vec2 kOffset;
 uniform float kGamma;
 uniform float kRenderPoints;
 
@@ -775,6 +779,8 @@ vec4 MixGradient(vec2 coords)
 void main()
 {
   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+  coords = (coords - kOffset) + vec2(0.5, 0.5);
+  coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
   color.a *= vAlpha;
   gl_FragColor = pow(color, vec4(kGamma));
@@ -788,6 +794,7 @@ void main()
     data.color_map[1] = mColorMap[1];
     data.color_map[2] = mColorMap[2];
     data.color_map[3] = mColorMap[3];
+    data.gradient_offset = mOffset;
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -802,6 +809,7 @@ size_t GradientClass::GetHash() const
     hash = base::hash_combine(hash, mColorMap[1]);
     hash = base::hash_combine(hash, mColorMap[2]);
     hash = base::hash_combine(hash, mColorMap[3]);
+    hash = base::hash_combine(hash, mOffset);
     return hash;
 }
 std::string GradientClass::GetProgramId() const
@@ -815,6 +823,7 @@ std::string GradientClass::GetProgramId() const
         hash = base::hash_combine(hash, mColorMap[1]);
         hash = base::hash_combine(hash, mColorMap[2]);
         hash = base::hash_combine(hash, mColorMap[3]);
+        hash = base::hash_combine(hash, mOffset);
     }
     return std::to_string(hash);
 }
@@ -837,16 +846,18 @@ void GradientClass::ApplyDynamicState(State& state, Device& device, Program& pro
         SetUniform("kColor1", state.uniforms, mColorMap[1], program);
         SetUniform("kColor2", state.uniforms, mColorMap[2], program);
         SetUniform("kColor3", state.uniforms, mColorMap[3], program);
+        SetUniform("kOffset", state.uniforms, mOffset, program);
     }
 }
 
-void GradientClass::ApplyStaticState(Device& device, Program& prog) const
+void GradientClass::ApplyStaticState(Device& device, Program& program) const
 {
-    prog.SetUniform("kGamma",  mGamma);
-    prog.SetUniform("kColor0", mColorMap[0]);
-    prog.SetUniform("kColor1", mColorMap[1]);
-    prog.SetUniform("kColor2", mColorMap[2]);
-    prog.SetUniform("kColor3", mColorMap[3]);
+    program.SetUniform("kGamma",  mGamma);
+    program.SetUniform("kColor0", mColorMap[0]);
+    program.SetUniform("kColor1", mColorMap[1]);
+    program.SetUniform("kColor2", mColorMap[2]);
+    program.SetUniform("kColor3", mColorMap[3]);
+    program.SetUniform("kOffset", mOffset);
 }
 
 void GradientClass::IntoJson(data::Writer& data) const
@@ -860,6 +871,7 @@ void GradientClass::IntoJson(data::Writer& data) const
     data.Write("color_map1", mColorMap[1]);
     data.Write("color_map2", mColorMap[2]);
     data.Write("color_map3", mColorMap[3]);
+    data.Write("offset", mOffset);
 }
 bool GradientClass::FromJson2(const data::Reader& data)
 {
@@ -870,7 +882,8 @@ bool GradientClass::FromJson2(const data::Reader& data)
         !data.Read("color_map0", &mColorMap[0]) ||
         !data.Read("color_map1", &mColorMap[1]) ||
         !data.Read("color_map2", &mColorMap[2]) ||
-        !data.Read("color_map3", &mColorMap[3]))
+        !data.Read("color_map3", &mColorMap[3]) ||
+        !data.Read("offset", &mOffset))
         return false;
     return true;
 }

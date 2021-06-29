@@ -95,6 +95,8 @@ namespace gui
         void on_colorMap1_colorChanged(QColor);
         void on_colorMap2_colorChanged(QColor);
         void on_colorMap3_colorChanged(QColor);
+        void on_gradientOffsetX_valueChanged(int value);
+        void on_gradientOffsetY_valueChanged(int value);
         void on_scaleX_valueChanged(double);
         void on_scaleY_valueChanged(double);
         void on_velocityX_valueChanged(double);

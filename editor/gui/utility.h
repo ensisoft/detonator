@@ -361,6 +361,16 @@ inline void SetValue(QSlider* slider, NormalizedFloat value)
     slider->setValue(value.value * max);
 }
 
+inline float GetNormalizedValue(QSlider* slider)
+{
+    QSignalBlocker s(slider);
+    const auto min = slider->minimum();
+    const auto max = slider->maximum();
+    const auto val = slider->value();
+    const float range = max - min;
+    return (val - min) / range;
+}
+
 template<typename Widget, typename Value> inline
 void SetUIValue(Widget* widget, const Value& value)
 {

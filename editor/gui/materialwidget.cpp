@@ -664,6 +664,10 @@ void MaterialWidget::on_colorMap2_colorChanged(QColor)
 { SetMaterialProperties(); }
 void MaterialWidget::on_colorMap3_colorChanged(QColor)
 { SetMaterialProperties(); }
+void MaterialWidget::on_gradientOffsetX_valueChanged(int value)
+{ SetMaterialProperties(); }
+void MaterialWidget::on_gradientOffsetY_valueChanged(int value)
+{ SetMaterialProperties(); }
 void MaterialWidget::on_scaleX_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_scaleY_valueChanged(double)
@@ -1124,6 +1128,10 @@ void MaterialWidget::SetMaterialProperties()
         ptr->SetColor(GetValue(mUI.colorMap1), gfx::GradientClass::ColorIndex::TopRight);
         ptr->SetColor(GetValue(mUI.colorMap2), gfx::GradientClass::ColorIndex::BottomLeft);
         ptr->SetColor(GetValue(mUI.colorMap3), gfx::GradientClass::ColorIndex::BottomRight);
+        glm::vec2 offset;
+        offset.x = GetNormalizedValue(mUI.gradientOffsetX);
+        offset.y = GetNormalizedValue(mUI.gradientOffsetY);
+        ptr->SetOffset(offset);
     }
     else if (auto* ptr = mMaterial->AsTexture())
     {
@@ -1207,6 +1215,8 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.colorMap1, gfx::Color::White);
     SetValue(mUI.colorMap2, gfx::Color::White);
     SetValue(mUI.colorMap3, gfx::Color::White);
+    SetValue(mUI.gradientOffsetX, NormalizedFloat(0.5f));
+    SetValue(mUI.gradientOffsetY, NormalizedFloat(0.5f));
     SetValue(mUI.scaleX,    1.0f);
     SetValue(mUI.scaleY,    1.0f);
     SetValue(mUI.velocityX, 1.0f);
@@ -1329,12 +1339,20 @@ void MaterialWidget::GetMaterialProperties()
     }
     else if (auto* ptr = mMaterial->AsGradient())
     {
+        const auto& offset = ptr->GetOffset();
         SetVisible(mUI.gradientMap, true);
         SetEnabled(mUI.gradientMap, true);
+        SetEnabled(mUI.gradientOffsetY, true);
+        SetEnabled(mUI.gradientOffsetX, true);
+        SetVisible(mUI.gradientOffsetX, true);
+        SetVisible(mUI.gradientOffsetY, true);
         SetValue(mUI.colorMap0, ptr->GetColor(gfx::GradientClass::ColorIndex::TopLeft));
         SetValue(mUI.colorMap1, ptr->GetColor(gfx::GradientClass::ColorIndex::TopRight));
         SetValue(mUI.colorMap2, ptr->GetColor(gfx::GradientClass::ColorIndex::BottomLeft));
         SetValue(mUI.colorMap3, ptr->GetColor(gfx::GradientClass::ColorIndex::BottomRight));
+        SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
+        SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
+
     }
     else if (auto* ptr = mMaterial->AsTexture())
     {
