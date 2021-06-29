@@ -976,6 +976,10 @@ namespace gfx
             else BUG("incorrect color index");
             return Color4f();
         }
+        glm::vec2 GetOffset() const
+        { return mOffset; }
+        void SetOffset(const glm::vec2& offset)
+        { mOffset = offset; }
         virtual Type GetType() const override { return Type::Gradient; }
         virtual gfx::Shader* GetShader(Device& device) const override;
         virtual std::size_t GetHash() const override;
@@ -995,6 +999,7 @@ namespace gfx
     private:
         Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
                                 gfx::Color::White, gfx::Color::White};
+        glm::vec2 mOffset = {0.5f, 0.5f};
     };
 
     // Shade surfaces using a sprite animation, i.e. by cycling through
