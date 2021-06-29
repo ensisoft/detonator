@@ -395,7 +395,7 @@ void ShapeWidget::on_actionClear_triggered()
 void ShapeWidget::on_blueprints_currentIndexChanged(int)
 {
     auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
-    mBlueprint.release();
+    mBlueprint.reset();
     mBlueprint = gfx::CreateMaterialInstance(klass);
 }
 
@@ -420,7 +420,7 @@ void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
 
     SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
     if (mBlueprint && (*mBlueprint)->GetId() == resource->GetIdUtf8())
-        mBlueprint.release();
+        mBlueprint.reset();
 }
 
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)

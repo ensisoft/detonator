@@ -1332,7 +1332,7 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
 
     if (mCurrentTool->MouseRelease(mickey, view))
     {
-        mCurrentTool.release();
+        mCurrentTool.reset();
         UncheckPlacementActions();
     }
 }
