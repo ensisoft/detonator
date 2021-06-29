@@ -168,7 +168,7 @@ public:
     {
         mSurface = std::make_unique<wdk::Surface>(*mConfig, window);
         mContext->MakeCurrent(mSurface.get());
-        mConfig.release();
+        mConfig.reset();
     }
     void Dispose()
     {

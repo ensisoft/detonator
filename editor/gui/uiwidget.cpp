@@ -1321,7 +1321,7 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
     }
     else if (mCurrentTool && mCurrentTool->MouseRelease(mickey, view))
     {
-        mCurrentTool.release();
+        mCurrentTool.reset();
     }
 }
 void UIWidget::MouseDoubleClick(QMouseEvent* mickey)

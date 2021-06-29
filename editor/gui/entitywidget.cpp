@@ -2098,7 +2098,7 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
 
     if (mCurrentTool->MouseRelease(mickey, view))
     {
-        mCurrentTool.release();
+        mCurrentTool.reset();
         UncheckPlacementActions();
     }
 }
@@ -2110,7 +2110,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
     // single click when trying to react only to double click other
     // than to set a timer (which adds latency).
     // Going to simply discard any tool selection here on double click.
-    mCurrentTool.release();
+    mCurrentTool.reset();
 
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
