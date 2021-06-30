@@ -111,7 +111,7 @@ void WidgetStyleWidget::on_btnSelectWidgetFont_clicked()
         return;
 
     const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Font File"), "", tr("Font (*.ttf *.otf"));
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
     if (list.isEmpty())
         return;
     const auto& file = mWorkspace->MapFileToWorkspace(list[0]);
