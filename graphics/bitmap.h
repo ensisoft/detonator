@@ -57,6 +57,15 @@ namespace gfx
         Grayscale(const RGB& rgb); // defined after RGB
         Grayscale(const RGBA& rgba); // defined after RGBA
     };
+    inline bool operator==(const Grayscale& lhs, const Grayscale& rhs)
+    { return lhs.r == rhs.r; }
+    inline bool operator!=(const Grayscale& lhs, const Grayscale& rhs)
+    { return lhs.r != rhs.r; }
+    inline Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs)
+    { return Grayscale(lhs.r & rhs.r); }
+    inline Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
+    { return Grayscale(lhs.r | rhs.r); }
+
 
     struct RGB {
         u8 r = 0;
@@ -148,6 +157,32 @@ namespace gfx
         RGB(const RGBA& rgba);
     };
 
+    inline bool operator==(const RGB& lhs, const RGB& rhs)
+    {
+        return lhs.r == rhs.r &&
+               lhs.g == rhs.g &&
+               lhs.b == rhs.b;
+    }
+    inline bool operator!=(const RGB& lhs, const RGB& rhs)
+    { return !(lhs == rhs); }
+
+    inline RGB operator & (const RGB& lhs, const RGB& rhs)
+    {
+        RGB ret;
+        ret.r = lhs.r & rhs.r;
+        ret.g = lhs.g & rhs.g;
+        ret.b = lhs.b & rhs.b;
+        return ret;
+    }
+    inline RGB operator | (const RGB& lhs, const RGB& rhs)
+    {
+        RGB ret;
+        ret.r = lhs.r | rhs.r;
+        ret.g = lhs.g | rhs.g;
+        ret.b = lhs.b | rhs.b;
+        return ret;
+    }
+
     struct RGBA {
         u8 r = 0;
         u8 g = 0;
@@ -177,16 +212,7 @@ namespace gfx
             b = rgb.b;
         }
     };
-    inline bool operator==(const RGB& lhs, const RGB& rhs)
-    {
-        return lhs.r == rhs.r &&
-               lhs.g == rhs.g &&
-               lhs.b == rhs.b;
-    }
-    inline bool operator!=(const RGB& lhs, const RGB& rhs)
-    {
-        return !(lhs == rhs);
-    }
+
     inline bool operator==(const RGBA& lhs, const RGBA& rhs)
     {
         return lhs.r == rhs.r &&
@@ -197,6 +223,24 @@ namespace gfx
     inline bool operator!=(const RGBA& lhs, const RGBA& rhs)
     {
         return !(lhs == rhs);
+    }
+    inline RGBA operator & (const RGBA& lhs, const RGBA& rhs)
+    {
+        RGBA ret;
+        ret.r = lhs.r & rhs.r;
+        ret.g = lhs.g & rhs.g;
+        ret.b = lhs.b & rhs.b;
+        ret.a = lhs.a & rhs.a;
+        return ret;
+    }
+    inline RGBA operator | (const RGBA& lhs, const RGBA& rhs)
+    {
+        RGBA ret;
+        ret.r = lhs.r | rhs.r;
+        ret.g = lhs.g | rhs.g;
+        ret.b = lhs.b | rhs.b;
+        ret.a = lhs.a | rhs.a;
+        return ret;
     }
 
     // RGB methods that depend on RGBA
@@ -240,6 +284,18 @@ namespace gfx
         "Unexpected size of RGB pixel struct type.");
     static_assert(sizeof(RGBA) == 4,
         "Unexpected size of RGBA pixel struct type.");
+
+    template<typename Pixel>
+    inline Pixel RasterOp_SourceOver(const Pixel& dst, const Pixel& src)
+    { return src; }
+
+    template<typename Pixel>
+    inline Pixel RasterOp_BitwiseAnd(const Pixel& dst, const Pixel& src)
+    { return dst & src; }
+
+    template<typename Pixel>
+    inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
+    { return dst | src; }
 
     // Bitmap interface. Mostly designed so that it's possible
     // to keep bitmap objects around as generic bitmaps
@@ -587,12 +643,8 @@ namespace gfx
             }
         }
 
-        // Copy data from given pixel array pointer into this bitmap.
-        // The data is expected to point to a total of width*height worth of pixels.
-        // The offset (position) of where to start copying the data into can be negative.
-        // Any pixel that is not within the bounds of this bitmap is silently clipped.
-        template<typename PixelType>
-        void Copy(int x, int y, unsigned width, unsigned height, const PixelType* data)
+        template<typename PixelType, typename RasterOp>
+        void Blit(int x, int y, unsigned width, unsigned height, const PixelType* data, RasterOp op)
         {
             ASSERT(width < std::numeric_limits<int>::max());
             ASSERT(height < std::numeric_limits<int>::max());
@@ -600,23 +652,33 @@ namespace gfx
             const auto& src = IRect(x, y, width, height);
             const auto& own = IRect(GetRect());
             const auto& dst = Intersect(own, src);
-
             for (unsigned y=0; y<dst.GetHeight(); ++y)
             {
                 for (unsigned x=0; x<dst.GetWidth(); ++x)
                 {
                     const auto& g = dst.MapToGlobal(x, y);
                     const auto& l = src.MapToLocal(g);
-                    SetPixel(UPoint(g), data[l.GetY() * width + l.GetX()]);
+                    const auto& p = op(GetPixel(UPoint(g)), data[l.GetY() * width + l.GetX()]);
+                    SetPixel(UPoint(g), p);
                 }
             }
         }
 
-        // Copy data from the given other bitmap into this bitmap.
-        // The offset (position) of where to start copying the data into can be negative.
-        // Any pixel that is not within the bounds of this bitmap is silently clipped.
+        // Copy data from given pixel array pointer into this bitmap.
+        // The data is expected to point to a total of width*height worth of pixels.
+        // The destination position can be negative.
+        // Any pixel that is not within the bounds of this bitmap will be clipped.
+        // This will perform a direct bitwise pixel transfer without any regard
+        // for the underlying color space.
         template<typename PixelType>
-        void Copy(int x, int y, const Bitmap<PixelType>& bmp)
+        void Copy(int x, int y, unsigned width, unsigned height, const PixelType* data)
+        {
+            Blit(x, y, width, height, data, &RasterOp_SourceOver<PixelType>);
+        }
+
+
+        template<typename PixelType, typename RasterOp>
+        void Blit(int x, int y, const Bitmap<PixelType>& bmp, RasterOp op)
         {
             const auto w = bmp.GetWidth();
             const auto h = bmp.GetHeight();
@@ -633,9 +695,21 @@ namespace gfx
                 {
                     const auto& g = dst.MapToGlobal(x, y);
                     const auto& l = src.MapToLocal(g);
-                    SetPixel(UPoint(g), bmp.GetPixel(UPoint(l)));
+                    const auto& p = op(GetPixel(UPoint(g)), bmp.GetPixel(UPoint(l)));
+                    SetPixel(UPoint(g), p);
                 }
             }
+        }
+
+        // Copy data from the given other bitmap into this bitmap.
+        // The destination position can be negative.
+        // Any pixel that is not within the bounds of this bitmap will be clipped.
+        // This will perform a direct bitwise pixel transfer without any regard
+        // for the underlying color space.
+        template<typename PixelType>
+        void Copy(int x, int y, const Bitmap<PixelType>& bmp)
+        {
+            Blit(x, y, bmp, &RasterOp_SourceOver<PixelType>);
         }
 
         // Copy a region of pixels from this bitmap into a new bitmap.
