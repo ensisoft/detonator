@@ -415,6 +415,19 @@ public:
         material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
         material.SetGamma(2.2f);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), material);
+
+        // *perceptually* linear gradient ramp
+        material.SetColor(gfx::Color::Black,   gfx::GradientClass::ColorIndex::TopLeft);
+        material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::BottomLeft);
+        material.SetColor(gfx::Color::White,  gfx::GradientClass::ColorIndex::BottomRight);
+        material.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        gfx::FillRect(painter, gfx::FRect(500, 20, 400, 100), material);
+
+        material.SetOffset(glm::vec2(0.75, 0.0f));
+        gfx::FillRect(painter, gfx::FRect(500, 140, 400, 100), material);
+
+        material.SetOffset(glm::vec2(0.25, 0.0f));
+        gfx::FillRect(painter, gfx::FRect(500, 260, 400, 100), material);
     }
     virtual std::string GetName() const override
     { return "GradientTest"; }
