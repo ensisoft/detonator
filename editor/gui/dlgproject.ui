@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>560</width>
+    <width>626</width>
     <height>485</height>
    </rect>
   </property>
@@ -206,6 +206,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="chkCursor">
+              <property name="text">
+               <string>Cursor</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QCheckBox" name="chkVsync">
               <property name="text">
                <string>VSYNC</string>
@@ -213,9 +220,12 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkCursor">
+             <widget class="QCheckBox" name="chkSrgb">
               <property name="text">
-               <string>Cursor</string>
+               <string>sRGB</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -772,8 +782,9 @@
   <tabstop>wndHeight</tabstop>
   <tabstop>chkWndCanResize</tabstop>
   <tabstop>chkWndHasBorder</tabstop>
-  <tabstop>chkVsync</tabstop>
   <tabstop>chkCursor</tabstop>
+  <tabstop>chkVsync</tabstop>
+  <tabstop>chkSrgb</tabstop>
   <tabstop>ticksPerSecond</tabstop>
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>

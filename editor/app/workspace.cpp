@@ -1311,6 +1311,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "window_has_border"       , mSettings.window_has_border);
     JsonWrite(project, "window_vsync"            , mSettings.window_vsync);
     JsonWrite(project, "window_cursor"           , mSettings.window_cursor);
+    JsonWrite(project, "config_srgb"             , mSettings.config_srgb);
     JsonWrite(project, "ticks_per_second"        , mSettings.ticks_per_second);
     JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
@@ -1398,6 +1399,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "window_has_border",        &mSettings.window_has_border);
     JsonReadSafe(project, "window_vsync",             &mSettings.window_vsync);
     JsonReadSafe(project, "window_cursor",            &mSettings.window_cursor);
+    JsonReadSafe(project, "config_srgb",              &mSettings.config_srgb);
     JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
     JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
@@ -2170,6 +2172,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["config"], "alpha_size",   8);
         base::JsonWrite(json["config"], "stencil_size", 8);
         base::JsonWrite(json["config"], "depth_size",   0);
+        base::JsonWrite(json["config"], "srgb", mSettings.config_srgb);
         if (mSettings.multisample_sample_count == 0)
             base::JsonWrite(json["config"], "sampling", "None");
         else if (mSettings.multisample_sample_count == 4)
