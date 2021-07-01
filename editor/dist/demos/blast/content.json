@@ -4,8 +4,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": true
       },
       "id": "diUlEeS5JH",
       "idle_track": "",
@@ -301,8 +304,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "iH79uGdYNY",
       "idle_track": "",
@@ -421,8 +427,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "pNT0bA0bpw",
       "idle_track": "",
@@ -733,8 +742,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "7NAD3QgFlq",
       "idle_track": "",
@@ -796,8 +808,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "qOIpuPbyL1",
       "idle_track": "",
@@ -867,8 +882,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "7AdsZqt5pg",
       "idle_track": "",
@@ -930,8 +948,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "gMY5RFLgyd",
       "idle_track": "",
@@ -993,8 +1014,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "5LKG2wBRGq",
       "idle_track": "",
@@ -1113,8 +1137,11 @@
       "flags": {
         "KillAtLifetime": false,
         "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "A7Z5jfJF38",
       "idle_track": "shUULfTlQd",
@@ -1199,8 +1226,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "sX3kBAhLxU",
       "idle_track": "",
@@ -1262,8 +1292,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "q4pUEDx2rE",
       "idle_track": "AnvwndODTH",
@@ -1436,8 +1469,11 @@
       "flags": {
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
         "VisibleInEditor": true,
-        "VisibleInGame": true
+        "VisibleInGame": true,
+        "WantsKeyEvents": false
       },
       "id": "wXtbrxNRpX",
       "idle_track": "",
@@ -2683,8 +2719,11 @@
           "flags": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
             "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
           },
           "id": "v6jMFkJ4BJ",
           "idle_animation_id": "",
@@ -2706,8 +2745,11 @@
           "flags": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
             "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
           },
           "id": "6bXKmTw71O",
           "idle_animation_id": "",
@@ -2729,8 +2771,11 @@
           "flags": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
             "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
           },
           "id": "khKJrggLXs",
           "idle_animation_id": "",
@@ -2780,8 +2825,11 @@
           "flags": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
             "VisibleInEditor": true,
-            "VisibleInGame": true
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
           },
           "id": "WYKWrRK5Fj",
           "idle_animation_id": "",
