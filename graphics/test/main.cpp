@@ -1489,6 +1489,7 @@ int main(int argc, char* argv[])
     bool issue_gold = false;
     bool fullscreen = false;
     bool user_interaction = true;
+    bool srgb = true;
     int swap_interval = 0;
     int test_result   = EXIT_SUCCESS;
     std::string casename;
@@ -1515,6 +1516,8 @@ int main(int argc, char* argv[])
             fullscreen = true;
         else if (!std::strcmp(argv[i], "--no-user"))
             user_interaction = false;
+        else if (!std::strcmp(argv[i], "--no-srgb"))
+            srgb = false;
     }
 
     // context integration glue code that puts together
@@ -1522,7 +1525,7 @@ int main(int argc, char* argv[])
     class WindowContext : public gfx::Device::Context
     {
     public:
-        WindowContext(wdk::Config::Multisampling sampling)
+        WindowContext(wdk::Config::Multisampling sampling, bool srgb)
         {
             wdk::Config::Attributes attrs;
             attrs.red_size  = 8;
@@ -1533,7 +1536,7 @@ int main(int argc, char* argv[])
             attrs.surfaces.window = true;
             attrs.double_buffer = true;
             attrs.sampling = sampling; //wdk::Config::Multisampling::MSAA4;
-            attrs.srgb_buffer = true;
+            attrs.srgb_buffer = srgb;
 
             mConfig   = std::make_unique<wdk::Config>(attrs);
             mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
@@ -1579,7 +1582,7 @@ int main(int argc, char* argv[])
         wdk::uint_t mVisualID = 0;
     };
 
-    auto context = std::make_shared<WindowContext>(sampling);
+    auto context = std::make_shared<WindowContext>(sampling, srgb);
     auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
     auto painter = gfx::Painter::Create(device);
 

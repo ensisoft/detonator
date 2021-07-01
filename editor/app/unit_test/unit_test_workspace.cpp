@@ -452,12 +452,14 @@ R"(
     auto [ok, json, error] = base::JsonParseFile("TestPackage/test/config.json");
     TEST_REQUIRE(ok);
     TEST_REQUIRE(json["config"]["sampling"] == "MSAA16");
+    TEST_REQUIRE(json["config"]["srgb"] == true);
     TEST_REQUIRE(json["window"]["can_resize"] == false);
     TEST_REQUIRE(json["window"]["has_border"] == false);
     TEST_REQUIRE(json["window"]["width"] == 600);
     TEST_REQUIRE(json["window"]["height"] == 400);
     TEST_REQUIRE(json["window"]["set_fullscreen"] == true);
     TEST_REQUIRE(json["window"]["vsync"] == true);
+    TEST_REQUIRE(json["window"]["cursor"] == true);
     TEST_REQUIRE(json["application"]["title"] == "foobar");
     TEST_REQUIRE(json["application"]["version"] == "1.1.1");
     TEST_REQUIRE(json["application"]["library"] == "game");

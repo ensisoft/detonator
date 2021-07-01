@@ -427,6 +427,8 @@ namespace app
             bool window_vsync = false;
             // whether to use/show the native window system mouse cursor/pointer.
             bool window_cursor = true;
+            // whether to use sRGB color space or not (not using sRGB implies linear)
+            bool config_srgb = true;
             // how many times the app ticks per second.
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.
