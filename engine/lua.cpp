@@ -575,6 +575,8 @@ void ScriptEngine::Tick(double game_time, double dt)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::TickEntity))
+            continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["Tick"], entity, game_time, dt);
@@ -586,6 +588,8 @@ void ScriptEngine::Update(double game_time, double dt)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::UpdateEntity))
+            continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["Update"], entity, game_time, dt);
@@ -673,6 +677,8 @@ void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
+            continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["OnKeyDown"], entity,
@@ -686,6 +692,8 @@ void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
+            continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["OnKeyUp"], entity,

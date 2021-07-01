@@ -950,7 +950,13 @@ namespace game
             LimitLifetime,
             // Whether to automatically kill entity when it reaches
             // it's end of lifetime.
-            KillAtLifetime
+            KillAtLifetime,
+            // Invoke the tick function on the entity
+            TickEntity,
+            // Invoke the update function on the entity
+            UpdateEntity,
+            // Whether to pass keyboard events to the entity or not
+            WantsKeyEvents
         };
 
         EntityClass()
@@ -960,6 +966,9 @@ namespace game
             mFlags.set(Flags::VisibleInGame, true);
             mFlags.set(Flags::LimitLifetime, false);
             mFlags.set(Flags::KillAtLifetime, true);
+            mFlags.set(Flags::TickEntity, true);
+            mFlags.set(Flags::UpdateEntity, true);
+            mFlags.set(Flags::WantsKeyEvents, false);
         }
         EntityClass(const EntityClass& other);
 

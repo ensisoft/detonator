@@ -55,7 +55,6 @@
         "material": "Bush (2)"
     },
     "FNUUxWSBTe": {
-        "checked_for_packing": true,
         "track_4FKDqoTRqr": {
             "JByFlM7KOG": "FqRgn3KqOb",
             "OD52kANM1i": "7xS9z3T2Bo",
@@ -461,6 +460,7 @@
         "application_version": "",
         "clear_color": "4278190080",
         "command_line_arguments": "",
+        "config_srgb": true,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
         "game_viewport_height": 800,
