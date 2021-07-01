@@ -181,7 +181,7 @@ inline void ClearList(QListWidget* list)
     list->clear();
 }
 
-inline void UpdateList(QListWidget* list, const std::vector<ListItem>& items)
+inline void SetList(QListWidget* list, const std::vector<ListItem>& items)
 {
     // maintain the current/previous selections
     std::unordered_set<QString> selected;
@@ -196,6 +196,7 @@ inline void UpdateList(QListWidget* list, const std::vector<ListItem>& items)
         QListWidgetItem* li = new QListWidgetItem;
         li->setText(item.name);
         li->setData(Qt::UserRole, item.id);
+        li->setIcon(item.icon);
         if (selected.find(item.id) != selected.end())
             li->setSelected(true);
         list->addItem(li);

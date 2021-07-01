@@ -102,6 +102,9 @@ namespace gui
         void on_entityLifetime_valueChanged(double value);
         void on_chkEntityLifetime_stateChanged(int);
         void on_chkKillAtLifetime_stateChanged(int);
+        void on_chkTickEntity_stateChanged(int);
+        void on_chkUpdateEntity_stateChanged(int);
+        void on_chkKeyEvents_stateChanged(int);
         void on_btnAddIdleTrack_clicked();
         void on_btnResetIdleTrack_clicked();
         void on_btnAddScript_clicked();
@@ -193,6 +196,7 @@ namespace gui
         void MouseRelease(QMouseEvent* mickey);
         void MouseDoubleClick(QMouseEvent* mickey);
         bool KeyPress(QKeyEvent* key);
+        void DisplayEntityProperties();
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
         void UncheckPlacementActions();

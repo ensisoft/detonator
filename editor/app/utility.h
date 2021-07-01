@@ -22,6 +22,7 @@
 #  include <QString>
 #  include <QColor>
 #  include <QJsonObject>
+#  include <QIcon>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
@@ -47,6 +48,7 @@ namespace app
 struct ListItem {
     QString name;
     QString id;
+    QIcon icon;
 };
 
 // Compute a file hash based on the contents of the file.
