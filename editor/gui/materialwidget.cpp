@@ -1321,7 +1321,7 @@ void MaterialWidget::GetMaterialProperties()
                 }
             } else BUG("Texture map not found in material.");
         }
-        UpdateList(mUI.textures, textures);
+        SetList(mUI.textures, textures);
         if (!textures.empty() && mUI.textures->currentRow() == -1)
             mUI.textures->setCurrentRow(0);
 
@@ -1394,7 +1394,7 @@ void MaterialWidget::GetMaterialProperties()
             SetValue(mUI.textureName, source->GetName());
             SetEnabled(mUI.btnDelTextureMap, true);
         }
-        UpdateList(mUI.textures, textures);
+        SetList(mUI.textures, textures);
         if (!textures.empty() && mUI.textures->currentRow() == -1)
             mUI.textures->setCurrentRow(0);
         GetTextureProperties();
@@ -1446,7 +1446,7 @@ void MaterialWidget::GetMaterialProperties()
             textures.push_back(item);
             SetEnabled(mUI.btnDelTextureMap, true);
         }
-        UpdateList(mUI.textures, textures);
+        SetList(mUI.textures, textures);
         if (!textures.empty() && mUI.textures->currentRow() == -1)
             mUI.textures->setCurrentRow(0);
 

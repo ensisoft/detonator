@@ -352,23 +352,17 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
-
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
-
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.entityName, mState.entity->GetName());
-    SetValue(mUI.entityID,   mState.entity->GetId());
-    SetValue(mUI.entityLifetime, mState.entity->GetLifetime());
-    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
-    SetValue(mUI.chkKillAtLifetime, mState.entity->TestFlag(game::EntityClass::Flags::KillAtLifetime));
-    setWindowTitle("My Entity");
 
     RebuildMenus();
     RebuildCombos();
 
     RegisterEntityWidget(this);
+    DisplayEntityProperties();
     DisplayCurrentNodeProperties();
+    DisplayCurrentCameraLocation();
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -377,21 +371,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     DEBUG("Editing entity '%1'", resource.GetName());
     const game::EntityClass* content = nullptr;
     resource.GetContent(&content);
-
-    mState.entity = std::make_shared<game::EntityClass>(*content);
-    mOriginalHash = mState.entity->GetHash();
-    mScriptVarModel->Reset();
-
-    const auto vars = mState.entity->GetNumScriptVars();
-    SetEnabled(mUI.btnEditScriptVar, vars > 0);
-    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
-
-    SetValue(mUI.entityName, content->GetName());
-    SetValue(mUI.entityID, content->GetId());
-    SetValue(mUI.scriptFile, ListItemId(content->GetScriptFileId()));
-    SetValue(mUI.entityLifetime, content->GetLifetime());
-    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
-    SetValue(mUI.chkKillAtLifetime, mState.entity->TestFlag(game::EntityClass::Flags::KillAtLifetime));
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -405,6 +384,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
+    mState.entity = std::make_shared<game::EntityClass>(*content);
+    mOriginalHash = mState.entity->GetHash();
+
     // load per track resource properties.
     for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
     {
@@ -415,9 +397,13 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
         mTrackProperties[Id] = properties;
     }
 
-    setWindowTitle(resource.GetName());
-
     UpdateDeletedResourceReferences();
+
+    DisplayEntityProperties();
+    DisplayCurrentNodeProperties();
+    DisplayCurrentCameraLocation();
+
+    mScriptVarModel->Reset();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
@@ -480,11 +466,6 @@ void EntityWidget::AddActions(QMenu& menu)
 
 bool EntityWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Entity", mUI.entityName);
-    settings.saveWidget("Entity", mUI.entityID);
-    settings.saveWidget("Entity", mUI.entityLifetime);
-    settings.saveWidget("Entity", mUI.chkEntityLifetime);
-    settings.saveWidget("Entity", mUI.chkKillAtLifetime);
     settings.saveWidget("Entity", mUI.scaleX);
     settings.saveWidget("Entity", mUI.scaleY);
     settings.saveWidget("Entity", mUI.rotation);
@@ -514,11 +495,6 @@ bool EntityWidget::SaveState(Settings& settings) const
 }
 bool EntityWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Entity", mUI.entityName);
-    settings.loadWidget("Entity", mUI.entityID);
-    settings.loadWidget("Entity", mUI.entityLifetime);
-    settings.loadWidget("Entity", mUI.chkEntityLifetime);
-    settings.loadWidget("Entity", mUI.chkKillAtLifetime);
     settings.loadWidget("Entity", mUI.scaleX);
     settings.loadWidget("Entity", mUI.scaleY);
     settings.loadWidget("Entity", mUI.rotation);
@@ -572,9 +548,10 @@ bool EntityWidget::LoadState(const Settings& settings)
 
     UpdateDeletedResourceReferences();
 
-    const auto vars = mState.entity->GetNumScriptVars();
-    SetEnabled(mUI.btnEditScriptVar, vars > 0);
-    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+    DisplayEntityProperties();
+    DisplayCurrentNodeProperties();
+    DisplayCurrentCameraLocation();
+
     mScriptVarModel->Reset();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
@@ -860,59 +837,6 @@ void EntityWidget::Refresh()
         mUndoStack.push_back(*mState.entity);
         DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
     }
-
-    bool changes = false;
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
-    {
-        if (i >= mUI.trackList->count())
-        {
-            changes = true;
-            break;
-        }
-        const auto& track = mState.entity->GetAnimationTrack(i);
-        const auto& name  = app::FromUtf8(track.GetName());
-        const auto& id    = app::FromUtf8(track.GetId());
-        const auto* item  = mUI.trackList->item(i);
-        if (item->text() != name || item->data(Qt::UserRole).toString() != id)
-        {
-            changes = true;
-            break;
-        }
-    }
-    if (!changes)
-        return;
-
-    auto selected = mUI.trackList->selectedItems();
-    std::unordered_set<std::string> selected_item_ids;
-    for (const auto* item : selected)
-        selected_item_ids.insert(app::ToUtf8(item->data(Qt::UserRole).toString()));
-
-    QSignalBlocker s(mUI.idleTrack);
-    mUI.trackList->clear();
-    mUI.idleTrack->clear();
-    int selected_idle_track_index = -1;
-    SetEnabled(mUI.btnDeleteTrack, false);
-    SetEnabled(mUI.btnEditTrack, false);
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
-    {
-        const auto& track = mState.entity->GetAnimationTrack(i);
-        const auto& name  = app::FromUtf8(track.GetName());
-        const auto& id    = app::FromUtf8(track.GetId());
-        QListWidgetItem* item = new QListWidgetItem;
-        item->setText(name);
-        item->setData(Qt::UserRole, id);
-        item->setIcon(QIcon("icons:animation_track.png"));
-        mUI.trackList->addItem(item);
-        mUI.idleTrack->addItem(name, QVariant(id)); // track id as user data
-        if (selected_item_ids.find(track.GetId()) != selected_item_ids.end())
-            item->setSelected(true);
-        if (mState.entity->HasIdleTrack())
-        {
-            if (id == app::FromUtf8(mState.entity->GetIdleTrackId()))
-                selected_idle_track_index = i;
-        }
-    }
-    SetValue(mUI.idleTrack, selected_idle_track_index);
 }
 
 bool EntityWidget::GetStats(Stats* stats) const
@@ -946,6 +870,8 @@ void EntityWidget::SaveAnimationTrack(const game::AnimationTrackClass& track, co
     mState.entity->AddAnimationTrack(track);
     INFO("Saved animation track '%1'", track.GetName());
     NOTE("Saved animation track '%1'", track.GetName());
+
+    DisplayEntityProperties();
 }
 
 void EntityWidget::on_actionPlay_triggered()
@@ -1136,6 +1062,19 @@ void EntityWidget::on_chkKillAtLifetime_stateChanged(int)
 void EntityWidget::on_chkEntityLifetime_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::LimitLifetime, GetValue(mUI.chkEntityLifetime));
+}
+
+void EntityWidget::on_chkTickEntity_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::TickEntity, GetValue(mUI.chkTickEntity));
+}
+void EntityWidget::on_chkUpdateEntity_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::UpdateEntity, GetValue(mUI.chkUpdateEntity));
+}
+void EntityWidget::on_chkKeyEvents_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::WantsKeyEvents, GetValue(mUI.chkKeyEvents));
 }
 
 void EntityWidget::on_btnAddIdleTrack_clicked()
@@ -1421,10 +1360,7 @@ void EntityWidget::on_idleTrack_currentIndexChanged(int index)
         mState.entity->ResetIdleTrack();
         return;
     }
-    const auto id   = mUI.idleTrack->currentData().toString();
-    const auto name = mUI.idleTrack->currentText();
-    mState.entity->SetIdleTrackId(app::ToUtf8(id));
-    DEBUG("Entity idle track set to '%1' ('%2')", name, id);
+    mState.entity->SetIdleTrackId(GetItemId(mUI.idleTrack));
 }
 
 void EntityWidget::on_scriptFile_currentIndexChanged(int index)
@@ -1434,10 +1370,7 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
         mState.entity->ResetIdleTrack();
         return;
     }
-    const auto id   = mUI.scriptFile->currentData().toString();
-    const auto name = mUI.scriptFile->currentText();
-    mState.entity->SetSriptFileId(app::ToUtf8(id));
-    DEBUG("Entity script file set to '%1' ('%2')", name, id);
+    mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -1862,12 +1795,15 @@ void EntityWidget::NewResourceAvailable(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
+    DisplayEntityProperties();
+    DisplayCurrentNodeProperties();
 }
 void EntityWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
     UpdateDeletedResourceReferences();
     RebuildCombos();
     RebuildMenus();
+    DisplayEntityProperties();
     DisplayCurrentNodeProperties();
 }
 void EntityWidget::ResourceUpdated(const app::Resource* resource)
@@ -2180,6 +2116,47 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
     return true;
 }
 
+void EntityWidget::DisplayEntityProperties()
+{
+    std::vector<ListItem> tracks;
+    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    {
+        const auto& track = mState.entity->GetAnimationTrack(i);
+        ListItem item;
+        item.name = app::FromUtf8(track.GetName());
+        item.id   = app::FromUtf8(track.GetId());
+        item.icon = QIcon("icons:animation_track.png");
+        tracks.push_back(std::move(item));
+    }
+    SetList(mUI.trackList, tracks);
+    SetList(mUI.idleTrack, tracks);
+
+    const auto vars = mState.entity->GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteTrack, false);
+    SetEnabled(mUI.btnEditTrack, false);
+
+    SetValue(mUI.entityName, mState.entity->GetName());
+    SetValue(mUI.entityID, mState.entity->GetId());
+    SetValue(mUI.idleTrack, ListItemId(mState.entity->GetIdleTrackId()));
+    SetValue(mUI.scriptFile, ListItemId(mState.entity->GetScriptFileId()));
+    SetValue(mUI.entityLifetime, mState.entity->GetLifetime());
+    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
+    SetValue(mUI.chkKillAtLifetime, mState.entity->TestFlag(game::EntityClass::Flags::KillAtLifetime));
+    SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
+    SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
+    SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
+
+    if (!mUI.trackList->selectedItems().isEmpty())
+    {
+        SetEnabled(mUI.btnDeleteTrack, true);
+        SetEnabled(mUI.btnEditTrack, true);
+    }
+
+    setWindowTitle(GetValue(mUI.entityName));
+}
+
 void EntityWidget::DisplayCurrentNodeProperties()
 {
     SetValue(mUI.nodeID, QString(""));
@@ -2469,7 +2446,6 @@ void EntityWidget::RebuildCombos()
     }
     SetList(mUI.rbPolygon, polygons);
     SetList(mUI.scriptFile, scripts);
-    SetValue(mUI.scriptFile, ListItemId(mState.entity->GetScriptFileId()));
 }
 
 void EntityWidget::UpdateDeletedResourceReferences()
