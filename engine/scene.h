@@ -51,12 +51,15 @@ namespace game
         SceneNodeClass()
         {
             mClassId = base::RandomString(10);
-            mFlags.set(Flags::VisibleInGame, true);
-            mFlags.set(Flags::VisibleInEditor, true);
+            SetFlag(Flags::VisibleInGame, true);
+            SetFlag(Flags::VisibleInEditor, true);
         }
         // class setters.
         void SetFlag(Flags flag, bool on_off)
-        { mFlags.set(flag, on_off); }
+        {
+            mFlagValBits.set(flag, on_off);
+            mFlagSetBits.set(flag, true);
+        }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
         void SetScale(const glm::vec2& scale)
@@ -86,7 +89,15 @@ namespace game
         void ResetEntityParams()
         {
             mIdleAnimationId.clear();
+            mLifetime.reset();
+            mFlagSetBits.clear();
+            mFlagValBits.clear();
         }
+        void ResetLifetime()
+        { mLifetime.reset(); }
+        void SetLifetime(double lifetime)
+        { mLifetime = lifetime; }
+
         // class getters.
         glm::vec2 GetTranslation() const
         { return mPosition; }
@@ -107,11 +118,21 @@ namespace game
         std::shared_ptr<const EntityClass> GetEntityClass() const
         { return mEntity; }
         bool TestFlag(Flags flag) const
-        { return mFlags.test(flag); }
+        { return mFlagValBits.test(flag); }
         int GetLayer() const
         { return mLayer; }
+        double GetLifetime() const
+        { return mLifetime.value_or(0.0); }
         bool HasSpecifiedParentNode() const
         { return !mParentRenderTreeNodeId.empty(); }
+        bool HasIdleAnimationSetting() const
+        { return !mIdleAnimationId.empty(); }
+        bool HasLifetimeSetting() const
+        { return mLifetime.has_value(); }
+        bool HasFlagSetting(Flags flag) const
+        { return mFlagSetBits.test(flag); }
+        void ClearFlagSetting(Flags flag)
+        { mFlagSetBits.set(flag, false); }
 
         // Get the node hash value based on the properties.
         std::size_t GetHash() const;
@@ -147,14 +168,17 @@ namespace game
         glm::vec2   mScale = {1.0f, 1.0f};
         // The rotation of the node relative to its parent.
         float mRotation = 0.0f;
-        // Node bitflags.
-        base::bitflag<Flags> mFlags;
+        // Node bitflags. the bits are doubled because a bit
+        // is needed to indicate whether a bit is set or not
+        base::bitflag<Flags> mFlagValBits;
+        base::bitflag<Flags> mFlagSetBits;
         // the relative render order (layer index)
         int mLayer = 0;
         // the track id of the idle animation if any.
         // this setting will override the entity class idle
         // track designation if set.
         std::string mIdleAnimationId;
+        std::optional<double> mLifetime;
     private:
         // This is the runtime class reference to the
         // entity class that this node uses. Before creating

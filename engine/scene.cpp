@@ -16,6 +16,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <neargye/magic_enum.hpp>
+#include "warnpop.h"
+
 #include <unordered_set>
 #include <stack>
 
@@ -41,10 +45,13 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mRotation);
-    hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mFlagValBits);
+    hash = base::hash_combine(hash, mFlagSetBits);
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
     hash = base::hash_combine(hash, mIdleAnimationId);
+    if (mLifetime.has_value())
+        hash = base::hash_combine(hash, mLifetime.value());
     return hash;
 }
 
@@ -72,10 +79,13 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
     data.Write("position", mPosition);
     data.Write("scale",    mScale);
     data.Write("rotation", mRotation);
-    data.Write("flags",    mFlags);
+    data.Write("flag_val_bits", mFlagValBits);
+    data.Write("flag_set_bits", mFlagSetBits);
     data.Write("layer",    mLayer);
     data.Write("parent_render_tree_node", mParentRenderTreeNodeId);
     data.Write("idle_animation_id", mIdleAnimationId);
+    if (mLifetime.has_value())
+        data.Write("lifetime", mLifetime.value());
 }
 
 // static
@@ -88,11 +98,20 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
         !data.Read("position", &ret.mPosition) ||
         !data.Read("scale",    &ret.mScale) ||
         !data.Read("rotation", &ret.mRotation) ||
-        !data.Read("flags",    &ret.mFlags) ||
-        !data.Read("layer",    &ret.mLayer) ||
+        !data.Read("flag_val_bits", &ret.mFlagValBits) ||
+        !data.Read("flag_set_bits", &ret.mFlagSetBits) ||
+        !data.Read("layer", &ret.mLayer) ||
         !data.Read("parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
         !data.Read("idle_animation_id", &ret.mIdleAnimationId))
         return std::nullopt;
+    if (data.HasValue("lifetime"))
+    {
+        // todo: double
+        float lifetime = 0.0;
+        if (!data.Read("lifetime", &lifetime))
+            return std::nullopt;
+        ret.mLifetime = lifetime;
+    }
     return ret;
 }
 
@@ -585,12 +604,27 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.id       = node.GetId();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
-        // override entity instance flags with the flag values from the
-        // placement scene node class.
-        entity->SetFlag(Entity::Flags::VisibleInGame, node.TestFlag(SceneNodeClass::Flags::VisibleInGame));
+
+        // these need always be set for each entity spawned from scene
+        // placement node.
         entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
-        entity->SetIdleTrackId(node.GetIdleAnimationId());
         entity->SetLayer(node.GetLayer());
+
+        // optionally set instance settings, if these are not set then
+        // entity class defaults apply.
+        if (node.HasIdleAnimationSetting())
+            entity->SetIdleTrackId(node.GetIdleAnimationId());
+        if (node.HasLifetimeSetting())
+            entity->SetLifetime(node.GetLifetime());
+
+        // check which flags the scene node has set and set those on the
+        // entity instance. for any flag setting that is not set entity class
+        // default will apply.
+        for (const auto& flag : magic_enum::enum_values<Entity::Flags>())
+        {
+            if (node.HasFlagSetting(flag))
+                entity->SetFlag(flag, node.TestFlag(flag));
+        }
 
         map[&node] = entity.get();
         mIdMap[entity->GetId()] = entity.get();

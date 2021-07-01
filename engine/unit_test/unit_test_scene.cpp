@@ -294,6 +294,9 @@ void unit_test_scene_class()
 void unit_test_scene_instance_create()
 {
     auto entity = std::make_shared<game::EntityClass>();
+    entity->SetFlag(game::EntityClass::Flags::TickEntity, true);
+    entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
+    entity->SetLifetime(5.0f);
 
     game::SceneClass klass;
     // set some entity nodes in the scene class.
@@ -307,12 +310,15 @@ void unit_test_scene_instance_create()
         game::SceneNodeClass node;
         node.SetName("child_1");
         node.SetEntity(entity);
+        node.SetFlag(game::SceneNodeClass::Flags::TickEntity, false);
+        node.SetFlag(game::SceneNodeClass::Flags::UpdateEntity, true);
         klass.AddNode(node);
     }
     {
         game::SceneNodeClass node;
         node.SetName("child_2");
         node.SetEntity(entity);
+        node.SetLifetime(3.0f);
         klass.AddNode(node);
     }
     // link to the scene graph
@@ -349,6 +355,12 @@ void unit_test_scene_instance_create()
     TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(2).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_1")->TestFlag(game::EntityClass::Flags::TickEntity) == false);
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_1")->TestFlag(game::EntityClass::Flags::UpdateEntity) == true);
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_1")->GetLifetime() == real::float32(5.0f));
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->TestFlag(game::EntityClass::Flags::TickEntity) == true);
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->TestFlag(game::EntityClass::Flags::UpdateEntity) == false);
+    TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->GetLifetime() == real::float32(3.0f));
 
     // the scene instance has the initial values of scripting variables based on the
     // values set in the scene class object.

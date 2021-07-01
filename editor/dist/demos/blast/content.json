@@ -2409,10 +2409,10 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kColor0",
+          "name": "kBaseColor",
           "value": {
             "a": 1.0,
-            "b": 0.0,
+            "b": 0.009170671924948692,
             "g": 0.0,
             "r": 1.0
           }
@@ -2422,10 +2422,10 @@
           "value": 1.0
         },
         {
-          "name": "kBaseColor",
+          "name": "kColor0",
           "value": {
             "a": 1.0,
-            "b": 0.009170671924948692,
+            "b": 0.0,
             "g": 0.0,
             "r": 1.0
           }
@@ -2569,10 +2569,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kGamma",
-          "value": 1.0
-        },
-        {
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
@@ -2580,6 +2576,10 @@
             "g": 0.607797384262085,
             "r": 0.05098039284348488
           }
+        },
+        {
+          "name": "kGamma",
+          "value": 1.0
         }
       ],
       "wrap_x": "Clamp",
@@ -2716,7 +2716,16 @@
       "nodes": [
         {
           "entity": "diUlEeS5JH",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -2742,7 +2751,16 @@
         },
         {
           "entity": "7NAD3QgFlq",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -2768,7 +2786,16 @@
         },
         {
           "entity": "wXtbrxNRpX",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -2822,7 +2849,16 @@
       "nodes": [
         {
           "entity": "7NAD3QgFlq",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,

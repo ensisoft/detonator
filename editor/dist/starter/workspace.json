@@ -30,6 +30,7 @@
         "application_version": "",
         "clear_color": "4281486692",
         "command_line_arguments": "",
+        "config_srgb": true,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
         "game_viewport_height": 800,

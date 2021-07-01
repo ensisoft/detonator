@@ -39,6 +39,11 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnResetIdleAnimation_clicked();
+        void on_btnResetLifetime_clicked();
+        void on_entityLifetime_valueChanged(double value);
+    private:
+        void SetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
+        void GetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
     private:
         Ui::DlgEntity mUI;
     private:

@@ -7551,7 +7551,16 @@
       "nodes": [
         {
           "entity": "HFSA8Yezdr",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7577,7 +7586,16 @@
         },
         {
           "entity": "HFSA8Yezdr",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7603,7 +7621,16 @@
         },
         {
           "entity": "HFSA8Yezdr",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7629,7 +7656,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7655,7 +7691,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7681,7 +7726,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7707,7 +7761,16 @@
         },
         {
           "entity": "FNUUxWSBTe",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7733,7 +7796,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7759,7 +7831,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7785,7 +7866,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7811,7 +7901,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7837,7 +7936,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7863,7 +7971,16 @@
         },
         {
           "entity": "HFSA8Yezdr",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7889,7 +8006,16 @@
         },
         {
           "entity": "HFSA8Yezdr",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7915,7 +8041,16 @@
         },
         {
           "entity": "bEAIWd3ESl",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7941,7 +8076,16 @@
         },
         {
           "entity": "bEAIWd3ESl",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7967,7 +8111,16 @@
         },
         {
           "entity": "y7bWvFuoie",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7993,7 +8146,16 @@
         },
         {
           "entity": "y7bWvFuoie",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8019,7 +8181,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8045,7 +8216,16 @@
         },
         {
           "entity": "HpAo2l11sT",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8071,7 +8251,16 @@
         },
         {
           "entity": "HpAo2l11sT",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8097,7 +8286,16 @@
         },
         {
           "entity": "y7bWvFuoie",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8123,7 +8321,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8149,7 +8356,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8175,7 +8391,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8201,7 +8426,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8227,7 +8461,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8253,7 +8496,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8279,7 +8531,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8305,7 +8566,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8331,7 +8601,16 @@
         },
         {
           "entity": "2Q2vkLGDEg",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8357,7 +8636,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8383,7 +8671,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8409,7 +8706,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8435,7 +8741,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8461,7 +8776,16 @@
         },
         {
           "entity": "ZNaUsmn31R",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8487,7 +8811,16 @@
         },
         {
           "entity": "ZNaUsmn31R",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8513,7 +8846,16 @@
         },
         {
           "entity": "Y3nvZp6DaX",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8539,7 +8881,16 @@
         },
         {
           "entity": "Y3nvZp6DaX",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8565,7 +8916,16 @@
         },
         {
           "entity": "y7bWvFuoie",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8591,7 +8951,16 @@
         },
         {
           "entity": "HpAo2l11sT",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8617,7 +8986,16 @@
         },
         {
           "entity": "HpAo2l11sT",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8643,7 +9021,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8669,7 +9056,16 @@
         },
         {
           "entity": "z3qBPdpAGa",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8695,7 +9091,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8721,7 +9126,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8747,7 +9161,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8773,7 +9196,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8799,7 +9231,16 @@
         },
         {
           "entity": "WtCkGlPDwf",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8825,7 +9266,16 @@
         },
         {
           "entity": "tqF7brLL08",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8851,7 +9301,16 @@
         },
         {
           "entity": "tqF7brLL08",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8877,7 +9336,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8903,7 +9371,16 @@
         },
         {
           "entity": "O5QefURbEM",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8929,7 +9406,16 @@
         },
         {
           "entity": "y7bWvFuoie",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8955,7 +9441,16 @@
         },
         {
           "entity": "bEAIWd3ESl",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8981,7 +9476,16 @@
         },
         {
           "entity": "Jn0SpbgGSY",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9007,7 +9511,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9033,7 +9546,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9059,7 +9581,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9085,7 +9616,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9111,7 +9651,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9137,7 +9686,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9163,7 +9721,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9189,7 +9756,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9215,7 +9791,16 @@
         },
         {
           "entity": "dfb84OzuRo",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9241,7 +9826,16 @@
         },
         {
           "entity": "gwm3bTflRn",
-          "flags": {
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false
+          },
+          "flag_val_bits": {
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,

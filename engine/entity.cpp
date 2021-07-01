@@ -1002,6 +1002,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     mInstanceId  = base::RandomString(10);
     mIdleTrackId = mClass->GetIdleTrackId();
     mFlags       = mClass->GetFlags();
+    mLifetime    = mClass->GetLifetime();
 }
 
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)
@@ -1252,7 +1253,7 @@ bool Entity::HasExpired() const
 {
     if (!mFlags.test(EntityClass::Flags::LimitLifetime))
         return false;
-    else if (mCurrentTime >= mClass->GetLifetime())
+    else if (mCurrentTime >= mLifetime)
         return true;
     return false;
 }

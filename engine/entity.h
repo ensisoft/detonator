@@ -1394,6 +1394,8 @@ namespace game
         { mIdleTrackId = id; }
         void SetLayer(int layer)
         { mLayer = layer; }
+        void SetLifetime(double lifetime)
+        { mLifetime = lifetime; }
 
         // Get the current track if any. (when IsPlaying is true)
         AnimationTrack* GetCurrentTrack()
@@ -1401,6 +1403,8 @@ namespace game
         const AnimationTrack* GetCurrentTrack() const
         { return mAnimationTrack.get(); }
 
+        double GetLifetime() const
+        { return mLifetime; }
         double GetTime() const
         { return mCurrentTime; }
         std::string GetIdleTrackId() const
@@ -1458,6 +1462,8 @@ namespace game
         RenderTree mRenderTree;
         // Current entity time.
         double mCurrentTime = 0.0;
+        // Entity's max lifetime.
+        double mLifetime = 0.0;
         // the render layer index.
         int mLayer = 0;
         // entity bit flags
