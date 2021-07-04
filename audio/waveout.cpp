@@ -36,14 +36,14 @@ namespace audio
 #ifdef WINDOWS_OS
 
 // AudioDevice implementation for Waveout
-class Waveout : public AudioDevice
+class Waveout : public Device
 {
 public:
     Waveout(const char*)
     {}
-    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSource> source) override
+    virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
     {
-        auto s = std::make_shared<Stream>(std::move(source));
+        auto s = std::make_shared<PlaybackStream>(std::move(source));
         streams_.push_back(s);
         return s;
     }
@@ -58,7 +58,7 @@ public:
             }
             else
             {
-                std::shared_ptr<Stream> s = stream.lock();
+                std::shared_ptr<PlaybackStream> s = stream.lock();
                 s->poll();
                 it++;
             }
@@ -69,7 +69,7 @@ public:
     {}
 
     virtual State GetState() const override
-    { return AudioDevice::State::Ready; }
+    { return Device::State::Ready; }
 private:
     class AlignedAllocator
     {
@@ -122,10 +122,10 @@ private:
 
     private:
         struct buffer {
-            void* base;
-            bool used;
-            size_t size;
-            size_t alignment;
+            void* base = nullptr;
+            bool used = false;
+            size_t size = 0;
+            size_t alignment = 0;
         };
 
         std::vector<buffer> buffers_;
@@ -150,7 +150,7 @@ private:
 
             AlignedAllocator::get().free(buffer_);
         }
-        std::size_t fill(AudioSource& source)
+        std::size_t fill(Source& source)
         {
             const auto pcm_bytes = source.FillBuffer(buffer_, size_);
 
@@ -177,17 +177,17 @@ private:
         void* buffer_ = nullptr;
     };
 
-    class Stream : public AudioStream
+    class PlaybackStream : public Stream
     {
     public:
-        Stream(std::unique_ptr<AudioSource> source) 
+        PlaybackStream(std::unique_ptr<Source> source)
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
 
             source_      = std::move(source);
             done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
             last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
-            state_       = AudioStream::State::None;
+            state_       = Stream::State::None;
             num_pcm_bytes_ = 0;
 
             const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
@@ -220,7 +220,7 @@ private:
                 buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, block_size * 10000, block_size));
             }
         }
-       ~Stream()
+       ~PlaybackStream()
         {
             auto ret = waveOutReset(handle_);
             assert(ret == MMSYSERR_NOERROR);
@@ -234,15 +234,15 @@ private:
             assert(ret == MMSYSERR_NOERROR);
         }
 
-        virtual AudioStream::State GetState() const override
+        virtual Stream::State GetState() const override
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             return state_;
         }
 
-        virtual std::unique_ptr<AudioSource> GetFinishedSource() override
+        virtual std::unique_ptr<Source> GetFinishedSource() override
         {
-            std::unique_ptr<AudioSource> ret;
+            std::unique_ptr<Source> ret;
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             if (state_ == State::Complete || state_ == State::Error)
                 ret = std::move(source_);
@@ -289,8 +289,8 @@ private:
             if (done_buffer_ == last_buffer_)
                 return;
 
-            if (state_ == AudioStream::State::Error ||
-                state_ == AudioStream::State::Complete)
+            if (state_ == Stream::State::Error ||
+                state_ == Stream::State::Complete)
                 return;
 
             // todo: we have a possible problem here that we might skip
@@ -316,7 +316,7 @@ private:
             if (dwInstance == 0)
                 return;
 
-            auto* this_ = reinterpret_cast<Stream*>(dwInstance);
+            auto* this_ = reinterpret_cast<PlaybackStream*>(dwInstance);
 
             std::lock_guard<std::recursive_mutex> lock(this_->mutex_);
 
@@ -328,17 +328,17 @@ private:
                 case WOM_DONE:
                     this_->done_buffer_++;
                     if (this_->source_ && !this_->source_->HasNextBuffer(this_->num_pcm_bytes_))
-                        this_->state_ = AudioStream::State::Complete;
+                        this_->state_ = Stream::State::Complete;
                     break;
 
                 case WOM_OPEN:
-                    this_->state_ = AudioStream::State::Ready;
+                    this_->state_ = Stream::State::Ready;
                     break;
             }
         }
 
     private:
-        std::unique_ptr<AudioSource> source_;
+        std::unique_ptr<Source> source_;
         std::uint64_t num_pcm_bytes_ = 0;
     private:
         HWAVEOUT handle_ = NULL;
@@ -351,13 +351,13 @@ private:
     };
 private:
     // currently active streams that we have to pump
-    std::list<std::weak_ptr<Stream>> streams_;
+    std::list<std::weak_ptr<PlaybackStream>> streams_;
 };
 
 // static
-std::unique_ptr<AudioDevice> AudioDevice::Create(const char* appname)
+std::unique_ptr<Device> Device::Create(const char* appname)
 {
-    std::unique_ptr<AudioDevice> device;
+    std::unique_ptr<Device> device;
     device = std::make_unique<Waveout>(appname);
     if (device)
         device->Init();

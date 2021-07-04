@@ -22,12 +22,12 @@
 
 namespace audio
 {
-    class AudioSource;
+    class Source;
 
     // Audio stream is the currently running state of some 
     // audio stream that exists on the device and is possibly
     // being played back.
-    class AudioStream
+    class Stream
     {
     public:
         // State of the stream.
@@ -43,7 +43,7 @@ namespace audio
             Complete
         };
         // dtor.
-        virtual ~AudioStream() = default;
+        virtual ~Stream() = default;
 
         // Get current stream state.
         virtual State GetState() const = 0;
@@ -51,7 +51,7 @@ namespace audio
         // Gives back the audio source but only when the state of the
         // stream is is either error or complete, i.e. the stream has
         // finished playback and reading data from the source.
-        virtual std::unique_ptr<AudioSource> GetFinishedSource() = 0;
+        virtual std::unique_ptr<Source> GetFinishedSource() = 0;
 
         // Get the human readable stream name if any.
         virtual std::string GetName() const = 0;
