@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
     
-    audio::AudioPlayer player(audio::AudioDevice::Create("audio_test"));
+    audio::Player player(audio::Device::Create("audio_test"));
     if (sine)
     {
         auto sample = std::make_unique<audio::SineGenerator>(500);
@@ -173,11 +173,11 @@ int main(int argc, char* argv[])
         while (completed_loop_count != loops)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            audio::AudioPlayer::TrackEvent e;
+            audio::Player::TrackEvent e;
             if (player.GetEvent(&e))
             {
                 DEBUG("Track id = %1 event", e.id);
-                INFO("Track status %1", e.status == audio::AudioPlayer::TrackStatus::Failure 
+                INFO("Track status %1", e.status == audio::Player::TrackStatus::Failure
                     ? "Failed" : "Success");
                 completed_loop_count++;
             }

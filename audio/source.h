@@ -32,9 +32,9 @@ namespace audio
     // for general audio terminology see the below reference
     // https://larsimmisch.github.io/pyalsaaudio/terminology.html
 
-    // AudioSource provides access to series of buffers
-    // of PCM encoded audio sample data.
-    class AudioSource
+    // Source provides access to series of buffers of PCM encoded
+    // audio data.
+    class Source
     {
     public:
         // The audio sample format.
@@ -42,7 +42,7 @@ namespace audio
             // 32bit float Native Endian
             Float32_NE 
         };
-        virtual ~AudioSource() = default;
+        virtual ~Source() = default;
 
         // Get the sample rate in Hz.
         virtual unsigned GetRateHz() const = 0;
@@ -75,7 +75,7 @@ namespace audio
     // AudioFile implements reading audio samples from an
     // encoded audio file on the file system.
     // Supported formats, WAV, OGG, MP3 (todo: check which others)
-    class AudioFile : public AudioSource
+    class AudioFile : public Source
     {
     public: 
         // Construct audio file audio sample by reading the contents
@@ -119,7 +119,7 @@ namespace audio
     };
 
 #ifdef AUDIO_ENABLE_TEST_SOUND
-    class SineGenerator : public AudioSource
+    class SineGenerator : public Source
     {
     public:
         SineGenerator(unsigned frequency) : frequency_(frequency)

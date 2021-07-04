@@ -34,7 +34,7 @@ namespace audio
 #ifdef LINUX_OS
 
 // AudioDevice implementation for PulseAudio
-class PulseAudio : public AudioDevice
+class PulseAudio : public Device
 {
 public:
     PulseAudio(const char* appname)
@@ -54,15 +54,15 @@ public:
         pa_mainloop_free(loop_);
     }
 
-    virtual std::shared_ptr<AudioStream> Prepare(std::unique_ptr<AudioSource> source) override
+    virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
     {
         auto stream = std::make_shared<PlaybackStream>(std::move(source), context_);
 
-        while (stream->GetState() == AudioStream::State::None)
+        while (stream->GetState() == Stream::State::None)
         {
             pa_mainloop_iterate(loop_, 0, nullptr);
         }
-        if (stream->GetState() == AudioStream::State::Error)
+        if (stream->GetState() == Stream::State::Error)
             throw std::runtime_error("pulseaudio stream error");
 
         return stream;
@@ -76,12 +76,12 @@ public:
     virtual void Init() override
     {
         // this is kinda ugly...
-        while (state_ == AudioDevice::State::None)
+        while (state_ == Device::State::None)
         {
             pa_mainloop_iterate(loop_, 0, nullptr);
         }
 
-        if (state_ == AudioDevice::State::Error)
+        if (state_ == Device::State::Error)
             throw std::runtime_error("pulseaudio error");
 
     }
@@ -94,10 +94,10 @@ public:
     PulseAudio(const PulseAudio&) = delete;
     PulseAudio& operator=(const PulseAudio&) = delete;
 private:
-    class PlaybackStream  : public AudioStream
+    class PlaybackStream  : public Stream
     {
     public:
-        PlaybackStream(std::unique_ptr<AudioSource> source, pa_context* context)
+        PlaybackStream(std::unique_ptr<Source> source, pa_context* context)
             : source_(std::move(source))
         {
             const std::string& name = source_->GetName();
@@ -127,12 +127,12 @@ private:
             pa_stream_unref(stream_);
         }
 
-        virtual AudioStream::State GetState() const override
+        virtual Stream::State GetState() const override
         {  return state_; }
         
-        virtual std::unique_ptr<AudioSource> GetFinishedSource() override
+        virtual std::unique_ptr<Source> GetFinishedSource() override
         {
-            std::unique_ptr<AudioSource> ret;
+            std::unique_ptr<Source> ret;
             if (state_ == State::Complete || state_ == State::Error)
                 ret = std::move(source_);
             return ret;
@@ -166,7 +166,7 @@ private:
             DEBUG("Drained stream!");
 
             auto* this_ = static_cast<PlaybackStream*>(user);
-            this_->state_ = AudioStream::State::Complete;
+            this_->state_ = Stream::State::Complete;
         }
         static void write_callback(pa_stream* stream, size_t length, void* user)
         {
@@ -214,19 +214,19 @@ private:
 
                 case PA_STREAM_FAILED:
                    DEBUG("PA_STREAM_FAILED");
-                   this_->state_ = AudioStream::State::Error;
+                   this_->state_ = Stream::State::Error;
                    break;
 
                 case PA_STREAM_READY:
                     DEBUG("PA_STREAM_READY");
-                    this_->state_ = AudioStream::State::Ready;
+                    this_->state_ = Stream::State::Ready;
                     break;
             }
         }
     private:
-        std::unique_ptr<AudioSource> source_;
+        std::unique_ptr<Source> source_;
         pa_stream*  stream_  = nullptr;
-        AudioStream::State state_ = AudioStream::State::None;
+        Stream::State state_ = Stream::State::None;
         std::uint64_t num_pcm_bytes_ = 0;
     private:
     };
@@ -271,13 +271,13 @@ private:
     pa_mainloop_api* main_ = nullptr;
     pa_context* context_   = nullptr;
 private:
-    State state_ = AudioDevice::State::None;
+    State state_ = Device::State::None;
 };
 
 // static
-std::unique_ptr<AudioDevice> AudioDevice::Create(const char* appname)
+std::unique_ptr<Device> Device::Create(const char* appname)
 {
-    std::unique_ptr<AudioDevice> device;
+    std::unique_ptr<Device> device;
     device = std::make_unique<PulseAudio>(appname);
     if (device)
         device->Init();
