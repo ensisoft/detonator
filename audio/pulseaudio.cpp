@@ -179,24 +179,47 @@ private:
         {
             auto* this_  = static_cast<PlaybackStream*>(user);
             auto& source = this_->source_;
-
             // we should always still have the source object as long
             // as the state is ready and playing and we're expected
             // to write more data into the stream!
             ASSERT(source);
-            
-            std::vector<std::uint8_t> buff(length);
+            // callback while the stream is being drained. weird..
+            if (!source->HasNextBuffer(this_->num_pcm_bytes_))
+                return;
 
-            const auto bytes = this_->source_->FillBuffer(&buff[0], length);
+            // try to see if we have a happy case and can get a buffer
+            // with a matching size from the server. however it's possible
+            // that the returned buffer doesn't have enough capacity
+            // in which case it cannot be used. :(
+            void* buffer = nullptr;
+            size_t buffer_size = -1;
+            if (pa_stream_begin_write(this_->stream_, &buffer, &buffer_size))
+                throw std::runtime_error("pa_stream_begin_write failed.");
 
-            pa_stream_write(this_->stream_, &buff[0], bytes, nullptr, 0, PA_SEEK_RELATIVE);
+            std::vector<std::uint8_t> backup_buff;
+            if (buffer_size < length)
+            {
+                pa_stream_cancel_write(this_->stream_);
+                backup_buff.resize(length);
+                buffer = &backup_buff[0];
+            }
+
+            const auto bytes = this_->source_->FillBuffer(buffer, length);
+
+            // it seems that if the pa_stream_write doesn't write exactly
+            // as many bytes as requested the playback stops and the
+            // callback is no longer invoked.
+            // as of July-2021 there's an open bug about this.
+            // https://gitlab.freedesktop.org/pulseaudio/pulseaudio/-/issues/1132
+            pa_stream_write(this_->stream_, buffer, bytes, nullptr, 0, PA_SEEK_RELATIVE);
             this_->num_pcm_bytes_ += bytes;
 
             // reaching the end of the stream, i.e. we're providing the last
             // write of data. schedule the drain operation callback on the stream.                
             if (!source->HasNextBuffer(this_->num_pcm_bytes_))
                 pa_operation_unref(pa_stream_drain(this_->stream_, drain_callback, this_));
-
+            else if (bytes != length)
+                WARN("Write callback requested %1 bytes but only %2 provided", length, bytes);
         }
 
         static void state_callback(pa_stream* stream, void* user)
