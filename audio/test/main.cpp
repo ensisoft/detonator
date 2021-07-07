@@ -68,12 +68,13 @@ int main(int argc, char* argv[])
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
-            "\t--sine\t\tTest procedural audio (sine wave).\n");
+            "\t--sine\t\tTest procedural audio (sine wave).\n"
+            "\t--graph1\t\tTest audio graph 1.\n");
         std::printf("Have a good day.\n");
         return 0;
     }
 
-    base::OStreamLogger logger(std::cout);
+    base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
     
