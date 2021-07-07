@@ -33,6 +33,9 @@
 int main(int argc, char* argv[])
 {
     std::string path(".");
+
+    audio::Source::Format format = audio::Source::Format::Float32;
+
     unsigned loops = 1;
     bool ogg_files = false;
     bool pcm_8bit_files = false;
@@ -55,10 +58,11 @@ int main(int argc, char* argv[])
             path = argv[++i];
         else if (!std::strcmp(argv[i], "--loops"))
             loops = std::stoi(argv[++i]);
-        
+        else if (!std::strcmp(argv[i], "--int16"))
+            format = audio::Source::Format::Int16;
+        else if (!std::strcmp(argv[i], "--int32"))
+            format = audio::Source::Format::Int32;
     }
-
-
 
     if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine))
     {
@@ -68,8 +72,7 @@ int main(int argc, char* argv[])
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
-            "\t--sine\t\tTest procedural audio (sine wave).\n"
-            "\t--graph1\t\tTest audio graph 1.\n");
+            "\t--sine\t\tTest procedural audio (sine wave).\n");
         std::printf("Have a good day.\n");
         return 0;
     }
@@ -81,8 +84,9 @@ int main(int argc, char* argv[])
     audio::Player player(audio::Device::Create("audio_test"));
     if (sine)
     {
-        auto sample = std::make_unique<audio::SineGenerator>(500);
-        const auto id = player.Play(std::move(sample), false /*looping*/);
+        auto source = std::make_unique<audio::SineGenerator>(500);
+        source->SetFormat(format);
+        const auto id = player.Play(std::move(source), false /*looping*/);
         DEBUG("New sine wave stream = %1", id);        
         INFO("Playing procedural sine audio for 10 seconds.");
         std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -165,9 +169,10 @@ int main(int argc, char* argv[])
         INFO("Testing: '%1'", filename);
         base::FlushGlobalLog();
 
-        auto sample = std::make_unique<audio::AudioFile>(filename, "test");
+        auto source = std::make_unique<audio::AudioFile>(filename, "test");
+        source->SetFormat(format);
         const auto looping = loops > 1;
-        const auto id = player.Play(std::move(sample), looping);
+        const auto id = player.Play(std::move(source), looping);
         DEBUG("New track. id = %1", id);
 
         unsigned completed_loop_count = 0;
