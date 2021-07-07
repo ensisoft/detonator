@@ -125,6 +125,7 @@ namespace audio
         const std::string name_;
         Format mFormat = Format::Float32;
         std::unique_ptr<SndFileVirtualDevice> device_;
+        std::size_t frames_ = 0;
     };
 
 #ifdef AUDIO_ENABLE_TEST_SOUND
