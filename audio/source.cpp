@@ -21,6 +21,7 @@
 #include <cstdio>
 
 #include "base/assert.h"
+#include "base/logging.h"
 #include "audio/source.h"
 #include "audio/sndfile.h"
 
@@ -52,6 +53,9 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     const auto num_channels = device_->GetNumChannels();
     const auto frame_size = num_channels * ByteSize(mFormat);
     const auto possible_num_frames = max_bytes / frame_size;
+    const auto frames_available = device_->GetNumFrames() - frames_;
+    const auto frames_to_read = std::min((unsigned)frames_available,
+                                         (unsigned)possible_num_frames);
     // change the output format into floats.
     // see this bug that confirms crackling playback wrt ogg files.
     // https://github.com/UniversityRadioYork/ury-playd/issues/111
@@ -59,22 +63,20 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     // the same test ogg (mentioned in the bug) without crackles.
     size_t ret = 0;
     if (mFormat == Format::Float32)
-        ret = device_->ReadFrames((float*)buff, possible_num_frames);
+        ret = device_->ReadFrames((float*)buff, frames_to_read);
     else if (mFormat == Format::Int32)
-        ret = device_->ReadFrames((int*)buff, possible_num_frames);
+        ret = device_->ReadFrames((int*)buff, frames_to_read);
     else if (mFormat == Format::Int16)
-        ret = device_->ReadFrames((short*)buff, possible_num_frames);
+        ret = device_->ReadFrames((short*)buff, frames_to_read);
+    if (ret != frames_to_read)
+        WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames_to_read);
+    frames_ += ret;
     return ret * frame_size;
 }
 
 bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const 
 {
-    const auto num_frames = device_->GetNumFrames();
-    const auto num_channels = device_->GetNumChannels();
-    const auto num_bytes = num_frames * num_channels * sizeof(float);
-    if (num_bytes == num_bytes_read)
-        return false;
-    return true;
+    return frames_ < device_->GetNumFrames();
 }
 
 void AudioFile::Reset()
@@ -104,6 +106,7 @@ void AudioFile::Open()
     auto buffer = std::make_unique<SndFileBuffer>(std::move(buff));
     auto device = std::make_unique<SndFileVirtualDevice>(std::move(buffer));
     device_ = std::move(device);
+    frames_ = 0;
 }
 
 } // namespace
