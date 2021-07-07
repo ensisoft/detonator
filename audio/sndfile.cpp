@@ -54,7 +54,13 @@ SndFileVirtualDevice::SndFileVirtualDevice(std::unique_ptr<SndFileIODevice> devi
     SF_INFO info = {};
     mFile = sf_open_virtual(&io, SFM_READ, &info, (void*)device.get());
     if (!mFile)
-    throw std::runtime_error("sf_open_virtual failed.");
+        throw std::runtime_error("sf_open_virtual failed.");
+    // When reading floating point wavs with the integer read functions
+    // this flag needs to be set for proper conversion.
+    // see Note2 @ http://www.mega-nerd.com/libsndfile/api.html#readf
+    const auto cmd = SF_TRUE;
+    sf_command(mFile, SFC_SET_SCALE_FLOAT_INT_READ, (void*)&cmd, sizeof(cmd));
+
     mSampleRate = info.samplerate;
     mChannels   = info.channels;
     mFrames     = info.frames;
