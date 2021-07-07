@@ -394,6 +394,7 @@ install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/di
 # audio test application. Simple console application that plays
 # OGG and WAV files in several different formats.
 add_executable(audio_test
+    audio/sndfile.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/source.cpp

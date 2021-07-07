@@ -20,6 +20,7 @@
   #include <mutex>
   #include <Windows.h>
   #include <Mmsystem.h>
+  #include <mmreg.h>
   #pragma comment(lib, "Winmm.lib")
 #endif
 
@@ -190,14 +191,27 @@ private:
             state_       = Stream::State::None;
             num_pcm_bytes_ = 0;
 
-            const auto WAVE_FORMAT_IEEE_FLOAT = 0x0003;
+            const auto format = source_->GetFormat();
 
             WAVEFORMATEX wfx = {0};
             wfx.nSamplesPerSec  = source_->GetRateHz();
-            wfx.wBitsPerSample  = 32;
-            wfx.nChannels       = 2;
+            wfx.nChannels       = source_->GetNumChannels();
             wfx.cbSize          = 0; // extra info
-            wfx.wFormatTag      = WAVE_FORMAT_IEEE_FLOAT;
+            if (format == Source::Format::Float32)
+            {
+                wfx.wBitsPerSample = 32;
+                wfx.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+            }
+            else if (format == Source::Format::Int32)
+            {
+                wfx.wBitsPerSample = 32;
+                wfx.wFormatTag = WAVE_FORMAT_PCM;
+            }
+            else if (format == Source::Format::Int16)
+            {
+                wfx.wBitsPerSample = 16;
+                wfx.wFormatTag = WAVE_FORMAT_PCM;
+            }
             wfx.nBlockAlign     = (wfx.wBitsPerSample * wfx.nChannels) / 8;
             wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
             MMRESULT ret = waveOutOpen(

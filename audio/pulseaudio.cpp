@@ -104,7 +104,14 @@ private:
             pa_sample_spec spec;
             spec.channels = source_->GetNumChannels();
             spec.rate     = source_->GetRateHz();
-            spec.format   = PA_SAMPLE_FLOAT32NE;
+            if (source_->GetFormat() == Source::Format::Float32)
+                spec.format = PA_SAMPLE_FLOAT32NE;
+            else if (source_->GetFormat() == Source::Format::Int16)
+                spec.format = PA_SAMPLE_S16NE;
+            else if (source_->GetFormat() == Source::Format::Int32)
+                spec.format = PA_SAMPLE_S32NE;
+            else BUG("Unsupported playback format.");
+
             stream_ = pa_stream_new(context, name.c_str(), &spec, nullptr);
             if (!stream_)
                 throw std::runtime_error("create stream failed");
@@ -230,8 +237,6 @@ private:
         std::uint64_t num_pcm_bytes_ = 0;
     private:
     };
-
-
 private:
     static void state(pa_context* context, void* user)
     {
@@ -253,17 +258,14 @@ private:
             case PA_CONTEXT_TERMINATED:
                 DEBUG("PA_CONTEXT_TERMINATED");
                 break;
-
             case PA_CONTEXT_READY:
                 DEBUG("PA_CONTEXT_READY");
                 this_->state_ = State::Ready;
                 break;
-
             case PA_CONTEXT_FAILED:
                 DEBUG("PA_CONTEXT_FAILED");
                 this_->state_ = State::Error;
                 break;
-
         }
     }
 private:
