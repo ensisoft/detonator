@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cstdio>
+#include <cstring>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -31,27 +32,24 @@ namespace audio
 AudioFile::AudioFile(const std::string& filename, const std::string& name)
     : filename_(filename)
     , name_(name)
-{
-    Open();
-}
+{}
 
-unsigned AudioFile::GetRateHz() const 
+unsigned AudioFile::GetRateHz() const noexcept
 { return device_->GetSampleRate(); }
 
-unsigned AudioFile::GetNumChannels() const 
+unsigned AudioFile::GetNumChannels() const noexcept
 { return device_->GetNumChannels(); }
 
-std::string AudioFile::GetName() const 
-{
-    if (name_.empty())
-        return filename_;
-    return name_;
-}
+Source::Format AudioFile::GetFormat() const noexcept
+{ return format_; }
+
+std::string AudioFile::GetName() const noexcept
+{ return name_; }
 
 unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes) 
 {
     const auto num_channels = device_->GetNumChannels();
-    const auto frame_size = num_channels * ByteSize(mFormat);
+    const auto frame_size = num_channels * ByteSize(format_);
     const auto possible_num_frames = max_bytes / frame_size;
     const auto frames_available = device_->GetNumFrames() - frames_;
     const auto frames_to_read = std::min((unsigned)frames_available,
@@ -62,11 +60,11 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     // sndfile-play however uses floats and is able to play
     // the same test ogg (mentioned in the bug) without crackles.
     size_t ret = 0;
-    if (mFormat == Format::Float32)
+    if (format_ == Format::Float32)
         ret = device_->ReadFrames((float*)buff, frames_to_read);
-    else if (mFormat == Format::Int32)
+    else if (format_ == Format::Int32)
         ret = device_->ReadFrames((int*)buff, frames_to_read);
-    else if (mFormat == Format::Int16)
+    else if (format_ == Format::Int16)
         ret = device_->ReadFrames((short*)buff, frames_to_read);
     if (ret != frames_to_read)
         WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames_to_read);
@@ -74,21 +72,22 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     return ret * frame_size;
 }
 
-bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const 
+bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
+{ return frames_ < device_->GetNumFrames(); }
+
+bool AudioFile::Reset() noexcept
 {
-    return frames_ < device_->GetNumFrames();
+    return Open();
 }
 
-void AudioFile::Reset()
-{
-    Open();
-}
-
-void AudioFile::Open()
+bool AudioFile::Open()
 {
     FILE* fptr = std::fopen(filename_.c_str(), "rb");
     if (!fptr)
-        throw std::runtime_error("open audio file failed");
+    {
+        ERROR("Failed to open file '%1' (%2)", filename_, std::strerror(errno));
+        return false;
+    }
 
     // read the whole file into a single buffer.
     std::fseek(fptr, 0, SEEK_END);
@@ -99,6 +98,7 @@ void AudioFile::Open()
     buff.resize(size);
     std::fread(&buff[0], 1, size, fptr);
     std::fclose(fptr);
+    DEBUG("Read %1 bytes from %2", buff.size(), filename_);
 
     // allocate just a single buffer that does the
     // data conversion from the buffer that we read from the file
@@ -107,6 +107,7 @@ void AudioFile::Open()
     auto device = std::make_unique<SndFileVirtualDevice>(std::move(buffer));
     device_ = std::move(device);
     frames_ = 0;
+    return true;
 }
 
 } // namespace

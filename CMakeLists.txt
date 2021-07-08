@@ -589,6 +589,20 @@ target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/ui
 target_link_libraries(unit_test_uikit DataLib BaseLib)
 add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 
+# audio tests
+add_executable(unit_test_audio
+        audio/unit_test/unit_test.cpp
+        audio/pulseaudio.cpp
+        audio/waveout.cpp
+        audio/player.cpp)
+target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
+target_link_libraries(unit_test_audio BaseLib)
+if (UNIX)
+    target_link_libraries(unit_test_audio pulse)
+    target_link_libraries(unit_test_audio pthread)
+endif()
+add_test(NAME unit_test_audio COMMAND unit_test_audio)
+
 # base tests
 add_executable(unit_test_math    base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)

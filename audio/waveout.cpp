@@ -24,9 +24,10 @@
   #pragma comment(lib, "Winmm.lib")
 #endif
 
-#include <cassert>
+#include <queue>
 
 #include "base/logging.h"
+#include "base/assert.h"
 #include "audio/source.h"
 #include "audio/stream.h"
 #include "audio/device.h"
@@ -36,6 +37,18 @@ namespace audio
 
 #ifdef WINDOWS_OS
 
+template<typename Function, typename... Args>
+void CallWaveout(Function func, const Args&... args)
+{
+    const MMRESULT ret = func(args...);
+    if (ret == MMSYSERR_NOERROR)
+        return;
+
+    char message[128] = { 0 };
+    waveOutGetErrorTextA(ret, message, sizeof(message));
+    throw std::runtime_error(message);
+}
+
 // AudioDevice implementation for Waveout
 class Waveout : public Device
 {
@@ -44,9 +57,19 @@ public:
     {}
     virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
     {
-        auto s = std::make_shared<PlaybackStream>(std::move(source));
-        streams_.push_back(s);
-        return s;
+        const auto name = source->GetName();
+        try
+        {
+            auto stream = std::make_shared<PlaybackStream>(std::move(source));
+            streams_.push_back(stream);
+            return stream;
+        } 
+        catch (const std::exception & e)
+        {
+            ERROR("Audio source '%1' failed to prepare (%2).", name, e.what());
+        }
+        return nullptr;
+
     }
     virtual void Poll()
     {
@@ -100,7 +123,7 @@ private:
             }
             void* base = _aligned_malloc(bytes, alignment);
             if (base == nullptr)
-                throw std::runtime_error("buffer allocation failed");
+                throw std::runtime_error("waveout buffer allocation failed");
             buffer buff;
             buff.base = base;
             buff.size = bytes;
@@ -147,7 +170,7 @@ private:
             // todo: should we somehow make sure here not to free the buffer
             // while it's being used in the waveout write??
             const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
-            assert(ret == MMSYSERR_NOERROR);
+            ASSERT(ret == MMSYSERR_NOERROR);
 
             AlignedAllocator::get().free(buffer_);
         }
@@ -158,15 +181,13 @@ private:
             ZeroMemory(&header_, sizeof(header_));
             header_.lpData         = (LPSTR)buffer_;
             header_.dwBufferLength = pcm_bytes;
-            const auto ret = waveOutPrepareHeader(hWave_, &header_, sizeof(header_));
-            assert(ret == MMSYSERR_NOERROR);
+            header_.dwUser         = (DWORD_PTR)this;
+            CallWaveout(waveOutPrepareHeader, hWave_, &header_, sizeof(header_));
             return pcm_bytes;
         }
         void play()
         {
-            const auto ret = waveOutWrite(hWave_, &header_, sizeof(header_));
-            if (ret != MMSYSERR_NOERROR)
-                throw std::runtime_error("waveOutWrite failed");
+            CallWaveout(waveOutWrite, hWave_, &header_, sizeof(header_));
         }
 
         Buffer(const Buffer&) = delete;
@@ -183,11 +204,9 @@ private:
     public:
         PlaybackStream(std::unique_ptr<Source> source)
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<decltype(mutex_)> lock(mutex_);
 
             source_      = std::move(source);
-            done_buffer_ = std::numeric_limits<decltype(done_buffer_)>::max();
-            last_buffer_ = std::numeric_limits<decltype(last_buffer_)>::max();
             state_       = Stream::State::None;
             num_pcm_bytes_ = 0;
 
@@ -211,33 +230,32 @@ private:
             {
                 wfx.wBitsPerSample = 16;
                 wfx.wFormatTag = WAVE_FORMAT_PCM;
-            }
+            } else BUG("Unsupported playback stream.");
+
             wfx.nBlockAlign     = (wfx.wBitsPerSample * wfx.nChannels) / 8;
             wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
-            MMRESULT ret = waveOutOpen(
+            CallWaveout(waveOutOpen,
                 &handle_,
                 WAVE_MAPPER,
                 &wfx,
                 (DWORD_PTR)waveOutProc,
                 (DWORD_PTR)this,
                 CALLBACK_FUNCTION);
-            if (ret != MMSYSERR_NOERROR)
-                throw std::runtime_error("waveOutOpen failed");
 
             const auto block_size = wfx.nBlockAlign;
 
             // todo: cache and recycle audio buffers, or maybe
             // we need to cache audio streams since the buffers are per HWAVEOUT ?
-            buffers_.resize(3);
+            buffers_.resize(5);
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, block_size * 10000, block_size));
+                buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, block_size * 2000, block_size));
             }
         }
        ~PlaybackStream()
         {
             auto ret = waveOutReset(handle_);
-            assert(ret == MMSYSERR_NOERROR);
+            ASSERT(ret == MMSYSERR_NOERROR);
 
             for (size_t i=0; i<buffers_.size(); ++i)
             {
@@ -245,19 +263,19 @@ private:
             }
 
             ret = waveOutClose(handle_);
-            assert(ret == MMSYSERR_NOERROR);
+            ASSERT(ret == MMSYSERR_NOERROR);
         }
 
         virtual Stream::State GetState() const override
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<decltype(mutex_)> lock(mutex_);
             return state_;
         }
 
         virtual std::unique_ptr<Source> GetFinishedSource() override
         {
             std::unique_ptr<Source> ret;
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<decltype(mutex_)> lock(mutex_);
             if (state_ == State::Complete || state_ == State::Error)
                 ret = std::move(source_);
             return ret;
@@ -266,7 +284,7 @@ private:
         virtual std::string GetName() const override
         { return source_->GetName(); }
 
-        virtual void Play()
+        virtual void Play() override
         {
             // enter initial play state. fill all buffers with audio
             // and enqueue them to the device. once a signal is
@@ -275,50 +293,89 @@ private:
             // to the device.
             // we continue this untill all data is consumed or an error
             // has occurred 
-
-            for (size_t i=0; i<buffers_.size(); ++i)
+            try
             {
-                num_pcm_bytes_ += buffers_[i]->fill(*source_);
-            }
-            for (size_t i=0; i<buffers_.size(); ++i)
-            {
-                buffers_[i]->play();
-            }
 
+                for (size_t i = 0; i < buffers_.size(); ++i)
+                {
+                    num_pcm_bytes_ += buffers_[i]->fill(*source_);
+                }
+                for (size_t i = 0; i < buffers_.size(); ++i)
+                {
+                    buffers_[i]->play();
+                }
+            }
+            catch (const std::exception & e)
+            {
+                ERROR("Audio stream '%1' play error (%2).", source_->GetName(), e.what());
+                state_ = Stream::State::Error;
+            }
         }
 
-        virtual void Pause()
+        virtual void Pause() override
         {
             waveOutPause(handle_);
         }
 
-        virtual void Resume()
+        virtual void Resume() override
         {
             waveOutRestart(handle_);
         }
 
         void poll()
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            if (done_buffer_ == last_buffer_)
+            std::unique_lock<decltype(mutex_)> lock(mutex_);
+
+            std::queue<Buffer*> empty_buffers;
+
+            while (!message_queue_.empty())
+            {
+                auto message = message_queue_.front();
+                if (message.message == WOM_OPEN)
+                {
+                    state_ = Stream::State::Ready;
+                    DEBUG("WOM_OPEN");
+                }
+                else if (message.message == WOM_DONE)
+                {
+                    auto* buffer = (Buffer*)message.header.dwUser;
+                    empty_buffers.push(buffer);
+                }
+                message_queue_.pop();
+            }
+            lock.unlock();
+
+            if (state_ == Stream::State::Error || state_ == Stream::State::Complete)
                 return;
 
-            if (state_ == Stream::State::Error ||
-                state_ == Stream::State::Complete)
-                return;
+            if (empty_buffers.size() == buffers_.size())
+            {
+                // if all the buffers have been returned from the waveout 
+                // device it's likely that we're too slow providing buffers
+                WARN("Likely audio buffer underrun detected.");
+            }
 
-            // todo: we have a possible problem here that we might skip
-            // a buffer. This would happen if if WOL_DONE occurs more than
-            // 1 time between calls to poll()
+            try
+            {
+                while (!empty_buffers.empty())
+                {
+                    auto* buffer = empty_buffers.front();
+                    empty_buffers.pop();
+                    if (!source_->HasNextBuffer(num_pcm_bytes_))
+                    {
+                        state_ = Stream::State::Complete;
+                        break;
+                    }
 
-            const auto num_buffers = buffers_.size();
-            const auto free_buffer = done_buffer_ % num_buffers;
-            
-            num_pcm_bytes_ += buffers_[free_buffer]->fill(*source_);
-
-            buffers_[free_buffer]->play();
-
-            last_buffer_ = done_buffer_;
+                    num_pcm_bytes_ += buffer->fill(*source_);
+                    buffer->play();
+                }
+            }
+            catch (const std::exception & e)
+            {
+                ERROR("Audio stream '%1' play error (%2).", source_->GetName(), e.what());
+                state_ = Stream::State::Error;
+            }
         }
 
     private:
@@ -330,25 +387,23 @@ private:
             if (dwInstance == 0)
                 return;
 
+            // this callback is called by the waveout thread. we need to be 
+            // very careful regarding which functions are okay to call!
+
+            WaveOutMessage message;
+            message.message = uMsg;
+
+            if (uMsg == WOM_DONE)
+            {
+                const WAVEHDR* header = (WAVEHDR*)dwParam1;
+                std::memcpy(&message.header, header, sizeof(WAVEHDR));
+            }
+
             auto* this_ = reinterpret_cast<PlaybackStream*>(dwInstance);
 
-            std::lock_guard<std::recursive_mutex> lock(this_->mutex_);
-
-            switch (uMsg)
-            {
-                case WOM_CLOSE:
-                    break;
-
-                case WOM_DONE:
-                    this_->done_buffer_++;
-                    if (this_->source_ && !this_->source_->HasNextBuffer(this_->num_pcm_bytes_))
-                        this_->state_ = Stream::State::Complete;
-                    break;
-
-                case WOM_OPEN:
-                    this_->state_ = Stream::State::Ready;
-                    break;
-            }
+            // enqueue the message so that the main audio thread can process it.
+            std::lock_guard<decltype(this_->mutex_)> lock(this_->mutex_);
+            this_->message_queue_.push(message);
         }
 
     private:
@@ -356,10 +411,14 @@ private:
         std::uint64_t num_pcm_bytes_ = 0;
     private:
         HWAVEOUT handle_ = NULL;
-        std::vector<std::unique_ptr<Buffer>> buffers_;
-        std::size_t last_buffer_ = 0;
-        std::size_t done_buffer_ = 0;
+
+        struct WaveOutMessage {
+            UINT message = 0;
+            WAVEHDR header;
+        };
         mutable std::recursive_mutex mutex_;
+        std::queue<WaveOutMessage> message_queue_;
+        std::vector<std::unique_ptr<Buffer>> buffers_;
     private:
         State state_ = State::None;
     };
@@ -382,3 +441,4 @@ std::unique_ptr<Device> Device::Create(const char* appname)
 #endif // WINDOWS_OS
 
 } // namespace
+

@@ -143,28 +143,30 @@ void Player::AudioThreadLoop(Device* ptr)
         {
             auto& track = *it;
             const auto state = track.stream->GetState();
-            if (state == Stream::State::Complete ||
-                state == Stream::State::Error)
+            if (state == Stream::State::Complete || state == Stream::State::Error)
             {
                 auto source = track.stream->GetFinishedSource();
-
                 if (state == Stream::State::Complete && track.looping)
                 {
-                    // reset state for replay.
-                    source->Reset();
-
-                    track.stream = dev->Prepare(std::move(source));
-                    track.stream->Play();
-                    DEBUG("Looping track ...");                    
+                    if (source->Reset())
+                    {
+                        DEBUG("Looping track %1", track.id);
+                        track.stream = dev->Prepare(std::move(source));
+                        track.stream->Play();
+                    }
+                    else
+                    {
+                        ERROR("Track %1 ('%2') failed to reset. Can't replay.", track.id, source->GetName());
+                        track.looping = false;
+                    }
                 }
                 // generate a track completion event
                 TrackEvent event;
                 event.id      = track.id;
                 event.when    = track.when;
-                event.status  = state == Stream::State::Complete
-                    ? TrackStatus::Success 
-                    : TrackStatus::Failure; 
                 event.looping = track.looping;
+                event.status  = state == Stream::State::Complete ? TrackStatus::Success
+                                                                 : TrackStatus::Failure;
                 {
                     std::lock_guard<std::mutex> lock(event_mutex_);
                     events_.push(std::move(event));
@@ -200,15 +202,30 @@ void Player::AudioThreadLoop(Device* ptr)
             // in cases where you for example want to get a std::unique_ptr<T>
             // out of the damn thing. 
             using pq_value_type = std::remove_cv<audio_pq::value_type>::type;
-            
-            Track item;
-            item.id      = top.id;
-            item.stream  = dev->Prepare(std::move(const_cast<pq_value_type&>(top).source));
-            item.when    = top.when;
-            item.looping = top.looping;
-            item.stream->Play();
+
+            auto stream = dev->Prepare(std::move(const_cast<pq_value_type&>(top).source));
+            if (!stream)
+            {
+                TrackEvent event;
+                event.id   = top.id;
+                event.when = top.when;
+                event.looping = top.looping;
+                event.status  = TrackStatus::Failure;
+                std::lock_guard<std::mutex> lock(event_mutex_);
+                events_.push(std::move(event));
+            }
+            else
+            {
+                Track item;
+                item.id      = top.id;
+                item.stream  = stream;
+                item.when    = top.when;
+                item.looping = top.looping;
+                item.stream->Play();
+                playing_.push_back(std::move(item));
+            }
+
             waiting_.pop();
-            playing_.push_back(std::move(item));            
         }
         while (false);
 
