@@ -170,6 +170,7 @@ int main(int argc, char* argv[])
         base::FlushGlobalLog();
 
         auto source = std::make_unique<audio::AudioFile>(filename, "test");
+        source->Open();
         source->SetFormat(format);
         const auto looping = loops > 1;
         const auto id = player.Play(std::move(source), looping);

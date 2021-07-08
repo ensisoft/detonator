@@ -51,28 +51,29 @@ namespace audio
         // dtor.
         virtual ~Source() = default;
         // Get the sample rate in Hz.
-        virtual unsigned GetRateHz() const = 0;
+        virtual unsigned GetRateHz() const noexcept = 0;
         // Get the number of channels. Typically either 1 for Mono
         // or 2 for stereo sound.
-        virtual unsigned GetNumChannels() const = 0;
+        virtual unsigned GetNumChannels() const noexcept = 0;
         // Get the PCM byte format of the sample.
-        virtual Format GetFormat() const = 0;
+        virtual Format GetFormat() const noexcept = 0;
         // Get the (human readable) name of the sample if any
         // For example the underlying filename.
-        virtual std::string GetName() const = 0;
+        virtual std::string GetName() const noexcept = 0;
         // Fill the given device buffer with PCM data.
         // Returns the number of *bytes* written into buff.
+        // May throw an exception.
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) = 0;
         // Returns true if there's more audio data available 
         // or false if the source has been depleted.
         // num bytes is the current number of PCM data extracted
         // and played back from the sample.
-        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const = 0;
+        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const noexcept = 0;
         // Reset the sample for looped playback, i.e. possibly rewind
-        // to the start of the data.
-        virtual void Reset() = 0;
+        // to the start of the data. Should return true on success.
+        virtual bool Reset() noexcept = 0;
 
-        static int ByteSize(Format format)
+        static int ByteSize(Format format) noexcept
         {
             if (format == Format::Float32) return 4;
             else if (format == Format::Int32) return 4;
@@ -90,40 +91,39 @@ namespace audio
     {
     public: 
         // Construct audio file audio sample by reading the contents
-        // of the given file. If name is empty the name of the file
-        // is used instead.
+        // of the given file. You must call Open before (and check for
+        // success) before passing the object to the audio device!
         AudioFile(const std::string& filename, const std::string& name);
         // Get the sample rate in Hz.
-        virtual unsigned GetRateHz() const override;
+        virtual unsigned GetRateHz() const noexcept override;
         // Get the number of channels in the sample
-        virtual unsigned GetNumChannels() const override;
+        virtual unsigned GetNumChannels() const noexcept override;
         // Get the PCM byte format of the sample.
-        virtual Format GetFormat() const override
-        { return mFormat; }
+        virtual Format GetFormat() const noexcept override;
         // Get the human readable name of the sample if any.
-        virtual std::string GetName() const override;
+        virtual std::string GetName() const noexcept override;
         // Fill the buffer with PCM data.
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
         // Returns true if there's more audio data available
         // or false if the source has been depleted.
-        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const override;
+        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const noexcept override;
         // Reset the sample for looped playback, i.e. possibly rewind
         // to the start of the data.
-        virtual void Reset() override;
+        virtual bool Reset() noexcept override;
 
         // Get the filename.
-        std::string GetFilename() const
+        std::string GetFilename() const noexcept
         { return filename_; }
-        void SetFormat(Format format)
-        { mFormat = format; }
+        void SetFormat(Format format) noexcept
+        { format_ = format; }
 
-        // todo: fix the error handling there.
-        void Open();
-
+        // Try to open the audio file for reading. Returns true if
+        // successful otherwise false and error is logged.
+        bool Open();
     private:
         const std::string filename_;
         const std::string name_;
-        Format mFormat = Format::Float32;
+        Format format_ = Format::Float32;
         std::unique_ptr<SndFileVirtualDevice> device_;
         std::size_t frames_ = 0;
     };
@@ -134,13 +134,13 @@ namespace audio
     public:
         SineGenerator(unsigned frequency) : frequency_(frequency)
         {}
-        virtual unsigned GetRateHz() const
+        virtual unsigned GetRateHz() const noexcept
         { return 44100; }
-        virtual unsigned GetNumChannels() const override
+        virtual unsigned GetNumChannels() const noexcept override
         { return 1; }
-        virtual Format GetFormat() const override
+        virtual Format GetFormat() const noexcept override
         { return format_; }
-        virtual std::string GetName() const override
+        virtual std::string GetName() const noexcept override
         { return "Sine"; }
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override
         {
@@ -163,10 +163,10 @@ namespace audio
             }
             return frames * frame_size;
         }
-        virtual bool HasNextBuffer(std::uint64_t) const override
+        virtual bool HasNextBuffer(std::uint64_t) const noexcept override
         { return true; }
-        virtual void Reset() override
-        { /* intentionally empty */ }
+        virtual bool Reset() noexcept override
+        { return true; /* intentionally empty */ }
         void SetFormat(Format format)
         { format_ = format; }
     private:

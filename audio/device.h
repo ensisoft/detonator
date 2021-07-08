@@ -43,6 +43,7 @@ namespace audio
 
         // Prepare a new audio stream from the already loaded audio sample.
         // the stream is initially paused but ready to play once play is called.
+        // should return nullptr if the stream failed to prepare.
         virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> sample) = 0;
 
         // Poll and dispatch pending audio device events.
