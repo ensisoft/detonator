@@ -122,6 +122,28 @@ T* SafeFind(std::vector<std::unique_ptr<T>>& vector, Predicate predicate)
     return nullptr;
 }
 
+template<typename T, typename Predicate>
+const T* SafeFind(const std::vector<T>& vector, Predicate predicate)
+{
+    for (auto& item : vector)
+    {
+        if (predicate(item))
+            return &item;
+    }
+    return nullptr;
+}
+
+template<typename T, typename Predicate>
+const T* SafeFind(const std::vector<std::unique_ptr<T>>& vector, Predicate predicate)
+{
+    for (auto& item : vector)
+    {
+        if (predicate(item))
+            return item.get();
+    }
+    return nullptr;
+}
+
 template<typename T, typename Deleter>
 std::unique_ptr<T, Deleter> MakeUniqueHandle(T* ptr, Deleter del)
 { return std::unique_ptr<T, Deleter>(ptr, del); }
