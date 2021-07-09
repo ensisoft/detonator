@@ -255,7 +255,7 @@ private:
                 // write of data. schedule the drain operation callback on the stream.
                 if (!source->HasNextBuffer(this_->num_pcm_bytes_))
                     pa_operation_unref(pa_stream_drain(this_->stream_, drain_callback, this_));
-                else if (bytes != length)
+                else if (bytes < length * 0.8)
                     WARN("Write callback requested %1 bytes but only %2 provided", length, bytes);
             }
             catch (const std::exception& exception)

@@ -27,6 +27,8 @@
 #include "audio/device.h"
 #include "audio/player.h"
 #include "audio/source.h"
+#include "audio/element.h"
+#include "audio/graph.h"
 
 // audio test application
 
@@ -42,6 +44,7 @@ int main(int argc, char* argv[])
     bool pcm_16bit_files = false;
     bool pcm_24bit_files = false;
     bool sine = false;
+    bool graph = false;
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--ogg"))
@@ -54,6 +57,8 @@ int main(int argc, char* argv[])
             pcm_24bit_files = true;
         else if (!std::strcmp(argv[i], "--sine"))
             sine = true;
+        else if (!std::strcmp(argv[i], "--graph"))
+            graph = true;
         else if (!std::strcmp(argv[i], "--path"))
             path = argv[++i];
         else if (!std::strcmp(argv[i], "--loops"))
@@ -64,7 +69,7 @@ int main(int argc, char* argv[])
             format = audio::Source::Format::Int32;
     }
 
-    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine))
+    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph))
     {
         std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
@@ -72,7 +77,8 @@ int main(int argc, char* argv[])
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
-            "\t--sine\t\tTest procedural audio (sine wave).\n");
+            "\t--sine\t\tTest procedural audio (sine wave).\n"
+            "\t--graph\t\tTest audio graph.\n");
         std::printf("Have a good day.\n");
         return 0;
     }
@@ -80,19 +86,46 @@ int main(int argc, char* argv[])
     base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
-    
+
     audio::Player player(audio::Device::Create("audio_test"));
     if (sine)
     {
         auto source = std::make_unique<audio::SineGenerator>(500);
         source->SetFormat(format);
-        const auto id = player.Play(std::move(source), false /*looping*/);
+        const auto id = player.Play(std::move(source), false);
         DEBUG("New sine wave stream = %1", id);        
         INFO("Playing procedural sine audio for 10 seconds.");
         std::this_thread::sleep_for(std::chrono::seconds(10));
         player.Cancel(id);
     }
 
+    if (graph)
+    {
+        auto graph = std::make_unique<audio::Graph>("graph");
+        auto* sine = graph->AddElement(audio::SineSource("sine", 500));
+        auto* file = graph->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg"));
+        auto* gain = graph->AddElement(audio::Gain("gain", 1.0f));
+        auto* mixer = graph->AddElement(audio::Mixer("mixer", 2));
+        auto* splitter = graph->AddElement(audio::ChannelSplitter("split"));
+        auto* null = graph->AddElement(audio::Null("null"));
+        file->SetSampleType(audio::SampleType::Float32);
+
+        ASSERT(graph->LinkElements("file", "out", "split", "in"));
+        ASSERT(graph->LinkElements("split", "left", "mixer", "in0"));
+        ASSERT(graph->LinkElements("split", "right", "null", "in"));
+        ASSERT(graph->LinkElements("sine", "out", "mixer", "in1"));
+        ASSERT(graph->LinkElements("mixer", "out", "gain", "in"));
+        ASSERT(graph->LinkGraph("gain", "out"));
+        ASSERT(graph->Prepare());
+
+        const auto& desc = graph->Describe();
+        for (const auto& str : desc)
+            DEBUG(str);
+
+        const auto id = player.Play(std::move(graph), false);
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        player.Cancel(id);
+    }
 
     std::vector<std::string> test_files;
     if (ogg_files)
