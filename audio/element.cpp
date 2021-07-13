@@ -29,7 +29,90 @@
 namespace audio
 {
 
-ChannelSplitter::ChannelSplitter(const std::string& name)
+Joiner::Joiner(const std::string& name)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mOut("out")
+  , mInLeft("left")
+  , mInRight("right")
+{}
+
+bool Joiner::Prepare()
+{
+    const auto left  = mInLeft.GetFormat();
+    const auto right = mInRight.GetFormat();
+    if (left == right && left.channel_count == 1)
+    {
+        Format out;
+        out.channel_count = 2;
+        out.sample_rate = left.sample_rate;
+        out.sample_type = left.sample_type;
+        mOut.SetFormat(out);
+        DEBUG("Joiner '%1' output set to %1", mName, out);
+        return true;
+    }
+    ERROR("Joiner '%1' input formats (%1, %2) are not compatible mono streams.", mName, left, right);
+    return false;
+}
+
+void Joiner::Process(unsigned int milliseconds)
+{
+    BufferHandle left;
+    BufferHandle right;
+    if (!mInLeft.HasBuffers())
+    {
+        WARN("No buffer available on Joiner '%1' left channel port.", mName);
+        return;
+    }
+    if (!mInRight.HasBuffers())
+    {
+        WARN("No buffer available on Joiner '%1' right channel port.", mName);
+        return;
+    }
+    mInLeft.PullBuffer(left);
+    mInRight.PullBuffer(right);
+    if (left->GetByteSize() != right->GetByteSize())
+    {
+        WARN("Can't join buffers with irregular number of audio frames.");
+        return;
+    }
+
+    const auto& format = mInLeft.GetFormat();
+    if (format.sample_type == SampleType::Int32)
+        Join<int>(left, right);
+    else if (format.sample_type == SampleType::Float32)
+        Join<float>(left, right);
+    else if (format.sample_type == SampleType::Int16)
+        Join<short>(left, right);
+    else WARN("Unsupported format %1", format.sample_type);
+}
+
+template<typename Type>
+void Joiner::Join(BufferHandle left, BufferHandle right)
+{
+    using StereoFrameType = StereoFrame<Type>;
+    using MonoFrameType   = MonoFrame<Type>;
+
+    const auto frame_size  = sizeof(MonoFrameType);
+    const auto buffer_size = left->GetByteSize();
+    const auto num_frames  = buffer_size / frame_size;
+
+    auto stereo = std::make_shared<VectorBuffer>();
+    stereo->AllocateBytes(buffer_size * 2);
+
+    auto* out = static_cast<StereoFrameType*>(stereo->GetPtr());
+
+    const auto* L = static_cast<const MonoFrameType*>(left->GetPtr());
+    const auto* R = static_cast<const MonoFrameType*>(right->GetPtr());
+    for (unsigned i=0; i<num_frames; ++i, ++out, ++L, ++R)
+    {
+        out->channels[0] = L->channels[0];
+        out->channels[1] = R->channels[1];
+    }
+    mOut.PushBuffer(stereo);
+}
+
+Splitter::Splitter(const std::string& name)
   : mName(name)
   , mId(base::RandomString(10))
   , mIn("in")
@@ -37,7 +120,7 @@ ChannelSplitter::ChannelSplitter(const std::string& name)
   , mOutRight("right")
 {}
 
-bool ChannelSplitter::Prepare()
+bool Splitter::Prepare()
 {
     const auto format = mIn.GetFormat();
     if (format.channel_count == 2)
@@ -48,14 +131,14 @@ bool ChannelSplitter::Prepare()
         out.sample_type = format.sample_type;
         mOutRight.SetFormat(out);
         mOutLeft.SetFormat(out);
-        DEBUG("ChannelSplitter output set to %1", out);
+        DEBUG("Splitter '%1' output set to %1", mName, out);
         return true;
     }
-    ERROR("ChannelSplitter input format (%1) is not stereo input.", format);
+    ERROR("Splitter '%1' input format (%1) is not stereo input.", mName, format);
     return false;
 }
 
-void ChannelSplitter::Process(unsigned milliseconds)
+void Splitter::Process(unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.HasBuffers())
@@ -75,7 +158,7 @@ void ChannelSplitter::Process(unsigned milliseconds)
 }
 
 template<typename Type>
-void ChannelSplitter::Split(BufferHandle buffer)
+void Splitter::Split(BufferHandle buffer)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -86,8 +169,8 @@ void ChannelSplitter::Split(BufferHandle buffer)
 
     const auto* in = static_cast<StereoFrameType*>(buffer->GetPtr());
 
-    auto left  = std::make_shared<VectorBuffer<>>();
-    auto right = std::make_shared<VectorBuffer<>>();
+    auto left  = std::make_shared<VectorBuffer>();
+    auto right = std::make_shared<VectorBuffer>();
     left->AllocateBytes(buffer_size / 2);
     right->AllocateBytes(buffer_size / 2);
     auto* L = static_cast<MonoFrameType *>(left->GetPtr());
@@ -157,60 +240,71 @@ void Mixer::MixSources()
 {
     using AudioFrame = Frame<DataType, ChannelCount>;
 
-    std::vector<BufferHandle> buffers;
-    std::vector<AudioFrame*> ins;
+    std::vector<BufferHandle> src_buffers;
+    std::vector<AudioFrame*> src_ptrs;
     for (auto& port :mSrcs)
     {
-        if (!port.HasBuffers())
+        if (port.HasBuffers())
         {
-            WARN("No buffer available on port %1:%2", mName, port.GetName());
-            return;
+            BufferHandle buffer;
+            port.PullBuffer(buffer);
+            src_buffers.push_back(buffer);
+            auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
+            src_ptrs.push_back(ptr);
         }
-        BufferHandle buffer;
-        port.PullBuffer(buffer);
-        buffers.push_back(buffer);
-        auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
-        ins.push_back(ptr);
     }
 
-    // make things simple now and require that each buffer
-    // has the same format and same amount of data. this should
-    // work as long as the formats are exactly the same and every
-    // source produces the same amount of data, i.e. adheres to the
-    // millisecond output.
-    for (size_t i=1; i<buffers.size(); ++i)
+    BufferHandle out_buffer;
+    // find the maximum buffer for computing how many frames must be processed.
+    // also the biggest buffer can be used for the output (mixing in place)
+    unsigned max_buffer_size = 0;
+    for (const auto& buffer : src_buffers)
     {
-        if (buffers[i]->GetByteSize() != buffers[0]->GetByteSize())
+        if (buffer->GetByteSize() > max_buffer_size)
         {
-            WARN("Can't mix buffers with irregular number of audio frames.");
-            return;
+            max_buffer_size = buffer->GetByteSize();
+            out_buffer = buffer;
         }
     }
 
     const auto frame_size  = sizeof(AudioFrame);
-    const auto buffer_size = buffers[0]->GetByteSize();
-    const auto num_frames  = buffer_size / frame_size;
+    const auto max_num_frames = max_buffer_size / frame_size;
 
-    auto* out = ins[0];
+    auto* out = static_cast<AudioFrame*>(out_buffer->GetPtr());
 
-    for (unsigned i=0; i<num_frames; ++i)
+    for (unsigned frame=0; frame<max_num_frames; ++frame, ++out)
     {
-        MixFrames(&ins[0], ins.size(), out);
+        MixFrames(&src_ptrs[0], src_ptrs.size(), out);
 
-        for (auto& in : ins)
-            ++in;
-
-        ++out;
+        ASSERT(src_buffers.size() == src_ptrs.size());
+        for (size_t i=0; i<src_buffers.size();)
+        {
+            const auto& buffer = src_buffers[i];
+            const auto buffer_size = buffer->GetByteSize();
+            const auto buffer_frames = buffer_size / frame_size;
+            if (buffer_frames == frame+1)
+            {
+                const auto end = src_buffers.size() - 1;
+                std::swap(src_buffers[i], src_buffers[end]);
+                std::swap(src_ptrs[i], src_ptrs[end]);
+                src_buffers.pop_back();
+                src_ptrs.pop_back();
+            }
+            else
+            {
+                ++src_ptrs[i++];
+            }
+        }
     }
 
-    mOut.PushBuffer(buffers[0]);
+    mOut.PushBuffer(out_buffer);
 }
 
 template<unsigned ChannelCount>
 void Mixer::MixFrames(Frame<float, ChannelCount>** srcs, unsigned count,
                       Frame<float, ChannelCount>* out) const
 {
-    const float src_gain = 1.0f/count;
+    const float src_gain = 1.0f/mSrcs.size();
 
     for (unsigned i=0; i<ChannelCount; ++i)
     {
@@ -230,7 +324,7 @@ void Mixer::MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count,
 {
     static_assert(std::is_integral<Type>::value);
 
-    const float src_gain = 1.0f/count;
+    const float src_gain = 1.0f/mSrcs.size();
 
     for (unsigned i=0; i<ChannelCount; ++i)
     {
@@ -323,13 +417,13 @@ void Gain::AdjustGain(Frame<Type, ChannelCount>* frame) const
 }
 
 
-FileSource::FileSource(const std::string& name, const std::string& file)
+FileSource::FileSource(const std::string& name, const std::string& file, SampleType type)
   : mName(name)
   , mId(base::RandomString(10))
   , mFile(file)
   , mPort("out")
 {
-    mFormat.sample_type = SampleType::Int16;
+    mFormat.sample_type = type;
 }
 
 FileSource::FileSource(FileSource&& other)
@@ -374,7 +468,7 @@ void FileSource::Process(unsigned milliseconds)
     const auto frames_available = mDevice->GetNumFrames();
     const auto frames = std::min(frames_available - mFramesRead, frames_wanted);
 
-    auto buffer = std::make_shared<VectorBuffer<>>();
+    auto buffer = std::make_shared<VectorBuffer>();
     buffer->SetFormat(mFormat);
     buffer->AllocateBytes(frame_size * frames);
     void* buff = buffer->GetPtr();
@@ -402,7 +496,7 @@ void FileSource::Shutdown()
     mDevice.reset();
 }
 
-bool FileSource::IsDone() const
+bool FileSource::IsSourceDone() const
 {
     return mFramesRead == mDevice->GetNumFrames();
 }
@@ -412,6 +506,21 @@ SineSource::SineSource(const std::string& name, unsigned int frequency)
   : mName(name)
   , mId(base::RandomString(10))
   , mFrequency(frequency)
+  , mLimitDuration(false)
+  , mPort("out")
+{
+    mFormat.channel_count = 1;
+    mFormat.sample_rate   = 44100;
+    mFormat.sample_type   = SampleType::Float32;
+    mPort.SetFormat(mFormat);
+}
+
+SineSource::SineSource(const std::string& name, unsigned int frequency, unsigned int millisecs)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mFrequency(frequency)
+  , mDuration(millisecs)
+  , mLimitDuration(true)
   , mPort("out")
 {
     mFormat.channel_count = 1;
@@ -429,6 +538,12 @@ bool SineSource::Prepare()
 
 void SineSource::Process(unsigned int milliseconds)
 {
+    if (mLimitDuration)
+    {
+        ASSERT(mDuration > mMilliSecs);
+        milliseconds = std::min(milliseconds, mDuration - mMilliSecs);
+    }
+
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_in_millisec = mFormat.sample_rate/1000;
     const auto frames = frames_in_millisec * milliseconds;
@@ -436,7 +551,7 @@ void SineSource::Process(unsigned int milliseconds)
     const auto sample_increment = 1.0/mFormat.sample_rate * radial_velocity;
     const auto bytes = frames * frame_size;
 
-    auto buffer = std::make_shared<VectorBuffer<>>();
+    auto buffer = std::make_shared<VectorBuffer>();
     buffer->SetFormat(mFormat);
     buffer->AllocateBytes(bytes);
 
@@ -454,6 +569,7 @@ void SineSource::Process(unsigned int milliseconds)
             ((short*)buff)[i] = 0x7fff * sample;
     }
     mPort.PushBuffer(buffer);
+    mMilliSecs += milliseconds;
 }
 #endif
 

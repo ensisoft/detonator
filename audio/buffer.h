@@ -21,7 +21,9 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <cstring>
 
+#include "base/assert.h"
 #include "audio/format.h"
 
 namespace audio
@@ -39,23 +41,23 @@ namespace audio
 
     };
 
-    // backing data storage. todo: add canary.
-    template<typename T = std::uint8_t>
+    // backing data storage.
     class VectorBuffer : public Buffer
     {
     public:
+       ~VectorBuffer()
+        {
+            ASSERT(mBuffer.size() >= sizeof(canary));
+            ASSERT(!std::memcmp(&mBuffer[GetByteSize()], &canary, sizeof(canary)) &&
+                   "Audio buffer out of bounds write detected.");
+        }
+
         void SetFormat(const Format& format)
         { mFormat = format; }
         void AllocateBytes(size_t bytes)
-        { mBuffer.resize(bytes / sizeof(T)); }
-        void AllocateItems(size_t count)
-        { mBuffer.resize(count); }
-        void SetFromVector(std::vector<T>&& buffer)
-        { mBuffer = std::move(buffer); }
+        { Resize(bytes); }
         void ResizeBytes(size_t bytes)
-        { mBuffer.resize(bytes / sizeof(T)); }
-        void ResizeItems(size_t count)
-        { mBuffer.resize(count); }
+        { Resize(bytes); }
 
         virtual Format GetFormat() const override
         { return mFormat; }
@@ -64,10 +66,19 @@ namespace audio
         virtual void* GetPtr() override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
         size_t GetByteSize() const override
-        { return mBuffer.size() * sizeof(T); }
+        { return mBuffer.size() - sizeof(canary); }
+    private:
+        void Resize(size_t bytes)
+        {
+            const auto actual = bytes + sizeof(canary);
+            mBuffer.resize(actual);
+            std::memcpy(&mBuffer[bytes], &canary, sizeof(canary));
+        }
+    private:
+        static constexpr auto canary = 0xF4F5ABCD;
     private:
         Format mFormat;
-        std::vector<T> mBuffer;
+        std::vector<std::uint8_t> mBuffer;
     };
 
 } // namespace

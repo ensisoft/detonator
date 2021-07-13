@@ -351,7 +351,7 @@ unsigned Graph::FillBuffer(void* buff, unsigned max_bytes)
     {
         // this element could be done but the pipeline could still
         // have pending buffers in the port queues.
-        if (source->IsDone())
+        if (source->IsSource() && source->IsSourceDone())
             continue;
 
         // process the audio buffers.
@@ -384,7 +384,9 @@ unsigned Graph::FillBuffer(void* buff, unsigned max_bytes)
     bool graph_done = true;
     for (const auto& element : mTopoOrder)
     {
-        graph_done = graph_done && element->IsDone();
+        if (element->IsSource() && !element->IsSourceDone())
+            graph_done = false;
+
         if (!graph_done)
             break;
 

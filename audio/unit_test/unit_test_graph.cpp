@@ -110,16 +110,34 @@ public:
       , mName(name)
       , mOut("out")
     {}
+    SrcElement(const std::string& id, const std::string& name, unsigned buffers)
+      : mId(id)
+      , mName(name)
+      , mShouldFinish(true)
+      , mNumOutBuffers(buffers)
+      , mOut("out")
+    {}
     virtual std::string GetId() const override
     { return mId; }
     virtual std::string GetName() const override
     { return mName; }
-    virtual bool IsDone() const
-    { return false; }
+    virtual bool IsSourceDone() const override
+    {
+        if (!mShouldFinish) return false;
+        if (mNumOutBuffers == mBufferCount)
+            return true;
+        return false;
+    }
+    virtual bool IsSource() const override
+    { return true; }
     virtual void Process(unsigned milliseconds) override
     {
+        if (mShouldFinish)
+            TEST_REQUIRE(mBufferCount < mNumOutBuffers);
+
         auto buffer = std::make_shared<TestBuffer>();
         mOut.PushBuffer(buffer);
+        ++mBufferCount;
     }
     virtual unsigned GetNumOutputPorts() const override
     { return 1; }
@@ -128,6 +146,9 @@ public:
 private:
     const std::string mId;
     const std::string mName;
+    const bool mShouldFinish = false;
+    const unsigned mNumOutBuffers = 0;
+    unsigned mBufferCount = 0;
     TestPort mOut;
 };
 
@@ -155,6 +176,8 @@ public:
         {
             audio::BufferHandle handle;
             mInputPorts[i]->PullBuffer(handle);
+            if (handle == nullptr)
+                continue;
             auto* test = dynamic_cast<TestBuffer*>(handle.get());
             test->AppendTag(base::FormatString("-> %1:%2 ", mName, mInputPorts[i]->GetName()));
             test->AppendTag(base::FormatString("-> %1:%2 ", mName, mOutputPorts[i]->GetName()));
@@ -170,11 +193,6 @@ public:
     { return *base::SafeIndex(mInputPorts, index); }
     virtual audio::Port& GetOutputPort(unsigned index) override
     { return *base::SafeIndex(mOutputPorts, index); }
-
-    virtual bool IsDone() const override
-    {
-        return false;
-    }
 
     void AddInputPort(std::unique_ptr<audio::Port> port)
     { mInputPorts.push_back(std::move(port)); }
@@ -243,8 +261,6 @@ void unit_test_basic()
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool IsDone() const override
-        { return true; }
     private:
         const std::string mId;
         const std::string mName;
@@ -408,6 +424,78 @@ void unit_test_buffer_flow()
     TEST_REQUIRE(outcome == "-> a:in -> a:out -> b:in -> b:out ");
 }
 
+void unit_test_completion()
+{
+    // test completion with just a source element
+    {
+        audio::Format format;
+        format.sample_type   = audio::SampleType::Int32;
+        format.channel_count = 2;
+        format.sample_rate   = 16000;
+
+        audio::Graph graph("test");
+        auto* src = graph.AddElement(SrcElement("src", "src", 10));
+        src->GetOutputPort(0).SetFormat(format);
+        TEST_REQUIRE(graph.LinkGraph("src", "out"));
+        TEST_REQUIRE(graph.Prepare());
+        std::size_t bytes_read = 0;
+        for (int i=0; i<10; ++i)
+        {
+            std::string buffer;
+            buffer.resize(1024);
+            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+        }
+        TEST_REQUIRE(!graph.HasNextBuffer(bytes_read));
+    }
+
+    // test completion with 2 sources.
+    {
+        audio::Format format;
+        format.sample_type   = audio::SampleType::Int32;
+        format.channel_count = 2;
+        format.sample_rate   = 16000;
+
+        TestState state;
+
+        audio::Graph graph("test");
+        auto* src0  = graph.AddElement(SrcElement("src0", "src0", 10));
+        auto* src1  = graph.AddElement(SrcElement("src1", "src1", 20));
+        auto* test = graph.AddElement(TestElement("test", "test", state));
+        test->AddInputPort("in0");
+        test->AddInputPort("in1");
+        test->AddOutputPort("out0", format);
+        test->AddOutputPort("out1", format);
+        src0->GetOutputPort(0).SetFormat(format);
+        src1->GetOutputPort(0).SetFormat(format);
+        TEST_REQUIRE(graph.LinkElements("src0", "out", "test", "in0"));
+        TEST_REQUIRE(graph.LinkElements("src1", "out", "test", "in1"));
+        TEST_REQUIRE(graph.LinkGraph("test", "out0"));
+        TEST_REQUIRE(graph.Prepare());
+
+        std::size_t bytes_read = 0;
+        for (int i=0; i<10; ++i)
+        {
+            std::string buffer;
+            buffer.resize(1024);
+            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+        }
+        TEST_REQUIRE(graph.HasNextBuffer(bytes_read));
+        TEST_REQUIRE(src0->IsSourceDone() == true);
+        TEST_REQUIRE(src1->IsSourceDone() == false);
+
+        for (int i=0; i<10; ++i)
+        {
+            std::string buffer;
+            buffer.resize(1024);
+            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+        }
+        TEST_REQUIRE(graph.HasNextBuffer(bytes_read) == false);
+        TEST_REQUIRE(src0->IsSourceDone() == true);
+        TEST_REQUIRE(src1->IsSourceDone() == true);
+
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -417,5 +505,6 @@ int test_main(int argc, char* argv[])
     unit_test_basic();
     unit_test_prepare_topologies();
     unit_test_buffer_flow();
+    unit_test_completion();
     return 0;
 }

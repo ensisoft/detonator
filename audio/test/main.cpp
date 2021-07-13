@@ -102,13 +102,12 @@ int main(int argc, char* argv[])
     if (graph)
     {
         auto graph = std::make_unique<audio::Graph>("graph");
-        auto* sine = graph->AddElement(audio::SineSource("sine", 500));
-        auto* file = graph->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg"));
+        auto* sine = graph->AddElement(audio::SineSource("sine", 500, 5000));
+        auto* file = graph->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
         auto* gain = graph->AddElement(audio::Gain("gain", 1.0f));
         auto* mixer = graph->AddElement(audio::Mixer("mixer", 2));
-        auto* splitter = graph->AddElement(audio::ChannelSplitter("split"));
+        auto* splitter = graph->AddElement(audio::Splitter("split"));
         auto* null = graph->AddElement(audio::Null("null"));
-        file->SetSampleType(audio::SampleType::Float32);
 
         ASSERT(graph->LinkElements("file", "out", "split", "in"));
         ASSERT(graph->LinkElements("split", "left", "mixer", "in0"));
