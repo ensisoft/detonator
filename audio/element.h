@@ -143,8 +143,11 @@ namespace audio
         virtual std::string GetId() const = 0;
         // Get the human readable name of the element.
         virtual std::string GetName() const = 0;
-        // Returns if the element is done processing or not.
-        virtual bool IsDone() const = 0;
+        // Returns whether the element is done producing audio buffers.
+        virtual bool IsSourceDone() const { return false; }
+        // Return whether the element is a source element, i.e. producer of
+        // audio buffers.
+        virtual bool IsSource() const { return false; }
         // Prepare the element for processing. Returns true if
         // successful or false on error and error details are logged.
         virtual bool Prepare() { return true; }
@@ -204,24 +207,53 @@ namespace audio
     // Join 2 mono streams into a stereo stream.
     // The streams to be joined must have the same
     // underlying type, sample rate and channel count.
-    class ChannelJoiner : public Element
-    {
-        // todo: implement.
-    };
-
-    // Split a stereo stream into left and right channel streams.
-    class ChannelSplitter : public Element
+    class Joiner : public Element
     {
     public:
-        ChannelSplitter(const std::string& name);
+        Joiner(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
         virtual void Process(unsigned milliseconds) override;
-        virtual bool IsDone() const override
-        { return false; }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumOutputPorts() const override
+        { return 2; }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mInLeft;
+            if (index == 1) return mInRight;
+            BUG("No such input port index.");
+        }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port index.");
+        }
+    private:
+        template<typename Type>
+        void Join(BufferHandle left, BufferHandle right);
+    private:
+        const std::string mName;
+        const std::string mId;
+        SingleSlotPort mOut;
+        SingleSlotPort mInLeft;
+        SingleSlotPort mInRight;
+    };
+
+    // Split a stereo stream into left and right channel streams.
+    class Splitter : public Element
+    {
+    public:
+        Splitter(const std::string& name);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool Prepare() override;
+        virtual void Process(unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
         virtual unsigned GetNumOutputPorts() const override
@@ -269,8 +301,6 @@ namespace audio
             BufferHandle buffer;
             mIn.PullBuffer(buffer);
         }
-        virtual bool IsDone() const override
-        { return false; }
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
         virtual Port& GetInputPort(unsigned index) override
@@ -298,8 +328,6 @@ namespace audio
         { return mName; }
         virtual bool Prepare() override;
         virtual void Process(unsigned milliseconds) override;
-        virtual bool IsDone() const override
-        { return false; }
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual unsigned GetNumInputPorts() const override
@@ -338,8 +366,6 @@ namespace audio
         { return mName; }
         virtual bool Prepare() override;
         virtual void Process(unsigned milliseconds) override;
-        virtual bool IsDone() const override
-        { return false; }
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual unsigned GetNumInputPorts() const override
@@ -383,7 +409,7 @@ namespace audio
     class FileSource : public Element
     {
     public:
-        FileSource(const std::string& name, const std::string& file);
+        FileSource(const std::string& name, const std::string& file, SampleType type = SampleType::Int16);
         FileSource(FileSource&& other);
        ~FileSource();
         virtual std::string GetId() const override
@@ -393,7 +419,9 @@ namespace audio
         virtual bool Prepare() override;
         virtual void Process(unsigned milliseconds) override;
         virtual void Shutdown() override;
-        virtual bool IsDone() const override;
+        virtual bool IsSourceDone() const override;
+        virtual bool IsSource() const override
+        { return true; }
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
@@ -401,8 +429,6 @@ namespace audio
             if (index == 0) return mPort;
             BUG("No such output port.");
         }
-        void SetSampleType(SampleType type)
-        { mFormat.sample_type = type; }
     private:
         const std::string mName;
         const std::string mId;
@@ -417,13 +443,20 @@ namespace audio
     class SineSource : public Element
     {
     public:
-        SineSource(const std::string& name, unsigned frequency);
+        SineSource(const std::string& name, unsigned frequence);
+        SineSource(const std::string& name, unsigned frequency, unsigned millisecs);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool IsDone() const override
-        { return false; }
+        virtual bool IsSourceDone() const override
+        {
+            if (!mLimitDuration)
+                return false;
+            return mMilliSecs >= mDuration;
+        }
+        virtual bool IsSource() const override
+        { return true; }
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
@@ -436,6 +469,9 @@ namespace audio
         const std::string mName;
         const std::string mId;
         const unsigned mFrequency = 0;
+        const unsigned mDuration  = 0;
+        const bool mLimitDuration = false;
+        unsigned mMilliSecs   = 0;
         unsigned mSampleCount = 0;
         SingleSlotPort mPort;
         Format mFormat;
