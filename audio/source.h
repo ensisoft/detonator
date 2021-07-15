@@ -28,10 +28,11 @@
 #endif
 
 #include "base/assert.h"
-#include "audio/sndfile.h"
 
 namespace audio
 {
+    class Decoder;
+
     // for general audio terminology see the below reference
     // https://larsimmisch.github.io/pyalsaaudio/terminology.html
 
@@ -94,6 +95,7 @@ namespace audio
         // of the given file. You must call Open before (and check for
         // success) before passing the object to the audio device!
         AudioFile(const std::string& filename, const std::string& name);
+       ~AudioFile();
         // Get the sample rate in Hz.
         virtual unsigned GetRateHz() const noexcept override;
         // Get the number of channels in the sample
@@ -124,7 +126,7 @@ namespace audio
         const std::string filename_;
         const std::string name_;
         Format format_ = Format::Float32;
-        std::unique_ptr<SndFileVirtualDevice> device_;
+        std::unique_ptr<Decoder> decoder_;
         std::size_t frames_ = 0;
     };
 

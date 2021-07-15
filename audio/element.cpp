@@ -27,6 +27,8 @@
 #include "base/math.h"
 #include "base/logging.h"
 #include "audio/element.h"
+#include "audio/sndfile.h"
+#include "audio/mpg123.h"
 
 namespace audio
 {
@@ -524,7 +526,7 @@ FileSource::FileSource(FileSource&& other)
   : mName(other.mName)
   , mId(other.mId)
   , mFile(other.mFile)
-  , mDevice(std::move(other.mDevice))
+  , mDecoder(std::move(other.mDecoder))
   , mPort(std::move(other.mPort))
   , mFormat(other.mFormat)
   , mFramesRead(other.mFramesRead)
@@ -534,21 +536,39 @@ FileSource::~FileSource() = default;
 
 bool FileSource::Prepare()
 {
-    auto stream = std::make_unique<SndFileInputStream>();
-    if (!stream->OpenFile(mFile))
+    std::unique_ptr<Decoder> decoder;
+    const auto& upper = base::ToUpperUtf8(mFile);
+    if (base::EndsWith(upper, ".MP3"))
+    {
+        auto dec = std::make_unique<Mpg123Decoder>();
+        if (!dec->Open(mFile, mFormat.sample_type))
+            return false;
+        decoder = std::move(dec);
+    }
+    else if (base::EndsWith(upper, ".OGG") ||
+             base::EndsWith(upper, ".WAV") ||
+             base::EndsWith(upper, ".FLAC"))
+    {
+        auto stream = std::make_unique<SndFileInputStream>();
+        if (!stream->OpenFile(mFile))
+            return false;
+        decoder = std::make_unique<SndFileDecoder>(std::move(stream));
+    }
+    else
+    {
+        ERROR("Unsupported audio file '%1'", mFile);
         return false;
-
-    auto device = std::make_unique<SndFileVirtualDevice>(std::move(stream));
+    }
     Format format;
-    format.channel_count = device->GetNumChannels();
-    format.sample_rate   = device->GetSampleRate();
+    format.channel_count = decoder->GetNumChannels();
+    format.sample_rate   = decoder->GetSampleRate();
     format.sample_type   = mFormat.sample_type;
     DEBUG("Opened '%1' for reading (%2 frames, %3). %4 channels @ %5 Hz.", mFile,
-          device->GetNumFrames(),
+          decoder->GetNumFrames(),
           format.sample_type,
           format.channel_count,
           format.sample_rate);
-    mDevice = std::move(device);
+    mDecoder = std::move(decoder);
     mPort.SetFormat(format);
     mFormat = format;
     return true;
@@ -559,7 +579,7 @@ void FileSource::Process(unsigned milliseconds)
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
     const auto frames_wanted = (unsigned)(frames_per_ms * milliseconds);
-    const auto frames_available = mDevice->GetNumFrames();
+    const auto frames_available = mDecoder->GetNumFrames();
     const auto frames = std::min(frames_available - mFramesRead, frames_wanted);
 
     auto buffer = std::make_shared<VectorBuffer>();
@@ -569,11 +589,11 @@ void FileSource::Process(unsigned milliseconds)
 
     size_t ret = 0;
     if (mFormat.sample_type == SampleType::Float32)
-        ret = mDevice->ReadFrames((float*)buff, frames);
+        ret = mDecoder->ReadFrames((float*)buff, frames);
     else if (mFormat.sample_type == SampleType::Int32)
-        ret = mDevice->ReadFrames((int*)buff, frames);
+        ret = mDecoder->ReadFrames((int*)buff, frames);
     else if (mFormat.sample_type == SampleType::Int16)
-        ret = mDevice->ReadFrames((short*)buff, frames);
+        ret = mDecoder->ReadFrames((short*)buff, frames);
 
     if (ret != frames)
         WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames);
@@ -587,12 +607,12 @@ void FileSource::Process(unsigned milliseconds)
 
 void FileSource::Shutdown()
 {
-    mDevice.reset();
+    mDecoder.reset();
 }
 
 bool FileSource::IsSourceDone() const
 {
-    return mFramesRead == mDevice->GetNumFrames();
+    return mFramesRead == mDecoder->GetNumFrames();
 }
 
 #ifdef AUDIO_ENABLE_TEST_SOUND

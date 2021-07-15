@@ -151,17 +151,39 @@ std::unique_ptr<T, Deleter> MakeUniqueHandle(T* ptr, Deleter del)
 // get the time in seconds since the first call to this function.
 double GetRuntimeSec();
 
+// when using these functions with narrow byte strings think about
+// the string encoding and whether that can be a problem!
 inline bool Contains(const std::string& str, const std::string& what)
 { return str.find(what) != std::string::npos; }
+inline bool Contains(const std::wstring& str, const std::wstring& what)
+{ return str.find(what) != std::wstring::npos; }
 inline bool StartsWith(const std::string& str, const std::string& what)
 { return str.find(what) == 0; }
+inline bool StartsWith(const std::wstring& str, const std::wstring& what)
+{ return str.find(what) == 0; }
+inline bool EndsWith(const std::string& str, const std::string& what)
+{
+    // SO saves the day..
+    if (what.size() > str.size()) return false;
+    return std::equal(what.rbegin(), what.rend(), str.rbegin());
+}
+inline bool EndsWith(const std::wstring& str, const std::wstring& what)
+{
+    // SO saves the day...
+    if (what.size() > str.size()) return false;
+    return std::equal(what.rbegin(), what.rend(), str.rbegin());
+}
 
 std::string RandomString(size_t len);
 std::string ToUtf8(const std::wstring& str);
 std::wstring FromUtf8(const std::string& str);
+// ToUpper/Lower are only provided for wide strings in order to avoid
+// potential issues with multibyte narrow string encoding.
 std::wstring ToUpper(const std::wstring& str);
 std::wstring ToLower(const std::wstring& str);
-std::wstring Widen(const std::string& str);
+std::string ToUpperUtf8(const std::string& str);
+std::string ToLowerUtf8(const std::string& str);
+
 std::string JoinPath(const std::string& a, const std::string& b);
 
 std::ifstream OpenBinaryInputStream(const std::string& filename);

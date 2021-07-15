@@ -123,7 +123,10 @@ private:
         PlaybackStream(std::unique_ptr<Source> source, pa_context* context)
             : source_(std::move(source))
         {
-            const std::string& name = source_->GetName();
+            DEBUG("Creating new PA playback stream '%1': %2 channel(s) @ %3 Hz, %4",
+                  source_->GetName(), source_->GetNumChannels(),
+                  source_->GetRateHz(), source_->GetFormat());
+            const auto& name  = source_->GetName();
             pa_sample_spec spec;
             spec.channels = source_->GetNumChannels();
             spec.rate     = source_->GetRateHz();

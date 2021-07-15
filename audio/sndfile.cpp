@@ -44,7 +44,7 @@ struct Trampoline {
 namespace audio
 {
 
-SndFileVirtualDevice::SndFileVirtualDevice(std::unique_ptr<SndFileIODevice> device)
+SndFileDecoder::SndFileDecoder(std::unique_ptr<SndFileIODevice> device)
 {
     SF_VIRTUAL_IO io = {};
     io.get_filelen = &Trampoline::GetLength;
@@ -65,21 +65,21 @@ SndFileVirtualDevice::SndFileVirtualDevice(std::unique_ptr<SndFileIODevice> devi
     mChannels   = info.channels;
     mFrames     = info.frames;
     mDevice = std::move(device);
+    DEBUG("SndFileDecoder stream has %1 PCM frames in %2 channel(s) @ %3 Hz.",
+          mFrames, mChannels, mSampleRate);
 }
 
-SndFileVirtualDevice::~SndFileVirtualDevice()
+SndFileDecoder::~SndFileDecoder()
 {
     if (mFile)
         ::sf_close(mFile);
 }
 
-size_t SndFileVirtualDevice::ReadFrames(float* ptr, size_t frames)
+size_t SndFileDecoder::ReadFrames(float* ptr, size_t frames)
 { return sf_readf_float(mFile, ptr, frames); }
-size_t SndFileVirtualDevice::ReadFrames(double* ptr, size_t frames)
-{ return sf_readf_double(mFile, ptr, frames); }
-size_t SndFileVirtualDevice::ReadFrames(short* ptr, size_t frames)
+size_t SndFileDecoder::ReadFrames(short* ptr, size_t frames)
 { return sf_readf_short(mFile, ptr, frames); }
-size_t SndFileVirtualDevice::ReadFrames(int* ptr, size_t frames)
+size_t SndFileDecoder::ReadFrames(int* ptr, size_t frames)
 { return sf_readf_int(mFile, ptr, frames); }
 
 SndFileInputStream::SndFileInputStream(const std::string& filename)

@@ -51,7 +51,7 @@ namespace audio
 
     inline std::string ToString(const Format& fmt)
     {
-        return base::FormatString("%1, %2 channels @ %3", fmt.sample_type,
+        return base::FormatString("%1, %2 channel(s) @ %3", fmt.sample_type,
                                   fmt.channel_count, fmt.sample_rate);
     }
 

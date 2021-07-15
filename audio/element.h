@@ -26,12 +26,13 @@
 #include "base/assert.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
-#include "audio/sndfile.h"
 
 typedef struct SRC_STATE_tag SRC_STATE;
 
 namespace audio
 {
+    class Decoder;
+
     using BufferHandle = std::shared_ptr<Buffer>;
 
     // Port provides an input/output /queueing abstraction.
@@ -463,7 +464,7 @@ namespace audio
         const std::string mName;
         const std::string mId;
         const std::string mFile;
-        std::unique_ptr<SndFileVirtualDevice> mDevice;
+        std::unique_ptr<Decoder> mDecoder;
         SingleSlotPort mPort;
         Format mFormat;
         unsigned mFramesRead = 0;

@@ -6,6 +6,7 @@ glm/0.9.9.8
 box2d/2.4.0
 lua/5.3.5
 sol2/3.2.3
+mpg123/1.26.4
 
 [generators]
 cmake

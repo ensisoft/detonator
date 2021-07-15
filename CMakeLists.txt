@@ -410,6 +410,7 @@ install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/di
 # OGG and WAV files in several different formats.
 add_executable(audio_test
     audio/sndfile.cpp
+    audio/mpg123.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/source.cpp
