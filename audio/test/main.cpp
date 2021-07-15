@@ -108,13 +108,15 @@ int main(int argc, char* argv[])
         auto* mixer = graph->AddElement(audio::Mixer("mixer", 2));
         auto* splitter = graph->AddElement(audio::Splitter("split"));
         auto* null = graph->AddElement(audio::Null("null"));
+        auto* resamp = graph->AddElement(audio::Resampler("resamp", 16000));
 
         ASSERT(graph->LinkElements("file", "out", "split", "in"));
         ASSERT(graph->LinkElements("split", "left", "mixer", "in0"));
         ASSERT(graph->LinkElements("split", "right", "null", "in"));
         ASSERT(graph->LinkElements("sine", "out", "mixer", "in1"));
         ASSERT(graph->LinkElements("mixer", "out", "gain", "in"));
-        ASSERT(graph->LinkGraph("gain", "out"));
+        ASSERT(graph->LinkElements("gain", "out", "resamp", "in"));
+        ASSERT(graph->LinkGraph("resamp", "out"));
         ASSERT(graph->Prepare());
 
         const auto& desc = graph->Describe();

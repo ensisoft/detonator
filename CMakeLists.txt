@@ -21,6 +21,11 @@ conan_basic_setup()
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
 
+# libsamplerate
+# not available on Conan Center as of July-2021
+# current version is 0.2.1
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
+
 # Unfortunately we need boost...
 set(Boost_USE_STATIC_LIBS ON)
 if(WIN32)
@@ -417,6 +422,7 @@ target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/t
 target_link_libraries(audio_test BaseLib)
 target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(audio_test ${CONAN_LIBS})
+target_link_libraries(audio_test samplerate)
 if (UNIX)
     target_link_libraries(audio_test pulse)
     target_link_libraries(audio_test pthread)

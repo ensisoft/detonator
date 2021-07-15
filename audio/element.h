@@ -28,6 +28,8 @@
 #include "audio/format.h"
 #include "audio/sndfile.h"
 
+typedef struct SRC_STATE_tag SRC_STATE;
+
 namespace audio
 {
     using BufferHandle = std::shared_ptr<Buffer>;
@@ -397,13 +399,41 @@ namespace audio
         float mGain = 1.0f;
     };
 
-    // Resample the input stream. Allows the change of underlying
-    // format, sample rate and channel count.
+    // Resample the input stream.
     class Resampler : public Element
     {
     public:
-        // todo: implement.
+        Resampler(const std::string& name, unsigned sample_rate);
+       ~Resampler();
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool Prepare() override;
+        virtual void Process(unsigned milliseconds) override;
+
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port.");
+        }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port.");
+        }
     private:
+        const std::string mName;
+        const std::string mId;
+        const unsigned mSampleRate = 0;
+        SingleSlotPort mIn;
+        SingleSlotPort mOut;
+    private:
+        SRC_STATE* mState = nullptr;
     };
 
     class FileSource : public Element
