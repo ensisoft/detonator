@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
     audio::Source::Format format = audio::Source::Format::Float32;
 
     unsigned loops = 1;
+    bool mp3_files = false;
     bool ogg_files = false;
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
@@ -49,6 +50,8 @@ int main(int argc, char* argv[])
     {
         if (!std::strcmp(argv[i], "--ogg"))
             ogg_files = true;
+        else if (!std::strcmp(argv[i], "--mp3"))
+            mp3_files = true;
         else if (!std::strcmp(argv[i], "--8bit"))
             pcm_8bit_files = true;
         else if (!std::strcmp(argv[i], "--16bit"))
@@ -69,11 +72,12 @@ int main(int argc, char* argv[])
             format = audio::Source::Format::Int32;
     }
 
-    if (!(ogg_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph))
+    if (!(ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph))
     {
         std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
             "\t--ogg\t\tTest Ogg Vorbis encoded files.\n"
+            "\t--mp3\t\tTest MP3 encoded files.\n"
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
@@ -137,6 +141,10 @@ int main(int argc, char* argv[])
         test_files.push_back("/OGG/a2002011001-e02-32k.ogg");
         test_files.push_back("/OGG/a2002011001-e02-64k.ogg");
         test_files.push_back("/OGG/a2002011001-e02-96k.ogg");
+    }
+    if (mp3_files)
+    {
+        test_files.push_back("/MP3/Kalimba_short.mp3");
     }
     if (pcm_8bit_files)
     {
@@ -204,8 +212,9 @@ int main(int argc, char* argv[])
         base::FlushGlobalLog();
 
         auto source = std::make_unique<audio::AudioFile>(filename, "test");
-        source->Open();
         source->SetFormat(format);
+        source->Open();
+
         const auto looping = loops > 1;
         const auto id = player.Play(std::move(source), looping);
         DEBUG("New track. id = %1", id);

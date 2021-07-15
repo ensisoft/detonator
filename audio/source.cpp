@@ -18,13 +18,14 @@
 
 #include <algorithm>
 #include <stdexcept>
-#include <cstdio>
 #include <cstring>
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "audio/source.h"
 #include "audio/sndfile.h"
+#include "audio/mpg123.h"
 
 namespace audio
 {
@@ -33,12 +34,13 @@ AudioFile::AudioFile(const std::string& filename, const std::string& name)
     : filename_(filename)
     , name_(name)
 {}
+AudioFile::~AudioFile() = default;
 
 unsigned AudioFile::GetRateHz() const noexcept
-{ return device_->GetSampleRate(); }
+{ return decoder_->GetSampleRate(); }
 
 unsigned AudioFile::GetNumChannels() const noexcept
-{ return device_->GetNumChannels(); }
+{ return decoder_->GetNumChannels(); }
 
 Source::Format AudioFile::GetFormat() const noexcept
 { return format_; }
@@ -48,10 +50,10 @@ std::string AudioFile::GetName() const noexcept
 
 unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes) 
 {
-    const auto num_channels = device_->GetNumChannels();
+    const auto num_channels = decoder_->GetNumChannels();
     const auto frame_size = num_channels * ByteSize(format_);
     const auto possible_num_frames = max_bytes / frame_size;
-    const auto frames_available = device_->GetNumFrames() - frames_;
+    const auto frames_available = decoder_->GetNumFrames() - frames_;
     const auto frames_to_read = std::min((unsigned)frames_available,
                                          (unsigned)possible_num_frames);
     // change the output format into floats.
@@ -61,11 +63,11 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     // the same test ogg (mentioned in the bug) without crackles.
     size_t ret = 0;
     if (format_ == Format::Float32)
-        ret = device_->ReadFrames((float*)buff, frames_to_read);
+        ret = decoder_->ReadFrames((float*)buff, frames_to_read);
     else if (format_ == Format::Int32)
-        ret = device_->ReadFrames((int*)buff, frames_to_read);
+        ret = decoder_->ReadFrames((int*)buff, frames_to_read);
     else if (format_ == Format::Int16)
-        ret = device_->ReadFrames((short*)buff, frames_to_read);
+        ret = decoder_->ReadFrames((short*)buff, frames_to_read);
     if (ret != frames_to_read)
         WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames_to_read);
     frames_ += ret;
@@ -73,7 +75,7 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
 }
 
 bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
-{ return frames_ < device_->GetNumFrames(); }
+{ return frames_ < decoder_->GetNumFrames(); }
 
 bool AudioFile::Reset() noexcept
 {
@@ -82,30 +84,38 @@ bool AudioFile::Reset() noexcept
 
 bool AudioFile::Open()
 {
-    FILE* fptr = std::fopen(filename_.c_str(), "rb");
-    if (!fptr)
+    std::unique_ptr<Decoder> decoder;
+    const auto& upper = base::ToUpperUtf8(filename_);
+    if (base::EndsWith(upper, ".MP3"))
     {
-        ERROR("Failed to open file '%1' (%2)", filename_, std::strerror(errno));
+        SampleType type = SampleType::NotSet;
+        if (format_ == Format::Float32)
+            type = SampleType::Float32;
+        else if (format_ == Format::Int32)
+            type = SampleType::Int32;
+        else if (format_ == Format::Int16)
+            type = SampleType::Int16;
+        else BUG("Unsupported format.");
+        auto dec = std::make_unique<Mpg123Decoder>();
+        if (!dec->Open(filename_, type))
+            return false;
+        decoder = std::move(dec);
+    }
+    else if (base::EndsWith(upper, ".OGG") ||
+             base::EndsWith(upper, ".WAV") ||
+             base::EndsWith(upper, ".FLAC"))
+    {
+        auto stream = std::make_unique<SndFileInputStream>();
+        if (!stream->OpenFile(filename_))
+            return false;
+        decoder = std::make_unique<SndFileDecoder>(std::move(stream));
+    }
+    else
+    {
+        ERROR("Unsupported audio file '%1'", filename_);
         return false;
     }
-
-    // read the whole file into a single buffer.
-    std::fseek(fptr, 0, SEEK_END);
-    const long size = std::ftell(fptr);
-    std::fseek(fptr, 0, SEEK_SET);
-
-    std::vector<std::uint8_t> buff;
-    buff.resize(size);
-    std::fread(&buff[0], 1, size, fptr);
-    std::fclose(fptr);
-    DEBUG("Read %1 bytes from %2", buff.size(), filename_);
-
-    // allocate just a single buffer that does the
-    // data conversion from the buffer that we read from the file
-    // and which contains the encoded data (for example in ogg vorbis)
-    auto buffer = std::make_unique<SndFileBuffer>(std::move(buff));
-    auto device = std::make_unique<SndFileVirtualDevice>(std::move(buffer));
-    device_ = std::move(device);
+    decoder_ = std::move(decoder);
     frames_ = 0;
     return true;
 }

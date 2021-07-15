@@ -74,7 +74,6 @@ std::string ToUtf8(const std::wstring& str)
     return converted_str;
 }
 
-
 std::wstring FromUtf8(const std::string& str)
 {
     // this way of converting is deprecated since c++17 but
@@ -93,7 +92,6 @@ std::wstring ToUpper(const std::wstring& str)
     return ret;
 }
 
-
 std::wstring ToLower(const std::wstring& str)
 {
     std::wstring ret;
@@ -102,15 +100,11 @@ std::wstring ToLower(const std::wstring& str)
     return ret;
 }
 
-// convert std::string to wide string representation
-// without any regard to encoding.
-std::wstring Widen(const std::string& str)
-{
-    std::wstring ret;
-    for (auto c : str)
-        ret.push_back(c);
-    return ret;
-}
+std::string ToUpperUtf8(const std::string& str)
+{ return ToUtf8(ToUpper(FromUtf8(str))); }
+
+std::string ToLowerUtf8(const std::string& str)
+{ return ToUtf8(ToLower(FromUtf8(str))); }
 
 bool FileExists(const std::string& filename)
 {

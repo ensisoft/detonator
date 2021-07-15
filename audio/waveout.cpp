@@ -206,6 +206,10 @@ private:
         {
             std::lock_guard<decltype(mutex_)> lock(mutex_);
 
+            DEBUG("Creating new WaveOut stream '%1': %2 channel(s) @ %3 Hz, %4",
+                source->GetName(), source->GetNumChannels(),
+                source->GetRateHz(), source->GetFormat());
+
             source_      = std::move(source);
             state_       = Stream::State::None;
             num_pcm_bytes_ = 0;

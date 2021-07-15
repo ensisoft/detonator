@@ -22,6 +22,8 @@
 #include <memory>
 #include <fstream>
 
+#include "audio/decoder.h"
+
 // todo: maybe move these wrappers out of the audio namespace?
 
 typedef	struct SNDFILE_tag	SNDFILE ;
@@ -39,22 +41,20 @@ namespace audio
     private:
     };
 
-    class SndFileVirtualDevice
+    class SndFileDecoder : public Decoder
     {
     public:
-        SndFileVirtualDevice(std::unique_ptr<SndFileIODevice> device);
-       ~SndFileVirtualDevice();
-        unsigned GetSampleRate() const
+        SndFileDecoder(std::unique_ptr<SndFileIODevice> device);
+       ~SndFileDecoder();
+        virtual unsigned GetSampleRate() const override
         { return mSampleRate; }
-        unsigned GetNumChannels() const
+        virtual unsigned GetNumChannels() const override
         { return mChannels; }
-        unsigned GetNumFrames() const
+        virtual unsigned GetNumFrames() const override
         { return mFrames; }
-
-        size_t ReadFrames(float* ptr, size_t frames);
-        size_t ReadFrames(double* ptr, size_t frames);
-        size_t ReadFrames(short* ptr, size_t frames);
-        size_t ReadFrames(int* ptr, size_t frames);
+        virtual size_t ReadFrames(float* ptr, size_t frames) override;
+        virtual size_t ReadFrames(short* ptr, size_t frames) override;
+        virtual size_t ReadFrames(int* ptr, size_t frames) override;
     private:
         std::unique_ptr<SndFileIODevice> mDevice;
         SNDFILE* mFile = nullptr;
