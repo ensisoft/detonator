@@ -51,6 +51,9 @@ void copyright()
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
 
+    INFO("http://http://mpg123.de/");
+    INFO("mpg123 - Fast console MPEG Audio Player and decoder library. 1.26.4");
+
     INFO("http://www.boost.org");
     INFO("Boost software library %1.%2.%3", boost_major, boost_minor, boost_revision);
 
@@ -89,6 +92,10 @@ void copyright()
     INFO("http://libsndfile.github.io/libsndfile/");
     INFO("libsndfile C library for sampled audio data. 1.0.30");
 
+    INFO("Copyright (c) 2012-2016, Erik de Castro Lopo <erikd@mega-nerd.com>");
+    INFO("http://http://libsndfile.github.io/libsamplerate/");
+    INFO("libsamplerate C library for audio resampling/sample rate conversion. 0.2.1");
+
     INFO("Copyright (c) 2013-2019 Niels Lohmann <http://nlohmann.me>");
     INFO("https://github.com/nlohmann/json");
     INFO("JSON for Modern C++ %1.%2.%3", NLOHMANN_JSON_VERSION_MAJOR,
@@ -126,7 +133,7 @@ void copyright()
     INFO("https://www.github.com/ensisoft/gamestudio");
     INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
     INFO("Compiled: " __DATE__ ", " __TIME__);
-    INFO("Copyright (c) Sami Väisänen 2020");
+    INFO("Copyright (c) Sami Väisänen 2020-2021");
     INFO(APP_TITLE " " APP_VERSION);
 }
 
