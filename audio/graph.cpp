@@ -29,10 +29,8 @@ namespace audio
 
 Graph::Graph(const std::string& name)
   : mName(name)
+  , mId(base::RandomString(10))
   , mPort("out")
-{}
-
-Graph::~Graph()
 {}
 
 Element* Graph::AddElementPtr(std::unique_ptr<Element> element)
@@ -343,10 +341,36 @@ unsigned Graph::FillBuffer(void* buff, unsigned max_bytes)
     const auto bytes = millis_in_bytes * milliseconds;
     ASSERT(bytes <= max_bytes);
 
+    Process(milliseconds);
+
+    if (!mPort.HasBuffers())
+    {
+        WARN("No audio buffer available.");
+        return 0;
+    }
+
+    BufferHandle buffer;
+    mPort.PullBuffer(buffer);
+
+    // todo: get rid of the copying.
+    ASSERT(buffer->GetByteSize() <= max_bytes);
+    std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
+    return buffer->GetByteSize();
+}
+bool Graph::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
+{
+    return !mDone;
+}
+bool Graph::Reset() noexcept
+{
+    // todo:
+    return true;
+}
+
+void Graph::Process(unsigned int milliseconds)
+{
     // Evaluate the elements in topological order and then
-    // dispatch the buffers according to the element/port
-    // links. Fill the audio device buffer from the last
-    // element of the ordering.
+    // dispatch the buffers according to the element/port links.
     for (auto& source : mTopoOrder)
     {
         // this element could be done but the pipeline could still
@@ -412,29 +436,12 @@ unsigned Graph::FillBuffer(void* buff, unsigned max_bytes)
         }
     }
     mDone = graph_done;
-
-    if (!mPort.HasBuffers())
-    {
-        WARN("No audio buffer available.");
-        return 0;
-    }
-
-    BufferHandle buffer;
-    mPort.PullBuffer(buffer);
-
-    // todo: get rid of the copying.
-    ASSERT(buffer->GetByteSize() <= max_bytes);
-    std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
-    return buffer->GetByteSize();
 }
-bool Graph::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
+
+void Graph::Shutdown()
 {
-    return !mDone;
+
 }
-bool Graph::Reset() noexcept
-{
-    // todo:
-    return true;
-}
+
 
 } // namespace
