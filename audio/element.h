@@ -142,6 +142,7 @@ namespace audio
     class Element
     {
     public:
+        virtual ~Element() = default;
         // Get the machine generated immutable ID of the element.
         virtual std::string GetId() const = 0;
         // Get the human readable name of the element.
