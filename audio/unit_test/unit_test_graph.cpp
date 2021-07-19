@@ -225,15 +225,15 @@ private:
 };
 
 void Link(audio::Graph& graph,
-          const std::string& src_elem_id, const std::string& src_port_name,
-          const std::string& dst_elem_id, const std::string& dst_port_name)
+          const std::string& src_elem_name, const std::string& src_port_name,
+          const std::string& dst_elem_name, const std::string& dst_port_name)
 {
-    auto* src_elem = graph.FindElementById(src_elem_id);
-    auto* dst_elem = graph.FindElementById(dst_elem_id);
-    auto* src_port = src_elem->FindOutputPortByName(src_port_name);
-    auto* dst_port = dst_elem->FindInputPortByName(dst_port_name);
+    auto* src_elem = graph.FindElementByName(src_elem_name);
+    auto* dst_elem = graph.FindElementByName(dst_elem_name);
     TEST_REQUIRE(src_elem);
     TEST_REQUIRE(dst_elem);
+    auto* src_port = src_elem->FindOutputPortByName(src_port_name);
+    auto* dst_port = dst_elem->FindInputPortByName(dst_port_name);
     TEST_REQUIRE(src_port);
     TEST_REQUIRE(dst_port);
     graph.LinkElements(src_elem, src_port, dst_elem, dst_port);
@@ -496,6 +496,51 @@ void unit_test_completion()
     }
 }
 
+void unit_test_graph_in_graph()
+{
+    TestState state;
+
+    audio::Format format;
+    format.sample_rate   = 77777;
+    format.channel_count = 5;
+    format.sample_type   = audio::SampleType::Float32;
+
+    auto sub_graph = std::make_unique<audio::Graph>("sub-graph");
+    auto s = std::make_unique<SrcElement>("s", "s");
+    auto a = std::make_unique<TestElement>("a", "a", state);
+    auto b = std::make_unique<TestElement>("b", "b", state);
+    a->AddInputPort("in");
+    a->AddOutputPort("out", format);
+    b->AddInputPort("in");
+    b->AddOutputPort("out", format);
+
+    sub_graph->AddElementPtr(std::move(s));
+    sub_graph->AddElementPtr(std::move(a));
+    sub_graph->AddElementPtr(std::move(b));
+
+    Link(*sub_graph, "s", "out", "a", "in");
+    Link(*sub_graph, "a", "out", "b", "in");
+    Link(*sub_graph, "b", "out");
+
+    audio::Graph graph("graph");
+    auto c = std::make_unique<TestElement>("c", "c", state);
+    c->AddInputPort("in");
+    c->AddOutputPort("out", format);
+    graph.AddElementPtr(std::move(sub_graph));
+    graph.AddElementPtr(std::move(c));
+
+    Link(graph, "sub-graph", "out", "c", "in");
+    Link(graph, "c", "out");
+    TEST_REQUIRE(graph.Prepare());
+
+    std::string outcome;
+    outcome.resize(1024);
+    const auto ret = graph.FillBuffer(&outcome[0], outcome.size());
+    outcome.resize(ret);
+    //std::cout << outcome;
+    TEST_REQUIRE(outcome == "-> a:in -> a:out -> b:in -> b:out -> c:in -> c:out ");
+}
+
 int test_main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -506,5 +551,6 @@ int test_main(int argc, char* argv[])
     unit_test_prepare_topologies();
     unit_test_buffer_flow();
     unit_test_completion();
+    unit_test_graph_in_graph();
     return 0;
 }

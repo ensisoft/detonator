@@ -35,15 +35,15 @@ namespace audio
     // an audio graph that is comprised of audio elements. Each element
     // can take a stream of data as an input, modify it and then provide
     // an outgoing stream of data.
-    class Graph : public Source
+    class Graph : public Source,
+                  public Element
     {
     public:
         // Creata new audio graph with the given human readable name.
         // The name will be audio stream name on the device, and will be
         // shown for example in Pavucontrol on Linux.
         Graph(const std::string& name);
-        // dtor.
-       ~Graph();
+        Graph(const Graph&) = delete;
         // Add a new element to the graph. Note that the element is not yet
         // linked anywhere. You'll likely want to call LinkElement after this.
         // Returns pointer to the new element in the graph.
@@ -143,15 +143,6 @@ namespace audio
         // linked to this dst port.
         bool IsDstPortTaken(const Port* dst) const;
 
-        // Prepare the graph for playback. Prepare should be called
-        // after all the elements have been added and linked to the graph
-        // and before the graph is given to the audio device for playback.
-        // The graph may not contain any cycles.
-        // Returns true on success if all audio elements were prepared
-        // successfully. After this it's possible to send the graph to
-        // the audio device/player for playback.
-        bool Prepare();
-
         // Source implementation.
         virtual unsigned GetRateHz() const noexcept override;
         virtual unsigned GetNumChannels() const noexcept override;
@@ -160,9 +151,36 @@ namespace audio
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
         virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const noexcept override;
         virtual bool Reset() noexcept override;
+
+        // Element implementation note that  GetName is already part of the Source impl
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual bool IsSource() const override
+        { return true; }
+        virtual bool IsSourceDone() const override
+        { return mDone; }
+        // Prepare the graph for playback. Prepare should be called
+        // after all the elements have been added and linked to the graph
+        // and before the graph is given to the audio device for playback.
+        // The graph may not contain any cycles.
+        // Returns true on success if all audio elements were prepared
+        // successfully. After this it's possible to send the graph to
+        // the audio device/player for playback.
+        virtual bool Prepare() override;
+        virtual void Process(unsigned milliseconds) override;
+        virtual void Shutdown() override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mPort;
+            BUG("No such port index.");
+        }
+        Graph& operator=(const Graph&) = delete;
     private:
         using AdjacencyList = std::unordered_set<Element*>;
-        std::string mName;
+        const std::string mName;
+        const std::string mId;
         // Maps an element to its source elements, i.e. answers
         // the question "which elements does this element depend on?".
         std::unordered_map<Element*, AdjacencyList> mSrcMap;
